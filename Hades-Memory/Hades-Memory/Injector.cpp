@@ -61,18 +61,18 @@ namespace Hades
       
       // Set working directory
       boost::filesystem::path WorkDirReal;
-			if (!WorkDir.empty())
-			{
-				WorkDirReal = WorkDir;
-			}
-			else if (Path.has_parent_path())
-			{
-				WorkDirReal = Path.parent_path();
-			}
-			else
-			{
-				WorkDirReal = _T("./");
-			}
+      if (!WorkDir.empty())
+      {
+        WorkDirReal = WorkDir;
+      }
+      else if (Path.has_parent_path())
+      {
+        WorkDirReal = Path.parent_path();
+      }
+      else
+      {
+        WorkDirReal = _T("./");
+      }
 
 
       // Attempt process creation
