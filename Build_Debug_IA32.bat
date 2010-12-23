@@ -1,0 +1,1 @@
+bjam --toolset=msvc -j 4 address-model=32 debug > Build_Debug_IA32.txt

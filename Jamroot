@@ -1,0 +1,74 @@
+use-project /Dependencies
+  : Dependencies 
+  ;
+  
+use-project /Hades-Common 
+  : Hades-Common 
+  ; 
+  
+use-project /Hades-Memory 
+  : Hades-Memory 
+  ; 
+   
+use-project /Hades-Scripting 
+  : Hades-Scripting
+  ; 
+ 
+project 
+  : requirements <define>BOOST_FILESYSTEM_VERSION=3 <runtime-link>shared <warnings>all 
+  : default-build debug 
+  ;
+
+path-constant TOP 
+  : . 
+  ;
+
+build-project Hades-Memory 
+  ;
+  
+build-project Hades-Scripting 
+  ;
+  
+rule Install-Rule ( properties * ) 
+{
+  local result 
+    ;
+  
+  if <address-model>32 in $(properties) 
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/IA32 
+        ;
+    }
+    
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/IA32 
+        ;
+    }
+  }
+  
+  if <address-model>64 in $(properties) 
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/AMD64 
+        ;
+    }
+    
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/AMD64 
+        ;
+    }
+  }
+  
+  return $(result) 
+    ;
+}
+  
+install Bin 
+  : Hades-Memory Hades-Scripting 
+  : <conditional>@Install-Rule <install-dependencies>on <install-type>SHARED_LIB <install-type>EXE <install-type>PYTHON_EXTENSION 
+  ;
