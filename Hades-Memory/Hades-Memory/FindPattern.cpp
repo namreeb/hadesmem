@@ -24,6 +24,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Boost
 #pragma warning(push, 1)
 #include <boost/lexical_cast.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/support.hpp>
 #pragma warning(pop)
 
 // RapidXML
@@ -97,41 +100,48 @@ namespace Hades
           ErrorString("Empty pattern or mask data."));
       }
 
-      // Ensure data is valid
-      if (Data.size() % 2)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::Find") << 
-          ErrorString("Data size invalid."));
-      }
-
-      // Ensure mask is valid
-      if (Mask.size() * 2 != Data.size())
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::Find") << 
-          ErrorString("Mask size invalid."));
-      }
-
       // Convert data to byte buffer
-      std::vector<std::pair<BYTE, bool>> DataBuf;
-      for (auto i = Data.cbegin(), j = Mask.cbegin(); i != Data.cend(); 
-        i += 2, ++j)
+      // Todo: Ensure each 'byte' is two characters long
+      std::vector<BYTE> Bytes;
+      auto DataBeg = Data.cbegin();
+      auto DataEnd = Data.cend();
+      if (!boost::spirit::qi::phrase_parse(DataBeg, DataEnd, 
+        *boost::spirit::qi::hex, boost::spirit::qi::space, Bytes) 
+        || DataBeg != DataEnd)
       {
-        std::basic_string<TCHAR> const CurrentStr(i, i + 2);
-        std::basic_stringstream<TCHAR> Converter(CurrentStr);
-        int Current(0);
-        if (!(Converter >> std::hex >> Current >> std::dec))
-        {
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("FindPattern::Find") << 
-            ErrorString("Invalid data conversion."));
-        }
-
-        BYTE CurrentReal = static_cast<BYTE>(Current);
-        bool MaskFlag = *j == _T('x');
-
-        DataBuf.push_back(std::make_pair(CurrentReal, MaskFlag));
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::Find") << 
+          ErrorString("Failed to parse bytes."));
+      }
+      
+      // Convert mask to bit flag
+      std::vector<bool> MaskFlags;
+      auto MaskBeg = Mask.cbegin();
+      auto MaskEnd = Mask.cend();
+      if (!boost::spirit::qi::parse(MaskBeg, MaskEnd, 
+        *((boost::spirit::qi::lit("x") >> boost::spirit::qi::attr(true)) | 
+        (boost::spirit::qi::lit("?") >> boost::spirit::qi::attr(false))), 
+        MaskFlags) || MaskBeg != MaskEnd)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::Find") << 
+          ErrorString("Failed to parse mask."));
+      }
+      
+      // Sanity check
+      if (Bytes.size() != MaskFlags.size())
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::Find") << 
+          ErrorString("Parsed data differs in size to parsed mask."));
+      }
+      
+      // Convert to required format
+      // Todo: Do this as part of the parsing process
+      std::vector<std::pair<BYTE, bool>> DataBuf;
+      for (std::size_t i = 0; i != Bytes.size(); ++i)
+      {
+        DataBuf.push_back(std::make_pair(Bytes[i], MaskFlags[i]));
       }
 
       // Search memory for pattern
