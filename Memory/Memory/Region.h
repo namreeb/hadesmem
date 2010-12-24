@@ -123,8 +123,6 @@ namespace Hades
         m_BaseAddress = static_cast<PBYTE>(m_BaseAddress) + m_RegionSize;
 
         // Get region info
-        // Fixme: Check GetLastError to ensure EOL and throw an exception 
-        // on an actual error.
         MEMORY_BASIC_INFORMATION MyMbi = { 0 };
         if (VirtualQueryEx(m_Memory.GetProcessHandle(), m_BaseAddress, &MyMbi, 
           sizeof(MyMbi)))

@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // C++ Standard Library
 #include <string>
+#include <utility>
 
 // Boost
 #pragma warning(push, 1)
@@ -137,6 +138,18 @@ namespace Hades
       {
         return m_Forwarder;
       }
+      
+      // Get forwarder module name
+      std::string GetForwarderModule() const
+      {
+        return m_ForwarderSplit.first;
+      }
+      
+      // Get forwarder function name
+      std::string GetForwarderFunction() const
+      {
+        return m_ForwarderSplit.second;
+      }
 
       // Get ordinal
       WORD GetOrdinal() const
@@ -170,6 +183,8 @@ namespace Hades
       std::string m_Name;
       // Forwarder
       std::string m_Forwarder;
+      // Split forwarder
+      std::pair<std::string, std::string> m_ForwarderSplit;
       // Ordinal
       WORD m_Ordinal;
       // If entry is exported by name

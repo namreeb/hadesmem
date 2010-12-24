@@ -163,16 +163,17 @@ namespace Hades
         : m_pMemory(&MyMemoryMgr), 
         m_Address(m_pMemory->Alloc(Size)) 
       { }
+      
+      void Free() const
+      {
+        m_pMemory->Free(m_Address);
+      }
 
       ~AllocAndFree()
       {
-        // Swallow any exceptions that occur when attempting to free the 
-        // memory as destructors are not allowed to throw.
-        // Fixme: Provide some sort of debug output when freeing memory 
-        // fails.
         try
         {
-          m_pMemory->Free(m_Address);
+          Free();
         }
         catch (MemoryMgr::Error const& /*e*/)
         { }

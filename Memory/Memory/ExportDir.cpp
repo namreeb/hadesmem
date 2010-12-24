@@ -209,6 +209,7 @@ namespace Hades
       m_Va(nullptr), 
       m_Name(), 
       m_Forwarder(), 
+      m_ForwarderSplit(), 
       m_Ordinal(0), 
       m_ByName(false), 
       m_Forwarded(false)
@@ -295,10 +296,22 @@ namespace Hades
       if (FuncRva > ExportDirStart && FuncRva < ExportDirEnd)
       {
         // Set export forwarder
-        // Fixme: Provide member which returns the 'split' version of the 
-        // forwarder. (i.e. module and name)
         m_Forwarded = true;
         m_Forwarder = m_Memory.Read<std::string>(m_PeFile.RvaToVa(FuncRva));
+          
+        // Split forwarder
+        std::string::size_type SplitPos = m_Forwarder.rfind('.');
+        if (SplitPos != std::string::npos)
+        {
+          m_ForwarderSplit = std::make_pair(m_Forwarder.substr(0, SplitPos), 
+            m_Forwarder.substr(SplitPos));
+        }
+        else
+        {
+          BOOST_THROW_EXCEPTION(ExportDir::Error() << 
+            ErrorFunction("Export::Export") << 
+            ErrorString("Invalid forwarder string format."));
+        }
       }
       else
       {
