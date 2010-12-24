@@ -21,6 +21,7 @@
 	* Change XML parser library from RapidXML to Boost.Spirit (may require a 
 	format change from XML to something custom).
 	* Change header ext from .h to .hpp.
+	* Convert code back to Unicode-only (no MBCS).
 * New Modules
 	* Process creation APIs.
 	* Debugging APIs.
