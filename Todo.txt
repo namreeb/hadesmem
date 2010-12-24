@@ -1,86 +1,87 @@
-* Prioritize this list.
+* High Priority
+  * General
+    * Documentation via Boost.QuickBook.
+    * Unit tests via Boost.Test.
+    * Code review and refactor.
+      * Assertions, concept checking, etc.
+      * Improve efficiency via profiling.
+      * Refactor poorly designed APIs.
+    * Make types moveable, copyable, and assignable.
+    * Implement no-throw operators and constructors (incl swap).
+    * Documented exception-safety guarantees (incl rollback support via RAII or Boost.ScopeExit).
+    * Documented thread-safety guarantees.
+    * Improve thread-safety.
+  	* Replace integer types with checked types (e.g. SafeInt) where appropriate.
+	  * Ensure 'rule-of-three' compliance.
+	  * Fix all 'fixme' items in code.
+	  * Change header ext from .h to .hpp.
+	  * Convert code back to Unicode-only (no MBCS).
+	  
+* Medium Priority
+  * New Modules
+  	* Process creation APIs.
+  	* Debugging APIs.
+  		* Software breakpoint.
+  		* Hardware breakpoint (incl read/write detection).
+  		* Conditional breakpoints.
+  		* Single-stepping.
+  	  * Stack trace APIs.
+  	* Anti-anti-cheat APIs.
+  	* Thread/process information APIs.
+  	* Process enumeration APIs.
+  * MemoryMgr
+  	* Improve 'safety' of remote function caller via EH to minimize risk of 
+  	crashing target.
+  	* Improve genericity of parameter passing in remote function caller.
+  * Disassembler
+  	* Decode calls/jumps to function names where possible.
+  	* NOP/UnNOP support.
+  	* ASM searching API with 'wildcards'. (Metasm?)
+  	* String based assembler with x64 support.
+  * Scanner
+  	* Multi-threaded scanning option.
+  	* Wildcard support for vector/string scanning.
+  	* Regex support for string scanning.
+  	* Memory protection filters (read, write, exec).
+  	* Memory type filters (private, mapped, image).
+  	* Pause target while scanning option.
+  	* Injected scanning option.
+  	* Configurable scan buffer size.
+  	* Pointer scanner.
+  	* Unknown value scan.
+  	* Progressive scan filtering based on either value or criteria.
+  	* Scan history and undo.
+  	* Case insensitive string scanning option.
+  	* Binary scanning.
+  	* Custom scanning via user-supplied predicate.
+  	* Improved floating-point scanning (configurable or 'smart' epsilon).
+  	* Group search support.
+  * Injector
+  	* .NET injection.
+  	* Cross-session injection.
+  	* IAT injection.
+  * Patcher
+  	* VEH hooking (Both INT3 and DR).
+  	* Transactional hooking.
+  	* Improved relative instruction rebuilding (including conditionals).
+  	* Sanity checking for target process.
+  	* Freeze target when hooking.
+  	* VMT hooking.
+  * ManualMap
+  	* Improved exception handling support.
+  * FindPattern
+  	* Pattern generator.
+  	* Multi-threaded scanning.
+  	* 'Start' attribute support.
+  	* Data/Rdata scanning support (for 'start' attribute and constant scans).
+  	* Support for loading XML file from resource or memory.
+  	* Dump results to file.
+  	* Change parser library from RapidXML to Boost.Spirit (may require a 
+  	format change from XML to something custom).
+  * PeLib
+  	* Finish implementing matching 'setters' for existing 'getters'.
+  	* Add modules to support more of the PE file format.
 
-* General
-	* Documentation via BoostBook and QuickBook.
-	* Unit tests for all components.
-	* Code review and refactor.
-		* More assertions.
-		* Concept checking.
-		* Review efficiency via profiling.
-		* Rewrite poorly designed APIs.
-	* Make types moveable where possible.
-	* Implement no-throw operators and constructors where possible (incl swap).
-	* Exception safety guarantees (noexcept where possible, provide rollback 
-	support with RAII or Boost.ScopeExit).
-	* Replace integer types with checked types (e.g. SafeInt) where 
-	appropriate.
-	* Thread-safety guarantees.
-	* Ensure rule-of-three compliance.
-	* Investigate GCC compilation support.
-	* Fix all 'fixme' items in code.
-	* Change XML parser library from RapidXML to Boost.Spirit (may require a 
-	format change from XML to something custom).
-	* Change header ext from .h to .hpp.
-	* Convert code back to Unicode-only (no MBCS).
-* New Modules
-	* Process creation APIs.
-	* Debugging APIs.
-		* Software breakpoint.
-		* Hardware breakpoint (incl read/write detection).
-		* Conditional breakpoints.
-		* Single-stepping.
-	* Anti-anti-cheat APIs.
-	* Stack trace APIs.
-	* Thread/process information APIs.
-	* String based assembler with x64 support.
-	* Process enumeration APIs.
-	* Symbol APIs.
-	* ASM searching API with 'wildcards'. (Metasm?)
-* MemoryMgr
-	* Improve 'safety' of remote function caller via EH to minimize risk of 
-	crashing target.
-	* Improve genericity of parameter passing in remote function caller.
-* Disassembler
-	* Decode calls/jumps to function names where possible.
-	* NOP/UnNOP support.
-* Scanner
-	* Multi-threaded scanning option.
-	* Wildcard support for vector/string scanning.
-	* Regex support for string scanning.
-	* Memory protection filters (read, write, exec).
-	* Memory type filters (private, mapped, image).
-	* Pause target while scanning option.
-	* Injected scanning option.
-	* Configurable scan buffer size.
-	* Pointer scanner.
-	* Unknown value scan.
-	* Progressive scan filtering based on either value or criteria.
-	* Scan history and undo.
-	* Case insensitive string scanning option.
-	* Binary scanning.
-	* Custom scanning via user-supplied predicate.
-	* Improved floating-point scanning (configurable or 'smart' epsilon).
-	* Group search support.
-* Injector
-	* .NET injection.
-	* Cross-session injection.
-	* IAT injection.
-* Patcher
-	* VEH hooking (Both INT3 and DR).
-	* Transactional hooking.
-	* Improved relative instruction rebuilding (including conditionals).
-	* Sanity checking for target process.
-	* Freeze target when hooking.
-	* VMT hooking.
-* ManualMap
-	* Improved exception handling support.
-* FindPattern
-	* Pattern generator.
-	* Multi-threaded scanning.
-	* 'Start' attribute support.
-	* Data/Rdata scanning support (for 'start' attribute and constant scans).
-	* Support for loading XML file from resource or memory.
-	* Dump results to file.
-* PeLib
-	* Finish implementing matching 'setters' for existing 'getters'.
-	* Add modules to support more of the PE file format.
+* Low Priority
+  * General
+  	* Investigate GCC compilation support.
