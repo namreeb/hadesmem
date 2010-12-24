@@ -37,6 +37,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "ModuleWrap.h"
 #include "RegionWrap.h"
 #include "TlsDirWrap.h"
+#include "SymbolWrap.h"
 #include "ScannerWrap.h"
 #include "SectionWrap.h"
 #include "InjectorWrap.h"
@@ -76,6 +77,7 @@ BOOST_PYTHON_MODULE(PyHadesMem)
   ExportModule();
   ExportRegion();
   ExportScanner();
+  ExportSymbol();
 
   ExportDosHeader();
   ExportExportDir();

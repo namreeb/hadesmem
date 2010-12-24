@@ -17,22 +17,4 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-// Hades (External)
-#include "Module.h"
-#include "Region.h"
-#include "Symbol.h"
-#include "Process.h"
-#include "Scanner.h"
-#include "Injector.h"
-#include "ManualMap.h"
-#include "MemoryMgr.h"
-#include "FindPattern.h"
-#include "Disassembler.h"
-
-// Hades (Internal)
-#include "Patcher.h"
-
-// Hades (PeLib)
-#include "PeLib.h"
+void ExportSymbol();
