@@ -21,8 +21,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <Windows.h>
-// Fixme: Reenable Unicode and enable this flag
+#ifdef UNICODE
 #define DBGHELP_TRANSLATE_TCHAR
+#endif
 #include <DbgHelp.h>
 
 // C++ Standard Library

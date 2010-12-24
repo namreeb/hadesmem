@@ -15,7 +15,6 @@
 	  * Ensure 'rule-of-three' compliance.
 	  * Fix all 'fixme' items in code.
 	  * Change header ext from .h to .hpp.
-	  * Convert code back to Unicode-only (no MBCS).
 	  
 * Medium Priority
   * New Modules
