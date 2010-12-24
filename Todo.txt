@@ -9,20 +9,17 @@
 		* Review efficiency via profiling.
 		* Rewrite poorly designed APIs.
 	* Make types moveable where possible.
+	* Implement no-throw operators and constructors where possible (incl swap).
 	* Exception safety guarantees (noexcept where possible, provide rollback 
 	support with RAII or Boost.ScopeExit).
 	* Replace integer types with checked types (e.g. SafeInt) where 
 	appropriate.
-	* Implement no-throw operators and constructors where possible.
-	* Implement no-throw swap where possible.
 	* Thread-safety guarantees.
 	* Ensure rule-of-three compliance.
 	* Investigate GCC compilation support.
 	* Fix all 'fixme' items in code.
-	* Write 'all in one' test utility.
-	* Fix 'solution folders' problem when attemtping to compile under 
-	MSVC express editions.
-	* Change XML parser library from RapidXML to Boost.Spirit.
+	* Change XML parser library from RapidXML to Boost.Spirit (may require a 
+	format change from XML to something custom).
 * New Modules
 	* Process creation APIs.
 	* Debugging APIs.
@@ -36,7 +33,7 @@
 	* String based assembler with x64 support.
 	* Process enumeration APIs.
 	* Symbol APIs.
-	* ASM searching API with 'wildcards'.
+	* ASM searching API with 'wildcards'. (Metasm?)
 * MemoryMgr
 	* Improve 'safety' of remote function caller via EH to minimize risk of 
 	crashing target.
