@@ -2,7 +2,6 @@
 
 * General
 	* Documentation via BoostBook and QuickBook.
-	* Move to Boost.Build.
 	* Unit tests for all components.
 	* Code review and refactor.
 		* More assertions.
