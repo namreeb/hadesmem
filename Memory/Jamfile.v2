@@ -1,0 +1,29 @@
+# Memory/Jamfile.v2
+
+lib user32 
+  : 
+  : <name>user32 
+  ;
+
+lib advapi32 
+  : 
+  : <name>advapi32 
+  ;
+
+project
+  : requirements <library>/boost//thread/<link>static <library>/boost//filesystem/<link>static 
+  ;
+
+lib Memory 
+  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 
+  : <link>static 
+  : 
+  : <include>"." 
+  ;
+
+lib MMHelper 
+  : [ glob MMHelper/*.cpp ] Memory user32 /boost//thread/<link>static /boost//filesystem/<link>static 
+  : <link>shared 
+  : 
+  : 
+  ;

@@ -2,16 +2,16 @@ use-project /Dependencies
   : Dependencies 
   ;
   
-use-project /Hades-Common 
-  : Hades-Common 
+use-project /Common 
+  : Common 
   ; 
   
-use-project /Hades-Memory 
-  : Hades-Memory 
+use-project /Memory 
+  : Memory 
   ; 
    
-use-project /Hades-Scripting 
-  : Hades-Scripting
+use-project /Scripting 
+  : Scripting
   ; 
  
 project 
@@ -19,14 +19,21 @@ project
   : default-build debug 
   ;
 
+alias HadesMem 
+  : 
+  : 
+  : 
+  : <include>"Include"
+  ;
+
 path-constant TOP 
   : . 
   ;
 
-build-project Hades-Memory 
+build-project Memory 
   ;
   
-build-project Hades-Scripting 
+build-project Scripting 
   ;
   
 rule Install-Rule ( properties * ) 
@@ -69,6 +76,6 @@ rule Install-Rule ( properties * )
 }
   
 install Bin 
-  : Hades-Memory Hades-Scripting 
+  : Memory Scripting 
   : <conditional>@Install-Rule <install-dependencies>on <install-type>SHARED_LIB <install-type>EXE <install-type>PYTHON_EXTENSION 
   ;
