@@ -1,4 +1,8 @@
-use-project /Dependencies
+use-project /HadesMem
+  : HadesMem
+  ;
+ 
+ use-project /Dependencies
   : Dependencies 
   ;
   
@@ -13,17 +17,14 @@ use-project /Memory
 use-project /Scripting 
   : Scripting
   ; 
+  
+use-project /Expression
+  : Expression
+  ;
  
 project 
   : requirements <define>BOOST_FILESYSTEM_VERSION=3 <define>UNICODE <define>_UNICODE <runtime-link>shared <warnings>all 
   : default-build debug 
-  ;
-
-alias HadesMem 
-  : 
-  : 
-  : 
-  : <include>"Include"
   ;
 
 path-constant TOP 
