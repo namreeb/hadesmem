@@ -1,0 +1,1 @@
+bjam --toolset=msvc-10.0 -j 4 address-model=32 release > Build_Release_IA32_MSVC100.txt
