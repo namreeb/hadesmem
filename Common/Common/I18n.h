@@ -22,9 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 #ifdef _MSC_VER
-#endif // #ifdef _MSC_VER
 #include <cvt/wstring>
-#ifdef _MSC_VER
 #endif // #ifdef _MSC_VER
 
 // Boost
