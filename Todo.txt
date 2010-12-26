@@ -8,10 +8,12 @@
       * Refactor poorly designed APIs.
     * Make types moveable, copyable, and assignable.
     * Implement no-throw operators and constructors (incl swap).
-    * Documented exception-safety guarantees (incl rollback support via RAII or Boost.ScopeExit).
+    * Documented exception-safety guarantees (incl rollback support via RAII 
+    or Boost.ScopeExit).
     * Documented thread-safety guarantees.
     * Improve thread-safety.
-  	* Replace integer types with checked types (e.g. SafeInt) where appropriate.
+  	* Replace integer types with checked types (e.g. SafeInt) where 
+  	appropriate.
 	  * Ensure 'rule-of-three' compliance.
 	  * Fix all 'fixme' items in code.
 	  * Change header ext from .h to .hpp.

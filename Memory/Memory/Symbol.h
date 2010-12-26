@@ -54,7 +54,8 @@ namespace Hades
       { };
 
       // Constructor
-      Symbols(MemoryMgr const& MyMemory, boost::filesystem::path const& SearchPath = boost::filesystem::path());
+      Symbols(MemoryMgr const& MyMemory, 
+        boost::filesystem::path const& SearchPath = boost::filesystem::path());
         
       // Destructor
       ~Symbols();

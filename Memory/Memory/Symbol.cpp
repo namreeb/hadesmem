@@ -32,7 +32,8 @@ namespace Hades
   namespace Memory
   {
     // Constructor
-  	Symbols::Symbols(MemoryMgr const& MyMemory, boost::filesystem::path const& SearchPath) 
+  	Symbols::Symbols(MemoryMgr const& MyMemory, 
+  	  boost::filesystem::path const& SearchPath) 
   	  : m_Memory(MyMemory)
   	{
   		// SYMOPT_DEBUG is not really necessary, but the debug output is always 
