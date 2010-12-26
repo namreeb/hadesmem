@@ -49,17 +49,17 @@ namespace Hades
     // CleanupFn = Cleanup function (e.g. 'CloseHandle')
     // Invalid = Invalid handle value (e.g. '0')
     template <typename HandleT, typename FuncT, FuncT CleanupFn, 
-      HandleT Invalid>
+      DWORD_PTR Invalid>
     class EnsureCleanup : private boost::noncopyable
     {
     public:
       // Ensure size of handle type is valid. Under Windows all handles are 
       // the size of a pointer.
-      static_assert(sizeof(HandleT) == sizeof(PVOID), 
+      static_assert(sizeof(HandleT) == sizeof(DWORD_PTR), 
         "Size of handle type is invalid.");
 
       // Constructor
-      EnsureCleanup(HandleT Handle = Invalid)
+      EnsureCleanup(HandleT Handle = reinterpret_cast<HandleT>(Invalid))
         : m_Handle(Handle)
       { }
 
@@ -100,7 +100,7 @@ namespace Hades
       // Whether object is valid
       BOOL IsValid() const
       {
-        return m_Handle != Invalid;
+        return m_Handle != reinterpret_cast<HandleT>(Invalid);
       }
 
       // Whether object is invalid
@@ -124,7 +124,7 @@ namespace Hades
           CleanupFn(m_Handle);
 
           // We no longer represent a valid object.
-          m_Handle = Invalid;
+          m_Handle = reinterpret_cast<HandleT>(Invalid);
         }
       }
 
@@ -132,6 +132,13 @@ namespace Hades
       // Handle being managed
       HandleT m_Handle;
     };
+    
+    // GCC workaround
+    namespace 
+    {
+      DWORD_PTR const INVALID_HANDLE_VALUE_CUSTOM = 
+        reinterpret_cast<DWORD_PTR>(INVALID_HANDLE_VALUE);
+    }
 
     // Instances of the template C++ class for common data types.
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), FindClose, 0> 
@@ -139,7 +146,7 @@ namespace Hades
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 0> 
       EnsureCloseHandle;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE> EnsureCloseSnap;
+      INVALID_HANDLE_VALUE_CUSTOM> EnsureCloseSnap;
     typedef EnsureCleanup<HLOCAL, HLOCAL(WINAPI*)(HLOCAL), LocalFree, 0> 
       EnsureLocalFree;
     typedef EnsureCleanup<HGLOBAL, HGLOBAL(WINAPI*)(HGLOBAL), GlobalFree, 0> 
@@ -163,7 +170,7 @@ namespace Hades
     typedef EnsureCleanup<HANDLE, DWORD(WINAPI*)(HANDLE), ResumeThread, 0> 
       EnsureResumeThread;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE> EnsureCloseFile;
+      INVALID_HANDLE_VALUE_CUSTOM> EnsureCloseFile;
     typedef EnsureCleanup<HHOOK, BOOL(WINAPI*)(HHOOK), UnhookWindowsHookEx, 0> 
       EnsureUnhookWindowsHookEx;
     typedef EnsureCleanup<HWND, BOOL(WINAPI*)(HWND), DestroyWindow, 0> 
