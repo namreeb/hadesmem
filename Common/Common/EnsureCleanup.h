@@ -134,10 +134,10 @@ namespace Hades
     };
     
     // GCC workaround
-    namespace 
+    namespace
     {
       DWORD_PTR const INVALID_HANDLE_VALUE_CUSTOM = 
-        reinterpret_cast<DWORD_PTR>(INVALID_HANDLE_VALUE);
+        static_cast<DWORD_PTR>(-1);
     }
 
     // Instances of the template C++ class for common data types.
