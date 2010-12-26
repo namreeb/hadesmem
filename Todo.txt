@@ -17,6 +17,7 @@
 	  * Ensure 'rule-of-three' compliance.
 	  * Fix all 'fixme' items in code.
 	  * Change header ext from .h to .hpp.
+	  * Hader-file checks (ensure sitll necessary -- e.g. noncopyable).
 	  
 * Medium Priority
   * New Modules

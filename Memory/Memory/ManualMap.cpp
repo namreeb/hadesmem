@@ -29,10 +29,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "PeLib.h"

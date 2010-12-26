@@ -22,14 +22,22 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/lexical_cast.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // RapidXML
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <RapidXML/rapidxml.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "PeFile.h"

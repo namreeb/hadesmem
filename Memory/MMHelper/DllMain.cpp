@@ -18,10 +18,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/thread.hpp>
 #include <boost/exception/all.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Windows API
 #include <crtdbg.h>
@@ -30,7 +34,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Common/Logger.h"
 #include "Memory/Memory.h"
-#include "Memory/AutoLink.h"
 
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
@@ -108,7 +111,9 @@ LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
 #endif
 }
 
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 void TestSEH()
 {
   // Test SEH
@@ -122,7 +127,9 @@ void TestSEH()
     MessageBox(NULL, _T("Testing SEH."), _T("MMHelper"), MB_OK);
   }
 }
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 void TestRelocs()
 {

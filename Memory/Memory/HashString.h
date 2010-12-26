@@ -27,11 +27,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // to the compile-time string hashing.
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/mpl/string.hpp>
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/size_t.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 namespace Hades
 {
@@ -39,9 +43,11 @@ namespace Hades
   {
     namespace Detail
     {
+#ifdef _MSC_VER
       // Disable 'integral constant overflow' warning.
 #pragma warning(push)
 #pragma warning(disable: 4307)
+#endif // #ifdef _MSC_VER
 
       // Perform hashing
       template <typename Seed, typename Value>
@@ -51,7 +57,9 @@ namespace Hades
           (Seed::value << 6) + (Seed::value >> 2))> type;
       };
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
       // Hash any sequence of integral wrapper types
       template <typename Sequence>

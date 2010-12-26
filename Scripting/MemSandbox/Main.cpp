@@ -31,16 +31,19 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <exception>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/timer.hpp>
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Memory/Memory.h"
-#include "Memory/AutoLink.h"
 
 bool GetInput(boost::python::object const& PythonNamespace) 
 {

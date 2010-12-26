@@ -27,10 +27,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/python.hpp>
 #include <boost/exception/all.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "PeFileWrap.h"
@@ -50,7 +54,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "FindPatternWrap.h"
 #include "DisassemblerWrap.h"
 #include "Common/Error.h"
-#include "Memory/AutoLink.h"
 
 // Custom error translator
 void HadesErrorTranslator(std::exception const& e)

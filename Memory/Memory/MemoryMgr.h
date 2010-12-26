@@ -30,16 +30,24 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
 #pragma warning(disable: 4706)
+#endif // #ifdef _MSC_VER
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // AsmJit
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include "AsmJit/AsmJit.h"
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Error.h"

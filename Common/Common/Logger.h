@@ -31,14 +31,18 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 // Boost C++ Libraries
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/thread.hpp>
 #include <boost/format.hpp>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/categories.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Error.h"

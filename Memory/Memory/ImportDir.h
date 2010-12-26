@@ -26,10 +26,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 // Boost
+#ifdef _MSC_VER
 #pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Fwd.h"
