@@ -19,7 +19,7 @@ use-project /Scripting
   ; 
   
 project 
-  : requirements <define>BOOST_FILESYSTEM_VERSION=3 <define>UNICODE <define>_UNICODE <runtime-link>shared <warnings>all 
+  : requirements <define>BOOST_FILESYSTEM_VERSION=3 <define>UNICODE <define>_UNICODE <runtime-link>shared <toolset>gcc:<warnings>off <toolset>msvc:<warnings>all 
   : default-build debug 
   ;
 

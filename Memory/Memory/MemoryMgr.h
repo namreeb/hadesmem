@@ -301,8 +301,8 @@ namespace Hades
       /*Dummy*/) const
     {
       // Ensure type to be read is POD
-      static_assert(std::is_pod<T::value_type>::value, "MemoryMgr::Read: "
-        "Value type of vector must be POD.");
+      static_assert(std::is_pod<typename T::value_type>::value, 
+        "MemoryMgr::Read: Value type of vector must be POD.");
 
       // Treat attempt to read from a guard page as an error
       if (IsGuard(Address))
@@ -313,7 +313,7 @@ namespace Hades
       }
 
       // Calculate 'raw' size of data
-      std::size_t RawSize = Size * sizeof(T::value_type);
+      std::size_t RawSize = Size * sizeof(typename T::value_type);
 
       // Whether we can read the given address
       bool const CanReadMem = CanRead(Address);
@@ -448,8 +448,8 @@ namespace Hades
       T>::type* /*Dummy*/) const
     {
       // Ensure type to be written is POD
-      static_assert(std::is_pod<T::value_type>::value, "MemoryMgr::Write: "
-        "Value type of vector must be POD.");
+      static_assert(std::is_pod<typename T::value_type>::value, 
+        "MemoryMgr::Write: Value type of vector must be POD.");
 
       // Treat attempt to write to a guard page as an error
       if (IsGuard(Address))
@@ -460,7 +460,7 @@ namespace Hades
       }
 
       // Calculate 'raw' size of data
-      std::size_t RawSize = Data.size() * sizeof(T::value_type);
+      std::size_t RawSize = Data.size() * sizeof(typename T::value_type);
 
       // Whether we can write to the given address
       bool const CanWriteMem = CanWrite(Address);

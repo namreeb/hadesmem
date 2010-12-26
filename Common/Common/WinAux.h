@@ -37,7 +37,8 @@ namespace Hades
     inline PVOID GetBaseOfSelf()
     {
       MEMORY_BASIC_INFORMATION MemInfo = { 0 };
-      if (!VirtualQuery(&GetBaseOfSelf, &MemInfo, sizeof(MemInfo)))
+      if (!VirtualQuery(reinterpret_cast<PVOID>(&GetBaseOfSelf), &MemInfo, 
+        sizeof(MemInfo)))
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(WinAuxError() << 

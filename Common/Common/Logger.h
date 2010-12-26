@@ -39,6 +39,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/categories.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -80,7 +81,7 @@ namespace Hades
       typedef boost::iostreams::sink_tag category;
 
       // STL typedefs
-      typedef std::basic_ofstream<char_type> tofstream;
+      typedef boost::filesystem::basic_ofstream<char_type> tofstream;
 
       // Stream typedef
       typedef boost::iostreams::stream<Logger<CharT>> Stream;
@@ -134,8 +135,7 @@ namespace Hades
         TimeStr[10] = '_'; TimeStr[13] = '-'; TimeStr[16] = '-';
 
         // Open file
-        tofstream Out(m_LogPath.string<std::basic_string<TCHAR>>().c_str(), 
-          tofstream::out | tofstream::app);
+        tofstream Out(m_LogPath, tofstream::out | tofstream::app);
         if(!Out)
         {
           BOOST_THROW_EXCEPTION(Error() << 

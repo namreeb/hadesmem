@@ -17,15 +17,29 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// C++ Standard Library
+#include <vector>
+#include <iterator>
+#include <algorithm>
+
 // Hades
 #include "Module.h"
 #include "Symbol.h"
-
-// C++ Standard Library
-#include <vector>
+#include "Common/I18n.h"
 
 // Ensure DebugHelp library is linked
 #pragma comment(lib, "dbghelp")
+
+// GCC workaround. MinGW does not support the updated DbgHelp APIs with 
+// Unicode support.
+namespace 
+{
+#ifdef _MSC_VER
+  typedef TCHAR TCHAR_TEMP;
+#else
+  typedef char TCHAR_TEMP;
+#endif // #ifdef _MSC_VER
+}
 
 namespace Hades
 {
@@ -40,10 +54,13 @@ namespace Hades
   		// good if something goes wrong
   		SymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
   		
+  		// Convert search path to non-const buffer (GCC workaround)
+  		std::basic_string<TCHAR_TEMP> SearchPathTemp(
+  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(SearchPath));
+  		
   		// Initialize symbol APIs
   		if(!SymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
-  		  NULL : SearchPath.string<std::basic_string<TCHAR>>().c_str(), 
-  		  FALSE))
+  		  NULL : &SearchPathTemp[0], FALSE))
   	  {
   	    DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -90,10 +107,15 @@ namespace Hades
           ErrorString("Could not find module in remote process."));
       }
         
+  		// Convert module name to non-const buffer (GCC workaround)
+  		std::basic_string<TCHAR_TEMP> ModuleNameTemp(
+  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(
+  		  MyModule->GetName()));
+  		
       // Load symbols for module
   		if(!SymLoadModuleEx(m_Memory.GetProcessHandle(), 
   		  NULL, 
-  		  MyModule->GetName().c_str(), 
+  		  &ModuleNameTemp[0], 
   		  NULL, 
   		  reinterpret_cast<DWORD64>(MyModule->GetBase()), 
   		  0, 
@@ -121,10 +143,14 @@ namespace Hades
       std::vector<ULONG64> SymInfoBuf(BufferSize);
       PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(&SymInfoBuf[0]);
       pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-      pSymbol->MaxNameLen = Name.size() + 1;
+      pSymbol->MaxNameLen = static_cast<ULONG>(Name.size() + 1);
       
+  		// Convert symbol name to non-const buffer (GCC workaround)
+  		std::basic_string<TCHAR_TEMP> NameTemp(
+  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(Name));
+  		
       // Look up symbol
-      if (!SymFromName(m_Memory.GetProcessHandle(), Name.c_str(), pSymbol))
+      if (!SymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
       {
   	    DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 

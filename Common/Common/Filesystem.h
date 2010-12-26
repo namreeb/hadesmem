@@ -30,6 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
@@ -55,8 +56,7 @@ namespace Hades
       boost::filesystem::path const& Path)
     {
       // Open file
-      std::basic_ofstream<BYTE> File(Path.string<std::basic_string<TCHAR>>().
-        c_str(), std::ios::binary);
+      boost::filesystem::basic_ofstream<BYTE> File(Path, std::ios::binary);
       if (!File)
       {
         BOOST_THROW_EXCEPTION(FilesystemError() << 
@@ -72,8 +72,8 @@ namespace Hades
     inline std::vector<BYTE> FileToBuffer(boost::filesystem::path const& Path)
     {
       // Open file
-      std::basic_ifstream<BYTE> File(Path.string<std::basic_string<TCHAR>>().
-        c_str(), std::ios::binary | std::ios::ate);
+      boost::filesystem::basic_ifstream<BYTE> File(Path, std::ios::binary | 
+        std::ios::ate);
       if (!File)
       {
         BOOST_THROW_EXCEPTION(FilesystemError() << 

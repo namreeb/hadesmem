@@ -34,6 +34,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/fstream.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
@@ -84,8 +85,8 @@ namespace Hades
       std::string const& Export, bool InjectHelper) const
     {
       // Open file for reading
-      std::basic_ifstream<BYTE> ModuleFile(Path.string<std::
-        basic_string<TCHAR>>().c_str(), std::ios::binary | std::ios::ate);
+      boost::filesystem::basic_ifstream<BYTE> ModuleFile(Path, 
+        std::ios::binary | std::ios::ate);
       if (!ModuleFile)
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -180,8 +181,9 @@ namespace Hades
       std::cout << "Entry Point: " << EntryPoint << "." << std::endl;
 
       // Get address of export in remote process
-      PVOID const ExportAddr = m_Memory.GetRemoteProcAddress(
-        reinterpret_cast<HMODULE>(RemoteBase), Path, Export.c_str());
+      PVOID const ExportAddr = reinterpret_cast<PVOID>(
+        m_Memory.GetRemoteProcAddress(reinterpret_cast<HMODULE>(RemoteBase), 
+        Path, Export.c_str()));
       std::cout << "Export Address: " << ExportAddr << "." << std::endl;
 
       // Inject helper module

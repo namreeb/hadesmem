@@ -116,7 +116,8 @@ namespace Hades
       T, std::basic_string<typename T::value_type>>>::type* /*Dummy*/) const
     {
       // Convert string to character buffer
-      std::vector<T::value_type> const MyBuffer(Data.cbegin(), Data.cend());
+      std::vector<typename T::value_type> const MyBuffer(Data.cbegin(), 
+        Data.cend());
       // Use vector specialization of find
       return Find(MyBuffer);
     }
@@ -126,8 +127,8 @@ namespace Hades
     PVOID Scanner::Find(T const& Data, typename boost::enable_if<std::is_same<
       T, std::vector<typename T::value_type>>>::type* /*Dummy1*/) const
     {
-      static_assert(std::is_pod<T::value_type>::value, "Scanner::Find: Value "
-        "type of vector must be POD.");
+      static_assert(std::is_pod<typename T::value_type>::value, 
+        "Scanner::Find: Value type of vector must be POD.");
 
       if (Data.empty())
       {
@@ -137,7 +138,8 @@ namespace Hades
       }
 
       LPCBYTE pDataRaw = reinterpret_cast<LPCBYTE>(&Data[0]);
-      std::size_t const DataRawSize = Data.size() * sizeof(T::value_type);
+      std::size_t const DataRawSize = Data.size() * sizeof(
+        typename T::value_type);
 
       std::vector<BYTE> DataRaw(pDataRaw, pDataRaw + DataRawSize);
 
@@ -202,7 +204,8 @@ namespace Hades
       type* /*Dummy*/) const
     {
       // Convert string to character buffer
-      std::vector<T::value_type> const MyBuffer(Data.cbegin(), Data.cend());
+      std::vector<typename T::value_type> const MyBuffer(Data.cbegin(), 
+        Data.cend());
       // Use vector specialization of find all
       return FindAll(MyBuffer);
     }
@@ -216,8 +219,8 @@ namespace Hades
       enable_if<std::is_same<T, std::vector<typename T::value_type>>>::type* 
       /*Dummy1*/) const
     {
-      static_assert(std::is_pod<T::value_type>::value, "Scanner::Find: Value "
-        "type of vector must be POD.");
+      static_assert(std::is_pod<typename T::value_type>::value, 
+        "Scanner::Find: Value type of vector must be POD.");
 
       if (Data.empty())
       {
@@ -227,7 +230,8 @@ namespace Hades
       }
 
       LPCBYTE pDataRaw = reinterpret_cast<LPCBYTE>(&Data[0]);
-      std::size_t const DataRawSize = Data.size() * sizeof(T::value_type);
+      std::size_t const DataRawSize = Data.size() * sizeof(
+        typename T::value_type);
 
       std::vector<BYTE> DataRaw(pDataRaw, pDataRaw + DataRawSize);
 

@@ -26,6 +26,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem/fstream.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
@@ -177,8 +178,7 @@ namespace Hades
     void FindPattern::LoadFromXML(boost::filesystem::path const& Path)
     {
       // Open current file
-      std::wifstream PatternFile(Path.string<std::basic_string<TCHAR>>().
-        c_str());
+      boost::filesystem::wifstream PatternFile(Path);
       if (!PatternFile)
       {
         BOOST_THROW_EXCEPTION(Error() << 

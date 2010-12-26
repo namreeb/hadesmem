@@ -28,48 +28,51 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Boost
 #include <boost/lexical_cast.hpp>
 
-// Boost.LexicalCast specialization to allow conversions from wide to narrow 
-// strings.
-template<> 
-inline std::string boost::lexical_cast<std::string, std::wstring>(
-  std::wstring const& Source)
+namespace boost
 {
-#ifdef _MSC_VER
-  return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
-    mbstate_t>>().to_bytes(Source);
-#else
-  // Fixme: Implement fully for non-MSVC
-  return std::string(Source.begin(), Source.end());
-#endif // #ifdef _MSC_VER
-}
-
-// Boost.LexicalCast specialization to allow conversions from narrow to wide 
-// strings.
-template<> 
-inline std::wstring boost::lexical_cast<std::wstring, std::string>(
-  std::string const& Source)
-{
-#ifdef _MSC_VER
-  return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
-    mbstate_t>>().from_bytes(Source);
-#else
-  // Fixme: Implement fully for non-MSVC
-  return std::wstring(Source.begin(), Source.end());
-#endif // #ifdef _MSC_VER
-}
-
-// Turn attempts to convert between the same string types into a nullsub.
-template<> 
-inline std::wstring boost::lexical_cast<std::wstring, std::wstring>(
-  std::wstring const& Source)
-{
-  return Source;
-}
-
-// Turn attempts to convert between the same string types into a nullsub.
-template<> 
-inline std::string boost::lexical_cast<std::string, std::string>(
-  std::string const& Source)
-{
-  return Source;
+  // Boost.LexicalCast specialization to allow conversions from wide to narrow 
+  // strings.
+  template<> 
+  inline std::string lexical_cast<std::string, std::wstring>(
+    std::wstring const& Source)
+  {
+  #ifdef _MSC_VER
+    return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
+      mbstate_t>>().to_bytes(Source);
+  #else
+    // Fixme: Implement fully for non-MSVC
+    return std::string(Source.begin(), Source.end());
+  #endif // #ifdef _MSC_VER
+  }
+  
+  // Boost.LexicalCast specialization to allow conversions from narrow to wide 
+  // strings.
+  template<> 
+  inline std::wstring lexical_cast<std::wstring, std::string>(
+    std::string const& Source)
+  {
+  #ifdef _MSC_VER
+    return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
+      mbstate_t>>().from_bytes(Source);
+  #else
+    // Fixme: Implement fully for non-MSVC
+    return std::wstring(Source.begin(), Source.end());
+  #endif // #ifdef _MSC_VER
+  }
+  
+  // Turn attempts to convert between the same string types into a nullsub.
+  template<> 
+  inline std::wstring lexical_cast<std::wstring, std::wstring>(
+    std::wstring const& Source)
+  {
+    return Source;
+  }
+  
+  // Turn attempts to convert between the same string types into a nullsub.
+  template<> 
+  inline std::string lexical_cast<std::string, std::string>(
+    std::string const& Source)
+  {
+    return Source;
+  }
 }

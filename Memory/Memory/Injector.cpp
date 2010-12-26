@@ -220,7 +220,7 @@ namespace Hades
       // Load module in remote process using LoadLibraryW
       std::vector<PVOID> Args;
       Args.push_back(LibFileRemote.GetAddress());
-      if (!m_Memory.Call(pLoadLibraryW, Args))
+      if (!m_Memory.Call(reinterpret_cast<PVOID>(pLoadLibraryW), Args))
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
@@ -281,7 +281,7 @@ namespace Hades
       // Create a remote thread that calls the desired export
       std::vector<PVOID> ExportArgs;
       ExportArgs.push_back(ModuleRemote);
-      return m_Memory.Call(pExportAddr, ExportArgs);
+      return m_Memory.Call(reinterpret_cast<PVOID>(pExportAddr), ExportArgs);
     }
   }
 }
