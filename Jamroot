@@ -18,10 +18,6 @@ use-project /Scripting
   : Scripting
   ; 
   
-use-project /Expression
-  : Expression
-  ;
- 
 project 
   : requirements <define>BOOST_FILESYSTEM_VERSION=3 <define>UNICODE <define>_UNICODE <runtime-link>shared <warnings>all 
   : default-build debug 

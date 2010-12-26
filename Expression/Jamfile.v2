@@ -1,6 +1,0 @@
-# Expression/Jamfile.v2
-
-exe Test 
-  : [ glob Test/*.cpp ] /Memory//Memory /HadesMem//HadesMem 
-  : <link>static 
-  ;
