@@ -1,0 +1,1 @@
+bjam --toolset=gcc -j 4 address-model=32 cxxflags="-std=c++0x" define="nullptr=NULL" release > Build_Release_IA32_GCC.txt

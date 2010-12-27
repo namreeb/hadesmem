@@ -1,0 +1,1 @@
+bjam --toolset=gcc -j 4 address-model=64 cxxflags="-std=c++0x" define="nullptr=NULL" debug > Build_Debug_AMD64_GCC.txt

@@ -1,0 +1,1 @@
+bjam --toolset=gcc -j 4 address-model=32 cxxflags="-std=c++0x" define="nullptr=NULL" debug > Build_Debug_IA32_GCC.txt
