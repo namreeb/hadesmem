@@ -106,7 +106,7 @@ namespace Hades
       // Put data in container
       std::vector<T> Buffer;
       Buffer.push_back(Data);
-      // Use vector specialization of FindAll
+      // Use vector specialization of Find
       return Find(Buffer);
     }
 
@@ -118,7 +118,7 @@ namespace Hades
       // Convert string to character buffer
       std::vector<typename T::value_type> const MyBuffer(Data.cbegin(), 
         Data.cend());
-      // Use vector specialization of find
+      // Use vector specialization of Find
       return Find(MyBuffer);
     }
 
