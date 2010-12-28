@@ -41,7 +41,7 @@ namespace boost
       mbstate_t>>().to_bytes(Source);
   #else
     // Fixme: Implement fully for non-MSVC
-    return std::string(Source.begin(), Source.end());
+    return std::string(Source.cbegin(), Source.cend());
   #endif // #ifdef _MSC_VER
   }
   
@@ -56,7 +56,7 @@ namespace boost
       mbstate_t>>().from_bytes(Source);
   #else
     // Fixme: Implement fully for non-MSVC
-    return std::wstring(Source.begin(), Source.end());
+    return std::wstring(Source.cbegin(), Source.cend());
   #endif // #ifdef _MSC_VER
   }
   
