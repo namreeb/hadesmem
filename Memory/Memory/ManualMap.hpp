@@ -24,65 +24,53 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // C++ Standard Library
 #include <string>
-#include <vector>
 
 // Boost
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
+#include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
 
-// BeaEngine
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
-#include "BeaEngine/BeaEngine.h"
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // #ifdef _MSC_VER
-
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "MemoryMgr.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {
   namespace Memory
   {
-    // Disassembler data
-    struct DisasmData
-    {
-      DISASM Disasm;
-      int Len;
-      std::vector<BYTE> Raw;
-    };
-
-    // Disassembler managing class
-    class Disassembler
+    // Manual mapping class
+    class ManualMap
     {
     public:
-      // Disassembler exception type
+      // ManualMap exception type
       class Error : public virtual HadesMemError 
       { };
 
       // Constructor
-      explicit Disassembler(MemoryMgr const& MyMemory);
+      explicit ManualMap(MemoryMgr const& MyMemory);
 
-      // Disassemble target and get results as strings
-      std::vector<std::string> DisassembleToStr(PVOID Address, 
-        DWORD_PTR NumInstructions) const;
-
-      // Disassemble target and get full disasm data back
-      std::vector<DisasmData> Disassemble(PVOID Address, 
-        DWORD_PTR NumInstructions) const;
+      // Manually map DLL
+      PVOID Map(boost::filesystem::path const& Path, 
+        std::string const& Export = "", bool InjectHelper = true) const;
 
     private:
+      // Map sections
+      void MapSections(PeFile& MyPeFile, PVOID RemoteAddr) const;
+
+      // Fix imports
+      void FixImports(PeFile& MyPeFile) const;
+
+      // Fix relocations
+      void FixRelocations(PeFile& MyPeFile, PVOID RemoteAddr) const;
+
       // MemoryMgr instance
-      MemoryMgr m_MemoryMgr;
+      MemoryMgr m_Memory;
     };
   }
 }

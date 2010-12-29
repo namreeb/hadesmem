@@ -23,7 +23,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // C++ Standard Library
+#include <tuple>
 #include <string>
+#include <utility>
 
 // Boost
 #ifdef _MSC_VER
@@ -36,41 +38,45 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "MemoryMgr.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "MemoryMgr.hpp"
+#include "Common/I18n.hpp"
 
 namespace Hades
 {
   namespace Memory
   {
-    // Manual mapping class
-    class ManualMap
+    // DLL injection class
+    class Injector
     {
     public:
-      // ManualMap exception type
+      // Injector exception type
       class Error : public virtual HadesMemError 
       { };
 
       // Constructor
-      explicit ManualMap(MemoryMgr const& MyMemory);
+      explicit Injector(MemoryMgr const& MyMemory);
 
-      // Manually map DLL
-      PVOID Map(boost::filesystem::path const& Path, 
-        std::string const& Export = "", bool InjectHelper = true) const;
+      // Inject DLL
+      HMODULE InjectDll(boost::filesystem::path const& Path, 
+        bool PathResolution = true) const;
+
+      // Call export
+      DWORD_PTR CallExport(boost::filesystem::path const& ModulePath, 
+        HMODULE ModuleRemote, std::string const& Export) const;
 
     private:
-      // Map sections
-      void MapSections(PeFile& MyPeFile, PVOID RemoteAddr) const;
-
-      // Fix imports
-      void FixImports(PeFile& MyPeFile) const;
-
-      // Fix relocations
-      void FixRelocations(PeFile& MyPeFile, PVOID RemoteAddr) const;
-
       // MemoryMgr instance
       MemoryMgr m_Memory;
     };
+    
+    // Create process (as suspended) and inject DLL
+    std::tuple<MemoryMgr, HMODULE, DWORD_PTR> CreateAndInject(
+      boost::filesystem::path const& Path, 
+      boost::filesystem::path const& WorkDir, 
+      std::basic_string<TCHAR> const& Args, 
+      std::basic_string<TCHAR> const& Module, 
+      std::string const& Export);
   }
 }

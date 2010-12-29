@@ -21,11 +21,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 // Hades
-#include "PeFile.h"
-#include "NtHeaders.h"
-#include "DosHeader.h"
-#include "MemoryMgr.h"
-#include "ExportDir.h"
+#include "PeFile.hpp"
+#include "NtHeaders.hpp"
+#include "DosHeader.hpp"
+#include "MemoryMgr.hpp"
+#include "ExportDir.hpp"
 
 namespace Hades
 {

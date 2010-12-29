@@ -19,64 +19,66 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
+// Windows
 #include <Windows.h>
-
-// C++ Standard Library
-#include <tuple>
-#include <string>
-#include <utility>
 
 // Boost
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
-#include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "MemoryMgr.h"
-#include "Common/I18n.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {
   namespace Memory
   {
-    // DLL injection class
-    class Injector
+    // PE file format wrapper
+    class PeFile
     {
     public:
-      // Injector exception type
+      // PeFile exception type
       class Error : public virtual HadesMemError 
       { };
 
+      enum FileType
+      {
+        FileType_Image, 
+        FileType_Data
+      };
+
       // Constructor
-      explicit Injector(MemoryMgr const& MyMemory);
+      PeFile(MemoryMgr const& MyMemory, PVOID Address, FileType Type = 
+        FileType_Image);
 
-      // Inject DLL
-      HMODULE InjectDll(boost::filesystem::path const& Path, 
-        bool PathResolution = true) const;
+      // Get memory manager
+      MemoryMgr GetMemoryMgr() const;
 
-      // Call export
-      DWORD_PTR CallExport(boost::filesystem::path const& ModulePath, 
-        HMODULE ModuleRemote, std::string const& Export) const;
+      // Get base address
+      PBYTE GetBase() const;
 
-    private:
-      // MemoryMgr instance
+      // Convert RVA to VA
+      PVOID RvaToVa(DWORD Rva) const;
+
+      // Get file type
+      FileType GetType() const;
+
+    protected:
+      // Memory instance
       MemoryMgr m_Memory;
+
+      // Base address
+      PBYTE m_pBase;
+
+      // File type
+      FileType m_Type;
     };
-    
-    // Create process (as suspended) and inject DLL
-    std::tuple<MemoryMgr, HMODULE, DWORD_PTR> CreateAndInject(
-      boost::filesystem::path const& Path, 
-      boost::filesystem::path const& WorkDir, 
-      std::basic_string<TCHAR> const& Args, 
-      std::basic_string<TCHAR> const& Module, 
-      std::string const& Export);
   }
 }

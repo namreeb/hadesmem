@@ -19,12 +19,5 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Common
-#include "../Common/Common/EnsureCleanup.h"
-#include "../Common/Common/Error.h"
-#include "../Common/Common/Filesystem.h"
-#include "../Common/Common/I18n.h"
-#include "../Common/Common/Logger.h"
-#include "../Common/Common/StringBuffer.h"
-#include "../Common/Common/VecN.h"
-#include "../Common/Common/WinAux.h"
+// Hades (External)
+#include "../Memory/Memory/Memory.hpp"

@@ -23,7 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Error.h"
+#include "Error.hpp"
 
 namespace Hades
 {

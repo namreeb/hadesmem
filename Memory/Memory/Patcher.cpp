@@ -18,9 +18,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "Patcher.h"
-#include "MemoryMgr.h"
-#include "Disassembler.h"
+#include "Patcher.hpp"
+#include "MemoryMgr.hpp"
+#include "Disassembler.hpp"
 
 namespace Hades
 {

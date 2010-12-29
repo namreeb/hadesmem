@@ -27,8 +27,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Types.h"
-#include "Memory/Scanner.h"
+#include "Memory/Types.hpp"
+#include "Memory/Scanner.hpp"
 
 class ScannerWrap : public Hades::Memory::Scanner
 {

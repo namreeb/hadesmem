@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "Scanner.h"
+#include "Scanner.hpp"
 
 namespace Hades
 {

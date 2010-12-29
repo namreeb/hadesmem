@@ -36,10 +36,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "PeFile.h"
-#include "ImportDir.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "PeFile.hpp"
+#include "ImportDir.hpp"
 
 namespace Hades
 {

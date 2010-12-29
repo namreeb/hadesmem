@@ -33,9 +33,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "MemoryMgr.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "MemoryMgr.hpp"
 
 // Note: Symbol APIs provided by DbgHelp are NOT thread-safe. 
 // Todo: Implement optional synchronization.

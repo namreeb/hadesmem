@@ -23,9 +23,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 
 // Hades
-#include "Module.h"
-#include "Symbol.h"
-#include "Common/I18n.h"
+#include "Module.hpp"
+#include "Symbol.hpp"
+#include "Common/I18n.hpp"
 
 // Ensure DebugHelp library is linked
 #pragma comment(lib, "dbghelp")

@@ -40,13 +40,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "PeLib.h"
-#include "Module.h"
-#include "Injector.h"
-#include "MemoryMgr.h"
-#include "ManualMap.h"
-#include "Common/I18n.h"
-#include "Common/EnsureCleanup.h"
+#include "PeLib.hpp"
+#include "Module.hpp"
+#include "Injector.hpp"
+#include "MemoryMgr.hpp"
+#include "ManualMap.hpp"
+#include "Common/I18n.hpp"
+#include "Common/EnsureCleanup.hpp"
 
 namespace 
 {

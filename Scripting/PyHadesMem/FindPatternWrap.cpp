@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/FindPattern.h"
+#include "Memory/FindPattern.hpp"
 
 class FindPatternWrap : public Hades::Memory::FindPattern
 {

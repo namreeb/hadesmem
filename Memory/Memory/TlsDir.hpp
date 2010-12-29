@@ -23,7 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // C++ Standard Library
-#include <string>
+#include <vector>
 
 // Boost
 #ifdef _MSC_VER
@@ -35,61 +35,58 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "PeFile.h"
-#include "MemoryMgr.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "PeFile.hpp"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {
   namespace Memory
   {
-    // PE file section
-    class Section
+    // PE file TLS directory
+    class TlsDir
     {
     public:
-      // Section error class
+      // TlsDir error class
       class Error : public virtual HadesMemError
       { };
 
       // Constructor
-      Section(PeFile const& MyPeFile, WORD Number);
+      TlsDir(PeFile const& MyPeFile);
 
-      // Get name
-      std::string GetName() const;
+      // Whether TLS directory is valid
+      bool IsValid() const;
 
-      // Get virtual address
-      DWORD GetVirtualAddress() const;
+      // Ensure TLS directory is valid
+      void EnsureValid() const;
 
-      // Get virtual size
-      DWORD GetVirtualSize() const;
+      // Get start address of raw data
+      DWORD_PTR GetStartAddressOfRawData() const;
 
-      // Get size of raw data
-      DWORD GetSizeOfRawData() const;
+      // Get end address of raw data
+      DWORD_PTR GetEndAddressOfRawData() const;
 
-      // Get pointer to raw data
-      DWORD GetPointerToRawData() const;
+      // Get address of index
+      DWORD_PTR GetAddressOfIndex() const;
 
-      // Get pointer to relocations
-      DWORD GetPointerToRelocations() const;
+      // Get address of callbacks
+      DWORD_PTR GetAddressOfCallBacks() const;
 
-      // Get pointer to line numbers
-      DWORD GetPointerToLinenumbers() const;
-
-      // Get number of relocations
-      WORD GetNumberOfRelocations() const;
-
-      // Get number of line numbers
-      WORD GetNumberOfLinenumbers() const;
+      // Get size of zero fill
+      DWORD GetSizeOfZeroFill() const;
 
       // Get characteristics
       DWORD GetCharacteristics() const;
 
-      // Get section header base
+      // Get list of TLS callbacks
+      std::vector<PIMAGE_TLS_CALLBACK> GetCallbacks() const;
+
+      // Get base of TLS dir
       PBYTE GetBase() const;
 
-      // Get raw section header
-      IMAGE_SECTION_HEADER GetSectionHeaderRaw() const;
+      // Get raw TLS dir
+      IMAGE_TLS_DIRECTORY GetTlsDirRaw() const;
 
     private:
       // PE file
@@ -97,9 +94,6 @@ namespace Hades
 
       // Memory instance
       MemoryMgr m_Memory;
-
-      // Section number
-      WORD m_SectionNum;
     };
   }
 }

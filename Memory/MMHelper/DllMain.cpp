@@ -32,8 +32,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Common/Logger.h"
-#include "Memory/Memory.h"
+#include "Common/Logger.hpp"
+#include "Memory/Memory.hpp"
 
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;

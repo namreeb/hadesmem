@@ -32,8 +32,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Process.h"
-#include "Common/I18n.h"
+#include "Process.hpp"
+#include "Common/I18n.hpp"
 
 namespace Hades
 {

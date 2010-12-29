@@ -19,15 +19,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Hades (PeLib)
-#include "PeFile.h"
-#include "TlsDir.h"
-#include "Section.h"
-#include "ImportDir.h"
-#include "ExportDir.h"
-#include "DosHeader.h"
-#include "ExportDir.h"
-#include "NtHeaders.h"
-#include "ImportEnum.h"
-#include "ExportEnum.h"
-#include "SectionEnum.h"
+// Hades
+#include "Common/Error.hpp"
+
+namespace Hades
+{
+  namespace Memory
+  {
+    // Base exception class
+    class HadesMemError : public virtual HadesError
+    { };
+  }
+}

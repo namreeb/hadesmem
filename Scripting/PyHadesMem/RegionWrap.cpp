@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Region.h"
+#include "Memory/Region.hpp"
 
 class RegionWrap : public Hades::Memory::Region
 {

@@ -19,20 +19,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Hades (External)
-#include "Module.h"
-#include "Region.h"
-#include "Symbol.h"
-#include "Process.h"
-#include "Scanner.h"
-#include "Injector.h"
-#include "ManualMap.h"
-#include "MemoryMgr.h"
-#include "FindPattern.h"
-#include "Disassembler.h"
-
-// Hades (Internal)
-#include "Patcher.h"
-
-// Hades (PeLib)
-#include "PeLib.h"
+// Common
+#include "../Common/Common/EnsureCleanup.hpp"
+#include "../Common/Common/Error.hpp"
+#include "../Common/Common/Filesystem.hpp"
+#include "../Common/Common/I18n.hpp"
+#include "../Common/Common/Logger.hpp"
+#include "../Common/Common/StringBuffer.hpp"
+#include "../Common/Common/VecN.hpp"
+#include "../Common/Common/WinAux.hpp"

@@ -41,13 +41,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "PeFile.h"
-#include "Module.h"
-#include "Scanner.h"
-#include "DosHeader.h"
-#include "NtHeaders.h"
-#include "FindPattern.h"
-#include "Common/I18n.h"
+#include "PeFile.hpp"
+#include "Module.hpp"
+#include "Scanner.hpp"
+#include "DosHeader.hpp"
+#include "NtHeaders.hpp"
+#include "FindPattern.hpp"
+#include "Common/I18n.hpp"
 
 namespace Hades
 {

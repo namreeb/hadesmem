@@ -22,8 +22,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 
 // Hades
-#include "MemoryMgr.h"
-#include "Disassembler.h"
+#include "MemoryMgr.hpp"
+#include "Disassembler.hpp"
 
 namespace Hades
 {

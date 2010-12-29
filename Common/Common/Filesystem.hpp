@@ -38,9 +38,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Error.h"
-#include "WinAux.h"
-#include "StringBuffer.h"
+#include "Error.hpp"
+#include "WinAux.hpp"
+#include "StringBuffer.hpp"
 
 namespace Hades
 {

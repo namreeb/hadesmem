@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Symbol.h"
+#include "Memory/Symbol.hpp"
 
 class SymbolsWrap : public Hades::Memory::Symbols
 {

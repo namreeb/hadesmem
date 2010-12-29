@@ -19,8 +19,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows
+// Windows API
 #include <Windows.h>
+
+// C++ Standard Library
+#include <string>
+#include <vector>
 
 // Boost
 #ifdef _MSC_VER
@@ -31,54 +35,54 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
 
+// BeaEngine
+#ifdef _MSC_VER
+#pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
+#include "BeaEngine/BeaEngine.h"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // #ifdef _MSC_VER
+
 // Hades
-#include "Fwd.h"
-#include "Error.h"
-#include "MemoryMgr.h"
+#include "Fwd.hpp"
+#include "Error.hpp"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {
   namespace Memory
   {
-    // PE file format wrapper
-    class PeFile
+    // Disassembler data
+    struct DisasmData
+    {
+      DISASM Disasm;
+      int Len;
+      std::vector<BYTE> Raw;
+    };
+
+    // Disassembler managing class
+    class Disassembler
     {
     public:
-      // PeFile exception type
+      // Disassembler exception type
       class Error : public virtual HadesMemError 
       { };
 
-      enum FileType
-      {
-        FileType_Image, 
-        FileType_Data
-      };
-
       // Constructor
-      PeFile(MemoryMgr const& MyMemory, PVOID Address, FileType Type = 
-        FileType_Image);
+      explicit Disassembler(MemoryMgr const& MyMemory);
 
-      // Get memory manager
-      MemoryMgr GetMemoryMgr() const;
+      // Disassemble target and get results as strings
+      std::vector<std::string> DisassembleToStr(PVOID Address, 
+        DWORD_PTR NumInstructions) const;
 
-      // Get base address
-      PBYTE GetBase() const;
+      // Disassemble target and get full disasm data back
+      std::vector<DisasmData> Disassemble(PVOID Address, 
+        DWORD_PTR NumInstructions) const;
 
-      // Convert RVA to VA
-      PVOID RvaToVa(DWORD Rva) const;
-
-      // Get file type
-      FileType GetType() const;
-
-    protected:
-      // Memory instance
-      MemoryMgr m_Memory;
-
-      // Base address
-      PBYTE m_pBase;
-
-      // File type
-      FileType m_Type;
+    private:
+      // MemoryMgr instance
+      MemoryMgr m_MemoryMgr;
     };
   }
 }

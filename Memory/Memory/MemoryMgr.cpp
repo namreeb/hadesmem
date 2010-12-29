@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "MemoryMgr.h"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {

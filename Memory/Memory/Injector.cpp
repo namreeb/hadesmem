@@ -34,11 +34,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Module.h"
-#include "Injector.h"
-#include "MemoryMgr.h"
-#include "Common/Filesystem.h"
-#include "Common/EnsureCleanup.h"
+#include "Module.hpp"
+#include "Injector.hpp"
+#include "MemoryMgr.hpp"
+#include "Common/Filesystem.hpp"
+#include "Common/EnsureCleanup.hpp"
 
 namespace Hades
 {

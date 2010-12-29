@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Module.h"
+#include "Memory/Module.hpp"
 
 class ModuleWrap : public Hades::Memory::Module
 {

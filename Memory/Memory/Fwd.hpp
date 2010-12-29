@@ -33,6 +33,7 @@ namespace Hades
     class ManualMap;
     class FindPattern;
     class Disassembler;
+    class Symbols;
     
     // Hades (Internal)
     class Patch;

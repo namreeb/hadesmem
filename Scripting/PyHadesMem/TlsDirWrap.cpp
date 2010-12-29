@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/TlsDir.h"
+#include "Memory/TlsDir.hpp"
 
 class TlsDirWrap : public Hades::Memory::TlsDir
 {

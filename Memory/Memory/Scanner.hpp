@@ -39,8 +39,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Region.h"
-#include "MemoryMgr.h"
+#include "Region.hpp"
+#include "MemoryMgr.hpp"
 
 namespace Hades
 {

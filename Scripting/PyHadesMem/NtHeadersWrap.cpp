@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/NtHeaders.h"
+#include "Memory/NtHeaders.hpp"
 
 class NtHeadersWrap : public Hades::Memory::NtHeaders
 {

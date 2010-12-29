@@ -36,7 +36,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "ExportDir.h"
+#include "ExportDir.hpp"
 
 namespace Hades
 {

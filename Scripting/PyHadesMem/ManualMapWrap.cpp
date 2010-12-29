@@ -27,7 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/ManualMap.h"
+#include "Memory/ManualMap.hpp"
 
 class ManualMapWrap : public Hades::Memory::ManualMap
 {

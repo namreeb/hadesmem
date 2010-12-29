@@ -27,8 +27,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Section.h"
-#include "Memory/SectionEnum.h"
+#include "Memory/Section.hpp"
+#include "Memory/SectionEnum.hpp"
 
 class SectionWrap : public Hades::Memory::Section
 {

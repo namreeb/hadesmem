@@ -46,8 +46,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Error.h"
-#include "Filesystem.h"
+#include "Error.hpp"
+#include "Filesystem.hpp"
 
 #define HADES_LOG_THREAD_SAFE(x)\
 {\
