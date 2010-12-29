@@ -6,6 +6,9 @@ import boostbook
 import quickbook 
   ;
   
+import os 
+  ; 
+  
 boostbook HadesMem 
   : HadesMem.qbk 
   ;
