@@ -51,14 +51,32 @@ rule Install-Rule ( properties * )
   {
     if <variant>debug in $(properties)
     {
-      result += <location>Bin/Debug/IA32 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Debug/IA32 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Debug/IA32 
+          ;
+      }
     }
     
     if <variant>release in $(properties)
     {
-      result += <location>Bin/Release/IA32 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Release/IA32 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Release/IA32 
+          ;
+      }
     }
   }
   
@@ -66,14 +84,32 @@ rule Install-Rule ( properties * )
   {
     if <variant>debug in $(properties)
     {
-      result += <location>Bin/Debug/AMD64 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Debug/AMD64 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Debug/AMD64 
+          ;
+      }
     }
     
     if <variant>release in $(properties)
     {
-      result += <location>Bin/Release/AMD64 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Release/AMD64 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Release/AMD64 
+          ;
+      }
     }
   }
   
