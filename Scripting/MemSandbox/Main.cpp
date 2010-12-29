@@ -23,6 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // C++ Standard Library
+#include <cmath> // GCC workaround
 #include <limits>
 #include <vector>
 #include <string>
