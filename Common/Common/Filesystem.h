@@ -23,7 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 #include <fstream>
-#include <iterator>
 
 // Boost
 #ifdef _MSC_VER

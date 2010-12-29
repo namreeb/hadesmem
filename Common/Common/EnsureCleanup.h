@@ -203,7 +203,7 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureReleaseRegion(PVOID pv = NULL)
+      EnsureReleaseRegion(PVOID pv = nullptr)
         : m_pv(pv)
       { }
 
@@ -215,7 +215,7 @@ namespace Hades
 
       // Move constructor
       EnsureReleaseRegion(EnsureReleaseRegion&& MyEnsureCleanup)
-        : m_pv(NULL)
+        : m_pv(nullptr)
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -251,11 +251,11 @@ namespace Hades
       // Cleanup the object if the value represents a valid object
       void Cleanup()
       {
-        if (m_pv != NULL)
+        if (m_pv != nullptr)
         {
           VirtualFree(m_pv, 0, MEM_RELEASE);
 
-          m_pv = NULL;
+          m_pv = nullptr;
         }
       }
 
@@ -269,13 +269,13 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureEndUpdateResource(HANDLE File = NULL) 
+      EnsureEndUpdateResource(HANDLE File = nullptr) 
         : m_File(File)
       { }
 
       // Move constructor
       EnsureEndUpdateResource(EnsureEndUpdateResource&& MyEnsureCleanup)
-        : m_File(NULL)
+        : m_File(nullptr)
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -288,7 +288,7 @@ namespace Hades
 
         m_File = MyEnsureCleanup.m_File;
 
-        MyEnsureCleanup.m_File = NULL;
+        MyEnsureCleanup.m_File = nullptr;
 
         return *this;
       }
@@ -318,11 +318,11 @@ namespace Hades
       // Cleanup the object if the value represents a valid object
       void Cleanup()
       {
-        if (m_File != NULL)
+        if (m_File != nullptr)
         {
           EndUpdateResource(m_File, FALSE);
 
-          m_File = NULL;
+          m_File = nullptr;
         }
       }
 
@@ -336,14 +336,14 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureHeapFree(PVOID pv = NULL, HANDLE hHeap = GetProcessHeap())
+      EnsureHeapFree(PVOID pv = nullptr, HANDLE hHeap = GetProcessHeap())
         : m_pv(pv), m_hHeap(hHeap)
       { }
 
       // Move constructor
       EnsureHeapFree(EnsureHeapFree&& MyEnsureCleanup)
-        : m_pv(NULL),
-        m_hHeap(NULL)
+        : m_pv(nullptr),
+        m_hHeap(nullptr)
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -356,8 +356,8 @@ namespace Hades
         m_pv = MyEnsureCleanup.m_pv;
         m_hHeap = MyEnsureCleanup.m_hHeap;
 
-        MyEnsureCleanup.m_pv = NULL;
-        MyEnsureCleanup.m_hHeap = NULL;
+        MyEnsureCleanup.m_pv = nullptr;
+        MyEnsureCleanup.m_hHeap = nullptr;
 
         return *this;
       }
@@ -387,11 +387,11 @@ namespace Hades
       // Cleanup the object if the value represents a valid object
       void Cleanup()
       {
-        if (m_pv != NULL)
+        if (m_pv != nullptr)
         {
           HeapFree(m_hHeap, 0, m_pv);
 
-          m_pv = NULL;
+          m_pv = nullptr;
         }
       }
 
@@ -406,15 +406,15 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureReleaseRegionEx(PVOID pv = NULL, HANDLE proc = NULL)
+      EnsureReleaseRegionEx(PVOID pv = nullptr, HANDLE proc = nullptr)
         : m_pv(pv), 
         m_proc(proc)
       { }
 
       // Move constructor
       EnsureReleaseRegionEx(EnsureReleaseRegionEx&& MyEnsureCleanup)
-        : m_pv(NULL),
-        m_proc(NULL)
+        : m_pv(nullptr),
+        m_proc(nullptr)
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -428,8 +428,8 @@ namespace Hades
         m_pv = MyEnsureCleanup.m_pv;
         m_proc = MyEnsureCleanup.m_proc;
 
-        MyEnsureCleanup.m_pv = NULL;
-        MyEnsureCleanup.m_proc = NULL;
+        MyEnsureCleanup.m_pv = nullptr;
+        MyEnsureCleanup.m_proc = nullptr;
 
         return *this;
       }
@@ -459,11 +459,11 @@ namespace Hades
       // Cleanup the object if the value represents a valid object
       void Cleanup()
       {
-        if (m_pv != NULL && m_proc != NULL)
+        if (m_pv != nullptr && m_proc != nullptr)
         {
           VirtualFreeEx(m_proc, m_pv, 0, MEM_RELEASE);
 
-          m_pv = NULL;
+          m_pv = nullptr;
         }
       }
 
@@ -568,7 +568,7 @@ namespace Hades
         m_Instance = MyEnsureCleanup.m_Instance;
 
         MyEnsureCleanup.m_ClassName = std::basic_string<TCHAR>();
-        MyEnsureCleanup.m_Instance = NULL;
+        MyEnsureCleanup.m_Instance = nullptr;
 
         return *this;
       }
@@ -603,15 +603,15 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureReleaseDc(HWND Wnd = NULL, HDC Dc = NULL)
+      EnsureReleaseDc(HWND Wnd = nullptr, HDC Dc = nullptr)
         : m_Wnd(Wnd),
         m_Dc(Dc)
       { }
 
       // Move constructor
       EnsureReleaseDc(EnsureReleaseDc&& MyEnsureCleanup)
-        : m_Wnd(NULL),
-        m_Dc(NULL)
+        : m_Wnd(nullptr),
+        m_Dc(nullptr)
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -624,8 +624,8 @@ namespace Hades
         m_Wnd = MyEnsureCleanup.m_Wnd;
         m_Dc = MyEnsureCleanup.m_Dc;
 
-        MyEnsureCleanup.m_Wnd = NULL;
-        MyEnsureCleanup.m_Dc = NULL;
+        MyEnsureCleanup.m_Wnd = nullptr;
+        MyEnsureCleanup.m_Dc = nullptr;
 
         return *this;
       }
@@ -655,12 +655,12 @@ namespace Hades
       // Cleanup the object if the value represents a valid object
       void Cleanup()
       {
-        if (m_Wnd != NULL && m_Dc != NULL)
+        if (m_Wnd != nullptr && m_Dc != nullptr)
         {
           ReleaseDC(m_Wnd, m_Dc);
 
-          m_Wnd = NULL;
-          m_Dc = NULL;
+          m_Wnd = nullptr;
+          m_Dc = nullptr;
         }
       }
 

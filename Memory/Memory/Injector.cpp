@@ -81,7 +81,7 @@ namespace Hades
 
       // Attempt process creation
       if (!CreateProcess(Path.string<std::basic_string<TCHAR>>().c_str(), 
-        &ProcArgs[0], NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, 
+        &ProcArgs[0], nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, 
         WorkDirReal.string<std::basic_string<TCHAR>>().c_str(), &StartInfo, 
         &ProcInfo))
       {

@@ -388,7 +388,7 @@ namespace Hades
     {
       // Load module as data so we can read the EAT locally
       Windows::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-        ModulePath.string<std::basic_string<TCHAR>>().c_str(), NULL, 
+        ModulePath.string<std::basic_string<TCHAR>>().c_str(), nullptr, 
         DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
@@ -424,7 +424,7 @@ namespace Hades
     {
       // Load module as data so we can read the EAT locally
       Windows::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-        ModulePath.string<std::basic_string<TCHAR>>().c_str(), NULL, 
+        ModulePath.string<std::basic_string<TCHAR>>().c_str(), nullptr, 
         DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {

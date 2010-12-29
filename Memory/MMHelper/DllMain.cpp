@@ -38,6 +38,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
+#ifdef _MSC_VER
 // Fixme: This entire module is a complete mess. Rewrite to move from 'PoC' 
 // quality to at least 'alpha' or 'beta' quality.
 
@@ -63,7 +64,7 @@ LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
   PVOID pTeb = NtCurrentTeb();
   if (!pTeb)
   {
-    MessageBox(NULL, _T("TEB pointer invalid."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, _T("TEB pointer invalid."), _T("MMHelper"), MB_OK);
     return EXCEPTION_CONTINUE_SEARCH;
   }
 
@@ -71,8 +72,8 @@ LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
     *reinterpret_cast<PEXCEPTION_REGISTRATION_RECORD*>(pTeb);
   if (!pExceptionList)
   {
-    MessageBox(NULL, _T("Exception list pointer invalid."), 
-      _T("Hades-MMHelper"), MB_OK);
+    MessageBox(nullptr, _T("Exception list pointer invalid."), _T("MMHelper"), 
+      MB_OK);
     return EXCEPTION_CONTINUE_SEARCH;
   }
 
@@ -124,7 +125,7 @@ void TestSEH()
   }
   __except (EXCEPTION_EXECUTE_HANDLER)
   {
-    MessageBox(NULL, _T("Testing SEH."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, _T("Testing SEH."), _T("MMHelper"), MB_OK);
   }
 }
 #ifdef _MSC_VER
@@ -133,7 +134,7 @@ void TestSEH()
 
 void TestRelocs()
 {
-  MessageBox(NULL, _T("Testing relocations."), _T("MMHelper"), MB_OK);
+  MessageBox(nullptr, _T("Testing relocations."), _T("MMHelper"), MB_OK);
 }
 
 void InitializeSEH()
@@ -151,7 +152,7 @@ void InitializeSEH()
     Memory::NtHeaders::DataDir_Exception);
   if (!ExceptDirSize || !ExceptDirRva)
   {
-    MessageBox(NULL, _T("Image has no exception directory."), 
+    MessageBox(nullptr, _T("Image has no exception directory."), 
       _T("MMHelper"), MB_OK);
     return;
   }
@@ -168,7 +169,7 @@ void InitializeSEH()
   if (!RtlAddFunctionTable(pExceptDir, NumEntries, reinterpret_cast<DWORD_PTR>(
     &__ImageBase)))
   {
-    MessageBox(NULL, _T("Could not add function table."), 
+    MessageBox(nullptr, _T("Could not add function table."), 
       _T("MMHelper"), MB_OK);
     return;
   }
@@ -176,7 +177,7 @@ void InitializeSEH()
   // Add VCH
   if (!AddVectoredContinueHandler(1, &VectoredHandler))
   {
-    MessageBox(NULL, _T("Failed to add VCH."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, _T("Failed to add VCH."), _T("MMHelper"), MB_OK);
   }
 
 #else 
@@ -192,12 +193,12 @@ void TestCPPEH()
   }
   catch (std::exception const& e)
   {
-    MessageBoxA(NULL, boost::diagnostic_information(e).c_str(), 
+    MessageBoxA(nullptr, boost::diagnostic_information(e).c_str(), 
       "MMHelper", MB_OK);
   }
   catch (...)
   {
-    MessageBoxA(NULL, "Caught unknown exception.", "MMHelper", MB_OK);
+    MessageBoxA(nullptr, "Caught unknown exception.", "MMHelper", MB_OK);
   }
 }
 
@@ -213,12 +214,12 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
   InitializeSEH();
 
   // Test IAT
-  MessageBox(NULL, _T("Testing IAT."), _T("MMHelper"), MB_OK);
+  MessageBox(nullptr, _T("Testing IAT."), _T("MMHelper"), MB_OK);
 
   // Test TLS
   boost::thread_specific_ptr<std::basic_string<TCHAR>> TlsTest;
   TlsTest.reset(new std::basic_string<TCHAR>(_T("Testing TLS.")));
-  MessageBox(NULL, TlsTest->c_str(), _T("MMHelper"), MB_OK);
+  MessageBox(nullptr, TlsTest->c_str(), _T("MMHelper"), MB_OK);
 
   // Test relocs
   typedef void (* tTestRelocs)();
@@ -246,6 +247,9 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE /*Module*/)
   // Test return values
   return 1234;
 }
+#else
+#error "MMHelper: Compilers other than MSVC currently unsupported."
+#endif // #ifdef _MSC_VER
 
 BOOL WINAPI DllMain(HINSTANCE /*hinstDLL*/, DWORD /*fdwReason*/, 
   LPVOID /*lpvReserved*/)

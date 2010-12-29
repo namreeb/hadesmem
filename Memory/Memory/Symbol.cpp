@@ -60,7 +60,7 @@ namespace Hades
   		
   		// Initialize symbol APIs
   		if(!SymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
-  		  NULL : &SearchPathTemp[0], FALSE))
+  		  nullptr : &SearchPathTemp[0], FALSE))
   	  {
   	    DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -114,12 +114,12 @@ namespace Hades
   		
       // Load symbols for module
   		if(!SymLoadModuleEx(m_Memory.GetProcessHandle(), 
-  		  NULL, 
+  		  nullptr, 
   		  &ModuleNameTemp[0], 
-  		  NULL, 
+  		  nullptr, 
   		  reinterpret_cast<DWORD64>(MyModule->GetBase()), 
   		  0, 
-  		  NULL, 
+  		  nullptr, 
   		  0))
   		{
   	    DWORD const LastError = GetLastError();

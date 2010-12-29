@@ -247,7 +247,7 @@ namespace Hades
 
       // Get the LUID for SE_DEBUG_NAME 
       LUID Luid = { 0 }; // Locally unique identifier
-      if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &Luid)) 
+      if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -273,7 +273,7 @@ namespace Hades
 
       // Apply the adjusted privileges
       if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, sizeof(Privileges), 
-        NULL, NULL)) 
+        nullptr, nullptr)) 
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
