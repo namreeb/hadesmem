@@ -50,12 +50,12 @@ public:
 // Export Symbol API
 void ExportSymbol()
 {
-  boost::python::class_<Hades::Memory::Symbols>("SymbolsBase", 
-    boost::python::no_init)
+  boost::python::class_<Hades::Memory::Symbols, boost::noncopyable>(
+    "SymbolsBase", boost::python::no_init)
     ;
 
   boost::python::class_<SymbolsWrap, boost::python::bases<Hades::Memory::
-    Symbols>>("Symbols", boost::python::init<
+    Symbols>, boost::noncopyable>("Symbols", boost::python::init<
     Hades::Memory::MemoryMgr const&>())
     .def(boost::python::init<Hades::Memory::MemoryMgr const&, 
       std::basic_string<TCHAR> const&>())

@@ -31,6 +31,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/filesystem.hpp>
+#include <boost/noncopyable.hpp>
 
 // Hades
 #include "Fwd.hpp"
@@ -46,7 +47,7 @@ namespace Hades
   {
     // Symbol handler
     // Note: Thanks to _Mike on MMOwned for the idea and initial PoC base
-    class Symbols
+    class Symbols : private boost::noncopyable
     {
     public:
       // Symbols exception type

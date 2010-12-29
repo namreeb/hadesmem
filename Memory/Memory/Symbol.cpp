@@ -69,7 +69,7 @@ namespace Hades
           ErrorCodeWin(LastError));
   	  }
   	}
-  
+  	
     // Destructor
   	Symbols::~Symbols()
   	{

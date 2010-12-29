@@ -2,18 +2,9 @@
   * General
     * Documentation via Boost.QuickBook.
     * Unit tests via Boost.Test.
-    * Code review and refactor.
-      * Assertions, concept checking, etc.
-      * Improve efficiency via profiling.
-      * Refactor poorly designed APIs.
-    * Make types moveable, copyable, and assignable.
-    * Implement no-throw operators and constructors (incl swap).
-    * Documented exception-safety guarantees (incl rollback support via RAII 
-    or Boost.ScopeExit).
-    * Documented thread-safety guarantees.
-    * Improve thread-safety.
-  	* Replace integer types with checked types (e.g. SafeInt) where 
-  	appropriate.
+    * Improved and documented exception-safety guarantees (incl rollback 
+    support via RAII or Boost.ScopeExit).
+    * Impvoed and documented thread-safety guarantees.
 	  * Ensure 'rule-of-three' compliance.
 	  * Fix all 'fixme' items in code.
 	  
