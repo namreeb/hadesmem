@@ -4,7 +4,7 @@
     * Unit tests via Boost.Test.
     * Improved and documented exception-safety guarantees (incl rollback 
     support via RAII or Boost.ScopeExit).
-    * Impvoed and documented thread-safety guarantees.
+    * Improvoed and documented thread-safety guarantees.
 	  * Fix all 'fixme' items in code.
 	  
 * Medium Priority
