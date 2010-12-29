@@ -90,7 +90,12 @@ bool GetInput(boost::python::object const& PythonNamespace)
 }
 
 // Program entry-point.
+#ifdef _MSC_VER
 int _tmain(int argc, TCHAR* argv[])
+#else
+// Fixme: Unicode EP support for compilers other than MSVC
+int main(int argc, char* argv[])
+#endif // #ifdef _MSC_VER
 {
   // Program timer
   boost::timer ProgTimer;

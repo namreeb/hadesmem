@@ -27,9 +27,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Symbol.hpp"
 #include "Common/I18n.hpp"
 
-// Ensure DebugHelp library is linked
-#pragma comment(lib, "dbghelp")
-
 // GCC workaround. MinGW does not support the updated DbgHelp APIs with 
 // Unicode support.
 namespace 

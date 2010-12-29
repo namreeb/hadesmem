@@ -10,12 +10,17 @@ lib advapi32
   : <name>advapi32 
   ;
 
+lib dbghelp 
+  : 
+  : <name>dbghelp 
+  ;
+
 project
   : requirements <library>/boost//thread/<link>static <library>/boost//filesystem/<link>static 
   ;
 
 lib Memory 
-  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 
+  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 dbghelp 
   : <link>static 
   : 
   : <include>"." 
