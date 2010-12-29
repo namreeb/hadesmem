@@ -33,7 +33,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
 #include <boost/filesystem.hpp>
-#include <boost/noncopyable.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
@@ -59,35 +58,37 @@ namespace Hades
 
       // Search memory (POD types)
       template <typename T>
-      PVOID Find(T const& Data, typename boost::enable_if<std::is_pod<T>>::
-        type* Dummy = 0) const;
+      PVOID Find(T const& Data, typename std::enable_if<std::is_pod<T>::value, 
+        T>::type* Dummy = 0) const;
 
       // Search memory (string types)
       template <typename T>
-      PVOID Find(T const& Data, typename boost::enable_if<std::is_same<T, std::
-        basic_string<typename T::value_type>>>::type* Dummy = 0) const;
+      PVOID Find(T const& Data, typename std::enable_if<std::is_same<T, std::
+        basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
+        const;
 
       // Search memory (vector types)
       template <typename T>
-      PVOID Find(T const& Data, typename boost::enable_if<std::is_same<T, 
-        std::vector<typename T::value_type>>>::type* Dummy1 = 0) const;
+      PVOID Find(T const& Data, typename std::enable_if<std::is_same<T, 
+        std::vector<typename T::value_type>>::value, T>::type* Dummy1 = 0) 
+        const;
 
       // Search memory (POD types)
       template <typename T>
-      std::vector<PVOID> FindAll(T const& data, typename boost::enable_if<std::
-        is_pod<T>>::type* Dummy = 0) const;
+      std::vector<PVOID> FindAll(T const& data, typename std::enable_if<std::
+        is_pod<T>::value, T>::type* Dummy = 0) const;
 
       // Search memory (string types)
       template <typename T>
-      std::vector<PVOID> FindAll(T const& Data, typename boost::enable_if<std::
-        is_same<T, std::basic_string<typename T::value_type>>>::type* Dummy 
-        = 0) const;
+      std::vector<PVOID> FindAll(T const& Data, typename std::enable_if<std::
+        is_same<T, std::basic_string<typename T::value_type>>::value, 
+        T>::type* Dummy = 0) const;
 
       // Search memory (vector types)
       template <typename T>
-      std::vector<PVOID> FindAll(T const& Data, typename boost::enable_if<std::
-        is_same<T, std::vector<typename T::value_type>>>::type* Dummy1 = 0) 
-        const;
+      std::vector<PVOID> FindAll(T const& Data, typename std::enable_if<std::
+        is_same<T, std::vector<typename T::value_type>>::value, 
+        T>::type* Dummy1 = 0) const;
 
     private:
       // Memory manager instance
@@ -100,8 +101,8 @@ namespace Hades
 
     // Search memory (POD types)
     template <typename T>
-    PVOID Scanner::Find(T const& Data, typename boost::enable_if<std::is_pod<
-      T>>:: type* /*Dummy*/) const
+    PVOID Scanner::Find(T const& Data, typename std::enable_if<std::is_pod<
+      T>::value, T>:: type* /*Dummy*/) const
     {
       // Put data in container
       std::vector<T> Buffer;
@@ -112,8 +113,9 @@ namespace Hades
 
     // Search memory (string types)
     template <typename T>
-    PVOID Scanner::Find(T const& Data, typename boost::enable_if<std::is_same<
-      T, std::basic_string<typename T::value_type>>>::type* /*Dummy*/) const
+    PVOID Scanner::Find(T const& Data, typename std::enable_if<std::is_same<
+      T, std::basic_string<typename T::value_type>>::value, 
+      T>::type* /*Dummy*/) const
     {
       // Convert string to character buffer
       std::vector<typename T::value_type> const MyBuffer(Data.cbegin(), 
@@ -124,8 +126,9 @@ namespace Hades
 
     // Search memory (vector types)
     template <typename T>
-    PVOID Scanner::Find(T const& Data, typename boost::enable_if<std::is_same<
-      T, std::vector<typename T::value_type>>>::type* /*Dummy1*/) const
+    PVOID Scanner::Find(T const& Data, typename std::enable_if<std::is_same<
+      T, std::vector<typename T::value_type>>::value, 
+      T>::type* /*Dummy1*/) const
     {
       static_assert(std::is_pod<typename T::value_type>::value, 
         "Scanner::Find: Value type of vector must be POD.");
@@ -188,8 +191,8 @@ namespace Hades
 
     // Search memory (POD types)
     template <typename T>
-    std::vector<PVOID> Scanner::FindAll(T const& Data, typename boost::
-      enable_if<std::is_pod<T>>::type* /*Dummy*/) const
+    std::vector<PVOID> Scanner::FindAll(T const& Data, typename std::
+      enable_if<std::is_pod<T>::value, T>::type* /*Dummy*/) const
     {
       // Put data in container
       std::vector<T> Buffer;
@@ -199,9 +202,9 @@ namespace Hades
     }
 
     template <typename T>
-    std::vector<PVOID> Scanner::FindAll(T const& Data, typename boost::
-      enable_if<std::is_same<T, std::basic_string<typename T::value_type>>>::
-      type* /*Dummy*/) const
+    std::vector<PVOID> Scanner::FindAll(T const& Data, typename std::
+      enable_if<std::is_same<T, std::basic_string<typename T::value_type>>::
+      value, T>::type* /*Dummy*/) const
     {
       // Convert string to character buffer
       std::vector<typename T::value_type> const MyBuffer(Data.cbegin(), 
@@ -215,9 +218,9 @@ namespace Hades
     // bugs. Perform a thorough review and rewrite.
     // Fixme: Refactor Find and FindAll to factor out duplicated code.
     template <typename T>
-    std::vector<PVOID> Scanner::FindAll(T const& Data, typename boost::
-      enable_if<std::is_same<T, std::vector<typename T::value_type>>>::type* 
-      /*Dummy1*/) const
+    std::vector<PVOID> Scanner::FindAll(T const& Data, typename std::
+      enable_if<std::is_same<T, std::vector<typename T::value_type>>::
+      value, T>::type* /*Dummy1*/) const
     {
       static_assert(std::is_pod<typename T::value_type>::value, 
         "Scanner::Find: Value type of vector must be POD.");

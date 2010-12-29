@@ -53,7 +53,7 @@ namespace Hades
         m_Current()
       {
         ExportDir const MyExportDir(m_PeFile);
-        DWORD NumberOfFunctions = MyExportDir.GetNumberOfFunctions();
+        DWORD const NumberOfFunctions = MyExportDir.GetNumberOfFunctions();
         if (NumberOfFunctions)
         {
           m_Current = Export(m_PeFile, MyExportDir.GetOrdinalBase());
@@ -68,8 +68,8 @@ namespace Hades
       void increment() 
       {
         ExportDir const MyExportDir(m_PeFile);
-        DWORD NumberOfFunctions = MyExportDir.GetNumberOfFunctions();
-        DWORD NextOrdinal = m_Current->GetOrdinal() + 1;
+        DWORD const NumberOfFunctions = MyExportDir.GetNumberOfFunctions();
+        DWORD const NextOrdinal = m_Current->GetOrdinal() + 1;
         if (NextOrdinal - MyExportDir.GetOrdinalBase() < NumberOfFunctions)
         {
           m_Current = Export(m_PeFile, NextOrdinal);

@@ -34,7 +34,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
 #include <boost/filesystem.hpp>
-#include <boost/noncopyable.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER

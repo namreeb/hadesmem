@@ -23,6 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "MemoryMgr.hpp"
+#include "Common/I18n.hpp"
 #include "Disassembler.hpp"
 
 namespace Hades
@@ -35,20 +36,21 @@ namespace Hades
     { }
 
     // Test disassembler
-    std::vector<std::string> Disassembler::DisassembleToStr(PVOID Address, 
-      DWORD_PTR NumInstructions) const
+    std::vector<std::basic_string<TCHAR>> Disassembler::DisassembleToStr(
+      PVOID Address, DWORD_PTR NumInstructions) const
     {
       // Disassemble target
       std::vector<DisasmData> MyDisasmData(Disassemble(Address, 
         NumInstructions));
 
       // Container to hold disassembled code as a string
-      std::vector<std::string> Results;
+      std::vector<std::basic_string<TCHAR>> Results;
       std::transform(MyDisasmData.cbegin(), MyDisasmData.cend(), 
         std::back_inserter(Results), 
         [] (DisasmData const& MyDisasm) 
       {
-        return MyDisasm.Disasm.CompleteInstr;
+        return boost::lexical_cast<std::basic_string<TCHAR>>(
+          static_cast<std::string>(MyDisasm.Disasm.CompleteInstr));
       });
 
       // Return disassembled data

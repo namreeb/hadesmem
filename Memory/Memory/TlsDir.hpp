@@ -25,15 +25,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <vector>
 
-// Boost
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
-#include <boost/noncopyable.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // #ifdef _MSC_VER
-
 // Hades
 #include "Fwd.hpp"
 #include "Error.hpp"
@@ -53,7 +44,7 @@ namespace Hades
       { };
 
       // Constructor
-      TlsDir(PeFile const& MyPeFile);
+      explicit TlsDir(PeFile const& MyPeFile);
 
       // Whether TLS directory is valid
       bool IsValid() const;

@@ -26,15 +26,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <utility>
 
-// Boost
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
-#include <boost/noncopyable.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // #ifdef _MSC_VER
-
 // Hades
 #include "Fwd.hpp"
 #include "Error.hpp"
@@ -54,7 +45,7 @@ namespace Hades
       { };
 
       // Constructor
-      ExportDir(PeFile const& MyPeFile);
+      explicit ExportDir(PeFile const& MyPeFile);
 
       // Whether export directory is valid
       bool IsValid() const;

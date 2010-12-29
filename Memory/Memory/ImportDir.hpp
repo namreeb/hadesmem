@@ -29,7 +29,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
-#include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)

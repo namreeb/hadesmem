@@ -135,7 +135,6 @@ namespace Hades
       // For Boost.Iterator
       void increment() 
       {
-
         MODULEENTRY32 MyModuleEntry = { sizeof(MyModuleEntry) };
         if (!Module32Next(m_Snap, &MyModuleEntry))
         {

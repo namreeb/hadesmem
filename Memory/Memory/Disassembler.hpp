@@ -26,15 +26,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-// Boost
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
-#include <boost/noncopyable.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // #ifdef _MSC_VER
-
 // BeaEngine
 #ifdef _MSC_VER
 #pragma warning(push, 1)
@@ -73,7 +64,7 @@ namespace Hades
       explicit Disassembler(MemoryMgr const& MyMemory);
 
       // Disassemble target and get results as strings
-      std::vector<std::string> DisassembleToStr(PVOID Address, 
+      std::vector<std::basic_string<TCHAR>> DisassembleToStr(PVOID Address, 
         DWORD_PTR NumInstructions) const;
 
       // Disassemble target and get full disasm data back
