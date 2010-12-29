@@ -1,0 +1,11 @@
+# Doc/Jamfile.v2
+
+import boostbook 
+  ;
+  
+import quickbook 
+  ;
+
+boostbook HadesMem 
+  : HadesMem.qbk
+  ;
