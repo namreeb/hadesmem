@@ -5,7 +5,6 @@
     * Improved and documented exception-safety guarantees (incl rollback 
     support via RAII or Boost.ScopeExit).
     * Impvoed and documented thread-safety guarantees.
-	  * Ensure 'rule-of-three' compliance.
 	  * Fix all 'fixme' items in code.
 	  
 * Medium Priority
