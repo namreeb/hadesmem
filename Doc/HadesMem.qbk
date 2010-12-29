@@ -1,9 +1,6 @@
 [book HadesMem 
   [quickbook 1.5] 
   [copyright 2010 RaptorFactor]
-  [purpose 
-    Safe and generic C++-based memory hacking library for Windows based 
-    applications]
 ]
 
 [section:intro Introduction]
