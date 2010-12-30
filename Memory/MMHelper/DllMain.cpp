@@ -201,9 +201,13 @@ void TestCPPEH()
     MessageBoxA(nullptr, "Caught unknown exception.", "MMHelper", MB_OK);
   }
 }
+#else
+#warning "MMHelper: Compilers other than MSVC currently unsupported."
+#endif // #ifdef _MSC_VER
 
 extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
 {
+#ifdef _MSC_VER
   // Break to debugger if present
   if (IsDebuggerPresent())
   {
@@ -231,6 +235,11 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
 
   // Test C++ EH
   TestCPPEH();
+#else
+#warning "MMHelper: Compilers other than MSVC currently unsupported."
+  MessageBox(nullptr, _T("MMHelper compiled with unsupported compiler. "
+    "Most functionality will be unavailable."), _T("MMHelper"), MB_OK);
+#endif // #ifdef _MSC_VER
 
   // Test return values
   return 1337;
@@ -247,9 +256,6 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE /*Module*/)
   // Test return values
   return 1234;
 }
-#else
-#error "MMHelper: Compilers other than MSVC currently unsupported."
-#endif // #ifdef _MSC_VER
 
 BOOL WINAPI DllMain(HINSTANCE /*hinstDLL*/, DWORD /*fdwReason*/, 
   LPVOID /*lpvReserved*/)
