@@ -160,17 +160,17 @@ namespace Hades
         MemSize));
 
       // Scan memory
-      auto Iter = std::search(Buffer.begin(), Buffer.end(), Data.begin(), 
-        Data.end(), 
-        [&] (BYTE HCur, std::pair<BYTE, bool> NCur)
+      auto Iter = std::search(Buffer.cbegin(), Buffer.cend(), Data.cbegin(), 
+        Data.cend(), 
+        [] (BYTE HCur, std::pair<BYTE, bool> const& NCur)
       {
         return (!NCur.second) || (HCur == NCur.first);
       });
 
       // Return address if found or null if not found
       return 
-        (Iter != Buffer.end()) 
-        ? (m_Start + std::distance(Buffer.begin(), Iter)) 
+        (Iter != Buffer.cend()) 
+        ? (m_Start + std::distance(Buffer.cbegin(), Iter)) 
         : nullptr;
     }
 
