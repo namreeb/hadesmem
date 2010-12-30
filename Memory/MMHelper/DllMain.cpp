@@ -38,24 +38,32 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
-#ifdef _MSC_VER
+extern "C" void tss_cleanup_implemented() { }
+
 // Fixme: This entire module is a complete mess. Rewrite to move from 'PoC' 
 // quality to at least 'alpha' or 'beta' quality.
 
-typedef struct _EXCEPTION_REGISTRATION_RECORD
+typedef EXCEPTION_DISPOSITION
+(NTAPI *PEXCEPTION_ROUTINE_CUSTOM)(
+  struct _EXCEPTION_RECORD *ExceptionRecord,
+  PVOID EstablisherFrame,
+  struct _CONTEXT *ContextRecord,
+  PVOID DispatcherContext);
+  
+typedef struct _EXCEPTION_REGISTRATION_RECORD_CUSTOM
 {
-  struct _EXCEPTION_REGISTRATION_RECORD *Next;
-  PEXCEPTION_ROUTINE Handler;
-} EXCEPTION_REGISTRATION_RECORD, *PEXCEPTION_REGISTRATION_RECORD;
+  struct _EXCEPTION_REGISTRATION_RECORD_CUSTOM *Next;
+  PEXCEPTION_ROUTINE_CUSTOM Handler;
+} EXCEPTION_REGISTRATION_RECORD_CUSTOM, *PEXCEPTION_REGISTRATION_RECORD_CUSTOM;
 
 typedef struct _DISPATCHER_CONTEXT
 {
-  PEXCEPTION_REGISTRATION_RECORD RegistrationPointer;
+  PEXCEPTION_REGISTRATION_RECORD_CUSTOM RegistrationPointer;
 } DISPATCHER_CONTEXT, *PDISPATCHER_CONTEXT;
 
-#define EXCEPTION_CHAIN_END ((PEXCEPTION_REGISTRATION_RECORD)-1)
+#define EXCEPTION_CHAIN_END ((PEXCEPTION_REGISTRATION_RECORD_CUSTOM)-1)
 
-LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
+LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
 {
 #if defined(_M_AMD64) 
   ExceptionInfo;
@@ -68,8 +76,8 @@ LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
     return EXCEPTION_CONTINUE_SEARCH;
   }
 
-  PEXCEPTION_REGISTRATION_RECORD pExceptionList = 
-    *reinterpret_cast<PEXCEPTION_REGISTRATION_RECORD*>(pTeb);
+  PEXCEPTION_REGISTRATION_RECORD_CUSTOM pExceptionList = 
+    *reinterpret_cast<PEXCEPTION_REGISTRATION_RECORD_CUSTOM*>(pTeb);
   if (!pExceptionList)
   {
     MessageBox(nullptr, _T("Exception list pointer invalid."), _T("MMHelper"), 
@@ -117,6 +125,7 @@ LONG CALLBACK VectoredHandler(__in PEXCEPTION_POINTERS ExceptionInfo)
 #endif // #ifdef _MSC_VER
 void TestSEH()
 {
+#ifdef _MSC_VER
   // Test SEH
   __try 
   {
@@ -127,6 +136,18 @@ void TestSEH()
   {
     MessageBox(nullptr, _T("Testing SEH."), _T("MMHelper"), MB_OK);
   }
+#else
+  // Test SEH
+  try
+  {
+    int* pInt = 0;
+    *pInt = 0;
+  }
+  catch (...)
+  {
+    MessageBox(nullptr, _T("Testing SEH."), _T("MMHelper"), MB_OK);
+  }
+#endif // #ifdef _MSC_VER
 }
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -201,13 +222,9 @@ void TestCPPEH()
     MessageBoxA(nullptr, "Caught unknown exception.", "MMHelper", MB_OK);
   }
 }
-#else
-#warning "MMHelper: Compilers other than MSVC currently unsupported."
-#endif // #ifdef _MSC_VER
 
 extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
 {
-#ifdef _MSC_VER
   // Break to debugger if present
   if (IsDebuggerPresent())
   {
@@ -235,11 +252,6 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
 
   // Test C++ EH
   TestCPPEH();
-#else
-#warning "MMHelper: Compilers other than MSVC currently unsupported."
-  MessageBox(nullptr, _T("MMHelper compiled with unsupported compiler. "
-    "Most functionality will be unavailable."), _T("MMHelper"), MB_OK);
-#endif // #ifdef _MSC_VER
 
   // Test return values
   return 1337;
