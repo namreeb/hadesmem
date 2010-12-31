@@ -141,13 +141,20 @@ namespace Hades
     { }
 
     // Inject DLL
-    // Fixme: Handle case where we are running with shims enabled, and 
-    // GetProcAddress will return a pointer which is invalid for the 
-    // target.
     // Fixme: Perform necessary adjustments to module base if necessary.
     HMODULE Injector::InjectDll(boost::filesystem::path const& Path, 
       bool PathResolution) const
     {
+      // Do not continue if Shim Engine is enabled for local process, 
+      // otherwise it could interfere with the address resolution.
+      HMODULE const ShimEngMod = GetModuleHandle(_T("ShimEng.dll"));
+      if (ShimEngMod)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Shims enabled for local process."));
+      }
+      
       // String to hold 'real' path to module
       boost::filesystem::path PathReal(Path);
 

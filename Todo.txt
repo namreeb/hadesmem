@@ -19,6 +19,8 @@
   	* Anti-anti-cheat APIs.
   	* Thread/process information APIs.
   	* Process enumeration APIs.
+  	* Injected 'base'.
+  	* Python scripts for automating common tasks.
   * MemoryMgr
   	* Improve 'safety' of remote function caller via EH to minimize risk of 
   	crashing target.

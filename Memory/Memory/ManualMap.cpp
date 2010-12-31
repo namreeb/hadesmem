@@ -84,6 +84,16 @@ namespace Hades
     PVOID ManualMap::Map(boost::filesystem::path const& Path, 
       std::string const& Export, bool InjectHelper) const
     {
+      // Do not continue if Shim Engine is enabled for local process, 
+      // otherwise it could interfere with the address resolution.
+      HMODULE const ShimEngMod = GetModuleHandle(_T("ShimEng.dll"));
+      if (ShimEngMod)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Shims enabled for local process."));
+      }
+      
       // Open file for reading
       boost::filesystem::basic_ifstream<BYTE> ModuleFile(Path, 
         std::ios::binary | std::ios::ate);
@@ -357,7 +367,7 @@ namespace Hades
         std::basic_string<TCHAR> const ModuleNameLowerT(boost::to_lower_copy(
           ModuleNameT));
         std::cout << "Module Name: " << ModuleName << "." << std::endl;
-
+          
         // Check whether dependent module is already loaded
         boost::optional<Module> MyModule;
         for (ModuleListIter j(m_Memory); *j; ++j)
@@ -366,13 +376,22 @@ namespace Hades
           if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerT || 
             boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerT)
           {
+            // Fixme: Support multiple modules with the same name in different 
+            // paths.
+            if (MyModule)
+            {
+              std::cout << "WARNING! Found two modules with the same name. You "
+                "may experience unexpected behaviour." << std::endl;
+            }
+            
             MyModule = *j;
           }
         }
 
-        // Module base address and name
+        // Module base address, name, and path
         HMODULE CurModBase = 0;
         std::basic_string<TCHAR> CurModName;
+        std::basic_string<TCHAR> CurModPath;
 
         // If dependent module is not yet loaded then inject it
         if (!MyModule)
@@ -382,11 +401,31 @@ namespace Hades
           Injector const MyInjector(m_Memory);
           CurModBase = MyInjector.InjectDll(ModuleName, false);
           CurModName = ModuleNameT;
+          
+          // Search again for dependent DLL and set module path
+          for (ModuleListIter j(m_Memory); *j; ++j)
+          {
+            Module const& Current = **j;
+            if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerT || 
+              boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerT)
+            {
+              // Fixme: Support multiple modules with the same name in different 
+              // paths.
+              if (!CurModPath.empty())
+              {
+                std::cout << "WARNING! Found two modules with the same name. "
+                  "You may experience unexpected behaviour." << std::endl;
+              }
+              
+              CurModPath = Current.GetPath();
+            }
+          }
         }
         else
         {
           CurModBase = MyModule->GetBase();
           CurModName = MyModule->GetName();
+          CurModPath = MyModule->GetPath();
         }
 
         // Loop over import thunks for current module
@@ -399,7 +438,8 @@ namespace Hades
           FARPROC FuncAddr = 0;
           if (ImpThunk.ByOrdinal())
           {
-            FuncAddr = m_Memory.GetRemoteProcAddress(CurModBase, CurModName, 
+            FuncAddr = m_Memory.GetRemoteProcAddress(CurModBase, 
+              CurModPath.empty() ? CurModName : CurModPath, 
               ImpThunk.GetOrdinal());
           }
           else
@@ -408,7 +448,8 @@ namespace Hades
             std::string const ImpName(ImpThunk.GetName());
             std::cout << "Function Name: " << ImpName << "." << std::endl;
 
-            FuncAddr = m_Memory.GetRemoteProcAddress(CurModBase, CurModName, 
+            FuncAddr = m_Memory.GetRemoteProcAddress(CurModBase, 
+              CurModPath.empty() ? CurModName : CurModPath, 
               ImpThunk.GetName());
           }
 
