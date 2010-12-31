@@ -1,0 +1,8 @@
+ProcName = raw_input("Process name: ")
+MyMem = PyHadesMem.MemoryMgr(ProcName)
+MySymbols = PyHadesMem.Symbols(MyMem)
+SymMod = raw_input("Symbol module: ")
+MySymbols.LoadForModule(SymMod)
+SymName = raw_input("Symbol name: ")
+Addr = MySymbols.GetAddress(SymName)
+print("Address: " + hex(Addr))

@@ -1,0 +1,12 @@
+ProcName = raw_input("Process name: ")
+MyMem = PyHadesMem.MemoryMgr(ProcName)
+RegionIter = PyHadesMem.RegionIter(MyMem)
+for MyRegion in RegionIter:
+  print("")
+  print("GetBase: " + hex(MyRegion.GetBase()))
+  print("GetAllocBase: " + hex(MyRegion.GetAllocBase()))
+  print("GetAllocProtect: " + hex(MyRegion.GetAllocProtect()))
+  print("GetSize: " + hex(MyRegion.GetSize()))
+  print("GetState: " + hex(MyRegion.GetState()))
+  print("GetProtect: " + hex(MyRegion.GetProtect()))
+  print("GetType: " + hex(MyRegion.GetType()))
