@@ -90,7 +90,7 @@ namespace Hades
       if (ShimEngMod)
       {
         BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Injector::InjectDll") << 
+          ErrorFunction("ManualMap::Map") << 
           ErrorString("Shims enabled for local process."));
       }
       
