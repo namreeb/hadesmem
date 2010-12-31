@@ -31,6 +31,7 @@
   	* NOP/UnNOP support.
   	* ASM searching API with 'wildcards'. (Metasm?)
   	* String based assembler with x64 support.
+  	* Improve bindings to make it actually useful from Python.
   * Scanner
   	* Multi-threaded scanning option.
   	* Wildcard support for vector/string scanning.
