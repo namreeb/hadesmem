@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     Py_Initialize();
 
     // Debug output
-    std::wcout << "Python " << Py_GetVersion() << std::endl;
+    std::wcout << "Python " << Py_GetVersion() << "\n" << std::endl;
 
     // Retrieve the main module.
     boost::python::object PythonMain(boost::python::import("__main__"));
