@@ -6,7 +6,6 @@
     support via RAII or Boost.ScopeExit).
     * Improved and documented thread-safety guarantees.
 	  * Fix all 'fixme' items in code.
-	  * Move ManualMap to optional 'experimental' project.
 	  
 * Medium Priority
   * New Modules
@@ -24,6 +23,7 @@
   	* Improve 'safety' of remote function caller via EH to minimize risk of 
   	crashing target.
   	* Improve genericity of parameter passing in remote function caller.
+  	* Memory reading via expression templates.
   * Disassembler
   	* Decode calls/jumps to function names where possible.
   	* NOP/UnNOP support.
