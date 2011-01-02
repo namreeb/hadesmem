@@ -104,6 +104,9 @@ void __bea_callspec__ Reg_Opcode(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[GV.REGOPCODE]);
             #endif
             (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[GV.REGOPCODE];
+			if (GV.REGOPCODE >= 4) {
+				(*pMyArgument).ArgPosition = HighPosition;
+			}
             (*pMyArgument).ArgSize = 8;
         }
         else {
@@ -2658,6 +2661,7 @@ void __bea_callspec__ _rESP(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[4+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[4+0];
+				(*pMyArgument).ArgPosition = HighPosition;
                 (*pMyArgument).ArgSize = 8;
             }
             else {
@@ -2768,6 +2772,7 @@ void __bea_callspec__ _rEBP(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[5+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[5+0];
+				(*pMyArgument).ArgPosition = HighPosition;
                 (*pMyArgument).ArgSize = 8;
             }
             else {
@@ -2878,6 +2883,7 @@ void __bea_callspec__ _rESI(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[6+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[6+0];
+				(*pMyArgument).ArgPosition = HighPosition;				
                 (*pMyArgument).ArgSize = 8;
             }
             else {
@@ -2988,6 +2994,7 @@ void __bea_callspec__ _rEDI(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[7+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[7+0];
+				(*pMyArgument).ArgPosition = HighPosition;				
                 (*pMyArgument).ArgSize = 8;
             }
             else {

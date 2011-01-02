@@ -21,6 +21,7 @@
   	* Process enumeration APIs.
   	* Injected 'base'.
   	* Python scripts for automating common tasks.
+  	* IA32 and AMD64 remote code 'emulator'.
   * MemoryMgr
   	* Improve 'safety' of remote function caller via EH to minimize risk of 
   	crashing target.

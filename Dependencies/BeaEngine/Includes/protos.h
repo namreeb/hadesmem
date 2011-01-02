@@ -63,6 +63,7 @@ size_t __bea_callspec__ SIB_2(ARGTYPE*, size_t, PDISASM);
 size_t __bea_callspec__ SIB_3(ARGTYPE*, size_t, PDISASM);
 
 /* ====================================== Routines_Disasm */
+void __bea_callspec__ CompleteInstructionFields (PDISASM);
 void __bea_callspec__ EbGb(PDISASM);
 void __bea_callspec__ EvGv(PDISASM);
 void __bea_callspec__ EvIb(PDISASM);

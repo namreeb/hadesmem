@@ -1,8 +1,6 @@
 #ifndef _BEA_ENGINE_
 #define _BEA_ENGINE_
 
-#define BEA_ENGINE_STATIC
-
 #include <beaengine/macros.h>
 #include <beaengine/export.h>
 #include <beaengine/basic_types.h>
@@ -96,6 +94,7 @@ typedef struct  {
    char ArgMnemonic[32];
    Int32 ArgType;
    Int32 ArgSize;
+   Int32 ArgPosition;
    UInt32 AccessMode;
    MEMORYTYPE Memory;
    UInt32 SegmentReg;
@@ -174,6 +173,9 @@ typedef struct _Disasm {
 #define NotUsedPrefix 0
 #define MandatoryPrefix 8
 #define InUsePrefix 1
+
+#define LowPosition 0
+#define HighPosition 1
 
 enum INSTRUCTION_TYPE
 {

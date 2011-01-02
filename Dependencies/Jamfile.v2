@@ -13,9 +13,9 @@ lib AsmJit
 
 lib BeaEngine 
   : [ glob BeaEngine/*.c ] 
-  : <include>"./BeaEngine/" <include>"./BeaEngine/includes/" 
+  : <include>"./BeaEngine/" <include>"./BeaEngine/includes/" <define>BEA_ENGINE_STATIC 
   : 
-  : <include>"." <include>"./BeaEngine/" 
+  : <include>"." <include>"./BeaEngine/" <define>BEA_ENGINE_STATIC 
   ;
 
 alias RapidXML 
