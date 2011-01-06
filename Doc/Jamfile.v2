@@ -1,14 +1,18 @@
 # Doc/Jamfile.v2
 
-import boostbook 
+using quickbook 
   ;
   
-import quickbook 
-  ;
-  
-import os 
-  ; 
-  
-boostbook HadesMem 
+xml HadesMemDoc 
   : HadesMem.qbk 
+  ;
+
+boostbook HadesMem 
+  : HadesMemDoc 
+  : 
+    <xsl:param>boost.image.src=Images/VelociraptorSq.png
+    <xsl:param>boost.image.alt="\"HadesMem\""
+    <xsl:param>boost.image.w=100
+    <xsl:param>boost.image.h=100
+    <xsl:param>nav.layout=none
   ;
