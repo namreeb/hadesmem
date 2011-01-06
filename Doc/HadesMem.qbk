@@ -39,19 +39,19 @@ Features include:
 [endsect]
 
 [section:hadesmem HadesMem]
-  [section:examples Examples]
-  [endsect]
-  
-  [section:reference Reference]
-  [endsect]
+[section:examples Examples]
+[endsect]
+
+[section:reference Reference]
+[endsect]
 [endsect]
 
 [section:pyhadesmem PyHadesMem]
-  [section:examples Examples]
-  [endsect]
-  
-  [section:reference Reference]
-  [endsect]
+[section:examples Examples]
+[endsect]
+
+[section:reference Reference]
+[endsect]
 [endsect]
 
 [section:faq FAQ]
