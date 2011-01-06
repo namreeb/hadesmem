@@ -1,21 +1,21 @@
 use-project /HadesMem
-  : HadesMem
+  : Include/HadesMem
   ;
  
- use-project /Dependencies
-  : Dependencies 
+ use-project /Dependencies 
+  : Src/Dependencies
   ;
   
 use-project /Common 
-  : Common 
+  : Src/Common 
   ; 
   
 use-project /Memory 
-  : Memory 
+  : Src/Memory 
   ; 
    
 use-project /Scripting 
-  : Scripting
+  : Src/Scripting
   ; 
   
 use-project /Doc 
@@ -33,10 +33,10 @@ path-constant TOP
   : . 
   ;
 
-build-project Memory 
+build-project Src/Memory 
   ;
   
-build-project Scripting 
+build-project Src/Scripting 
   ;
   
 build-project Doc
@@ -118,6 +118,6 @@ rule Install-Rule ( properties * )
 }
   
 install Bin 
-  : Memory Scripting 
+  : Src/Memory Src/Scripting 
   : <conditional>@Install-Rule <install-dependencies>on <install-type>SHARED_LIB <install-type>EXE <install-type>PYTHON_EXTENSION 
   ;
