@@ -105,7 +105,9 @@ namespace Hades
       boost::filesystem::path const& Params, 
       boost::filesystem::path const& WorkingDir);
 
-    // Module iterator
+    // Process iterator
+    // Fixme: Implement in a more rhobust manner. Currently just 'skips' 
+    // processes if something goes wrong...
     class ProcessIter : public boost::iterator_facade<ProcessIter, 
       boost::optional<Process>, boost::incrementable_traversal_tag>, 
       private boost::noncopyable

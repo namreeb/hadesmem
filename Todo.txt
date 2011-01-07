@@ -17,7 +17,6 @@
   	  * Stack trace APIs.
   	* Anti-anti-cheat APIs.
   	* Thread/process information APIs.
-  	* Process enumeration APIs.
   	* Injected 'base'.
   	* Python scripts for automating common tasks.
   	* IA32 and AMD64 remote code 'emulator'.
