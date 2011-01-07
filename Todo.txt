@@ -6,8 +6,6 @@
     support via RAII or Boost.ScopeExit).
     * Improved and documented thread-safety guarantees.
 	  * Fix all 'fixme' items in code.
-	  * Convert back to Unicode-only code base to simplify code, and also 
-	  simplify build matrix.
 	  
 * Medium Priority
   * New Modules
