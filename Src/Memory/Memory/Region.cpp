@@ -36,11 +36,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Memory.GetProcessHandle(), Address, 
         &m_RegionInfo, sizeof(m_RegionInfo)))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Region::Region") << 
           ErrorString("Could not query memory region.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
     }
 

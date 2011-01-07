@@ -25,6 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 #include <stdexcept>
+#include <system_error>
 
 // Boost
 #ifdef _MSC_VER
@@ -42,7 +43,15 @@ namespace Hades
   // Error info (error string)
   typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
   // Error info (Windows error code)
-  typedef boost::error_info<struct TagErrorCodeWin, DWORD> ErrorCodeWin;
+  typedef boost::error_info<struct TagErrorCode, std::error_code> 
+    ErrorCode;
+    
+  // Call 'GetLastError' and convert result to error_code
+  inline std::error_code GetLastErrorCode()
+  {
+    DWORD const LastError = GetLastError();
+    return std::error_code(LastError, std::system_category());
+  }
 
   // Base exception class
   class HadesError : public virtual std::exception, 

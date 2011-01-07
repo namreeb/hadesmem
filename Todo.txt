@@ -31,6 +31,7 @@
   	* ASM searching API with 'wildcards'. (Metasm?)
   	* String based assembler with x64 support.
   	* Improve bindings to make it actually useful from Python.
+  	* 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
   * Scanner
   	* Multi-threaded scanning option.
   	* Wildcard support for vector/string scanning.

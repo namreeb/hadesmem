@@ -47,11 +47,11 @@ namespace Hades
         TH32CS_SNAPMODULE, MyMemory.GetProcessID()));
       if (Snap == INVALID_HANDLE_VALUE)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Module::Module") << 
           ErrorString("Could not get module snapshot.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Convert module name to lowercase
@@ -101,11 +101,11 @@ namespace Hades
         TH32CS_SNAPMODULE, MyMemory.GetProcessID()));
       if (Snap == INVALID_HANDLE_VALUE)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Module::Module") << 
           ErrorString("Could not get module snapshot.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Search for process

@@ -85,11 +85,11 @@ namespace Hades
         WorkDirReal.string<std::basic_string<TCHAR>>().c_str(), &StartInfo, 
         &ProcInfo))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Injector::Error() << 
           ErrorFunction("CreateAndInject") << 
           ErrorString("Could not create process.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Ensure cleanup
@@ -114,11 +114,11 @@ namespace Hades
         // Success! Let the process continue execution.
         if (ResumeThread(ProcInfo.hThread) == static_cast<DWORD>(-1))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Injector::Error() << 
             ErrorFunction("CreateAndInject") << 
             ErrorString("Could not resume process.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
 
         // Return data to caller
@@ -194,11 +194,11 @@ namespace Hades
       AllocAndFree const LibFileRemote(m_Memory, PathBufSize);
       if (!LibFileRemote.GetAddress())
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
           ErrorString("Could not allocate memory.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Copy the DLL's pathname to the remote process' address space
@@ -208,20 +208,20 @@ namespace Hades
       HMODULE const hKernel32 = GetModuleHandle(_T("Kernel32.dll"));
       if (!hKernel32)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
           ErrorString("Could not get handle to Kernel32.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
       FARPROC const pLoadLibraryW = GetProcAddress(hKernel32, "LoadLibraryW");
       if (!pLoadLibraryW)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
           ErrorString("Could not get pointer to LoadLibraryW.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Load module in remote process using LoadLibraryW

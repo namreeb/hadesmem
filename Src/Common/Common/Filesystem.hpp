@@ -102,11 +102,11 @@ namespace Hades
         SelfPathSize), SelfPathSize) || GetLastError() == 
         ERROR_INSUFFICIENT_BUFFER)
       {
-        DWORD LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(HadesError() << 
           ErrorFunction("GetSelfPath") << 
           ErrorString("Could not get path to self.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Path to self

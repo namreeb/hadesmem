@@ -115,11 +115,11 @@ namespace Hades
         PAGE_READWRITE));
       if (!pBase)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("ManualMap::Map") << 
           ErrorString("Could not allocate memory for image data.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
       Windows::EnsureReleaseRegion const EnsureFreeLocalMod(pBase);
 
@@ -316,11 +316,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Memory.GetProcessHandle(), TargetAddr, 
           VirtualSize, SecProtect, &OldProtect))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("ManualMap::MapSections") << 
             ErrorString("Could not change page protections for section.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
       }
     }

@@ -59,11 +59,11 @@ namespace Hades
   		if(!SymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
   		  nullptr : &SearchPathTemp[0], FALSE))
   	  {
-  	    DWORD const LastError = GetLastError();
+  	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Symbols::~Symbols") << 
           ErrorString("Failed to initialize symbols.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
   	  }
   	}
   	
@@ -73,11 +73,11 @@ namespace Hades
   	  // Clean up symbol APIs
   	  if (!SymCleanup(m_Memory.GetProcessHandle()))
   	  {
-  	    DWORD const LastError = GetLastError();
+  	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Symbols::~Symbols") << 
           ErrorString("Failed to clean up symbols.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
   	  }
   	}
   
@@ -119,14 +119,14 @@ namespace Hades
   		  nullptr, 
   		  0))
   		{
-  	    DWORD const LastError = GetLastError();
+  	    std::error_code const LastError = GetLastErrorCode();
   	    // ERROR_SUCCESS indicates that the symbols were already loaded
   	    if (LastError != ERROR_SUCCESS)
   	    {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("Symbols::LoadForModule") << 
             ErrorString("Failed to load symbols for module.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
   	    }
   		}
   	}
@@ -149,11 +149,11 @@ namespace Hades
       // Look up symbol
       if (!SymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
       {
-  	    DWORD const LastError = GetLastError();
+  	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Symbols::GetAddress") << 
           ErrorString("Failed to get address for symbol.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
       
       // Return symbol address

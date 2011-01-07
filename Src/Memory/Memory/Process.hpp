@@ -122,33 +122,33 @@ namespace Hades
         m_Snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         if (m_Snap == INVALID_HANDLE_VALUE)
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Process::Error() << 
             ErrorFunction("ProcessIter::First") << 
             ErrorString("Could not get process snapshot.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
 
         // Get first module entry
         PROCESSENTRY32 ProcEntry = { sizeof(ProcEntry) };
         if (!Process32First(m_Snap, &ProcEntry))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Process::Error() << 
             ErrorFunction("ProcessIter::First") << 
             ErrorString("Error enumerating process list.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
         
         // Get WoW64 status of self
         BOOL IsWoW64Me = FALSE;
         if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Process::Error() << 
             ErrorFunction("ProcessIter::First") << 
             ErrorString("Could not detect WoW64 status of current process.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
         
         // Get handle to target
@@ -170,11 +170,11 @@ namespace Hades
         BOOL IsWoW64 = FALSE;
         if (!IsWow64Process(TargetProc, &IsWoW64))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Process::Error() << 
             ErrorFunction("ProcessIter::First") << 
             ErrorString("Could not detect WoW64 status of target process.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
   
         // Ensure WoW64 status of both self and target match
@@ -200,11 +200,11 @@ namespace Hades
         {
           if (GetLastError() != ERROR_NO_MORE_FILES)
           {
-            DWORD const LastError = GetLastError();
+            std::error_code const LastError = GetLastErrorCode();
             BOOST_THROW_EXCEPTION(Process::Error() << 
               ErrorFunction("ProcessIter::Next") << 
               ErrorString("Error enumerating process list.") << 
-              ErrorCodeWin(LastError));
+              ErrorCode(LastError));
           }
 
           m_Current = boost::optional<Process>();
@@ -215,12 +215,12 @@ namespace Hades
           BOOL IsWoW64Me = FALSE;
           if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
           {
-            DWORD const LastError = GetLastError();
+            std::error_code const LastError = GetLastErrorCode();
             BOOST_THROW_EXCEPTION(Process::Error() << 
               ErrorFunction("ProcessIter::Next") << 
               ErrorString("Could not detect WoW64 status of current "
                 "process.") << 
-              ErrorCodeWin(LastError));
+              ErrorCode(LastError));
           }
         
           // Get handle to target
@@ -242,12 +242,12 @@ namespace Hades
           BOOL IsWoW64 = FALSE;
           if (!IsWow64Process(TargetProc, &IsWoW64))
           {
-            DWORD const LastError = GetLastError();
+            std::error_code const LastError = GetLastErrorCode();
             BOOST_THROW_EXCEPTION(Process::Error() << 
               ErrorFunction("ProcessIter::Next") << 
               ErrorString("Could not detect WoW64 status of target "
                 "process.") << 
-              ErrorCodeWin(LastError));
+              ErrorCode(LastError));
           }
   
           // Ensure WoW64 status of both self and target match

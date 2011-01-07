@@ -103,11 +103,11 @@ namespace Hades
         if (!VirtualQueryEx(m_Memory.GetProcessHandle(), m_BaseAddress, &MyMbi, 
           sizeof(MyMbi)))
         {
-          DWORD const LastError = GetLastError();
+          std::error_code const LastError = GetLastErrorCode();
           BOOST_THROW_EXCEPTION(Region::Error() << 
             ErrorFunction("RegionEnum::First") << 
             ErrorString("Could not get first memory region.") << 
-            ErrorCodeWin(LastError));
+            ErrorCode(LastError));
         }
 
         m_BaseAddress = MyMbi.BaseAddress;

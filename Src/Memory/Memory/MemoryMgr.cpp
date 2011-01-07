@@ -250,21 +250,21 @@ namespace Hades
         pRemoteStub), pReturnAddress, 0, nullptr));
       if (!MyThread)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Call") << 
           ErrorString("Could not create remote thread.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Wait for the remote thread to terminate
       if (WaitForSingleObject(MyThread, INFINITE) != WAIT_OBJECT_0)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Call") << 
           ErrorString("Could not wait for remote thread.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Forward return value from remote thread
@@ -280,11 +280,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::CanRead") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Whether memory is currently readable
@@ -305,11 +305,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Whether memory is currently writable
@@ -328,11 +328,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMemInfo, 
         sizeof(MyMemInfo)))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::IsGuard") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Whether address is in a guard page
@@ -346,11 +346,11 @@ namespace Hades
         MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
       if (!Address)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Alloc") << 
           ErrorString("Could not allocate memory.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       return Address;
@@ -361,11 +361,11 @@ namespace Hades
     {
       if (!VirtualFreeEx(m_Process.GetHandle(), Address, 0, MEM_RELEASE))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Free") << 
           ErrorString("Could not free memory.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
     }
 
@@ -392,11 +392,11 @@ namespace Hades
         DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not load module locally.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Find target function in module
@@ -428,11 +428,11 @@ namespace Hades
         DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not load module locally.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
 
       // Find target function in module
@@ -460,11 +460,11 @@ namespace Hades
     {
       if (!FlushInstructionCache(m_Process.GetHandle(), Address, Size))
       {
-        DWORD const LastError = GetLastError();
+        std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::FlushInstructionCache") << 
           ErrorString("Could not flush instruction cache.") << 
-          ErrorCodeWin(LastError));
+          ErrorCode(LastError));
       }
     }
   }
