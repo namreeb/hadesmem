@@ -59,6 +59,43 @@ public:
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Process::GetHandle());
   }
+
+  std::basic_string<TCHAR> GetPath() const
+  {
+    return Hades::Memory::Process::GetPath().string<std::basic_string<TCHAR>>();
+  }
+};
+
+struct ProcessIterWrap
+{
+  static ProcessWrap next(Hades::Memory::ProcessIter& o)
+  {
+    if (!*o)
+    {
+      PyErr_SetString(PyExc_StopIteration, "No more data.");
+      boost::python::throw_error_already_set();
+    }
+
+    auto MyProcessWrap(*static_cast<ProcessWrap*>(&**o));
+
+    ++o;
+
+    return MyProcessWrap;
+  }
+
+  static boost::python::object pass_through(boost::python::object const& o) 
+  {
+    return o;
+  }
+
+  static void wrap(const char* python_name)
+  {
+    boost::python::class_<Hades::Memory::ProcessIter, boost::noncopyable>(
+      python_name)
+      .def("next", next)
+      .def("__iter__", pass_through)
+      ;
+  }
 };
 
 // Export Process API
@@ -77,5 +114,8 @@ void ExportProcess()
       std::basic_string<TCHAR> const&>())
     .def("GetHandle", &ProcessWrap::GetHandle)
     .def("GetID", &ProcessWrap::GetID)
+    .def("GetPath", &ProcessWrap::GetPath)
     ;
+
+  ProcessIterWrap::wrap("ProcessIter"); 
 }

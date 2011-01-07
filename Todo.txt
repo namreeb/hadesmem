@@ -9,7 +9,6 @@
 	  
 * Medium Priority
   * New Modules
-  	* Process creation APIs.
   	* Debugging APIs.
   		* Software breakpoint.
   		* Hardware breakpoint (incl read/write detection).

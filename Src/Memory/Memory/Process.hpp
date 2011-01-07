@@ -22,6 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <tchar.h>
 #include <Windows.h>
+#include <TlHelp32.h>
 
 // C++ Standard Library
 #include <string>
@@ -30,7 +31,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
+#include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER
@@ -79,6 +82,9 @@ namespace Hades
       
       // Get process ID
       DWORD GetID() const;
+      
+      // Get process path
+      boost::filesystem::path GetPath() const;
 
     private:
       // Open process given process id
@@ -98,5 +104,173 @@ namespace Hades
     Process CreateProcess(boost::filesystem::path const& Path, 
       boost::filesystem::path const& Params, 
       boost::filesystem::path const& WorkingDir);
+
+    // Module iterator
+    class ProcessIter : public boost::iterator_facade<ProcessIter, 
+      boost::optional<Process>, boost::incrementable_traversal_tag>, 
+      private boost::noncopyable
+    {
+    public:
+      // Constructor
+      ProcessIter() 
+        : m_Snap(), 
+        m_Current()
+      {
+        // Grab a new snapshot of the process
+        m_Snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (m_Snap == INVALID_HANDLE_VALUE)
+        {
+          DWORD const LastError = GetLastError();
+          BOOST_THROW_EXCEPTION(Process::Error() << 
+            ErrorFunction("ProcessIter::First") << 
+            ErrorString("Could not get process snapshot.") << 
+            ErrorCodeWin(LastError));
+        }
+
+        // Get first module entry
+        PROCESSENTRY32 ProcEntry = { sizeof(ProcEntry) };
+        if (!Process32First(m_Snap, &ProcEntry))
+        {
+          DWORD const LastError = GetLastError();
+          BOOST_THROW_EXCEPTION(Process::Error() << 
+            ErrorFunction("ProcessIter::First") << 
+            ErrorString("Error enumerating process list.") << 
+            ErrorCodeWin(LastError));
+        }
+        
+        // Get WoW64 status of self
+        BOOL IsWoW64Me = FALSE;
+        if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
+        {
+          DWORD const LastError = GetLastError();
+          BOOST_THROW_EXCEPTION(Process::Error() << 
+            ErrorFunction("ProcessIter::First") << 
+            ErrorString("Could not detect WoW64 status of current process.") << 
+            ErrorCodeWin(LastError));
+        }
+        
+        // Get handle to target
+        // Using more access flags than is strictly necessar, but if I don't 
+        // it will simply fail further down the chain
+        Windows::EnsureCloseHandle TargetProc(OpenProcess(PROCESS_CREATE_THREAD | 
+          PROCESS_QUERY_INFORMATION | 
+          PROCESS_VM_OPERATION | 
+          PROCESS_VM_READ | 
+          PROCESS_VM_WRITE, 
+          FALSE, ProcEntry.th32ProcessID));
+        if (!TargetProc)
+        {
+          increment();
+          return;
+        }
+  
+        // Get WoW64 status of target process
+        BOOL IsWoW64 = FALSE;
+        if (!IsWow64Process(TargetProc, &IsWoW64))
+        {
+          DWORD const LastError = GetLastError();
+          BOOST_THROW_EXCEPTION(Process::Error() << 
+            ErrorFunction("ProcessIter::First") << 
+            ErrorString("Could not detect WoW64 status of target process.") << 
+            ErrorCodeWin(LastError));
+        }
+  
+        // Ensure WoW64 status of both self and target match
+        if (IsWoW64Me != IsWoW64)
+        {
+          increment();
+        }
+        else
+        {
+          m_Current = Process(ProcEntry.th32ProcessID);
+        }
+      }
+
+    private:
+      // Allow Boost.Iterator access to internals
+      friend class boost::iterator_core_access;
+
+      // For Boost.Iterator
+      void increment() 
+      {
+        PROCESSENTRY32 ProcEntry = { sizeof(ProcEntry) };
+        if (!Process32Next(m_Snap, &ProcEntry))
+        {
+          if (GetLastError() != ERROR_NO_MORE_FILES)
+          {
+            DWORD const LastError = GetLastError();
+            BOOST_THROW_EXCEPTION(Process::Error() << 
+              ErrorFunction("ProcessIter::Next") << 
+              ErrorString("Error enumerating process list.") << 
+              ErrorCodeWin(LastError));
+          }
+
+          m_Current = boost::optional<Process>();
+        }
+        else
+        {
+          // Get WoW64 status of self
+          BOOL IsWoW64Me = FALSE;
+          if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
+          {
+            DWORD const LastError = GetLastError();
+            BOOST_THROW_EXCEPTION(Process::Error() << 
+              ErrorFunction("ProcessIter::Next") << 
+              ErrorString("Could not detect WoW64 status of current "
+                "process.") << 
+              ErrorCodeWin(LastError));
+          }
+        
+          // Get handle to target
+          // Using more access flags than is strictly necessar, but if I don't 
+          // it will simply fail further down the chain
+          Windows::EnsureCloseHandle TargetProc(OpenProcess(PROCESS_CREATE_THREAD | 
+            PROCESS_QUERY_INFORMATION | 
+            PROCESS_VM_OPERATION | 
+            PROCESS_VM_READ | 
+            PROCESS_VM_WRITE, 
+            FALSE, ProcEntry.th32ProcessID));
+          if (!TargetProc)
+          {
+            increment();
+            return;
+          }
+    
+          // Get WoW64 status of target process
+          BOOL IsWoW64 = FALSE;
+          if (!IsWow64Process(TargetProc, &IsWoW64))
+          {
+            DWORD const LastError = GetLastError();
+            BOOST_THROW_EXCEPTION(Process::Error() << 
+              ErrorFunction("ProcessIter::Next") << 
+              ErrorString("Could not detect WoW64 status of target "
+                "process.") << 
+              ErrorCodeWin(LastError));
+          }
+  
+          // Ensure WoW64 status of both self and target match
+          if (IsWoW64Me != IsWoW64)
+          {
+            increment();
+          }
+          else
+          {
+            m_Current = Process(ProcEntry.th32ProcessID);
+          }
+        }
+      }
+
+      // For Boost.Iterator
+      boost::optional<Process>& dereference() const
+      {
+        return m_Current;
+      }
+
+      // Toolhelp32 snapshot handle
+      Windows::EnsureCloseSnap m_Snap;
+
+      // Current module
+      mutable boost::optional<Process> m_Current;
+    };
   }
 }

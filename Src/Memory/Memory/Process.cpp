@@ -19,6 +19,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <Windows.h>
+#include <psapi.h>
 #include <TlHelp32.h>
 
 // Boost
@@ -34,6 +35,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Process.hpp"
 #include "Common/I18n.hpp"
+#include "Common/StringBuffer.hpp"
 
 namespace Hades
 {
@@ -293,6 +295,22 @@ namespace Hades
     DWORD Process::GetID() const
     {
       return m_ID;
+    }
+      
+    // Get process path
+    boost::filesystem::path Process::GetPath() const
+    {
+      std::basic_string<TCHAR> Path;
+      if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, MAX_PATH), MAX_PATH))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Process::GetPath") << 
+          ErrorString("Could not get path.") << 
+          ErrorCodeWin(LastError));
+      }
+      
+      return Path;
     }
     
     // Create process

@@ -160,6 +160,5 @@ namespace Hades
       // Current region
       mutable boost::optional<Region> m_Current;
     };
-
   }
 }
