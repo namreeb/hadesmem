@@ -15,12 +15,17 @@ lib dbghelp
   : <name>dbghelp 
   ;
 
+lib shell32 
+  : 
+  : <name>shell32 
+  ;
+
 project
   : requirements <library>/boost//thread/<link>static <library>/boost//filesystem/<link>static 
   ;
 
 lib Memory 
-  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 dbghelp 
+  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 dbghelp shell32 
   : <link>static 
   : 
   : <include>"." 

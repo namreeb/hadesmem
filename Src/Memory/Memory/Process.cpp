@@ -294,5 +294,36 @@ namespace Hades
     {
       return m_ID;
     }
+    
+    // Create process
+    Process CreateProcess(boost::filesystem::path const& Path, 
+      boost::filesystem::path const& Params, 
+        boost::filesystem::path const& WorkingDir)
+    {
+      // Start process
+      SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
+      ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
+      ExecInfo.lpFile = Path.empty() ? NULL : 
+        Path.string<std::basic_string<TCHAR>>().c_str();
+      ExecInfo.lpParameters = Params.empty() ? NULL : 
+        Params.string<std::basic_string<TCHAR>>().c_str();
+      ExecInfo.lpDirectory = WorkingDir.empty() ? NULL : 
+        WorkingDir.string<std::basic_string<TCHAR>>().c_str();
+      ExecInfo.nShow = SW_SHOWNORMAL;
+      if (!ShellExecuteEx(&ExecInfo))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("CreateProcess") << 
+          ErrorString("Could not create process.") << 
+          ErrorCodeWin(LastError));
+      }
+      
+      // Ensure handle is closed
+      Windows::EnsureCloseHandle MyProc(ExecInfo.hProcess);
+      
+      // Return process object
+      return Process(GetProcessId(MyProc));
+    }
   }
 }

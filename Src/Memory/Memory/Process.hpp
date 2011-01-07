@@ -26,6 +26,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 
+// Boost
+#ifdef _MSC_VER
+#pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
+#include <boost/filesystem.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // #ifdef _MSC_VER
+
 // Hades
 #include "Fwd.hpp"
 #include "Error.hpp"
@@ -84,5 +93,10 @@ namespace Hades
       // Process ID
       DWORD m_ID;
     };
+    
+    // Create process
+    Process CreateProcess(boost::filesystem::path const& Path, 
+      boost::filesystem::path const& Params, 
+      boost::filesystem::path const& WorkingDir);
   }
 }
