@@ -56,14 +56,26 @@ namespace Hades
       // Get characteristics
       DWORD GetCharacteristics() const;
 
+      // Set characteristics
+      void SetCharacteristics(DWORD Characteristics) const;
+
       // Get time date stamp
       DWORD GetTimeDateStamp() const;
+
+      // Set time date stamp
+      void SetTimeDateStamp(DWORD TimeDateStamp) const;
 
       // Get major version
       WORD GetMajorVersion() const;
 
+      // Set major version
+      void SetMajorVersion(WORD MajorVersion) const;
+
       // Get minor version
       WORD GetMinorVersion() const;
+
+      // Set minor version
+      void SetMinorVersion(WORD MinorVersion) const;
 
       // Get module name
       std::string GetName() const;
@@ -71,20 +83,38 @@ namespace Hades
       // Get ordinal base
       DWORD GetOrdinalBase() const;
 
+      // Set ordinal base
+      void SetOrdinalBase(DWORD OrdinalBase) const;
+
       // Get number of functions
       DWORD GetNumberOfFunctions() const;
+
+      // Set number of functions
+      void SetNumberOfFunctions(DWORD NumberOfFunctions) const;
 
       // Get number of names
       DWORD GetNumberOfNames() const;
 
+      // Set number of names
+      void SetNumberOfNames(DWORD NumberOfNames) const;
+
       // Get address of functions
       DWORD GetAddressOfFunctions() const;
+
+      // Set address of functions
+      void SetAddressOfFunctions(DWORD AddressOfFunctions) const;
 
       // Get address of names
       DWORD GetAddressOfNames() const;
 
+      // Set address of names
+      void SetAddressOfNames(DWORD AddressOfNames) const;
+
       // Get address of name ordinals
       DWORD GetAddressOfNameOrdinals() const;
+
+      // Set address of name ordinals
+      void SetAddressOfNameOrdinals(DWORD AddressOfNameOrdinals) const;
 
       // Get base of export dir
       PBYTE GetBase() const;
@@ -111,79 +141,60 @@ namespace Hades
       Export(PeFile const& MyPeFile, DWORD Ordinal);
 
       // Get RVA
-      DWORD GetRva() const
-      {
-        return m_Rva;
-      }
+      DWORD GetRva() const;
 
       // Get VA
-      PVOID GetVa() const
-      {
-        return m_Va;
-      }
+      PVOID GetVa() const;
 
       // Get name
-      std::string GetName() const
-      {
-        return m_Name;
-      }
+      std::string GetName() const;
 
       // Get forwarder
-      std::string GetForwarder() const
-      {
-        return m_Forwarder;
-      }
+      std::string GetForwarder() const;
       
       // Get forwarder module name
-      std::string GetForwarderModule() const
-      {
-        return m_ForwarderSplit.first;
-      }
+      std::string GetForwarderModule() const;
       
       // Get forwarder function name
-      std::string GetForwarderFunction() const
-      {
-        return m_ForwarderSplit.second;
-      }
+      std::string GetForwarderFunction() const;
 
       // Get ordinal
-      WORD GetOrdinal() const
-      {
-        return m_Ordinal;
-      }
+      WORD GetOrdinal() const;
 
       // If entry is exported by name
-      bool ByName() const
-      {
-        return m_ByName;
-      }
+      bool ByName() const;
 
       // If entry is forwarded
-      bool Forwarded() const
-      {
-        return m_Forwarded;
-      }
+      bool Forwarded() const;
 
     private:
       // PE file instance
       PeFile m_PeFile;
+      
       // Memory instance
       MemoryMgr m_Memory;
 
       // RVA
       DWORD m_Rva;
+      
       // VA
       PVOID m_Va;
+      
       // Name
       std::string m_Name;
+      
       // Forwarder
       std::string m_Forwarder;
+      
       // Split forwarder
       std::pair<std::string, std::string> m_ForwarderSplit;
+      
       // Ordinal
       WORD m_Ordinal;
+      
       // If entry is exported by name
       bool m_ByName;
+      
       // If entry is forwarded
       bool m_Forwarded;
     };
