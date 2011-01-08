@@ -232,7 +232,7 @@ namespace Hades
       *reinterpret_cast<PDWORD_PTR>(pJumpBuf) = static_cast<DWORD_PTR>(
         static_cast<PBYTE>(Target) - static_cast<PBYTE>(Address) - 5);
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
       // Write code to address
       m_Memory.Write(Address, JumpBuf);
@@ -246,7 +246,7 @@ namespace Hades
 #elif defined(_M_IX86) 
       unsigned int JumpSize = 5;
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
 
       return JumpSize;

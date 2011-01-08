@@ -204,7 +204,7 @@ namespace Hades
 #elif defined(_M_IX86) 
         Map(_T("MMHelper.dll"), "_Initialize@4", false);
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
       }
 

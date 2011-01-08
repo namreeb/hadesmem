@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 #elif defined(_M_IX86)
     std::wcout << "MemSandbox IA32 [Version " << VerNum << "]\n";
 #else
-#error Unsupported platform!
+#error "[HadesMem] Unsupported architecture."
 #endif
     std::wcout << "Copyright (C) 2010 RaptorFactor. All rights reserved." << 
       std::endl;

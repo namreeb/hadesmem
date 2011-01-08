@@ -222,7 +222,7 @@ namespace Hades
       // Return
       MyJitFunc.ret(AsmJit::Imm(0x4));
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
 
       // Get stub size

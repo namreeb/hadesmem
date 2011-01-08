@@ -35,7 +35,7 @@ namespace Hades
       : m_MemoryMgr(MyMemory)
     { }
 
-    // Test disassembler
+    // Disassemble target to string
     std::vector<std::basic_string<TCHAR>> Disassembler::DisassembleToStr(
       PVOID Address, DWORD_PTR NumInstructions) const
     {
@@ -57,6 +57,7 @@ namespace Hades
       return Results;
     }
 
+    // Disassemble target
     std::vector<DisasmData> Disassembler::Disassemble(PVOID Address, 
       DWORD_PTR NumInstructions) const
     {
@@ -74,7 +75,7 @@ namespace Hades
 #elif defined(_M_IX86) 
       MyDisasm.Archi = 32;
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
 
       // Container to hold disassembled code as a string

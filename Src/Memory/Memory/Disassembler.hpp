@@ -63,11 +63,11 @@ namespace Hades
       // Constructor
       explicit Disassembler(MemoryMgr const& MyMemory);
 
-      // Disassemble target and get results as strings
+      // Disassemble target to string
       std::vector<std::basic_string<TCHAR>> DisassembleToStr(PVOID Address, 
         DWORD_PTR NumInstructions) const;
 
-      // Disassemble target and get full disasm data back
+      // Disassemble target
       std::vector<DisasmData> Disassemble(PVOID Address, 
         DWORD_PTR NumInstructions) const;
 

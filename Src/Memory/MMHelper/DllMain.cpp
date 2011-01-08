@@ -116,7 +116,7 @@ LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
 
   return EXCEPTION_CONTINUE_SEARCH;
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
 }
 
@@ -202,7 +202,7 @@ void InitializeSEH()
   }
 
 #else 
-#error "Unsupported architecture."
+#error "[HadesMem] Unsupported architecture."
 #endif
 }
 
