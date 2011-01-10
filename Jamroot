@@ -1,13 +1,9 @@
-use-project /HadesMem
-  : Include/HadesMem
-  ;
- 
  use-project /Dependencies 
   : Src/Dependencies
   ;
   
 use-project /Common 
-  : Src/Common 
+  : Include/Common 
   ; 
   
 use-project /Memory 

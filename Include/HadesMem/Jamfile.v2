@@ -1,8 +1,0 @@
-# HadesMem/Jamfile.v2
-
-alias HadesMem 
-  : 
-  : 
-  : 
-  : <include>"."
-  ;

@@ -31,9 +31,9 @@ project
 
 lib Memory 
   : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 dbghelp shell32 psapi 
-  : <link>static 
+  : <link>static <include>"../../Include/Memory/Memory"
   : 
-  : <include>"." 
+  : <include>"../../Include/Memory"
   ;
 
 lib MMHelper 
