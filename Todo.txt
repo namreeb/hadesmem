@@ -5,16 +5,16 @@
     * Improved and documented exception-safety guarantees (incl rollback 
     support via RAII or Boost.ScopeExit).
     * Improved and documented thread-safety guarantees.
-	  * Fix all 'fixme' items in code.
+    * Fix all 'fixme' items in code.
 	  
 * Medium Priority
   * New Modules
   	* Debugging APIs.
-  		* Software breakpoint.
-  		* Hardware breakpoint (incl read/write detection).
-  		* Conditional breakpoints.
-  		* Single-stepping.
-  	  * Stack trace APIs.
+      * Software breakpoint.
+      * Hardware breakpoint (incl read/write detection).
+      * Conditional breakpoints.
+      * Single-stepping.
+      * Stack trace APIs.
   	* Anti-anti-cheat APIs.
   	* Thread/process information APIs.
   	* Injected 'base'.
@@ -79,4 +79,4 @@
 
 * Low Priority
   * General
-  	* Investigate GCC compilation support.
+    * Investigate GCC compilation support.
