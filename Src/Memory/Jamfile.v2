@@ -38,7 +38,5 @@ lib Memory
 
 lib MMHelper 
   : [ glob MMHelper/*.cpp ] Memory user32 /boost//thread/<link>static /boost//filesystem/<link>static 
-  : <link>shared 
-  : 
-  : 
+  : <link>shared <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
