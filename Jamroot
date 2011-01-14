@@ -71,17 +71,17 @@ rule format-name ( format * : name : type ? : property-set )
           ;
       
       case <address-model> :
-      result += 
-      [ 
-        join-tag $(f:G=) 
-        : 
-          [ 
-            address-model-tag $(name) 
-            : $(type) 
-            : $(property-set) 
-          ] 
-      ] 
-      ;
+        result += 
+        [ 
+          join-tag $(f:G=) 
+          : 
+            [ 
+              address-model-tag $(name) 
+              : $(type) 
+              : $(property-set) 
+            ] 
+        ] 
+        ;
 
       case * :
         result += $(f:G=) 
