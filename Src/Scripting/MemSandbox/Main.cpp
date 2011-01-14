@@ -185,8 +185,17 @@ int main(int argc, char* argv[])
 
     try
     {
+#if defined(_M_X64)
       // Import PyHadesMem
-      boost::python::exec("import PyHadesMem", PythonGlobal, PythonGlobal);
+      boost::python::exec("import PyHadesMem_64 as PyHadesMem", PythonGlobal, 
+        PythonGlobal);
+#elif defined(_M_IX86)
+      // Import PyHadesMem
+      boost::python::exec("import PyHadesMem_32 as PyHadesMem", PythonGlobal, 
+        PythonGlobal);
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
     }
     catch (...)
     {

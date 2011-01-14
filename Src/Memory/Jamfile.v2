@@ -2,41 +2,69 @@
 
 lib user32 
   : 
-  : <name>user32 
+  : 
+    <name>user32 
   ;
 
 lib advapi32 
   : 
-  : <name>advapi32 
+  : 
+    <name>advapi32 
   ;
 
 lib dbghelp 
   : 
-  : <name>dbghelp 
+  : 
+    <name>dbghelp 
   ;
 
 lib shell32 
   : 
-  : <name>shell32 
+  : 
+    <name>shell32 
   ;
 
 lib psapi 
   : 
-  : <name>psapi 
+  : 
+    <name>psapi 
   ;
 
 project
-  : requirements <library>/boost//thread/<link>static <library>/boost//filesystem/<link>static 
+  : 
+    requirements 
+    <library>/boost//thread/<link>static 
+    <library>/boost//filesystem/<link>static 
   ;
 
 lib Memory 
-  : [ glob Memory/*.cpp ] /Common//Common /Dependencies//AsmJit /Dependencies//BeaEngine /Dependencies//RapidXML user32 advapi32 dbghelp shell32 psapi 
-  : <link>static <include>"../../Include/Memory/HadesMemory"
   : 
-  : <include>"../../Include/Memory"
+    [ glob Memory/*.cpp ] 
+    /Common//Common 
+    /Dependencies//AsmJit 
+    /Dependencies//BeaEngine 
+    /Dependencies//RapidXML 
+    user32 
+    advapi32 
+    dbghelp 
+    shell32 
+    psapi 
+  : 
+    <link>static 
+    <include>"../../Include/Memory/HadesMemory"
+  : 
+  : 
+    <include>"../../Include/Memory"
   ;
 
 lib MMHelper 
-  : [ glob MMHelper/*.cpp ] Memory user32 /boost//thread/<link>static /boost//filesystem/<link>static 
-  : <link>shared <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
+  : 
+    [ glob MMHelper/*.cpp ] 
+    Memory 
+    user32 
+    /boost//thread/<link>static 
+    /boost//filesystem/<link>static 
+  : 
+    <link>shared 
+    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
