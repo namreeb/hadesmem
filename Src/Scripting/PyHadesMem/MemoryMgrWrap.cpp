@@ -31,8 +31,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Types.hpp"
-#include "Memory/MemoryMgr.hpp"
+#include "HadesMemory/Types.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 class MemoryMgrWrap : public Hades::Memory::MemoryMgr
 {

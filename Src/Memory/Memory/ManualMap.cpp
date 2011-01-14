@@ -45,8 +45,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
 #include "ManualMap.hpp"
-#include "Common/I18n.hpp"
-#include "Common/EnsureCleanup.hpp"
+#include "HadesCommon/I18n.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace 
 {

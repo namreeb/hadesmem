@@ -30,7 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Injector.hpp"
+#include "HadesMemory/Injector.hpp"
 
 template <class T1, class T2, class T3>
 boost::python::tuple tuple_to_python(std::tuple<T1, T2, T3> const& x)

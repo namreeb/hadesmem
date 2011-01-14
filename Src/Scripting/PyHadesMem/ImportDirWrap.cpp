@@ -30,8 +30,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/ImportDir.hpp"
-#include "Memory/ImportEnum.hpp"
+#include "HadesMemory/ImportDir.hpp"
+#include "HadesMemory/ImportEnum.hpp"
 
 class ImportDirWrap : public Hades::Memory::ImportDir
 {

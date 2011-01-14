@@ -25,7 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Module.hpp"
 #include "Symbol.hpp"
-#include "Common/I18n.hpp"
+#include "HadesCommon/I18n.hpp"
 
 // GCC workaround. MinGW does not support the updated DbgHelp APIs with 
 // Unicode support.
@@ -121,7 +121,7 @@ namespace Hades
   		{
   	    std::error_code const LastError = GetLastErrorCode();
   	    // ERROR_SUCCESS indicates that the symbols were already loaded
-  	    if (LastError != ERROR_SUCCESS)
+  	    if (LastError.value() != ERROR_SUCCESS)
   	    {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("Symbols::LoadForModule") << 

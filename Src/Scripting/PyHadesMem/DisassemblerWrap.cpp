@@ -30,7 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Disassembler.hpp"
+#include "HadesMemory/Disassembler.hpp"
 
 class DisassemblerWrap : public Hades::Memory::Disassembler
 {

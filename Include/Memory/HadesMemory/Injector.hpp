@@ -40,7 +40,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Fwd.hpp"
 #include "Error.hpp"
 #include "MemoryMgr.hpp"
-#include "Common/I18n.hpp"
+#include "HadesCommon/I18n.hpp"
 
 namespace Hades
 {

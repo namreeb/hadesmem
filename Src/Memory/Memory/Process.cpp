@@ -34,8 +34,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Process.hpp"
-#include "Common/I18n.hpp"
-#include "Common/StringBuffer.hpp"
+#include "HadesCommon/I18n.hpp"
+#include "HadesCommon/StringBuffer.hpp"
 
 namespace Hades
 {
@@ -320,6 +320,10 @@ namespace Hades
     {
       // Start process
       SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
+      // MinGW workaround
+      #ifndef SEE_MASK_NOASYNC
+      #define SEE_MASK_NOASYNC 0x00000100
+      #endif
       ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
       ExecInfo.lpFile = Path.empty() ? NULL : 
         Path.string<std::basic_string<TCHAR>>().c_str();

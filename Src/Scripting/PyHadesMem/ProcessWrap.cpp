@@ -30,7 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Process.hpp"
+#include "HadesMemory/Process.hpp"
     
 Hades::Memory::Process CreateProcessWrap(std::basic_string<TCHAR> const& Path, 
   std::basic_string<TCHAR> const& Params, 

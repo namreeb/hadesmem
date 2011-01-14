@@ -55,7 +55,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "ManualMapWrap.hpp"
 #include "FindPatternWrap.hpp"
 #include "DisassemblerWrap.hpp"
-#include "Common/Error.hpp"
+#include "HadesCommon/Error.hpp"
 
 // Custom error translator
 void HadesErrorTranslator(std::exception const& e)

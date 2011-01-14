@@ -47,7 +47,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "DosHeader.hpp"
 #include "NtHeaders.hpp"
 #include "FindPattern.hpp"
-#include "Common/I18n.hpp"
+#include "HadesCommon/I18n.hpp"
 
 namespace Hades
 {

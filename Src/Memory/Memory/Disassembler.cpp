@@ -23,8 +23,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "MemoryMgr.hpp"
-#include "Common/I18n.hpp"
 #include "Disassembler.hpp"
+#include "HadesCommon/I18n.hpp"
 
 namespace Hades
 {

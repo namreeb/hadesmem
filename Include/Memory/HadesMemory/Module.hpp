@@ -42,7 +42,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Fwd.hpp"
 #include "Error.hpp"
 #include "MemoryMgr.hpp"
-#include "Common/EnsureCleanup.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace Hades
 {

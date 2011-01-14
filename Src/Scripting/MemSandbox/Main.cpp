@@ -44,7 +44,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Memory.hpp"
+#include "HadesMemory/Memory.hpp"
 
 bool GetInput(boost::python::object const& PythonNamespace) 
 {

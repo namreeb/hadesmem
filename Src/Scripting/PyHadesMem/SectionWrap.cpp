@@ -30,8 +30,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/Section.hpp"
-#include "Memory/SectionEnum.hpp"
+#include "HadesMemory/Section.hpp"
+#include "HadesMemory/SectionEnum.hpp"
 
 class SectionWrap : public Hades::Memory::Section
 {

@@ -30,7 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif // #ifdef _MSC_VER
 
 // Hades
-#include "Memory/DosHeader.hpp"
+#include "HadesMemory/DosHeader.hpp"
 
 // Export DosHeader API
 void ExportDosHeader()

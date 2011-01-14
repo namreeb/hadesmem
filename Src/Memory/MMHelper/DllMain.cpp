@@ -32,12 +32,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Common/Logger.hpp"
-#include "Memory/Memory.hpp"
+#include "HadesCommon/Logger.hpp"
+#include "HadesMemory/Memory.hpp"
 
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
+// MinGW Boost.Thread compilation workaround
 extern "C" void tss_cleanup_implemented() { }
 
 // Fixme: This entire module is a complete mess. Rewrite to move from 'PoC' 

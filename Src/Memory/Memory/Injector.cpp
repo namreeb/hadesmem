@@ -37,8 +37,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Module.hpp"
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
-#include "Common/Filesystem.hpp"
-#include "Common/EnsureCleanup.hpp"
+#include "HadesCommon/Filesystem.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace Hades
 {
