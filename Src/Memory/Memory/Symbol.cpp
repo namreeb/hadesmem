@@ -29,6 +29,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Module.hpp"
 #include "Symbol.hpp"
 #include "HadesCommon/I18n.hpp"
+#include "HadesCommon/Filesystem.hpp"
 
 // GCC workaround. MinGW does not support the updated DbgHelp APIs with 
 // Unicode support.
@@ -48,23 +49,63 @@ namespace Hades
     // Constructor
   	Symbols::Symbols(MemoryMgr const& MyMemory, 
   	  std::basic_string<TCHAR> const& SearchPath) 
-  	  : m_Memory(MyMemory)
+  	  : m_Memory(MyMemory), 
+      m_DbgHelpMod()
   	{
+      // Load DbgHelp.dll
+      m_DbgHelpMod = LoadLibrary((Windows::GetSelfDirPath() / "dbghelp.dll").
+        string<std::basic_string<TCHAR>>().c_str());
+      if (!m_DbgHelpMod)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::Symbols") << 
+          ErrorString("Failed to load DbgHelp.dll.") << 
+          ErrorCode(LastError));
+      }
+      
+      // Get address of DbgHelp!SymSetOptions
+      typedef DWORD (WINAPI* tSymSetOptions)(__in DWORD SymOptions);
+      auto pSymSetOptions = reinterpret_cast<tSymSetOptions>(GetProcAddress(
+        m_DbgHelpMod, "SymSetOptions"));
+      if (!pSymSetOptions)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::Symbols") << 
+          ErrorString("Failed to find DbgHelp!SymSetOptions.") << 
+          ErrorCode(LastError));
+      }
+      
   		// SYMOPT_DEBUG is not really necessary, but the debug output is always 
   		// good if something goes wrong
-  		SymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
+  		pSymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
   		
+      // Get address of DbgHelp!SymInitialize
+      typedef BOOL (WINAPI* tSymInitialize)(__in HANDLE hProcess, 
+        __in_opt PCTSTR UserSearchPath, __in BOOL fInvadeProcess);
+      auto pSymInitialize = reinterpret_cast<tSymInitialize>(GetProcAddress(
+        m_DbgHelpMod, "SymInitialize"));
+      if (!pSymInitialize)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::Symbols") << 
+          ErrorString("Failed to find DbgHelp!SymInitialize.") << 
+          ErrorCode(LastError));
+      }
+      
   		// Convert search path to non-const buffer (GCC workaround)
   		std::basic_string<TCHAR_TEMP> SearchPathTemp(
   		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(SearchPath));
   		
   		// Initialize symbol APIs
-  		if(!SymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
+  		if(!pSymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
   		  nullptr : &SearchPathTemp[0], FALSE))
   	  {
   	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Symbols::~Symbols") << 
+          ErrorFunction("Symbols::Symbols") << 
           ErrorString("Failed to initialize symbols.") << 
           ErrorCode(LastError));
   	  }
@@ -73,8 +114,21 @@ namespace Hades
     // Destructor
   	Symbols::~Symbols()
   	{
+      // Get address of DbgHelp!SymCleanup
+      typedef BOOL (WINAPI* tSymCleanup)(__in HANDLE hProcess);
+      auto pSymCleanup = reinterpret_cast<tSymCleanup>(GetProcAddress(
+        m_DbgHelpMod, "SymCleanup"));
+      if (!pSymCleanup)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::~Symbols") << 
+          ErrorString("Failed to find DbgHelp!SymCleanup.") << 
+          ErrorCode(LastError));
+      }
+      
   	  // Clean up symbol APIs
-  	  if (!SymCleanup(m_Memory.GetProcessHandle()))
+  	  if (!pSymCleanup(m_Memory.GetProcessHandle()))
   	  {
   	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -110,14 +164,36 @@ namespace Hades
           ErrorFunction("Symbols::LoadForModule") << 
           ErrorString("Could not find module in remote process."));
       }
-        
+      
+      // Get address of DbgHelp!SymLoadModuleEx
+      typedef DWORD64 (WINAPI* tSymLoadModuleEx)(
+        __in HANDLE hProcess,
+        __in HANDLE hFile,
+        __in PCTSTR ImageName,
+        __in PCTSTR ModuleName,
+        __in DWORD64 BaseOfDll,
+        __in DWORD DllSize,
+        __in PMODLOAD_DATA Data,
+        __in DWORD Flags
+      );
+      auto pSymLoadModuleEx = reinterpret_cast<tSymLoadModuleEx>(
+        GetProcAddress(m_DbgHelpMod, "SymLoadModuleEx"));
+      if (!pSymLoadModuleEx)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::LoadForModule") << 
+          ErrorString("Failed to find DbgHelp!SymLoadModuleEx.") << 
+          ErrorCode(LastError));
+      }
+      
   		// Convert module name to non-const buffer (GCC workaround)
   		std::basic_string<TCHAR_TEMP> ModuleNameTemp(
   		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(
   		  MyModule->GetName()));
   		
       // Load symbols for module
-  		if(!SymLoadModuleEx(m_Memory.GetProcessHandle(), 
+  		if(!pSymLoadModuleEx(m_Memory.GetProcessHandle(), 
   		  nullptr, 
   		  &ModuleNameTemp[0], 
   		  nullptr, 
@@ -137,9 +213,26 @@ namespace Hades
   	    }
   		}
       
+      // Get address of DbgHelp!SymGetModuleInfo64
+      typedef BOOL (WINAPI* tSymGetModuleInfo64)(
+        __in HANDLE hProcess,
+        __in DWORD64 dwAddr,
+        __out PIMAGEHLP_MODULE64 ModuleInfo
+      );
+      auto pSymGetModuleInfo64 = reinterpret_cast<tSymGetModuleInfo64>(
+        GetProcAddress(m_DbgHelpMod, "SymGetModuleInfo64"));
+      if (!pSymGetModuleInfo64)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::LoadForModule") << 
+          ErrorString("Failed to find DbgHelp!SymGetModuleInfo64.") << 
+          ErrorCode(LastError));
+      }
+      
       // Get module info
       IMAGEHLP_MODULE64 ModuleInfo = { sizeof(ModuleInfo) };
-      if (!SymGetModuleInfo64(m_Memory.GetProcessHandle(), 
+      if (!pSymGetModuleInfo64(m_Memory.GetProcessHandle(), 
         reinterpret_cast<DWORD64>(MyModule->GetBase()), 
         &ModuleInfo))
       {
@@ -165,8 +258,25 @@ namespace Hades
   		// Convert symbol name to non-const buffer (GCC workaround)
   		auto NameTemp(boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(Name));
   		
+      // Get address of DbgHelp!SymFromName
+      typedef BOOL (WINAPI* tSymFromName)(
+        __in HANDLE hProcess,
+        __in PCTSTR Name,
+        __inout PSYMBOL_INFO Symbol
+      );
+      auto pSymFromName = reinterpret_cast<tSymFromName>(
+        GetProcAddress(m_DbgHelpMod, "SymFromName"));
+      if (!pSymFromName)
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::LoadForModule") << 
+          ErrorString("Failed to find DbgHelp!SymFromName.") << 
+          ErrorCode(LastError));
+      }
+      
       // Look up symbol
-      if (!SymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
+      if (!pSymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
       {
   	    std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 

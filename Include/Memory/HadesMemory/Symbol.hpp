@@ -37,6 +37,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Fwd.hpp"
 #include "Error.hpp"
 #include "MemoryMgr.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 // Note: Symbol APIs provided by DbgHelp are NOT thread-safe. 
 // Todo: Implement optional synchronization.
@@ -71,6 +72,9 @@ namespace Hades
     private:
       // Memory instance
       MemoryMgr m_Memory;
+      
+      // Module handle
+      Windows::EnsureFreeLibrary m_DbgHelpMod;
     };
   }
 }
