@@ -85,7 +85,7 @@ namespace Hades
       // Hook IDrect3DDevice9::Reset
       m_pResetHk.reset(new Memory::PatchDetour(MyMemory, pReset, 
         reinterpret_cast<PVOID>(&Reset_Hook)));
-      m_pEndSceneHk->Apply();
+      m_pResetHk->Apply();
         
       // Debug output
       std::wcout << "D3D9Hook::Startup: D3D9 successfully hooked." 
@@ -111,6 +111,13 @@ namespace Hades
     {
       try
       {
+        // Initialize if necessary
+        if (pThis != m_pDevice)
+        {
+          m_pDevice = pThis;
+          Initialize();
+        }
+        
         // Perform rendering
         Render();
 
@@ -138,6 +145,13 @@ namespace Hades
     {
       try
       {
+        // Initialize if necessary
+        if (pThis != m_pDevice)
+        {
+          m_pDevice = pThis;
+          Initialize();
+        }
+        
         // Perform pre-reset duties
         PreReset();
 

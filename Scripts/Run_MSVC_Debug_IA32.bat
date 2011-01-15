@@ -1,1 +1,1 @@
-"..\Bin\MSVC\Debug\MemSandbox_32.exe" --file="%1" --keep-open
+"..\Bin\MSVC\Debug\IA32\MemSandbox.exe" --file="%1" --keep-open

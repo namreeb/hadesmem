@@ -45,109 +45,9 @@ project
     <toolset>gcc:<warnings>off 
     <toolset>gcc:<define>nullptr=NULL 
     <toolset>msvc:<warnings>all 
-    <tag>@gentag 
   : 
     default-build debug 
   ;
-
-local rule address-model-tag ( name : type ? : property-set )
-{
-  local tag = 
-    ;
-    
-  local version = 
-    [ 
-      $(property-set).get <address-model> 
-    ] 
-    ;
-    
-  return $(version) 
-    ;
-}
-
-rule format-name ( format * : name : type ? : property-set )
-{
-  local result = "" ;
-  for local f in $(format)
-  {
-    switch $(f:G)
-    {
-      case <base> :
-        result += $(name:B) 
-          ;
-      
-      case <address-model> :
-        result += 
-        [ 
-          join-tag $(f:G=) 
-          : 
-            [ 
-              address-model-tag $(name) 
-              : $(type) 
-              : $(property-set) 
-            ] 
-        ] 
-        ;
-
-      case * :
-        result += $(f:G=) 
-          ;
-    }
-  }
-  
-  result = 
-    [ 
-      virtual-target.add-prefix-and-suffix $(result:J=) 
-        : $(type) 
-        : $(property-set) 
-    ] 
-    ;
-    
-  return $(result) 
-    ;
-}
-
-local rule join-tag ( joiner ? : tag ? )
-{
-  if ! $(joiner) 
-  { 
-    joiner = _ 
-      ; 
-  }
-  
-  return $(joiner)$(tag) 
-    ;
-}
-
-rule gentag ( name : type ? : property-set )
-{
-  if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB PYTHON_EXTENSION EXE 
-  {
-    if [ $(property-set).get <address-model> ] != 32 && 
-      [ $(property-set).get <address-model> ] != 64 
-    {
-      ECHO "Error! Could not detect address-model."
-        ;
-      EXIT
-        ;
-    }
-
-    local result 
-      ;
-      
-    result = 
-      [ 
-        format-name <base> <address-model>  
-        : $(name) 
-        : $(type) 
-        : $(property-set) 
-      ] 
-      ;
-      
-    return $(result) 
-      ;
-  } 
-}
 
 path-constant TOP 
   : 
@@ -163,54 +63,115 @@ build-project Src/Scripting
 build-project Doc
   ;
   
+actions Install-Rule
+{
+  
+}
+  
 rule Install-Rule ( properties * ) 
 {
   local result 
     ;
   
-  if <variant>debug in $(properties)
+  if <address-model>32 in $(properties)
   {
-    if <toolset>gcc in $(properties)
+    if <variant>debug in $(properties)
     {
-      result += <location>Bin/GCC/Debug 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Debug/IA32 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Debug/IA32 
+          ;
+      }
     }
-    
-    if <toolset>msvc in $(properties)
+
+    if <variant>release in $(properties)
     {
-      result += <location>Bin/MSVC/Debug 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Release/IA32 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Release/IA32 
+          ;
+      }
     }
   }
   
-  if <variant>release in $(properties)
+  if <address-model>64 in $(properties)
   {
-    if <toolset>gcc in $(properties)
+    if <variant>debug in $(properties)
     {
-      result += <location>Bin/GCC/Release 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Debug/AMD64 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Debug/AMD64 
+          ;
+      }
     }
-    
-    if <toolset>msvc in $(properties)
+
+    if <variant>release in $(properties)
     {
-      result += <location>Bin/MSVC/Release 
-        ;
+      if <toolset>gcc in $(properties)
+      {
+        result += <location>Bin/GCC/Release/AMD64 
+          ;
+      }
+      
+      if <toolset>msvc in $(properties)
+      {
+        result += <location>Bin/MSVC/Release/AMD64 
+          ;
+      }
     }
   }
   
   return $(result) 
     ;
 }
-  
+
 install Bin 
   : 
     Src/Memory 
     Src/Scripting 
     Src/Injected 
+    Misc/DbgHelp/IA32/dbghelp.dll 
+    Misc/DbgHelp/IA32/symsrv.dll 
   : 
     <conditional>@Install-Rule 
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
     <install-type>PYTHON_EXTENSION 
+    <address-model>32 
+  ;
+
+
+install Bin 
+  : 
+    Src/Memory 
+    Src/Scripting 
+    Src/Injected 
+    Misc/DbgHelp/AMD64/dbghelp.dll 
+    Misc/DbgHelp/AMD64/symsrv.dll 
+  : 
+    <conditional>@Install-Rule 
+    <install-dependencies>on 
+    <install-type>SHARED_LIB 
+    <install-type>EXE 
+    <install-type>PYTHON_EXTENSION 
+    <address-model>64 
   ;

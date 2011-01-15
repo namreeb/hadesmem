@@ -163,8 +163,7 @@ namespace Hades
       pSymbol->MaxNameLen = MAX_SYM_NAME;
       
   		// Convert symbol name to non-const buffer (GCC workaround)
-  		std::basic_string<TCHAR_TEMP> NameTemp(
-  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(Name));
+  		auto NameTemp(boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(Name));
   		
       // Look up symbol
       if (!SymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
