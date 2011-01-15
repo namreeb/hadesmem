@@ -33,6 +33,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Boost C++ Libraries
 #ifdef _MSC_VER
 #pragma warning(push, 1)
+#pragma warning(disable: 4100)
+#pragma warning(disable: 4127)
 #pragma warning(disable: 4702)
 #endif // #ifdef _MSC_VER
 #include <boost/thread.hpp>

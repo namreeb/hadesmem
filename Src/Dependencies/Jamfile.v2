@@ -1,16 +1,11 @@
 # Dependencies/Jamfile.v2
 
-project 
-  : 
-    requirements 
-    <link>static 
-    <warnings>off 
-  ;
-  
 lib AsmJit 
   : 
     [ glob AsmJit/*.cpp ] 
   : 
+    <warnings>off 
+    <link>static 
   : 
   : 
     <include>"." 
@@ -23,6 +18,8 @@ lib BeaEngine
     <include>"./BeaEngine/" 
     <include>"./BeaEngine/includes/" 
     <define>BEA_ENGINE_STATIC 
+    <warnings>off 
+    <link>static 
   : 
   : 
     <include>"." 
