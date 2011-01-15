@@ -29,6 +29,12 @@ lib psapi
   : 
     <name>psapi 
   ;
+  
+lib imagehlp
+  : 
+  : 
+    <name>imagehlp 
+  ;
 
 project
   : 
@@ -49,6 +55,7 @@ lib Memory
     dbghelp 
     shell32 
     psapi 
+    imagehlp 
   : 
     <link>static 
     <include>"../../Include/Memory/HadesMemory"

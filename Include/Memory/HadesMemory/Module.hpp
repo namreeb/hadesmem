@@ -97,7 +97,7 @@ namespace Hades
     {
     public:
       // Constructor
-      ModuleListIter(MemoryMgr const& MyMemory) 
+      explicit ModuleListIter(MemoryMgr const& MyMemory) 
         : m_Memory(MyMemory), 
         m_Snap(), 
         m_Current()

@@ -1,0 +1,9 @@
+# Injected/Jamfile.v2
+
+lib Kernel 
+  : 
+    [ glob Kernel/*.cpp ] 
+    /Memory//Memory 
+  : 
+    <link>shared 
+  ;

@@ -5,10 +5,11 @@ import python
 
 if ![python.configured]
 {
-  ECHO "Notice: no Python configured in user-config.jam"
+  ECHO 
+    "Notice: No Python configured in user-config.jam." 
+    "Will use default configuration."
     ;
-  ECHO "Notice: will use default configuration"
-    ;
+    
   using python
     ;
 }

@@ -32,6 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Disassembler.hpp"
 
 // Hades (Internal)
+#include "APIHook.hpp"
 #include "Patcher.hpp"
 
 // Hades (PeLib)

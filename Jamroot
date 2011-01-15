@@ -4,16 +4,21 @@ import common
 import virtual-target 
   ;
 
-use-project /Dependencies 
-  : 
-    Src/Dependencies
-  ;
-  
 use-project /Common 
   : 
     Include/Common 
   ; 
   
+use-project /Dependencies 
+  : 
+    Src/Dependencies
+  ;
+  
+use-project /Injected 
+  : 
+    Src/Injected 
+  ; 
+   
 use-project /Memory 
   : 
     Src/Memory 
@@ -201,6 +206,7 @@ install Bin
   : 
     Src/Memory 
     Src/Scripting 
+    Src/Injected 
   : 
     <conditional>@Install-Rule 
     <install-dependencies>on 
