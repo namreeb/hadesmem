@@ -56,7 +56,8 @@ namespace Hades
 
       // Constructor
       explicit Symbols(MemoryMgr const& MyMemory, 
-        boost::filesystem::path const& SearchPath = boost::filesystem::path());
+        std::basic_string<TCHAR> const& SearchPath = 
+        std::basic_string<TCHAR>());
         
       // Destructor
       ~Symbols();
