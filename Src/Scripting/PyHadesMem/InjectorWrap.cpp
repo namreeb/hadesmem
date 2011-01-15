@@ -55,7 +55,8 @@ std::tuple<Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR> CreateAndInject(
   std::basic_string<TCHAR> const& Module, 
   std::string const& Export)
 {
-  auto InjectData(Hades::Memory::CreateAndInject(Path, WorkDir, Args, Module, Export));
+  auto InjectData(Hades::Memory::CreateAndInject(Path, WorkDir, Args, Module, 
+    Export));
   Hades::Memory::MemoryMgr MyMemory(std::get<0>(InjectData));
   DWORD_PTR ModuleBase = reinterpret_cast<DWORD_PTR>(std::get<1>(InjectData));
   DWORD_PTR ExportRet = std::get<2>(InjectData);

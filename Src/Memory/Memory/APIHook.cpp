@@ -254,7 +254,8 @@ namespace Hades
           {
             // We should never get here
             
-            std::string ErrorMsg(boost::str(boost::format("Could not find %s!%s.") 
+            std::string ErrorMsg(boost::str(boost::format(
+              "Could not find %s!%s.") 
               %boost::lexical_cast<std::string>(p->m_ModuleName) 
               %boost::lexical_cast<std::string>(p->m_FunctionName)));
               
