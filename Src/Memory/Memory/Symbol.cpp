@@ -52,7 +52,7 @@ namespace Hades
   	{
   		// SYMOPT_DEBUG is not really necessary, but the debug output is always 
   		// good if something goes wrong
-  		SymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
+  		SymSetOptions(SYMOPT_DEBUG | SYMOPT_UNDNAME);
   		
   		// Convert search path to non-const buffer (GCC workaround)
   		std::basic_string<TCHAR_TEMP> SearchPathTemp(
@@ -136,18 +136,31 @@ namespace Hades
             ErrorCode(LastError));
   	    }
   		}
+      
+      // Get module info
+      IMAGEHLP_MODULE64 ModuleInfo = { sizeof(ModuleInfo) };
+      if (!SymGetModuleInfo64(m_Memory.GetProcessHandle(), 
+        reinterpret_cast<DWORD64>(MyModule->GetBase()), 
+        &ModuleInfo))
+      {
+  	    std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Symbols::LoadForModule") << 
+          ErrorString("Failed to get module info.") << 
+          ErrorCode(LastError));
+      }
   	}
   
     // Get address for symbol
     PVOID Symbols::GetAddress(std::basic_string<TCHAR> const& Name)
   	{
   	  // Construct buffer for symbol API
-  	  std::size_t const BufferSize = (sizeof(SYMBOL_INFO) + Name.size() * 
+  	  std::size_t const BufferSize = (sizeof(SYMBOL_INFO) + MAX_SYM_NAME * 
   	    sizeof(TCHAR) + sizeof(ULONG64) - 1) / sizeof(ULONG64);
       std::vector<ULONG64> SymInfoBuf(BufferSize);
       PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(&SymInfoBuf[0]);
       pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-      pSymbol->MaxNameLen = static_cast<ULONG>(Name.size() + 1);
+      pSymbol->MaxNameLen = MAX_SYM_NAME;
       
   		// Convert symbol name to non-const buffer (GCC workaround)
   		std::basic_string<TCHAR_TEMP> NameTemp(
