@@ -52,7 +52,7 @@ namespace Hades
   	{
   		// SYMOPT_DEBUG is not really necessary, but the debug output is always 
   		// good if something goes wrong
-  		SymSetOptions(SYMOPT_DEBUG | SYMOPT_UNDNAME);
+  		SymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
   		
   		// Convert search path to non-const buffer (GCC workaround)
   		std::basic_string<TCHAR_TEMP> SearchPathTemp(
