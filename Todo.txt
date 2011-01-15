@@ -8,6 +8,7 @@
     * Fix all 'fixme' items in code.
     * Rename include folders to prevent name clashes.
     * std::basic_string<TCHAR> to std::string/std::wstring.
+    * Proper locale support.
 	  
 * Medium Priority
   * New Modules
