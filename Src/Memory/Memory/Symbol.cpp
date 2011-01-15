@@ -22,6 +22,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 #include <algorithm>
 
+// Boost
+#include <boost/algorithm/string.hpp>
+
 // Hades
 #include "Module.hpp"
 #include "Symbol.hpp"
@@ -84,12 +87,16 @@ namespace Hades
     // Load symbols for module
   	void Symbols::LoadForModule(std::basic_string<TCHAR> const& ModuleName)
   	{
+      // Convert module name to lowercase
+      auto ModuleNameLower(boost::to_lower_copy(ModuleName));
+      
   	  // Look up module in remote process
   	  boost::optional<Module> MyModule;
       for (ModuleListIter i(m_Memory); *i; ++i)
       {
         Module& Current = **i;
-        if (Current.GetName() == ModuleName || Current.GetPath() == ModuleName)
+        if (boost::to_lower_copy(Current.GetName()) == ModuleNameLower || 
+          boost::to_lower_copy(Current.GetPath()) == ModuleNameLower)
         {
           MyModule = *i;
           break;

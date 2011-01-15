@@ -154,7 +154,8 @@ namespace Hades
       PROC pNew
     ) 
     {
-      HMODULE ThisMod = ModuleFromAddress(ReplaceIATEntryInAllMods);
+      HMODULE ThisMod = ModuleFromAddress(reinterpret_cast<PVOID>(
+        ReplaceIATEntryInAllMods));
           
       static MemoryMgr MyMemory(GetCurrentProcessId());
       for (ModuleListIter i(MyMemory); *i; ++i)
@@ -235,9 +236,17 @@ namespace Hades
       DWORD dwFlags
     ) 
     {
+      PVOID pFixupNewlyLoadedModule = reinterpret_cast<PVOID>(
+        FixupNewlyLoadedModule);
+        
+      // MinGW workaround
+      #ifndef LOAD_LIBRARY_AS_IMAGE_RESOURCE
+      #define LOAD_LIBRARY_AS_IMAGE_RESOURCE 0x00000020
+      #endif
+        
       // If a new module is loaded, hook the hooked functions
       if ((hModule != NULL) && 
-        (hModule != ModuleFromAddress(FixupNewlyLoadedModule)) && 
+        (hModule != ModuleFromAddress(pFixupNewlyLoadedModule)) && 
         ((dwFlags & LOAD_LIBRARY_AS_DATAFILE) == 0) &&
         ((dwFlags & LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE) == 0) &&
         ((dwFlags & LOAD_LIBRARY_AS_IMAGE_RESOURCE) == 0)

@@ -18,6 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // C++ Standard Library
+#include <memory>
 #include <iostream>
 
 // Windows API
@@ -28,13 +29,22 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 
+// Todo: Make hook objects a member of a class with a destructor that runs on 
+// module unload to ensure that we call PatchDetour::Remove
+
+std::shared_ptr<Hades::Memory::PatchDetour> GetCursorPosHk;
+
 BOOL WINAPI GetCursorPos_Hook(
   LPPOINT lpPoint
 )
 {
   std::wcout << "GetCursorPos called." << std::endl;
   
-  return GetCursorPos(lpPoint);
+  typedef BOOL (WINAPI* tGetCursorPos)(LPPOINT lpPoint);
+  tGetCursorPos pGetCursorPos = reinterpret_cast<tGetCursorPos>(
+    GetCursorPosHk->GetTrampoline());
+  
+  return pGetCursorPos(lpPoint);
 }
 
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE /*Module*/)
@@ -67,11 +77,34 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE /*Module*/)
       "Email: raptorfactor@raptorfactor.com." << std::endl;
     std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << "." << 
       std::endl << std::endl;
-      
+    
+    // Create memory manager
+    Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+    
     // Test hooking
-    Hades::Memory::APIHook::Initialize();
-    static Hades::Memory::APIHook MyAPIHook(_T("user32.dll"), 
-      _T("GetCursorPos"), reinterpret_cast<PROC>(&GetCursorPos_Hook));
+    HMODULE User32Mod = LoadLibrary(_T("user32.dll"));
+    if (!User32Mod)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("_Initialize@4") << 
+        Hades::ErrorString("Could not load user32.dll.") << 
+        Hades::ErrorCode(LastError));
+    }
+    FARPROC pGetCursorPos = GetProcAddress(User32Mod, "GetCursorPos");
+    if (!pGetCursorPos)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("_Initialize@4") << 
+        Hades::ErrorString("Could not find user32.dll!GetCursorPos.") << 
+        Hades::ErrorCode(LastError));
+    }
+    GetCursorPosHk.reset(new Hades::Memory::PatchDetour(
+      MyMemory, 
+      reinterpret_cast<PVOID>(pGetCursorPos), 
+      reinterpret_cast<PVOID>(&GetCursorPos_Hook)));
+    GetCursorPosHk->Apply();
   }
   catch (std::exception const& e)
   {
