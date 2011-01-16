@@ -6,4 +6,5 @@ lib Kernel
     /Memory//Memory 
   : 
     <link>shared 
+    <toolset>msvc:<cxxflags>"/wd4503"
   ;

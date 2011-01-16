@@ -70,7 +70,7 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
     static Hades::Kernel::Kernel MyKernel;
     
     // Initialize D3D9
-    Hades::Kernel::D3D9Hook::Startup();
+    static Hades::Kernel::D3D9HookInit MyD3DHook;
   }
   catch (std::exception const& e)
   {
