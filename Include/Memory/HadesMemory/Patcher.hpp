@@ -1,6 +1,6 @@
 /*
 This file is part of HadesMem.
-Copyright © 2010 RaptorFactor (aka Cypherjb, Cypher, Chazwazza). 
+Copyright (C) 2010 Joshua Boyce (aka RaptorFactor, Cypherjb, Cypher, Chazwazza).
 <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 HadesMem is free software: you can redistribute it and/or modify
