@@ -544,7 +544,7 @@ namespace Hades
     {
     public:
       // Constructor
-      EnsureUnregisterClass(std::basic_string<TCHAR> const& ClassName, 
+      EnsureUnregisterClass(std::wstring const& ClassName, 
         HINSTANCE Instance)
         : m_ClassName(ClassName),
         m_Instance(Instance)
@@ -567,7 +567,7 @@ namespace Hades
         m_ClassName = std::move(MyEnsureCleanup.m_ClassName);
         m_Instance = MyEnsureCleanup.m_Instance;
 
-        MyEnsureCleanup.m_ClassName = std::basic_string<TCHAR>();
+        MyEnsureCleanup.m_ClassName = std::wstring();
         MyEnsureCleanup.m_Instance = nullptr;
 
         return *this;
@@ -593,7 +593,7 @@ namespace Hades
 
     private:
       // 'Handles' being managed
-      std::basic_string<TCHAR> m_ClassName;
+      std::wstring m_ClassName;
       HINSTANCE m_Instance;
     };
 

@@ -26,7 +26,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -61,7 +60,7 @@ namespace Hades
     }
 
     // Open process from process name
-    Process::Process(std::basic_string<TCHAR> const& ProcName) 
+    Process::Process(std::wstring const& ProcName) 
       : m_Handle(nullptr), 
       m_ID(0) 
     {
@@ -81,7 +80,7 @@ namespace Hades
       }
 
       // Convert process name to lowercase
-      std::basic_string<TCHAR> const ProcNameLower(boost::to_lower_copy(
+      std::wstring const ProcNameLower(boost::to_lower_copy(
         ProcName));
 
       // Search for process
@@ -90,7 +89,7 @@ namespace Hades
       for (BOOL MoreMods = Process32First(Snap, &ProcEntry); MoreMods; 
         MoreMods = Process32Next(Snap, &ProcEntry)) 
       {
-        Found = (boost::to_lower_copy(static_cast<std::basic_string<TCHAR>>(
+        Found = (boost::to_lower_copy(static_cast<std::wstring>(
           ProcEntry.szExeFile)) == ProcNameLower);
         if (Found)
         {
@@ -112,8 +111,8 @@ namespace Hades
     }
 
     // Open process from window name and class
-    Process::Process(std::basic_string<TCHAR> const& WindowName, 
-      std::basic_string<TCHAR> const& ClassName) 
+    Process::Process(std::wstring const& WindowName, 
+      std::wstring const& ClassName) 
       : m_Handle(nullptr), 
       m_ID(0) 
     {
@@ -300,7 +299,7 @@ namespace Hades
     // Get process path
     boost::filesystem::path Process::GetPath() const
     {
-      std::basic_string<TCHAR> Path;
+      std::wstring Path;
       if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, MAX_PATH), MAX_PATH))
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -316,7 +315,7 @@ namespace Hades
     // Create process
     Process CreateProcess(boost::filesystem::path const& Path, 
       boost::filesystem::path const& Params, 
-        boost::filesystem::path const& WorkingDir)
+      boost::filesystem::path const& WorkingDir)
     {
       // Start process
       SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
@@ -325,12 +324,9 @@ namespace Hades
       #define SEE_MASK_NOASYNC 0x00000100
       #endif
       ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
-      ExecInfo.lpFile = Path.empty() ? NULL : 
-        Path.string<std::basic_string<TCHAR>>().c_str();
-      ExecInfo.lpParameters = Params.empty() ? NULL : 
-        Params.string<std::basic_string<TCHAR>>().c_str();
-      ExecInfo.lpDirectory = WorkingDir.empty() ? NULL : 
-        WorkingDir.string<std::basic_string<TCHAR>>().c_str();
+      ExecInfo.lpFile = Path.empty() ? NULL : Path.c_str();
+      ExecInfo.lpParameters = Params.empty() ? NULL : Params.c_str();
+      ExecInfo.lpDirectory = WorkingDir.empty() ? NULL : WorkingDir.c_str();
       ExecInfo.nShow = SW_SHOWNORMAL;
       if (!ShellExecuteEx(&ExecInfo))
       {

@@ -32,9 +32,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "HadesMemory/Process.hpp"
     
-Hades::Memory::Process CreateProcessWrap(std::basic_string<TCHAR> const& Path, 
-  std::basic_string<TCHAR> const& Params, 
-  std::basic_string<TCHAR> const& WorkingDir)
+Hades::Memory::Process CreateProcessWrap(std::wstring const& Path, 
+  std::wstring const& Params, 
+  std::wstring const& WorkingDir)
 {
   return Hades::Memory::CreateProcess(Path, Params, WorkingDir);
 }
@@ -46,12 +46,12 @@ public:
     : Hades::Memory::Process(ProcID)
   { }
 
-  explicit ProcessWrap(std::basic_string<TCHAR> const& ProcName) 
+  explicit ProcessWrap(std::wstring const& ProcName) 
     : Hades::Memory::Process(ProcName)
   { }
 
-  ProcessWrap(std::basic_string<TCHAR> const& WindowName, 
-    std::basic_string<TCHAR> const& ClassName) 
+  ProcessWrap(std::wstring const& WindowName, 
+    std::wstring const& ClassName) 
     : Hades::Memory::Process(WindowName, ClassName)
   { }
 
@@ -60,9 +60,9 @@ public:
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Process::GetHandle());
   }
 
-  std::basic_string<TCHAR> GetPath() const
+  std::wstring GetPath() const
   {
-    return Hades::Memory::Process::GetPath().string<std::basic_string<TCHAR>>();
+    return Hades::Memory::Process::GetPath().native();
   }
 };
 
@@ -109,9 +109,9 @@ void ExportProcess()
 
   boost::python::class_<ProcessWrap, boost::python::bases<Hades::Memory::
     Process>>("Process", boost::python::init<DWORD>())
-    .def(boost::python::init<std::basic_string<TCHAR> const&>())
-    .def(boost::python::init<std::basic_string<TCHAR> const&, 
-      std::basic_string<TCHAR> const&>())
+    .def(boost::python::init<std::wstring const&>())
+    .def(boost::python::init<std::wstring const&, 
+      std::wstring const&>())
     .def("GetHandle", &ProcessWrap::GetHandle)
     .def("GetID", &ProcessWrap::GetID)
     .def("GetPath", &ProcessWrap::GetPath)

@@ -21,9 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <Windows.h>
-#ifdef UNICODE
 #define DBGHELP_TRANSLATE_TCHAR
-#endif
 #include <DbgHelp.h>
 
 // C++ Standard Library
@@ -57,17 +55,16 @@ namespace Hades
 
       // Constructor
       explicit Symbols(MemoryMgr const& MyMemory, 
-        std::basic_string<TCHAR> const& SearchPath = 
-        std::basic_string<TCHAR>());
+        std::wstring const& SearchPath = std::wstring());
         
       // Destructor
       ~Symbols();
       
       // Load symbols for module
-      void LoadForModule(std::basic_string<TCHAR> const& ModuleName);
+      void LoadForModule(std::wstring const& ModuleName);
       
       // Get address for symbol
-      PVOID GetAddress(std::basic_string<TCHAR> const& Name);
+      PVOID GetAddress(std::wstring const& Name);
         
     private:
       // Memory instance

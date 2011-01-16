@@ -20,7 +20,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 #include <TlHelp32.h>
 
@@ -63,8 +62,7 @@ namespace Hades
       Module(MemoryMgr const& MyMemory, HMODULE Handle);
 
       // Find module by name
-      Module(MemoryMgr const& MyMemory, 
-        std::basic_string<TCHAR> const& ModuleName);
+      Module(MemoryMgr const& MyMemory, std::wstring const& ModuleName);
 
       // Get module base
       HMODULE GetBase() const;
@@ -72,9 +70,9 @@ namespace Hades
       DWORD GetSize() const;
 
       // Get module name
-      std::basic_string<TCHAR> GetName() const;
+      std::wstring GetName() const;
       // Get module path
-      std::basic_string<TCHAR> GetPath() const;
+      std::wstring GetPath() const;
 
     private:
       // Memory instance
@@ -85,9 +83,9 @@ namespace Hades
       // Module size
       DWORD m_Size;
       // Module name
-      std::basic_string<TCHAR> m_Name;
+      std::wstring m_Name;
       // Module path
-      std::basic_string<TCHAR> m_Path;
+      std::wstring m_Path;
     };
 
     // Module iterator

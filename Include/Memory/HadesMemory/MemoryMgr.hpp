@@ -20,7 +20,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 
 // C++ Standard Library
@@ -69,11 +68,10 @@ namespace Hades
       explicit MemoryMgr(DWORD ProcID);
 
       // Open process from process name
-      explicit MemoryMgr(std::basic_string<TCHAR> const& ProcName);
+      explicit MemoryMgr(std::wstring const& ProcName);
 
       // Open process from window name and class
-      MemoryMgr(std::basic_string<TCHAR> const& WindowName, 
-        std::basic_string<TCHAR> const& ClassName);
+      MemoryMgr(std::wstring const& WindowName, std::wstring const& ClassName);
 
       // Calling conventions
       enum CallConv
@@ -152,8 +150,7 @@ namespace Hades
 
       // Get address of export in remote process (by ordinal)
       FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-        boost::filesystem::path const& Module, WORD Function) 
-        const;
+        boost::filesystem::path const& Module, WORD Function) const;
 
       // Flush instruction cache
       void FlushCache(PVOID Address, SIZE_T Size) const;

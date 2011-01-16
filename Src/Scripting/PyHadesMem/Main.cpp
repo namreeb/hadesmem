@@ -74,10 +74,10 @@ BOOST_PYTHON_MODULE(PyHadesMem)
     .def("__iter__", boost::python::iterator<std::vector<DWORD_PTR>>())
     ;
 
-  boost::python::class_<std::vector<std::basic_string<TCHAR>>>("PointerStr", 
+  boost::python::class_<std::vector<std::wstring>>("PointerStr", 
     boost::python::no_init)
     .def("__iter__", boost::python::iterator<std::vector<
-      std::basic_string<TCHAR>>>())
+      std::wstring>>())
     ;
 
   ExportDisassembler();

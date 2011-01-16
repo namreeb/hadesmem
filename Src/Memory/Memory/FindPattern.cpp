@@ -25,7 +25,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/fstream.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -95,8 +94,8 @@ namespace Hades
     }
 
     // Find pattern
-    PVOID FindPattern::Find(std::basic_string<TCHAR> const& Data, 
-      std::basic_string<TCHAR> const& Mask) const
+    PVOID FindPattern::Find(std::wstring const& Data, 
+      std::wstring const& Mask) const
     {
       // Ensure pattern attributes are valid
       if (Data.empty() || Mask.empty())
@@ -127,8 +126,8 @@ namespace Hades
       for (auto i = Data.cbegin(), j = Mask.cbegin(); i != Data.cend(); 
         i += 2, ++j)
       {
-        std::basic_string<TCHAR> const CurrentStr(i, i + 2);
-        std::basic_stringstream<TCHAR> Converter(CurrentStr);
+        std::wstring const CurrentStr(i, i + 2);
+        std::wstringstream Converter(CurrentStr);
         int Current(0);
         if (!(Converter >> std::hex >> Current >> std::dec))
         {
@@ -138,7 +137,7 @@ namespace Hades
         }
 
         BYTE CurrentReal = static_cast<BYTE>(Current);
-        bool MaskFlag = *j == _T('x');
+        bool MaskFlag = *j == L'x';
 
         DataBuf.push_back(std::make_pair(CurrentReal, MaskFlag));
       }
@@ -221,7 +220,6 @@ namespace Hades
         std::wstring const Name(NameNode ? NameNode->value() : L"");
         std::wstring const Mask(MaskNode ? MaskNode->value() : L"");
         std::wstring const Data(DataNode ? DataNode->value() : L"");
-        std::string const DataReal(boost::lexical_cast<std::string>(Data));
 
         // Ensure pattern attributes are valid
         if (Name.empty())
@@ -232,9 +230,7 @@ namespace Hades
         }
 
         // Find pattern
-        PBYTE Address = static_cast<PBYTE>(Find(
-          boost::lexical_cast<std::basic_string<TCHAR>>(Data), 
-          boost::lexical_cast<std::basic_string<TCHAR>>(Mask)));
+        PBYTE Address = static_cast<PBYTE>(Find(Data, Mask));
 
         // Only apply options if pattern was found
         if (Address != 0)
@@ -355,8 +351,7 @@ namespace Hades
         }
 
         // Check for duplicate entry
-        auto const Iter = m_Addresses.find(boost::lexical_cast<std::
-          basic_string<TCHAR>>(Name));
+        auto const Iter = m_Addresses.find(Name);
         if (Iter != m_Addresses.end())
         {
           BOOST_THROW_EXCEPTION(Error() << 
@@ -365,19 +360,18 @@ namespace Hades
         }
 
         // Add address to map
-        m_Addresses[boost::lexical_cast<std::basic_string<TCHAR>>(Name)] = 
-          Address;
+        m_Addresses[Name] = Address;
       }
     }
 
     // Get address map
-    std::map<std::basic_string<TCHAR>, PVOID> FindPattern::GetAddresses() const
+    std::map<std::wstring, PVOID> FindPattern::GetAddresses() const
     {
       return m_Addresses;
     }
 
     // Operator[] overload to allow retrieving addresses by name
-    PVOID FindPattern::operator[](std::basic_string<TCHAR> const& Name) const
+    PVOID FindPattern::operator[](std::wstring const& Name) const
     {
       auto const Iter = m_Addresses.find(Name);
       return Iter != m_Addresses.end() ? Iter->second : nullptr;

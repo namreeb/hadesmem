@@ -25,7 +25,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 
 // Hades
@@ -43,11 +42,8 @@ namespace Hades
       { };
 
       // Hook a function in all modules
-      APIHook(
-        std::basic_string<TCHAR> const& ModuleName, 
-        std::basic_string<TCHAR> const& FunctionName, 
-        PROC pHook
-      );
+      APIHook(std::wstring const& ModuleName, std::wstring const& FunctionName, 
+        PROC pHook);
       
       // Unhook a function from all modules
       ~APIHook();
@@ -70,18 +66,12 @@ namespace Hades
     private:
       // Replaces a symbol's address in a module's import section
       static void WINAPI ReplaceIATEntryInAllMods(
-        std::basic_string<TCHAR> const& ModuleName, 
-        PROC pOrig, 
-        PROC pHook
-      );
+        std::wstring const& ModuleName, PROC pOrig, PROC pHook);
 
       // Replaces a symbol's address in all modules' import sections
       static void WINAPI ReplaceIATEntryInOneMod(
-        std::basic_string<TCHAR> const& ModuleName, 
-        PROC pOrig, 
-        PROC pHook, 
-        HMODULE CallerMod
-      );
+        std::wstring const& ModuleName, PROC pOrig, PROC pHook, 
+        HMODULE CallerMod);
 
       // Used when a DLL is newly loaded after hooking a function
       static void WINAPI FixupNewlyLoadedModule(
@@ -117,9 +107,9 @@ namespace Hades
       static std::list<APIHook*> sm_HookList;
 
       // Module containing the function
-      std::basic_string<TCHAR> m_ModuleName;
+      std::wstring m_ModuleName;
       // Function name in callee
-      std::basic_string<TCHAR> m_FunctionName;
+      std::wstring m_FunctionName;
       // Original function address in callee
       PROC m_pOrig;
       // Hook function address

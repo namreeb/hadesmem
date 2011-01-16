@@ -20,7 +20,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 #include <TlHelp32.h>
 
@@ -59,11 +58,10 @@ namespace Hades
       explicit Process(DWORD ProcID);
 
       // Open process from process name
-      explicit Process(std::basic_string<TCHAR> const& ProcName);
+      explicit Process(std::wstring const& ProcName);
 
       // Open process from window name and class
-      Process(std::basic_string<TCHAR> const& WindowName, 
-        std::basic_string<TCHAR> const& ClassName);
+      Process(std::wstring const& WindowName, std::wstring const& ClassName);
 
       // Copy constructor
       Process(Process const& MyProcess);

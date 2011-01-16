@@ -35,7 +35,7 @@ namespace Hades
   {
     // Find module by name
     Module::Module(MemoryMgr const& MyMemory, 
-      std::basic_string<TCHAR> const& ModuleName) 
+      std::wstring const& ModuleName) 
       : m_Memory(MyMemory), 
       m_Base(nullptr), 
       m_Size(0), 
@@ -55,7 +55,7 @@ namespace Hades
       }
 
       // Convert module name to lowercase
-      std::basic_string<TCHAR> const ModuleNameLower(boost::to_lower_copy(
+      std::wstring const ModuleNameLower(boost::to_lower_copy(
         ModuleName));
 
       // Search for process
@@ -64,9 +64,9 @@ namespace Hades
       for (BOOL MoreMods = Module32First(Snap, &ModEntry); MoreMods; 
         MoreMods = Module32Next(Snap, &ModEntry)) 
       {
-        Found = (boost::to_lower_copy(std::basic_string<TCHAR>(ModEntry.
+        Found = (boost::to_lower_copy(std::wstring(ModEntry.
           szModule)) == ModuleNameLower) || (boost::to_lower_copy(std::
-          basic_string<TCHAR>(ModEntry.szExePath)) == ModuleNameLower);
+          wstring(ModEntry.szExePath)) == ModuleNameLower);
         if (Found)
         {
           break;
@@ -157,13 +157,13 @@ namespace Hades
     }
 
     // Get module name
-    std::basic_string<TCHAR> Module::GetName() const
+    std::wstring Module::GetName() const
     {
       return m_Name;
     }
 
     // Get module path
-    std::basic_string<TCHAR> Module::GetPath() const
+    std::wstring Module::GetPath() const
     {
       return m_Path;
     }

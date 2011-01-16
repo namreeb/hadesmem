@@ -20,7 +20,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 
 // C++ Standard Library
@@ -91,7 +90,7 @@ namespace Hades
 
       // Constructor
       Logger(boost::filesystem::path const& LogDirPath, 
-        std::basic_string<TCHAR> const& Filename) 
+        std::wstring const& Filename) 
         : m_LogPath(GeneratePath(LogDirPath, Filename))
       { }
 
@@ -102,38 +101,35 @@ namespace Hades
       }
 
       // Generate path to log file.
-      std::basic_string<TCHAR> GeneratePath(boost::filesystem::path const& 
-        LogDirPath, std::basic_string<TCHAR> const& Filename)
+      boost::filesystem::path GeneratePath(
+        boost::filesystem::path const& LogDirPath, 
+        std::wstring const& Filename)
       {
         // Get local time
-        boost::posix_time::ptime const Time(boost::posix_time::second_clock::
-          local_time());
+        auto const Time(boost::posix_time::second_clock::local_time());
         // Convert time to string YYYY-MM-DDTHH:MM:SS
-        std::basic_string<TCHAR> TimeStr(boost::posix_time::
-          to_iso_extended_string_type<TCHAR>(Time));
+        auto TimeStr(boost::posix_time::to_iso_extended_wstring(Time));
         // Reformat time YYYY-MM-DD_HH-MM-SS
-        TimeStr[10] = _T('_'); TimeStr[13] = _T('-'); TimeStr[16] = _T('-');
+        TimeStr[10] = L'_'; TimeStr[13] = L'-'; TimeStr[16] = L'-';
 
         // Generate file path relative to initial directory
-        std::basic_string<TCHAR> const LogFile(Filename + _T("-") + TimeStr + 
-          _T(".log"));
+        std::wstring const LogFile(Filename + L"-" + TimeStr + L".log");
 
         // Make full path to log file
         boost::filesystem::path const LogPath(LogDirPath / LogFile);
 
         // Return path to log file
-        return LogPath.string<std::basic_string<TCHAR>>();
+        return LogPath;
       }
 
       // Writes n characters from s
       std::streamsize write(const char_type* s, std::streamsize n)
       {
         // Get time
-        boost::posix_time::ptime const Time(boost::posix_time::second_clock::
-          local_time());
+        auto const Time(boost::posix_time::second_clock::local_time());
         // Convert time to string YYYY-MM-DDTHH:MM:SS
-        std::basic_string<char_type> TimeStr(boost::posix_time::
-          to_iso_extended_string_type<char_type>(Time));
+        auto TimeStr(boost::posix_time::to_iso_extended_string_type<char_type>(
+          Time));
         // Reformat time YYYY-MM-DD_HH-MM-SS
         TimeStr[10] = '_'; TimeStr[13] = '-'; TimeStr[16] = '-';
 
@@ -162,8 +158,8 @@ namespace Hades
     };
 
     // Initialize logging. Returns wide path to self.
-    inline void InitLogger(std::basic_string<TCHAR> const& OutName, 
-      std::basic_string<TCHAR> const& LogName)
+    inline void InitLogger(std::wstring const& OutName, 
+      std::wstring const& LogName)
     {
       // Check if we actually need to continue
       if (OutName.empty() && LogName.empty())

@@ -41,12 +41,12 @@ public:
     : Hades::Memory::MemoryMgr(ProcID)
   { }
 
-  explicit MemoryMgrWrap(std::basic_string<TCHAR> const& ProcName) 
+  explicit MemoryMgrWrap(std::wstring const& ProcName) 
     : Hades::Memory::MemoryMgr(ProcName)
   { }
 
-  explicit MemoryMgrWrap(std::basic_string<TCHAR> const& WindowName, 
-    std::basic_string<TCHAR> const& ClassName) 
+  explicit MemoryMgrWrap(std::wstring const& WindowName, 
+    std::wstring const& ClassName) 
     : Hades::Memory::MemoryMgr(WindowName, ClassName)
   { }
 
@@ -78,14 +78,14 @@ public:
   }
 
   DWORD_PTR GetRemoteProcAddressByName(HMODULE RemoteMod, 
-    std::basic_string<TCHAR> const& Module, std::string const& Function) const
+    std::wstring const& Module, std::string const& Function) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::MemoryMgr::
       GetRemoteProcAddress(RemoteMod, Module, Function));
   }
 
   DWORD_PTR GetRemoteProcAddressByOrdinal(HMODULE RemoteMod, 
-    std::basic_string<TCHAR> const& Module, WORD Function) const
+    std::wstring const& Module, WORD Function) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::MemoryMgr::
       GetRemoteProcAddress(RemoteMod, Module, Function));
@@ -124,9 +124,9 @@ void ExportMemoryMgr()
   boost::python::scope MemoryMgrScope = boost::python::class_<MemoryMgrWrap, 
     boost::python::bases<Hades::Memory::MemoryMgr>>("MemoryMgr", 
     boost::python::init<DWORD>())
-    .def(boost::python::init<std::basic_string<TCHAR> const&>())
-    .def(boost::python::init<std::basic_string<TCHAR> const&, 
-    std::basic_string<TCHAR> const&>())
+    .def(boost::python::init<std::wstring const&>())
+    .def(boost::python::init<std::wstring const&, 
+    std::wstring const&>())
     .def("Call", &MemoryMgrWrap::Call)
     .def("ReadInt8", &MemoryMgrWrap::Read<Hades::Memory::Types::Int8>)
     .def("ReadUInt8", &MemoryMgrWrap::Read<Hades::Memory::Types::UInt8>)

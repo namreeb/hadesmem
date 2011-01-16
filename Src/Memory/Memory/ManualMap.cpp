@@ -86,7 +86,7 @@ namespace Hades
     {
       // Do not continue if Shim Engine is enabled for local process, 
       // otherwise it could interfere with the address resolution.
-      HMODULE const ShimEngMod = GetModuleHandle(_T("ShimEng.dll"));
+      HMODULE const ShimEngMod = GetModuleHandle(L"ShimEng.dll");
       if (ShimEngMod)
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -200,9 +200,9 @@ namespace Hades
       if (InjectHelper)
       {
 #if defined(_M_AMD64) 
-        Map(_T("MMHelper.dll"), "Initialize", false);
+        Map(L"MMHelper.dll", "Initialize", false);
 #elif defined(_M_IX86) 
-        Map(_T("MMHelper.dll"), "_Initialize@4", false);
+        Map(L"MMHelper.dll", "_Initialize@4", false);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -361,11 +361,11 @@ namespace Hades
         }
 
         // Get module name
-        std::string ModuleName(MyImportDir.GetName());
-        std::basic_string<TCHAR> ModuleNameT(boost::lexical_cast<std::
-          basic_string<TCHAR>>(ModuleName));
-        std::basic_string<TCHAR> const ModuleNameLowerT(boost::to_lower_copy(
-          ModuleNameT));
+        std::string const ModuleName(MyImportDir.GetName());
+        std::wstring const ModuleNameW(boost::lexical_cast<std::wstring>(
+          ModuleName));
+        std::wstring const ModuleNameLowerW(boost::to_lower_copy(
+          ModuleNameW));
         std::cout << "Module Name: " << ModuleName << "." << std::endl;
           
         // Check whether dependent module is already loaded
@@ -373,8 +373,8 @@ namespace Hades
         for (ModuleListIter j(m_Memory); *j; ++j)
         {
           Module& Current = **j;
-          if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerT || 
-            boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerT)
+          if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerW || 
+            boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerW)
           {
             // Fixme: Support multiple modules with the same name in different 
             // paths.
@@ -390,8 +390,8 @@ namespace Hades
 
         // Module base address, name, and path
         HMODULE CurModBase = 0;
-        std::basic_string<TCHAR> CurModName;
-        std::basic_string<TCHAR> CurModPath;
+        std::wstring CurModName;
+        std::wstring CurModPath;
 
         // If dependent module is not yet loaded then inject it
         if (!MyModule)
@@ -400,14 +400,14 @@ namespace Hades
           std::cout << "Injecting dependent DLL." << std::endl;
           Injector const MyInjector(m_Memory);
           CurModBase = MyInjector.InjectDll(ModuleName, false);
-          CurModName = ModuleNameT;
+          CurModName = ModuleNameW;
           
           // Search again for dependent DLL and set module path
           for (ModuleListIter j(m_Memory); *j; ++j)
           {
             Module const& Current = **j;
-            if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerT || 
-              boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerT)
+            if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerW || 
+              boost::to_lower_copy(Current.GetPath()) == ModuleNameLowerW)
             {
               // Fixme: Support multiple modules with the same name in different 
               // paths.

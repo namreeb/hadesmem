@@ -40,11 +40,11 @@ public:
   { }
 
   SymbolsWrap(Hades::Memory::MemoryMgr const& MyMem, 
-    std::basic_string<TCHAR> const& SearchPath) 
+    std::wstring const& SearchPath) 
     : Hades::Memory::Symbols(MyMem, SearchPath)
   { }
   
-  DWORD_PTR GetAddress(std::basic_string<TCHAR> const& Name)
+  DWORD_PTR GetAddress(std::wstring const& Name)
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Symbols::GetAddress(Name));
   }
@@ -61,7 +61,7 @@ void ExportSymbol()
     Symbols>, boost::noncopyable>("Symbols", boost::python::init<
     Hades::Memory::MemoryMgr const&>())
     .def(boost::python::init<Hades::Memory::MemoryMgr const&, 
-      std::basic_string<TCHAR> const&>())
+      std::wstring const&>())
     .def("LoadForModule", &SymbolsWrap::LoadForModule)
     .def("GetAddress", &SymbolsWrap::GetAddress)
     ;

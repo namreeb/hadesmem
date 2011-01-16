@@ -23,7 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 
 // Windows API
-#include <Tchar.h>
 #include <Windows.h>
 #include <ImageHlp.h>
 
@@ -54,29 +53,21 @@ namespace Hades
     {
       // Hook LoadLibrary functions and GetProcAddress so that hooked functions 
       // are handled correctly if these functions are called.
-      sm_LoadLibraryA.reset(new APIHook(_T("Kernel32.dll"), 
-        _T("LoadLibraryA"), 
+      sm_LoadLibraryA.reset(new APIHook(L"Kernel32.dll", L"LoadLibraryA", 
         reinterpret_cast<PROC>(APIHook::LoadLibraryA)));
-      sm_LoadLibraryW.reset(new APIHook(_T("Kernel32.dll"), 
-        _T("LoadLibraryW"), 
+      sm_LoadLibraryW.reset(new APIHook(L"Kernel32.dll", L"LoadLibraryW", 
         reinterpret_cast<PROC>(APIHook::LoadLibraryW)));
-      sm_LoadLibraryExA.reset(new APIHook(_T("Kernel32.dll"), 
-        _T("LoadLibraryExA"), 
+      sm_LoadLibraryExA.reset(new APIHook(L"Kernel32.dll", L"LoadLibraryExA", 
         reinterpret_cast<PROC>(APIHook::LoadLibraryExA)));
-      sm_LoadLibraryExW.reset(new APIHook(_T("Kernel32.dll"), 
-        _T("LoadLibraryExW"), 
+      sm_LoadLibraryExW.reset(new APIHook(L"Kernel32.dll", L"LoadLibraryExW", 
         reinterpret_cast<PROC>(APIHook::LoadLibraryExW)));
-      sm_GetProcAddress.reset(new APIHook(_T("Kernel32.dll"), 
-        _T("GetProcAddress"), 
+      sm_GetProcAddress.reset(new APIHook(L"Kernel32.dll", L"GetProcAddress", 
         reinterpret_cast<PROC>(APIHook::GetProcAddress)));
     }
     
     // Hook a function in all modules
-    APIHook::APIHook(
-      std::basic_string<TCHAR> const& ModuleName, 
-      std::basic_string<TCHAR> const& FunctionName, 
-      PROC pHook
-    ) 
+    APIHook::APIHook(std::wstring const& ModuleName, 
+      std::wstring const& FunctionName, PROC pHook) 
       : m_ModuleName(ModuleName), 
       m_FunctionName(FunctionName), 
       m_pOrig(nullptr), 
@@ -149,7 +140,7 @@ namespace Hades
     }
 
     void APIHook::ReplaceIATEntryInAllMods(
-      std::basic_string<TCHAR> const& ModuleName, 
+      std::wstring const& ModuleName, 
       PROC pCurrent, 
       PROC pNew
     ) 
@@ -188,7 +179,7 @@ namespace Hades
     }
 
     void APIHook::ReplaceIATEntryInOneMod(
-      std::basic_string<TCHAR> const& ModuleName, 
+      std::wstring const& ModuleName, 
       PROC pCurrent, 
       PROC pNew, 
       HMODULE CallerMod

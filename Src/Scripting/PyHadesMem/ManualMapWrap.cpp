@@ -39,7 +39,7 @@ public:
     : Hades::Memory::ManualMap(MyMem)
   { }
 
-  DWORD_PTR Map(std::basic_string<TCHAR> const& Path, 
+  DWORD_PTR Map(std::wstring const& Path, 
     std::string const& Export, bool InjectHelper) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::ManualMap::Map(Path, 

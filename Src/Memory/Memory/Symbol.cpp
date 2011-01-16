@@ -36,7 +36,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 namespace 
 {
 #ifdef _MSC_VER
-  typedef TCHAR TCHAR_TEMP;
+  typedef wchar_t TCHAR_TEMP;
 #else
   typedef char TCHAR_TEMP;
 #endif // #ifdef _MSC_VER
@@ -48,13 +48,13 @@ namespace Hades
   {
     // Constructor
   	Symbols::Symbols(MemoryMgr const& MyMemory, 
-  	  std::basic_string<TCHAR> const& SearchPath) 
+  	  std::wstring const& SearchPath) 
   	  : m_Memory(MyMemory), 
       m_DbgHelpMod()
   	{
       // Load DbgHelp.dll
       m_DbgHelpMod = LoadLibrary((Windows::GetSelfDirPath() / "dbghelp.dll").
-        string<std::basic_string<TCHAR>>().c_str());
+        string<std::wstring>().c_str());
       if (!m_DbgHelpMod)
       {
   	    std::error_code const LastError = GetLastErrorCode();
@@ -99,8 +99,8 @@ namespace Hades
       }
       
   		// Convert search path to non-const buffer (GCC workaround)
-  		std::basic_string<TCHAR_TEMP> SearchPathTemp(
-  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(SearchPath));
+  		auto const SearchPathTemp(boost::lexical_cast<std::basic_string<
+        TCHAR_TEMP>>(SearchPath));
   		
   		// Initialize symbol APIs
   		if(!pSymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
@@ -142,7 +142,7 @@ namespace Hades
   	}
   
     // Load symbols for module
-  	void Symbols::LoadForModule(std::basic_string<TCHAR> const& ModuleName)
+  	void Symbols::LoadForModule(std::wstring const& ModuleName)
   	{
       // Convert module name to lowercase
       auto ModuleNameLower(boost::to_lower_copy(ModuleName));
@@ -191,9 +191,8 @@ namespace Hades
       }
       
   		// Convert module name to non-const buffer (GCC workaround)
-  		std::basic_string<TCHAR_TEMP> ModuleNameTemp(
-  		  boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(
-  		  MyModule->GetName()));
+  		auto const ModuleNameTemp(boost::lexical_cast<std::basic_string<
+        TCHAR_TEMP>>(MyModule->GetName()));
   		
       // Load symbols for module
   		if(!pSymLoadModuleEx(m_Memory.GetProcessHandle(), 
@@ -248,18 +247,19 @@ namespace Hades
   	}
   
     // Get address for symbol
-    PVOID Symbols::GetAddress(std::basic_string<TCHAR> const& Name)
+    PVOID Symbols::GetAddress(std::wstring const& Name)
   	{
   	  // Construct buffer for symbol API
   	  std::size_t const BufferSize = (sizeof(SYMBOL_INFO) + MAX_SYM_NAME * 
-  	    sizeof(TCHAR) + sizeof(ULONG64) - 1) / sizeof(ULONG64);
+  	    sizeof(TCHAR_TEMP) + sizeof(ULONG64) - 1) / sizeof(ULONG64);
       std::vector<ULONG64> SymInfoBuf(BufferSize);
       PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(&SymInfoBuf[0]);
       pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
       pSymbol->MaxNameLen = MAX_SYM_NAME;
       
   		// Convert symbol name to non-const buffer (GCC workaround)
-  		auto NameTemp(boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(Name));
+  		auto const NameTemp(boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(
+        Name));
   		
       // Get address of DbgHelp!SymFromName
       typedef BOOL (WINAPI* tSymFromName)(

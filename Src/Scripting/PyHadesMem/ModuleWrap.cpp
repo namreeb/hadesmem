@@ -40,7 +40,7 @@ public:
   { }
 
   ModuleWrap(Hades::Memory::MemoryMgr const& MyMem, 
-    std::basic_string<TCHAR> const& Name) 
+    std::wstring const& Name) 
     : Hades::Memory::Module(MyMem, Name)
   { }
 
@@ -93,7 +93,7 @@ void ExportModule()
     Module>>("Module", boost::python::init<Hades::Memory::MemoryMgr const&, 
     DWORD_PTR>())
     .def(boost::python::init<Hades::Memory::MemoryMgr const&, 
-    std::basic_string<TCHAR> const&>())
+    std::wstring const&>())
     .def("GetBase", &ModuleWrap::GetBase)
     .def("GetSize", &ModuleWrap::GetSize)
     .def("GetName", &ModuleWrap::GetName)

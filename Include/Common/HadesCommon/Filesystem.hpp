@@ -97,7 +97,7 @@ namespace Hades
 
       // Get path to self
       DWORD const SelfPathSize = MAX_PATH;
-      std::basic_string<TCHAR> SelfFullPath;
+      std::wstring SelfFullPath;
       if (!GetModuleFileName(ModMe, Util::MakeStringBuffer(SelfFullPath, 
         SelfPathSize), SelfPathSize) || GetLastError() == 
         ERROR_INSUFFICIENT_BUFFER)

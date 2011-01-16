@@ -18,7 +18,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 
 // C++ Standard Library
@@ -48,8 +47,8 @@ namespace Hades
     std::tuple<MemoryMgr, HMODULE, DWORD_PTR> CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
-      std::basic_string<TCHAR> const& Args, 
-      std::basic_string<TCHAR> const& Module, 
+      std::wstring const& Args, 
+      std::wstring const& Module, 
       std::string const& Export)
     {
       // Set up args for CreateProcess
@@ -57,10 +56,9 @@ namespace Hades
       PROCESS_INFORMATION ProcInfo = { 0 };
 
       // Construct command line.
-      std::basic_string<TCHAR> const CommandLine(_T("\"") + Path.
-        string<std::basic_string<TCHAR>>() + _T("\" ") + Args);
+      std::wstring const CommandLine(L"\"" + Path.native() + L"\" " + Args);
       // Copy command line to buffer
-      std::vector<TCHAR> ProcArgs(CommandLine.cbegin(), CommandLine.cend());
+      std::vector<wchar_t> ProcArgs(CommandLine.cbegin(), CommandLine.cend());
       ProcArgs.push_back(L'\0');
       
       // Set working directory
@@ -75,15 +73,13 @@ namespace Hades
       }
       else
       {
-        WorkDirReal = _T("./");
+        WorkDirReal = L"./";
       }
 
 
       // Attempt process creation
-      if (!CreateProcess(Path.string<std::basic_string<TCHAR>>().c_str(), 
-        &ProcArgs[0], nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, 
-        WorkDirReal.string<std::basic_string<TCHAR>>().c_str(), &StartInfo, 
-        &ProcInfo))
+      if (!CreateProcess(Path.c_str(), &ProcArgs[0], nullptr, nullptr, FALSE, 
+        CREATE_SUSPENDED, nullptr, WorkDirReal.c_str(), &StartInfo, &ProcInfo))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Injector::Error() << 
@@ -147,7 +143,7 @@ namespace Hades
     {
       // Do not continue if Shim Engine is enabled for local process, 
       // otherwise it could interfere with the address resolution.
-      HMODULE const ShimEngMod = GetModuleHandle(_T("ShimEng.dll"));
+      HMODULE const ShimEngMod = GetModuleHandle(L"ShimEng.dll");
       if (ShimEngMod)
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -184,7 +180,8 @@ namespace Hades
       }
 
       // Get path as string
-      std::wstring PathString(PathReal.wstring());
+      std::wstring const PathStringTemp(PathReal.native());
+      std::wstring const PathString(boost::to_lower_copy(PathStringTemp));
 
       // Calculate the number of bytes needed for the DLL's pathname
       std::size_t const PathBufSize = (PathString.size() + 1) * 
@@ -205,7 +202,7 @@ namespace Hades
       m_Memory.Write(LibFileRemote.GetAddress(), PathString);
 
       // Get address of LoadLibraryW in Kernel32.dll
-      HMODULE const hKernel32 = GetModuleHandle(_T("Kernel32.dll"));
+      HMODULE const hKernel32 = GetModuleHandle(L"Kernel32.dll");
       if (!hKernel32)
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -234,10 +231,6 @@ namespace Hades
           ErrorString("Call to LoadLibraryW in remote process failed."));
       }
 
-      // Get path as lowercase string
-      std::basic_string<TCHAR> const PathRealLower(boost::to_lower_copy(
-        boost::lexical_cast<std::basic_string<TCHAR>>(PathString)));
-
       // Look for target module
       boost::optional<Module> MyModule;
       for (ModuleListIter MyIter(m_Memory); *MyIter; ++MyIter)
@@ -251,8 +244,8 @@ namespace Hades
         }
         else
         {
-          if (boost::to_lower_copy((*MyIter)->GetName()) == PathRealLower || 
-            boost::to_lower_copy((*MyIter)->GetPath()) == PathRealLower)
+          if (boost::to_lower_copy((*MyIter)->GetName()) == PathString || 
+            boost::to_lower_copy((*MyIter)->GetPath()) == PathString)
           {
             MyModule = *MyIter;
           }

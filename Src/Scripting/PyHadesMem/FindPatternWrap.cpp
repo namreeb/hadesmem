@@ -43,19 +43,19 @@ public:
     : Hades::Memory::FindPattern(MyMem, reinterpret_cast<HMODULE>(ModuleBase))
   { }
 
-  DWORD_PTR Find(std::basic_string<TCHAR> const& Data, 
-    std::basic_string<TCHAR> const& Mask) const
+  DWORD_PTR Find(std::wstring const& Data, 
+    std::wstring const& Mask) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::FindPattern::Find(Data, 
       Mask));
   }
 
-  void LoadFromXML(std::basic_string<TCHAR> const& Path)
+  void LoadFromXML(std::wstring const& Path)
   {
     return Hades::Memory::FindPattern::LoadFromXML(Path);
   }
 
-  DWORD_PTR GetAddress(std::basic_string<TCHAR> const& Name) const
+  DWORD_PTR GetAddress(std::wstring const& Name) const
   {
     Hades::Memory::FindPattern const& Me = *this;
     return reinterpret_cast<DWORD_PTR>(Me[Name]);

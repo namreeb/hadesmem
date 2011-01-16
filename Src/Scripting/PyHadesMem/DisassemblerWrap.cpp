@@ -39,7 +39,7 @@ public:
     : Hades::Memory::Disassembler(MyMem)
   { }
 
-  std::vector<std::basic_string<TCHAR>> DisassembleToStr(DWORD_PTR Address, 
+  std::vector<std::wstring> DisassembleToStr(DWORD_PTR Address, 
     DWORD_PTR NumInstructions) const
   {
     return Hades::Memory::Disassembler::DisassembleToStr(

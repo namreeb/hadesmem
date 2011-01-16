@@ -49,10 +49,10 @@ struct tupleconverter
 };
 
 std::tuple<Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR> CreateAndInject(
-  std::basic_string<TCHAR> const& Path, 
-  std::basic_string<TCHAR> const& WorkDir, 
-  std::basic_string<TCHAR> const& Args, 
-  std::basic_string<TCHAR> const& Module, 
+  std::wstring const& Path, 
+  std::wstring const& WorkDir, 
+  std::wstring const& Args, 
+  std::wstring const& Module, 
   std::string const& Export)
 {
   auto InjectData(Hades::Memory::CreateAndInject(Path, WorkDir, Args, Module, 
@@ -70,14 +70,14 @@ public:
     : Hades::Memory::Injector(MyMem)
   { }
 
-  DWORD_PTR InjectDll(std::basic_string<TCHAR> const& Path, 
+  DWORD_PTR InjectDll(std::wstring const& Path, 
     bool PathResolution) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Injector::InjectDll(Path, 
       PathResolution));
   }
 
-  DWORD_PTR CallExport(std::basic_string<TCHAR> const& Path, 
+  DWORD_PTR CallExport(std::wstring const& Path, 
     DWORD_PTR ModuleRemote, std::string const& Export) const
   {
     return Hades::Memory::Injector::CallExport(Path, reinterpret_cast<HMODULE>(

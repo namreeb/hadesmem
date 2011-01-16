@@ -20,7 +20,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Windows API
-#include <tchar.h>
 #include <Windows.h>
 
 // C++ Standard Library
@@ -60,17 +59,16 @@ namespace Hades
       FindPattern(MemoryMgr const& MyMemory, HMODULE Module);
 
       // Find pattern
-      PVOID Find(std::basic_string<TCHAR> const& Data, 
-        std::basic_string<TCHAR> const& Mask) const;
+      PVOID Find(std::wstring const& Data, std::wstring const& Mask) const;
 
       // Load patterns from XML file
       void LoadFromXML(boost::filesystem::path const& Path);
 
       // Get address map
-      std::map<std::basic_string<TCHAR>, PVOID> GetAddresses() const;
+      std::map<std::wstring, PVOID> GetAddresses() const;
 
       // Operator[] overload to allow retrieving addresses by name
-      PVOID operator[](std::basic_string<TCHAR> const& Name) const;
+      PVOID operator[](std::wstring const& Name) const;
 
     private:
       // Search memory
@@ -84,7 +82,7 @@ namespace Hades
       PBYTE m_End;
 
       // Map to hold addresses
-      std::map<std::basic_string<TCHAR>, PVOID> m_Addresses;
+      std::map<std::wstring, PVOID> m_Addresses;
     };
   }
 }

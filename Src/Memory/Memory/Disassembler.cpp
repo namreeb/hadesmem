@@ -21,6 +21,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 #include <algorithm>
 
+// Boost
+#include <boost/lexical_cast.hpp>
+
 // Hades
 #include "MemoryMgr.hpp"
 #include "Disassembler.hpp"
@@ -36,7 +39,7 @@ namespace Hades
     { }
 
     // Disassemble target to string
-    std::vector<std::basic_string<TCHAR>> Disassembler::DisassembleToStr(
+    std::vector<std::wstring> Disassembler::DisassembleToStr(
       PVOID Address, DWORD_PTR NumInstructions) const
     {
       // Disassemble target
@@ -44,13 +47,13 @@ namespace Hades
         NumInstructions));
 
       // Container to hold disassembled code as a string
-      std::vector<std::basic_string<TCHAR>> Results;
+      std::vector<std::wstring> Results;
       std::transform(MyDisasmData.cbegin(), MyDisasmData.cend(), 
         std::back_inserter(Results), 
         [] (DisasmData const& MyDisasm) 
       {
-        return boost::lexical_cast<std::basic_string<TCHAR>>(
-          static_cast<std::string>(MyDisasm.Disasm.CompleteInstr));
+        return boost::lexical_cast<std::wstring>(static_cast<std::string>(
+          MyDisasm.Disasm.CompleteInstr));
       });
 
       // Return disassembled data

@@ -60,13 +60,13 @@ namespace Hades
     { }
 
     // Open process from process name
-    MemoryMgr::MemoryMgr(std::basic_string<TCHAR> const& ProcName) 
+    MemoryMgr::MemoryMgr(std::wstring const& ProcName) 
       : m_Process(ProcName) 
     { }
 
     // Open process from window name and class
-    MemoryMgr::MemoryMgr(std::basic_string<TCHAR> const& WindowName, 
-      std::basic_string<TCHAR> const& ClassName) 
+    MemoryMgr::MemoryMgr(std::wstring const& WindowName, 
+      std::wstring const& ClassName) 
       : m_Process(WindowName, ClassName) 
     { }
 
@@ -388,8 +388,7 @@ namespace Hades
     {
       // Load module as data so we can read the EAT locally
       Windows::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-        ModulePath.string<std::basic_string<TCHAR>>().c_str(), nullptr, 
-        DONT_RESOLVE_DLL_REFERENCES));
+        ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -424,8 +423,7 @@ namespace Hades
     {
       // Load module as data so we can read the EAT locally
       Windows::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-        ModulePath.string<std::basic_string<TCHAR>>().c_str(), nullptr, 
-        DONT_RESOLVE_DLL_REFERENCES));
+        ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
         std::error_code const LastError = GetLastErrorCode();

@@ -73,7 +73,7 @@ LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
   PVOID pTeb = NtCurrentTeb();
   if (!pTeb)
   {
-    MessageBox(nullptr, _T("TEB pointer invalid."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"TEB pointer invalid.", L"MMHelper", MB_OK);
     return EXCEPTION_CONTINUE_SEARCH;
   }
 
@@ -81,7 +81,7 @@ LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
     *reinterpret_cast<PEXCEPTION_REGISTRATION_RECORD_CUSTOM*>(pTeb);
   if (!pExceptionList)
   {
-    MessageBox(nullptr, _T("Exception list pointer invalid."), _T("MMHelper"), 
+    MessageBox(nullptr, L"Exception list pointer invalid.", L"MMHelper", 
       MB_OK);
     return EXCEPTION_CONTINUE_SEARCH;
   }
@@ -135,7 +135,7 @@ void TestSEH()
   }
   __except (EXCEPTION_EXECUTE_HANDLER)
   {
-    MessageBox(nullptr, _T("Testing SEH."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"Testing SEH.", L"MMHelper", MB_OK);
   }
 #else
   // Test SEH
@@ -146,7 +146,7 @@ void TestSEH()
   }
   catch (...)
   {
-    MessageBox(nullptr, _T("Testing SEH."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"Testing SEH.", L"MMHelper", MB_OK);
   }
 #endif // #ifdef _MSC_VER
 }
@@ -156,7 +156,7 @@ void TestSEH()
 
 void TestRelocs()
 {
-  MessageBox(nullptr, _T("Testing relocations."), _T("MMHelper"), MB_OK);
+  MessageBox(nullptr, L"Testing relocations.", L"MMHelper", MB_OK);
 }
 
 void InitializeSEH()
@@ -174,8 +174,8 @@ void InitializeSEH()
     Memory::NtHeaders::DataDir_Exception);
   if (!ExceptDirSize || !ExceptDirRva)
   {
-    MessageBox(nullptr, _T("Image has no exception directory."), 
-      _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"Image has no exception directory.", 
+      L"MMHelper", MB_OK);
     return;
   }
 
@@ -191,15 +191,14 @@ void InitializeSEH()
   if (!RtlAddFunctionTable(pExceptDir, NumEntries, reinterpret_cast<DWORD_PTR>(
     &__ImageBase)))
   {
-    MessageBox(nullptr, _T("Could not add function table."), 
-      _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"Could not add function table.", L"MMHelper", MB_OK);
     return;
   }
 #elif defined(_M_IX86) 
   // Add VCH
   if (!AddVectoredContinueHandler(1, &VectoredHandler))
   {
-    MessageBox(nullptr, _T("Failed to add VCH."), _T("MMHelper"), MB_OK);
+    MessageBox(nullptr, L"Failed to add VCH.", L"MMHelper", MB_OK);
   }
 
 #else 
@@ -236,12 +235,12 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
   InitializeSEH();
 
   // Test IAT
-  MessageBox(nullptr, _T("Testing IAT."), _T("MMHelper"), MB_OK);
+  MessageBox(nullptr, L"Testing IAT.", L"MMHelper", MB_OK);
 
   // Test TLS
-  boost::thread_specific_ptr<std::basic_string<TCHAR>> TlsTest;
-  TlsTest.reset(new std::basic_string<TCHAR>(_T("Testing TLS.")));
-  MessageBox(nullptr, TlsTest->c_str(), _T("MMHelper"), MB_OK);
+  boost::thread_specific_ptr<std::wstring> TlsTest;
+  TlsTest.reset(new std::wstring(L"Testing TLS."));
+  MessageBox(nullptr, TlsTest->c_str(), L"MMHelper", MB_OK);
 
   // Test relocs
   typedef void (* tTestRelocs)();
