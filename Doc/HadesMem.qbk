@@ -1,7 +1,8 @@
 [book HadesMem 
   [quickbook 1.5] 
-  [copyright 2010 RaptorFactor]
-  [license Distributed under the GNU General Public License, Version 3. (See accompanying file gpl-3.0 or copy at [@http://www.gnu.org/licenses/])]
+  [copyright 2010 Joshua Boyce]
+  [license Distributed under the GNU General Public License, Version 3. (See 
+  accompanying file gpl-3.0 or copy at [@http://www.gnu.org/licenses/])]
 ]
 
 [section:intro Introduction]
