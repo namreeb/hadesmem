@@ -65,7 +65,7 @@ namespace Hades
       }
       
       // Get address of DbgHelp!SymSetOptions
-      typedef DWORD (WINAPI* tSymSetOptions)(__in DWORD SymOptions);
+      typedef DWORD (WINAPI* tSymSetOptions)(DWORD SymOptions);
       auto pSymSetOptions = reinterpret_cast<tSymSetOptions>(GetProcAddress(
         m_DbgHelpMod, "SymSetOptions"));
       if (!pSymSetOptions)
@@ -82,8 +82,11 @@ namespace Hades
   		pSymSetOptions(SYMOPT_DEBUG | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
   		
       // Get address of DbgHelp!SymInitialize
-      typedef BOOL (WINAPI* tSymInitialize)(__in HANDLE hProcess, 
-        __in_opt PCTSTR UserSearchPath, __in BOOL fInvadeProcess);
+      typedef BOOL (WINAPI* tSymInitialize)(
+        HANDLE hProcess, 
+        TCHAR_TEMP const* UserSearchPath, 
+        BOOL fInvadeProcess
+      );
       auto pSymInitialize = reinterpret_cast<tSymInitialize>(GetProcAddress(
         m_DbgHelpMod, "SymInitialize"));
       if (!pSymInitialize)
@@ -115,7 +118,7 @@ namespace Hades
   	Symbols::~Symbols()
   	{
       // Get address of DbgHelp!SymCleanup
-      typedef BOOL (WINAPI* tSymCleanup)(__in HANDLE hProcess);
+      typedef BOOL (WINAPI* tSymCleanup)(HANDLE hProcess);
       auto pSymCleanup = reinterpret_cast<tSymCleanup>(GetProcAddress(
         m_DbgHelpMod, "SymCleanup"));
       if (!pSymCleanup)
@@ -167,14 +170,14 @@ namespace Hades
       
       // Get address of DbgHelp!SymLoadModuleEx
       typedef DWORD64 (WINAPI* tSymLoadModuleEx)(
-        __in HANDLE hProcess,
-        __in HANDLE hFile,
-        __in PCTSTR ImageName,
-        __in PCTSTR ModuleName,
-        __in DWORD64 BaseOfDll,
-        __in DWORD DllSize,
-        __in PMODLOAD_DATA Data,
-        __in DWORD Flags
+        HANDLE hProcess,
+        HANDLE hFile,
+        TCHAR_TEMP const* ImageName,
+        TCHAR_TEMP const* ModuleName,
+        DWORD64 BaseOfDll,
+        DWORD DllSize,
+        PMODLOAD_DATA Data,
+        DWORD Flags
       );
       auto pSymLoadModuleEx = reinterpret_cast<tSymLoadModuleEx>(
         GetProcAddress(m_DbgHelpMod, "SymLoadModuleEx"));
@@ -215,9 +218,9 @@ namespace Hades
       
       // Get address of DbgHelp!SymGetModuleInfo64
       typedef BOOL (WINAPI* tSymGetModuleInfo64)(
-        __in HANDLE hProcess,
-        __in DWORD64 dwAddr,
-        __out PIMAGEHLP_MODULE64 ModuleInfo
+        HANDLE hProcess,
+        DWORD64 dwAddr,
+        PIMAGEHLP_MODULE64 ModuleInfo
       );
       auto pSymGetModuleInfo64 = reinterpret_cast<tSymGetModuleInfo64>(
         GetProcAddress(m_DbgHelpMod, "SymGetModuleInfo64"));
@@ -260,9 +263,9 @@ namespace Hades
   		
       // Get address of DbgHelp!SymFromName
       typedef BOOL (WINAPI* tSymFromName)(
-        __in HANDLE hProcess,
-        __in PCTSTR Name,
-        __inout PSYMBOL_INFO Symbol
+        HANDLE hProcess,
+        TCHAR_TEMP const* Name,
+        PSYMBOL_INFO Symbol
       );
       auto pSymFromName = reinterpret_cast<tSymFromName>(
         GetProcAddress(m_DbgHelpMod, "SymFromName"));
