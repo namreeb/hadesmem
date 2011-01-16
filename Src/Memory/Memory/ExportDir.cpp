@@ -357,13 +357,13 @@ namespace Hades
       {
         std::vector<WORD> NameOrdinals(m_Memory.Read<std::vector<WORD>>(
           pOrdinals, NumberOfNames));
-        auto NameOrdIter = std::find(NameOrdinals.begin(), NameOrdinals.end(), 
-          Offset);
-        if (NameOrdIter != NameOrdinals.end())
+        auto NameOrdIter = std::find(NameOrdinals.cbegin(), 
+          NameOrdinals.cend(), Offset);
+        if (NameOrdIter != NameOrdinals.cend())
         {
           m_ByName = true;
           DWORD const NameRva = m_Memory.Read<DWORD>(pNames + std::distance(
-            NameOrdinals.begin(), NameOrdIter));
+            NameOrdinals.cbegin(), NameOrdIter));
           m_Name = m_Memory.Read<std::string>(m_PeFile.RvaToVa(NameRva));
         }
       }

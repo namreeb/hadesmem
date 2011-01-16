@@ -243,7 +243,7 @@ namespace Hades
         ((dwFlags & LOAD_LIBRARY_AS_IMAGE_RESOURCE) == 0)
       ) 
       {
-        for (auto i = sm_HookList.rbegin(); i != sm_HookList.rend(); ++i) 
+        for (auto i = sm_HookList.crbegin(); i != sm_HookList.crend(); ++i) 
         {
           APIHook* p = *i;
           if (p->m_pOrig != NULL) 
@@ -316,7 +316,7 @@ namespace Hades
       FARPROC pFunc = GetProcAddressRaw(hModule, lpProcName);
 
       // Is it one of the functions that we want hooked?
-      for (auto i = sm_HookList.rbegin(); (i != sm_HookList.rend()) && 
+      for (auto i = sm_HookList.crbegin(); (i != sm_HookList.crend()) && 
         (pFunc != NULL); ++i) 
       {
         APIHook* p = *i;

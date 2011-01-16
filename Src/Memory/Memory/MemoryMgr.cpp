@@ -112,7 +112,7 @@ namespace Hades
       // Handle remaining parameters (if any)
       if (NumArgs > 4)
       {
-        std::for_each(Args.rbegin(), Args.rend() - 4, 
+        std::for_each(Args.crbegin(), Args.crend() - 4, 
           [&MyJitFunc] (PVOID Arg)
         {
           MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Arg));
@@ -193,7 +193,7 @@ namespace Hades
       // Pass all remaining args on stack if there are any left to process.
       if (NumArgs > StackArgOffs)
       {
-        std::for_each(Args.rbegin(), Args.rend() - StackArgOffs, 
+        std::for_each(Args.crbegin(), Args.crend() - StackArgOffs, 
           [&] (PVOID Arg)
         {
           MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Arg));
