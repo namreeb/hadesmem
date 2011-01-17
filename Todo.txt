@@ -7,6 +7,8 @@
     * Improved and documented thread-safety guarantees.
     * Fix all 'fixme' items in code.
     * Proper locale support.
+    * Cheat Engine 'replacement'.
+    * Investigate .NET binding support.
 	  
 * Medium Priority
   * New Modules
@@ -77,7 +79,3 @@
   * PeLib
   	* Finish implementing matching 'setters' for existing 'getters'.
   	* Add modules to support more of the PE file format.
-
-* Low Priority
-  * General
-    * Investigate GCC compilation support.
