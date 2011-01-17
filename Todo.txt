@@ -8,7 +8,6 @@
     * Fix all 'fixme' items in code.
     * Proper locale support.
     * Cheat Engine 'replacement'.
-    * Investigate .NET binding support.
 	  
 * Medium Priority
   * New Modules
