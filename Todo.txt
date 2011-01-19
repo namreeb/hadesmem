@@ -8,6 +8,7 @@
     * Fix all 'fixme' items in code.
     * Proper locale support.
     * Cheat Engine 'replacement'.
+    * Upgrade to Python 3.x.
 	  
 * Medium Priority
   * New Modules

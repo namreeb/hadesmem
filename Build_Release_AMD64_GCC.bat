@@ -1,1 +1,0 @@
-bjam --toolset=gcc -j 4 address-model=64 release > Build_Release_AMD64_GCC.txt

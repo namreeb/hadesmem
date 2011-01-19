@@ -1,1 +1,0 @@
-bjam --toolset=gcc -j 4 address-model=64 debug > Build_Debug_AMD64_GCC.txt
