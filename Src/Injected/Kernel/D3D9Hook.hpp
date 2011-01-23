@@ -122,7 +122,7 @@ namespace Hades
       static IDirect3DDevice9* m_pDevice;
 
       // State block
-      static IDirect3DStateBlock9*	m_pStateBlock;
+      static IDirect3DStateBlock9*  m_pStateBlock;
 
       // Callback managers
       static Callbacks m_CallsOnFrame;

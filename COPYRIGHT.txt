@@ -1,1 +1,2 @@
-Copyright © 2010 RaptorFactor (aka Cypherjb, aka Chazwazza, aka Cypher). <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
+Copyright (C) 2010 Joshua Boyce (aka RaptorFactor, Cypherjb, Cypher, Chazwazza).
+<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>

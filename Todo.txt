@@ -9,73 +9,73 @@
     * Proper locale support.
     * Cheat Engine 'replacement'.
     * Upgrade to Python 3.x.
-	  
+    
 * Medium Priority
   * New Modules
-  	* Debugging APIs.
+    * Debugging APIs.
       * Software breakpoint.
       * Hardware breakpoint (incl read/write detection).
       * Conditional breakpoints.
       * Single-stepping.
       * Stack trace APIs.
-  	* Anti-anti-cheat APIs.
-  	* Thread/process information APIs.
-  	* Injected 'base'.
-  	* Python scripts for automating common tasks.
-  	* IA32 and AMD64 remote code 'emulator'.
-  	* Custom GetModuleHandle, GetProcAddress, etc.
+    * Anti-anti-cheat APIs.
+    * Thread/process information APIs.
+    * Injected 'base'.
+    * Python scripts for automating common tasks.
+    * IA32 and AMD64 remote code 'emulator'.
+    * Custom GetModuleHandle, GetProcAddress, etc.
   * MemoryMgr
-  	* Improve 'safety' of remote function caller via EH to minimize risk of 
-  	crashing target.
-  	* Improve genericity of parameter passing in remote function caller.
-  	* Memory reading via expression templates.
+    * Improve 'safety' of remote function caller via EH to minimize risk of 
+    crashing target.
+    * Improve genericity of parameter passing in remote function caller.
+    * Memory reading via expression templates.
   * Disassembler
-  	* Decode calls/jumps to function names where possible.
-  	* NOP/UnNOP support.
-  	* ASM searching API with 'wildcards'. (Metasm?)
-  	* String based assembler with x64 support.
-  	* Improve bindings to make it actually useful from Python.
-  	* 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+    * Decode calls/jumps to function names where possible.
+    * NOP/UnNOP support.
+    * ASM searching API with 'wildcards'. (Metasm?)
+    * String based assembler with x64 support.
+    * Improve bindings to make it actually useful from Python.
+    * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
   * Scanner
-  	* Multi-threaded scanning option.
-  	* Wildcard support for vector/string scanning.
-  	* Regex support for string scanning.
-  	* Memory protection filters (read, write, exec).
-  	* Memory type filters (private, mapped, image).
-  	* Pause target while scanning option.
-  	* Injected scanning option.
-  	* Configurable scan buffer size.
-  	* Pointer scanner.
-  	* Unknown value scan.
-  	* Progressive scan filtering based on either value or criteria.
-  	* Scan history and undo.
-  	* Case insensitive string scanning option.
-  	* Binary scanning.
-  	* Custom scanning via user-supplied predicate.
-  	* Improved floating-point scanning (configurable or 'smart' epsilon).
-  	* Group search support.
+    * Multi-threaded scanning option.
+    * Wildcard support for vector/string scanning.
+    * Regex support for string scanning.
+    * Memory protection filters (read, write, exec).
+    * Memory type filters (private, mapped, image).
+    * Pause target while scanning option.
+    * Injected scanning option.
+    * Configurable scan buffer size.
+    * Pointer scanner.
+    * Unknown value scan.
+    * Progressive scan filtering based on either value or criteria.
+    * Scan history and undo.
+    * Case insensitive string scanning option.
+    * Binary scanning.
+    * Custom scanning via user-supplied predicate.
+    * Improved floating-point scanning (configurable or 'smart' epsilon).
+    * Group search support.
   * Injector
-  	* .NET injection.
-  	* Cross-session injection.
-  	* IAT injection.
+    * .NET injection.
+    * Cross-session injection.
+    * IAT injection.
   * Patcher
-  	* VEH hooking (Both INT3 and DR).
-  	* Transactional hooking.
-  	* Improved relative instruction rebuilding (including conditionals).
-  	* Sanity checking for target process.
-  	* Freeze target when hooking.
-  	* VMT hooking.
+    * VEH hooking (Both INT3 and DR).
+    * Transactional hooking.
+    * Improved relative instruction rebuilding (including conditionals).
+    * Sanity checking for target process.
+    * Freeze target when hooking.
+    * VMT hooking.
   * ManualMap
-  	* Improved exception handling support.
+    * Improved exception handling support.
   * FindPattern
-  	* Pattern generator.
-  	* Multi-threaded scanning.
-  	* 'Start' attribute support.
-  	* Data/Rdata scanning support (for 'start' attribute and constant scans).
-  	* Support for loading XML file from resource or memory.
-  	* Dump results to file.
-  	* Change parser library from RapidXML to Boost.Spirit (may require a 
-  	format change from XML to something custom).
+    * Pattern generator.
+    * Multi-threaded scanning.
+    * 'Start' attribute support.
+    * Data/Rdata scanning support (for 'start' attribute and constant scans).
+    * Support for loading XML file from resource or memory.
+    * Dump results to file.
+    * Change parser library from RapidXML to Boost.Spirit (may require a 
+    format change from XML to something custom).
   * PeLib
-  	* Finish implementing matching 'setters' for existing 'getters'.
-  	* Add modules to support more of the PE file format.
+    * Finish implementing matching 'setters' for existing 'getters'.
+    * Add modules to support more of the PE file format.
