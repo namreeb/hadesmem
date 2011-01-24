@@ -12,6 +12,7 @@
 * Medium Priority
   * General
     * Upgrade to Python 3.x.
+    * x64 -> x86 process manipulation.
   * New Modules
     * Debugging APIs.
       * Software breakpoint.
