@@ -2,29 +2,29 @@
 
 lib AsmJit 
   : 
-    [ glob AsmJitNew/AsmJit/*.cpp ] 
+    [ glob AsmJit/AsmJit/*.cpp ] 
   : 
     <warnings>off 
     <link>static 
     <define>ASMJIT_API="" 
   : 
   : 
-    <include>"./AsmJitNew/" 
+    <include>"./AsmJit/" 
     <define>ASMJIT_API="" 
   ;
 
 lib BeaEngine 
   : 
-    [ glob BeaEngineNew/beaengineSources/*.c ] 
+    [ glob BeaEngine/beaengineSources/*.c ] 
   : 
-    <include>"./BeaEngineNew/beaengineSources/Includes/" 
-    <include>"./BeaEngineNew/include/" 
+    <include>"./BeaEngine/beaengineSources/Includes/" 
+    <include>"./BeaEngine/include/" 
     <define>BEA_ENGINE_STATIC 
     <warnings>off 
     <link>static 
   : 
   : 
-    <include>"./BeaEngineNew/include/" 
+    <include>"./BeaEngine/include/" 
     <define>BEA_ENGINE_STATIC 
   ;
 
