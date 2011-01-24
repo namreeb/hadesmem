@@ -8,11 +8,6 @@ use-project /Dependencies
     Src/Dependencies
   ;
   
-use-project /Injected 
-  : 
-    Src/Injected 
-  ; 
-   
 use-project /Memory 
   : 
     Src/Memory 
