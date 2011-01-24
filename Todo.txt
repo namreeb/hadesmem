@@ -7,10 +7,11 @@
     * Improved and documented thread-safety guarantees.
     * Fix all 'fixme' items in code.
     * Proper locale support.
-    * Cheat Engine 'replacement'.
-    * Upgrade to Python 3.x.
+    * Template concept checking and improved error messages.
     
 * Medium Priority
+  * General
+    * Upgrade to Python 3.x.
   * New Modules
     * Debugging APIs.
       * Software breakpoint.
@@ -24,6 +25,7 @@
     * Python scripts for automating common tasks.
     * IA32 and AMD64 remote code 'emulator'.
     * Custom GetModuleHandle, GetProcAddress, etc.
+    * Cheat Engine 'replacement'.
   * MemoryMgr
     * Improve 'safety' of remote function caller via EH to minimize risk of 
     crashing target.
