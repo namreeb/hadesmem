@@ -43,6 +43,9 @@ path-constant TOP
     . 
   ;
 
+build-project Src/Dependencies 
+  ;
+  
 build-project Src/Memory 
   ;
   
