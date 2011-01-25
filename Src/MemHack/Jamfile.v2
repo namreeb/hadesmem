@@ -1,0 +1,10 @@
+# MemHack/Jamfile.v2
+
+exe MemHack 
+  : 
+    [ glob MemHack/*.cpp ] 
+    /Dependencies//WTL 
+    /Memory//Memory 
+  : 
+    <user-interface>gui 
+  ;
