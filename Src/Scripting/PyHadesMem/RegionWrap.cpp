@@ -48,6 +48,11 @@ public:
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Region::GetBase());
   }
+  
+  void Dump(std::wstring const& Path) const
+  {
+    return Hades::Memory::Region::Dump(Path);
+  }
 };
 
 struct RegionIterWrap
@@ -99,6 +104,7 @@ void ExportRegion()
     .def("GetState", &RegionWrap::GetState)
     .def("GetProtect", &RegionWrap::GetProtect)
     .def("GetType", &RegionWrap::GetType)
+    .def("Dump", &RegionWrap::Dump)
     ;
 
   RegionIterWrap::wrap("RegionIter"); 

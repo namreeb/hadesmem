@@ -20,6 +20,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Region.hpp"
 
+// Boost
+#ifdef _MSC_VER
+#pragma warning(push, 1)
+#endif // #ifdef _MSC_VER
+#include <boost/filesystem/fstream.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // #ifdef _MSC_VER
+
 namespace Hades
 {
   namespace Memory
@@ -91,6 +100,28 @@ namespace Hades
     DWORD Region::GetType() const
     {
       return m_RegionInfo.Type;
+    }
+    
+    // Dump to file
+    void Region::Dump(boost::filesystem::path const& Path) const
+    {
+      boost::filesystem::ofstream Out(Path, std::ios::binary | std::ios::trunc);
+      if (!Out)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Region::Dump") << 
+          ErrorString("Could not open dump file."));
+      }
+      
+      auto RegionBuf(m_Memory.Read<std::vector<BYTE>>(GetBase(), GetSize()));
+      Out.write(reinterpret_cast<char const*>(&RegionBuf[0]), 
+        RegionBuf.size());
+      if (!Out)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Region::Dump") << 
+          ErrorString("Error writing to dump file."));
+      }
     }
   }
 }

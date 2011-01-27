@@ -30,6 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
 #include <boost/optional.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -78,6 +79,9 @@ namespace Hades
       
       // Get type
       DWORD GetType() const;
+      
+      // Dump to file
+      void Dump(boost::filesystem::path const& Path) const;
 
     private:
       // MemoryMgr instance
