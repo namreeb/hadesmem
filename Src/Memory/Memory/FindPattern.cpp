@@ -18,6 +18,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // C++ Standard Library
+#include <vector>
+#include <string>
 #include <fstream>
 #include <sstream>
 
@@ -55,6 +57,7 @@ namespace Hades
     // Constructor
     FindPattern::FindPattern(MemoryMgr const& MyMemory) 
       : m_Memory(MyMemory), 
+      m_Base(0), 
       m_Start(nullptr), 
       m_End(nullptr), 
       m_Addresses()
@@ -62,6 +65,7 @@ namespace Hades
       // Get pointer to image headers
       ModuleListIter ModIter(m_Memory);
       PBYTE const pBase = reinterpret_cast<PBYTE>((*ModIter)->GetBase());
+      m_Base = reinterpret_cast<DWORD_PTR>(pBase);
       PeFile MyPeFile(m_Memory, pBase);
       DosHeader const MyDosHeader(MyPeFile);
       NtHeaders const MyNtHeaders(MyPeFile);
@@ -76,12 +80,14 @@ namespace Hades
     // Constructor
     FindPattern::FindPattern(MemoryMgr const& MyMemory, HMODULE Module) 
       : m_Memory(MyMemory), 
+      m_Base(0), 
       m_Start(nullptr), 
       m_End(nullptr), 
       m_Addresses()
     {
       // Ensure file is a valid PE file
       PBYTE const pBase = reinterpret_cast<PBYTE>(Module);
+      m_Base = reinterpret_cast<DWORD_PTR>(pBase);
       PeFile MyPeFile(m_Memory, pBase);
       DosHeader const MyDosHeader(MyPeFile);
       NtHeaders const MyNtHeaders(MyPeFile);
@@ -104,32 +110,23 @@ namespace Hades
           ErrorFunction("FindPattern::Find") << 
           ErrorString("Empty pattern or mask data."));
       }
-
-      // Ensure data is valid
-      if (Data.size() % 2)
+      
+      // Sanity check
+      if (Data.size() != Mask.size() * 2 + (Mask.size() - 1))
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::Find") << 
-          ErrorString("Data size invalid."));
-      }
-
-      // Ensure mask is valid
-      if (Mask.size() * 2 != Data.size())
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::Find") << 
-          ErrorString("Mask size invalid."));
+          ErrorString("Invalid mask or data size."));
       }
 
       // Convert data to byte buffer
       std::vector<std::pair<BYTE, bool>> DataBuf;
-      for (auto i = Data.cbegin(), j = Mask.cbegin(); i != Data.cend(); 
-        i += 2, ++j)
+      std::wstringstream Converter(Data);
+      Converter.setf(std::ios::hex, std::ios::basefield);
+      for (auto i = Mask.cbegin(); i != Mask.cend(); ++i)
       {
-        std::wstring const CurrentStr(i, i + 2);
-        std::wstringstream Converter(CurrentStr);
-        int Current(0);
-        if (!(Converter >> std::hex >> Current >> std::dec))
+        int Current = 0;
+        if (!(Converter >> Current))
         {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("FindPattern::Find") << 
@@ -137,7 +134,7 @@ namespace Hades
         }
 
         BYTE CurrentReal = static_cast<BYTE>(Current);
-        bool MaskFlag = *j == L'x';
+        bool MaskFlag = *i == L'x';
 
         DataBuf.push_back(std::make_pair(CurrentReal, MaskFlag));
       }
@@ -169,7 +166,7 @@ namespace Hades
       // Return address if found or null if not found
       return 
         (Iter != Buffer.cend()) 
-        ? (m_Start + std::distance(Buffer.cbegin(), Iter)) 
+        ? (m_Start - m_Base + std::distance(Buffer.cbegin(), Iter)) 
         : nullptr;
     }
 
@@ -211,12 +208,9 @@ namespace Hades
         L"Pattern")); Pattern; Pattern = Pattern->next_sibling(L"Pattern"))
       {
         // Get pattern attributes
-        rapidxml::xml_attribute<wchar_t> const* NameNode = Pattern->
-          first_attribute(L"Name");
-        rapidxml::xml_attribute<wchar_t> const* MaskNode = Pattern->
-          first_attribute(L"Mask");
-        rapidxml::xml_attribute<wchar_t> const* DataNode = Pattern->
-          first_attribute(L"Data");
+        auto const NameNode = Pattern->first_attribute(L"Name");
+        auto const MaskNode = Pattern->first_attribute(L"Mask");
+        auto const DataNode = Pattern->first_attribute(L"Data");
         std::wstring const Name(NameNode ? NameNode->value() : L"");
         std::wstring const Mask(MaskNode ? MaskNode->value() : L"");
         std::wstring const Data(DataNode ? DataNode->value() : L"");
@@ -287,7 +281,8 @@ namespace Hades
             else if (OptionName == L"Lea")
             {
               // Perform absolute 'dereference'
-              Address = m_Memory.Read<PBYTE>(Address);
+              Address = m_Memory.Read<PBYTE>(reinterpret_cast<PVOID>(Address + m_Base));
+              Address -= m_Base;
             }
             // Handle 'Rel' option (rel deref)
             else if (OptionName == L"Rel")
@@ -337,8 +332,10 @@ namespace Hades
               }
 
               // Perform relative 'dereference'
-              Address = m_Memory.Read<PBYTE>(Address) + 
-                reinterpret_cast<DWORD_PTR>(Address) + Size - Offset;
+              Address = m_Memory.Read<PBYTE>(Address + m_Base) + 
+                reinterpret_cast<DWORD_PTR>(Address + m_Base) + 
+                Size - Offset;
+              Address -= m_Base;
             }
             else
             {

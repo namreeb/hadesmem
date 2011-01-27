@@ -60,6 +60,20 @@ public:
     Hades::Memory::FindPattern const& Me = *this;
     return reinterpret_cast<DWORD_PTR>(Me[Name]);
   }
+
+  boost::python::list GetAddresses() const
+  {
+    std::map<std::wstring, PVOID> Addresses(Hades::Memory::
+      FindPattern::GetAddresses());
+    boost::python::list New;
+    std::for_each(Addresses.begin(), Addresses.end(), 
+      [&] (std::pair<std::wstring, PVOID> const& Address) 
+      {
+        New.append(boost::python::make_tuple(Address.first, 
+          reinterpret_cast<DWORD_PTR>(Address.second)));
+      });
+    return New;
+  }
 };
 
 // Export FindPattern API

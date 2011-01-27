@@ -76,6 +76,9 @@ namespace Hades
 
       // Memory manager instance
       MemoryMgr m_Memory;
+      
+      // Target module base
+      DWORD_PTR m_Base;
 
       // Start and end addresses of search region
       PBYTE m_Start;
