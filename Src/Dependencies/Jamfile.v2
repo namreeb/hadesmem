@@ -35,3 +35,11 @@ alias RapidXML
   : 
     <include>"."
   ;
+
+alias WTL 
+  : 
+  : 
+  : 
+  : 
+    <include>"./WTL/include/"
+  ;

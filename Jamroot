@@ -8,6 +8,11 @@ use-project /Dependencies
     Src/Dependencies
   ;
   
+use-project /MemHack 
+  : 
+    Src/MemHack 
+  ; 
+   
 use-project /Memory 
   : 
     Src/Memory 
@@ -47,6 +52,9 @@ build-project Src/Dependencies
   ;
   
 build-project Src/Memory 
+  ;
+  
+build-project Src/MemHack 
   ;
   
 build-project Src/Scripting 
