@@ -141,6 +141,7 @@ rule Install-Rule ( properties * )
 install Bin 
   : 
     Src/Memory 
+    Src/MemHack 
     Src/Scripting 
     Misc/DbgHelp/IA32/dbghelp.dll 
     Misc/DbgHelp/IA32/symsrv.dll 
@@ -157,6 +158,7 @@ install Bin
 install Bin 
   : 
     Src/Memory 
+    Src/MemHack 
     Src/Scripting 
     Misc/DbgHelp/AMD64/dbghelp.dll 
     Misc/DbgHelp/AMD64/symsrv.dll 
