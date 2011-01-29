@@ -37,7 +37,6 @@ project
     <runtime-link>shared 
     <toolset>gcc:<cxxflags>"-std=c++0x" 
     <toolset>gcc:<warnings>off 
-    <toolset>gcc:<define>nullptr=NULL 
     <toolset>msvc:<warnings>all 
   : 
     default-build debug 
