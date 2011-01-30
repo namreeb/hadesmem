@@ -1,5 +1,12 @@
 # Memory/Jamfile.v2
 
+project 
+  : 
+    requirements 
+    <toolset>gcc:<warnings>off 
+    <toolset>msvc:<warnings>all 
+  ;
+
 lib user32 
   : 
   : 
