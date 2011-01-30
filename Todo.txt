@@ -8,12 +8,15 @@
     * Fix all 'fixme' items in code.
     * Proper locale support.
     * Template concept checking and improved error messages.
+    * Enable GCC warnings for HadesMem and fix any warnings emitted.
     
 * Medium Priority
   * General
     * Upgrade to Python 3.x.
     * x64 -> x86 process manipulation.
   * New Modules
+    * Injected 'base'.
+    * Rewrite GUI library.
     * Debugging APIs.
       * Software breakpoint.
       * Hardware breakpoint (incl read/write detection).
@@ -22,7 +25,6 @@
       * Stack trace APIs.
     * Anti-anti-cheat APIs.
     * Thread/process information APIs.
-    * Injected 'base'.
     * Python scripts for automating common tasks.
     * IA32 and AMD64 remote code 'emulator'.
     * Custom GetModuleHandle, GetProcAddress, etc.
