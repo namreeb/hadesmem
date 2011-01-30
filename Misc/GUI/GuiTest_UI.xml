@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<GUI>
+	<Font face="Tahoma" size="10"/>
+	<Windows>
+		<Window absX="250" absY="330" width="540" height="220" hidden="0" string="Cool test window" string2="WINDOW_TEST2">
+			<Text relX="10" relY="10" string="This is a Text element"/>
+			<EditBox relX="10" relY="30" width="200" string="Hello!"/>
+			<ListBox relX="10" relY="70" width="230" height="120">
+				<Row>Wooop</Row>
+				<Row>Wooaaaaaah!</Row>
+				<Row>Kynox!</Row>
+				<Row>Sup!?</Row>
+				<Row>"§/%()"$§%/)(/</Row>
+			</ListBox>
+
+			<CheckBox relX="250" relY="10" string="Check me!!"/>
+			<CheckBox relX="250" relY="30" string="Me toooo!"/>
+			<CheckBox relX="250" relY="50" string="Uncheck me!" checked="1"/>
+			<VerticalSliderBar relX="280" relY="80" height="80" minvalue="0" maxvalue="100" step="1" value="50" string="VSlider!"/>
+			<HorizontalSliderBar relX="370" relY="20" width="160" minvalue="0" maxvalue="100" step="1" value="34" string="HSlider!"/>
+			<ProgressBar relX="370" relY="60" width="160" height="20" value="34"/>
+			<DropDown relX="400" relY="90" width="100">
+				<Entry string="Default" value="0"/>
+				<Entry string="One" value="1"/>
+				<Entry string="Two" value="2"/>
+				<Entry string="Three" value="3"/>
+				<Entry string="Four" value="4"/>
+			</DropDown>
+			<TextBox relX="370" relY="120" width="160" height="70">
+				<Row>Wooop</Row>
+				<Row>Wooaaaaaah!</Row>
+				<Row>Kynox!</Row>
+				<Row>Sup!?</Row>
+				<Row>"§/%()"$§%/)(/</Row>
+			</TextBox>
+		</Window>
+		<Window absX="100" absY="100" width="340" height="170" hidden="1" string="Waypoint controls" string2="WINDOW_WAYPOINT_CONTROLS">
+			<EditBox relX="10" relY="10" width="100" string2="EDITBOX_ADDNODE" /> 
+			
+			<Button relX="10" relY="34" width="45" string="First" string2="BUTTON_ADD_FIRST"/> 
+			<Button relX="65" relY="34" width="45" string="Second" string2="BUTTON_ADD_SECOND"/> 
+			<Button relX="10" relY="60" width="45" string="Load"/> 
+			<Button relX="65" relY="60" width="45" string="Save"/> 
+
+			<Text relX="120" relY="10" string="Current first node:" string2="TEXT_FIRST_NODE" /> 
+			<Text relX="120" relY="34" string="Current second node:" string2="TEXT_SECOND_NODE" /> 
+			<Text relX="120" relY="58" string="Current path:" string2="TEXT_PATH" /> 
+			
+			<Button relX="10" relY="120" width="100" string="Add Path"/> 
+			<Button relX="120" relY="120" width="100" string="Add waypoint"/> 
+
+			<Button relX="120" relY="90" width="70" string="Reset"/>
+			<CheckBox relX="200" relY="90" width="100" string="Auto add waypoints"/>
+
+			<Button relX="10" relY="90" width="100" string="Flip nodes"/> 
+			<Button relX="230" relY="120" width="100" string="Flip path"/>
+		</Window>
+		<Window absX="100" absY="330" width="340" height="190" hidden="1" string="Bot controls">
+			<Text relX="10" relY="10" string="Behavior"/>
+			<Text relX="120" relY="10" string="Current behavior: $Behavior"/>
+			<Button relX="10" relY="30" width="100" string="Passive"/>
+			<Button relX="120" relY="30" width="100" string="Defensive"/>
+			<Button relX="230" relY="30" width="100" string="Aggressive"/>
+			
+			<Text relX="10" relY="60" string="On-screen info"/>
+			<CheckBox relX="10" relY="80" string="Mark possible targets"/>
+			<CheckBox relX="10" relY="100" string="Draw current path"/>
+			<CheckBox relX="10" relY="120" string="Draw created path"/>
+			<CheckBox relX="10" relY="140" string="Draw debug info"/>
+		</Window>
+	</Windows>
+</GUI>
