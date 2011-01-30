@@ -121,8 +121,8 @@ public:
 	HRESULT Begin(D3DPRIMITIVETYPE primType);
 	HRESULT End();
 
-	inline HRESULT D3DColour(DWORD colour);
-	inline HRESULT D3DVertex2f(float x, float y);
+	HRESULT D3DColour(DWORD colour);
+	HRESULT D3DVertex2f(float x, float y);
 
 	HRESULT D3DAddQuad( int x, int y, int w, int h, DWORD dwColor );
 	
@@ -150,7 +150,7 @@ public:
 	HRESULT Print( float x, float y, DWORD colour, const char *szText, DWORD dwFlags = 0 );
 
 	int DrawLength( const char* ) const;
-	inline int DrawHeight() const
+	int DrawHeight() const
 	{
 		return static_cast<int>( m_fChrHeight );
 	}

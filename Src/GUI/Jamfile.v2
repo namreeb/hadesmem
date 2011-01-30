@@ -28,6 +28,12 @@ lib user32
     <name>user32 
   ;
 
+lib winmm 
+  : 
+  : 
+    <name>winmm 
+  ;
+
 lib D3D9 
   : 
   : 
@@ -52,6 +58,7 @@ lib GUI
     D3DX9 
     gdi32 
     user32 
+    winmm 
   : 
     <link>static 
     <include>$(DXSDK_DIR)/Include 

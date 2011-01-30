@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 #include "CGUI.h"
 
-bool CKeyboard::HandleMessage( unsigned int uMsg, __w64 unsigned int wParam, _w64 long lParam )
+bool CKeyboard::HandleMessage( unsigned int uMsg, /*__w64*/ unsigned int wParam, /*_w64*/ long lParam )
 {
 	if( !gpGui->IsVisible() || uMsg < WM_KEYFIRST || uMsg > WM_KEYLAST || gpGui->GetMouse().GetLeftButton() )
 		return false;

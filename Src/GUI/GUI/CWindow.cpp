@@ -78,8 +78,8 @@ CWindow::CWindow( TiXmlElement * pElement )
 
 CWindow::~CWindow()
 {
-	for each( CElement * pElement in m_vElements )
-		SAFE_DELETE( pElement )
+  for (std::vector<CElement*>::iterator i = m_vElements.begin(); i != m_vElements.end(); ++i)
+		SAFE_DELETE( *i )
 	m_vElements.clear();
 }
 
@@ -101,8 +101,11 @@ void CWindow::Draw()
 	{
 		gpGui->DrawOutlinedBox( GetAbsPos()->GetX(), GetAbsPos()->GetY() + TITLEBAR_HEIGHT, GetWidth(), GetHeight() - TITLEBAR_HEIGHT + 1,  pBodyInner->GetD3DColor(), pBodyBorder->GetD3DColor() );
 
-		for each( CElement * pElement in m_vElements )
+    for (std::vector<CElement*>::iterator i = m_vElements.begin(); i != m_vElements.end(); ++i)
+    {
+      CElement* pElement = *i;
 			pElement->Draw();
+    }
 	}
 }
 
@@ -111,8 +114,13 @@ void CWindow::PreDraw()
 	GetString( true );
 
 	if( GetMaximized() )
-		for each( CElement * pElement in m_vElements )
+	{
+    for (std::vector<CElement*>::iterator i = m_vElements.begin(); i != m_vElements.end(); ++i)
+    {
+      CElement* pElement = *i;
 			pElement->PreDraw();
+    }
+	}
 }
 
 void CWindow::MouseMove( CMouse & pMouse )
@@ -136,8 +144,13 @@ void CWindow::MouseMove( CMouse & pMouse )
 		SetElementState( SetMouseOver( pMouse.InArea( GetAbsPos()->GetX() + GetWidth() - BUTTON_HEIGHT - 2, GetAbsPos()->GetY() + 2, BUTTON_HEIGHT, BUTTON_HEIGHT ) )?"MouseOver":"Norm", 1 );
 
 	if( GetMaximized() )
-		for each( CElement * pElement in m_vElements )
-			pElement->MouseMove( pMouse );
+	{
+    for (std::vector<CElement*>::iterator i = m_vElements.begin(); i != m_vElements.end(); ++i)
+    {
+      CElement* pElement = *i;
+			pElement->MouseMove(pMouse);
+    }
+	}
 }
 
 bool CWindow::KeyEvent( SKey sKey )
@@ -251,9 +264,12 @@ CElement * CWindow::GetFocussedElement()
 
 CElement * CWindow::GetElementByString( const char * pszString, int iIndex )
 {
-	for each( CElement * pElement in m_vElements )
+  for (std::vector<CElement*>::iterator i = m_vElements.begin(); i != m_vElements.end(); ++i)
+  {
+    CElement* pElement = *i;
 		if( pElement->GetString( false, iIndex ) == pszString )
 			return pElement;
+  }
 	return 0;
 }
 

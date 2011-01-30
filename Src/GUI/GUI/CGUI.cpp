@@ -220,9 +220,11 @@ void CGUI::Draw()
 		return;
 
 	PreDraw();
-
-	for each( CWindow * pWindow in m_vWindows )
+	
+	for (std::vector<CWindow*>::iterator i = m_vWindows.begin(); i != m_vWindows.end(); ++i)
 	{
+	  CWindow* pWindow = *i;
+	  
 		if( !pWindow->IsVisible() )
 			continue;
 
@@ -322,8 +324,10 @@ bool CGUI::KeyEvent( SKey sKey )
 			}
 		}
 
-		for each( CWindow * pRepeat in vRepeat )
+	  for (std::vector<CWindow*>::iterator i = vRepeat.begin(); i != vRepeat.end(); ++i)
 		{
+		  CWindow* pRepeat = *i;
+		  
 			pMouse.SavePos();
 			pMouse.SetPos( CPos( -1, -1 ) );
 			pRepeat->KeyEvent( sKey );

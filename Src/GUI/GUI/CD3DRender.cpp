@@ -335,14 +335,14 @@ HRESULT CD3DRender::End()
 }
 
 
-inline HRESULT CD3DRender::D3DColour( DWORD colour )
+HRESULT CD3DRender::D3DColour( DWORD colour )
 {
 	m_colour = colour;
 	return ( m_canRender ? S_OK : E_FAIL );
 }
 
 
-inline HRESULT CD3DRender::D3DVertex2f( float x, float y )
+HRESULT CD3DRender::D3DVertex2f( float x, float y )
 {
 	if( m_canRender && m_pVertex && ++m_curVertex < m_maxVertex )
 		*m_pVertex++ = InitPrim2DVertex( x, y, m_colour );
@@ -369,7 +369,8 @@ HRESULT CD3DRender::D3DAddQuad( int x, int y, int w, int h, DWORD dwColor )
 
 CD3DFont::CD3DFont( const char * pszFontName, int iFontHeight, DWORD dwCreateFlags )
 {
-	strcpy_s( m_szFontName, 32, pszFontName );
+	strcpy( m_szFontName, pszFontName );
+	//strcpy_s( m_szFontName, 32, pszFontName );
 
 	m_fontHeight = iFontHeight;
 	m_dwCreateFlags = dwCreateFlags;

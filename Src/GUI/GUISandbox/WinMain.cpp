@@ -24,6 +24,8 @@ THE SOFTWARE.
 #include <wininet.h>
 #include <shlobj.h>
 
+#include <sstream>
+
 bool g_bRunning = true;
 
 void RenderScreen();
@@ -33,7 +35,7 @@ IDirect3DDevice9 * g_pDevice = 0;
 D3DPRESENT_PARAMETERS d3dPP;
 
 int g_iMenuSize = 0;
-CTexture * pBackground = 0;
+//CTexture * pBackground = 0;
 
 std::string MainMenuCallback( const char *, CElement * pElement )
 {
@@ -100,13 +102,17 @@ void LoadGUI( IDirect3DDevice9 * pDevice )
 	gpGui->SetVisible( true );
 }
 
-DWORD WINAPI LoadWallpaper( LPVOID )
+/*DWORD WINAPI LoadWallpaper( LPVOID )
 {
 	CoInitialize( 0 );
 
 	IActiveDesktop* pActiveDesktop = 0;
 	if( !FAILED( CoCreateInstance( CLSID_ActiveDesktop, 0, CLSCTX_INPROC_SERVER, IID_IActiveDesktop, (void**) &pActiveDesktop ) ) )
 	{
+	  #ifndef AD_GETWP_BMP
+	  #define AD_GETWP_BMP 0x00000000
+	  #endif
+	  
 		wchar_t * pwszStr = new wchar_t[ MAX_PATH ];
 		pActiveDesktop->GetWallpaper( pwszStr, MAX_PATH, AD_GETWP_BMP );
 
@@ -119,7 +125,7 @@ DWORD WINAPI LoadWallpaper( LPVOID )
 
 	CoUninitialize();
 	return 0;
-}
+}*/
 
 bool bReset = false;
 
@@ -150,7 +156,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 						SAFE_DELETE( gpGui );
 						LoadGUI( pDevice );
 						
-						pBackground->SetSprite( gpGui->GetSprite() );
+						//pBackground->SetSprite( gpGui->GetSprite() );
 					}
 				}
 				else if( GetAsyncKeyState( VK_DOWN )&1 )
@@ -248,7 +254,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
 		return -5;
 
 	LoadGUI( g_pDevice );
-	CreateThread( 0, 0, LoadWallpaper, 0, 0, 0 );
+	//CreateThread( 0, 0, LoadWallpaper, 0, 0, 0 );
 
 	while( g_bRunning )
 	{
@@ -269,9 +275,9 @@ void RenderScreen()
 {
 	if( GetTickCount() - dwTimer >= 1000 )
 	{
-		char szBuffer[ 256 ] = { 0 };
-		sprintf_s( szBuffer, "WoWXGui test environment FPS: %i", iFrames );
-		SetWindowTextA( hWindow, szBuffer );
+	  std::stringstream szBuffer;
+	  szBuffer << "WoWXGui test environment FPS: " << iFrames;
+		SetWindowTextA( hWindow, szBuffer.str().c_str() );
 
 		iFrames = 0;
 		dwTimer = GetTickCount();
@@ -284,8 +290,8 @@ void RenderScreen()
 		g_pDevice->Clear( 0, 0, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1.0f, 0 );
 		g_pDevice->BeginScene();
 
-		if( pBackground )
-			pBackground->Draw( CPos( 0, 0 ), iWidth, iHeight );
+		/*if( pBackground )
+			pBackground->Draw( CPos( 0, 0 ), iWidth, iHeight );*/
 
 		if( gpGui )
 			gpGui->Draw();
