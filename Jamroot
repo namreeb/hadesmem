@@ -39,6 +39,8 @@ project
     <define>BOOST_FILESYSTEM_VERSION=3 
     <define>UNICODE 
     <define>_UNICODE 
+    <toolset>msvc:<define>_WIN32_WINNT=_WIN32_WINNT_WS03 
+    <toolset>msvc:<define>WINVER=_WIN32_WINNT_WS03 
     <runtime-link>shared 
     <toolset>gcc:<cxxflags>"-std=c++0x" 
   : 
