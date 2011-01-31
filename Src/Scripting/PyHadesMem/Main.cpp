@@ -18,7 +18,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Windows API
+#ifdef _MSC_VER
 #include <crtdbg.h>
+#endif // #ifdef _MSC_VER
 #include <Windows.h>
 
 // C++ Standard Library

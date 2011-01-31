@@ -3,7 +3,7 @@
 project 
   : 
     requirements 
-    <toolset>gcc:<warnings>off 
+    <toolset>gcc:<warnings>all 
     <toolset>msvc:<warnings>all 
   ;
 
