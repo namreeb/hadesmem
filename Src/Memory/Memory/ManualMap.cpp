@@ -50,8 +50,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace 
 {
-  std::array<ULONG, 16> const SectionCharacteristicsToProtect =
-  {
+  std::array<ULONG, 16> const SectionCharacteristicsToProtect = 
+  {{
     PAGE_NOACCESS,          /* 0 = NONE */
     PAGE_NOACCESS,          /* 1 = SHARED */
     PAGE_EXECUTE,           /* 2 = EXECUTABLE */
@@ -68,7 +68,7 @@ namespace
     PAGE_READWRITE,         /* 13 = WRITABLE, READABLE, SHARED */
     PAGE_EXECUTE_READWRITE, /* 14 = WRITABLE, READABLE, EXECUTABLE */
     PAGE_EXECUTE_READWRITE, /* 15 = WRITABLE, READABLE, EXECUTABLE, SHARED */
-  };
+  }};
 }
 
 namespace Hades

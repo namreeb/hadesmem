@@ -43,7 +43,16 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #endif // #ifdef _MSC_VER
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-pedantic"
+#pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#endif // #ifdef __GNUC__
 #include "AsmJit/AsmJit.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif // #ifdef __GNUC__
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // #ifdef _MSC_VER

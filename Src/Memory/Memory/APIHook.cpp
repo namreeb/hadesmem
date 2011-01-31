@@ -39,6 +39,11 @@ namespace Hades
 {
   namespace Memory
   {
+    namespace 
+    {
+      static int ModFromAddressHelper = 0;
+    }
+
     // Hook list
     std::list<APIHook*> APIHook::sm_HookList;
     
@@ -145,8 +150,7 @@ namespace Hades
       PROC pNew
     ) 
     {
-      HMODULE ThisMod = ModuleFromAddress(reinterpret_cast<PVOID>(
-        ReplaceIATEntryInAllMods));
+      HMODULE ThisMod = ModuleFromAddress(&ModFromAddressHelper);
           
       static MemoryMgr MyMemory(GetCurrentProcessId());
       for (ModuleListIter i(MyMemory); *i; ++i)
@@ -227,8 +231,7 @@ namespace Hades
       DWORD dwFlags
     ) 
     {
-      PVOID pFixupNewlyLoadedModule = reinterpret_cast<PVOID>(
-        FixupNewlyLoadedModule);
+      PVOID pFixupNewlyLoadedModule = &ModFromAddressHelper;
         
       // MinGW workaround
       #ifndef LOAD_LIBRARY_AS_IMAGE_RESOURCE

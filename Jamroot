@@ -32,6 +32,7 @@ project
   : 
     requirements 
     <define>BOOST_FILESYSTEM_VERSION=3 
+    <define>BOOST_SYSTEM_NO_DEPRECATED=1 
     <define>UNICODE 
     <define>_UNICODE 
     <toolset>msvc:<define>_WIN32_WINNT=_WIN32_WINNT_WS03 
