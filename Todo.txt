@@ -15,8 +15,6 @@
     * Upgrade to Python 3.x.
     * x64 -> x86 process manipulation.
   * New Modules
-    * Injected 'base'.
-    * Rewrite GUI library.
     * Debugging APIs.
       * Software breakpoint.
       * Hardware breakpoint (incl read/write detection).
@@ -29,6 +27,8 @@
     * IA32 and AMD64 remote code 'emulator'.
     * Custom GetModuleHandle, GetProcAddress, etc.
     * Cheat Engine 'replacement'.
+    * Injected 'base'.
+    * Injected GUI library.
   * MemoryMgr
     * Improve 'safety' of remote function caller via EH to minimize risk of 
     crashing target.
