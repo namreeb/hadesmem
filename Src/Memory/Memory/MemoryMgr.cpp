@@ -231,6 +231,7 @@ namespace Hades
       // Allocate memory for stub buffer
       AllocAndFree const StubMemRemote(*this, StubSize);
       PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetAddress());
+      DWORD_PTR pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(pRemoteStub);
       PBYTE pReturnAddress = static_cast<PBYTE>(ReturnAddressRemote.
         GetAddress());
 
@@ -247,7 +248,7 @@ namespace Hades
       // Call stub via creating a remote thread in the target.
       Windows::EnsureCloseHandle const MyThread(CreateRemoteThread(m_Process.
         GetHandle(), nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(
-        pRemoteStub), pReturnAddress, 0, nullptr));
+        pRemoteStubTemp), pReturnAddress, 0, nullptr));
       if (!MyThread)
       {
         std::error_code const LastError = GetLastErrorCode();

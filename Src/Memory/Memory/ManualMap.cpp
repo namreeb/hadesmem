@@ -191,9 +191,10 @@ namespace Hades
       std::cout << "Entry Point: " << EntryPoint << "." << std::endl;
 
       // Get address of export in remote process
-      PVOID const ExportAddr = reinterpret_cast<PVOID>(
+      DWORD_PTR const ExportAddrTemp = reinterpret_cast<DWORD_PTR>(
         m_Memory.GetRemoteProcAddress(reinterpret_cast<HMODULE>(RemoteBase), 
         Path, Export.c_str()));
+      PVOID const ExportAddr = reinterpret_cast<PVOID const>(ExportAddrTemp);
       std::cout << "Export Address: " << ExportAddr << "." << std::endl;
 
       // Inject helper module

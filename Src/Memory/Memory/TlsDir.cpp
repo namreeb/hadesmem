@@ -127,9 +127,10 @@ namespace Hades
         pCallbacks); pCallback; pCallback = m_Memory.Read<PIMAGE_TLS_CALLBACK>(
         ++pCallbacks))
       {
-        PIMAGE_TLS_CALLBACK pCallbackReal = 
-          reinterpret_cast<PIMAGE_TLS_CALLBACK>((reinterpret_cast<PBYTE>(
-          pCallback) - MyNtHeaders.GetImageBase()));
+        auto pCallbackRealTemp = reinterpret_cast<DWORD_PTR>(pCallback) - 
+          MyNtHeaders.GetImageBase();
+        auto pCallbackReal = reinterpret_cast<PIMAGE_TLS_CALLBACK>(
+          pCallbackRealTemp);
         Callbacks.push_back(pCallbackReal);
       }
 
