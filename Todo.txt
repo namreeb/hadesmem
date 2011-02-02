@@ -8,7 +8,6 @@
     * Fix all 'fixme' items in code.
     * Proper locale support.
     * Template concept checking and improved error messages.
-    * Enable GCC warnings for HadesMem and fix any warnings emitted.
     
 * Medium Priority
   * General
