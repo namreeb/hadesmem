@@ -1,14 +1,10 @@
 # Common/Jamfile.v2
 
-project
-  : 
-    requirements 
-    <library>/boost//date_time/<link>static 
-  ;
-
 alias Common 
   : 
     /boost//date_time/<link>static 
+    /boost//filesystem/<link>static 
+    /boost//thread/<link>static 
   : 
   : 
   : 

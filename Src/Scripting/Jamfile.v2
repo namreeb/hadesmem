@@ -32,6 +32,8 @@ exe MemSandbox
   : 
     [ glob MemSandbox/*.cpp ] 
     /Memory//Memory 
+    /boost//python/<link>static 
+    /boost//program_options/<link>static 
   : 
     <link>static 
   : 
@@ -43,6 +45,7 @@ python-extension PyHadesMem
   : 
     [ glob PyHadesMem/*.cpp ] 
     /Memory//Memory 
+    /boost//python/<link>static 
   : 
     <link>shared 
   ;

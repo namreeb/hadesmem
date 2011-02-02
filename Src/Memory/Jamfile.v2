@@ -43,13 +43,6 @@ lib imagehlp
     <name>imagehlp 
   ;
 
-project
-  : 
-    requirements 
-    <library>/boost//thread/<link>static 
-    <library>/boost//filesystem/<link>static 
-  ;
-
 lib Memory 
   : 
     [ glob Memory/*.cpp ] 
@@ -76,8 +69,6 @@ lib MMHelper
     [ glob MMHelper/*.cpp ] 
     Memory 
     user32 
-    /boost//thread/<link>static 
-    /boost//filesystem/<link>static 
   : 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
