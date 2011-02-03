@@ -138,7 +138,7 @@ namespace Hades
       bool CanWrite(PVOID Address) const;
 
       // Whether an address is contained within a guard page
-      bool  IsGuard(PVOID Address) const;
+      bool IsGuard(PVOID Address) const;
 
       // Allocate memory
       PVOID Alloc(SIZE_T Size) const;
