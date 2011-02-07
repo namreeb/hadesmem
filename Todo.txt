@@ -1,85 +1,83 @@
-* High Priority
-  * General
-    * Documentation via Boost.QuickBook.
-    * Unit tests via Boost.Test.
-    * Improved and documented exception-safety guarantees (incl rollback 
-    support via RAII or Boost.ScopeExit).
-    * Improved and documented thread-safety guarantees.
-    * Fix all 'fixme' items in code.
-    * Proper locale support.
-    * Template concept checking and improved error messages.
-    
-* Medium Priority
-  * General
-    * Upgrade to Python 3.x.
-    * x64 -> x86 process manipulation.
-  * New Modules
-    * Debugging APIs.
-      * Software breakpoint.
-      * Hardware breakpoint (incl read/write detection).
-      * Conditional breakpoints.
-      * Single-stepping.
-      * Stack trace APIs.
-    * Anti-anti-cheat APIs.
-    * Thread/process information APIs.
-    * Python scripts for automating common tasks.
-    * IA32 and AMD64 remote code 'emulator'.
-    * Custom GetModuleHandle, GetProcAddress, etc.
-    * Cheat Engine 'replacement'.
-    * Injected 'base'.
-    * Injected GUI library.
-  * MemoryMgr
-    * Improve 'safety' of remote function caller via EH to minimize risk of 
-    crashing target.
-    * Improve genericity of parameter passing in remote function caller.
-    * Memory reading via expression templates.
-  * Disassembler
-    * Decode calls/jumps to function names where possible.
-    * NOP/UnNOP support.
-    * ASM searching API with 'wildcards'. (Metasm?)
-    * String based assembler with x64 support.
-    * Improve bindings to make it actually useful from Python.
-    * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
-  * Scanner
-    * Multi-threaded scanning option.
-    * Wildcard support for vector/string scanning.
-    * Regex support for string scanning.
-    * Memory protection filters (read, write, exec).
-    * Memory type filters (private, mapped, image).
-    * Pause target while scanning option.
-    * Injected scanning option.
-    * Configurable scan buffer size.
-    * Pointer scanner.
-    * Unknown value scan.
-    * Progressive scan filtering based on either value or criteria.
-    * Scan history and undo.
-    * Case insensitive string scanning option.
-    * Binary scanning.
-    * Custom scanning via user-supplied predicate.
-    * Improved floating-point scanning (configurable or 'smart' epsilon).
-    * Group search support.
-  * Injector
-    * .NET injection.
-    * Cross-session injection.
-    * IAT injection.
-  * Patcher
-    * VEH hooking (Both INT3 and DR).
-    * Transactional hooking.
-    * Improved relative instruction rebuilding (including conditionals).
-    * Sanity checking for target process.
-    * Freeze target when hooking.
-    * VMT hooking.
-  * ManualMap
-    * Improved exception handling support.
-  * FindPattern
-    * Pattern generator.
-    * Multi-threaded scanning.
-    * 'Start' attribute support.
-    * Data/Rdata scanning support (for 'start' attribute and constant scans).
-    * Support for loading XML file from resource or memory.
-    * Dump results to file.
-    * Change parser library from RapidXML to Boost.Spirit (may require a 
-    format change from XML to something custom).
-  * PeLib
-    * Finish implementing matching 'setters' for existing 'getters'.
-    * Add modules to support more of the PE file format.
+* General
+  * Upgrade to Python 3.x.
+  * x64 -> x86 process manipulation.
+  * Documentation via Boost.QuickBook.
+  * Unit tests via Boost.Test.
+  * Improved and documented exception-safety guarantees (incl rollback 
+  support via RAII or Boost.ScopeExit).
+  * Improved and documented thread-safety guarantees.
+  * Fix all 'fixme' items in code.
+  * Proper locale support.
+  * Template concept checking and improved error messages.
+* New Modules
+  * Debugging APIs.
+    * Software breakpoint.
+    * Hardware breakpoint (incl read/write detection).
+    * Conditional breakpoints.
+    * Single-stepping.
+    * Stack trace APIs.
+  * Anti-anti-cheat APIs.
+  * Thread/process information APIs.
+  * Python scripts for automating common tasks.
+  * IA32 and AMD64 remote code 'emulator'.
+  * Custom GetModuleHandle, GetProcAddress, etc.
+  * Cheat Engine 'replacement'.
+  * Injected 'base hook'.
+* Base hook
+  * Injected GUI library.
+  * Injected music player controller.
+* MemoryMgr
+  * Improve 'safety' of remote function caller via EH to minimize risk of 
+  crashing target.
+  * Improve genericity of parameter passing in remote function caller.
+  * Memory reading via expression templates.
+* Disassembler
+  * Decode calls/jumps to function names where possible.
+  * NOP/UnNOP support.
+  * ASM searching API with 'wildcards'. (Metasm?)
+  * String based assembler with x64 support.
+  * Improve bindings to make it actually useful from Python.
+  * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+* Scanner
+  * Multi-threaded scanning option.
+  * Wildcard support for vector/string scanning.
+  * Regex support for string scanning.
+  * Memory protection filters (read, write, exec).
+  * Memory type filters (private, mapped, image).
+  * Pause target while scanning option.
+  * Injected scanning option.
+  * Configurable scan buffer size.
+  * Pointer scanner.
+  * Unknown value scan.
+  * Progressive scan filtering based on either value or criteria.
+  * Scan history and undo.
+  * Case insensitive string scanning option.
+  * Binary scanning.
+  * Custom scanning via user-supplied predicate.
+  * Improved floating-point scanning (configurable or 'smart' epsilon).
+  * Group search support.
+* Injector
+  * .NET injection.
+  * Cross-session injection.
+  * IAT injection.
+* Patcher
+  * VEH hooking (Both INT3 and DR).
+  * Transactional hooking.
+  * Improved relative instruction rebuilding (including conditionals).
+  * Sanity checking for target process.
+  * Freeze target when hooking.
+  * VMT hooking.
+* ManualMap
+  * Improved exception handling support.
+* FindPattern
+  * Pattern generator.
+  * Multi-threaded scanning.
+  * 'Start' attribute support.
+  * Data/Rdata scanning support (for 'start' attribute and constant scans).
+  * Support for loading XML file from resource or memory.
+  * Dump results to file.
+  * Change parser library from RapidXML to Boost.Spirit (may require a 
+  format change from XML to something custom).
+* PeLib
+  * Finish implementing matching 'setters' for existing 'getters'.
+  * Add modules to support more of the PE file format.
