@@ -1,10 +1,30 @@
 # Injected/Jamfile.v2
 
+import os 
+  ;
+  
+local DXSDK_DIR = [ os.environ DXSDK_DIR ] 
+  ;
+
 project 
   : 
     requirements 
     <toolset>gcc:<warnings>all 
     <toolset>msvc:<warnings>all 
+  ;
+
+lib d3d10 : : <name>d3d10 <address-model>32:<search>$(DXSDK_DIR)/lib/x86 <address-model>64:<search>$(DXSDK_DIR)/lib/x64 ;
+lib d3dx10 : : <name>d3dx10 <address-model>32:<search>$(DXSDK_DIR)/lib/x86 <address-model>64:<search>$(DXSDK_DIR)/lib/x64 ;
+
+exe D3D10Test 
+  : 
+    [ glob D3D10Test/*.cpp ] 
+    /Common//Common 
+    d3d10 
+    d3dx10 
+  : 
+    <include>$(DXSDK_DIR)/Include 
+    <user-interface>gui 
   ;
 
 lib HadesKernel 
