@@ -4,6 +4,55 @@
 #include <iostream>
 #include <exception>
 
+namespace 
+{
+  char const EffectFx[] = 
+    "\n"
+    "\n//----------------------------------------------------------------------"
+    "\n// Vertex Shader"
+    "\n//----------------------------------------------------------------------"
+    "\nfloat2 Viewport;"
+    "\n"
+    "\nstruct VS_OUTPUT"
+    "\n{"
+    "\n    float4 Pos : SV_POSITION;"
+    "\n    float4 Color : COLOR0;"
+    "\n};"
+    "\n"
+    "\nVS_OUTPUT VS( float4 Pos : POSITION, float4 Color : COLOR )"
+    "\n{"
+    "\n	VS_OUTPUT output = (VS_OUTPUT)0;"
+    "\n	output.Pos = Pos;"
+    "\n	output.Color = Color;"
+    "\n	"
+    "\n	// Translate our 2D coordinates to 0,0(center) relative coordinates"
+    "\n	output.Pos.x = ( -1.f + (2 * (output.Pos.x / Viewport.x)) );"
+    "\n	output.Pos.y = ( 1.f - (2 * (output.Pos.y / Viewport.y)) );"
+    "\n	"
+    "\n    return output;"
+    "\n}"
+    "\n"
+    "\n//----------------------------------------------------------------------"
+    "\n// Pixel Shader"
+    "\n//----------------------------------------------------------------------"
+    "\nfloat4 PS( VS_OUTPUT input ) : SV_Target"
+    "\n{"
+    "\n    return input.Color;"
+    "\n}"
+    "\n"
+    "\n//----------------------------------------------------------------------"
+    "\ntechnique10 Render"
+    "\n{"
+    "\n    pass P0"
+    "\n    {"
+    "\n        SetVertexShader( CompileShader( vs_4_0, VS() ) );"
+    "\n        SetGeometryShader( NULL );"
+    "\n        SetPixelShader( CompileShader( ps_4_0, PS() ) );"
+    "\n    }"
+    "\n}"
+    "\n";
+}
+
 namespace JustConsole
 {
 	namespace Renderer
@@ -28,8 +77,8 @@ namespace JustConsole
 					throw std::runtime_error(
 						"Failed to create Vertex Buffer" );
 
-				if ( FAILED( D3DX10CreateEffectFromFile(L"Effect.fx", 0, 0,
-					"fx_4_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+				if ( FAILED( D3DX10CreateEffectFromMemory(EffectFx, sizeof(EffectFx), 
+				  "Effect.fx", 0, 0, "fx_4_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 					m_Device, 0, 0, &m_Effect, 0, 0) ) )
 					throw std::runtime_error( "Failed to create Effect" );
 
