@@ -1,5 +1,4 @@
 #include "DX10Renderer.h"
-#include "Locale.h"
 
 #include <iostream>
 #include <exception>
