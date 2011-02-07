@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Device.hpp"
 #include "Exports.hpp"
 #include "SwapChain.hpp"
+#include "DeviceContext.hpp"
 #include "HadesCommon/Logger.hpp"
 
 namespace Hades
@@ -199,6 +200,14 @@ namespace Hades
             L"D3D11CreateDeviceAndSwapChain_Hook: "
             L"Hooking ID3D11Device." << std::endl);
           *ppDevice = new ID3D11DeviceHook(*ppDevice);
+        }
+        if (ppImmediateContext)
+        {
+          HADES_LOG_THREAD_SAFE(std::wcout << 
+            L"D3D11CreateDeviceAndSwapChain_Hook: "
+            L"Hooking ID3D11DeviceContext." << std::endl);
+          *ppImmediateContext = new ID3D11DeviceContextHook(
+            *ppImmediateContext);
         }
       }
       else
