@@ -1,0 +1,26 @@
+# Injected/Jamfile.v2
+
+project 
+  : 
+    requirements 
+    <toolset>gcc:<warnings>all 
+    <toolset>msvc:<warnings>all 
+  ;
+
+lib HadesKernel 
+  : 
+    [ glob HadesKernel/*.cpp ] 
+    /Memory//Memory 
+  : 
+    <link>shared 
+    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
+  ;
+
+lib HadesD3D11 
+  : 
+    [ glob HadesD3D11/*.cpp ] 
+    /Memory//Memory 
+  : 
+    <link>shared 
+    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
+  ;

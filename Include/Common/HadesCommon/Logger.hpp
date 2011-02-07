@@ -57,7 +57,6 @@ boost::lock_guard<boost::mutex> MyLock(Hades::Util::Logger<char>::GetMutex());\
 x;\
 }\
 
-
 namespace Hades
 {
   namespace Util

@@ -21,13 +21,6 @@ if ![python.configured]
     ;
 }
 
-project
-  : 
-    requirements 
-    <library>/boost//python/<link>static 
-    <library>/boost//program_options/<link>static 
-  ;
-
 exe MemSandbox 
   : 
     [ glob MemSandbox/*.cpp ] 

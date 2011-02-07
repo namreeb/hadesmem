@@ -17,16 +17,25 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 // Windows API
 #include <Windows.h>
 
-// Entry point
-int CALLBACK WinMain(
-  HINSTANCE /*hInstance*/,
-  HINSTANCE /*hPrevInstance*/,
-  LPSTR /*lpCmdLine*/,
-  int /*nCmdShow*/
-)
+// DirectX
+#define D3D11_IGNORE_SDK_LAYERS
+#include <d3d11.h>
+
+// C++ Standard Library
+#include <memory>
+
+// Hades
+#include "HadesMemory/Memory.hpp"
+
+namespace Hades
 {
-  return 0;
+  namespace D3D11
+  {
+    void HookD3D11();
+  }
 }

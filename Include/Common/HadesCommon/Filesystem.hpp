@@ -89,6 +89,26 @@ namespace Hades
       return Buffer;
     }
 
+    // Get path to module
+    inline boost::filesystem::path GetModulePath(HMODULE Module)
+    {
+      // Get path to self
+      DWORD const PathSize = MAX_PATH;
+      std::wstring FullPath;
+      if (!GetModuleFileName(Module, Util::MakeStringBuffer(FullPath, 
+        PathSize), PathSize) || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(HadesError() << 
+          ErrorFunction("GetModulePath") << 
+          ErrorString("Could not get path to module.") << 
+          ErrorCode(LastError));
+      }
+
+      // Path to self
+      return FullPath;
+    }
+
     // Get path to self (directory)
     inline boost::filesystem::path GetSelfPath()
     {
@@ -110,7 +130,7 @@ namespace Hades
       }
 
       // Path to self
-      return boost::filesystem::path(SelfFullPath);
+      return SelfFullPath;
     }
 
     // Get path to self (directory)
