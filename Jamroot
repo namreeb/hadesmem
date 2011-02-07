@@ -8,11 +8,6 @@ use-project /Dependencies
     Src/Dependencies
   ;
   
-use-project /Injected 
-  : 
-    Src/Injected
-  ;
-  
 use-project /MemHack 
   : 
     Src/MemHack 
@@ -54,9 +49,6 @@ path-constant TOP
   ;
 
 build-project Src/Dependencies 
-  ;
-  
-build-project Src/Injected 
   ;
   
 build-project Src/Memory 
@@ -148,7 +140,6 @@ rule Install-Rule ( properties * )
 
 install Bin 
   : 
-    Src/Injected 
     Src/Memory 
     Src/MemHack 
     Src/Scripting 
@@ -166,7 +157,6 @@ install Bin
 
 install Bin 
   : 
-    Src/Injected 
     Src/Memory 
     Src/MemHack 
     Src/Scripting 
