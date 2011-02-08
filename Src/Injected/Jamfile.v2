@@ -13,15 +13,104 @@ project
     <toolset>msvc:<warnings>all 
   ;
 
-lib d3d10 : : <name>d3d10 <address-model>32:<search>$(DXSDK_DIR)/lib/x86 <address-model>64:<search>$(DXSDK_DIR)/lib/x64 ;
-lib d3dx10 : : <name>d3dx10 <address-model>32:<search>$(DXSDK_DIR)/lib/x86 <address-model>64:<search>$(DXSDK_DIR)/lib/x64 ;
-
-exe D3D10Test 
+lib d3d9 
   : 
-    [ glob D3D10Test/*.cpp ] 
+  : 
+    <name>d3d9 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+  
+lib d3dx9 
+  : 
+  : 
+    <name>d3dx9 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+
+lib d3d10 
+  : 
+  : 
+    <name>d3d10 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+  
+lib d3dx10 
+  : 
+  : 
+    <name>d3dx10 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+
+lib d3d11 
+  : 
+  : 
+    <name>d3d11 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+  
+lib d3dx11 
+  : 
+  : 
+    <name>d3dx11 
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86 
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
+  ;
+
+lib user32 
+  : 
+  : 
+    <name>user32 
+  ;
+
+alias HadesRenderer 
+  : 
     /Common//Common 
+  : 
+  : 
+  : 
+    <include>"."
+  ;
+
+
+exe D3D9Sandbox 
+  : 
+    [ glob D3D9Sandbox/*.cpp ] 
+    /Common//Common 
+    HadesRenderer 
+    d3d9 
+    d3dx9 
+    user32 
+  : 
+    <include>$(DXSDK_DIR)/Include 
+    <user-interface>gui 
+  ;
+
+exe D3D10Sandbox 
+  : 
+    [ glob D3D10Sandbox/*.cpp ] 
+    /Common//Common 
+    HadesRenderer 
     d3d10 
     d3dx10 
+    user32 
+  : 
+    <include>$(DXSDK_DIR)/Include 
+    <user-interface>gui 
+  ;
+
+exe D3D11Sandbox 
+  : 
+    [ glob D3D11Sandbox/*.cpp ] 
+    /Common//Common 
+    HadesRenderer 
+    d3d11 
+    d3dx11 
+    user32 
   : 
     <include>$(DXSDK_DIR)/Include 
     <user-interface>gui 
