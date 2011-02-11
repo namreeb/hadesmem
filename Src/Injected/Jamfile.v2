@@ -129,6 +129,7 @@ lib HadesD3D9
   : 
     [ glob HadesD3D9/*.cpp ] 
     /Memory//Memory 
+    HadesRenderer 
   : 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
@@ -138,6 +139,7 @@ lib HadesD3D10
   : 
     [ glob HadesD3D10/*.cpp ] 
     /Memory//Memory 
+    HadesRenderer 
   : 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
@@ -147,6 +149,7 @@ lib HadesD3D11
   : 
     [ glob HadesD3D11/*.cpp ] 
     /Memory//Memory 
+    HadesRenderer 
   : 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
