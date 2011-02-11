@@ -27,6 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Exports.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
+#include "HadesCommon/Filesystem.hpp"
 
 // Initialize D3D11
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)

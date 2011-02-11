@@ -28,7 +28,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesCommon/Logger.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
-// Initialize kernel
+// Initialize D3D11
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
 {
   try
@@ -44,9 +44,9 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
       
     // Debug output
     HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
-      L"Hades-Kernel::Initialize: Module Base = %p, Path to Self = %s, "
+      L"Hades-D3D10::Initialize: Module Base = %p, Path to Self = %s, "
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
-      %Hades::Windows::GetModulePath(nullptr));
+      %Hades::Windows::GetModulePath(nullptr) << std::endl);
   }
   catch (std::exception const& e)
   {
