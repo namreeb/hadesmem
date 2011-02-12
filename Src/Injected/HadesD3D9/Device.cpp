@@ -145,105 +145,284 @@ namespace Hades
         pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateDepthStencilSurface(UINT Width,UINT Height,D3DFORMAT Format,D3DMULTISAMPLE_TYPE MultiSample,DWORD MultisampleQuality,BOOL Discard,IDirect3DSurface9** ppSurface,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateDepthStencilSurface(
+      UINT Width, 
+      UINT Height, 
+      D3DFORMAT Format, 
+      D3DMULTISAMPLE_TYPE MultiSample, 
+      DWORD MultisampleQuality, 
+      BOOL Discard, 
+      IDirect3DSurface9** ppSurface, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateDepthStencilSurface(Width, Height, Format, MultiSample, MultisampleQuality,Discard,ppSurface, pSharedHandle);
+      return m_pDevice->CreateDepthStencilSurface(
+        Width, 
+        Height, 
+        Format, 
+        MultiSample, 
+        MultisampleQuality, 
+        Discard, 
+        ppSurface, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateIndexBuffer(UINT Length,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DIndexBuffer9** ppIndexBuffer,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateIndexBuffer(
+      UINT Length, 
+      DWORD Usage, 
+      D3DFORMAT Format, 
+      D3DPOOL Pool, 
+      IDirect3DIndexBuffer9** ppIndexBuffer, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateIndexBuffer(Length, Usage, Format, Pool, ppIndexBuffer,pSharedHandle);
+      return m_pDevice->CreateIndexBuffer(
+        Length, 
+        Usage, 
+        Format, 
+        Pool, 
+        ppIndexBuffer, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateOffscreenPlainSurface(UINT Width,UINT Height,D3DFORMAT Format,D3DPOOL Pool,IDirect3DSurface9** ppSurface,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateOffscreenPlainSurface(
+      UINT Width, 
+      UINT Height, 
+      D3DFORMAT Format, 
+      D3DPOOL Pool, 
+      IDirect3DSurface9** ppSurface, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateOffscreenPlainSurface(Width,Height,Format,Pool,ppSurface,pSharedHandle);
+      return m_pDevice->CreateOffscreenPlainSurface(
+        Width, 
+        Height, 
+        Format, 
+        Pool, 
+        ppSurface, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixelShader9** ppShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreatePixelShader(
+        CONST DWORD* pFunction, 
+        IDirect3DPixelShader9** ppShader) 
     {
-      return m_pDevice->CreatePixelShader(pFunction, ppShader);
+      return m_pDevice->CreatePixelShader(
+        pFunction, 
+        ppShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateQuery(D3DQUERYTYPE Type,IDirect3DQuery9** ppQuery) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateQuery(
+      D3DQUERYTYPE Type, 
+      IDirect3DQuery9** ppQuery) 
     {
-      return m_pDevice->CreateQuery(Type,ppQuery);
+      return m_pDevice->CreateQuery(
+        Type, 
+        ppQuery);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateRenderTarget(UINT Width,UINT Height,D3DFORMAT Format,D3DMULTISAMPLE_TYPE MultiSample,DWORD MultisampleQuality,BOOL Lockable,IDirect3DSurface9** ppSurface,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateRenderTarget(
+      UINT Width, 
+      UINT Height, 
+      D3DFORMAT Format, 
+      D3DMULTISAMPLE_TYPE MultiSample, 
+      DWORD MultisampleQuality, 
+      BOOL Lockable, 
+      IDirect3DSurface9** ppSurface, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateRenderTarget(Width, Height, Format, MultiSample,MultisampleQuality, Lockable, ppSurface,pSharedHandle);
+      return m_pDevice->CreateRenderTarget(
+        Width, 
+        Height, 
+        Format, 
+        MultiSample, 
+        MultisampleQuality, 
+        Lockable, 
+        ppSurface, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateStateBlock(D3DSTATEBLOCKTYPE Type,IDirect3DStateBlock9** ppSB) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateStateBlock(
+        D3DSTATEBLOCKTYPE Type, 
+        IDirect3DStateBlock9** ppSB) 
     {
-      return m_pDevice->CreateStateBlock(Type, ppSB);
+      return m_pDevice->CreateStateBlock(
+        Type, 
+        ppSB);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateTexture(UINT Width,UINT Height,UINT Levels,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DTexture9** ppTexture,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateTexture(
+      UINT Width, 
+      UINT Height, 
+      UINT Levels, 
+      DWORD Usage, 
+      D3DFORMAT Format, 
+      D3DPOOL Pool, 
+      IDirect3DTexture9** ppTexture, 
+      HANDLE* pSharedHandle) 
     {
-      HRESULT Result = m_pDevice->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
+      HRESULT Result = m_pDevice->CreateTexture(
+        Width, 
+        Height, 
+        Levels, 
+        Usage, 
+        Format, 
+        Pool, 
+        ppTexture, 
+        pSharedHandle);
     
-      //#ifdef D3DHOOK_TEXTURES
-      //if(ret == D3D_OK) { new hkIDirect3DTexture9(ppTexture, this, Width, Height, Format); }
-      //#endif
-
+      //if(ret == D3D_OK) 
+      //{ 
+      //  new hkIDirect3DTexture9(ppTexture, this, Width, Height, Format);
+      //}
+      
       return Result;
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexBuffer(UINT Length,DWORD Usage,DWORD FVF,D3DPOOL Pool,IDirect3DVertexBuffer9** ppVertexBuffer,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexBuffer(
+      UINT Length, 
+      DWORD Usage, 
+      DWORD FVF, 
+      D3DPOOL Pool, 
+      IDirect3DVertexBuffer9** ppVertexBuffer, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateVertexBuffer(Length, Usage, FVF, Pool, ppVertexBuffer,pSharedHandle);
+      return m_pDevice->CreateVertexBuffer(
+        Length, 
+        Usage, 
+        FVF, 
+        Pool, 
+        ppVertexBuffer, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements,IDirect3DVertexDeclaration9** ppDecl) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexDeclaration(
+      CONST D3DVERTEXELEMENT9* pVertexElements, 
+      IDirect3DVertexDeclaration9** ppDecl) 
     {
-      return m_pDevice->CreateVertexDeclaration(pVertexElements,ppDecl);
+      return m_pDevice->CreateVertexDeclaration(
+        pVertexElements, 
+        ppDecl);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShader9** ppShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVertexShader(
+      CONST DWORD* pFunction, 
+      IDirect3DVertexShader9** ppShader) 
     {
-      return m_pDevice->CreateVertexShader(pFunction, ppShader);
+      return m_pDevice->CreateVertexShader(
+        pFunction, 
+        ppShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVolumeTexture(UINT Width,UINT Height,UINT Depth,UINT Levels,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DVolumeTexture9** ppVolumeTexture,HANDLE* pSharedHandle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::CreateVolumeTexture(
+      UINT Width, 
+      UINT Height, 
+      UINT Depth, 
+      UINT Levels, 
+      DWORD Usage, 
+      D3DFORMAT Format, 
+      D3DPOOL Pool, 
+      IDirect3DVolumeTexture9** ppVolumeTexture, 
+      HANDLE* pSharedHandle) 
     {
-      return m_pDevice->CreateVolumeTexture(Width, Height, Depth, Levels, Usage, Format, Pool, ppVolumeTexture,pSharedHandle);
+      return m_pDevice->CreateVolumeTexture(
+        Width, 
+        Height, 
+        Depth, 
+        Levels, 
+        Usage, 
+        Format, 
+        Pool, 
+        ppVolumeTexture, 
+        pSharedHandle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DeletePatch(UINT Handle) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::DeletePatch(
+      UINT Handle) 
     {
-      return m_pDevice->DeletePatch(Handle);
+      return m_pDevice->DeletePatch(
+        Handle);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawIndexedPrimitive(D3DPRIMITIVETYPE Type,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount)
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawIndexedPrimitive(
+      D3DPRIMITIVETYPE Type, 
+      INT BaseVertexIndex, 
+      UINT MinVertexIndex, 
+      UINT NumVertices, 
+      UINT startIndex, 
+      UINT primCount)
     {
-      return m_pDevice->DrawIndexedPrimitive(Type,BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
+      return m_pDevice->DrawIndexedPrimitive(
+        Type, 
+        BaseVertexIndex, 
+        MinVertexIndex, 
+        NumVertices, 
+        startIndex, 
+        primCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawIndexedPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT MinIndex, UINT NumVertices, UINT PrimitiveCount, CONST void *pIndexData, D3DFORMAT IndexDataFormat, CONST void *pVertexStreamZeroData, UINT VertexStreamZeroStride) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawIndexedPrimitiveUP(
+      D3DPRIMITIVETYPE PrimitiveType, 
+      UINT MinIndex, 
+      UINT NumVertices, 
+      UINT PrimitiveCount, 
+      CONST void *pIndexData, 
+      D3DFORMAT IndexDataFormat, 
+      CONST void *pVertexStreamZeroData, 
+      UINT VertexStreamZeroStride) 
     { 
-      return m_pDevice->DrawIndexedPrimitiveUP(PrimitiveType, MinIndex, NumVertices, PrimitiveCount, pIndexData, IndexDataFormat, pVertexStreamZeroData, VertexStreamZeroStride);
+      return m_pDevice->DrawIndexedPrimitiveUP(
+        PrimitiveType, 
+        MinIndex, 
+        NumVertices, 
+        PrimitiveCount, 
+        pIndexData, 
+        IndexDataFormat, 
+        pVertexStreamZeroData, 
+        VertexStreamZeroStride);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawPrimitive(
+      D3DPRIMITIVETYPE PrimitiveType, 
+      UINT StartVertex, 
+      UINT PrimitiveCount) 
     {
-      return m_pDevice->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
+      return m_pDevice->DrawPrimitive(
+        PrimitiveType, 
+        StartVertex, 
+        PrimitiveCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void *pVertexStreamZeroData, UINT VertexStreamZeroStride) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawPrimitiveUP(
+      D3DPRIMITIVETYPE PrimitiveType, 
+      UINT PrimitiveCount, 
+      CONST void *pVertexStreamZeroData, 
+      UINT VertexStreamZeroStride) 
     {
-      return m_pDevice->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
+      return m_pDevice->DrawPrimitiveUP(
+        PrimitiveType, 
+        PrimitiveCount, 
+        pVertexStreamZeroData, 
+        VertexStreamZeroStride);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawRectPatch(UINT Handle, CONST float *pNumSegs, CONST D3DRECTPATCH_INFO *pRectPatchInfo) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawRectPatch(
+      UINT Handle, 
+      CONST float *pNumSegs, 
+      CONST D3DRECTPATCH_INFO *pRectPatchInfo) 
     {
-      return m_pDevice->DrawRectPatch(Handle, pNumSegs, pRectPatchInfo);
+      return m_pDevice->DrawRectPatch(
+        Handle, 
+        pNumSegs, 
+        pRectPatchInfo);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::DrawTriPatch(UINT Handle, CONST float *pNumSegs, CONST D3DTRIPATCH_INFO *pTriPatchInfo)
+    HRESULT APIENTRY IDirect3DDevice9Hook::DrawTriPatch(
+      UINT Handle, 
+      CONST float *pNumSegs, 
+      CONST D3DTRIPATCH_INFO *pTriPatchInfo)
     {
-      return m_pDevice->DrawTriPatch(Handle, pNumSegs, pTriPatchInfo);
+      return m_pDevice->DrawTriPatch(
+        Handle, 
+        pNumSegs, 
+        pTriPatchInfo);
     }
     
     HRESULT APIENTRY IDirect3DDevice9Hook::EndScene()
@@ -251,9 +430,11 @@ namespace Hades
       return m_pDevice->EndScene();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::EndStateBlock(IDirect3DStateBlock9** ppSB) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::EndStateBlock(
+      IDirect3DStateBlock9** ppSB) 
     {
-      return m_pDevice->EndStateBlock(ppSB);
+      return m_pDevice->EndStateBlock(
+        ppSB);
     }
     
     HRESULT APIENTRY IDirect3DDevice9Hook::EvictManagedResources() 
@@ -266,44 +447,68 @@ namespace Hades
       return m_pDevice->GetAvailableTextureMem();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetBackBuffer(UINT iSwapChain,UINT iBackBuffer,D3DBACKBUFFER_TYPE Type,IDirect3DSurface9** ppBackBuffer) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetBackBuffer(
+      UINT iSwapChain, 
+      UINT iBackBuffer, 
+      D3DBACKBUFFER_TYPE Type, 
+      IDirect3DSurface9** ppBackBuffer) 
     {
-      return m_pDevice->GetBackBuffer(iSwapChain,iBackBuffer, Type, ppBackBuffer);
+      return m_pDevice->GetBackBuffer(
+        iSwapChain, 
+        iBackBuffer, 
+        Type, 
+        ppBackBuffer);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetClipPlane(DWORD Index, float *pPlane) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetClipPlane(
+      DWORD Index, 
+      float *pPlane) 
     {
-      return m_pDevice->GetClipPlane(Index, pPlane);
+      return m_pDevice->GetClipPlane(
+        Index, 
+        pPlane);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetClipStatus(D3DCLIPSTATUS9 *pClipStatus) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetClipStatus(
+      D3DCLIPSTATUS9 *pClipStatus) 
     {
-      return m_pDevice->GetClipStatus(pClipStatus);
+      return m_pDevice->GetClipStatus(
+        pClipStatus);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetCreationParameters(D3DDEVICE_CREATION_PARAMETERS *pParameters) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetCreationParameters(
+      D3DDEVICE_CREATION_PARAMETERS *pParameters) 
     {
-      return m_pDevice->GetCreationParameters(pParameters);
+      return m_pDevice->GetCreationParameters(
+        pParameters);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetCurrentTexturePalette(UINT *pPaletteNumber)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetCurrentTexturePalette(
+      UINT *pPaletteNumber)
     {
-      return m_pDevice->GetCurrentTexturePalette(pPaletteNumber);
+      return m_pDevice->GetCurrentTexturePalette(
+        pPaletteNumber);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetDepthStencilSurface(IDirect3DSurface9 **ppZStencilSurface) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetDepthStencilSurface(
+      IDirect3DSurface9 **ppZStencilSurface) 
     {
-      return m_pDevice->GetDepthStencilSurface(ppZStencilSurface);
+      return m_pDevice->GetDepthStencilSurface(
+        ppZStencilSurface);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetDeviceCaps(D3DCAPS9 *pCaps) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetDeviceCaps(
+      D3DCAPS9 *pCaps) 
     {
-      return m_pDevice->GetDeviceCaps(pCaps);
+      return m_pDevice->GetDeviceCaps(
+        pCaps);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetDirect3D(IDirect3D9 **ppD3D9) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetDirect3D(
+      IDirect3D9 **ppD3D9) 
     {
-      HRESULT Result = m_pDevice->GetDirect3D(ppD3D9);
+      HRESULT Result = m_pDevice->GetDirect3D(
+        ppD3D9);
       
       if (SUCCEEDED(Result))
       {
@@ -313,44 +518,70 @@ namespace Hades
       return Result;
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetDisplayMode(UINT iSwapChain,D3DDISPLAYMODE* pMode) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetDisplayMode(
+      UINT iSwapChain, 
+      D3DDISPLAYMODE* pMode) 
     {
-      return m_pDevice->GetDisplayMode(iSwapChain,pMode);
+      return m_pDevice->GetDisplayMode(
+        iSwapChain, 
+        pMode);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetFrontBufferData(UINT iSwapChain,IDirect3DSurface9* pDestSurface) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetFrontBufferData(
+      UINT iSwapChain, 
+      IDirect3DSurface9* pDestSurface) 
     {
-      return m_pDevice->GetFrontBufferData(iSwapChain,pDestSurface);
+      return m_pDevice->GetFrontBufferData(
+        iSwapChain, 
+        pDestSurface);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetFVF(DWORD* pFVF) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetFVF(
+      DWORD* pFVF) 
     {
-      return m_pDevice->GetFVF(pFVF);
+      return m_pDevice->GetFVF(
+        pFVF);
     }
     
-    void APIENTRY IDirect3DDevice9Hook::GetGammaRamp(UINT iSwapChain,D3DGAMMARAMP* pRamp) 
+    void APIENTRY IDirect3DDevice9Hook::GetGammaRamp(
+      UINT iSwapChain, 
+      D3DGAMMARAMP* pRamp) 
     {
-      m_pDevice->GetGammaRamp(iSwapChain,pRamp);
+      m_pDevice->GetGammaRamp(
+        iSwapChain, 
+        pRamp);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetIndices(IDirect3DIndexBuffer9** ppIndexData) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetIndices(
+      IDirect3DIndexBuffer9** ppIndexData) 
     {
-      return m_pDevice->GetIndices(ppIndexData);
+      return m_pDevice->GetIndices(
+        ppIndexData);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetLight(DWORD Index, D3DLIGHT9 *pLight) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetLight(
+      DWORD Index, 
+      D3DLIGHT9 *pLight) 
     {
-      return m_pDevice->GetLight(Index, pLight);
+      return m_pDevice->GetLight(
+        Index, 
+        pLight);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetLightEnable(DWORD Index, BOOL *pEnable) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetLightEnable(
+      DWORD Index, 
+      BOOL *pEnable) 
     {
-      return m_pDevice->GetLightEnable(Index, pEnable);
+      return m_pDevice->GetLightEnable(
+        Index, 
+        pEnable);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetMaterial(D3DMATERIAL9 *pMaterial) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetMaterial(
+      D3DMATERIAL9 *pMaterial) 
     {
-      return m_pDevice->GetMaterial(pMaterial);
+      return m_pDevice->GetMaterial(
+        pMaterial);
     }
     
     float APIENTRY IDirect3DDevice9Hook::GetNPatchMode() 
@@ -363,59 +594,107 @@ namespace Hades
       return m_pDevice->GetNumberOfSwapChains();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetPaletteEntries(UINT PaletteNumber, PALETTEENTRY *pEntries)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetPaletteEntries(
+      UINT PaletteNumber, 
+      PALETTEENTRY *pEntries)
     {
-      return m_pDevice->GetPaletteEntries(PaletteNumber, pEntries);
+      return m_pDevice->GetPaletteEntries(
+        PaletteNumber, 
+        pEntries);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShader(IDirect3DPixelShader9** ppShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShader(
+      IDirect3DPixelShader9** ppShader) 
     {
-      return m_pDevice->GetPixelShader(ppShader);
+      return m_pDevice->GetPixelShader(
+        ppShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantB(UINT StartRegister,BOOL* pConstantData,UINT BoolCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantB(
+      UINT StartRegister, 
+      BOOL* pConstantData, 
+      UINT BoolCount) 
     {
-      return m_pDevice->GetPixelShaderConstantB(StartRegister,pConstantData,BoolCount);
+      return m_pDevice->GetPixelShaderConstantB(
+        StartRegister, 
+        pConstantData, 
+        BoolCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantF(UINT StartRegister,float* pConstantData,UINT Vector4fCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantF(
+      UINT StartRegister, 
+      float* pConstantData, 
+      UINT Vector4fCount) 
     {
-      return m_pDevice->GetPixelShaderConstantF(StartRegister,pConstantData,Vector4fCount);
+      return m_pDevice->GetPixelShaderConstantF(
+        StartRegister, 
+        pConstantData, 
+        Vector4fCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantI(UINT StartRegister,int* pConstantData,UINT Vector4iCount)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetPixelShaderConstantI(
+      UINT StartRegister, 
+      int* pConstantData, 
+      UINT Vector4iCount)
     {
-      return m_pDevice->GetPixelShaderConstantI(StartRegister,pConstantData,Vector4iCount);
+      return m_pDevice->GetPixelShaderConstantI(
+        StartRegister, 
+        pConstantData, 
+        Vector4iCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetRasterStatus(UINT iSwapChain,D3DRASTER_STATUS* pRasterStatus) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetRasterStatus(
+      UINT iSwapChain, 
+      D3DRASTER_STATUS* pRasterStatus) 
     {
-      return m_pDevice->GetRasterStatus(iSwapChain,pRasterStatus);
+      return m_pDevice->GetRasterStatus(
+        iSwapChain, 
+        pRasterStatus);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderState(D3DRENDERSTATETYPE State, DWORD *pValue) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderState(
+      D3DRENDERSTATETYPE State, 
+      DWORD *pValue) 
     {
-      return m_pDevice->GetRenderState(State, pValue);
+      return m_pDevice->GetRenderState(
+        State, 
+        pValue);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurface9** ppRenderTarget) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderTarget(
+      DWORD RenderTargetIndex, 
+      IDirect3DSurface9** ppRenderTarget) 
     {
-      return m_pDevice->GetRenderTarget(RenderTargetIndex,ppRenderTarget);
+      return m_pDevice->GetRenderTarget(
+        RenderTargetIndex, 
+        ppRenderTarget);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderTargetData(IDirect3DSurface9* pRenderTarget,IDirect3DSurface9* pDestSurface) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetRenderTargetData(
+      IDirect3DSurface9* pRenderTarget, 
+      IDirect3DSurface9* pDestSurface) 
     {
-      return m_pDevice->GetRenderTargetData(pRenderTarget,pDestSurface);
+      return m_pDevice->GetRenderTargetData(
+        pRenderTarget, 
+        pDestSurface);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetSamplerState(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD* pValue) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetSamplerState(
+      DWORD Sampler, 
+      D3DSAMPLERSTATETYPE Type, 
+      DWORD* pValue) 
     {
-      return m_pDevice->GetSamplerState(Sampler,Type,pValue);
+      return m_pDevice->GetSamplerState(
+        Sampler, 
+        Type, 
+        pValue);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetScissorRect(RECT* pRect) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetScissorRect(
+      RECT* pRect) 
     {
-      return m_pDevice->GetScissorRect(pRect);
+      return m_pDevice->GetScissorRect(
+        pRect);
     }
     
     BOOL APIENTRY IDirect3DDevice9Hook::GetSoftwareVertexProcessing() 
@@ -423,84 +702,166 @@ namespace Hades
       return m_pDevice->GetSoftwareVertexProcessing();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9** ppStreamData,UINT* OffsetInBytes,UINT* pStride) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetStreamSource(
+      UINT StreamNumber, 
+      IDirect3DVertexBuffer9** ppStreamData, 
+      UINT* OffsetInBytes, 
+      UINT* pStride) 
     {
-      return m_pDevice->GetStreamSource(StreamNumber, ppStreamData,OffsetInBytes, pStride);
+      return m_pDevice->GetStreamSource(
+        StreamNumber, 
+        ppStreamData, 
+        OffsetInBytes, 
+        pStride);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetStreamSourceFreq(UINT StreamNumber,UINT* Divider) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetStreamSourceFreq(
+      UINT StreamNumber, 
+      UINT* Divider) 
     {
-      return m_pDevice->GetStreamSourceFreq(StreamNumber,Divider);
+      return m_pDevice->GetStreamSourceFreq(
+        StreamNumber, 
+        Divider);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetSwapChain(UINT iSwapChain,IDirect3DSwapChain9** pSwapChain)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetSwapChain(
+      UINT iSwapChain, 
+      IDirect3DSwapChain9** pSwapChain)
     {
-      return m_pDevice->GetSwapChain(iSwapChain,pSwapChain);
+      return m_pDevice->GetSwapChain(
+        iSwapChain, 
+        pSwapChain);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetTexture(DWORD Stage, IDirect3DBaseTexture9 **ppTexture) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetTexture(
+      DWORD Stage, 
+      IDirect3DBaseTexture9 **ppTexture) 
     {
-      return m_pDevice->GetTexture(Stage, ppTexture);
+      return m_pDevice->GetTexture(
+        Stage, 
+        ppTexture);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetTextureStageState(DWORD Stage, D3DTEXTURESTAGESTATETYPE Type, DWORD *pValue) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetTextureStageState(
+      DWORD Stage, 
+      D3DTEXTURESTAGESTATETYPE Type, 
+      DWORD *pValue) 
     {
-      return m_pDevice->GetTextureStageState(Stage, Type, pValue);
+      return m_pDevice->GetTextureStageState( 
+        Stage, 
+        Type, 
+        pValue);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetTransform(D3DTRANSFORMSTATETYPE State, D3DMATRIX *pMatrix) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetTransform(
+      D3DTRANSFORMSTATETYPE State, 
+      D3DMATRIX *pMatrix) 
     {
-      return m_pDevice->GetTransform(State, pMatrix);
+      return m_pDevice->GetTransform(
+        State, 
+        pMatrix);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexDeclaration(IDirect3DVertexDeclaration9** ppDecl) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexDeclaration(
+      IDirect3DVertexDeclaration9** ppDecl) 
     {
-      return m_pDevice->GetVertexDeclaration(ppDecl);
+      return m_pDevice->GetVertexDeclaration(
+        ppDecl);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShader(IDirect3DVertexShader9** ppShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShader(
+      IDirect3DVertexShader9** ppShader) 
     {
-      return m_pDevice->GetVertexShader(ppShader);
+      return m_pDevice->GetVertexShader(
+        ppShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantB(UINT StartRegister,BOOL* pConstantData,UINT BoolCount)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantB(
+      UINT StartRegister, 
+      BOOL* pConstantData, 
+      UINT BoolCount)
     {
-      return m_pDevice->GetVertexShaderConstantB(StartRegister,pConstantData,BoolCount);
+      return m_pDevice->GetVertexShaderConstantB(
+        StartRegister, 
+        pConstantData, 
+        BoolCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantF(UINT StartRegister,float* pConstantData,UINT Vector4fCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantF(
+      UINT StartRegister, 
+      float* pConstantData, 
+      UINT Vector4fCount) 
     {
-      return m_pDevice->GetVertexShaderConstantF(StartRegister,pConstantData,Vector4fCount);
+      return m_pDevice->GetVertexShaderConstantF(
+        StartRegister, 
+        pConstantData, 
+        Vector4fCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantI(UINT StartRegister,int* pConstantData,UINT Vector4iCount)
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetVertexShaderConstantI(
+      UINT StartRegister, 
+      int* pConstantData, 
+      UINT Vector4iCount)
     {
-      return m_pDevice->GetVertexShaderConstantI(StartRegister,pConstantData,Vector4iCount);
+      return m_pDevice->GetVertexShaderConstantI(
+        StartRegister, 
+        pConstantData, 
+        Vector4iCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::GetViewport(D3DVIEWPORT9 *pViewport) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::GetViewport(
+      D3DVIEWPORT9 *pViewport) 
     {
-      return m_pDevice->GetViewport(pViewport);
+      return m_pDevice->GetViewport(
+        pViewport);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::LightEnable(DWORD LightIndex, BOOL bEnable) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::LightEnable(
+      DWORD LightIndex, 
+      BOOL bEnable) 
     {
-      return m_pDevice->LightEnable(LightIndex, bEnable);
+      return m_pDevice->LightEnable(
+        LightIndex, 
+        bEnable);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::MultiplyTransform(D3DTRANSFORMSTATETYPE State, CONST D3DMATRIX *pMatrix) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::MultiplyTransform(
+      D3DTRANSFORMSTATETYPE State, 
+      CONST D3DMATRIX *pMatrix) 
     {
-      return m_pDevice->MultiplyTransform(State, pMatrix);
+      return m_pDevice->MultiplyTransform(
+        State, 
+        pMatrix);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::Present(CONST RECT *pSourceRect, CONST RECT *pDestRect, HWND hDestWindowOverride, CONST RGNDATA *pDirtyRegion) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::Present(
+      CONST RECT *pSourceRect, 
+      CONST RECT *pDestRect, 
+      HWND hDestWindowOverride, 
+      CONST RGNDATA *pDirtyRegion) 
     { 
-      return m_pDevice->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+      return m_pDevice->Present(
+        pSourceRect, 
+        pDestRect, 
+        hDestWindowOverride, 
+        pDirtyRegion);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::ProcessVertices(UINT SrcStartIndex,UINT DestIndex,UINT VertexCount,IDirect3DVertexBuffer9* pDestBuffer,IDirect3DVertexDeclaration9* pVertexDecl,DWORD Flags) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::ProcessVertices(
+      UINT SrcStartIndex, 
+      UINT DestIndex, 
+      UINT VertexCount, 
+      IDirect3DVertexBuffer9* pDestBuffer, 
+      IDirect3DVertexDeclaration9* pVertexDecl, 
+      DWORD Flags) 
     {
-      return m_pDevice->ProcessVertices(SrcStartIndex, DestIndex, VertexCount, pDestBuffer,pVertexDecl, Flags);
+      return m_pDevice->ProcessVertices(
+        SrcStartIndex, 
+        DestIndex, 
+        VertexCount, 
+        pDestBuffer, 
+        pVertexDecl, 
+        Flags);
     }
     
     ULONG APIENTRY IDirect3DDevice9Hook::Release() 
@@ -511,11 +872,13 @@ namespace Hades
       return m_pDevice->Release();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::Reset(
+      D3DPRESENT_PARAMETERS *pPresentationParameters) 
     {
       //m_pManager->PreReset();
     
-      HRESULT Result = m_pDevice->Reset(pPresentationParameters);
+      HRESULT Result = m_pDevice->Reset(
+        pPresentationParameters);
     
       if (SUCCEEDED(Result))
       {
@@ -526,193 +889,340 @@ namespace Hades
       return Result;
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetClipPlane(DWORD Index, CONST float *pPlane) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetClipPlane(
+      DWORD Index, 
+      CONST float *pPlane) 
     {
-      return m_pDevice->SetClipPlane(Index, pPlane);
+      return m_pDevice->SetClipPlane(
+        Index, 
+        pPlane);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetClipStatus(CONST D3DCLIPSTATUS9 *pClipStatus) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetClipStatus(
+      CONST D3DCLIPSTATUS9 *pClipStatus) 
     {
-      return m_pDevice->SetClipStatus(pClipStatus);
+      return m_pDevice->SetClipStatus(
+        pClipStatus);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetCurrentTexturePalette(UINT PaletteNumber) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetCurrentTexturePalette(
+      UINT PaletteNumber) 
     {
-      return m_pDevice->SetCurrentTexturePalette(PaletteNumber);
+      return m_pDevice->SetCurrentTexturePalette(
+        PaletteNumber);
     }
     
-    void APIENTRY IDirect3DDevice9Hook::SetCursorPosition(int X, int Y, DWORD Flags) 
+    void APIENTRY IDirect3DDevice9Hook::SetCursorPosition(
+      int X, 
+      int Y, 
+      DWORD Flags) 
     {
-      m_pDevice->SetCursorPosition(X, Y, Flags);
+      m_pDevice->SetCursorPosition(
+        X, 
+        Y, 
+        Flags);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetCursorProperties(UINT XHotSpot, UINT YHotSpot, IDirect3DSurface9 *pCursorBitmap) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetCursorProperties(
+      UINT XHotSpot, 
+      UINT YHotSpot, 
+      IDirect3DSurface9 *pCursorBitmap) 
     {
-      return m_pDevice->SetCursorProperties(XHotSpot, YHotSpot, pCursorBitmap);
+      return m_pDevice->SetCursorProperties(
+        XHotSpot, 
+        YHotSpot, 
+        pCursorBitmap);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetDepthStencilSurface(IDirect3DSurface9* pNewZStencil) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetDepthStencilSurface(
+      IDirect3DSurface9* pNewZStencil) 
     {
-      return m_pDevice->SetDepthStencilSurface(pNewZStencil);
+      return m_pDevice->SetDepthStencilSurface(
+        pNewZStencil);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetDialogBoxMode(BOOL bEnableDialogs) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetDialogBoxMode(
+      BOOL bEnableDialogs) 
     {
-      return m_pDevice->SetDialogBoxMode(bEnableDialogs);
+      return m_pDevice->SetDialogBoxMode(
+        bEnableDialogs);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetFVF(DWORD FVF) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetFVF(
+      DWORD FVF) 
     {
-      return m_pDevice->SetFVF(FVF);
+      return m_pDevice->SetFVF(
+        FVF);
     }
     
-    void APIENTRY IDirect3DDevice9Hook::SetGammaRamp(UINT iSwapChain,DWORD Flags,CONST D3DGAMMARAMP* pRamp)
+    void APIENTRY IDirect3DDevice9Hook::SetGammaRamp(
+      UINT iSwapChain, 
+      DWORD Flags, 
+      CONST D3DGAMMARAMP* pRamp)
     {
-      m_pDevice->SetGammaRamp(iSwapChain,Flags, pRamp);
+      m_pDevice->SetGammaRamp(
+        iSwapChain, 
+        Flags, 
+        pRamp);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetIndices(IDirect3DIndexBuffer9* pIndexData) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetIndices(
+      IDirect3DIndexBuffer9* pIndexData) 
     {
-      return m_pDevice->SetIndices(pIndexData);
+      return m_pDevice->SetIndices(
+        pIndexData);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetLight(DWORD Index, CONST D3DLIGHT9 *pLight) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetLight(
+      DWORD Index, 
+      CONST D3DLIGHT9 *pLight) 
     {
-      return m_pDevice->SetLight(Index, pLight);
+      return m_pDevice->SetLight(
+        Index, 
+        pLight);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetMaterial(CONST D3DMATERIAL9 *pMaterial) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetMaterial(
+      CONST D3DMATERIAL9 *pMaterial) 
     { 
-      return m_pDevice->SetMaterial(pMaterial);
+      return m_pDevice->SetMaterial(
+        pMaterial);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetNPatchMode(float nSegments) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetNPatchMode(
+      float nSegments) 
     { 
-      return m_pDevice->SetNPatchMode(nSegments);
+      return m_pDevice->SetNPatchMode(
+        nSegments);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetPaletteEntries(UINT PaletteNumber, CONST PALETTEENTRY *pEntries) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetPaletteEntries(
+      UINT PaletteNumber, 
+      CONST PALETTEENTRY *pEntries) 
     {
-      return m_pDevice->SetPaletteEntries(PaletteNumber, pEntries);
+      return m_pDevice->SetPaletteEntries(
+        PaletteNumber, 
+        pEntries);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShader(IDirect3DPixelShader9* pShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShader(
+      IDirect3DPixelShader9* pShader) 
     {
-      return m_pDevice->SetPixelShader(pShader);
+      return m_pDevice->SetPixelShader(
+        pShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantB(
+      UINT StartRegister, 
+      CONST BOOL* pConstantData, 
+      UINT BoolCount) 
     {
-      return m_pDevice->SetPixelShaderConstantB(StartRegister,pConstantData,BoolCount);
+      return m_pDevice->SetPixelShaderConstantB(
+        StartRegister, 
+        pConstantData, 
+        BoolCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantF(
+      UINT StartRegister, 
+      CONST float* pConstantData, 
+      UINT Vector4fCount) 
     {
-      return m_pDevice->SetPixelShaderConstantF(StartRegister,pConstantData,Vector4fCount);
+      return m_pDevice->SetPixelShaderConstantF(
+        StartRegister, 
+        pConstantData, 
+        Vector4fCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetPixelShaderConstantI(
+      UINT StartRegister, 
+      CONST int* pConstantData, 
+      UINT Vector4iCount) 
     {
-      return m_pDevice->SetPixelShaderConstantI(StartRegister,pConstantData,Vector4iCount);
+      return m_pDevice->SetPixelShaderConstantI(
+        StartRegister, 
+        pConstantData, 
+        Vector4iCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetRenderState(
+      D3DRENDERSTATETYPE State, 
+      DWORD Value) 
     {
-      return m_pDevice->SetRenderState(State, Value);
+      return m_pDevice->SetRenderState(
+        State, 
+        Value);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9* pRenderTarget) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetRenderTarget(
+      DWORD RenderTargetIndex, 
+      IDirect3DSurface9* pRenderTarget) 
     {
-      return m_pDevice->SetRenderTarget(RenderTargetIndex,pRenderTarget);
+      return m_pDevice->SetRenderTarget(
+        RenderTargetIndex, 
+        pRenderTarget);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetSamplerState(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD Value) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetSamplerState(
+      DWORD Sampler, 
+      D3DSAMPLERSTATETYPE Type, 
+      DWORD Value) 
     {
-      return m_pDevice->SetSamplerState(Sampler,Type,Value);
+      return m_pDevice->SetSamplerState(
+        Sampler, 
+        Type, 
+        Value);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetScissorRect(CONST RECT* pRect) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetScissorRect(
+      CONST RECT* pRect) 
     {
-      return m_pDevice->SetScissorRect(pRect);
+      return m_pDevice->SetScissorRect(
+        pRect);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetSoftwareVertexProcessing(BOOL bSoftware) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetSoftwareVertexProcessing(
+      BOOL bSoftware) 
     {
-      return m_pDevice->SetSoftwareVertexProcessing(bSoftware);
+      return m_pDevice->SetSoftwareVertexProcessing(
+        bSoftware);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetStreamSource(
+      UINT StreamNumber, 
+      IDirect3DVertexBuffer9* pStreamData, 
+      UINT OffsetInBytes, 
+      UINT Stride) 
     {
-      return m_pDevice->SetStreamSource(StreamNumber, pStreamData,OffsetInBytes, Stride);
+      return m_pDevice->SetStreamSource(
+        StreamNumber, 
+        pStreamData, 
+        OffsetInBytes, 
+        Stride);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetStreamSourceFreq(UINT StreamNumber,UINT Divider)
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetStreamSourceFreq(
+      UINT StreamNumber, 
+      UINT Divider)
     { 
-      return m_pDevice->SetStreamSourceFreq(StreamNumber,Divider);
+      return m_pDevice->SetStreamSourceFreq(
+        StreamNumber, 
+        Divider);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetTexture(DWORD Stage, IDirect3DBaseTexture9 *pTexture) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetTexture(DWORD Stage, 
+      IDirect3DBaseTexture9 *pTexture) 
     {
-      //#ifdef D3DHOOK_TEXTURES
       //IDirect3DDevice9 *dev = NULL;
-      //if(pTexture != NULL && ((hkIDirect3DTexture9*)(pTexture))->GetDevice(&dev) == D3D_OK)
+      //if (pTexture != NULL && ((hkIDirect3DTexture9*)(pTexture))->
+      //  GetDevice(&dev) == D3D_OK)
       //{
-      //  if(dev == this)
-      //    return m_pDevice->SetTexture(Stage, ((hkIDirect3DTexture9*)(pTexture))->m_D3Dtex);
+      //  if (dev == this)
+      //  {
+      //    return m_pDevice->SetTexture(Stage, ((hkIDirect3DTexture9*)
+      //      (pTexture))->m_D3Dtex);
+      //  }
       //}
-      //#endif
       
-      return m_pDevice->SetTexture(Stage, pTexture);
+      return m_pDevice->SetTexture(
+        Stage, 
+        pTexture);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetTextureStageState(DWORD Stage, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetTextureStageState(
+      DWORD Stage, 
+      D3DTEXTURESTAGESTATETYPE Type, 
+      DWORD Value) 
     {
-      return m_pDevice->SetTextureStageState(Stage, Type, Value);
+      return m_pDevice->SetTextureStageState(
+        Stage, 
+        Type, 
+        Value);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetTransform(D3DTRANSFORMSTATETYPE State, CONST D3DMATRIX *pMatrix) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetTransform(
+      D3DTRANSFORMSTATETYPE State, 
+      CONST D3DMATRIX *pMatrix) 
     {
-      return m_pDevice->SetTransform(State, pMatrix);
+      return m_pDevice->SetTransform(
+        State, 
+        pMatrix);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexDeclaration(
+      IDirect3DVertexDeclaration9* pDecl) 
     {
-      return m_pDevice->SetVertexDeclaration(pDecl);
+      return m_pDevice->SetVertexDeclaration(
+        pDecl);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShader(IDirect3DVertexShader9* pShader) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShader(
+      IDirect3DVertexShader9* pShader) 
     {
-      return m_pDevice->SetVertexShader(pShader);
+      return m_pDevice->SetVertexShader(
+        pShader);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantB(
+      UINT StartRegister, 
+      CONST BOOL* pConstantData, 
+      UINT BoolCount) 
     {
-      return m_pDevice->SetVertexShaderConstantB(StartRegister,pConstantData,BoolCount);
+      return m_pDevice->SetVertexShaderConstantB(
+        StartRegister, 
+        pConstantData, 
+        BoolCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantF(
+      UINT StartRegister, 
+      CONST float* pConstantData, 
+      UINT Vector4fCount) 
     {
-      return m_pDevice->SetVertexShaderConstantF(StartRegister,pConstantData,Vector4fCount);
+      return m_pDevice->SetVertexShaderConstantF(
+        StartRegister, 
+        pConstantData, 
+        Vector4fCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetVertexShaderConstantI(
+      UINT StartRegister, 
+      CONST int* pConstantData, 
+      UINT Vector4iCount) 
     {
-      return m_pDevice->SetVertexShaderConstantI(StartRegister,pConstantData,Vector4iCount);
+      return m_pDevice->SetVertexShaderConstantI(
+        StartRegister, 
+        pConstantData, 
+        Vector4iCount);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::SetViewport(CONST D3DVIEWPORT9 *pViewport) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::SetViewport(
+      CONST D3DVIEWPORT9 *pViewport) 
     {
-      return m_pDevice->SetViewport(pViewport);
+      return m_pDevice->SetViewport(
+        pViewport);
     }
     
-    BOOL APIENTRY IDirect3DDevice9Hook::ShowCursor(BOOL bShow) 
+    BOOL APIENTRY IDirect3DDevice9Hook::ShowCursor(
+      BOOL bShow) 
     {
-      return m_pDevice->ShowCursor(bShow);
+      return m_pDevice->ShowCursor(
+        bShow);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::StretchRect(IDirect3DSurface9* pSourceSurface,CONST RECT* pSourceRect,IDirect3DSurface9* pDestSurface,CONST RECT* pDestRect,D3DTEXTUREFILTERTYPE Filter) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::StretchRect(
+      IDirect3DSurface9* pSourceSurface, 
+      CONST RECT* pSourceRect, 
+      IDirect3DSurface9* pDestSurface, 
+      CONST RECT* pDestRect, 
+      D3DTEXTUREFILTERTYPE Filter) 
     {
-      return m_pDevice->StretchRect(pSourceSurface,pSourceRect,pDestSurface,pDestRect,Filter);
+      return m_pDevice->StretchRect(
+        pSourceSurface, 
+        pSourceRect, 
+        pDestSurface, 
+        pDestRect, 
+        Filter);
     }
     
     HRESULT APIENTRY IDirect3DDevice9Hook::TestCooperativeLevel() 
@@ -720,19 +1230,33 @@ namespace Hades
       return m_pDevice->TestCooperativeLevel();
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::UpdateSurface(IDirect3DSurface9* pSourceSurface,CONST RECT* pSourceRect,IDirect3DSurface9* pDestinationSurface,CONST POINT* pDestPoint) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::UpdateSurface(
+      IDirect3DSurface9* pSourceSurface, 
+      CONST RECT* pSourceRect, 
+      IDirect3DSurface9* pDestinationSurface, 
+      CONST POINT* pDestPoint) 
     {
-      return m_pDevice->UpdateSurface(pSourceSurface,pSourceRect,pDestinationSurface,pDestPoint);
+      return m_pDevice->UpdateSurface(
+        pSourceSurface, 
+        pSourceRect, 
+        pDestinationSurface, 
+        pDestPoint);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::UpdateTexture(IDirect3DBaseTexture9 *pSourceTexture, IDirect3DBaseTexture9 *pDestinationTexture) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::UpdateTexture(
+      IDirect3DBaseTexture9 *pSourceTexture, 
+      IDirect3DBaseTexture9 *pDestinationTexture) 
     {
-      return m_pDevice->UpdateTexture(pSourceTexture, pDestinationTexture);
+      return m_pDevice->UpdateTexture(
+        pSourceTexture, 
+        pDestinationTexture);
     }
     
-    HRESULT APIENTRY IDirect3DDevice9Hook::ValidateDevice(DWORD *pNumPasses) 
+    HRESULT APIENTRY IDirect3DDevice9Hook::ValidateDevice(
+      DWORD *pNumPasses) 
     {
-      return m_pDevice->ValidateDevice(pNumPasses);
+      return m_pDevice->ValidateDevice(
+        pNumPasses);
     }
   }
 }
