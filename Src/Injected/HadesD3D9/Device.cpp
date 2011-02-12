@@ -248,9 +248,6 @@ namespace Hades
     
     HRESULT APIENTRY IDirect3DDevice9Hook::EndScene()
     {
-      HADES_LOG_THREAD_SAFE(std::wcout << L"IDirect3DDevice9Hook::EndScene: "
-        L"Called." << std::endl);
-          
       return m_pDevice->EndScene();
     }
     
