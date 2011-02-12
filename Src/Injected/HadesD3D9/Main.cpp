@@ -24,11 +24,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 
 // Hades
+#include "Exports.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
-// Initialize D3D11
+// Initialize D3D9
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
 {
   try
@@ -47,6 +48,9 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
       L"Hades-D3D9::Initialize: Module Base = %p, Path to Self = %s, "
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
       %Hades::Windows::GetModulePath(nullptr) << std::endl);
+        
+    // Hook D3D9
+    Hades::D3D9::D3D9Manager::Hook();
   }
   catch (std::exception const& e)
   {

@@ -131,6 +131,7 @@ lib HadesD3D9
     /Memory//Memory 
     HadesRenderer 
   : 
+    <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
@@ -141,6 +142,7 @@ lib HadesD3D10
     /Memory//Memory 
     HadesRenderer 
   : 
+    <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
@@ -151,6 +153,7 @@ lib HadesD3D11
     /Memory//Memory 
     HadesRenderer 
   : 
+    <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
