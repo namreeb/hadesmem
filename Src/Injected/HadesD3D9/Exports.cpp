@@ -25,6 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Exports.hpp"
+#include "Interface.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 
@@ -89,7 +90,7 @@ namespace Hades
       HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Manager::"
         L"Direct3DCreate9_Hook: Return = %p.") %pD3D9 << std::endl);
           
-      return pD3D9;
+      return new IDirect3D9Hook(pD3D9);
     }
   }
 }
