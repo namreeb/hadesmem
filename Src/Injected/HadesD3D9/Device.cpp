@@ -33,7 +33,8 @@ namespace Hades
       : m_pD3D(pD3D9), 
       m_pDevice(pDevice), 
       m_PresentParams(), 
-      m_RefCount(1)
+      m_RefCount(1), 
+      m_pRenderer()
     {
       if (!pD3D9)
       {
@@ -63,6 +64,8 @@ namespace Hades
       }
       
       m_PresentParams = *pPresentParams;
+      
+      m_pRenderer.reset(new GUI::D3D9Renderer(m_pDevice));
     }
     
     HRESULT APIENTRY IDirect3DDevice9Hook::QueryInterface(
@@ -427,6 +430,8 @@ namespace Hades
     
     HRESULT APIENTRY IDirect3DDevice9Hook::EndScene()
     {
+      m_pRenderer->DrawText(L"Test", 0, 0);
+      
       return m_pDevice->EndScene();
     }
     
@@ -875,7 +880,7 @@ namespace Hades
     HRESULT APIENTRY IDirect3DDevice9Hook::Reset(
       D3DPRESENT_PARAMETERS *pPresentationParameters) 
     {
-      //m_pManager->PreReset();
+      m_pRenderer->PreReset();
     
       HRESULT Result = m_pDevice->Reset(
         pPresentationParameters);
@@ -883,7 +888,7 @@ namespace Hades
       if (SUCCEEDED(Result))
       {
         m_PresentParams = *pPresentationParameters;
-        //m_pManager->PostReset();
+        m_pRenderer->PostReset();
       }
     
       return Result;

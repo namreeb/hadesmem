@@ -17,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
+// C++ Standard Library
+#include <memory>
+
 // Windows API
 #include <Windows.h>
 
@@ -25,6 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <d3dx9.h>
 
 // Hades
+#include "Renderer.hpp"
 #include "HadesCommon/Error.hpp"
 
 namespace Hades
@@ -576,9 +582,10 @@ namespace Hades
     private:
       IDirect3D9* m_pD3D;
       IDirect3DDevice9* m_pDevice;
-      D3DPRESENT_PARAMETERS m_PresentParams;
-      
+      D3DPRESENT_PARAMETERS m_PresentParams;      
       UINT m_RefCount;
+      
+      std::shared_ptr<GUI::D3D9Renderer> m_pRenderer;
     };
   }
 }

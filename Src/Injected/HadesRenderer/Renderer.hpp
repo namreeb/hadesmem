@@ -19,6 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include "HadesCommon/Error.hpp"
+
 namespace Hades
 {
   namespace GUI
@@ -26,8 +29,18 @@ namespace Hades
     class Renderer
     {
     public:
+      class Error : public virtual HadesError 
+      { };
+
       virtual ~Renderer() 
       { }
+      
+      virtual void PreReset() = 0;
+      
+      virtual void PostReset() = 0;
+      
+      virtual void DrawText(std::wstring const& Text, unsigned int X, 
+        unsigned int Y) = 0;
     };
   }
 }

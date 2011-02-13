@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 // Windows API
 #include <Windows.h>
 

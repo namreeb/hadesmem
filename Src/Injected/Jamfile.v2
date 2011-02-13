@@ -61,6 +61,12 @@ lib d3dx11
     <address-model>64:<search>$(DXSDK_DIR)/lib/x64 
   ;
 
+lib gdi32 
+  : 
+  : 
+    <name>gdi32 
+  ;
+
 lib user32 
   : 
   : 
@@ -130,6 +136,9 @@ lib HadesD3D9
     [ glob HadesD3D9/*.cpp ] 
     /Memory//Memory 
     HadesRenderer 
+    d3d9 
+    d3dx9 
+    gdi32 
   : 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
