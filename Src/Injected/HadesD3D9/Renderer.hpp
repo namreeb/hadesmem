@@ -66,7 +66,7 @@ namespace Hades
           OUT_DEFAULT_PRECIS, 
           DEFAULT_QUALITY, 
           DEFAULT_PITCH | FF_DONTCARE, 
-          L"Arial", 
+          L"Arial Bold", 
           &m_pFont);
   
         if (FAILED(ResultF))
