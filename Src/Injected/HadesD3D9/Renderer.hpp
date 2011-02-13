@@ -34,6 +34,9 @@ namespace Hades
 {
   namespace GUI
   {
+    // Todo: Make things like font height, font face, text colour, draw flags, 
+    // etc configurable.
+    
     class D3D9Renderer : public Renderer
     {
     public:

@@ -38,6 +38,7 @@ namespace Hades
   namespace D3D9
   {
     // Todo: Decouple device and renderer objects
+    // Todo: Hook IDirect3D9Ex 
     
     class IDirect3DDevice9Hook : public IDirect3DDevice9
     {
