@@ -19,39 +19,32 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
+// C++ Standard Library
+#include <vector>
 
-// DirectX
-#include <d3d9.h>
-#include <d3dx9.h>
+// Boost
+#include <boost/filesystem.hpp>
 
 // Hades
-#include "HadesMemory/Memory.hpp"
-#include "HadesKernel/Kernel.hpp"
+#include "HadesRenderer/Renderer.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace Hades
 {
-  namespace D3D9
+  namespace Kernel
   {
-    class D3D9Manager
+    class Kernel
     {
     public:
       class Error : public virtual HadesError 
       { };
       
-      static void Initialize(Kernel::Kernel* pKernel);
+      virtual void LoadExtension(boost::filesystem::path const& Path);
+      
+      virtual void OnFrame(Hades::GUI::Renderer& pRenderer);
 
-      static void Hook();
-      
-      static void Unhook();
-      
     private:
-      static IDirect3D9* WINAPI Direct3DCreate9_Hook(UINT SDKVersion);
-      
-      static Kernel::Kernel* m_pKernel;
-        
-      static std::shared_ptr<Hades::Memory::PatchDetour> m_pDirect3DCreate9;
+      std::vector<Hades::Windows::EnsureFreeLibrary> m_Extensions;
     };
   }
 }

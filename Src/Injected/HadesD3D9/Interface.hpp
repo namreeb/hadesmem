@@ -28,6 +28,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesCommon/Error.hpp"
+#include "HadesKernel/Kernel.hpp"
 
 namespace Hades
 {
@@ -39,7 +40,7 @@ namespace Hades
       class Error : public virtual HadesError 
       { };
 
-      explicit IDirect3D9Hook(IDirect3D9* pD3D9);
+      explicit IDirect3D9Hook(Kernel::Kernel* pKernel, IDirect3D9* pD3D9);
       
       // IUnknown methods
       STDMETHOD(QueryInterface)(
@@ -130,6 +131,7 @@ namespace Hades
         IDirect3DDevice9** ppReturnedDeviceInterface);
       
     private:
+      Kernel::Kernel* m_pKernel;
       IDirect3D9* m_pD3D;
     };
   }

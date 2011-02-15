@@ -27,10 +27,12 @@ namespace Hades
   namespace D3D9
   {
     IDirect3DDevice9Hook::IDirect3DDevice9Hook(
+      Kernel::Kernel* pKernel, 
       IDirect3D9* pD3D9, 
       IDirect3DDevice9* pDevice, 
       D3DPRESENT_PARAMETERS* pPresentParams) 
-      : m_pD3D(pD3D9), 
+      : m_pKernel(pKernel), 
+      m_pD3D(pD3D9), 
       m_pDevice(pDevice), 
       m_PresentParams(), 
       m_RefCount(1), 
@@ -430,7 +432,7 @@ namespace Hades
     
     HRESULT APIENTRY IDirect3DDevice9Hook::EndScene()
     {
-      m_pRenderer->DrawText(L"Test", 0, 0);
+      m_pKernel->OnFrame(*m_pRenderer);
       
       return m_pDevice->EndScene();
     }

@@ -79,7 +79,7 @@ alias HadesRenderer
   : 
   : 
   : 
-    <include>"."
+    <include>"." 
   ;
 
 
@@ -126,7 +126,9 @@ lib HadesKernel
   : 
     [ glob HadesKernel/*.cpp ] 
     /Memory//Memory 
+    HadesRenderer 
   : 
+    <include>"." 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
@@ -140,6 +142,7 @@ lib HadesD3D9
     d3dx9 
     gdi32 
   : 
+    <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
@@ -151,6 +154,7 @@ lib HadesD3D10
     /Memory//Memory 
     HadesRenderer 
   : 
+    <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
@@ -162,6 +166,7 @@ lib HadesD3D11
     /Memory//Memory 
     HadesRenderer 
   : 
+    <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
     <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 

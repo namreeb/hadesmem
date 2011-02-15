@@ -32,6 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Renderer.hpp"
 #include "HadesCommon/Error.hpp"
+#include "HadesKernel/Kernel.hpp"
 
 namespace Hades
 {
@@ -47,6 +48,7 @@ namespace Hades
       { };
       
       explicit IDirect3DDevice9Hook(
+        Kernel::Kernel* pKernel, 
         IDirect3D9* pD3D9, 
         IDirect3DDevice9* pDevice, 
         D3DPRESENT_PARAMETERS* pPresentParams);
@@ -583,6 +585,7 @@ namespace Hades
         IDirect3DQuery9** ppQuery);
       
     private:
+      Kernel::Kernel* m_pKernel;
       IDirect3D9* m_pD3D;
       IDirect3DDevice9* m_pDevice;
       D3DPRESENT_PARAMETERS m_PresentParams;      

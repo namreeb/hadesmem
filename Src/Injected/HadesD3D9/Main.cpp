@@ -27,10 +27,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Exports.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
+#include "HadesKernel/Kernel.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
 // Initialize D3D9
-extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
+extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module, 
+  Hades::Kernel::Kernel* pKernel)
 {
   try
   {
@@ -49,7 +51,8 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
       %Hades::Windows::GetModulePath(nullptr) << std::endl);
         
-    // Hook D3D9
+    // Initialize and hook D3D9
+    Hades::D3D9::D3D9Manager::Initialize(pKernel);
     Hades::D3D9::D3D9Manager::Hook();
   }
   catch (std::exception const& e)

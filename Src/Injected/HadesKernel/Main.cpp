@@ -24,11 +24,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 
 // Hades
+#include "Kernel.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 #include "HadesCommon/Filesystem.hpp"
+#include "HadesRenderer/Renderer.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 // Initialize kernel
+// Todo: Ensure safe for reentry
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
 {
   try
@@ -47,6 +51,10 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
       L"Hades-Kernel::Initialize: Module Base = %p, Path to Self = %s, "
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
       %Hades::Windows::GetModulePath(nullptr));
+        
+    // Initialize Kernel
+    static Hades::Kernel::Kernel MyKernel;
+    MyKernel.LoadExtension("HadesD3D9.dll");
   }
   catch (std::exception const& e)
   {

@@ -33,8 +33,15 @@ namespace Hades
 {
   namespace D3D9
   {
+    Kernel::Kernel* D3D9Manager::m_pKernel = nullptr;
+      
     std::shared_ptr<Hades::Memory::PatchDetour> D3D9Manager::
       m_pDirect3DCreate9;
+      
+    void D3D9Manager::Initialize(Kernel::Kernel* pKernel)
+    {
+      m_pKernel = pKernel;
+    }
       
     void D3D9Manager::Hook()
     {
@@ -90,7 +97,7 @@ namespace Hades
       HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Manager::"
         L"Direct3DCreate9_Hook: Return = %p.") %pD3D9 << std::endl);
           
-      return new IDirect3D9Hook(pD3D9);
+      return new IDirect3D9Hook(m_pKernel, pD3D9);
     }
   }
 }
