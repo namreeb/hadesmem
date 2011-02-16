@@ -19,6 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// C++ Standard Library
+#include <string>
+
 // Hades
 #include "HadesCommon/Error.hpp"
 

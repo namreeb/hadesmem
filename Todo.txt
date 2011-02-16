@@ -9,6 +9,7 @@
   * Fix all 'fixme' items in code.
   * Proper locale support.
   * Template concept checking and improved error messages.
+  
 * New Modules
   * Debugging APIs.
     * Software breakpoint.
@@ -22,15 +23,18 @@
   * IA32 and AMD64 remote code 'emulator'.
   * Custom GetModuleHandle, GetProcAddress, etc.
   * Cheat Engine 'replacement'.
-  * Injected 'base hook'.
+  
 * Base hook
+  * Increase safety and stability before adding any major new functionality.
   * Injected GUI library.
   * Injected music player controller.
+
 * MemoryMgr
   * Improve 'safety' of remote function caller via EH to minimize risk of 
   crashing target.
   * Improve genericity of parameter passing in remote function caller.
   * Memory reading via expression templates.
+
 * Disassembler
   * Decode calls/jumps to function names where possible.
   * NOP/UnNOP support.
@@ -38,6 +42,7 @@
   * String based assembler with x64 support.
   * Improve bindings to make it actually useful from Python.
   * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+
 * Scanner
   * Multi-threaded scanning option.
   * Wildcard support for vector/string scanning.
@@ -56,10 +61,12 @@
   * Custom scanning via user-supplied predicate.
   * Improved floating-point scanning (configurable or 'smart' epsilon).
   * Group search support.
+
 * Injector
   * .NET injection.
   * Cross-session injection.
   * IAT injection.
+
 * Patcher
   * VEH hooking (Both INT3 and DR).
   * Transactional hooking.
@@ -67,8 +74,10 @@
   * Sanity checking for target process.
   * Freeze target when hooking.
   * VMT hooking.
+  
 * ManualMap
   * Improved exception handling support.
+  
 * FindPattern
   * Pattern generator.
   * Multi-threaded scanning.
@@ -78,6 +87,7 @@
   * Dump results to file.
   * Change parser library from RapidXML to Boost.Spirit (may require a 
   format change from XML to something custom).
+  
 * PeLib
   * Finish implementing matching 'setters' for existing 'getters'.
   * Add modules to support more of the PE file format.
