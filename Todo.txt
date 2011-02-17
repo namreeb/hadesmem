@@ -1,14 +1,17 @@
 * General
-  * Upgrade to Python 3.x.
   * x64 -> x86 process manipulation.
   * Documentation via Boost.QuickBook.
-  * Unit tests via Boost.Test.
-  * Improved and documented exception-safety guarantees (incl rollback 
-  support via RAII or Boost.ScopeExit).
+  * Unit tests (Boost.Test?).
+  * Improved and documented exception-safety guarantees, incl rollback 
+  support (RAII? Boost.ScopeExit?).
   * Improved and documented thread-safety guarantees.
+  * Rethink and reimplement threading model.
   * Fix all 'fixme' items in code.
   * Proper locale support.
   * Template concept checking and improved error messages.
+  * Binaries with update server.
+  * Automatic binary versioning using SVN revision.
+  * Upgrade to Python 3.x.
   
 * New Modules
   * Debugging APIs.
@@ -25,7 +28,13 @@
   * Cheat Engine 'replacement'.
   
 * Base hook
+  * Rethink and reimplement threading model.
   * Increase safety and stability before adding any major new functionality.
+  * D3D9, D3D10, D3D11 rendering support.
+  * Exception handling at hook/module boundaries.
+  * Hook profiling.
+  * Child process injection/hooking with WoW64 'workaround' (two-way).
+  * Config support (Spirit? XML?).
   * Injected GUI library.
   * Injected music player controller.
 
