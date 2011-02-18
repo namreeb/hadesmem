@@ -166,21 +166,33 @@ namespace Hades
           L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
           L"Call successful." << std::endl);
         
+        auto pDevice = *ppDevice;
+        auto pImmediateContext = *ppImmediateContext;
+        auto pSwapChain = *ppSwapChain;
+          
         if (ppDevice && ppImmediateContext)
         {
-          auto pDevice = *ppDevice;
-          auto pImmediateContext = *ppImmediateContext;
-          
           HADES_LOG_THREAD_SAFE(std::wcout << 
             L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
             L"Hooking ID3D11Device." << std::endl);
-          *ppDevice = new ID3D11DeviceHook(pDevice);
+          *ppDevice = new ID3D11DeviceHook(*m_pKernel, 
+            pDevice, pImmediateContext);
           
           HADES_LOG_THREAD_SAFE(std::wcout << 
             L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
             L"Hooking ID3D11DeviceContext." << std::endl);
-          *ppImmediateContext = new ID3D11DeviceContextHook(*m_pKernel, 
-            pImmediateContext, pDevice);
+          *ppImmediateContext = new ID3D11DeviceContextHook(
+            pImmediateContext);
+        }
+        
+        if (ppSwapChain)
+        {
+          
+          HADES_LOG_THREAD_SAFE(std::wcout << 
+            L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
+            L"Hooking IDXGISwapChain." << std::endl);
+          *ppSwapChain = new IDXGISwapChainHook(*ppDevice, pSwapChain, 
+            pSwapChainDesc);
         }
       }
       else

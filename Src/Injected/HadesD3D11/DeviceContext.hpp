@@ -29,10 +29,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define D3D11_IGNORE_SDK_LAYERS
 #include <d3d11.h>
 
-// Hades
-#include "Renderer.hpp"
-#include "HadesKernel/Kernel.hpp"
-
 namespace Hades
 {
   namespace D3D11
@@ -40,13 +36,8 @@ namespace Hades
     class ID3D11DeviceContextHook : public ID3D11DeviceContext
     {
     public:
-      ID3D11DeviceContextHook(Kernel::Kernel& MyKernel, 
-        ID3D11DeviceContext* pDeviceContext, 
-        ID3D11Device* pDevice) 
-        : m_Kernel(MyKernel), 
-        m_pDeviceContext(pDeviceContext), 
-        m_pDevice(pDevice), 
-        m_pRenderer(new GUI::D3D11Renderer(pDevice, pDeviceContext))
+      ID3D11DeviceContextHook(ID3D11DeviceContext* pDeviceContext) 
+        : m_pDeviceContext(pDeviceContext)
       { }
       
       // 
@@ -596,10 +587,7 @@ namespace Hades
       // 
       
     private:
-      Kernel::Kernel& m_Kernel;
   		ID3D11DeviceContext* m_pDeviceContext;
-  		ID3D11Device* m_pDevice;
-  		std::shared_ptr<GUI::D3D11Renderer> m_pRenderer;
     };
   }
 }

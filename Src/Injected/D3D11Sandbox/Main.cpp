@@ -416,15 +416,15 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
 //--------------------------------------------------------------------------------------
 void Render()
 {
-    // Clear the back buffer 
-    float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red,green,blue,alpha
-    g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
-
-    // Render a triangle
-	g_pImmediateContext->VSSetShader( g_pVertexShader, NULL, 0 );
-	g_pImmediateContext->PSSetShader( g_pPixelShader, NULL, 0 );
-    g_pImmediateContext->Draw( 3, 0 );
-
-    // Present the information rendered to the back buffer to the front buffer (the screen)
-    g_pSwapChain->Present( 0, 0 );
+  // Clear the back buffer 
+  float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red,green,blue,alpha
+  g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
+  
+  // Render a triangle
+  g_pImmediateContext->VSSetShader( g_pVertexShader, NULL, 0 );
+  g_pImmediateContext->PSSetShader( g_pPixelShader, NULL, 0 );
+  g_pImmediateContext->Draw( 3, 0 );
+  
+  // Present the information rendered to the back buffer to the front buffer (the screen)
+  g_pSwapChain->Present( 0, 0 );
 }
