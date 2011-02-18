@@ -26,8 +26,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // DirectX
-#include <d3d9.h>
-#include <d3dx9.h>
+#define D3D11_IGNORE_SDK_LAYERS
+#include <d3d11.h>
 
 // Hades
 #include "HadesMemory/Memory.hpp"
@@ -35,9 +35,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Hades
 {
-  namespace D3D9
+  namespace D3D11
   {
-    class D3D9Hooker
+    class D3D11Hooker
     {
     public:
       class Error : public virtual HadesError 
@@ -50,11 +50,35 @@ namespace Hades
       static void Unhook();
       
     private:
-      static IDirect3D9* WINAPI Direct3DCreate9_Hook(UINT SDKVersion);
+      static HRESULT WINAPI D3D11CreateDeviceAndSwapChain_Hook(
+        IDXGIAdapter *pAdapter,
+        D3D_DRIVER_TYPE DriverType,
+        HMODULE Software,
+        UINT Flags,
+        const D3D_FEATURE_LEVEL *pFeatureLevels,
+        UINT FeatureLevels,
+        UINT SDKVersion,
+        const DXGI_SWAP_CHAIN_DESC *pSwapChainDesc,
+        IDXGISwapChain **ppSwapChain,
+        ID3D11Device **ppDevice,
+        D3D_FEATURE_LEVEL *pFeatureLevel,
+        ID3D11DeviceContext **ppImmediateContext);
+              
+      static HRESULT WINAPI CreateDXGIFactory_Hook(
+        REFIID riid,
+        void **ppFactory);
+      
+      static HRESULT WINAPI CreateDXGIFactory1_Hook(
+        REFIID riid,
+        void **ppFactory);
       
       static Kernel::Kernel* m_pKernel;
         
-      static std::shared_ptr<Hades::Memory::PatchDetour> m_pDirect3DCreate9;
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pD3D11CreateDeviceAndSwapChainHk;
+        
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDXGIFactoryHk;
+        
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDXGIFactory1Hk;
     };
   }
 }

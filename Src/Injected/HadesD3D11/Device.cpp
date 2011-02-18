@@ -95,8 +95,6 @@ namespace Hades
       const D3D11_RENDER_TARGET_VIEW_DESC *pDesc,
       ID3D11RenderTargetView **ppRTView)
     {
-      HADES_LOG_THREAD_SAFE(std::wcout << L"ID3D11DeviceHook::"
-        L"CreateRenderTargetView: Test." << std::endl);
       return m_pDevice->CreateRenderTargetView(pResource, pDesc, ppRTView);
     }
 

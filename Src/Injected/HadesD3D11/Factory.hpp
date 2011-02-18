@@ -42,6 +42,38 @@ namespace Hades
         return m_pFactory;
       }
       
+      // 
+      
+      virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+        REFIID riid, 
+        void** ppvObject);
+        
+      virtual ULONG STDMETHODCALLTYPE AddRef();
+        
+      virtual ULONG STDMETHODCALLTYPE Release();
+      
+      // 
+      
+      virtual HRESULT STDMETHODCALLTYPE SetPrivateData( 
+        REFGUID Name,
+        UINT DataSize,
+        const void *pData);
+      
+      virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface( 
+        REFGUID Name,
+        const IUnknown *pUnknown);
+      
+      virtual HRESULT STDMETHODCALLTYPE GetPrivateData( 
+        REFGUID Name,
+        UINT *pDataSize,
+        void *pData);
+      
+      virtual HRESULT STDMETHODCALLTYPE GetParent( 
+        REFIID riid,
+        void **ppParent);
+        
+      // 
+      
       virtual HRESULT STDMETHODCALLTYPE EnumAdapters( 
         UINT Adapter,
         IDXGIAdapter **ppAdapter);
@@ -78,6 +110,38 @@ namespace Hades
         return m_pFactory;
       }
       
+      // 
+      
+      virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+        REFIID riid, 
+        void** ppvObject);
+        
+      virtual ULONG STDMETHODCALLTYPE AddRef();
+        
+      virtual ULONG STDMETHODCALLTYPE Release();
+      
+      // 
+      
+      virtual HRESULT STDMETHODCALLTYPE SetPrivateData( 
+        REFGUID Name,
+        UINT DataSize,
+        const void *pData);
+      
+      virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface( 
+        REFGUID Name,
+        const IUnknown *pUnknown);
+      
+      virtual HRESULT STDMETHODCALLTYPE GetPrivateData( 
+        REFGUID Name,
+        UINT *pDataSize,
+        void *pData);
+      
+      virtual HRESULT STDMETHODCALLTYPE GetParent( 
+        REFIID riid,
+        void **ppParent);
+        
+      // 
+      
       virtual HRESULT STDMETHODCALLTYPE EnumAdapters( 
         UINT Adapter,
         IDXGIAdapter **ppAdapter);
@@ -97,6 +161,8 @@ namespace Hades
       virtual HRESULT STDMETHODCALLTYPE CreateSoftwareAdapter( 
         HMODULE Module,
         IDXGIAdapter **ppAdapter);
+        
+      // 
         
       virtual HRESULT STDMETHODCALLTYPE EnumAdapters1( 
         UINT Adapter,

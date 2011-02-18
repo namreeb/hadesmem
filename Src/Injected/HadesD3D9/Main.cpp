@@ -42,9 +42,6 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module,
       DebugBreak();
     }
     
-    // Initialize logger
-    Hades::Util::InitLogger(L"Log", L"Debug");
-      
     // Debug output
     HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
       L"Hades-D3D9::Initialize: Module Base = %p, Path to Self = %s, "

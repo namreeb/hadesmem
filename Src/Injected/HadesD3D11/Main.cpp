@@ -24,13 +24,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 
 // Hades
-#include "Exports.hpp"
+#include "Hooker.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
+#include "HadesKernel/Kernel.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
-// Initialize D3D11
-extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
+// Initialize D3D9
+extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module, 
+  Hades::Kernel::Kernel& MyKernel)
 {
   try
   {
@@ -40,17 +42,15 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
       DebugBreak();
     }
     
-    // Initialize logger
-    Hades::Util::InitLogger(L"Log", L"Debug");
-      
     // Debug output
     HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
       L"Hades-D3D11::Initialize: Module Base = %p, Path to Self = %s, "
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
       %Hades::Windows::GetModulePath(nullptr) << std::endl);
         
-     // Hook D3D11
-     Hades::D3D11::HookD3D11();
+    // Initialize and hook D3D11
+    Hades::D3D11::D3D11Hooker::Initialize(MyKernel);
+    Hades::D3D11::D3D11Hooker::Hook();
   }
   catch (std::exception const& e)
   {

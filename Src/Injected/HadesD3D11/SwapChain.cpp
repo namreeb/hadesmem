@@ -92,7 +92,7 @@ namespace Hades
       UINT Flags)
     {
       HADES_LOG_THREAD_SAFE(std::wcout << L"IDXGISwapChainHook::Present: "
-        L"Test." << std::endl);
+        L"Called." << std::endl);
       return m_pSwapChain->Present(SyncInterval, Flags);
     }
     

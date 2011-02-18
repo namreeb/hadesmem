@@ -457,7 +457,7 @@ namespace Hades
       const FLOAT ColorRGBA[ 4 ])
     {
       HADES_LOG_THREAD_SAFE(std::wcout << L"ID3D11DeviceContextHook::"
-        L"ClearRenderTargetView: Test." << std::endl);
+        L"ClearRenderTargetView: Called." << std::endl);
       return m_pDeviceContext->ClearRenderTargetView(pRenderTargetView, 
         ColorRGBA);
     }

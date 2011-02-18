@@ -33,6 +33,8 @@ namespace Hades
 {
   namespace D3D9
   {
+    // Todo: Ensure hook removal on module unload
+    
     Kernel::Kernel* D3D9Hooker::m_pKernel = nullptr;
       
     std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::

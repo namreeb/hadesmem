@@ -55,6 +55,7 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
     // Initialize Kernel
     static Hades::Kernel::Kernel MyKernel;
     MyKernel.LoadExtension("HadesD3D9.dll");
+    MyKernel.LoadExtension("HadesD3D11.dll");
   }
   catch (std::exception const& e)
   {
