@@ -95,9 +95,6 @@ namespace Hades
       HADES_LOG_THREAD_SAFE(std::wcout << L"IDXGISwapChainHook::Present: "
         L"Called." << std::endl);
       
-      ID3D11DeviceHook* pDeviceHk = static_cast<ID3D11DeviceHook*>(m_pDevice);
-      pDeviceHk->OnFrame();
-      
       return m_pSwapChain->Present(SyncInterval, Flags);
     }
     

@@ -169,7 +169,6 @@ namespace Hades
         auto pDevice = ppDevice ? *ppDevice : nullptr;
         auto pImmediateContext = ppImmediateContext ? *ppImmediateContext : 
           nullptr;
-        auto pSwapChain = ppSwapChain ? *ppSwapChain : nullptr;
           
         if (ppDevice && ppImmediateContext)
         {
@@ -184,16 +183,6 @@ namespace Hades
             L"Hooking ID3D11DeviceContext." << std::endl);
           *ppImmediateContext = new ID3D11DeviceContextHook(
             pImmediateContext);
-        }
-        
-        if (ppSwapChain)
-        {
-          
-          HADES_LOG_THREAD_SAFE(std::wcout << 
-            L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
-            L"Hooking IDXGISwapChain." << std::endl);
-          *ppSwapChain = new IDXGISwapChainHook(*ppDevice, pSwapChain, 
-            pSwapChainDesc);
         }
       }
       else
