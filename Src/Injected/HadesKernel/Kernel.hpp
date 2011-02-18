@@ -23,7 +23,16 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 // Boost
+#ifdef _MSC_VER
+#pragma warning(push, 1)
+#pragma warning(disable: 4267)
+#endif // #ifdef _MSC_VER
+#include <boost/thread.hpp>
+#include <boost/signals2.hpp>
 #include <boost/filesystem.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // #ifdef _MSC_VER
 
 // Hades
 #include "HadesRenderer/Renderer.hpp"
@@ -42,9 +51,15 @@ namespace Hades
       virtual void LoadExtension(boost::filesystem::path const& Path);
       
       virtual void OnFrame(Hades::GUI::Renderer& pRenderer);
+        
+      typedef boost::signals2::signal<void (Hades::GUI::Renderer& pRenderer)> 
+        OnFrameSig;
+      typedef OnFrameSig::slot_type OnFrameFn;
+      virtual boost::signals2::connection RegisterOnFrame(OnFrameFn Fn);
 
     private:
       std::vector<Hades::Windows::EnsureFreeLibrary> m_Extensions;
+      OnFrameSig m_OnFrame;
     };
   }
 }

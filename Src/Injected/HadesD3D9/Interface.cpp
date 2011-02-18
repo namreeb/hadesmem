@@ -30,8 +30,8 @@ namespace Hades
 {
   namespace D3D9
   {
-    IDirect3D9Hook::IDirect3D9Hook(Kernel::Kernel* pKernel, IDirect3D9* pD3D9) 
-      : m_pKernel(pKernel), 
+    IDirect3D9Hook::IDirect3D9Hook(Kernel::Kernel& MyKernel, IDirect3D9* pD3D9) 
+      : m_Kernel(MyKernel), 
       m_pD3D(pD3D9)
     {
       if (!pD3D9)
@@ -160,7 +160,7 @@ namespace Hades
           L"CreateDevice: Hooking device. Device = %p.") 
           %*ppReturnedDeviceInterface << std::endl);
         *ppReturnedDeviceInterface = new IDirect3DDevice9Hook(
-          m_pKernel, 
+          m_Kernel, 
           this, 
           *ppReturnedDeviceInterface, 
           pPresentationParameters);

@@ -29,12 +29,8 @@ namespace Hades
   {
     void Kernel::LoadExtension(boost::filesystem::path const& Path)
     {
-      boost::filesystem::path PathReal(Path);
-        
-      if (Path.is_relative())
-      {
-        PathReal = Hades::Windows::GetSelfDirPath() / Path;
-      }
+      boost::filesystem::path PathReal(Path.is_relative() ? 
+        Hades::Windows::GetSelfDirPath() / Path : Path);
       
       Windows::EnsureFreeLibrary ExtMod(LoadLibrary(PathReal.c_str()));
       if (!ExtMod)
@@ -62,16 +58,23 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      typedef DWORD (__stdcall* tInitialize)(HMODULE Module, Kernel* pKernel);
+      typedef DWORD (__stdcall* tInitialize)(HMODULE Module, Kernel& MyKernel);
       auto pInitializeReal = reinterpret_cast<tInitialize>(pInitialize);
-      pInitializeReal(ExtMod, this);
+      pInitializeReal(ExtMod, *this);
       
       m_Extensions.push_back(std::move(ExtMod));
     }
     
     void Kernel::OnFrame(Hades::GUI::Renderer& pRenderer)
     {
-      pRenderer.DrawText(L"Test", 0, 0);
+      pRenderer.DrawText(L"Hades", 5, 5);
+      
+      m_OnFrame(pRenderer);
+    }
+    
+    boost::signals2::connection Kernel::RegisterOnFrame(OnFrameFn Fn)
+    {
+      return m_OnFrame.connect(Fn);
     }
   }
 }

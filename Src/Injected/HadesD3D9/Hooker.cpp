@@ -24,7 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 
 // Hades
-#include "Exports.hpp"
+#include "Hooker.hpp"
 #include "Interface.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
@@ -33,17 +33,17 @@ namespace Hades
 {
   namespace D3D9
   {
-    Kernel::Kernel* D3D9Manager::m_pKernel = nullptr;
+    Kernel::Kernel* D3D9Hooker::m_pKernel = nullptr;
       
-    std::shared_ptr<Hades::Memory::PatchDetour> D3D9Manager::
+    std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::
       m_pDirect3DCreate9;
       
-    void D3D9Manager::Initialize(Kernel::Kernel* pKernel)
+    void D3D9Hooker::Initialize(Kernel::Kernel& MyKernel)
     {
-      m_pKernel = pKernel;
+      m_pKernel = &MyKernel;
     }
       
-    void D3D9Manager::Hook()
+    void D3D9Hooker::Hook()
     {
       // Todo: Deferred hooking via a LoadLibrary hook
       HMODULE const D3D9Mod = LoadLibrary(L"d3d9.dll");
@@ -51,7 +51,7 @@ namespace Hades
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("D3D9Manager::Hook") << 
+          ErrorFunction("D3D9Hooker::Hook") << 
           ErrorString("Could not load D3D9.dll") << 
           ErrorCode(LastError));
       }
@@ -62,21 +62,21 @@ namespace Hades
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("D3D9Manager::Hook") << 
+          ErrorFunction("D3D9Hooker::Hook") << 
           ErrorString("Could not find D3D9!Direct3DCreate9") << 
           ErrorCode(LastError));
       }
       
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Manager::"
+      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
         L"Hook: pDirect3DCreate9 = %p.") %pDirect3DCreate9 << std::endl);
           
-      Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+      Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
       m_pDirect3DCreate9.reset(new Memory::PatchDetour(MyMemory, pDirect3DCreate9, 
         &Direct3DCreate9_Hook));
       m_pDirect3DCreate9->Apply();
     }
     
-    void D3D9Manager::Unhook()
+    void D3D9Hooker::Unhook()
     {
       if (m_pDirect3DCreate9)
       {
@@ -84,20 +84,20 @@ namespace Hades
       }
     }
     
-    IDirect3D9* WINAPI D3D9Manager::Direct3DCreate9_Hook(UINT SDKVersion)
+    IDirect3D9* WINAPI D3D9Hooker::Direct3DCreate9_Hook(UINT SDKVersion)
     {
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Manager::"
+      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
         L"Direct3DCreate9_Hook: SDKVersion = %u.") %SDKVersion << std::endl);
           
       typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
-      auto pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
+      auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
         m_pDirect3DCreate9->GetTrampoline());      
       IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
         
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Manager::"
+      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
         L"Direct3DCreate9_Hook: Return = %p.") %pD3D9 << std::endl);
           
-      return new IDirect3D9Hook(m_pKernel, pD3D9);
+      return new IDirect3D9Hook(*m_pKernel, pD3D9);
     }
   }
 }

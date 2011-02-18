@@ -34,13 +34,13 @@ namespace Hades
 {
   namespace D3D9
   {
-    class D3D9Manager
+    class D3D9Hooker
     {
     public:
       class Error : public virtual HadesError 
       { };
       
-      static void Initialize(Kernel::Kernel* pKernel);
+      static void Initialize(Kernel::Kernel& MyKernel);
 
       static void Hook();
       

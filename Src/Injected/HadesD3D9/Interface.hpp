@@ -40,7 +40,7 @@ namespace Hades
       class Error : public virtual HadesError 
       { };
 
-      explicit IDirect3D9Hook(Kernel::Kernel* pKernel, IDirect3D9* pD3D9);
+      explicit IDirect3D9Hook(Kernel::Kernel& MyKernel, IDirect3D9* pD3D9);
       
       // IUnknown methods
       STDMETHOD(QueryInterface)(
@@ -131,7 +131,7 @@ namespace Hades
         IDirect3DDevice9** ppReturnedDeviceInterface);
       
     private:
-      Kernel::Kernel* m_pKernel;
+      Kernel::Kernel& m_Kernel;
       IDirect3D9* m_pD3D;
     };
   }

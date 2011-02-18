@@ -48,7 +48,7 @@ namespace Hades
       { };
       
       explicit IDirect3DDevice9Hook(
-        Kernel::Kernel* pKernel, 
+        Kernel::Kernel& MyKernel, 
         IDirect3D9* pD3D9, 
         IDirect3DDevice9* pDevice, 
         D3DPRESENT_PARAMETERS* pPresentParams);
@@ -585,7 +585,7 @@ namespace Hades
         IDirect3DQuery9** ppQuery);
       
     private:
-      Kernel::Kernel* m_pKernel;
+      Kernel::Kernel& m_Kernel;
       IDirect3D9* m_pD3D;
       IDirect3DDevice9* m_pDevice;
       D3DPRESENT_PARAMETERS m_PresentParams;      

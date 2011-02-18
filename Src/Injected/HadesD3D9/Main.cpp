@@ -24,7 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 
 // Hades
-#include "Exports.hpp"
+#include "Hooker.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 #include "HadesKernel/Kernel.hpp"
@@ -32,7 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Initialize D3D9
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module, 
-  Hades::Kernel::Kernel* pKernel)
+  Hades::Kernel::Kernel& MyKernel)
 {
   try
   {
@@ -52,8 +52,8 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module,
       %Hades::Windows::GetModulePath(nullptr) << std::endl);
         
     // Initialize and hook D3D9
-    Hades::D3D9::D3D9Manager::Initialize(pKernel);
-    Hades::D3D9::D3D9Manager::Hook();
+    Hades::D3D9::D3D9Hooker::Initialize(MyKernel);
+    Hades::D3D9::D3D9Hooker::Hook();
   }
   catch (std::exception const& e)
   {
