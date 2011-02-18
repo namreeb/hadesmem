@@ -166,9 +166,10 @@ namespace Hades
           L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
           L"Call successful." << std::endl);
         
-        auto pDevice = *ppDevice;
-        auto pImmediateContext = *ppImmediateContext;
-        auto pSwapChain = *ppSwapChain;
+        auto pDevice = ppDevice ? *ppDevice : nullptr;
+        auto pImmediateContext = ppImmediateContext ? *ppImmediateContext : 
+          nullptr;
+        auto pSwapChain = ppSwapChain ? *ppSwapChain : nullptr;
           
         if (ppDevice && ppImmediateContext)
         {
