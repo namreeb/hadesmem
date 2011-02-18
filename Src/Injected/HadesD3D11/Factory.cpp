@@ -108,11 +108,11 @@ namespace Hades
       if (SUCCEEDED(Ret))
       {
         HADES_LOG_THREAD_SAFE(std::wcout << 
-          L"IDXGIFactory1Hook::CreateSwapChain: "
+          L"IDXGIFactoryHook::CreateSwapChain: "
           L"Call successful." << std::endl);
             
         HADES_LOG_THREAD_SAFE(std::wcout << 
-          L"IDXGIFactory1Hook::CreateSwapChain: "
+          L"IDXGIFactoryHook::CreateSwapChain: "
           L"Hooking IDXGISwapChain." << std::endl);
             
         *ppSwapChain = new IDXGISwapChainHook(pDevice, *ppSwapChain, pDesc);
@@ -120,7 +120,7 @@ namespace Hades
       else
       {
         HADES_LOG_THREAD_SAFE(std::wcout << 
-          L"IDXGIFactory1Hook::CreateSwapChain: "
+          L"IDXGIFactoryHook::CreateSwapChain: "
           L"Call failed." << std::endl);
       }
       
@@ -140,16 +140,25 @@ namespace Hades
       REFIID riid, 
       void** ppvObject)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::QueryInterface: "
+        L"Called." << std::endl);
       return m_pFactory->QueryInterface(riid, ppvObject);
     }
       
     ULONG STDMETHODCALLTYPE IDXGIFactory1Hook::AddRef()
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::AddRef: "
+        L"Called." << std::endl);
       return m_pFactory->AddRef();
     }
       
     ULONG STDMETHODCALLTYPE IDXGIFactory1Hook::Release()
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::Release: "
+        L"Called." << std::endl);
       return m_pFactory->Release();
     }
     
@@ -160,6 +169,9 @@ namespace Hades
       UINT DataSize,
       const void *pData)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::SetPrivateData: "
+        L"Called." << std::endl);
       return m_pFactory->SetPrivateData(Name, DataSize, pData);
     }
     
@@ -167,6 +179,9 @@ namespace Hades
       REFGUID Name,
       const IUnknown *pUnknown)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::SetPrivateDataInterface: "
+        L"Called." << std::endl);
       return m_pFactory->SetPrivateDataInterface(Name, pUnknown);
     }
     
@@ -175,6 +190,9 @@ namespace Hades
       UINT *pDataSize,
       void *pData)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::GetPrivateData: "
+        L"Called." << std::endl);
       return m_pFactory->GetPrivateData(Name, pDataSize, pData);
     }
     
@@ -182,6 +200,9 @@ namespace Hades
       REFIID riid,
       void **ppParent)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::GetParent: "
+        L"Called." << std::endl);
       return m_pFactory->GetParent(riid, ppParent);
     }
         
@@ -191,6 +212,9 @@ namespace Hades
       UINT Adapter,
       IDXGIAdapter **ppAdapter)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::EnumAdapters: "
+        L"Called." << std::endl);
       return m_pFactory->EnumAdapters(Adapter, ppAdapter);
     }
       
@@ -198,12 +222,18 @@ namespace Hades
       HWND WindowHandle,
       UINT Flags)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::MakeWindowAssociation: "
+        L"Called." << std::endl);
       return m_pFactory->MakeWindowAssociation(WindowHandle, Flags);
     }
       
     HRESULT STDMETHODCALLTYPE IDXGIFactory1Hook::GetWindowAssociation( 
       HWND *pWindowHandle)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::GetWindowAssociation: "
+        L"Called." << std::endl);
       return m_pFactory->GetWindowAssociation(pWindowHandle);
     }
       
@@ -212,6 +242,9 @@ namespace Hades
       DXGI_SWAP_CHAIN_DESC *pDesc,
       IDXGISwapChain **ppSwapChain)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::CreateSwapChain: "
+        L"Called." << std::endl);
       HRESULT Ret = m_pFactory->CreateSwapChain(pDevice, pDesc, ppSwapChain);
       if (SUCCEEDED(Ret))
       {
@@ -239,6 +272,9 @@ namespace Hades
       HMODULE Module,
       IDXGIAdapter **ppAdapter)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::CreateSoftwareAdapter: "
+        L"Called." << std::endl);
       return m_pFactory->CreateSoftwareAdapter(Module, ppAdapter);
     }
         
@@ -246,11 +282,17 @@ namespace Hades
       UINT Adapter,
       IDXGIAdapter1 **ppAdapter)
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::EnumAdapters1: "
+        L"Called." << std::endl);
       return m_pFactory->EnumAdapters1(Adapter, ppAdapter);
     }
     
     BOOL STDMETHODCALLTYPE IDXGIFactory1Hook::IsCurrent()
     {
+      HADES_LOG_THREAD_SAFE(std::wcout << 
+        L"IDXGIFactory1Hook::IsCurrent: "
+        L"Called." << std::endl);
       return m_pFactory->IsCurrent();
     }
   }

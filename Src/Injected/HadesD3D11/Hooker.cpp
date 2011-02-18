@@ -166,21 +166,21 @@ namespace Hades
           L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
           L"Call successful." << std::endl);
         
-        if (ppDevice)
+        if (ppDevice && ppImmediateContext)
         {
+          auto pDevice = *ppDevice;
+          auto pImmediateContext = *ppImmediateContext;
+          
           HADES_LOG_THREAD_SAFE(std::wcout << 
             L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
             L"Hooking ID3D11Device." << std::endl);
-          *ppDevice = new ID3D11DeviceHook(*ppDevice);
-        }
-        
-        if (ppImmediateContext)
-        {
+          *ppDevice = new ID3D11DeviceHook(pDevice);
+          
           HADES_LOG_THREAD_SAFE(std::wcout << 
             L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
             L"Hooking ID3D11DeviceContext." << std::endl);
-          *ppImmediateContext = new ID3D11DeviceContextHook(
-            *ppImmediateContext);
+          *ppImmediateContext = new ID3D11DeviceContextHook(*m_pKernel, 
+            pImmediateContext, pDevice);
         }
       }
       else

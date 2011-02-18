@@ -165,6 +165,8 @@ lib HadesD3D11
     [ glob HadesD3D11/*.cpp ] 
     /Memory//Memory 
     HadesRenderer 
+    d3d11 
+    d3dx11 
   : 
     <include>"." 
     <include>$(DXSDK_DIR)/Include 
