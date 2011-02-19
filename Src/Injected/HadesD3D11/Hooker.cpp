@@ -184,6 +184,13 @@ namespace Hades
           *ppImmediateContext = new ID3D11DeviceContextHook(
             pImmediateContext);
         }
+        
+        if (ppSwapChain)
+        {
+          HADES_LOG_THREAD_SAFE(std::wcout << 
+            L"D3D11Hooker::D3D11CreateDeviceAndSwapChain_Hook: "
+            L"Swap chain requested. Should it be hooked?" << std::endl);
+        }
       }
       else
       {
