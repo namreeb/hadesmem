@@ -28,6 +28,8 @@
   * Cheat Engine 'replacement'.
   
 * Base hook
+  * Convert D3D extensions to use detours rather than COM interface 
+  replacements.
   * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
   similar).
   * Ensure error state is retained in hooks (GetLastError/SetLastError).
