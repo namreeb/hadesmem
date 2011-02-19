@@ -137,8 +137,8 @@ namespace Hades
         // Debug output
         std::wcout << boost::wformat(L"Loader::CreateProcessInternalW_Hook: "
           L"App = %s, CmdLine = %s. Return = %u.") 
-          %(lpApplicationName ? lpApplicationName : L"<None>") 
-          %(lpCommandLine ? lpCommandLine: L"<None>") 
+          %(lpApplicationName ? lpApplicationName : L"") 
+          %(lpCommandLine ? lpCommandLine: L"") 
           %Ret << std::endl;
   
         // Return if call failed
