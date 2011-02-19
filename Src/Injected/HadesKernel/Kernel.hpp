@@ -42,23 +42,31 @@ namespace Hades
 {
   namespace Kernel
   {
+    // Hades injected 'kernel'. Central manager of injected components.
     class Kernel
     {
     public:
+      // Error type
       class Error : public virtual HadesError 
       { };
       
+      // Load extension
       virtual void LoadExtension(boost::filesystem::path const& Path);
       
+      // OnFrame notification function
       virtual void OnFrame(Hades::GUI::Renderer& pRenderer);
         
+      // Subscribe to OnFrame event
       typedef boost::signals2::signal<void (Hades::GUI::Renderer& pRenderer)> 
         OnFrameSig;
       typedef OnFrameSig::slot_type OnFrameFn;
       virtual boost::signals2::connection RegisterOnFrame(OnFrameFn Fn);
 
     private:
+      // Loaded extensions
       std::vector<Hades::Windows::EnsureFreeLibrary> m_Extensions;
+        
+      // OnFrame event subscribers
       OnFrameSig m_OnFrame;
     };
   }

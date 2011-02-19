@@ -28,11 +28,15 @@ namespace Hades
 {
   namespace Kernel
   {
+    // Load extension
     void Kernel::LoadExtension(boost::filesystem::path const& Path)
     {
+      // If extension path is relative assume that it's relative to the 
+      // directory that the kernel is located in
       boost::filesystem::path PathReal(Path.is_relative() ? 
         Hades::Windows::GetSelfDirPath() / Path : Path);
       
+      // Load extension
       Windows::EnsureFreeLibrary ExtMod(LoadLibrary(PathReal.c_str()));
       if (!ExtMod)
       {
@@ -43,6 +47,7 @@ namespace Hades
           ErrorCode(LastError));
       }
       
+      // Call extension initialization routine
 #if defined(_M_AMD64) 
       FARPROC pInitialize = GetProcAddress(ExtMod, "Initialize");
 #elif defined(_M_IX86) 
@@ -58,26 +63,32 @@ namespace Hades
           ErrorString("Could not initialize extension.") << 
           ErrorCode(LastError));
       }
-      
       typedef DWORD (__stdcall* tInitialize)(HMODULE Module, Kernel& MyKernel);
       auto pInitializeReal = reinterpret_cast<tInitialize>(pInitialize);
       pInitializeReal(ExtMod, *this);
       
+      // Add loaded extension to list
       m_Extensions.push_back(std::move(ExtMod));
     }
     
+    // OnFrame notification function
     void Kernel::OnFrame(Hades::GUI::Renderer& pRenderer)
     {
+      // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
+      // Draw watermark
       pRenderer.DrawText(L"Hades", 5, 5);
       
+      // Notify subscribers
       m_OnFrame(pRenderer);
     }
     
+    // Subscribe to OnFrame event
     boost::signals2::connection Kernel::RegisterOnFrame(OnFrameFn Fn)
     {
+      // Subscribe to OnFrame event
       return m_OnFrame.connect(Fn);
     }
   }

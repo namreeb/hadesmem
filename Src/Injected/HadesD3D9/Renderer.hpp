@@ -37,17 +37,19 @@ namespace Hades
     // Todo: Make things like font height, font face, text colour, draw flags, 
     // etc configurable.
     
+    // D3D9 renderer
     class D3D9Renderer : public Renderer
     {
     public:
+      // Constructor
       explicit D3D9Renderer(IDirect3DDevice9* pDevice) 
         : m_pDevice(pDevice), 
         m_pStateBlock(), 
         m_pFont()
       {
+        // Create state block
         HRESULT ResultSB = m_pDevice->CreateStateBlock(D3DSBT_ALL, 
           &m_pStateBlock);
-  
         if (FAILED(ResultSB))
         {
           std::error_code const MyErrorCode(ResultSB, std::system_category());
@@ -57,6 +59,7 @@ namespace Hades
             ErrorCode(MyErrorCode));
         }
         
+        // Create font
         UINT Height = 10;
         HRESULT ResultF = D3DXCreateFont(
           m_pDevice, 
@@ -71,7 +74,6 @@ namespace Hades
           DEFAULT_PITCH | FF_DONTCARE, 
           L"Arial Bold", 
           &m_pFont);
-  
         if (FAILED(ResultF))
         {
           std::error_code const MyErrorCode(ResultF, std::system_category());
@@ -82,16 +84,19 @@ namespace Hades
         }
       }
       
+      // Perform pre-reset duties
       void PreReset()
       {
         m_pStateBlock = nullptr;
       }
       
+      // Perform post-reset duties
       void PostReset()
       {
         m_pDevice->CreateStateBlock(D3DSBT_ALL, &m_pStateBlock);
       }
       
+      // Draw text to screen
       void DrawText(std::wstring const& Text, unsigned int X, unsigned int Y)
       {
         m_pStateBlock->Capture();
@@ -109,8 +114,11 @@ namespace Hades
       }
       
     private:
+      // Device
       IDirect3DDevice9* m_pDevice;
+      // State block
       CComPtr<IDirect3DStateBlock9> m_pStateBlock;
+      // Font
       CComPtr<ID3DXFont> m_pFont;
     };
   }

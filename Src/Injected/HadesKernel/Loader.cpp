@@ -31,26 +31,33 @@ namespace Hades
     // Todo: Hook other process creation APIs such as ShellExecuteEx after 
     // confirming they don't use already hooked APIs internally.
     
+    // Kernel instance
     Kernel* Loader::m_pKernel = nullptr;
+    
+    // kernel32.dll!CreateProcessInternalW hook
     std::shared_ptr<Hades::Memory::PatchDetour> Loader::m_pCreateProcessInternalWHk;
       
+    // Initialize loader
     void Loader::Initialize(Kernel& MyKernel)
     {
       m_pKernel = &MyKernel;
     }
     
+    // Hook process creation
     void Loader::Hook()
     {
+      // Get kernel32.dll module handle
       HMODULE Kernel32Mod = GetModuleHandle(L"kernel32.dll");
       if (!Kernel32Mod)
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Loader::Hook") << 
-          ErrorString("Could not find Kernel32.dll") << 
+          ErrorString("Could not find kernel32.dll") << 
           ErrorCode(LastError));
       }
       
+      // Find kernel32.dll!CreateProcessInternalW
       FARPROC const pCreateProcessInternalW = GetProcAddress(Kernel32Mod, 
         "CreateProcessInternalW");
       if (!pCreateProcessInternalW)
@@ -58,19 +65,22 @@ namespace Hades
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Loader::Hook") << 
-          ErrorString("Could not find Kernel32!CreateProcessInternalW") << 
+          ErrorString("Could not find kernel32.dll!CreateProcessInternalW") << 
           ErrorCode(LastError));
       }
       
-      std::wcout << boost::wformat(L"Loader::Hook: pCreateProcessInternalW = "
-        L"%p.") %pCreateProcessInternalW << std::endl;
+      // Debug output
+      std::wcout << boost::wformat(L"Loader::Hook: Hooking kernel32.dll!"
+        L"CreateProcessInternalW (%p).") %pCreateProcessInternalW << std::endl;
           
+      // Hook kernel32.dll!CreateProcessInternalW
       Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
       m_pCreateProcessInternalWHk.reset(new Memory::PatchDetour(MyMemory, 
         pCreateProcessInternalW, &CreateProcessInternalW_Hook));
       m_pCreateProcessInternalWHk->Apply();
     }
     
+    // Unhook process creation
     void Loader::Unhook()
     {
       if (m_pCreateProcessInternalWHk)
@@ -79,6 +89,7 @@ namespace Hades
       }
     }
       
+    // kernel32.dll!CreateProcessInternalW hook implementation
     BOOL WINAPI Loader::CreateProcessInternalW_Hook(
       HANDLE hToken,
       LPCWSTR lpApplicationName,
@@ -93,11 +104,13 @@ namespace Hades
       LPPROCESS_INFORMATION lpProcessInformation,
       PHANDLE hNewToken)
     {
+      // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
+        // Get trampoline
         typedef BOOL (WINAPI* tCreateProcessInternalW)(
           HANDLE hToken,
           LPCWSTR lpApplicationName,
@@ -184,6 +197,10 @@ namespace Hades
             ErrorFunction("Loader::CreateProcessInternalW_Hook") << 
             ErrorString("WoW64 bypass currently unsupported."));
         }
+        
+        // Debug output
+        std::wcout << "Loader::CreateProcessInternalW_Hook: Attempting "
+          "injection." << std::endl;
         
         // Create memory manager
         Memory::MemoryMgr MyMemory(lpProcessInformation->dwProcessId);

@@ -33,18 +33,25 @@ namespace Hades
 {
   namespace Kernel
   {
+    // Hades child process 'loader'
     class Loader
     {
     public:
+      // Error type
       class Error : public virtual HadesError 
       { };
       
+      // Initialize loader
       static void Initialize(Kernel& MyKernel);
       
+      // Hook process creation
       static void Hook();
       
+      // Unhook process creation
       static void Unhook();
-      
+    
+    private:
+      // kernel32.dll!CreateProcessInternalW hook implementation
       static BOOL WINAPI CreateProcessInternalW_Hook(
         HANDLE hToken,
         LPCWSTR lpApplicationName,
@@ -59,8 +66,10 @@ namespace Hades
         LPPROCESS_INFORMATION lpProcessInformation,
         PHANDLE hNewToken);
 
-    private:
+      // Kernel instance
       static Kernel* m_pKernel;
+      
+      // kernel32.dll!CreateProcessInternalW hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateProcessInternalWHk;
     };
   }

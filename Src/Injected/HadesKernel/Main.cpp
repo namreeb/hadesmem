@@ -27,11 +27,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Kernel.hpp"
 #include "Loader.hpp"
-#include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 #include "HadesCommon/Filesystem.hpp"
-#include "HadesRenderer/Renderer.hpp"
-#include "HadesCommon/EnsureCleanup.hpp"
 
 // Initialize kernel
 // Todo: Ensure safe for reentry

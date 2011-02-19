@@ -38,9 +38,11 @@ namespace Hades
 {
   namespace D3D9
   {
+    // D3D9 hooker
     class D3D9Hooker
     {
     public:
+      // Error type
       class Error : public virtual HadesError 
       { };
       
@@ -54,10 +56,10 @@ namespace Hades
       static void Unhook();
       
     private:
-      // Direct3DCreate9 hook implementation
+      // d3d9.dll!Direct3DCreate9 hook implementation
       static IDirect3D9* WINAPI Direct3DCreate9_Hook(UINT SDKVersion);
       
-      // IDirect3D9::CreateDevice hook implementation
+      // d3d9.dll!IDirect3D9::CreateDevice hook implementation
       static HRESULT WINAPI CreateDevice_Hook(
         IDirect3D9* pThis, 
         UINT Adapter, 
@@ -67,11 +69,11 @@ namespace Hades
         D3DPRESENT_PARAMETERS* pPresentationParameters, 
         IDirect3DDevice9** ppReturnedDeviceInterface);
 
-      // IDrect3DDevice9::EndScene hook implementation
+      // d3d9.dll!IDrect3DDevice9::EndScene hook implementation
       static HRESULT WINAPI EndScene_Hook(
         IDirect3DDevice9* pThis);
 
-      // IDrect3DDevice9::Reset hook implementation
+      // d3d9.dll!IDrect3DDevice9::Reset hook implementation
       static HRESULT WINAPI Reset_Hook(
         IDirect3DDevice9* pThis, 
         D3DPRESENT_PARAMETERS* pPresentationParameters);
@@ -85,15 +87,15 @@ namespace Hades
       // Renderer instance
       static std::shared_ptr<GUI::D3D9Renderer> m_pRenderer;
       
-      // Direct3DCreate9 hook
+      // d3d9.dll!Direct3DCreate9 hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pDirect3DCreate9Hk;
       
-      // IDirect3D9::CreateDevice hook  
+      // d3d9.dll!IDirect3D9::CreateDevice hook  
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDeviceHk;
         
-      // IDrect3DDevice9::EndScene hook
+      // d3d9.dll!IDrect3DDevice9::EndScene hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pEndSceneHk;
-      // IDrect3DDevice9::Reset hook
+      // d3d9.dll!IDrect3DDevice9::Reset hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pResetHk;
     };
   }
