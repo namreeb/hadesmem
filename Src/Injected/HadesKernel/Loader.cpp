@@ -25,6 +25,9 @@ namespace Hades
 {
   namespace Kernel
   {
+    // Todo: Hook other process creation APIs such as ShellExecuteEx after 
+    // confirming they don't use already hooked APIs internally.
+    
     Kernel* Loader::m_pKernel = nullptr;
     std::shared_ptr<Hades::Memory::PatchDetour> Loader::m_pCreateProcessInternalWHk;
       
