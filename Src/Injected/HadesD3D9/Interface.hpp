@@ -41,6 +41,8 @@ namespace Hades
       { };
 
       explicit IDirect3D9Hook(Kernel::Kernel& MyKernel, IDirect3D9* pD3D9);
+        
+      IDirect3D9Hook& operator=(IDirect3D9Hook const&);
       
       // IUnknown methods
       STDMETHOD(QueryInterface)(

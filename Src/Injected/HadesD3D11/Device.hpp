@@ -45,6 +45,8 @@ namespace Hades
         m_pDevice(pDevice), 
         m_pRenderer(new GUI::D3D11Renderer(pDevice, pDeviceContext))
       { }
+        
+      ID3D11DeviceHook& operator=(ID3D11DeviceHook const&);
       
       void OnFrame() 
       {

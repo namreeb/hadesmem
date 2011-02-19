@@ -187,6 +187,23 @@ namespace Hades
       EnsureDestroyIcon;
     typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, 0> 
       EnsureDestroyMenu;
+      
+    // Special class for ensuring the 'LastError' is restored in hooks
+    class EnsureLastError : private boost::noncopyable
+    {
+    public:
+      EnsureLastError() 
+        : m_LastError(GetLastError())
+      { }
+      
+      ~EnsureLastError()
+      {
+        SetLastError(m_LastError);
+      }
+    
+    private:
+      DWORD m_LastError;
+    };
 
     // Special class for ensuring COM is uninitialized
     class EnsureCoUninitialize : private boost::noncopyable

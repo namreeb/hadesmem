@@ -44,6 +44,8 @@ namespace Hades
           m_Desc = *pDesc;
         }
       }
+        
+      IDXGISwapChainHook& operator=(IDXGISwapChainHook const&);
       
       IUnknown* GetDevice()
       {

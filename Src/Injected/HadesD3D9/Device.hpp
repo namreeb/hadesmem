@@ -53,6 +53,8 @@ namespace Hades
         IDirect3DDevice9* pDevice, 
         D3DPRESENT_PARAMETERS* pPresentParams);
         
+      IDirect3DDevice9Hook& operator=(IDirect3DDevice9Hook const&);
+        
       // IUnknown methods
       STDMETHOD(QueryInterface)(
         THIS_ REFIID riid, 

@@ -41,6 +41,8 @@ namespace Hades
       {
         return m_pFactory;
       }
+        
+      IDXGIFactoryHook& operator=(IDXGIFactoryHook const&);
       
       // 
       

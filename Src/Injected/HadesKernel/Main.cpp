@@ -25,6 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Kernel.hpp"
+#include "Loader.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesCommon/Logger.hpp"
 #include "HadesCommon/Filesystem.hpp"
@@ -54,6 +55,12 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
         
     // Initialize Kernel
     static Hades::Kernel::Kernel MyKernel;
+      
+    // Initialize Loader
+    Hades::Kernel::Loader::Initialize(MyKernel);
+    Hades::Kernel::Loader::Hook();
+      
+    // Load D3D extensions
     MyKernel.LoadExtension("HadesD3D9.dll");
     MyKernel.LoadExtension("HadesD3D11.dll");
   }

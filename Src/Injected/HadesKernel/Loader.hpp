@@ -20,48 +20,48 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // C++ Standard Library
-#include <vector>
+#include <memory>
 
-// Boost
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#pragma warning(disable: 4267)
-#pragma warning(disable: 4503)
-#pragma warning(disable: 4996)
-#endif // #ifdef _MSC_VER
-#include <boost/thread.hpp>
-#include <boost/signals2.hpp>
-#include <boost/filesystem.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // #ifdef _MSC_VER
+// Windows API
+#include <Windows.h>
 
 // Hades
-#include "HadesRenderer/Renderer.hpp"
-#include "HadesCommon/EnsureCleanup.hpp"
+#include "Kernel.hpp"
+#include "HadesMemory/Memory.hpp"
 
 namespace Hades
 {
   namespace Kernel
   {
-    class Kernel
+    class Loader
     {
     public:
       class Error : public virtual HadesError 
       { };
       
-      virtual void LoadExtension(boost::filesystem::path const& Path);
+      static void Initialize(Kernel& MyKernel);
       
-      virtual void OnFrame(Hades::GUI::Renderer& pRenderer);
-        
-      typedef boost::signals2::signal<void (Hades::GUI::Renderer& pRenderer)> 
-        OnFrameSig;
-      typedef OnFrameSig::slot_type OnFrameFn;
-      virtual boost::signals2::connection RegisterOnFrame(OnFrameFn Fn);
+      static void Hook();
+      
+      static void Unhook();
+      
+      static BOOL WINAPI CreateProcessInternalW_Hook(
+        HANDLE hToken,
+        LPCWSTR lpApplicationName,
+        LPWSTR lpCommandLine,
+        LPSECURITY_ATTRIBUTES lpProcessAttributes,
+        LPSECURITY_ATTRIBUTES lpThreadAttributes,
+        BOOL bInheritHandles,
+        DWORD dwCreationFlags,
+        LPVOID lpEnvironment,
+        LPCWSTR lpCurrentDirectory,
+        LPSTARTUPINFOW lpStartupInfo,
+        LPPROCESS_INFORMATION lpProcessInformation,
+        PHANDLE hNewToken);
 
     private:
-      std::vector<Hades::Windows::EnsureFreeLibrary> m_Extensions;
-      OnFrameSig m_OnFrame;
+      static Kernel* m_pKernel;
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateProcessInternalWHk;
     };
   }
 }

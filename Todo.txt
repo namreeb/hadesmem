@@ -28,6 +28,7 @@
   * Cheat Engine 'replacement'.
   
 * Base hook
+  * Ensure error state is retained in hooks (GetLastError/SetLastError).
   * Rethink and reimplement threading model.
   * Increase safety and stability before adding any major new functionality.
   * D3D9, D3D10, D3D11 rendering support.

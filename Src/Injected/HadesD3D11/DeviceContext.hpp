@@ -39,6 +39,8 @@ namespace Hades
       ID3D11DeviceContextHook(ID3D11DeviceContext* pDeviceContext) 
         : m_pDeviceContext(pDeviceContext)
       { }
+        
+      ID3D11DeviceContextHook& operator=(ID3D11DeviceContextHook const&);
       
       // 
       
