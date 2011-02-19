@@ -155,18 +155,18 @@ namespace Hades
     // d3d9.dll!Direct3DCreate9 hook implementation
     IDirect3D9* WINAPI D3D9Hooker::Direct3DCreate9_Hook(UINT SDKVersion)
     {
-      // Call trampoline
-      typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
-      auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
-        m_pDirect3DCreate9Hk->GetTrampoline());      
-      IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
-        
       // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
+        // Call trampoline
+        typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
+        auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
+          m_pDirect3DCreate9Hk->GetTrampoline());      
+        IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
+          
         // Debug output
         std::wcout << boost::wformat(L"D3D9Hooker::Direct3DCreate9_Hook: "
           L"SDKVersion = %u. Return = %p.") %SDKVersion %pD3D9 << std::endl;
@@ -214,25 +214,25 @@ namespace Hades
       D3DPRESENT_PARAMETERS* pPresentationParameters, 
       IDirect3DDevice9** ppReturnedDeviceInterface)
     {
-      // Call trampoline
-      typedef HRESULT (WINAPI* tCreateDevice)(IDirect3D9* pThis, 
-        UINT Adapter, 
-        D3DDEVTYPE DeviceType, 
-        HWND hFocusWindow, 
-        DWORD BehaviorFlags, 
-        D3DPRESENT_PARAMETERS* pPresentationParameters, 
-        IDirect3DDevice9** ppReturnedDeviceInterface);
-      auto pCreateDevice = reinterpret_cast<tCreateDevice>(m_pCreateDeviceHk->
-        GetTrampoline());
-      HRESULT Result = pCreateDevice(pThis, Adapter, DeviceType, hFocusWindow, 
-        BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
-
       // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
+        // Call trampoline
+        typedef HRESULT (WINAPI* tCreateDevice)(IDirect3D9* pThis, 
+          UINT Adapter, 
+          D3DDEVTYPE DeviceType, 
+          HWND hFocusWindow, 
+          DWORD BehaviorFlags, 
+          D3DPRESENT_PARAMETERS* pPresentationParameters, 
+          IDirect3DDevice9** ppReturnedDeviceInterface);
+        auto pCreateDevice = reinterpret_cast<tCreateDevice>(m_pCreateDeviceHk->
+          GetTrampoline());
+        HRESULT Result = pCreateDevice(pThis, Adapter, DeviceType, hFocusWindow, 
+          BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+
         // Debug output
         std::wcout << boost::wformat(L"D3D9Hooker::CreateDevice_Hook: "
           L"pThis = %p, Adapter = %u, DeviceType = %u, hFocusWindow = %p, "
