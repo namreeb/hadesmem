@@ -28,6 +28,8 @@
   * Cheat Engine 'replacement'.
   
 * Base hook
+  * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
+  similar).
   * Ensure error state is retained in hooks (GetLastError/SetLastError).
   * Rethink and reimplement threading model.
   * Increase safety and stability before adding any major new functionality.

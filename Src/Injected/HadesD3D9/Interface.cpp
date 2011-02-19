@@ -17,14 +17,17 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// C++ Standard Library
+#include <iostream>
+
 // Boost
 #include <boost/format.hpp>
+#include <boost/thread.hpp>
 
 // Hades
 #include "Device.hpp"
 #include "Interface.hpp"
 #include "HadesCommon/Error.hpp"
-#include "HadesCommon/Logger.hpp"
 
 namespace Hades
 {
@@ -33,16 +36,7 @@ namespace Hades
     IDirect3D9Hook::IDirect3D9Hook(Kernel::Kernel& MyKernel, IDirect3D9* pD3D9) 
       : m_Kernel(MyKernel), 
       m_pD3D(pD3D9)
-    {
-      if (!pD3D9)
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("IDirect3DDevice9Hook::IDirect3DDevice9Hook") << 
-          ErrorString("Invalid interface pointer.") << 
-          ErrorCode(LastError));
-      }
-    }
+    { }
     
     HRESULT APIENTRY IDirect3D9Hook::QueryInterface(
       REFIID riid, 
@@ -143,6 +137,9 @@ namespace Hades
       D3DPRESENT_PARAMETERS* pPresentationParameters, 
       IDirect3DDevice9** ppReturnedDeviceInterface)
     {
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
+        
       HRESULT Result = m_pD3D->CreateDevice(
         Adapter, 
         DeviceType, 
@@ -151,14 +148,15 @@ namespace Hades
         pPresentationParameters, 
         ppReturnedDeviceInterface);
         
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"IDirect3D9Hook::"
-        L"CreateDevice: Result = %u.") %Result << std::endl);
+      std::wcout << boost::wformat(L"IDirect3D9Hook::CreateDevice: "
+        L"Result = %u.") %Result << std::endl;
           
       if (SUCCEEDED(Result))
       {
-        HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"IDirect3D9Hook::"
-          L"CreateDevice: Hooking device. Device = %p.") 
-          %*ppReturnedDeviceInterface << std::endl);
+        std::wcout << boost::wformat(L"IDirect3D9Hook::CreateDevice: "
+          L"Hooking device. Device = %p.") %*ppReturnedDeviceInterface 
+          << std::endl;
+            
         *ppReturnedDeviceInterface = new IDirect3DDevice9Hook(
           m_Kernel, 
           this, 

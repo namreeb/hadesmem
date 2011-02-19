@@ -27,9 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4503)
-#pragma warning(disable: 4996)
 #endif // #ifdef _MSC_VER
-#include <boost/thread.hpp>
 #include <boost/signals2.hpp>
 #include <boost/filesystem.hpp>
 #ifdef _MSC_VER

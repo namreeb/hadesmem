@@ -42,6 +42,7 @@ project
     <define>_UNICODE 
     <toolset>msvc:<define>_WIN32_WINNT=_WIN32_WINNT_WS03 
     <toolset>msvc:<define>WINVER=_WIN32_WINNT_WS03 
+    <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS 
     <runtime-link>shared 
     <toolset>gcc:<cxxflags>"-std=c++0x" 
   : 

@@ -22,12 +22,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/format.hpp>
+#include <boost/thread.hpp>
 
 // Hades
 #include "Hooker.hpp"
 #include "Interface.hpp"
 #include "HadesMemory/Memory.hpp"
-#include "HadesCommon/Logger.hpp"
 
 namespace Hades
 {
@@ -69,8 +69,8 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
-        L"Hook: pDirect3DCreate9 = %p.") %pDirect3DCreate9 << std::endl);
+      std::cout << boost::format("D3D9Hooker::Hook: pDirect3DCreate9 = %p.") 
+        %pDirect3DCreate9 << std::endl;
           
       Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
       m_pDirect3DCreate9.reset(new Memory::PatchDetour(MyMemory, pDirect3DCreate9, 
@@ -88,18 +88,33 @@ namespace Hades
     
     IDirect3D9* WINAPI D3D9Hooker::Direct3DCreate9_Hook(UINT SDKVersion)
     {
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
-        L"Direct3DCreate9_Hook: SDKVersion = %u.") %SDKVersion << std::endl);
-          
-      typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
-      auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
-        m_pDirect3DCreate9->GetTrampoline());      
-      IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"D3D9Hooker::"
-        L"Direct3DCreate9_Hook: Return = %p.") %pD3D9 << std::endl);
+      try
+      {
+        std::cout << boost::format("D3D9Hooker::Direct3DCreate9_Hook: "
+          "SDKVersion = %u.") %SDKVersion << std::endl;
+            
+        typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
+        auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
+          m_pDirect3DCreate9->GetTrampoline());      
+        IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
           
-      return new IDirect3D9Hook(*m_pKernel, pD3D9);
+        std::cout << boost::format("D3D9Hooker::Direct3DCreate9_Hook: "
+          "Return = %p.") %pD3D9 << std::endl;
+            
+        return new IDirect3D9Hook(*m_pKernel, pD3D9);
+      }
+      catch (std::exception const& e)
+      {
+        // Debug output
+        std::cout << boost::format("D3D9Hooker::Direct3DCreate9_Hook: "
+          "Error! %s.") %e.what() << std::endl;
+            
+        // Failure
+        return nullptr;
+      }
     }
   }
 }

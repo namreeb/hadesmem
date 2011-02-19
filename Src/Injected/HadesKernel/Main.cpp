@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Boost
+#include <boost/thread.hpp>
 #include <boost/format.hpp>
 
 // Hades
@@ -36,7 +37,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Todo: Ensure safe for reentry
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
 {
-  try
+  // Function is not thread-safe
+  static boost::mutex MyMutex;
+  boost::lock_guard<boost::mutex> MyLock(MyMutex);
+    
+  // 'Real' initialization code
+  auto InitReal = [&] () 
   {
     // Break to debugger if present
     if (IsDebuggerPresent())
@@ -48,10 +54,10 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
     Hades::Util::InitLogger(L"Log", L"Debug");
       
     // Debug output
-    HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
-      L"Hades-Kernel::Initialize: Module Base = %p, Path to Self = %s, "
-      L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
-      %Hades::Windows::GetModulePath(nullptr) << std::endl);
+    std::wcout << boost::wformat(L"Hades-Kernel::Initialize: "
+      L"Module Base = %p, Path to Self = %s, Path to Bin = %s.") %Module 
+      %Hades::Windows::GetSelfPath() %Hades::Windows::GetModulePath(nullptr) 
+      << std::endl;
         
     // Initialize Kernel
     static Hades::Kernel::Kernel MyKernel;
@@ -63,13 +69,23 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
     // Load D3D extensions
     MyKernel.LoadExtension("HadesD3D9.dll");
     MyKernel.LoadExtension("HadesD3D11.dll");
+  };
+    
+  try
+  {
+    // Call real init routine safely
+    static boost::once_flag f = BOOST_ONCE_INIT;
+    boost::call_once(f, InitReal);
   }
   catch (std::exception const& e)
   {
     // Dump error information
     std::cout << boost::diagnostic_information(e) << std::endl;
+      
+    // Failure
+    return 1;
   }
-
+  
   // Success
   return 0;
 }

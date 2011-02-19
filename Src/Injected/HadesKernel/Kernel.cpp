@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+// Boost
+#include <boost/thread.hpp>
 
 // Hades
 #include "Kernel.hpp"
@@ -67,6 +68,9 @@ namespace Hades
     
     void Kernel::OnFrame(Hades::GUI::Renderer& pRenderer)
     {
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
+        
       pRenderer.DrawText(L"Hades", 5, 5);
       
       m_OnFrame(pRenderer);

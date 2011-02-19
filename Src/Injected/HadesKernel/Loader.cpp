@@ -17,9 +17,12 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Boost
+#include <boost/thread.hpp>
+#include <boost/format.hpp>
+
 // Hades
 #include "Loader.hpp"
-#include "HadesCommon/Logger.hpp"
 
 namespace Hades
 {
@@ -59,9 +62,8 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(L"Loader::"
-        L"Hook: pCreateProcessInternalW = %p.") %pCreateProcessInternalW 
-        << std::endl);
+      std::wcout << boost::wformat(L"Loader::Hook: pCreateProcessInternalW = "
+        L"%p.") %pCreateProcessInternalW << std::endl;
           
       Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
       m_pCreateProcessInternalWHk.reset(new Memory::PatchDetour(MyMemory, 
@@ -91,65 +93,64 @@ namespace Hades
       LPPROCESS_INFORMATION lpProcessInformation,
       PHANDLE hNewToken)
     {
-      HADES_LOG_THREAD_SAFE(std::wcout << 
-        "Loader::CreateProcessInternalW_Hook: Called." << std::endl);
-          
-      typedef BOOL (WINAPI* tCreateProcessInternalW)(
-        HANDLE hToken,
-        LPCWSTR lpApplicationName,
-        LPWSTR lpCommandLine,
-        LPSECURITY_ATTRIBUTES lpProcessAttributes,
-        LPSECURITY_ATTRIBUTES lpThreadAttributes,
-        BOOL bInheritHandles,
-        DWORD dwCreationFlags,
-        LPVOID lpEnvironment,
-        LPCWSTR lpCurrentDirectory,
-        LPSTARTUPINFOW lpStartupInfo,
-        LPPROCESS_INFORMATION lpProcessInformation,
-        PHANDLE hNewToken);
-      auto pCreateProcessInternalW = reinterpret_cast<tCreateProcessInternalW>(
-        m_pCreateProcessInternalWHk->GetTrampoline());
-      
-      // If suspended process is requested by caller don't automatically 
-      // resume.
-      bool ResumeProc = !(dwCreationFlags & CREATE_SUSPENDED);
-
-      // Call trampoline
-      BOOL Ret = pCreateProcessInternalW(
-        hToken, 
-        lpApplicationName, 
-        lpCommandLine, 
-        lpProcessAttributes, 
-        lpThreadAttributes, 
-        bInheritHandles, 
-        (dwCreationFlags | CREATE_SUSPENDED), 
-        lpEnvironment, 
-        lpCurrentDirectory, 
-        lpStartupInfo, 
-        lpProcessInformation, 
-        hNewToken);
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
-      // Debug output
-      HADES_LOG_THREAD_SAFE(
-      std::wcout << boost::wformat(L"Loader::CreateProcessInternalW_Hook: "
-        L"App = %s, CmdLine = %s. Return = %u.") 
-        %(lpApplicationName ? lpApplicationName : L"<None>") 
-        %(lpCommandLine ? lpCommandLine: L"<None>") 
-        %Ret << std::endl);
-
-      // Return if call failed
-      if (!Ret)
-      {
-        return Ret;
-      }
-      
-      // Ensure thread is resumed if required
-      Windows::EnsureResumeThread ProcThread(ResumeProc ? 
-        lpProcessInformation->hThread : nullptr);
-      
-      // Attempt injection
       try
       {
+        typedef BOOL (WINAPI* tCreateProcessInternalW)(
+          HANDLE hToken,
+          LPCWSTR lpApplicationName,
+          LPWSTR lpCommandLine,
+          LPSECURITY_ATTRIBUTES lpProcessAttributes,
+          LPSECURITY_ATTRIBUTES lpThreadAttributes,
+          BOOL bInheritHandles,
+          DWORD dwCreationFlags,
+          LPVOID lpEnvironment,
+          LPCWSTR lpCurrentDirectory,
+          LPSTARTUPINFOW lpStartupInfo,
+          LPPROCESS_INFORMATION lpProcessInformation,
+          PHANDLE hNewToken);
+        auto pCreateProcessInternalW = 
+          reinterpret_cast<tCreateProcessInternalW>(
+          m_pCreateProcessInternalWHk->GetTrampoline());
+        
+        // If suspended process is requested by caller don't automatically 
+        // resume.
+        bool ResumeProc = !(dwCreationFlags & CREATE_SUSPENDED);
+  
+        // Call trampoline
+        BOOL Ret = pCreateProcessInternalW(
+          hToken, 
+          lpApplicationName, 
+          lpCommandLine, 
+          lpProcessAttributes, 
+          lpThreadAttributes, 
+          bInheritHandles, 
+          (dwCreationFlags | CREATE_SUSPENDED), 
+          lpEnvironment, 
+          lpCurrentDirectory, 
+          lpStartupInfo, 
+          lpProcessInformation, 
+          hNewToken);
+            
+        // Debug output
+        std::wcout << boost::wformat(L"Loader::CreateProcessInternalW_Hook: "
+          L"App = %s, CmdLine = %s. Return = %u.") 
+          %(lpApplicationName ? lpApplicationName : L"<None>") 
+          %(lpCommandLine ? lpCommandLine: L"<None>") 
+          %Ret << std::endl;
+  
+        // Return if call failed
+        if (!Ret)
+        {
+          return Ret;
+        }
+        
+        // Ensure thread is resumed if required
+        Windows::EnsureResumeThread ProcThread(ResumeProc ? 
+          lpProcessInformation->hThread : nullptr);
+      
         // Get WoW64 status of target
         BOOL IsTargetWoW64 = FALSE;
         if (!IsWow64Process(lpProcessInformation->hProcess, &IsTargetWoW64))
@@ -202,19 +203,20 @@ namespace Hades
 #endif
       
         // Debug output
-        HADES_LOG_THREAD_SAFE(std::wcout << "Injection successful." 
-          << std::endl);
+        std::wcout << "Injection successful." << std::endl;
+      
+        // Return result from trampoline
+        return Ret;
       }
       catch (std::exception const& e)
       {
         // Debug output
-        HADES_LOG_THREAD_SAFE(
         std::cout << boost::format("Loader::CreateProcessInternalW_Hook: "
-          "Error! %s.") %e.what() << std::endl);
+          "Error! %s.") %e.what() << std::endl;
+            
+        // Failure
+        return FALSE;
       }
-      
-      // Return result from trampoline
-      return Ret;
     }
   }
 }

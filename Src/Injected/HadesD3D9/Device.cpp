@@ -17,10 +17,11 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// C++ Standard Library
+#include <iostream>
+
 // Hades
 #include "Device.hpp"
-#include "HadesCommon/Error.hpp"
-#include "HadesCommon/Logger.hpp"
 
 namespace Hades
 {
@@ -38,36 +39,17 @@ namespace Hades
       m_RefCount(1), 
       m_pRenderer()
     {
-      if (!pD3D9)
+      try
       {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("IDirect3DDevice9Hook::IDirect3DDevice9Hook") << 
-          ErrorString("Invalid interface pointer.") << 
-          ErrorCode(LastError));
-      }
+        m_PresentParams = *pPresentParams;
       
-      if (!pDevice)
+        m_pRenderer.reset(new GUI::D3D9Renderer(m_pDevice));
+      }
+      catch (std::exception const& e)
       {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("IDirect3DDevice9Hook::IDirect3DDevice9Hook") << 
-          ErrorString("Invalid device pointer.") << 
-          ErrorCode(LastError));
+        // Dump error information
+        std::cout << boost::diagnostic_information(e) << std::endl;
       }
-      
-      if (!pPresentParams)
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("IDirect3DDevice9Hook::IDirect3DDevice9Hook") << 
-          ErrorString("Invalid presentation params.") << 
-          ErrorCode(LastError));
-      }
-      
-      m_PresentParams = *pPresentParams;
-      
-      m_pRenderer.reset(new GUI::D3D9Renderer(m_pDevice));
     }
     
     HRESULT APIENTRY IDirect3DDevice9Hook::QueryInterface(
