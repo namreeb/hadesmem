@@ -109,11 +109,112 @@ namespace Hades
         PHANDLE hNewToken);
       auto pCreateProcessInternalW = reinterpret_cast<tCreateProcessInternalW>(
         m_pCreateProcessInternalWHk->GetTrampoline());
+      
+      // If suspended process is requested by caller don't automatically 
+      // resume.
+      bool ResumeProc = !(dwCreationFlags & CREATE_SUSPENDED);
+
+      // Call trampoline
+      BOOL Ret = pCreateProcessInternalW(
+        hToken, 
+        lpApplicationName, 
+        lpCommandLine, 
+        lpProcessAttributes, 
+        lpThreadAttributes, 
+        bInheritHandles, 
+        (dwCreationFlags | CREATE_SUSPENDED), 
+        lpEnvironment, 
+        lpCurrentDirectory, 
+        lpStartupInfo, 
+        lpProcessInformation, 
+        hNewToken);
         
-      return pCreateProcessInternalW(hToken, lpApplicationName, lpCommandLine, 
-        lpProcessAttributes, lpThreadAttributes, bInheritHandles, 
-        dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, 
-        lpProcessInformation, hNewToken);
+      // Debug output
+      HADES_LOG_THREAD_SAFE(
+      std::wcout << boost::wformat(L"Loader::CreateProcessInternalW_Hook: "
+        L"App = %s, CmdLine = %s. Return = %u.") 
+        %(lpApplicationName ? lpApplicationName : L"<None>") 
+        %(lpCommandLine ? lpCommandLine: L"<None>") 
+        %Ret << std::endl);
+
+      // Return if call failed
+      if (!Ret)
+      {
+        return Ret;
+      }
+      
+      // Ensure thread is resumed if required
+      Windows::EnsureResumeThread ProcThread(ResumeProc ? 
+        lpProcessInformation->hThread : nullptr);
+      
+      // Attempt injection
+      try
+      {
+        // Get WoW64 status of target
+        BOOL IsTargetWoW64 = FALSE;
+        if (!IsWow64Process(lpProcessInformation->hProcess, &IsTargetWoW64))
+        {
+          std::error_code const LastError = GetLastErrorCode();
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("Loader::CreateProcessInternalW_Hook") << 
+            ErrorString("Could not get WoW64 status of target.") << 
+            ErrorCode(LastError));
+        }
+        
+        // Get WoW64 status of self
+        BOOL IsMeWoW64 = FALSE;
+        if (!IsWow64Process(GetCurrentProcess(), &IsMeWoW64))
+        {
+          std::error_code const LastError = GetLastErrorCode();
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("Loader::CreateProcessInternalW_Hook") << 
+            ErrorString("Could not get WoW64 status of self.") << 
+            ErrorCode(LastError));
+        }
+        
+        // Check if the current process is x86 and the target process is x64 
+        // or vice-versa
+        // i.e. Do we need to break the WoW64 barrier?
+        if (IsTargetWoW64 != IsMeWoW64)
+        {
+          // Breaking the WoW64 barrier in either direction is currrently 
+          // unsupported
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("Loader::CreateProcessInternalW_Hook") << 
+            ErrorString("WoW64 bypass currently unsupported."));
+        }
+        
+        // Create memory manager
+        Memory::MemoryMgr MyMemory(lpProcessInformation->dwProcessId);
+          
+        // Create injector
+        Memory::Injector MyInjector(MyMemory);
+
+        // Inject module
+#if defined(_M_AMD64) 
+        MyInjector.CallExport("HadesKernel.dll", MyInjector.InjectDll(
+          "HadesKernel.dll"), "Initialize");
+#elif defined(_M_IX86) 
+        MyInjector.CallExport("HadesKernel.dll", MyInjector.InjectDll(
+          "HadesKernel.dll"), "_Initialize@4");
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+      
+        // Debug output
+        HADES_LOG_THREAD_SAFE(std::wcout << "Injection successful." 
+          << std::endl);
+      }
+      catch (std::exception const& e)
+      {
+        // Debug output
+        HADES_LOG_THREAD_SAFE(
+        std::cout << boost::format("Loader::CreateProcessInternalW_Hook: "
+          "Error! %s.") %e.what() << std::endl);
+      }
+      
+      // Return result from trampoline
+      return Ret;
     }
   }
 }

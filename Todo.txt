@@ -76,6 +76,7 @@
   * .NET injection.
   * Cross-session injection.
   * IAT injection.
+  * Varargs/generic export calling.
 
 * Patcher
   * VEH hooking (Both INT3 and DR).
