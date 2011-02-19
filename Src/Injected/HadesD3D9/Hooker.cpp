@@ -34,6 +34,7 @@ namespace Hades
   {
     // Todo: Ensure hook removal on module unload
     // Todo: Deferred hooking via a LoadLibrary hook
+    // Todo: Fail gracefully if particular export/interface not supported
     
     // Kernel instance
     Kernel::Kernel* D3D9Hooker::m_pKernel = nullptr;
@@ -99,11 +100,11 @@ namespace Hades
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("D3D9Hooker::Hook") << 
-          ErrorString("Could not load d3d9.dll!") << 
+          ErrorString("Could not load d3d9.dll") << 
           ErrorCode(LastError));
       }
       
-      // Find d3d9.dll!!Direct3DCreate9
+      // Find d3d9.dll!Direct3DCreate9
       FARPROC const pDirect3DCreate9 = GetProcAddress(D3D9Mod, 
         "Direct3DCreate9");
       if (!pDirect3DCreate9)
@@ -111,7 +112,7 @@ namespace Hades
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("D3D9Hooker::Hook") << 
-          ErrorString("Could not find d3d9.dll!!Direct3DCreate9") << 
+          ErrorString("Could not find d3d9.dll!Direct3DCreate9") << 
           ErrorCode(LastError));
       }
       
@@ -120,7 +121,7 @@ namespace Hades
         L"d3d9.dll!Direct3DCreate9 (%p).") %pDirect3DCreate9 
         << std::endl;
           
-      // Hook d3d9.dll!!Direct3DCreate9
+      // Hook d3d9.dll!Direct3DCreate9
       Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
       m_pDirect3DCreate9Hk.reset(new Memory::PatchDetour(MyMemory, 
         pDirect3DCreate9, &Direct3DCreate9_Hook));
@@ -154,18 +155,18 @@ namespace Hades
     // d3d9.dll!Direct3DCreate9 hook implementation
     IDirect3D9* WINAPI D3D9Hooker::Direct3DCreate9_Hook(UINT SDKVersion)
     {
+      // Call trampoline
+      typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
+      auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
+        m_pDirect3DCreate9Hk->GetTrampoline());      
+      IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
+        
       // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
-        // Call trampoline
-        typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
-        auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
-          m_pDirect3DCreate9Hk->GetTrampoline());      
-        IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
-          
         // Debug output
         std::wcout << boost::wformat(L"D3D9Hooker::Direct3DCreate9_Hook: "
           L"SDKVersion = %u. Return = %p.") %SDKVersion %pD3D9 << std::endl;
@@ -174,7 +175,7 @@ namespace Hades
         if (pD3D9 && !m_pCreateDeviceHk)
         {
           // Get pointer to d3d9.dll!IDirect3D9::CreateDevice
-          PBYTE* pInterfaceVMT = *reinterpret_cast<PBYTE**>(pD3D9);
+          PVOID* pInterfaceVMT = *reinterpret_cast<PVOID**>(pD3D9);
           PVOID pCreateDevice = pInterfaceVMT[16];
           
           // Debug output
@@ -182,8 +183,8 @@ namespace Hades
             L"Hooking d3d9.dll!IDirect3D9::CreateDevice (%p).") %pCreateDevice 
             << std::endl;
 
-          // Hook CreateDevice
-          Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+          // Hook d3d9.dll!IDirect3D9::CreateDevice
+          Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
           m_pCreateDeviceHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
             pCreateDevice, &CreateDevice_Hook));
           m_pCreateDeviceHk->Apply();
@@ -213,25 +214,25 @@ namespace Hades
       D3DPRESENT_PARAMETERS* pPresentationParameters, 
       IDirect3DDevice9** ppReturnedDeviceInterface)
     {
+      // Call trampoline
+      typedef HRESULT (WINAPI* tCreateDevice)(IDirect3D9* pThis, 
+        UINT Adapter, 
+        D3DDEVTYPE DeviceType, 
+        HWND hFocusWindow, 
+        DWORD BehaviorFlags, 
+        D3DPRESENT_PARAMETERS* pPresentationParameters, 
+        IDirect3DDevice9** ppReturnedDeviceInterface);
+      auto pCreateDevice = reinterpret_cast<tCreateDevice>(m_pCreateDeviceHk->
+        GetTrampoline());
+      HRESULT Result = pCreateDevice(pThis, Adapter, DeviceType, hFocusWindow, 
+        BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+
       // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
-        // Call trampoline
-        typedef HRESULT (WINAPI* tCreateDevice)(IDirect3D9* pThis, 
-          UINT Adapter, 
-          D3DDEVTYPE DeviceType, 
-          HWND hFocusWindow, 
-          DWORD BehaviorFlags, 
-          D3DPRESENT_PARAMETERS* pPresentationParameters, 
-          IDirect3DDevice9** ppReturnedDeviceInterface);
-        auto pCreateDevice = reinterpret_cast<tCreateDevice>(m_pCreateDeviceHk->
-          GetTrampoline());
-        HRESULT Result = pCreateDevice(pThis, Adapter, DeviceType, hFocusWindow, 
-          BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
-
         // Debug output
         std::wcout << boost::wformat(L"D3D9Hooker::CreateDevice_Hook: "
           L"pThis = %p, Adapter = %u, DeviceType = %u, hFocusWindow = %p, "
@@ -246,7 +247,7 @@ namespace Hades
         {
           // Get device and VMT
           IDirect3DDevice9* pDevice = *ppReturnedDeviceInterface;
-          PBYTE* pDeviceVMT = *reinterpret_cast<PBYTE**>(pDevice);
+          PVOID* pDeviceVMT = *reinterpret_cast<PVOID**>(pDevice);
 
           // Get pointer to d3d9.dll!IDirect3DDevice9::EndScene
           PVOID pEndScene = pDeviceVMT[42];
@@ -257,9 +258,9 @@ namespace Hades
             << std::endl;
 
           // Create memory manager
-          Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+          Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
 
-          // Hook EndScene
+          // Hook d3d9.dll!IDirect3DDevice9::EndScene
           m_pEndSceneHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
             pEndScene, &EndScene_Hook));
           m_pEndSceneHk->Apply();
@@ -272,7 +273,7 @@ namespace Hades
             L"Hooking d3d9.dll!IDirect3DDevice9::Reset (%p).") %pReset 
             << std::endl;
 
-          // Hook Reset
+          // Hook d3d9.dll!IDirect3DDevice9::Reset
           m_pResetHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
             pReset, &Reset_Hook));
           m_pResetHk->Apply();

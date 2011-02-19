@@ -17,24 +17,32 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Windows API
-#include <Windows.h>
+// C++ Standard Library
+#include <iostream>
 
 // Boost
 #include <boost/format.hpp>
+#include <boost/thread.hpp>
+
+// Windows API
+#include <Windows.h>
 
 // Hades
 #include "Hooker.hpp"
 #include "HadesMemory/Memory.hpp"
-#include "HadesCommon/Logger.hpp"
 #include "HadesKernel/Kernel.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
-// Initialize D3D9
+// Initialize D3D11
 extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module, 
   Hades::Kernel::Kernel& MyKernel)
 {
-  try
+  // Function is not thread-safe
+  static boost::mutex MyMutex;
+  boost::lock_guard<boost::mutex> MyLock(MyMutex);
+    
+  // 'Real' initialization code
+  auto InitReal = [&] () 
   {
     // Break to debugger if present
     if (IsDebuggerPresent())
@@ -43,21 +51,31 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module,
     }
     
     // Debug output
-    HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
-      L"Hades-D3D11::Initialize: Module Base = %p, Path to Self = %s, "
-      L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
-      %Hades::Windows::GetModulePath(nullptr) << std::endl);
+    std::wcout << boost::wformat(L"Hades-D3D11::Initialize: Module Base = %p, "
+      L"Path to Self = %s, Path to Bin = %s.") %Module 
+      %Hades::Windows::GetSelfPath() %Hades::Windows::GetModulePath(nullptr) 
+      << std::endl;
         
     // Initialize and hook D3D11
     Hades::D3D11::D3D11Hooker::Initialize(MyKernel);
     Hades::D3D11::D3D11Hooker::Hook();
+  };
+    
+  try
+  {
+    // Call real init routine safely
+    static boost::once_flag f = BOOST_ONCE_INIT;
+    boost::call_once(f, InitReal);
   }
   catch (std::exception const& e)
   {
     // Dump error information
     std::cout << boost::diagnostic_information(e) << std::endl;
+      
+    // Failure
+    return 1;
   }
-
+  
   // Success
   return 0;
 }

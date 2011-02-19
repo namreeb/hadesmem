@@ -37,48 +37,59 @@ namespace Hades
 {
   namespace D3D11
   {
+    // D3D11 hooker
     class D3D11Hooker
     {
     public:
+      // Error type
       class Error : public virtual HadesError 
       { };
       
+      // Initialize D3D11 hooker
       static void Initialize(Kernel::Kernel& MyKernel);
 
+      // Hook D3D11
       static void Hook();
       
+      // Unhook D3D11
       static void Unhook();
       
     private:
-      static HRESULT WINAPI D3D11CreateDeviceAndSwapChain_Hook(
-        IDXGIAdapter *pAdapter,
-        D3D_DRIVER_TYPE DriverType,
-        HMODULE Software,
-        UINT Flags,
-        const D3D_FEATURE_LEVEL *pFeatureLevels,
-        UINT FeatureLevels,
-        UINT SDKVersion,
-        const DXGI_SWAP_CHAIN_DESC *pSwapChainDesc,
-        IDXGISwapChain **ppSwapChain,
-        ID3D11Device **ppDevice,
-        D3D_FEATURE_LEVEL *pFeatureLevel,
-        ID3D11DeviceContext **ppImmediateContext);
-              
+      // dxgi.dll!CreateDXGIFactory hook implementation
       static HRESULT WINAPI CreateDXGIFactory_Hook(
         REFIID riid,
         void **ppFactory);
       
+      // dxgi.dll!CreateDXGIFactory1 hook implementation
       static HRESULT WINAPI CreateDXGIFactory1_Hook(
         REFIID riid,
         void **ppFactory);
+        
+      // dxgi.dll!IDXGIFactory::CreateSwapChain hook implementation
+      static HRESULT WINAPI CreateSwapChain_Hook(
+        IUnknown *pDevice,
+        DXGI_SWAP_CHAIN_DESC *pDesc,
+        IDXGISwapChain **ppSwapChain);
       
+      // dxgi.dll!IDXGISwapChain::Present hook implementation
+      static HRESULT WINAPI Present_Hook(
+        UINT SyncInterval,
+        UINT Flags);
+
+      // Kernel instance
       static Kernel::Kernel* m_pKernel;
-        
-      static std::shared_ptr<Hades::Memory::PatchDetour> m_pD3D11CreateDeviceAndSwapChainHk;
-        
+      
+      // dxgi.dll!CreateDXGIFactory hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDXGIFactoryHk;
         
+      // dxgi.dll!CreateDXGIFactory1 hook
       static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDXGIFactory1Hk;
+        
+      // dxgi.dll!IDXGIFactory::CreateSwapChain hook
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateSwapChainHk;
+        
+      // dxgi.dll!IDXGISwapChain::Present hook
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pPresentHk;
     };
   }
 }
