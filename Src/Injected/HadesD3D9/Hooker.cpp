@@ -26,7 +26,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Hooker.hpp"
-#include "Interface.hpp"
 #include "HadesMemory/Memory.hpp"
 
 namespace Hades
@@ -34,20 +33,66 @@ namespace Hades
   namespace D3D9
   {
     // Todo: Ensure hook removal on module unload
+    // Todo: Deferred hooking via a LoadLibrary hook
     
+    // Kernel instance
     Kernel::Kernel* D3D9Hooker::m_pKernel = nullptr;
       
+    // Device instance
+    IDirect3DDevice9* D3D9Hooker::m_pDevice = nullptr;
+    
+    // Renderer instance
+    std::shared_ptr<GUI::D3D9Renderer> D3D9Hooker::m_pRenderer;
+    
+    // Direct3DCreate9 hook
     std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::
-      m_pDirect3DCreate9;
+      m_pDirect3DCreate9Hk;
+    
+    // IDirect3D9::CreateDevice hook  
+    std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::m_pCreateDeviceHk;
       
+    // IDrect3DDevice9::EndScene hook
+    std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::m_pEndSceneHk;
+    // IDrect3DDevice9::Reset hook
+    std::shared_ptr<Hades::Memory::PatchDetour> D3D9Hooker::m_pResetHk;
+      
+    // Initialize D3D9 hooker
     void D3D9Hooker::Initialize(Kernel::Kernel& MyKernel)
     {
       m_pKernel = &MyKernel;
     }
       
+    // Hook D3D9
     void D3D9Hooker::Hook()
     {
-      // Todo: Deferred hooking via a LoadLibrary hook
+      // Check if already hooked
+      if (m_pDirect3DCreate9Hk || m_pCreateDeviceHk || m_pEndSceneHk || 
+        m_pResetHk)
+      {
+        if (m_pDirect3DCreate9Hk)
+        {
+          m_pDirect3DCreate9Hk->Apply();
+        }
+        
+        if (m_pCreateDeviceHk)
+        {
+          m_pCreateDeviceHk->Apply();
+        }
+        
+        if (m_pEndSceneHk)
+        {
+          m_pEndSceneHk->Apply();
+        }
+        
+        if (m_pResetHk)
+        {
+          m_pResetHk->Apply();
+        }
+        
+        return;
+      }
+      
+      // Get D3D9 module
       HMODULE const D3D9Mod = LoadLibrary(L"d3d9.dll");
       if (!D3D9Mod)
       {
@@ -58,6 +103,7 @@ namespace Hades
           ErrorCode(LastError));
       }
       
+      // Find D3D9!Direct3DCreate9
       FARPROC const pDirect3DCreate9 = GetProcAddress(D3D9Mod, 
         "Direct3DCreate9");
       if (!pDirect3DCreate9)
@@ -69,42 +115,78 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      std::cout << boost::format("D3D9Hooker::Hook: pDirect3DCreate9 = %p.") 
-        %pDirect3DCreate9 << std::endl;
+      // Debug output
+      std::wcout << boost::wformat(L"D3D9Hooker::Hook: Hooking "
+        L"Direct3DCreate9. pDirect3DCreate9 = %p.") %pDirect3DCreate9 
+        << std::endl;
           
+      // Hook D3D9!Direct3DCreate9
       Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
-      m_pDirect3DCreate9.reset(new Memory::PatchDetour(MyMemory, pDirect3DCreate9, 
-        &Direct3DCreate9_Hook));
-      m_pDirect3DCreate9->Apply();
+      m_pDirect3DCreate9Hk.reset(new Memory::PatchDetour(MyMemory, 
+        pDirect3DCreate9, &Direct3DCreate9_Hook));
+      m_pDirect3DCreate9Hk->Apply();
     }
     
+    // Unhook D3D9
     void D3D9Hooker::Unhook()
     {
-      if (m_pDirect3DCreate9)
+      if (m_pDirect3DCreate9Hk)
       {
-        m_pDirect3DCreate9->Remove();
+        m_pDirect3DCreate9Hk->Remove();
+      }
+      
+      if (m_pCreateDeviceHk)
+      {
+        m_pCreateDeviceHk->Remove();
+      }
+      
+      if (m_pEndSceneHk)
+      {
+        m_pEndSceneHk->Remove();
+      }
+      
+      if (m_pResetHk)
+      {
+        m_pResetHk->Remove();
       }
     }
     
+    // Direct3DCreate9 hook implementation
     IDirect3D9* WINAPI D3D9Hooker::Direct3DCreate9_Hook(UINT SDKVersion)
     {
+      // Function is not thread-safe
       static boost::mutex MyMutex;
       boost::lock_guard<boost::mutex> MyLock(MyMutex);
         
       try
       {
-        std::cout << boost::format("D3D9Hooker::Direct3DCreate9_Hook: "
-          "SDKVersion = %u.") %SDKVersion << std::endl;
-            
+        // Call trampoline
         typedef IDirect3D9* (WINAPI* tDirect3DCreate9)(UINT SDKVersion);
         auto const pDirect3DCreate9 = reinterpret_cast<tDirect3DCreate9>(
-          m_pDirect3DCreate9->GetTrampoline());      
+          m_pDirect3DCreate9Hk->GetTrampoline());      
         IDirect3D9* pD3D9 = pDirect3DCreate9(SDKVersion);
           
-        std::cout << boost::format("D3D9Hooker::Direct3DCreate9_Hook: "
-          "Return = %p.") %pD3D9 << std::endl;
+        // Debug output
+        std::wcout << boost::wformat(L"D3D9Hooker::Direct3DCreate9_Hook: "
+          L"SDKVersion = %u. Return = %p.") %SDKVersion %pD3D9 << std::endl;
             
-        return new IDirect3D9Hook(*m_pKernel, pD3D9);
+        // Hook if call successful
+        if (pD3D9 && !m_pCreateDeviceHk)
+        {
+          // Debug output
+          std::wcout << "D3D9Hooker::Direct3DCreate9_Hook: Hooking "
+            "d3d9.dll!IDirect3D9::CreateDevice." << std::endl;
+
+          // Hook CreateDevice
+          PBYTE* pDeviceVMT = *reinterpret_cast<PBYTE**>(pD3D9);
+          Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+          m_pCreateDeviceHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
+            pDeviceVMT[16], &CreateDevice_Hook));
+          m_pCreateDeviceHk->Apply();
+        }
+        
+        // Return result from trampoline
+        return pD3D9;
       }
       catch (std::exception const& e)
       {
@@ -114,6 +196,180 @@ namespace Hades
             
         // Failure
         return nullptr;
+      }
+    }
+    
+    // IDirect3D9::CreateDevice hook implementation
+    HRESULT WINAPI D3D9Hooker::CreateDevice_Hook(
+      IDirect3D9* pThis, 
+      UINT Adapter, 
+      D3DDEVTYPE DeviceType, 
+      HWND hFocusWindow, 
+      DWORD BehaviorFlags, 
+      D3DPRESENT_PARAMETERS* pPresentationParameters, 
+      IDirect3DDevice9** ppReturnedDeviceInterface)
+    {
+      // Function is not thread-safe
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
+        
+      try
+      {
+        // Call trampoline
+        typedef HRESULT (WINAPI* tCreateDevice)(IDirect3D9* pThis, 
+          UINT Adapter, 
+          D3DDEVTYPE DeviceType, 
+          HWND hFocusWindow, 
+          DWORD BehaviorFlags, 
+          D3DPRESENT_PARAMETERS* pPresentationParameters, 
+          IDirect3DDevice9** ppReturnedDeviceInterface);
+        auto pCreateDevice = reinterpret_cast<tCreateDevice>(m_pCreateDeviceHk->
+          GetTrampoline());
+        HRESULT Result = pCreateDevice(pThis, Adapter, DeviceType, hFocusWindow, 
+          BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+
+        // Debug output
+        std::wcout << boost::wformat(L"D3D9Hooker::CreateDevice_Hook: "
+          L"pThis = %p, Adapter = %u, DeviceType = %u, hFocusWindow = %p, "
+          L"BehaviorFlags = %u, pPresentationParameters = %p, "
+          L"ppReturnedDeviceInterface = %p. Return = %u.") 
+          %pThis %Adapter %DeviceType %hFocusWindow %BehaviorFlags 
+          %pPresentationParameters %ppReturnedDeviceInterface %Result 
+          << std::endl;
+            
+        // Hook if call successful
+        if (SUCCEEDED(Result) && !m_pEndSceneHk && !m_pResetHk)
+        {
+          // Get device and VMT
+          IDirect3DDevice9* pDevice = *ppReturnedDeviceInterface;
+          PBYTE* pDeviceVMT = *reinterpret_cast<PBYTE**>(pDevice);
+
+          // Debug output
+          std::wcout << "D3D9Hooker::CreateDevice_Hook: Hooking "
+            "d3d9.dll!IDirect3DDevice9::EndScene." << std::endl;
+              
+          // Create memory manager
+          Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+
+          // Hook EndScene
+          m_pEndSceneHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
+            pDeviceVMT[42], &EndScene_Hook));
+          m_pEndSceneHk->Apply();
+
+          // Debug output
+          std::wcout << "D3D9Hooker::CreateDevice_Hook: Hooking "
+            "d3d9.dll!IDirect3DDevice9::Reset." << std::endl;
+
+          // Hook Reset
+          m_pResetHk.reset(new Hades::Memory::PatchDetour(MyMemory, 
+            pDeviceVMT[16], &Reset_Hook));
+          m_pResetHk->Apply();
+        }
+        
+        // Perform initialization if call successfull
+        if (SUCCEEDED(Result))
+        {
+          // Debug output
+          std::wcout << boost::wformat(L"D3D9Hooker::CreateDevice_Hook: "
+            L"Initializing resources. Old device = %p, New device = %p.") 
+            %m_pDevice %*ppReturnedDeviceInterface << std::endl;
+              
+          // Cache device pointer
+          m_pDevice = *ppReturnedDeviceInterface;
+          
+          // Create renderer
+          m_pRenderer.reset(new GUI::D3D9Renderer(m_pDevice));
+        }
+        
+        return Result;
+      }
+      catch (std::exception const& e)
+      {
+        // Debug output
+        std::cout << boost::format("D3D9Hooker::CreateDevice_Hook: "
+          "Error! %s.") %e.what() << std::endl;
+            
+        // Failure
+        return E_FAIL;
+      }
+    }
+    
+    // IDrect3DDevice9::EndScene hook implementation
+    HRESULT WINAPI D3D9Hooker::EndScene_Hook(IDirect3DDevice9* pThis)
+    {
+      // Function is not thread-safe
+      static boost::mutex MyMutex;
+      boost::lock_guard<boost::mutex> MyLock(MyMutex);
+        
+      try
+      {
+        // Sanity check
+        if (pThis != m_pDevice)
+        {
+          std::wcout << "D3D9Hooker::EndScene_Hook: Warning! Multiple devices "
+            "are currently unsupported." << std::endl;
+        }
+        
+        // Get trampoline
+        typedef HRESULT (WINAPI* tEndScene)(IDirect3DDevice9* pThis);
+        auto pEndScene = reinterpret_cast<tEndScene>(m_pEndSceneHk->
+          GetTrampoline());
+
+        // Notify kernel of OnFrame event
+        m_pKernel->OnFrame(*m_pRenderer);
+
+        // Call trampoline
+        return pEndScene(pThis);
+      }
+      catch (std::exception const& e)
+      {
+        // Debug output
+        std::cout << boost::format("D3D9Hooker::EndScene_Hook: "
+          "Error! %s.") %e.what() << std::endl;
+            
+        // Failure
+        return E_FAIL;
+      }
+    }
+
+    // IDrect3DDevice9::Reset hook implementation
+    HRESULT WINAPI D3D9Hooker::Reset_Hook(IDirect3DDevice9* pThis, 
+      D3DPRESENT_PARAMETERS* pPresentationParameters)
+    {
+      try
+      {
+        // Sanity check
+        if (pThis != m_pDevice)
+        {
+          std::wcout << "D3D9Hooker::EndScene_Hook: Warning! Multiple devices "
+            "are currently unsupported." << std::endl;
+        }
+        
+        // Get trampoline
+        typedef HRESULT (WINAPI* tReset)(IDirect3DDevice9* pThis, 
+          D3DPRESENT_PARAMETERS* pPresentationParameters);
+        auto pReset = reinterpret_cast<tReset>(m_pResetHk->GetTrampoline());
+
+        // Perform pre-reset duties
+        m_pRenderer->PreReset();
+
+        // Call trampoline
+        HRESULT Result = pReset(pThis, pPresentationParameters);
+
+        // Perform post-reset duties
+        m_pRenderer->PostReset();
+
+        // Return result from trampoline
+        return Result;
+      }
+      catch (std::exception const& e)
+      {
+        // Debug output
+        std::cout << boost::format("D3D9Hooker::Reset_Hook: "
+          "Error! %s.") %e.what() << std::endl;
+            
+        // Failure
+        return E_FAIL;
       }
     }
   }

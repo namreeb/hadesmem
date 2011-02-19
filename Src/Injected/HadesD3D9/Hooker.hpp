@@ -30,6 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <d3dx9.h>
 
 // Hades
+#include "Renderer.hpp"
 #include "HadesMemory/Memory.hpp"
 #include "HadesKernel/Kernel.hpp"
 
@@ -43,18 +44,57 @@ namespace Hades
       class Error : public virtual HadesError 
       { };
       
+      // Initialize D3D9 hooker
       static void Initialize(Kernel::Kernel& MyKernel);
 
+      // Hook D3D9
       static void Hook();
       
+      // Unhook D3D9
       static void Unhook();
       
     private:
+      // Direct3DCreate9 hook implementation
       static IDirect3D9* WINAPI Direct3DCreate9_Hook(UINT SDKVersion);
       
+      // IDirect3D9::CreateDevice hook implementation
+      static HRESULT WINAPI CreateDevice_Hook(
+        IDirect3D9* pThis, 
+        UINT Adapter, 
+        D3DDEVTYPE DeviceType, 
+        HWND hFocusWindow, 
+        DWORD BehaviorFlags, 
+        D3DPRESENT_PARAMETERS* pPresentationParameters, 
+        IDirect3DDevice9** ppReturnedDeviceInterface);
+
+      // IDrect3DDevice9::EndScene hook implementation
+      static HRESULT WINAPI EndScene_Hook(
+        IDirect3DDevice9* pThis);
+
+      // IDrect3DDevice9::Reset hook implementation
+      static HRESULT WINAPI Reset_Hook(
+        IDirect3DDevice9* pThis, 
+        D3DPRESENT_PARAMETERS* pPresentationParameters);
+
+      // Kernel instance
       static Kernel::Kernel* m_pKernel;
         
-      static std::shared_ptr<Hades::Memory::PatchDetour> m_pDirect3DCreate9;
+      // Device instance
+      static IDirect3DDevice9* m_pDevice;
+      
+      // Renderer instance
+      static std::shared_ptr<GUI::D3D9Renderer> m_pRenderer;
+      
+      // Direct3DCreate9 hook
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pDirect3DCreate9Hk;
+      
+      // IDirect3D9::CreateDevice hook  
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pCreateDeviceHk;
+        
+      // IDrect3DDevice9::EndScene hook
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pEndSceneHk;
+      // IDrect3DDevice9::Reset hook
+      static std::shared_ptr<Hades::Memory::PatchDetour> m_pResetHk;
     };
   }
 }
