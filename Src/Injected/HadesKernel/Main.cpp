@@ -50,7 +50,7 @@ extern "C" __declspec(dllexport) DWORD __stdcall Initialize(HMODULE Module)
     HADES_LOG_THREAD_SAFE(std::wcout << boost::wformat(
       L"Hades-Kernel::Initialize: Module Base = %p, Path to Self = %s, "
       L"Path to Bin = %s.") %Module %Hades::Windows::GetSelfPath() 
-      %Hades::Windows::GetModulePath(nullptr));
+      %Hades::Windows::GetModulePath(nullptr) << std::endl);
         
     // Initialize Kernel
     static Hades::Kernel::Kernel MyKernel;
