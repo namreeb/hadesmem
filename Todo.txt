@@ -28,6 +28,7 @@
   * Cheat Engine 'replacement'.
   
 * Base hook
+  * CEGUI support.
   * Convert D3D extensions to use detours rather than COM interface 
   replacements.
   * Ensure register state is maintained in hooks.
