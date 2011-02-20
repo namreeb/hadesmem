@@ -12,6 +12,7 @@
   * Binaries with update server.
   * Automatic binary versioning using SVN revision.
   * Upgrade to Python 3.x.
+  * Decide whether to maintain GCC/MinGW support.
   
 * New Modules
   * Debugging APIs.
