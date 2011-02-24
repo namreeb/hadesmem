@@ -3221,7 +3221,7 @@ void __bea_callspec__ jbe_(PDISASM pMyDisasm)
         (*pMyDisasm).Prefix.BranchTaken = InUsePrefix;
     }
     (*pMyDisasm).Instruction.Category = GENERAL_PURPOSE_INSTRUCTION+CONTROL_TRANSFER;
-    (*pMyDisasm).Instruction.BranchType = JB;
+    (*pMyDisasm).Instruction.BranchType = JNA;
     #ifndef BEA_LIGHT_DISASSEMBLY
        (void) strcpy ((*pMyDisasm).Instruction.Mnemonic, "jbe ");
     #endif
@@ -3557,7 +3557,7 @@ void __bea_callspec__ jle_(PDISASM pMyDisasm)
         (*pMyDisasm).Prefix.BranchTaken = InUsePrefix;
     }
     (*pMyDisasm).Instruction.Category = GENERAL_PURPOSE_INSTRUCTION+CONTROL_TRANSFER;
-    (*pMyDisasm).Instruction.BranchType = JL;
+    (*pMyDisasm).Instruction.BranchType = JNG;
     #ifndef BEA_LIGHT_DISASSEMBLY
        (void) strcpy ((*pMyDisasm).Instruction.Mnemonic, "jle ");
     #endif
@@ -3986,7 +3986,7 @@ void __bea_callspec__ jbe_near(PDISASM pMyDisasm)
         (*pMyDisasm).Prefix.BranchTaken = InUsePrefix;
     }
     (*pMyDisasm).Instruction.Category = GENERAL_PURPOSE_INSTRUCTION+CONTROL_TRANSFER;
-    (*pMyDisasm).Instruction.BranchType = JB;
+    (*pMyDisasm).Instruction.BranchType = JNA;
     (*pMyDisasm).Argument1.ArgSize = GV.OperandSize;
     #ifndef BEA_LIGHT_DISASSEMBLY
        (void) strcpy ((*pMyDisasm).Instruction.Mnemonic, "jbe ");

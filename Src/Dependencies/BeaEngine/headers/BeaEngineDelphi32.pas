@@ -6,6 +6,7 @@
 //  v0.4 support Delphi7 - Delphi2010
 // ====================================================================
 //  BeaEngine.pas convert by Vince
+//	updated by kao
 // ====================================================================
 // [+] BranchTaken,BranchNotTaken added in TPREFIXINFO v3.1.0
 unit BeaEngineDelphi32;
@@ -13,7 +14,7 @@ unit BeaEngineDelphi32;
 // Default link type is static lib
 // comment below line to switch link with DLL
 // ====================================================================
-//{$DEFINE USEDLL}
+// {$DEFINE USEDLL}
 // ====================================================================
 // Copyright 2006-2009, BeatriX
 // File coded by BeatriX
@@ -330,48 +331,35 @@ uses Windows,SysUtils;
 implementation
 {$IFNDEF USEDLL}
 {$L BeaEngineLib.obj}
-{$ENDIF}
 
-function _strcpy(dest, src: PAnsiChar): PAnsiChar;cdecl;
+function strcpy(dest, src: PAnsiChar): PAnsiChar;cdecl;
 begin
   Result := SysUtils.StrCopy(dest, src);
 end;
 
-function _strlen(s: PAnsiChar): Cardinal; cdecl;
+function strlen(s: PAnsiChar): Cardinal; cdecl;
 begin
   Result := SysUtils.StrLen(s);
 end;
 
-function _memset(Destination: Pointer; C: Integer; Count: Cardinal): Pointer; cdecl;
+function memset(Destination: Pointer; C: Integer; Count: Cardinal): Pointer; cdecl;
 begin
   FillMemory(Destination, Count, C);
   Result := Destination;
 end;
 
-function _sprintf(Buffer, Format: PAnsiChar):longint; varargs;  cdecl; external 'User32.DLL' name 'wsprintfA';
+function sprintf(Buffer, Format: PAnsiChar):longint; varargs;  cdecl; external 'User32.DLL' name 'wsprintfA';
 
-{$IFDEF USEDLL}
-function Disasm(var aDisAsm:TDISASM):longint;stdcall;external 'BeaEngine.DLL' index 3;
-function BeaEngineVersion:longint;stdcall;external 'BeaEngine.DLL' index 2;
-function BeaEngineRevision:longint;stdcall;external 'BeaEngine.DLL' index 1;
+function Disasm(var aDisAsm:TDISASM):longint;stdcall;external;
+function BeaEngineVersion:longint;stdcall;external;
+function BeaEngineRevision:longint;stdcall;external;
+
 {$ELSE}
-function _Disasm(var aDisAsm:TDISASM):longint;stdcall;external;
-function _BeaEngineVersion:longint;stdcall;external;
-function _BeaEngineRevision:longint;stdcall;external;
 
-function Disasm(var aDisAsm:TDISASM):longint;stdcall;
-begin
-result := _Disasm(aDisAsm);
-end;
-function BeaEngineVersion:longint;stdcall;
-begin
-result := _BeaEngineVersion;
-end;
-function BeaEngineRevision:longint;stdcall;
-begin
-result := _BeaEngineRevision;
-end;
+function Disasm(var aDisAsm:TDISASM):longint;stdcall;external 'BeaEngine.DLL' name '_Disasm@4';
+function BeaEngineVersion:longint;stdcall;external 'BeaEngine.DLL' name '_BeaEngineVersion@0';
+function BeaEngineRevision:longint;stdcall;external 'BeaEngine.DLL' name '_BeaEngineRevision@0';
+
 {$ENDIF}
 
 end.
-

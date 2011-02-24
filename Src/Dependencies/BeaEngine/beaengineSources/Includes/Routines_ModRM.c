@@ -424,6 +424,7 @@ void __bea_callspec__ Addr_disp32(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                 MyNumber +=1;
             }
             CalculateRelativeAddress(&MyAddress, (Int64)MyNumber, pMyDisasm);
+            (*pMyDisasm).Instruction.AddrValue = MyAddress;
             #ifndef BEA_LIGHT_DISASSEMBLY
                i+= CopyFormattedNumber(pMyDisasm, (char*) (*pMyArgument).ArgMnemonic+i,"%I64X", (Int64)MyAddress);
             #endif
@@ -2883,7 +2884,7 @@ void __bea_callspec__ _rESI(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[6+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[6+0];
-				(*pMyArgument).ArgPosition = HighPosition;				
+				(*pMyArgument).ArgPosition = HighPosition;
                 (*pMyArgument).ArgSize = 8;
             }
             else {
@@ -2994,7 +2995,7 @@ void __bea_callspec__ _rEDI(ARGTYPE* pMyArgument, PDISASM pMyDisasm)
                    (void) strcpy ((char*) (*pMyArgument).ArgMnemonic+i, Registers8BitsLegacy[7+0]);
                 #endif
                 (*pMyArgument).ArgType = REGISTER_TYPE+GENERAL_REG+REGS8BITS[7+0];
-				(*pMyArgument).ArgPosition = HighPosition;				
+				(*pMyArgument).ArgPosition = HighPosition;
                 (*pMyArgument).ArgSize = 8;
             }
             else {
