@@ -175,14 +175,6 @@ namespace Hades
             MB_OK );
           return; //hr;
         }
-        
-        // Set vertex buffer
-        UINT stride = sizeof( SimpleVertex );
-        UINT offset = 0;
-        m_pDeviceContext->IASetVertexBuffers( 0, 1, &m_pVertexBuffer, &stride, &offset );
-        
-        // Set primitive topology
-        m_pDeviceContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
       }
       
       void PreReset()
@@ -196,6 +188,21 @@ namespace Hades
       void DrawText(std::wstring const& /*Text*/, unsigned int /*X*/, unsigned int /*Y*/)
       {
         // Todo: Actually draw text rather than some test stuff...
+        
+        // Set the input layout
+        m_pDeviceContext->IASetInputLayout( m_pVertexLayout );
+        
+        // Set vertex buffer
+        struct SimpleVertex
+        {
+          XMFLOAT3 Pos;
+        };
+        UINT stride = sizeof( SimpleVertex );
+        UINT offset = 0;
+        m_pDeviceContext->IASetVertexBuffers( 0, 1, &m_pVertexBuffer, &stride, &offset );
+        
+        // Set primitive topology
+        m_pDeviceContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
         
         // Render a triangle
         m_pDeviceContext->VSSetShader( m_pVertexShader, NULL, 0 );
