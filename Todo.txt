@@ -51,6 +51,8 @@
   crashing target.
   * Improve genericity of parameter passing in remote function caller.
   * Memory reading via expression templates.
+  * Improved type genericity via type decay to ensure templates function 
+  correctly in the face of const, volatile, references, etc.
 
 * Disassembler
   * Decode calls/jumps to function names where possible.
