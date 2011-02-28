@@ -13,9 +13,9 @@ use-project /Injected
     Src/Injected
   ;
   
-use-project /MemHack 
+use-project /GUI 
   : 
-    Src/MemHack 
+    Src/GUI 
   ; 
    
 use-project /Memory 
@@ -63,7 +63,7 @@ build-project Src/Injected
 build-project Src/Memory 
   ;
   
-build-project Src/MemHack 
+build-project Src/GUI 
   ;
   
 build-project Src/Scripting 
@@ -151,7 +151,7 @@ install Bin
   : 
     Src/Injected 
     Src/Memory 
-    Src/MemHack 
+    Src/GUI 
     Src/Scripting 
     Misc/DbgHelp/IA32/dbghelp.dll 
     Misc/DbgHelp/IA32/symsrv.dll 
@@ -169,7 +169,7 @@ install Bin
   : 
     Src/Injected 
     Src/Memory 
-    Src/MemHack 
+    Src/GUI 
     Src/Scripting 
     Misc/DbgHelp/AMD64/dbghelp.dll 
     Misc/DbgHelp/AMD64/symsrv.dll 
