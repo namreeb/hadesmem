@@ -1,3 +1,11 @@
+local boost = [ modules.peek : BOOST_ROOT ]
+  ;
+  
+use-project /boost 
+  : 
+    $(boost) 
+  ;
+
 use-project /Common 
   : 
     Include/Common 
