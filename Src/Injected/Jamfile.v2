@@ -6,13 +6,6 @@ import os
 local DXSDK_DIR = [ os.environ DXSDK_DIR ] 
   ;
 
-project 
-  : 
-    requirements 
-    <toolset>gcc:<warnings>all 
-    <toolset>msvc:<warnings>all 
-  ;
-
 lib d3d9 
   : 
   : 
@@ -130,7 +123,6 @@ lib HadesKernel
   : 
     <include>"." 
     <link>shared 
-    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
 
 lib HadesD3D9 
@@ -145,7 +137,6 @@ lib HadesD3D9
     <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
-    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
 
 lib HadesD3D10 
@@ -157,7 +148,6 @@ lib HadesD3D10
     <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
-    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;
 
 lib HadesD3D11 
@@ -171,5 +161,4 @@ lib HadesD3D11
     <include>"." 
     <include>$(DXSDK_DIR)/Include 
     <link>shared 
-    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
   ;

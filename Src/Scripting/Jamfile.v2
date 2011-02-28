@@ -1,12 +1,5 @@
 # Scripting/Jamfile.v2
 
-project 
-  : 
-    requirements 
-    <toolset>gcc:<warnings>all 
-    <toolset>msvc:<warnings>all 
-  ;
-
 import python 
   ;
 

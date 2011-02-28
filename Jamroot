@@ -1,6 +1,6 @@
 local boost = [ modules.peek : BOOST_ROOT ]
   ;
-  
+
 use-project /boost 
   : 
     $(boost) 
@@ -10,68 +10,68 @@ use-project /Common
   : 
     Include/Common 
   ; 
-  
+
 use-project /Dependencies 
   : 
     Src/Dependencies 
   ;
-  
+
 use-project /Injected 
   : 
     Src/Injected 
   ;
-  
+
 use-project /GUI 
   : 
     Src/GUI 
   ; 
-   
+
 use-project /Memory 
   : 
     Src/Memory 
   ; 
-   
+
 use-project /Scripting 
   : 
     Src/Scripting 
   ; 
-  
+
 use-project /Docs 
   : 
     Docs 
   ; 
-  
+
 project 
   : 
     requirements 
-    <define>BOOST_FILESYSTEM_VERSION=3 
-    <define>BOOST_SYSTEM_NO_DEPRECATED=1 
+    <define>BOOST_SYSTEM_NO_DEPRECATED 
+    <define>BOOST_FILESYSTEM_NO_DEPRECATED 
     <define>UNICODE 
     <define>_UNICODE 
-    <toolset>msvc:<define>_WIN32_WINNT=_WIN32_WINNT_WS03 
-    <toolset>msvc:<define>WINVER=_WIN32_WINNT_WS03 
-    <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS 
+    <define>_WIN32_WINNT=_WIN32_WINNT_WS03 
+    <define>WINVER=_WIN32_WINNT_WS03 
+    <define>_SCL_SECURE_NO_WARNINGS 
     <runtime-link>shared 
-    <toolset>gcc:<cxxflags>"-std=c++0x" 
+    <warnings>all 
   : 
     default-build debug 
   ;
 
 build-project Src/Dependencies 
   ;
-  
-build-project Src/Injected 
-  ;
-  
+
 build-project Src/Memory 
   ;
-  
+
+build-project Src/Injected 
+  ;
+
 build-project Src/GUI 
   ;
-  
+
 build-project Src/Scripting 
   ;
-  
+
 build-project Docs 
   ;
 
@@ -84,32 +84,14 @@ rule Install-Rule ( properties * )
   {
     if <variant>debug in $(properties)
     {
-      if <toolset>gcc in $(properties)
-      {
-        result += <location>Bin/GCC/Debug/IA32 
-          ;
-      }
-      
-      if <toolset>msvc in $(properties)
-      {
-        result += <location>Bin/MSVC/Debug/IA32 
-          ;
-      }
+      result += <location>Bin/Debug/IA32 
+        ;
     }
 
     if <variant>release in $(properties)
     {
-      if <toolset>gcc in $(properties)
-      {
-        result += <location>Bin/GCC/Release/IA32 
-          ;
-      }
-      
-      if <toolset>msvc in $(properties)
-      {
-        result += <location>Bin/MSVC/Release/IA32 
-          ;
-      }
+      result += <location>Bin/Release/IA32 
+        ;
     }
   }
   
@@ -117,32 +99,14 @@ rule Install-Rule ( properties * )
   {
     if <variant>debug in $(properties)
     {
-      if <toolset>gcc in $(properties)
-      {
-        result += <location>Bin/GCC/Debug/AMD64 
-          ;
-      }
-      
-      if <toolset>msvc in $(properties)
-      {
-        result += <location>Bin/MSVC/Debug/AMD64 
-          ;
-      }
+      result += <location>Bin/Debug/AMD64 
+        ;
     }
 
     if <variant>release in $(properties)
     {
-      if <toolset>gcc in $(properties)
-      {
-        result += <location>Bin/GCC/Release/AMD64 
-          ;
-      }
-      
-      if <toolset>msvc in $(properties)
-      {
-        result += <location>Bin/MSVC/Release/AMD64 
-          ;
-      }
+      result += <location>Bin/Release/AMD64 
+        ;
     }
   }
   
@@ -152,9 +116,9 @@ rule Install-Rule ( properties * )
 
 install Bin 
   : 
-    Src/Injected 
     Src/Memory 
     Src/GUI 
+    Src/Injected 
     Src/Scripting 
     Misc/DbgHelp/IA32/dbghelp.dll 
     Misc/DbgHelp/IA32/symsrv.dll 
@@ -167,12 +131,11 @@ install Bin
     <address-model>32 
   ;
 
-
 install Bin 
   : 
-    Src/Injected 
     Src/Memory 
     Src/GUI 
+    Src/Injected 
     Src/Scripting 
     Misc/DbgHelp/AMD64/dbghelp.dll 
     Misc/DbgHelp/AMD64/symsrv.dll 
