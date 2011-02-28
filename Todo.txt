@@ -13,6 +13,7 @@
   * Automatic binary versioning using SVN revision.
   * Upgrade to Python 3.x.
   * Decide whether to maintain GCC/MinGW support.
+  * Support paths larger than MAX_PATH in spots where it is currently capped.
   
 * New Modules
   * Debugging APIs.
