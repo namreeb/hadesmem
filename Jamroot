@@ -13,12 +13,12 @@ use-project /Common
   
 use-project /Dependencies 
   : 
-    Src/Dependencies
+    Src/Dependencies 
   ;
   
 use-project /Injected 
   : 
-    Src/Injected
+    Src/Injected 
   ;
   
 use-project /GUI 
@@ -33,12 +33,12 @@ use-project /Memory
    
 use-project /Scripting 
   : 
-    Src/Scripting
+    Src/Scripting 
   ; 
   
-use-project /Doc 
+use-project /Docs 
   : 
-    Doc
+    Docs 
   ; 
   
 project 
@@ -57,11 +57,6 @@ project
     default-build debug 
   ;
 
-path-constant TOP 
-  : 
-    . 
-  ;
-
 build-project Src/Dependencies 
   ;
   
@@ -77,7 +72,7 @@ build-project Src/GUI
 build-project Src/Scripting 
   ;
   
-build-project Doc
+build-project Docs 
   ;
 
 rule Install-Rule ( properties * ) 
