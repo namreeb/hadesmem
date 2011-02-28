@@ -18,13 +18,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/algorithm/string.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Module.hpp"

@@ -27,13 +27,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/noncopyable.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Notice: Modified version of EnsureCleanup library provided in the 'Windows
 // via C/C++' sample code. Originally copyright Jeffrey Richter and
@@ -49,7 +45,7 @@ namespace Hades
     // CleanupFn = Cleanup function (e.g. 'CloseHandle')
     // Invalid = Invalid handle value (e.g. '0')
     template <typename HandleT, typename FuncT, FuncT CleanupFn, 
-      DWORD_PTR Invalid>
+      HandleT Invalid>
     class EnsureCleanup : private boost::noncopyable
     {
     public:
@@ -59,7 +55,7 @@ namespace Hades
         "Size of handle type is invalid.");
 
       // Constructor
-      EnsureCleanup(HandleT Handle = reinterpret_cast<HandleT>(Invalid))
+      EnsureCleanup(HandleT Handle = Invalid)
         : m_Handle(Handle)
       { }
 
@@ -100,7 +96,7 @@ namespace Hades
       // Whether object is valid
       BOOL IsValid() const
       {
-        return m_Handle != reinterpret_cast<HandleT>(Invalid);
+        return m_Handle != Invalid;
       }
 
       // Whether object is invalid
@@ -124,7 +120,7 @@ namespace Hades
           CleanupFn(m_Handle);
 
           // We no longer represent a valid object.
-          m_Handle = reinterpret_cast<HandleT>(Invalid);
+          m_Handle = Invalid;
         }
       }
 
@@ -133,59 +129,52 @@ namespace Hades
       HandleT m_Handle;
     };
     
-    // GCC workaround
-    namespace
-    {
-      DWORD_PTR const INVALID_HANDLE_VALUE_CUSTOM = 
-        static_cast<DWORD_PTR>(-1);
-    }
-
     // Instances of the template C++ class for common data types.
-    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), FindClose, 0> 
+    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), FindClose, nullptr> 
       EnsureFindClose;
-    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 0> 
+    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, nullptr> 
       EnsureCloseHandle;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE_CUSTOM> EnsureCloseSnap;
-    typedef EnsureCleanup<HLOCAL, HLOCAL(WINAPI*)(HLOCAL), LocalFree, 0> 
+      INVALID_HANDLE_VALUE> EnsureCloseSnap;
+    typedef EnsureCleanup<HLOCAL, HLOCAL(WINAPI*)(HLOCAL), LocalFree, nullptr> 
       EnsureLocalFree;
-    typedef EnsureCleanup<HGLOBAL, HGLOBAL(WINAPI*)(HGLOBAL), GlobalFree, 0> 
-      EnsureGlobalFree;
-    typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), GlobalUnlock, 0> 
-      EnsureGlobalUnlock;
-    typedef EnsureCleanup<HKEY, LONG(WINAPI*)(HKEY), RegCloseKey, 0> 
+    typedef EnsureCleanup<HGLOBAL, HGLOBAL(WINAPI*)(HGLOBAL), GlobalFree, 
+      nullptr> EnsureGlobalFree;
+    typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), GlobalUnlock, 
+      nullptr> EnsureGlobalUnlock;
+    typedef EnsureCleanup<HKEY, LONG(WINAPI*)(HKEY), RegCloseKey, nullptr> 
       EnsureRegCloseKey;
     typedef EnsureCleanup<SC_HANDLE, BOOL(WINAPI*)(SC_HANDLE), 
       CloseServiceHandle, 0> EnsureCloseServiceHandle;
     typedef EnsureCleanup<HWINSTA, BOOL(WINAPI*)(HWINSTA), CloseWindowStation, 
       0> EnsureCloseWindowStation;
-    typedef EnsureCleanup<HDESK, BOOL(WINAPI*)(HDESK), CloseDesktop, 0> 
+    typedef EnsureCleanup<HDESK, BOOL(WINAPI*)(HDESK), CloseDesktop, nullptr> 
       EnsureCloseDesktop;
-    typedef EnsureCleanup<LPCVOID, BOOL(WINAPI*)(LPCVOID), UnmapViewOfFile, 0> 
-      EnsureUnmapViewOfFile;
-    typedef EnsureCleanup<HMODULE, BOOL(WINAPI*)(HMODULE), FreeLibrary, 0> 
-      EnsureFreeLibrary;
+    typedef EnsureCleanup<LPCVOID, BOOL(WINAPI*)(LPCVOID), UnmapViewOfFile, 
+      nullptr> EnsureUnmapViewOfFile;
+    typedef EnsureCleanup<HMODULE, BOOL(WINAPI*)(HMODULE), FreeLibrary, 
+      nullptr> EnsureFreeLibrary;
     typedef EnsureCleanup<PVOID, ULONG(WINAPI*)(PVOID), 
       RemoveVectoredExceptionHandler, 0> EnsureRemoveVEH;
-    typedef EnsureCleanup<HANDLE, DWORD(WINAPI*)(HANDLE), ResumeThread, 0> 
-      EnsureResumeThread;
+    typedef EnsureCleanup<HANDLE, DWORD(WINAPI*)(HANDLE), ResumeThread, 
+      nullptr> EnsureResumeThread;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE_CUSTOM> EnsureCloseFile;
-    typedef EnsureCleanup<HHOOK, BOOL(WINAPI*)(HHOOK), UnhookWindowsHookEx, 0> 
-      EnsureUnhookWindowsHookEx;
-    typedef EnsureCleanup<HWND, BOOL(WINAPI*)(HWND), DestroyWindow, 0> 
+      INVALID_HANDLE_VALUE> EnsureCloseFile;
+    typedef EnsureCleanup<HHOOK, BOOL(WINAPI*)(HHOOK), UnhookWindowsHookEx, 
+      nullptr> EnsureUnhookWindowsHookEx;
+    typedef EnsureCleanup<HWND, BOOL(WINAPI*)(HWND), DestroyWindow, nullptr> 
       EnsureDestroyWindow;
-    typedef EnsureCleanup<PSID, PVOID(WINAPI*)(PSID), FreeSid, 0> 
+    typedef EnsureCleanup<PSID, PVOID(WINAPI*)(PSID), FreeSid, nullptr> 
       EnsureFreeSid;
-    typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), FreeResource, 0> 
-      EnsureFreeResource;
-    typedef EnsureCleanup<HDC, BOOL(WINAPI*)(HDC), DeleteDC, 0> 
+    typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), FreeResource, 
+      nullptr> EnsureFreeResource;
+    typedef EnsureCleanup<HDC, BOOL(WINAPI*)(HDC), DeleteDC, nullptr> 
       EnsureDeleteDc;
-    typedef EnsureCleanup<HBITMAP, BOOL(WINAPI*)(HGDIOBJ), DeleteObject, 0> 
-      EnsureDeleteObject;
-    typedef EnsureCleanup<HICON, BOOL(WINAPI*)(HICON), DestroyIcon, 0> 
+    typedef EnsureCleanup<HBITMAP, BOOL(WINAPI*)(HGDIOBJ), DeleteObject, 
+      nullptr> EnsureDeleteObject;
+    typedef EnsureCleanup<HICON, BOOL(WINAPI*)(HICON), DestroyIcon, nullptr> 
       EnsureDestroyIcon;
-    typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, 0> 
+    typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, nullptr> 
       EnsureDestroyMenu;
       
     // Special class for ensuring the 'LastError' is restored in hooks

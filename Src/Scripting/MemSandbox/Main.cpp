@@ -19,13 +19,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <tchar.h>
-#ifdef _MSC_VER
 #include <crtdbg.h>
-#endif // #ifdef _MSC_VER
 #include <Windows.h>
 
 // C++ Standard Library
-#include <cmath> // GCC workaround
 #include <limits>
 #include <vector>
 #include <string>
@@ -34,16 +31,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <exception>
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/timer.hpp>
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Hades
 #include "HadesMemory/Memory.hpp"
@@ -92,12 +85,7 @@ bool GetInput(boost::python::object const& PythonNamespace)
 }
 
 // Program entry-point.
-#ifdef _MSC_VER
 int _tmain(int argc, TCHAR* argv[])
-#else
-// Fixme: Unicode EP support for compilers other than MSVC
-int main(int argc, char* argv[])
-#endif // #ifdef _MSC_VER
 {
   // Program timer
   boost::timer ProgTimer;

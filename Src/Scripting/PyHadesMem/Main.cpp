@@ -18,26 +18,19 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Windows API
-#ifdef _MSC_VER
 #include <crtdbg.h>
-#endif // #ifdef _MSC_VER
 #include <Windows.h>
 
 // C++ Standard Library
-#include <cmath> // GCC workaround
 #include <string>
 #include <vector>
 #include <iostream>
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/python.hpp>
 #include <boost/exception/all.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Hades
 #include "PeFileWrap.hpp"

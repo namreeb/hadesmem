@@ -233,11 +233,6 @@ namespace Hades
     {
       PVOID pFixupNewlyLoadedModule = &ModFromAddressHelper;
         
-      // MinGW workaround
-      #ifndef LOAD_LIBRARY_AS_IMAGE_RESOURCE
-      #define LOAD_LIBRARY_AS_IMAGE_RESOURCE 0x00000020
-      #endif
-        
       // If a new module is loaded, hook the hooked functions
       if ((hModule != NULL) && 
         (hModule != ModuleFromAddress(pFixupNewlyLoadedModule)) && 

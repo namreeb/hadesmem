@@ -30,12 +30,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 // Boost C++ Libraries
-#ifdef _MSC_VER
 #pragma warning(push, 1)
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4127)
 #pragma warning(disable: 4702)
-#endif // #ifdef _MSC_VER
 #include <boost/thread.hpp>
 #include <boost/format.hpp>
 #include <boost/date_time.hpp>
@@ -43,9 +41,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/categories.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Error.hpp"

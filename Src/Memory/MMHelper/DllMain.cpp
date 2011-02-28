@@ -18,19 +18,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/thread.hpp>
 #include <boost/exception/all.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Windows API
-#ifdef _MSC_VER
 #include <crtdbg.h>
-#endif // #ifdef _MSC_VER
 #include <Windows.h>
 
 // Hades
@@ -39,9 +33,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-
-// MinGW Boost.Thread compilation workaround
-extern "C" void tss_cleanup_implemented() { }
 
 // Fixme: This entire module is a complete mess. Rewrite to move from 'PoC' 
 // quality to at least 'alpha' or 'beta' quality.
@@ -123,12 +114,9 @@ LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
 #endif
 }
 
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 void TestSEH()
 {
-#ifdef _MSC_VER
   // Test SEH
   __try 
   {
@@ -139,22 +127,8 @@ void TestSEH()
   {
     MessageBox(nullptr, L"Testing SEH.", L"MMHelper", MB_OK);
   }
-#else
-  // Test SEH
-  try
-  {
-    int* pInt = 0;
-    *pInt = 0;
-  }
-  catch (...)
-  {
-    MessageBox(nullptr, L"Testing SEH.", L"MMHelper", MB_OK);
-  }
-#endif // #ifdef _MSC_VER
 }
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 void TestRelocs()
 {

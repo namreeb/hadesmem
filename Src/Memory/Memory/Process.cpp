@@ -23,13 +23,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <TlHelp32.h>
 
 // Boost
-#ifdef _MSC_VER
 #pragma warning(push, 1)
-#endif // #ifdef _MSC_VER
 #include <boost/algorithm/string.hpp>
-#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // #ifdef _MSC_VER
 
 // Hades
 #include "Process.hpp"
@@ -319,10 +315,6 @@ namespace Hades
     {
       // Start process
       SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
-      // MinGW workaround
-      #ifndef SEE_MASK_NOASYNC
-      #define SEE_MASK_NOASYNC 0x00000100
-      #endif
       ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
       ExecInfo.lpFile = Path.empty() ? NULL : Path.c_str();
       ExecInfo.lpParameters = Params.empty() ? NULL : Params.c_str();

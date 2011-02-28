@@ -31,17 +31,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
-// GCC workaround. MinGW does not support the updated DbgHelp APIs with 
-// Unicode support.
-namespace 
-{
-#ifdef _MSC_VER
-  typedef wchar_t TCHAR_TEMP;
-#else
-  typedef char TCHAR_TEMP;
-#endif // #ifdef _MSC_VER
-}
-
 namespace Hades
 {
   namespace Memory
@@ -84,7 +73,7 @@ namespace Hades
       // Get address of DbgHelp!SymInitialize
       typedef BOOL (WINAPI* tSymInitialize)(
         HANDLE hProcess, 
-        TCHAR_TEMP const* UserSearchPath, 
+        wchar_t const* UserSearchPath, 
         BOOL fInvadeProcess
       );
       auto pSymInitialize = reinterpret_cast<tSymInitialize>(GetProcAddress(
@@ -98,13 +87,9 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      // Convert search path to non-const buffer (GCC workaround)
-      auto const SearchPathTemp(boost::lexical_cast<std::basic_string<
-        TCHAR_TEMP>>(SearchPath));
-      
       // Initialize symbol APIs
       if(!pSymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
-        nullptr : &SearchPathTemp[0], FALSE))
+        nullptr : &SearchPath[0], FALSE))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -172,8 +157,8 @@ namespace Hades
       typedef DWORD64 (WINAPI* tSymLoadModuleEx)(
         HANDLE hProcess,
         HANDLE hFile,
-        TCHAR_TEMP const* ImageName,
-        TCHAR_TEMP const* ModuleName,
+        wchar_t const* ImageName,
+        wchar_t const* ModuleName,
         DWORD64 BaseOfDll,
         DWORD DllSize,
         PMODLOAD_DATA Data,
@@ -190,14 +175,10 @@ namespace Hades
           ErrorCode(LastError));
       }
       
-      // Convert module name to non-const buffer (GCC workaround)
-      auto const ModuleNameTemp(boost::lexical_cast<std::basic_string<
-        TCHAR_TEMP>>(MyModule->GetName()));
-      
       // Load symbols for module
       if(!pSymLoadModuleEx(m_Memory.GetProcessHandle(), 
         nullptr, 
-        &ModuleNameTemp[0], 
+        &MyModule->GetName()[0], 
         nullptr, 
         reinterpret_cast<DWORD64>(MyModule->GetBase()), 
         0, 
@@ -251,20 +232,16 @@ namespace Hades
     {
       // Construct buffer for symbol API
       std::size_t const BufferSize = (sizeof(SYMBOL_INFO) + MAX_SYM_NAME * 
-        sizeof(TCHAR_TEMP) + sizeof(ULONG64) - 1) / sizeof(ULONG64);
+        sizeof(wchar_t) + sizeof(ULONG64) - 1) / sizeof(ULONG64);
       std::vector<ULONG64> SymInfoBuf(BufferSize);
       PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(&SymInfoBuf[0]);
       pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
       pSymbol->MaxNameLen = MAX_SYM_NAME;
       
-      // Convert symbol name to non-const buffer (GCC workaround)
-      auto const NameTemp(boost::lexical_cast<std::basic_string<TCHAR_TEMP>>(
-        Name));
-      
       // Get address of DbgHelp!SymFromName
       typedef BOOL (WINAPI* tSymFromName)(
         HANDLE hProcess,
-        TCHAR_TEMP const* Name,
+        wchar_t const* Name,
         PSYMBOL_INFO Symbol
       );
       auto pSymFromName = reinterpret_cast<tSymFromName>(
@@ -279,7 +256,7 @@ namespace Hades
       }
       
       // Look up symbol
-      if (!pSymFromName(m_Memory.GetProcessHandle(), &NameTemp[0], pSymbol))
+      if (!pSymFromName(m_Memory.GetProcessHandle(), &Name[0], pSymbol))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
