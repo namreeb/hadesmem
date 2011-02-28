@@ -14,6 +14,9 @@
   * Upgrade to Python 3.x.
   * Decide whether to maintain GCC/MinGW support.
   * Support paths larger than MAX_PATH in spots where it is currently capped.
+  * Move to a more 'selective' and cleaner compilation model such as that used 
+  by Boost (e.g. --with-injected --with-scripting etc.)
+  * Split code into 'mature' and 'experimental' parts.
   
 * New Modules
   * Debugging APIs.
