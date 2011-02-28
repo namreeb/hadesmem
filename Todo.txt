@@ -17,6 +17,8 @@
   * Move to a more 'selective' and cleaner compilation model such as that used 
   by Boost (e.g. --with-injected --with-scripting etc.)
   * Split code into 'mature' and 'experimental' parts.
+  * Automatic build bot.
+  * Digital signature (for build bot, WER, etc).
   
 * New Modules
   * Debugging APIs.
