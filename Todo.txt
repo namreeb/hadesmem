@@ -7,6 +7,7 @@
   * Improved and documented thread-safety guarantees.
   * Rethink and reimplement threading model.
   * Fix all 'fixme' items in code.
+  * Const correctness.
   * Proper locale support.
   * Template concept checking and improved error messages.
   * Binaries with update server.

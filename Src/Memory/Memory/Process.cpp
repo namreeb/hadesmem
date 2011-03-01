@@ -295,8 +295,13 @@ namespace Hades
     // Get process path
     boost::filesystem::path Process::GetPath() const
     {
+      // Note: This currently uses device form rather than Win32 form.
+      // The QueryFullProcessImageName API can return the path in Win32 form 
+      // but is only available on Vista+.
+      // Fixme: Return path in Win32 form.
       std::wstring Path;
-      if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, MAX_PATH), MAX_PATH))
+      if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, 
+        MAX_PATH), MAX_PATH))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -330,7 +335,7 @@ namespace Hades
       }
       
       // Ensure handle is closed
-      Windows::EnsureCloseHandle MyProc(ExecInfo.hProcess);
+      Windows::EnsureCloseHandle const MyProc(ExecInfo.hProcess);
       
       // Return process object
       return Process(GetProcessId(MyProc));
