@@ -15,6 +15,7 @@
   * Support paths larger than MAX_PATH in spots where it is currently capped.
   * Move to a more 'selective' and cleaner compilation model such as that used 
   by Boost (e.g. --with-injected --with-scripting etc.)
+  * Move back to VS?
   * Split code into 'mature' and 'experimental' parts.
   * Automatic build bot.
   * Digital signature (for build bot, WER, etc).
