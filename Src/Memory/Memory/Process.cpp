@@ -298,7 +298,8 @@ namespace Hades
       // Note: This currently uses device form rather than Win32 form.
       // The QueryFullProcessImageName API can return the path in Win32 form 
       // but is only available on Vista+.
-      // Fixme: Return path in Win32 form.
+      // Fixme: Return path in Win32 form. Path can be converted using APIs 
+      // such as GetLogicalDriveStrings and QueryDosDevice.
       std::wstring Path;
       if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, 
         MAX_PATH), MAX_PATH))
