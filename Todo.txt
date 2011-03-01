@@ -53,6 +53,8 @@
   * Injected music player controller.
 
 * MemoryMgr
+  * Clean up memory reading/writing API to reduce use of TMP in public 
+  interface.
   * Improve 'safety' of remote function caller via EH to minimize risk of 
   crashing target.
   * Improve genericity of parameter passing in remote function caller.
