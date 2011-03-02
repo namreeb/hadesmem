@@ -41,9 +41,6 @@ namespace Hades
       : m_Handle(nullptr), 
       m_ID(ProcID) 
     {
-      // Get SeDebugPrivilege
-      GetSeDebugPrivilege();
-
       // Open process
       if (GetCurrentProcessId() == ProcID)
       {
@@ -60,9 +57,6 @@ namespace Hades
       : m_Handle(nullptr), 
       m_ID(0) 
     {
-      // Get SeDebugPrivilege
-      GetSeDebugPrivilege();
-
       // Grab a new snapshot of the process
       Windows::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
         TH32CS_SNAPPROCESS, 0));
@@ -112,9 +106,6 @@ namespace Hades
       : m_Handle(nullptr), 
       m_ID(0) 
     {
-      // Get SeDebugPrivilege
-      GetSeDebugPrivilege();
-
       // Find window
       HWND const MyWnd = FindWindow(ClassName.c_str(), WindowName.c_str());
       if (!MyWnd)
@@ -225,61 +216,6 @@ namespace Hades
       }
     }
 
-    // Gets the SeDebugPrivilege
-    void Process::GetSeDebugPrivilege()
-    {
-      // Open current process token with adjust rights
-      HANDLE TempToken = 0;
-      BOOL const RetVal = OpenProcessToken(GetCurrentProcess(), 
-        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TempToken);
-      if (!RetVal) 
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::GetSeDebugPrivilege") << 
-          ErrorString("Could not open process token.") << 
-          ErrorCode(LastError));
-      }
-      Windows::EnsureCloseHandle const Token(TempToken);
-
-      // Get the LUID for SE_DEBUG_NAME 
-      LUID Luid = { 0 }; // Locally unique identifier
-      if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::GetSeDebugPrivilege") << 
-          ErrorString("Could not look up privilege value for SeDebugName.") << 
-          ErrorCode(LastError));
-      }
-      if (Luid.LowPart == 0 && Luid.HighPart == 0) 
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::GetSeDebugPrivilege") << 
-          ErrorString("Could not get LUID for SeDebugName.") << 
-          ErrorCode(LastError));
-      }
-
-      // Process privileges
-      TOKEN_PRIVILEGES Privileges = { 0 };
-      // Set the privileges we need
-      Privileges.PrivilegeCount = 1;
-      Privileges.Privileges[0].Luid = Luid;
-      Privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-      // Apply the adjusted privileges
-      if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, sizeof(Privileges), 
-        nullptr, nullptr)) 
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::GetSeDebugPrivilege") << 
-          ErrorString("Could not adjust token privileges.") << 
-          ErrorCode(LastError));
-      }
-    }
-
     // Get process handle
     HANDLE Process::GetHandle() const
     {
@@ -295,13 +231,11 @@ namespace Hades
     // Get process path
     boost::filesystem::path Process::GetPath() const
     {
-      // Note: This currently uses device form rather than Win32 form.
-      // The QueryFullProcessImageName API can return the path in Win32 form 
-      // but is only available on Vista+.
-      // Fixme: Return path in Win32 form. Path can be converted using APIs 
-      // such as GetLogicalDriveStrings and QueryDosDevice.
+      // Note: The QueryFullProcessImageName API is more efficient and 
+      // reliable but is only available on Vista+.
+      // Fixme: Use QueryFullProcessImageName when the swap to Win7+ is made.
       std::wstring Path;
-      if (!GetProcessImageFileName(m_Handle, Util::MakeStringBuffer(Path, 
+      if (!GetModuleFileNameEx(m_Handle, NULL, Util::MakeStringBuffer(Path, 
         MAX_PATH), MAX_PATH))
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -340,6 +274,71 @@ namespace Hades
       
       // Return process object
       return Process(GetProcessId(MyProc));
+    }
+
+    // Gets the SeDebugPrivilege
+    void GetSeDebugPrivilege()
+    {
+      // Open current process token with adjust rights
+      HANDLE TempToken = 0;
+      BOOL const RetVal = OpenProcessToken(GetCurrentProcess(), 
+        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TempToken);
+      if (!RetVal) 
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("GetSeDebugPrivilege") << 
+          ErrorString("Could not open process token.") << 
+          ErrorCode(LastError));
+      }
+      Windows::EnsureCloseHandle const Token(TempToken);
+
+      // Get the LUID for SE_DEBUG_NAME 
+      LUID Luid = { 0 }; // Locally unique identifier
+      if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("GetSeDebugPrivilege") << 
+          ErrorString("Could not look up privilege value for SeDebugName.") << 
+          ErrorCode(LastError));
+      }
+      if (Luid.LowPart == 0 && Luid.HighPart == 0) 
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("GetSeDebugPrivilege") << 
+          ErrorString("Could not get LUID for SeDebugName.") << 
+          ErrorCode(LastError));
+      }
+
+      // Process privileges
+      TOKEN_PRIVILEGES Privileges = { 0 };
+      // Set the privileges we need
+      Privileges.PrivilegeCount = 1;
+      Privileges.Privileges[0].Luid = Luid;
+      Privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+      // Apply the adjusted privileges
+      if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, sizeof(Privileges), 
+        nullptr, nullptr)) 
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("GetSeDebugPrivilege") << 
+          ErrorString("Could not adjust token privileges.") << 
+          ErrorCode(LastError));
+      }
+      
+      // Ensure privileges were adjusted
+      if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Process::Error() << 
+          ErrorFunction("GetSeDebugPrivilege") << 
+          ErrorString("Could not assign all privileges.") << 
+          ErrorCode(LastError));
+      }
     }
   }
 }

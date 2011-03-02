@@ -96,6 +96,9 @@ void ExportProcess()
 {
   boost::python::def("CreateProcess", &CreateProcessWrap);
   
+  boost::python::def("GetSeDebugPrivilege", 
+    &Hades::Memory::GetSeDebugPrivilege);
+  
   boost::python::class_<Hades::Memory::Process>("ProcessBase", 
     boost::python::no_init)
     ;

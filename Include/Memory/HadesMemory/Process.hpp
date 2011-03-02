@@ -84,9 +84,6 @@ namespace Hades
       // Open process given process id
       void Open(DWORD ProcID);
 
-      // Gets the SeDebugPrivilege
-      void GetSeDebugPrivilege();
-
       // Process handle
       Windows::EnsureCloseHandle m_Handle;
 
@@ -98,6 +95,9 @@ namespace Hades
     Process CreateProcess(boost::filesystem::path const& Path, 
       boost::filesystem::path const& Params, 
       boost::filesystem::path const& WorkingDir);
+
+    // Gets the SeDebugPrivilege
+    void GetSeDebugPrivilege();
 
     // Process iterator
     // Fixme: Implement in a more rhobust manner. Currently just 'skips' 
@@ -146,7 +146,7 @@ namespace Hades
         }
         
         // Get handle to target
-        // Using more access flags than is strictly necessar, but if I don't 
+        // Using more access flags than is strictly necessary, but if I don't 
         // it will simply fail further down the chain
         Windows::EnsureCloseHandle TargetProc(OpenProcess(PROCESS_CREATE_THREAD | 
           PROCESS_QUERY_INFORMATION | 
