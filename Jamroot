@@ -52,27 +52,11 @@ project
     <define>WINVER=_WIN32_WINNT_WS03 
     <define>_SCL_SECURE_NO_WARNINGS 
     <runtime-link>shared 
-    <warnings>all 
   : 
     default-build debug 
   ;
-
-build-project Src/Dependencies 
-  ;
-
+  
 build-project Src/Memory 
-  ;
-
-build-project Src/Injected 
-  ;
-
-build-project Src/GUI 
-  ;
-
-build-project Src/Scripting 
-  ;
-
-build-project Docs 
   ;
 
 rule Install-Rule ( properties * ) 
@@ -117,9 +101,6 @@ rule Install-Rule ( properties * )
 install Bin 
   : 
     Src/Memory 
-    Src/GUI 
-    Src/Injected 
-    Src/Scripting 
     Misc/DbgHelp/IA32/dbghelp.dll 
     Misc/DbgHelp/IA32/symsrv.dll 
   : 
@@ -134,9 +115,6 @@ install Bin
 install Bin 
   : 
     Src/Memory 
-    Src/GUI 
-    Src/Injected 
-    Src/Scripting 
     Misc/DbgHelp/AMD64/dbghelp.dll 
     Misc/DbgHelp/AMD64/symsrv.dll 
   : 
@@ -147,3 +125,57 @@ install Bin
     <install-type>PYTHON_EXTENSION 
     <address-model>64 
   ;
+
+if --build-injected in [ modules.peek : ARGV ]
+{
+  build-project Src/Injected 
+    ;
+    
+  install InjectedBin 
+    : 
+      Src/Injected 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --build-gui in [ modules.peek : ARGV ]
+{
+  build-project Src/GUI 
+    ;
+    
+  install GUIBin 
+    : 
+      Src/GUI 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --build-scripting in [ modules.peek : ARGV ]
+{
+  build-project Src/Scripting 
+    ;
+    
+  install ScriptingBin 
+    : 
+      Src/Scripting 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --build-docs in [ modules.peek : ARGV ]
+{
+  build-project Docs 
+    ;
+}

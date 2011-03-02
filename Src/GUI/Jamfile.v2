@@ -1,5 +1,11 @@
 # GUI/Jamfile.v2
 
+project 
+  : 
+    requirements 
+    <warnings>all 
+  ;
+
 exe MemHack 
   : 
     [ glob MemHack/*.cpp ] 

@@ -1,5 +1,11 @@
 # Dependencies/Jamfile.v2
 
+project 
+  : 
+    requirements 
+    <warnings>off 
+  ;
+
 lib AsmJit 
   : 
     [ glob AsmJit/AsmJit/*.cpp ] 

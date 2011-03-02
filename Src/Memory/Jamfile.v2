@@ -1,5 +1,11 @@
 # Memory/Jamfile.v2
 
+project 
+  : 
+    requirements 
+    <warnings>all 
+  ;
+
 lib user32 
   : 
   : 
