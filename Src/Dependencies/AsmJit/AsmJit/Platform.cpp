@@ -74,6 +74,13 @@ static sysuint_t roundUpToPowerOf2(sysuint_t base)
   base = base | (base >> 8);
   base = base | (base >> 16);
 
+  // I'm trying to make this portable and MSVC strikes me the warning C4293:
+  //   "Shift count negative or too big, undefined behavior"
+  // Fixing...
+#if _MSC_VER
+# pragma warning(disable: 4293)
+#endif // _MSC_VER
+
   if (sizeof(sysuint_t) >= 8)
     base = base | (base >> 32);
 

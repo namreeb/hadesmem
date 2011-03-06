@@ -338,9 +338,9 @@ void AssemblerCore::_emitModM(
   // [index * scale + displacemnt] |   ABSOLUTE  | ABSOLUTE (ZERO EXTENDED)
   else
   {
-    // - In 32-bit mode is used absolute addressing model.
-    // - In 64-bit mode is used relative addressing model together with
-    //   absolute addressing one. Main problem is that if instruction
+    // - In 32-bit mode the absolute addressing model is used.
+    // - In 64-bit mode the relative addressing model is used together with
+    //   the absolute addressing. Main problem is that if instruction
     //   contains SIB then relative addressing (RIP) is not possible.
 
 #if defined(ASMJIT_X86)
@@ -448,7 +448,7 @@ void AssemblerCore::_emitModM(
       {
         if (_logger && _logger->isUsed())
         {
-          _logger->logString("*** ASSEMBER WARNING - Absolute address truncated to 32-bits\n");
+          _logger->logString("*** ASSEMBER WARNING - Absolute address truncated to 32-bits.\n");
         }
         target &= 0xFFFFFFFF;
       }
@@ -2486,8 +2486,8 @@ void AssemblerCore::relocCode(void* _dst, sysuint_t addressBase) const ASMJIT_NO
   sysint_t coff = _buffer.getOffset();
   sysint_t csize = getCodeSize();
 
-  // We are copying exactly size of generated code. Extra code for trampolines
-  // is generated on-the-fly by relocator (this code not exists at this moment).
+  // We are copying the exact size of the generated code. Extra code for trampolines
+  // is generated on-the-fly by relocator (this code doesn't exist at the moment).
   memcpy(dst, _buffer.getData(), coff);
 
 #if defined(ASMJIT_X64)
@@ -2525,12 +2525,12 @@ void AssemblerCore::relocCode(void* _dst, sysuint_t addressBase) const ASMJIT_NO
 
       case RelocData::ABSOLUTE_TO_RELATIVE:
       case RelocData::ABSOLUTE_TO_RELATIVE_TRAMPOLINE:
-        val = (sysint_t)( (sysuint_t)r.address - ((sysuint_t)addressBase + (sysuint_t)r.offset + 4) );
+        val = (sysint_t)( (sysuint_t)r.address - (addressBase + (sysuint_t)r.offset + 4) );
 
 #if defined(ASMJIT_X64)
         if (r.type == RelocData::ABSOLUTE_TO_RELATIVE_TRAMPOLINE && !Util::isInt32(val))
         {
-          val = (sysint_t)( (sysuint_t)tramp - ((sysuint_t)addressBase + (sysuint_t)r.offset + 4) );
+          val = (sysint_t)( (sysuint_t)tramp - ((sysuint_t)_dst + (sysuint_t)r.offset + 4) );
           useTrampoline = true;
         }
 #endif // ASMJIT_X64
