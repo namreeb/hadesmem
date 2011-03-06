@@ -23,19 +23,19 @@ namespace Hades
 {
   namespace Util
   {
-    template<unsigned long X, unsigned long P>
+    template <unsigned long X, unsigned long P>
     struct Pow
     {
-      static unsigned long const Result = X * Pow<X, P-1>::Result;
+      static unsigned long const Result = X * Pow<X, P - 1>::Result;
     };
     
-    template<unsigned long X>
+    template <unsigned long X>
     struct Pow<X, 0>
     {
       static unsigned long const Result = 1;
     };
     
-    template<unsigned long X>
+    template <unsigned long X>
     struct Pow<X, 1>
     {
       static unsigned long const Result = X;
