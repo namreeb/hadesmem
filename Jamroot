@@ -41,7 +41,7 @@ use-project /Docs
     Docs 
   ; 
 
-project 
+project Hades 
   : 
     requirements 
     <define>BOOST_SYSTEM_NO_DEPRECATED 
@@ -54,6 +54,8 @@ project
     <runtime-link>shared 
   : 
     default-build debug 
+  : 
+    build-dir Bin 
   ;
   
 build-project Src/Memory 
