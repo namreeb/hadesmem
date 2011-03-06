@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // C++ Standard Library
 #include <vector>
+#include <memory>
 
 // Hades
 #include "Fwd.hpp"
@@ -119,8 +120,8 @@ namespace Hades
       PVOID m_Target;
       // Detour address
       PVOID m_Detour;
-      // Trampoline address
-      PVOID m_Trampoline;
+      // Trampoline memory
+      std::shared_ptr<AllocAndFree> m_Trampoline;
       // Backup code
       std::vector<BYTE> m_Orig;
     };

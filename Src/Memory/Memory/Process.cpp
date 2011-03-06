@@ -29,6 +29,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Process.hpp"
+#include "HadesCommon/Pow.hpp"
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/StringBuffer.hpp"
 
@@ -233,10 +234,10 @@ namespace Hades
     {
       // Note: The QueryFullProcessImageName API is more efficient and 
       // reliable but is only available on Vista+.
-      // Fixme: Use QueryFullProcessImageName when the swap to Win7+ is made.
+      DWORD const PathSize = Util::Pow<2, 16>::Result;
       std::wstring Path;
       if (!GetModuleFileNameEx(m_Handle, NULL, Util::MakeStringBuffer(Path, 
-        MAX_PATH), MAX_PATH))
+        PathSize), PathSize))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 

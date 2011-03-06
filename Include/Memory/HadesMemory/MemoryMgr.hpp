@@ -172,7 +172,7 @@ namespace Hades
         {
           Free();
         }
-        catch (MemoryMgr::Error const& /*e*/)
+        catch (...)
         { }
       }
 

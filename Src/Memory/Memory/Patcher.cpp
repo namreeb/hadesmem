@@ -97,7 +97,7 @@ namespace Hades
       : Patch(MyMemory), 
       m_Target(Target), 
       m_Detour(Detour), 
-      m_Trampoline(nullptr)
+      m_Trampoline()
     { }
 
     // Apply patch
@@ -116,8 +116,8 @@ namespace Hades
       // Allocate trampoline buffer
       // Fixme: Ensure trampoline is within range for a RIP-relative 
       // JMP under x64.
-      m_Trampoline = m_Memory.Alloc(TrampSize);
-      PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline);
+      m_Trampoline.reset(new AllocAndFree(m_Memory, TrampSize));
+      PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline->GetAddress());
 
       // Disassemble target (for worst case scenario)
       Disassembler MyDisasm(m_Memory);
@@ -165,7 +165,8 @@ namespace Hades
       TrampCur += GetJumpSize();
 
       // Flush instruction cache
-      m_Memory.FlushCache(m_Trampoline, InstrSize + GetJumpSize());
+      m_Memory.FlushCache(m_Trampoline->GetAddress(), 
+        InstrSize + GetJumpSize());
 
       // Backup original code
       m_Orig = m_Memory.Read<std::vector<BYTE>>(m_Target, GetJumpSize());
@@ -193,10 +194,7 @@ namespace Hades
       m_Memory.Write(m_Target, m_Orig);
 
       // Free trampoline
-      // Fixme: Use RAII for the remote memory buffer used to store the 
-      // trampoline. Currently, if detour removal (above) fails and an 
-      // exception is thrown, the memory will potentially be 'leaked'.
-      m_Memory.Free(m_Trampoline);
+      m_Trampoline.reset();
 
       // Patch has been removed
       m_Applied = false;
@@ -205,7 +203,7 @@ namespace Hades
     // Get pointer to trampoline
     PVOID PatchDetour::GetTrampoline() const
     {
-      return m_Trampoline;
+      return m_Trampoline->GetAddress();
     }
 
     // Write jump to target at address

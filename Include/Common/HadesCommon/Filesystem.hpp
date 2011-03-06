@@ -34,6 +34,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
+#include "Pow.hpp"
 #include "Error.hpp"
 #include "WinAux.hpp"
 #include "StringBuffer.hpp"
@@ -89,7 +90,7 @@ namespace Hades
     inline boost::filesystem::path GetModulePath(HMODULE Module)
     {
       // Get path to self
-      DWORD const PathSize = MAX_PATH;
+      DWORD const PathSize = Util::Pow<2, 16>::Result;
       std::wstring FullPath;
       if (!GetModuleFileName(Module, Util::MakeStringBuffer(FullPath, 
         PathSize), PathSize) || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
@@ -112,7 +113,7 @@ namespace Hades
       HMODULE const ModMe(reinterpret_cast<HMODULE>(GetBaseOfSelf()));
 
       // Get path to self
-      DWORD const SelfPathSize = MAX_PATH;
+      DWORD const SelfPathSize = Util::Pow<2, 16>::Result;
       std::wstring SelfFullPath;
       if (!GetModuleFileName(ModMe, Util::MakeStringBuffer(SelfFullPath, 
         SelfPathSize), SelfPathSize) || GetLastError() == 
