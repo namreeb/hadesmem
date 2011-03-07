@@ -111,14 +111,25 @@ namespace Hades
 
     APIHook::~APIHook() 
     {
-      // Unhook this function from all modules
-      ReplaceIATEntryInAllMods(m_ModuleName, m_pHook, m_pOrig);
-
-      // Remove this object from the linked list
-      auto Iter = std::find(sm_HookList.rbegin(), sm_HookList.rend(), this);
-      if (Iter != sm_HookList.rend())
+      try
       {
-        sm_HookList.erase(Iter.base());
+        // Unhook this function from all modules
+        ReplaceIATEntryInAllMods(m_ModuleName, m_pHook, m_pOrig);
+  
+        // Remove this object from the linked list
+        auto Iter = std::find(sm_HookList.rbegin(), sm_HookList.rend(), this);
+        if (Iter != sm_HookList.rend())
+        {
+          sm_HookList.erase(Iter.base());
+        }
+      }
+      catch (std::exception const& e)
+      {
+        OutputDebugStringA(boost::diagnostic_information(e).c_str());
+      }
+      catch (...)
+      {
+        OutputDebugString(L"APIHook::~APIHook: Unknown error.");
       }
     }
 

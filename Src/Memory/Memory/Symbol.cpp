@@ -102,27 +102,38 @@ namespace Hades
     // Destructor
     Symbols::~Symbols()
     {
-      // Get address of DbgHelp!SymCleanup
-      typedef BOOL (WINAPI* tSymCleanup)(HANDLE hProcess);
-      auto pSymCleanup = reinterpret_cast<tSymCleanup>(GetProcAddress(
-        m_DbgHelpMod, "SymCleanup"));
-      if (!pSymCleanup)
+      try
       {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Symbols::~Symbols") << 
-          ErrorString("Failed to find DbgHelp!SymCleanup.") << 
-          ErrorCode(LastError));
+        // Get address of DbgHelp!SymCleanup
+        typedef BOOL (WINAPI* tSymCleanup)(HANDLE hProcess);
+        auto pSymCleanup = reinterpret_cast<tSymCleanup>(GetProcAddress(
+          m_DbgHelpMod, "SymCleanup"));
+        if (!pSymCleanup)
+        {
+          std::error_code const LastError = GetLastErrorCode();
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("Symbols::~Symbols") << 
+            ErrorString("Failed to find DbgHelp!SymCleanup.") << 
+            ErrorCode(LastError));
+        }
+        
+        // Clean up symbol APIs
+        if (!pSymCleanup(m_Memory.GetProcessHandle()))
+        {
+          std::error_code const LastError = GetLastErrorCode();
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("Symbols::~Symbols") << 
+            ErrorString("Failed to clean up symbols.") << 
+            ErrorCode(LastError));
+        }
       }
-      
-      // Clean up symbol APIs
-      if (!pSymCleanup(m_Memory.GetProcessHandle()))
+      catch (std::exception const& e)
       {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Symbols::~Symbols") << 
-          ErrorString("Failed to clean up symbols.") << 
-          ErrorCode(LastError));
+        OutputDebugStringA(boost::diagnostic_information(e).c_str());
+      }
+      catch (...)
+      {
+        OutputDebugString(L"Symbols::~Symbols: Unknown error.");
       }
     }
   

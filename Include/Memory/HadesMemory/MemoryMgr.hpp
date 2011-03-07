@@ -172,8 +172,14 @@ namespace Hades
         {
           Free();
         }
+        catch (std::exception const& e)
+        {
+          OutputDebugStringA(boost::diagnostic_information(e).c_str());
+        }
         catch (...)
-        { }
+        {
+          OutputDebugString(L"AllocAndFree::~AllocAndFree: Unknown error.");
+        }
       }
 
       PVOID GetAddress() const 
