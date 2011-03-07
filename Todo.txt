@@ -7,6 +7,7 @@
   * Improved and documented thread-safety guarantees.
   * Rethink and reimplement threading model.
   * Fix all 'fixme' items in code.
+  * Ensure destructors will never throw.
   * Const correctness.
   * Proper locale support.
   * Template concept checking and improved error messages.
@@ -18,7 +19,6 @@
   * Automatic build bot.
   * Digital signature (for build bot, WER, etc).
   * Drop XP support and move to Windows Vista+ (or Windows 7+?).
-  * Ensure destructors will never throw.
   
 * New Modules
   * Debugging APIs.
