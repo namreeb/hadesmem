@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-
 // C++ Standard Library
 #include <string>
 #include <vector>
@@ -42,6 +39,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/categories.hpp>
 #pragma warning(pop)
+
+// Windows API
+#include <Windows.h>
 
 // Hades
 #include "Error.hpp"
@@ -118,7 +118,7 @@ namespace Hades
       }
 
       // Writes n characters from s
-      std::streamsize write(const char_type* s, std::streamsize n)
+      std::streamsize write(char_type const* s, std::streamsize n)
       {
         // Get time
         auto const Time(boost::posix_time::second_clock::local_time());

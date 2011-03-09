@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows
-#include <Windows.h>
-
 // C++ Standard Library
 #include <memory>
 
@@ -30,6 +27,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/optional.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #pragma warning(pop)
+
+// Windows
+#include <Windows.h>
 
 // Hades
 #include "Fwd.hpp"

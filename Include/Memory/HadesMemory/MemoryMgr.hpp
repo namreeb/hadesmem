@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-
 // C++ Standard Library
 #include <memory>
 #include <string>
@@ -34,6 +31,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 #pragma warning(pop)
+
+// Windows API
+#include <Windows.h>
 
 // AsmJit
 #pragma warning(push, 1)

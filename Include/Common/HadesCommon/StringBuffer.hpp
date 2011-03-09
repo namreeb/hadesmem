@@ -39,7 +39,8 @@ namespace Hades
     {
     public:
       // Constructor
-      StringBuffer(std::basic_string<CharT>& String, std::size_t Size) 
+      StringBuffer(std::basic_string<CharT>& String, 
+        typename std::vector<CharT>::size_type Size) 
         : m_String(&String), 
         m_Buffer(Size + 1) 
       { }
@@ -54,7 +55,7 @@ namespace Hades
       StringBuffer& operator=(StringBuffer&& Other)
       {
         this->m_String = Other.m_String;
-        Other.m_String = 0;
+        Other.m_String = nullptr;
 
         this->m_Buffer = std::move(Other.m_Buffer);
 
@@ -105,8 +106,8 @@ namespace Hades
       std::vector<CharT> m_Buffer;
     };
 
-    // Make string buffer class. Function is simply used to automatically 
-    // deduce and forward template argument type.
+    // Make string buffer. Simple helper function to automatically detect 
+    // character type.
     template <class CharT>
     StringBuffer<CharT> MakeStringBuffer(std::basic_string<CharT>& String, 
       std::size_t Size)

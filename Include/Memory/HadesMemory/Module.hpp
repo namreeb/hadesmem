@@ -19,10 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-#include <TlHelp32.h>
-
 // C++ Standard Library
 #include <string>
 #include <memory>
@@ -32,6 +28,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/optional.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #pragma warning(pop)
+
+// Windows API
+#include <Windows.h>
+#include <TlHelp32.h>
 
 // Hades
 #include "Fwd.hpp"

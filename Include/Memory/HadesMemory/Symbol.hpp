@@ -19,17 +19,17 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-#define DBGHELP_TRANSLATE_TCHAR
-#include <DbgHelp.h>
-
 // C++ Standard Library
 #include <string>
 
 // Boost
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
+
+// Windows API
+#include <Windows.h>
+#define DBGHELP_TRANSLATE_TCHAR
+#include <DbgHelp.h>
 
 // Hades
 #include "Fwd.hpp"

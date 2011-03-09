@@ -19,10 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-#include <Objbase.h>
-
 // C++ Standard Library
 #include <string>
 
@@ -30,6 +26,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #include <boost/noncopyable.hpp>
 #pragma warning(pop)
+
+// Windows API
+#include <Windows.h>
+#include <Objbase.h>
 
 // Notice: Modified version of EnsureCleanup library provided in the 'Windows
 // via C/C++' sample code. Originally copyright Jeffrey Richter and

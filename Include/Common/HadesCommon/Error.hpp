@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows
-#include <Windows.h>
-
 // C++ Standard Library
 #include <string>
 #include <stdexcept>
@@ -32,8 +29,16 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/exception/all.hpp>
 #pragma warning(pop)
 
+// Windows
+#include <Windows.h>
+
 namespace Hades
 {
+  // Base exception class
+  class HadesError : public virtual std::exception, 
+    public virtual boost::exception
+  { };
+  
   // Error info (function name)
   typedef boost::error_info<struct TagErrorFunc, std::string> ErrorFunction;
   // Error info (error string)
@@ -48,9 +53,4 @@ namespace Hades
     DWORD const LastError = GetLastError();
     return std::error_code(LastError, std::system_category());
   }
-
-  // Base exception class
-  class HadesError : public virtual std::exception, 
-    public virtual boost::exception
-  { };
 }

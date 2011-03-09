@@ -33,16 +33,11 @@ namespace Hades
     class WinAuxError : public virtual HadesError 
     { };
 
-    namespace 
-    {
-      static int GetBaseOfSelfHelper = 0;
-    }
-
     // Get base of self
     inline PVOID GetBaseOfSelf()
     {
       MEMORY_BASIC_INFORMATION MemInfo = { 0 };
-      if (!VirtualQuery(&GetBaseOfSelfHelper, &MemInfo, sizeof(MemInfo)))
+      if (!VirtualQuery(&GetBaseOfSelf, &MemInfo, sizeof(MemInfo)))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(WinAuxError() << 
@@ -52,6 +47,12 @@ namespace Hades
       }
 
       return MemInfo.AllocationBase;
+    }
+
+    // Get handle to self
+    inline HMODULE GetHandleToSelf()
+    {
+      return reinterpret_cast<HMODULE>(GetBaseOfSelf());
     }
   }
 }

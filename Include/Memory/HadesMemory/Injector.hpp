@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-
 // C++ Standard Library
 #include <tuple>
 #include <string>
@@ -31,6 +28,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #include <boost/filesystem.hpp>
 #pragma warning(pop)
+
+// Windows API
+#include <Windows.h>
 
 // Hades
 #include "Fwd.hpp"

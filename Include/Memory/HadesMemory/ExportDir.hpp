@@ -19,12 +19,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows
-#include <Windows.h>
-
 // C++ Standard Library
 #include <string>
 #include <utility>
+
+// Windows
+#include <Windows.h>
 
 // Hades
 #include "Fwd.hpp"

@@ -19,12 +19,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Windows API
-#include <Windows.h>
-
 // C++ Standard Library
 #include <string>
 #include <vector>
+
+// Windows API
+#include <Windows.h>
 
 // BeaEngine
 #pragma warning(push, 1)

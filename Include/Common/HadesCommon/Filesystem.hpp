@@ -78,7 +78,8 @@ namespace Hades
       }
 
       // Copy file to buffer
-      std::vector<BYTE> Buffer(static_cast<std::size_t>(File.tellg()));
+      std::vector<BYTE> Buffer(static_cast<std::vector<BYTE>::size_type>(
+        File.tellg()));
       File.seekg(0, std::ios::beg);
       File.read(&Buffer[0], Buffer.size());
 
@@ -109,14 +110,11 @@ namespace Hades
     // Get path to self (directory)
     inline boost::filesystem::path GetSelfPath()
     {
-      // Get self
-      HMODULE const ModMe(reinterpret_cast<HMODULE>(GetBaseOfSelf()));
-
       // Get path to self
       DWORD const SelfPathSize = Util::Pow<2, 16>::Result;
       std::wstring SelfFullPath;
-      if (!GetModuleFileName(ModMe, Util::MakeStringBuffer(SelfFullPath, 
-        SelfPathSize), SelfPathSize) || GetLastError() == 
+      if (!GetModuleFileName(GetHandleToSelf(), Util::MakeStringBuffer(
+        SelfFullPath, SelfPathSize), SelfPathSize) || GetLastError() == 
         ERROR_INSUFFICIENT_BUFFER)
       {
         std::error_code const LastError = GetLastErrorCode();
