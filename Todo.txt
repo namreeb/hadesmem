@@ -13,9 +13,11 @@
   * Binaries with update server.
   * Automatic binary versioning using SVN revision.
   * Upgrade to Python 3.x.
-  * Move back to VS?
+  * Move back to VS.
+  * WinAPI C++ wrapper.
   * Split code into 'mature' and 'experimental' parts.
   * Automatic build bot.
+  * Extra debug output when building such as Boost version, MSVC version, etc.
   * Digital signature (for build bot, WER, etc).
   * Drop XP support and move to Windows Vista+ (or Windows 7+?).
   * Decouple components where possible (pimpl etc), and ensure all 
