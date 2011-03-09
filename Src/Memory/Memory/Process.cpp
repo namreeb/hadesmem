@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 #include <psapi.h>
 #include <TlHelp32.h>
+#include <Shellapi.h>
 
 // Boost
 #pragma warning(push, 1)

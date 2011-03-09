@@ -52,6 +52,11 @@
   * Config support (Spirit? XML?).
   * Injected GUI library.
   * Injected music player controller.
+  
+* Process
+  * Constructors that take window/process name should throw if multiple 
+  processes match the criteria. In this case, the PID constructor should be 
+  used.
 
 * MemoryMgr
   * Clean up memory reading/writing API to reduce use of TMP in public 
