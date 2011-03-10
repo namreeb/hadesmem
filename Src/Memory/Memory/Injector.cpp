@@ -32,6 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Module.hpp"
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
+#include "ModuleEnum.hpp"
 #include "HadesCommon/Filesystem.hpp"
 #include "HadesCommon/EnsureCleanup.hpp"
 
@@ -230,7 +231,7 @@ namespace Hades
 
       // Look for target module
       boost::optional<Module> MyModule;
-      for (ModuleListIter MyIter(m_Memory); *MyIter; ++MyIter)
+      for (ModuleIter MyIter(m_Memory); *MyIter; ++MyIter)
       {
         if (PathResolution)
         {

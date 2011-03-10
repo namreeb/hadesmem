@@ -39,6 +39,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Scanner.hpp"
 #include "DosHeader.hpp"
 #include "NtHeaders.hpp"
+#include "ModuleEnum.hpp"
 #include "FindPattern.hpp"
 #include "HadesCommon/I18n.hpp"
 
@@ -55,7 +56,7 @@ namespace Hades
       m_Addresses()
     {
       // Get pointer to image headers
-      ModuleListIter ModIter(m_Memory);
+      ModuleIter ModIter(m_Memory);
       PBYTE const pBase = reinterpret_cast<PBYTE>((*ModIter)->GetBase());
       m_Base = reinterpret_cast<DWORD_PTR>(pBase);
       PeFile MyPeFile(m_Memory, pBase);

@@ -28,6 +28,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Module.hpp"
 #include "Symbol.hpp"
+#include "ModuleEnum.hpp"
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
@@ -145,7 +146,7 @@ namespace Hades
       
       // Look up module in remote process
       boost::optional<Module> MyModule;
-      for (ModuleListIter i(m_Memory); *i; ++i)
+      for (ModuleIter i(m_Memory); *i; ++i)
       {
         Module& Current = **i;
         if (boost::to_lower_copy(Current.GetName()) == ModuleNameLower || 

@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Process.hpp"
+#include "HadesMemory/ProcessEnum.hpp"
     
 Hades::Memory::Process CreateProcessWrap(std::wstring const& Path, 
   std::wstring const& Params, 

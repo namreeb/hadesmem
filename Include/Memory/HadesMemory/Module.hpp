@@ -21,13 +21,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // C++ Standard Library
 #include <string>
-#include <memory>
-
-// Boost
-#pragma warning(push, 1)
-#include <boost/optional.hpp>
-#include <boost/iterator/iterator_facade.hpp>
-#pragma warning(pop)
 
 // Windows API
 #include <Windows.h>
@@ -37,7 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Fwd.hpp"
 #include "Error.hpp"
 #include "MemoryMgr.hpp"
-#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace Hades
 {
@@ -82,87 +74,6 @@ namespace Hades
       std::wstring m_Name;
       // Module path
       std::wstring m_Path;
-    };
-
-    // Module iterator
-    class ModuleListIter : public boost::iterator_facade<ModuleListIter, 
-      boost::optional<Module>, boost::incrementable_traversal_tag>, 
-      private boost::noncopyable
-    {
-    public:
-      // Constructor
-      explicit ModuleListIter(MemoryMgr const& MyMemory) 
-        : m_Memory(MyMemory), 
-        m_Snap(), 
-        m_Current()
-      {
-        // Grab a new snapshot of the process
-        m_Snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, m_Memory.
-          GetProcessID());
-        if (m_Snap == INVALID_HANDLE_VALUE)
-        {
-          std::error_code const LastError = GetLastErrorCode();
-          BOOST_THROW_EXCEPTION(Module::Error() << 
-            ErrorFunction("ModuleEnum::First") << 
-            ErrorString("Could not get module snapshot.") << 
-            ErrorCode(LastError));
-        }
-
-        // Get first module entry
-        MODULEENTRY32 MyModuleEntry = { sizeof(MyModuleEntry) };
-        if (!Module32First(m_Snap, &MyModuleEntry))
-        {
-          std::error_code const LastError = GetLastErrorCode();
-          BOOST_THROW_EXCEPTION(Module::Error() << 
-            ErrorFunction("ModuleEnum::First") << 
-            ErrorString("Could not get module info.") << 
-            ErrorCode(LastError));
-        }
-
-        m_Current = Module(m_Memory, MyModuleEntry);
-      }
-
-    private:
-      // Allow Boost.Iterator access to internals
-      friend class boost::iterator_core_access;
-
-      // For Boost.Iterator
-      void increment() 
-      {
-        MODULEENTRY32 MyModuleEntry = { sizeof(MyModuleEntry) };
-        if (!Module32Next(m_Snap, &MyModuleEntry))
-        {
-          if (GetLastError() != ERROR_NO_MORE_FILES)
-          {
-            std::error_code const LastError = GetLastErrorCode();
-            BOOST_THROW_EXCEPTION(Module::Error() << 
-              ErrorFunction("ModuleEnum::Next") << 
-              ErrorString("Error enumerating module list.") << 
-              ErrorCode(LastError));
-          }
-
-          m_Current = boost::optional<Module>();
-        }
-        else
-        {
-          m_Current = Module(m_Memory, MyModuleEntry);
-        }
-      }
-
-      // For Boost.Iterator
-      boost::optional<Module>& dereference() const
-      {
-        return m_Current;
-      }
-
-      // Memory instance
-      MemoryMgr m_Memory;
-
-      // Toolhelp32 snapshot handle
-      Windows::EnsureCloseSnap m_Snap;
-
-      // Current module
-      mutable boost::optional<Module> m_Current;
     };
   }
 }

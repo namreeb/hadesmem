@@ -32,6 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "APIHook.hpp"
 #include "MemoryMgr.hpp"
 #include "ImportDir.hpp"
+#include "ModuleEnum.hpp"
 #include "ImportEnum.hpp"
 #include "HadesCommon/I18n.hpp"
 
@@ -164,7 +165,7 @@ namespace Hades
       HMODULE ThisMod = ModuleFromAddress(&ModFromAddressHelper);
           
       static MemoryMgr MyMemory(GetCurrentProcessId());
-      for (ModuleListIter i(MyMemory); *i; ++i)
+      for (ModuleIter i(MyMemory); *i; ++i)
       {
         Module& Current = **i;
 

@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Module.hpp"
+#include "HadesMemory/ModuleEnum.hpp"
 
 class ModuleWrap : public Hades::Memory::Module
 {
@@ -45,7 +46,7 @@ public:
 
 struct ModuleIterWrap
 {
-  static ModuleWrap next(Hades::Memory::ModuleListIter& o)
+  static ModuleWrap next(Hades::Memory::ModuleIter& o)
   {
     if (!*o)
     {
@@ -67,7 +68,7 @@ struct ModuleIterWrap
 
   static void wrap(const char* python_name)
   {
-    boost::python::class_<Hades::Memory::ModuleListIter, boost::noncopyable>(
+    boost::python::class_<Hades::Memory::ModuleIter, boost::noncopyable>(
       python_name, boost::python::init<Hades::Memory::MemoryMgr const&>())
       .def("next", next)
       .def("__iter__", pass_through)

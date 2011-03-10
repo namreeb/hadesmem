@@ -41,6 +41,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
 #include "ManualMap.hpp"
+#include "ModuleEnum.hpp"
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/EnsureCleanup.hpp"
 
@@ -367,7 +368,7 @@ namespace Hades
           
         // Check whether dependent module is already loaded
         boost::optional<Module> MyModule;
-        for (ModuleListIter j(m_Memory); *j; ++j)
+        for (ModuleIter j(m_Memory); *j; ++j)
         {
           Module& Current = **j;
           if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerW || 
@@ -400,7 +401,7 @@ namespace Hades
           CurModName = ModuleNameW;
           
           // Search again for dependent DLL and set module path
-          for (ModuleListIter j(m_Memory); *j; ++j)
+          for (ModuleIter j(m_Memory); *j; ++j)
           {
             Module const& Current = **j;
             if (boost::to_lower_copy(Current.GetName()) == ModuleNameLowerW || 
