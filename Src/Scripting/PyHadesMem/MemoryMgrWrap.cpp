@@ -161,6 +161,7 @@ void ExportMemoryMgr()
     .def("GetRemoteProcAddress", &MemoryMgrWrap::GetRemoteProcAddressByName)
     .def("GetRemoteProcAddress", &MemoryMgrWrap::GetRemoteProcAddressByOrdinal)
     .def("FlushCache", &MemoryMgrWrap::FlushCache)
+    .def("IsWoW64", &MemoryMgrWrap::IsWoW64)
     ;
 
   boost::python::enum_<Hades::Memory::MemoryMgr::CallConv>("CallConv")

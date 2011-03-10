@@ -466,5 +466,11 @@ namespace Hades
           ErrorCode(LastError));
       }
     }
+
+    // Is WoW64 process
+    bool MemoryMgr::IsWoW64() const 
+    {
+      return m_Process.IsWoW64();
+    }
   }
 }

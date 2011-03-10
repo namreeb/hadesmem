@@ -207,6 +207,9 @@ namespace Hades
           ErrorString("Could not detect WoW64 status of target process.") << 
           ErrorCode(LastError));
       }
+      
+      // Set WoW64 status
+      m_IsWoW64 = (IsWoW64 != FALSE);
 
       // Ensure WoW64 status of both self and target match
       if (IsWoW64Me != IsWoW64)
@@ -248,6 +251,12 @@ namespace Hades
       }
       
       return Path;
+    }
+    
+    // Is WoW64 process
+    bool Process::IsWoW64() const
+    {
+      return m_IsWoW64;
     }
     
     // Create process

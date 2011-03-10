@@ -146,6 +146,9 @@ namespace Hades
 
       // Flush instruction cache
       void FlushCache(PVOID Address, SIZE_T Size) const;
+      
+      // Is WoW64 process
+      bool IsWoW64() const;
 
     private:
       // Target process

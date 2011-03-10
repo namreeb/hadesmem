@@ -79,6 +79,9 @@ namespace Hades
       
       // Get process path
       boost::filesystem::path GetPath() const;
+        
+      // Is WoW64 process
+      bool IsWoW64() const;
 
     private:
       // Open process given process id
@@ -89,6 +92,9 @@ namespace Hades
 
       // Process ID
       DWORD m_ID;
+      
+      // Is WoW64 process
+      bool m_IsWoW64;
     };
     
     // Create process
