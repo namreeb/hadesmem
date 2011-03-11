@@ -110,6 +110,7 @@
   * Sanity checking for target process.
   * Freeze target when hooking.
   * VMT hooking.
+  * IAT/EAT hooking.
   
 * ManualMap
   * Improved exception handling support.

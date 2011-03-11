@@ -26,13 +26,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Process.hpp"
 #include "Scanner.hpp"
 #include "Injector.hpp"
-#include "ManualMap.hpp"
 #include "MemoryMgr.hpp"
 #include "FindPattern.hpp"
 #include "Disassembler.hpp"
 
 // Hades (Internal)
-#include "APIHook.hpp"
 #include "Patcher.hpp"
 
 // Hades (PeLib)

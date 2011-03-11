@@ -16,11 +16,6 @@ use-project /Dependencies
     Src/Dependencies 
   ;
 
-use-project /Injected 
-  : 
-    Src/Injected 
-  ;
-
 use-project /GUI 
   : 
     Src/GUI 
@@ -128,22 +123,6 @@ install Bin
     <install-type>PYTHON_EXTENSION 
     <address-model>64 
   ;
-
-if --build-injected in [ modules.peek : ARGV ]
-{
-  build-project Src/Injected 
-    ;
-    
-  install InjectedBin 
-    : 
-      Src/Injected 
-    : 
-      <conditional>@Install-Rule 
-      <install-type>SHARED_LIB 
-      <install-type>EXE 
-      <install-type>PYTHON_EXTENSION 
-    ;
-}
 
 if --build-gui in [ modules.peek : ARGV ]
 {

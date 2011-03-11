@@ -62,12 +62,3 @@ lib Memory
   : 
     <include>"../../Include/Memory"
   ;
-
-lib MMHelper 
-  : 
-    [ glob MMHelper/*.cpp ] 
-    Memory 
-    user32 
-  : 
-    <link>shared 
-  ;

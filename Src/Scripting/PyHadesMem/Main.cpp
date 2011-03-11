@@ -47,7 +47,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "ImportDirWrap.hpp"
 #include "DosHeaderWrap.hpp"
 #include "MemoryMgrWrap.hpp"
-#include "ManualMapWrap.hpp"
 #include "FindPatternWrap.hpp"
 #include "DisassemblerWrap.hpp"
 #include "HadesCommon/Error.hpp"
@@ -78,7 +77,6 @@ BOOST_PYTHON_MODULE(PyHadesMem)
   ExportDisassembler();
   ExportFindPattern();
   ExportInjector();
-  ExportManualMap();
   ExportMemoryMgr();
   ExportModule();
   ExportProcess();
