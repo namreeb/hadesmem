@@ -64,6 +64,8 @@
   * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
 
 * Scanner
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
   * Multi-threaded scanning option.
   * Wildcard support for vector/string scanning.
   * Regex support for string scanning.
@@ -98,6 +100,8 @@
   * IAT/EAT hooking.
 
 * FindPattern
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
   * Pattern generator.
   * Multi-threaded scanning.
   * 'Start' attribute support.
