@@ -75,7 +75,7 @@ namespace Hades
 
 
       // Attempt process creation
-      if (!CreateProcess(Path.c_str(), &ProcArgs[0], nullptr, nullptr, FALSE, 
+      if (!CreateProcess(Path.c_str(), ProcArgs.data(), nullptr, nullptr, FALSE, 
         CREATE_SUSPENDED, nullptr, WorkDirReal.c_str(), &StartInfo, &ProcInfo))
       {
         std::error_code const LastError = GetLastErrorCode();

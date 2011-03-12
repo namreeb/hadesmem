@@ -239,7 +239,7 @@ namespace Hades
       std::vector<BYTE> CodeReal(StubSize);
 
       // Generate code
-      MyJitFunc.relocCode(&CodeReal[0], reinterpret_cast<DWORD_PTR>(
+      MyJitFunc.relocCode(CodeReal.data(), reinterpret_cast<DWORD_PTR>(
         pRemoteStub));
 
       // Write stub buffer to process

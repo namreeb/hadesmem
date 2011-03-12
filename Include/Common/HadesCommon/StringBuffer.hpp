@@ -72,7 +72,13 @@ namespace Hades
       // Get pointer to internal buffer
       CharT* Get()
       {
-        return &m_Buffer[0];
+        return m_Buffer.data();
+      }
+
+      // Get pointer to internal buffer
+      CharT* Get() const
+      {
+        return m_Buffer.data();
       }
 
       // Implicit conversion operator to allow for easy C-style API 
@@ -87,7 +93,7 @@ namespace Hades
       {
         if (!m_Buffer.empty())
         {
-          *m_String = &m_Buffer[0];
+          *m_String = m_Buffer.data();
           m_Buffer.clear();
         }
       }

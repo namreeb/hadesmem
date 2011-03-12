@@ -61,7 +61,7 @@ namespace Hades
       }
 
       // Copy buffer to file
-      File.write(&Buffer[0], Buffer.size());
+      File.write(Buffer.data(), Buffer.size());
     }
 
     // Load a file into a buffer
@@ -81,7 +81,7 @@ namespace Hades
       std::vector<BYTE> Buffer(static_cast<std::vector<BYTE>::size_type>(
         File.tellg()));
       File.seekg(0, std::ios::beg);
-      File.read(&Buffer[0], Buffer.size());
+      File.read(Buffer.data(), Buffer.size());
 
       // Return file as buffer
       return Buffer;

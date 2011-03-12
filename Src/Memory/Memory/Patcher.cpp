@@ -212,7 +212,7 @@ namespace Hades
       // Create buffer to hold jump instruction
       std::vector<BYTE> JumpBuf(GetJumpSize());
       // Get pointer to buffer
-      PBYTE pJumpBuf = &JumpBuf[0];
+      PBYTE pJumpBuf = JumpBuf.data();
       // Write code to buffer ('JMP QWORD NEAR [RIP+0]')
       // Fixme: If an attempt to hook an already hooked function is made 
       // the disassembled code will be 'garbage' due to code and data being 

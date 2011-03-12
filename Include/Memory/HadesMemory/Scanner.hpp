@@ -135,7 +135,7 @@ namespace Hades
           ErrorString("Data container is empty."));
       }
 
-      BYTE const* pDataRaw = reinterpret_cast<BYTE const*>(&Data[0]);
+      BYTE const* pDataRaw = reinterpret_cast<BYTE const*>(Data.data());
       std::size_t const DataRawSize = Data.size() * sizeof(
         typename T::value_type);
 
@@ -227,7 +227,7 @@ namespace Hades
           ErrorString("Data container is empty."));
       }
 
-      BYTE const* pDataRaw = reinterpret_cast<BYTE const*>(&Data[0]);
+      BYTE const* pDataRaw = reinterpret_cast<BYTE const*>(Data.data());
       std::size_t const DataRawSize = Data.size() * sizeof(
         typename T::value_type);
 

@@ -109,9 +109,8 @@ namespace Hades
           ErrorString("Could not open dump file."));
       }
       
-      auto RegionBuf(m_Memory.Read<std::vector<BYTE>>(GetBase(), GetSize()));
-      Out.write(reinterpret_cast<char const*>(&RegionBuf[0]), 
-        RegionBuf.size());
+      auto RegionBuf(m_Memory.Read<std::vector<char>>(GetBase(), GetSize()));
+      Out.write(RegionBuf.data(), RegionBuf.size());
       if (!Out)
       {
         BOOST_THROW_EXCEPTION(Error() << 

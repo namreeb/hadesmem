@@ -184,7 +184,7 @@ namespace Hades
       // Open XML document
       std::shared_ptr<rapidxml::xml_document<wchar_t>> const AccountsDoc(
         std::make_shared<rapidxml::xml_document<wchar_t>>());
-      AccountsDoc->parse<0>(&PatFileBuf[0]);
+      AccountsDoc->parse<0>(PatFileBuf.data());
 
       // Ensure pattern tag is found
       rapidxml::xml_node<wchar_t>* PatternsTag = AccountsDoc->first_node(

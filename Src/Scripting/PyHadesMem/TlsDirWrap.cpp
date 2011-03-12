@@ -36,8 +36,8 @@ public:
   {
     std::vector<PIMAGE_TLS_CALLBACK> Temp(Hades::Memory::TlsDir::
       GetCallbacks());
-    std::vector<DWORD_PTR> New(reinterpret_cast<DWORD_PTR*>(&Temp[0]), 
-      reinterpret_cast<DWORD_PTR*>(&Temp[0]) + Temp.size());
+    std::vector<DWORD_PTR> New(reinterpret_cast<DWORD_PTR*>(Temp.data()), 
+      reinterpret_cast<DWORD_PTR*>(Temp.data()) + Temp.size());
     return New;
   }
 

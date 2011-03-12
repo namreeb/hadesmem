@@ -293,6 +293,7 @@ namespace Hades
     }
 
     // Read memory (vector types)
+    // Fixme: Traits will not work if type passed is std::vector<T const>
     template <typename T>
     T MemoryMgr::Read(PVOID Address, std::size_t Size, typename std::enable_if<
       std::is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
@@ -334,7 +335,7 @@ namespace Hades
       // Read data
       T Buffer(Size);
       SIZE_T BytesRead = 0;
-      if (!ReadProcessMemory(m_Process.GetHandle(), Address, &Buffer[0], 
+      if (!ReadProcessMemory(m_Process.GetHandle(), Address, Buffer.data(), 
         RawSize, &BytesRead) || BytesRead != RawSize)
       {
         if (!CanReadMem)
@@ -440,6 +441,7 @@ namespace Hades
     }
 
     // Write memory (vector types)
+    // Fixme: Traits will not work if type passed is std::vector<T const>
     template <typename T>
     void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
       enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
@@ -480,7 +482,7 @@ namespace Hades
 
       // Read data
       SIZE_T BytesWritten = 0;
-      if (!WriteProcessMemory(m_Process.GetHandle(), Address, &Data[0], 
+      if (!WriteProcessMemory(m_Process.GetHandle(), Address, Data.data(), 
         RawSize, &BytesWritten) || BytesWritten != RawSize)
       {
         if (!CanWriteMem)

@@ -90,7 +90,7 @@ namespace Hades
       
       // Initialize symbol APIs
       if(!pSymInitialize(m_Memory.GetProcessHandle(), SearchPath.empty() ? 
-        nullptr : &SearchPath[0], FALSE))
+        nullptr : SearchPath.c_str(), FALSE))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -190,7 +190,7 @@ namespace Hades
       // Load symbols for module
       if(!pSymLoadModuleEx(m_Memory.GetProcessHandle(), 
         nullptr, 
-        &MyModule->GetName()[0], 
+        MyModule->GetName().c_str(), 
         nullptr, 
         reinterpret_cast<DWORD64>(MyModule->GetBase()), 
         0, 
@@ -268,7 +268,7 @@ namespace Hades
       }
       
       // Look up symbol
-      if (!pSymFromName(m_Memory.GetProcessHandle(), &Name[0], pSymbol))
+      if (!pSymFromName(m_Memory.GetProcessHandle(), Name.c_str(), pSymbol))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
