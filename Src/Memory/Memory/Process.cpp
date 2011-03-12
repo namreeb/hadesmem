@@ -238,7 +238,7 @@ namespace Hades
     {
       // Note: The QueryFullProcessImageName API is more efficient and 
       // reliable but is only available on Vista+.
-      DWORD const PathSize = Util::Pow<2, 15>::Result;
+      DWORD const PathSize = 32767;
       std::wstring Path;
       if (!GetModuleFileNameEx(m_Handle, NULL, Util::MakeStringBuffer(Path, 
         PathSize), PathSize))
