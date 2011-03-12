@@ -18,6 +18,8 @@
   * Split code into 'mature' and 'experimental' parts.
   * Automatic build bot.
   * Extra debug output when building such as Boost version, MSVC version, etc.
+  * Compile time checks to ensure MSVC, Boost, etc versions meen the minimum 
+  requirements.
   * Digital signature (for build bot, WER, etc).
   * Drop XP support and move to Windows Vista+ (or Windows 7+?).
   * Decouple components where possible (pimpl etc), and ensure all 
@@ -43,6 +45,7 @@
   used.
 
 * MemoryMgr
+  * Add option for remote function caller to call GetLastError.
   * Clean up memory reading/writing API to reduce use of TMP in public 
   interface.
   * Improve 'safety' of remote function caller via EH to minimize risk of 
