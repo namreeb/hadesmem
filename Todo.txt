@@ -22,7 +22,7 @@
   * Drop XP support and move to Windows Vista+ (or Windows 7+?).
   * Decouple components where possible (pimpl etc), and ensure all 
   headers are self sufficient.
-  
+
 * New Modules
   * Debugging APIs.
     * Software breakpoint.
@@ -36,25 +36,7 @@
   * IA32 and AMD64 remote code 'emulator'.
   * Custom GetModuleHandle, GetProcAddress, etc.
   * Cheat Engine 'replacement'.
-  
-* Base hook
-  * CEGUI support.
-  * Convert D3D extensions to use detours rather than COM interface 
-  replacements.
-  * Ensure register state is maintained in hooks.
-  * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
-  similar).
-  * Ensure error state is retained in hooks (GetLastError/SetLastError).
-  * Rethink and reimplement threading model.
-  * Increase safety and stability before adding any major new functionality.
-  * D3D9, D3D10, D3D11 rendering support.
-  * Exception handling at hook/module boundaries.
-  * Hook profiling.
-  * Child process injection/hooking with WoW64 'workaround' (two-way).
-  * Config support (Spirit? XML?).
-  * Injected GUI library.
-  * Injected music player controller.
-  
+
 * Process
   * Constructors that take window/process name should throw if multiple 
   processes match the criteria. In this case, the PID constructor should be 
@@ -111,10 +93,7 @@
   * Freeze target when hooking.
   * VMT hooking.
   * IAT/EAT hooking.
-  
-* ManualMap
-  * Improved exception handling support.
-  
+
 * FindPattern
   * Pattern generator.
   * Multi-threaded scanning.
@@ -124,7 +103,28 @@
   * Dump results to file.
   * Change parser library from RapidXML to Boost.Spirit (may require a 
   format change from XML to something custom).
-  
+
 * PeLib
   * Finish implementing matching 'setters' for existing 'getters'.
   * Add modules to support more of the PE file format.
+
+* ManualMap
+  * Improved exception handling support.
+
+* Base hook
+  * CEGUI support.
+  * Convert D3D extensions to use detours rather than COM interface 
+  replacements.
+  * Ensure register state is maintained in hooks.
+  * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
+  similar).
+  * Ensure error state is retained in hooks (GetLastError/SetLastError).
+  * Rethink and reimplement threading model.
+  * Increase safety and stability before adding any major new functionality.
+  * D3D9, D3D10, D3D11 rendering support.
+  * Exception handling at hook/module boundaries.
+  * Hook profiling.
+  * Child process injection/hooking with WoW64 'workaround' (two-way).
+  * Config support (Spirit? XML?).
+  * Injected GUI library.
+  * Injected music player controller.
