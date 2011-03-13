@@ -85,7 +85,7 @@ bool GetInput(boost::python::object const& PythonNamespace)
 }
 
 // Program entry-point.
-int _tmain(int argc, TCHAR* argv[])
+int wmain(int argc, wchar_t *argv[ ], wchar_t* /*envp*/[])
 {
   // Program timer
   boost::timer ProgTimer;
@@ -99,6 +99,28 @@ int _tmain(int argc, TCHAR* argv[])
       _CRTDBG_CHECK_ALWAYS_DF);
     _CrtSetDbgFlag(CurrentFlags | NewFlags);
 #endif
+
+    // Get default heap
+    HANDLE ProcHeap = GetProcessHeap();
+    if (!ProcHeap)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("wmain") << 
+        Hades::ErrorString("Could not get process heap.") << 
+        Hades::ErrorCode(LastError));
+    }
+
+    // Detect heap corruption
+    if (!HeapSetInformation(ProcHeap, HeapEnableTerminationOnCorruption, 
+      NULL, 0))
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("wmain") << 
+        Hades::ErrorString("Could not set heap information.") << 
+        Hades::ErrorCode(LastError));
+    }
 
     // Hades version number
     std::wstring const VerNum(L"TRUNK");
