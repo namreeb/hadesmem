@@ -127,9 +127,9 @@ int wmain(int argc, wchar_t *argv[ ], wchar_t* /*envp*/[])
 
     // Version and copyright output
 #if defined(_M_X64)
-    std::wcout << "MemSandbox AMD64 [Version " << VerNum << "]\n";
+    std::wcout << "Hades MemSandbox AMD64 [Version " << VerNum << "]\n";
 #elif defined(_M_IX86)
-    std::wcout << "MemSandbox IA32 [Version " << VerNum << "]\n";
+    std::wcout << "Hades MemSandbox IA32 [Version " << VerNum << "]\n";
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
