@@ -2165,7 +2165,7 @@ void __bea_callspec__ stosw_(PDISASM pMyDisasm)
 void __bea_callspec__ syscall_(PDISASM pMyDisasm)
 {
     if (GV.Architecture == 64) {
-        (*pMyDisasm).Instruction.Category = SYSTEM_INSTRUCTION;
+        (*pMyDisasm).Instruction.Category = SYSTEM_INSTRUCTION+CONTROL_TRANSFER;
         #ifndef BEA_LIGHT_DISASSEMBLY
            (void) strcpy ((*pMyDisasm).Instruction.Mnemonic, "syscall ");
         #endif

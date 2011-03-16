@@ -1,5 +1,8 @@
 #ifndef _BEA_ENGINE_
 #define _BEA_ENGINE_
+#if  defined(__cplusplus) && defined(__BORLANDC__)
+namespace BeaEngine {
+#endif
 
 #include <beaengine/macros.h>
 #include <beaengine/export.h>
@@ -351,4 +354,8 @@ extern "C"
 BEA_API int __bea_callspec__ Disasm (LPDISASM pDisAsm);
 BEA_API const__ char* __bea_callspec__ BeaEngineVersion (void);
 BEA_API const__ char* __bea_callspec__ BeaEngineRevision (void);
+#if  defined(__cplusplus) && defined(__BORLANDC__)
+};
+using namespace BeaEngine;
+#endif
 #endif

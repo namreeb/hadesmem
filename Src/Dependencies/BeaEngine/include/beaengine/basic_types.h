@@ -29,7 +29,7 @@
 #include <stdint.h>
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__BORLANDC__)
 	/*
 	* Windows/Visual C++
 	*/

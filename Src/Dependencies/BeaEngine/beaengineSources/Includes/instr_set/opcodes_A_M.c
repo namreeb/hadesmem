@@ -1094,6 +1094,7 @@ void __bea_callspec__ call_(PDISASM pMyDisasm)
 void __bea_callspec__ callf_(PDISASM pMyDisasm)
 {
     UInt32 MyNumber;
+    UInt64 MyAddress;
     size_t i = 0;
     if (GV.Architecture == 64) {
         FailDecode(pMyDisasm);
@@ -1141,6 +1142,7 @@ void __bea_callspec__ callf_(PDISASM pMyDisasm)
             #endif
             i+=3;
         }
+        MyAddress = MyNumber*16;
         MyNumber = *((UInt32*)(UIntPtr) (GV.EIP_+1));
         if (GV.OperandSize == 16) {
             MyNumber = MyNumber & 0xffff;
@@ -1157,7 +1159,7 @@ void __bea_callspec__ callf_(PDISASM pMyDisasm)
         (*pMyDisasm).Argument1.ArgType = CONSTANT_TYPE+ABSOLUTE_;
         (*pMyDisasm).Argument1.AccessMode = READ;
         (*pMyDisasm).Instruction.ImplicitModifiedRegs = GENERAL_REG+REG4;
-
+        (*pMyDisasm).Instruction.AddrValue = MyAddress + MyNumber;
     }
 }
 
@@ -4701,6 +4703,7 @@ void __bea_callspec__ jmp_short(PDISASM pMyDisasm)
 void __bea_callspec__ jmp_far(PDISASM pMyDisasm)
 {
     UInt32 MyNumber;
+    UInt64 MyAddress;
     size_t i = 0;
     if (GV.Architecture == 64) {
         FailDecode(pMyDisasm);
@@ -4749,6 +4752,7 @@ void __bea_callspec__ jmp_far(PDISASM pMyDisasm)
             #endif
             i+=3;
         }
+        MyAddress = MyNumber*16;
         MyNumber = *((UInt32*)(UIntPtr) (GV.EIP_+1));
         if (GV.OperandSize == 16) {
             MyNumber = MyNumber & 0xffff;
@@ -4762,6 +4766,7 @@ void __bea_callspec__ jmp_far(PDISASM pMyDisasm)
         else {
             GV.EIP_+=5;
         }
+        (*pMyDisasm).Instruction.AddrValue = MyAddress + MyNumber;
     }
 }
 
@@ -5613,15 +5618,15 @@ void __bea_callspec__ mov_OveAX(PDISASM pMyDisasm)
 
     (*pMyDisasm).Argument2.ArgType = REGISTER_TYPE+GENERAL_REG+REG0;
     (*pMyDisasm).Argument1.ArgType = MEMORY_TYPE ;
-    if (GV.MemDecoration == 104) {
+    if (GV.MemDecoration == Arg1qword) {
         (*pMyDisasm).Argument1.ArgSize = 64;
         (*pMyDisasm).Argument2.ArgSize = 64;
     }
-    else if (GV.MemDecoration == 103) {
+    else if (GV.MemDecoration == Arg1dword) {
         (*pMyDisasm).Argument1.ArgSize = 32;
         (*pMyDisasm).Argument2.ArgSize = 32;
     }
-    else if (GV.MemDecoration == 102) {
+    else if (GV.MemDecoration == Arg1word) {
         (*pMyDisasm).Argument1.ArgSize = 16;
         (*pMyDisasm).Argument2.ArgSize = 16;
     }

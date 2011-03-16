@@ -92,7 +92,7 @@ int __bea_callspec__ InitVariables (PDISASM pMyDisasm) {
     (*pMyDisasm).Argument1.AccessMode = WRITE;
 	(*pMyDisasm).Argument1.ArgPosition = LowPosition;
 	(*pMyDisasm).Argument2.ArgPosition = LowPosition;
-	(*pMyDisasm).Argument3.ArgPosition = LowPosition;	
+	(*pMyDisasm).Argument3.ArgPosition = LowPosition;
     (*pMyDisasm).Argument2.AccessMode = READ;
     (*pMyDisasm).Argument3.AccessMode = READ;
     (void) memset (&(*pMyDisasm).Instruction, 0, sizeof (INSTRTYPE));
@@ -444,7 +444,10 @@ void __bea_callspec__ GxEx(PDISASM pMyDisasm)
 void __bea_callspec__ GvEw(PDISASM pMyDisasm)
 {
     GV.MemDecoration = Arg2word;
+    GV.OriginalOperandSize = GV.OperandSize;
+    GV.OperandSize = 16;
     MOD_RM(&(*pMyDisasm).Argument2, pMyDisasm);
+    GV.OperandSize = GV.OriginalOperandSize;
     Reg_Opcode(&(*pMyDisasm).Argument1, pMyDisasm);
     GV.EIP_ += GV.DECALAGE_EIP+2;
 }
