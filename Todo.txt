@@ -27,6 +27,10 @@
   * Readd GCC experimental support (user request via email, with user-supplied 
   patches).
   * Use SVN externals for dependencies (also consider including Boost).
+  * Config header to account for differences in compilers (or compiler 
+  versions). Consider using Boost.Config.
+  * Add support for optional error reporing via error codes to avoid littering 
+  user code with try-catch blocks.
   * Tag as v3 and move to v4 before readding GCC, using externals, dropping 
   XP, etc.
 
