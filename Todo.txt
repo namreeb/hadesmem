@@ -24,6 +24,11 @@
   * Drop XP support and move to Windows Vista+ (or Windows 7+?).
   * Decouple components where possible (pimpl etc), and ensure all 
   headers are self sufficient.
+  * Readd GCC experimental support (user request via email, with user-supplied 
+  patches).
+  * Use SVN externals for dependencies (also consider including Boost).
+  * Tag as v3 and move to v4 before readding GCC, using externals, dropping 
+  XP, etc.
 
 * New Modules
   * Debugging APIs.
