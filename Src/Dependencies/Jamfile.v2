@@ -8,27 +8,27 @@ project
 
 lib AsmJit 
   : 
-    [ glob AsmJit/AsmJit/*.cpp ] 
+    [ glob AsmJitNew/AsmJit/*.cpp ] 
   : 
     <link>static 
     <define>ASMJIT_API="" 
   : 
   : 
-    <include>"./AsmJit/" 
+    <include>"./AsmJitNew/" 
     <define>ASMJIT_API="" 
   ;
 
 lib BeaEngine 
   : 
-    [ glob BeaEngine/beaengineSources/*.c ] 
+    [ glob BeaEngineNew/beaengineSources/*.c ] 
   : 
-    <include>"./BeaEngine/beaengineSources/Includes/" 
-    <include>"./BeaEngine/include/" 
+    <include>"./BeaEngineNew/beaengineSources/Includes/" 
+    <include>"./BeaEngineNew/include/" 
     <define>BEA_ENGINE_STATIC 
     <link>static 
   : 
   : 
-    <include>"./BeaEngine/include/" 
+    <include>"./BeaEngineNew/include/" 
     <define>BEA_ENGINE_STATIC 
   ;
 
@@ -45,5 +45,5 @@ alias WTL
   : 
   : 
   : 
-    <include>"./WTL/include/"
+    <include>"./WTLNew/include/"
   ;
