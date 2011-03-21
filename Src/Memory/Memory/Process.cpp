@@ -211,13 +211,13 @@ namespace Hades
       // Set WoW64 status
       m_IsWoW64 = (IsWoW64 != FALSE);
 
-      // Ensure WoW64 status of both self and target match
-      if (IsWoW64Me != IsWoW64)
+      // Disable x86 -> x64 process manipulation
+      if (IsWoW64Me && !IsWoW64)
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Open") << 
-          ErrorString("Cross-architecture process manipulation is "
-          "currently unsupported."));
+          ErrorString("x86 -> x64 process manipulation is currently "
+          "unsupported."));
       }
     }
 

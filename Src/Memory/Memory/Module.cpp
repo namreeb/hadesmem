@@ -40,7 +40,7 @@ namespace Hades
     {
       // Grab a new snapshot of the process
       Windows::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE, MyMemory.GetProcessID()));
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, MyMemory.GetProcessID()));
       if (Snap == INVALID_HANDLE_VALUE)
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -94,7 +94,7 @@ namespace Hades
     {
       // Grab a new snapshot of the process
       Windows::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE, MyMemory.GetProcessID()));
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, MyMemory.GetProcessID()));
       if (Snap == INVALID_HANDLE_VALUE)
       {
         std::error_code const LastError = GetLastErrorCode();
