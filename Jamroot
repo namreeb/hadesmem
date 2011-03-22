@@ -1,9 +1,6 @@
-local boost = [ modules.peek : BOOST_ROOT ]
-  ;
-
 use-project /boost 
   : 
-    $(boost) 
+    Src/Dependencies/Boost 
   ;
 
 use-project /Common 

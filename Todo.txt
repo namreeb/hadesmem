@@ -37,6 +37,8 @@
   XP, etc.
 
 * New Modules
+  * Helper service to run HadesMem as 'SYSYTEM' for when manipulating certain 
+  protected/critical processes (running in separate desktops, sessions, etc).
   * Debugging APIs.
     * Software breakpoint.
     * Hardware breakpoint (incl read/write detection).
