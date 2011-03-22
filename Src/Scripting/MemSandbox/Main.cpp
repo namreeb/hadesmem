@@ -34,6 +34,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #include <boost/timer.hpp>
 #include <boost/python.hpp>
+#include <boost/config.hpp>
+#include <boost/version.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #pragma warning(pop)
@@ -137,6 +139,9 @@ int wmain(int argc, wchar_t *argv[ ], wchar_t* /*envp*/[])
       std::endl;
     std::wcout << "Website: http://www.raptorfactor.com/, "
       "Email: raptorfactor@raptorfactor.com." << std::endl;
+    std::wcout << "Compiler: \"" << BOOST_COMPILER << "\", Standard "
+      "Library: \"" << BOOST_STDLIB << "\", Platform: \"" << BOOST_PLATFORM 
+      << "\", Boost: " << BOOST_VERSION << "." << std::endl;
     std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << "." << 
       std::endl << std::endl;
 
