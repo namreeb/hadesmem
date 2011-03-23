@@ -37,6 +37,8 @@
   XP, etc.
 
 * New Modules
+  * Remote Python injection.
+    * Remote API hooking with Python support.
   * Helper service to run HadesMem as 'SYSYTEM' for when manipulating certain 
   protected/critical processes (running in separate desktops, sessions, etc).
   * Debugging APIs.
