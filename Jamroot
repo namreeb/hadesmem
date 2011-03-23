@@ -40,10 +40,11 @@ project Hades
     <define>BOOST_FILESYSTEM_NO_DEPRECATED 
     <define>UNICODE 
     <define>_UNICODE 
+    <define>STRICT 
     <define>WIN32_LEAN_AND_MEAN 
-    <define>_WIN32_WINNT=_WIN32_WINNT_WS03 
-    <define>WINVER=_WIN32_WINNT_WS03 
-    <define>_SCL_SECURE_NO_WARNINGS 
+    <define>NTDDI_VERSION=NTDDI_VISTA 
+    <define>_WIN32_WINNT=_WIN32_WINNT_VISTA 
+    <define>WINVER=_WIN32_WINNT_VISTA 
     <runtime-link>shared 
   : 
     default-build debug 

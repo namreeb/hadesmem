@@ -19,7 +19,6 @@
   * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
   requirements.
   * Digital signature (for build bot, WER, etc).
-  * Drop XP support and move to Windows Vista+ (or Windows 7+?).
   * Decouple components where possible (pimpl etc), and ensure all 
   headers are self sufficient.
   * Explicit x64 -> x86 process manipulation support for all components.
@@ -27,6 +26,8 @@
   patches).
   * Config header to account for differences in compilers (or compiler 
   versions). Consider using Boost.Config.
+  * Improved error reporting via exceptions, especially with regard to Python 
+  bindings.
   * Add support for optional error reporing via error codes to avoid littering 
   user code with try-catch blocks.
   * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 

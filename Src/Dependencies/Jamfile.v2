@@ -12,6 +12,7 @@ lib AsmJit
   : 
     <link>static 
     <define>ASMJIT_API="" 
+    <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
     <include>"./AsmJit/" 
@@ -26,6 +27,7 @@ lib BeaEngine
     <include>"./BeaEngine/include/" 
     <define>BEA_ENGINE_STATIC 
     <link>static 
+    <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
     <include>"./BeaEngine/include/" 
