@@ -26,15 +26,12 @@
   headers are self sufficient.
   * Readd GCC experimental support (user request via email, with user-supplied 
   patches).
-  * Use SVN externals for dependencies (also consider including Boost).
   * Config header to account for differences in compilers (or compiler 
   versions). Consider using Boost.Config.
   * Add support for optional error reporing via error codes to avoid littering 
   user code with try-catch blocks.
   * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 
   API boundaries. If implemented, all files written should be UTF-8.
-  * Tag as v3 and move to v4 before readding GCC, using externals, dropping 
-  XP, etc.
 
 * New Modules
   * Remote Python injection.
