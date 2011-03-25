@@ -30,6 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <Windows.h>
 #include <Objbase.h>
+#include <wlanapi.h>
 
 // Notice: Modified version of EnsureCleanup library provided in the 'Windows
 // via C/C++' sample code. Originally copyright Jeffrey Richter and
@@ -176,7 +177,9 @@ namespace Hades
       EnsureDestroyIcon;
     typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, nullptr> 
       EnsureDestroyMenu;
-      
+    typedef EnsureCleanup<PVOID, VOID(WINAPI*)(PVOID), WlanFreeMemory, 
+      nullptr> EnsureWlanFreeMemory;
+
     // Special class for ensuring the 'LastError' is restored in hooks
     class EnsureLastError : private boost::noncopyable
     {
@@ -270,7 +273,7 @@ namespace Hades
       PVOID m_pv;
     };
 
-    // Special class for releasing a reserved region.
+    // Special class for ending a resource update operation
     class EnsureEndUpdateResource : private boost::noncopyable
     {
     public:
@@ -674,6 +677,73 @@ namespace Hades
       // Handles being managed
       HWND m_Wnd;
       HDC m_Dc;
+    };
+
+    // Special class for closing WLAN handles
+    class EnsureWlanCloseHandle : private boost::noncopyable
+    {
+    public:
+      // Constructor
+      EnsureWlanCloseHandle(HANDLE Client = nullptr) 
+        : m_Client(Client)
+      { }
+
+      // Move constructor
+      EnsureWlanCloseHandle(EnsureWlanCloseHandle&& MyEnsureCleanup)
+        : m_Client(nullptr)
+      {
+        *this = std::move(MyEnsureCleanup);
+      }
+
+      // Move assignment operator
+      EnsureWlanCloseHandle& operator= (EnsureWlanCloseHandle&&
+        MyEnsureCleanup)
+      {
+        Cleanup();
+
+        m_Client = MyEnsureCleanup.m_Client;
+
+        MyEnsureCleanup.m_Client = nullptr;
+
+        return *this;
+      }
+
+      // Destructor
+      ~EnsureWlanCloseHandle()
+      {
+        Cleanup();
+      }
+
+      // Assignment operator (for HANDLE values) 
+      EnsureWlanCloseHandle& operator= (HANDLE Client)
+      {
+        Cleanup();
+
+        m_Client = Client;
+
+        return *this;
+      }
+
+      // Implicit conversion operator for HANDLE
+      operator HANDLE() const
+      {
+        return m_Client;
+      }
+
+      // Cleanup the object if the value represents a valid object
+      void Cleanup()
+      {
+        if (m_Client != nullptr)
+        {
+          WlanCloseHandle(m_Client, NULL);
+
+          m_Client = nullptr;
+        }
+      }
+
+    private:
+      // Handle being managed
+      HANDLE m_Client;
     };
   }
 }
