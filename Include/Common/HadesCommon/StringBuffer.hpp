@@ -76,7 +76,7 @@ namespace Hades
       }
 
       // Get pointer to internal buffer
-      CharT* Get() const
+      CharT const* Get() const
       {
         return m_Buffer.data();
       }
@@ -84,6 +84,13 @@ namespace Hades
       // Implicit conversion operator to allow for easy C-style API 
       // interoperability
       operator CharT* ()
+      {
+        return Get();
+      }
+
+      // Implicit conversion operator to allow for easy C-style API 
+      // interoperability
+      operator CharT const* () const
       {
         return Get();
       }

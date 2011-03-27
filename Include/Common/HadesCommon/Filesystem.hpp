@@ -34,7 +34,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Pow.hpp"
 #include "Error.hpp"
 #include "WinAux.hpp"
 #include "StringBuffer.hpp"

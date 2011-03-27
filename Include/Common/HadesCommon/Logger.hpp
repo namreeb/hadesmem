@@ -98,7 +98,7 @@ namespace Hades
       // Generate path to log file.
       boost::filesystem::path GeneratePath(
         boost::filesystem::path const& LogDirPath, 
-        std::wstring const& Filename)
+        std::wstring const& Filename) const
       {
         // Get local time
         auto const Time(boost::posix_time::second_clock::local_time());

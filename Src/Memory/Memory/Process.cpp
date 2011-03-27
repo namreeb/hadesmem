@@ -30,7 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "Process.hpp"
-#include "HadesCommon/Pow.hpp"
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/StringBuffer.hpp"
 
