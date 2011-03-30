@@ -102,7 +102,7 @@
       </PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
@@ -119,7 +119,7 @@
       </PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
@@ -138,7 +138,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
@@ -159,7 +159,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
