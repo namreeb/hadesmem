@@ -25,21 +25,21 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>Windows7.1SDK</PlatformToolset>
     <UseOfAtl>Dynamic</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>Windows7.1SDK</PlatformToolset>
     <UseOfAtl>Dynamic</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -47,7 +47,7 @@
     <UseOfAtl>Dynamic</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -75,26 +75,26 @@
     <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BUILD_BEA_ENGINE_DLL %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -121,7 +121,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BUILD_BEA_ENGINE_DLL %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -140,7 +140,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BUILD_BEA_ENGINE_DLL %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -161,7 +161,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BEAENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BUILD_BEA_ENGINE_DLL %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D BEA_ENGINE_STATIC %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>"../../../../Src/Dependencies/BeaEngine/beaengineSources/Includes/";"../../../../Src/Dependencies/BeaEngine/include/";</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
