@@ -114,6 +114,8 @@
   * Freeze target when hooking.
   * VMT hooking.
   * IAT/EAT hooking.
+  * Explicitly support hook chains (and write test).
+  * Use relative jumps where possible (detect delta at runtime).
 
 * FindPattern
   * Use a file view with a small memory cache rather than consuming large 
