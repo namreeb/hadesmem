@@ -150,7 +150,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\;"../../../../Src/Dependencies/Boost/stage/lib/";C:\Python27\libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\;"../../../../Src/Dependencies/Boost/stage/lib/ia32/";C:\Python27\libs;</AdditionalLibraryDirectories>
       <AdditionalDependencies>AsmJit.lib;BeaEngine.lib;HadesMem.lib;Psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
