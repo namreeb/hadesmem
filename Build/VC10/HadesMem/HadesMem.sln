@@ -21,6 +21,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemSandbox", "MemSandbox\Me
 		{3E2BA64E-0866-4630-B649-9ACE6389625D} = {3E2BA64E-0866-4630-B649-9ACE6389625D}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{FCDCE3FC-81BD-4796-B9A2-CAB69DA74195}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Todo.txt = ..\..\..\Todo.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
