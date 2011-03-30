@@ -23,6 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 #include <vector>
+#include <utility>
 #include <type_traits>
 
 // Boost
@@ -77,7 +78,8 @@ namespace Hades
       };
 
       // Call remote function
-      DWORD_PTR Call(PVOID Address, std::vector<PVOID> const& Args, 
+      std::pair<DWORD_PTR, DWORD_PTR> Call(PVOID Address, 
+        std::vector<PVOID> const& Args, 
         CallConv MyCallConv = CallConv_Default) const;
 
       // Read memory (POD types)

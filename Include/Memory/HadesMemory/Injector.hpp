@@ -58,7 +58,8 @@ namespace Hades
         bool PathResolution = true) const;
 
       // Call export
-      DWORD_PTR CallExport(boost::filesystem::path const& ModulePath, 
+      std::pair<DWORD_PTR, DWORD_PTR> CallExport(
+        boost::filesystem::path const& ModulePath, 
         HMODULE ModuleRemote, std::string const& Export) const;
 
     private:
@@ -67,7 +68,7 @@ namespace Hades
     };
     
     // Create process (as suspended) and inject DLL
-    std::tuple<MemoryMgr, HMODULE, DWORD_PTR> CreateAndInject(
+    std::tuple<MemoryMgr, HMODULE, DWORD_PTR, DWORD_PTR> CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
       std::wstring const& Args, 

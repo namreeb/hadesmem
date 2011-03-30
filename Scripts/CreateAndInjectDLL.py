@@ -25,6 +25,8 @@ InjectData = PyHadesMem.CreateAndInject(ProcPath, WorkingDir, ProcArgs,
 MyMem = InjectData[0]
 ModBase = InjectData[1]
 ExpRet = InjectData[2]
+ExpLastErr = InjectData[3]
 print("Module Base: " + hex(ModBase))
 if ExpName:
   print("Export Ret: " + hex(ExpRet) + " " + str(ExpRet))
+  print("Export Last Err: " + hex(ExpLastErr) + " " + str(ExpLastErr))

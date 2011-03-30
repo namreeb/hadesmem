@@ -25,11 +25,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "HadesMemory/Injector.hpp"
 
-template <class T1, class T2, class T3>
-boost::python::tuple tuple_to_python(std::tuple<T1, T2, T3> const& x)
+template <class T1, class T2, class T3, class T4>
+boost::python::tuple tuple_to_python(std::tuple<T1, T2, T3, T4> const& x)
 {
   return boost::python::make_tuple(std::get<0>(x), std::get<1>(x), 
-    std::get<2>(x));
+    std::get<2>(x), std::get<3>(x));
 }
 
 template <class T>
@@ -41,7 +41,7 @@ struct tupleconverter
   }
 };
 
-std::tuple<Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR> CreateAndInject(
+std::tuple<Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR, DWORD_PTR> CreateAndInject(
   std::wstring const& Path, 
   std::wstring const& WorkDir, 
   std::wstring const& Args, 
@@ -53,7 +53,8 @@ std::tuple<Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR> CreateAndInject(
   Hades::Memory::MemoryMgr MyMemory(std::get<0>(InjectData));
   DWORD_PTR ModuleBase = reinterpret_cast<DWORD_PTR>(std::get<1>(InjectData));
   DWORD_PTR ExportRet = std::get<2>(InjectData);
-  return std::make_tuple(MyMemory, ModuleBase, ExportRet);
+  DWORD_PTR ExportLastError = std::get<3>(InjectData);
+  return std::make_tuple(MyMemory, ModuleBase, ExportRet, ExportLastError);
 }
 
 class InjectorWrap : public Hades::Memory::Injector
@@ -70,7 +71,7 @@ public:
       PathResolution));
   }
 
-  DWORD_PTR CallExport(std::wstring const& Path, 
+  std::pair<DWORD_PTR, DWORD_PTR> CallExport(std::wstring const& Path, 
     DWORD_PTR ModuleRemote, std::string const& Export) const
   {
     return Hades::Memory::Injector::CallExport(Path, reinterpret_cast<HMODULE>(
@@ -95,6 +96,6 @@ void ExportInjector()
   boost::python::def("CreateAndInject", &CreateAndInject);
 
   boost::python::to_python_converter<std::tuple<Hades::Memory::MemoryMgr, 
-    DWORD_PTR, DWORD_PTR>, tupleconverter<std::tuple<Hades::Memory::MemoryMgr, 
-    DWORD_PTR, DWORD_PTR>>>();
+    DWORD_PTR, DWORD_PTR, DWORD_PTR>, tupleconverter<std::tuple<
+    Hades::Memory::MemoryMgr, DWORD_PTR, DWORD_PTR, DWORD_PTR>>>();
 }

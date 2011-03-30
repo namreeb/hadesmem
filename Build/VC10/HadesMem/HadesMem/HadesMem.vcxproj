@@ -182,6 +182,13 @@
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\TlsDir.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\EnsureCleanup.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Error.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Filesystem.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\I18n.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Logger.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\StringBuffer.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\WinAux.hpp" />
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Disassembler.hpp" />
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\DosHeader.hpp" />
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Error.hpp" />

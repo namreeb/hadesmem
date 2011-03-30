@@ -18,6 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
+#include "Module.hpp"
 #include "MemoryMgr.hpp"
 
 namespace Hades
@@ -71,7 +72,8 @@ namespace Hades
     { }
 
     // Call remote function
-    DWORD_PTR MemoryMgr::Call(PVOID Address, std::vector<PVOID> const& Args, 
+    std::pair<DWORD_PTR, DWORD_PTR> MemoryMgr::Call(PVOID Address, 
+      std::vector<PVOID> const& Args, 
       CallConv MyCallConv) const 
     {
       // Get number of arguments
@@ -80,8 +82,16 @@ namespace Hades
       // Create Assembler.
       AsmJit::Assembler MyJitFunc;
 
-      // Allocate memory for return address
-      AllocAndFree const ReturnAddressRemote(*this, sizeof(DWORD_PTR));
+      // Allocate memory for return value
+      AllocAndFree const ReturnValueRemote(*this, sizeof(DWORD_PTR));
+
+      // Allocate memory for thread's last-error code
+      AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
+      
+      // Get address of Kernel32.dll
+      Module K32Mod(*this, L"kernel32.dll");
+      PVOID pGetLastError = GetRemoteProcAddress(K32Mod.GetBase(), 
+        L"kernel32.dll", "GetLastError");
 
 #if defined(_M_AMD64) 
       // Check calling convention
@@ -123,17 +133,26 @@ namespace Hades
       // Call target
       MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
       MyJitFunc.call(AsmJit::rax);
+      
+      // Write return value to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueRemote.GetAddress()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+
+      // Call kernel32.dll!GetLastError
+      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pGetLastError));
+      MyJitFunc.call(AsmJit::rax);
+      
+      // Write error code to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        LastErrorRemote.GetAddress()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
 
       // Cleanup ghost space
       MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
 
       // Clean up remaining stack space
       MyJitFunc.add(AsmJit::rsp, 0x8 * (NumArgs - 4));
-
-      // Write return value to memory
-      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-        ReturnAddressRemote.GetAddress()));
-      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
 
       // Epilogue
       MyJitFunc.mov(AsmJit::rsp, AsmJit::rbp);
@@ -145,10 +164,6 @@ namespace Hades
       // Prologue
       MyJitFunc.push(AsmJit::ebp);
       MyJitFunc.mov(AsmJit::ebp, AsmJit::esp);
-
-      // Get address to write return value to and store for later
-      MyJitFunc.mov(AsmJit::eax, AsmJit::dword_ptr(AsmJit::ebp, 8));
-      MyJitFunc.push(AsmJit::eax);
 
       // Get stack arguments offset
       std::size_t StackArgOffs = 0;
@@ -204,16 +219,26 @@ namespace Hades
       // Call target
       MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Address));
       MyJitFunc.call(AsmJit::eax);
-
+      
+      // Write return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueRemote.GetAddress()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      
+      // Call kernel32.dll!GetLastError
+      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pGetLastError));
+      MyJitFunc.call(AsmJit::eax);
+      
+      // Write return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        LastErrorRemote.GetAddress()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      
       // Clean up stack if necessary
       if (MyCallConv == CallConv_CDECL)
       {
         MyJitFunc.add(AsmJit::esp, AsmJit::Imm(NumArgs * sizeof(PVOID)));
       }
-
-      // Write return value to memory
-      MyJitFunc.pop(AsmJit::ecx);
-      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
 
       // Epilogue
       MyJitFunc.mov(AsmJit::esp, AsmJit::ebp);
@@ -232,8 +257,6 @@ namespace Hades
       AllocAndFree const StubMemRemote(*this, StubSize);
       PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetAddress());
       DWORD_PTR pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(pRemoteStub);
-      PBYTE pReturnAddress = static_cast<PBYTE>(ReturnAddressRemote.
-        GetAddress());
 
       // Create buffer to hold relocated code plus the return value address
       std::vector<BYTE> CodeReal(StubSize);
@@ -248,7 +271,7 @@ namespace Hades
       // Call stub via creating a remote thread in the target.
       Windows::EnsureCloseHandle const MyThread(CreateRemoteThread(m_Process.
         GetHandle(), nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(
-        pRemoteStubTemp), pReturnAddress, 0, nullptr));
+        pRemoteStubTemp), nullptr, 0, nullptr));
       if (!MyThread)
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -269,8 +292,9 @@ namespace Hades
       }
 
       // Forward return value from remote thread
-      DWORD_PTR RetVal = Read<DWORD_PTR>(pReturnAddress);
-      return RetVal;
+      DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetAddress());
+      DWORD_PTR const ErrorCode = Read<DWORD_PTR>(LastErrorRemote.GetAddress());
+      return std::make_pair(RetVal, ErrorCode);
     }
 
     // Whether an address is currently readable

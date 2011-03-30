@@ -27,4 +27,5 @@ ExpName = raw_input("Export name (optional): ")
 if ExpName:
   print("Calling export")
   ExpRet = MyInjector.CallExport(ModPath, ModRemote, ExpName)
-  print("Export Ret: " + hex(ExpRet) + " " + str(ExpRet))
+  print("Export Ret: " + hex(ExpRet[0]) + " " + str(ExpRet[0]))
+  print("Export Last Error: " + hex(ExpRet[1]) + " " + str(ExpRet[1]))

@@ -27,6 +27,16 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/Types.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
+template<class T1, class T2>
+struct PairToTupleConverter 
+{
+  static PyObject* convert(const std::pair<T1, T2>& pair) 
+  {
+    return boost::python::incref(boost::python::make_tuple(
+      pair.first, pair.second).ptr());
+  }
+};
+
 class MemoryMgrWrap : public Hades::Memory::MemoryMgr
 {
 public:
@@ -43,7 +53,8 @@ public:
     : Hades::Memory::MemoryMgr(WindowName, ClassName)
   { }
 
-  DWORD_PTR Call(DWORD_PTR Address, boost::python::object const& Args, 
+  std::pair<DWORD_PTR, DWORD_PTR> Call(DWORD_PTR Address, 
+    boost::python::object const& Args, 
     CallConv MyCallConv) const
   {
     boost::python::stl_input_iterator<DWORD_PTR> ArgsBeg(Args), ArgsEnd;
@@ -174,4 +185,7 @@ void ExportMemoryMgr()
     .value("X64", Hades::Memory::MemoryMgr::CallConv_X64)
     .value("Default", Hades::Memory::MemoryMgr::CallConv_Default)
     ;
+
+  boost::python::to_python_converter<std::pair<DWORD_PTR, DWORD_PTR>, 
+    PairToTupleConverter<DWORD_PTR, DWORD_PTR>>();
 }
