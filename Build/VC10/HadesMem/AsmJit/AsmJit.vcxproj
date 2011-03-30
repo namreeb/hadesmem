@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{42D1F821-8994-4F68-B479-A44525B54150}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>AsmJit</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D AsmJit_EXPORTS %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D AsmJit_EXPORTS %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D AsmJit_EXPORTS %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/D BOOST_ALL_DYN_LINK /D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D AsmJit_EXPORTS %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Assembler.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\AssemblerX86X64.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CodeGenerator.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Compiler.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CompilerX86X64.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CpuInfo.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Defs.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\DefsX86X64.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Logger.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\MemoryManager.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Operand.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\OperandX86X64.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Platform.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\ApiBegin.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\ApiEnd.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\AsmJit.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Assembler.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\AssemblerX86X64.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Build.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CodeGenerator.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Compiler.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CompilerX86X64.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Config.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\CpuInfo.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Defs.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\DefsX86X64.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Logger.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\MemoryManager.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Operand.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\OperandX86X64.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Platform.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Util.h" />
+    <ClInclude Include="..\..\..\..\Src\Dependencies\AsmJit\AsmJit\Util_p.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
