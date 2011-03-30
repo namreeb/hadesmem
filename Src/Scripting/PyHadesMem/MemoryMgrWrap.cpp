@@ -70,18 +70,20 @@ public:
       GetProcessHandle());
   }
 
-  DWORD_PTR GetRemoteProcAddressByName(HMODULE RemoteMod, 
+  DWORD_PTR GetRemoteProcAddressByName(DWORD_PTR RemoteMod, 
     std::wstring const& Module, std::string const& Function) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::MemoryMgr::
-      GetRemoteProcAddress(RemoteMod, Module, Function));
+      GetRemoteProcAddress(reinterpret_cast<HMODULE>(RemoteMod), Module, 
+      Function));
   }
 
-  DWORD_PTR GetRemoteProcAddressByOrdinal(HMODULE RemoteMod, 
+  DWORD_PTR GetRemoteProcAddressByOrdinal(DWORD_PTR RemoteMod, 
     std::wstring const& Module, WORD Function) const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::MemoryMgr::
-      GetRemoteProcAddress(RemoteMod, Module, Function));
+      GetRemoteProcAddress(reinterpret_cast<HMODULE>(RemoteMod), Module, 
+      Function));
   }
 
   template <typename T>
