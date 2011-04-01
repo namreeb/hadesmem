@@ -18,6 +18,7 @@
   * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
   requirements.
   * Investigate C++/CLI support.
+  * DLL build option.
   * Fix VS build to not require any 'manual' work (copy to clean dir once 
   built, copy dependent DLLs, copy scripts, copy docs, etc. Build should 
   effectively mean 'install'.).
