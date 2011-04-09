@@ -58,7 +58,7 @@ namespace Hades
         bool PathResolution = true) const;
 
       // Call export
-      std::pair<DWORD_PTR, DWORD_PTR> CallExport(
+      std::pair<DWORD_PTR, DWORD> CallExport(
         boost::filesystem::path const& ModulePath, 
         HMODULE ModuleRemote, std::string const& Export) const;
 

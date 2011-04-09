@@ -72,7 +72,7 @@ namespace Hades
     { }
 
     // Call remote function
-    std::pair<DWORD_PTR, DWORD_PTR> MemoryMgr::Call(PVOID Address, 
+    std::pair<DWORD_PTR, DWORD> MemoryMgr::Call(PVOID Address, 
       std::vector<PVOID> const& Args, 
       CallConv MyCallConv) const 
     {
@@ -293,7 +293,7 @@ namespace Hades
 
       // Forward return value from remote thread
       DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetAddress());
-      DWORD_PTR const ErrorCode = Read<DWORD_PTR>(LastErrorRemote.GetAddress());
+      DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetAddress());
       return std::make_pair(RetVal, ErrorCode);
     }
 

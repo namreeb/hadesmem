@@ -78,7 +78,7 @@ namespace Hades
       };
 
       // Call remote function
-      std::pair<DWORD_PTR, DWORD_PTR> Call(PVOID Address, 
+      std::pair<DWORD_PTR, DWORD> Call(PVOID Address, 
         std::vector<PVOID> const& Args, 
         CallConv MyCallConv = CallConv_Default) const;
 

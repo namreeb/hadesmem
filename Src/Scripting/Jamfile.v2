@@ -28,6 +28,7 @@ exe MemSandbox
     /boost//program_options/<link>static 
   : 
     <link>static 
+    <warnings-as-errors>on 
   : 
   : 
     <include>"." 
@@ -40,4 +41,5 @@ python-extension PyHadesMem
     /boost//python/<link>static 
   : 
     <link>shared 
+    <warnings-as-errors>on 
   ;

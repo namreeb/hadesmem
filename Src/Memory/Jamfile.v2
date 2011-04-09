@@ -57,8 +57,9 @@ lib Memory
     imagehlp 
   : 
     <link>static 
-    <include>"../../Include/Memory/HadesMemory"
+    <include>"../../Include/Memory/HadesMemory" 
+    <warnings-as-errors>on 
   : 
   : 
-    <include>"../../Include/Memory"
+    <include>"../../Include/Memory" 
   ;

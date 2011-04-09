@@ -13,4 +13,5 @@ exe MemHack
     /Memory//Memory 
   : 
     <user-interface>gui 
+    <warnings-as-errors>on 
   ;

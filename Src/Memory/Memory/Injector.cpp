@@ -101,11 +101,10 @@ namespace Hades
         HMODULE const ModBase = MyInjector.InjectDll(Module);
 
         // If export has been specified
-        std::pair<DWORD_PTR, DWORD_PTR> ExpRetData = MyInjector.CallExport(
+        std::pair<DWORD_PTR, DWORD> ExpRetData = MyInjector.CallExport(
           Module, ModBase, Export);
         DWORD_PTR const ExportRet = Export.empty() ? 0 : ExpRetData.first;
-        DWORD_PTR const ExportLastError = Export.empty() ? 0 : 
-          ExpRetData.second;
+        DWORD const ExportLastError = Export.empty() ? 0 : ExpRetData.second;
 
         // Success! Let the process continue execution.
         if (ResumeThread(ProcInfo.hThread) == static_cast<DWORD>(-1))
@@ -228,7 +227,7 @@ namespace Hades
       // Load module in remote process using LoadLibraryW
       std::vector<PVOID> Args;
       Args.push_back(LibFileRemote.GetAddress());
-      std::pair<DWORD_PTR, DWORD_PTR> RemoteRet = m_Memory.Call(
+      std::pair<DWORD_PTR, DWORD> RemoteRet = m_Memory.Call(
         reinterpret_cast<PVOID>(pLoadLibraryWTemp), Args);
       if (!RemoteRet.first)
       {
@@ -274,7 +273,7 @@ namespace Hades
     }
 
     // Call export
-    std::pair<DWORD_PTR, DWORD_PTR> Injector::CallExport(
+    std::pair<DWORD_PTR, DWORD> Injector::CallExport(
       boost::filesystem::path const& ModulePath, 
       HMODULE ModuleRemote, std::string const& Export) const
     {
