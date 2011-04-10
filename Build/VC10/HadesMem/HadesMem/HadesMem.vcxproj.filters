@@ -16,21 +16,18 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{23f1882e-f7a3-4be7-b3e7-6a73cd52c6c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\PeLib">
+      <UniqueIdentifier>{ad824694-7193-4a00-920e-a6c5b24da77b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PeLib">
+      <UniqueIdentifier>{c133dccd-f09f-4835-99a0-45b066d27384}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Src\Memory\Memory\DosHeader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ExportDir.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\FindPattern.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ImportDir.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Injector.cpp">
@@ -40,9 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Module.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Src\Memory\Memory\NtHeaders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Patcher.cpp">
@@ -60,30 +54,33 @@
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Section.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\Symbol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\DosHeader.cpp">
+      <Filter>Source Files\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ExportDir.cpp">
+      <Filter>Source Files\PeLib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\Src\Memory\Memory\TlsDir.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Section.cpp">
+      <Filter>Source Files\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\NtHeaders.cpp">
+      <Filter>Source Files\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ImportDir.cpp">
+      <Filter>Source Files\PeLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Disassembler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\DosHeader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Error.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportDir.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportEnum.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\FindPattern.hpp">
@@ -93,12 +90,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\HashString.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportDir.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportEnum.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Injector.hpp">
@@ -116,16 +107,7 @@
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ModuleEnum.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\NtHeaders.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Patcher.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PEFile.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PeLib.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Process.hpp">
@@ -140,16 +122,7 @@
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Scanner.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Section.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\SectionEnum.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Symbol.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\TlsDir.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Types.hpp">
@@ -175,6 +148,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\WinAux.hpp">
       <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PEFile.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PeLib.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\TlsDir.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\SectionEnum.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Section.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\NtHeaders.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportDir.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportEnum.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\DosHeader.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportDir.hpp">
+      <Filter>Header Files\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportEnum.hpp">
+      <Filter>Header Files\PeLib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
