@@ -14,6 +14,7 @@
   * Upgrade to Python 3.x.
   * WinAPI C++ wrapper.
   * Automatic build bot.
+  * Investigate CMake build option.
   * Extra debug output when building such as Boost version, MSVC version, etc.
   * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
   requirements.
@@ -23,6 +24,7 @@
   built, copy dependent DLLs, copy scripts, copy docs, etc. Build should 
   effectively mean 'install'.).
   * Digital signature (for build bot, WER, etc).
+  * Investigate CMake build.
   * Decouple components where possible (pimpl etc), and ensure all 
   headers are self sufficient.
   * Explicit x64 -> x86 process manipulation support for all components.
