@@ -40,6 +40,7 @@
   API boundaries. If implemented, all files written should be UTF-8.
   * Deprecate MemSandbox, and instead install PyHadesMem to site-packages and 
   redirect all helper scripts to use the 'standard' Python binaries.
+  * Clean up all Python scripts.
 
 * New Modules
   * Remote Python injection.
