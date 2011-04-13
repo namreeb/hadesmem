@@ -38,6 +38,8 @@
   user code with try-catch blocks.
   * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 
   API boundaries. If implemented, all files written should be UTF-8.
+  * Deprecate MemSandbox, and instead install PyHadesMem to site-packages and 
+  redirect all helper scripts to use the 'standard' Python binaries.
 
 * New Modules
   * Remote Python injection.
