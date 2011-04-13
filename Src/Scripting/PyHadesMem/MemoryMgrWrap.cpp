@@ -118,6 +118,11 @@ public:
   {
     Write(Address, Data);
   }
+  
+  void Free(DWORD_PTR Address) const
+  {
+    Hades::Memory::MemoryMgr::Free(reinterpret_cast<PVOID>(Address));
+  }
 };
 
 // Export MemoryMgr API
