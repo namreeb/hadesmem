@@ -1,5 +1,5 @@
 # This file is part of HadesMem.
-# Copyright (C) 2010 Joshua Boyce (aka RaptorFactor, Cypherjb, Cypher, Chazwazza).
+# Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
 # <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 # 
 # HadesMem is free software: you can redistribute it and/or modify
