@@ -13,11 +13,6 @@ use-project /Dependencies
     Src/Dependencies 
   ;
 
-use-project /GUI 
-  : 
-    Src/GUI 
-  ; 
-
 use-project /Memory 
   : 
     Src/Memory 
@@ -26,11 +21,6 @@ use-project /Memory
 use-project /Scripting 
   : 
     Src/Scripting 
-  ; 
-
-use-project /Docs 
-  : 
-    Docs 
   ; 
 
 project Hades 
@@ -122,22 +112,6 @@ install Bin
     <address-model>64 
   ;
 
-if --build-gui in [ modules.peek : ARGV ]
-{
-  build-project Src/GUI 
-    ;
-    
-  install GUIBin 
-    : 
-      Src/GUI 
-    : 
-      <conditional>@Install-Rule 
-      <install-type>SHARED_LIB 
-      <install-type>EXE 
-      <install-type>PYTHON_EXTENSION 
-    ;
-}
-
 if --build-scripting in [ modules.peek : ARGV ]
 {
   build-project Src/Scripting 
@@ -151,11 +125,5 @@ if --build-scripting in [ modules.peek : ARGV ]
       <install-type>SHARED_LIB 
       <install-type>EXE 
       <install-type>PYTHON_EXTENSION 
-    ;
-}
-
-if --build-docs in [ modules.peek : ARGV ]
-{
-  build-project Docs 
     ;
 }
