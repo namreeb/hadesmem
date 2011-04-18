@@ -1,0 +1,20 @@
+# Tests/Jamfile.v2
+
+import testing 
+  ;
+
+project 
+  : 
+    requirements 
+    <warnings>all 
+    <warnings-as-errors>on 
+    <library>/Memory//Memory 
+    <library>/boost//unit_test_framework/<link>static 
+  ;
+
+test-suite Memory
+  :
+    [ run DisassemblerTest.cpp ]
+    [ run FindPatternTest.cpp ]
+    [ run InjectorTest.cpp ]
+  ;

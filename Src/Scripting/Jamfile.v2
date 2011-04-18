@@ -1,4 +1,4 @@
-# Scripting/Jamfile.v2
+# Src/Scripting/Jamfile.v2
 
 project 
   : 
