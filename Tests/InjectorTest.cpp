@@ -32,13 +32,14 @@ BOOST_AUTO_TEST_CASE(InjectorTest)
     
   Hades::Memory::Injector MyInjector(MyMemory);
     
-  HMODULE NtdllMod = GetModuleHandle(L"kernel32.dll");
-  BOOST_REQUIRE(NtdllMod != nullptr);
+  HMODULE Kernel32Mod = GetModuleHandle(L"kernel32.dll");
+  BOOST_REQUIRE(Kernel32Mod != nullptr);
     
-  HMODULE NtdllModNew = MyInjector.InjectDll(L"kernel32.dll", false);
-  BOOST_CHECK_EQUAL(NtdllMod, NtdllModNew);
+  HMODULE Kernel32ModNew = MyInjector.InjectDll(L"kernel32.dll", false);
+  BOOST_CHECK_EQUAL(Kernel32Mod, Kernel32ModNew);
   
-  std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(L"kernel32.dll", NtdllModNew, "GetCurrentProcessId");
+  std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(L"kernel32.dll", 
+    Kernel32ModNew, "GetCurrentProcessId");
   BOOST_CHECK_EQUAL(ExpRet.first, GetCurrentProcessId());
   BOOST_CHECK_EQUAL(ExpRet.second, 0);
   

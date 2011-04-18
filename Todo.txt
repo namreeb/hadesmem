@@ -41,6 +41,7 @@
   * Deprecate MemSandbox, and instead install PyHadesMem to site-packages and 
   redirect all helper scripts to use the 'standard' Python binaries.
   * Clean up all Python scripts.
+  * Add overloads to support pointers to constant data.
 
 * New Modules
   * Remote Python injection.

@@ -45,17 +45,21 @@ BOOST_AUTO_TEST_CASE(DisassemblerTest)
   BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 500).size(), 500);
   
   BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 1).size(), 1);
-  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 50).size(), 50);
-  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 500).size(), 500);
+  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 50).size(), 
+    50);
+  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 500).size(), 
+    500);
   
   auto DisasmData = MyDisassembler.Disassemble(pEntryPoint, 500);
-  std::for_each(DisasmData.begin(), DisasmData.end(), [] (Hades::Memory::DisasmData const& Data)
+  std::for_each(DisasmData.begin(), DisasmData.end(), 
+    [] (Hades::Memory::DisasmData const& Data)
   {
     BOOST_CHECK_EQUAL(Data.Len, Data.Raw.size());
   });
   
   auto DisasmDataStr = MyDisassembler.DisassembleToStr(pEntryPoint, 500);
-  std::for_each(DisasmDataStr.begin(), DisasmDataStr.end(), [] (std::wstring const& Str)
+  std::for_each(DisasmDataStr.begin(), DisasmDataStr.end(), 
+    [] (std::wstring const& Str)
   {
     BOOST_CHECK(!Str.empty());
   });
