@@ -42,5 +42,5 @@ BOOST_AUTO_TEST_CASE(InjectorTest)
   BOOST_CHECK_EQUAL(ExpRet.first, GetCurrentProcessId());
   BOOST_CHECK_EQUAL(ExpRet.second, 0);
   
-  // Todo: Test CreateAndInject(
+  // Todo: Test CreateAndInject
 }
