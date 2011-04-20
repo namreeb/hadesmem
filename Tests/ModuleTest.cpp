@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define BOOST_TEST_MODULE FindPatternTest
+#define BOOST_TEST_MODULE ModuleTest
 #pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
 #pragma warning(pop)
@@ -27,17 +27,17 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+   
+  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
+  {
+    Hades::Memory::Module const& Mod = **ModIter;
+    BOOST_CHECK(Mod.GetBase() != 0);
+    BOOST_CHECK(Mod.GetSize() != 0);
+    BOOST_CHECK(!Mod.GetName().empty());
+    BOOST_CHECK(!Mod.GetPath().empty());
     
-  Hades::Memory::FindPattern MyFindPattern(MyMemory);
-  MyFindPattern = Hades::Memory::FindPattern(MyMemory, GetModuleHandle(NULL));
-    
-  auto pNops = MyFindPattern.Find(L"90 90 90 90 90", L"xxxxx");
-  auto pInt3s = MyFindPattern.Find(L"CC CC CC CC CC", L"xxxxx");
-  BOOST_CHECK(pNops != pInt3s);
-  
-  auto pNopsAny = MyFindPattern.Find(L"90 90 90 90 90", L"?????");
-  auto pInt3sAny = MyFindPattern.Find(L"CC CC CC CC CC", L"?????");
-  BOOST_CHECK_EQUAL(pNopsAny, pInt3sAny);
-  
-  // Todo: Add tests for LoadFromXML, GetAddress, and operator[]
+    Hades::Memory::Module TestMod1(MyMemory, Mod.GetBase());
+    Hades::Memory::Module TestMod2(MyMemory, Mod.GetName());
+    Hades::Memory::Module TestMod3(MyMemory, Mod.GetPath().wstring());
+  }
 }

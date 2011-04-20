@@ -26,7 +26,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "HadesMemory/Memory.hpp"
 
-BOOST_AUTO_TEST_CASE(InjectorTest)
+BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     

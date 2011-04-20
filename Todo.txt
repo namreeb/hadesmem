@@ -42,6 +42,10 @@
   redirect all helper scripts to use the 'standard' Python binaries.
   * Clean up all Python scripts.
   * Add overloads to support pointers to constant data.
+  * In Boost.Filesystem equality != equivalence. Change to use equivalence 
+  where appropriate.
+  * Investigate dumping Boost.ProgramOptions as it apparently does not support 
+  wide paths correctly.
 
 * New Modules
   * Remote Python injection.
@@ -85,6 +89,9 @@
   * String based assembler with x64 support.
   * Improve bindings to make it actually useful from Python.
   * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+  
+* Region
+  * Move region enumeration code to separate header.
 
 * Scanner
   * Use a file view with a small memory cache rather than consuming large 

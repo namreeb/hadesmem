@@ -159,7 +159,7 @@ namespace Hades
     }
 
     // Get module path
-    std::wstring Module::GetPath() const
+    boost::filesystem::path Module::GetPath() const
     {
       return m_Path;
     }

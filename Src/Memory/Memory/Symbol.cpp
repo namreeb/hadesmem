@@ -150,7 +150,7 @@ namespace Hades
       {
         Module& Current = **i;
         if (boost::to_lower_copy(Current.GetName()) == ModuleNameLower || 
-          boost::to_lower_copy(Current.GetPath()) == ModuleNameLower)
+          boost::filesystem::equivalent(Current.GetPath(), ModuleNameLower))
         {
           MyModule = *i;
           break;

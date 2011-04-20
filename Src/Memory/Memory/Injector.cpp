@@ -253,7 +253,7 @@ namespace Hades
         else
         {
           if (boost::to_lower_copy((*MyIter)->GetName()) == PathString || 
-            boost::to_lower_copy((*MyIter)->GetPath()) == PathString)
+            boost::filesystem::equivalent((*MyIter)->GetPath(), PathString))
           {
             MyModule = *MyIter;
           }

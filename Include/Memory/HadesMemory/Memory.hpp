@@ -27,6 +27,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Scanner.hpp"
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
+#include "ModuleEnum.hpp"
+#include "ProcessEnum.hpp"
 #include "FindPattern.hpp"
 #include "Disassembler.hpp"
 

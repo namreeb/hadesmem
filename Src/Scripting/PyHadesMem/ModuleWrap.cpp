@@ -42,6 +42,11 @@ public:
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Module::GetBase());
   }
+  
+  std::wstring GetPath() const
+  {
+    return Hades::Memory::Module::GetPath().wstring();
+  }
 };
 
 struct ModuleIterWrap

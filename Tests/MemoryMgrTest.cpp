@@ -45,7 +45,7 @@ struct TestPODType
   long long d;
 };
 
-BOOST_AUTO_TEST_CASE(MemoryMgrTest)
+BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
   

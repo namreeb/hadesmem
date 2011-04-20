@@ -22,6 +22,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 
+// Boost
+#include <boost/filesystem.hpp>
+
 // Windows API
 #include <Windows.h>
 #include <TlHelp32.h>
@@ -60,7 +63,7 @@ namespace Hades
       // Get module name
       std::wstring GetName() const;
       // Get module path
-      std::wstring GetPath() const;
+      boost::filesystem::path GetPath() const;
 
     private:
       // Memory instance
@@ -73,7 +76,7 @@ namespace Hades
       // Module name
       std::wstring m_Name;
       // Module path
-      std::wstring m_Path;
+      boost::filesystem::path m_Path;
     };
   }
 }
