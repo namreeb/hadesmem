@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       // is a possibility
       BOOST_CHECK(!CurProc.GetPath().empty());
     }
-    catch (Hades::HadesError const& e)
+    catch (Hades::HadesError const& /*e*/)
     { }
     CurProc.IsWoW64();
   }
