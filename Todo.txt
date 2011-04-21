@@ -44,6 +44,7 @@
   * Add overloads to support pointers to constant data.
   * In Boost.Filesystem equality != equivalence. Change to use equivalence 
   where appropriate.
+  * Use 'ranges' over direct containers where possible.
   * Investigate dumping Boost.ProgramOptions as it apparently does not support 
   wide paths correctly.
 
