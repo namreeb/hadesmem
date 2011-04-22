@@ -136,7 +136,7 @@ namespace Hades
       
       // Write return value to memory
       MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-        ReturnValueRemote.GetAddress()));
+        ReturnValueRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
 
       // Call kernel32.dll!GetLastError
@@ -145,7 +145,7 @@ namespace Hades
       
       // Write error code to memory
       MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-        LastErrorRemote.GetAddress()));
+        LastErrorRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
 
       // Cleanup ghost space
