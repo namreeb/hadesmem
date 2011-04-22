@@ -117,7 +117,7 @@ namespace Hades
       // Fixme: Ensure trampoline is within range for a RIP-relative 
       // JMP under x64.
       m_Trampoline.reset(new AllocAndFree(m_Memory, TrampSize));
-      PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline->GetAddress());
+      PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline->GetBase());
 
       // Disassemble target (for worst case scenario)
       Disassembler MyDisasm(m_Memory);
@@ -165,8 +165,7 @@ namespace Hades
       TrampCur += GetJumpSize();
 
       // Flush instruction cache
-      m_Memory.FlushCache(m_Trampoline->GetAddress(), 
-        InstrSize + GetJumpSize());
+      m_Memory.FlushCache(m_Trampoline->GetBase(), InstrSize + GetJumpSize());
 
       // Backup original code
       m_Orig = m_Memory.Read<std::vector<BYTE>>(m_Target, GetJumpSize());
@@ -203,7 +202,7 @@ namespace Hades
     // Get pointer to trampoline
     PVOID PatchDetour::GetTrampoline() const
     {
-      return m_Trampoline->GetAddress();
+      return m_Trampoline->GetBase();
     }
 
     // Write jump to target at address

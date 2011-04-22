@@ -264,7 +264,7 @@ namespace Hades
 
         auto Iter = std::search(Buffer.cbegin(), Buffer.cend(), 
           DataRaw.cbegin(), DataRaw.cend());
-        if (Iter != Buffer.cend())
+        while (Iter != Buffer.cend())
         {
           PVOID AddressReal = static_cast<PBYTE>(MyRegion.GetBase()) + 
             std::distance(Buffer.cbegin(), Iter);
@@ -272,6 +272,10 @@ namespace Hades
           {
             Matches.push_back(AddressReal);
           }
+          
+          ++Iter;
+          Iter = std::search(Iter, Buffer.cend(), DataRaw.cbegin(), 
+            DataRaw.cend());
         }
       }
 

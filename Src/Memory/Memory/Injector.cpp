@@ -191,7 +191,7 @@ namespace Hades
 
       // Allocate space in the remote process for the pathname
       AllocAndFree const LibFileRemote(m_Memory, PathBufSize);
-      if (!LibFileRemote.GetAddress())
+      if (!LibFileRemote.GetBase())
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -201,7 +201,7 @@ namespace Hades
       }
 
       // Copy the DLL's pathname to the remote process' address space
-      m_Memory.Write(LibFileRemote.GetAddress(), PathString);
+      m_Memory.Write(LibFileRemote.GetBase(), PathString);
 
       // Get address of LoadLibraryW in Kernel32.dll
       HMODULE const hKernel32 = GetModuleHandle(L"Kernel32.dll");
@@ -226,7 +226,7 @@ namespace Hades
 
       // Load module in remote process using LoadLibraryW
       std::vector<PVOID> Args;
-      Args.push_back(LibFileRemote.GetAddress());
+      Args.push_back(LibFileRemote.GetBase());
       std::pair<DWORD_PTR, DWORD> RemoteRet = m_Memory.Call(
         reinterpret_cast<PVOID>(pLoadLibraryWTemp), Args);
       if (!RemoteRet.first)

@@ -222,7 +222,7 @@ namespace Hades
       
       // Write return value to memory
       MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-        ReturnValueRemote.GetAddress()));
+        ReturnValueRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
       
       // Call kernel32.dll!GetLastError
@@ -231,7 +231,7 @@ namespace Hades
       
       // Write return value to memory
       MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-        LastErrorRemote.GetAddress()));
+        LastErrorRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
       
       // Clean up stack if necessary
@@ -255,7 +255,7 @@ namespace Hades
 
       // Allocate memory for stub buffer
       AllocAndFree const StubMemRemote(*this, StubSize);
-      PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetAddress());
+      PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetBase());
       DWORD_PTR pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(pRemoteStub);
 
       // Create buffer to hold relocated code plus the return value address
@@ -292,8 +292,8 @@ namespace Hades
       }
 
       // Forward return value from remote thread
-      DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetAddress());
-      DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetAddress());
+      DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetBase());
+      DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetBase());
       return std::make_pair(RetVal, ErrorCode);
     }
 

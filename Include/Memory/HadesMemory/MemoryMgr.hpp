@@ -163,12 +163,17 @@ namespace Hades
     public:
       AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size) 
         : m_pMemory(&MyMemoryMgr), 
+        m_Size(Size), 
         m_Address(m_pMemory->Alloc(Size)) 
       { }
       
       void Free() const
       {
-        m_pMemory->Free(m_Address);
+        if (m_Address)
+        {
+          m_pMemory->Free(m_Address);
+        }
+        m_Address = nullptr;
       }
 
       ~AllocAndFree()
@@ -187,14 +192,20 @@ namespace Hades
         }
       }
 
-      PVOID GetAddress() const 
+      PVOID GetBase() const 
       {
         return m_Address;
+      }
+      
+      SIZE_T GetSize() const
+      {
+        return m_Size;
       }
 
     private:
       MemoryMgr const* m_pMemory;
-      PVOID m_Address;
+      SIZE_T m_Size;
+      mutable PVOID m_Address;
     };
 
     // Read memory (POD types)
