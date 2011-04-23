@@ -143,6 +143,8 @@
 * PeLib
   * Finish implementing matching 'setters' for existing 'getters'.
   * Add modules to support more of the PE file format.
+  * Check NumberOfRvaAndSizes in NtHeaders sanity checks before attempting to 
+  retrieve a data dir.
 
 * ManualMap
   * Improved exception handling support.
