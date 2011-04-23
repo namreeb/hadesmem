@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
    
   for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
   {
-    Hades::Memory::Module const& Mod = **ModIter;
+    Hades::Memory::Module const Mod = **ModIter;
     BOOST_CHECK(Mod.GetBase() != 0);
     BOOST_CHECK(Mod.GetSize() != 0);
     BOOST_CHECK(!Mod.GetName().empty());

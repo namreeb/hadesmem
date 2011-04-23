@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   for (Hades::Memory::ProcessIter Iter; *Iter; ++Iter)
   {
-    Hades::Memory::Process const& CurProc = **Iter;
+    Hades::Memory::Process CurProc = **Iter;
       
     BOOST_CHECK(CurProc.GetHandle() != 0);
     BOOST_CHECK(CurProc.GetID() != 0);
