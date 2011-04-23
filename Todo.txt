@@ -49,8 +49,8 @@
   wide paths correctly.
 
 * New Modules
-  * Remote Python injection.
-    * Remote API hooking with Python support.
+  * Remote Python injection (also from C++ layer).
+  * Remote API hooking with Python support.
   * Helper service to run HadesMem as 'SYSYTEM' for when manipulating certain 
   protected/critical processes (running in separate desktops, sessions, etc).
   * Debugging APIs.
@@ -145,24 +145,3 @@
   * Add modules to support more of the PE file format.
   * Check NumberOfRvaAndSizes in NtHeaders sanity checks before attempting to 
   retrieve a data dir.
-
-* ManualMap
-  * Improved exception handling support.
-
-* Base hook
-  * CEGUI support.
-  * Convert D3D extensions to use detours rather than COM interface 
-  replacements.
-  * Ensure register state is maintained in hooks.
-  * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
-  similar).
-  * Ensure error state is retained in hooks (GetLastError/SetLastError).
-  * Rethink and reimplement threading model.
-  * Increase safety and stability before adding any major new functionality.
-  * D3D9, D3D10, D3D11 rendering support.
-  * Exception handling at hook/module boundaries.
-  * Hook profiling.
-  * Child process injection/hooking with WoW64 'workaround' (two-way).
-  * Config support (Spirit? XML?).
-  * Injected GUI library.
-  * Injected music player controller.
