@@ -495,7 +495,7 @@ namespace Hades
     WORD NtHeaders::GetMajorOperatingSystemVersion() const
     {
       return m_Memory.Read<WORD>(GetBase() + FIELD_OFFSET(IMAGE_NT_HEADERS, 
-        OptionalHeader.FileAlignment));
+        OptionalHeader.MajorOperatingSystemVersion));
     }
 
     // Set major operating system version
