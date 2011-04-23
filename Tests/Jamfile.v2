@@ -15,10 +15,12 @@ project
 test-suite Memory
   :
     [ run DisassemblerTest.cpp ]
+    [ run DosHeaderTest.cpp ]
     [ run FindPatternTest.cpp ]
     [ run InjectorTest.cpp ]
     [ run MemoryMgrTest.cpp ]
     [ run ModuleTest.cpp ]
+    [ run PeFileTest.cpp ]
     [ run ProcessTest.cpp ]
     [ run RegionTest.cpp ]
     [ run ScannerTest.cpp ]
