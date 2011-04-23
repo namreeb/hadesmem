@@ -29,6 +29,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+    
+  boost::optional<Hades::Memory::Region> TestEnum(*Hades::Memory::
+    RegionListIter(MyMemory));
+  BOOST_CHECK(TestEnum);
   
   for (Hades::Memory::RegionListIter i(MyMemory); *i; ++i)
   {

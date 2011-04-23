@@ -25,4 +25,5 @@ test-suite Memory
     [ run ProcessTest.cpp ]
     [ run RegionTest.cpp ]
     [ run ScannerTest.cpp ]
+    [ run SectionTest.cpp ]
   ;

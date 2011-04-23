@@ -47,6 +47,7 @@
   * Use 'ranges' over direct containers where possible.
   * Investigate dumping Boost.ProgramOptions as it apparently does not support 
   wide paths correctly.
+  * Make iterator names consistent.
 
 * New Modules
   * Remote Python injection (also from C++ layer).

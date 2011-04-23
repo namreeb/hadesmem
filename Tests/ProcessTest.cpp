@@ -34,6 +34,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK(!MyProcess.GetPath().empty());
   MyProcess.IsWoW64();
   
+  boost::optional<Hades::Memory::Process> TestEnum(*Hades::Memory::
+    ProcessIter());
+  BOOST_CHECK(TestEnum);
+  
   for (Hades::Memory::ProcessIter Iter; *Iter; ++Iter)
   {
     Hades::Memory::Process CurProc = **Iter;

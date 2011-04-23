@@ -58,12 +58,42 @@ namespace Hades
       return Name;
     }
 
+    // Set name
+    void Section::SetName(std::string const& Name) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        Name), Name);
+
+      if (GetName() != Name)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetName") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
+    }
+
     // Get virtual address
     DWORD Section::GetVirtualAddress() const
     {
       PBYTE const pSection = GetBase();
       return m_Memory.Read<DWORD>(pSection + FIELD_OFFSET(
         IMAGE_SECTION_HEADER, VirtualAddress));
+    }
+
+    // Set virtual address
+    void Section::SetVirtualAddress(DWORD VirtualAddress) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        VirtualAddress), VirtualAddress);
+
+      if (GetVirtualAddress() != VirtualAddress)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetVirtualAddress") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
     }
 
     // Get virtual size
@@ -74,12 +104,42 @@ namespace Hades
         IMAGE_SECTION_HEADER, Misc.VirtualSize));
     }
 
+    // Set virtual size
+    void Section::SetVirtualSize(DWORD VirtualSize) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        Misc.VirtualSize), VirtualSize);
+
+      if (GetVirtualSize() != VirtualSize)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetVirtualSize") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
+    }
+
     // Get size of raw data
     DWORD Section::GetSizeOfRawData() const
     {
       PBYTE const pSection = GetBase();
       return m_Memory.Read<DWORD>(pSection + FIELD_OFFSET(
         IMAGE_SECTION_HEADER, SizeOfRawData));
+    }
+
+    // Set size of raw data
+    void Section::SetSizeOfRawData(DWORD SizeOfRawData) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        SizeOfRawData), SizeOfRawData);
+
+      if (GetSizeOfRawData() != SizeOfRawData)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetSizeOfRawData") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
     }
 
     // Get pointer to raw data
@@ -90,12 +150,42 @@ namespace Hades
         IMAGE_SECTION_HEADER, PointerToRawData));
     }
 
+    // Set pointer to raw data
+    void Section::SetPointerToRawData(DWORD PointerToRawData) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        PointerToRawData), PointerToRawData);
+
+      if (GetPointerToRawData() != PointerToRawData)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetPointerToRawData") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
+    }
+
     // Get pointer to relocations
     DWORD Section::GetPointerToRelocations() const
     {
       PBYTE const pSection = GetBase();
       return m_Memory.Read<DWORD>(pSection + FIELD_OFFSET(
         IMAGE_SECTION_HEADER, PointerToRelocations));
+    }
+
+    // Set pointer to relocations
+    void Section::SetPointerToRelocations(DWORD PointerToRelocations) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        PointerToRelocations), PointerToRelocations);
+
+      if (GetPointerToRelocations() != PointerToRelocations)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetPointerToRelocations") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
     }
 
     // Get pointer to line numbers
@@ -106,12 +196,42 @@ namespace Hades
         IMAGE_SECTION_HEADER, PointerToLinenumbers));
     }
 
+    // Set pointer to line numbers
+    void Section::SetPointerToLinenumbers(DWORD PointerToLinenumbers) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        PointerToLinenumbers), PointerToLinenumbers);
+
+      if (GetPointerToLinenumbers() != PointerToLinenumbers)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetPointerToLinenumbers") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
+    }
+
     // Get number of relocations
     WORD Section::GetNumberOfRelocations() const
     {
       PBYTE const pSection = GetBase();
       return m_Memory.Read<WORD>(pSection + FIELD_OFFSET(
         IMAGE_SECTION_HEADER, NumberOfRelocations));
+    }
+
+    // Set number of relocations
+    void Section::SetNumberOfRelocations(WORD NumberOfRelocations) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        NumberOfRelocations), NumberOfRelocations);
+
+      if (GetNumberOfRelocations() != NumberOfRelocations)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetNumberOfRelocations") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
     }
 
     // Get number of line numbers
@@ -122,12 +242,42 @@ namespace Hades
         IMAGE_SECTION_HEADER, NumberOfLinenumbers));
     }
 
+    // Set number of line numbers
+    void Section::SetNumberOfLinenumbers(WORD NumberOfLinenumbers) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        NumberOfLinenumbers), NumberOfLinenumbers);
+
+      if (GetNumberOfLinenumbers() != NumberOfLinenumbers)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetNumberOfLinenumbers") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
+    }
+
     // Get characteristics
     DWORD Section::GetCharacteristics() const
     {
       PBYTE const pSection = GetBase();
       return m_Memory.Read<DWORD>(pSection + FIELD_OFFSET(
         IMAGE_SECTION_HEADER, Characteristics));
+    }
+
+    // Set characteristics
+    void Section::SetCharacteristics(DWORD Characteristics) const
+    {
+      PBYTE const pSection = GetBase();
+      m_Memory.Write(pSection + FIELD_OFFSET(IMAGE_SECTION_HEADER, 
+        Characteristics), Characteristics);
+
+      if (GetCharacteristics() != Characteristics)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Section::SetCharacteristics") << 
+          ErrorString("Could not set data. Verification mismatch."));
+      }
     }
 
     // Get section header base
@@ -169,6 +319,12 @@ namespace Hades
     {
       // Get target raw section header
       return m_Memory.Read<IMAGE_SECTION_HEADER>(GetBase());
+    }
+    
+    // Get section number
+    WORD Section::GetNumber() const
+    {
+      return m_SectionNum;
     }
   }
 }

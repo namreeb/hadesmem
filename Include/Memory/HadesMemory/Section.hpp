@@ -49,38 +49,71 @@ namespace Hades
       // Get name
       std::string GetName() const;
 
+      // Set name
+      void SetName(std::string const& Name) const;
+
       // Get virtual address
       DWORD GetVirtualAddress() const;
+
+      // Set virtual address
+      void SetVirtualAddress(DWORD VirtualAddress) const;
 
       // Get virtual size
       DWORD GetVirtualSize() const;
 
+      // Set virtual size
+      void SetVirtualSize(DWORD VirtualSize) const;
+
       // Get size of raw data
       DWORD GetSizeOfRawData() const;
+
+      // Set size of raw data
+      void SetSizeOfRawData(DWORD SizeOfRawData) const;
 
       // Get pointer to raw data
       DWORD GetPointerToRawData() const;
 
+      // Set pointer to raw data
+      void SetPointerToRawData(DWORD PointerToRawData) const;
+
       // Get pointer to relocations
       DWORD GetPointerToRelocations() const;
+
+      // Set pointer to relocations
+      void SetPointerToRelocations(DWORD PointerToRelocations) const;
 
       // Get pointer to line numbers
       DWORD GetPointerToLinenumbers() const;
 
+      // Set pointer to line numbers
+      void SetPointerToLinenumbers(DWORD PointerToLinenumbers) const;
+
       // Get number of relocations
       WORD GetNumberOfRelocations() const;
+
+      // Set number of relocations
+      void SetNumberOfRelocations(WORD NumberOfRelocations) const;
 
       // Get number of line numbers
       WORD GetNumberOfLinenumbers() const;
 
+      // Set number of line numbers
+      void SetNumberOfLinenumbers(WORD NumberOfLinenumbers) const;
+
       // Get characteristics
       DWORD GetCharacteristics() const;
+
+      // Set characteristics
+      void SetCharacteristics(DWORD Characteristics) const;
 
       // Get section header base
       PBYTE GetBase() const;
 
       // Get raw section header
       IMAGE_SECTION_HEADER GetSectionHeaderRaw() const;
+      
+      // Get section number
+      WORD GetNumber() const;
 
     private:
       // PE file
