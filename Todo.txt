@@ -62,6 +62,7 @@
   * Anti-anti-cheat APIs.
   * Thread/process information APIs.
   * Manual mapper.
+    * Windows PE loader reversing.
   * Python scripts for automating common tasks.
   * IA32 and AMD64 remote code 'emulator'.
   * Custom GetModuleHandle, GetProcAddress, etc.
