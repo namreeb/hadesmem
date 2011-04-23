@@ -20,5 +20,6 @@ test-suite Memory
     [ run MemoryMgrTest.cpp ]
     [ run ModuleTest.cpp ]
     [ run ProcessTest.cpp ]
+    [ run RegionTest.cpp ]
     [ run ScannerTest.cpp ]
   ;

@@ -73,7 +73,6 @@
   used.
 
 * MemoryMgr
-  * Add option for remote function caller to call GetLastError.
   * Clean up memory reading/writing API to reduce use of TMP in public 
   interface.
   * Improve 'safety' of remote function caller via EH to minimize risk of 
@@ -91,9 +90,6 @@
   * Improve bindings to make it actually useful from Python.
   * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
   
-* Region
-  * Move region enumeration code to separate header.
-
 * Scanner
   * Use a file view with a small memory cache rather than consuming large 
   amounts of RAM.

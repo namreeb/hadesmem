@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Region.hpp"
+#include "HadesMemory/RegionEnum.hpp"
 
 class RegionWrap : public Hades::Memory::Region
 {
