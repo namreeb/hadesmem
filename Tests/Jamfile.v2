@@ -27,4 +27,5 @@ test-suite Memory
     [ run RegionTest.cpp ]
     [ run ScannerTest.cpp ]
     [ run SectionTest.cpp ]
+    [ run TlsDirTest.cpp ]
   ;

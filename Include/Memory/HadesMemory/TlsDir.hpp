@@ -55,23 +55,43 @@ namespace Hades
       // Get start address of raw data
       DWORD_PTR GetStartAddressOfRawData() const;
 
+      // Set start address of raw data
+      void SetStartAddressOfRawData(DWORD_PTR StartAddressOfRawData) const;
+
       // Get end address of raw data
       DWORD_PTR GetEndAddressOfRawData() const;
+
+      // Set end address of raw data
+      void SetEndAddressOfRawData(DWORD_PTR EndAddressOfRawData) const;
 
       // Get address of index
       DWORD_PTR GetAddressOfIndex() const;
 
+      // Set address of index
+      void SetAddressOfIndex(DWORD_PTR AddressOfIndex) const;
+
       // Get address of callbacks
       DWORD_PTR GetAddressOfCallBacks() const;
+
+      // Set address of callbacks
+      void SetAddressOfCallBacks(DWORD_PTR AddressOfCallbacks) const;
 
       // Get size of zero fill
       DWORD GetSizeOfZeroFill() const;
 
+      // Set size of zero fill
+      void SetSizeOfZeroFill(DWORD SizeOfZeroFill) const;
+
       // Get characteristics
       DWORD GetCharacteristics() const;
 
+      // Set characteristics
+      void SetCharacteristics(DWORD Characteristics) const;
+
       // Get list of TLS callbacks
       std::vector<PIMAGE_TLS_CALLBACK> GetCallbacks() const;
+        
+      // Todo: SetCallbacks function
 
       // Get base of TLS dir
       PBYTE GetBase() const;

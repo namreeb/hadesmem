@@ -147,3 +147,6 @@
   * Add modules to support more of the PE file format.
   * Check NumberOfRvaAndSizes in NtHeaders sanity checks before attempting to 
   retrieve a data dir.
+  * Cache base pointers etc rather than retrieving it manually in every 
+  getter/setter. Slightly less 'robust', but due to the typically 'read-only' 
+  nature of the data this is the expected behaviour in all known cases anyway.
