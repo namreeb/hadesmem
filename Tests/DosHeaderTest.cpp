@@ -28,36 +28,41 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
-  // Todo: Also test FileType_Data
-  Hades::Memory::PeFile MyPeFile(MyMemory, GetModuleHandle(NULL));
+  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
+  {
+    Hades::Memory::Module const Mod = **ModIter;
+      
+    // Todo: Also test FileType_Data
+    Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
     
-  auto HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
-  
-  Hades::Memory::DosHeader MyDosHdr(MyPeFile);
-  BOOST_CHECK_EQUAL(MyDosHdr.IsMagicValid(), true);
-  MyDosHdr.EnsureMagicValid();
-  MyDosHdr.SetMagic(MyDosHdr.GetMagic());
-  MyDosHdr.SetBytesOnLastPage(MyDosHdr.GetBytesOnLastPage());
-  MyDosHdr.SetPagesInFile(MyDosHdr.GetPagesInFile());
-  MyDosHdr.SetRelocations(MyDosHdr.GetRelocations());
-  MyDosHdr.SetSizeOfHeaderInParagraphs(MyDosHdr.GetSizeOfHeaderInParagraphs());
-  MyDosHdr.SetMinExtraParagraphs(MyDosHdr.GetMinExtraParagraphs());
-  MyDosHdr.SetMaxExtraParagraphs(MyDosHdr.GetMaxExtraParagraphs());
-  MyDosHdr.SetInitialSS(MyDosHdr.GetInitialSS());
-  MyDosHdr.SetInitialSP(MyDosHdr.GetInitialSP());
-  MyDosHdr.SetChecksum(MyDosHdr.GetChecksum());
-  MyDosHdr.SetInitialIP(MyDosHdr.GetInitialIP());
-  MyDosHdr.SetInitialCS(MyDosHdr.GetInitialCS());
-  MyDosHdr.SetRelocTableFileAddr(MyDosHdr.GetRelocTableFileAddr());
-  MyDosHdr.SetOverlayNum(MyDosHdr.GetOverlayNum());
-  MyDosHdr.SetReservedWords1(MyDosHdr.GetReservedWords1());
-  MyDosHdr.SetOEMID(MyDosHdr.GetOEMID());
-  MyDosHdr.SetOEMInfo(MyDosHdr.GetOEMInfo());
-  MyDosHdr.SetReservedWords2(MyDosHdr.GetReservedWords2());
-  MyDosHdr.SetNewHeaderOffset(MyDosHdr.GetNewHeaderOffset());
+    auto HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
     
-  auto HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
-  
-  BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
-    IMAGE_DOS_HEADER)), 0);
+    Hades::Memory::DosHeader MyDosHdr(MyPeFile);
+    BOOST_CHECK_EQUAL(MyDosHdr.IsMagicValid(), true);
+    MyDosHdr.EnsureMagicValid();
+    MyDosHdr.SetMagic(MyDosHdr.GetMagic());
+    MyDosHdr.SetBytesOnLastPage(MyDosHdr.GetBytesOnLastPage());
+    MyDosHdr.SetPagesInFile(MyDosHdr.GetPagesInFile());
+    MyDosHdr.SetRelocations(MyDosHdr.GetRelocations());
+    MyDosHdr.SetSizeOfHeaderInParagraphs(MyDosHdr.GetSizeOfHeaderInParagraphs());
+    MyDosHdr.SetMinExtraParagraphs(MyDosHdr.GetMinExtraParagraphs());
+    MyDosHdr.SetMaxExtraParagraphs(MyDosHdr.GetMaxExtraParagraphs());
+    MyDosHdr.SetInitialSS(MyDosHdr.GetInitialSS());
+    MyDosHdr.SetInitialSP(MyDosHdr.GetInitialSP());
+    MyDosHdr.SetChecksum(MyDosHdr.GetChecksum());
+    MyDosHdr.SetInitialIP(MyDosHdr.GetInitialIP());
+    MyDosHdr.SetInitialCS(MyDosHdr.GetInitialCS());
+    MyDosHdr.SetRelocTableFileAddr(MyDosHdr.GetRelocTableFileAddr());
+    MyDosHdr.SetOverlayNum(MyDosHdr.GetOverlayNum());
+    MyDosHdr.SetReservedWords1(MyDosHdr.GetReservedWords1());
+    MyDosHdr.SetOEMID(MyDosHdr.GetOEMID());
+    MyDosHdr.SetOEMInfo(MyDosHdr.GetOEMInfo());
+    MyDosHdr.SetReservedWords2(MyDosHdr.GetReservedWords2());
+    MyDosHdr.SetNewHeaderOffset(MyDosHdr.GetNewHeaderOffset());
+      
+    auto HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
+    
+    BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
+      IMAGE_DOS_HEADER)), 0);
+  }
 }

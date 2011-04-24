@@ -16,6 +16,7 @@ test-suite Memory
   :
     [ run DisassemblerTest.cpp ]
     [ run DosHeaderTest.cpp ]
+    [ run ExportDirTest.cpp ]
     [ run FindPatternTest.cpp ]
     [ run InjectorTest.cpp ]
     [ run MemoryMgrTest.cpp ]
