@@ -68,11 +68,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       BOOST_CHECK_EQUAL(std::memcmp(&ImpDirRaw, &ImpDirRawNew, sizeof(
         IMAGE_IMPORT_DESCRIPTOR)), 0);
         
-      for (Hades::Memory::ImportThunkIter j(MyPeFile, Test.GetFirstThunk()); 
+      for (Hades::Memory::ImportThunkIter j(MyPeFile, Test.GetCharacteristics()); 
         *j; ++j)
       {
         Hades::Memory::ImportThunk CurrentNew = **j;
-        Hades::Memory::ImportThunk TestNew(MyPeFile, Current.GetBase());
+        Hades::Memory::ImportThunk TestNew(MyPeFile, CurrentNew.GetBase());
         
         auto ImpThunkRaw = MyMemory.Read<IMAGE_THUNK_DATA>(TestNew.GetBase());
         
