@@ -1,3 +1,8 @@
+path-constant TOP 
+  : 
+    .
+  ;
+
 use-project /boost 
   : 
     Src/Dependencies/Boost 
@@ -92,29 +97,12 @@ rule Install-Rule ( properties * )
 install Bin 
   : 
     Src/Memory 
-    Misc/DbgHelp/IA32/dbghelp.dll 
-    Misc/DbgHelp/IA32/symsrv.dll 
   : 
     <conditional>@Install-Rule 
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
     <install-type>PYTHON_EXTENSION 
-    <address-model>32 
-  ;
-
-install Bin 
-  : 
-    Src/Memory 
-    Misc/DbgHelp/AMD64/dbghelp.dll 
-    Misc/DbgHelp/AMD64/symsrv.dll 
-  : 
-    <conditional>@Install-Rule 
-    <install-dependencies>on 
-    <install-type>SHARED_LIB 
-    <install-type>EXE 
-    <install-type>PYTHON_EXTENSION 
-    <address-model>64 
   ;
 
 if --build-scripting in [ modules.peek : ARGV ]

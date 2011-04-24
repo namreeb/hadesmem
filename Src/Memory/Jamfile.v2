@@ -42,6 +42,34 @@ lib imagehlp
     <name>imagehlp 
   ;
 
+lib dbghelpbin
+  : 
+  : 
+    <file>$(TOP)/Misc/DbgHelp/IA32/dbghelp.dll 
+    <address-model>32 
+  ;
+
+lib dbghelpbin
+  : 
+  : 
+    <file>$(TOP)/Misc/DbgHelp/AMD64/dbghelp.dll 
+    <address-model>64 
+  ;
+
+lib symsrvbin
+  : 
+  : 
+    <file>$(TOP)/Misc/DbgHelp/IA32/symsrv.dll 
+    <address-model>32 
+  ;
+
+lib symsrvbin
+  : 
+  : 
+    <file>$(TOP)/Misc/DbgHelp/AMD64/symsrv.dll 
+    <address-model>64 
+  ;
+
 lib Memory 
   : 
     [ glob Memory/*.cpp ] 
@@ -49,6 +77,8 @@ lib Memory
     /Dependencies//AsmJit 
     /Dependencies//BeaEngine 
     /Dependencies//RapidXML 
+    dbghelpbin 
+    symsrvbin 
     user32 
     advapi32 
     dbghelp 
