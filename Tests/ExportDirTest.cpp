@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       MyExportDir.GetBase());
       
     BOOST_CHECK_EQUAL(std::memcmp(&ExpDirRaw, &ExpDirRawNew, sizeof(
-      IMAGE_SECTION_HEADER)), 0);
+      IMAGE_EXPORT_DIRECTORY)), 0);
       
     boost::optional<Hades::Memory::Export> TestEnum(*Hades::Memory::
       ExportIter(MyPeFile));
