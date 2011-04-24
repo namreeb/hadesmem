@@ -72,6 +72,9 @@
 * Tests
   * In tests such as PeLib etc ensure at least one module is processed per 
   test, in case the validity check function is the one with a regression.
+  * Extra sanity checks to ensure not only that the functions return 
+  without exception, but also that the returned data is valid. e.g. GetName in 
+  ImpThunk etc.
 
 * Process
   * Constructors that take window/process name should throw if multiple 
