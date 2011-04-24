@@ -148,6 +148,7 @@
   * Dump results to file.
   * Change parser library from RapidXML to Boost.Spirit (may require a 
   format change from XML to something custom).
+  * Object or stream-based implementation that allows operation chaining.
 
 * PeLib
   * Finish implementing matching 'setters' for existing 'getters'.
