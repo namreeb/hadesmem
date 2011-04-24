@@ -67,20 +67,37 @@ namespace Hades
       // Get characteristics
       DWORD GetCharacteristics() const;
 
+      // Set characteristics
+      void SetCharacteristics(DWORD Characteristics) const;
+
       // Get time and date stamp
       DWORD GetTimeDateStamp() const;
+
+      // Set time and date stamp
+      void SetTimeDateStamp(DWORD TimeDateStamp) const;
 
       // Get forwarder chain
       DWORD GetForwarderChain() const;
 
+      // Set forwarder chain
+      void SetForwarderChain(DWORD ForwarderChain) const;
+
       // Get name (raw)
       DWORD GetNameRaw() const;
 
+      // Set name (raw)
+      void SetNameRaw(DWORD Name) const;
+
       // Get name
       std::string GetName() const;
+        
+      // Todo: SetName function
 
-      // Get first think
+      // Get first thunk
       DWORD GetFirstThunk() const;
+
+      // Set first thunk
+      void SetFirstThunk(DWORD FirstThunk) const;
 
     private:
       PeFile m_PeFile;
@@ -94,7 +111,7 @@ namespace Hades
     class ImportThunk
     {
     public:
-      // ImportDir error type
+      // ImportThunk error type
       class Error : public virtual HadesMemError
       { };
 
@@ -110,26 +127,42 @@ namespace Hades
       // Get address of data
       DWORD_PTR GetAddressOfData() const;
 
+      // Set address of data
+      void SetAddressOfData(DWORD_PTR AddressOfData) const;
+
       // Get ordinal (raw)
       DWORD_PTR GetOrdinalRaw() const;
+
+      // Set ordinal (raw)
+      void SetOrdinalRaw(DWORD_PTR OrdinalRaw) const;
       
       // Whether import is by ordinal
       bool ByOrdinal() const;
 
       // Get ordinal
       WORD GetOrdinal() const;
+        
+      // Todo: SetOrdinal function
 
       // Get function
       DWORD_PTR GetFunction() const;
 
+      // Set function
+      void SetFunction(DWORD_PTR Function) const;
+
       // Get hint
       WORD GetHint() const;
 
+      // Set hint
+      void SetHint(WORD Hint) const;
+
       // Get name
       std::string GetName() const;
-
-      // Set function
-      void SetFunction(DWORD_PTR Function) const;
+        
+      // Todo: SetName function
+      
+      // Get base
+      PVOID GetBase() const;
 
     private:
       PeFile m_PeFile;

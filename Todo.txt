@@ -68,6 +68,10 @@
   * IA32 and AMD64 remote code 'emulator'.
   * Custom GetModuleHandle, GetProcAddress, etc.
   * Cheat Engine 'replacement'.
+  
+* Tests
+  * In tests such as PeLib etc ensure at least one module is processed per 
+  test, in case the validity check function is the one with a regression.
 
 * Process
   * Constructors that take window/process name should throw if multiple 
@@ -150,3 +154,4 @@
   * Cache base pointers etc rather than retrieving it manually in every 
   getter/setter. Slightly less 'robust', but due to the typically 'read-only' 
   nature of the data this is the expected behaviour in all known cases anyway.
+  * Consistent API for GetBase. e.g. PVOID vs PBYTE vs T*.
