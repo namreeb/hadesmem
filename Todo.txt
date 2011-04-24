@@ -155,3 +155,4 @@
   getter/setter. Slightly less 'robust', but due to the typically 'read-only' 
   nature of the data this is the expected behaviour in all known cases anyway.
   * Consistent API for GetBase. e.g. PVOID vs PBYTE vs T*.
+  * Add bindings for new setters etc.

@@ -42,13 +42,14 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     for (Hades::Memory::ImportDirIter i(MyPeFile); *i; ++i)
     {
       Hades::Memory::ImportDir Current = **i;
-      Hades::Memory::ImportDir Test(MyPeFile, 
-        reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(Current.GetBase()));
         
-      if (!Test.IsValid())
+      if (!Current.IsValid())
       {
         continue;
       }
+      
+      Hades::Memory::ImportDir Test(MyPeFile, 
+        reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(Current.GetBase()));
       
       auto ImpDirRaw = MyMemory.Read<IMAGE_IMPORT_DESCRIPTOR>(Test.GetBase());
       
@@ -67,34 +68,35 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       BOOST_CHECK_EQUAL(std::memcmp(&ImpDirRaw, &ImpDirRawNew, sizeof(
         IMAGE_IMPORT_DESCRIPTOR)), 0);
         
-      for (Hades::Memory::ImportThunkiter i(MyPeFile, Test.GetFirstThunk()); 
-        *i; ++i)
+      for (Hades::Memory::ImportThunkIter j(MyPeFile, Test.GetFirstThunk()); 
+        *j; ++j)
       {
-        Hades::Memory::ImportThunk Current = **i;
-        Hades::Memory::ImportThunk Test(MyPeFile, Current.GetBase());
+        Hades::Memory::ImportThunk CurrentNew = **j;
+        Hades::Memory::ImportThunk TestNew(MyPeFile, Current.GetBase());
         
-        auto ImpThunkRaw = MyMemory.Read<IMAGE_THUNK_DATA>(Test.GetBase());
+        auto ImpThunkRaw = MyMemory.Read<IMAGE_THUNK_DATA>(TestNew.GetBase());
         
-        BOOST_CHECK_EQUAL(Test.IsValid(), true);
-        Test.EnsureValid();
-        Test.SetAddressOfData(Test.GetAddressOfData());
-        Test.SetOrdinalRaw(Test.GetOrdinalRaw());
-        Test.SetFunction(Test.GetFunction());
-        Test.SetHint(Test.GetHint());
-        Test.GetBase();
-        if (Test.ByOrdinal())
+        BOOST_CHECK_EQUAL(TestNew.IsValid(), true);
+        TestNew.EnsureValid();
+        TestNew.SetAddressOfData(TestNew.GetAddressOfData());
+        TestNew.SetOrdinalRaw(TestNew.GetOrdinalRaw());
+        TestNew.SetFunction(TestNew.GetFunction());
+        TestNew.SetHint(TestNew.GetHint());
+        TestNew.GetBase();
+        if (TestNew.ByOrdinal())
         {
-          Test.GetOrdinal();
+          TestNew.GetOrdinal();
         }
         else
         {
-          BOOST_CHECK(!Test.GetName().empty());
+          BOOST_CHECK(!TestNew.GetName().empty());
         }
         
-        auto ImpThunkRawNew = MyMemory.Read<IMAGE_THUNK_DATA>(Test.GetBase());
+        auto ImpThunkRawNew = MyMemory.Read<IMAGE_THUNK_DATA>(
+          TestNew.GetBase());
           
         BOOST_CHECK_EQUAL(std::memcmp(&ImpThunkRaw, &ImpThunkRawNew, sizeof(
-          IMAGE_IMPORT_DESCRIPTOR)), 0);
+          IMAGE_THUNK_DATA)), 0);
       }
     }
   }

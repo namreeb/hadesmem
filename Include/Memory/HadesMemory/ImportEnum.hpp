@@ -51,9 +51,12 @@ namespace Hades
         : m_PeFile(MyPeFile), 
         m_Current(m_PeFile)
       {
-        if (!m_Current->GetCharacteristics())
+        if (m_Current->IsValid())
         {
-          m_Current = boost::optional<ImportDir>();
+          if (!m_Current->GetCharacteristics())
+          {
+            m_Current = boost::optional<ImportDir>();
+          }
         }
       }
 
@@ -64,10 +67,17 @@ namespace Hades
       // For Boost.Iterator
       void increment() 
       {
-        auto pImpDesc = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
-          m_Current->GetBase());
-        m_Current = ImportDir(m_PeFile, ++pImpDesc);
-        if (!m_Current->GetCharacteristics())
+        if (m_Current->IsValid())
+        {
+          auto pImpDesc = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
+            m_Current->GetBase());
+          m_Current = ImportDir(m_PeFile, ++pImpDesc);
+          if (!m_Current->GetCharacteristics())
+          {
+            m_Current = boost::optional<ImportDir>();
+          }
+        }
+        else
         {
           m_Current = boost::optional<ImportDir>();
         }

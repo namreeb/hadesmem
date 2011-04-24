@@ -192,6 +192,17 @@ namespace Hades
       return GetAddressOfData() != 0;
     }
 
+    // Ensure thunk is valid
+    void ImportThunk::EnsureValid() const
+    {
+      if (!IsValid())
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("ImportThunk::EnsureValid") << 
+          ErrorString("Import thunk is invalid."));
+      }
+    }
+
     // Advance to next thunk
     void ImportThunk::Advance() const
     {

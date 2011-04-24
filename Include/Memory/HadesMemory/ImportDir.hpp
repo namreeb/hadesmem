@@ -121,6 +121,9 @@ namespace Hades
       // Whether thunk is valid
       bool IsValid() const;
 
+      // Ensure thunk is valid
+      void EnsureValid() const;
+
       // Advance to next thunk
       void Advance() const;
 
