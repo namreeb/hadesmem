@@ -81,7 +81,6 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
         TestNew.SetAddressOfData(TestNew.GetAddressOfData());
         TestNew.SetOrdinalRaw(TestNew.GetOrdinalRaw());
         TestNew.SetFunction(TestNew.GetFunction());
-        TestNew.SetHint(TestNew.GetHint());
         TestNew.GetBase();
         if (TestNew.ByOrdinal())
         {
@@ -89,6 +88,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
         }
         else
         {
+          TestNew.GetHint();
           BOOST_CHECK(!TestNew.GetName().empty());
         }
         
