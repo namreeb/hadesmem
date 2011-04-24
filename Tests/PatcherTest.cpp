@@ -39,7 +39,7 @@ DWORD HookMe_Hook()
 {
   BOOST_CHECK(pDetour1->GetTrampoline() != nullptr);
   auto pOrig = reinterpret_cast<DWORD (*)()>(pDetour1->GetTrampoline());
-  pOrig();
+  BOOST_CHECK(pOrig(), 0x1234);
   return 0x1337;
 }
 
