@@ -35,32 +35,29 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     // Todo: Also test FileType_Data
     Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
     
-    boost::optional<Hades::Memory::Section> TestEnum(*Hades::Memory::
-      SectionIter(MyPeFile));
-    BOOST_CHECK(TestEnum);
-      
-    for (Hades::Memory::SectionIter i(MyPeFile); *i; ++i)
-    {
-      Hades::Memory::Section Current = **i;
-      Hades::Memory::Section Test(MyPeFile, Current.GetNumber());
-      
-      auto HdrRaw = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
-      
-      Test.SetName(Test.GetName());
-      Test.SetVirtualAddress(Test.GetVirtualAddress());
-      Test.SetVirtualSize(Test.GetVirtualSize());
-      Test.SetSizeOfRawData(Test.GetSizeOfRawData());
-      Test.SetPointerToRawData(Test.GetPointerToRawData());
-      Test.SetPointerToRelocations(Test.GetPointerToRelocations());
-      Test.SetPointerToLinenumbers(Test.GetPointerToLinenumbers());
-      Test.SetNumberOfRelocations(Test.GetNumberOfRelocations());
-      Test.SetNumberOfLinenumbers(Test.GetNumberOfLinenumbers());
-      Test.SetCharacteristics(Test.GetCharacteristics());
+    Hades::Memory::SectionList Sections(MyPeFile);
+    std::for_each(Sections.begin(), Sections.end(), 
+      [&] (Hades::Memory::Section const& Current)
+      {
+        Hades::Memory::Section Test(MyPeFile, Current.GetNumber());
         
-      auto HdrRawNew = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
-      
-      BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
-        IMAGE_SECTION_HEADER)), 0);
-    }
+        auto HdrRaw = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
+        
+        Test.SetName(Test.GetName());
+        Test.SetVirtualAddress(Test.GetVirtualAddress());
+        Test.SetVirtualSize(Test.GetVirtualSize());
+        Test.SetSizeOfRawData(Test.GetSizeOfRawData());
+        Test.SetPointerToRawData(Test.GetPointerToRawData());
+        Test.SetPointerToRelocations(Test.GetPointerToRelocations());
+        Test.SetPointerToLinenumbers(Test.GetPointerToLinenumbers());
+        Test.SetNumberOfRelocations(Test.GetNumberOfRelocations());
+        Test.SetNumberOfLinenumbers(Test.GetNumberOfLinenumbers());
+        Test.SetCharacteristics(Test.GetCharacteristics());
+          
+        auto HdrRawNew = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
+        
+        BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
+          IMAGE_SECTION_HEADER)), 0);
+      });
   }
 }

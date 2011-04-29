@@ -37,4 +37,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Patcher.hpp"
 
 // Hades (PeLib)
-#include "PeLib.hpp"
+#include "PeFile.hpp"
+#include "TlsDir.hpp"
+#include "Section.hpp"
+#include "ImportDir.hpp"
+#include "ExportDir.hpp"
+#include "DosHeader.hpp"
+#include "ExportDir.hpp"
+#include "NtHeaders.hpp"
+#include "ImportEnum.hpp"
+#include "ExportEnum.hpp"
