@@ -48,6 +48,15 @@
   * Investigate dumping Boost.ProgramOptions as it apparently does not support 
   wide paths correctly.
   * Make iterator names consistent.
+  * Rewrite iterators to be more idiomatic and not require a double 
+  dereference. Syntax should be something like: 
+  'for (SectionIter i(MyPeFile); i != SectionIter::End; ++i)
+  Or something more idiomatic would be even better. For example:
+  'Sections MySections(MyPeFile);
+  for (Sections::iterator i = MySections.begin(); i != MySections.end(); ++i)'
+  Sections::iterator should be a stateful object which can iterate to the next 
+  section without requiring preprocessing on the part of the original Sections 
+  object.
 
 * New Modules
   * Remote Python injection (also from C++ layer).
