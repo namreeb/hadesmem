@@ -151,6 +151,7 @@
   * Object or stream-based implementation that allows operation chaining.
 
 * PeLib
+  * Overlay data support.
   * Finish implementing matching 'setters' for existing 'getters'.
   * Add modules to support more of the PE file format.
   * Check NumberOfRvaAndSizes in NtHeaders sanity checks before attempting to 
@@ -159,3 +160,13 @@
   getter/setter. Slightly less 'robust', but due to the typically 'read-only' 
   nature of the data this is the expected behaviour in all known cases anyway.
   * Consistent API for GetBase. e.g. PVOID vs PBYTE vs T*.
+  * Resource directory support.
+  * Exception directory support.
+  * Relocation directory support.
+  * Security directory support.
+  * Debug directory support.
+  * Load config directory support.
+  * Delay import directory support.
+  * Bound import directory support.
+  * IAT (as opposed to Import) directory support.
+  * CLR runtime directory support.
