@@ -61,7 +61,7 @@
 * New Modules
   * Remote Python injection (also from C++ layer).
   * Remote API hooking with Python support.
-  * Helper service to run HadesMem as 'SYSYTEM' for when manipulating certain 
+  * Helper service to run HadesMem as 'SYSTEM' for when manipulating certain 
   protected/critical processes (running in separate desktops, sessions, etc).
   * Debugging APIs.
     * Software breakpoint.
@@ -73,6 +73,9 @@
   * Thread/process information APIs.
   * Manual mapper.
     * Windows PE loader reversing.
+    * TLS support.
+    * Exception handling support.
+    * No 'external' (read: MMHelper) dependencies.
   * Python scripts for automating common tasks.
   * IA32 and AMD64 remote code 'emulator'.
   * Custom GetModuleHandle, GetProcAddress, etc.
@@ -179,3 +182,6 @@
   * Bound import directory support.
   * IAT (as opposed to Import) directory support.
   * CLR runtime directory support.
+  * Full support for writing back to PE file, including automatically 
+  performing adjustments where required to fit in new data or remove 
+  unnecessary space.
