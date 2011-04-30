@@ -19,22 +19,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// Hades (External)
-#include "Module.hpp"
-#include "Region.hpp"
-#include "Symbol.hpp"
-#include "Process.hpp"
-#include "Scanner.hpp"
-#include "Injector.hpp"
-#include "MemoryMgr.hpp"
-#include "ModuleEnum.hpp"
-#include "RegionEnum.hpp"
-#include "ProcessEnum.hpp"
-#include "FindPattern.hpp"
-#include "Disassembler.hpp"
-
-// Hades (Internal)
-#include "Patcher.hpp"
-
 // Hades (PeLib)
-#include "PeLib.hpp"
+#include "PeFile.hpp"
+#include "TlsDir.hpp"
+#include "Section.hpp"
+#include "ImportDir.hpp"
+#include "ExportDir.hpp"
+#include "DosHeader.hpp"
+#include "ExportDir.hpp"
+#include "NtHeaders.hpp"
+#include "ImportEnum.hpp"
+#include "ExportEnum.hpp"
+#include "SectionEnum.hpp"

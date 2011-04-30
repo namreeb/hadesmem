@@ -22,9 +22,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 
-// Boost
-#include <boost/optional.hpp>
-
 // Windows
 #include <Windows.h>
 
@@ -32,7 +29,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Fwd.hpp"
 #include "Error.hpp"
 #include "PeFile.hpp"
-#include "NtHeaders.hpp"
 #include "MemoryMgr.hpp"
 
 namespace Hades
@@ -129,156 +125,5 @@ namespace Hades
       // Section number
       WORD m_SectionNum;
     };
-    
-    // Section enumeration class
-    class SectionList
-    {
-    public:
-      // Section iterator
-      template <typename SectionT>
-      class SectionIter : public std::iterator<std::forward_iterator_tag, 
-        SectionT>
-      {
-      public:
-        // Section iterator error class
-        class Error : public virtual HadesMemError
-        { };
-
-        // Constructor
-        SectionIter() 
-          : m_PeFile(), 
-          m_Number(0), 
-          m_Section()
-        { }
-        
-        // Constructor
-        SectionIter(PeFile const& MyPeFile, WORD Number) 
-          : m_PeFile(MyPeFile), 
-          m_Number(Number), 
-          m_Section(Section(*m_PeFile, m_Number))
-        { }
-        
-        // Copy constructor
-        template <typename OtherT>
-        SectionIter(SectionIter<OtherT> const& Rhs) 
-          : m_PeFile(Rhs.m_PeFile), 
-          m_Number(Rhs.Number), 
-          m_Section(Rhs.m_Section)
-        { }
-        
-        // Assignment operator
-        template <typename OtherT>
-        SectionIter& operator=(SectionIter<OtherT> const& Rhs) 
-        {
-          m_PeFile = Rhs.m_PeFile;
-          m_Number = Rhs.m_Number;
-          m_Section = Rhs.m_Section;
-        }
-        
-        // Prefix increment
-        SectionIter& operator++()
-        {
-          m_Section = Section(*m_PeFile, ++m_Number);
-          return *this;
-        }
-        
-        // Postfix increment
-        SectionIter operator++(int)
-        {
-          SectionIter Temp(*this);
-          ++*this;
-          return Temp;
-        }
-        
-        // Dereference operator
-        reference operator*()
-        {
-          return *m_Section;
-        }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_Section;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const SectionIter<T>& Rhs, 
-          const SectionIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const SectionIter<T>& Rhs, 
-          const SectionIter<T>& Lhs);
-
-      private:
-        // PE file
-        boost::optional<PeFile> m_PeFile;
-        // Section number
-        WORD m_Number;
-        // Section object
-        boost::optional<Section> m_Section;
-      };
-      
-      // Section list iterator types
-      typedef SectionIter<const Section> const_iterator;
-      typedef SectionIter<Section> iterator;
-      
-      // Constructor
-      SectionList(PeFile const& MyPeFile)
-        : m_PeFile(MyPeFile), 
-        m_Number(0), 
-        m_Total(NtHeaders(MyPeFile).GetNumberOfSections())
-      { }
-      
-      // Get start of section list
-      const_iterator begin() const
-      {
-        return const_iterator(m_PeFile, m_Number);
-      }
-      
-      // Get end of section list
-      const_iterator end() const
-      {
-        return const_iterator(m_PeFile, m_Total);
-      }
-      
-      // Get start of section list
-      iterator begin()
-      {
-        return iterator(m_PeFile, m_Number);
-      }
-      
-      // Get end of section list
-      iterator end()
-      {
-        return iterator(m_PeFile, m_Total);
-      }
-      
-    private:
-      // PE file
-      PeFile m_PeFile;
-      // Section number
-      WORD m_Number;
-      // Total sections
-      WORD m_Total;
-    };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(SectionList::SectionIter<T> const& Lhs, 
-      SectionList::SectionIter<T> const& Rhs)
-    {
-      return (Lhs.m_Number == Rhs.m_Number);
-    }
-    
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(SectionList::SectionIter<T> const& Lhs, 
-      SectionList::SectionIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }

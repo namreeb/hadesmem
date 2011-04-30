@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Section.hpp"
+#include "HadesMemory/SectionEnum.hpp"
 
 class SectionWrap : public Hades::Memory::Section
 {
@@ -35,6 +36,38 @@ public:
   DWORD_PTR GetBase() const
   {
     return reinterpret_cast<DWORD_PTR>(Hades::Memory::Section::GetBase());
+  }
+};
+
+struct SectionIterWrap
+{
+  static SectionWrap next(Hades::Memory::SectionIter& o)
+  {
+    if (!*o)
+    {
+      PyErr_SetString(PyExc_StopIteration, "No more data.");
+      boost::python::throw_error_already_set();
+    }
+
+    auto MySection(*static_cast<SectionWrap*>(&**o));
+
+    ++o;
+
+    return MySection;
+  }
+
+  static boost::python::object pass_through(boost::python::object const& o) 
+  {
+    return o;
+  }
+
+  static void wrap(const char* python_name)
+  {
+    boost::python::class_<Hades::Memory::SectionIter>(python_name, 
+      boost::python::init<Hades::Memory::PeFile const&>())
+      .def("next", next)
+      .def("__iter__", pass_through)
+      ;
   }
 };
 
@@ -72,8 +105,5 @@ void ExportSection()
     .def("GetSectionHeaderRaw", &SectionWrap::GetSectionHeaderRaw)
     ;
 
-  boost::python::class_<Hades::Memory::SectionList>("SectionList", 
-    boost::python::init<Hades::Memory::PeFile const&>())
-    .def("__iter__", boost::python::iterator<Hades::Memory::SectionList>())
-    ;
+  SectionIterWrap::wrap("SectionIter"); 
 }
