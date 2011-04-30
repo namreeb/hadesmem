@@ -87,6 +87,7 @@
   * Extra sanity checks to ensure not only that the functions return 
   without exception, but also that the returned data is valid. e.g. GetName in 
   ImpThunk etc.
+  * Tests for Python bindings.
 
 * Process
   * Constructors that take window/process name should throw if multiple 
