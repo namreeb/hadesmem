@@ -57,6 +57,7 @@
   Sections::iterator should be a stateful object which can iterate to the next 
   section without requiring preprocessing on the part of the original Sections 
   object.
+  * Support building dependencies as shared libraries.
 
 * New Modules
   * Remote Python injection (also from C++ layer).
