@@ -1,6 +1,7 @@
 * General
   * Documentation via Boost.QuickBook.
   * Unit tests (Boost.Test?).
+  * Example programs.
   * Improved and documented exception-safety guarantees, incl rollback 
   support (RAII? Boost.ScopeExit?).
   * Improved and documented thread-safety guarantees.
