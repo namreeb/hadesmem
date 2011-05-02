@@ -60,7 +60,9 @@
   section without requiring preprocessing on the part of the original Sections 
   object.
   * Support building dependencies as shared libraries.
-  * Consider making Python bindings separate project
+  * Consider making Python bindings separate project.
+  * Clean up APIs returning pairs/tuples/etc to return objects with named 
+  fields and/or getters.
 
 * New Modules
   * Remote Python injection (also from C++ layer).
@@ -145,6 +147,8 @@
   * Cross-session injection.
   * IAT injection.
   * Varargs/generic export calling.
+  * Clean up APIs returning pairs/tuples/etc to return objects with named 
+  fields and/or getters.
 
 * Patcher
   * VEH hooking (Both INT3 and DR).
