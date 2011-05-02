@@ -141,6 +141,7 @@
 
 * Injector
   * .NET injection.
+    * Without DLL dependency if possible.
   * Cross-session injection.
   * IAT injection.
   * Varargs/generic export calling.
