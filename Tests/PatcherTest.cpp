@@ -22,9 +22,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
 #pragma warning(pop)
 
-#include <algorithm>
-
-#include "HadesMemory/Memory.hpp"
+#include "HadesMemory/Patcher.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 DWORD HookMe()
 {

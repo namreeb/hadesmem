@@ -24,7 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-#include "HadesMemory/Memory.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 DWORD_PTR TestCall(PVOID a, PVOID b, PVOID c, PVOID d)
 {

@@ -22,7 +22,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
 #pragma warning(pop)
 
-#include "HadesMemory/Memory.hpp"
+#include "HadesMemory/Region.hpp"
+#include "HadesMemory/RegionEnum.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 // Todo: Proper checks/tests
 

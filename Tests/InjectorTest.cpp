@@ -22,9 +22,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
 #pragma warning(pop)
 
-#include <algorithm>
-
-#include "HadesMemory/Memory.hpp"
+#include "HadesMemory/Injector.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
