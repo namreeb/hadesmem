@@ -60,6 +60,7 @@
   section without requiring preprocessing on the part of the original Sections 
   object.
   * Support building dependencies as shared libraries.
+  * Consider making Python bindings separate project
 
 * New Modules
   * Remote Python injection (also from C++ layer).
@@ -91,8 +92,7 @@
   without exception, but also that the returned data is valid. e.g. GetName in 
   ImpThunk etc.
   * Tests for Python bindings.
-  * Only use required headers rather than catch-all header. (To help find 
-  missed dependencies.)
+  * Cleanup.
 
 * Process
   * Constructors that take window/process name should throw if multiple 
@@ -193,3 +193,4 @@
   * Full support for writing back to PE file, including automatically 
   performing adjustments where required to fit in new data or remove 
   unnecessary space.
+  * Move to sub-folder to avoid header clashes etc.
