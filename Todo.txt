@@ -91,6 +91,8 @@
   without exception, but also that the returned data is valid. e.g. GetName in 
   ImpThunk etc.
   * Tests for Python bindings.
+  * Only use required headers rather than catch-all header. (To help find 
+  missed dependencies.)
 
 * Process
   * Constructors that take window/process name should throw if multiple 
