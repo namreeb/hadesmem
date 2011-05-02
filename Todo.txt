@@ -19,6 +19,7 @@
   * Extra debug output when building such as Boost version, MSVC version, etc.
   * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
   requirements.
+  * Assertions where appropriate.
   * Investigate C++/CLI support.
   * DLL build option.
   * Fix VS build to not require any 'manual' work (copy to clean dir once 
@@ -95,6 +96,7 @@
   * Constructors that take window/process name should throw if multiple 
   processes match the criteria. In this case, the PID constructor should be 
   used.
+  * Fix process enumeration code to allow x64 -> x86 enumeration.
 
 * MemoryMgr
   * Clean up memory reading/writing API to reduce use of TMP in public 
