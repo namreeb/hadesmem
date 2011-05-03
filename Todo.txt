@@ -1,7 +1,15 @@
 * General
   * Documentation via Boost.QuickBook.
+    * Write full source docs simultaneously.
+    * Write threading docs simultaneously.
+    * Write exception guarantee docs simultaneously.
   * Unit tests (Boost.Test?).
+    * Cleanup and docs.
+    * Extend and improve.
   * Example programs.
+    * All components.
+    * C++ (not Python).
+    * Documented.
   * Improved and documented exception-safety guarantees, incl rollback 
   support (RAII? Boost.ScopeExit?).
   * Improved and documented thread-safety guarantees.
@@ -50,19 +58,24 @@
   * Investigate dumping Boost.ProgramOptions as it apparently does not support 
   wide paths correctly.
   * Make iterator names consistent.
-  * Rewrite iterators to be more idiomatic and not require a double 
-  dereference. Syntax should be something like: 
-  'for (SectionIter i(MyPeFile); i != SectionIter::End; ++i)
-  Or something more idiomatic would be even better. For example:
-  'Sections MySections(MyPeFile);
-  for (Sections::iterator i = MySections.begin(); i != MySections.end(); ++i)'
-  Sections::iterator should be a stateful object which can iterate to the next 
-  section without requiring preprocessing on the part of the original Sections 
-  object.
+  * Rewrite iterators to be STL compatible.
+    * Investigate use of Boost.Iterators, use STL base impl otherwise.
   * Support building dependencies as shared libraries.
   * Consider making Python bindings separate project.
   * Clean up APIs returning pairs/tuples/etc to return objects with named 
   fields and/or getters.
+  * STL compatible function objects. (e.g. MemoryMgr::Read<T> should return 
+  a functor for use in algorithms such as generate_n)
+    * Consider using Boost.Phoenix to provide lazy expression evaluation and 
+    allow richer functionality. (e.g. MemoryMgr::Read<T>(Addr++) where the 
+    expression 'Addr++' is evaluated on every call, and state is maintained 
+    across calls, or something to that effect. Needs more investigation.)
+  * Reduce compile time.
+    * Reduce include dependencies.
+    * Pointer-to-impl idiom.
+    * Forward declarations where possible. (Boost? STL?)
+    * PCH support when using Boost.Build.
+  * Prioritize todo list.
 
 * New Modules
   * Remote Python injection (also from C++ layer).
