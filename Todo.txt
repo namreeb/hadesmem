@@ -82,7 +82,7 @@
   * Prioritize todo list.
   * Port todo list to Google Code issue tracker.
   * Memory/handle leak testing.
-  * Unit tests and exampels should pass app verifier.
+  * Unit tests and examples should pass app verifier.
   * Maintain a changelog.
   * Branch before beginning on the next round of sweeping breaking changes.
   
