@@ -70,6 +70,10 @@
     allow richer functionality. (e.g. MemoryMgr::Read<T>(Addr++) where the 
     expression 'Addr++' is evaluated on every call, and state is maintained 
     across calls, or something to that effect. Needs more investigation.)
+    * Should probably be implemented as separate API, to avoid problems caused 
+    by implicit conversions and type deduction. (e.g. auto will not behave as 
+    expected, function template type deduction will not behave as expected, 
+    nor will some other minor things.)
   * Reduce compile time.
     * Reduce include dependencies.
     * Pointer-to-impl idiom.
