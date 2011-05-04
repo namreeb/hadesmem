@@ -160,7 +160,7 @@ namespace Hades
         SectionIter(PeFile const& MyPeFile) 
           : m_PeFile(MyPeFile), 
           m_Number(0), 
-          m_Section(Section(*m_PeFile))
+          m_Section(Section(*m_PeFile, m_Number))
         { }
         
         // Copy constructor
