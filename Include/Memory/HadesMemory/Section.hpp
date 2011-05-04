@@ -183,11 +183,11 @@ namespace Hades
         // Prefix increment
         SectionIter& operator++()
         {
-          if (++m_Number >= NtHeaders(*MyPeFile).GetNumberOfSections())
+          if (++m_Number >= NtHeaders(*m_PeFile).GetNumberOfSections())
           {
-            m_Section = boost::optional<Section>();
             m_PeFile = boost::optional<PeFile>();
             m_Number = static_cast<WORD>(-1);
+            m_Section = boost::optional<Section>();
           }
           else
           {
