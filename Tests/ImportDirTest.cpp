@@ -25,7 +25,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/ImportDir.hpp"
 #include "HadesMemory/ImportEnum.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 #include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
@@ -33,76 +32,76 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
-  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
-  {
-    Hades::Memory::Module const Mod = **ModIter;
-      
-    // Todo: Also test FileType_Data
-    Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
-      
-    boost::optional<Hades::Memory::ImportDir> TestEnum(*Hades::Memory::
-      ImportDirIter(MyPeFile));
-    BOOST_CHECK(TestEnum);
-      
-    for (Hades::Memory::ImportDirIter i(MyPeFile); *i; ++i)
+  Hades::Memory::ModuleList Modules(MyMemory);
+  std::for_each(Modules.begin(), Modules.end(), 
+    [&] (Hades::Memory::Module const& Mod) 
     {
-      Hades::Memory::ImportDir Current = **i;
+      // Todo: Also test FileType_Data
+      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
         
-      if (!Current.IsValid())
+      boost::optional<Hades::Memory::ImportDir> TestEnum(*Hades::Memory::
+        ImportDirIter(MyPeFile));
+      BOOST_CHECK(TestEnum);
+        
+      for (Hades::Memory::ImportDirIter i(MyPeFile); *i; ++i)
       {
-        continue;
-      }
-      
-      Hades::Memory::ImportDir Test(MyPeFile, 
-        reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(Current.GetBase()));
-      
-      auto ImpDirRaw = MyMemory.Read<IMAGE_IMPORT_DESCRIPTOR>(Test.GetBase());
-      
-      BOOST_CHECK_EQUAL(Test.IsValid(), true);
-      Test.EnsureValid();
-      Test.SetCharacteristics(Test.GetCharacteristics());
-      Test.SetTimeDateStamp(Test.GetTimeDateStamp());
-      Test.SetForwarderChain(Test.GetForwarderChain());
-      Test.SetNameRaw(Test.GetNameRaw());
-      Test.SetFirstThunk(Test.GetFirstThunk());
-      BOOST_CHECK(!Test.GetName().empty());
-      
-      auto ImpDirRawNew = MyMemory.Read<IMAGE_IMPORT_DESCRIPTOR>(
-        Test.GetBase());
-        
-      BOOST_CHECK_EQUAL(std::memcmp(&ImpDirRaw, &ImpDirRawNew, sizeof(
-        IMAGE_IMPORT_DESCRIPTOR)), 0);
-        
-      for (Hades::Memory::ImportThunkIter j(MyPeFile, Test.GetCharacteristics()); 
-        *j; ++j)
-      {
-        Hades::Memory::ImportThunk CurrentNew = **j;
-        Hades::Memory::ImportThunk TestNew(MyPeFile, CurrentNew.GetBase());
-        
-        auto ImpThunkRaw = MyMemory.Read<IMAGE_THUNK_DATA>(TestNew.GetBase());
-        
-        BOOST_CHECK_EQUAL(TestNew.IsValid(), true);
-        TestNew.EnsureValid();
-        TestNew.SetAddressOfData(TestNew.GetAddressOfData());
-        TestNew.SetOrdinalRaw(TestNew.GetOrdinalRaw());
-        TestNew.SetFunction(TestNew.GetFunction());
-        TestNew.GetBase();
-        if (TestNew.ByOrdinal())
-        {
-          TestNew.GetOrdinal();
-        }
-        else
-        {
-          TestNew.GetHint();
-          BOOST_CHECK(!TestNew.GetName().empty());
-        }
-        
-        auto ImpThunkRawNew = MyMemory.Read<IMAGE_THUNK_DATA>(
-          TestNew.GetBase());
+        Hades::Memory::ImportDir Current = **i;
           
-        BOOST_CHECK_EQUAL(std::memcmp(&ImpThunkRaw, &ImpThunkRawNew, sizeof(
-          IMAGE_THUNK_DATA)), 0);
+        if (!Current.IsValid())
+        {
+          continue;
+        }
+        
+        Hades::Memory::ImportDir Test(MyPeFile, 
+          reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(Current.GetBase()));
+        
+        auto ImpDirRaw = MyMemory.Read<IMAGE_IMPORT_DESCRIPTOR>(Test.GetBase());
+        
+        BOOST_CHECK_EQUAL(Test.IsValid(), true);
+        Test.EnsureValid();
+        Test.SetCharacteristics(Test.GetCharacteristics());
+        Test.SetTimeDateStamp(Test.GetTimeDateStamp());
+        Test.SetForwarderChain(Test.GetForwarderChain());
+        Test.SetNameRaw(Test.GetNameRaw());
+        Test.SetFirstThunk(Test.GetFirstThunk());
+        BOOST_CHECK(!Test.GetName().empty());
+        
+        auto ImpDirRawNew = MyMemory.Read<IMAGE_IMPORT_DESCRIPTOR>(
+          Test.GetBase());
+          
+        BOOST_CHECK_EQUAL(std::memcmp(&ImpDirRaw, &ImpDirRawNew, sizeof(
+          IMAGE_IMPORT_DESCRIPTOR)), 0);
+          
+        for (Hades::Memory::ImportThunkIter j(MyPeFile, Test.GetCharacteristics()); 
+          *j; ++j)
+        {
+          Hades::Memory::ImportThunk CurrentNew = **j;
+          Hades::Memory::ImportThunk TestNew(MyPeFile, CurrentNew.GetBase());
+          
+          auto ImpThunkRaw = MyMemory.Read<IMAGE_THUNK_DATA>(TestNew.GetBase());
+          
+          BOOST_CHECK_EQUAL(TestNew.IsValid(), true);
+          TestNew.EnsureValid();
+          TestNew.SetAddressOfData(TestNew.GetAddressOfData());
+          TestNew.SetOrdinalRaw(TestNew.GetOrdinalRaw());
+          TestNew.SetFunction(TestNew.GetFunction());
+          TestNew.GetBase();
+          if (TestNew.ByOrdinal())
+          {
+            TestNew.GetOrdinal();
+          }
+          else
+          {
+            TestNew.GetHint();
+            BOOST_CHECK(!TestNew.GetName().empty());
+          }
+          
+          auto ImpThunkRawNew = MyMemory.Read<IMAGE_THUNK_DATA>(
+            TestNew.GetBase());
+            
+          BOOST_CHECK_EQUAL(std::memcmp(&ImpThunkRaw, &ImpThunkRawNew, sizeof(
+            IMAGE_THUNK_DATA)), 0);
+        }
       }
-    }
-  }
+    });
 }

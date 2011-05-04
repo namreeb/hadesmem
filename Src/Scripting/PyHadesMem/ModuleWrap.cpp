@@ -24,7 +24,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 
 class ModuleWrap : public Hades::Memory::Module
 {
@@ -49,38 +48,6 @@ public:
   }
 };
 
-struct ModuleIterWrap
-{
-  static ModuleWrap next(Hades::Memory::ModuleIter& o)
-  {
-    if (!*o)
-    {
-      PyErr_SetString(PyExc_StopIteration, "No more data.");
-      boost::python::throw_error_already_set();
-    }
-
-    auto MyModuleWrap(*static_cast<ModuleWrap*>(&**o));
-
-    ++o;
-
-    return MyModuleWrap;
-  }
-
-  static boost::python::object pass_through(boost::python::object const& o) 
-  {
-    return o;
-  }
-
-  static void wrap(const char* python_name)
-  {
-    boost::python::class_<Hades::Memory::ModuleIter, boost::noncopyable>(
-      python_name, boost::python::init<Hades::Memory::MemoryMgr const&>())
-      .def("next", next)
-      .def("__iter__", pass_through)
-      ;
-  }
-};
-
 // Export Module API
 void ExportModule()
 {
@@ -99,5 +66,8 @@ void ExportModule()
     .def("GetPath", &ModuleWrap::GetPath)
     ;
 
-  ModuleIterWrap::wrap("ModuleIter"); 
+  boost::python::class_<Hades::Memory::ModuleList, boost::noncopyable>(
+    "ModuleList", boost::python::init<Hades::Memory::MemoryMgr const&>())
+    .def("__iter__", boost::python::iterator<Hades::Memory::ModuleList>())
+    ;
 }

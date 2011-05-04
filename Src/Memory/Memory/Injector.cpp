@@ -32,7 +32,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Module.hpp"
 #include "Injector.hpp"
 #include "MemoryMgr.hpp"
-#include "ModuleEnum.hpp"
 #include "HadesCommon/Filesystem.hpp"
 #include "HadesCommon/EnsureCleanup.hpp"
 
@@ -240,28 +239,31 @@ namespace Hades
       }
 
       // Look for target module
-      boost::optional<Module> MyModule;
-      for (ModuleIter MyIter(m_Memory); *MyIter; ++MyIter)
-      {
-        if (PathResolution)
+      ModuleList Modules(m_Memory);
+      auto ModIter = std::find_if(Modules.begin(), Modules.end(), 
+        [&] (Module const& M) -> bool
         {
-          if (boost::filesystem::equivalent((*MyIter)->GetPath(), PathReal))
+          if (PathResolution)
           {
-            MyModule = *MyIter;
+            if (boost::filesystem::equivalent(M.GetPath(), PathReal))
+            {
+              return true;
+            }
           }
-        }
-        else
-        {
-          if (boost::to_lower_copy((*MyIter)->GetName()) == PathString || 
-            boost::filesystem::equivalent((*MyIter)->GetPath(), PathString))
+          else
           {
-            MyModule = *MyIter;
+            if (boost::to_lower_copy(M.GetName()) == PathString || 
+              boost::filesystem::equivalent(M.GetPath(), PathString))
+            {
+              return true;
+            }
           }
-        }
-      }
-
+          
+          return false;
+        });
+      
       // Ensure target module was found
-      if (!MyModule)
+      if (ModIter == Modules.end())
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
@@ -269,7 +271,7 @@ namespace Hades
       }
 
       // Return module base
-      return MyModule->GetBase();
+      return ModIter->GetBase();
     }
 
     // Call export

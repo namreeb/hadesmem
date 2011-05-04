@@ -25,81 +25,80 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/ExportDir.hpp"
 #include "HadesMemory/ExportEnum.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 #include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
-    
-  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
-  {
-    Hades::Memory::Module const Mod = **ModIter;
-      
-    // Todo: Also test FileType_Data
-    Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
-      
-    Hades::Memory::ExportDir MyExportDir(MyPeFile);
-    if (!MyExportDir.IsValid())
+  
+  Hades::Memory::ModuleList Modules(MyMemory);
+  std::for_each(Modules.begin(), Modules.end(), 
+    [&] (Hades::Memory::Module const& Mod) 
     {
-      continue;
-    }
-    
-    auto ExpDirRaw = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
-      MyExportDir.GetBase());
-    
-    BOOST_CHECK_EQUAL(MyExportDir.IsValid(), true);
-    MyExportDir.EnsureValid();
-    MyExportDir.SetCharacteristics(MyExportDir.GetCharacteristics());
-    MyExportDir.SetTimeDateStamp(MyExportDir.GetTimeDateStamp());
-    MyExportDir.SetMajorVersion(MyExportDir.GetMajorVersion());
-    MyExportDir.SetMinorVersion(MyExportDir.GetMinorVersion());
-    MyExportDir.SetOrdinalBase(MyExportDir.GetOrdinalBase());
-    MyExportDir.SetNumberOfFunctions(MyExportDir.GetNumberOfFunctions());
-    MyExportDir.SetNumberOfNames(MyExportDir.GetNumberOfNames());
-    MyExportDir.SetAddressOfFunctions(MyExportDir.GetAddressOfFunctions());
-    MyExportDir.SetAddressOfNames(MyExportDir.GetAddressOfNames());
-    MyExportDir.SetAddressOfNameOrdinals(MyExportDir.GetAddressOfNameOrdinals());
-    MyExportDir.SetCharacteristics(MyExportDir.GetCharacteristics());
-    BOOST_CHECK(!MyExportDir.GetName().empty());
-    MyExportDir.GetExportDirRaw();
-    
-    auto ExpDirRawNew = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
-      MyExportDir.GetBase());
-      
-    BOOST_CHECK_EQUAL(std::memcmp(&ExpDirRaw, &ExpDirRawNew, sizeof(
-      IMAGE_EXPORT_DIRECTORY)), 0);
-      
-    boost::optional<Hades::Memory::Export> TestEnum(*Hades::Memory::
-      ExportIter(MyPeFile));
-    BOOST_CHECK(TestEnum);
-      
-    for (Hades::Memory::ExportIter i(MyPeFile); *i; ++i)
-    {
-      Hades::Memory::Export const Current = **i;
-      Hades::Memory::Export const Test(MyPeFile, Current.GetOrdinal());
+      // Todo: Also test FileType_Data
+      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
         
-      if (Test.ByName())
+      Hades::Memory::ExportDir MyExportDir(MyPeFile);
+      if (!MyExportDir.IsValid())
       {
-        BOOST_CHECK(!Test.GetName().empty());
-      }
-      else
-      {
-        BOOST_CHECK(Test.GetOrdinal() >= MyExportDir.GetOrdinalBase());
+        return;
       }
       
-      if (Test.Forwarded())
+      auto ExpDirRaw = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
+        MyExportDir.GetBase());
+      
+      BOOST_CHECK_EQUAL(MyExportDir.IsValid(), true);
+      MyExportDir.EnsureValid();
+      MyExportDir.SetCharacteristics(MyExportDir.GetCharacteristics());
+      MyExportDir.SetTimeDateStamp(MyExportDir.GetTimeDateStamp());
+      MyExportDir.SetMajorVersion(MyExportDir.GetMajorVersion());
+      MyExportDir.SetMinorVersion(MyExportDir.GetMinorVersion());
+      MyExportDir.SetOrdinalBase(MyExportDir.GetOrdinalBase());
+      MyExportDir.SetNumberOfFunctions(MyExportDir.GetNumberOfFunctions());
+      MyExportDir.SetNumberOfNames(MyExportDir.GetNumberOfNames());
+      MyExportDir.SetAddressOfFunctions(MyExportDir.GetAddressOfFunctions());
+      MyExportDir.SetAddressOfNames(MyExportDir.GetAddressOfNames());
+      MyExportDir.SetAddressOfNameOrdinals(MyExportDir.GetAddressOfNameOrdinals());
+      MyExportDir.SetCharacteristics(MyExportDir.GetCharacteristics());
+      BOOST_CHECK(!MyExportDir.GetName().empty());
+      MyExportDir.GetExportDirRaw();
+      
+      auto ExpDirRawNew = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
+        MyExportDir.GetBase());
+        
+      BOOST_CHECK_EQUAL(std::memcmp(&ExpDirRaw, &ExpDirRawNew, sizeof(
+        IMAGE_EXPORT_DIRECTORY)), 0);
+        
+      boost::optional<Hades::Memory::Export> TestEnum(*Hades::Memory::
+        ExportIter(MyPeFile));
+      BOOST_CHECK(TestEnum);
+        
+      for (Hades::Memory::ExportIter i(MyPeFile); *i; ++i)
       {
-        BOOST_CHECK(!Test.GetForwarder().empty());
-        BOOST_CHECK(!Test.GetForwarderModule().empty());
-        BOOST_CHECK(!Test.GetForwarderFunction().empty());
+        Hades::Memory::Export const Current = **i;
+        Hades::Memory::Export const Test(MyPeFile, Current.GetOrdinal());
+          
+        if (Test.ByName())
+        {
+          BOOST_CHECK(!Test.GetName().empty());
+        }
+        else
+        {
+          BOOST_CHECK(Test.GetOrdinal() >= MyExportDir.GetOrdinalBase());
+        }
+        
+        if (Test.Forwarded())
+        {
+          BOOST_CHECK(!Test.GetForwarder().empty());
+          BOOST_CHECK(!Test.GetForwarderModule().empty());
+          BOOST_CHECK(!Test.GetForwarderFunction().empty());
+        }
+        else
+        {
+          BOOST_CHECK(Test.GetRva() != 0);
+          BOOST_CHECK(Test.GetVa() != nullptr);
+        }
       }
-      else
-      {
-        BOOST_CHECK(Test.GetRva() != 0);
-        BOOST_CHECK(Test.GetVa() != nullptr);
-      }
-    }
-  }
+    });
 }

@@ -24,7 +24,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "HadesMemory/TlsDir.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 #include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
@@ -32,36 +31,36 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
-  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
-  {
-    Hades::Memory::Module const Mod = **ModIter;
-      
-    // Todo: Also test FileType_Data
-    Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
-      
-    Hades::Memory::TlsDir MyTlsDir(MyPeFile);
-    if (!MyTlsDir.IsValid())
+  Hades::Memory::ModuleList Modules(MyMemory);
+  std::for_each(Modules.begin(), Modules.end(), 
+    [&] (Hades::Memory::Module const& Mod) 
     {
-      continue;
-    }
-    
-    auto TlsDirRaw = MyMemory.Read<IMAGE_TLS_DIRECTORY>(MyTlsDir.GetBase());
-    
-    BOOST_CHECK_EQUAL(MyTlsDir.IsValid(), true);
-    MyTlsDir.EnsureValid();
-    MyTlsDir.SetStartAddressOfRawData(MyTlsDir.GetStartAddressOfRawData());
-    MyTlsDir.SetEndAddressOfRawData(MyTlsDir.GetEndAddressOfRawData());
-    MyTlsDir.SetAddressOfIndex(MyTlsDir.GetAddressOfIndex());
-    MyTlsDir.SetAddressOfCallBacks(MyTlsDir.GetAddressOfCallBacks());
-    MyTlsDir.SetSizeOfZeroFill(MyTlsDir.GetSizeOfZeroFill());
-    MyTlsDir.SetCharacteristics(MyTlsDir.GetCharacteristics());
-    MyTlsDir.GetCallbacks();
-    MyTlsDir.GetTlsDirRaw();
-    
-    auto TlsDirRawNew = MyMemory.Read<IMAGE_TLS_DIRECTORY>(
-      MyTlsDir.GetBase());
+      // Todo: Also test FileType_Data
+      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+        
+      Hades::Memory::TlsDir MyTlsDir(MyPeFile);
+      if (!MyTlsDir.IsValid())
+      {
+        return;
+      }
       
-    BOOST_CHECK_EQUAL(std::memcmp(&TlsDirRaw, &TlsDirRawNew, sizeof(
-      IMAGE_TLS_DIRECTORY)), 0);
-  }
+      auto TlsDirRaw = MyMemory.Read<IMAGE_TLS_DIRECTORY>(MyTlsDir.GetBase());
+      
+      BOOST_CHECK_EQUAL(MyTlsDir.IsValid(), true);
+      MyTlsDir.EnsureValid();
+      MyTlsDir.SetStartAddressOfRawData(MyTlsDir.GetStartAddressOfRawData());
+      MyTlsDir.SetEndAddressOfRawData(MyTlsDir.GetEndAddressOfRawData());
+      MyTlsDir.SetAddressOfIndex(MyTlsDir.GetAddressOfIndex());
+      MyTlsDir.SetAddressOfCallBacks(MyTlsDir.GetAddressOfCallBacks());
+      MyTlsDir.SetSizeOfZeroFill(MyTlsDir.GetSizeOfZeroFill());
+      MyTlsDir.SetCharacteristics(MyTlsDir.GetCharacteristics());
+      MyTlsDir.GetCallbacks();
+      MyTlsDir.GetTlsDirRaw();
+      
+      auto TlsDirRawNew = MyMemory.Read<IMAGE_TLS_DIRECTORY>(
+        MyTlsDir.GetBase());
+        
+      BOOST_CHECK_EQUAL(std::memcmp(&TlsDirRaw, &TlsDirRawNew, sizeof(
+        IMAGE_TLS_DIRECTORY)), 0);
+    });
 }

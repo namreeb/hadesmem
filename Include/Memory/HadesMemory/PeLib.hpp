@@ -30,4 +30,3 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "NtHeaders.hpp"
 #include "ImportEnum.hpp"
 #include "ExportEnum.hpp"
-#include "SectionEnum.hpp"

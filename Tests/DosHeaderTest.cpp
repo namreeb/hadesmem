@@ -24,49 +24,48 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "HadesMemory/DosHeader.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 #include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
-    
-  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
-  {
-    Hades::Memory::Module const Mod = **ModIter;
+  
+  Hades::Memory::ModuleList Modules(MyMemory);
+  std::for_each(Modules.begin(), Modules.end(), 
+    [&] (Hades::Memory::Module const& Mod) 
+    {
+      // Todo: Also test FileType_Data
+      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
       
-    // Todo: Also test FileType_Data
-    Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
-    
-    auto HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
-    
-    Hades::Memory::DosHeader MyDosHdr(MyPeFile);
-    BOOST_CHECK_EQUAL(MyDosHdr.IsMagicValid(), true);
-    MyDosHdr.EnsureMagicValid();
-    MyDosHdr.SetMagic(MyDosHdr.GetMagic());
-    MyDosHdr.SetBytesOnLastPage(MyDosHdr.GetBytesOnLastPage());
-    MyDosHdr.SetPagesInFile(MyDosHdr.GetPagesInFile());
-    MyDosHdr.SetRelocations(MyDosHdr.GetRelocations());
-    MyDosHdr.SetSizeOfHeaderInParagraphs(MyDosHdr.GetSizeOfHeaderInParagraphs());
-    MyDosHdr.SetMinExtraParagraphs(MyDosHdr.GetMinExtraParagraphs());
-    MyDosHdr.SetMaxExtraParagraphs(MyDosHdr.GetMaxExtraParagraphs());
-    MyDosHdr.SetInitialSS(MyDosHdr.GetInitialSS());
-    MyDosHdr.SetInitialSP(MyDosHdr.GetInitialSP());
-    MyDosHdr.SetChecksum(MyDosHdr.GetChecksum());
-    MyDosHdr.SetInitialIP(MyDosHdr.GetInitialIP());
-    MyDosHdr.SetInitialCS(MyDosHdr.GetInitialCS());
-    MyDosHdr.SetRelocTableFileAddr(MyDosHdr.GetRelocTableFileAddr());
-    MyDosHdr.SetOverlayNum(MyDosHdr.GetOverlayNum());
-    MyDosHdr.SetReservedWords1(MyDosHdr.GetReservedWords1());
-    MyDosHdr.SetOEMID(MyDosHdr.GetOEMID());
-    MyDosHdr.SetOEMInfo(MyDosHdr.GetOEMInfo());
-    MyDosHdr.SetReservedWords2(MyDosHdr.GetReservedWords2());
-    MyDosHdr.SetNewHeaderOffset(MyDosHdr.GetNewHeaderOffset());
+      auto HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
       
-    auto HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
-    
-    BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
-      IMAGE_DOS_HEADER)), 0);
-  }
+      Hades::Memory::DosHeader MyDosHdr(MyPeFile);
+      BOOST_CHECK_EQUAL(MyDosHdr.IsMagicValid(), true);
+      MyDosHdr.EnsureMagicValid();
+      MyDosHdr.SetMagic(MyDosHdr.GetMagic());
+      MyDosHdr.SetBytesOnLastPage(MyDosHdr.GetBytesOnLastPage());
+      MyDosHdr.SetPagesInFile(MyDosHdr.GetPagesInFile());
+      MyDosHdr.SetRelocations(MyDosHdr.GetRelocations());
+      MyDosHdr.SetSizeOfHeaderInParagraphs(MyDosHdr.GetSizeOfHeaderInParagraphs());
+      MyDosHdr.SetMinExtraParagraphs(MyDosHdr.GetMinExtraParagraphs());
+      MyDosHdr.SetMaxExtraParagraphs(MyDosHdr.GetMaxExtraParagraphs());
+      MyDosHdr.SetInitialSS(MyDosHdr.GetInitialSS());
+      MyDosHdr.SetInitialSP(MyDosHdr.GetInitialSP());
+      MyDosHdr.SetChecksum(MyDosHdr.GetChecksum());
+      MyDosHdr.SetInitialIP(MyDosHdr.GetInitialIP());
+      MyDosHdr.SetInitialCS(MyDosHdr.GetInitialCS());
+      MyDosHdr.SetRelocTableFileAddr(MyDosHdr.GetRelocTableFileAddr());
+      MyDosHdr.SetOverlayNum(MyDosHdr.GetOverlayNum());
+      MyDosHdr.SetReservedWords1(MyDosHdr.GetReservedWords1());
+      MyDosHdr.SetOEMID(MyDosHdr.GetOEMID());
+      MyDosHdr.SetOEMInfo(MyDosHdr.GetOEMInfo());
+      MyDosHdr.SetReservedWords2(MyDosHdr.GetReservedWords2());
+      MyDosHdr.SetNewHeaderOffset(MyDosHdr.GetNewHeaderOffset());
+        
+      auto HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
+      
+      BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
+        IMAGE_DOS_HEADER)), 0);
+    });
 }

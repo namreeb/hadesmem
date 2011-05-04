@@ -23,27 +23,23 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(pop)
 
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/ModuleEnum.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
-  boost::optional<Hades::Memory::Module> TestEnum(*Hades::Memory::
-    ModuleIter(MyMemory));
-  BOOST_CHECK(TestEnum);
-   
-  for (Hades::Memory::ModuleIter ModIter(MyMemory); *ModIter; ++ModIter)
-  {
-    Hades::Memory::Module const Mod = **ModIter;
-    BOOST_CHECK(Mod.GetBase() != 0);
-    BOOST_CHECK(Mod.GetSize() != 0);
-    BOOST_CHECK(!Mod.GetName().empty());
-    BOOST_CHECK(!Mod.GetPath().empty());
-    
-    Hades::Memory::Module TestMod1(MyMemory, Mod.GetBase());
-    Hades::Memory::Module TestMod2(MyMemory, Mod.GetName());
-    Hades::Memory::Module TestMod3(MyMemory, Mod.GetPath().wstring());
-  }
+  Hades::Memory::ModuleList Modules(MyMemory);
+  std::for_each(Modules.begin(), Modules.end(), 
+    [&] (Hades::Memory::Module& M)
+    {
+      BOOST_CHECK(M.GetBase() != 0);
+      BOOST_CHECK(M.GetSize() != 0);
+      BOOST_CHECK(!M.GetName().empty());
+      BOOST_CHECK(!M.GetPath().empty());
+      
+      Hades::Memory::Module TestMod1(MyMemory, M.GetBase());
+      Hades::Memory::Module TestMod2(MyMemory, M.GetName());
+      Hades::Memory::Module TestMod3(MyMemory, M.GetPath().wstring());
+    });
 }

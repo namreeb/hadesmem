@@ -17,8 +17,8 @@
 
 ProcName = raw_input("Process name: ")
 MyMem = PyHadesMem.MemoryMgr(ProcName)
-ModIter = PyHadesMem.ModuleIter(MyMem)
-for MyMod in ModIter:
+Modules = PyHadesMem.ModuleEnum(MyMem)
+for MyMod in Modules:
   print("")
   print("Base: " + hex(MyMod.GetBase()))
   print("Size: " + hex(MyMod.GetSize()))
@@ -26,7 +26,7 @@ for MyMod in ModIter:
   print("Path: " + MyMod.GetPath())
   
   MyPeFile = PyHadesMem.PeFile(MyMem, MyMod.GetBase(), PyHadesMem.PeFile.FileType.Image)
-  SecIter = PyHadesMem.SectionIter(MyPeFile)
-  for MySection in SecIter:
+  Sections = PyHadesMem.SectionList(MyPeFile)
+  for MySection in Sections:
     print("")
     print("Name: " + MySection.GetName())

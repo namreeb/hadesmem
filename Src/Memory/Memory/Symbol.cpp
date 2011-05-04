@@ -28,7 +28,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Module.hpp"
 #include "Symbol.hpp"
-#include "ModuleEnum.hpp"
 #include "HadesCommon/I18n.hpp"
 #include "HadesCommon/Filesystem.hpp"
 
@@ -143,22 +142,18 @@ namespace Hades
     {
       // Convert module name to lowercase
       auto ModuleNameLower(boost::to_lower_copy(ModuleName));
-      
-      // Look up module in remote process
-      boost::optional<Module> MyModule;
-      for (ModuleIter i(m_Memory); *i; ++i)
-      {
-        Module& Current = **i;
-        if (boost::to_lower_copy(Current.GetName()) == ModuleNameLower || 
-          boost::filesystem::equivalent(Current.GetPath(), ModuleNameLower))
+
+      // Look for target module
+      ModuleList Modules(m_Memory);
+      auto ModIter = std::find_if(Modules.begin(), Modules.end(), 
+        [&] (Module const& M) -> bool
         {
-          MyModule = *i;
-          break;
-        }
-      }
+          return (boost::to_lower_copy(M.GetName()) == ModuleNameLower || 
+            boost::filesystem::equivalent(M.GetPath(), ModuleNameLower));
+        });
       
       // Ensure module was found
-      if (!MyModule)
+      if (ModIter == Modules.end())
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Symbols::LoadForModule") << 
@@ -190,9 +185,9 @@ namespace Hades
       // Load symbols for module
       if(!pSymLoadModuleEx(m_Memory.GetProcessHandle(), 
         nullptr, 
-        MyModule->GetName().c_str(), 
+        ModIter->GetName().c_str(), 
         nullptr, 
-        reinterpret_cast<DWORD64>(MyModule->GetBase()), 
+        reinterpret_cast<DWORD64>(ModIter->GetBase()), 
         0, 
         nullptr, 
         0))
@@ -228,7 +223,7 @@ namespace Hades
       // Get module info
       IMAGEHLP_MODULE64 ModuleInfo = { sizeof(ModuleInfo) };
       if (!pSymGetModuleInfo64(m_Memory.GetProcessHandle(), 
-        reinterpret_cast<DWORD64>(MyModule->GetBase()), 
+        reinterpret_cast<DWORD64>(ModIter->GetBase()), 
         &ModuleInfo))
       {
         std::error_code const LastError = GetLastErrorCode();
