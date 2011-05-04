@@ -85,6 +85,9 @@
   * Unit tests and examples should pass app verifier.
   * Maintain a changelog.
   * Branch before beginning on the next round of sweeping breaking changes.
+  * Make APIs more generic where possible. e.g. Instead of taking or returning 
+  a vector<T>, instead use C<T> where 'C' is a template param representing 
+  an arbitrary container.
   
 * New Modules
   * Remote Python injection (also from C++ layer).
