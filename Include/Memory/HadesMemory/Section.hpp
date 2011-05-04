@@ -152,15 +152,15 @@ namespace Hades
         // Constructor
         SectionIter() 
           : m_PeFile(), 
-          m_Number(0), 
+          m_Number(static_cast<WORD>(-1)), 
           m_Section()
         { }
         
         // Constructor
-        SectionIter(PeFile const& MyPeFile, WORD Number) 
+        SectionIter(PeFile const& MyPeFile) 
           : m_PeFile(MyPeFile), 
-          m_Number(Number), 
-          m_Section(Section(*m_PeFile, m_Number))
+          m_Number(0), 
+          m_Section(Section(*m_PeFile))
         { }
         
         // Copy constructor
@@ -183,7 +183,16 @@ namespace Hades
         // Prefix increment
         SectionIter& operator++()
         {
-          m_Section = Section(*m_PeFile, ++m_Number);
+          if (++m_Number >= NtHeaders(*MyPeFile).GetNumberOfSections())
+          {
+            m_Section = boost::optional<Section>();
+            m_PeFile = boost::optional<PeFile>();
+            m_Number = static_cast<WORD>(-1);
+          }
+          else
+          {
+            m_Section = Section(*m_PeFile, m_Number);
+          }
           return *this;
         }
         
@@ -232,30 +241,24 @@ namespace Hades
       
       // Constructor
       SectionList(PeFile const& MyPeFile)
-        : m_PeFile(MyPeFile), 
-        m_Number(0), 
-        m_Total(NtHeaders(MyPeFile).GetNumberOfSections())
+        : m_PeFile(MyPeFile)
       { }
       
       // Get start of section list
       iterator begin()
       {
-        return iterator(m_PeFile, m_Number);
+        return iterator(m_PeFile);
       }
       
       // Get end of section list
       iterator end()
       {
-        return iterator(m_PeFile, m_Total);
+        return iterator();
       }
       
     private:
       // PE file
       PeFile m_PeFile;
-      // Section number
-      WORD m_Number;
-      // Total sections
-      WORD m_Total;
     };
     
     // Equality operator

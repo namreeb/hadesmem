@@ -107,10 +107,10 @@ namespace Hades
         { }
         
         // Constructor
-        ModuleIter(ModuleList& Parent, DWORD Number) 
+        ModuleIter(ModuleList& Parent) 
           : m_Parent(&Parent), 
-          m_Number(Number), 
-          m_Current(m_Parent->GetByNum(0))
+          m_Number(0), 
+          m_Current(m_Parent->GetByNum(m_Number))
         { }
         
         // Copy constructor
@@ -195,7 +195,7 @@ namespace Hades
       // Get start of section list
       iterator begin()
       {
-        return iterator(*this, 0);
+        return iterator(*this);
       }
       
       // Get end of section list
