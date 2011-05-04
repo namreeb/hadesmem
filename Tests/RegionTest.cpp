@@ -23,7 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(pop)
 
 #include "HadesMemory/Region.hpp"
-#include "HadesMemory/RegionEnum.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 
 // Todo: Proper checks/tests
@@ -31,46 +30,42 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
-    
-  boost::optional<Hades::Memory::Region> TestEnum(*Hades::Memory::
-    RegionListIter(MyMemory));
-  BOOST_CHECK(TestEnum);
   
-  for (Hades::Memory::RegionListIter i(MyMemory); *i; ++i)
-  {
-    Hades::Memory::Region Current = **i;
-      
-    Hades::Memory::Region Test(MyMemory, Current.GetBase());
-      
-    if (Test.GetState() != MEM_FREE)
+  Hades::Memory::RegionList Regions(MyMemory);
+  std::for_each(Regions.begin(), Regions.end(), 
+    [&] (Hades::Memory::Region const& R)
     {
-      BOOST_CHECK(Test.GetBase() != nullptr);
-      BOOST_CHECK(Test.GetAllocBase() != nullptr);
-      BOOST_CHECK(Test.GetAllocProtect() != 0);
-      BOOST_CHECK(Test.GetType() != 0);
-    }
-    
-    Test.GetProtect();
+      Hades::Memory::Region Test(MyMemory, R.GetBase());
       
-    BOOST_CHECK(Test.GetSize() != 0);
-    BOOST_CHECK(Test.GetState() != 0);
-    
-    auto Path = boost::filesystem::unique_path();
-      
-    try
-    {
-      if (!MyMemory.IsGuard(Test.GetBase()) && MyMemory.CanRead(Test.GetBase()))
+      if (Test.GetState() != MEM_FREE)
       {
-        Test.Dump(Path);
+        BOOST_CHECK(Test.GetBase() != nullptr);
+        BOOST_CHECK(Test.GetAllocBase() != nullptr);
+        BOOST_CHECK(Test.GetAllocProtect() != 0);
+        BOOST_CHECK(Test.GetType() != 0);
       }
       
-      boost::filesystem::remove(Path);
-    }
-    catch (...)
-    {
-      boost::filesystem::remove(Path);
+      Test.GetProtect();
         
-      throw;
-    }
-  }
+      BOOST_CHECK(Test.GetSize() != 0);
+      BOOST_CHECK(Test.GetState() != 0);
+      
+      auto Path = boost::filesystem::unique_path();
+        
+      try
+      {
+        if (!MyMemory.IsGuard(Test.GetBase()) && MyMemory.CanRead(Test.GetBase()))
+        {
+          Test.Dump(Path);
+        }
+        
+        boost::filesystem::remove(Path);
+      }
+      catch (...)
+      {
+        boost::filesystem::remove(Path);
+          
+        throw;
+      }
+    });
 }

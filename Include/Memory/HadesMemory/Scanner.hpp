@@ -35,7 +35,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include "Region.hpp"
 #include "MemoryMgr.hpp"
-#include "RegionEnum.hpp"
 
 namespace Hades
 {
@@ -142,9 +141,10 @@ namespace Hades
 
       std::vector<BYTE> DataRaw(pDataRaw, pDataRaw + DataRawSize);
 
-      for (RegionListIter i(m_Memory); *i; ++i)
+      RegionList Regions(m_Memory);
+      for (auto i = Regions.begin(); i != Regions.end(); ++i) 
       {
-        Hades::Memory::Region const& MyRegion = **i;
+        Hades::Memory::Region MyRegion = *i;
 
         if (static_cast<PBYTE>(MyRegion.GetBase()) + MyRegion.GetSize() < 
           m_Start)
@@ -236,9 +236,10 @@ namespace Hades
 
       std::vector<PVOID> Matches;
 
-      for (RegionListIter i(m_Memory); *i; ++i)
+      RegionList Regions(m_Memory);
+      for (auto i = Regions.begin(); i != Regions.end(); ++i) 
       {
-        Hades::Memory::Region const& MyRegion = **i;
+        Hades::Memory::Region const& MyRegion = *i;
 
         if (static_cast<PBYTE>(MyRegion.GetBase()) + MyRegion.GetSize() < 
           m_Start)

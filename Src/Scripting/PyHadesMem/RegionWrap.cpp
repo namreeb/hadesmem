@@ -24,7 +24,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include "HadesMemory/Region.hpp"
-#include "HadesMemory/RegionEnum.hpp"
 
 class RegionWrap : public Hades::Memory::Region
 {
@@ -49,38 +48,6 @@ public:
   }
 };
 
-struct RegionIterWrap
-{
-  static RegionWrap next(Hades::Memory::RegionListIter& o)
-  {
-    if (!*o)
-    {
-      PyErr_SetString(PyExc_StopIteration, "No more data.");
-      boost::python::throw_error_already_set();
-    }
-
-    auto MyRegionWrap(*static_cast<RegionWrap*>(&**o));
-
-    ++o;
-
-    return MyRegionWrap;
-  }
-
-  static boost::python::object pass_through(boost::python::object const& o) 
-  {
-    return o;
-  }
-
-  static void wrap(const char* python_name)
-  {
-    boost::python::class_<Hades::Memory::RegionListIter>(python_name, 
-      boost::python::init<Hades::Memory::MemoryMgr const&>())
-      .def("next", next)
-      .def("__iter__", pass_through)
-      ;
-  }
-};
-
 // Export Region API
 void ExportRegion()
 {
@@ -101,5 +68,8 @@ void ExportRegion()
     .def("Dump", &RegionWrap::Dump)
     ;
 
-  RegionIterWrap::wrap("RegionIter"); 
+  boost::python::class_<Hades::Memory::RegionList>("RegionList", 
+    boost::python::init<Hades::Memory::MemoryMgr const&>())
+    .def("__iter__", boost::python::iterator<Hades::Memory::RegionList>())
+    ;
 }
