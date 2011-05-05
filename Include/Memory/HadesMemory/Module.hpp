@@ -81,7 +81,7 @@ namespace Hades
       boost::filesystem::path m_Path;
     };
     
-    // Section enumeration class
+    // Module enumeration class
     class ModuleList
     {
     public:
@@ -192,13 +192,13 @@ namespace Hades
         m_Cache()
       { }
       
-      // Get start of section list
+      // Get start of module list
       iterator begin()
       {
         return iterator(*this);
       }
       
-      // Get end of section list
+      // Get end of module list
       iterator end()
       {
         return iterator();
