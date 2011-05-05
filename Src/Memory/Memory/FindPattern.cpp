@@ -158,7 +158,7 @@ namespace Hades
       // Return address if found or null if not found
       return 
         (Iter != Buffer.cend()) 
-        ? (m_Start - m_Base + std::distance(Buffer.cbegin(), Iter)) 
+        ? (m_Start + std::distance(Buffer.cbegin(), Iter)) 
         : nullptr;
     }
 
