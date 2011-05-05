@@ -136,9 +136,6 @@ namespace Hades
     }
 
     // Search memory
-    // Note: Previous implementation used modified Boyer-Moore-Horspool, but 
-    // this was dropped as the C++ 'search' algorithm provided with MSVC 
-    // performs equally if not slightly better than my custom search.
     PVOID FindPattern::Find(std::vector<std::pair<BYTE, bool>> const& Data) 
       const
     {
