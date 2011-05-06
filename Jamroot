@@ -23,11 +23,6 @@ use-project /Memory
     Src/Memory 
   ; 
 
-use-project /Scripting 
-  : 
-    Src/Scripting 
-  ; 
-
 use-project /Tests 
   : 
     Tests 
@@ -53,6 +48,9 @@ project Hades
   ;
   
 build-project Src/Memory 
+  ;
+
+build-project Tests 
   ;
 
 rule Install-Rule ( properties * ) 
@@ -102,27 +100,4 @@ install Bin
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
-    <install-type>PYTHON_EXTENSION 
   ;
-
-if --build-scripting in [ modules.peek : ARGV ]
-{
-  build-project Src/Scripting 
-    ;
-    
-  install ScriptingBin 
-    : 
-      Src/Scripting 
-    : 
-      <conditional>@Install-Rule 
-      <install-type>SHARED_LIB 
-      <install-type>EXE 
-      <install-type>PYTHON_EXTENSION 
-    ;
-}
-
-if --run-tests in [ modules.peek : ARGV ]
-{
-  build-project Tests 
-    ;
-}
