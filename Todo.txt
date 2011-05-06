@@ -84,6 +84,7 @@
   * Memory/handle leak testing.
   * Unit tests and examples should pass app verifier.
   * Maintain a changelog.
+  * Investigate policy based design where appropriate.
   * Branch before beginning on the next round of sweeping breaking changes.
   * Make APIs more generic where possible. e.g. Instead of taking or returning 
   a vector<T>, instead use C<T> where 'C' is a template param representing 
@@ -198,6 +199,10 @@
   * Change parser library from RapidXML to Boost.Spirit (may require a 
   format change from XML to something custom).
   * Object or stream-based implementation that allows operation chaining.
+  * Improve constructors.
+  * Improve tests.
+  * Optional relative address support (for dumping addresses where the game 
+  has ASLR enabled).
 
 * PeLib
   * Overlay data support.
