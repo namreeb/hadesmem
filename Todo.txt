@@ -9,6 +9,8 @@
   * Example programs.
     * All components.
     * Documented.
+    * Comprehensive and targetted at providing useful utilities for remote 
+    processes out of the box.
   * Improved and documented exception-safety guarantees, incl rollback 
   support (RAII? Boost.ScopeExit?).
   * Improved and documented thread-safety guarantees.

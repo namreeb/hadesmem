@@ -18,6 +18,11 @@ use-project /Dependencies
     Src/Dependencies 
   ;
 
+use-project /Examples 
+  : 
+    Examples 
+  ; 
+
 use-project /Memory 
   : 
     Src/Memory 
@@ -51,6 +56,9 @@ build-project Src/Memory
   ;
 
 build-project Tests 
+  ;
+
+build-project Examples 
   ;
 
 rule Install-Rule ( properties * ) 
@@ -95,6 +103,7 @@ rule Install-Rule ( properties * )
 install Bin 
   : 
     Src/Memory 
+    Examples 
   : 
     <conditional>@Install-Rule 
     <install-dependencies>on 

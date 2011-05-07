@@ -1,0 +1,14 @@
+# Examples/Jamfile.v2
+
+project 
+  : 
+    requirements 
+    <warnings>all 
+    <warnings-as-errors>on 
+  ;
+
+exe ExportDump 
+  : 
+    ExportDump.cpp 
+    /Memory//Memory 
+  ;

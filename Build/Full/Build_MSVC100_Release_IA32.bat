@@ -1,3 +1,3 @@
 cd ..
 cd ..
-bjam --build-scripting --run-tests -j 4 toolset=msvc-10.0 address-model=32 release > Build\Full\Build_MSVC100_Release_IA32.txt
+bjam -j 4 toolset=msvc-10.0 address-model=32 release > Build\Full\Build_MSVC100_Release_IA32.txt

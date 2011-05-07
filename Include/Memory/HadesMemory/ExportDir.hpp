@@ -22,6 +22,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 #include <utility>
+#include <iterator>
+
+// Boost
+#include <boost/optional.hpp>
 
 // Windows
 #include <Windows.h>
@@ -198,5 +202,173 @@ namespace Hades
       // If entry is forwarded
       bool m_Forwarded;
     };
+    
+    // Export enumeration class
+    class ExportList
+    {
+    public:
+      // Export list error class
+      class Error : public virtual HadesMemError
+      { };
+        
+      // Export iterator
+      template <typename ExportT>
+      class ExportIter : public std::iterator<std::input_iterator_tag, 
+        ExportT>
+      {
+      public:
+        // Export iterator error class
+        class Error : public virtual HadesMemError
+        { };
+
+        // Constructor
+        ExportIter() 
+          : m_PeFile(), 
+          m_NumFuncs(static_cast<DWORD>(-1)), 
+          m_OrdBase(static_cast<DWORD>(-1)), 
+          m_Export()
+        { }
+        
+        // Constructor
+        ExportIter(PeFile const& MyPeFile) 
+          : m_PeFile(MyPeFile), 
+          m_NumFuncs(0), 
+          m_OrdBase(0), 
+          m_Export()
+        {
+          ExportDir const MyExportDir(*m_PeFile);
+          if (!MyExportDir.IsValid() || !MyExportDir.GetNumberOfFunctions())
+          {
+            m_PeFile = boost::optional<PeFile>();
+            m_NumFuncs = static_cast<DWORD>(-1);
+            m_OrdBase = static_cast<DWORD>(-1);
+            m_Export = boost::optional<Export>();
+          }
+          
+          m_NumFuncs = MyExportDir.GetNumberOfFunctions();
+          m_OrdBase = MyExportDir.GetOrdinalBase();
+          m_Export = Export(*m_PeFile, MyExportDir.GetOrdinalBase());
+        }
+        
+        // Copy constructor
+        template <typename OtherT>
+        ExportIter(ExportIter<OtherT> const& Rhs) 
+          : m_PeFile(Rhs.m_PeFile), 
+          m_Number(Rhs.Number), 
+          m_Export(Rhs.m_Export)
+        { }
+        
+        // Assignment operator
+        template <typename OtherT>
+        ExportIter& operator=(ExportIter<OtherT> const& Rhs) 
+        {
+          m_PeFile = Rhs.m_PeFile;
+          m_Number = Rhs.m_Number;
+          m_Export = Rhs.m_Export;
+        }
+        
+        // Prefix increment
+        ExportIter& operator++()
+        {
+          DWORD const NextOrdinal = m_Export->GetOrdinal() + 1;
+          if (NextOrdinal - m_OrdBase < m_NumFuncs)
+          {
+            m_Export = Export(*m_PeFile, NextOrdinal);
+          }
+          else
+          {
+            m_PeFile = boost::optional<PeFile>();
+            m_NumFuncs = static_cast<DWORD>(-1);
+            m_OrdBase = static_cast<DWORD>(-1);
+            m_Export = boost::optional<Export>();
+          }
+          
+          return *this;
+        }
+        
+        // Postfix increment
+        ExportIter operator++(int)
+        {
+          ExportIter Temp(*this);
+          ++*this;
+          return Temp;
+        }
+        
+        // Dereference operator
+        reference operator*()
+        {
+          return *m_Export;
+        }
+        
+        // Dereference operator
+        pointer operator->()
+        {
+          return &*m_Export;
+        }
+        
+        // Equality operator
+        template<typename T>
+        friend bool operator==(const ExportIter<T>& Rhs, 
+          const ExportIter<T>& Lhs);
+        
+        // Inequality operator
+        template<typename T>
+        friend bool operator!=(const ExportIter<T>& Rhs, 
+          const ExportIter<T>& Lhs);
+
+      private:
+        // PE file
+        boost::optional<PeFile> m_PeFile;
+        // Number of functions
+        DWORD m_NumFuncs;
+        // Ordinal base
+        DWORD m_OrdBase;
+        // Export object
+        boost::optional<Export> m_Export;
+      };
+      
+      // Export list iterator types
+      typedef ExportIter<const Export> const_iterator;
+      typedef ExportIter<Export> iterator;
+      
+      // Constructor
+      ExportList(PeFile const& MyPeFile)
+        : m_PeFile(MyPeFile)
+      { }
+      
+      // Get start of export list
+      iterator begin()
+      {
+        return iterator(m_PeFile);
+      }
+      
+      // Get end of export list
+      iterator end()
+      {
+        return iterator();
+      }
+      
+    private:
+      // PE file
+      PeFile m_PeFile;
+    };
+    
+    // Equality operator
+    template<typename T>
+    inline bool operator==(ExportList::ExportIter<T> const& Lhs, 
+      ExportList::ExportIter<T> const& Rhs)
+    {
+      return (Lhs.m_Export && Rhs.m_Export) ? 
+        (Lhs.m_Export->GetOrdinal() == Rhs.m_Export->GetOrdinal()) : 
+        (Lhs.m_NumFuncs == Rhs.m_NumFuncs);
+    }
+        
+    // Inequality operator
+    template<typename T>    
+    inline bool operator!=(ExportList::ExportIter<T> const& Lhs, 
+      ExportList::ExportIter<T> const& Rhs)
+    {
+      return !(Lhs == Rhs);
+    }
   }
 }

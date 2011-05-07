@@ -23,7 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(pop)
 
 #include "HadesMemory/ExportDir.hpp"
-#include "HadesMemory/ExportEnum.hpp"
 #include "HadesMemory/Module.hpp"
 #include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
@@ -70,35 +69,32 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       BOOST_CHECK_EQUAL(std::memcmp(&ExpDirRaw, &ExpDirRawNew, sizeof(
         IMAGE_EXPORT_DIRECTORY)), 0);
         
-      boost::optional<Hades::Memory::Export> TestEnum(*Hades::Memory::
-        ExportIter(MyPeFile));
-      BOOST_CHECK(TestEnum);
-        
-      for (Hades::Memory::ExportIter i(MyPeFile); *i; ++i)
-      {
-        Hades::Memory::Export const Current = **i;
-        Hades::Memory::Export const Test(MyPeFile, Current.GetOrdinal());
+      Hades::Memory::ExportList Exports(MyPeFile);
+      std::for_each(Exports.begin(), Exports.end(), 
+        [&] (Hades::Memory::Export& E)
+        {
+          Hades::Memory::Export const Test(MyPeFile, E.GetOrdinal());
+            
+          if (Test.ByName())
+          {
+            BOOST_CHECK(!Test.GetName().empty());
+          }
+          else
+          {
+            BOOST_CHECK(Test.GetOrdinal() >= MyExportDir.GetOrdinalBase());
+          }
           
-        if (Test.ByName())
-        {
-          BOOST_CHECK(!Test.GetName().empty());
-        }
-        else
-        {
-          BOOST_CHECK(Test.GetOrdinal() >= MyExportDir.GetOrdinalBase());
-        }
-        
-        if (Test.Forwarded())
-        {
-          BOOST_CHECK(!Test.GetForwarder().empty());
-          BOOST_CHECK(!Test.GetForwarderModule().empty());
-          BOOST_CHECK(!Test.GetForwarderFunction().empty());
-        }
-        else
-        {
-          BOOST_CHECK(Test.GetRva() != 0);
-          BOOST_CHECK(Test.GetVa() != nullptr);
-        }
-      }
+          if (Test.Forwarded())
+          {
+            BOOST_CHECK(!Test.GetForwarder().empty());
+            BOOST_CHECK(!Test.GetForwarderModule().empty());
+            BOOST_CHECK(!Test.GetForwarderFunction().empty());
+          }
+          else
+          {
+            BOOST_CHECK(Test.GetRva() != 0);
+            BOOST_CHECK(Test.GetVa() != nullptr);
+          }
+        });
     });
 }
