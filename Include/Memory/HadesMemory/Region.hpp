@@ -117,9 +117,27 @@ namespace Hades
         RegionIter(MemoryMgr const& MyMemory) 
           : m_Memory(MyMemory), 
           m_Address(nullptr), 
-          m_Region(Region(*m_Memory, m_Address)), 
-          m_RegionSize(m_Region->GetSize())
-        { }
+          m_Region(), 
+          m_RegionSize()
+        {
+          // Get region info
+          MEMORY_BASIC_INFORMATION MyMbi = { 0 };
+          if (VirtualQueryEx(m_Memory->GetProcessHandle(), m_Address, &MyMbi, 
+            sizeof(MyMbi)))
+          {
+            m_Address = MyMbi.BaseAddress;
+            m_RegionSize = MyMbi.RegionSize;
+  
+            m_Region = Region(*m_Memory, MyMbi);
+          }
+          else
+          {
+            m_Memory = boost::optional<MemoryMgr>();
+            m_Address = reinterpret_cast<PVOID>(-1);
+            m_Region = boost::optional<Region>();
+            m_RegionSize = 0;
+          }
+        }
         
         // Copy constructor
         template <typename OtherT>

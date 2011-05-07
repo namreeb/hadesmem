@@ -110,8 +110,18 @@ namespace Hades
         ModuleIter(ModuleList& Parent) 
           : m_Parent(&Parent), 
           m_Number(0), 
-          m_Current(m_Parent->GetByNum(m_Number))
-        { }
+          m_Current()
+        {
+          boost::optional<Module&> Temp = m_Parent->GetByNum(m_Number);
+          if (Temp)
+          {
+            m_Current = *Temp;
+          }
+          else
+          {
+            m_Number = static_cast<DWORD>(-1);
+          }
+        }
         
         // Copy constructor
         template <typename OtherT>

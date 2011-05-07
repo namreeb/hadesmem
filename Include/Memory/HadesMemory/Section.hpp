@@ -160,8 +160,19 @@ namespace Hades
         SectionIter(PeFile const& MyPeFile) 
           : m_PeFile(MyPeFile), 
           m_Number(0), 
-          m_Section(Section(*m_PeFile, m_Number))
-        { }
+          m_Section()
+        {
+          if (m_Number >= NtHeaders(*m_PeFile).GetNumberOfSections())
+          {
+            m_PeFile = boost::optional<PeFile>();
+            m_Number = static_cast<WORD>(-1);
+            m_Section = boost::optional<Section>();
+          }
+          else
+          {
+            m_Section = Section(*m_PeFile, m_Number);
+          }
+        }
         
         // Copy constructor
         template <typename OtherT>
