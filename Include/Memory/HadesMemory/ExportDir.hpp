@@ -226,7 +226,8 @@ namespace Hades
           : m_PeFile(), 
           m_NumFuncs(static_cast<DWORD>(-1)), 
           m_OrdBase(static_cast<DWORD>(-1)), 
-          m_Export()
+          m_Export(), 
+          m_CurNum(static_cast<DWORD>(-1))
         { }
         
         // Constructor
@@ -234,7 +235,8 @@ namespace Hades
           : m_PeFile(MyPeFile), 
           m_NumFuncs(0), 
           m_OrdBase(0), 
-          m_Export()
+          m_Export(), 
+          m_CurNum(0)
         {
           ExportDir const MyExportDir(*m_PeFile);
           if (!MyExportDir.IsValid() || !MyExportDir.GetNumberOfFunctions())
@@ -243,6 +245,7 @@ namespace Hades
             m_NumFuncs = static_cast<DWORD>(-1);
             m_OrdBase = static_cast<DWORD>(-1);
             m_Export = boost::optional<Export>();
+            m_CurNum = static_cast<DWORD>(-1);
           }
           
           m_NumFuncs = MyExportDir.GetNumberOfFunctions();
@@ -254,8 +257,10 @@ namespace Hades
         template <typename OtherT>
         ExportIter(ExportIter<OtherT> const& Rhs) 
           : m_PeFile(Rhs.m_PeFile), 
-          m_Number(Rhs.Number), 
-          m_Export(Rhs.m_Export)
+          m_NumFuncs(Rhs.m_NumFuncs), 
+          m_OrdBase(Rhs.m_OrdBase), 
+          m_Export(Rhs.m_Export), 
+          m_CurNum(Rhs.m_CurNum)
         { }
         
         // Assignment operator
@@ -263,13 +268,16 @@ namespace Hades
         ExportIter& operator=(ExportIter<OtherT> const& Rhs) 
         {
           m_PeFile = Rhs.m_PeFile;
-          m_Number = Rhs.m_Number;
+          m_NumFuncs = Rhs.m_NumFuncs;
+          m_OrdBase = Rhs.m_OrdBase;
           m_Export = Rhs.m_Export;
+          m_CurNum = Rhs.m_CurNum;
         }
         
         // Prefix increment
         ExportIter& operator++()
         {
+          ++m_CurNum;
           DWORD const NextOrdinal = m_Export->GetOrdinal() + 1;
           if (NextOrdinal - m_OrdBase < m_NumFuncs)
           {
@@ -281,6 +289,7 @@ namespace Hades
             m_NumFuncs = static_cast<DWORD>(-1);
             m_OrdBase = static_cast<DWORD>(-1);
             m_Export = boost::optional<Export>();
+            m_CurNum = static_cast<DWORD>(-1);
           }
           
           return *this;
@@ -325,6 +334,8 @@ namespace Hades
         DWORD m_OrdBase;
         // Export object
         boost::optional<Export> m_Export;
+        // Current export number
+        DWORD m_CurNum;
       };
       
       // Export list iterator types
@@ -358,9 +369,7 @@ namespace Hades
     inline bool operator==(ExportList::ExportIter<T> const& Lhs, 
       ExportList::ExportIter<T> const& Rhs)
     {
-      return (Lhs.m_Export && Rhs.m_Export) ? 
-        (Lhs.m_Export->GetOrdinal() == Rhs.m_Export->GetOrdinal()) : 
-        (Lhs.m_NumFuncs == Rhs.m_NumFuncs);
+      return (Lhs.m_CurNum == Rhs.m_CurNum);
     }
         
     // Inequality operator

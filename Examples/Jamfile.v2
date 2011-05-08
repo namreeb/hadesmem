@@ -12,3 +12,9 @@ exe ExportDump
     ExportDump.cpp 
     /Memory//Memory 
   ;
+
+exe ImportDump 
+  : 
+    ImportDump.cpp 
+    /Memory//Memory 
+  ;

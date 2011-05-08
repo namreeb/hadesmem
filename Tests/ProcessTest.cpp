@@ -23,7 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(pop)
 
 #include "HadesMemory/Process.hpp"
-#include "HadesMemory/ProcessEnum.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
@@ -34,25 +33,4 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK(MyProcess.GetID() != 0);
   BOOST_CHECK(!MyProcess.GetPath().empty());
   MyProcess.IsWoW64();
-  
-  boost::optional<Hades::Memory::Process> TestEnum(*Hades::Memory::
-    ProcessIter());
-  BOOST_CHECK(TestEnum);
-  
-  for (Hades::Memory::ProcessIter Iter; *Iter; ++Iter)
-  {
-    Hades::Memory::Process CurProc = **Iter;
-      
-    BOOST_CHECK(CurProc.GetHandle() != 0);
-    BOOST_CHECK(CurProc.GetID() != 0);
-    try
-    {
-      // Wrap this block in EH because we're not running elevated so failure 
-      // is a possibility
-      BOOST_CHECK(!CurProc.GetPath().empty());
-    }
-    catch (Hades::HadesError const& /*e*/)
-    { }
-    CurProc.IsWoW64();
-  }
 }

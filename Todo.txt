@@ -75,6 +75,8 @@
     a vector<T>, instead use C<T> where 'C' is a template param representing 
     an arbitrary container.
     * Use 'ranges' over direct containers where possible.
+  * When doing equality comparisons in iterators check that parent pointers 
+  are the same on top of any other checks.
   
 * New Modules
   * Helper service to run HadesMem as 'SYSTEM' for when manipulating certain 
