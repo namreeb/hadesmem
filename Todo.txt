@@ -78,6 +78,7 @@
     * Prioritize.
     * Port to Google Code issue tracker.
   * Maintain a changelog.
+  * Performance improvements in potential bottlenecks (e.g. iterators).
   
 * New Modules
   * Helper service to run HadesMem as 'SYSTEM' for when manipulating certain 
