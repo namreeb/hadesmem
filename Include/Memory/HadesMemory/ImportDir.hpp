@@ -126,19 +126,22 @@ namespace Hades
 
         // Constructor
         ImportDirIter() 
-          : m_PeFile(), 
+          : m_pParent(nullptr), 
+          m_PeFile(), 
           m_ImportDir(), 
           m_Num(static_cast<DWORD>(-1))
         { }
         
         // Constructor
-        ImportDirIter(PeFile const& MyPeFile) 
-          : m_PeFile(MyPeFile), 
+        ImportDirIter(ImportDirList& Parent, PeFile const& MyPeFile) 
+          : m_pParent(&Parent), 
+          m_PeFile(MyPeFile), 
           m_ImportDir(*m_PeFile), 
           m_Num(0)
         {
           if (!m_ImportDir->IsValid() || !m_ImportDir->GetCharacteristics())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_ImportDir = boost::optional<ImportDir>();
             m_Num = static_cast<DWORD>(-1);
@@ -148,7 +151,8 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         ImportDirIter(ImportDirIter<OtherT> const& Rhs) 
-          : m_PeFile(Rhs.m_PeFile), 
+          : m_pParent(Rhs.m_pParent), 
+          m_PeFile(Rhs.m_PeFile), 
           m_ImportDir(Rhs.m_ImportDir), 
           m_Num(Rhs.m_Num)
         { }
@@ -157,6 +161,7 @@ namespace Hades
         template <typename OtherT>
         ImportDirIter& operator=(ImportDirIter<OtherT> const& Rhs) 
         {
+          m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_ImportDir = Rhs.m_ImportDir;
           m_Num = Rhs.m_Num;
@@ -171,6 +176,7 @@ namespace Hades
           m_ImportDir = ImportDir(*m_PeFile, ++pImpDesc);
           if (!m_ImportDir->GetCharacteristics())
           {
+            m_pParent = nullptr;
             m_ImportDir = boost::optional<ImportDir>();
             m_PeFile = boost::optional<PeFile>();
             m_Num = static_cast<DWORD>(-1);
@@ -210,6 +216,8 @@ namespace Hades
           const ImportDirIter<T>& Lhs);
 
       private:
+        // Parent
+        class ImportDirList* m_pParent;
         // PE file
         boost::optional<PeFile> m_PeFile;
         // ImportDir object
@@ -230,7 +238,7 @@ namespace Hades
       // Get start of importdir list
       iterator begin()
       {
-        return iterator(m_PeFile);
+        return iterator(*this, m_PeFile);
       }
       
       // Get end of importdir list
@@ -249,7 +257,7 @@ namespace Hades
     inline bool operator==(ImportDirList::ImportDirIter<T> const& Lhs, 
       ImportDirList::ImportDirIter<T> const& Rhs)
     {
-      return (Lhs.m_Num == Rhs.m_Num);
+      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Num == Rhs.m_Num);
     }
         
     // Inequality operator
@@ -350,14 +358,17 @@ namespace Hades
 
         // Constructor
         ImportThunkIter() 
-          : m_PeFile(), 
+          : m_pParent(nullptr), 
+          m_PeFile(), 
           m_pThunk(nullptr), 
           m_ImportThunk()
         { }
         
         // Constructor
-        ImportThunkIter(PeFile const& MyPeFile, DWORD FirstThunk) 
-          : m_PeFile(MyPeFile), 
+        ImportThunkIter(ImportThunkList& Parent, PeFile const& MyPeFile, 
+          DWORD FirstThunk) 
+          : m_pParent(&Parent), 
+          m_PeFile(MyPeFile), 
           m_pThunk(nullptr), 
           m_ImportThunk()
         {
@@ -366,6 +377,7 @@ namespace Hades
           m_ImportThunk = ImportThunk(*m_PeFile, m_pThunk);
           if (!m_ImportThunk->IsValid())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_pThunk = nullptr;
             m_ImportThunk = boost::optional<ImportThunk>();
@@ -375,7 +387,8 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         ImportThunkIter(ImportThunkIter<OtherT> const& Rhs) 
-          : m_PeFile(Rhs.m_PeFile), 
+          : m_pParent(Rhs.m_pParent), 
+          m_PeFile(Rhs.m_PeFile), 
           m_pThunk(Rhs.m_pThunk), 
           m_ImportThunk(Rhs.m_ImportThunk)
         { }
@@ -384,6 +397,7 @@ namespace Hades
         template <typename OtherT>
         ImportThunkIter& operator=(ImportThunkIter<OtherT> const& Rhs) 
         {
+          m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_pThunk = Rhs.m_pThunk;
           m_ImportThunk = Rhs.m_ImportThunk;
@@ -395,6 +409,7 @@ namespace Hades
           m_ImportThunk = ImportThunk(*m_PeFile, ++m_pThunk);
           if (!m_ImportThunk->IsValid())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_pThunk = nullptr;
             m_ImportThunk = boost::optional<ImportThunk>();
@@ -434,6 +449,8 @@ namespace Hades
           const ImportThunkIter<T>& Lhs);
 
       private:
+        // Parent
+        class ImportThunkList* m_pParent;
         // PE file
         boost::optional<PeFile> m_PeFile;
         // Current thunk pointer
@@ -455,7 +472,7 @@ namespace Hades
       // Get start of importthunk list
       iterator begin()
       {
-        return iterator(m_PeFile, m_FirstThunk);
+        return iterator(*this, m_PeFile, m_FirstThunk);
       }
       
       // Get end of importthunk list
@@ -476,7 +493,7 @@ namespace Hades
     inline bool operator==(ImportThunkList::ImportThunkIter<T> const& Lhs, 
       ImportThunkList::ImportThunkIter<T> const& Rhs)
     {
-      return (Lhs.m_pThunk == Rhs.m_pThunk);
+      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_pThunk == Rhs.m_pThunk);
     }
         
     // Inequality operator

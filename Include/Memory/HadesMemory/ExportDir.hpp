@@ -223,7 +223,8 @@ namespace Hades
 
         // Constructor
         ExportIter() 
-          : m_PeFile(), 
+          : m_pParent(nullptr), 
+          m_PeFile(), 
           m_NumFuncs(static_cast<DWORD>(-1)), 
           m_OrdBase(static_cast<DWORD>(-1)), 
           m_Export(), 
@@ -231,8 +232,9 @@ namespace Hades
         { }
         
         // Constructor
-        ExportIter(PeFile const& MyPeFile) 
-          : m_PeFile(MyPeFile), 
+        ExportIter(ExportList& Parent, PeFile const& MyPeFile) 
+          : m_pParent(&Parent), 
+          m_PeFile(MyPeFile), 
           m_NumFuncs(0), 
           m_OrdBase(0), 
           m_Export(), 
@@ -241,6 +243,7 @@ namespace Hades
           ExportDir const MyExportDir(*m_PeFile);
           if (!MyExportDir.IsValid() || !MyExportDir.GetNumberOfFunctions())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_NumFuncs = static_cast<DWORD>(-1);
             m_OrdBase = static_cast<DWORD>(-1);
@@ -256,7 +259,8 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         ExportIter(ExportIter<OtherT> const& Rhs) 
-          : m_PeFile(Rhs.m_PeFile), 
+          : m_pParent(Rhs.m_pParent), 
+          m_PeFile(Rhs.m_PeFile), 
           m_NumFuncs(Rhs.m_NumFuncs), 
           m_OrdBase(Rhs.m_OrdBase), 
           m_Export(Rhs.m_Export), 
@@ -267,6 +271,7 @@ namespace Hades
         template <typename OtherT>
         ExportIter& operator=(ExportIter<OtherT> const& Rhs) 
         {
+          m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_NumFuncs = Rhs.m_NumFuncs;
           m_OrdBase = Rhs.m_OrdBase;
@@ -285,6 +290,7 @@ namespace Hades
           }
           else
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_NumFuncs = static_cast<DWORD>(-1);
             m_OrdBase = static_cast<DWORD>(-1);
@@ -326,6 +332,8 @@ namespace Hades
           const ExportIter<T>& Lhs);
 
       private:
+        // Parent
+        class ExportList* m_pParent;
         // PE file
         boost::optional<PeFile> m_PeFile;
         // Number of functions
@@ -350,7 +358,7 @@ namespace Hades
       // Get start of export list
       iterator begin()
       {
-        return iterator(m_PeFile);
+        return iterator(*this, m_PeFile);
       }
       
       // Get end of export list
@@ -369,7 +377,7 @@ namespace Hades
     inline bool operator==(ExportList::ExportIter<T> const& Lhs, 
       ExportList::ExportIter<T> const& Rhs)
     {
-      return (Lhs.m_CurNum == Rhs.m_CurNum);
+      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_CurNum == Rhs.m_CurNum);
     }
         
     // Inequality operator

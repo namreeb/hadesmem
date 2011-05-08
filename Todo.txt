@@ -6,56 +6,67 @@
   * Unit tests (Boost.Test?).
     * Cleanup and docs.
     * Extend and improve.
+    * Pass app verifier.
+    * Leak testing.
   * Example programs.
     * All components.
     * Documented.
     * Comprehensive and targetted at providing useful utilities for remote 
     processes out of the box.
-  * Improved and documented exception-safety guarantees, incl rollback 
-  support (RAII? Boost.ScopeExit?).
-  * Improved and documented thread-safety guarantees.
-  * Rethink and reimplement threading model.
-  * Fix all 'fixme' items in code.
-  * Const correctness.
-    * Fix API to support pointers to constant data where possible (rather than 
-    using PVOID everywhere).
-  * Proper localization and internationalization support/framework.
-  * Template concept checking and improved error messages.
-  * Binaries with update server.
-  * Automatic binary versioning using SVN revision.
-  * Automatic build bot.
-  * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
-  requirements.
-  * Assertions where appropriate.
+    * Pass app verifier.
+    * Leak testing.
+  * Improve quality of existing code.
+    * Improved and documented exception-safety guarantees, incl rollback 
+    support (RAII? Boost.ScopeExit?).
+    * Improved and documented thread-safety guarantees.
+    * Rethink and reimplement threading model.
+    * Fix all 'fixme' items in code.
+    * Const correctness.
+      * Fix API to support pointers to constant data where possible (rather 
+      than using PVOID everywhere).
+    * Proper localization and internationalization support/framework.
+      * Consider moving from UTF-16 internally to UTF-8, and only using 
+      UTF-16 at API boundaries. If implemented, all files written should be 
+      UTF-8.
+    * Template concept checking and improved error messages.
+    * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
+    requirements.
+    * Assertions where appropriate.
+    * Config header to account for differences in compilers (or compiler 
+    versions). Consider using Boost.Config.
+    * Readd GCC experimental support.
+    * Improved error reporting via exceptions.
+    * Move support where appropriate.
+  * Improved binary generation and distribution.
+    * Binaries with update server.
+    * Automatic binary versioning using SVN revision.
+    * Automatic build bot.
+    * Digital signature (for build bot, WER, etc).
   * Shared library build option.
     * Including building dependencies as shared libraries.
-  * Digital signature (for build bot, WER, etc).
+  * Improve API
+    * Clean up APIs returning pairs/tuples/etc to return objects with named 
+    fields and/or getters.
+    * STL compatible function objects. (e.g. MemoryMgr::Read<T> should return 
+    a functor for use in algorithms such as generate_n)
+      * Consider using Boost.Phoenix to provide lazy expression evaluation and 
+      allow richer functionality. (e.g. MemoryMgr::Read<T>(Addr++) where the 
+      expression 'Addr++' is evaluated on every call, and state is maintained 
+      across calls, or something to that effect. Needs more investigation.)
+      * Should probably be implemented as separate API, to avoid problems caused 
+      by implicit conversions and type deduction. (e.g. auto will not behave as 
+      expected, function template type deduction will not behave as expected, 
+      nor will some other minor things.)
+    * Add support for optional error reporing via error codes to avoid littering 
+    user code with try-catch blocks.
+    * Investigate policy based design where appropriate. (e.g. FindPattern 
+    offset style, PeFile file type, MemoryMgr 'bitness', PeFile 'bitness', etc).
+    * Make APIs more generic where possible.
+      * Instead of taking or returning 
+      a vector<T>, instead use C<T> where 'C' is a template param representing 
+      an arbitrary container.
+      * Use 'ranges' over direct containers where possible.
   * Explicit x64 -> x86 process manipulation support for all components.
-  * Readd GCC experimental support (user request via email, with user-supplied 
-  patches).
-  * Config header to account for differences in compilers (or compiler 
-  versions). Consider using Boost.Config.
-  * Improved error reporting via exceptions.
-  * Add support for optional error reporing via error codes to avoid littering 
-  user code with try-catch blocks.
-  * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 
-  API boundaries. If implemented, all files written should be UTF-8.
-  * Investigate dumping Boost.ProgramOptions as it apparently does not support 
-  wide paths correctly.
-  * Make iterator names consistent.
-  * Rewrite iterators to be STL compatible.
-  * Clean up APIs returning pairs/tuples/etc to return objects with named 
-  fields and/or getters.
-  * STL compatible function objects. (e.g. MemoryMgr::Read<T> should return 
-  a functor for use in algorithms such as generate_n)
-    * Consider using Boost.Phoenix to provide lazy expression evaluation and 
-    allow richer functionality. (e.g. MemoryMgr::Read<T>(Addr++) where the 
-    expression 'Addr++' is evaluated on every call, and state is maintained 
-    across calls, or something to that effect. Needs more investigation.)
-    * Should probably be implemented as separate API, to avoid problems caused 
-    by implicit conversions and type deduction. (e.g. auto will not behave as 
-    expected, function template type deduction will not behave as expected, 
-    nor will some other minor things.)
   * Reduce compile time.
     * Reduce include dependencies.
     * Pointer-to-impl idiom.
@@ -63,20 +74,10 @@
     * PCH support when using Boost.Build.
     * Decouple components if possible.
     * Ensure all headers are self-sufficient.
-  * Prioritize todo list.
-  * Port todo list to Google Code issue tracker.
-  * Memory/handle leak testing.
-  * Unit tests and examples should pass app verifier.
+  * Todo list
+    * Prioritize.
+    * Port to Google Code issue tracker.
   * Maintain a changelog.
-  * Investigate policy based design where appropriate.
-  * Branch before beginning on the next round of sweeping breaking changes.
-  * Make APIs more generic where possible.
-    * Instead of taking or returning 
-    a vector<T>, instead use C<T> where 'C' is a template param representing 
-    an arbitrary container.
-    * Use 'ranges' over direct containers where possible.
-  * When doing equality comparisons in iterators check that parent pointers 
-  are the same on top of any other checks.
   
 * New Modules
   * Helper service to run HadesMem as 'SYSTEM' for when manipulating certain 

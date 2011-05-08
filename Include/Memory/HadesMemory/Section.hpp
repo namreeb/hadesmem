@@ -151,19 +151,22 @@ namespace Hades
 
         // Constructor
         SectionIter() 
-          : m_PeFile(), 
+          : m_pParent(nullptr), 
+          m_PeFile(), 
           m_Number(static_cast<WORD>(-1)), 
           m_Section()
         { }
         
         // Constructor
-        SectionIter(PeFile const& MyPeFile) 
-          : m_PeFile(MyPeFile), 
+        SectionIter(SectionList& Parent, PeFile const& MyPeFile) 
+          : m_pParent(&Parent), 
+          m_PeFile(MyPeFile), 
           m_Number(0), 
           m_Section()
         {
           if (m_Number >= NtHeaders(*m_PeFile).GetNumberOfSections())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_Number = static_cast<WORD>(-1);
             m_Section = boost::optional<Section>();
@@ -177,7 +180,8 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         SectionIter(SectionIter<OtherT> const& Rhs) 
-          : m_PeFile(Rhs.m_PeFile), 
+          : m_pParent(Rhs.m_pParent), 
+          m_PeFile(Rhs.m_PeFile), 
           m_Number(Rhs.Number), 
           m_Section(Rhs.m_Section)
         { }
@@ -186,6 +190,7 @@ namespace Hades
         template <typename OtherT>
         SectionIter& operator=(SectionIter<OtherT> const& Rhs) 
         {
+          m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_Number = Rhs.m_Number;
           m_Section = Rhs.m_Section;
@@ -196,6 +201,7 @@ namespace Hades
         {
           if (++m_Number >= NtHeaders(*m_PeFile).GetNumberOfSections())
           {
+            m_pParent = nullptr;
             m_PeFile = boost::optional<PeFile>();
             m_Number = static_cast<WORD>(-1);
             m_Section = boost::optional<Section>();
@@ -204,6 +210,7 @@ namespace Hades
           {
             m_Section = Section(*m_PeFile, m_Number);
           }
+          
           return *this;
         }
         
@@ -238,6 +245,8 @@ namespace Hades
           const SectionIter<T>& Lhs);
 
       private:
+        // Parent
+        class SectionList* m_pParent;
         // PE file
         boost::optional<PeFile> m_PeFile;
         // Section number
@@ -258,7 +267,7 @@ namespace Hades
       // Get start of section list
       iterator begin()
       {
-        return iterator(m_PeFile);
+        return iterator(*this, m_PeFile);
       }
       
       // Get end of section list
@@ -277,7 +286,7 @@ namespace Hades
     inline bool operator==(SectionList::SectionIter<T> const& Lhs, 
       SectionList::SectionIter<T> const& Rhs)
     {
-      return (Lhs.m_Number == Rhs.m_Number);
+      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Number == Rhs.m_Number);
     }
         
     // Inequality operator

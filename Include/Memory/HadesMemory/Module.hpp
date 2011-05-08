@@ -101,24 +101,25 @@ namespace Hades
 
         // Constructor
         ModuleIter() : 
-          m_Parent(nullptr), 
+          m_pParent(nullptr), 
           m_Number(static_cast<DWORD>(-1)), 
           m_Current()
         { }
         
         // Constructor
         ModuleIter(ModuleList& Parent) 
-          : m_Parent(&Parent), 
+          : m_pParent(&Parent), 
           m_Number(0), 
           m_Current()
         {
-          boost::optional<Module&> Temp = m_Parent->GetByNum(m_Number);
+          boost::optional<Module&> Temp = m_pParent->GetByNum(m_Number);
           if (Temp)
           {
             m_Current = *Temp;
           }
           else
           {
+            m_pParent = nullptr;
             m_Number = static_cast<DWORD>(-1);
           }
         }
@@ -126,7 +127,7 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         ModuleIter(ModuleIter<OtherT> const& Rhs) 
-          : m_Parent(Rhs.m_Parent), 
+          : m_pParent(Rhs.m_pParent), 
           m_Number(Rhs.m_Number), 
           m_Current(Rhs.m_Current)
         { }
@@ -135,7 +136,7 @@ namespace Hades
         template <typename OtherT>
         ModuleIter& operator=(ModuleIter<OtherT> const& Rhs) 
         {
-          m_Parent = Rhs.m_Parent;
+          m_pParent = Rhs.m_pParent;
           m_Number = Rhs.m_Number;
           m_Current = Rhs.m_Current;
         }
@@ -143,10 +144,11 @@ namespace Hades
         // Prefix increment
         ModuleIter& operator++()
         {
-          boost::optional<Module&> Temp = m_Parent->GetByNum(++m_Number);
+          boost::optional<Module&> Temp = m_pParent->GetByNum(++m_Number);
           m_Current = Temp ? *Temp : boost::optional<Module>();
           if (!Temp)
           {
+            m_pParent = nullptr;
             m_Number = static_cast<DWORD>(-1);
           }
           return *this;
@@ -184,7 +186,7 @@ namespace Hades
 
       private:
         // Parent list instance
-        class ModuleList* m_Parent;
+        class ModuleList* m_pParent;
         // Module number
         DWORD m_Number;
         // Current module instance
@@ -284,7 +286,7 @@ namespace Hades
     inline bool operator==(ModuleList::ModuleIter<T> const& Lhs, 
       ModuleList::ModuleIter<T> const& Rhs)
     {
-      return (Lhs.m_Number == Rhs.m_Number);
+      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Number == Rhs.m_Number);
     }
         
     // Inequality operator

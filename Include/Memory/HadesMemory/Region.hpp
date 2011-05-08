@@ -107,15 +107,17 @@ namespace Hades
 
         // Constructor
         RegionIter() 
-          : m_Memory(), 
+          : m_pParent(nullptr), 
+          m_Memory(), 
           m_Address(reinterpret_cast<PVOID>(-1)), 
           m_Region(), 
           m_RegionSize(0)
         { }
         
         // Constructor
-        RegionIter(MemoryMgr const& MyMemory) 
-          : m_Memory(MyMemory), 
+        RegionIter(RegionList& Parent, MemoryMgr const& MyMemory) 
+          : m_pParent(&Parent), 
+          m_Memory(MyMemory), 
           m_Address(nullptr), 
           m_Region(), 
           m_RegionSize()
@@ -132,6 +134,7 @@ namespace Hades
           }
           else
           {
+            m_pParent = nullptr;
             m_Memory = boost::optional<MemoryMgr>();
             m_Address = reinterpret_cast<PVOID>(-1);
             m_Region = boost::optional<Region>();
@@ -142,7 +145,8 @@ namespace Hades
         // Copy constructor
         template <typename OtherT>
         RegionIter(RegionIter<OtherT> const& Rhs) 
-          : m_Memory(Rhs.m_Memory), 
+          : m_pParent(Rhs.m_pParent), 
+          m_Memory(Rhs.m_Memory), 
           m_Address(Rhs.m_Address), 
           m_Region(Rhs.m_Region), 
           m_RegionSize(Rhs.m_RegionSize)
@@ -152,6 +156,7 @@ namespace Hades
         template <typename OtherT>
         RegionIter& operator=(RegionIter<OtherT> const& Rhs) 
         {
+          m_pParent = Rhs.m_pParent;
           m_Memory = Rhs.m_Memory;
           m_Address = Rhs.m_Address;
           m_Region = Rhs.m_Region;
@@ -176,6 +181,7 @@ namespace Hades
           }
           else
           {
+            m_pParent = nullptr;
             m_Memory = boost::optional<MemoryMgr>();
             m_Address = reinterpret_cast<PVOID>(-1);
             m_Region = boost::optional<Region>();
@@ -216,6 +222,8 @@ namespace Hades
           const RegionIter<T>& Lhs);
 
       private:
+        // Parent
+        class RegionList* m_pParent;
         // Memory instance
         boost::optional<MemoryMgr> m_Memory;
         // Region address
@@ -238,7 +246,7 @@ namespace Hades
       // Get start of Region list
       iterator begin()
       {
-        return iterator(m_Memory);
+        return iterator(*this, m_Memory);
       }
       
       // Get end of Region list
@@ -257,7 +265,8 @@ namespace Hades
     inline bool operator==(RegionList::RegionIter<T> const& Lhs, 
       RegionList::RegionIter<T> const& Rhs)
     {
-      return (Lhs.m_Address == Rhs.m_Address);
+      return (Lhs.m_pParent == Rhs.m_pParent && 
+        Lhs.m_Address == Rhs.m_Address);
     }
         
     // Inequality operator
