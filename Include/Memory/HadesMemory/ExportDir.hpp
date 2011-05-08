@@ -250,10 +250,12 @@ namespace Hades
             m_Export = boost::optional<Export>();
             m_CurNum = static_cast<DWORD>(-1);
           }
-          
-          m_NumFuncs = MyExportDir.GetNumberOfFunctions();
-          m_OrdBase = MyExportDir.GetOrdinalBase();
-          m_Export = Export(*m_PeFile, MyExportDir.GetOrdinalBase());
+          else
+          {
+            m_NumFuncs = MyExportDir.GetNumberOfFunctions();
+            m_OrdBase = MyExportDir.GetOrdinalBase();
+            m_Export = Export(*m_PeFile, MyExportDir.GetOrdinalBase());
+          }
         }
         
         // Copy constructor
