@@ -242,23 +242,7 @@ namespace Hades
       auto ModIter = std::find_if(Modules.begin(), Modules.end(), 
         [&] (Module const& M) -> bool
         {
-          if (PathResolution)
-          {
-            if (boost::filesystem::equivalent(M.GetPath(), PathReal))
-            {
-              return true;
-            }
-          }
-          else
-          {
-            if (boost::to_lower_copy(M.GetName()) == PathString || 
-              boost::filesystem::equivalent(M.GetPath(), PathString))
-            {
-              return true;
-            }
-          }
-          
-          return false;
+          return M.GetBase() == reinterpret_cast<HMODULE>(RemoteRet.first);
         });
       
       // Ensure target module was found
