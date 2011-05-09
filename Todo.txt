@@ -124,6 +124,9 @@
   * Memory reading via expression templates.
   * Improved type genericity via type decay to ensure templates function 
   correctly in the face of const, volatile, references, etc.
+  
+* Module
+  * Remote GetModuleHandle implementation with same path semantics etc.
 
 * Disassembler
   * Decode calls/jumps to function names where possible.
