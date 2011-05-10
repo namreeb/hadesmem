@@ -7,14 +7,8 @@ project
     <warnings-as-errors>on 
   ;
 
-exe ExportDump 
+exe PeFile 
   : 
-    ExportDump.cpp 
-    /Memory//Memory 
-  ;
-
-exe ImportDump 
-  : 
-    ImportDump.cpp 
+    PeFile.cpp 
     /Memory//Memory 
   ;

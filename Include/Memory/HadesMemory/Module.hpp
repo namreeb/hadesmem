@@ -223,8 +223,8 @@ namespace Hades
         {
           if (m_Cache.empty())
           {
-            m_Snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | 
-              TH32CS_SNAPMODULE32, m_Memory.GetProcessID());
+            m_Snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
+              m_Memory.GetProcessID());
             if (m_Snap == INVALID_HANDLE_VALUE)
             {
               std::error_code const LastError = GetLastErrorCode();
