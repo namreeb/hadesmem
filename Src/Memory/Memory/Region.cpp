@@ -21,9 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "Region.hpp"
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/filesystem/fstream.hpp>
-#pragma warning(pop)
 
 namespace Hades
 {

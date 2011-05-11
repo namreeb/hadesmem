@@ -24,9 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/algorithm/string.hpp>
-#pragma warning(pop)
 
 // Hades
 #include "Module.hpp"

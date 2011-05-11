@@ -24,9 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Shellapi.h>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/algorithm/string.hpp>
-#pragma warning(pop)
 
 // Hades
 #include "Process.hpp"
