@@ -170,14 +170,24 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
         Result.begin()), 
         [&] (Hades::Memory::Export& E) -> std::string 
         {
+          std::string Result;
+          
           if (E.ByName())
           {
-            return E.GetName();
+            Result += E.GetName();
           }
           else
           {
-            return "#" + boost::lexical_cast<std::string>(E.GetOrdinal());
+            Result += "#" + boost::lexical_cast<std::string>(E.GetOrdinal());
           }
+          
+          // Note: Was causing some 'false positives' to be raised.
+          //if (E.Forwarded())
+          //{
+          //  Result += " -> " + E.GetForwarder();
+          //}
+          
+          return Result;
         });
         
       return Result;
