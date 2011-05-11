@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE DisassemblerTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include <algorithm>
 
@@ -43,21 +41,25 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   Hades::Memory::Disassembler MyDisassembler(MyMemory);
     
-  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 1).size(), 1);
-  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 50).size(), 50);
-  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 500).size(), 500);
+  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 1).size(), 
+    static_cast<std::size_t>(1));
+  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 50).size(), 
+    static_cast<std::size_t>(50));
+  BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 500).size(), 
+    static_cast<std::size_t>(500));
   
-  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 1).size(), 1);
+  BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 1).size(), 
+    static_cast<std::size_t>(1));
   BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 50).size(), 
-    50);
+    static_cast<std::size_t>(50));
   BOOST_CHECK_EQUAL(MyDisassembler.DisassembleToStr(pEntryPoint, 500).size(), 
-    500);
+    static_cast<std::size_t>(500));
   
   auto DisasmData = MyDisassembler.Disassemble(pEntryPoint, 500);
   std::for_each(DisasmData.begin(), DisasmData.end(), 
     [] (Hades::Memory::DisasmData const& Data)
   {
-    BOOST_CHECK_EQUAL(Data.Len, Data.Raw.size());
+    BOOST_CHECK_EQUAL(static_cast<std::size_t>(Data.Len), Data.Raw.size());
   });
   
   auto DisasmDataStr = MyDisassembler.DisassembleToStr(pEntryPoint, 500);

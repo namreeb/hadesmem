@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE ScannerTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include <algorithm>
 
@@ -68,7 +66,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   PVOID pTestStringA = MyScanner.Find(TestStringA);
   BOOST_CHECK(pTestStringA == pMemBlock + 0x000);
   std::vector<PVOID> pTestStringAVec = MyScanner.FindAll(TestStringA);
-  BOOST_CHECK_EQUAL(pTestStringAVec.size(), 2);
+  BOOST_CHECK_EQUAL(pTestStringAVec.size(), static_cast<std::size_t>(2));
   std::for_each(pTestStringAVec.cbegin(), pTestStringAVec.cend(), 
     [=] (PVOID p)
     {
@@ -78,7 +76,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   PVOID pTestStringW = MyScanner.Find(TestStringW);
   BOOST_CHECK(pTestStringW == pMemBlock + 0x200);
   std::vector<PVOID> pTestStringWVec = MyScanner.FindAll(TestStringW);
-  BOOST_CHECK_EQUAL(pTestStringWVec.size(), 2);
+  BOOST_CHECK_EQUAL(pTestStringWVec.size(), static_cast<std::size_t>(2));
   std::for_each(pTestStringWVec.cbegin(), pTestStringWVec.cend(), 
     [=] (PVOID p)
     {
@@ -88,7 +86,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   PVOID pTestPODType = MyScanner.Find(TestPODType);
   BOOST_CHECK(pTestPODType == pMemBlock + 0x400);
   std::vector<PVOID> TestPODTypeAddrList = MyScanner.FindAll(TestPODType);
-  BOOST_CHECK_EQUAL(TestPODTypeAddrList.size(), 2);
+  BOOST_CHECK_EQUAL(TestPODTypeAddrList.size(), static_cast<std::size_t>(2));
   std::for_each(TestPODTypeAddrList.cbegin(), TestPODTypeAddrList.cend(), 
     [=] (PVOID p)
     {
@@ -98,7 +96,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   PVOID pTestPODTypeVec = MyScanner.Find(TestPODTypeVec);
   BOOST_CHECK(pTestPODTypeVec == pMemBlock + 0x600);
   std::vector<PVOID> TestPODTypeVecAddrList = MyScanner.FindAll(TestPODTypeVec);
-  BOOST_CHECK_EQUAL(TestPODTypeVecAddrList.size(), 2);
+  BOOST_CHECK_EQUAL(TestPODTypeVecAddrList.size(), static_cast<std::size_t>(2));
   std::for_each(TestPODTypeVecAddrList.cbegin(), 
     TestPODTypeVecAddrList.cend(), 
     [=] (PVOID p)

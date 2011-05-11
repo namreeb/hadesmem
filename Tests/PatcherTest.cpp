@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE PatcherTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include "HadesMemory/Patcher.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
@@ -38,7 +36,7 @@ DWORD HookMe_Hook()
 {
   BOOST_CHECK(pDetour1->GetTrampoline() != nullptr);
   auto pOrig = reinterpret_cast<DWORD (*)()>(pDetour1->GetTrampoline());
-  BOOST_CHECK_EQUAL(pOrig(), 0x1234);
+  BOOST_CHECK_EQUAL(pOrig(), static_cast<DWORD>(0x1234));
   return 0x1337;
 }
 
@@ -63,16 +61,16 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK(Orig1 != Apply1);
   BOOST_CHECK(Data1 == Apply1);
   
-  BOOST_CHECK_EQUAL(HookMe(), 0x1234);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
   pDetour1.reset(new Hades::Memory::PatchDetour(MyMemory, &HookMe, 
     &HookMe_Hook));
-  BOOST_CHECK_EQUAL(HookMe(), 0x1234);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
   pDetour1->Apply();
-  BOOST_CHECK_EQUAL(HookMe(), 0x1337);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
   pDetour1->Remove();
-  BOOST_CHECK_EQUAL(HookMe(), 0x1234);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
   pDetour1->Apply();
-  BOOST_CHECK_EQUAL(HookMe(), 0x1337);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
   pDetour1->Remove();
-  BOOST_CHECK_EQUAL(HookMe(), 0x1234);
+  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
 }

@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE NtHeadersTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include "HadesMemory/NtHeaders.hpp"
 #include "HadesMemory/Module.hpp"

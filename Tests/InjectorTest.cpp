@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE InjectorTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include "HadesMemory/Injector.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
@@ -40,7 +38,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(L"kernel32.dll", 
     Kernel32ModNew, "GetCurrentProcessId");
   BOOST_CHECK_EQUAL(ExpRet.first, GetCurrentProcessId());
-  BOOST_CHECK_EQUAL(ExpRet.second, 0);
+  BOOST_CHECK_EQUAL(ExpRet.second, static_cast<DWORD>(0));
   
   // Todo: Test CreateAndInject
 }

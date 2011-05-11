@@ -18,9 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE MemoryMgrTest
-#pragma warning(push, 1)
 #include <boost/test/unit_test.hpp>
-#pragma warning(pop)
 
 #include <algorithm>
 
@@ -55,8 +53,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
   std::pair<DWORD_PTR, DWORD> CallRet = MyMemory.Call(&TestCall, TestCallArgs);
-  BOOST_CHECK_EQUAL(CallRet.first, 1234);
-  BOOST_CHECK_EQUAL(CallRet.second, 5678);
+  BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
+  BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
   TestPODType MyTestPODType = { 1, 0, L'a', 1234567812345678 };
   auto MyNewTestPODType = MyMemory.Read<TestPODType>(&MyTestPODType);
