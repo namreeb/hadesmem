@@ -20,12 +20,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <set>
 #include <string>
+#include <iterator>
 #include <iostream>
 #include <exception>
 #include <algorithm>
 
 // Boost
-#include <boost/format.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
 // Windows
@@ -33,8 +34,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "HadesCommon/I18n.hpp"
 #include "HadesMemory/Memory.hpp"
+#include "HadesCommon/EnsureCleanup.hpp"
 
 int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
 {
@@ -75,22 +76,20 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
 
     // Version and copyright output
 #if defined(_M_X64)
-    std::wcout << "Hades ExportDiff AMD64 [Version " << VerNum << "]\n";
+    std::wcout << "Hades PeFile AMD64 [Version " << VerNum << "]\n";
 #elif defined(_M_IX86)
-    std::wcout << "Hades ExportDiff IA32 [Version " << VerNum << "]\n";
+    std::wcout << "Hades PeFile IA32 [Version " << VerNum << "]\n";
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-    std::wcout << "Copyright (C) 2011 RaptorFactor. All rights reserved." << 
-      std::endl;
-    std::wcout << "Website: http://www.raptorfactor.com/, "
-      "Email: raptorfactor@raptorfactor.com." << std::endl;
-    std::wcout << "Compiler: \"" << BOOST_COMPILER << "\", Standard "
-      "Library: \"" << BOOST_STDLIB << "\", Platform: \"" << BOOST_PLATFORM 
-      << "\", Boost: " << BOOST_VERSION << "." << std::endl;
-    std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << "." << 
-      std::endl << std::endl;
-        
+    std::wcout << "Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).\n"
+      << "<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>\n"
+      << "Compiler: \"" << BOOST_COMPILER << "\", Standard Library: \"" 
+      << BOOST_STDLIB << "\", Platform: \"" << BOOST_PLATFORM << "\", Boost: " 
+      << BOOST_VERSION << ".\n";
+    std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << ".\n" 
+      << std::endl;
+    
     // Get target module from args
     if (argc < 2)
     {

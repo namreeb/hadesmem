@@ -71,7 +71,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
 
     // Hades version number
     std::wstring const VerNum(L"TRUNK");
-
+    
     // Version and copyright output
 #if defined(_M_X64)
     std::wcout << "Hades PeFile AMD64 [Version " << VerNum << "]\n";
@@ -80,16 +80,14 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-    std::wcout << "Copyright (C) 2011 RaptorFactor. All rights reserved." << 
-      std::endl;
-    std::wcout << "Website: http://www.raptorfactor.com/, "
-      "Email: raptorfactor@raptorfactor.com." << std::endl;
-    std::wcout << "Compiler: \"" << BOOST_COMPILER << "\", Standard "
-      "Library: \"" << BOOST_STDLIB << "\", Platform: \"" << BOOST_PLATFORM 
-      << "\", Boost: " << BOOST_VERSION << "." << std::endl;
-    std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << "." << 
-      std::endl << std::endl;
-        
+    std::wcout << "Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).\n"
+      << "<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>\n"
+      << "Compiler: \"" << BOOST_COMPILER << "\", Standard Library: \"" 
+      << BOOST_STDLIB << "\", Platform: \"" << BOOST_PLATFORM << "\", Boost: " 
+      << BOOST_VERSION << ".\n";
+    std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << ".\n" 
+      << std::endl;
+    
     // Get target process ID from args
     if (argc < 2)
     {
