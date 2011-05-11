@@ -12,3 +12,9 @@ exe PeFile
     PeFile.cpp 
     /Memory//Memory 
   ;
+
+exe ExportDiff 
+  : 
+    ExportDiff.cpp 
+    /Memory//Memory 
+  ;
