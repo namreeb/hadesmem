@@ -61,51 +61,19 @@ build-project Tests
 build-project Examples 
   ;
 
-rule Install-Rule ( properties * ) 
-{
-  local result 
-    ;
-  
-  if <address-model>32 in $(properties)
-  {
-    if <variant>debug in $(properties)
-    {
-      result += <location>Bin/Debug/IA32 
-        ;
-    }
-
-    if <variant>release in $(properties)
-    {
-      result += <location>Bin/Release/IA32 
-        ;
-    }
-  }
-  
-  if <address-model>64 in $(properties)
-  {
-    if <variant>debug in $(properties)
-    {
-      result += <location>Bin/Debug/AMD64 
-        ;
-    }
-
-    if <variant>release in $(properties)
-    {
-      result += <location>Bin/Release/AMD64 
-        ;
-    }
-  }
-  
-  return $(result) 
-    ;
-}
-
-install Bin 
+install Dist 
   : 
     Src/Memory 
     Examples 
   : 
-    <conditional>@Install-Rule 
+    <toolset>msvc,<variant>debug,<address-model>32:<location>Dist/MSVC/Debug/IA32
+    <toolset>msvc,<variant>debug,<address-model>64:<location>Dist/MSVC/Debug/AMD64
+    <toolset>msvc,<variant>release,<address-model>32:<location>Dist/MSVC/Release/IA32
+    <toolset>msvc,<variant>release,<address-model>64:<location>Dist/MSVC/Release/AMD64
+    <toolset>gcc,<variant>debug,<address-model>32:<location>Dist/GCC/Debug/IA32
+    <toolset>gcc,<variant>debug,<address-model>64:<location>Dist/GCC/Debug/AMD64
+    <toolset>gcc,<variant>release,<address-model>32:<location>Dist/GCC/Release/IA32
+    <toolset>gcc,<variant>release,<address-model>64:<location>Dist/GCC/Release/AMD64
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
