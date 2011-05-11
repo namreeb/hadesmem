@@ -25,9 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <system_error>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/exception/all.hpp>
-#pragma warning(pop)
 
 // Windows
 #include <Windows.h>

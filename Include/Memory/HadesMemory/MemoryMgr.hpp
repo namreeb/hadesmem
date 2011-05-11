@@ -27,11 +27,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 
 // Boost
-#pragma warning(push, 1)
-#pragma warning(disable: 4706)
 #include <boost/filesystem.hpp>
-#include <boost/noncopyable.hpp>
-#pragma warning(pop)
 
 // Windows API
 #include <Windows.h>
@@ -158,7 +154,7 @@ namespace Hades
     };
 
     // RAII class for remote memory allocation and freeing
-    class AllocAndFree : private boost::noncopyable
+    class AllocAndFree
     {
     public:
       AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size) 
@@ -202,6 +198,10 @@ namespace Hades
         return m_Size;
       }
 
+    protected:
+      AllocAndFree(AllocAndFree const&);
+      AllocAndFree& operator=(AllocAndFree const&);
+      
     private:
       MemoryMgr const* m_pMemory;
       SIZE_T m_Size;

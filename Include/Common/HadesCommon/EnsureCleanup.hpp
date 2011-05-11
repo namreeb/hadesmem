@@ -22,11 +22,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 
-// Boost
-#pragma warning(push, 1)
-#include <boost/noncopyable.hpp>
-#pragma warning(pop)
-
 // Windows API
 #include <Windows.h>
 #include <Objbase.h>
@@ -47,7 +42,7 @@ namespace Hades
     // Invalid = Invalid handle value (e.g. '0')
     template <typename HandleT, typename FuncT, FuncT CleanupFn, 
       HandleT Invalid>
-    class EnsureCleanup : private boost::noncopyable
+    class EnsureCleanup
     {
     public:
       // Ensure size of handle type is valid. Under Windows all handles are 
@@ -124,6 +119,10 @@ namespace Hades
           m_Handle = Invalid;
         }
       }
+      
+    protected:
+      EnsureCleanup(EnsureCleanup const&);
+      EnsureCleanup& operator=(EnsureCleanup const&);
 
     private:
       // Handle being managed
@@ -181,7 +180,7 @@ namespace Hades
       nullptr> EnsureWlanFreeMemory;
 
     // Special class for ensuring the 'LastError' is restored in hooks
-    class EnsureLastError : private boost::noncopyable
+    class EnsureLastError
     {
     public:
       EnsureLastError() 
@@ -192,23 +191,31 @@ namespace Hades
       {
         SetLastError(m_LastError);
       }
+      
+    protected:
+      EnsureLastError(EnsureLastError const&);
+      EnsureLastError& operator=(EnsureLastError const&);
     
     private:
       DWORD m_LastError;
     };
 
     // Special class for ensuring COM is uninitialized
-    class EnsureCoUninitialize : private boost::noncopyable
+    class EnsureCoUninitialize
     {
     public:
       ~EnsureCoUninitialize()
       {
         CoUninitialize();
       }
+      
+    protected:
+      EnsureCoUninitialize(EnsureCoUninitialize const&);
+      EnsureCoUninitialize& operator=(EnsureCoUninitialize const&);
     };
 
     // Special class for releasing a reserved region.
-    class EnsureReleaseRegion : private boost::noncopyable
+    class EnsureReleaseRegion
     {
     public:
       // Constructor
@@ -267,6 +274,10 @@ namespace Hades
           m_pv = nullptr;
         }
       }
+      
+    protected:
+      EnsureReleaseRegion(EnsureReleaseRegion const&);
+      EnsureReleaseRegion& operator=(EnsureReleaseRegion const&);
 
     private:
       // Handle being managed
@@ -274,7 +285,7 @@ namespace Hades
     };
 
     // Special class for ending a resource update operation
-    class EnsureEndUpdateResource : private boost::noncopyable
+    class EnsureEndUpdateResource
     {
     public:
       // Constructor
@@ -334,6 +345,10 @@ namespace Hades
           m_File = nullptr;
         }
       }
+      
+    protected:
+      EnsureEndUpdateResource(EnsureEndUpdateResource const&);
+      EnsureEndUpdateResource& operator=(EnsureEndUpdateResource const&);
 
     private:
       // Handle being managed
@@ -341,7 +356,7 @@ namespace Hades
     };
 
     // Special class for freeing a block from a heap
-    class EnsureHeapFree : private boost::noncopyable
+    class EnsureHeapFree
     {
     public:
       // Constructor
@@ -403,6 +418,10 @@ namespace Hades
           m_pv = nullptr;
         }
       }
+      
+    protected:
+      EnsureHeapFree(EnsureHeapFree const&);
+      EnsureHeapFree& operator=(EnsureHeapFree const&);
 
     private:
       // Handles being managed
@@ -411,7 +430,7 @@ namespace Hades
     };
 
     // Special class for releasing a remote reserved region
-    class EnsureReleaseRegionEx : private boost::noncopyable
+    class EnsureReleaseRegionEx
     {
     public:
       // Constructor
@@ -475,6 +494,10 @@ namespace Hades
           m_pv = nullptr;
         }
       }
+      
+    protected:
+      EnsureReleaseRegionEx(EnsureReleaseRegionEx const&);
+      EnsureReleaseRegionEx& operator=(EnsureReleaseRegionEx const&);
 
     private:
       // Handles being managed
@@ -483,7 +506,7 @@ namespace Hades
     };
 
     // Special class for closing the clipboard
-    class EnsureCloseClipboard : private boost::noncopyable
+    class EnsureCloseClipboard
     {
     public:
       // Constructor
@@ -542,6 +565,10 @@ namespace Hades
           m_Success = FALSE;
         }
       }
+      
+    protected:
+      EnsureCloseClipboard(EnsureCloseClipboard const&);
+      EnsureCloseClipboard& operator=(EnsureCloseClipboard const&);
 
     private:
       // 'Handle' being managed
@@ -549,7 +576,7 @@ namespace Hades
     };
 
     // Special class for releasing a window class
-    class EnsureUnregisterClass : private boost::noncopyable
+    class EnsureUnregisterClass
     {
     public:
       // Constructor
@@ -599,6 +626,10 @@ namespace Hades
           m_Instance = 0;
         }
       }
+      
+    protected:
+      EnsureUnregisterClass(EnsureUnregisterClass const&);
+      EnsureUnregisterClass& operator=(EnsureUnregisterClass const&);
 
     private:
       // 'Handles' being managed
@@ -672,6 +703,10 @@ namespace Hades
           m_Dc = nullptr;
         }
       }
+      
+    protected:
+      EnsureReleaseDc(EnsureReleaseDc const&);
+      EnsureReleaseDc& operator=(EnsureReleaseDc const&);
 
     private:
       // Handles being managed
@@ -680,7 +715,7 @@ namespace Hades
     };
 
     // Special class for closing WLAN handles
-    class EnsureWlanCloseHandle : private boost::noncopyable
+    class EnsureWlanCloseHandle
     {
     public:
       // Constructor
@@ -740,6 +775,10 @@ namespace Hades
           m_Client = nullptr;
         }
       }
+      
+    protected:
+      EnsureWlanCloseHandle(EnsureWlanCloseHandle const&);
+      EnsureWlanCloseHandle& operator=(EnsureWlanCloseHandle const&);
 
     private:
       // Handle being managed

@@ -35,7 +35,7 @@ namespace Hades
     // Utility class to 'bind' a temporary buffer to a string and allow 
     // easy interoperability with C-style APIs.
     template <class CharT>
-    class StringBuffer : private boost::noncopyable
+    class StringBuffer
     {
     public:
       // Constructor
@@ -110,6 +110,10 @@ namespace Hades
       {
         m_Buffer.clear();
       }
+      
+    protected:
+      StringBuffer(StringBuffer const&);
+      StringBuffer& operator=(StringBuffer const&);
 
     private:
       // Target string

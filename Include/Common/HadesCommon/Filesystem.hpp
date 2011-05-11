@@ -25,10 +25,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#pragma warning(pop)
 
 // Windows API
 #include <Windows.h>

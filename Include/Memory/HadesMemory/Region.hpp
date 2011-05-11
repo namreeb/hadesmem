@@ -23,11 +23,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#pragma warning(pop)
 
 // Windows API
 #include <Windows.h>

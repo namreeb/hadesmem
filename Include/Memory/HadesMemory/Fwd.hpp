@@ -47,5 +47,8 @@ namespace Hades
     class DosHeader;
     class ExportDir;
     class NtHeaders;
+    class ImportDir;
+    class Export;
+    class ImportThunk;
   }
 }
