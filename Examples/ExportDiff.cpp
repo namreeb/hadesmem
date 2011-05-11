@@ -133,7 +133,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
     Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
     // Load base module
-    Hades::Windows::EnsureFreeLibrary BaseMod = LoadLibraryEx(BaseModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
+    Hades::Windows::EnsureFreeLibrary BaseMod = LoadLibraryEx(
+      BaseModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
     if (!BaseMod)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -144,7 +145,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
     }
     
     // Load target module
-    Hades::Windows::EnsureFreeLibrary TargetMod = LoadLibraryEx(TargetModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
+    Hades::Windows::EnsureFreeLibrary TargetMod = LoadLibraryEx(
+      TargetModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
     if (!TargetMod)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -164,7 +166,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
       std::set<std::string> Result;
         
       Hades::Memory::ExportList Exports(MyPeFile);
-      std::transform(Exports.begin(), Exports.end(), std::inserter(Result, Result.begin()), 
+      std::transform(Exports.begin(), Exports.end(), std::inserter(Result, 
+        Result.begin()), 
         [&] (Hades::Memory::Export& E) -> std::string 
         {
           if (E.ByName())
@@ -180,14 +183,22 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
       return Result;
     };
     
+    // Get exports for base module
     std::set<std::string> BaseExports(GetExports(BaseMod));
+      
+    // Get exports for target module
     std::set<std::string> TargetExports(GetExports(TargetMod));
-      
+    
+    // Find exports in target that do not exist in base
     std::set<std::string> NewExports;
-    set_difference(TargetExports.begin(), TargetExports.end(), BaseExports.begin(), BaseExports.end(), std::inserter(NewExports, NewExports.begin()));
+    set_difference(TargetExports.begin(), TargetExports.end(), 
+      BaseExports.begin(), BaseExports.end(), std::inserter(NewExports, 
+      NewExports.begin()));
       
+    // Dump new exports
     std::wcout << "New Exports:\n";
-    std::copy(NewExports.begin(), NewExports.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+    std::copy(NewExports.begin(), NewExports.end(), 
+      std::ostream_iterator<std::string>(std::cout, "\n"));
   }
   catch (std::exception const& e)
   {
