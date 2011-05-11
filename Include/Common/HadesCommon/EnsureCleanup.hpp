@@ -25,7 +25,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <Windows.h>
 #include <Objbase.h>
-#include <wlanapi.h>
 
 // Notice: Modified version of EnsureCleanup library provided in the 'Windows
 // via C/C++' sample code. Originally copyright Jeffrey Richter and
@@ -41,7 +40,7 @@ namespace Hades
     // CleanupFn = Cleanup function (e.g. 'CloseHandle')
     // Invalid = Invalid handle value (e.g. '0')
     template <typename HandleT, typename FuncT, FuncT CleanupFn, 
-      HandleT Invalid>
+      DWORD_PTR Invalid>
     class EnsureCleanup
     {
     public:
@@ -51,13 +50,13 @@ namespace Hades
         "Size of handle type is invalid.");
 
       // Constructor
-      EnsureCleanup(HandleT Handle = Invalid)
+      EnsureCleanup(HandleT Handle = reinterpret_cast<HandleT>(Invalid))
         : m_Handle(Handle)
       { }
 
       // Move constructor
       EnsureCleanup(EnsureCleanup&& MyEnsureCleanup)
-        : m_Handle(Invalid)
+        : m_Handle(reinterpret_cast<HandleT>(Invalid))
       {
         *this = std::move(MyEnsureCleanup);
       }
@@ -68,7 +67,7 @@ namespace Hades
         Cleanup();
 
         this->m_Handle = MyEnsureCleanup.m_Handle;
-        MyEnsureCleanup.m_Handle = Invalid;
+        MyEnsureCleanup.m_Handle = reinterpret_cast<HandleT>(Invalid);
 
         return *this;
       }
@@ -92,7 +91,7 @@ namespace Hades
       // Whether object is valid
       BOOL IsValid() const
       {
-        return m_Handle != Invalid;
+        return m_Handle != reinterpret_cast<HandleT>(Invalid);
       }
 
       // Whether object is invalid
@@ -116,7 +115,7 @@ namespace Hades
           CleanupFn(m_Handle);
 
           // We no longer represent a valid object.
-          m_Handle = Invalid;
+          m_Handle = reinterpret_cast<HandleT>(Invalid);
         }
       }
       
@@ -130,54 +129,52 @@ namespace Hades
     };
     
     // Instances of the template C++ class for common data types.
-    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), FindClose, nullptr> 
+    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), FindClose, 0> 
       EnsureFindClose;
-    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, nullptr> 
+    typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 0> 
       EnsureCloseHandle;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE> EnsureCloseSnap;
-    typedef EnsureCleanup<HLOCAL, HLOCAL(WINAPI*)(HLOCAL), LocalFree, nullptr> 
+      reinterpret_cast<DWORD_PTR>(INVALID_HANDLE_VALUE)> EnsureCloseSnap;
+    typedef EnsureCleanup<HLOCAL, HLOCAL(WINAPI*)(HLOCAL), LocalFree, 0> 
       EnsureLocalFree;
     typedef EnsureCleanup<HGLOBAL, HGLOBAL(WINAPI*)(HGLOBAL), GlobalFree, 
-      nullptr> EnsureGlobalFree;
+      0> EnsureGlobalFree;
     typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), GlobalUnlock, 
-      nullptr> EnsureGlobalUnlock;
-    typedef EnsureCleanup<HKEY, LONG(WINAPI*)(HKEY), RegCloseKey, nullptr> 
+      0> EnsureGlobalUnlock;
+    typedef EnsureCleanup<HKEY, LONG(WINAPI*)(HKEY), RegCloseKey, 0> 
       EnsureRegCloseKey;
     typedef EnsureCleanup<SC_HANDLE, BOOL(WINAPI*)(SC_HANDLE), 
       CloseServiceHandle, 0> EnsureCloseServiceHandle;
     typedef EnsureCleanup<HWINSTA, BOOL(WINAPI*)(HWINSTA), CloseWindowStation, 
       0> EnsureCloseWindowStation;
-    typedef EnsureCleanup<HDESK, BOOL(WINAPI*)(HDESK), CloseDesktop, nullptr> 
+    typedef EnsureCleanup<HDESK, BOOL(WINAPI*)(HDESK), CloseDesktop, 0> 
       EnsureCloseDesktop;
     typedef EnsureCleanup<LPCVOID, BOOL(WINAPI*)(LPCVOID), UnmapViewOfFile, 
-      nullptr> EnsureUnmapViewOfFile;
+      0> EnsureUnmapViewOfFile;
     typedef EnsureCleanup<HMODULE, BOOL(WINAPI*)(HMODULE), FreeLibrary, 
-      nullptr> EnsureFreeLibrary;
+      0> EnsureFreeLibrary;
     typedef EnsureCleanup<PVOID, ULONG(WINAPI*)(PVOID), 
       RemoveVectoredExceptionHandler, 0> EnsureRemoveVEH;
     typedef EnsureCleanup<HANDLE, DWORD(WINAPI*)(HANDLE), ResumeThread, 
-      nullptr> EnsureResumeThread;
+      0> EnsureResumeThread;
     typedef EnsureCleanup<HANDLE, BOOL(WINAPI*)(HANDLE), CloseHandle, 
-      INVALID_HANDLE_VALUE> EnsureCloseFile;
+      reinterpret_cast<DWORD_PTR>(INVALID_HANDLE_VALUE)> EnsureCloseFile;
     typedef EnsureCleanup<HHOOK, BOOL(WINAPI*)(HHOOK), UnhookWindowsHookEx, 
-      nullptr> EnsureUnhookWindowsHookEx;
-    typedef EnsureCleanup<HWND, BOOL(WINAPI*)(HWND), DestroyWindow, nullptr> 
+      0> EnsureUnhookWindowsHookEx;
+    typedef EnsureCleanup<HWND, BOOL(WINAPI*)(HWND), DestroyWindow, 0> 
       EnsureDestroyWindow;
-    typedef EnsureCleanup<PSID, PVOID(WINAPI*)(PSID), FreeSid, nullptr> 
+    typedef EnsureCleanup<PSID, PVOID(WINAPI*)(PSID), FreeSid, 0> 
       EnsureFreeSid;
     typedef EnsureCleanup<HGLOBAL, BOOL(WINAPI*)(HGLOBAL), FreeResource, 
-      nullptr> EnsureFreeResource;
-    typedef EnsureCleanup<HDC, BOOL(WINAPI*)(HDC), DeleteDC, nullptr> 
+      0> EnsureFreeResource;
+    typedef EnsureCleanup<HDC, BOOL(WINAPI*)(HDC), DeleteDC, 0> 
       EnsureDeleteDc;
     typedef EnsureCleanup<HBITMAP, BOOL(WINAPI*)(HGDIOBJ), DeleteObject, 
-      nullptr> EnsureDeleteObject;
-    typedef EnsureCleanup<HICON, BOOL(WINAPI*)(HICON), DestroyIcon, nullptr> 
+      0> EnsureDeleteObject;
+    typedef EnsureCleanup<HICON, BOOL(WINAPI*)(HICON), DestroyIcon, 0> 
       EnsureDestroyIcon;
-    typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, nullptr> 
+    typedef EnsureCleanup<HMENU, BOOL(WINAPI*)(HMENU), DestroyMenu, 0> 
       EnsureDestroyMenu;
-    typedef EnsureCleanup<PVOID, VOID(WINAPI*)(PVOID), WlanFreeMemory, 
-      nullptr> EnsureWlanFreeMemory;
 
     // Special class for ensuring the 'LastError' is restored in hooks
     class EnsureLastError
@@ -712,77 +709,6 @@ namespace Hades
       // Handles being managed
       HWND m_Wnd;
       HDC m_Dc;
-    };
-
-    // Special class for closing WLAN handles
-    class EnsureWlanCloseHandle
-    {
-    public:
-      // Constructor
-      EnsureWlanCloseHandle(HANDLE Client = nullptr) 
-        : m_Client(Client)
-      { }
-
-      // Move constructor
-      EnsureWlanCloseHandle(EnsureWlanCloseHandle&& MyEnsureCleanup)
-        : m_Client(nullptr)
-      {
-        *this = std::move(MyEnsureCleanup);
-      }
-
-      // Move assignment operator
-      EnsureWlanCloseHandle& operator= (EnsureWlanCloseHandle&&
-        MyEnsureCleanup)
-      {
-        Cleanup();
-
-        m_Client = MyEnsureCleanup.m_Client;
-
-        MyEnsureCleanup.m_Client = nullptr;
-
-        return *this;
-      }
-
-      // Destructor
-      ~EnsureWlanCloseHandle()
-      {
-        Cleanup();
-      }
-
-      // Assignment operator (for HANDLE values) 
-      EnsureWlanCloseHandle& operator= (HANDLE Client)
-      {
-        Cleanup();
-
-        m_Client = Client;
-
-        return *this;
-      }
-
-      // Implicit conversion operator for HANDLE
-      operator HANDLE() const
-      {
-        return m_Client;
-      }
-
-      // Cleanup the object if the value represents a valid object
-      void Cleanup()
-      {
-        if (m_Client != nullptr)
-        {
-          WlanCloseHandle(m_Client, NULL);
-
-          m_Client = nullptr;
-        }
-      }
-      
-    protected:
-      EnsureWlanCloseHandle(EnsureWlanCloseHandle const&);
-      EnsureWlanCloseHandle& operator=(EnsureWlanCloseHandle const&);
-
-    private:
-      // Handle being managed
-      HANDLE m_Client;
     };
   }
 }

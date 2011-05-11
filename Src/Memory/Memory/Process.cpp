@@ -263,6 +263,9 @@ namespace Hades
     {
       // Start process
       SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
+#ifndef SEE_MASK_NOASYNC 
+#define SEE_MASK_NOASYNC 0x00000100
+#endif
       ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
       ExecInfo.lpFile = Path.empty() ? NULL : Path.c_str();
       ExecInfo.lpParameters = Params.empty() ? NULL : Params.c_str();

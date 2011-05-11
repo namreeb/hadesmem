@@ -19,6 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include "HadesCommon/Config.hpp"
+
 // C++ Standard Library
 #include <string>
 #include <vector>
@@ -27,10 +30,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 // Boost C++ Libraries
+#ifdef HADES_MSVC
 #pragma warning(push, 1)
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4127)
 #pragma warning(disable: 4702)
+#endif
 #include <boost/thread.hpp>
 #include <boost/format.hpp>
 #include <boost/date_time.hpp>
@@ -38,7 +43,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/categories.hpp>
+#ifdef HADES_MSVC
 #pragma warning(pop)
+#endif
 
 // Windows API
 #include <Windows.h>

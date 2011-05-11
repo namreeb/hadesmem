@@ -217,6 +217,13 @@ namespace Hades
         ExportT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
+          iterator iterator;
+          
         // Export iterator error class
         class Error : public virtual HadesMemError
         { };

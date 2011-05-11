@@ -25,17 +25,43 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/format.hpp>
+#include <boost/version.hpp>
 #include <boost/lexical_cast.hpp>
 
 // Windows
 #include <crtdbg.h>
 #include <Windows.h>
+#include <Shellapi.h>
 
 // Hades
 #include "HadesCommon/I18n.hpp"
+#include "HadesCommon/Config.hpp"
 #include "HadesMemory/Memory.hpp"
 
-int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
+#ifdef HADES_GCC
+int wmain(int argc, wchar_t* argv[]);
+
+int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+{
+  LPWSTR CmdLineW = GetCommandLine();
+  int argc = 0;
+  LPWSTR* argv = CommandLineToArgvW(CmdLineW, &argc);
+  try
+  {
+    int result = wmain(argc, argv);
+    LocalFree(argv);
+    return result;
+  }
+  catch (...)
+  {
+    LocalFree(argv);
+  }
+  
+  return 0;
+}
+#endif
+
+int wmain(int argc, wchar_t* argv[])
 {
   try
   {
@@ -100,7 +126,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
     {
       ProcId = boost::lexical_cast<DWORD>(argv[1]);
     }
-    catch (boost::bad_lexical_cast const& /*e*/)
+    catch (std::exception const& /*e*/)
     {
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
@@ -285,4 +311,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
   {
     std::cerr << boost::diagnostic_information(e) << std::endl;
   }
+  
+  return 0;
 }

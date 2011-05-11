@@ -120,6 +120,13 @@ namespace Hades
         ImportDirT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
+          iterator iterator;
+          
         // ImportDir iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -352,6 +359,13 @@ namespace Hades
         ImportThunkT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
+          iterator iterator;
+          
         // ImportThunk iterator error class
         class Error : public virtual HadesMemError
         { };

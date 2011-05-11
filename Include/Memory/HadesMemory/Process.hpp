@@ -60,12 +60,6 @@ namespace Hades
       // Copy assignment
       Process& operator=(Process const& MyProcess);
 
-      // Move constructor
-      Process(Process&& MyProcess);
-
-      // Move assignment
-      Process& operator=(Process&& MyProcess);
-
       // Get process handle
       HANDLE GetHandle() const;
       

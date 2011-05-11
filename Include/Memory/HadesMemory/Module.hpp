@@ -95,6 +95,13 @@ namespace Hades
         ModuleT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
+          iterator iterator;
+          
         // Module iterator error class
         class Error : public virtual HadesMemError
         { };

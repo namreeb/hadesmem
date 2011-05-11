@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyPeFile.GetMemoryMgr();
   BOOST_CHECK_EQUAL(MyPeFile.GetBase(), reinterpret_cast<PVOID>(
     GetModuleHandle(NULL)));
-  BOOST_CHECK_EQUAL(MyPeFile.RvaToVa(0), reinterpret_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(MyPeFile.RvaToVa(0), static_cast<PVOID>(0));
   BOOST_CHECK_EQUAL(MyPeFile.GetType(), Hades::Memory::PeFile::
     FileType_Image);
 }

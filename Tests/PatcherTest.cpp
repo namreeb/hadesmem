@@ -62,8 +62,9 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK(Data1 == Apply1);
   
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  pDetour1.reset(new Hades::Memory::PatchDetour(MyMemory, &HookMe, 
-    &HookMe_Hook));
+  pDetour1.reset(new Hades::Memory::PatchDetour(MyMemory, 
+    reinterpret_cast<PVOID>(&HookMe), 
+    reinterpret_cast<PVOID>(&HookMe_Hook)));
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
   pDetour1->Apply();
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));

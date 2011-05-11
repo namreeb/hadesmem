@@ -19,6 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include "HadesCommon/Config.hpp"
+
 // C++ Standard Library
 #include <string>
 #include <vector>
@@ -27,9 +30,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // BeaEngine
+#ifdef HADES_MSVC
 #pragma warning(push, 1)
+#endif
 #include "BeaEngine/BeaEngine.h"
+#ifdef HADES_MSVC
 #pragma warning(pop)
+#endif
 
 // Hades
 #include "Fwd.hpp"

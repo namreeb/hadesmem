@@ -99,6 +99,13 @@ namespace Hades
         RegionT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
+          iterator iterator;
+          
         // Region iterator error class
         class Error : public virtual HadesMemError
         { };

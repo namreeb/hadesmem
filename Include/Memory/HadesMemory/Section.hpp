@@ -145,6 +145,13 @@ namespace Hades
         SectionT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
+          reference reference;
+        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
+          pointer pointer;
+        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
+          iterator iterator;
+          
         // Section iterator error class
         class Error : public virtual HadesMemError
         { };

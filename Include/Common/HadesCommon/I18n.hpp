@@ -19,9 +19,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include "Config.hpp"
+
 // C++ Standard Library
 #include <string>
+#ifdef HADES_MSVC
 #include <cvt/wstring>
+#endif
 
 // Boost
 #include <boost/lexical_cast.hpp>
@@ -34,8 +39,13 @@ namespace boost
   inline std::string lexical_cast<std::string, std::wstring>(
     std::wstring const& Source)
   {
+#ifdef HADES_MSVC
     return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
       mbstate_t>>().to_bytes(Source);
+#else
+    // Fixme: Proper imlementation for non-MSVC compilers
+    return std::string(Source.begin(), Source.end());
+#endif
   }
   
   // Boost.LexicalCast specialization to allow conversions from narrow to wide 
@@ -44,8 +54,13 @@ namespace boost
   inline std::wstring lexical_cast<std::wstring, std::string>(
     std::string const& Source)
   {
+#ifdef HADES_MSVC
     return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
       mbstate_t>>().from_bytes(Source);
+#else
+    // Fixme: Proper imlementation for non-MSVC compilers
+    return std::wstring(Source.begin(), Source.end());
+#endif
   }
   
   // Turn attempts to convert between the same string types into a nullsub.

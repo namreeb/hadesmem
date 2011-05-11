@@ -6,8 +6,10 @@ import testing
 project 
   : 
     requirements 
-    <warnings>all 
-    <warnings-as-errors>on 
+    <toolset>msvc:<warnings>all 
+    <toolset>gcc:<warnings>off 
+    <toolset>msvc:<warnings-as-errors>on 
+    <toolset>gcc:<warnings-as-errors>off 
     <library>/Memory//Memory 
     <library>/boost//unit_test_framework/<link>static 
   ;

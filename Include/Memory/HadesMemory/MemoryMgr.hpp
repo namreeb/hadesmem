@@ -19,6 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include "HadesCommon/Config.hpp"
+
 // C++ Standard Library
 #include <memory>
 #include <string>
@@ -33,9 +36,21 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // AsmJit
+#ifdef HADES_MSVC
 #pragma warning(push, 1)
+#endif
+#ifdef HADES_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
 #include "AsmJit/AsmJit.h"
+#ifdef HADES_MSVC
 #pragma warning(pop)
+#endif
+#ifdef HADES_GCC
+#pragma GCC diagnostic pop
+#endif
 
 // Hades
 #include "Error.hpp"

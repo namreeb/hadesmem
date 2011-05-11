@@ -90,8 +90,8 @@ namespace Hades
       
       // Get address of Kernel32.dll
       Module K32Mod(*this, L"kernel32.dll");
-      PVOID pGetLastError = GetRemoteProcAddress(K32Mod.GetBase(), 
-        L"kernel32.dll", "GetLastError");
+      PVOID pGetLastError = reinterpret_cast<PVOID>(GetRemoteProcAddress(
+        K32Mod.GetBase(), L"kernel32.dll", "GetLastError"));
 
 #if defined(_M_AMD64) 
       // Check calling convention

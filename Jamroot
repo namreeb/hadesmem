@@ -36,6 +36,7 @@ use-project /Tests
 project Hades 
   : 
     requirements 
+    <define>BOOST_FILESYSTEM_VERSION=3 
     <define>BOOST_SYSTEM_NO_DEPRECATED 
     <define>BOOST_FILESYSTEM_NO_DEPRECATED 
     <define>UNICODE 

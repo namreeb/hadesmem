@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include "HadesCommon/Config.hpp"
+
 // C++ Standard Library
 #include <vector>
 #include <string>
@@ -27,9 +30,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem/fstream.hpp>
 
 // RapidXML
+#ifdef HADES_MSVC
 #pragma warning(push, 1)
+#endif
 #include <RapidXML/rapidxml.hpp>
+#ifdef HADES_MSVC
 #pragma warning(pop)
+#endif
 
 // Hades
 #include "PeFile.hpp"
