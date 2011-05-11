@@ -1,2 +1,2 @@
 cd ..\..\Src\Dependencies\Boost
-call bootstrap.bat
+call bootstrap.bat > ..\..\..\Build\Boost\Bootstrap.txt
