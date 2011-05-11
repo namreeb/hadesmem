@@ -116,17 +116,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("You must supply a target module."));
     }
-    std::wstring ModuleName;
-    try
-    {
-      ModuleName = boost::lexical_cast<std::wstring>(argv[2]);
-    }
-    catch (boost::bad_lexical_cast const& /*e*/)
-    {
-      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
-        Hades::ErrorFunction("wmain") << 
-        Hades::ErrorString("You must supply a target module."));
-    }
+    std::wstring ModuleName(argv[2]);
         
     // Open memory manager
     Hades::Memory::MemoryMgr MyMemory(ProcId == static_cast<DWORD>(-1) ? 
@@ -292,10 +282,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* /*envp*/[])
       // Dump info for target module
       DumpAll(*Iter);
     }
-    
   }
   catch (std::exception const& e)
   {
-    std::cout << boost::diagnostic_information(e) << std::endl;
+    std::cerr << boost::diagnostic_information(e) << std::endl;
   }
 }
