@@ -132,6 +132,11 @@ namespace Hades
         });
       }
 
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.push(AsmJit::Imm(0x0));
+      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.call(AsmJit::rax);
+
       // Call target
       MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
       MyJitFunc.call(AsmJit::rax);
