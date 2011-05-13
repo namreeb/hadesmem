@@ -111,6 +111,11 @@ namespace Hades
       // Allocate ghost space
       MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
 
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.mov(AsmJit::rcx, 0);
+      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.call(AsmJit::rax);
+
       // Set up first 4 parameters
       MyJitFunc.mov(AsmJit::rcx, NumArgs > 0 ? reinterpret_cast<DWORD_PTR>(
         Args[0]) : 0);
@@ -131,11 +136,6 @@ namespace Hades
           MyJitFunc.push(AsmJit::rax);
         });
       }
-
-      // Call kernel32.dll!SetLastError
-      MyJitFunc.push(AsmJit::Imm(0x0));
-      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pSetLastError));
-      MyJitFunc.call(AsmJit::rax);
 
       // Call target
       MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
@@ -171,6 +171,11 @@ namespace Hades
       // Prologue
       MyJitFunc.push(AsmJit::ebp);
       MyJitFunc.mov(AsmJit::ebp, AsmJit::esp);
+
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.push(AsmJit::Imm(0x0));
+      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.call(AsmJit::eax);
 
       // Get stack arguments offset
       std::size_t StackArgOffs = 0;
@@ -223,11 +228,6 @@ namespace Hades
         });
       }
       
-      // Call kernel32.dll!SetLastError
-      MyJitFunc.push(AsmJit::Imm(0x0));
-      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pSetLastError));
-      MyJitFunc.call(AsmJit::eax);
-
       // Call target
       MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Address));
       MyJitFunc.call(AsmJit::eax);
