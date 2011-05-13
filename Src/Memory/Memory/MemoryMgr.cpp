@@ -92,6 +92,8 @@ namespace Hades
       Module K32Mod(*this, L"kernel32.dll");
       PVOID pGetLastError = reinterpret_cast<PVOID>(GetRemoteProcAddress(
         K32Mod.GetBase(), L"kernel32.dll", "GetLastError"));
+      PVOID pSetLastError = reinterpret_cast<PVOID>(GetRemoteProcAddress(
+        K32Mod.GetBase(), L"kernel32.dll", "SetLastError"));
 
 #if defined(_M_AMD64) 
       // Check calling convention
@@ -215,6 +217,11 @@ namespace Hades
           MyJitFunc.push(AsmJit::eax);
         });
       }
+      
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.push(AsmJit::Imm(0x0));
+      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.call(AsmJit::eax);
 
       // Call target
       MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Address));
@@ -427,7 +434,11 @@ namespace Hades
       FARPROC const LocalFunc = GetProcAddress(LocalMod, Function.c_str());
       if (!LocalFunc)
       {
-        return nullptr;
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+          ErrorString("Could not find target function.") << 
+          ErrorCode(LastError));
       }
 
       // Calculate function delta
@@ -463,7 +474,11 @@ namespace Hades
         Ordinal));
       if (!LocalFunc)
       {
-        return nullptr;
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+          ErrorString("Could not find target function.") << 
+          ErrorCode(LastError));
       }
 
       // Calculate function delta
