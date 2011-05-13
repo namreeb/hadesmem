@@ -263,11 +263,14 @@ namespace Hades
       // Get export address
       FARPROC const pExportAddr = m_Memory.GetRemoteProcAddress(ModuleRemote, 
         ModulePath, Export);
+      DWORD_PTR const pExportAddrTemp = reinterpret_cast<DWORD_PTR>(
+        pExportAddr);
 
       // Create a remote thread that calls the desired export
       std::vector<PVOID> ExportArgs;
       ExportArgs.push_back(ModuleRemote);
-      return m_Memory.Call(reinterpret_cast<PVOID>(pExportAddr), ExportArgs);
+      return m_Memory.Call(reinterpret_cast<PVOID>(pExportAddrTemp), 
+        ExportArgs);
     }
   }
 }

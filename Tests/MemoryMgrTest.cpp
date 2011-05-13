@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
   std::pair<DWORD_PTR, DWORD> CallRet = MyMemory.Call(reinterpret_cast<PVOID>(
-    &TestCall), TestCallArgs);
+    reinterpret_cast<DWORD_PTR>(&TestCall)), TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
@@ -125,7 +125,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyMemory.GetRemoteProcAddress(Kernel32Mod, 
     "kernel32.dll", "GetCurrentProcessId"), pGetCurrentProcessId);
     
-  MyMemory.FlushCache(reinterpret_cast<PVOID>(&TestCall), 10);
+  MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestCall)), 10);
     
   MyMemory.IsWoW64();
     

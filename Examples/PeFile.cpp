@@ -29,7 +29,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 
 // Windows
-#include <crtdbg.h>
 #include <Windows.h>
 #include <Shellapi.h>
 

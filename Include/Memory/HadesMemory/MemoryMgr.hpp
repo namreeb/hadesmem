@@ -41,8 +41,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #ifdef HADES_GCC
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-pedantic"
 #pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic ignored "-Wparentheses"
 #endif
 #include "AsmJit/AsmJit.h"
 #ifdef HADES_MSVC

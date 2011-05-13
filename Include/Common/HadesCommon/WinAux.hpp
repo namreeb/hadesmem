@@ -37,7 +37,8 @@ namespace Hades
     inline PVOID GetBaseOfSelf()
     {
       MEMORY_BASIC_INFORMATION MemInfo = { 0 };
-      if (!VirtualQuery(reinterpret_cast<LPCVOID>(&GetBaseOfSelf), &MemInfo, 
+      DWORD_PTR const pSelfAddr = reinterpret_cast<DWORD_PTR>(&GetBaseOfSelf);
+      if (!VirtualQuery(reinterpret_cast<LPCVOID>(pSelfAddr), &MemInfo, 
         sizeof(MemInfo)))
       {
         std::error_code const LastError = GetLastErrorCode();

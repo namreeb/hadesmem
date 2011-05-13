@@ -4,7 +4,7 @@ project
   : 
     requirements 
     <toolset>msvc:<warnings>all 
-    <toolset>gcc:<warnings>off 
+    <toolset>gcc:<warnings>all 
   ;
 
 lib user32 
@@ -90,7 +90,7 @@ lib Memory
     <link>static 
     <include>"../../Include/Memory/HadesMemory" 
     <toolset>msvc:<warnings-as-errors>on 
-    <toolset>gcc:<warnings-as-errors>off 
+    <toolset>gcc:<warnings-as-errors>on 
   : 
   : 
     <include>"../../Include/Memory" 

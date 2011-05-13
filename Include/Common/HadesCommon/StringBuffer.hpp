@@ -24,9 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 // Boost
-#pragma warning(push, 1)
 #include <boost/noncopyable.hpp>
-#pragma warning(pop)
 
 namespace Hades
 {

@@ -89,11 +89,13 @@ namespace Hades
       AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
       
       // Get address of Kernel32.dll
-      Module K32Mod(*this, L"kernel32.dll");
-      PVOID pGetLastError = reinterpret_cast<PVOID>(GetRemoteProcAddress(
-        K32Mod.GetBase(), L"kernel32.dll", "GetLastError"));
-      PVOID pSetLastError = reinterpret_cast<PVOID>(GetRemoteProcAddress(
-        K32Mod.GetBase(), L"kernel32.dll", "SetLastError"));
+      Module const K32Mod(*this, L"kernel32.dll");
+      DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
+        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
+        "GetLastError"));
+      DWORD_PTR const pSetLastError = reinterpret_cast<DWORD_PTR>(
+        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
+        "SetLastError"));
 
 #if defined(_M_AMD64) 
       // Check calling convention
@@ -113,7 +115,7 @@ namespace Hades
 
       // Call kernel32.dll!SetLastError
       MyJitFunc.mov(AsmJit::rcx, 0);
-      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.mov(AsmJit::rax, pSetLastError);
       MyJitFunc.call(AsmJit::rax);
 
       // Set up first 4 parameters
@@ -147,7 +149,7 @@ namespace Hades
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
 
       // Call kernel32.dll!GetLastError
-      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(pGetLastError));
+      MyJitFunc.mov(AsmJit::rax, pGetLastError);
       MyJitFunc.call(AsmJit::rax);
       
       // Write error code to memory
@@ -174,7 +176,7 @@ namespace Hades
 
       // Call kernel32.dll!SetLastError
       MyJitFunc.push(AsmJit::Imm(0x0));
-      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pSetLastError));
+      MyJitFunc.mov(AsmJit::eax, pSetLastError);
       MyJitFunc.call(AsmJit::eax);
 
       // Get stack arguments offset
@@ -238,7 +240,7 @@ namespace Hades
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
       
       // Call kernel32.dll!GetLastError
-      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(pGetLastError));
+      MyJitFunc.mov(AsmJit::eax, pGetLastError);
       MyJitFunc.call(AsmJit::eax);
       
       // Write return value to memory
