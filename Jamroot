@@ -47,6 +47,7 @@ project Hades
     <define>_WIN32_WINNT=_WIN32_WINNT_VISTA 
     <define>WINVER=_WIN32_WINNT_VISTA 
     <runtime-link>shared 
+    <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 
   : 
     default-build debug 

@@ -46,29 +46,15 @@ lib imagehlp
 lib dbghelpbin
   : 
   : 
-    <file>$(TOP)/Misc/DbgHelp/IA32/dbghelp.dll 
-    <address-model>32 
-  ;
-
-lib dbghelpbin
-  : 
-  : 
-    <file>$(TOP)/Misc/DbgHelp/AMD64/dbghelp.dll 
-    <address-model>64 
+    <address-model>32,<threading>multi,<runtime-link>shared:<file>$(TOP)/Misc/DbgHelp/IA32/dbghelp.dll 
+    <address-model>64,<threading>multi,<runtime-link>shared:<file>$(TOP)/Misc/DbgHelp/AMD64/dbghelp.dll 
   ;
 
 lib symsrvbin
   : 
   : 
-    <file>$(TOP)/Misc/DbgHelp/IA32/symsrv.dll 
-    <address-model>32 
-  ;
-
-lib symsrvbin
-  : 
-  : 
-    <file>$(TOP)/Misc/DbgHelp/AMD64/symsrv.dll 
-    <address-model>64 
+    <address-model>32,<threading>multi,<runtime-link>shared:<file>$(TOP)/Misc/DbgHelp/IA32/symsrv.dll 
+    <address-model>64,<threading>multi,<runtime-link>shared:<file>$(TOP)/Misc/DbgHelp/AMD64/symsrv.dll 
   ;
 
 lib Memory 
