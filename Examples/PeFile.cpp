@@ -163,6 +163,30 @@ int wmain(int argc, wchar_t* argv[])
             %S.GetVirtualAddress() %S.GetVirtualSize() %S.GetCharacteristics();
         });
     };
+        
+    // Dump TLS data for module
+    auto DumpTLS = [&] (Hades::Memory::Module const& M) 
+    {
+      // Create PE file object for current module
+      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+        
+      // Ensure module has TLS dir
+      Hades::Memory::TlsDir MyTlsDir(MyPeFile);
+      if (!MyTlsDir.IsValid())
+      {
+        return;
+      }
+      
+      // Dump TLS callbacks
+      auto TlsCallbacks(MyTlsDir.GetCallbacks());
+      std::for_each(TlsCallbacks.begin(), TlsCallbacks.end(), 
+        [&] (PIMAGE_TLS_CALLBACK T)
+        {
+          // Dump section info
+          std::wcout << boost::wformat(L"T: %s - Callback = %p.\n") 
+            %M.GetName() %T;
+        });
+    };
     
     // Dump exports for module
     auto DumpExports = [&] (Hades::Memory::Module const& M) 
@@ -269,6 +293,9 @@ int wmain(int argc, wchar_t* argv[])
       
       std::wcout << "Sections:\n";
       DumpSections(M);
+      std::wcout << "\n";
+      std::wcout << "TLS Callbacks:\n";
+      DumpTLS(M);
       std::wcout << "\n";
       std::wcout << "Exports:\n";
       DumpExports(M);
