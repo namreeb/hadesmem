@@ -112,7 +112,7 @@ namespace Hades
       void SetCharacteristics(DWORD Characteristics) const;
 
       // Get section header base
-      PBYTE GetBase() const;
+      PVOID GetBase() const;
 
       // Get raw section header
       IMAGE_SECTION_HEADER GetSectionHeaderRaw() const;
@@ -129,6 +129,9 @@ namespace Hades
 
       // Section number
       WORD m_SectionNum;
+      
+      // Section base
+      mutable PBYTE m_pBase;
     };
     
     // Section enumeration class
@@ -145,6 +148,10 @@ namespace Hades
         SectionT>
       {
       public:
+        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
+          value_type value_type;
+        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
+          difference_type difference_type;
         typedef typename std::iterator<std::input_iterator_tag, SectionT>::
           reference reference;
         typedef typename std::iterator<std::input_iterator_tag, SectionT>::

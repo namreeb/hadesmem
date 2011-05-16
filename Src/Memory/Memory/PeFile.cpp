@@ -39,7 +39,7 @@ namespace Hades
     }
 
     // Get base address
-    PBYTE PeFile::GetBase() const
+    PVOID PeFile::GetBase() const
     {
       return m_pBase;
     }
@@ -99,7 +99,7 @@ namespace Hades
             Rva -= SectionHeader.VirtualAddress;
             Rva += SectionHeader.PointerToRawData;
 
-            return GetBase() + Rva;
+            return m_pBase + Rva;
           }
 
           // Get next section

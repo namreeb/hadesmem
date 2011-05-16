@@ -64,7 +64,7 @@ namespace Hades
       explicit NtHeaders(PeFile const& MyPeFile);
 
       // Get base of NT headers
-      PBYTE GetBase() const;
+      PVOID GetBase() const;
 
       // Whether signature is valid
       bool IsSignatureValid() const;
@@ -329,7 +329,7 @@ namespace Hades
       MemoryMgr m_Memory;
 
       // Base address
-      mutable PBYTE m_pBase;
+      PBYTE m_pBase;
     };
   }
 }

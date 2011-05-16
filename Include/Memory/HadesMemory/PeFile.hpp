@@ -53,7 +53,7 @@ namespace Hades
       MemoryMgr GetMemoryMgr() const;
 
       // Get base address
-      PBYTE GetBase() const;
+      PVOID GetBase() const;
 
       // Convert RVA to VA
       PVOID RvaToVa(DWORD Rva) const;

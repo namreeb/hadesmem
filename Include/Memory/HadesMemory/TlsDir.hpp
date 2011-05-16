@@ -94,7 +94,7 @@ namespace Hades
       // Todo: SetCallbacks function
 
       // Get base of TLS dir
-      PBYTE GetBase() const;
+      PVOID GetBase() const;
 
       // Get raw TLS dir
       IMAGE_TLS_DIRECTORY GetTlsDirRaw() const;
@@ -105,6 +105,9 @@ namespace Hades
 
       // Memory instance
       MemoryMgr m_Memory;
+      
+      // Tls dir base
+      mutable PBYTE m_pBase;
     };
   }
 }

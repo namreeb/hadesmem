@@ -45,6 +45,9 @@ namespace Hades
 
       // Constructor
       explicit DosHeader(PeFile const& MyPeFile);
+      
+      // Get base
+      PVOID GetBase() const;
 
       // Whether magic is valid
       bool IsMagicValid() const;

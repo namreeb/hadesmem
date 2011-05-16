@@ -30,10 +30,16 @@ namespace Hades
     DosHeader::DosHeader(PeFile const& MyPeFile)
       : m_PeFile(MyPeFile), 
       m_Memory(m_PeFile.GetMemoryMgr()), 
-      m_pBase(m_PeFile.GetBase())
+      m_pBase(static_cast<PBYTE>(m_PeFile.GetBase()))
     {
       // Ensure magic is valid
       EnsureMagicValid();
+    }
+    
+    // Get base
+    PVOID DosHeader::GetBase() const
+    {
+      return m_pBase;
     }
 
     // Whether magic is valid
@@ -192,13 +198,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_magic), 
         Magic);
-
-      if (GetMagic() != Magic)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetMagic") << 
-          ErrorString("Could not set magic. Verification mismatch."));
-      }
     }
 
     // Set bytes on last page
@@ -206,14 +205,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_cblp), 
         BytesOnLastPage);
-
-      if (GetBytesOnLastPage() != BytesOnLastPage)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetBytesOnLastPage") << 
-          ErrorString("Could not set bytes on last page. Verification "
-          "mismatch."));
-      }
     }
 
     // Set pages in file
@@ -221,13 +212,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_cp), 
         PagesInFile);
-
-      if (GetPagesInFile() != PagesInFile)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetPagesInFile") << 
-          ErrorString("Could not set pages in file. Verification mismatch."));
-      }
     }
 
     // Set relocations
@@ -235,13 +219,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_crlc), 
         Relocations);
-
-      if (GetRelocations() != Relocations)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetRelocations") << 
-          ErrorString("Could not set relocations. Verification mismatch."));
-      }
     }
 
     // Set size of header in paragraphs
@@ -250,14 +227,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_cparhdr), 
         SizeOfHeaderInParagraphs);
-
-      if (GetSizeOfHeaderInParagraphs() != SizeOfHeaderInParagraphs)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetSizeOfHeaderInParagraphs") << 
-          ErrorString("Could not set size of header in paragraphs. "
-          "Verification mismatch."));
-      }
     }
 
     // Set min extra paragraphs
@@ -265,14 +234,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_minalloc), 
         MinExtraParagraphs);
-
-      if (GetMinExtraParagraphs() != MinExtraParagraphs)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetMinExtraParagraphs") << 
-          ErrorString("Could not set min extra paragraphs. Verification "
-          "mismatch."));
-      }
     }
 
     // Set max extra paragraphs
@@ -280,14 +241,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_maxalloc), 
         MaxExtraParagraphs);
-
-      if (GetMaxExtraParagraphs() != MaxExtraParagraphs)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetMaxExtraParagraphs") << 
-          ErrorString("Could not set max extra paragraphs. Verification "
-          "mismatch."));
-      }
     }
 
     // Set initial SS
@@ -295,13 +248,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_ss), 
         InitialSS);
-
-      if (GetInitialSS() != InitialSS)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetInitialSS") << 
-          ErrorString("Could not set initial SS. Verification mismatch."));
-      }
     }
 
     // Set initial SP
@@ -309,13 +255,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_sp), 
         InitialSP);
-
-      if (GetInitialSP() != InitialSP)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetInitialSP") << 
-          ErrorString("Could not set initial SP. Verification mismatch."));
-      }
     }
 
     // Set checksum
@@ -323,13 +262,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_csum), 
         Checksum);
-
-      if (GetChecksum() != Checksum)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetChecksum") << 
-          ErrorString("Could not set checksum. Verification mismatch."));
-      }
     }
 
     // Set initial IP
@@ -337,13 +269,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_ip), 
         InitialIP);
-
-      if (GetInitialIP() != InitialIP)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetInitialIP") << 
-          ErrorString("Could not set initial IP. Verification mismatch."));
-      }
     }
 
     // Set initial CS
@@ -351,13 +276,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_cs), 
         InitialCS);
-
-      if (GetInitialCS() != InitialCS)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetInitialCS") << 
-          ErrorString("Could not set initial CS. Verification mismatch."));
-      }
     }
 
     // Set reloc table file address
@@ -365,14 +283,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_lfarlc), 
         RelocTableFileAddr);
-
-      if (GetRelocTableFileAddr() != RelocTableFileAddr)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetRelocTableFileAddr") << 
-          ErrorString("Could not set reloc table file address. Verification "
-          "mismatch."));
-      }
     }
 
     // Set overlay number
@@ -380,13 +290,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_ovno), 
         OverlayNum);
-
-      if (GetOverlayNum() != OverlayNum)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetOverlayNum") << 
-          ErrorString("Could not set overlay number. Verification mismatch."));
-      }
     }
 
     // Set first set of reserved words
@@ -395,14 +298,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_res), 
         ReservedWords1);
-
-      if (GetReservedWords1() != ReservedWords1)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetReservedWords1") << 
-          ErrorString("Could not set first set of reserved words. "
-          "Verification mismatch."));
-      }
     }
 
     // Set OEM ID
@@ -410,13 +305,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_oemid), 
         OEMID);
-
-      if (GetOEMID() != OEMID)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetOEMID") << 
-          ErrorString("Could not set OEM ID. Verification mismatch."));
-      }
     }
 
     // Set OEM info
@@ -424,13 +312,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_oeminfo), 
         OEMInfo);
-
-      if (GetOEMInfo() != OEMInfo)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetOEMInfo") << 
-          ErrorString("Could not set OEM info. Verification mismatch."));
-      }
     }
 
     // Set second set of reserved words
@@ -439,14 +320,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_res2), 
         ReservedWords2);
-
-      if (GetReservedWords2() != ReservedWords2)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetReservedWords2") << 
-          ErrorString("Could not set second set of reserved words. "
-          "Verification mismatch."));
-      }
     }
 
     // Set new header offset
@@ -454,14 +327,6 @@ namespace Hades
     {
       m_Memory.Write(m_pBase + FIELD_OFFSET(IMAGE_DOS_HEADER, e_lfanew), 
         Offset);
-
-      if (GetNewHeaderOffset() != Offset)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("DosHeader::SetNewHeaderOffset") << 
-          ErrorString("Could not set new header offset. Verification "
-          "mismatch."));
-      }
     }
   }
 }
