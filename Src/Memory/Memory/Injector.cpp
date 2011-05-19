@@ -187,37 +187,14 @@ namespace Hades
 
       // Allocate space in the remote process for the pathname
       AllocAndFree const LibFileRemote(m_Memory, PathBufSize);
-      if (!LibFileRemote.GetBase())
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Injector::InjectDll") << 
-          ErrorString("Could not allocate memory.") << 
-          ErrorCode(LastError));
-      }
 
       // Copy the DLL's pathname to the remote process' address space
       m_Memory.Write(LibFileRemote.GetBase(), PathString);
 
       // Get address of LoadLibraryW in Kernel32.dll
-      HMODULE const hKernel32 = GetModuleHandle(L"Kernel32.dll");
-      if (!hKernel32)
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Injector::InjectDll") << 
-          ErrorString("Could not get handle to Kernel32.") << 
-          ErrorCode(LastError));
-      }
-      FARPROC const pLoadLibraryW = GetProcAddress(hKernel32, "LoadLibraryW");
-      if (!pLoadLibraryW)
-      {
-        std::error_code const LastError = GetLastErrorCode();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Injector::InjectDll") << 
-          ErrorString("Could not get pointer to LoadLibraryW.") << 
-          ErrorCode(LastError));
-      }
+      Module Kernel32Mod(m_Memory, L"kernel32.dll");
+      FARPROC const pLoadLibraryW = m_Memory.GetRemoteProcAddress(
+        Kernel32Mod.GetBase(), "kernel32.dll", "LoadLibraryW");
       DWORD_PTR pLoadLibraryWTemp = reinterpret_cast<DWORD_PTR>(pLoadLibraryW);
 
       // Load module in remote process using LoadLibraryW
@@ -236,23 +213,10 @@ namespace Hades
       }
 
       // Look for target module
-      ModuleList Modules(m_Memory);
-      auto ModIter = std::find_if(Modules.begin(), Modules.end(), 
-        [&] (Module const& M) -> bool
-        {
-          return M.GetBase() == reinterpret_cast<HMODULE>(RemoteRet.first);
-        });
-      
-      // Ensure target module was found
-      if (ModIter == Modules.end())
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Injector::InjectDll") << 
-          ErrorString("Could not find module in remote process."));
-      }
+      Module NewModule(m_Memory, reinterpret_cast<HMODULE>(RemoteRet.first));
 
       // Return module base
-      return ModIter->GetBase();
+      return NewModule.GetBase();
     }
 
     // Call export
