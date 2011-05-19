@@ -60,6 +60,7 @@ lib symsrvbin
 lib Memory 
   : 
     [ glob Memory/*.cpp ] 
+    [ glob Memory/PeLib/*.cpp ] 
     /Common//Common 
     /Dependencies//AsmJit 
     /Dependencies//BeaEngine 
@@ -74,7 +75,7 @@ lib Memory
     imagehlp 
   : 
     <link>static 
-    <include>"../../Include/Memory/HadesMemory" 
+    <include>"../../Include/Memory" 
     <toolset>msvc:<warnings-as-errors>on 
     <toolset>gcc:<warnings-as-errors>on 
   : 

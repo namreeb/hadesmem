@@ -21,7 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 
 // Hades
-#include "Module.hpp"
+#include "HadesMemory/Module.hpp"
 
 namespace Hades
 {

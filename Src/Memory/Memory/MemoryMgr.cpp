@@ -18,8 +18,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "Module.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/Module.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {

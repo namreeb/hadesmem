@@ -39,13 +39,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // Hades
-#include "PeFile.hpp"
-#include "Module.hpp"
-#include "Scanner.hpp"
-#include "DosHeader.hpp"
-#include "NtHeaders.hpp"
-#include "FindPattern.hpp"
 #include "HadesCommon/I18n.hpp"
+#include "HadesMemory/Module.hpp"
+#include "HadesMemory/Scanner.hpp"
+#include "HadesMemory/FindPattern.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/DosHeader.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 namespace Hades
 {

@@ -20,8 +20,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE PeFileTest
 #include <boost/test/unit_test.hpp>
 
-#include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {

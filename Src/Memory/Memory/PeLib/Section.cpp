@@ -21,10 +21,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 
 // Hades
-#include "PeFile.hpp"
-#include "Section.hpp"
-#include "NtHeaders.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/Section.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 namespace Hades
 {

@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "Region.hpp"
+#include "HadesMemory/Region.hpp"
 
 // Boost
 #include <boost/filesystem/fstream.hpp>

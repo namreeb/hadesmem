@@ -25,9 +25,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 
 // Hades
-#include "MemoryMgr.hpp"
-#include "Disassembler.hpp"
 #include "HadesCommon/I18n.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/Disassembler.hpp"
 
 namespace Hades
 {

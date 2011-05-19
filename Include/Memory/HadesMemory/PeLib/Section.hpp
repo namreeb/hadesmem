@@ -30,11 +30,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // Hades
-#include "Fwd.hpp"
-#include "Error.hpp"
-#include "PeFile.hpp"
-#include "NtHeaders.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/Fwd.hpp"
+#include "HadesMemory/Error.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 namespace Hades
 {

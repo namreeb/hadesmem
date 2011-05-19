@@ -27,9 +27,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 
 // Hades
-#include "Module.hpp"
-#include "Injector.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/Module.hpp"
+#include "HadesMemory/Injector.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 #include "HadesCommon/Filesystem.hpp"
 #include "HadesCommon/EnsureCleanup.hpp"
 

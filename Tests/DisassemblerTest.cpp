@@ -22,10 +22,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-#include "HadesMemory/Disassembler.hpp"
-#include "HadesMemory/PeFile.hpp"
-#include "HadesMemory/NtHeaders.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/Disassembler.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {

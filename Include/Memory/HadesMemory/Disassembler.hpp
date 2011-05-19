@@ -39,9 +39,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // Hades
-#include "Fwd.hpp"
-#include "Error.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/Fwd.hpp"
+#include "HadesMemory/Error.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {

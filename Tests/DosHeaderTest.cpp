@@ -20,10 +20,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE DosHeaderTest
 #include <boost/test/unit_test.hpp>
 
-#include "HadesMemory/DosHeader.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/DosHeader.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {

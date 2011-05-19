@@ -54,8 +54,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // Hades
-#include "Error.hpp"
-#include "Process.hpp"
+#include "HadesMemory/Error.hpp"
+#include "HadesMemory/Process.hpp"
 
 namespace Hades
 {

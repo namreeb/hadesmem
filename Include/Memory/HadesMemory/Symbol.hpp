@@ -32,9 +32,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <DbgHelp.h>
 
 // Hades
-#include "Fwd.hpp"
-#include "Error.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/Fwd.hpp"
+#include "HadesMemory/Error.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
 #include "HadesCommon/EnsureCleanup.hpp"
 
 // Note: Symbol APIs provided by DbgHelp are NOT thread-safe. 

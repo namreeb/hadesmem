@@ -27,8 +27,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 
 // Hades
-#include "Process.hpp"
 #include "HadesCommon/I18n.hpp"
+#include "HadesMemory/Process.hpp"
 #include "HadesCommon/StringBuffer.hpp"
 
 namespace Hades

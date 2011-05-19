@@ -18,10 +18,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "TlsDir.hpp"
-#include "PeFile.hpp"
-#include "NtHeaders.hpp"
-#include "MemoryMgr.hpp"
+#include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/TlsDir.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 namespace Hades
 {

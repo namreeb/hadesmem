@@ -20,10 +20,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE NtHeadersTest
 #include <boost/test/unit_test.hpp>
 
-#include "HadesMemory/NtHeaders.hpp"
 #include "HadesMemory/Module.hpp"
-#include "HadesMemory/PeFile.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
+#include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
