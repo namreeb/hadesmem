@@ -59,6 +59,10 @@ namespace Hades
       bool IsApplied() const;
 
     protected:
+      // Disable copying
+      Patch(Patch const&);
+      Patch& operator=(Patch const&);
+      
       // Memory manager instance
       MemoryMgr m_Memory;
 
