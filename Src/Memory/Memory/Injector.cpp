@@ -88,7 +88,7 @@ namespace Hades
       try
       {
         // Memory manager instance
-        MemoryMgr MyMemory(ProcInfo.dwProcessId);
+        MemoryMgr const MyMemory(ProcInfo.dwProcessId);
 
         // Create DLL injector
         Hades::Memory::Injector const MyInjector(MyMemory);
@@ -96,11 +96,16 @@ namespace Hades
         // Inject DLL
         HMODULE const ModBase = MyInjector.InjectDll(Module);
 
-        // If export has been specified
-        std::pair<DWORD_PTR, DWORD> ExpRetData = MyInjector.CallExport(
-          Module, ModBase, Export);
-        DWORD_PTR const ExportRet = Export.empty() ? 0 : ExpRetData.first;
-        DWORD const ExportLastError = Export.empty() ? 0 : ExpRetData.second;
+        // Call export if one has been specified
+        std::pair<DWORD_PTR, DWORD> ExpRetData;
+        DWORD_PTR ExportRet = 0;
+        DWORD ExportLastError = 0;
+        if (!Export.empty())
+        {
+          ExpRetData = MyInjector.CallExport(Module, ModBase, Export);
+          ExportRet = ExpRetData.first;
+          ExportLastError = ExpRetData.second;
+        }
 
         // Success! Let the process continue execution.
         if (ResumeThread(ProcInfo.hThread) == static_cast<DWORD>(-1))
@@ -178,8 +183,7 @@ namespace Hades
       }
 
       // Get path as string
-      std::wstring const PathStringTemp(PathReal.native());
-      std::wstring const PathString(boost::to_lower_copy(PathStringTemp));
+      std::wstring const PathString(PathReal.native());
 
       // Calculate the number of bytes needed for the DLL's pathname
       std::size_t const PathBufSize = (PathString.size() + 1) * 
