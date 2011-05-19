@@ -90,6 +90,8 @@ namespace Hades
       
       // Get address of Kernel32.dll
       Module const K32Mod(*this, L"kernel32.dll");
+      // Get address of kernel32.dll!GetLastError and 
+      // kernel32.dll!SetLastError
       DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
         GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
         "GetLastError"));
