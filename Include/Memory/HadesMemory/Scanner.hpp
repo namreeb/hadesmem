@@ -208,9 +208,6 @@ namespace Hades
     }
 
     // Search memory (vector types)
-    // Fixme: This function is extremely inefficient and full of potential 
-    // bugs. Perform a thorough review and rewrite.
-    // Fixme: Refactor Find and FindAll to factor out duplicated code.
     template <typename T>
     std::vector<PVOID> Scanner::FindAll(T const& Data, typename std::
       enable_if<std::is_same<T, std::vector<typename T::value_type>>::

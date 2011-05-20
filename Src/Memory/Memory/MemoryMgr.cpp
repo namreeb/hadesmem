@@ -72,7 +72,7 @@ namespace Hades
     { }
 
     // Call remote function
-    std::pair<DWORD_PTR, DWORD> MemoryMgr::Call(PVOID Address, 
+    std::pair<DWORD_PTR, DWORD> MemoryMgr::Call(LPCVOID Address, 
       std::vector<PVOID> const& Args, 
       CallConv MyCallConv) const 
     {
@@ -314,7 +314,7 @@ namespace Hades
     }
 
     // Whether an address is currently readable
-    bool MemoryMgr::CanRead(PVOID Address) const
+    bool MemoryMgr::CanRead(LPCVOID Address) const
     {
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMbi = { 0 };
@@ -339,7 +339,7 @@ namespace Hades
     }
 
     // Whether an address is currently writable
-    bool MemoryMgr::CanWrite(PVOID Address) const
+    bool MemoryMgr::CanWrite(LPCVOID Address) const
     {
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMbi = { 0 };
@@ -362,7 +362,7 @@ namespace Hades
     }
 
     // Whether an address is contained within a guard page
-    bool MemoryMgr::IsGuard(PVOID Address) const
+    bool MemoryMgr::IsGuard(LPCVOID Address) const
     {
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMemInfo = { 0 };
@@ -503,7 +503,7 @@ namespace Hades
     }
 
     // Flush instruction cache
-    void MemoryMgr::FlushCache(PVOID Address, SIZE_T Size) const
+    void MemoryMgr::FlushCache(LPCVOID Address, SIZE_T Size) const
     {
       if (!FlushInstructionCache(m_Process.GetHandle(), Address, Size))
       {

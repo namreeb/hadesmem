@@ -140,7 +140,6 @@ namespace Hades
     { }
 
     // Inject DLL
-    // Fixme: Perform necessary adjustments to module base if necessary.
     HMODULE Injector::InjectDll(boost::filesystem::path const& Path, 
       bool PathResolution) const
     {

@@ -90,14 +90,14 @@ namespace Hades
       };
 
       // Call remote function
-      std::pair<DWORD_PTR, DWORD> Call(PVOID Address, 
+      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, 
         std::vector<PVOID> const& Args, 
         CallConv MyCallConv = CallConv_Default) const;
 
       // Read memory (POD types)
       template <typename T>
-      T Read(PVOID Address, typename std::enable_if<std::is_pod<T>::value, T>::
-        type* Dummy = 0) const;
+      T Read(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
+        T>::type* Dummy = 0) const;
 
       // Read memory (string types)
       template <typename T>
@@ -129,13 +129,13 @@ namespace Hades
         Dummy = 0) const;
 
       // Whether an address is currently readable
-      bool CanRead(PVOID Address) const;
+      bool CanRead(LPCVOID Address) const;
 
       // Whether an address is currently writable
-      bool CanWrite(PVOID Address) const;
+      bool CanWrite(LPCVOID Address) const;
 
       // Whether an address is contained within a guard page
-      bool IsGuard(PVOID Address) const;
+      bool IsGuard(LPCVOID Address) const;
 
       // Allocate memory
       PVOID Alloc(SIZE_T Size) const;
@@ -159,7 +159,7 @@ namespace Hades
         boost::filesystem::path const& Module, WORD Function) const;
 
       // Flush instruction cache
-      void FlushCache(PVOID Address, SIZE_T Size) const;
+      void FlushCache(LPCVOID Address, SIZE_T Size) const;
       
       // Is WoW64 process
       bool IsWoW64() const;
@@ -322,11 +322,10 @@ namespace Hades
     }
 
     // Read memory (vector types)
-    // Fixme: Traits will not work if type passed is std::vector<T const>
     template <typename T>
-    T MemoryMgr::Read(PVOID Address, std::size_t Size, typename std::enable_if<
-      std::is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-      /*Dummy*/) const
+    T MemoryMgr::Read(PVOID Address, std::size_t Size, typename 
+      std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::
+      value, T>::type* /*Dummy*/) const
     {
       // Ensure type to be read is POD
       static_assert(std::is_pod<typename T::value_type>::value, 
@@ -470,7 +469,6 @@ namespace Hades
     }
 
     // Write memory (vector types)
-    // Fixme: Traits will not work if type passed is std::vector<T const>
     template <typename T>
     void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
       enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 

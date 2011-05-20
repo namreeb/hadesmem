@@ -114,8 +114,6 @@ namespace Hades
       ULONG const TrampSize = GetJumpSize() * 3;
 
       // Allocate trampoline buffer
-      // Fixme: Ensure trampoline is within range for a RIP-relative 
-      // JMP under x64.
       m_Trampoline.reset(new AllocAndFree(m_Memory, TrampSize));
       PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline->GetBase());
 
@@ -141,7 +139,6 @@ namespace Hades
         std::vector<BYTE> const& CurRaw = CurDisasmData.Raw;
 
         // Detect and resolve jumps
-        // Fixme: Resolve other relative instructions.
         if ((CurDisasm.Instruction.BranchType == JmpType) && 
           (CurDisasm.Instruction.AddrValue != 0)) 
         {
@@ -213,9 +210,6 @@ namespace Hades
       // Get pointer to buffer
       PBYTE pJumpBuf = JumpBuf.data();
       // Write code to buffer ('JMP QWORD NEAR [RIP+0]')
-      // Fixme: If an attempt to hook an already hooked function is made 
-      // the disassembled code will be 'garbage' due to code and data being 
-      // mixed. Rewrite this using a safer redirection method.
 #if defined(_M_AMD64) 
       *pJumpBuf++ = 0xFF;
       *pJumpBuf++ = 0x25;
