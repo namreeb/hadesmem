@@ -18,9 +18,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
-#include "HadesMemory/PeLib/DosHeader.hpp"
+#include <HadesMemory/PeLib/DosHeader.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
 
 namespace Hades
 {

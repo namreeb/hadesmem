@@ -17,6 +17,13 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/Injector.hpp>
+#include <HadesMemory/Module.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesCommon/Filesystem.hpp>
+#include <HadesCommon/EnsureCleanup.hpp>
+
 // Windows API
 #include <Windows.h>
 
@@ -25,13 +32,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/algorithm/string.hpp>
-
-// Hades
-#include "HadesMemory/Module.hpp"
-#include "HadesMemory/Injector.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesCommon/Filesystem.hpp"
-#include "HadesCommon/EnsureCleanup.hpp"
 
 namespace Hades
 {

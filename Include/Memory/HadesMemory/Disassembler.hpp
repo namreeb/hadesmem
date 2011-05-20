@@ -20,7 +20,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include "HadesCommon/Config.hpp"
+#include <HadesMemory/Fwd.hpp>
+#include <HadesMemory/Error.hpp>
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
 
 // C++ Standard Library
 #include <string>
@@ -37,11 +40,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_MSVC
 #pragma warning(pop)
 #endif
-
-// Hades
-#include "HadesMemory/Fwd.hpp"
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {

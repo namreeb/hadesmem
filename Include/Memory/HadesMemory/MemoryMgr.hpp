@@ -20,7 +20,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include "HadesCommon/Config.hpp"
+#include <HadesMemory/Error.hpp>
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/Process.hpp>
 
 // C++ Standard Library
 #include <memory>
@@ -52,10 +54,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_GCC
 #pragma GCC diagnostic pop
 #endif
-
-// Hades
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/Process.hpp"
 
 namespace Hades
 {
@@ -174,18 +172,18 @@ namespace Hades
     {
     public:
       AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size) 
-        : m_pMemory(&MyMemoryMgr), 
+        : m_Memory(MyMemoryMgr), 
         m_Size(Size), 
-        m_Address(m_pMemory->Alloc(Size)) 
+        m_Address(MyMemoryMgr.Alloc(Size)) 
       { }
       
       void Free() const
       {
         if (m_Address)
         {
-          m_pMemory->Free(m_Address);
+          m_Memory.Free(m_Address);
+          m_Address = nullptr;
         }
-        m_Address = nullptr;
       }
 
       ~AllocAndFree()
@@ -219,7 +217,7 @@ namespace Hades
       AllocAndFree& operator=(AllocAndFree const&);
       
     private:
-      MemoryMgr const* m_pMemory;
+      MemoryMgr m_Memory;
       SIZE_T m_Size;
       mutable PVOID m_Address;
     };

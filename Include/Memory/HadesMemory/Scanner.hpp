@@ -19,20 +19,18 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesMemory/Region.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+
 // C++ Standard Library
 #include <map>
 #include <string>
 #include <vector>
-
-// Boost
-#include <boost/filesystem.hpp>
+#include <type_traits>
 
 // Windows API
 #include <Windows.h>
-
-// Hades
-#include "HadesMemory/Region.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {

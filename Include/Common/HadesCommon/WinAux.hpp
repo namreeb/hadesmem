@@ -19,11 +19,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesCommon/Error.hpp>
+
 // Windows API
 #include <Windows.h>
-
-// Hades
-#include "Error.hpp"
 
 namespace Hades
 {

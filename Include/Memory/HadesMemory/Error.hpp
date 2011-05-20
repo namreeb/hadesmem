@@ -20,7 +20,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include "HadesCommon/Error.hpp"
+#include <HadesCommon/Error.hpp>
 
 namespace Hades
 {

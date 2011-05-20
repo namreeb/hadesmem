@@ -19,13 +19,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesMemory/Fwd.hpp>
+#include <HadesMemory/Error.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+
 // Windows
 #include <Windows.h>
-
-// Hades
-#include "HadesMemory/Fwd.hpp"
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {

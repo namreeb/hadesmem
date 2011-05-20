@@ -18,7 +18,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesCommon/Config.hpp"
+#include <HadesMemory/FindPattern.hpp>
+#include <HadesCommon/I18n.hpp>
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/Module.hpp>
+#include <HadesMemory/Scanner.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
+#include <HadesMemory/PeLib/DosHeader.hpp>
+#include <HadesMemory/PeLib/NtHeaders.hpp>
 
 // C++ Standard Library
 #include <vector>
@@ -37,15 +44,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_MSVC
 #pragma warning(pop)
 #endif
-
-// Hades
-#include "HadesCommon/I18n.hpp"
-#include "HadesMemory/Module.hpp"
-#include "HadesMemory/Scanner.hpp"
-#include "HadesMemory/FindPattern.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
-#include "HadesMemory/PeLib/DosHeader.hpp"
-#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 namespace Hades
 {

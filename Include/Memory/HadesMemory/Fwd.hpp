@@ -25,7 +25,11 @@ namespace Hades
   {
     // Hades (External)
     class Module;
+    class ModuleList;
+    class ModuleIter;
     class Region;
+    class RegionList;
+    class RegionIter;
     class Scanner;
     class Process;
     class Injector;
@@ -34,6 +38,7 @@ namespace Hades
     class FindPattern;
     class Disassembler;
     class Symbols;
+    class AllocAndFree;
     
     // Hades (Internal)
     class Patch;
@@ -44,11 +49,19 @@ namespace Hades
     class PeFile;
     class TlsDir;
     class Section;
+    class SectionList;
+    class SectionIter;
     class DosHeader;
+    class Export;
     class ExportDir;
+    class ExportList;
+    class ExportIter;
     class NtHeaders;
     class ImportDir;
-    class Export;
+    class ImportDirList;
+    class ImportDirIter;
     class ImportThunk;
+    class ImportThunkList;
+    class ImportThunkIter;
   }
 }

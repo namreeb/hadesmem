@@ -17,17 +17,17 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/Disassembler.hpp>
+#include <HadesCommon/I18n.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+
 // C++ Standard Library
 #include <iterator>
 #include <algorithm>
 
 // Boost
 #include <boost/lexical_cast.hpp>
-
-// Hades
-#include "HadesCommon/I18n.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/Disassembler.hpp"
 
 namespace Hades
 {

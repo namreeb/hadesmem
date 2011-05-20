@@ -20,7 +20,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include "HadesCommon/Config.hpp"
+#include <HadesCommon/Config.hpp>
 
 // C++ Standard Library
 #include <string>

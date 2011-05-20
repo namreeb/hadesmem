@@ -19,10 +19,14 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesCommon/Error.hpp>
+#include <HadesCommon/WinAux.hpp>
+#include <HadesCommon/StringBuffer.hpp>
+
 // C++ Standard Library
 #include <string>
 #include <vector>
-#include <fstream>
 
 // Boost
 #include <boost/filesystem.hpp>
@@ -30,11 +34,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <Windows.h>
-
-// Hades
-#include "Error.hpp"
-#include "WinAux.hpp"
-#include "StringBuffer.hpp"
 
 namespace Hades
 {

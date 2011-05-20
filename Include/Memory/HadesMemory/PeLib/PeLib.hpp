@@ -20,11 +20,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades (PeLib)
-#include "HadesMemory/PeLib/PeFile.hpp"
-#include "HadesMemory/PeLib/TlsDir.hpp"
-#include "HadesMemory/PeLib/Section.hpp"
-#include "HadesMemory/PeLib/ImportDir.hpp"
-#include "HadesMemory/PeLib/ExportDir.hpp"
-#include "HadesMemory/PeLib/DosHeader.hpp"
-#include "HadesMemory/PeLib/ExportDir.hpp"
-#include "HadesMemory/PeLib/NtHeaders.hpp"
+#include <HadesMemory/PeLib/PeFile.hpp>
+#include <HadesMemory/PeLib/TlsDir.hpp>
+#include <HadesMemory/PeLib/Section.hpp>
+#include <HadesMemory/PeLib/ImportDir.hpp>
+#include <HadesMemory/PeLib/ExportDir.hpp>
+#include <HadesMemory/PeLib/DosHeader.hpp>
+#include <HadesMemory/PeLib/ExportDir.hpp>
+#include <HadesMemory/PeLib/NtHeaders.hpp>

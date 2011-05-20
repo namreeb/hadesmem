@@ -17,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/Process.hpp>
+#include <HadesCommon/I18n.hpp>
+#include <HadesCommon/StringBuffer.hpp>
+
 // Windows API
 #include <Windows.h>
 #include <psapi.h>
@@ -25,11 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/algorithm/string.hpp>
-
-// Hades
-#include "HadesCommon/I18n.hpp"
-#include "HadesMemory/Process.hpp"
-#include "HadesCommon/StringBuffer.hpp"
 
 namespace Hades
 {

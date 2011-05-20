@@ -19,17 +19,17 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesMemory/Fwd.hpp>
+#include <HadesMemory/Error.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+
 // C++ Standard Library
 #include <vector>
 #include <memory>
 
 // Windows API
 #include <Windows.h>
-
-// Hades
-#include "HadesMemory/Fwd.hpp"
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
 
 namespace Hades
 {
@@ -125,7 +125,7 @@ namespace Hades
       // Detour address
       PVOID m_Detour;
       // Trampoline memory
-      std::shared_ptr<AllocAndFree> m_Trampoline;
+      std::unique_ptr<AllocAndFree> m_Trampoline;
       // Backup code
       std::vector<BYTE> m_Orig;
     };

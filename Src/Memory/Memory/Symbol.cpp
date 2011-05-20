@@ -17,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/Symbol.hpp>
+#include <HadesCommon/I18n.hpp>
+#include <HadesMemory/Module.hpp>
+#include <HadesCommon/Filesystem.hpp>
+
 // C++ Standard Library
 #include <vector>
 #include <iterator>
@@ -24,12 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/algorithm/string.hpp>
-
-// Hades
-#include "HadesCommon/I18n.hpp"
-#include "HadesMemory/Module.hpp"
-#include "HadesMemory/Symbol.hpp"
-#include "HadesCommon/Filesystem.hpp"
 
 namespace Hades
 {

@@ -17,11 +17,11 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/Module.hpp>
+
 // Boost
 #include <boost/algorithm/string.hpp>
-
-// Hades
-#include "HadesMemory/Module.hpp"
 
 namespace Hades
 {

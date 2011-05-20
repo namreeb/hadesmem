@@ -23,9 +23,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-// Boost
-#include <boost/noncopyable.hpp>
-
 namespace Hades
 {
   namespace Util

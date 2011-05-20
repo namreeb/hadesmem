@@ -19,23 +19,19 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesMemory/Fwd.hpp>
+#include <HadesMemory/Error.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesCommon/EnsureCleanup.hpp>
+
 // C++ Standard Library
 #include <string>
-
-// Boost
-#include <boost/filesystem.hpp>
-#include <boost/noncopyable.hpp>
 
 // Windows API
 #include <Windows.h>
 #define DBGHELP_TRANSLATE_TCHAR
 #include <DbgHelp.h>
-
-// Hades
-#include "HadesMemory/Fwd.hpp"
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesCommon/EnsureCleanup.hpp"
 
 // Note: Symbol APIs provided by DbgHelp are NOT thread-safe. 
 // Todo: Implement optional synchronization.
@@ -46,7 +42,7 @@ namespace Hades
   {
     // Symbol handler
     // Note: Thanks to _Mike on MMOwned for the idea and initial PoC base
-    class Symbols : private boost::noncopyable
+    class Symbols
     {
     public:
       // Symbols exception type
@@ -65,6 +61,11 @@ namespace Hades
       
       // Get address for symbol
       PVOID GetAddress(std::wstring const& Name);
+        
+    protected:
+      // Disable copying
+      Symbols(Symbols const&);
+      Symbols& operator=(Symbols const&);
         
     private:
       // Memory instance

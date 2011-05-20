@@ -19,17 +19,17 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+// Hades
+#include <HadesMemory/Fwd.hpp>
+#include <HadesMemory/Error.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
+
 // C++ Standard Library
 #include <vector>
 
 // Windows
 #include <Windows.h>
-
-// Hades
-#include "HadesMemory/Fwd.hpp"
-#include "HadesMemory/Error.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
 
 namespace Hades
 {

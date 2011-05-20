@@ -17,15 +17,15 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include <HadesMemory/PeLib/ImportDir.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
+#include <HadesMemory/PeLib/NtHeaders.hpp>
+#include <HadesMemory/PeLib/DosHeader.hpp>
+
 // C++ Standard Library
 #include <vector>
-
-// Hades
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
-#include "HadesMemory/PeLib/ImportDir.hpp"
-#include "HadesMemory/PeLib/NtHeaders.hpp"
-#include "HadesMemory/PeLib/DosHeader.hpp"
 
 namespace Hades
 {
