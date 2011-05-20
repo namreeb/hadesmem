@@ -17,34 +17,55 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define BOOST_TEST_MODULE TlsDirTest
-#include <boost/test/unit_test.hpp>
-
+// Hades
 #include "HadesMemory/Module.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/PeLib/TlsDir.hpp"
 #include "HadesMemory/PeLib/PeFile.hpp"
 
+// C++ Standard Library
+#include <algorithm>
+
+// Boost
+#define BOOST_TEST_MODULE TlsDirTest
+#include <boost/thread.hpp>
+#include <boost/test/unit_test.hpp>
+
+// TLS component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
+  // Use threads and TSS to ensure that at least one module has a TLS dir
+  auto DoNothing = [] () { };
+  boost::thread DoNothingThread(DoNothing);
+  boost::thread_specific_ptr<int> TssDummy;
+  TssDummy.reset(new int(1234));
+  
+  // Create memory manager for self
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
+  // Enumerate module list and run TLS dir tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
   std::for_each(Modules.begin(), Modules.end(), 
     [&] (Hades::Memory::Module const& Mod) 
     {
+      // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
       Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
-        
+      
+      // Ensure module has a TLS directory before continuing
+      // Todo: Ensure via test that at least one module with a TLS dir is 
+      // processed (i.e. this one)
       Hades::Memory::TlsDir MyTlsDir(MyPeFile);
       if (!MyTlsDir.IsValid())
       {
         return;
       }
       
+      // Get raw TLS dir data
       auto TlsDirRaw = MyMemory.Read<IMAGE_TLS_DIRECTORY>(MyTlsDir.GetBase());
       
-      BOOST_CHECK_EQUAL(MyTlsDir.IsValid(), true);
+      // Ensure all member functions are called without exception, and 
+      // overwrite the value of each field with the existing value
       MyTlsDir.EnsureValid();
       MyTlsDir.SetStartAddressOfRawData(MyTlsDir.GetStartAddressOfRawData());
       MyTlsDir.SetEndAddressOfRawData(MyTlsDir.GetEndAddressOfRawData());
@@ -55,10 +76,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       MyTlsDir.GetCallbacks();
       MyTlsDir.GetTlsDirRaw();
       
-      auto TlsDirRawNew = MyMemory.Read<IMAGE_TLS_DIRECTORY>(
-        MyTlsDir.GetBase());
-        
+      // Get raw TLS dir data again (using the member function this time)
+      auto TlsDirRawNew = MyTlsDir.GetTlsDirRaw();
+      
+      // Ensure TlsDir getters/setters 'match' by checking that the data is 
+      // unchanged
       BOOST_CHECK_EQUAL(std::memcmp(&TlsDirRaw, &TlsDirRawNew, sizeof(
-        IMAGE_TLS_DIRECTORY)), 0);
+        TlsDirRaw)), 0);
     });
 }
