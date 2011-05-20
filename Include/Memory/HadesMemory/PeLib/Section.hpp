@@ -143,22 +143,10 @@ namespace Hades
       { };
         
       // Section iterator
-      template <typename SectionT>
-      class SectionIter : public std::iterator<std::input_iterator_tag, 
-        SectionT>
+      class SectionIter : public boost::iterator_facade<SectionIter, Section, 
+        boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
-          value_type value_type;
-        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
-          difference_type difference_type;
-        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, SectionT>::
-          iterator iterator;
-          
         // Section iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -172,9 +160,9 @@ namespace Hades
         { }
         
         // Constructor
-        SectionIter(SectionList& Parent, PeFile const& MyPeFile) 
+        SectionIter(SectionList& Parent) 
           : m_pParent(&Parent), 
-          m_PeFile(MyPeFile), 
+          m_PeFile(Parent.m_PeFile), 
           m_Number(0), 
           m_Section()
         {
@@ -192,26 +180,29 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        SectionIter(SectionIter<OtherT> const& Rhs) 
+        SectionIter(SectionIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_PeFile(Rhs.m_PeFile), 
-          m_Number(Rhs.Number), 
+          m_Number(Rhs.m_Number), 
           m_Section(Rhs.m_Section)
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        SectionIter& operator=(SectionIter<OtherT> const& Rhs) 
+        SectionIter& operator=(SectionIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_Number = Rhs.m_Number;
           m_Section = Rhs.m_Section;
+          return *this;
         }
-        
-        // Prefix increment
-        SectionIter& operator++()
+
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           if (++m_Number >= NtHeaders(*m_PeFile).GetNumberOfSections())
           {
@@ -224,41 +215,21 @@ namespace Hades
           {
             m_Section = Section(*m_PeFile, m_Number);
           }
-          
-          return *this;
         }
         
-        // Postfix increment
-        SectionIter operator++(int)
+        // Check iterator for equality
+        bool equal(SectionIter const& Rhs) const
         {
-          SectionIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && 
+            this->m_Number == Rhs.m_Number;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        Section& dereference() const 
         {
           return *m_Section;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_Section;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const SectionIter<T>& Rhs, 
-          const SectionIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const SectionIter<T>& Rhs, 
-          const SectionIter<T>& Lhs);
 
-      private:
         // Parent
         class SectionList* m_pParent;
         // PE file
@@ -266,12 +237,11 @@ namespace Hades
         // Section number
         WORD m_Number;
         // Section object
-        boost::optional<Section> m_Section;
+        mutable boost::optional<Section> m_Section;
       };
       
       // Section list iterator types
-      typedef SectionIter<const Section> const_iterator;
-      typedef SectionIter<Section> iterator;
+      typedef SectionIter iterator;
       
       // Constructor
       SectionList(PeFile const& MyPeFile)
@@ -281,7 +251,7 @@ namespace Hades
       // Get start of section list
       iterator begin()
       {
-        return iterator(*this, m_PeFile);
+        return iterator(*this);
       }
       
       // Get end of section list
@@ -291,24 +261,11 @@ namespace Hades
       }
       
     private:
+      // Give iterator access to internals
+      friend class ExportIter;
+      
       // PE file
       PeFile m_PeFile;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(SectionList::SectionIter<T> const& Lhs, 
-      SectionList::SectionIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Number == Rhs.m_Number);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(SectionList::SectionIter<T> const& Lhs, 
-      SectionList::SectionIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }

@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 
 // Boost
+#include <boost/iterator.hpp>
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
 
@@ -90,18 +91,10 @@ namespace Hades
       { };
 
       // Module iterator
-      template <typename ModuleT>
-      class ModuleIter : public std::iterator<std::input_iterator_tag, 
-        ModuleT>
+      class ModuleIter : public boost::iterator_facade<ModuleIter, Module, 
+        boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, ModuleT>::
-          iterator iterator;
-          
         // Module iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -132,24 +125,27 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        ModuleIter(ModuleIter<OtherT> const& Rhs) 
+        ModuleIter(ModuleIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_Number(Rhs.m_Number), 
           m_Current(Rhs.m_Current)
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        ModuleIter& operator=(ModuleIter<OtherT> const& Rhs) 
+        ModuleIter& operator=(ModuleIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_Number = Rhs.m_Number;
           m_Current = Rhs.m_Current;
+          return *this;
         }
-        
-        // Prefix increment
-        ModuleIter& operator++()
+      
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           boost::optional<Module&> Temp = m_pParent->GetByNum(++m_Number);
           m_Current = Temp ? *Temp : boost::optional<Module>();
@@ -158,51 +154,31 @@ namespace Hades
             m_pParent = nullptr;
             m_Number = static_cast<DWORD>(-1);
           }
-          return *this;
         }
         
-        // Postfix increment
-        ModuleIter operator++(int)
+        // Check iterator for equality
+        bool equal(ModuleIter const& Rhs) const
         {
-          ModuleIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && 
+            this->m_Number == Rhs.m_Number;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        Module& dereference() const 
         {
           return *m_Current;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_Current;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const ModuleIter<T>& Rhs, 
-          const ModuleIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const ModuleIter<T>& Rhs, 
-          const ModuleIter<T>& Lhs);
 
-      private:
         // Parent list instance
         class ModuleList* m_pParent;
         // Module number
         DWORD m_Number;
         // Current module instance
-        boost::optional<Module> m_Current;
+        mutable boost::optional<Module> m_Current;
       };
       
       // Module list iterator types
-      typedef ModuleIter<const Module> const_iterator;
-      typedef ModuleIter<Module> iterator;
+      typedef ModuleIter iterator;
       
       // Constructor
       ModuleList(MemoryMgr const& MyMemory)
@@ -287,21 +263,5 @@ namespace Hades
       // Module cache
       std::vector<Module> m_Cache;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(ModuleList::ModuleIter<T> const& Lhs, 
-      ModuleList::ModuleIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Number == Rhs.m_Number);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(ModuleList::ModuleIter<T> const& Lhs, 
-      ModuleList::ModuleIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }

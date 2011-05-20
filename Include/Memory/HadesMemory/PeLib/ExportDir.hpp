@@ -25,6 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 
 // Boost
+#include <boost/iterator.hpp>
 #include <boost/optional.hpp>
 
 // Windows
@@ -212,18 +213,10 @@ namespace Hades
       { };
         
       // Export iterator
-      template <typename ExportT>
-      class ExportIter : public std::iterator<std::input_iterator_tag, 
-        ExportT>
+      class ExportIter : public boost::iterator_facade<ExportIter, Export, 
+        boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, ExportT>::
-          iterator iterator;
-          
         // Export iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -239,9 +232,9 @@ namespace Hades
         { }
         
         // Constructor
-        ExportIter(ExportList& Parent, PeFile const& MyPeFile) 
+        ExportIter(ExportList& Parent) 
           : m_pParent(&Parent), 
-          m_PeFile(MyPeFile), 
+          m_PeFile(Parent.m_PeFile), 
           m_NumFuncs(0), 
           m_OrdBase(0), 
           m_Export(), 
@@ -266,8 +259,7 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        ExportIter(ExportIter<OtherT> const& Rhs) 
+        ExportIter(ExportIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_PeFile(Rhs.m_PeFile), 
           m_NumFuncs(Rhs.m_NumFuncs), 
@@ -277,8 +269,7 @@ namespace Hades
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        ExportIter& operator=(ExportIter<OtherT> const& Rhs) 
+        ExportIter& operator=(ExportIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
@@ -286,10 +277,15 @@ namespace Hades
           m_OrdBase = Rhs.m_OrdBase;
           m_Export = Rhs.m_Export;
           m_CurNum = Rhs.m_CurNum;
+          return *this;
         }
-        
-        // Prefix increment
-        ExportIter& operator++()
+
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           ++m_CurNum;
           DWORD const NextOrdinal = m_Export->GetOrdinal() + 1;
@@ -306,41 +302,21 @@ namespace Hades
             m_Export = boost::optional<Export>();
             m_CurNum = static_cast<DWORD>(-1);
           }
-          
-          return *this;
         }
         
-        // Postfix increment
-        ExportIter operator++(int)
+        // Check iterator for equality
+        bool equal(ExportIter const& Rhs) const
         {
-          ExportIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && 
+            this->m_CurNum == Rhs.m_CurNum;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        Export& dereference() const 
         {
           return *m_Export;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_Export;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const ExportIter<T>& Rhs, 
-          const ExportIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const ExportIter<T>& Rhs, 
-          const ExportIter<T>& Lhs);
 
-      private:
         // Parent
         class ExportList* m_pParent;
         // PE file
@@ -350,14 +326,13 @@ namespace Hades
         // Ordinal base
         DWORD m_OrdBase;
         // Export object
-        boost::optional<Export> m_Export;
+        mutable boost::optional<Export> m_Export;
         // Current export number
         DWORD m_CurNum;
       };
       
       // Export list iterator types
-      typedef ExportIter<const Export> const_iterator;
-      typedef ExportIter<Export> iterator;
+      typedef ExportIter iterator;
       
       // Constructor
       ExportList(PeFile const& MyPeFile)
@@ -367,7 +342,7 @@ namespace Hades
       // Get start of export list
       iterator begin()
       {
-        return iterator(*this, m_PeFile);
+        return iterator(*this);
       }
       
       // Get end of export list
@@ -377,24 +352,11 @@ namespace Hades
       }
       
     private:
+      // Give iterator access to internals
+      friend class ExportIter;
+      
       // PE file
       PeFile m_PeFile;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(ExportList::ExportIter<T> const& Lhs, 
-      ExportList::ExportIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_CurNum == Rhs.m_CurNum);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(ExportList::ExportIter<T> const& Lhs, 
-      ExportList::ExportIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }

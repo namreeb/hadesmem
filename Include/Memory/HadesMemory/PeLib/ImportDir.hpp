@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 
 // Boost
+#include <boost/iterator.hpp>
 #include <boost/optional.hpp>
 
 // Windows
@@ -115,18 +116,10 @@ namespace Hades
       { };
         
       // ImportDir iterator
-      template <typename ImportDirT>
-      class ImportDirIter : public std::iterator<std::input_iterator_tag, 
-        ImportDirT>
+      class ImportDirIter : public boost::iterator_facade<ImportDirIter, 
+        ImportDir, boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, ImportDirT>::
-          iterator iterator;
-          
         // ImportDir iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -140,9 +133,9 @@ namespace Hades
         { }
         
         // Constructor
-        ImportDirIter(ImportDirList& Parent, PeFile const& MyPeFile) 
+        ImportDirIter(ImportDirList& Parent) 
           : m_pParent(&Parent), 
-          m_PeFile(MyPeFile), 
+          m_PeFile(Parent.m_PeFile), 
           m_ImportDir(*m_PeFile), 
           m_Num(0)
         {
@@ -156,8 +149,7 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        ImportDirIter(ImportDirIter<OtherT> const& Rhs) 
+        ImportDirIter(ImportDirIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_PeFile(Rhs.m_PeFile), 
           m_ImportDir(Rhs.m_ImportDir), 
@@ -165,17 +157,21 @@ namespace Hades
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        ImportDirIter& operator=(ImportDirIter<OtherT> const& Rhs) 
+        ImportDirIter& operator=(ImportDirIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_ImportDir = Rhs.m_ImportDir;
           m_Num = Rhs.m_Num;
+          return *this;
         }
-        
-        // Prefix increment
-        ImportDirIter& operator++()
+
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           ++m_Num;
           auto pImpDesc = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
@@ -188,54 +184,32 @@ namespace Hades
             m_PeFile = boost::optional<PeFile>();
             m_Num = static_cast<DWORD>(-1);
           }
-          
-          return *this;
         }
         
-        // Postfix increment
-        ImportDirIter operator++(int)
+        // Check iterator for equality
+        bool equal(ImportDirIter const& Rhs) const
         {
-          ImportDirIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && this->m_Num == Rhs.m_Num;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        ImportDir& dereference() const 
         {
           return *m_ImportDir;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_ImportDir;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const ImportDirIter<T>& Rhs, 
-          const ImportDirIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const ImportDirIter<T>& Rhs, 
-          const ImportDirIter<T>& Lhs);
 
-      private:
         // Parent
         class ImportDirList* m_pParent;
         // PE file
         boost::optional<PeFile> m_PeFile;
         // ImportDir object
-        boost::optional<ImportDir> m_ImportDir;
+        mutable boost::optional<ImportDir> m_ImportDir;
         // Import dir num
         DWORD m_Num;
       };
       
       // ImportDir list iterator types
-      typedef ImportDirIter<const ImportDir> const_iterator;
-      typedef ImportDirIter<ImportDir> iterator;
+      typedef ImportDirIter iterator;
       
       // Constructor
       ImportDirList(PeFile const& MyPeFile)
@@ -245,7 +219,7 @@ namespace Hades
       // Get start of importdir list
       iterator begin()
       {
-        return iterator(*this, m_PeFile);
+        return iterator(*this);
       }
       
       // Get end of importdir list
@@ -255,25 +229,12 @@ namespace Hades
       }
       
     private:
+      // Give iterator access to internals
+      friend class ImportDirIter;
+      
       // PE file
       PeFile m_PeFile;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(ImportDirList::ImportDirIter<T> const& Lhs, 
-      ImportDirList::ImportDirIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_Num == Rhs.m_Num);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(ImportDirList::ImportDirIter<T> const& Lhs, 
-      ImportDirList::ImportDirIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
 
     // Import thunk wrapper
     class ImportThunk
@@ -354,18 +315,10 @@ namespace Hades
       { };
         
       // ImportThunk iterator
-      template <typename ImportThunkT>
-      class ImportThunkIter : public std::iterator<std::input_iterator_tag, 
-        ImportThunkT>
+      class ImportThunkIter : public boost::iterator_facade<ImportThunkIter, 
+        ImportThunk, boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, ImportThunkT>::
-          iterator iterator;
-          
         // ImportThunk iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -379,10 +332,9 @@ namespace Hades
         { }
         
         // Constructor
-        ImportThunkIter(ImportThunkList& Parent, PeFile const& MyPeFile, 
-          DWORD FirstThunk) 
+        ImportThunkIter(ImportThunkList& Parent, DWORD FirstThunk) 
           : m_pParent(&Parent), 
-          m_PeFile(MyPeFile), 
+          m_PeFile(Parent.m_PeFile), 
           m_pThunk(nullptr), 
           m_ImportThunk()
         {
@@ -399,8 +351,7 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        ImportThunkIter(ImportThunkIter<OtherT> const& Rhs) 
+        ImportThunkIter(ImportThunkIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_PeFile(Rhs.m_PeFile), 
           m_pThunk(Rhs.m_pThunk), 
@@ -408,17 +359,21 @@ namespace Hades
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        ImportThunkIter& operator=(ImportThunkIter<OtherT> const& Rhs) 
+        ImportThunkIter& operator=(ImportThunkIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_PeFile = Rhs.m_PeFile;
           m_pThunk = Rhs.m_pThunk;
           m_ImportThunk = Rhs.m_ImportThunk;
+          return *this;
         }
-        
-        // Prefix increment
-        ImportThunkIter& operator++()
+
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           m_ImportThunk = ImportThunk(*m_PeFile, ++m_pThunk);
           if (!m_ImportThunk->IsValid())
@@ -428,41 +383,21 @@ namespace Hades
             m_pThunk = nullptr;
             m_ImportThunk = boost::optional<ImportThunk>();
           }
-          
-          return *this;
         }
         
-        // Postfix increment
-        ImportThunkIter operator++(int)
+        // Check iterator for equality
+        bool equal(ImportThunkIter const& Rhs) const
         {
-          ImportThunkIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && 
+            this->m_pThunk == Rhs.m_pThunk;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        ImportThunk& dereference() const 
         {
           return *m_ImportThunk;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_ImportThunk;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const ImportThunkIter<T>& Rhs, 
-          const ImportThunkIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const ImportThunkIter<T>& Rhs, 
-          const ImportThunkIter<T>& Lhs);
 
-      private:
         // Parent
         class ImportThunkList* m_pParent;
         // PE file
@@ -470,12 +405,11 @@ namespace Hades
         // Current thunk pointer
         PIMAGE_THUNK_DATA m_pThunk;
         // ImportThunk object
-        boost::optional<ImportThunk> m_ImportThunk;
+        mutable boost::optional<ImportThunk> m_ImportThunk;
       };
       
       // ImportThunk list iterator types
-      typedef ImportThunkIter<const ImportThunk> const_iterator;
-      typedef ImportThunkIter<ImportThunk> iterator;
+      typedef ImportThunkIter iterator;
       
       // Constructor
       ImportThunkList(PeFile const& MyPeFile, DWORD FirstThunk)
@@ -486,7 +420,7 @@ namespace Hades
       // Get start of importthunk list
       iterator begin()
       {
-        return iterator(*this, m_PeFile, m_FirstThunk);
+        return iterator(*this, m_FirstThunk);
       }
       
       // Get end of importthunk list
@@ -496,26 +430,13 @@ namespace Hades
       }
       
     private:
+      // Give iterator access to internals
+      friend class ImportThunkIter;
+      
       // PE file
       PeFile m_PeFile;
       // First thunk
       DWORD m_FirstThunk;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(ImportThunkList::ImportThunkIter<T> const& Lhs, 
-      ImportThunkList::ImportThunkIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && Lhs.m_pThunk == Rhs.m_pThunk);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(ImportThunkList::ImportThunkIter<T> const& Lhs, 
-      ImportThunkList::ImportThunkIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }

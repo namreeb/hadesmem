@@ -23,9 +23,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 
 // Boost
+#include <boost/iterator.hpp>
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/iterator/iterator_facade.hpp>
 
 // Windows API
 #include <Windows.h>
@@ -94,18 +94,10 @@ namespace Hades
       { };
         
       // Region iterator
-      template <typename RegionT>
-      class RegionIter : public std::iterator<std::input_iterator_tag, 
-        RegionT>
+      class RegionIter : public boost::iterator_facade<RegionIter, Region, 
+        boost::forward_traversal_tag>
       {
       public:
-        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
-          reference reference;
-        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
-          pointer pointer;
-        typedef typename std::iterator<std::input_iterator_tag, RegionT>::
-          iterator iterator;
-          
         // Region iterator error class
         class Error : public virtual HadesMemError
         { };
@@ -120,9 +112,9 @@ namespace Hades
         { }
         
         // Constructor
-        RegionIter(RegionList& Parent, MemoryMgr const& MyMemory) 
+        RegionIter(RegionList& Parent) 
           : m_pParent(&Parent), 
-          m_Memory(MyMemory), 
+          m_Memory(Parent.m_Memory), 
           m_Address(nullptr), 
           m_Region(), 
           m_RegionSize()
@@ -148,8 +140,7 @@ namespace Hades
         }
         
         // Copy constructor
-        template <typename OtherT>
-        RegionIter(RegionIter<OtherT> const& Rhs) 
+        RegionIter(RegionIter const& Rhs) 
           : m_pParent(Rhs.m_pParent), 
           m_Memory(Rhs.m_Memory), 
           m_Address(Rhs.m_Address), 
@@ -158,18 +149,22 @@ namespace Hades
         { }
         
         // Assignment operator
-        template <typename OtherT>
-        RegionIter& operator=(RegionIter<OtherT> const& Rhs) 
+        RegionIter& operator=(RegionIter const& Rhs) 
         {
           m_pParent = Rhs.m_pParent;
           m_Memory = Rhs.m_Memory;
           m_Address = Rhs.m_Address;
           m_Region = Rhs.m_Region;
           m_RegionSize = Rhs.m_RegionSize;
+          return *this;
         }
-        
-        // Prefix increment
-        RegionIter& operator++()
+
+      private:
+        // Give Boost.Iterator access to internals
+        friend class boost::iterator_core_access;
+
+        // Increment iterator
+        void increment() 
         {
           // Advance to next region
           m_Address = static_cast<PBYTE>(m_Address) + m_RegionSize;
@@ -192,41 +187,21 @@ namespace Hades
             m_Region = boost::optional<Region>();
             m_RegionSize = 0;
           }
-          
-          return *this;
         }
         
-        // Postfix increment
-        RegionIter operator++(int)
+        // Check iterator for equality
+        bool equal(RegionIter const& Rhs) const
         {
-          RegionIter Temp(*this);
-          ++*this;
-          return Temp;
+          return this->m_pParent == Rhs.m_pParent && 
+            this->m_Address == Rhs.m_Address;
         }
-        
-        // Dereference operator
-        reference operator*()
+    
+        // Dereference iterator
+        Region& dereference() const 
         {
           return *m_Region;
         }
-        
-        // Dereference operator
-        pointer operator->()
-        {
-          return &*m_Region;
-        }
-        
-        // Equality operator
-        template<typename T>
-        friend bool operator==(const RegionIter<T>& Rhs, 
-          const RegionIter<T>& Lhs);
-        
-        // Inequality operator
-        template<typename T>
-        friend bool operator!=(const RegionIter<T>& Rhs, 
-          const RegionIter<T>& Lhs);
 
-      private:
         // Parent
         class RegionList* m_pParent;
         // Memory instance
@@ -234,14 +209,13 @@ namespace Hades
         // Region address
         PVOID m_Address;
         // Region object
-        boost::optional<Region> m_Region;
+        mutable boost::optional<Region> m_Region;
         // Region size
         SIZE_T m_RegionSize;
       };
       
       // Region list iterator types
-      typedef RegionIter<const Region> const_iterator;
-      typedef RegionIter<Region> iterator;
+      typedef RegionIter iterator;
       
       // Constructor
       RegionList(MemoryMgr const& MyMemory)
@@ -251,7 +225,7 @@ namespace Hades
       // Get start of Region list
       iterator begin()
       {
-        return iterator(*this, m_Memory);
+        return iterator(*this);
       }
       
       // Get end of Region list
@@ -261,25 +235,11 @@ namespace Hades
       }
       
     private:
+      // Give iterator access to internals
+      friend class RegionIter;
+      
       // Memory instance
       MemoryMgr m_Memory;
     };
-    
-    // Equality operator
-    template<typename T>
-    inline bool operator==(RegionList::RegionIter<T> const& Lhs, 
-      RegionList::RegionIter<T> const& Rhs)
-    {
-      return (Lhs.m_pParent == Rhs.m_pParent && 
-        Lhs.m_Address == Rhs.m_Address);
-    }
-        
-    // Inequality operator
-    template<typename T>    
-    inline bool operator!=(RegionList::RegionIter<T> const& Lhs, 
-      RegionList::RegionIter<T> const& Rhs)
-    {
-      return !(Lhs == Rhs);
-    }
   }
 }
