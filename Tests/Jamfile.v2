@@ -12,6 +12,7 @@ project
     <toolset>gcc:<warnings-as-errors>on 
     <library>/Memory//Memory 
     <library>/boost//unit_test_framework/<link>static 
+    <toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
   ;
 
 test-suite Memory

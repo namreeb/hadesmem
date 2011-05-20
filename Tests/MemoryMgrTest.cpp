@@ -45,6 +45,8 @@ struct TestPODType
 
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
+  // Create memory manager for self
+  // Todo: Test other constructors
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
   
   std::vector<PVOID> TestCallArgs;

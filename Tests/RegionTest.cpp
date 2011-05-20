@@ -23,6 +23,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #define BOOST_TEST_MODULE RegionTest
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 // Region component tests
