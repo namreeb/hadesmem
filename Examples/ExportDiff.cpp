@@ -41,7 +41,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_GCC
 int wmain(int argc, wchar_t* argv[]);
 
-int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+int CALLBACK wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, 
+  LPWSTR /*lpCmdLine*/, int /*nCmdShow*/)
 {
   LPWSTR CmdLineW = GetCommandLine();
   int argc = 0;

@@ -221,7 +221,9 @@ namespace Hades
       }
       
       // Get module info
-      IMAGEHLP_MODULE64 ModuleInfo = { sizeof(ModuleInfo) };
+      IMAGEHLP_MODULE64 ModuleInfo;
+      ZeroMemory(&ModuleInfo, sizeof(ModuleInfo));
+      ModuleInfo.SizeOfStruct = sizeof(ModuleInfo);
       if (!pSymGetModuleInfo64(m_Memory.GetProcessHandle(), 
         reinterpret_cast<DWORD64>(ModIter->GetBase()), 
         &ModuleInfo))

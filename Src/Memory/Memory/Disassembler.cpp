@@ -70,7 +70,8 @@ namespace Hades
         NumInstructions * MaxInstructionSize));
 
       // Set up disasm structure for BeaEngine
-      DISASM MyDisasm = { 0 };
+      DISASM MyDisasm;
+      ZeroMemory(&MyDisasm, sizeof(MyDisasm));
       MyDisasm.EIP = reinterpret_cast<long long>(Buffer.data());
       MyDisasm.VirtualAddr = reinterpret_cast<long long>(Address);
 #if defined(_M_AMD64) 

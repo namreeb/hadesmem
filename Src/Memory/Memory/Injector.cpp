@@ -46,8 +46,11 @@ namespace Hades
       std::string const& Export)
     {
       // Set up args for CreateProcess
-      STARTUPINFO StartInfo = { sizeof(StartInfo) };
-      PROCESS_INFORMATION ProcInfo = { 0 };
+      STARTUPINFO StartInfo;
+      ZeroMemory(&StartInfo, sizeof(StartInfo));
+      StartInfo.cb = sizeof(StartInfo);
+      PROCESS_INFORMATION ProcInfo;
+      ZeroMemory(&ProcInfo, sizeof(ProcInfo));
 
       // Construct command line.
       std::wstring const CommandLine(L"\"" + Path.native() + L"\" " + Args);

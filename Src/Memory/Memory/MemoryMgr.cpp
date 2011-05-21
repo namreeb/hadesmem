@@ -317,7 +317,8 @@ namespace Hades
     bool MemoryMgr::CanRead(LPCVOID Address) const
     {
       // Query page protections
-      MEMORY_BASIC_INFORMATION MyMbi = { 0 };
+      MEMORY_BASIC_INFORMATION MyMbi;
+      ZeroMemory(&MyMbi, sizeof(MyMbi));
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
@@ -342,7 +343,8 @@ namespace Hades
     bool MemoryMgr::CanWrite(LPCVOID Address) const
     {
       // Query page protections
-      MEMORY_BASIC_INFORMATION MyMbi = { 0 };
+      MEMORY_BASIC_INFORMATION MyMbi;
+      ZeroMemory(&MyMbi, sizeof(MyMbi));
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
@@ -365,9 +367,10 @@ namespace Hades
     bool MemoryMgr::IsGuard(LPCVOID Address) const
     {
       // Query page protections
-      MEMORY_BASIC_INFORMATION MyMemInfo = { 0 };
-      if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMemInfo, 
-        sizeof(MyMemInfo)))
+      MEMORY_BASIC_INFORMATION MyMbi;
+      ZeroMemory(&MyMbi, sizeof(MyMbi));
+      if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+        sizeof(MyMbi)))
       {
         std::error_code const LastError = GetLastErrorCode();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -377,7 +380,7 @@ namespace Hades
       }
 
       // Whether address is in a guard page
-      return (MyMemInfo.Protect & PAGE_GUARD) == PAGE_GUARD;
+      return (MyMbi.Protect & PAGE_GUARD) == PAGE_GUARD;
     }
 
     // Allocate memory

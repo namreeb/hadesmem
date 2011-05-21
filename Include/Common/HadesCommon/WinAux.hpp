@@ -36,7 +36,8 @@ namespace Hades
     // Get base of self
     inline PVOID GetBaseOfSelf()
     {
-      MEMORY_BASIC_INFORMATION MemInfo = { 0 };
+      MEMORY_BASIC_INFORMATION MemInfo;
+      ZeroMemory(&MemInfo, sizeof(MemInfo));
       DWORD_PTR const pSelfAddr = reinterpret_cast<DWORD_PTR>(&GetBaseOfSelf);
       if (!VirtualQuery(reinterpret_cast<LPCVOID>(pSelfAddr), &MemInfo, 
         sizeof(MemInfo)))

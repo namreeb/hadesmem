@@ -52,8 +52,10 @@ namespace Hades
       std::wstring const ModuleNameLower(boost::to_lower_copy(
         ModuleName));
 
-      // Search for process
-      MODULEENTRY32 ModEntry = { sizeof(ModEntry) };
+      // Search for module
+      MODULEENTRY32 ModEntry;
+      ZeroMemory(&ModEntry, sizeof(ModEntry));
+      ModEntry.dwSize = sizeof(ModEntry);
       bool Found = false;
       for (BOOL MoreMods = Module32First(Snap, &ModEntry); MoreMods; 
         MoreMods = Module32Next(Snap, &ModEntry)) 
@@ -67,7 +69,7 @@ namespace Hades
         }
       }
 
-      // Check process was found
+      // Check module was found
       if (!Found)
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -102,8 +104,10 @@ namespace Hades
           ErrorCode(LastError));
       }
 
-      // Search for process
-      MODULEENTRY32 ModEntry = { sizeof(ModEntry) };
+      // Search for module
+      MODULEENTRY32 ModEntry;
+      ZeroMemory(&ModEntry, sizeof(ModEntry));
+      ModEntry.dwSize = sizeof(ModEntry);
       bool Found = false;
       for (BOOL MoreMods = Module32First(Snap, &ModEntry); MoreMods; 
         MoreMods = Module32Next(Snap, &ModEntry)) 
@@ -115,7 +119,7 @@ namespace Hades
         }
       }
 
-      // Check process was found
+      // Check module was found
       if (!Found)
       {
         BOOST_THROW_EXCEPTION(Error() << 

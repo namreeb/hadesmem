@@ -216,7 +216,9 @@ namespace Hades
                 ErrorCode(LastError));
             }
     
-            MODULEENTRY32 MyModuleEntry = { sizeof(MyModuleEntry) };
+            MODULEENTRY32 MyModuleEntry;
+            ZeroMemory(&MyModuleEntry, sizeof(MyModuleEntry));
+            MyModuleEntry.dwSize = sizeof(MyModuleEntry);
             if (!Module32First(m_Snap, &MyModuleEntry))
             {
               std::error_code const LastError = GetLastErrorCode();
@@ -230,7 +232,9 @@ namespace Hades
           }
           else
           {
-            MODULEENTRY32 MyModuleEntry = { sizeof(MyModuleEntry) };
+            MODULEENTRY32 MyModuleEntry;
+            ZeroMemory(&MyModuleEntry, sizeof(MyModuleEntry));
+            MyModuleEntry.dwSize = sizeof(MyModuleEntry);
             if (!Module32Next(m_Snap, &MyModuleEntry))
             {
               if (GetLastError() != ERROR_NO_MORE_FILES)

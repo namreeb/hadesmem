@@ -18,6 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
+#include "HadesCommon/Config.hpp"
 #include "HadesMemory/Module.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/PeLib/TlsDir.hpp"
@@ -28,9 +29,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #define BOOST_TEST_MODULE TlsDirTest
+#ifdef HADES_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 #include <boost/thread.hpp>
+#ifdef HADES_GCC
+#pragma GCC diagnostic pop
+#endif
 #include <boost/test/unit_test.hpp>
-
 // TLS component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {

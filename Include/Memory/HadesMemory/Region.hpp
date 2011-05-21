@@ -120,7 +120,8 @@ namespace Hades
           m_RegionSize()
         {
           // Get region info
-          MEMORY_BASIC_INFORMATION MyMbi = { 0 };
+          MEMORY_BASIC_INFORMATION MyMbi;
+          ZeroMemory(&MyMbi, sizeof(MyMbi));
           if (VirtualQueryEx(m_Memory->GetProcessHandle(), m_Address, &MyMbi, 
             sizeof(MyMbi)))
           {
@@ -170,7 +171,8 @@ namespace Hades
           m_Address = static_cast<PBYTE>(m_Address) + m_RegionSize;
   
           // Get region info
-          MEMORY_BASIC_INFORMATION MyMbi = { 0 };
+          MEMORY_BASIC_INFORMATION MyMbi;
+          ZeroMemory(&MyMbi, sizeof(MyMbi));
           if (VirtualQueryEx(m_Memory->GetProcessHandle(), m_Address, &MyMbi, 
             sizeof(MyMbi)))
           {

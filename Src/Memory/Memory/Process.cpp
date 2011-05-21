@@ -73,7 +73,9 @@ namespace Hades
         ProcName));
 
       // Search for process
-      PROCESSENTRY32 ProcEntry = { sizeof(ProcEntry) };
+      PROCESSENTRY32 ProcEntry;
+      ZeroMemory(&ProcEntry, sizeof(ProcEntry));
+      ProcEntry.dwSize = sizeof(ProcEntry);
       bool Found = false;
       for (BOOL MoreMods = Process32First(Snap, &ProcEntry); MoreMods; 
         MoreMods = Process32Next(Snap, &ProcEntry)) 
@@ -262,7 +264,9 @@ namespace Hades
       boost::filesystem::path const& WorkingDir)
     {
       // Start process
-      SHELLEXECUTEINFO ExecInfo = { sizeof(ExecInfo) };
+      SHELLEXECUTEINFO ExecInfo;
+      ZeroMemory(&ExecInfo, sizeof(ExecInfo));
+      ExecInfo.cbSize = sizeof(ExecInfo);
 #ifndef SEE_MASK_NOASYNC 
 #define SEE_MASK_NOASYNC 0x00000100
 #endif
@@ -305,7 +309,7 @@ namespace Hades
       Windows::EnsureCloseHandle const Token(TempToken);
 
       // Get the LUID for SE_DEBUG_NAME 
-      LUID Luid = { 0 }; // Locally unique identifier
+      LUID Luid = { 0, 0 }; // Locally unique identifier
       if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
       {
         std::error_code const LastError = GetLastErrorCode();
@@ -324,7 +328,8 @@ namespace Hades
       }
 
       // Process privileges
-      TOKEN_PRIVILEGES Privileges = { 0 };
+      TOKEN_PRIVILEGES Privileges;
+      ZeroMemory(&Privileges, sizeof(Privileges));
       // Set the privileges we need
       Privileges.PrivilegeCount = 1;
       Privileges.Privileges[0].Luid = Luid;
