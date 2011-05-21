@@ -17,29 +17,39 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define BOOST_TEST_MODULE NtHeadersTest
-#include <boost/test/unit_test.hpp>
-
+// Hades
 #include "HadesMemory/Module.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/PeLib/PeFile.hpp"
 #include "HadesMemory/PeLib/NtHeaders.hpp"
 
+// Boost
+#define BOOST_TEST_MODULE NtHeadersTest
+#include <boost/test/unit_test.hpp>
+
+// NT headers component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
+  // Create memory manager for self
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
     
+  // Enumerate module list and run NT headers tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
   std::for_each(Modules.begin(), Modules.end(), 
     [&] (Hades::Memory::Module const& Mod) 
     {
+      // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
       Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
     
+      // Create NT headers manager
       Hades::Memory::NtHeaders MyNtHdrs(MyPeFile);
         
+      // Get raw NT headers
       auto HdrRaw = MyMemory.Read<IMAGE_NT_HEADERS>(MyNtHdrs.GetBase());
       
+      // Ensure all member functions are called without exception, and 
+      // overwrite the value of each field with the existing value
       BOOST_CHECK_EQUAL(MyNtHdrs.IsSignatureValid(), true);
       MyNtHdrs.EnsureSignatureValid();
       MyNtHdrs.SetSignature(MyNtHdrs.GetSignature());
@@ -95,11 +105,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
         MyNtHdrs.SetDataDirectorySize(Dir, MyNtHdrs.GetDataDirectorySize(Dir));
       }
       
-      MyNtHdrs.GetHeadersRaw();
-        
-      auto HdrRawNew = MyMemory.Read<IMAGE_NT_HEADERS>(MyNtHdrs.GetBase());
+      // Get raw TLS dir data again (using the member function this time)
+      auto HdrRawNew = MyNtHdrs.GetHeadersRaw();
       
+      // Ensure NtHeaders getters/setters 'match' by checking that the data is 
+      // unchanged
       BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
-        IMAGE_NT_HEADERS)), 0);
+        HdrRaw)), 0);
     });
 }

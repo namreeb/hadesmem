@@ -17,13 +17,14 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Hades
+#include "HadesMemory/MemoryMgr.hpp"
+
+// Boost
 #define BOOST_TEST_MODULE MemoryMgrTest
 #include <boost/test/unit_test.hpp>
 
-#include <algorithm>
-
-#include "HadesMemory/MemoryMgr.hpp"
-
+// Test function to be called by MemoryMgr::Call
 DWORD_PTR TestCall(PVOID a, PVOID b, PVOID c, PVOID d)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
@@ -35,20 +36,14 @@ DWORD_PTR TestCall(PVOID a, PVOID b, PVOID c, PVOID d)
   return 1234;
 }
 
-struct TestPODType
-{
-  int a;
-  char* b;
-  wchar_t c;
-  long long d;
-};
-
+// MemoryMgr component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
   // Todo: Test other constructors
   Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
   
+  // Call test function and ensure returned data is valid
   std::vector<PVOID> TestCallArgs;
   TestCallArgs.push_back(nullptr);
   TestCallArgs.push_back(reinterpret_cast<PVOID>(-1));
@@ -59,6 +54,16 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
+  // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
+  struct TestPODType
+  {
+    int a;
+    char* b;
+    wchar_t c;
+    long long d;
+  };
+
+  // Test MemoryMgr::Read and MemoryMgr::Write for POD types
   TestPODType MyTestPODType = { 1, 0, L'a', 1234567812345678 };
   auto MyNewTestPODType = MyMemory.Read<TestPODType>(&MyTestPODType);
   BOOST_CHECK_EQUAL(MyNewTestPODType.a, MyTestPODType.a);
@@ -72,6 +77,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyTestPODType2.c, MyTestPODType.c);
   BOOST_CHECK_EQUAL(MyTestPODType2.d, MyTestPODType.d);
   
+  // Test MemoryMgr::Read and MemoryMgr::Write for std::string
   char const* pTestStringA = "Narrow test string.";
   char* pTestStringAReal = const_cast<char*>(pTestStringA);
   auto NewTestStringA = MyMemory.Read<std::string>(pTestStringAReal);
@@ -83,6 +89,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   auto NewTestStringARev = MyMemory.Read<std::string>(pTestStringAReal);
   BOOST_CHECK_EQUAL(NewTestStringARev, TestStringARev);
   
+  // Test MemoryMgr::Read and MemoryMgr::Write for std::wstring
   wchar_t const* pTestStringW = L"Wide test string.";
   wchar_t* pTestStringWReal = const_cast<wchar_t*>(pTestStringW);
   auto NewTestStringW = MyMemory.Read<std::wstring>(pTestStringWReal);
@@ -96,41 +103,56 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
   BOOST_CHECK(NewTestStringWRev == TestStringWRev);
   
+  // Test MemoryMgr::CanRead
   BOOST_CHECK_EQUAL(MyMemory.CanRead(GetModuleHandle(NULL)), true);
   int ReadTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.CanRead(&ReadTestStack), true);
   
+  // Test MemoryMgr::CanWrite
   BOOST_CHECK_EQUAL(MyMemory.CanWrite(GetModuleHandle(NULL)), false);
   int WriteTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.CanWrite(&WriteTestStack), true);
   
-  
+  // Test MemoryMgr::IsGuard
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(GetModuleHandle(NULL)), false);
   int GuardTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(&GuardTestStack), false);
   
+  // Test MemoryMgr::Alloc and MemoryMgr::Free
   auto pNewMemBlock = MyMemory.Alloc(0x1000);
   BOOST_CHECK(pNewMemBlock != nullptr);
   MyMemory.Free(pNewMemBlock);
   
+  // Test AllocAndFree
+  {
+    Hades::Memory::AllocAndFree MyAllocTest(MyMemory, 0x1000);
+  }
+  
+  // Test MemoryMgr::GetProcessID
   BOOST_CHECK_EQUAL(MyMemory.GetProcessID(), GetCurrentProcessId());
   
+  // Test MemoryMgr::GetProcessHandle
   BOOST_CHECK_EQUAL(MyMemory.GetProcessHandle(), GetCurrentProcess());
   
+  // Ensure we can find a valid Kernel32 instance
   HMODULE Kernel32Mod = GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(Kernel32Mod != nullptr);
   
+  // Ensure we can find Kernel32.dll!GetCurrentProcessId
   FARPROC pGetCurrentProcessId = GetProcAddress(Kernel32Mod, 
     "GetCurrentProcessId");
   BOOST_REQUIRE(pGetCurrentProcessId != nullptr);
   
+  // 'Remotely' call Kernel32.dll!GetCurrentProcessId and ensure its result 
+  // matches the local results.
+  // Todo: Test GetRemoteProcAddress with ordinals
   BOOST_CHECK_EQUAL(MyMemory.GetRemoteProcAddress(Kernel32Mod, 
     "kernel32.dll", "GetCurrentProcessId"), pGetCurrentProcessId);
-    
+  
+  // Test MemoryMgr::FlushCache
   MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), 10);
-    
+  
+  // Todo: Verify MemoryMgr::IsWoW64 return value
   MyMemory.IsWoW64();
-    
-  // Todo: Test GetRemoteProcAddress with ordinals
 }

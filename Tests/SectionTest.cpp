@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
           // Ensure TlsDir getters/setters 'match' by checking that the data is 
           // unchanged
           BOOST_CHECK_EQUAL(std::memcmp(&HdrRaw, &HdrRawNew, sizeof(
-            IMAGE_SECTION_HEADER)), 0);
+            HdrRaw)), 0);
         });
     });
 }
