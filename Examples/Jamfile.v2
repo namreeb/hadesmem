@@ -8,6 +8,7 @@ project
     <toolset>msvc:<warnings-as-errors>on 
     <toolset>gcc:<warnings-as-errors>on 
     <toolset>gcc:<cxxflags>-Wextra 
+    <toolset>gcc:<cxxflags>-pedantic-errors 
     <toolset>gcc:<linkflags>-municode  
   ;
 
