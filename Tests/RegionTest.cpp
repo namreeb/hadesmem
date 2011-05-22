@@ -18,8 +18,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesMemory/Region.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
+#include <HadesMemory/Region.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
 
 // Boost
 #define BOOST_TEST_MODULE RegionTest

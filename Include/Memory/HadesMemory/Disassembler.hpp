@@ -36,7 +36,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_MSVC
 #pragma warning(push, 1)
 #endif
-#include "BeaEngine/BeaEngine.h"
+#include <BeaEngine/BeaEngine.h>
 #ifdef HADES_MSVC
 #pragma warning(pop)
 #endif

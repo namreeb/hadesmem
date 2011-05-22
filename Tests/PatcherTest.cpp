@@ -18,9 +18,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesCommon/Config.hpp"
-#include "HadesMemory/Patcher.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/Patcher.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
 
 // C++ Standard Library
 #include <string>

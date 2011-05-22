@@ -18,13 +18,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesCommon/Config.hpp"
-#include "HadesMemory/Module.hpp"
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/PeLib/TlsDir.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
-#include "HadesMemory/PeLib/DosHeader.hpp"
-#include "HadesMemory/PeLib/NtHeaders.hpp"
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/Module.hpp>
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/PeLib/TlsDir.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
+#include <HadesMemory/PeLib/DosHeader.hpp>
+#include <HadesMemory/PeLib/NtHeaders.hpp>
 
 // C++ Standard Library
 #include <algorithm>

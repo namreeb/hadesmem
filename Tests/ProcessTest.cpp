@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesMemory/Process.hpp"
+#include <HadesMemory/Process.hpp>
 
 // Boost
 #define BOOST_TEST_MODULE ProcessTest

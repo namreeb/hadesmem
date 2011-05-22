@@ -34,9 +34,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Shellapi.h>
 
 // Hades
-#include "HadesCommon/I18n.hpp"
-#include "HadesCommon/Config.hpp"
-#include "HadesMemory/Memory.hpp"
+#include <HadesCommon/I18n.hpp>
+#include <HadesCommon/Config.hpp>
+#include <HadesMemory/Memory.hpp>
 
 #ifdef HADES_GCC
 int wmain(int argc, wchar_t* argv[]);

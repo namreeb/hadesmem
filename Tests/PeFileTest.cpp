@@ -18,8 +18,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include "HadesMemory/MemoryMgr.hpp"
-#include "HadesMemory/PeLib/PeFile.hpp"
+#include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/PeLib/PeFile.hpp>
 
 // Boost
 #define BOOST_TEST_MODULE PeFileTest

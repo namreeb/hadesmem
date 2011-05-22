@@ -48,7 +48,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic ignored "-Wparentheses"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
-#include "AsmJit/AsmJit.h"
+#include <AsmJit/AsmJit.h>
 #ifdef HADES_MSVC
 #pragma warning(pop)
 #endif
