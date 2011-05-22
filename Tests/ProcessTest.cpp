@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create process manager for self
   // Todo: Test other constructors
-  Hades::Memory::Process MyProcess(GetCurrentProcessId());
+  Hades::Memory::Process const MyProcess(GetCurrentProcessId());
     
   // Check process APIs for predictable values where possible, otherwise just 
   // ensure they run without exception

@@ -29,11 +29,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Open self as a memory-based PeFile
   // Todo: Also test FileType_Data
-  Hades::Memory::PeFile MyPeFile(MyMemory, GetModuleHandle(NULL));
+  Hades::Memory::PeFile const MyPeFile(MyMemory, GetModuleHandle(NULL));
   
   // Check PeFile APIs for predictable values where possible, otherwise just 
   // ensure they run without exception

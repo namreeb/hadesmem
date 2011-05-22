@@ -32,25 +32,25 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
     
   // Create injector manager
-  Hades::Memory::Injector MyInjector(MyMemory);
+  Hades::Memory::Injector const MyInjector(MyMemory);
     
   // Get handle to Kernel32
-  HMODULE Kernel32Mod = GetModuleHandle(L"kernel32.dll");
+  HMODULE const Kernel32Mod = GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(Kernel32Mod != nullptr);
   
   // 'Inject' Kernel32 with path resolution disabled and ensure that the 
   // module handle matches the one retrieved via GetModuleHandle earlier
   // Todo: Test path resolution
-  HMODULE Kernel32ModNew = MyInjector.InjectDll(L"kernel32.dll", false);
+  HMODULE const Kernel32ModNew = MyInjector.InjectDll(L"kernel32.dll", false);
   BOOST_CHECK_EQUAL(Kernel32Mod, Kernel32ModNew);
   
   // Call Kernel32.dll!GetCurrentProcessId and ensure the return value and 
   // last error code are their expected values
-  std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(L"kernel32.dll", 
-    Kernel32ModNew, "GetCurrentProcessId");
+  std::pair<DWORD_PTR, DWORD> const ExpRet = MyInjector.CallExport(
+    L"kernel32.dll", Kernel32ModNew, "GetCurrentProcessId");
   BOOST_CHECK_EQUAL(ExpRet.first, GetCurrentProcessId());
   BOOST_CHECK_EQUAL(ExpRet.second, static_cast<DWORD>(0));
   

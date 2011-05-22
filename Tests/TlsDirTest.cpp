@@ -45,13 +45,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Use threads and TSS to ensure that at least one module has a TLS dir
-  auto DoNothing = [] () { };
+  auto const DoNothing = [] () { };
   boost::thread DoNothingThread(DoNothing);
   boost::thread_specific_ptr<int> TssDummy;
   TssDummy.reset(new int(1234));
   
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
     
   // Enumerate module list and run TLS dir tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     {
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
-      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
       
@@ -74,7 +74,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       }
       
       // Get raw TLS dir data
-      auto TlsDirRaw = MyMemory.Read<IMAGE_TLS_DIRECTORY>(MyTlsDir.GetBase());
+      auto const TlsDirRaw = MyMemory.Read<IMAGE_TLS_DIRECTORY>(MyTlsDir.
+        GetBase());
       
       // Ensure all member functions are called without exception, and 
       // overwrite the value of each field with the existing value
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       MyTlsDir.GetTlsDirRaw();
       
       // Get raw TLS dir data again (using the member function this time)
-      auto TlsDirRawNew = MyTlsDir.GetTlsDirRaw();
+      auto const TlsDirRawNew = MyTlsDir.GetTlsDirRaw();
       
       // Ensure TlsDir getters/setters 'match' by checking that the data is 
       // unchanged

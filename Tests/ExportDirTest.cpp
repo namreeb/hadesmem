@@ -37,7 +37,7 @@ BOOST_SYMBOL_EXPORT void TestExport() { }
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Enumerate module list and run section tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     {
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
-      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       }
       
       // Get raw export dir data
-      auto ExpDirRaw = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
+      auto const ExpDirRaw = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
         MyExportDir.GetBase());
       
       // Ensure all member functions are called without exception, and 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       MyExportDir.GetExportDirRaw();
       
       // Get raw export dir data again (using the member function this time)
-      auto ExpDirRawNew = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
+      auto const ExpDirRawNew = MyMemory.Read<IMAGE_EXPORT_DIRECTORY>(
         MyExportDir.GetBase());
         
       // Ensure ExportDir getters/setters 'match' by checking that the data is 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       // prove it should.
       Hades::Memory::ExportList Exports(MyPeFile);
       std::for_each(Exports.begin(), Exports.end(), 
-        [&] (Hades::Memory::Export& E)
+        [&] (Hades::Memory::Export const& E)
         {
           // Test export constructor
           Hades::Memory::Export const Test(MyPeFile, E.GetOrdinal());

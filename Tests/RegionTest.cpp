@@ -30,7 +30,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Enumerate region list and run tests on all regions
   // Todo: Test region enumeration APIs before relying on them
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     [&] (Hades::Memory::Region const& R)
     {
       // Test Region::Region
-      Hades::Memory::Region Test(MyMemory, R.GetBase());
+      Hades::Memory::Region const Test(MyMemory, R.GetBase());
       
       // Test region member functions that must be non-zero on non-free blocks
       // Todo: Test Region::GetState before relying on its data

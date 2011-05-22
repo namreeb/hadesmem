@@ -32,7 +32,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
     
   // Enumerate module list and run NT headers tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
@@ -41,12 +41,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     {
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
-      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
     
       // Get raw NT headers
-      auto HdrRaw = MyMemory.Read<IMAGE_NT_HEADERS>(MyNtHeaders.GetBase());
+      auto const HdrRaw = MyMemory.Read<IMAGE_NT_HEADERS>(
+        MyNtHeaders.GetBase());
       
       // Ensure all member functions are called without exception, and 
       // overwrite the value of each field with the existing value
@@ -113,7 +114,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       }
       
       // Get raw TLS dir data again (using the member function this time)
-      auto HdrRawNew = MyNtHeaders.GetHeadersRaw();
+      auto const HdrRawNew = MyNtHeaders.GetHeadersRaw();
       
       // Ensure NtHeaders getters/setters 'match' by checking that the data is 
       // unchanged

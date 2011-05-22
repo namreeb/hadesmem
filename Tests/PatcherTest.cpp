@@ -41,7 +41,7 @@ using namespace boost::assign;
 // Function to be used as the detour target
 DWORD HookMe()
 {
-  std::string Foo("Foo");
+  std::string const Foo("Foo");
   BOOST_CHECK_EQUAL(Foo, "Foo");
   return 0x1234;
 }
@@ -53,7 +53,7 @@ std::shared_ptr<Hades::Memory::PatchDetour> pDetour1;
 DWORD HookMe_Hook()
 {
   BOOST_CHECK(pDetour1->GetTrampoline() != nullptr);
-  auto pOrig = reinterpret_cast<DWORD (*)()>(reinterpret_cast<DWORD_PTR>(
+  auto const pOrig = reinterpret_cast<DWORD (*)()>(reinterpret_cast<DWORD_PTR>(
     pDetour1->GetTrampoline()));
   BOOST_CHECK_EQUAL(pOrig(), static_cast<DWORD>(0x1234));
   return 0x1337;
@@ -63,10 +63,10 @@ DWORD HookMe_Hook()
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Allocate memory block for use in byte patch tests
-  Hades::Memory::AllocAndFree TestMem1(MyMemory, 0x1000);
+  Hades::Memory::AllocAndFree const TestMem1(MyMemory, 0x1000);
   // Create test data for use in byte patch tests
   std::vector<BYTE> Data1;
   Data1 += 0x00, 0x11, 0x22, 0x33, 0x44;
@@ -74,15 +74,15 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Create byte patcher
   Hades::Memory::PatchRaw Patch1(MyMemory, TestMem1.GetBase(), Data1);
   // Get original memory contents
-  auto Orig1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
+  auto const Orig1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
   // Apply patch
   Patch1.Apply();
   // Get patched memory contents
-  auto Apply1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
+  auto const Apply1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
   // Remove patch
   Patch1.Remove();
   // Get unpatched memory contents
-  auto Remove1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
+  auto const Remove1 = MyMemory.Read<std::vector<BYTE>>(TestMem1.GetBase(), 5);
   // Ensure original and unpatched memory contents are the same
   BOOST_CHECK(Orig1 == Remove1);
   // Ensure original and patched memory contents are the same

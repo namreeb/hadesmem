@@ -36,7 +36,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
     
   // Enumerate module list and run section tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     {
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
-      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
       
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       WORD Number = 0;
       Hades::Memory::SectionList Sections(MyPeFile);
       std::for_each(Sections.begin(), Sections.end(), 
-        [&] (Hades::Memory::Section& S)
+        [&] (Hades::Memory::Section const& S)
         {
           // Check Section::GetNumber
           BOOST_CHECK_EQUAL(S.GetNumber(), Number);
@@ -64,7 +64,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
           Hades::Memory::Section Test(MyPeFile, S.GetNumber());
           
           // Get raw section header data
-          auto HdrRaw = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
+          auto const HdrRaw = MyMemory.Read<IMAGE_SECTION_HEADER>(
+            Test.GetBase());
           
           // Ensure all member functions are called without exception, and 
           // overwrite the value of each field with the existing value
@@ -80,7 +81,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
           Test.SetCharacteristics(Test.GetCharacteristics());
             
           // Get raw section header data again
-          auto HdrRawNew = MyMemory.Read<IMAGE_SECTION_HEADER>(Test.GetBase());
+          auto const HdrRawNew = MyMemory.Read<IMAGE_SECTION_HEADER>(
+            Test.GetBase());
           
           // Ensure TlsDir getters/setters 'match' by checking that the data is 
           // unchanged

@@ -34,11 +34,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Allocate memory block to test scanner with
   // Todo: Tests which cross region boundaries
-  Hades::Memory::AllocAndFree MyMemBlock(MyMemory, 0x1000);
+  Hades::Memory::AllocAndFree const MyMemBlock(MyMemory, 0x1000);
   PBYTE pMemBlock = static_cast<PBYTE>(MyMemBlock.GetBase());
   
   // Write test std::strings to memory block at known offset
@@ -58,13 +58,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     char* b;
     bool c;
   };
-  TestPODTypeT TestPODType = { 1337, reinterpret_cast<char*>(-1), true };
+  TestPODTypeT const TestPODType = { 1337, reinterpret_cast<char*>(-1), true };
   MyMemory.Write(pMemBlock + 0x400, TestPODType);
   MyMemory.Write(pMemBlock + 0x500, TestPODType);
   
   // Write test vectors of POD structures to memory block at known offset
-  TestPODTypeT TestPODTypeOther = { 4321, reinterpret_cast<char*>(0x87654321), 
-    false };
+  TestPODTypeT const TestPODTypeOther = { 4321, reinterpret_cast<char*>(
+    0x87654321), false };
   std::vector<TestPODTypeT> TestPODTypeVec;
   for (std::size_t i = 0; i != 10; ++i)
   {
@@ -74,14 +74,14 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyMemory.Write(pMemBlock + 0x700, TestPODTypeVec);
   
   // Create scanner targetting our memory block
-  Hades::Memory::Scanner MyScanner(MyMemory, MyMemBlock.GetBase(), 
+  Hades::Memory::Scanner const MyScanner(MyMemory, MyMemBlock.GetBase(), 
     static_cast<PBYTE>(MyMemBlock.GetBase()) + MyMemBlock.GetSize());
   
   // Test Scanner::Find for T = std::string
-  PVOID pTestStringA = MyScanner.Find(TestStringA);
+  PVOID const pTestStringA = MyScanner.Find(TestStringA);
   BOOST_CHECK(pTestStringA == pMemBlock + 0x000);
   // Test Scanner::FindAll for T = std::string
-  std::vector<PVOID> pTestStringAVec = MyScanner.FindAll(TestStringA);
+  std::vector<PVOID> const pTestStringAVec = MyScanner.FindAll(TestStringA);
   BOOST_CHECK_EQUAL(pTestStringAVec.size(), static_cast<std::size_t>(2));
   std::for_each(pTestStringAVec.cbegin(), pTestStringAVec.cend(), 
     [=] (PVOID p)
@@ -90,10 +90,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     });
   
   // Test Scanner::Find for T = std::wstring
-  PVOID pTestStringW = MyScanner.Find(TestStringW);
+  PVOID const pTestStringW = MyScanner.Find(TestStringW);
   BOOST_CHECK(pTestStringW == pMemBlock + 0x200);
   // Test Scanner::FindAll for T = std::wstring
-  std::vector<PVOID> pTestStringWVec = MyScanner.FindAll(TestStringW);
+  std::vector<PVOID> const pTestStringWVec = MyScanner.FindAll(TestStringW);
   BOOST_CHECK_EQUAL(pTestStringWVec.size(), static_cast<std::size_t>(2));
   std::for_each(pTestStringWVec.cbegin(), pTestStringWVec.cend(), 
     [=] (PVOID p)
@@ -102,10 +102,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     });
   
   // Test Scanner::Find for T = POD type
-  PVOID pTestPODType = MyScanner.Find(TestPODType);
+  PVOID const pTestPODType = MyScanner.Find(TestPODType);
   BOOST_CHECK(pTestPODType == pMemBlock + 0x400);
   // Test Scanner::FindAll for T = POD type
-  std::vector<PVOID> TestPODTypeAddrList = MyScanner.FindAll(TestPODType);
+  std::vector<PVOID> const TestPODTypeAddrList = MyScanner.FindAll(
+    TestPODType);
   BOOST_CHECK_EQUAL(TestPODTypeAddrList.size(), static_cast<std::size_t>(2));
   std::for_each(TestPODTypeAddrList.cbegin(), TestPODTypeAddrList.cend(), 
     [=] (PVOID p)
@@ -114,11 +115,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     });
   
   // Test Scanner::Find for T = std::vector<U> where U = POD type
-  PVOID pTestPODTypeVec = MyScanner.Find(TestPODTypeVec);
+  PVOID const pTestPODTypeVec = MyScanner.Find(TestPODTypeVec);
   BOOST_CHECK(pTestPODTypeVec == pMemBlock + 0x600);
   // Test Scanner::FindAll for T = std::vector<U> where U = POD type
-  std::vector<PVOID> TestPODTypeVecAddrList = MyScanner.FindAll(TestPODTypeVec);
-  BOOST_CHECK_EQUAL(TestPODTypeVecAddrList.size(), static_cast<std::size_t>(2));
+  std::vector<PVOID> const TestPODTypeVecAddrList = MyScanner.FindAll(
+    TestPODTypeVec);
+  BOOST_CHECK_EQUAL(TestPODTypeVecAddrList.size(), static_cast<std::size_t>(
+    2));
   std::for_each(TestPODTypeVecAddrList.cbegin(), 
     TestPODTypeVecAddrList.cend(), 
     [=] (PVOID p)

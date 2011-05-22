@@ -25,7 +25,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
 
 // Test function to be called by MemoryMgr::Call
-DWORD_PTR TestCall(PVOID a, PVOID b, PVOID c, PVOID d)
+DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
   // Todo: Test other constructors
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Call test function and ensure returned data is valid
   std::vector<PVOID> TestCallArgs;
@@ -49,8 +49,9 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(-1));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
-  std::pair<DWORD_PTR, DWORD> CallRet = MyMemory.Call(reinterpret_cast<PVOID>(
-    reinterpret_cast<DWORD_PTR>(&TestCall)), TestCallArgs);
+  std::pair<DWORD_PTR, DWORD> const CallRet = MyMemory.Call(
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
+    TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
@@ -78,44 +79,44 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyTestPODType2.d, MyTestPODType.d);
   
   // Test MemoryMgr::Read and MemoryMgr::Write for std::string
-  char const* pTestStringA = "Narrow test string.";
-  char* pTestStringAReal = const_cast<char*>(pTestStringA);
-  auto NewTestStringA = MyMemory.Read<std::string>(pTestStringAReal);
+  char const* const pTestStringA = "Narrow test string.";
+  char* const pTestStringAReal = const_cast<char*>(pTestStringA);
+  auto const NewTestStringA = MyMemory.Read<std::string>(pTestStringAReal);
   BOOST_CHECK_EQUAL(NewTestStringA, pTestStringA);
-  auto TestStringAStr = std::string(pTestStringA);
-  auto TestStringARev = std::string(TestStringAStr.rbegin(), 
+  auto const TestStringAStr = std::string(pTestStringA);
+  auto const TestStringARev = std::string(TestStringAStr.rbegin(), 
     TestStringAStr.rend());
   MyMemory.Write(pTestStringAReal, TestStringARev);
-  auto NewTestStringARev = MyMemory.Read<std::string>(pTestStringAReal);
+  auto const NewTestStringARev = MyMemory.Read<std::string>(pTestStringAReal);
   BOOST_CHECK_EQUAL(NewTestStringARev, TestStringARev);
   
   // Test MemoryMgr::Read and MemoryMgr::Write for std::wstring
-  wchar_t const* pTestStringW = L"Wide test string.";
-  wchar_t* pTestStringWReal = const_cast<wchar_t*>(pTestStringW);
-  auto NewTestStringW = MyMemory.Read<std::wstring>(pTestStringWReal);
+  wchar_t const* const pTestStringW = L"Wide test string.";
+  wchar_t* const pTestStringWReal = const_cast<wchar_t*>(pTestStringW);
+  auto const NewTestStringW = MyMemory.Read<std::wstring>(pTestStringWReal);
   // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
   BOOST_CHECK(NewTestStringW == pTestStringW);
-  auto TestStringWStr = std::wstring(pTestStringW);
-  auto TestStringWRev = std::wstring(TestStringWStr.rbegin(), 
+  auto const TestStringWStr = std::wstring(pTestStringW);
+  auto const TestStringWRev = std::wstring(TestStringWStr.rbegin(), 
     TestStringWStr.rend());
   MyMemory.Write(pTestStringWReal, TestStringWRev);
-  auto NewTestStringWRev = MyMemory.Read<std::wstring>(pTestStringWReal);
+  auto const NewTestStringWRev = MyMemory.Read<std::wstring>(pTestStringWReal);
   // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
   BOOST_CHECK(NewTestStringWRev == TestStringWRev);
   
   // Test MemoryMgr::CanRead
   BOOST_CHECK_EQUAL(MyMemory.CanRead(GetModuleHandle(NULL)), true);
-  int ReadTestStack = 0;
+  int const ReadTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.CanRead(&ReadTestStack), true);
   
   // Test MemoryMgr::CanWrite
   BOOST_CHECK_EQUAL(MyMemory.CanWrite(GetModuleHandle(NULL)), false);
-  int WriteTestStack = 0;
+  int const WriteTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.CanWrite(&WriteTestStack), true);
   
   // Test MemoryMgr::IsGuard
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(GetModuleHandle(NULL)), false);
-  int GuardTestStack = 0;
+  int const GuardTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(&GuardTestStack), false);
   
   // Test MemoryMgr::Alloc and MemoryMgr::Free
@@ -125,7 +126,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Test AllocAndFree
   {
-    Hades::Memory::AllocAndFree MyAllocTest(MyMemory, 0x1000);
+    Hades::Memory::AllocAndFree const MyAllocTest(MyMemory, 0x1000);
   }
   
   // Test MemoryMgr::GetProcessID
@@ -135,11 +136,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyMemory.GetProcessHandle(), GetCurrentProcess());
   
   // Ensure we can find a valid Kernel32 instance
-  HMODULE Kernel32Mod = GetModuleHandle(L"kernel32.dll");
+  HMODULE const Kernel32Mod = GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(Kernel32Mod != nullptr);
   
   // Ensure we can find Kernel32.dll!GetCurrentProcessId
-  FARPROC pGetCurrentProcessId = GetProcAddress(Kernel32Mod, 
+  FARPROC const pGetCurrentProcessId = GetProcAddress(Kernel32Mod, 
     "GetCurrentProcessId");
   BOOST_REQUIRE(pGetCurrentProcessId != nullptr);
   

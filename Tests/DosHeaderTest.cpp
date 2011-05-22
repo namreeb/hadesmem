@@ -31,7 +31,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
   
   // Enumerate module list and run DOS header tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
@@ -40,13 +40,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     {
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
-      Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       
       // Create DOS header manager
       Hades::Memory::DosHeader MyDosHdr(MyPeFile);
         
       // Get raw DOS header
-      auto HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
+      auto const HdrRaw = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
       
       // Ensure all member functions are called without exception, and 
       // overwrite the value of each field with the existing value
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       MyDosHdr.SetNewHeaderOffset(MyDosHdr.GetNewHeaderOffset());
       
       // Get raw DOS header again
-      auto HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
+      auto const HdrRawNew = MyMemory.Read<IMAGE_DOS_HEADER>(MyPeFile.GetBase());
       
       // Ensure DosHeader getters/setters 'match' by checking that the data is 
       // unchanged

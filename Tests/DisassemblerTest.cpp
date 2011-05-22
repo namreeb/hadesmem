@@ -35,20 +35,20 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
 
   // Open self as a memory-based PeFile
-  Hades::Memory::PeFile MyPeFile(MyMemory, GetModuleHandle(NULL));
+  Hades::Memory::PeFile const MyPeFile(MyMemory, GetModuleHandle(NULL));
   Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
   Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
     
   // Get EP of self from NT headers
-  auto EntryPointRva = MyNtHeaders.GetAddressOfEntryPoint();
-  auto pEntryPoint = MyPeFile.RvaToVa(EntryPointRva);
+  auto const EntryPointRva = MyNtHeaders.GetAddressOfEntryPoint();
+  auto const pEntryPoint = MyPeFile.RvaToVa(EntryPointRva);
   BOOST_REQUIRE(pEntryPoint != 0);
   
   // Create disasembler manager
-  Hades::Memory::Disassembler MyDisassembler(MyMemory);
+  Hades::Memory::Disassembler const MyDisassembler(MyMemory);
   
   // Disassemble EP for various lengths and ensure it succeeded
   BOOST_CHECK_EQUAL(MyDisassembler.Disassemble(pEntryPoint, 1).size(), 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Verify that the raw data buffer in the DiasmData structure matches the 
   // specified length.
-  auto DisasmData = MyDisassembler.Disassemble(pEntryPoint, 500);
+  auto const DisasmData = MyDisassembler.Disassemble(pEntryPoint, 500);
   std::for_each(DisasmData.begin(), DisasmData.end(), 
     [] (Hades::Memory::DisasmData const& Data)
   {
@@ -76,7 +76,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   });
   
   // Verify that none of the instruction strings are empty
-  auto DisasmDataStr = MyDisassembler.DisassembleToStr(pEntryPoint, 500);
+  auto const DisasmDataStr = MyDisassembler.DisassembleToStr(pEntryPoint, 
+    500);
   std::for_each(DisasmDataStr.begin(), DisasmDataStr.end(), 
     [] (std::wstring const& Str)
   {
