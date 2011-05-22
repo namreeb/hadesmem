@@ -24,6 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 
 // Boost
+#include <boost/timer.hpp>
 #include <boost/format.hpp>
 #include <boost/version.hpp>
 #include <boost/lexical_cast.hpp>
@@ -61,8 +62,12 @@ int CALLBACK wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/,
 }
 #endif
 
+// Program entry point
 int wmain(int argc, wchar_t* argv[])
 {
+  // Program timer
+  boost::timer ProgTimer;
+
   try
   {
     // Attempt to detect memory leaks in debug mode
@@ -338,6 +343,9 @@ int wmain(int argc, wchar_t* argv[])
   {
     std::cerr << boost::diagnostic_information(e) << std::endl;
   }
+  
+  // Print elapsed time
+  std::wcout << "\nElapsed Time: " << ProgTimer.elapsed() << "\n";
   
   return 0;
 }
