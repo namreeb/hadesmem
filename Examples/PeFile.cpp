@@ -66,19 +66,19 @@ int CALLBACK wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/,
 int wmain(int argc, wchar_t* argv[])
 {
   // Program timer
-  boost::timer ProgTimer;
+  boost::timer const ProgTimer;
 
   try
   {
     // Attempt to detect memory leaks in debug mode
 #ifdef _DEBUG
-    int CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+    int const CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     int NewFlags = (_CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF | 
       _CRTDBG_CHECK_ALWAYS_DF);
     _CrtSetDbgFlag(CurrentFlags | NewFlags);
 
     // Get default heap
-    HANDLE ProcHeap = GetProcessHeap();
+    HANDLE const ProcHeap = GetProcessHeap();
     if (!ProcHeap)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -145,24 +145,24 @@ int wmain(int argc, wchar_t* argv[])
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("You must supply a target module."));
     }
-    std::wstring ModuleName(argv[2]);
+    std::wstring const ModuleName(argv[2]);
         
     // Open memory manager
-    Hades::Memory::MemoryMgr MyMemory(ProcId == static_cast<DWORD>(-1) ? 
+    Hades::Memory::MemoryMgr const MyMemory(ProcId == static_cast<DWORD>(-1) ? 
       GetCurrentProcessId() : ProcId);
         
     // Dump sections for module
-    auto DumpSections = [&] (Hades::Memory::Module const& M) 
+    auto const DumpSections = [&] (Hades::Memory::Module const& M) 
     {
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, M.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate section list for current module
       Hades::Memory::SectionList Sections(MyPeFile);
       std::for_each(Sections.begin(), Sections.end(), 
-        [&] (Hades::Memory::Section& S)
+        [&] (Hades::Memory::Section const& S)
         {
           // Dump section info
           std::wcout << boost::wformat(L"S: %s - Number = %u, Name = %s, "
@@ -173,23 +173,23 @@ int wmain(int argc, wchar_t* argv[])
     };
         
     // Dump TLS data for module
-    auto DumpTLS = [&] (Hades::Memory::Module const& M) 
+    auto const DumpTLS = [&] (Hades::Memory::Module const& M) 
     {
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, M.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Ensure module has TLS dir
-      Hades::Memory::TlsDir MyTlsDir(MyPeFile);
+      Hades::Memory::TlsDir const MyTlsDir(MyPeFile);
       if (!MyTlsDir.IsValid())
       {
         return;
       }
       
       // Dump TLS callbacks
-      auto TlsCallbacks(MyTlsDir.GetCallbacks());
-      std::for_each(TlsCallbacks.begin(), TlsCallbacks.end(), 
+      auto const TlsCallbacks(MyTlsDir.GetCallbacks());
+      std::for_each(TlsCallbacks.cbegin(), TlsCallbacks.cend(), 
         [&] (PIMAGE_TLS_CALLBACK T)
         {
           // Dump section info
@@ -199,17 +199,17 @@ int wmain(int argc, wchar_t* argv[])
     };
     
     // Dump exports for module
-    auto DumpExports = [&] (Hades::Memory::Module const& M) 
+    auto const DumpExports = [&] (Hades::Memory::Module const& M) 
     {
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, M.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate export list for current module
       Hades::Memory::ExportList Exports(MyPeFile);
       std::for_each(Exports.begin(), Exports.end(), 
-        [&] (Hades::Memory::Export& E)
+        [&] (Hades::Memory::Export const& E)
         {
           // Output prefix
           std::wcout << "E: ";
@@ -242,23 +242,23 @@ int wmain(int argc, wchar_t* argv[])
     };
     
     // Dump imports for module
-    auto DumpImports = [&] (Hades::Memory::Module const& M) 
+    auto const DumpImports = [&] (Hades::Memory::Module const& M) 
     {
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, M.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate import dir list for current module
       Hades::Memory::ImportDirList ImpDirs(MyPeFile);
       std::for_each(ImpDirs.begin(), ImpDirs.end(), 
-        [&] (Hades::Memory::ImportDir& I)
+        [&] (Hades::Memory::ImportDir const& I)
         {
           // Enumerate import thunk list for current module
           Hades::Memory::ImportThunkList ImpThunks(MyPeFile, 
             I.GetCharacteristics());
           std::for_each(ImpThunks.begin(), ImpThunks.end(), 
-            [&] (Hades::Memory::ImportThunk& T)
+            [&] (Hades::Memory::ImportThunk const& T)
             {
               // Output prefix
               std::wcout << "I: ";
@@ -280,21 +280,21 @@ int wmain(int argc, wchar_t* argv[])
     };
     
     // Dump all PE file info
-    auto DumpAll = [&] (Hades::Memory::Module const& M) 
+    auto const DumpAll = [&] (Hades::Memory::Module const& M) 
     {
       // Dump module name
       std::wcout << M.GetName() << "\n\n";
       
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::PeFile const MyPeFile(MyMemory, M.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Skip modules which don't match our architecture
 #if defined(_M_X64)
-      WORD MachineMe = IMAGE_FILE_MACHINE_AMD64;
+      WORD const MachineMe = IMAGE_FILE_MACHINE_AMD64;
 #elif defined(_M_IX86)
-      WORD MachineMe = IMAGE_FILE_MACHINE_I386;
+      WORD const MachineMe = IMAGE_FILE_MACHINE_I386;
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif

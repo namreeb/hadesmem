@@ -67,19 +67,19 @@ int CALLBACK wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/,
 int wmain(int argc, wchar_t* argv[])
 {
   // Program timer
-  boost::timer ProgTimer;
+  boost::timer const ProgTimer;
 
   try
   {
     // Attempt to detect memory leaks in debug mode
 #ifdef _DEBUG
-    int CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+    int const CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     int NewFlags = (_CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF | 
       _CRTDBG_CHECK_ALWAYS_DF);
     _CrtSetDbgFlag(CurrentFlags | NewFlags);
 
     // Get default heap
-    HANDLE ProcHeap = GetProcessHeap();
+    HANDLE const ProcHeap = GetProcessHeap();
     if (!ProcHeap)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -159,11 +159,11 @@ int wmain(int argc, wchar_t* argv[])
     }
         
     // Open memory manager
-    Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+    Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
     
     // Load base module
-    Hades::Windows::EnsureFreeLibrary BaseMod = LoadLibraryEx(
-      BaseModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
+    Hades::Windows::EnsureFreeLibrary const BaseMod(LoadLibraryEx(
+      BaseModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!BaseMod)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -174,8 +174,8 @@ int wmain(int argc, wchar_t* argv[])
     }
     
     // Load target module
-    Hades::Windows::EnsureFreeLibrary TargetMod = LoadLibraryEx(
-      TargetModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
+    Hades::Windows::EnsureFreeLibrary const TargetMod(LoadLibraryEx(
+      TargetModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!TargetMod)
     {
       std::error_code const LastError = Hades::GetLastErrorCode();
@@ -186,10 +186,10 @@ int wmain(int argc, wchar_t* argv[])
     }
     
     // Get exports for module
-    auto GetExports = [&MyMemory] (HMODULE Base) -> std::set<std::string> 
+    auto const GetExports = [&] (HMODULE Base) -> std::set<std::string> 
     {
       // Create PE file object for current module
-      Hades::Memory::PeFile MyPeFile(MyMemory, Base);
+      Hades::Memory::PeFile const MyPeFile(MyMemory, Base);
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
@@ -199,7 +199,7 @@ int wmain(int argc, wchar_t* argv[])
       Hades::Memory::ExportList Exports(MyPeFile);
       std::transform(Exports.begin(), Exports.end(), std::inserter(Result, 
         Result.begin()), 
-        [&] (Hades::Memory::Export& E) -> std::string 
+        [&] (Hades::Memory::Export const& E) -> std::string 
         {
           std::string Result;
           
@@ -225,20 +225,20 @@ int wmain(int argc, wchar_t* argv[])
     };
     
     // Get exports for base module
-    std::set<std::string> BaseExports(GetExports(BaseMod));
+    std::set<std::string> const BaseExports(GetExports(BaseMod));
       
     // Get exports for target module
-    std::set<std::string> TargetExports(GetExports(TargetMod));
+    std::set<std::string> const TargetExports(GetExports(TargetMod));
     
     // Find exports in target that do not exist in base
     std::set<std::string> NewExports;
-    set_difference(TargetExports.begin(), TargetExports.end(), 
-      BaseExports.begin(), BaseExports.end(), std::inserter(NewExports, 
+    set_difference(TargetExports.cbegin(), TargetExports.cend(), 
+      BaseExports.cbegin(), BaseExports.cend(), std::inserter(NewExports, 
       NewExports.begin()));
       
     // Dump new exports
     std::wcout << "New Exports:\n";
-    std::copy(NewExports.begin(), NewExports.end(), 
+    std::copy(NewExports.cbegin(), NewExports.cend(), 
       std::ostream_iterator<std::string>(std::cout, "\n"));
   }
   catch (std::exception const& e)
