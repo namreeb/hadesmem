@@ -22,6 +22,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/PeLib/PeFile.hpp"
 #include "HadesMemory/PeLib/ImportDir.hpp"
+#include "HadesMemory/PeLib/DosHeader.hpp"
+#include "HadesMemory/PeLib/NtHeaders.hpp"
 
 // Boost
 #define BOOST_TEST_MODULE ImportDirTest
@@ -41,6 +43,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
       Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
       
       // Enumerate import dirs for module
       // Todo: Ensure via test that at least one module with an import dir is 

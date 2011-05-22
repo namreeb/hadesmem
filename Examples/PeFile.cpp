@@ -156,6 +156,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate section list for current module
       Hades::Memory::SectionList Sections(MyPeFile);
@@ -175,6 +177,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Ensure module has TLS dir
       Hades::Memory::TlsDir MyTlsDir(MyPeFile);
@@ -199,6 +203,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate export list for current module
       Hades::Memory::ExportList Exports(MyPeFile);
@@ -240,6 +246,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Enumerate import dir list for current module
       Hades::Memory::ImportDirList ImpDirs(MyPeFile);
@@ -279,9 +287,8 @@ int wmain(int argc, wchar_t* argv[])
       
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, M.GetBase());
-      
-      // Get NT headers
-      Hades::Memory::NtHeaders MyNtHdrs(MyPeFile);
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Skip modules which don't match our architecture
 #if defined(_M_X64)
@@ -291,7 +298,7 @@ int wmain(int argc, wchar_t* argv[])
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-      if (MyNtHdrs.GetMachine() != MachineMe)
+      if (MyNtHeaders.GetMachine() != MachineMe)
       {
         std::wcout << "WARNING: Skipping module. Architecture conflict.\n\n";
         return;

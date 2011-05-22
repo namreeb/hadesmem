@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/Module.hpp"
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/DosHeader.hpp"
 #include "HadesMemory/PeLib/NtHeaders.hpp"
 
 // Boost
@@ -41,72 +42,78 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       // Open module as a memory-based PeFile
       // Todo: Also test FileType_Data
       Hades::Memory::PeFile MyPeFile(MyMemory, Mod.GetBase());
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
     
-      // Create NT headers manager
-      Hades::Memory::NtHeaders MyNtHdrs(MyPeFile);
-        
       // Get raw NT headers
-      auto HdrRaw = MyMemory.Read<IMAGE_NT_HEADERS>(MyNtHdrs.GetBase());
+      auto HdrRaw = MyMemory.Read<IMAGE_NT_HEADERS>(MyNtHeaders.GetBase());
       
       // Ensure all member functions are called without exception, and 
       // overwrite the value of each field with the existing value
-      BOOST_CHECK_EQUAL(MyNtHdrs.IsSignatureValid(), true);
-      MyNtHdrs.EnsureSignatureValid();
-      MyNtHdrs.SetSignature(MyNtHdrs.GetSignature());
-      MyNtHdrs.SetMachine(MyNtHdrs.GetMachine());
-      MyNtHdrs.SetNumberOfSections(MyNtHdrs.GetNumberOfSections());
-      MyNtHdrs.SetTimeDateStamp(MyNtHdrs.GetTimeDateStamp());
-      MyNtHdrs.SetPointerToSymbolTable(MyNtHdrs.GetPointerToSymbolTable());
-      MyNtHdrs.SetNumberOfSymbols(MyNtHdrs.GetNumberOfSymbols());
-      MyNtHdrs.SetSizeOfOptionalHeader(MyNtHdrs.GetSizeOfOptionalHeader());
-      MyNtHdrs.SetCharacteristics(MyNtHdrs.GetCharacteristics());
-      MyNtHdrs.SetMagic(MyNtHdrs.GetMagic());
-      MyNtHdrs.SetMajorLinkerVersion(MyNtHdrs.GetMajorLinkerVersion());
-      MyNtHdrs.SetMinorLinkerVersion(MyNtHdrs.GetMinorLinkerVersion());
-      MyNtHdrs.SetSizeOfCode(MyNtHdrs.GetSizeOfCode());
-      MyNtHdrs.SetSizeOfInitializedData(MyNtHdrs.GetSizeOfInitializedData());
-      MyNtHdrs.SetSizeOfUninitializedData(MyNtHdrs.GetSizeOfUninitializedData());
-      MyNtHdrs.SetAddressOfEntryPoint(MyNtHdrs.GetAddressOfEntryPoint());
-      MyNtHdrs.SetBaseOfCode(MyNtHdrs.GetBaseOfCode());
+      BOOST_CHECK_EQUAL(MyNtHeaders.IsSignatureValid(), true);
+      MyNtHeaders.EnsureSignatureValid();
+      MyNtHeaders.SetSignature(MyNtHeaders.GetSignature());
+      MyNtHeaders.SetMachine(MyNtHeaders.GetMachine());
+      MyNtHeaders.SetNumberOfSections(MyNtHeaders.GetNumberOfSections());
+      MyNtHeaders.SetTimeDateStamp(MyNtHeaders.GetTimeDateStamp());
+      MyNtHeaders.SetPointerToSymbolTable(MyNtHeaders.
+        GetPointerToSymbolTable());
+      MyNtHeaders.SetNumberOfSymbols(MyNtHeaders.GetNumberOfSymbols());
+      MyNtHeaders.SetSizeOfOptionalHeader(MyNtHeaders.
+        GetSizeOfOptionalHeader());
+      MyNtHeaders.SetCharacteristics(MyNtHeaders.GetCharacteristics());
+      MyNtHeaders.SetMagic(MyNtHeaders.GetMagic());
+      MyNtHeaders.SetMajorLinkerVersion(MyNtHeaders.GetMajorLinkerVersion());
+      MyNtHeaders.SetMinorLinkerVersion(MyNtHeaders.GetMinorLinkerVersion());
+      MyNtHeaders.SetSizeOfCode(MyNtHeaders.GetSizeOfCode());
+      MyNtHeaders.SetSizeOfInitializedData(MyNtHeaders.
+        GetSizeOfInitializedData());
+      MyNtHeaders.SetSizeOfUninitializedData(MyNtHeaders.
+        GetSizeOfUninitializedData());
+      MyNtHeaders.SetAddressOfEntryPoint(MyNtHeaders.GetAddressOfEntryPoint());
+      MyNtHeaders.SetBaseOfCode(MyNtHeaders.GetBaseOfCode());
     #if defined(_M_IX86) 
-      MyNtHdrs.SetBaseOfData(MyNtHdrs.GetBaseOfData());
+      MyNtHeaders.SetBaseOfData(MyNtHeaders.GetBaseOfData());
     #endif
-      MyNtHdrs.SetImageBase(MyNtHdrs.GetImageBase());
-      MyNtHdrs.SetSectionAlignment(MyNtHdrs.GetSectionAlignment());
-      MyNtHdrs.SetFileAlignment(MyNtHdrs.GetFileAlignment());
-      MyNtHdrs.SetMajorOperatingSystemVersion(MyNtHdrs.
+      MyNtHeaders.SetImageBase(MyNtHeaders.GetImageBase());
+      MyNtHeaders.SetSectionAlignment(MyNtHeaders.GetSectionAlignment());
+      MyNtHeaders.SetFileAlignment(MyNtHeaders.GetFileAlignment());
+      MyNtHeaders.SetMajorOperatingSystemVersion(MyNtHeaders.
         GetMajorOperatingSystemVersion());
-      MyNtHdrs.SetMinorOperatingSystemVersion(MyNtHdrs.
+      MyNtHeaders.SetMinorOperatingSystemVersion(MyNtHeaders.
         GetMinorOperatingSystemVersion());
-      MyNtHdrs.SetMajorImageVersion(MyNtHdrs.GetMajorImageVersion());
-      MyNtHdrs.SetMinorImageVersion(MyNtHdrs.GetMinorImageVersion());
-      MyNtHdrs.SetMajorSubsystemVersion(MyNtHdrs.GetMajorSubsystemVersion());
-      MyNtHdrs.SetMinorSubsystemVersion(MyNtHdrs.GetMinorSubsystemVersion());
-      MyNtHdrs.SetWin32VersionValue(MyNtHdrs.GetWin32VersionValue());
-      MyNtHdrs.SetSizeOfImage(MyNtHdrs.GetSizeOfImage());
-      MyNtHdrs.SetSizeOfHeaders(MyNtHdrs.GetSizeOfHeaders());
-      MyNtHdrs.SetCheckSum(MyNtHdrs.GetCheckSum());
-      MyNtHdrs.SetSubsystem(MyNtHdrs.GetSubsystem());
-      MyNtHdrs.SetDllCharacteristics(MyNtHdrs.GetDllCharacteristics());
-      MyNtHdrs.SetSizeOfStackReserve(MyNtHdrs.GetSizeOfStackReserve());
-      MyNtHdrs.SetSizeOfStackCommit(MyNtHdrs.GetSizeOfStackCommit());
-      MyNtHdrs.SetSizeOfHeapReserve(MyNtHdrs.GetSizeOfHeapReserve());
-      MyNtHdrs.SetSizeOfHeapCommit(MyNtHdrs.GetSizeOfHeapCommit());
-      MyNtHdrs.SetLoaderFlags(MyNtHdrs.GetLoaderFlags());
-      MyNtHdrs.SetNumberOfRvaAndSizes(MyNtHdrs.GetNumberOfRvaAndSizes());
+      MyNtHeaders.SetMajorImageVersion(MyNtHeaders.GetMajorImageVersion());
+      MyNtHeaders.SetMinorImageVersion(MyNtHeaders.GetMinorImageVersion());
+      MyNtHeaders.SetMajorSubsystemVersion(MyNtHeaders.
+        GetMajorSubsystemVersion());
+      MyNtHeaders.SetMinorSubsystemVersion(MyNtHeaders.
+        GetMinorSubsystemVersion());
+      MyNtHeaders.SetWin32VersionValue(MyNtHeaders.GetWin32VersionValue());
+      MyNtHeaders.SetSizeOfImage(MyNtHeaders.GetSizeOfImage());
+      MyNtHeaders.SetSizeOfHeaders(MyNtHeaders.GetSizeOfHeaders());
+      MyNtHeaders.SetCheckSum(MyNtHeaders.GetCheckSum());
+      MyNtHeaders.SetSubsystem(MyNtHeaders.GetSubsystem());
+      MyNtHeaders.SetDllCharacteristics(MyNtHeaders.GetDllCharacteristics());
+      MyNtHeaders.SetSizeOfStackReserve(MyNtHeaders.GetSizeOfStackReserve());
+      MyNtHeaders.SetSizeOfStackCommit(MyNtHeaders.GetSizeOfStackCommit());
+      MyNtHeaders.SetSizeOfHeapReserve(MyNtHeaders.GetSizeOfHeapReserve());
+      MyNtHeaders.SetSizeOfHeapCommit(MyNtHeaders.GetSizeOfHeapCommit());
+      MyNtHeaders.SetLoaderFlags(MyNtHeaders.GetLoaderFlags());
+      MyNtHeaders.SetNumberOfRvaAndSizes(MyNtHeaders.GetNumberOfRvaAndSizes());
       // Todo: Investigate whether this should be checking NumberOfRvaAndSizes 
       // instead of IMAGE_NUMBEROF_DIRECTORY_ENTRIES. Especially when working 
       // with an on-disk representation of a PE file.
       for (std::size_t i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; ++i)
       {
         auto Dir = static_cast<Hades::Memory::NtHeaders::DataDir>(i);
-        MyNtHdrs.SetDataDirectoryVirtualAddress(Dir, MyNtHdrs.
+        MyNtHeaders.SetDataDirectoryVirtualAddress(Dir, MyNtHeaders.
           GetDataDirectoryVirtualAddress(Dir));
-        MyNtHdrs.SetDataDirectorySize(Dir, MyNtHdrs.GetDataDirectorySize(Dir));
+        MyNtHeaders.SetDataDirectorySize(Dir, MyNtHeaders.GetDataDirectorySize(
+          Dir));
       }
       
       // Get raw TLS dir data again (using the member function this time)
-      auto HdrRawNew = MyNtHdrs.GetHeadersRaw();
+      auto HdrRawNew = MyNtHeaders.GetHeadersRaw();
       
       // Ensure NtHeaders getters/setters 'match' by checking that the data is 
       // unchanged

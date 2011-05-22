@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include "HadesMemory/MemoryMgr.hpp"
 #include "HadesMemory/Disassembler.hpp"
 #include "HadesMemory/PeLib/PeFile.hpp"
+#include "HadesMemory/PeLib/DosHeader.hpp"
 #include "HadesMemory/PeLib/NtHeaders.hpp"
 
 // C++ Standard Library
@@ -38,9 +39,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 
   // Open self as a memory-based PeFile
   Hades::Memory::PeFile MyPeFile(MyMemory, GetModuleHandle(NULL));
+  Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+  Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
     
   // Get EP of self from NT headers
-  Hades::Memory::NtHeaders MyNtHeaders(MyPeFile);
   auto EntryPointRva = MyNtHeaders.GetAddressOfEntryPoint();
   auto pEntryPoint = MyPeFile.RvaToVa(EntryPointRva);
   BOOST_REQUIRE(pEntryPoint != 0);

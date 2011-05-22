@@ -190,6 +190,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       // Create PE file object for current module
       Hades::Memory::PeFile MyPeFile(MyMemory, Base);
+      Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
+      Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
         
       // Export list
       std::set<std::string> Result;
