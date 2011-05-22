@@ -31,6 +31,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE TlsDirTest
 #ifdef HADES_GCC
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 #include <boost/thread.hpp>
