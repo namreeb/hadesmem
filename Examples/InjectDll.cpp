@@ -189,7 +189,7 @@ int wmain(int argc, wchar_t* argv[])
       else
       {
         std::wcout << "Relative module path detected, but file could not be "
-          "located. Attempting injection path resolution anyway.\n";
+          "located. Attempting injection with path resolution anyway.\n";
       }
       
       ModRemote = MyInjector.InjectDll(ModulePath, true);
