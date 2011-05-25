@@ -23,3 +23,17 @@ exe ExportDiff
     ExportDiff.cpp 
     /Memory//Memory 
   ;
+
+exe InjectDll 
+  : 
+    InjectDll.cpp 
+    /Memory//Memory 
+  ;
+
+lib TestMod 
+  : 
+    TestMod.cpp 
+    /Memory//Memory 
+  : 
+    <link>shared 
+  ;
