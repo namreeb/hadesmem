@@ -87,17 +87,47 @@ namespace Hades
 
       // Allocate memory for thread's last-error code
       AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
-      
-      // Get address of Kernel32.dll
-      Module const K32Mod(*this, L"kernel32.dll");
-      // Get address of kernel32.dll!GetLastError and 
-      // kernel32.dll!SetLastError
+
+      // Get address of LoadLibraryW in Kernel32.dll
+      // Note: We can't use our module enumeration APIs here as module 
+      // snapshots can't be generated for newly created suspended processes, 
+      // and this API is called by CreateAndInjectDll which depends on 
+      // exactly that.
+      // Todo: Find a better way to do this. (See Injector::InjectDll notes 
+      // for the Kernel32 GetModuleHandle for some ideas...)
+      HMODULE const hKernel32 = GetModuleHandle(L"Kernel32.dll");
+      if (!hKernel32)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Could not get handle to Kernel32.") << 
+          ErrorCode(LastError));
+      }
+      FARPROC const pGetLastErrorTemp = GetProcAddress(hKernel32, 
+        "GetLastError");
+      if (!pGetLastErrorTemp)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Could not get pointer to GetLastError.") << 
+          ErrorCode(LastError));
+      }
+      FARPROC const pSetLastErrorTemp = GetProcAddress(hKernel32, 
+        "SetLastError");
+      if (!pSetLastErrorTemp)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Could not get pointer to SetLastError.") << 
+          ErrorCode(LastError));
+      }
       DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
-        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
-        "GetLastError"));
+        pGetLastErrorTemp);
       DWORD_PTR const pSetLastError = reinterpret_cast<DWORD_PTR>(
-        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
-        "SetLastError"));
+        pSetLastErrorTemp);
 
 #if defined(_M_AMD64) 
       // Check calling convention

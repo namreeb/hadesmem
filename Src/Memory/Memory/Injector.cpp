@@ -38,12 +38,16 @@ namespace Hades
   namespace Memory
   {
     // Create process (as suspended) and inject DLL
-    std::tuple<MemoryMgr, HMODULE, DWORD_PTR, DWORD_PTR> CreateAndInject(
+    // Todo: Rewrite this API with 'manual' implementations of APIs which rely 
+    // on the Module APIs so we don't have to implement workarounds in all the 
+    // APIs this function depends on.
+    CreateAndInjectData CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
       std::wstring const& Args, 
-      std::wstring const& Module, 
-      std::string const& Export)
+      boost::filesystem::path const& Module, 
+      std::string const& Export, 
+      bool PathResolution)
     {
       // Set up args for CreateProcess
       STARTUPINFO StartInfo;
@@ -94,10 +98,10 @@ namespace Hades
         MemoryMgr const MyMemory(ProcInfo.dwProcessId);
 
         // Create DLL injector
-        Hades::Memory::Injector const MyInjector(MyMemory);
+        Injector const MyInjector(MyMemory);
 
         // Inject DLL
-        HMODULE const ModBase = MyInjector.InjectDll(Module);
+        HMODULE const ModBase = MyInjector.InjectDll(Module, PathResolution);
 
         // Call export if one has been specified
         std::pair<DWORD_PTR, DWORD> ExpRetData;
@@ -124,7 +128,7 @@ namespace Hades
         }
 
         // Return data to caller
-        return std::make_tuple(MyMemory, ModBase, ExportRet, ExportLastError);
+        return CreateAndInjectData(MyMemory, ModBase, ExportRet, ExportLastError);
       }
       // Catch exceptions
       catch (std::exception const& /*e*/)
@@ -198,10 +202,35 @@ namespace Hades
       m_Memory.Write(LibFileRemote.GetBase(), PathString);
 
       // Get address of LoadLibraryW in Kernel32.dll
-      Module Kernel32Mod(m_Memory, L"kernel32.dll");
-      FARPROC const pLoadLibraryW = m_Memory.GetRemoteProcAddress(
-        Kernel32Mod.GetBase(), "kernel32.dll", "LoadLibraryW");
-      DWORD_PTR pLoadLibraryWTemp = reinterpret_cast<DWORD_PTR>(pLoadLibraryW);
+      // Note: We can't use our module enumeration APIs here as module 
+      // snapshots can't be generated for newly created suspended processes, 
+      // and this API is called by CreateAndInjectDll which depends on 
+      // exactly that.
+      // Todo: Find a way to fix this so we don't have to assume that 
+      // kernel32.dll shares a common base address across all processes.
+      // Maybe generate a code stub to do a GetModuleHandle and GetProcAddress 
+      // in the context of the remote process? Alternatively we could perform 
+      // manual PEB enumeration.
+      HMODULE const hKernel32 = GetModuleHandle(L"Kernel32.dll");
+      if (!hKernel32)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Could not get handle to Kernel32.") << 
+          ErrorCode(LastError));
+      }
+      FARPROC const pLoadLibraryW = GetProcAddress(hKernel32, "LoadLibraryW");
+      if (!pLoadLibraryW)
+      {
+        std::error_code const LastError = GetLastErrorCode();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::InjectDll") << 
+          ErrorString("Could not get pointer to LoadLibraryW.") << 
+          ErrorCode(LastError));
+      }
+      DWORD_PTR const pLoadLibraryWTemp = reinterpret_cast<DWORD_PTR>(
+        pLoadLibraryW);
 
       // Load module in remote process using LoadLibraryW
       std::vector<PVOID> Args;
@@ -219,10 +248,21 @@ namespace Hades
       }
 
       // Look for target module
-      Module NewModule(m_Memory, reinterpret_cast<HMODULE>(RemoteRet.first));
+      // Note: If creating a module snapshot fails we simply assume injection 
+      // succeeded if we've gotten this far. This is because module snapshots 
+      // can't be generated for newly created suspended processes, which 
+      // CreateAndInjectDll depends on.
+      // Todo: Find a better way to do this. (See Injector::InjectDll notes 
+      // for the Kernel32 GetModuleHandle for some ideas...)
+      Windows::EnsureCloseSnap MySnap(CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE, m_Memory.GetProcessID()));
+      if (MySnap != INVALID_HANDLE_VALUE)
+      {
+        Module NewModule(m_Memory, reinterpret_cast<HMODULE>(RemoteRet.first));
+      }
 
       // Return module base
-      return NewModule.GetBase();
+      return reinterpret_cast<HMODULE>(RemoteRet.first);
     }
 
     // Call export

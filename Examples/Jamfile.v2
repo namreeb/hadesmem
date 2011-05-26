@@ -12,6 +12,12 @@ project
     <toolset>gcc:<linkflags>-municode  
   ;
 
+exe CreateAndInjectDll 
+  : 
+    CreateAndInjectDll.cpp 
+    /Memory//Memory 
+  ;
+
 exe PeFile 
   : 
     PeFile.cpp 

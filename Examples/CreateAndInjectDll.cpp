@@ -105,9 +105,11 @@ int wmain(int argc, wchar_t* argv[])
     
     // Version and copyright output
 #if defined(_M_X64)
-    std::wcout << "Hades InjectDll AMD64 [Version " << VerNum << "]\n";
+    std::wcout << "Hades CreateAndInjectDll AMD64 [Version " << VerNum << 
+      "]\n";
 #elif defined(_M_IX86)
-    std::wcout << "Hades InjectDll IA32 [Version " << VerNum << "]\n";
+    std::wcout << "Hades CreateAndInjectDll IA32 [Version " << VerNum << 
+      "]\n";
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -119,27 +121,46 @@ int wmain(int argc, wchar_t* argv[])
     std::wcout << "Built on " << __DATE__ << " at " << __TIME__ << ".\n" 
       << std::endl;
     
-    // Get target process ID from args
+    // Get target process from args
     if (argc < 2)
     {
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
-        Hades::ErrorString("You must supply a valid process id."));
+        Hades::ErrorString("You must supply a valid process path."));
     }
-    DWORD ProcId = 0;
+    boost::filesystem::path ProcPath;
     try
     {
-      ProcId = boost::lexical_cast<DWORD>(argv[1]);
+      ProcPath = argv[1];
     }
     catch (std::exception const& /*e*/)
     {
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
-        Hades::ErrorString("You must supply a valid process id."));
+        Hades::ErrorString("You must supply a valid process path."));
+    }
+    
+    // Get target process args from args
+    if (argc < 3)
+    {
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("wmain") << 
+        Hades::ErrorString("You must supply valid process args."));
+    }
+    std::wstring ProcArgs;
+    try
+    {
+      ProcArgs = argv[2];
+    }
+    catch (std::exception const& /*e*/)
+    {
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("wmain") << 
+        Hades::ErrorString("You must supply valid process args."));
     }
     
     // Get target module from args
-    if (argc < 3)
+    if (argc < 4)
     {
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
@@ -148,7 +169,7 @@ int wmain(int argc, wchar_t* argv[])
     boost::filesystem::path ModulePath;
     try
     {
-      ModulePath = argv[2];
+      ModulePath = argv[3];
     }
     catch (std::exception const& /*e*/)
     {
@@ -159,24 +180,17 @@ int wmain(int argc, wchar_t* argv[])
     
     // Get target export from args (optional)
     std::string Export;
-    if (argc > 3)
+    if (argc > 4)
     {
-      Export = boost::lexical_cast<std::string>(static_cast<std::wstring>(argv[3]));
+      Export = boost::lexical_cast<std::string>(static_cast<std::wstring>(
+        argv[4]));
     }
     
-    // Open memory manager
-    Hades::Memory::MemoryMgr const MyMemory(ProcId == static_cast<DWORD>(-1) ? 
-      GetCurrentProcessId() : ProcId);
-        
-    // Create injector
-    Hades::Memory::Injector const MyInjector(MyMemory);
-    
-    // Inject DLL
-    boost::filesystem::path ModulePathReal(ModulePath);
-    HMODULE ModRemote = nullptr;
-    if (ModulePathReal.is_absolute())
+    // Create process and inject DLL
+    std::unique_ptr<Hades::Memory::CreateAndInjectData> pInjectionData;
+    if (ModulePath.is_absolute())
     {
-      if (boost::filesystem::exists(ModulePathReal))
+      if (boost::filesystem::exists(ModulePath))
       {
         std::wcout << "Absolute module path detected, and file located. "
           "Attempting injection without path resolution.\n";
@@ -187,11 +201,13 @@ int wmain(int argc, wchar_t* argv[])
           "located. Attempting injection without path resolution anyway.\n";
       }
       
-      ModRemote = MyInjector.InjectDll(ModulePath, false);
+      pInjectionData.reset(new Hades::Memory::CreateAndInjectData(
+        Hades::Memory::CreateAndInject(ProcPath, "", ProcArgs, ModulePath, 
+        Export, false)));
     }
     else
     {
-      if (boost::filesystem::exists(boost::filesystem::absolute(ModulePathReal)))
+      if (boost::filesystem::exists(boost::filesystem::absolute(ModulePath)))
       {
         std::wcout << "Relative module path detected, and file located. "
           "Attempting injection with path resolution.\n";
@@ -202,22 +218,24 @@ int wmain(int argc, wchar_t* argv[])
           "located. Attempting injection with path resolution anyway.\n";
       }
       
-      ModRemote = MyInjector.InjectDll(ModulePath, true);
+      pInjectionData.reset(new Hades::Memory::CreateAndInjectData(
+        Hades::Memory::CreateAndInject(ProcPath, "", ProcArgs, ModulePath, 
+        Export, true)));
     }
     
-    std::wcout << "Module successfully injected. Base = " << ModRemote << 
-      ".\n";
-    
-    // Call export if requested
+    HMODULE ModuleBase = pInjectionData->GetModule();
+    DWORD_PTR ExportRet = pInjectionData->GetExportRet();
+    DWORD ExportLastError = pInjectionData->GetExportLastError();
     if (!Export.empty())
     {
-      std::wcout << "Attempting to call remote export." << std::endl;
-      std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(
-        ModulePathReal.is_absolute() ? ModulePathReal : 
-        boost::filesystem::absolute(ModulePathReal), ModRemote, Export);
-      std::wcout << boost::wformat(L"Remote export called. Return = %d (%x). "
-        L"LastError = %d (%x).\n") %ExpRet.first %ExpRet.first %ExpRet.second 
-        %ExpRet.second;
+      std::wcout << boost::wformat(L"Module successfully injected. Base = %p, "
+        L"Return = %d (%x), LastError = %d (%x).\n") %ModuleBase %ExportRet 
+        %ExportRet %ExportLastError %ExportLastError;
+    }
+    else
+    {
+      std::wcout << boost::wformat(L"Module successfully injected. Base = "
+        L"%p.\n") %ModuleBase;
     }
   }
   catch (std::exception const& e)
