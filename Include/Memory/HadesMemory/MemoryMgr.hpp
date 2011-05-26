@@ -21,7 +21,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include <HadesMemory/Error.hpp>
-#include <HadesCommon/Config.hpp>
 #include <HadesMemory/Process.hpp>
 
 // C++ Standard Library
@@ -36,25 +35,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Windows API
 #include <Windows.h>
-
-// AsmJit
-#ifdef HADES_MSVC
-#pragma warning(push, 1)
-#endif
-#ifdef HADES_GCC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-pedantic"
-#pragma GCC diagnostic ignored "-Wattributes"
-#pragma GCC diagnostic ignored "-Wparentheses"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
-#include <AsmJit/AsmJit.h>
-#ifdef HADES_MSVC
-#pragma warning(pop)
-#endif
-#ifdef HADES_GCC
-#pragma GCC diagnostic pop
-#endif
 
 namespace Hades
 {
