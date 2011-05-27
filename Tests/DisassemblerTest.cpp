@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   auto const DisasmDataStr = MyDisassembler.DisassembleToStr(pEntryPoint, 
     500);
   std::for_each(DisasmDataStr.begin(), DisasmDataStr.end(), 
-    [] (std::wstring const& Str)
+    [] (std::string const& Str)
   {
     BOOST_CHECK(!Str.empty());
   });

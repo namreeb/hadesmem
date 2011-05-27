@@ -20,13 +20,12 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
+#include <HadesCommon/Error.hpp>
 #include <HadesCommon/Config.hpp>
+#include <HadesCommon/StringBuffer.hpp>
 
 // C++ Standard Library
 #include <string>
-#ifdef HADES_MSVC
-#include <cvt/wstring>
-#endif
 
 // Boost
 #include <boost/lexical_cast.hpp>
@@ -39,13 +38,35 @@ namespace boost
   inline std::string lexical_cast<std::string, std::wstring>(
     std::wstring const& Source)
   {
-#ifdef HADES_MSVC
-    return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
-      mbstate_t>>().to_bytes(Source);
-#else
-    // Fixme: Proper imlementation for non-MSVC compilers
-    return std::string(Source.begin(), Source.end());
-#endif
+    if (Source.empty())
+    {
+      return std::string();
+    }
+
+    int const OutSize = WideCharToMultiByte(CP_ACP, 0, Source.c_str(), -1, 
+      nullptr, 0, nullptr, nullptr);
+    if (!OutSize)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("lexical_cast<std::string, std::wstring>") << 
+        Hades::ErrorString("Could not get size of output buffer.") << 
+        Hades::ErrorCode(LastError));
+    }
+    
+    std::string Dest;
+    int const Result = WideCharToMultiByte(CP_ACP, 0, Source.c_str(), -1, 
+      Hades::Util::MakeStringBuffer(Dest, OutSize), OutSize, nullptr, nullptr);
+    if (!Result)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("lexical_cast<std::string, std::wstring>") << 
+        Hades::ErrorString("Could not convert string.") << 
+        Hades::ErrorCode(LastError));
+    }
+    
+    return Dest;
   }
   
   // Boost.LexicalCast specialization to allow conversions from narrow to wide 
@@ -54,13 +75,35 @@ namespace boost
   inline std::wstring lexical_cast<std::wstring, std::string>(
     std::string const& Source)
   {
-#ifdef HADES_MSVC
-    return stdext::cvt::wstring_convert<std::codecvt<wchar_t, char, 
-      mbstate_t>>().from_bytes(Source);
-#else
-    // Fixme: Proper imlementation for non-MSVC compilers
-    return std::wstring(Source.begin(), Source.end());
-#endif
+    if (Source.empty())
+    {
+      return std::wstring();
+    }
+
+    int const OutSize = MultiByteToWideChar(CP_ACP, 0, Source.c_str(), -1, 
+      nullptr, 0);
+    if (!OutSize)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("lexical_cast<std::wstring, std::string>") << 
+        Hades::ErrorString("Could not get size of output buffer.") << 
+        Hades::ErrorCode(LastError));
+    }
+    
+    std::wstring Dest;
+    int const Result = MultiByteToWideChar(CP_ACP, 0, Source.c_str(), -1, 
+      Hades::Util::MakeStringBuffer(Dest, OutSize), OutSize);
+    if (!Result)
+    {
+      std::error_code const LastError = Hades::GetLastErrorCode();
+      BOOST_THROW_EXCEPTION(Hades::HadesError() << 
+        Hades::ErrorFunction("lexical_cast<std::wstring, std::string>") << 
+        Hades::ErrorString("Could not convert string.") << 
+        Hades::ErrorCode(LastError));
+    }
+    
+    return Dest;
   }
   
   // Turn attempts to convert between the same string types into a nullsub.

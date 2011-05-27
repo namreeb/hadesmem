@@ -161,7 +161,8 @@ int wmain(int argc, wchar_t* argv[])
     std::string Export;
     if (argc > 3)
     {
-      Export = boost::lexical_cast<std::string>(static_cast<std::wstring>(argv[3]));
+      Export = boost::lexical_cast<std::string>(static_cast<std::wstring>(
+        argv[3]));
     }
     
     // Open memory manager
@@ -172,11 +173,10 @@ int wmain(int argc, wchar_t* argv[])
     Hades::Memory::Injector const MyInjector(MyMemory);
     
     // Inject DLL
-    boost::filesystem::path ModulePathReal(ModulePath);
     HMODULE ModRemote = nullptr;
-    if (ModulePathReal.is_absolute())
+    if (ModulePath.is_absolute())
     {
-      if (boost::filesystem::exists(ModulePathReal))
+      if (boost::filesystem::exists(ModulePath))
       {
         std::wcout << "Absolute module path detected, and file located. "
           "Attempting injection without path resolution.\n";
@@ -191,7 +191,7 @@ int wmain(int argc, wchar_t* argv[])
     }
     else
     {
-      if (boost::filesystem::exists(boost::filesystem::absolute(ModulePathReal)))
+      if (boost::filesystem::exists(boost::filesystem::absolute(ModulePath)))
       {
         std::wcout << "Relative module path detected, and file located. "
           "Attempting injection with path resolution.\n";
@@ -213,8 +213,8 @@ int wmain(int argc, wchar_t* argv[])
     {
       std::wcout << "Attempting to call remote export." << std::endl;
       std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(
-        ModulePathReal.is_absolute() ? ModulePathReal : 
-        boost::filesystem::absolute(ModulePathReal), ModRemote, Export);
+        ModulePath.is_absolute() ? ModulePath : boost::filesystem::absolute(
+        ModulePath), ModRemote, Export);
       std::wcout << boost::wformat(L"Remote export called. Return = %d (%x). "
         L"LastError = %d (%x).\n") %ExpRet.first %ExpRet.first %ExpRet.second 
         %ExpRet.second;

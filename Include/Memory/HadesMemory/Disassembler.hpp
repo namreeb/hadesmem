@@ -65,7 +65,7 @@ namespace Hades
       explicit Disassembler(MemoryMgr const& MyMemory);
 
       // Disassemble target to string
-      std::vector<std::wstring> DisassembleToStr(PVOID Address, 
+      std::vector<std::string> DisassembleToStr(PVOID Address, 
         DWORD_PTR NumInstructions) const;
 
       // Disassemble target
