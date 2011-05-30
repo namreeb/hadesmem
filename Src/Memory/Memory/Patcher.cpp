@@ -22,6 +22,25 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Disassembler.hpp>
 
+// AsmJit
+#ifdef HADES_MSVC
+#pragma warning(push, 1)
+#endif
+#ifdef HADES_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-pedantic"
+#pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+#include <AsmJit/AsmJit.h>
+#ifdef HADES_MSVC
+#pragma warning(pop)
+#endif
+#ifdef HADES_GCC
+#pragma GCC diagnostic pop
+#endif
+
 namespace Hades
 {
   namespace Memory
@@ -205,26 +224,44 @@ namespace Hades
     // Write jump to target at address
     void PatchDetour::WriteJump(PVOID Address, PVOID Target)
     {
-      // Create buffer to hold jump instruction
-      std::vector<BYTE> JumpBuf(GetJumpSize());
-      // Get pointer to buffer
-      PBYTE pJumpBuf = JumpBuf.data();
-      // Write code to buffer ('JMP QWORD NEAR [RIP+0]')
+      // Create Assembler.
+      AsmJit::Assembler MyJitFunc;
+
+      // Write code to buffer
+      // PUSH <Low Absolute>
+      // MOV [RSP+4], <High Absolute>
+      // RET
 #if defined(_M_AMD64) 
-      *pJumpBuf++ = 0xFF;
-      *pJumpBuf++ = 0x25;
-      *reinterpret_cast<PDWORD>(pJumpBuf) = 0;
-      pJumpBuf += sizeof(DWORD);
-      *reinterpret_cast<PDWORD_PTR>(pJumpBuf) = reinterpret_cast<DWORD_PTR>(
-        Target);
-      // Write code to buffer ('JMP TARGET' - REL)
+      MyJitFunc.push(static_cast<DWORD>(reinterpret_cast<DWORD_PTR>(Target)));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>(((
+        reinterpret_cast<DWORD_PTR>(Target) >> 32) & 0xFFFFFFFF)));
+      MyJitFunc.ret();
+      // Write code to buffer
+      // JMP <Target, Relative>
 #elif defined(_M_IX86) 
-      *pJumpBuf++ = 0xE9;
-      *reinterpret_cast<PDWORD_PTR>(pJumpBuf) = static_cast<DWORD_PTR>(
-        static_cast<PBYTE>(Target) - static_cast<PBYTE>(Address) - 5);
+      MyJitFunc.jmp(Target);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+      // Get stub size
+      DWORD_PTR const StubSize = MyJitFunc.getCodeSize();
+      
+      // Ensure stub size is as expected
+      if (StubSize != GetJumpSize())
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("PatchDetour::WriteJump") << 
+          ErrorString("Unexpected stub size."));
+      }
+
+      // Create buffer to hold jump instruction
+      std::vector<BYTE> JumpBuf(StubSize);
+        
+      // Generate code
+      MyJitFunc.relocCode(JumpBuf.data(), reinterpret_cast<DWORD_PTR>(
+        Address));
+
       // Write code to address
       m_Memory.Write(Address, JumpBuf);
     }
