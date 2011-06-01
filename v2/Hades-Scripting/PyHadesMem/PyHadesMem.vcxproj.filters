@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Wrappers">
+      <UniqueIdentifier>{d0bd7738-8e10-4317-8a20-d59e823caf7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Wrappers\PeLib">
+      <UniqueIdentifier>{b9af0137-47ac-4f7c-98a3-ce37fcd56cb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Wrappers">
+      <UniqueIdentifier>{3edb03a9-0a9e-408d-95fb-4acd781c525b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Wrappers\PeLib">
+      <UniqueIdentifier>{bd0e58ae-b4bf-4ba9-90c2-af7808cdb86b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisassemblerWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="FindPatternWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectorWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualMapWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryMgrWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="RegionWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerWrap.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="DosHeaderWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ExportDirWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImportDirWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="NtHeadersWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="PeFileWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="SectionWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="TlsDirWrap.cpp">
+      <Filter>Source Files\Wrappers\PeLib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ScannerWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="FindPatternWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectorWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="ManualMapWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryMgrWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="RegionWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="DisassemblerWrap.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="PeFileWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="DosHeaderWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportDirWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportDirWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="NtHeadersWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsDirWrap.h">
+      <Filter>Header Files\Wrappers\PeLib</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

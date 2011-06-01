@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<GUI>
+	<Font face="Tahoma" size="10"/>
+	<Windows>
+		<Window absX="50" absY="500" width="170" height="200" hidden="0" string="HXGenHack" string2="HXGENHACK_WINDOW">
+			<Button relX="10" relY="10" width="150" string="Enable Crosshair" string2="HXGENHACK_CROSSHAIR_ENABLE"/>
+			<Button relX="10" relY="40" width="150" string="Disable Crosshair" string2="HXGENHACK_CROSSHAIR_DISABLE"/>
+			<Button relX="10" relY="70" width="150" string="Enable Speedhack" string2="HXGENHACK_SPEEDHACK_ENABLE"/>
+			<Button relX="10" relY="100" width="150" string="Disable Speedhack" string2="HXGENHACK_SPEEDHACK_DISABLE"/>
+			<HorizontalSliderBar relX="10" relY="145" width="150" minvalue="1" maxvalue="50" step="1" value="1" string="Speed Multiplier" string2="HXGENHACK_SPEED_MULTIPLIER"/>
+		</Window>
+	</Windows>
+</GUI>

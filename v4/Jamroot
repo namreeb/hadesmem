@@ -1,0 +1,128 @@
+path-constant TOP 
+  : 
+    .
+  ;
+
+use-project /boost 
+  : 
+    Src/Dependencies/Boost 
+  ;
+
+use-project /Common 
+  : 
+    Include/Common 
+  ; 
+
+use-project /Dependencies 
+  : 
+    Src/Dependencies 
+  ;
+
+use-project /Memory 
+  : 
+    Src/Memory 
+  ; 
+
+use-project /Scripting 
+  : 
+    Src/Scripting 
+  ; 
+
+use-project /Tests 
+  : 
+    Tests 
+  ; 
+
+project Hades 
+  : 
+    requirements 
+    <define>BOOST_SYSTEM_NO_DEPRECATED 
+    <define>BOOST_FILESYSTEM_NO_DEPRECATED 
+    <define>UNICODE 
+    <define>_UNICODE 
+    <define>STRICT 
+    <define>WIN32_LEAN_AND_MEAN 
+    <define>NTDDI_VERSION=NTDDI_VISTA 
+    <define>_WIN32_WINNT=_WIN32_WINNT_VISTA 
+    <define>WINVER=_WIN32_WINNT_VISTA 
+    <runtime-link>shared 
+  : 
+    default-build debug 
+  : 
+    build-dir Bin 
+  ;
+  
+build-project Src/Memory 
+  ;
+
+rule Install-Rule ( properties * ) 
+{
+  local result 
+    ;
+  
+  if <address-model>32 in $(properties)
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/IA32 
+        ;
+    }
+
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/IA32 
+        ;
+    }
+  }
+  
+  if <address-model>64 in $(properties)
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/AMD64 
+        ;
+    }
+
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/AMD64 
+        ;
+    }
+  }
+  
+  return $(result) 
+    ;
+}
+
+install Bin 
+  : 
+    Src/Memory 
+  : 
+    <conditional>@Install-Rule 
+    <install-dependencies>on 
+    <install-type>SHARED_LIB 
+    <install-type>EXE 
+    <install-type>PYTHON_EXTENSION 
+  ;
+
+if --build-scripting in [ modules.peek : ARGV ]
+{
+  build-project Src/Scripting 
+    ;
+    
+  install ScriptingBin 
+    : 
+      Src/Scripting 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --run-tests in [ modules.peek : ARGV ]
+{
+  build-project Tests 
+    ;
+}

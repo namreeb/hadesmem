@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<Games>
+	<Game Name="World of Warcraft" Path="C:/Users/Public/Games/World of Warcraft/WoW.exe" Args="" Module="Hades-Kernel_IA32.dll" Export="_Initialize@4"/>
+	<Game Name="Steam" Path="C:/Program Files (x86)/Steam/Steam.exe" Args="" Module="Hades-Kernel_IA32.dll" Export="_Initialize@4"/>
+</Games>

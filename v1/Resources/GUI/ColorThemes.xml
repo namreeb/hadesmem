@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<GUI>
+	<ColorThemes default="WoW">
+		<Standard>
+			<Window default="Norm">
+				<State string="Norm">
+					<Color string="Title" r="171" g="255" b="255" a="255"/>
+
+					<Color string="BodyInner" r="5" g="46" b="74" a="200"/>
+					<Color string="BodyBorder" r="120" g="224" b="255" a="255"/>
+
+					<Texture string="Titlebar" path="HorizontalBar_Norm.png" alpha="200"/>
+				</State>
+				<State string="Minimized">
+					<Texture string="Titlebar" path="HorizontalBar_Pressed.png" alpha="200"/>
+				</State>
+				<State string="Dragging">
+					<Texture string="Titlebar" path="HorizontalBar_MouseOver.png" alpha="200"/>
+				</State>
+			</Window>
+			<CloseButton default="Norm">
+				<State string="Norm">
+					<Texture string="Button" path="CloseButton_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="Button" path="CloseButton_MouseOver.png"/>
+				</State>
+				<State string="Disabled">
+					<Texture string="Button" path="CloseButton_MouseOver.png"/>
+				</State>
+			</CloseButton>
+			<Button default="Norm">
+				<State string="Norm">
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+					<Texture string="Button" path="HorizontalBar_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+					<Texture string="Button" path="HorizontalBar_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Button" path="HorizontalBar_Pressed.png" alpha="200"/>
+				</State>
+			</Button>
+			<ProgressBar default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="19" g="80" b="117" a="200"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+					
+					<Texture string="ProgressBar" path="Progress_Norm.png" alpha="200"/>
+				</State>
+			</ProgressBar>
+			<EditBox default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="19" g="80" b="117" a="180"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+					<Color string="Cursor" r="171" g="255" b="255" a="255"/>
+				</State>
+			</EditBox>
+			<DropDown default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="19" g="80" b="117" a="200"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+
+					<Color string="SelectedInner" r="171" g="255" b="255" a="255"/>
+					<Color string="SelectedString" r="19" g="80" b="117" a="255"/>
+
+					<Texture string="Button" path="DownArrow_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="Button" path="DownArrow_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Button" path="DownArrow_Pressed.png" alpha="200"/>
+				</State>
+			</DropDown>
+			<HorizontalSliderBar default="Norm">
+				<State string="Norm">
+					<Color string="Lines" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+
+					<Texture string="Slider" path="HSlider_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+					<Texture string="Slider" path="HSlider_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Slider" path="HSlider_Pressed.png" alpha="200"/>
+				</State>
+			</HorizontalSliderBar>
+			<VerticalSliderBar default="Norm">
+				<State string="Norm">
+					<Color string="Lines" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+
+					<Texture string="Slider" path="VSlider_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+					<Texture string="Slider" path="VSlider_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Slider" path="VSlider_Pressed.png" alpha="200"/>
+				</State>
+			</VerticalSliderBar>
+			<CheckBox default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="19" g="80" b="117" a="180"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+
+					<Color string="Cross" r="171" g="255" b="255" a="255"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+				</State>
+			</CheckBox>
+			<Text default="Norm">
+				<State string="Norm">
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="255" b="255" a="255"/>
+				</State>
+			</Text>
+			<TextBox default="Norm">
+				<State string="Norm">
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+					<Color string="Inner" r="19" g="80" b="117" a="180"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+
+					<Texture string="UpArrow" path="UpArrow_Norm.png"/>
+					<Texture string="DownArrow" path="DownArrow_Norm.png"/>
+					<Texture string="Slider" path="VSlider_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="UpArrow" path="UpArrow_MouseOver.png"/>
+					<Texture string="DownArrow" path="DownArrow_MouseOver.png"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="UpArrow" path="UpArrow_Pressed.png"/>
+					<Texture string="DownArrow" path="DownArrow_Pressed.png"/>
+				</State>
+			</TextBox>
+			<ListBox default="Norm">
+				<State string="Norm">
+					<Color string="String" r="171" g="255" b="255" a="255"/>
+					<Color string="Inner" r="19" g="80" b="117" a="180"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+
+					<Color string="MouseOverString" r="255" g="255" b="255" a="255"/>
+				</State>
+			</ListBox>
+			<HelperSlider default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="19" g="80" b="117" a="200"/>
+					<Color string="Border" r="171" g="255" b="255" a="255"/>
+
+					<Texture string="UpArrow" path="UpArrow_Norm.png"/>
+					<Texture string="DownArrow" path="DownArrow_Norm.png"/>
+					<Texture string="Slider" path="VSlider_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="UpArrow" path="UpArrow_MouseOver.png"/>
+					<Texture string="DownArrow" path="DownArrow_MouseOver.png"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="UpArrow" path="UpArrow_Pressed.png"/>
+					<Texture string="DownArrow" path="DownArrow_Pressed.png"/>
+				</State>
+			</HelperSlider>
+		</Standard>
+		<WoW>
+			<Window default="Norm">
+				<State string="Norm">
+					<Color string="Title" r="237" g="194" b="102" a="255"/>
+
+					<Color string="BodyInner" r="320" g="0" b="40" a="200"/>
+					<Color string="BodyBorder" r="0" g="0" b="0" a="255"/>
+
+					<Texture string="Titlebar" path="HorizontalBar_Norm.png" alpha="230"/>
+				</State>
+				<State string="Minimized">
+					<Texture string="Titlebar" path="HorizontalBar_Pressed.png" alpha="230"/>
+				</State>
+				<State string="Dragging">
+					<Texture string="Titlebar" path="HorizontalBar_MouseOver.png" alpha="230"/>
+				</State>
+			</Window>
+			<CloseButton default="Norm">
+				<State string="Norm">
+					<Texture string="Button" path="CloseButton_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="Button" path="CloseButton_MouseOver.png"/>
+				</State>
+				<State string="Disabled">
+					<Texture string="Button" path="CloseButton_MouseOver.png"/>
+				</State>
+			</CloseButton>
+			<Button default="Norm">
+				<State string="Norm">
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+					<Texture string="Button" path="HorizontalBar_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+					<Texture string="Button" path="HorizontalBar_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Button" path="HorizontalBar_Pressed.png" alpha="200"/>
+				</State>
+			</Button>
+			<ProgressBar default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+					
+					<Texture string="ProgressBar" path="Progress_Norm.png" alpha="200"/>
+				</State>
+			</ProgressBar>
+			<EditBox default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+					<Color string="Cursor" r="237" g="194" b="102" a="255"/>
+				</State>
+			</EditBox>
+			<DropDown default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+
+					<Color string="SelectedInner" r="237" g="194" b="102" a="255"/>
+					<Color string="SelectedString" r="130" g="0" b="0" a="180"/>
+
+					<Texture string="Button" path="DownArrow_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+					<Texture string="Button" path="DownArrow_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Button" path="DownArrow_Pressed.png" alpha="200"/>
+				</State>
+			</DropDown>
+			<HorizontalSliderBar default="Norm">
+				<State string="Norm">
+					<Color string="Lines" r="237" g="194" b="102" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+
+					<Texture string="Slider" path="HSlider_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+					<Color string="Lines" r="255" g="205" b="134" a="255"/>
+					
+					<Texture string="Slider" path="HSlider_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Slider" path="HSlider_Pressed.png" alpha="200"/>
+				</State>
+			</HorizontalSliderBar>
+			<VerticalSliderBar default="Norm">
+				<State string="Norm">
+					<Color string="Lines" r="237" g="194" b="102" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+
+					<Texture string="Slider" path="VSlider_Norm.png" alpha="200"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+					<Color string="Lines" r="255" g="205" b="134" a="255"/>
+					
+					<Texture string="Slider" path="VSlider_MouseOver.png" alpha="200"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="Slider" path="VSlider_Pressed.png" alpha="200"/>
+				</State>
+			</VerticalSliderBar>
+			<CheckBox default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+
+					<Color string="Cross" r="237" g="194" b="102" a="255"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+					<Color string="Cross" r="255" g="205" b="134" a="255"/>
+				</State>
+			</CheckBox>
+			<Text default="Norm">
+				<State string="Norm">
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+				</State>
+				<State string="MouseOver">
+					<Color string="String" r="255" g="205" b="134" a="255"/>
+				</State>
+			</Text>
+			<TextBox default="Norm">
+				<State string="Norm">
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+
+					<Texture string="UpArrow" path="UpArrow_Norm.png"/>
+					<Texture string="DownArrow" path="DownArrow_Norm.png"/>
+					<Texture string="Slider" path="VSlider_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="UpArrow" path="UpArrow_MouseOver.png"/>
+					<Texture string="DownArrow" path="DownArrow_MouseOver.png"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="UpArrow" path="UpArrow_Pressed.png"/>
+					<Texture string="DownArrow" path="DownArrow_Pressed.png"/>
+				</State>
+			</TextBox>
+			<ListBox default="Norm">
+				<State string="Norm">
+					<Color string="String" r="237" g="194" b="102" a="255"/>
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+
+					<Color string="MouseOverString" r="255" g="205" b="134" a="255"/>
+				</State>
+			</ListBox>
+			<HelperSlider default="Norm">
+				<State string="Norm">
+					<Color string="Inner" r="130" g="0" b="0" a="180"/>
+					<Color string="Border" r="0" g="0" b="0" a="255"/>
+
+					<Texture string="UpArrow" path="UpArrow_Norm.png"/>
+					<Texture string="DownArrow" path="DownArrow_Norm.png"/>
+					<Texture string="Slider" path="VSlider_Norm.png"/>
+				</State>
+				<State string="MouseOver">
+					<Texture string="UpArrow" path="UpArrow_MouseOver.png"/>
+					<Texture string="DownArrow" path="DownArrow_MouseOver.png"/>
+				</State>
+				<State string="Pressed">
+					<Texture string="UpArrow" path="UpArrow_Pressed.png"/>
+					<Texture string="DownArrow" path="DownArrow_Pressed.png"/>
+				</State>
+			</HelperSlider>
+		</WoW>
+	</ColorThemes>
+</GUI>

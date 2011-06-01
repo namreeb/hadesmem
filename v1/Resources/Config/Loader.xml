@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Targets>
+	<Target Name="WoW.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Launcher.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="UT3.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="IW4MP.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Aion.bin" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="HL2.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="BFBC2Game.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="NCLauncher.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="NCWLauncherSetup.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="AvP.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="AvP_DX11.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="SR2_pc.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="FEAR2.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Left4Dead.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Left4Dead2.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Crysis.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Crysis.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="Eve.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="iw3mp.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="iw3sp.exe" Module="Hades-Kernel_IA32.dll"/>
+	<Target Name="S8.exe" Module="Hades-Kernel_IA32.dll"/>
+</Targets>

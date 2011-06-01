@@ -1,0 +1,2 @@
+Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
+<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>

@@ -1,0 +1,12 @@
+# Common/Jamfile.v2
+
+alias Common 
+  : 
+    /boost//date_time/<link>static 
+    /boost//filesystem/<link>static 
+    /boost//thread/<link>static 
+  : 
+  : 
+  : 
+    <include>"."
+  ;

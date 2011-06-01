@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3E2BA64E-0866-4630-B649-9ACE6389625D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>HadesMem</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../Include/Common/;../../../../Include/Memory/HadesMemory/;../../../../Src/Dependencies/AsmJit/;../../../../Src/Dependencies/BeaEngine/Include/;../../../../Src/Dependencies/Boost/;../../../../Src/Dependencies/</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D ASMJIT_API="" /D BEA_ENGINE_STATIC </AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../Include/Common/;../../../../Include/Memory/HadesMemory/;../../../../Src/Dependencies/AsmJit/;../../../../Src/Dependencies/BeaEngine/Include/;../../../../Src/Dependencies/Boost/;../../../../Src/Dependencies/</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D ASMJIT_API="" /D BEA_ENGINE_STATIC </AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../Include/Common/;../../../../Include/Memory/HadesMemory/;../../../../Src/Dependencies/AsmJit/;../../../../Src/Dependencies/BeaEngine/Include/;../../../../Src/Dependencies/Boost/;../../../../Src/Dependencies/</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D ASMJIT_API="" /D BEA_ENGINE_STATIC </AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../Include/Common/;../../../../Include/Memory/HadesMemory/;../../../../Src/Dependencies/AsmJit/;../../../../Src/Dependencies/BeaEngine/Include/;../../../../Src/Dependencies/Boost/;../../../../Src/Dependencies/</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D BOOST_SYSTEM_NO_DEPRECATED /D BOOST_FILESYSTEM_NO_DEPRECATED /D STRICT /D WIN32_LEAN_AND_MEAN /D NTDDI_VERSION=NTDDI_VISTA /D _WIN32_WINNT=_WIN32_WINNT_VISTA /D WINVER=_WIN32_WINNT_VISTA /D ASMJIT_API="" /D BEA_ENGINE_STATIC </AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Disassembler.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\DosHeader.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ExportDir.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\FindPattern.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\ImportDir.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Injector.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\MemoryMgr.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Module.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\NtHeaders.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Patcher.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\PeFile.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Process.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Region.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Scanner.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Section.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\Symbol.cpp" />
+    <ClCompile Include="..\..\..\..\Src\Memory\Memory\TlsDir.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\EnsureCleanup.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Error.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Filesystem.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\I18n.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\Logger.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\StringBuffer.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Common\HadesCommon\WinAux.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Disassembler.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\DosHeader.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Error.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportDir.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ExportEnum.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\FindPattern.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Fwd.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\HashString.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportDir.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ImportEnum.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Injector.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Memory.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\MemoryMgr.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Module.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ModuleEnum.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\NtHeaders.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Patcher.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PEFile.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\PeLib.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Process.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\ProcessEnum.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Region.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Scanner.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Section.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\SectionEnum.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Symbol.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\TlsDir.hpp" />
+    <ClInclude Include="..\..\..\..\Include\Memory\HadesMemory\Types.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

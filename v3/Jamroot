@@ -1,0 +1,163 @@
+local boost = [ modules.peek : BOOST_ROOT ]
+  ;
+
+use-project /boost 
+  : 
+    $(boost) 
+  ;
+
+use-project /Common 
+  : 
+    Include/Common 
+  ; 
+
+use-project /Dependencies 
+  : 
+    Src/Dependencies 
+  ;
+
+use-project /GUI 
+  : 
+    Src/GUI 
+  ; 
+
+use-project /Memory 
+  : 
+    Src/Memory 
+  ; 
+
+use-project /Scripting 
+  : 
+    Src/Scripting 
+  ; 
+
+use-project /Docs 
+  : 
+    Docs 
+  ; 
+
+project Hades 
+  : 
+    requirements 
+    <define>BOOST_SYSTEM_NO_DEPRECATED 
+    <define>BOOST_FILESYSTEM_NO_DEPRECATED 
+    <define>UNICODE 
+    <define>_UNICODE 
+    <define>WIN32_LEAN_AND_MEAN 
+    <define>_WIN32_WINNT=_WIN32_WINNT_WS03 
+    <define>WINVER=_WIN32_WINNT_WS03 
+    <define>_SCL_SECURE_NO_WARNINGS 
+    <runtime-link>shared 
+  : 
+    default-build debug 
+  : 
+    build-dir Bin 
+  ;
+  
+build-project Src/Memory 
+  ;
+
+rule Install-Rule ( properties * ) 
+{
+  local result 
+    ;
+  
+  if <address-model>32 in $(properties)
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/IA32 
+        ;
+    }
+
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/IA32 
+        ;
+    }
+  }
+  
+  if <address-model>64 in $(properties)
+  {
+    if <variant>debug in $(properties)
+    {
+      result += <location>Bin/Debug/AMD64 
+        ;
+    }
+
+    if <variant>release in $(properties)
+    {
+      result += <location>Bin/Release/AMD64 
+        ;
+    }
+  }
+  
+  return $(result) 
+    ;
+}
+
+install Bin 
+  : 
+    Src/Memory 
+    Misc/DbgHelp/IA32/dbghelp.dll 
+    Misc/DbgHelp/IA32/symsrv.dll 
+  : 
+    <conditional>@Install-Rule 
+    <install-dependencies>on 
+    <install-type>SHARED_LIB 
+    <install-type>EXE 
+    <install-type>PYTHON_EXTENSION 
+    <address-model>32 
+  ;
+
+install Bin 
+  : 
+    Src/Memory 
+    Misc/DbgHelp/AMD64/dbghelp.dll 
+    Misc/DbgHelp/AMD64/symsrv.dll 
+  : 
+    <conditional>@Install-Rule 
+    <install-dependencies>on 
+    <install-type>SHARED_LIB 
+    <install-type>EXE 
+    <install-type>PYTHON_EXTENSION 
+    <address-model>64 
+  ;
+
+if --build-gui in [ modules.peek : ARGV ]
+{
+  build-project Src/GUI 
+    ;
+    
+  install GUIBin 
+    : 
+      Src/GUI 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --build-scripting in [ modules.peek : ARGV ]
+{
+  build-project Src/Scripting 
+    ;
+    
+  install ScriptingBin 
+    : 
+      Src/Scripting 
+    : 
+      <conditional>@Install-Rule 
+      <install-type>SHARED_LIB 
+      <install-type>EXE 
+      <install-type>PYTHON_EXTENSION 
+    ;
+}
+
+if --build-docs in [ modules.peek : ARGV ]
+{
+  build-project Docs 
+    ;
+}

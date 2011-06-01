@@ -1,0 +1,148 @@
+* General
+  * x64 -> x86 process manipulation.
+  * Documentation via Boost.QuickBook.
+  * Unit tests (Boost.Test?).
+  * Improved and documented exception-safety guarantees, incl rollback 
+  support (RAII? Boost.ScopeExit?).
+  * Improved and documented thread-safety guarantees.
+  * Rethink and reimplement threading model.
+  * Fix all 'fixme' items in code.
+  * Const correctness.
+  * Proper locale support.
+  * Template concept checking and improved error messages.
+  * Binaries with update server.
+  * Automatic binary versioning using SVN revision.
+  * Upgrade to Python 3.x.
+  * Move back to VS.
+  * WinAPI C++ wrapper.
+  * Split code into 'mature' and 'experimental' parts.
+  * Automatic build bot.
+  * Extra debug output when building such as Boost version, MSVC version, etc.
+  * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
+  requirements.
+  * Digital signature (for build bot, WER, etc).
+  * Drop XP support and move to Windows Vista+ (or Windows 7+?).
+  * Decouple components where possible (pimpl etc), and ensure all 
+  headers are self sufficient.
+  * Readd GCC experimental support (user request via email, with user-supplied 
+  patches).
+  * Use SVN externals for dependencies (also consider including Boost).
+  * Config header to account for differences in compilers (or compiler 
+  versions). Consider using Boost.Config.
+  * Add support for optional error reporing via error codes to avoid littering 
+  user code with try-catch blocks.
+  * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 
+  API boundaries. If implemented, all files written should be UTF-8.
+  * Tag as v3 and move to v4 before readding GCC, using externals, dropping 
+  XP, etc.
+
+* New Modules
+  * Debugging APIs.
+    * Software breakpoint.
+    * Hardware breakpoint (incl read/write detection).
+    * Conditional breakpoints.
+    * Single-stepping.
+    * Stack trace APIs.
+  * Anti-anti-cheat APIs.
+  * Thread/process information APIs.
+  * Python scripts for automating common tasks.
+  * IA32 and AMD64 remote code 'emulator'.
+  * Custom GetModuleHandle, GetProcAddress, etc.
+  * Cheat Engine 'replacement'.
+
+* Process
+  * Constructors that take window/process name should throw if multiple 
+  processes match the criteria. In this case, the PID constructor should be 
+  used.
+
+* MemoryMgr
+  * Add option for remote function caller to call GetLastError.
+  * Clean up memory reading/writing API to reduce use of TMP in public 
+  interface.
+  * Improve 'safety' of remote function caller via EH to minimize risk of 
+  crashing target.
+  * Improve genericity of parameter passing in remote function caller.
+  * Memory reading via expression templates.
+  * Improved type genericity via type decay to ensure templates function 
+  correctly in the face of const, volatile, references, etc.
+
+* Disassembler
+  * Decode calls/jumps to function names where possible.
+  * NOP/UnNOP support.
+  * ASM searching API with 'wildcards'. (Metasm?)
+  * String based assembler with x64 support.
+  * Improve bindings to make it actually useful from Python.
+  * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+
+* Scanner
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
+  * Multi-threaded scanning option.
+  * Wildcard support for vector/string scanning.
+  * Regex support for string scanning.
+  * Memory protection filters (read, write, exec).
+  * Memory type filters (private, mapped, image).
+  * Pause target while scanning option.
+  * Injected scanning option.
+  * Configurable scan buffer size.
+  * Pointer scanner.
+  * Unknown value scan.
+  * Progressive scan filtering based on either value or criteria.
+  * Scan history and undo.
+  * Case insensitive string scanning option.
+  * Binary scanning.
+  * Custom scanning via user-supplied predicate.
+  * Improved floating-point scanning (configurable or 'smart' epsilon).
+  * Group search support.
+
+* Injector
+  * .NET injection.
+  * Cross-session injection.
+  * IAT injection.
+  * Varargs/generic export calling.
+
+* Patcher
+  * VEH hooking (Both INT3 and DR).
+  * Transactional hooking.
+  * Improved relative instruction rebuilding (including conditionals).
+  * Sanity checking for target process.
+  * Freeze target when hooking.
+  * VMT hooking.
+  * IAT/EAT hooking.
+
+* FindPattern
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
+  * Pattern generator.
+  * Multi-threaded scanning.
+  * 'Start' attribute support.
+  * Data/Rdata scanning support (for 'start' attribute and constant scans).
+  * Support for loading XML file from resource or memory.
+  * Dump results to file.
+  * Change parser library from RapidXML to Boost.Spirit (may require a 
+  format change from XML to something custom).
+
+* PeLib
+  * Finish implementing matching 'setters' for existing 'getters'.
+  * Add modules to support more of the PE file format.
+
+* ManualMap
+  * Improved exception handling support.
+
+* Base hook
+  * CEGUI support.
+  * Convert D3D extensions to use detours rather than COM interface 
+  replacements.
+  * Ensure register state is maintained in hooks.
+  * 'Unifty' debug output (e.g. in hooks etc the 'format' should always be 
+  similar).
+  * Ensure error state is retained in hooks (GetLastError/SetLastError).
+  * Rethink and reimplement threading model.
+  * Increase safety and stability before adding any major new functionality.
+  * D3D9, D3D10, D3D11 rendering support.
+  * Exception handling at hook/module boundaries.
+  * Hook profiling.
+  * Child process injection/hooking with WoW64 'workaround' (two-way).
+  * Config support (Spirit? XML?).
+  * Injected GUI library.
+  * Injected music player controller.

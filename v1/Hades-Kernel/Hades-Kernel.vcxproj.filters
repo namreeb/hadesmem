@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\.NET">
+      <UniqueIdentifier>{2b2659e1-3173-416b-8b44-6cce0bbde06e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\.NET">
+      <UniqueIdentifier>{d6f0a477-12fc-4722-998e-16eda4cb0048}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scripting">
+      <UniqueIdentifier>{5dfc0c8e-0c1a-4435-9857-c4e4e82c3d46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scripting">
+      <UniqueIdentifier>{79906a8c-7771-4760-8daf-05291dff8004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kernel">
+      <UniqueIdentifier>{1437c0e3-22a9-4ad7-8fae-4134674837a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kernel">
+      <UniqueIdentifier>{ae70c408-ec4f-41be-94e4-249c083289ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Aux">
+      <UniqueIdentifier>{ebca4ac6-12dc-49ca-90c9-251b05410cda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Aux">
+      <UniqueIdentifier>{47fb54bc-953c-4cb7-999c-216c066fb010}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CLRHostControl.cpp">
+      <Filter>Source Files\.NET</Filter>
+    </ClCompile>
+    <ClCompile Include="DotNet.cpp">
+      <Filter>Source Files\.NET</Filter>
+    </ClCompile>
+    <ClCompile Include="Scripting.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="Wrappers.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="Kernel.cpp">
+      <Filter>Source Files\Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader.cpp">
+      <Filter>Source Files\Aux</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CLRHostControl.h">
+      <Filter>Header Files\.NET</Filter>
+    </ClInclude>
+    <ClInclude Include="DotNet.h">
+      <Filter>Header Files\.NET</Filter>
+    </ClInclude>
+    <ClInclude Include="Scripting.h">
+      <Filter>Header Files\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers.h">
+      <Filter>Header Files\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="Kernel.h">
+      <Filter>Header Files\Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader.h">
+      <Filter>Header Files\Aux</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

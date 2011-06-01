@@ -1,0 +1,230 @@
+* General
+  * Documentation via Boost.QuickBook.
+    * Write full source docs simultaneously.
+    * Write threading docs simultaneously.
+    * Write exception guarantee docs simultaneously.
+  * Unit tests (Boost.Test?).
+    * Cleanup and docs.
+    * Extend and improve.
+  * Example programs.
+    * All components.
+    * C++ (not Python).
+    * Documented.
+  * Improved and documented exception-safety guarantees, incl rollback 
+  support (RAII? Boost.ScopeExit?).
+  * Improved and documented thread-safety guarantees.
+  * Rethink and reimplement threading model.
+  * Fix all 'fixme' items in code.
+  * Const correctness.
+  * Proper locale support.
+  * Template concept checking and improved error messages.
+  * Binaries with update server.
+  * Automatic binary versioning using SVN revision.
+  * Upgrade to Python 3.x.
+  * WinAPI C++ wrapper.
+  * Automatic build bot.
+  * Investigate CMake build option.
+  * Extra debug output when building such as Boost version, MSVC version, etc.
+  * Compile time checks to ensure MSVC, Boost, etc versions meet the minimum 
+  requirements.
+  * Assertions where appropriate.
+  * Investigate C++/CLI support.
+  * DLL build option.
+  * Fix VS build to not require any 'manual' work (copy to clean dir once 
+  built, copy dependent DLLs, copy scripts, copy docs, etc. Build should 
+  effectively mean 'install'.).
+  * Digital signature (for build bot, WER, etc).
+  * Investigate CMake build.
+  * Decouple components where possible (pimpl etc), and ensure all 
+  headers are self sufficient.
+  * Explicit x64 -> x86 process manipulation support for all components.
+  * Readd GCC experimental support (user request via email, with user-supplied 
+  patches).
+  * Config header to account for differences in compilers (or compiler 
+  versions). Consider using Boost.Config.
+  * Improved error reporting via exceptions, especially with regard to Python 
+  bindings.
+  * Add support for optional error reporing via error codes to avoid littering 
+  user code with try-catch blocks.
+  * Consider moving from UTF-16 internally to UTF-8, and only using UTF-16 at 
+  API boundaries. If implemented, all files written should be UTF-8.
+  * Deprecate MemSandbox, and instead install PyHadesMem to site-packages and 
+  redirect all helper scripts to use the 'standard' Python binaries.
+  * Clean up all Python scripts.
+  * Add overloads to support pointers to constant data.
+  * In Boost.Filesystem equality != equivalence. Change to use equivalence 
+  where appropriate.
+  * Use 'ranges' over direct containers where possible.
+  * Investigate dumping Boost.ProgramOptions as it apparently does not support 
+  wide paths correctly.
+  * Make iterator names consistent.
+  * Rewrite iterators to be STL compatible.
+    * Investigate use of Boost.Iterators, use STL base impl otherwise.
+  * Support building dependencies as shared libraries.
+  * Consider making Python bindings separate project.
+  * Clean up APIs returning pairs/tuples/etc to return objects with named 
+  fields and/or getters.
+  * STL compatible function objects. (e.g. MemoryMgr::Read<T> should return 
+  a functor for use in algorithms such as generate_n)
+    * Consider using Boost.Phoenix to provide lazy expression evaluation and 
+    allow richer functionality. (e.g. MemoryMgr::Read<T>(Addr++) where the 
+    expression 'Addr++' is evaluated on every call, and state is maintained 
+    across calls, or something to that effect. Needs more investigation.)
+    * Should probably be implemented as separate API, to avoid problems caused 
+    by implicit conversions and type deduction. (e.g. auto will not behave as 
+    expected, function template type deduction will not behave as expected, 
+    nor will some other minor things.)
+  * Reduce compile time.
+    * Reduce include dependencies.
+    * Pointer-to-impl idiom.
+    * Forward declarations where possible. (Boost? STL?)
+    * PCH support when using Boost.Build.
+  * Prioritize todo list.
+  * Port todo list to Google Code issue tracker.
+  * Memory/handle leak testing.
+  * Unit tests and examples should pass app verifier.
+  * Maintain a changelog.
+  * Investigate policy based design where appropriate.
+  * Branch before beginning on the next round of sweeping breaking changes.
+  * Make APIs more generic where possible. e.g. Instead of taking or returning 
+  a vector<T>, instead use C<T> where 'C' is a template param representing 
+  an arbitrary container.
+  
+* New Modules
+  * Remote Python injection (also from C++ layer).
+  * Remote API hooking with Python support.
+  * Helper service to run HadesMem as 'SYSTEM' for when manipulating certain 
+  protected/critical processes (running in separate desktops, sessions, etc).
+  * Debugging APIs.
+    * Software breakpoint.
+    * Hardware breakpoint (incl read/write detection).
+    * Conditional breakpoints.
+    * Single-stepping.
+    * Stack trace APIs.
+  * Anti-anti-cheat APIs.
+  * Thread/process information APIs.
+  * Manual mapper.
+    * Windows PE loader reversing.
+    * TLS support.
+    * Exception handling support.
+    * No 'external' (read: MMHelper) dependencies.
+  * Python scripts for automating common tasks.
+  * IA32 and AMD64 remote code 'emulator'.
+  * Custom GetModuleHandle, GetProcAddress, etc.
+  * Cheat Engine 'replacement'.
+  
+* Tests
+  * In tests such as PeLib etc ensure at least one module is processed per 
+  test, in case the validity check function is the one with a regression.
+  * Extra sanity checks to ensure not only that the functions return 
+  without exception, but also that the returned data is valid. e.g. GetName in 
+  ImpThunk etc.
+  * Tests for Python bindings.
+  * Cleanup.
+
+* Process
+  * Constructors that take window/process name should throw if multiple 
+  processes match the criteria. In this case, the PID constructor should be 
+  used.
+  * Fix process enumeration code to allow x64 -> x86 enumeration.
+
+* MemoryMgr
+  * Clean up memory reading/writing API to reduce use of TMP in public 
+  interface.
+  * Improve 'safety' of remote function caller via EH to minimize risk of 
+  crashing target.
+  * Improve genericity of parameter passing in remote function caller.
+  * Memory reading via expression templates.
+  * Improved type genericity via type decay to ensure templates function 
+  correctly in the face of const, volatile, references, etc.
+
+* Disassembler
+  * Decode calls/jumps to function names where possible.
+  * NOP/UnNOP support.
+  * ASM searching API with 'wildcards'. (Metasm?)
+  * String based assembler with x64 support.
+  * Improve bindings to make it actually useful from Python.
+  * 'Integrate' existing BeaEngine Python bindings into PyHadesMem.
+  
+* Scanner
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
+  * Multi-threaded scanning option.
+  * Wildcard support for vector/string scanning.
+  * Regex support for string scanning.
+  * Memory protection filters (read, write, exec).
+  * Memory type filters (private, mapped, image).
+  * Pause target while scanning option.
+  * Injected scanning option.
+  * Configurable scan buffer size.
+  * Pointer scanner.
+  * Unknown value scan.
+  * Progressive scan filtering based on either value or criteria.
+  * Scan history and undo.
+  * Case insensitive string scanning option.
+  * Binary scanning.
+  * Custom scanning via user-supplied predicate.
+  * Improved floating-point scanning (configurable or 'smart' epsilon).
+  * Group search support.
+
+* Injector
+  * .NET injection.
+    * Without DLL dependency if possible.
+  * Cross-session injection.
+  * IAT injection.
+  * Varargs/generic export calling.
+  * Clean up APIs returning pairs/tuples/etc to return objects with named 
+  fields and/or getters.
+
+* Patcher
+  * VEH hooking (Both INT3 and DR).
+  * Transactional hooking.
+  * Improved relative instruction rebuilding (including conditionals).
+  * Sanity checking for target process.
+  * Freeze target when hooking.
+  * VMT hooking.
+  * IAT/EAT hooking.
+  * Explicitly support hook chains (and write test).
+  * Use relative jumps where possible (detect delta at runtime).
+
+* FindPattern
+  * Use a file view with a small memory cache rather than consuming large 
+  amounts of RAM.
+  * Pattern generator.
+  * Multi-threaded scanning.
+  * 'Start' attribute support.
+  * Data/Rdata scanning support (for 'start' attribute and constant scans).
+  * Support for loading XML file from resource or memory.
+  * Dump results to file.
+  * Change parser library from RapidXML to Boost.Spirit (may require a 
+  format change from XML to something custom).
+  * Object or stream-based implementation that allows operation chaining.
+  * Improve constructors.
+  * Improve tests.
+  * Optional relative address support (for dumping addresses where the game 
+  has ASLR enabled).
+
+* PeLib
+  * Overlay data support.
+  * Finish implementing matching 'setters' for existing 'getters'.
+  * Add modules to support more of the PE file format.
+  * Check NumberOfRvaAndSizes in NtHeaders sanity checks before attempting to 
+  retrieve a data dir.
+  * Cache base pointers etc rather than retrieving it manually in every 
+  getter/setter. Slightly less 'robust', but due to the typically 'read-only' 
+  nature of the data this is the expected behaviour in all known cases anyway.
+  * Consistent API for GetBase. e.g. PVOID vs PBYTE vs T*.
+  * Resource directory support.
+  * Exception directory support.
+  * Relocation directory support.
+  * Security directory support.
+  * Debug directory support.
+  * Load config directory support.
+  * Delay import directory support.
+  * Bound import directory support.
+  * IAT (as opposed to Import) directory support.
+  * CLR runtime directory support.
+  * Full support for writing back to PE file, including automatically 
+  performing adjustments where required to fit in new data or remove 
+  unnecessary space.
+  * Move to sub-folder to avoid header clashes etc.

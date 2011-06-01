@@ -1,0 +1,33 @@
+# Tests/Jamfile.v2
+
+import testing 
+  ;
+
+project 
+  : 
+    requirements 
+    <warnings>all 
+    <warnings-as-errors>on 
+    <library>/Memory//Memory 
+    <library>/boost//unit_test_framework/<link>static 
+  ;
+
+test-suite Memory
+  :
+    [ run DisassemblerTest.cpp ]
+    [ run DosHeaderTest.cpp ]
+    [ run ExportDirTest.cpp ]
+    [ run FindPatternTest.cpp ]
+    [ run ImportDirTest.cpp ]
+    [ run InjectorTest.cpp ]
+    [ run PatcherTest.cpp ]
+    [ run MemoryMgrTest.cpp ]
+    [ run ModuleTest.cpp ]
+    [ run NtHeadersTest.cpp ]
+    [ run PeFileTest.cpp ]
+    [ run ProcessTest.cpp ]
+    [ run RegionTest.cpp ]
+    [ run ScannerTest.cpp ]
+    [ run SectionTest.cpp ]
+    [ run TlsDirTest.cpp ]
+  ;

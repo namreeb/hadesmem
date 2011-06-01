@@ -1,0 +1,62 @@
+[book HadesMem 
+  [quickbook 1.5] 
+  [copyright 2010 Joshua Boyce]
+  [license Distributed under the GNU General Public License, Version 3. (See 
+  accompanying file gpl-3.0 or copy at [@http://www.gnu.org/licenses/])]
+]
+
+[section:intro Introduction]
+
+HadesMem is a C++-based memory hacking library for Windows based applications, 
+with the goal of providing a safe, generic, powerful, and efficient API. All 
+components (with some minor exceptions, such as the Patcher) are useable on 
+remote targets. Furthermore, all components compile for (and work natively on) 
+both IA32 and AMD64.
+
+To aid in rapid development, HadesMem ships with full Python bindings, useable 
+for anything from the simplest of tests, to full-blown applications.
+
+Features include:
+
+* Disassembler
+* Pattern scanner
+* Injector
+* Manual mapper
+* Memory modification
+* Remote function caller
+* Module enumeration
+* Code detouring/patching
+* Memory region enumeration
+* Memory scanner
+* Symbol lookup
+* PE file format wrapper
+
+[endsect]
+
+[section:changes Changes]
+[endsect]
+
+[section:install Installation]
+[endsect]
+
+[section:hadesmem HadesMem]
+[section:examples Examples]
+[endsect]
+
+[section:reference Reference]
+[endsect]
+[endsect]
+
+[section:pyhadesmem PyHadesMem]
+[section:examples Examples]
+[endsect]
+
+[section:reference Reference]
+[endsect]
+[endsect]
+
+[section:faq FAQ]
+[endsect]
+
+[section:acknowledgments Acknowledgments]
+[endsect]

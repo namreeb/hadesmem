@@ -1,0 +1,45 @@
+# Src/Scripting/Jamfile.v2
+
+project 
+  : 
+    requirements 
+    <warnings>all 
+  ;
+
+import python 
+  ;
+
+if ![python.configured]
+{
+  ECHO 
+    "Notice: No Python configured in user-config.jam." 
+    "Will use default configuration."
+    ;
+    
+  using python
+    ;
+}
+
+exe MemSandbox 
+  : 
+    [ glob MemSandbox/*.cpp ] 
+    /Memory//Memory 
+    /boost//python/<link>static 
+    /boost//program_options/<link>static 
+  : 
+    <link>static 
+    <warnings-as-errors>on 
+  : 
+  : 
+    <include>"." 
+  ;
+
+python-extension PyHadesMem 
+  : 
+    [ glob PyHadesMem/*.cpp ] 
+    /Memory//Memory 
+    /boost//python/<link>static 
+  : 
+    <link>shared 
+    <warnings-as-errors>on 
+  ;

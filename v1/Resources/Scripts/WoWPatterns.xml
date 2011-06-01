@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Patterns>
+	<Pattern Name="MaxClimbAngle" Data="D90520779E008B0D9094A8006BC034" Mask="xx????xx????xxx">
+		<Add Value="2"/>
+		<Lea/>
+	</Pattern>
+</Patterns>

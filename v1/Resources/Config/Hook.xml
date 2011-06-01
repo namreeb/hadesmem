@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Hooks>
+	<Hook Name="user32.dll!SetCursor" Enabled="1"/>
+	<Hook Name="user32.dll!GetCursorPos" Enabled="1"/>
+	<Hook Name="user32.dll!SetCursorPos" Enabled="1"/>
+	
+	<Hook Name="d3d9.dll!Direct3DCreate9" Enabled="1"/>
+	<Hook Name="d3d9.dll!IDirect3D9::CreateDevice" Enabled="1"/>
+	<Hook Name="d3d9.dll!IDirect3DDevice9::EndScene" Enabled="1"/>
+	<Hook Name="d3d9.dll!IDirect3DDevice9::Reset" Enabled="1"/>
+	<Hook Name="d3d9.dll!IDirect3DDevice9::Release" Enabled="1"/>
+	
+	<Hook Name="kernel32.dll!CreateProcessInternalW" Enabled="1"/>
+	
+	<Hook Name="kernel32.dll!GetTickCount" Enabled="1"/>
+	<Hook Name="kernel32.dll!QueryPerformanceCounter" Enabled="1"/>
+</Hooks>

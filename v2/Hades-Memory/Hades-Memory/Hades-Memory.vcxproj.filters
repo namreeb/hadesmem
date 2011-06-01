@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Aux">
+      <UniqueIdentifier>{06302c30-6025-470c-85a5-ba28715f8f44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\External">
+      <UniqueIdentifier>{4c1fbea3-b11a-4ce3-9dd3-90204d38c9fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Internal">
+      <UniqueIdentifier>{f5354ef0-883f-4799-9047-3caef0312ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\External\PeLib">
+      <UniqueIdentifier>{ddcd7702-c910-4e83-9b85-d08684a05d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\External">
+      <UniqueIdentifier>{076a74c8-a005-4183-b1db-2c2988209150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\External\PeLib">
+      <UniqueIdentifier>{1ababb4f-7092-4589-8709-e52c0c2d912f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Internal">
+      <UniqueIdentifier>{c581c5ae-2da0-4123-8cc9-e118cac78158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Anti-Anti">
+      <UniqueIdentifier>{d9935020-19ea-4dfe-b485-f751313f0a99}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MemoryMgr.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Injector.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualMap.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Region.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Scanner.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="DosHeader.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ExportDir.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="NtHeaders.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="PeFile.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Section.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="TlsDir.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Patcher.cpp">
+      <Filter>Source Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="Disassembler.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="ImportDir.cpp">
+      <Filter>Source Files\External\PeLib</Filter>
+    </ClCompile>
+    <ClCompile Include="FindPattern.cpp">
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.h">
+      <Filter>Header Files\Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Header Files\Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="Disassembler.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Injector.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="ManualMap.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryMgr.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Region.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Scanner.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Patcher.h">
+      <Filter>Header Files\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsDir.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportDir.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportEnum.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="NtHeaders.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="PeFile.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="PeLib.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Section.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionEnum.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="DosHeader.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoLink.h">
+      <Filter>Header Files\Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="Fwd.h">
+      <Filter>Header Files\Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportDir.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportEnum.h">
+      <Filter>Header Files\External\PeLib</Filter>
+    </ClInclude>
+    <ClInclude Include="FindPattern.h">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="HashString.h">
+      <Filter>Header Files\Anti-Anti</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

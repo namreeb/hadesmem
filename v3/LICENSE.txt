@@ -1,0 +1,1 @@
+See gpl-3.0.txt.

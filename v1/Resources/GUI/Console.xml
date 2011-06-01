@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<GUI>
+	<Font face="Tahoma" size="10"/>
+	<Windows>
+		<Window absX="50" absY="50" width="1820" height="400" hidden="0" string="Hades Console" string2="HADES_CONSOLE_WINDOW">
+			<EditBox relX="10" relY="345" width="1800" string="" string2="HADES_CONSOLE_INPUT"/>
+			<TextBox relX="10" relY="10" width="1800" height="330" string2="HADES_CONSOLE_OUTPUT">
+				<Row>Welcome to Hades. Press F12 to toggle this window.</Row>
+			</TextBox>
+		</Window>
+	</Windows>
+</GUI>
