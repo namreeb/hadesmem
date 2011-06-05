@@ -22,6 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include <HadesMemory/Error.hpp>
 #include <HadesMemory/Process.hpp>
+#include <HadesCommon/TypeTraits.hpp>
 
 // C++ Standard Library
 #include <memory>
@@ -72,6 +73,22 @@ namespace Hades
       // Call remote function
       std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
         std::vector<PVOID> const& Args) const;
+
+#ifndef BOOST_NO_INITIALIZER_LISTS
+#ifndef BOOST_NO_VARIADIC_TEMPLATES
+      // Call remote function
+      template <typename... T>
+      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
+        T const&... Args) const
+      {
+        static_assert(sizeof...(Args) <= sizeof(PVOID), 
+          "Size of types must be <= memsize.");
+        static_assert(Util::all_pod<T...>::value, "All types must be POD.");
+        std::vector<PVOID> NewArgs { reinterpret_cast<PVOID>(Args)... };
+        return Call(Address, MyCallConv, NewArgs);
+      }
+#endif
+#endif
 
       // Read memory (POD types)
       template <typename T>

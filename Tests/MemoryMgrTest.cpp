@@ -54,6 +54,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
+  
+#ifndef BOOST_NO_VARIADIC_TEMPLATES
+  MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestCall)), Hades::Memory::MemoryMgr::CallConv_Default, 0, -1, 
+    0x11223344, 0xAABBCCDD);
+#endif
 
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
   struct TestPODType
