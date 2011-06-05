@@ -19,8 +19,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include <HadesMemory/Patcher.hpp>
+#include <HadesCommon/Config.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
-#include <HadesMemory/Disassembler.hpp>
 
 // AsmJit
 #ifdef HADES_MSVC
@@ -39,6 +39,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #ifdef HADES_GCC
 #pragma GCC diagnostic pop
+#endif
+
+// BeaEngine
+#ifdef HADES_MSVC
+#pragma warning(push, 1)
+#endif
+#include <BeaEngine/BeaEngine.h>
+#ifdef HADES_MSVC
+#pragma warning(pop)
 #endif
 
 namespace Hades
@@ -135,45 +144,62 @@ namespace Hades
       // Allocate trampoline buffer
       m_Trampoline.reset(new AllocAndFree(m_Memory, TrampSize));
       PBYTE TrampCur = static_cast<PBYTE>(m_Trampoline->GetBase());
-
-      // Disassemble target (for worst case scenario)
-      Disassembler MyDisasm(m_Memory);
-      std::vector<DisasmData> MyDisasmData(MyDisasm.Disassemble(m_Target, 
+      
+      // Get instructions at target
+      std::vector<BYTE> Buffer(m_Memory.Read<std::vector<BYTE>>(m_Target, 
         TrampSize));
 
-      // Parse disassembly
+      // Set up disasm structure for BeaEngine
+      DISASM MyDisasm;
+      ZeroMemory(&MyDisasm, sizeof(MyDisasm));
+      MyDisasm.EIP = reinterpret_cast<long long>(Buffer.data());
+      MyDisasm.VirtualAddr = reinterpret_cast<long long>(m_Target);
+#if defined(_M_AMD64) 
+      MyDisasm.Archi = 64;
+#elif defined(_M_IX86) 
+      MyDisasm.Archi = 32;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+      // Disassemble instructions until we have enough data to generate the 
+      // trampoline
       unsigned int InstrSize = 0;
-      for (auto i = MyDisasmData.cbegin(); i != MyDisasmData.cend(); ++i)
+      while (InstrSize < GetJumpSize())
       {
-        // Break once we've disassembled enough data
-        if (InstrSize >= GetJumpSize())
+        // Disassemble target
+        int const Len = Disasm(&MyDisasm);
+        // Ensure disassembly succeeded
+        if (Len == UNKNOWN_OPCODE)
         {
-          break;
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("PatchDetour::Apply") << 
+            ErrorString("Disassembly failed."));
         }
 
-        // Get current instruction data
-        DisasmData const& CurDisasmData = *i;
-        DISASM const& CurDisasm = CurDisasmData.Disasm;
-        int CurLen = CurDisasmData.Len;
-        std::vector<BYTE> const& CurRaw = CurDisasmData.Raw;
-
         // Detect and resolve jumps
-        if ((CurDisasm.Instruction.BranchType == JmpType) && 
-          (CurDisasm.Instruction.AddrValue != 0)) 
+        if ((MyDisasm.Instruction.BranchType == JmpType) && 
+          (MyDisasm.Instruction.AddrValue != 0)) 
         {
-          WriteJump(TrampCur, reinterpret_cast<PVOID>(CurDisasm.
+          WriteJump(TrampCur, reinterpret_cast<PVOID>(MyDisasm.
             Instruction.AddrValue));
           TrampCur += GetJumpSize();
         }
         // Handle 'generic' instructions
         else
         {
+          auto CurRaw = m_Memory.Read<std::vector<BYTE>>(
+            reinterpret_cast<PVOID>(MyDisasm.VirtualAddr), Len);
           m_Memory.Write(TrampCur, CurRaw);
-          TrampCur += CurLen;
+          TrampCur += Len;
         }
 
+        // Advance to next instruction
+        MyDisasm.EIP += Len;
+        MyDisasm.VirtualAddr += Len;
+
         // Add to total instruction size
-        InstrSize += CurLen;
+        InstrSize += Len;
       }
 
       // Write jump back to target

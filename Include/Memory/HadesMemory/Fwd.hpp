@@ -27,17 +27,11 @@ namespace Hades
     class Module;
     class ModuleList;
     class ModuleIter;
-    class Region;
-    class RegionList;
-    class RegionIter;
-    class Scanner;
     class Process;
     class Injector;
     class MemoryMgr;
     class ManualMap;
     class FindPattern;
-    class Disassembler;
-    class Symbols;
     class AllocAndFree;
     
     // Hades (Internal)

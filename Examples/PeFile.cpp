@@ -100,14 +100,13 @@ int wmain(int argc, wchar_t* argv[])
     }
 #endif
 
-    // Hades version number
-    std::wstring const VerNum(L"TRUNK");
-    
     // Version and copyright output
 #if defined(_M_X64)
-    std::wcout << "Hades PeFile AMD64 [Version " << VerNum << "]\n";
+    std::wcout << "Hades PeFile AMD64 [Version " << 
+      HADES_VERSION_FULL_STRING << "]\n";
 #elif defined(_M_IX86)
-    std::wcout << "Hades PeFile IA32 [Version " << VerNum << "]\n";
+    std::wcout << "Hades PeFile IA32 [Version " << 
+      HADES_VERSION_FULL_STRING << "]\n";
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif

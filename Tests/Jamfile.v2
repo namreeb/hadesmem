@@ -19,20 +19,17 @@ project
 
 test-suite Memory
   :
-    [ run DisassemblerTest.cpp ]
-    [ run DosHeaderTest.cpp ]
-    [ run ExportDirTest.cpp ]
     [ run FindPatternTest.cpp ]
-    [ run ImportDirTest.cpp ]
     [ run InjectorTest.cpp ]
     [ run PatcherTest.cpp ]
     [ run MemoryMgrTest.cpp ]
     [ run ModuleTest.cpp ]
-    [ run NtHeadersTest.cpp ]
-    [ run PeFileTest.cpp ]
     [ run ProcessTest.cpp ]
-    [ run RegionTest.cpp ]
-    [ run ScannerTest.cpp ]
-    [ run SectionTest.cpp ]
-    [ run TlsDirTest.cpp ]
+    [ run PeLib/DosHeaderTest.cpp ]
+    [ run PeLib/ExportDirTest.cpp ]
+    [ run PeLib/ImportDirTest.cpp ]
+    [ run PeLib/NtHeadersTest.cpp ]
+    [ run PeLib/PeFileTest.cpp ]
+    [ run PeLib/SectionTest.cpp ]
+    [ run PeLib/TlsDirTest.cpp ]
   ;

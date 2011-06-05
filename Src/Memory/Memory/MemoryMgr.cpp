@@ -93,8 +93,7 @@ namespace Hades
 
     // Call remote function
     std::pair<DWORD_PTR, DWORD> MemoryMgr::Call(LPCVOID Address, 
-      std::vector<PVOID> const& Args, 
-      CallConv MyCallConv) const 
+      CallConv MyCallConv, std::vector<PVOID> const& Args) const 
     {
       // Get number of arguments
       std::size_t NumArgs = Args.size();

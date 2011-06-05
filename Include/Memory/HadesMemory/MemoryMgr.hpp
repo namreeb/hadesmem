@@ -31,6 +31,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 
 // Boost
+#include <boost/config.hpp>
 #include <boost/filesystem.hpp>
 
 // Windows API
@@ -60,18 +61,17 @@ namespace Hades
       // Calling conventions
       enum CallConv
       {
+        CallConv_Default, 
         CallConv_CDECL, 
         CallConv_STDCALL, 
         CallConv_THISCALL, 
         CallConv_FASTCALL, 
-        CallConv_X64, 
-        CallConv_Default
+        CallConv_X64
       };
 
       // Call remote function
-      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, 
-        std::vector<PVOID> const& Args, 
-        CallConv MyCallConv = CallConv_Default) const;
+      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
+        std::vector<PVOID> const& Args) const;
 
       // Read memory (POD types)
       template <typename T>

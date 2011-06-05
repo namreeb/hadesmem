@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
   std::pair<DWORD_PTR, DWORD> const CallRet = MyMemory.Call(
     reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
-    TestCallArgs);
+    Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
-  
+
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
   struct TestPODType
   {

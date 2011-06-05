@@ -48,14 +48,14 @@ namespace Hades
       class Error : public virtual HadesMemError
       { };
 
-      // Create module
-      Module(MemoryMgr const& MyMemory, MODULEENTRY32 const& ModuleEntry);
-
       // Find module by handle
       Module(MemoryMgr const& MyMemory, HMODULE Handle);
 
       // Find module by name
       Module(MemoryMgr const& MyMemory, std::wstring const& ModuleName);
+
+      // Create module
+      Module(MemoryMgr const& MyMemory, MODULEENTRY32 const& ModuleEntry);
 
       // Get module base
       HMODULE GetBase() const;

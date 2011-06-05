@@ -57,9 +57,6 @@ namespace Hades
   namespace Memory
   {
     // Create process (as suspended) and inject DLL
-    // Todo: Rewrite this API with 'manual' implementations of APIs which rely 
-    // on the Module APIs so we don't have to implement workarounds in all the 
-    // APIs this function depends on.
     CreateAndInjectData CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
@@ -291,7 +288,8 @@ namespace Hades
       std::vector<PVOID> Args;
       Args.push_back(LibFileRemote.GetBase());
       std::pair<DWORD_PTR, DWORD> RemoteRet = m_Memory.Call(
-        reinterpret_cast<PVOID>(pLoadLibraryWTemp), Args);
+        reinterpret_cast<PVOID>(pLoadLibraryWTemp), 
+        MemoryMgr::CallConv_Default, Args);
       if (!RemoteRet.first)
       {
         std::error_code const LastError = std::error_code(RemoteRet.second, 
@@ -324,7 +322,7 @@ namespace Hades
       std::vector<PVOID> ExportArgs;
       ExportArgs.push_back(ModuleRemote);
       return m_Memory.Call(reinterpret_cast<PVOID>(pExportAddrTemp), 
-        ExportArgs);
+        MemoryMgr::CallConv_Default, ExportArgs);
     }
   }
 }
