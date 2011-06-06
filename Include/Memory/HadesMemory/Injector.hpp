@@ -56,7 +56,7 @@ namespace Hades
         bool PathResolution = true) const;
 
       // Call export
-      std::pair<DWORD_PTR, DWORD> CallExport(
+      MemoryMgr::RemoteFunctionRet CallExport(
         boost::filesystem::path const& ModulePath, 
         HMODULE ModuleRemote, std::string const& Export) const;
 
@@ -71,31 +71,15 @@ namespace Hades
     public:
       CreateAndInjectData(MemoryMgr const& MyMemory, HMODULE Module, 
         DWORD_PTR ExportRet, DWORD ExportLastError) 
-        : m_Memory(new MemoryMgr(MyMemory)), 
+        : m_Memory(MyMemory), 
         m_Module(Module), 
         m_ExportRet(ExportRet), 
         m_ExportLastError(ExportLastError)
       { }
       
-      CreateAndInjectData(CreateAndInjectData const& Rhs)
-        : m_Memory(new MemoryMgr(*Rhs.m_Memory)), 
-        m_Module(Rhs.m_Module), 
-        m_ExportRet(Rhs.m_ExportRet), 
-        m_ExportLastError(Rhs.m_ExportLastError)
-      { }
-      
-      CreateAndInjectData& operator=(CreateAndInjectData const& Rhs)
-      {
-        m_Memory.reset(new Hades::Memory::MemoryMgr(*Rhs.m_Memory));
-        m_Module = Rhs.m_Module;
-        m_ExportRet = Rhs.m_ExportRet;
-        m_ExportLastError = Rhs.m_ExportLastError;
-        return *this;
-      }
-      
       MemoryMgr GetMemoryMgr() const
       {
-        return *m_Memory;
+        return m_Memory;
       }
       
       HMODULE GetModule() const
@@ -114,7 +98,7 @@ namespace Hades
       }
       
     private:
-      std::unique_ptr<MemoryMgr> m_Memory;
+      MemoryMgr m_Memory;
       HMODULE m_Module;
       DWORD_PTR m_ExportRet;
       DWORD m_ExportLastError;

@@ -211,12 +211,12 @@ int wmain(int argc, wchar_t* argv[])
     if (!Export.empty())
     {
       std::wcout << "Attempting to call remote export." << std::endl;
-      std::pair<DWORD_PTR, DWORD> ExpRet = MyInjector.CallExport(
-        ModulePath.is_absolute() ? ModulePath : boost::filesystem::absolute(
-        ModulePath), ModRemote, Export);
+      Hades::Memory::MemoryMgr::RemoteFunctionRet ExpRet = 
+        MyInjector.CallExport(ModulePath.is_absolute() ? ModulePath : 
+        boost::filesystem::absolute(ModulePath), ModRemote, Export);
       std::wcout << boost::wformat(L"Remote export called. Return = %d (%x). "
-        L"LastError = %d (%x).\n") %ExpRet.first %ExpRet.first %ExpRet.second 
-        %ExpRet.second;
+        L"LastError = %d (%x).\n") %ExpRet.GetReturnValue() 
+        %ExpRet.GetReturnValue() %ExpRet.GetLastError() %ExpRet.GetLastError();
     }
   }
   catch (std::exception const& e)

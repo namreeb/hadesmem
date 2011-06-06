@@ -49,16 +49,19 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(-1));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
-  std::pair<DWORD_PTR, DWORD> const CallRet = MyMemory.Call(
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet = MyMemory.Call(
     reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
     Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
-  BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
-  BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
+  BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
+  BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
 #ifndef BOOST_NO_VARIADIC_TEMPLATES
-  MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet2 =  
+    MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), Hades::Memory::MemoryMgr::CallConv_Default, 0, -1, 
     0x11223344, 0xAABBCCDD);
+  BOOST_CHECK_EQUAL(CallRet2.GetReturnValue(), static_cast<DWORD_PTR>(1234));
+  BOOST_CHECK_EQUAL(CallRet2.GetLastError(), static_cast<DWORD>(5678));
 #endif
 
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write

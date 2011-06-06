@@ -49,10 +49,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Call Kernel32.dll!GetCurrentProcessId and ensure the return value and 
   // last error code are their expected values
-  std::pair<DWORD_PTR, DWORD> const ExpRet = MyInjector.CallExport(
-    L"kernel32.dll", Kernel32ModNew, "GetCurrentProcessId");
-  BOOST_CHECK_EQUAL(ExpRet.first, GetCurrentProcessId());
-  BOOST_CHECK_EQUAL(ExpRet.second, static_cast<DWORD>(0));
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const ExpRet = 
+    MyInjector.CallExport(L"kernel32.dll", Kernel32ModNew, 
+    "GetCurrentProcessId");
+  BOOST_CHECK_EQUAL(ExpRet.GetReturnValue(), GetCurrentProcessId());
+  BOOST_CHECK_EQUAL(ExpRet.GetLastError(), static_cast<DWORD>(0));
   
   // Todo: Test CreateAndInject API
 }

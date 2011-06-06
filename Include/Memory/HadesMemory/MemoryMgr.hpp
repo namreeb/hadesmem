@@ -59,6 +59,35 @@ namespace Hades
       // Open process from window name and class
       MemoryMgr(std::wstring const& WindowName, std::wstring const& ClassName);
 
+      // MemoryMgr::Call return data
+      class RemoteFunctionRet
+      {
+      public:
+        RemoteFunctionRet() 
+          : m_ReturnValue(0), 
+          m_LastError(0)
+        { }
+        
+        RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD LastError) 
+          : m_ReturnValue(ReturnValue), 
+          m_LastError(LastError)
+        { }
+        
+        DWORD_PTR GetReturnValue() const
+        {
+          return m_ReturnValue;
+        }
+        
+        DWORD GetLastError() const
+        {
+          return m_LastError;
+        }
+        
+      private:
+        DWORD_PTR m_ReturnValue;
+        DWORD m_LastError;
+      };
+    
       // Calling conventions
       enum CallConv
       {
@@ -71,14 +100,14 @@ namespace Hades
       };
 
       // Call remote function
-      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
+      RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
         std::vector<PVOID> const& Args) const;
 
 #ifndef BOOST_NO_INITIALIZER_LISTS
 #ifndef BOOST_NO_VARIADIC_TEMPLATES
       // Call remote function
       template <typename... T>
-      std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
+      RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
         T const&... Args) const
       {
         static_assert(Util::all_memsize_or_less<T...>::value, 

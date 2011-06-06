@@ -181,14 +181,10 @@ namespace Hades
         HMODULE const ModBase = MyInjector.InjectDll(Module, PathResolution);
 
         // Call export if one has been specified
-        std::pair<DWORD_PTR, DWORD> ExpRetData;
-        DWORD_PTR ExportRet = 0;
-        DWORD ExportLastError = 0;
+        MemoryMgr::RemoteFunctionRet ExpRetData;
         if (!Export.empty())
         {
           ExpRetData = MyInjector.CallExport(Module, ModBase, Export);
-          ExportRet = ExpRetData.first;
-          ExportLastError = ExpRetData.second;
         }
 
         // Success! Let the process continue execution.
@@ -196,7 +192,7 @@ namespace Hades
         {
           std::error_code const LastError = GetLastErrorCode();
           std::error_code const LastErrorRemote = std::error_code(
-            ExportLastError, std::system_category());
+            ExpRetData.GetLastError(), std::system_category());
           BOOST_THROW_EXCEPTION(Injector::Error() << 
             ErrorFunction("CreateAndInject") << 
             ErrorString("Could not resume process.") << 
@@ -205,7 +201,8 @@ namespace Hades
         }
 
         // Return data to caller
-        return CreateAndInjectData(MyMemory, ModBase, ExportRet, ExportLastError);
+        return CreateAndInjectData(MyMemory, ModBase, 
+          ExpRetData.GetReturnValue(), ExpRetData.GetLastError());
       }
       // Catch exceptions
       catch (std::exception const& /*e*/)
@@ -287,13 +284,13 @@ namespace Hades
       // Load module in remote process using LoadLibraryW
       std::vector<PVOID> Args;
       Args.push_back(LibFileRemote.GetBase());
-      std::pair<DWORD_PTR, DWORD> RemoteRet = m_Memory.Call(
+      MemoryMgr::RemoteFunctionRet RemoteRet = m_Memory.Call(
         reinterpret_cast<PVOID>(pLoadLibraryWTemp), 
         MemoryMgr::CallConv_Default, Args);
-      if (!RemoteRet.first)
+      if (!RemoteRet.GetReturnValue())
       {
-        std::error_code const LastError = std::error_code(RemoteRet.second, 
-          std::system_category());
+        std::error_code const LastError = std::error_code(
+          RemoteRet.GetLastError(), std::system_category());
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
           ErrorString("Call to LoadLibraryW in remote process failed.") << 
@@ -301,14 +298,15 @@ namespace Hades
       }
       
       // Look for target module
-      Module NewModule(m_Memory, reinterpret_cast<HMODULE>(RemoteRet.first));
+      Module NewModule(m_Memory, reinterpret_cast<HMODULE>(
+        RemoteRet.GetReturnValue()));
 
       // Return module base
       return NewModule.GetBase();
     }
 
     // Call export
-    std::pair<DWORD_PTR, DWORD> Injector::CallExport(
+    MemoryMgr::RemoteFunctionRet Injector::CallExport(
       boost::filesystem::path const& ModulePath, 
       HMODULE ModuleRemote, std::string const& Export) const
     {

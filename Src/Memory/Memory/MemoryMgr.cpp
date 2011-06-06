@@ -92,7 +92,7 @@ namespace Hades
     { }
 
     // Call remote function
-    std::pair<DWORD_PTR, DWORD> MemoryMgr::Call(LPCVOID Address, 
+    MemoryMgr::RemoteFunctionRet MemoryMgr::Call(LPCVOID Address, 
       CallConv MyCallConv, std::vector<PVOID> const& Args) const 
     {
       // Get number of arguments
@@ -329,7 +329,7 @@ namespace Hades
       // Forward return value from remote thread
       DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetBase());
       DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetBase());
-      return std::make_pair(RetVal, ErrorCode);
+      return RemoteFunctionRet(RetVal, ErrorCode);
     }
 
     // Whether an address is currently readable
