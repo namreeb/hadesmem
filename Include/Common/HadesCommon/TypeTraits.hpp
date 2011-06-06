@@ -22,6 +22,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <type_traits>
 
+// Boost
+#include <boost/config.hpp>
+
 namespace Hades
 {
   namespace Util
