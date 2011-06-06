@@ -32,13 +32,30 @@ namespace Hades
     template <typename Head, typename... Tail>
     struct all_pod<Head, Tail...>
     {
-        static const bool value = std::is_pod<Head>::value && all_pod<Tail...>::value;
+      static const bool value = std::is_pod<Head>::value && 
+        all_pod<Tail...>::value;
     };
     
     template <typename T>
     struct all_pod<T>
     {
-        static const bool value = std::is_pod<T>::value;
+      static const bool value = std::is_pod<T>::value;
+    };
+    
+    template <typename... Ts>
+    struct all_memsize_or_less;
+    
+    template <typename Head, typename... Tail>
+    struct all_memsize_or_less<Head, Tail...>
+    {
+      static const bool value = (sizeof(Head) <= sizeof(void*)) && 
+        all_memsize_or_less<Tail...>::value;
+    };
+    
+    template <typename T>
+    struct all_memsize_or_less<T>
+    {
+      static const bool value = sizeof(T) <= sizeof(void*);
     };
   }
 }

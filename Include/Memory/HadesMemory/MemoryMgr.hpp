@@ -81,7 +81,7 @@ namespace Hades
       std::pair<DWORD_PTR, DWORD> Call(LPCVOID Address, CallConv MyCallConv, 
         T const&... Args) const
       {
-        static_assert(sizeof...(Args) <= sizeof(PVOID), 
+        static_assert(Util::all_memsize_or_less<T...>::value, 
           "Size of types must be <= memsize.");
         static_assert(Util::all_pod<T...>::value, "All types must be POD.");
         std::vector<PVOID> NewArgs { reinterpret_cast<PVOID>(Args)... };
