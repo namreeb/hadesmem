@@ -26,6 +26,7 @@ namespace Hades
 {
   namespace Util
   {
+#ifndef BOOST_NO_VARIADIC_TEMPLATES
     template <typename... Ts>
     struct all_pod;
     
@@ -57,5 +58,6 @@ namespace Hades
     {
       static const bool value = sizeof(T) <= sizeof(void*);
     };
+#endif
   }
 }
