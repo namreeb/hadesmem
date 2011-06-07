@@ -25,6 +25,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE FindPatternTest
 #include <boost/test/unit_test.hpp>
 
+// Constant which should be scannable with data scans
+static DWORD const MagicValue = 0x77333311;
+
 // FindPattern component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
@@ -98,4 +101,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     L"66 77 88 99 00 11 33 33 77", L"xxxxxxxxxxxxxxxxxxxx", 
     Hades::Memory::FindPattern::ThrowOnUnmatch), 
     Hades::Memory::FindPattern::Error);
+  
+  // Check ScanData flag
+  // Note: Pattern is for narrow string 'FindPattern' (without quotes)
+  auto const pFindPatternStr = MyFindPattern.Find(L"46 69 6E 64 50 61 74 74 "
+    L"65 72 6E", L"xxxxxxxxxxx", Hades::Memory::FindPattern::ScanData);
+  BOOST_CHECK(pFindPatternStr != nullptr);
 }

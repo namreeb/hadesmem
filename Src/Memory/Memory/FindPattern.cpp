@@ -19,9 +19,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Hades
 #include <HadesMemory/FindPattern.hpp>
+#include <HadesCommon/I18n.hpp>
 #include <HadesCommon/Config.hpp>
 #include <HadesMemory/Module.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
+#include <HadesMemory/PeLib/Section.hpp>
 #include <HadesMemory/PeLib/DosHeader.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 
@@ -42,8 +44,8 @@ namespace Hades
     FindPattern::FindPattern(MemoryMgr const& MyMemory, HMODULE Module) 
       : m_Memory(MyMemory), 
       m_Base(0), 
-      m_Start(nullptr), 
-      m_End(nullptr), 
+      m_CodeRegions(), 
+      m_DataRegions(), 
       m_Addresses()
     {
       // Get base of exe if required
@@ -61,13 +63,41 @@ namespace Hades
       DosHeader const MyDosHeader(MyPeFile);
       NtHeaders const MyNtHeaders(MyPeFile);
 
-      // Get base of code section
-      m_Start = pBase + MyNtHeaders.GetBaseOfCode();
-      BOOST_ASSERT(m_Start != nullptr);
-
-      // Calculate end of code section
-      m_End = m_Start + MyNtHeaders.GetSizeOfCode();
-      BOOST_ASSERT(m_End != nullptr);
+      // Get scan regions (sections marked as code and/or data)
+      SectionList Sections(MyPeFile);
+      std::for_each(Sections.begin(), Sections.end(), 
+        [&] (Section const& S)
+        {
+          if ((S.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == 
+            IMAGE_SCN_CNT_CODE)
+          {
+            PBYTE SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
+              S.GetVirtualAddress()));
+            BOOST_ASSERT(SBegin != nullptr);
+            PBYTE SEnd = SBegin + S.GetSizeOfRawData();
+            BOOST_ASSERT(SEnd > SBegin);
+            m_CodeRegions.push_back(std::make_pair(SBegin, SEnd));
+          }
+          
+          if ((S.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA) == 
+            IMAGE_SCN_CNT_INITIALIZED_DATA)
+          {
+            PBYTE SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
+              S.GetVirtualAddress()));
+            BOOST_ASSERT(SBegin != nullptr);
+            PBYTE SEnd = SBegin + S.GetSizeOfRawData();
+            BOOST_ASSERT(SEnd > SBegin);
+            m_DataRegions.push_back(std::make_pair(SBegin, SEnd));
+          }
+        });
+        
+      // Ensure we found at least one section to scan
+      if (m_CodeRegions.empty() && m_DataRegions.empty())
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::FindPattern") << 
+          ErrorString("No valid sections to scan found."));
+      }
     }
     
     // Find pattern
@@ -100,8 +130,20 @@ namespace Hades
         {
           try
           {
+#ifndef HADES_MSVC
+            std::wstringstream ss;
+            if (!(ss << std::hex << Data.substr(i * 3, ((i * 3) + 2))))
+            {
+              throw std::exception();
+            }
+            if (!(ss >> Current))
+            {
+              throw std::exception();
+            }
+#else
             Current = std::stoi(Data.substr(i * 3, ((i * 3) + 2)), nullptr, 
               16);
+#endif
           }
           catch (std::exception const& /*e*/)
           {
@@ -119,7 +161,8 @@ namespace Hades
       }
 
       // Search memory for pattern
-      PVOID Address = Find(DataBuf);
+      bool ScanDataSecs = ((Flags & ScanData) == ScanData);
+      PVOID Address = Find(DataBuf, ScanDataSecs);
       if (!Address && ((Flags & ThrowOnUnmatch) == ThrowOnUnmatch))
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -156,28 +199,41 @@ namespace Hades
     }
 
     // Search memory
-    PVOID FindPattern::Find(std::vector<std::pair<BYTE, bool>> const& Data) 
-      const
+    PVOID FindPattern::Find(std::vector<std::pair<BYTE, bool>> const& Data, 
+      bool ScanDataSecs) const
     {
-      // Cache all memory to be scanned
-      BOOST_ASSERT(m_End > m_Start);
-      std::size_t MemSize = m_End - m_Start;
-      std::vector<BYTE> Buffer(m_Memory.Read<std::vector<BYTE>>(m_Start, 
-        MemSize));
-
-      // Scan memory
-      auto Iter = std::search(Buffer.cbegin(), Buffer.cend(), Data.cbegin(), 
-        Data.cend(), 
-        [] (BYTE HCur, std::pair<BYTE, bool> const& NCur)
+      // Scan all specified section until we find something
+      std::vector<std::pair<PBYTE, PBYTE>> const& ScanRegions = 
+        ScanDataSecs ? m_DataRegions : m_CodeRegions;
+      for (auto i = ScanRegions.cbegin(); i != ScanRegions.cend(); ++i)
+      {
+        // Get section start and end
+        PBYTE SBegin = i->first;
+        PBYTE SEnd = i->second;
+        
+        // Cache all memory to be scanned
+        BOOST_ASSERT(SEnd > SBegin);
+        std::size_t MemSize = SEnd - SBegin;
+        std::vector<BYTE> Buffer(m_Memory.Read<std::vector<BYTE>>(SBegin, 
+          MemSize));
+  
+        // Scan memory
+        auto Iter = std::search(Buffer.cbegin(), Buffer.cend(), Data.cbegin(), 
+          Data.cend(), 
+          [] (BYTE HCur, std::pair<BYTE, bool> const& NCur)
+          {
+            return (!NCur.second) || (HCur == NCur.first);
+          });
+  
+        // Return address if found
+        if (Iter != Buffer.cend())
         {
-          return (!NCur.second) || (HCur == NCur.first);
-        });
-
-      // Return address if found or null if not found
-      return 
-        (Iter != Buffer.cend()) 
-        ? (m_Start + std::distance(Buffer.cbegin(), Iter)) 
-        : nullptr;
+          return (SBegin + std::distance(Buffer.cbegin(), Iter));
+        }
+      }
+      
+      // Nothing found
+      return nullptr;
     }
 
     // Get address map

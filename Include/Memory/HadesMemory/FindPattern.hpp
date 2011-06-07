@@ -53,7 +53,8 @@ namespace Hades
       {
         None = 0, 
         ThrowOnUnmatch = 1, 
-        RelativeAddress = 2
+        RelativeAddress = 2, 
+        ScanData = 4
       };
 
       // Find pattern
@@ -75,7 +76,8 @@ namespace Hades
       void Initialize(HMODULE Module);
       
       // Search memory
-      PVOID Find(std::vector<std::pair<BYTE, bool>> const& Data) const;
+      PVOID Find(std::vector<std::pair<BYTE, bool>> const& Data, 
+        bool ScanDataSecs) const;
 
       // Memory manager instance
       MemoryMgr m_Memory;
@@ -83,9 +85,9 @@ namespace Hades
       // Target module base
       DWORD_PTR m_Base;
 
-      // Start and end addresses of search region
-      PBYTE m_Start;
-      PBYTE m_End;
+      // Start and end addresses of search regions
+      std::vector<std::pair<PBYTE, PBYTE>> m_CodeRegions;
+      std::vector<std::pair<PBYTE, PBYTE>> m_DataRegions;
 
       // Map to hold addresses
       std::map<std::wstring, PVOID> m_Addresses;
