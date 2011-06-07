@@ -30,9 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <utility>
 
-// Boost
-#include <boost/filesystem.hpp>
-
 // Windows API
 #include <Windows.h>
 
@@ -49,14 +46,23 @@ namespace Hades
       { };
 
       // Constructor
-      explicit FindPattern(MemoryMgr const& MyMemory);
-      FindPattern(MemoryMgr const& MyMemory, HMODULE Module);
+      FindPattern(MemoryMgr const& MyMemory, HMODULE Module = nullptr);
+      
+      // Pattern matching flags
+      enum FindFlags
+      {
+        None = 0, 
+        ThrowOnUnmatch = 1, 
+        RelativeAddress = 2
+      };
 
       // Find pattern
-      PVOID Find(std::wstring const& Data, std::wstring const& Mask) const;
-
-      // Load patterns from XML file
-      void LoadFromXML(boost::filesystem::path const& Path);
+      PVOID Find(std::wstring const& Data, std::wstring const& Mask, 
+        FindFlags Flags = None) const;
+        
+      // Find pattern and store by name
+      PVOID Find(std::wstring const& Data, std::wstring const& Mask, 
+        std::wstring const& Name, FindFlags Flags = None);
 
       // Get address map
       std::map<std::wstring, PVOID> GetAddresses() const;
@@ -65,6 +71,9 @@ namespace Hades
       PVOID operator[](std::wstring const& Name) const;
 
     private:
+      // Initialize pattern finder
+      void Initialize(HMODULE Module);
+      
       // Search memory
       PVOID Find(std::vector<std::pair<BYTE, bool>> const& Data) const;
 
