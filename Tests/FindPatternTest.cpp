@@ -107,4 +107,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   auto const pFindPatternStr = MyFindPattern.Find(L"46 69 6E 64 50 61 74 74 "
     L"65 72 6E", L"xxxxxxxxxxx", Hades::Memory::FindPattern::ScanData);
   BOOST_CHECK(pFindPatternStr != nullptr);
+  
+  // Check conversion failures throw
+  BOOST_CHECK_THROW(MyFindPattern.Find(L"ZZ", L"x"), 
+    Hades::Memory::FindPattern::Error);
 }
