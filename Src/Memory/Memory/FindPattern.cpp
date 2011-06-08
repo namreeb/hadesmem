@@ -124,6 +124,13 @@ namespace Hades
       std::vector<std::pair<BYTE, bool>> DataBuf;
       for (std::size_t i = 0; i != Mask.size(); ++i)
       {
+        if (Mask[i] != L'x' && Mask[i] != L'?')
+        {
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("FindPattern::Find") << 
+            ErrorString("Invalid mask."));
+        }
+        
         bool MaskFlag = (Mask[i] == L'x');
         int Current = 0;
         if (MaskFlag)

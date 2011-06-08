@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   {
     auto const pNop = MyFindPattern.Find(L"90", L"x");
     BOOST_CHECK(pNop != nullptr);
-    BOOST_CHECK(pNop > GetModuleHandle(NULL));
+    BOOST_CHECK_GT(pNop, GetModuleHandle(NULL));
     MyFindPattern.Find(L"90", L"x", L"Nop");
     BOOST_CHECK_EQUAL(pNop, MyFindPattern[L"Nop"]);
     BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     
     auto const pZeros = MyFindPattern.Find(L"00 00 00", L"x?x");
     BOOST_CHECK(pZeros != nullptr);
-    BOOST_CHECK(pZeros > GetModuleHandle(NULL));
+    BOOST_CHECK_GT(pZeros, GetModuleHandle(NULL));
     MyFindPattern.Find(L"00 00 00", L"x?x", L"Zeros");
     BOOST_CHECK_EQUAL(pZeros, MyFindPattern[L"Zeros"]);
     BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // pointer despite different data.
   {
     auto const pNopsAny = MyFindPattern.Find(L"90 90 90 90 90", L"?????");
-    BOOST_CHECK(pNopsAny > GetModuleHandle(NULL));
+    BOOST_CHECK_GT(pNopsAny, GetModuleHandle(NULL));
     MyFindPattern.Find(L"90 90 90 90 90", L"?????", L"NopsAny");
     BOOST_CHECK_EQUAL(pNopsAny, MyFindPattern[L"NopsAny"]);
     BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopsAnyRel) + pSelf, pNopsAny);
     
     auto const pInt3sAny = MyFindPattern.Find(L"CC CC CC CC CC", L"?????");
-    BOOST_CHECK(pInt3sAny > GetModuleHandle(NULL));
+    BOOST_CHECK_GT(pInt3sAny, GetModuleHandle(NULL));
     MyFindPattern.Find(L"CC CC CC CC CC", L"?????", L"Int3sAny");
     BOOST_CHECK_EQUAL(pInt3sAny, MyFindPattern[L"Int3sAny"]);
     BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
