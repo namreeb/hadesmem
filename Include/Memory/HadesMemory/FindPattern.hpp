@@ -41,6 +41,9 @@ namespace Hades
     class FindPattern
     {
     public:
+      // Allow 'Pattern' class access to internals
+      friend class Pattern;
+      
       // FindPattern exception type
       class Error : public virtual HadesMemError 
       { };
@@ -92,5 +95,131 @@ namespace Hades
       // Map to hold addresses
       std::map<std::wstring, PVOID> m_Addresses;
     };
+		
+		// Pattern wrapper
+		class Pattern
+		{
+		public:
+		  // Constructor
+		  Pattern(FindPattern& Finder, std::wstring const& Data, 
+		    std::wstring const& Mask, std::wstring const& Name, 
+		    FindPattern::FindFlags Flags = FindPattern::None);
+		  
+		  // Constructor
+		  Pattern(FindPattern& Finder, std::wstring const& Data, 
+		    std::wstring const& Mask, FindPattern::FindFlags Flags = 
+		    FindPattern::None);
+		  
+		  // Save back to parent
+		  void Save();
+		  
+		  // Update address
+		  void Update(PBYTE Address);
+		  
+	    // Get address
+		  PBYTE GetAddress() const;
+		  
+	    // Get memory manager
+		  MemoryMgr GetMemory() const;
+		  
+	    // Get find flags
+		  FindPattern::FindFlags GetFlags() const;
+		  
+	    // Get base
+		  DWORD_PTR GetBase() const;
+		  
+		protected:
+		  // Disable copying and assignment
+		  Pattern(Pattern const&);
+		  Pattern& operator=(Pattern const&);
+		    
+		private:
+		  // Parent pattern finder
+		  FindPattern& m_Finder;
+		  // Pattern name
+		  std::wstring m_Name;
+		  // Pattern address
+		  PBYTE m_Address;
+		  // Find flags
+		  FindPattern::FindFlags m_Flags;
+		};
+		
+		namespace PatternManipulators
+		{
+		  // Pattern manipulator base
+      class Manipulator
+      {
+      public:
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& /*Pat*/) const;
+  
+        // Manipulator chaining operator overload
+  			friend Pattern& operator<< (Pattern& Pat, 
+  			  Manipulator const& Manip);
+      };
+      
+      // Save pattern back to parent
+      class Save : public Manipulator
+      {
+      public:
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& Pat) const;
+      };
+      
+      // Add offset to address
+      class Add : public Manipulator
+      {
+      public:
+        // Constructor
+        explicit Add(DWORD_PTR Offset);
+        
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& Pat) const;
+      
+      private:
+        // Offset
+        DWORD_PTR m_Offset;
+      };
+      
+      // Subtract offset from address
+      class Sub : public Manipulator
+      {
+      public:
+        // Constructor
+        explicit Sub(DWORD_PTR Offset);
+        
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& Pat) const;
+      
+      private:
+        // Offset
+        DWORD_PTR m_Offset;
+      };
+      
+      // Dereference address
+      class Lea : public Manipulator
+      {
+      public:
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& Pat) const;
+      };
+      
+      // Relative dereference address
+      class Rel : public Manipulator
+      {
+      public:
+        // Constructor
+        Rel(DWORD_PTR Size, DWORD_PTR Offset);
+        
+        // Manipulate pattern
+        virtual void Manipulate(Pattern& Pat) const;
+      
+      private:
+        // Instruction size
+        DWORD_PTR m_Size;
+        // Instruction offset
+        DWORD_PTR m_Offset;
+      };
+		}
   }
 }

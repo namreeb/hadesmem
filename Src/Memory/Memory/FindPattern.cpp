@@ -210,9 +210,9 @@ namespace Hades
         // Get section start and end
         PBYTE SBegin = i->first;
         PBYTE SEnd = i->second;
+        BOOST_ASSERT(SEnd > SBegin);
         
         // Cache all memory to be scanned
-        BOOST_ASSERT(SEnd > SBegin);
         std::size_t MemSize = SEnd - SBegin;
         std::vector<BYTE> Buffer(m_Memory.Read<std::vector<BYTE>>(SBegin, 
           MemSize));
@@ -248,5 +248,152 @@ namespace Hades
       auto const Iter = m_Addresses.find(Name);
       return Iter != m_Addresses.end() ? Iter->second : nullptr;
     }
+    
+    // Constructor
+    Pattern::Pattern(FindPattern& Finder, std::wstring const& Data, 
+	    std::wstring const& Mask, std::wstring const& Name, 
+	    FindPattern::FindFlags Flags)
+	    : m_Finder(Finder), 
+	    m_Name(Name), 
+	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Mask, Flags))), 
+	    m_Flags(Flags)
+	  { }
+    
+    // Constructor
+    Pattern::Pattern(FindPattern& Finder, std::wstring const& Data, 
+	    std::wstring const& Mask, FindPattern::FindFlags Flags)
+	    : m_Finder(Finder), 
+	    m_Name(), 
+	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Mask, Flags))), 
+	    m_Flags(Flags)
+	  { }
+	  
+	  // Save back to parent
+	  void Pattern::Save()
+	  {
+	    if (m_Name.empty())
+	    {
+	      return;
+	    }
+	    
+	    m_Finder.m_Addresses[m_Name] = m_Address;
+	  }
+		
+		// Update address
+	  void Pattern::Update(PBYTE Address)
+	  {
+	    m_Address = Address;
+	  }
+	  
+	  // Get address
+	  PBYTE Pattern::GetAddress() const
+	  {
+	    return m_Address;
+	  }
+	  
+	  // Get memory manager
+	  MemoryMgr Pattern::GetMemory() const
+	  {
+	    return m_Finder.m_Memory;
+	  }
+	  
+	  // Get find flags
+	  FindPattern::FindFlags Pattern::GetFlags() const
+	  {
+	    return m_Flags;
+	  }
+	  
+	  // Get base
+	  DWORD_PTR Pattern::GetBase() const
+	  {
+	    return m_Finder.m_Base;
+	  }
+	  
+	  namespace PatternManipulators
+	  {
+	    void Manipulator::Manipulate(Pattern& /*Pat*/) const
+	    { }
+  
+  		Pattern& operator<< (Pattern& Pat, Manipulator const& Manip)
+  		{
+  			Manip.Manipulate(Pat);
+  			return Pat;
+  		}
+  		
+	    void Save::Manipulate(Pattern& Pat) const
+	    {
+        Pat.Save();
+	    }
+	    
+	    Add::Add(DWORD_PTR Offset)
+	      : m_Offset(Offset)
+	    { }
+	    
+	    void Add::Manipulate(Pattern& Pat) const
+	    {
+        PBYTE Address = Pat.GetAddress();
+        if (Address)
+        {
+          Pat.Update(Address + m_Offset);
+        }
+	    }
+	    
+	    Sub::Sub(DWORD_PTR Offset)
+	      : m_Offset(Offset)
+	    { }
+	    
+	    void Sub::Manipulate(Pattern& Pat) const
+	    {
+        PBYTE Address = Pat.GetAddress();
+        if (Address)
+        {
+          Pat.Update(Address - m_Offset);
+        }
+	    }
+	    
+	    void Lea::Manipulate(Pattern& Pat) const
+      {
+        PBYTE Address = Pat.GetAddress();
+        if (Address)
+        {
+          try
+          {
+            DWORD_PTR Base = ((Pat.GetFlags() & FindPattern::RelativeAddress) == 
+              FindPattern::RelativeAddress) ? Pat.GetBase() : 0;
+            Address = Pat.GetMemory().Read<PBYTE>(Pat.GetAddress() + Base);
+            Pat.Update(Address - Base);
+          }
+          catch (MemoryMgr::Error const& /*e*/)
+          {
+            Pat.Update(nullptr);
+          }
+        }
+      }
+	    
+	    Rel::Rel(DWORD_PTR Size, DWORD_PTR Offset)
+	      : m_Size(Size), 
+	      m_Offset(Offset)
+	    { }
+	    
+	    void Rel::Manipulate(Pattern& Pat) const
+      {
+        PBYTE Address = Pat.GetAddress();
+        if (Address)
+        {
+          try
+          {
+            DWORD_PTR Base = ((Pat.GetFlags() & FindPattern::RelativeAddress) == 
+              FindPattern::RelativeAddress) ? Pat.GetBase() : 0;
+            Address = Pat.GetMemory().Read<PBYTE>(Address + Base) + 
+              reinterpret_cast<DWORD_PTR>(Address + Base) + m_Size - m_Offset;
+            Pat.Update(Address - Base);
+          }
+          catch (MemoryMgr::Error const& /*e*/)
+          {
+            Pat.Update(nullptr);
+          }
+        }
+      }
+	  }
   }
 }
