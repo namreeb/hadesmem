@@ -209,11 +209,11 @@ namespace Hades
               m_Memory.GetProcessID());
             if (m_Snap == INVALID_HANDLE_VALUE)
             {
-              std::error_code const LastError = GetLastErrorCode();
+              DWORD const LastError = GetLastError();
               BOOST_THROW_EXCEPTION(Error() << 
                 ErrorFunction("ModuleList::GetByNum") << 
                 ErrorString("Could not get module snapshot.") << 
-                ErrorCode(LastError));
+                ErrorCodeWinLast(LastError));
             }
     
             MODULEENTRY32 MyModuleEntry;
@@ -221,11 +221,11 @@ namespace Hades
             MyModuleEntry.dwSize = sizeof(MyModuleEntry);
             if (!Module32First(m_Snap, &MyModuleEntry))
             {
-              std::error_code const LastError = GetLastErrorCode();
+              DWORD const LastError = GetLastError();
               BOOST_THROW_EXCEPTION(Error() << 
                 ErrorFunction("ModuleList::GetByNum") << 
                 ErrorString("Could not get module info.") << 
-                ErrorCode(LastError));
+                ErrorCodeWinLast(LastError));
             }
     
             m_Cache.push_back(Module(m_Memory, MyModuleEntry));
@@ -239,11 +239,11 @@ namespace Hades
             {
               if (GetLastError() != ERROR_NO_MORE_FILES)
               {
-                std::error_code const LastError = GetLastErrorCode();
+                DWORD const LastError = GetLastError();
                 BOOST_THROW_EXCEPTION(Error() << 
                   ErrorFunction("ModuleList::GetByNum") << 
                   ErrorString("Error enumerating module list.") << 
-                  ErrorCode(LastError));
+                  ErrorCodeWinLast(LastError));
               }
               
               return boost::optional<Module&>();

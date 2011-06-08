@@ -81,22 +81,22 @@ int wmain(int argc, wchar_t* argv[])
     HANDLE const ProcHeap = GetProcessHeap();
     if (!ProcHeap)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not get process heap.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
 
     // Detect heap corruption
     if (!HeapSetInformation(ProcHeap, HeapEnableTerminationOnCorruption, 
       NULL, 0))
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not set heap information.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
 #endif
 

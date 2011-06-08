@@ -309,21 +309,21 @@ namespace Hades
         pRemoteStubTemp), nullptr, 0, nullptr));
       if (!MyThread)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Call") << 
           ErrorString("Could not create remote thread.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Wait for the remote thread to terminate
       if (WaitForSingleObject(MyThread, INFINITE) != WAIT_OBJECT_0)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Call") << 
           ErrorString("Could not wait for remote thread.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Forward return value from remote thread
@@ -341,11 +341,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::CanRead") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Whether memory is currently readable
@@ -367,11 +367,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Whether memory is currently writable
@@ -391,11 +391,11 @@ namespace Hades
       if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
         sizeof(MyMbi)))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::IsGuard") << 
           ErrorString("Could not read process memory protection.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Whether address is in a guard page
@@ -409,11 +409,11 @@ namespace Hades
         MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
       if (!Address)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Alloc") << 
           ErrorString("Could not allocate memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       return Address;
@@ -424,11 +424,11 @@ namespace Hades
     {
       if (!VirtualFreeEx(m_Process.GetHandle(), Address, 0, MEM_RELEASE))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Free") << 
           ErrorString("Could not free memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
     }
 
@@ -454,22 +454,22 @@ namespace Hades
         ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not load module locally.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Find target function in module
       FARPROC const LocalFunc = GetProcAddress(LocalMod, Function.c_str());
       if (!LocalFunc)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not find target function.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Calculate function delta
@@ -493,11 +493,11 @@ namespace Hades
         ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
       if (!LocalMod)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not load module locally.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Find target function in module
@@ -505,11 +505,11 @@ namespace Hades
         Ordinal));
       if (!LocalFunc)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
           ErrorString("Could not find target function.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Calculate function delta
@@ -529,11 +529,11 @@ namespace Hades
     {
       if (!FlushInstructionCache(m_Process.GetHandle(), Address, Size))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::FlushInstructionCache") << 
           ErrorString("Could not flush instruction cache.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
     }
 

@@ -97,11 +97,11 @@ namespace Hades
       if (!CreateProcess(Path.c_str(), ProcArgs.data(), nullptr, nullptr, FALSE, 
         CREATE_SUSPENDED, nullptr, WorkDirReal.c_str(), &StartInfo, &ProcInfo))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Injector::Error() << 
           ErrorFunction("CreateAndInject") << 
           ErrorString("Could not create process.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Ensure cleanup
@@ -157,21 +157,21 @@ namespace Hades
           0, nullptr));
         if (!MyThread)
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Injector::Error() << 
             ErrorFunction("CreateAndInject") << 
             ErrorString("Could not create remote thread.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
   
         // Wait for the remote thread to terminate
         if (WaitForSingleObject(MyThread, INFINITE) != WAIT_OBJECT_0)
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Injector::Error() << 
             ErrorFunction("CreateAndInject") << 
             ErrorString("Could not wait for remote thread.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
 
         // Create DLL injector
@@ -190,14 +190,13 @@ namespace Hades
         // Success! Let the process continue execution.
         if (ResumeThread(ProcInfo.hThread) == static_cast<DWORD>(-1))
         {
-          std::error_code const LastError = GetLastErrorCode();
-          std::error_code const LastErrorRemote = std::error_code(
-            ExpRetData.GetLastError(), std::system_category());
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Injector::Error() << 
             ErrorFunction("CreateAndInject") << 
             ErrorString("Could not resume process.") << 
-            ErrorCode(LastError) << 
-            ErrorCode(LastErrorRemote));
+            ErrorCodeWinLast(LastError) << 
+            ErrorCodeWinRet(ExpRetData.GetReturnValue()) << 
+            ErrorCodeWinOther(ExpRetData.GetLastError()));
         }
 
         // Return data to caller
@@ -289,12 +288,10 @@ namespace Hades
         MemoryMgr::CallConv_Default, Args);
       if (!RemoteRet.GetReturnValue())
       {
-        std::error_code const LastError = std::error_code(
-          RemoteRet.GetLastError(), std::system_category());
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Injector::InjectDll") << 
           ErrorString("Call to LoadLibraryW in remote process failed.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(RemoteRet.GetLastError()));
       }
       
       // Look for target module

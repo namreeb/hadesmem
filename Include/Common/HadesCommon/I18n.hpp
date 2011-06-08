@@ -47,11 +47,11 @@ namespace boost
       nullptr, 0, nullptr, nullptr);
     if (!OutSize)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("lexical_cast<std::string, std::wstring>") << 
         Hades::ErrorString("Could not get size of output buffer.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     std::string Dest;
@@ -59,11 +59,11 @@ namespace boost
       Hades::Util::MakeStringBuffer(Dest, OutSize), OutSize, nullptr, nullptr);
     if (!Result)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("lexical_cast<std::string, std::wstring>") << 
         Hades::ErrorString("Could not convert string.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     return Dest;
@@ -84,11 +84,11 @@ namespace boost
       nullptr, 0);
     if (!OutSize)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("lexical_cast<std::wstring, std::string>") << 
         Hades::ErrorString("Could not get size of output buffer.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     std::wstring Dest;
@@ -96,11 +96,11 @@ namespace boost
       Hades::Util::MakeStringBuffer(Dest, OutSize), OutSize);
     if (!Result)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("lexical_cast<std::wstring, std::string>") << 
         Hades::ErrorString("Could not convert string.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     return Dest;

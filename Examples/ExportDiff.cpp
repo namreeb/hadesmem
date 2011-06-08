@@ -82,22 +82,22 @@ int wmain(int argc, wchar_t* argv[])
     HANDLE const ProcHeap = GetProcessHeap();
     if (!ProcHeap)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not get process heap.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
 
     // Detect heap corruption
     if (!HeapSetInformation(ProcHeap, HeapEnableTerminationOnCorruption, 
       NULL, 0))
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not set heap information.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
 #endif
 
@@ -165,11 +165,11 @@ int wmain(int argc, wchar_t* argv[])
       BaseModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!BaseMod)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not load base module.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     // Load target module
@@ -177,11 +177,11 @@ int wmain(int argc, wchar_t* argv[])
       TargetModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!TargetMod)
     {
-      std::error_code const LastError = Hades::GetLastErrorCode();
+      DWORD const LastError = GetLastError();
       BOOST_THROW_EXCEPTION(Hades::HadesError() << 
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("Could not load base module.") << 
-        Hades::ErrorCode(LastError));
+        Hades::ErrorCodeWinLast(LastError));
     }
     
     // Get exports for module

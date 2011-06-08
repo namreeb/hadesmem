@@ -42,11 +42,11 @@ namespace Hades
       if (!VirtualQuery(reinterpret_cast<LPCVOID>(pSelfAddr), &MemInfo, 
         sizeof(MemInfo)))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(WinAuxError() << 
           ErrorFunction("GetBaseOfSelf") << 
           ErrorString("Failed to query memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       return MemInfo.AllocationBase;

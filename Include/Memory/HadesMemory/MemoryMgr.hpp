@@ -272,11 +272,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
           PAGE_EXECUTE_READWRITE, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Read") << 
             ErrorString("Could not change process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
 
@@ -293,11 +293,11 @@ namespace Hades
             OldProtect, &OldProtect);
         }
 
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Read") << 
           ErrorString("Could not read process memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Restore original page protections
@@ -306,11 +306,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
           OldProtect, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Read") << 
             ErrorString("Could not restore process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
 
@@ -377,11 +377,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
           PAGE_EXECUTE_READWRITE, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Read") << 
             ErrorString("Could not change process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
 
@@ -398,11 +398,11 @@ namespace Hades
             OldProtect, &OldProtect);
         }
 
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Read") << 
           ErrorString("Could not read process memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Restore original page protections
@@ -411,11 +411,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
           OldProtect, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Read") << 
             ErrorString("Could not restore process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
 
@@ -441,11 +441,11 @@ namespace Hades
       if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
         PAGE_EXECUTE_READWRITE, &OldProtect))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not change process memory protection.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Write data
@@ -457,22 +457,22 @@ namespace Hades
         VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), OldProtect, 
           &OldProtect);
 
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not write process memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Restore original page protections
       if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
         OldProtect, &OldProtect))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not restore process memory protection.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
     }
 
@@ -524,11 +524,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
           PAGE_EXECUTE_READWRITE, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Write") << 
             ErrorString("Could not change process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
 
@@ -544,11 +544,11 @@ namespace Hades
             OldProtect, &OldProtect);
         }
 
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("MemoryMgr::Write") << 
           ErrorString("Could not read process memory.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Restore original page protections
@@ -557,11 +557,11 @@ namespace Hades
         if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
           OldProtect, &OldProtect))
         {
-          std::error_code const LastError = GetLastErrorCode();
+          DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("MemoryMgr::Write") << 
             ErrorString("Could not restore process memory protection.") << 
-            ErrorCode(LastError));
+            ErrorCodeWinLast(LastError));
         }
       }
     }

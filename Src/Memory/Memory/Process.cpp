@@ -61,11 +61,11 @@ namespace Hades
         TH32CS_SNAPPROCESS, 0));
       if (Snap == INVALID_HANDLE_VALUE)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Process") << 
           ErrorString("Could not get process snapshot.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Convert process name to lowercase
@@ -111,22 +111,22 @@ namespace Hades
       HWND const MyWnd = FindWindow(ClassName.c_str(), WindowName.c_str());
       if (!MyWnd)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Process") << 
           ErrorString("Could not find window.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Get process ID from window
       GetWindowThreadProcessId(MyWnd, &m_ID);
       if (!m_ID)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Process") << 
           ErrorString("Could not get process id from window.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Open process
@@ -178,33 +178,33 @@ namespace Hades
         ProcID);
       if (!m_Handle)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Open") << 
           ErrorString("Could not open process.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Get WoW64 status of self
       BOOL IsWoW64Me = FALSE;
       if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Open") << 
           ErrorString("Could not detect WoW64 status of current process.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Get WoW64 status of target process
       BOOL IsWoW64 = FALSE;
       if (!IsWow64Process(m_Handle, &IsWoW64))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::Open") << 
           ErrorString("Could not detect WoW64 status of target process.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       
       // Set WoW64 status
@@ -242,11 +242,11 @@ namespace Hades
       if (!GetModuleFileNameEx(m_Handle, NULL, Util::MakeStringBuffer(Path, 
         PathSize), PathSize))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Process::GetPath") << 
           ErrorString("Could not get path.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       
       return Path;
@@ -277,11 +277,11 @@ namespace Hades
       ExecInfo.nShow = SW_SHOWNORMAL;
       if (!ShellExecuteEx(&ExecInfo))
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("CreateProcess") << 
           ErrorString("Could not create process.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       
       // Ensure handle is closed
@@ -300,11 +300,11 @@ namespace Hades
         TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TempToken);
       if (!RetVal) 
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
           ErrorString("Could not open process token.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       Windows::EnsureCloseHandle const Token(TempToken);
 
@@ -312,19 +312,19 @@ namespace Hades
       LUID Luid = { 0, 0 }; // Locally unique identifier
       if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
           ErrorString("Could not look up privilege value for SeDebugName.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       if (Luid.LowPart == 0 && Luid.HighPart == 0) 
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
           ErrorString("Could not get LUID for SeDebugName.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Process privileges
@@ -339,21 +339,21 @@ namespace Hades
       if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, sizeof(Privileges), 
         nullptr, nullptr)) 
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
           ErrorString("Could not adjust token privileges.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
       
       // Ensure privileges were adjusted
       if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
           ErrorString("Could not assign all privileges.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
     }
   }

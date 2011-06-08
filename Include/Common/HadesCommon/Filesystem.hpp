@@ -92,11 +92,11 @@ namespace Hades
       if (!GetModuleFileName(Module, Util::MakeStringBuffer(FullPath, 
         PathSize), PathSize) || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(HadesError() << 
           ErrorFunction("GetModulePath") << 
           ErrorString("Could not get path to module.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Path to self
@@ -113,11 +113,11 @@ namespace Hades
         SelfFullPath, SelfPathSize), SelfPathSize) || GetLastError() == 
         ERROR_INSUFFICIENT_BUFFER)
       {
-        std::error_code const LastError = GetLastErrorCode();
+        DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(HadesError() << 
           ErrorFunction("GetSelfPath") << 
           ErrorString("Could not get path to self.") << 
-          ErrorCode(LastError));
+          ErrorCodeWinLast(LastError));
       }
 
       // Path to self
