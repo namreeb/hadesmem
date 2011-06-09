@@ -211,21 +211,24 @@ namespace Hades
             ErrorString("Invalid data (bytes)."));
         }
              
-        // Get data for non-wildcards
+        // Get data for non-wildcards by converting hex string to integer
         bool MaskFlag = (Mask[i] == L'x');
         int Current = 0;
         if (MaskFlag)
         {
+#ifndef HADES_MSVC
+          // Note: My GCC implementation does not provide std::stoi
+          std::wstringstream Convert(ByteStr);
+          if (!(Convert >> std::hex >> Current))
+          {
+            BOOST_THROW_EXCEPTION(Error() << 
+              ErrorFunction("FindPattern::Find") << 
+              ErrorString("Invalid data conversion."));
+          }
+#else
           try
           {
-            // Convert byte string to integer
-#ifndef HADES_MSVC
-            // Note: GCC does not provide a wide version of std::stoi
-            Current = std::stoi(boost::lexical_cast<std::string>(ByteStr), 
-              nullptr, 16);
-#else
             Current = std::stoi(ByteStr, nullptr, 16);
-#endif
           }
           catch (std::exception const& /*e*/)
           {
@@ -233,6 +236,7 @@ namespace Hades
               ErrorFunction("FindPattern::Find") << 
               ErrorString("Invalid data conversion."));
           }
+#endif
         }
         
         // The data should be in the range 0x00 - 0xFF and hence should 
