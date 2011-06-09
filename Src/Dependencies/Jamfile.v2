@@ -33,11 +33,3 @@ lib BeaEngine
     <include>"./BeaEngine/include/" 
     <define>BEA_ENGINE_STATIC 
   ;
-
-alias RapidXML 
-  : 
-  : 
-  : 
-  : 
-    <include>"."
-  ;
