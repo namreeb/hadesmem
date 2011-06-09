@@ -31,6 +31,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <limits>
 #include <vector>
 #include <string>
+#include <locale>
+#include <iterator>
 #include <algorithm>
 
 // Boost
@@ -38,16 +40,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif
 #include <boost/assert.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/fusion/adapted.hpp>
-#include <boost/fusion/sequence.hpp>
-#include <boost/fusion/include/sequence.hpp>
-#include <boost/fusion/tuple/tuple.hpp>
-#include <boost/fusion/tuple/detail/tuple_expand.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #ifdef HADES_MSVC
 #pragma warning(pop)
 #endif
@@ -56,19 +53,22 @@ namespace Hades
 {
   namespace Memory
   {
+    // Pattern info for parser
     struct PatternInfo
     {
-      std::string Name;
-      std::vector<unsigned> Data;
-      std::vector<bool> Mask;
+      std::wstring Name;
+      std::wstring Data;
+      std::wstring Mask;
     };
     
+    // Pattern manipulator info for parser
     struct ManipInfo
     {
-      std::string Name;
+      std::wstring Name;
       std::vector<unsigned> Operands;
     };
     
+    // Full pattern info for parser (both pattern and manipulator info)
     struct PatternInfoFull
     {
       PatternInfo Pattern;
@@ -77,15 +77,18 @@ namespace Hades
   }
 }
 
+// Adapt pattern info struct for parser
 BOOST_FUSION_ADAPT_STRUCT(Hades::Memory::PatternInfo, 
-  (std::string, Name)
-  (std::vector<unsigned>, Data)
-  (std::vector<bool>, Mask))
+  (std::wstring, Name)
+  (std::wstring, Data)
+  (std::wstring, Mask))
 
+// Adapt pattern manipulator info struct for parser
 BOOST_FUSION_ADAPT_STRUCT(Hades::Memory::ManipInfo, 
-  (std::string, Name)
+  (std::wstring, Name)
   (std::vector<unsigned>, Operands))
 
+// Adapt full pattern info struct for parser
 BOOST_FUSION_ADAPT_STRUCT(Hades::Memory::PatternInfoFull, 
   (Hades::Memory::PatternInfo, Pattern)
   (std::vector<Hades::Memory::ManipInfo>, Manipulators))
@@ -122,6 +125,7 @@ namespace Hades
       std::for_each(Sections.begin(), Sections.end(), 
         [&] (Section const& S)
         {
+          // Handle sections marked as code
           if ((S.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == 
             IMAGE_SCN_CNT_CODE)
           {
@@ -133,6 +137,7 @@ namespace Hades
             m_CodeRegions.push_back(std::make_pair(SBegin, SEnd));
           }
           
+          // Handle sections marked as (initialized) data
           if ((S.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA) == 
             IMAGE_SCN_CNT_INITIALIZED_DATA)
           {
@@ -159,7 +164,7 @@ namespace Hades
       std::wstring const& Mask, FindFlags Flags) const
     {
       // Ensure pattern attributes are valid
-      if (Data.empty() || Mask.empty())
+      if (Data.size() < 2 || Mask.empty())
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::Find") << 
@@ -178,6 +183,7 @@ namespace Hades
       std::vector<std::pair<BYTE, bool>> DataBuf;
       for (std::size_t i = 0; i != Mask.size(); ++i)
       {
+        // Sanity check
         if (Mask[i] != L'x' && Mask[i] != L'?')
         {
           BOOST_THROW_EXCEPTION(Error() << 
@@ -185,25 +191,40 @@ namespace Hades
             ErrorString("Invalid mask."));
         }
         
+        // Sanity check
+        for (auto j = Data.cbegin() + 2; j != Data.cend();  j += 3)
+        {
+          if (*j != L' ')
+          {
+            BOOST_THROW_EXCEPTION(Error() << 
+              ErrorFunction("FindPattern::Find") << 
+              ErrorString("Invalid data (whitespace)."));
+          }
+        }
+        
+        // Get current byte as string
+        std::wstring const ByteStr = Data.substr(i * 3, ((i * 3) + 2));
+        if (!std::isxdigit(ByteStr[0]) || !std::isxdigit(ByteStr[1]))
+        {
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("FindPattern::Find") << 
+            ErrorString("Invalid data (bytes)."));
+        }
+             
+        // Get data for non-wildcards
         bool MaskFlag = (Mask[i] == L'x');
         int Current = 0;
         if (MaskFlag)
         {
           try
           {
+            // Convert byte string to integer
 #ifndef HADES_MSVC
-            std::wstringstream ss;
-            if (!(ss << std::hex << Data.substr(i * 3, ((i * 3) + 2))))
-            {
-              throw std::exception();
-            }
-            if (!(ss >> Current))
-            {
-              throw std::exception();
-            }
+            // Note: GCC does not provide a wide version of std::stoi
+            Current = std::stoi(boost::lexical_cast<std::string>(ByteStr), 
+              nullptr, 16);
 #else
-            Current = std::stoi(Data.substr(i * 3, ((i * 3) + 2)), nullptr, 
-              16);
+            Current = std::stoi(ByteStr, nullptr, 16);
 #endif
           }
           catch (std::exception const& /*e*/)
@@ -214,9 +235,12 @@ namespace Hades
           }
         }
         
+        // The data should be in the range 0x00 - 0xFF and hence should 
+        // always fit in a BYTE
         BOOST_ASSERT(Current >= (std::numeric_limits<BYTE>::min)() && 
           Current <= (std::numeric_limits<BYTE>::max)());
 
+        // Add current data and mask to list
         DataBuf.push_back(std::make_pair(static_cast<BYTE>(Current), 
           MaskFlag));
       }
@@ -309,6 +333,28 @@ namespace Hades
       auto const Iter = m_Addresses.find(Name);
       return Iter != m_Addresses.end() ? Iter->second : nullptr;
     }
+      
+    // Read patterns from file
+    void FindPattern::LoadFile(boost::filesystem::path const& Path)
+    {
+      // Open current file
+      boost::filesystem::wifstream PatternFile(Path);
+      if (!PatternFile)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::LoadFile") << 
+          ErrorString("Could not open pattern file."));
+      }
+
+      // Copy file to buffer
+      std::istreambuf_iterator<wchar_t> const PatFileBeg(PatternFile);
+      std::istreambuf_iterator<wchar_t> const PatFileEnd;
+      std::vector<wchar_t> PatFileBuf(PatFileBeg, PatFileEnd);
+      PatFileBuf.push_back(L'\0');
+      
+      // Parse pattern file
+      LoadFileMemory(PatFileBuf.data());
+    }
     
     // Read patterns from memory
     void FindPattern::LoadFileMemory(std::wstring const& Data)
@@ -316,6 +362,12 @@ namespace Hades
       using namespace boost::spirit;
       using namespace boost::spirit::qi;
       
+      // Data iterator type (wide string)
+      typedef std::wstring::const_iterator DataIter;
+      // Parser skipper type (whitespace)
+      typedef qi::standard::space_type SkipType;
+        
+      // Map flag names to values
       symbols<wchar_t, FindFlags> FlagsMap;
       FlagsMap.add
         (L"None", None)
@@ -323,42 +375,48 @@ namespace Hades
         (L"RelativeAddress", RelativeAddress)
         (L"ScanData", ScanData);
       
-      typedef std::wstring::const_iterator DataIter;
-      typedef qi::standard::space_type SkipType;
-        
+      // Flags parser
       rule<DataIter, std::vector<FindFlags>(), SkipType> FlagsRule = 
         '(' >> *(FlagsMap % ',') >> ')';
         
+      // Pattern name parser
       rule<DataIter, std::wstring(), SkipType> NameRule = 
         lexeme[*(~char_(','))] >> ',';
-        
-      rule<DataIter, std::vector<unsigned>(), SkipType> DataRule = 
-        lexeme[+(hex % ' ')] >> ',';
-        
-      rule<DataIter, bool(), SkipType> MaskValRule = 
-        char_('x')[_val = true] | char_('?')[_val = false];
-        
-      rule<DataIter, std::vector<bool>(), SkipType> MaskRule = 
-        +(MaskValRule);
-        
+      
+      // Pattern data parser
+      rule<DataIter, std::wstring(), SkipType> DataRule = 
+        lexeme[*(~char_(','))] >> ',';
+      
+      // Mask parser
+      rule<DataIter, std::wstring(), SkipType> MaskRule = 
+        *(~char_('}'));
+      
+      // Pattern parser
       rule<DataIter, PatternInfo(), SkipType> PatternRule = 
         '{' >> NameRule >> DataRule >> MaskRule >> '}';
-        
+      
+      // Manipulator name parser
       rule<DataIter, std::wstring(), SkipType> ManipNameRule = 
         +(~char_(',')) >> ',';
-        
+      
+      // Manipulator operand parser
       rule<DataIter, std::vector<unsigned>(), SkipType> OperandRule = 
         *(uint_ % ',');
-        
+      
+      // Manipulator parser
       rule<DataIter, ManipInfo(), SkipType> ManipRule = 
         '[' >> ManipNameRule >> OperandRule >> ']';
-        
+      
+      // Pattern parser
       rule <DataIter, PatternInfoFull(), SkipType> PatternFullRule = 
         PatternRule >> *ManipRule;
       
+      // Flag list
       std::vector<FindFlags> FlagsList;
+      // Pattern list
       std::vector<PatternInfoFull> PatternList;
       
+      // Parse pattern file
       auto DataBeg = Data.cbegin();
       auto DataEnd = Data.cend();
       bool Parsed = phrase_parse(DataBeg, DataEnd, 
@@ -369,6 +427,7 @@ namespace Hades
         space, 
         FlagsList, PatternList);
       
+      // Ensure parsing succeeded
       if (!Parsed)
       {
         BOOST_THROW_EXCEPTION(Error() << 
@@ -376,12 +435,98 @@ namespace Hades
           ErrorString("Parsing failed."));
       }
       
+      // Ensure entire file was parsed
       if (DataBeg != DataEnd)
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::LoadFileMemory") << 
           ErrorString("Parsing failed. Partial match only."));
       }
+      
+      // Get flags
+      unsigned int Flags = None;
+      std::for_each(FlagsList.cbegin(), FlagsList.cend(), 
+        [&] (FindFlags Flag)
+        {
+          Flags |= Flag;
+        });
+      
+      // Find all patterns
+      std::for_each(PatternList.cbegin(), PatternList.cend(), 
+        [&, this] (PatternInfoFull const& P)
+        {
+          // Create pattern scanner
+          PatternInfo const& PatInfo = P.Pattern;
+          Pattern MyPattern(*this, PatInfo.Data, PatInfo.Mask, PatInfo.Name, 
+            static_cast<FindFlags>(Flags));
+            
+          // Apply manipulators
+          std::vector<ManipInfo> const& ManipList = P.Manipulators;
+          std::for_each(ManipList.cbegin(), ManipList.cend(), 
+            [&] (ManipInfo const& M)
+            {
+              // Handle 'Add'
+              if (M.Name == L"Add")
+              {
+                // Ensure correct operands are specified
+                if (M.Operands.size() != 1)
+                {
+                  BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                    ErrorFunction("FindPattern::LoadFileMemory") << 
+                    ErrorString("Invalid manipulator operands for 'Add'."));
+                }
+                
+                // Apply manipulator
+                MyPattern << PatternManipulators::Add(M.Operands[0]);
+              }
+              // Handle 'Sub'
+              else if (M.Name == L"Sub")
+              {
+                // Ensure correct operands are specified
+                if (M.Operands.size() != 1)
+                {
+                  BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                    ErrorFunction("FindPattern::LoadFileMemory") << 
+                    ErrorString("Invalid manipulator operands for 'Sub'."));
+                }
+                
+                // Apply manipulator
+                MyPattern << PatternManipulators::Sub(M.Operands[0]);
+              }
+              // Handle 'Rel'
+              else if (M.Name == L"Rel")
+              {
+                // Ensure correct operands are specified
+                if (M.Operands.size() != 2)
+                {
+                  BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                    ErrorFunction("FindPattern::LoadFileMemory") << 
+                    ErrorString("Invalid manipulator operands for 'Rel'."));
+                }
+                
+                // Apply manipulator
+                MyPattern << PatternManipulators::Rel(M.Operands[0], 
+                  M.Operands[1]);
+              }
+              // Handle 'Lea'
+              else if (M.Name == L"Lea")
+              {
+                // Ensure correct operands are specified
+                if (M.Operands.size() != 0)
+                {
+                  BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                    ErrorFunction("FindPattern::LoadFileMemory") << 
+                    ErrorString("Invalid manipulator operands for 'Lea'."));
+                }
+                
+                // Apply manipulator
+                MyPattern << PatternManipulators::Lea();
+              }
+            });
+            
+            // Save pattern back to parent
+            MyPattern << PatternManipulators::Save();
+        });
     }
     
     // Constructor

@@ -95,12 +95,6 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Todo: PatternManipulators::Lea test
  
   // Test pattern file
-  /*std::wstring const PatternFileData = 
-    L"HadesMem Patterns (RelativeAddress, ScanData)\n"
-    L"\n"
-    L"{ Foo, 00 11 22 33 44, xxxxx }\n"
-    L"[ Add, 1 ]\n"
-    L"[ Rel, 5, 1 ]\n";*/
   std::wstring const PatternFileData = 
     L"HadesMem Patterns (RelativeAddress, ThrowOnUnmatch)\n"
     L"{ FirstCall, E8, x }\n"
@@ -110,8 +104,10 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     L"[ Add, 1 ]\n"
     L"[ Sub, 1 ]\n";
   MyFindPattern.LoadFileMemory(PatternFileData);
-  //BOOST_CHECK_EQUAL(MyFindPattern[L"FirstCall"], CallPattern.GetAddress());
-  //BOOST_CHECK_EQUAL(MyFindPattern[L"ZerosNew"], pZerosRel);
+  BOOST_CHECK_EQUAL(MyFindPattern[L"FirstCall"], CallPattern.GetAddress());
+  BOOST_CHECK_EQUAL(MyFindPattern[L"ZerosNew"], pZerosRel);
+  
+  // Todo: LoadFile test
   
   // Perform a full wildcard scan and ensure that both scans return the same 
   // pointer despite different data.
@@ -120,7 +116,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyFindPattern.Find(L"90 90 90 90 90", L"?????", L"NopsAny");
   BOOST_CHECK_EQUAL(pNopsAny, MyFindPattern[L"NopsAny"]);
   BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-    static_cast<std::size_t>(5));
+    static_cast<std::size_t>(7));
   auto const pNopsAnyRel = MyFindPattern.Find(L"90 90 90 90 90", L"?????", 
     Hades::Memory::FindPattern::RelativeAddress);
   BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopsAnyRel) + pSelf, pNopsAny);
@@ -130,7 +126,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyFindPattern.Find(L"CC CC CC CC CC", L"?????", L"Int3sAny");
   BOOST_CHECK_EQUAL(pInt3sAny, MyFindPattern[L"Int3sAny"]);
   BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-    static_cast<std::size_t>(6));
+    static_cast<std::size_t>(8));
   BOOST_CHECK_EQUAL(pNopsAny, pInt3sAny);
   auto const pInt3sAnyRel = MyFindPattern.Find(L"CC CC CC CC CC", L"?????", 
     Hades::Memory::FindPattern::RelativeAddress);

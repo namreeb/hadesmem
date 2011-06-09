@@ -78,7 +78,7 @@ namespace Hades
       PVOID operator[](std::wstring const& Name) const;
         
       // Read patterns from file
-      void LoadFile(boost::filesystem::path const& File);
+      void LoadFile(boost::filesystem::path const& Path);
       
       // Read patterns from memory
       void LoadFileMemory(std::wstring const& Data);
