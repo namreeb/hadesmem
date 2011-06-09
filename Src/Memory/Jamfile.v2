@@ -54,7 +54,6 @@ lib Memory
     /Common//Common 
     /Dependencies//AsmJit 
     /Dependencies//BeaEngine 
-    /Dependencies//RapidXML 
     user32 
     advapi32 
     dbghelp 
