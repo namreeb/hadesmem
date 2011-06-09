@@ -46,79 +46,88 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Scan for predicatable byte masks and ensure that they were found and are 
   // different.
-  {
-    auto const pNop = MyFindPattern.Find(L"90", L"x");
-    BOOST_CHECK(pNop != nullptr);
-    BOOST_CHECK_GT(pNop, GetModuleHandle(NULL));
-    MyFindPattern.Find(L"90", L"x", L"Nop");
-    BOOST_CHECK_EQUAL(pNop, MyFindPattern[L"Nop"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(1));
-    auto const pNopRel = MyFindPattern.Find(L"90", L"x", 
-      Hades::Memory::FindPattern::RelativeAddress);
-    BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopRel) + pSelf, pNop);
-    
-    Hades::Memory::Pattern NopPattern(MyFindPattern, L"90", L"x", L"NopPlus1");
-    NopPattern << Hades::Memory::PatternManipulators::Add(1) << 
-      Hades::Memory::PatternManipulators::Save();
-    BOOST_CHECK_EQUAL(NopPattern.GetAddress(), static_cast<PBYTE>(pNop) + 1);
-    BOOST_CHECK_EQUAL(NopPattern.GetAddress(), MyFindPattern[L"NopPlus1"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(2));
-    
-    auto const pZeros = MyFindPattern.Find(L"00 00 00", L"x?x");
-    BOOST_CHECK(pZeros != nullptr);
-    BOOST_CHECK_GT(pZeros, GetModuleHandle(NULL));
-    MyFindPattern.Find(L"00 00 00", L"x?x", L"Zeros");
-    BOOST_CHECK_EQUAL(pZeros, MyFindPattern[L"Zeros"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(3));
-    BOOST_CHECK(pNop != pZeros);
-    auto const pZerosRel = MyFindPattern.Find(L"00 00 00", L"x?x", 
-      Hades::Memory::FindPattern::RelativeAddress);
-    BOOST_CHECK_EQUAL(static_cast<PBYTE>(pZerosRel) + pSelf, pZeros);
-    
-    Hades::Memory::Pattern ZerosPattern(MyFindPattern, L"00 00 00", L"x?x", 
-      L"ZerosMinus1");
-    ZerosPattern << Hades::Memory::PatternManipulators::Sub(1) << 
-      Hades::Memory::PatternManipulators::Save();
-    BOOST_CHECK_EQUAL(ZerosPattern.GetAddress(), static_cast<PBYTE>(pZeros) - 1);
-    BOOST_CHECK_EQUAL(ZerosPattern.GetAddress(), MyFindPattern[L"ZerosMinus1"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(4));
-    
-    Hades::Memory::Pattern CallPattern(MyFindPattern, L"E8", L"x");
-    CallPattern << Hades::Memory::PatternManipulators::Add(1) << 
-      Hades::Memory::PatternManipulators::Rel(5, 1);
-    BOOST_CHECK(CallPattern.GetAddress() != nullptr);
-    
-    // Todo: PatternManipulators::Lea test
-  }
+  auto const pNop = MyFindPattern.Find(L"90", L"x");
+  BOOST_CHECK(pNop != nullptr);
+  BOOST_CHECK_GT(pNop, GetModuleHandle(NULL));
+  MyFindPattern.Find(L"90", L"x", L"Nop");
+  BOOST_CHECK_EQUAL(pNop, MyFindPattern[L"Nop"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(1));
+  auto const pNopRel = MyFindPattern.Find(L"90", L"x", 
+    Hades::Memory::FindPattern::RelativeAddress);
+  BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopRel) + pSelf, pNop);
+  
+  Hades::Memory::Pattern NopPattern(MyFindPattern, L"90", L"x", L"NopPlus1");
+  NopPattern << Hades::Memory::PatternManipulators::Add(1) << 
+    Hades::Memory::PatternManipulators::Save();
+  BOOST_CHECK_EQUAL(NopPattern.GetAddress(), static_cast<PBYTE>(pNop) + 1);
+  BOOST_CHECK_EQUAL(NopPattern.GetAddress(), MyFindPattern[L"NopPlus1"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(2));
+  
+  auto const pZeros = MyFindPattern.Find(L"00 00 00", L"x?x");
+  BOOST_CHECK(pZeros != nullptr);
+  BOOST_CHECK_GT(pZeros, GetModuleHandle(NULL));
+  MyFindPattern.Find(L"00 00 00", L"x?x", L"Zeros");
+  BOOST_CHECK_EQUAL(pZeros, MyFindPattern[L"Zeros"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(3));
+  BOOST_CHECK(pNop != pZeros);
+  auto const pZerosRel = MyFindPattern.Find(L"00 00 00", L"x?x", 
+    Hades::Memory::FindPattern::RelativeAddress);
+  BOOST_CHECK_EQUAL(static_cast<PBYTE>(pZerosRel) + pSelf, pZeros);
+  
+  Hades::Memory::Pattern ZerosPattern(MyFindPattern, L"00 00 00", L"x?x", 
+    L"ZerosMinus1");
+  ZerosPattern << Hades::Memory::PatternManipulators::Sub(1) << 
+    Hades::Memory::PatternManipulators::Save();
+  BOOST_CHECK_EQUAL(ZerosPattern.GetAddress(), static_cast<PBYTE>(pZeros) - 1);
+  BOOST_CHECK_EQUAL(ZerosPattern.GetAddress(), MyFindPattern[L"ZerosMinus1"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(4));
+  
+  Hades::Memory::Pattern CallPattern(MyFindPattern, L"E8", L"x");
+  CallPattern << Hades::Memory::PatternManipulators::Add(1) << 
+    Hades::Memory::PatternManipulators::Rel(5, 1);
+  BOOST_CHECK(CallPattern.GetAddress() != nullptr);
+  
+  // Todo: PatternManipulators::Lea test
+ 
+  // Test pattern file
+  /*std::wstring const PatternFileData = 
+    L"HadesMem Patterns (RelativeAddress, ScanData)\n"
+    L"\n"
+    L"{ Foo, 00 11 22 33 44, xxxxx }\n"
+    L"[ Add, 1 ]\n"
+    L"[ Rel, 5, 1 ]\n";*/
+  std::string const PatternFileData = 
+    "HadesMem Patterns (RelativeAddress, ScanData)\n"
+    "{ Foo Bar, AA BB CC, x?x }\n"
+    "[ Rel, 5, 1 ]\n";
+  MyFindPattern.LoadFileMemory(PatternFileData);
   
   // Perform a full wildcard scan and ensure that both scans return the same 
   // pointer despite different data.
-  {
-    auto const pNopsAny = MyFindPattern.Find(L"90 90 90 90 90", L"?????");
-    BOOST_CHECK_GT(pNopsAny, GetModuleHandle(NULL));
-    MyFindPattern.Find(L"90 90 90 90 90", L"?????", L"NopsAny");
-    BOOST_CHECK_EQUAL(pNopsAny, MyFindPattern[L"NopsAny"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(5));
-    auto const pNopsAnyRel = MyFindPattern.Find(L"90 90 90 90 90", L"?????", 
-      Hades::Memory::FindPattern::RelativeAddress);
-    BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopsAnyRel) + pSelf, pNopsAny);
-    
-    auto const pInt3sAny = MyFindPattern.Find(L"CC CC CC CC CC", L"?????");
-    BOOST_CHECK_GT(pInt3sAny, GetModuleHandle(NULL));
-    MyFindPattern.Find(L"CC CC CC CC CC", L"?????", L"Int3sAny");
-    BOOST_CHECK_EQUAL(pInt3sAny, MyFindPattern[L"Int3sAny"]);
-    BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-      static_cast<std::size_t>(6));
-    BOOST_CHECK_EQUAL(pNopsAny, pInt3sAny);
-    auto const pInt3sAnyRel = MyFindPattern.Find(L"CC CC CC CC CC", L"?????", 
-      Hades::Memory::FindPattern::RelativeAddress);
-    BOOST_CHECK_EQUAL(static_cast<PBYTE>(pInt3sAnyRel) + pSelf, pInt3sAny);
-  }
+  auto const pNopsAny = MyFindPattern.Find(L"90 90 90 90 90", L"?????");
+  BOOST_CHECK_GT(pNopsAny, GetModuleHandle(NULL));
+  MyFindPattern.Find(L"90 90 90 90 90", L"?????", L"NopsAny");
+  BOOST_CHECK_EQUAL(pNopsAny, MyFindPattern[L"NopsAny"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(5));
+  auto const pNopsAnyRel = MyFindPattern.Find(L"90 90 90 90 90", L"?????", 
+    Hades::Memory::FindPattern::RelativeAddress);
+  BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopsAnyRel) + pSelf, pNopsAny);
+  
+  auto const pInt3sAny = MyFindPattern.Find(L"CC CC CC CC CC", L"?????");
+  BOOST_CHECK_GT(pInt3sAny, GetModuleHandle(NULL));
+  MyFindPattern.Find(L"CC CC CC CC CC", L"?????", L"Int3sAny");
+  BOOST_CHECK_EQUAL(pInt3sAny, MyFindPattern[L"Int3sAny"]);
+  BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
+    static_cast<std::size_t>(6));
+  BOOST_CHECK_EQUAL(pNopsAny, pInt3sAny);
+  auto const pInt3sAnyRel = MyFindPattern.Find(L"CC CC CC CC CC", L"?????", 
+    Hades::Memory::FindPattern::RelativeAddress);
+  BOOST_CHECK_EQUAL(static_cast<PBYTE>(pInt3sAnyRel) + pSelf, pInt3sAny);
   
   // Check ThrowOnUnmatch flag
   BOOST_CHECK_THROW(MyFindPattern.Find(L"AA BB CC DD EE FF 11 22 33 44 55 "

@@ -30,6 +30,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <utility>
 
+// Boost
+#include <boost/filesystem.hpp>
+
 // Windows API
 #include <Windows.h>
 
@@ -73,6 +76,12 @@ namespace Hades
 
       // Operator[] overload to allow retrieving addresses by name
       PVOID operator[](std::wstring const& Name) const;
+        
+      // Read patterns from file
+      void LoadFile(boost::filesystem::path const& File);
+      
+      // Read patterns from memory
+      void LoadFileMemory(std::string const& Data);
 
     private:
       // Initialize pattern finder
