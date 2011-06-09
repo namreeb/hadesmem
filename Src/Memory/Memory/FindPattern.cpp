@@ -311,25 +311,25 @@ namespace Hades
     }
     
     // Read patterns from memory
-    void FindPattern::LoadFileMemory(std::string const& Data)
+    void FindPattern::LoadFileMemory(std::wstring const& Data)
     {
       using namespace boost::spirit;
       using namespace boost::spirit::qi;
       
-      symbols<char, FindFlags> FlagsMap;
+      symbols<wchar_t, FindFlags> FlagsMap;
       FlagsMap.add
-        ("None", None)
-        ("ThrowOnUnmatch", ThrowOnUnmatch)
-        ("RelativeAddress", RelativeAddress)
-        ("ScanData", ScanData);
+        (L"None", None)
+        (L"ThrowOnUnmatch", ThrowOnUnmatch)
+        (L"RelativeAddress", RelativeAddress)
+        (L"ScanData", ScanData);
       
-      typedef std::string::const_iterator DataIter;
+      typedef std::wstring::const_iterator DataIter;
       typedef qi::standard::space_type SkipType;
         
-      rule<DataIter, std::vector<FindFlags>(), SkipType> FlagsRule; FlagsRule %= 
+      rule<DataIter, std::vector<FindFlags>(), SkipType> FlagsRule = 
         '(' >> *(FlagsMap % ',') >> ')';
         
-      rule<DataIter, std::string(), SkipType> NameRule = 
+      rule<DataIter, std::wstring(), SkipType> NameRule = 
         lexeme[*(~char_(','))] >> ',';
         
       rule<DataIter, std::vector<unsigned>(), SkipType> DataRule = 
@@ -344,7 +344,7 @@ namespace Hades
       rule<DataIter, PatternInfo(), SkipType> PatternRule = 
         '{' >> NameRule >> DataRule >> MaskRule >> '}';
         
-      rule<DataIter, std::string(), SkipType> ManipNameRule = 
+      rule<DataIter, std::wstring(), SkipType> ManipNameRule = 
         +(~char_(',')) >> ',';
         
       rule<DataIter, std::vector<unsigned>(), SkipType> OperandRule = 
@@ -363,7 +363,7 @@ namespace Hades
       auto DataEnd = Data.cend();
       bool Parsed = phrase_parse(DataBeg, DataEnd, 
         (
-          "HadesMem Patterns" >> FlagsRule >> 
+          L"HadesMem Patterns" >> FlagsRule >> 
           *PatternFullRule
         ), 
         space, 

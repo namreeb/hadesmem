@@ -81,7 +81,7 @@ namespace Hades
       void LoadFile(boost::filesystem::path const& File);
       
       // Read patterns from memory
-      void LoadFileMemory(std::string const& Data);
+      void LoadFileMemory(std::wstring const& Data);
 
     private:
       // Initialize pattern finder

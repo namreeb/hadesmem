@@ -86,7 +86,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
     static_cast<std::size_t>(4));
   
-  Hades::Memory::Pattern CallPattern(MyFindPattern, L"E8", L"x");
+  Hades::Memory::Pattern CallPattern(MyFindPattern, L"E8", L"x", 
+    Hades::Memory::FindPattern::RelativeAddress);
   CallPattern << Hades::Memory::PatternManipulators::Add(1) << 
     Hades::Memory::PatternManipulators::Rel(5, 1);
   BOOST_CHECK(CallPattern.GetAddress() != nullptr);
@@ -100,11 +101,17 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     L"{ Foo, 00 11 22 33 44, xxxxx }\n"
     L"[ Add, 1 ]\n"
     L"[ Rel, 5, 1 ]\n";*/
-  std::string const PatternFileData = 
-    "HadesMem Patterns (RelativeAddress, ScanData)\n"
-    "{ Foo Bar, AA BB CC, x?x }\n"
-    "[ Rel, 5, 1 ]\n";
+  std::wstring const PatternFileData = 
+    L"HadesMem Patterns (RelativeAddress, ThrowOnUnmatch)\n"
+    L"{ FirstCall, E8, x }\n"
+    L"[ Add, 1 ]\n"
+    L"[ Rel, 5, 1 ]\n"
+    L"{ ZerosNew, 00 00 00, x?x }\n"
+    L"[ Add, 1 ]\n"
+    L"[ Sub, 1 ]\n";
   MyFindPattern.LoadFileMemory(PatternFileData);
+  //BOOST_CHECK_EQUAL(MyFindPattern[L"FirstCall"], CallPattern.GetAddress());
+  //BOOST_CHECK_EQUAL(MyFindPattern[L"ZerosNew"], pZerosRel);
   
   // Perform a full wildcard scan and ensure that both scans return the same 
   // pointer despite different data.
