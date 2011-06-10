@@ -103,8 +103,7 @@ namespace Hades
       RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
         std::vector<PVOID> const& Args) const;
 
-#ifndef BOOST_NO_INITIALIZER_LISTS
-#ifndef BOOST_NO_VARIADIC_TEMPLATES
+#if !defined(BOOST_NO_INITIALIZER_LISTS) && !defined(BOOST_NO_VARIADIC_TEMPLATES)
       // Call remote function
       template <typename... T>
       RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
@@ -116,7 +115,6 @@ namespace Hades
         std::vector<PVOID> NewArgs { reinterpret_cast<PVOID>(Args)... };
         return Call(Address, MyCallConv, NewArgs);
       }
-#endif
 #endif
 
       // Read memory (POD types)

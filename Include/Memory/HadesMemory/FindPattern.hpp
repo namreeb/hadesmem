@@ -57,18 +57,19 @@ namespace Hades
       // Pattern matching flags
       enum FindFlags
       {
-        None = 0, 
-        ThrowOnUnmatch = 1, 
-        RelativeAddress = 2, 
-        ScanData = 4
+        FindFlags_None = 0, 
+        FindFlags_ThrowOnUnmatch = 1, 
+        FindFlags_RelativeAddress = 2, 
+        FindFlags_ScanData = 4
       };
 
       // Find pattern
-      PVOID Find(std::wstring const& Data, FindFlags Flags = None) const;
+      PVOID Find(std::wstring const& Data, FindFlags Flags = 
+        FindFlags_None) const;
         
       // Find pattern and store by name
       PVOID Find(std::wstring const& Data, std::wstring const& Name, 
-        FindFlags Flags = None);
+        FindFlags Flags = FindFlags_None);
 
       // Get address map
       std::map<std::wstring, PVOID> GetAddresses() const;
@@ -111,11 +112,11 @@ namespace Hades
 		  // Constructor
 		  Pattern(FindPattern& Finder, std::wstring const& Data, 
 		    std::wstring const& Name, FindPattern::FindFlags Flags = 
-		    FindPattern::None);
+		    FindPattern::FindFlags_None);
 		  
 		  // Constructor
 		  Pattern(FindPattern& Finder, std::wstring const& Data, 
-		    FindPattern::FindFlags Flags = FindPattern::None);
+		    FindPattern::FindFlags Flags = FindPattern::FindFlags_None);
 		  
 		  // Save back to parent
 		  void Save();

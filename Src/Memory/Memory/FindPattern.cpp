@@ -221,10 +221,16 @@ namespace Hades
           !IsWildcard));
       }
 
-      // Search memory for pattern
-      bool ScanDataSecs = ((Flags & ScanData) == ScanData);
+      // Check if data sections should be scanned
+      bool ScanDataSecs = ((Flags & FindFlags_ScanData) == 
+        FindFlags_ScanData);
+      
+      // Find pattern
       PVOID Address = Find(DataBuf, ScanDataSecs);
-      if (!Address && ((Flags & ThrowOnUnmatch) == ThrowOnUnmatch))
+      
+      // Throw on unmatched pattern if requested
+      if (!Address && ((Flags & FindFlags_ThrowOnUnmatch) == 
+        FindFlags_ThrowOnUnmatch))
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::Find") << 
@@ -232,7 +238,8 @@ namespace Hades
       }
       
       // Convert to relative address if required
-      if (Address && ((Flags & RelativeAddress) == RelativeAddress))
+      if (Address && ((Flags & FindFlags_RelativeAddress) == 
+        FindFlags_RelativeAddress))
       {
         Address = static_cast<PBYTE>(Address) - m_Base;
       }
@@ -347,10 +354,10 @@ namespace Hades
         FlagsParserT()
         {
           add
-            (L"None", None)
-            (L"ThrowOnUnmatch", ThrowOnUnmatch)
-            (L"RelativeAddress", RelativeAddress)
-            (L"ScanData", ScanData);
+            (L"None", FindFlags_None)
+            (L"ThrowOnUnmatch", FindFlags_ThrowOnUnmatch)
+            (L"RelativeAddress", FindFlags_RelativeAddress)
+            (L"ScanData", FindFlags_ScanData);
         }
       } FlagsParser;
       
@@ -419,7 +426,7 @@ namespace Hades
       }
       
       // Get flags
-      unsigned int Flags = None;
+      unsigned int Flags = FindFlags_None;
       std::for_each(FlagsList.cbegin(), FlagsList.cend(), 
         [&] (FindFlags Flag)
         {
@@ -620,8 +627,9 @@ namespace Hades
         {
           try
           {
-            DWORD_PTR Base = ((Pat.GetFlags() & FindPattern::RelativeAddress) == 
-              FindPattern::RelativeAddress) ? Pat.GetBase() : 0;
+            DWORD_PTR Base = ((Pat.GetFlags() & 
+              FindPattern::FindFlags_RelativeAddress) == 
+              FindPattern::FindFlags_RelativeAddress) ? Pat.GetBase() : 0;
             Address = Pat.GetMemory().Read<PBYTE>(Pat.GetAddress() + Base);
             Pat.Update(Address - Base);
           }
@@ -646,8 +654,9 @@ namespace Hades
         {
           try
           {
-            DWORD_PTR Base = ((Pat.GetFlags() & FindPattern::RelativeAddress) == 
-              FindPattern::RelativeAddress) ? Pat.GetBase() : 0;
+            DWORD_PTR Base = ((Pat.GetFlags() & 
+              FindPattern::FindFlags_RelativeAddress) == 
+              FindPattern::FindFlags_RelativeAddress) ? Pat.GetBase() : 0;
             Address = Pat.GetMemory().Read<PBYTE>(Address + Base) + 
               reinterpret_cast<DWORD_PTR>(Address + Base) + m_Size - m_Offset;
             Pat.Update(Address - Base);
