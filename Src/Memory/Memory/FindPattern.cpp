@@ -40,9 +40,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push, 1)
 #endif
 #include <boost/assert.hpp>
+#include <boost/variant.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #ifdef HADES_MSVC
@@ -193,39 +195,40 @@ namespace Hades
       {
         // Get current byte as string
         std::wstring const ByteStr = Data.substr(i, 2);
-        bool IsWildcard = (ByteStr == L"??");
-        bool IsHex = (std::isxdigit(ByteStr[0]) && std::isxdigit(ByteStr[1]));
-        if (!IsWildcard && !IsHex)
+        
+        // Get data for non-wildcards by converting hex string to integer
+        boost::variant<unsigned int, std::wstring> Current;
+        auto ByteStrBeg = ByteStr.cbegin();
+        auto ByteStrEnd = ByteStr.cend();
+        bool Converted = boost::spirit::qi::parse(
+          ByteStrBeg, ByteStrEnd, 
+          (boost::spirit::qi::hex | boost::spirit::qi::string(L"??")), 
+          Current);
+        if (!Converted || ByteStrBeg != ByteStrEnd)
         {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("FindPattern::Find") << 
-            ErrorString("Invalid data (bytes)."));
-        }
-             
-        // Get data for non-wildcards by converting hex string to integer
-        unsigned int Current = 0;
-        if (!IsWildcard)
-        {
-          auto ByteStrBeg = ByteStr.cbegin();
-          auto ByteStrEnd = ByteStr.cend();
-          bool Converted = boost::spirit::qi::parse(ByteStrBeg, 
-            ByteStrEnd, boost::spirit::qi::hex, Current);
-          if (!Converted || ByteStrBeg != ByteStrEnd)
-          {
-            BOOST_THROW_EXCEPTION(Error() << 
-              ErrorFunction("FindPattern::Find") << 
-              ErrorString("Invalid data conversion."));
-          }
+            ErrorString("Invalid data conversion (parse)."));
         }
         
-        // The data should be in the range 0x00 - 0xFF and hence should 
-        // always fit in a BYTE
-        BOOST_ASSERT(Current >= (std::numeric_limits<BYTE>::min)() && 
-          Current <= (std::numeric_limits<BYTE>::max)());
+        // Get data as integer
+        unsigned int* pCurrentInt = boost::get<unsigned int>(&Current);
+        BYTE CurrentByte = 0;
+        try
+        {
+          CurrentByte = pCurrentInt ? 
+            boost::numeric_cast<BYTE>(*pCurrentInt) : 
+            0;
+        }
+        catch (std::exception const& /*e*/)
+        {
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("FindPattern::Find") << 
+            ErrorString("Invalid data conversion (numeric)."));
+        }
 
         // Add current data and mask to list
-        DataBuf.push_back(std::make_pair(static_cast<BYTE>(Current), 
-          !IsWildcard));
+        DataBuf.push_back(std::make_pair(CurrentByte, pCurrentInt != nullptr));
       }
 
       // Check if data sections should be scanned
