@@ -58,7 +58,6 @@ namespace Hades
     {
       std::wstring Name;
       std::wstring Data;
-      std::wstring Mask;
     };
     
     // Pattern manipulator info for parser
@@ -160,51 +159,36 @@ namespace Hades
     }
     
     // Find pattern
-    PVOID FindPattern::Find(std::wstring const& Data, 
-      std::wstring const& Mask, FindFlags Flags) const
+    PVOID FindPattern::Find(std::wstring const& Data, FindFlags Flags) const
     {
       // Ensure pattern attributes are valid
-      if (Data.size() < 2 || Mask.empty())
+      if (Data.size() < 2)
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::Find") << 
-          ErrorString("Empty pattern or mask data."));
+          ErrorString("Pattern length invalid."));
       }
       
-      // Sanity check
-      if (Data.size() != Mask.size() * 2 + (Mask.size() - 1))
+      // Ensure whitespace in pattern data is correct
+      for (std::size_t i = 2; i < Data.size(); i += 3)
       {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::Find") << 
-          ErrorString("Invalid mask or data size."));
-      }
-
-      // Convert data to byte buffer
-      std::vector<std::pair<BYTE, bool>> DataBuf;
-      for (std::size_t i = 0; i != Mask.size(); ++i)
-      {
-        // Sanity check
-        if (Mask[i] != L'x' && Mask[i] != L'?')
+        if (Data[i] != L' ')
         {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("FindPattern::Find") << 
-            ErrorString("Invalid mask."));
+            ErrorString("Pattern data invalid (whitespace)."));
         }
+      }
         
-        // Sanity check
-        for (auto j = Data.cbegin() + 2; j != Data.cend();  j += 3)
-        {
-          if (*j != L' ')
-          {
-            BOOST_THROW_EXCEPTION(Error() << 
-              ErrorFunction("FindPattern::Find") << 
-              ErrorString("Invalid data (whitespace)."));
-          }
-        }
-        
+      // Convert data to byte buffer
+      std::vector<std::pair<BYTE, bool>> DataBuf;
+      for (std::size_t i = 0; i < Data.size(); i += 3)
+      {
         // Get current byte as string
-        std::wstring const ByteStr = Data.substr(i * 3, ((i * 3) + 2));
-        if (!std::isxdigit(ByteStr[0]) || !std::isxdigit(ByteStr[1]))
+        std::wstring const ByteStr = Data.substr(i, 2);
+        bool IsWildcard = (ByteStr == L"??");
+        bool IsHex = (std::isxdigit(ByteStr[0]) && std::isxdigit(ByteStr[1]));
+        if (!IsWildcard && !IsHex)
         {
           BOOST_THROW_EXCEPTION(Error() << 
             ErrorFunction("FindPattern::Find") << 
@@ -212,31 +196,19 @@ namespace Hades
         }
              
         // Get data for non-wildcards by converting hex string to integer
-        bool MaskFlag = (Mask[i] == L'x');
-        int Current = 0;
-        if (MaskFlag)
+        unsigned int Current = 0;
+        if (!IsWildcard)
         {
-#ifndef HADES_MSVC
-          // Note: My GCC implementation does not provide std::stoi
-          std::wstringstream Convert(ByteStr);
-          if (!(Convert >> std::hex >> Current))
+          auto ByteStrBeg = ByteStr.cbegin();
+          auto ByteStrEnd = ByteStr.cend();
+          bool Converted = boost::spirit::qi::parse(ByteStrBeg, 
+            ByteStrEnd, boost::spirit::qi::hex, Current);
+          if (!Converted || ByteStrBeg != ByteStrEnd)
           {
             BOOST_THROW_EXCEPTION(Error() << 
               ErrorFunction("FindPattern::Find") << 
               ErrorString("Invalid data conversion."));
           }
-#else
-          try
-          {
-            Current = std::stoi(ByteStr, nullptr, 16);
-          }
-          catch (std::exception const& /*e*/)
-          {
-            BOOST_THROW_EXCEPTION(Error() << 
-              ErrorFunction("FindPattern::Find") << 
-              ErrorString("Invalid data conversion."));
-          }
-#endif
         }
         
         // The data should be in the range 0x00 - 0xFF and hence should 
@@ -246,7 +218,7 @@ namespace Hades
 
         // Add current data and mask to list
         DataBuf.push_back(std::make_pair(static_cast<BYTE>(Current), 
-          MaskFlag));
+          !IsWildcard));
       }
 
       // Search memory for pattern
@@ -271,11 +243,10 @@ namespace Hades
 
     // Find pattern
     PVOID FindPattern::Find(std::wstring const& Data, 
-      std::wstring const& Mask, std::wstring const& Name, 
-      FindFlags Flags)
+      std::wstring const& Name, FindFlags Flags)
     {
       // Search memory for pattern
-      PVOID Address = Find(Data, Mask, Flags);
+      PVOID Address = Find(Data, Flags);
       
       // Store address if name is specified
       if (!Name.empty())
@@ -363,56 +334,56 @@ namespace Hades
     // Read patterns from memory
     void FindPattern::LoadFileMemory(std::wstring const& Data)
     {
-      using namespace boost::spirit;
-      using namespace boost::spirit::qi;
+      namespace qi = boost::spirit::qi;
       
       // Data iterator type (wide string)
       typedef std::wstring::const_iterator DataIter;
       // Parser skipper type (whitespace)
-      typedef qi::standard::space_type SkipType;
+      typedef qi::standard::space_type SkipWsT;
         
       // Map flag names to values
-      symbols<wchar_t, FindFlags> FlagsMap;
-      FlagsMap.add
-        (L"None", None)
-        (L"ThrowOnUnmatch", ThrowOnUnmatch)
-        (L"RelativeAddress", RelativeAddress)
-        (L"ScanData", ScanData);
+      struct FlagsParserT : qi::symbols<wchar_t, FindFlags> 
+      {
+        FlagsParserT()
+        {
+          add
+            (L"None", None)
+            (L"ThrowOnUnmatch", ThrowOnUnmatch)
+            (L"RelativeAddress", RelativeAddress)
+            (L"ScanData", ScanData);
+        }
+      } FlagsParser;
       
       // Flags parser
-      rule<DataIter, std::vector<FindFlags>(), SkipType> FlagsRule = 
-        '(' >> *(FlagsMap % ',') >> ')';
+      qi::rule<DataIter, std::vector<FindFlags>(), SkipWsT> FlagsRule = 
+        '(' >> *(FlagsParser % ',') >> ')';
         
       // Pattern name parser
-      rule<DataIter, std::wstring(), SkipType> NameRule = 
-        lexeme[*(~char_(','))] >> ',';
+      qi::rule<DataIter, std::wstring()> NameRule = 
+        qi::lexeme[*(~qi::char_(','))] >> ',';
       
       // Pattern data parser
-      rule<DataIter, std::wstring(), SkipType> DataRule = 
-        lexeme[*(~char_(','))] >> ',';
-      
-      // Mask parser
-      rule<DataIter, std::wstring(), SkipType> MaskRule = 
-        *(~char_('}'));
+      qi::rule<DataIter, std::wstring()> DataRule = 
+        qi::lexeme[*(~qi::char_('}'))];
       
       // Pattern parser
-      rule<DataIter, PatternInfo(), SkipType> PatternRule = 
-        '{' >> NameRule >> DataRule >> MaskRule >> '}';
+      qi::rule<DataIter, PatternInfo(), SkipWsT> PatternRule = 
+        '{' >> NameRule >> DataRule >> '}';
       
       // Manipulator name parser
-      rule<DataIter, std::wstring(), SkipType> ManipNameRule = 
-        +(~char_(',')) >> ',';
+      qi::rule<DataIter, std::wstring(), SkipWsT> ManipNameRule = 
+        +(~qi::char_(',')) >> ',';
       
       // Manipulator operand parser
-      rule<DataIter, std::vector<unsigned>(), SkipType> OperandRule = 
-        *(uint_ % ',');
+      qi::rule<DataIter, std::vector<unsigned>(), SkipWsT> OperandRule = 
+        *(qi::uint_ % ',');
       
       // Manipulator parser
-      rule<DataIter, ManipInfo(), SkipType> ManipRule = 
+      qi::rule<DataIter, ManipInfo(), SkipWsT> ManipRule = 
         '[' >> ManipNameRule >> OperandRule >> ']';
       
       // Pattern parser
-      rule <DataIter, PatternInfoFull(), SkipType> PatternFullRule = 
+      qi::rule <DataIter, PatternInfoFull(), SkipWsT> PatternFullRule = 
         PatternRule >> *ManipRule;
       
       // Flag list
@@ -423,12 +394,12 @@ namespace Hades
       // Parse pattern file
       auto DataBeg = Data.cbegin();
       auto DataEnd = Data.cend();
-      bool Parsed = phrase_parse(DataBeg, DataEnd, 
+      bool Parsed = qi::phrase_parse(DataBeg, DataEnd, 
         (
           L"HadesMem Patterns" >> FlagsRule >> 
           *PatternFullRule
         ), 
-        space, 
+        qi::space, 
         FlagsList, PatternList);
       
       // Ensure parsing succeeded
@@ -461,7 +432,7 @@ namespace Hades
         {
           // Create pattern scanner
           PatternInfo const& PatInfo = P.Pattern;
-          Pattern MyPattern(*this, PatInfo.Data, PatInfo.Mask, PatInfo.Name, 
+          Pattern MyPattern(*this, PatInfo.Data, PatInfo.Name, 
             static_cast<FindFlags>(Flags));
             
           // Apply manipulators
@@ -535,20 +506,19 @@ namespace Hades
     
     // Constructor
     Pattern::Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    std::wstring const& Mask, std::wstring const& Name, 
-	    FindPattern::FindFlags Flags)
+	    std::wstring const& Name, FindPattern::FindFlags Flags)
 	    : m_Finder(Finder), 
 	    m_Name(Name), 
-	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Mask, Flags))), 
+	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Flags))), 
 	    m_Flags(Flags)
 	  { }
     
     // Constructor
     Pattern::Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    std::wstring const& Mask, FindPattern::FindFlags Flags)
+	    FindPattern::FindFlags Flags)
 	    : m_Finder(Finder), 
 	    m_Name(), 
-	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Mask, Flags))), 
+	    m_Address(static_cast<PBYTE>(Finder.Find(Data, Flags))), 
 	    m_Flags(Flags)
 	  { }
 	  

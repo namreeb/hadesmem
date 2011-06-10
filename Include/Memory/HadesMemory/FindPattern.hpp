@@ -64,12 +64,11 @@ namespace Hades
       };
 
       // Find pattern
-      PVOID Find(std::wstring const& Data, std::wstring const& Mask, 
-        FindFlags Flags = None) const;
+      PVOID Find(std::wstring const& Data, FindFlags Flags = None) const;
         
       // Find pattern and store by name
-      PVOID Find(std::wstring const& Data, std::wstring const& Mask, 
-        std::wstring const& Name, FindFlags Flags = None);
+      PVOID Find(std::wstring const& Data, std::wstring const& Name, 
+        FindFlags Flags = None);
 
       // Get address map
       std::map<std::wstring, PVOID> GetAddresses() const;
@@ -111,13 +110,12 @@ namespace Hades
 		public:
 		  // Constructor
 		  Pattern(FindPattern& Finder, std::wstring const& Data, 
-		    std::wstring const& Mask, std::wstring const& Name, 
-		    FindPattern::FindFlags Flags = FindPattern::None);
+		    std::wstring const& Name, FindPattern::FindFlags Flags = 
+		    FindPattern::None);
 		  
 		  // Constructor
 		  Pattern(FindPattern& Finder, std::wstring const& Data, 
-		    std::wstring const& Mask, FindPattern::FindFlags Flags = 
-		    FindPattern::None);
+		    FindPattern::FindFlags Flags = FindPattern::None);
 		  
 		  // Save back to parent
 		  void Save();
