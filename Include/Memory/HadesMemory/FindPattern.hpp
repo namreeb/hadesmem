@@ -52,7 +52,8 @@ namespace Hades
       { };
 
       // Constructor
-      FindPattern(MemoryMgr const& MyMemory, HMODULE Module = nullptr);
+      explicit FindPattern(MemoryMgr const& MyMemory, 
+        HMODULE Module = nullptr);
       
       // Pattern matching flags
       enum FindFlags
