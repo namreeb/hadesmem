@@ -186,7 +186,7 @@ namespace Hades
       // Parser skipper type (whitespace)
       typedef qi::standard::space_type SkipWsT;
       
-      // Get data for non-wildcards by converting hex string to integer
+      // Parse pattern data
       boost::spirit::qi::rule<DataIter, unsigned int(), SkipWsT> DataRule;
       DataRule %= qi::hex | qi::string(L"??")[qi::_val = 
         static_cast<unsigned int>(-1)];
