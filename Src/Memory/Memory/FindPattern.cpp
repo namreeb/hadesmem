@@ -63,7 +63,15 @@ namespace Hades
     // Pattern manipulator info for parser
     struct ManipInfo
     {
-      std::wstring Name;
+      enum Manipulator
+      {
+        Manip_Add, 
+        Manip_Sub, 
+        Manip_Rel, 
+        Manip_Lea
+      };
+      
+      Manipulator Type;
       std::vector<unsigned> Operands;
     };
     
@@ -79,12 +87,11 @@ namespace Hades
 // Adapt pattern info struct for parser
 BOOST_FUSION_ADAPT_STRUCT(Hades::Memory::PatternInfo, 
   (std::wstring, Name)
-  (std::wstring, Data)
-  (std::wstring, Mask))
+  (std::wstring, Data))
 
 // Adapt pattern manipulator info struct for parser
 BOOST_FUSION_ADAPT_STRUCT(Hades::Memory::ManipInfo, 
-  (std::wstring, Name)
+  (Hades::Memory::ManipInfo::Manipulator, Type)
   (std::vector<unsigned>, Operands))
 
 // Adapt full pattern info struct for parser
@@ -377,9 +384,22 @@ namespace Hades
       qi::rule<DataIter, PatternInfo(), SkipWsT> PatternRule = 
         '{' >> NameRule >> DataRule >> '}';
       
+      // Map manipulator names to values
+      struct ManipParserT : qi::symbols<wchar_t, ManipInfo::Manipulator> 
+      {
+        ManipParserT()
+        {
+          add
+            (L"Add", ManipInfo::Manip_Add)
+            (L"Sub", ManipInfo::Manip_Sub)
+            (L"Rel", ManipInfo::Manip_Rel)
+            (L"Lea", ManipInfo::Manip_Lea);
+        }
+      } ManipParser;
+      
       // Manipulator name parser
-      qi::rule<DataIter, std::wstring(), SkipWsT> ManipNameRule = 
-        +(~qi::char_(',')) >> ',';
+      qi::rule<DataIter, ManipInfo::Manipulator(), SkipWsT> ManipNameRule = 
+        ManipParser >> ',';
       
       // Manipulator operand parser
       qi::rule<DataIter, std::vector<unsigned>(), SkipWsT> OperandRule = 
@@ -447,9 +467,10 @@ namespace Hades
           std::for_each(ManipList.cbegin(), ManipList.cend(), 
             [&] (ManipInfo const& M)
             {
-              // Handle 'Add'
-              if (M.Name == L"Add")
+              switch (M.Type)
               {
+              // Handle 'Add'
+              case ManipInfo::Manip_Add:
                 // Ensure correct operands are specified
                 if (M.Operands.size() != 1)
                 {
@@ -460,10 +481,11 @@ namespace Hades
                 
                 // Apply manipulator
                 MyPattern << PatternManipulators::Add(M.Operands[0]);
-              }
+                  
+                break;
+                
               // Handle 'Sub'
-              else if (M.Name == L"Sub")
-              {
+              case ManipInfo::Manip_Sub:
                 // Ensure correct operands are specified
                 if (M.Operands.size() != 1)
                 {
@@ -474,10 +496,11 @@ namespace Hades
                 
                 // Apply manipulator
                 MyPattern << PatternManipulators::Sub(M.Operands[0]);
-              }
+                
+                break;
+              
               // Handle 'Rel'
-              else if (M.Name == L"Rel")
-              {
+              case ManipInfo::Manip_Rel:
                 // Ensure correct operands are specified
                 if (M.Operands.size() != 2)
                 {
@@ -489,10 +512,11 @@ namespace Hades
                 // Apply manipulator
                 MyPattern << PatternManipulators::Rel(M.Operands[0], 
                   M.Operands[1]);
-              }
+                
+                break;
+              
               // Handle 'Lea'
-              else if (M.Name == L"Lea")
-              {
+              case ManipInfo::Manip_Lea:
                 // Ensure correct operands are specified
                 if (M.Operands.size() != 0)
                 {
@@ -503,6 +527,14 @@ namespace Hades
                 
                 // Apply manipulator
                 MyPattern << PatternManipulators::Lea();
+                
+                break;
+              
+              // Handle unknown manipulators
+              default:
+                BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                  ErrorFunction("FindPattern::LoadFileMemory") << 
+                  ErrorString("Unknown manipulator."));
               }
             });
             
