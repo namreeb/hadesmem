@@ -178,65 +178,70 @@ namespace Hades
           ErrorString("Pattern length invalid."));
       }
       
-      // Ensure whitespace in pattern data is correct
-      for (std::size_t i = 2; i < Data.size(); i += 3)
+      // For Boost.Spirit Qi
+      namespace qi = boost::spirit::qi;
+      
+      // Data iterator type (wide string)
+      typedef std::wstring::const_iterator DataIter;
+      // Parser skipper type (whitespace)
+      typedef qi::standard::space_type SkipWsT;
+      
+      // Get data for non-wildcards by converting hex string to integer
+      boost::spirit::qi::rule<DataIter, unsigned int(), SkipWsT> DataRule;
+      DataRule %= qi::hex | qi::string(L"??")[qi::_val = 
+        static_cast<unsigned int>(-1)];
+      qi::rule<DataIter, std::vector<unsigned int>(), SkipWsT> DataListRule = 
+        +(DataRule);
+      std::vector<unsigned int> DataParsed;
+      auto DataBeg = Data.cbegin();
+      auto DataEnd = Data.cend();
+      bool Converted = boost::spirit::qi::phrase_parse(
+        DataBeg, DataEnd, 
+        DataListRule, 
+        boost::spirit::qi::space, 
+        DataParsed);
+      if (!Converted || DataBeg != DataEnd)
       {
-        if (Data[i] != L' ')
-        {
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("FindPattern::Find") << 
-            ErrorString("Pattern data invalid (whitespace)."));
-        }
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("FindPattern::Find") << 
+          ErrorString("Invalid data conversion (parse)."));
       }
-        
-      // Convert data to byte buffer
-      std::vector<std::pair<BYTE, bool>> DataBuf;
-      for (std::size_t i = 0; i < Data.size(); i += 3)
-      {
-        // Get current byte as string
-        std::wstring const ByteStr = Data.substr(i, 2);
-        
-        // Get data for non-wildcards by converting hex string to integer
-        boost::variant<unsigned int, std::wstring> Current;
-        auto ByteStrBeg = ByteStr.cbegin();
-        auto ByteStrEnd = ByteStr.cend();
-        bool Converted = boost::spirit::qi::parse(
-          ByteStrBeg, ByteStrEnd, 
-          (boost::spirit::qi::hex | boost::spirit::qi::string(L"??")), 
-          Current);
-        if (!Converted || ByteStrBeg != ByteStrEnd)
+      
+      // Convert data to required format
+      std::vector<std::pair<BYTE, bool>> DataReal;
+      std::transform(DataParsed.cbegin(), DataParsed.cend(), 
+        std::back_inserter(DataReal), 
+        [] (unsigned int Current) -> std::pair<BYTE, bool>
         {
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("FindPattern::Find") << 
-            ErrorString("Invalid data conversion (parse)."));
-        }
-        
-        // Get data as integer
-        unsigned int* pCurrentInt = boost::get<unsigned int>(&Current);
-        BYTE CurrentByte = 0;
-        try
-        {
-          CurrentByte = pCurrentInt ? 
-            boost::numeric_cast<BYTE>(*pCurrentInt) : 
-            0;
-        }
-        catch (std::exception const& /*e*/)
-        {
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("FindPattern::Find") << 
-            ErrorString("Invalid data conversion (numeric)."));
-        }
-
-        // Add current data and mask to list
-        DataBuf.push_back(std::make_pair(CurrentByte, pCurrentInt != nullptr));
-      }
+          // Check for wildcard
+          bool IsWildcard = (Current == static_cast<unsigned int>(-1));
+          
+          // Get data as integer
+          BYTE CurrentByte = 0;
+          if (!IsWildcard)
+          {
+            try
+            {
+              CurrentByte = boost::numeric_cast<BYTE>(Current);
+            }
+            catch (std::exception const& /*e*/)
+            {
+              BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                ErrorFunction("FindPattern::Find") << 
+                ErrorString("Invalid data conversion (numeric)."));
+            }
+          }
+    
+          // Add current data and mask to list
+          return std::make_pair(CurrentByte, !IsWildcard);
+        });
 
       // Check if data sections should be scanned
       bool ScanDataSecs = ((Flags & FindFlags_ScanData) == 
         FindFlags_ScanData);
       
       // Find pattern
-      PVOID Address = Find(DataBuf, ScanDataSecs);
+      PVOID Address = Find(DataReal, ScanDataSecs);
       
       // Throw on unmatched pattern if requested
       if (!Address && ((Flags & FindFlags_ThrowOnUnmatch) == 
@@ -351,6 +356,7 @@ namespace Hades
     // Read patterns from memory
     void FindPattern::LoadFileMemory(std::wstring const& Data)
     {
+      // For Boost.Spirit Qi
       namespace qi = boost::spirit::qi;
       
       // Data iterator type (wide string)
