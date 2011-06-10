@@ -38,7 +38,8 @@ namespace Hades
     // Open process from process id
     Process::Process(DWORD ProcID) 
       : m_Handle(nullptr), 
-      m_ID(ProcID) 
+      m_ID(ProcID), 
+      m_IsWoW64(false)
     {
       // Open process
       if (GetCurrentProcessId() == ProcID)
@@ -54,7 +55,8 @@ namespace Hades
     // Open process from process name
     Process::Process(std::wstring const& ProcName) 
       : m_Handle(nullptr), 
-      m_ID(0) 
+      m_ID(0), 
+      m_IsWoW64(false)
     {
       // Grab a new snapshot of the process
       Windows::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
@@ -105,7 +107,8 @@ namespace Hades
     Process::Process(std::wstring const& WindowName, 
       std::wstring const& ClassName) 
       : m_Handle(nullptr), 
-      m_ID(0) 
+      m_ID(0), 
+      m_IsWoW64(false)
     {
       // Find window
       HWND const MyWnd = FindWindow(ClassName.c_str(), WindowName.c_str());
@@ -134,9 +137,10 @@ namespace Hades
     }
 
     // Copy constructor
-    Process::Process(Process const& MyProcess) 
+    Process::Process(Process const& Other) 
       : m_Handle(nullptr), 
-      m_ID(MyProcess.m_ID)
+      m_ID(Other.m_ID), 
+      m_IsWoW64(Other.m_IsWoW64)
     {
       if (m_ID == GetCurrentProcessId())
       {
@@ -149,9 +153,11 @@ namespace Hades
     }
 
     // Copy assignment
-    Process& Process::operator=(Process const& MyProcess)
+    Process& Process::operator=(Process const& Other)
     {
-      m_ID = MyProcess.m_ID;
+      m_ID = Other.m_ID;
+      
+      m_IsWoW64 = Other.m_IsWoW64;
 
       if (m_ID == GetCurrentProcessId())
       {

@@ -55,10 +55,10 @@ namespace Hades
       Process(std::wstring const& WindowName, std::wstring const& ClassName);
 
       // Copy constructor
-      Process(Process const& MyProcess);
+      Process(Process const& Other);
 
       // Copy assignment
-      Process& operator=(Process const& MyProcess);
+      Process& operator=(Process const& Other);
 
       // Get process handle
       HANDLE GetHandle() const;
