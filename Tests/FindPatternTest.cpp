@@ -143,4 +143,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Check conversion failures throw
   BOOST_CHECK_THROW(MyFindPattern.Find(L"ZZ"), 
     Hades::Memory::FindPattern::Error);
+  
+  // Check conversion failures throw
+  BOOST_CHECK_THROW(MyFindPattern.Find(L""), 
+    Hades::Memory::FindPattern::Error);
 }

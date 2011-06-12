@@ -131,17 +131,26 @@ namespace Hades
       // Get scan regions (sections marked as code and/or data)
       SectionList Sections(MyPeFile);
       std::for_each(Sections.begin(), Sections.end(), 
-        [&] (Section const& S)
+        [&, this] (Section const& S)
         {
           // Handle sections marked as code
           if ((S.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == 
             IMAGE_SCN_CNT_CODE)
           {
+            // Get start of section
             PBYTE SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
               S.GetVirtualAddress()));
-            BOOST_ASSERT(SBegin != nullptr);
+            if (SBegin == nullptr)
+            {
+              BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                ErrorFunction("FindPattern::FindPattern") << 
+                ErrorString("Could not get section base address."));
+            }
+            
+            // Calculate end of section
             PBYTE SEnd = SBegin + S.GetSizeOfRawData();
-            BOOST_ASSERT(SEnd > SBegin);
+            
+            // Add section to list
             m_CodeRegions.push_back(std::make_pair(SBegin, SEnd));
           }
           
@@ -149,11 +158,20 @@ namespace Hades
           if ((S.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA) == 
             IMAGE_SCN_CNT_INITIALIZED_DATA)
           {
+            // Get start of section
             PBYTE SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
               S.GetVirtualAddress()));
-            BOOST_ASSERT(SBegin != nullptr);
+            if (SBegin == nullptr)
+            {
+              BOOST_THROW_EXCEPTION(FindPattern::Error() << 
+                ErrorFunction("FindPattern::FindPattern") << 
+                ErrorString("Could not get section base address."));
+            }
+            
+            // Calculate end of section
             PBYTE SEnd = SBegin + S.GetSizeOfRawData();
-            BOOST_ASSERT(SEnd > SBegin);
+            
+            // Add section to list
             m_DataRegions.push_back(std::make_pair(SBegin, SEnd));
           }
         });
@@ -170,14 +188,6 @@ namespace Hades
     // Find pattern
     PVOID FindPattern::Find(std::wstring const& Data, FindFlags Flags) const
     {
-      // Ensure pattern attributes are valid
-      if (Data.size() < 2)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::Find") << 
-          ErrorString("Pattern length invalid."));
-      }
-      
       // For Boost.Spirit Qi
       namespace qi = boost::spirit::qi;
       
@@ -186,12 +196,17 @@ namespace Hades
       // Parser skipper type (whitespace)
       typedef qi::standard::space_type SkipWsT;
       
-      // Parse pattern data
+      // Data list entry parser
       boost::spirit::qi::rule<DataIter, unsigned int(), SkipWsT> DataRule;
-      DataRule %= qi::hex | qi::string(L"??")[qi::_val = 
-        static_cast<unsigned int>(-1)];
+      DataRule %= 
+        (qi::hex | 
+        qi::string(L"??")[qi::_val = static_cast<unsigned int>(-1)]);
+      
+      // Data list parser
       qi::rule<DataIter, std::vector<unsigned int>(), SkipWsT> DataListRule = 
         +(DataRule);
+      
+      // Parse data
       std::vector<unsigned int> DataParsed;
       auto DataBeg = Data.cbegin();
       auto DataEnd = Data.cend();
@@ -204,7 +219,7 @@ namespace Hades
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::Find") << 
-          ErrorString("Invalid data conversion (parse)."));
+          ErrorString("Data parsing failed."));
       }
       
       // Convert data to required format
@@ -228,7 +243,7 @@ namespace Hades
             {
               BOOST_THROW_EXCEPTION(FindPattern::Error() << 
                 ErrorFunction("FindPattern::Find") << 
-                ErrorString("Invalid data conversion (numeric)."));
+                ErrorString("Data conversion failed (numeric)."));
             }
           }
     
@@ -284,6 +299,9 @@ namespace Hades
     PVOID FindPattern::Find(std::vector<std::pair<BYTE, bool>> const& Data, 
       bool ScanDataSecs) const
     {
+      // Data should always be non-empty
+      BOOST_ASSERT(!Data.empty());
+      
       // Scan all specified section until we find something
       std::vector<std::pair<PBYTE, PBYTE>> const& ScanRegions = 
         ScanDataSecs ? m_DataRegions : m_CodeRegions;
@@ -439,19 +457,11 @@ namespace Hades
         FlagsList, PatternList);
       
       // Ensure parsing succeeded
-      if (!Parsed)
+      if (!Parsed || DataBeg != DataEnd)
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("FindPattern::LoadFileMemory") << 
           ErrorString("Parsing failed."));
-      }
-      
-      // Ensure entire file was parsed
-      if (DataBeg != DataEnd)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("FindPattern::LoadFileMemory") << 
-          ErrorString("Parsing failed. Partial match only."));
       }
       
       // Get flags
