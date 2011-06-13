@@ -438,7 +438,7 @@ namespace Hades
       
       // Pattern parser
       qi::rule <DataIter, PatternInfoFull(), SkipWsT> PatternFullRule = 
-        PatternRule >> *ManipRule;
+        (PatternRule >> *ManipRule);
       
       // Flag list
       std::vector<FindFlags> FlagsList;
