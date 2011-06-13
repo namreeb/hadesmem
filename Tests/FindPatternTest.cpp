@@ -99,10 +99,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     L"[ Rel, 5, 1 ]\n"
     L"{ Zeros New, 00 ?? 00 }\n"
     L"[ Add, 1 ]\n"
-    L"[ Sub, 1 ]\n";
+    L"[ Sub, 1 ]\n"
+    L"{ Nop Other, 90 }\n";
   MyFindPattern.LoadFileMemory(PatternFileData);
   BOOST_CHECK_EQUAL(MyFindPattern[L"First Call"], CallPattern.GetAddress());
   BOOST_CHECK_EQUAL(MyFindPattern[L"Zeros New"], pZerosRel);
+  BOOST_CHECK_EQUAL(MyFindPattern[L"Nop Other"], pNopRel);
   
   // Todo: LoadFile test
   
@@ -113,7 +115,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyFindPattern.Find(L"?? ?? ?? ?? ??", L"NopsAny");
   BOOST_CHECK_EQUAL(pNopsAny, MyFindPattern[L"NopsAny"]);
   BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-    static_cast<std::size_t>(7));
+    static_cast<std::size_t>(8));
   auto const pNopsAnyRel = MyFindPattern.Find(L"?? ?? ?? ?? ??", 
     Hades::Memory::FindPattern::FindFlags_RelativeAddress);
   BOOST_CHECK_EQUAL(static_cast<PBYTE>(pNopsAnyRel) + pSelf, pNopsAny);
@@ -123,7 +125,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyFindPattern.Find(L"?? ?? ?? ?? ??", L"Int3sAny");
   BOOST_CHECK_EQUAL(pInt3sAny, MyFindPattern[L"Int3sAny"]);
   BOOST_CHECK_EQUAL(MyFindPattern.GetAddresses().size(), 
-    static_cast<std::size_t>(8));
+    static_cast<std::size_t>(9));
   BOOST_CHECK_EQUAL(pNopsAny, pInt3sAny);
   auto const pInt3sAnyRel = MyFindPattern.Find(L"?? ?? ?? ?? ??", 
     Hades::Memory::FindPattern::FindFlags_RelativeAddress);
