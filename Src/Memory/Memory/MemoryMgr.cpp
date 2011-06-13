@@ -425,7 +425,7 @@ namespace Hades
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("MemoryMgr::Read") << 
+          ErrorFunction("MemoryMgr::ProtectRegion") << 
           ErrorString("Could not change process memory protection.") << 
           ErrorCodeWinLast(LastError));
       }
