@@ -124,7 +124,7 @@ namespace Hades
       PBYTE const pBase = reinterpret_cast<PBYTE>(Module);
       m_Base = reinterpret_cast<DWORD_PTR>(pBase);
       BOOST_ASSERT(m_Base != 0);
-      PeFile MyPeFile(m_Memory, pBase);
+      PeFile const MyPeFile(m_Memory, pBase);
       DosHeader const MyDosHeader(MyPeFile);
       NtHeaders const MyNtHeaders(MyPeFile);
 
@@ -138,7 +138,7 @@ namespace Hades
             IMAGE_SCN_CNT_CODE)
           {
             // Get start of section
-            PBYTE SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
+            PBYTE const SBegin = static_cast<PBYTE>(MyPeFile.RvaToVa(
               S.GetVirtualAddress()));
             if (SBegin == nullptr)
             {
@@ -148,7 +148,7 @@ namespace Hades
             }
             
             // Calculate end of section
-            PBYTE SEnd = SBegin + S.GetSizeOfRawData();
+            PBYTE const SEnd = SBegin + S.GetSizeOfRawData();
             
             // Add section to list
             m_CodeRegions.push_back(std::make_pair(SBegin, SEnd));
@@ -210,7 +210,7 @@ namespace Hades
       std::vector<unsigned int> DataParsed;
       auto DataBeg = Data.cbegin();
       auto DataEnd = Data.cend();
-      bool Converted = boost::spirit::qi::phrase_parse(
+      bool const Converted = boost::spirit::qi::phrase_parse(
         DataBeg, DataEnd, 
         DataListRule, 
         boost::spirit::qi::space, 
@@ -229,7 +229,7 @@ namespace Hades
         [] (unsigned int Current) -> std::pair<BYTE, bool>
         {
           // Check for wildcard
-          bool IsWildcard = (Current == static_cast<unsigned int>(-1));
+          bool const IsWildcard = (Current == static_cast<unsigned int>(-1));
           
           // Get data as integer
           BYTE CurrentByte = 0;
@@ -252,7 +252,7 @@ namespace Hades
         });
 
       // Check if data sections should be scanned
-      bool ScanDataSecs = ((Flags & FindFlags_ScanData) == 
+      bool const ScanDataSecs = ((Flags & FindFlags_ScanData) == 
         FindFlags_ScanData);
       
       // Find pattern
@@ -283,7 +283,7 @@ namespace Hades
       std::wstring const& Name, FindFlags Flags)
     {
       // Search memory for pattern
-      PVOID Address = Find(Data, Flags);
+      PVOID const Address = Find(Data, Flags);
       
       // Store address if name is specified
       if (!Name.empty())
@@ -308,18 +308,18 @@ namespace Hades
       for (auto i = ScanRegions.cbegin(); i != ScanRegions.cend(); ++i)
       {
         // Get section start and end
-        PBYTE SBegin = i->first;
-        PBYTE SEnd = i->second;
+        PBYTE const SBegin = i->first;
+        PBYTE const SEnd = i->second;
         BOOST_ASSERT(SEnd > SBegin);
         
         // Cache all memory to be scanned
-        std::size_t MemSize = SEnd - SBegin;
-        std::vector<BYTE> Buffer(m_Memory.Read<std::vector<BYTE>>(SBegin, 
-          MemSize));
+        std::size_t const MemSize = SEnd - SBegin;
+        std::vector<BYTE> const Buffer(m_Memory.Read<std::vector<BYTE>>(
+          SBegin, MemSize));
   
         // Scan memory
-        auto Iter = std::search(Buffer.cbegin(), Buffer.cend(), Data.cbegin(), 
-          Data.cend(), 
+        auto const Iter = std::search(Buffer.cbegin(), Buffer.cend(), 
+          Data.cbegin(), Data.cend(), 
           [] (BYTE HCur, std::pair<BYTE, bool> const& NCur)
           {
             return (!NCur.second) || (HCur == NCur.first);
@@ -448,7 +448,7 @@ namespace Hades
       // Parse pattern file
       auto DataBeg = Data.cbegin();
       auto DataEnd = Data.cend();
-      bool Parsed = qi::phrase_parse(DataBeg, DataEnd, 
+      bool const Parsed = qi::phrase_parse(DataBeg, DataEnd, 
         (
           L"HadesMem Patterns" >> FlagsRule >> 
           *PatternFullRule
@@ -684,7 +684,7 @@ namespace Hades
             Address = Pat.GetMemory().Read<PBYTE>(Pat.GetAddress() + Base);
             Pat.Update(Address - Base);
           }
-          catch (MemoryMgr::Error const& /*e*/)
+          catch (std::exception const& /*e*/)
           {
             Pat.Update(nullptr);
           }
@@ -712,7 +712,7 @@ namespace Hades
               reinterpret_cast<DWORD_PTR>(Address + Base) + m_Size - m_Offset;
             Pat.Update(Address - Base);
           }
-          catch (MemoryMgr::Error const& /*e*/)
+          catch (std::exception const& /*e*/)
           {
             Pat.Update(nullptr);
           }
