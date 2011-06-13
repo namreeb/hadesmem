@@ -50,10 +50,17 @@ namespace Hades
 
       // Constructor
       explicit Injector(MemoryMgr const& MyMemory);
+      
+      // Injection flags
+      enum InjectFlags
+      {
+        InjectFlag_None, 
+        InjectFlag_PathResolution
+      };
 
       // Inject DLL
       HMODULE InjectDll(boost::filesystem::path const& Path, 
-        bool PathResolution = true) const;
+        InjectFlags Flags = InjectFlag_None) const;
 
       // Call export
       MemoryMgr::RemoteFunctionRet CallExport(
@@ -111,6 +118,6 @@ namespace Hades
       std::wstring const& Args, 
       boost::filesystem::path const& Module, 
       std::string const& Export, 
-      bool PathResolution = true);
+      Injector::InjectFlags Flags = Injector::InjectFlag_None);
   }
 }

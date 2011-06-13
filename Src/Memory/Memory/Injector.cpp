@@ -63,7 +63,7 @@ namespace Hades
       std::wstring const& Args, 
       boost::filesystem::path const& Module, 
       std::string const& Export, 
-      bool PathResolution)
+      Injector::InjectFlags Flags)
     {
       // Set up args for CreateProcess
       STARTUPINFO StartInfo;
@@ -178,7 +178,7 @@ namespace Hades
         Injector const MyInjector(MyMemory);
 
         // Inject DLL
-        HMODULE const ModBase = MyInjector.InjectDll(Module, PathResolution);
+        HMODULE const ModBase = MyInjector.InjectDll(Module, Flags);
 
         // Call export if one has been specified
         MemoryMgr::RemoteFunctionRet ExpRetData;
@@ -221,7 +221,7 @@ namespace Hades
 
     // Inject DLL
     HMODULE Injector::InjectDll(boost::filesystem::path const& Path, 
-      bool PathResolution) const
+      InjectFlags Flags) const
     {
       // Do not continue if Shim Engine is enabled for local process, 
       // otherwise it could interfere with the address resolution.
@@ -235,6 +235,10 @@ namespace Hades
       
       // String to hold 'real' path to module
       boost::filesystem::path PathReal(Path);
+        
+      // Check if path resolution was requested
+      bool PathResolution = ((Flags & InjectFlag_PathResolution) == 
+        InjectFlag_PathResolution);
 
       // Check whether we need to convert the path from a relative to 
       // an absolute

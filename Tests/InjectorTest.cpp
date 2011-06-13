@@ -43,16 +43,19 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // 'Inject' Kernel32 with path resolution disabled and ensure that the 
   // module handle matches the one retrieved via GetModuleHandle earlier
-  // Todo: Test path resolution
-  HMODULE const Kernel32ModNew = MyInjector.InjectDll(L"kernel32.dll", false);
+  HMODULE const Kernel32ModNew = MyInjector.InjectDll(L"kernel32.dll", 
+    Hades::Memory::Injector::InjectFlag_None);
   BOOST_CHECK_EQUAL(Kernel32Mod, Kernel32ModNew);
   
-  // Call Kernel32.dll!GetCurrentProcessId and ensure the return value and 
+  // Todo: Test path resolution
+  
+  // Call Kernel32.dll!FreeLibrary and ensure the return value and 
   // last error code are their expected values
+  // Note: This is actually sort-of broken, but 
   Hades::Memory::MemoryMgr::RemoteFunctionRet const ExpRet = 
     MyInjector.CallExport(L"kernel32.dll", Kernel32ModNew, 
-    "GetCurrentProcessId");
-  BOOST_CHECK_EQUAL(ExpRet.GetReturnValue(), GetCurrentProcessId());
+    "FreeLibrary");
+  BOOST_CHECK(ExpRet.GetReturnValue() != 0);
   BOOST_CHECK_EQUAL(ExpRet.GetLastError(), static_cast<DWORD>(0));
   
   // Todo: Test CreateAndInject API

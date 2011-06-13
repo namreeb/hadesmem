@@ -200,7 +200,7 @@ int wmain(int argc, wchar_t* argv[])
       
       pInjectionData.reset(new Hades::Memory::CreateAndInjectData(
         Hades::Memory::CreateAndInject(ProcPath, "", ProcArgs, ModulePath, 
-        Export, false)));
+        Export, Hades::Memory::Injector::InjectFlag_None)));
     }
     else
     {
@@ -217,7 +217,7 @@ int wmain(int argc, wchar_t* argv[])
       
       pInjectionData.reset(new Hades::Memory::CreateAndInjectData(
         Hades::Memory::CreateAndInject(ProcPath, "", ProcArgs, ModulePath, 
-        Export, true)));
+        Export, Hades::Memory::Injector::InjectFlag_PathResolution)));
     }
     
     HMODULE ModuleBase = pInjectionData->GetModule();

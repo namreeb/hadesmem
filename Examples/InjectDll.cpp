@@ -186,7 +186,8 @@ int wmain(int argc, wchar_t* argv[])
           "located. Attempting injection without path resolution anyway.\n";
       }
       
-      ModRemote = MyInjector.InjectDll(ModulePath, false);
+      ModRemote = MyInjector.InjectDll(ModulePath, Hades::Memory::Injector::
+        InjectFlag_None);
     }
     else
     {
@@ -201,7 +202,8 @@ int wmain(int argc, wchar_t* argv[])
           "located. Attempting injection with path resolution anyway.\n";
       }
       
-      ModRemote = MyInjector.InjectDll(ModulePath, true);
+      ModRemote = MyInjector.InjectDll(ModulePath, Hades::Memory::Injector::
+        InjectFlag_PathResolution);
     }
     
     std::wcout << "Module successfully injected. Base = " << ModRemote << 
