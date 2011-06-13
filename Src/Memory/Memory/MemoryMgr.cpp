@@ -338,8 +338,8 @@ namespace Hades
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMbi;
       ZeroMemory(&MyMbi, sizeof(MyMbi));
-      if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
-        sizeof(MyMbi)))
+      if (VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+        sizeof(MyMbi)) != sizeof(MyMbi))
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -364,8 +364,8 @@ namespace Hades
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMbi;
       ZeroMemory(&MyMbi, sizeof(MyMbi));
-      if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
-        sizeof(MyMbi)))
+      if (VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+        sizeof(MyMbi)) != sizeof(MyMbi))
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -388,8 +388,8 @@ namespace Hades
       // Query page protections
       MEMORY_BASIC_INFORMATION MyMbi;
       ZeroMemory(&MyMbi, sizeof(MyMbi));
-      if (!VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
-        sizeof(MyMbi)))
+      if (VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+        sizeof(MyMbi)) != sizeof(MyMbi))
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -400,6 +400,38 @@ namespace Hades
 
       // Whether address is in a guard page
       return (MyMbi.Protect & PAGE_GUARD) == PAGE_GUARD;
+    }
+    
+    // Protect a memory region
+    DWORD MemoryMgr::ProtectRegion(LPVOID Address, DWORD Protect) const
+    {
+      // Query page protections
+      MEMORY_BASIC_INFORMATION MyMbi;
+      ZeroMemory(&MyMbi, sizeof(MyMbi));
+      if (VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+        sizeof(MyMbi)) != sizeof(MyMbi))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::ProtectRegion") << 
+          ErrorString("Could not read process memory protection.") << 
+          ErrorCodeWinLast(LastError));
+      }
+      
+      // Protect memory region
+      DWORD OldProtect = 0;
+      if (!VirtualProtectEx(m_Process.GetHandle(), MyMbi.BaseAddress, 
+        MyMbi.RegionSize, Protect, &OldProtect))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::Read") << 
+          ErrorString("Could not change process memory protection.") << 
+          ErrorCodeWinLast(LastError));
+      }
+      
+      // Return previous protection
+      return OldProtect;
     }
 
     // Allocate memory

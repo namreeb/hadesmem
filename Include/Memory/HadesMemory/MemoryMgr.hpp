@@ -159,6 +159,9 @@ namespace Hades
 
       // Whether an address is contained within a guard page
       bool IsGuard(LPCVOID Address) const;
+      
+      // Protect a memory region
+      DWORD ProtectRegion(LPVOID Address, DWORD Protect) const;
 
       // Allocate memory
       PVOID Alloc(SIZE_T Size) const;
@@ -267,15 +270,7 @@ namespace Hades
       DWORD OldProtect = 0;
       if (!CanReadMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
-          PAGE_EXECUTE_READWRITE, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Read") << 
-            ErrorString("Could not change process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
       }
 
       // Read data
@@ -286,9 +281,13 @@ namespace Hades
       {
         if (!CanReadMem)
         {
-          // Restore original page protections
-          VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
-            OldProtect, &OldProtect);
+          try
+          {
+            // Restore original page protections
+            ProtectRegion(Address, OldProtect);
+          }
+          catch (...)
+          { }
         }
 
         DWORD const LastError = GetLastError();
@@ -301,15 +300,7 @@ namespace Hades
       // Restore original page protections
       if (!CanReadMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
-          OldProtect, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Read") << 
-            ErrorString("Could not restore process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        ProtectRegion(Address, OldProtect);
       }
 
       return Out;
@@ -372,15 +363,7 @@ namespace Hades
       DWORD OldProtect = 0;
       if (!CanReadMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-          PAGE_EXECUTE_READWRITE, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Read") << 
-            ErrorString("Could not change process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
       }
 
       // Read data
@@ -391,9 +374,13 @@ namespace Hades
       {
         if (!CanReadMem)
         {
-          // Restore original page protections
-          VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-            OldProtect, &OldProtect);
+          try
+          {
+            // Restore original page protections
+            ProtectRegion(Address, OldProtect);
+          }
+          catch (...)
+          { }
         }
 
         DWORD const LastError = GetLastError();
@@ -406,15 +393,7 @@ namespace Hades
       // Restore original page protections
       if (!CanReadMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-          OldProtect, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Read") << 
-            ErrorString("Could not restore process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        ProtectRegion(Address, OldProtect);
       }
 
       // Return buffer
@@ -434,16 +413,14 @@ namespace Hades
           ErrorString("Attempt to write to guard page."));
       }
 
+      // Whether we can write to the given address
+      bool const CanWriteMem = CanWrite(Address);
+
       // Set page protections for writing
       DWORD OldProtect = 0;
-      if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
-        PAGE_EXECUTE_READWRITE, &OldProtect))
+      if (!CanWriteMem)
       {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("MemoryMgr::Write") << 
-          ErrorString("Could not change process memory protection.") << 
-          ErrorCodeWinLast(LastError));
+        OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
       }
 
       // Write data
@@ -451,9 +428,16 @@ namespace Hades
       if (!WriteProcessMemory(m_Process.GetHandle(), Address, &Data, sizeof(T), 
         &BytesWritten) || BytesWritten != sizeof(T))
       {
-        // Restore original page protections
-        VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), OldProtect, 
-          &OldProtect);
+        if (!CanWriteMem)
+        {
+          try
+          {
+            // Restore original page protections
+            ProtectRegion(Address, OldProtect);
+          }
+          catch (...)
+          { }
+        }
 
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -463,14 +447,9 @@ namespace Hades
       }
 
       // Restore original page protections
-      if (!VirtualProtectEx(m_Process.GetHandle(), Address, sizeof(T), 
-        OldProtect, &OldProtect))
+      if (!CanWriteMem)
       {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("MemoryMgr::Write") << 
-          ErrorString("Could not restore process memory protection.") << 
-          ErrorCodeWinLast(LastError));
+        ProtectRegion(Address, OldProtect);
       }
     }
 
@@ -519,15 +498,7 @@ namespace Hades
       DWORD OldProtect = 0;
       if (!CanWriteMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-          PAGE_EXECUTE_READWRITE, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Write") << 
-            ErrorString("Could not change process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
       }
 
       // Read data
@@ -537,9 +508,13 @@ namespace Hades
       {
         if (!CanWriteMem)
         {
-          // Restore original page protections
-          VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-            OldProtect, &OldProtect);
+          try
+          {
+            // Restore original page protections
+            ProtectRegion(Address, OldProtect);
+          }
+          catch (...)
+          { }
         }
 
         DWORD const LastError = GetLastError();
@@ -552,15 +527,7 @@ namespace Hades
       // Restore original page protections
       if (!CanWriteMem)
       {
-        if (!VirtualProtectEx(m_Process.GetHandle(), Address, RawSize, 
-          OldProtect, &OldProtect))
-        {
-          DWORD const LastError = GetLastError();
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("MemoryMgr::Write") << 
-            ErrorString("Could not restore process memory protection.") << 
-            ErrorCodeWinLast(LastError));
-        }
+        ProtectRegion(Address, OldProtect);
       }
     }
   }
