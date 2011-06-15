@@ -61,6 +61,9 @@ namespace Hades
       // Inject DLL
       HMODULE InjectDll(boost::filesystem::path const& Path, 
         InjectFlags Flags = InjectFlag_None) const;
+        
+      // Free DLL
+      void FreeDll(HMODULE Module) const;
 
       // Call export
       MemoryMgr::RemoteFunctionRet CallExport(

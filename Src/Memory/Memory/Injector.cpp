@@ -306,6 +306,30 @@ namespace Hades
       return NewModule.GetBase();
     }
 
+    // Free DLL
+    void Injector::FreeDll(HMODULE ModuleRemote) const
+    {
+      // Get address of FreeLibrary in Kernel32.dll
+      Module Kernel32Mod(m_Memory, L"kernel32.dll");
+      FARPROC const pFreeLibrary = m_Memory.GetRemoteProcAddress(
+        Kernel32Mod.GetBase(), "kernel32.dll", "FreeLibrary");
+      DWORD_PTR pFreeLibraryTemp = reinterpret_cast<DWORD_PTR>(pFreeLibrary);
+
+      // Free module in remote process using FreeLibrary
+      std::vector<PVOID> Args;
+      Args.push_back(reinterpret_cast<PVOID>(ModuleRemote));
+      MemoryMgr::RemoteFunctionRet RemoteRet = m_Memory.Call(
+        reinterpret_cast<PVOID>(pFreeLibraryTemp), 
+        MemoryMgr::CallConv_STDCALL, Args);
+      if (!RemoteRet.GetReturnValue())
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Injector::FreeDll") << 
+          ErrorString("Call to FreeLibrary in remote process failed.") << 
+          ErrorCodeWinLast(RemoteRet.GetLastError()));
+      }
+    }
+
     // Call export
     MemoryMgr::RemoteFunctionRet Injector::CallExport(
       boost::filesystem::path const& ModulePath, 

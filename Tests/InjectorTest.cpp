@@ -51,12 +51,19 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Call Kernel32.dll!FreeLibrary and ensure the return value and 
   // last error code are their expected values
-  // Note: This is actually sort-of broken, but 
   Hades::Memory::MemoryMgr::RemoteFunctionRet const ExpRet = 
     MyInjector.CallExport(L"kernel32.dll", Kernel32ModNew, 
     "FreeLibrary");
   BOOST_CHECK(ExpRet.GetReturnValue() != 0);
   BOOST_CHECK_EQUAL(ExpRet.GetLastError(), static_cast<DWORD>(0));
+  
+  // Perform injection test again so we can test the FreeDll API
+  HMODULE const Kernel32ModNew2 = MyInjector.InjectDll(L"kernel32.dll", 
+    Hades::Memory::Injector::InjectFlag_None);
+  BOOST_CHECK_EQUAL(Kernel32Mod, Kernel32ModNew2);
+  
+  // Free kernel32.dll in remote process
+  MyInjector.FreeDll(Kernel32ModNew2);
   
   // Todo: Test CreateAndInject API
 }
