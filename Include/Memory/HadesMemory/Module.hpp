@@ -59,11 +59,13 @@ namespace Hades
 
       // Get module base
       HMODULE GetBase() const;
+      
       // Get module size
       DWORD GetSize() const;
 
       // Get module name
       std::wstring GetName() const;
+      
       // Get module path
       boost::filesystem::path GetPath() const;
 
@@ -80,6 +82,10 @@ namespace Hades
       // Module path
       boost::filesystem::path m_Path;
     };
+    
+    // Get remote module handle
+    HMODULE GetRemoteModuleHandle(MemoryMgr const& MyMemory, 
+      LPCWSTR ModuleName);
     
     // Module enumeration class
     class ModuleList

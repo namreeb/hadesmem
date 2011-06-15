@@ -45,6 +45,15 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       BOOST_CHECK(!M.GetName().empty());
       BOOST_CHECK(!M.GetPath().empty());
       
+      // Ensure GetREmoteModuleHandle works as expected
+      // Note: The module name check could possibly fail if multiple modules 
+      // with the same name but a different path are loaded in the process, 
+      // but this is currently not the case with any of the testing binaries.
+      BOOST_CHECK_EQUAL(M.GetBase(), Hades::Memory::GetRemoteModuleHandle(
+        MyMemory, M.GetName().c_str()));
+      BOOST_CHECK_EQUAL(M.GetBase(), Hades::Memory::GetRemoteModuleHandle(
+        MyMemory, M.GetPath().c_str()));
+      
       // Test module constructors
       Hades::Memory::Module const TestMod1(MyMemory, M.GetBase());
       Hades::Memory::Module const TestMod2(MyMemory, M.GetName());
