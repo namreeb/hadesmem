@@ -123,7 +123,6 @@ namespace Hades
       // Ensure file is a valid PE file
       PBYTE const pBase = reinterpret_cast<PBYTE>(Module);
       m_Base = reinterpret_cast<DWORD_PTR>(pBase);
-      BOOST_ASSERT(m_Base != 0);
       PeFile const MyPeFile(m_Memory, pBase);
       DosHeader const MyDosHeader(MyPeFile);
       NtHeaders const MyNtHeaders(MyPeFile);

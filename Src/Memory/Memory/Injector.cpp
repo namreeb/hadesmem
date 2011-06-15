@@ -289,7 +289,7 @@ namespace Hades
       Args.push_back(LibFileRemote.GetBase());
       MemoryMgr::RemoteFunctionRet RemoteRet = m_Memory.Call(
         reinterpret_cast<PVOID>(pLoadLibraryWTemp), 
-        MemoryMgr::CallConv_Default, Args);
+        MemoryMgr::CallConv_STDCALL, Args);
       if (!RemoteRet.GetReturnValue())
       {
         BOOST_THROW_EXCEPTION(Error() << 
