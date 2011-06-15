@@ -47,10 +47,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
       
       // Enumerate import dirs for module
-      // Todo: Ensure via test that at least one module with an import dir is 
-      // processed (i.e. this one)
-      // Todo: Test import dir enumeration APIs before relying on them
       Hades::Memory::ImportDirList ImportDirs(MyPeFile);
+      if (Mod.GetBase() == GetModuleHandle(NULL))
+      {
+        BOOST_CHECK(ImportDirs.begin() != ImportDirs.end());
+      }
       std::for_each(ImportDirs.begin(), ImportDirs.end(), 
         [&] (Hades::Memory::ImportDir const& D)
         {
@@ -83,11 +84,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
             IMAGE_IMPORT_DESCRIPTOR)), 0);
           
           // Enumerate import thunks for import dir
-          // Todo: Ensure via test that at least one import dir with import 
-          // thunks is processed (i.e. this one)
-          // Todo: Test import thunk enumeration APIs before relying on them
           Hades::Memory::ImportThunkList ImportThunks(MyPeFile, 
             D.GetCharacteristics());
+          if (Mod.GetBase() == GetModuleHandle(NULL))
+          {
+            BOOST_CHECK(ImportThunks.begin() != ImportThunks.end());
+          }
           std::for_each(ImportThunks.begin(), ImportThunks.end(), 
             [&] (Hades::Memory::ImportThunk const& T)
             {

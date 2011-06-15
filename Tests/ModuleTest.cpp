@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     
   // Enumerate module list and run tests on all modules
   Hades::Memory::ModuleList Modules(MyMemory);
+  BOOST_CHECK(Modules.begin() != Modules.end());
   std::for_each(Modules.begin(), Modules.end(), 
     [&] (Hades::Memory::Module const& M)
     {

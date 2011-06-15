@@ -49,11 +49,17 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       Hades::Memory::PeFile const MyPeFile(MyMemory, Mod.GetBase());
       Hades::Memory::DosHeader const MyDosHeader(MyPeFile);
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
-        
-      // Ensure module has an export directory before continuing
-      // Todo: Ensure via test that at least one module with an export dir is 
-      // processed (i.e. this one)
+      
+      // Get export dir
       Hades::Memory::ExportDir MyExportDir(MyPeFile);
+        
+      // Ensure validity check is correct
+      if (Mod.GetBase() == GetModuleHandle(NULL))
+      {
+        BOOST_CHECK(MyExportDir.IsValid());
+      }
+      
+      // Ensure module has an export directory before continuing
       if (!MyExportDir.IsValid())
       {
         return;
@@ -92,10 +98,11 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
         ExpDirRaw)), 0);
         
       // Enumerate exports for module
-      // Todo: Test export enumeration APIs before relying on them.
-      // Todo: Ensure at least one export is processed in cases where we can 
-      // prove it should.
       Hades::Memory::ExportList Exports(MyPeFile);
+      if (Mod.GetBase() == GetModuleHandle(NULL))
+      {
+        BOOST_CHECK(Exports.begin() != Exports.end());
+      }
       std::for_each(Exports.begin(), Exports.end(), 
         [&] (Hades::Memory::Export const& E)
         {
