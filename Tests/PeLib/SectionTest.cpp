@@ -50,9 +50,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
       Hades::Memory::NtHeaders const MyNtHeaders(MyPeFile);
       
       // Enumerate sections for module
-      // Todo: Test section enumeration APIs before relying on them
       WORD Number = 0;
       Hades::Memory::SectionList Sections(MyPeFile);
+      if (Mod.GetBase() == GetModuleHandle(NULL))
+      {
+        BOOST_CHECK(Sections.begin() != Sections.end());
+      }
       std::for_each(Sections.begin(), Sections.end(), 
         [&] (Hades::Memory::Section const& S)
         {
