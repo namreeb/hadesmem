@@ -28,7 +28,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 
 // C++ Standard Library
-#include <vector>
+#include <algorithm>
 
 // Boost
 #include <boost/algorithm/string.hpp>
@@ -56,11 +56,67 @@ namespace Hades
 {
   namespace Memory
   {
+    // This routine appends the given argument to a command line such
+    // that CommandLineToArgvW will return the argument string unchanged.
+    // Arguments in a command line should be separated by spaces; this
+    // function does not add these spaces.
+    void ArgvQuote(const std::wstring& Argument, std::wstring& CommandLine, 
+      bool Force)    
+    {
+      // Unless we're told otherwise, don't quote unless we actually
+      // need to do so --- hopefully avoid problems if programs won't
+      // parse quotes properly
+      if (!Force && !Argument.empty () && Argument.find_first_of(L" \t\n\v\"") 
+        == Argument.npos)
+      {
+        CommandLine.append(Argument);
+      }
+      else 
+      {
+        CommandLine.push_back(L'"');
+        
+        for (auto It = Argument.begin(); ;++It)
+        {
+          unsigned NumberBackslashes = 0;
+          
+          while (It != Argument.end () && *It == L'\\') 
+          {
+            ++It;
+            ++NumberBackslashes;
+          }
+      
+          if (It == Argument.end ())
+          {
+            // Escape all backslashes, but let the terminating
+            // double quotation mark we add below be interpreted
+            // as a metacharacter.
+            CommandLine.append(NumberBackslashes * 2, L'\\');
+            break;
+          }
+          else if (*It == L'"')
+          {
+            // Escape all backslashes and the following
+            // double quotation mark.
+            CommandLine.append(NumberBackslashes * 2 + 1, L'\\');
+            CommandLine.push_back(*It);
+          }
+          else
+          {
+            // Backslashes aren't special here.
+            CommandLine.append(NumberBackslashes, L'\\');
+            CommandLine.push_back(*It);
+          }
+        }
+        
+        CommandLine.push_back(L'"');
+      }
+    }
+
     // Create process (as suspended) and inject DLL
     CreateAndInjectData CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
-      std::wstring const& Args, 
+      std::vector<std::wstring> const& Args, 
       boost::filesystem::path const& Module, 
       std::string const& Export, 
       Injector::InjectFlags Flags)
@@ -73,7 +129,15 @@ namespace Hades
       ZeroMemory(&ProcInfo, sizeof(ProcInfo));
 
       // Construct command line.
-      std::wstring const CommandLine(L"\"" + Path.native() + L"\" " + Args);
+      std::wstring CommandLine;
+      ArgvQuote(Path.native(), CommandLine, false);
+      std::for_each(Args.begin(), Args.end(), 
+        [&] (std::wstring const& Arg) 
+        {
+          CommandLine += L' ';
+          ArgvQuote(Arg, CommandLine, false);
+        });
+      
       // Copy command line to buffer
       std::vector<wchar_t> ProcArgs(CommandLine.cbegin(), CommandLine.cend());
       ProcArgs.push_back(L'\0');

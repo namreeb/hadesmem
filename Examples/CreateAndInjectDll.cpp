@@ -144,10 +144,10 @@ int wmain(int argc, wchar_t* argv[])
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("You must supply valid process args."));
     }
-    std::wstring ProcArgs;
+    std::wstring ProcArgsTemp;
     try
     {
-      ProcArgs = argv[2];
+      ProcArgsTemp = argv[2];
     }
     catch (std::exception const& /*e*/)
     {
@@ -155,6 +155,8 @@ int wmain(int argc, wchar_t* argv[])
         Hades::ErrorFunction("wmain") << 
         Hades::ErrorString("You must supply valid process args."));
     }
+    std::vector<std::wstring> ProcArgs;
+    ProcArgs.push_back(ProcArgsTemp);
     
     // Get target module from args
     if (argc < 4)

@@ -28,6 +28,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 #include <memory>
+#include <vector>
 #include <utility>
 
 // Boost
@@ -118,7 +119,7 @@ namespace Hades
     CreateAndInjectData CreateAndInject(
       boost::filesystem::path const& Path, 
       boost::filesystem::path const& WorkDir, 
-      std::wstring const& Args, 
+      std::vector<std::wstring> const& Args, 
       boost::filesystem::path const& Module, 
       std::string const& Export, 
       Injector::InjectFlags Flags = Injector::InjectFlag_None);
