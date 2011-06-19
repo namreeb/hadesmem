@@ -362,12 +362,8 @@ namespace Hades
           ErrorCodeWinLast(RemoteRet.GetLastError()));
       }
       
-      // Look for target module
-      Module NewModule(m_Memory, reinterpret_cast<HMODULE>(
-        RemoteRet.GetReturnValue()));
-
       // Return module base
-      return NewModule.GetBase();
+      return reinterpret_cast<HMODULE>(RemoteRet.GetReturnValue());
     }
 
     // Free DLL
