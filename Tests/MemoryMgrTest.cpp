@@ -25,12 +25,15 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/test/unit_test.hpp>
 
 // Test function to be called by MemoryMgr::Call
-DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d)
+DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d, 
+  PVOID const e, PVOID const f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
   BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
   BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
+  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
+  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
   
   SetLastError(5678);
   return 1234;
@@ -49,6 +52,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(-1));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
+  TestCallArgs.push_back(reinterpret_cast<PVOID>(0x55667788));
+  TestCallArgs.push_back(reinterpret_cast<PVOID>(0x99999999));
   Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet = MyMemory.Call(
     reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
     Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
@@ -59,7 +64,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet2 =  
     MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), Hades::Memory::MemoryMgr::CallConv_Default, 0, -1, 
-    0x11223344, 0xAABBCCDD);
+    0x11223344, 0xAABBCCDD, 0x55667788, 0x99999999);
   BOOST_CHECK_EQUAL(CallRet2.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet2.GetLastError(), static_cast<DWORD>(5678));
 #endif
