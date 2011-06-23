@@ -18,11 +18,6 @@ use-project /Dependencies
     Src/Dependencies 
   ;
 
-use-project /Examples 
-  : 
-    Examples 
-  ; 
-
 use-project /Memory 
   : 
     Src/Memory 
@@ -43,9 +38,9 @@ project Hades
     <define>_UNICODE 
     <define>STRICT 
     <define>WIN32_LEAN_AND_MEAN 
-    <define>NTDDI_VERSION=NTDDI_VISTA 
-    <define>_WIN32_WINNT=_WIN32_WINNT_VISTA 
-    <define>WINVER=_WIN32_WINNT_VISTA 
+    <define>NTDDI_VERSION=NTDDI_WINXPSP2 
+    <define>_WIN32_WINNT=_WIN32_WINNT_WINXP 
+    <define>WINVER=_WIN32_WINNT_WINXP 
     <runtime-link>shared 
     <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 
@@ -62,13 +57,9 @@ build-project Src/Memory
 build-project Tests 
   ;
 
-build-project Examples 
-  ;
-
 install Dist 
   : 
     Src/Memory 
-    Examples 
   : 
     <toolset>msvc,<variant>debug,<address-model>32:<location>Dist/MSVC/Debug/IA32
     <toolset>msvc,<variant>debug,<address-model>64:<location>Dist/MSVC/Debug/AMD64

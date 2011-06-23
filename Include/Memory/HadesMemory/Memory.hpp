@@ -20,14 +20,4 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades (External)
-#include <HadesMemory/Module.hpp>
-#include <HadesMemory/Process.hpp>
-#include <HadesMemory/Injector.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
-#include <HadesMemory/FindPattern.hpp>
-
-// Hades (Internal)
-#include <HadesMemory/Patcher.hpp>
-
-// Hades (PeLib)
-#include <HadesMemory/PeLib/PeLib.hpp>

@@ -19,17 +19,6 @@ project
 
 test-suite Memory
   :
-    [ run FindPatternTest.cpp ]
-    [ run InjectorTest.cpp ]
-    [ run PatcherTest.cpp ]
     [ run MemoryMgrTest.cpp ]
-    [ run ModuleTest.cpp ]
     [ run ProcessTest.cpp ]
-    [ run PeLib/DosHeaderTest.cpp ]
-    [ run PeLib/ExportDirTest.cpp ]
-    [ run PeLib/ImportDirTest.cpp ]
-    [ run PeLib/NtHeadersTest.cpp ]
-    [ run PeLib/PeFileTest.cpp ]
-    [ run PeLib/SectionTest.cpp ]
-    [ run PeLib/TlsDirTest.cpp ]
   ;

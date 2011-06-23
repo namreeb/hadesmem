@@ -24,38 +24,7 @@ namespace Hades
   namespace Memory
   {
     // Hades (External)
-    class Module;
-    class ModuleList;
-    class ModuleIter;
-    class Process;
-    class Injector;
     class MemoryMgr;
-    class ManualMap;
-    class FindPattern;
     class AllocAndFree;
-    
-    // Hades (Internal)
-    class Patch;
-    class PatchRaw;
-    class PatchDetour;
-    
-    // Hades (PeLib)
-    class PeFile;
-    class TlsDir;
-    class Section;
-    class SectionList;
-    class SectionIter;
-    class DosHeader;
-    class Export;
-    class ExportDir;
-    class ExportList;
-    class ExportIter;
-    class NtHeaders;
-    class ImportDir;
-    class ImportDirList;
-    class ImportDirIter;
-    class ImportThunk;
-    class ImportThunkList;
-    class ImportThunkIter;
   }
 }

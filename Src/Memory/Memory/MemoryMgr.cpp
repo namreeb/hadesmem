@@ -20,7 +20,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesCommon/Config.hpp>
-#include <HadesMemory/Module.hpp>
+
+// Boost
+#include <boost/algorithm/string.hpp>
 
 // AsmJit
 #ifdef HADES_MSVC
@@ -40,6 +42,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HADES_GCC
 #pragma GCC diagnostic pop
 #endif
+
+// Windows API
+#include <TlHelp32.h>
 
 namespace Hades
 {
@@ -107,16 +112,70 @@ namespace Hades
       // Allocate memory for thread's last-error code
       AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
 
+      // Function to find Kernel32.dll
+      auto GetKernel32 = 
+        [&, this] () -> HMODULE
+        {
+          // Get module snapshot
+          Windows::EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
+            TH32CS_SNAPMODULE, GetProcessID());
+          if (Snap == INVALID_HANDLE_VALUE)
+          {
+            DWORD const LastError = GetLastError();
+            BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
+              ErrorFunction("MemoryMgr::Call") << 
+              ErrorString("Could not get module snapshot.") << 
+              ErrorCodeWinLast(LastError));
+          }
+          
+          // Start module enumeration
+          MODULEENTRY32 ModEntry;
+          ZeroMemory(&ModEntry, sizeof(ModEntry));
+          ModEntry.dwSize = sizeof(ModEntry);
+          if (!Module32First(Snap, &ModEntry))
+          {
+            DWORD const LastError = GetLastError();
+            BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
+              ErrorFunction("MemoryMgr::Call") << 
+              ErrorString("Could not get first module in list.") << 
+              ErrorCodeWinLast(LastError));
+          }
+          
+          // Enumerate module list
+          do
+          {
+            // Find Kernel32.dll
+            if (boost::to_lower_copy(static_cast<std::wstring>(
+              ModEntry.szModule)) == L"kernel32.dll")
+            {
+              return ModEntry.hModule;
+            }
+          } while(Module32Next(Snap, &ModEntry));
+          
+          // If module enumeration stopped for a reason other than EOL return 
+          // an error.
+          DWORD const LastError = GetLastError();
+          if (LastError != ERROR_NO_MORE_FILES)
+          {
+            BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
+              ErrorFunction("MemoryMgr::Call") << 
+              ErrorString("Module enumeration failed.") << 
+              ErrorCodeWinLast(LastError));
+          }
+          
+          // If we reached EOL then return a different error
+          BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+            ErrorFunction("MemoryMgr::Call") << 
+            ErrorString("Could not find Kernel32.dll."));
+        };
       // Get address of Kernel32.dll
-      Module const K32Mod(*this, L"kernel32.dll");
+      HMODULE K32Mod = GetKernel32();
       // Get address of kernel32.dll!GetLastError and 
       // kernel32.dll!SetLastError
       DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
-        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
-        "GetLastError"));
+        GetRemoteProcAddress(K32Mod, L"kernel32.dll", "GetLastError"));
       DWORD_PTR const pSetLastError = reinterpret_cast<DWORD_PTR>(
-        GetRemoteProcAddress(K32Mod.GetBase(), L"kernel32.dll", 
-        "SetLastError"));
+        GetRemoteProcAddress(K32Mod, L"kernel32.dll", "SetLastError"));
 
 #if defined(_M_AMD64) 
       // Check calling convention

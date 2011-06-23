@@ -1,0 +1,17 @@
+[article HadesMem
+  [quickbook 1.5]
+  [version 1.0.0]
+  [copyright 2011 Joshua Boyce]
+  [authors [Boyce, Joshua]]
+  [license Distributed under the GNU GPL v3. See accompanying file 
+    LICENSE.txt.]
+]
+
+[section:intro Introduction]
+
+HadesMem is a C++-based memory hacking library for Windows based 
+applications, with the goal of providing a safe, generic, powerful, and 
+efficient API. All components are useable on remote targets. Furthermore, all 
+components compile for (and work natively on) both IA32 and AMD64.
+
+[endsect] [/ Introduction]
