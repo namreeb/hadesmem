@@ -27,9 +27,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // C++ Standard Library
 #include <string>
 
-// Boost
-#include <boost/filesystem.hpp>
-
 // Windows API
 #include <Windows.h>
 
