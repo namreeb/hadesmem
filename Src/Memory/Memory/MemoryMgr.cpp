@@ -22,6 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <HadesCommon/Config.hpp>
 
 // Boost
+#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
 // AsmJit
@@ -44,42 +45,13 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // Windows API
+#include <Windows.h>
 #include <TlHelp32.h>
 
 namespace Hades
 {
   namespace Memory
   {
-    // RAII class for AsmJit
-    class EnsureAsmJitFree : private boost::noncopyable
-    {
-    public:
-      // Constructor
-      EnsureAsmJitFree(PVOID Address) 
-        : m_Address(Address)
-      { }
-
-      // Destructor
-      ~EnsureAsmJitFree()
-      {
-        // Free memory if necessary
-        if (m_Address)
-        {
-          AsmJit::MemoryManager::getGlobal()->free(m_Address);
-        }
-      }
-
-      // Get address
-      PVOID Get() const 
-      {
-        return m_Address;
-      }
-
-    private:
-      // Address
-      PVOID m_Address;
-    };
-
     // Open process from process ID
     MemoryMgr::MemoryMgr(DWORD ProcID) 
       : m_Process(ProcID) 
@@ -101,7 +73,7 @@ namespace Hades
       CallConv MyCallConv, std::vector<PVOID> const& Args) const 
     {
       // Get number of arguments
-      std::size_t NumArgs = Args.size();
+      std::size_t const NumArgs = Args.size();
 
       // Create Assembler.
       AsmJit::Assembler MyJitFunc;
@@ -169,7 +141,7 @@ namespace Hades
             ErrorString("Could not find Kernel32.dll."));
         };
       // Get address of Kernel32.dll
-      HMODULE K32Mod = GetKernel32();
+      HMODULE const K32Mod = GetKernel32();
       // Get address of kernel32.dll!GetLastError and 
       // kernel32.dll!SetLastError
       DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
@@ -349,8 +321,9 @@ namespace Hades
 
       // Allocate memory for stub buffer
       AllocAndFree const StubMemRemote(*this, StubSize);
-      PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetBase());
-      DWORD_PTR pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(pRemoteStub);
+      PBYTE const pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetBase());
+      DWORD_PTR const pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(
+        pRemoteStub);
 
       // Create buffer to hold relocated code plus the return value address
       std::vector<BYTE> CodeReal(StubSize);
@@ -496,8 +469,8 @@ namespace Hades
     // Allocate memory
     PVOID MemoryMgr::Alloc(SIZE_T Size) const
     {
-      PVOID Address = VirtualAllocEx(m_Process.GetHandle(), nullptr, Size, 
-        MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+      PVOID const Address = VirtualAllocEx(m_Process.GetHandle(), nullptr, 
+        Size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
       if (!Address)
       {
         DWORD const LastError = GetLastError();
@@ -537,7 +510,7 @@ namespace Hades
 
     // Get address of export in remote process
     FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
-      boost::filesystem::path const& ModulePath, std::string const& Function) 
+      std::wstring const& ModulePath, std::string const& Function) 
       const
     {
       // Load module as data so we can read the EAT locally
@@ -577,7 +550,7 @@ namespace Hades
 
     // Get address of export in remote process
     FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
-      boost::filesystem::path const& ModulePath, WORD Ordinal) const
+      std::wstring const& ModulePath, WORD Ordinal) const
     {
       // Load module as data so we can read the EAT locally
       Windows::EnsureFreeLibrary const LocalMod(LoadLibraryEx(

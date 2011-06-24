@@ -50,6 +50,9 @@ namespace Hades
       {
         Open(m_ID);
       }
+      
+      // Set WoW64 member
+      SetWoW64();
     }
 
     // Open process from process name
@@ -101,6 +104,9 @@ namespace Hades
       // Open process
       m_ID = ProcEntry.th32ProcessID;
       Open(m_ID);
+      
+      // Set WoW64 member
+      SetWoW64();
     }
 
     // Open process from window name and class
@@ -134,6 +140,9 @@ namespace Hades
 
       // Open process
       Open(m_ID);
+      
+      // Set WoW64 member
+      SetWoW64();
     }
 
     // Copy constructor
@@ -150,6 +159,9 @@ namespace Hades
       {
         Open(m_ID);
       }
+      
+      // Set WoW64 member
+      SetWoW64();
     }
 
     // Copy assignment
@@ -167,8 +179,49 @@ namespace Hades
       {
         Open(m_ID);
       }
+      
+      // Set WoW64 member
+      SetWoW64();
 
       return *this;
+    }
+    
+    // Get WoW64 status of process and set member var
+    void Process::SetWoW64()
+    {
+      // Get WoW64 status of self
+      BOOL IsWoW64Me = FALSE;
+      if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Process::SetWoW64") << 
+          ErrorString("Could not detect WoW64 status of current process.") << 
+          ErrorCodeWinLast(LastError));
+      }
+
+      // Get WoW64 status of target process
+      BOOL IsWoW64 = FALSE;
+      if (!IsWow64Process(m_Handle, &IsWoW64))
+      {
+        DWORD const LastError = GetLastError();
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Process::SetWoW64") << 
+          ErrorString("Could not detect WoW64 status of target process.") << 
+          ErrorCodeWinLast(LastError));
+      }
+      
+      // Set WoW64 status
+      m_IsWoW64 = (IsWoW64 != FALSE);
+
+      // Disable x86 -> x64 process manipulation
+      if (IsWoW64Me && !IsWoW64)
+      {
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("Process::SetWoW64") << 
+          ErrorString("x86 -> x64 process manipulation is currently "
+          "unsupported."));
+      }
     }
 
     // Open process given process id
@@ -190,40 +243,6 @@ namespace Hades
           ErrorString("Could not open process.") << 
           ErrorCodeWinLast(LastError));
       }
-
-      // Get WoW64 status of self
-      BOOL IsWoW64Me = FALSE;
-      if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
-      {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::Open") << 
-          ErrorString("Could not detect WoW64 status of current process.") << 
-          ErrorCodeWinLast(LastError));
-      }
-
-      // Get WoW64 status of target process
-      BOOL IsWoW64 = FALSE;
-      if (!IsWow64Process(m_Handle, &IsWoW64))
-      {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::Open") << 
-          ErrorString("Could not detect WoW64 status of target process.") << 
-          ErrorCodeWinLast(LastError));
-      }
-      
-      // Set WoW64 status
-      m_IsWoW64 = (IsWoW64 != FALSE);
-
-      // Disable x86 -> x64 process manipulation
-      if (IsWoW64Me && !IsWoW64)
-      {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("Process::Open") << 
-          ErrorString("x86 -> x64 process manipulation is currently "
-          "unsupported."));
-      }
     }
 
     // Get process handle
@@ -239,7 +258,7 @@ namespace Hades
     }
       
     // Get process path
-    boost::filesystem::path Process::GetPath() const
+    std::wstring Process::GetPath() const
     {
       // Note: The QueryFullProcessImageName API is more efficient and 
       // reliable but is only available on Vista+.
@@ -265,9 +284,9 @@ namespace Hades
     }
     
     // Create process
-    Process CreateProcess(boost::filesystem::path const& Path, 
-      boost::filesystem::path const& Params, 
-      boost::filesystem::path const& WorkingDir)
+    Process CreateProcess(std::wstring const& Path, 
+      std::wstring const& Params, 
+      std::wstring const& WorkingDir)
     {
       // Start process
       SHELLEXECUTEINFO ExecInfo;
@@ -321,7 +340,8 @@ namespace Hades
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 
           ErrorFunction("GetSeDebugPrivilege") << 
-          ErrorString("Could not look up privilege value for SeDebugName.") << 
+          ErrorString("Could not look up privilege value for "
+          "SeDebugName.") << 
           ErrorCodeWinLast(LastError));
       }
       if (Luid.LowPart == 0 && Luid.HighPart == 0) 
@@ -342,8 +362,8 @@ namespace Hades
       Privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
       // Apply the adjusted privileges
-      if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, sizeof(Privileges), 
-        nullptr, nullptr)) 
+      if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, 
+        sizeof(Privileges), nullptr, nullptr)) 
       {
         DWORD const LastError = GetLastError();
         BOOST_THROW_EXCEPTION(Process::Error() << 

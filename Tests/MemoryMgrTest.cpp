@@ -162,12 +162,20 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // matches the local results.
   // Todo: Test GetRemoteProcAddress with ordinals
   BOOST_CHECK_EQUAL(MyMemory.GetRemoteProcAddress(Kernel32Mod, 
-    "kernel32.dll", "GetCurrentProcessId"), pGetCurrentProcessId);
+    L"kernel32.dll", "GetCurrentProcessId"), pGetCurrentProcessId);
   
   // Test MemoryMgr::FlushCache
   MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), 10);
   
-  // Todo: Verify MemoryMgr::IsWoW64 return value
-  MyMemory.IsWoW64();
+  // Test MemoryMgr::IsWoW64
+#if defined(_M_AMD64) 
+  BOOST_CHECK_EQUAL(MyMemory.IsWoW64(), false);
+#elif defined(_M_IX86) 
+  BOOL Wow64Process = FALSE;
+  BOOST_REQUIRE(IsWow64Process(MyMemory.GetProcessHandle(), &Wow64Process));
+  BOOST_CHECK_EQUAL(MyMemory.IsWoW64(), (Wow64Process ? true : false));
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
 }

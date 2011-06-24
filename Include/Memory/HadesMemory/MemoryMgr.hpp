@@ -33,7 +33,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // Boost
 #include <boost/config.hpp>
-#include <boost/filesystem.hpp>
 
 // Windows API
 #include <Windows.h>
@@ -117,39 +116,17 @@ namespace Hades
       }
 #endif
 
-      // Read memory (POD types)
+      // Read memory
       template <typename T>
-      T Read(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
-        T>::type* Dummy = 0) const;
+      T Read(PVOID Address) const;
 
-      // Read memory (string types)
+      // Read memory
       template <typename T>
-      T Read(PVOID Address, typename std::enable_if<std::is_same<T, std::
-        basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
-        const;
+      T Read(PVOID Address, std::size_t Size) const;
 
-      // Read memory (vector types)
+      // Write memory
       template <typename T>
-      T Read(PVOID Address, std::size_t Size, typename std::enable_if<std::
-        is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-        Dummy = 0) const;
-
-      // Write memory (POD types)
-      template <typename T>
-      void Write(PVOID Address, T const& Data, typename std::enable_if<std::
-        is_pod<T>::value, T>::type* Dummy = 0) const;
-
-      // Write memory (string types)
-      template <typename T>
-      void Write(PVOID Address, T const& Data, typename std::enable_if<std::
-        is_same<T, std::basic_string<typename T::value_type>>::value, T>::
-        type* Dummy = 0) const;
-
-      // Write memory (vector types)
-      template <typename T>
-      void Write(PVOID Address, T const& Data, typename std::enable_if<std::
-        is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-        Dummy = 0) const;
+      void Write(PVOID Address, T const& Data) const;
 
       // Whether an address is currently readable
       bool CanRead(LPCVOID Address) const;
@@ -177,12 +154,11 @@ namespace Hades
 
       // Get address of export in remote process (by name)
       FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-        boost::filesystem::path const& Module, std::string const& Function) 
-        const;
+        std::wstring const& Module, std::string const& Function) const;
 
       // Get address of export in remote process (by ordinal)
       FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-        boost::filesystem::path const& Module, WORD Function) const;
+        std::wstring const& Module, WORD Function) const;
 
       // Flush instruction cache
       void FlushCache(LPCVOID Address, SIZE_T Size) const;
@@ -191,6 +167,40 @@ namespace Hades
       bool IsWoW64() const;
 
     private:
+      // Read memory (POD types)
+      template <typename T>
+      T ReadImpl(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
+        T>::type* Dummy = 0) const;
+
+      // Read memory (string types)
+      template <typename T>
+      T ReadImpl(PVOID Address, typename std::enable_if<std::is_same<T, std::
+        basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
+        const;
+
+      // Read memory (vector types)
+      template <typename T>
+      T ReadImpl(PVOID Address, std::size_t Size, typename std::enable_if<std::
+        is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
+        Dummy = 0) const;
+
+      // Write memory (POD types)
+      template <typename T>
+      void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
+        is_pod<T>::value, T>::type* Dummy = 0) const;
+
+      // Write memory (string types)
+      template <typename T>
+      void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
+        is_same<T, std::basic_string<typename T::value_type>>::value, T>::
+        type* Dummy = 0) const;
+
+      // Write memory (vector types)
+      template <typename T>
+      void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
+        is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
+        Dummy = 0) const;
+      
       // Target process
       Process m_Process;
     };
@@ -250,10 +260,31 @@ namespace Hades
       mutable PVOID m_Address;
     };
 
+    // Read memory
+    template <typename T>
+    T MemoryMgr::Read(PVOID Address) const
+    {
+      return this->ReadImpl<T>(Address);
+    }
+
+    // Read memory
+    template <typename T>
+    T MemoryMgr::Read(PVOID Address, std::size_t Size) const
+    {
+      return this->ReadImpl<T>(Address, Size);
+    }
+
+    // Write memory
+    template <typename T>
+    void MemoryMgr::Write(PVOID Address, T const& Data) const
+    {
+      this->WriteImpl(Address, Data);
+    }
+
     // Read memory (POD types)
     template <typename T>
-    T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_pod<T>::
-      value, T>::type* /*Dummy*/) const 
+    T MemoryMgr::ReadImpl(PVOID Address, typename std::enable_if<
+      std::is_pod<T>::value, T>::type* /*Dummy*/) const 
     {
       // Treat attempt to read from a guard page as an error
       if (IsGuard(Address))
@@ -276,8 +307,8 @@ namespace Hades
       // Read data
       T Out = T();
       SIZE_T BytesRead = 0;
-      if (!ReadProcessMemory(m_Process.GetHandle(), Address, &Out, sizeof(T), 
-        &BytesRead) || BytesRead != sizeof(T))
+      if (!ReadProcessMemory(m_Process.GetHandle(), Address, &Out, 
+        sizeof(T), &BytesRead) || BytesRead != sizeof(T))
       {
         if (!CanReadMem)
         {
@@ -308,7 +339,7 @@ namespace Hades
 
     // Read memory (string types)
     template <typename T>
-    T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_same<T, 
+    T MemoryMgr::ReadImpl(PVOID Address, typename std::enable_if<std::is_same<T, 
       std::basic_string<typename T::value_type>>::value, T>::type* /*Dummy*/) 
       const
     {
@@ -322,7 +353,7 @@ namespace Hades
       for (CharT* AddressReal = static_cast<CharT*>(Address);; ++AddressReal)
       {
         // Read current character
-        CharT const Current = Read<CharT>(AddressReal);
+        CharT const Current = this->ReadImpl<CharT>(AddressReal);
 
         // Return generated string on null terminator
         if (Current == 0)
@@ -337,7 +368,7 @@ namespace Hades
 
     // Read memory (vector types)
     template <typename T>
-    T MemoryMgr::Read(PVOID Address, std::size_t Size, typename 
+    T MemoryMgr::ReadImpl(PVOID Address, std::size_t Size, typename 
       std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::
       value, T>::type* /*Dummy*/) const
     {
@@ -402,7 +433,7 @@ namespace Hades
 
     // Write memory (POD types)
     template <typename T>
-    void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
+    void MemoryMgr::WriteImpl(PVOID Address, T const& Data, typename std::
       enable_if<std::is_pod<T>::value, T>::type* /*Dummy*/) const 
     {
       // Treat attempt to write to a guard page as an error
@@ -425,8 +456,8 @@ namespace Hades
 
       // Write data
       SIZE_T BytesWritten = 0;
-      if (!WriteProcessMemory(m_Process.GetHandle(), Address, &Data, sizeof(T), 
-        &BytesWritten) || BytesWritten != sizeof(T))
+      if (!WriteProcessMemory(m_Process.GetHandle(), Address, &Data, 
+        sizeof(T), &BytesWritten) || BytesWritten != sizeof(T))
       {
         if (!CanWriteMem)
         {
@@ -455,7 +486,7 @@ namespace Hades
 
     // Write memory (string types)
     template <typename T>
-    void MemoryMgr::Write(PVOID Address, T const& Data, 
+    void MemoryMgr::WriteImpl(PVOID Address, T const& Data, 
       typename std::enable_if<std::is_same<T, std::basic_string<typename T::
       value_type>>::value, T>::type* /*Dummy*/) const
     {
@@ -467,12 +498,12 @@ namespace Hades
       DataReal.push_back(0);
 
       // Write string to memory
-      this->Write(Address, DataReal);
+      this->WriteImpl(Address, DataReal);
     }
 
     // Write memory (vector types)
     template <typename T>
-    void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
+    void MemoryMgr::WriteImpl(PVOID Address, T const& Data, typename std::
       enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
       T>::type* /*Dummy*/) const
     {

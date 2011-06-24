@@ -51,6 +51,8 @@ lib Memory
   : 
     [ glob Memory/*.cpp ] 
     [ glob Memory/PeLib/*.cpp ] 
+    [ glob Memory/Detail/*.cpp ] 
+    [ glob Memory/PeLib/Detail/*.cpp ] 
     /Common//Common 
     /Dependencies//AsmJit 
     /Dependencies//BeaEngine 

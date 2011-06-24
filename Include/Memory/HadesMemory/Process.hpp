@@ -33,7 +33,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <Windows.h>
 
-namespace Hades
+namespace Hades 
 {
   namespace Memory
   {
@@ -44,22 +44,22 @@ namespace Hades
       // Process exception type
       class Error : public virtual HadesMemError 
       { };
-
+    
       // Open process from process ID
       explicit Process(DWORD ProcID);
-
+    
       // Open process from process name
       explicit Process(std::wstring const& ProcName);
-
+    
       // Open process from window name and class
       Process(std::wstring const& WindowName, std::wstring const& ClassName);
-
+    
       // Copy constructor
       Process(Process const& Other);
-
+    
       // Copy assignment
       Process& operator=(Process const& Other);
-
+    
       // Get process handle
       HANDLE GetHandle() const;
       
@@ -67,18 +67,21 @@ namespace Hades
       DWORD GetID() const;
       
       // Get process path
-      boost::filesystem::path GetPath() const;
+      std::wstring GetPath() const;
         
       // Is WoW64 process
       bool IsWoW64() const;
-
+    
     private:
+      // Get WoW64 status of process and set member var
+      void SetWoW64();
+      
       // Open process given process id
       void Open(DWORD ProcID);
-
+    
       // Process handle
       Windows::EnsureCloseHandle m_Handle;
-
+    
       // Process ID
       DWORD m_ID;
       
@@ -87,11 +90,11 @@ namespace Hades
     };
     
     // Create process
-    Process CreateProcess(boost::filesystem::path const& Path, 
-      boost::filesystem::path const& Params, 
-      boost::filesystem::path const& WorkingDir);
-
+    Process CreateProcess(std::wstring const& Path, 
+      std::wstring const& Params, 
+      std::wstring const& WorkingDir);
+    
     // Gets the SeDebugPrivilege
     void GetSeDebugPrivilege();
-  }
-}
+  } // namespace Memory
+} // namespace Hades
