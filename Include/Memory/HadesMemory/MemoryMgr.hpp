@@ -102,20 +102,6 @@ namespace Hades
       RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
         std::vector<PVOID> const& Args) const;
 
-#if !defined(BOOST_NO_INITIALIZER_LISTS) && !defined(BOOST_NO_VARIADIC_TEMPLATES)
-      // Call remote function
-      template <typename... T>
-      RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
-        T const&... Args) const
-      {
-        static_assert(Util::all_memsize_or_less<T...>::value, 
-          "Size of types must be <= memsize.");
-        static_assert(Util::all_pod<T...>::value, "All types must be POD.");
-        std::vector<PVOID> NewArgs { reinterpret_cast<PVOID>(Args)... };
-        return Call(Address, MyCallConv, NewArgs);
-      }
-#endif
-
       // Read memory
       template <typename T>
       T Read(PVOID Address) const;
