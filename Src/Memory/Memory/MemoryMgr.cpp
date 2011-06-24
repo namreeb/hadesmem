@@ -170,6 +170,9 @@ namespace Hades
       MyJitFunc.mov(AsmJit::rax, pSetLastError);
       MyJitFunc.call(AsmJit::rax);
 
+      // Cleanup ghost space
+      MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
+
       // Set up first 4 parameters
       MyJitFunc.mov(AsmJit::rcx, NumArgs > 0 ? reinterpret_cast<DWORD_PTR>(
         Args[0]) : 0);
@@ -191,10 +194,19 @@ namespace Hades
         });
       }
 
+      // Allocate ghost space
+      MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+
       // Call target
       MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
       MyJitFunc.call(AsmJit::rax);
       
+      // Cleanup ghost space
+      MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
+
+      // Clean up remaining stack space
+      MyJitFunc.add(AsmJit::rsp, 0x8 * (NumArgs - 4));
+
       // Write return value to memory
       MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
         ReturnValueRemote.GetBase()));
@@ -208,12 +220,6 @@ namespace Hades
       MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
         LastErrorRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
-
-      // Cleanup ghost space
-      MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
-
-      // Clean up remaining stack space
-      MyJitFunc.add(AsmJit::rsp, 0x8 * (NumArgs - 4));
 
       // Epilogue
       MyJitFunc.mov(AsmJit::rsp, AsmJit::rbp);
