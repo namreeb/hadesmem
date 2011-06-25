@@ -20,6 +20,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include <HadesMemory/MemoryMgr.hpp>
 
+// C++ Standard Library
+#include <cmath>
+
 // Boost
 #define BOOST_TEST_MODULE MemoryMgrTest
 #include <boost/test/unit_test.hpp>
@@ -37,6 +40,16 @@ DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d,
   
   SetLastError(5678);
   return 1234;
+}
+
+DWORD64 TestCall64Ret()
+{
+  return 0x123456787654321LL;
+}
+
+double TestCallFloatRet()
+{
+  return 1.337;
 }
 
 // MemoryMgr component tests
@@ -59,6 +72,27 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
+  
+  // Test 64-bit return values in MemoryMgr::Call
+  std::vector<PVOID> TestCall64Args;
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet64 = MyMemory.Call(
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall64Ret)), 
+    Hades::Memory::MemoryMgr::CallConv_Default, TestCall64Args);
+  BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
+    0x123456787654321LL));
+  
+  // Test floating point return values in MemoryMgr::Call
+  std::vector<PVOID> TestCallFloatArgs;
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetFloat = 
+    MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestCallFloatRet)), Hades::Memory::MemoryMgr::CallConv_Default, 
+    TestCallFloatArgs);
+  {
+    double const epsilon = .001;
+    double const expected = 1.337;
+    double const recieved = CallRetFloat.GetReturnValueFloat();
+    BOOST_CHECK(std::abs(recieved - expected) <= epsilon * std::abs(recieved));
+  }
 
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
   struct TestPODType

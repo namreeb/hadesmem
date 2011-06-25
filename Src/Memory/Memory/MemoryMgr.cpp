@@ -140,6 +140,12 @@ namespace Hades
       // Allocate memory for return value
       AllocAndFree const ReturnValueRemote(*this, sizeof(DWORD_PTR));
 
+      // Allocate memory for 64-bit return value
+      AllocAndFree const ReturnValue64Remote(*this, sizeof(DWORD64));
+
+      // Allocate memory for floating point return value
+      AllocAndFree const ReturnValueFloatRemote(*this, sizeof(double));
+
       // Allocate memory for thread's last-error code
       AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
 
@@ -214,6 +220,16 @@ namespace Hades
       MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
         ReturnValueRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+
+      // Write 64-bit return value to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        ReturnValue64Remote.GetBase()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+
+      // Write floating point return value to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueFloatRemote.GetBase()));
+      MyJitFunc.movq(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
       // Call kernel32.dll!GetLastError
       MyJitFunc.mov(AsmJit::rax, pGetLastError);
@@ -300,6 +316,17 @@ namespace Hades
         ReturnValueRemote.GetBase()));
       MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
       
+      // Write 64-bit return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        ReturnValue64Remote.GetBase()));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
+      
+      // Write floating point return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueFloatRemote.GetBase()));
+      MyJitFunc.fst(AsmJit::qword_ptr(AsmJit::ecx));
+      
       // Call kernel32.dll!GetLastError
       MyJitFunc.mov(AsmJit::eax, pGetLastError);
       MyJitFunc.call(AsmJit::eax);
@@ -370,7 +397,9 @@ namespace Hades
       // Forward return value from remote thread
       DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetBase());
       DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetBase());
-      return RemoteFunctionRet(RetVal, ErrorCode);
+      DWORD64 const RetVal64 = Read<DWORD64>(ReturnValue64Remote.GetBase());
+      double const RetValFloat = Read<double>(ReturnValueFloatRemote.GetBase());
+      return RemoteFunctionRet(RetVal, RetVal64, RetValFloat, ErrorCode);
     }
 
     // Whether an address is currently readable

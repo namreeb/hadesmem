@@ -64,17 +64,32 @@ namespace Hades
       public:
         RemoteFunctionRet() 
           : m_ReturnValue(0), 
+          m_ReturnValue64(0), 
+          m_ReturnValueFloat(.0), 
           m_LastError(0)
         { }
         
-        RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD LastError) 
+        RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
+          double ReturnValueFloat, DWORD LastError) 
           : m_ReturnValue(ReturnValue), 
+          m_ReturnValue64(ReturnValue64), 
+          m_ReturnValueFloat(ReturnValueFloat), 
           m_LastError(LastError)
         { }
         
         DWORD_PTR GetReturnValue() const
         {
           return m_ReturnValue;
+        }
+        
+        DWORD64 GetReturnValue64() const
+        {
+          return m_ReturnValue64;
+        }
+        
+        double GetReturnValueFloat() const
+        {
+          return m_ReturnValueFloat;
         }
         
         DWORD GetLastError() const
@@ -84,6 +99,8 @@ namespace Hades
         
       private:
         DWORD_PTR m_ReturnValue;
+        DWORD64 m_ReturnValue64;
+        double m_ReturnValueFloat;
         DWORD m_LastError;
       };
     
