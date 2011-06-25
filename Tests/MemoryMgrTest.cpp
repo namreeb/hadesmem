@@ -52,6 +52,39 @@ double TestCallFloatRet()
   return 1.337;
 }
 
+#if defined(_M_AMD64) 
+#elif defined(_M_IX86) 
+DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c, 
+  PVOID const d, PVOID const e, PVOID const f)
+{
+  BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
+  BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
+  BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
+  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
+  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
+  
+  SetLastError(5678);
+  return 1234;
+}
+
+DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c, 
+  PVOID const d, PVOID const e, PVOID const f)
+{
+  BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
+  BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
+  BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
+  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
+  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
+  
+  SetLastError(5678);
+  return 1234;
+}
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
 // MemoryMgr component tests
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
@@ -73,6 +106,27 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
+  // Test __fastcall and __stdcall under x86
+#if defined(_M_AMD64) 
+#elif defined(_M_IX86) 
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetFast = 
+    MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestFastCall)), Hades::Memory::MemoryMgr::CallConv_FASTCALL, 
+    TestCallArgs);
+  BOOST_CHECK_EQUAL(CallRetFast.GetReturnValue(), static_cast<DWORD_PTR>(
+    1234));
+  BOOST_CHECK_EQUAL(CallRetFast.GetLastError(), static_cast<DWORD>(5678));
+  
+  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetStd = 
+    MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestStdCall)), Hades::Memory::MemoryMgr::CallConv_STDCALL, TestCallArgs);
+  BOOST_CHECK_EQUAL(CallRetStd.GetReturnValue(), static_cast<DWORD_PTR>(
+    1234));
+  BOOST_CHECK_EQUAL(CallRetStd.GetLastError(), static_cast<DWORD>(5678));
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
   // Test 64-bit return values in MemoryMgr::Call
   std::vector<PVOID> TestCall64Args;
   Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet64 = MyMemory.Call(
@@ -91,7 +145,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     double const epsilon = .001;
     double const expected = 1.337;
     double const recieved = CallRetFloat.GetReturnValueFloat();
-    BOOST_CHECK(std::abs(recieved - expected) <= epsilon * std::abs(recieved));
+    BOOST_CHECK(std::abs(recieved - expected) <= epsilon * std::abs(
+      recieved));
   }
 
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
