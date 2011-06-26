@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<Patterns>
-  <Pattern Name="FrameScript__Execute" Data="55 8B EC 51 83 05 00 00 00 00 01 A1 00 00 00 00 89 45 FC" Mask="xxxxxx????xx????xxx"/>
-  <Pattern Name="MaxClimbAngle" Data="8B 0D 00 00 00 00 6B C0 34 F3 0F 10 05 00 00 00 00 0F 2F 44 08 08 72 06" Mask="xx????xxxxxxx????xxxxxxx">
-    <Add Value="D"/>
-    <Lea/>
-  </Pattern>
-</Patterns>

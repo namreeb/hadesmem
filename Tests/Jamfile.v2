@@ -13,7 +13,7 @@ project
     <toolset>gcc:<cxxflags>-Wextra 
     <toolset>gcc:<cxxflags>-pedantic-errors 
     <library>/Memory//Memory 
-    <library>/boost//unit_test_framework/<link>static 
+    <library>/boost//unit_test_framework/<link>shared 
     <toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
   ;
 
