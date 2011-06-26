@@ -36,6 +36,15 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK(MyProcess.GetHandle() != 0);
   BOOST_CHECK(MyProcess.GetID() != 0);
   BOOST_CHECK(!MyProcess.GetPath().empty());
-  // Todo: Verify Process::IsWoW64 return value
-  MyProcess.IsWoW64();
+  
+  // Test Process::IsWoW64
+#if defined(_M_AMD64) 
+  BOOST_CHECK_EQUAL(MyProcess.IsWoW64(), false);
+#elif defined(_M_IX86) 
+  BOOL Wow64Process = FALSE;
+  BOOST_REQUIRE(IsWow64Process(MyProcess.GetHandle(), &Wow64Process));
+  BOOST_CHECK_EQUAL(MyProcess.IsWoW64(), (Wow64Process ? true : false));
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
 }
