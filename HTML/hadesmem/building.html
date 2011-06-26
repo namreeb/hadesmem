@@ -20,12 +20,91 @@
 <a name="hadesmem.building"></a><a class="link" href="building.html" title="Building">Building</a>
 </h2></div></div></div>
 <p>
-      TODO: Write this!
+      HadesMem uses the <a href="http://www.boost.org/boost-build2/" target="_top">Boost.Build</a>
+      build system. If you have not already, it is recommend you familiarize yourself
+      with this framework.
     </p>
+<p>
+      Supported Compilers:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <a href="http://www.microsoft.com/visualstudio/en-us" target="_top">Microsoft Visual
+          C++ 2010</a> (Express edition not officially supported)
+        </li>
+<li class="listitem">
+          <a href="http://gcc.gnu.org/" target="_top">GNU GCC 4.6.0</a> (via <a href="http://www.equation.com/servlet/equation.cmd?fa=fortran" target="_top">MinGW-w64</a>)
+        </li>
+</ul></div>
+<p>
+      Supported Platforms:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+          <a href="http://www.microsoft.com/windows/" target="_top">Microsoft Windows</a>
+          (Windows XP SP2 or later)
+        </li></ul></div>
+<p>
+      Steps to Build:
+    </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+<p class="simpara">
+          Build Boost.
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="a">
+<li class="listitem">
+              Navigate to Build/Boost.
+            </li>
+<li class="listitem">
+              Run Bootstrap.bat.
+            </li>
+<li class="listitem">
+              Run Build_Compiler.bat (Substitute 'Compiler' as appropriate).
+            </li>
+<li class="listitem">
+              Check output and ensure there are no errors.
+            </li>
+</ol></div>
+</li>
+<li class="listitem">
+<p class="simpara">
+          Build HadesMem.
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="a">
+<li class="listitem">
+              Navigate to Build/Full.
+            </li>
+<li class="listitem">
+              Run Build_Compiler_Configuration_Architecture.bat (Substitute 'Compiler',
+              'Configuration', and 'Architecture' as appropriate).
+            </li>
+<li class="listitem">
+              Check output and ensure there are no errors.
+            </li>
+</ol></div>
+</li>
+</ol></div>
+<p>
+      Using HadesMem (in a Boost.Build based project):
+    </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+          Add a <span class="emphasis"><em>use-project</em></span> directive to your Jamroot targeting
+          HadesMem (this document assumes you name the project 'HadesMem').
+        </li>
+<li class="listitem">
+          Add /HadesMem//Memory to the source list of your application/library or the requirements
+          list of your project.
+        </li>
+<li class="listitem">
+          Add <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">HadesMemory</span><span class="special">/</span><span class="identifier">Memory</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>
+          to your code.
+        </li>
+</ol></div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce (aka RaptorFactor)<p>
         Distributed under the GNU GPL v3. See accompanying file LICENSE.txt.
       </p>
 </div></td>

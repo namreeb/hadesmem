@@ -1,7 +1,7 @@
 [article HadesMem
   [quickbook 1.5]
   [version 0.0.0]
-  [copyright 2011 Joshua Boyce]
+  [copyright 2011 Joshua Boyce (aka RaptorFactor)]
   [authors [Boyce, Joshua]]
   [license Distributed under the GNU GPL v3. See accompanying file 
     LICENSE.txt.]
@@ -43,7 +43,42 @@ Nothing to see here yet.
 
 [section:building Building]
 
-TODO: Write this!
+HadesMem uses the [@http://www.boost.org/boost-build2/ Boost.Build] build 
+system. If you have not already, it is recommend you familiarize yourself 
+with this framework.
+
+Supported Compilers:
+
+* [@http://www.microsoft.com/visualstudio/en-us Microsoft Visual C++ 2010] 
+(Express edition not officially supported)
+* [@http://gcc.gnu.org/ GNU GCC 4.6.0] (via 
+[@http://www.equation.com/servlet/equation.cmd?fa=fortran MinGW-w64])
+
+Supported Platforms:
+
+* [@http://www.microsoft.com/windows/ Microsoft Windows] (Windows XP SP2 or 
+later)
+
+Steps to Build:
+
+# Build Boost.
+  # Navigate to Build/Boost.
+  # Run Bootstrap.bat.
+  # Run Build_Compiler.bat (Substitute 'Compiler' as appropriate).
+  # Check output and ensure there are no errors.
+# Build HadesMem.
+  # Navigate to Build/Full.
+  # Run Build_Compiler_Configuration_Architecture.bat (Substitute 'Compiler', 
+  'Configuration', and 'Architecture' as appropriate).
+  # Check output and ensure there are no errors.
+  
+Using HadesMem (in a Boost.Build based project):
+
+# Add a /use-project/ directive to your Jamroot targeting HadesMem (this 
+document assumes you name the project 'HadesMem').
+# Add '''/HadesMem//Memory''' to the source list of your application/library 
+or the requirements list of your project.
+# Add `#include <HadesMemory/Memory.hpp>` to your code.
 
 [endsect] [/ Building]
 
@@ -63,3 +98,12 @@ TODO: Write this!
 
 [endsect] [/ Reference]
 
+[section:acknowledge Acknowledgements]
+
+HadesMem would not be possible without the help of the following projects:
+
+* [@http://code.google.com/p/asmjit/ AsmJit]
+* [@http://www.beaengine.org/ BeaEngine]
+* [@http://www.boost.org/ Boost]
+
+[endsect] [/ Acknowledgements]
