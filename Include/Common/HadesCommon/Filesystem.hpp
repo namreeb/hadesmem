@@ -44,11 +44,12 @@ namespace Hades
     { };
 
     // Load a buffer into a file
-    inline void BufferToFile(std::vector<BYTE> const& Buffer, 
+    template <typename CharT = BYTE>
+    inline void BufferToFile(std::vector<CharT> const& Buffer, 
       boost::filesystem::path const& Path)
     {
       // Open file
-      boost::filesystem::basic_ofstream<BYTE> File(Path, std::ios::binary);
+      boost::filesystem::basic_ofstream<CharT> File(Path, std::ios::binary);
       if (!File)
       {
         BOOST_THROW_EXCEPTION(FilesystemError() << 
@@ -61,10 +62,11 @@ namespace Hades
     }
 
     // Load a file into a buffer
-    inline std::vector<BYTE> FileToBuffer(boost::filesystem::path const& Path)
+    template <typename CharT = BYTE>
+    inline std::vector<CharT> FileToBuffer(boost::filesystem::path const& Path)
     {
       // Open file
-      boost::filesystem::basic_ifstream<BYTE> File(Path, std::ios::binary | 
+      boost::filesystem::basic_ifstream<CharT> File(Path, std::ios::binary | 
         std::ios::ate);
       if (!File)
       {
@@ -74,8 +76,7 @@ namespace Hades
       }
 
       // Copy file to buffer
-      std::vector<BYTE> Buffer(static_cast<std::vector<BYTE>::size_type>(
-        File.tellg()));
+      std::vector<CharT> Buffer(static_cast<std::size_t>(File.tellg()));
       File.seekg(0, std::ios::beg);
       File.read(Buffer.data(), Buffer.size());
 

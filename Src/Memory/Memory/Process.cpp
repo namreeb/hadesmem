@@ -264,7 +264,7 @@ namespace Hades
       // reliable but is only available on Vista+.
       DWORD const PathSize = 32767;
       std::wstring Path;
-      if (!GetModuleFileNameEx(m_Handle, NULL, Util::MakeStringBuffer(Path, 
+      if (!GetModuleFileNameEx(m_Handle, nullptr, Util::MakeStringBuffer(Path, 
         PathSize), PathSize))
       {
         DWORD const LastError = GetLastError();
@@ -296,9 +296,9 @@ namespace Hades
 #define SEE_MASK_NOASYNC 0x00000100
 #endif
       ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
-      ExecInfo.lpFile = Path.empty() ? NULL : Path.c_str();
-      ExecInfo.lpParameters = Params.empty() ? NULL : Params.c_str();
-      ExecInfo.lpDirectory = WorkingDir.empty() ? NULL : WorkingDir.c_str();
+      ExecInfo.lpFile = Path.empty() ? nullptr : Path.c_str();
+      ExecInfo.lpParameters = Params.empty() ? nullptr : Params.c_str();
+      ExecInfo.lpDirectory = WorkingDir.empty() ? nullptr : WorkingDir.c_str();
       ExecInfo.nShow = SW_SHOWNORMAL;
       if (!ShellExecuteEx(&ExecInfo))
       {
