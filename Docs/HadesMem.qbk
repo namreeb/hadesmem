@@ -86,7 +86,7 @@ or the requirements list of your project.
 
 [section:process Process]
 
-[h3 Synopsis]
+[h4 Synopsis]
 
   // In header: <HadesMemory/Process.hpp>
 
@@ -114,7 +114,7 @@ or the requirements list of your project.
   
   void GetSeDebugPrivilege();
 
-[h3 Description]
+[h4 Description]
 
 The Process class is used for process management in the context of memory 
 hacking. It opens a process using the required access rights for memory 
@@ -123,19 +123,19 @@ hacking, and exposes APIs to access commonly needed data related to a process.
 Free functions are provided for process creation, and debug privilege 
 acquisition.
 
-[h3 Process public types]
+[h4 Process public types]
 
 TODO: Write this!
 
-[h3 Process public construct/copy/destruct/move]
+[h4 Process public construct/copy/destruct/move]
 
 TODO: Write this!
 
-[h3 Process public member functions]
+[h4 Process public member functions]
 
 TODO: Write this!
 
-[h3 Public free functions]
+[h4 Public free functions]
 
 TODO: Write this!
 
