@@ -31,7 +31,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
+along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
 
 [endsect] [/ License]
 
@@ -85,6 +85,57 @@ or the requirements list of your project.
 [section:reference Reference]
 
 [section:process Process]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/Process.hpp>
+
+  class Process
+  {
+  public:
+    class Error : public virtual HadesMemError 
+    { };
+  
+    explicit Process(DWORD ProcID);
+    explicit Process(std::wstring const& ProcName);
+    Process(std::wstring const& WindowName, std::wstring const& ClassName);
+    Process(Process const& Other);
+    Process& operator=(Process const& Other);
+  
+    HANDLE GetHandle() const;    
+    DWORD GetID() const;    
+    std::wstring GetPath() const;      
+    bool IsWoW64() const;
+  };
+  
+  Process CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir);
+  
+  void GetSeDebugPrivilege();
+
+[h3 Description]
+
+The Process class is used for process management in the context of memory 
+hacking. It opens a process using the required access rights for memory 
+hacking, and exposes APIs to access commonly needed data related to a process.
+
+Free functions are provided for process creation, and debug privilege 
+acquisition.
+
+[h3 Process public types]
+
+TODO: Write this!
+
+[h3 Process public construct/copy/destruct/move]
+
+TODO: Write this!
+
+[h3 Process public member functions]
+
+TODO: Write this!
+
+[h3 Public free functions]
 
 TODO: Write this!
 
