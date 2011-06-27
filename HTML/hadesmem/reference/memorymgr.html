@@ -19,6 +19,195 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="hadesmem.reference.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
 </h3></div></div></div>
+<a name="hadesmem.reference.memorymgr.synopsis"></a><h5>
+<a name="id857977"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.synopsis">Synopsis</a>
+      </h5>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;
+</span>
+<span class="keyword">class</span> <span class="identifier">MemoryMgr</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
+  <span class="special">{</span> <span class="special">};</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ProcName</span><span class="special">);</span>
+
+  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WindowName</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ClassName</span><span class="special">);</span>
+
+  <span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="identifier">RemoteFunctionRet</span><span class="special">()</span> 
+      <span class="special">:</span> <span class="identifier">m_ReturnValue</span><span class="special">(</span><span class="number">0</span><span class="special">),</span> 
+      <span class="identifier">m_ReturnValue64</span><span class="special">(</span><span class="number">0</span><span class="special">),</span> 
+      <span class="identifier">m_ReturnValueFloat</span><span class="special">(.</span><span class="number">0</span><span class="special">),</span> 
+      <span class="identifier">m_LastError</span><span class="special">(</span><span class="number">0</span><span class="special">)</span>
+    <span class="special">{</span> <span class="special">}</span>
+    
+    <span class="identifier">RemoteFunctionRet</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">ReturnValue</span><span class="special">,</span> <span class="identifier">DWORD64</span> <span class="identifier">ReturnValue64</span><span class="special">,</span> 
+      <span class="keyword">double</span> <span class="identifier">ReturnValueFloat</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">LastError</span><span class="special">)</span> 
+      <span class="special">:</span> <span class="identifier">m_ReturnValue</span><span class="special">(</span><span class="identifier">ReturnValue</span><span class="special">),</span> 
+      <span class="identifier">m_ReturnValue64</span><span class="special">(</span><span class="identifier">ReturnValue64</span><span class="special">),</span> 
+      <span class="identifier">m_ReturnValueFloat</span><span class="special">(</span><span class="identifier">ReturnValueFloat</span><span class="special">),</span> 
+      <span class="identifier">m_LastError</span><span class="special">(</span><span class="identifier">LastError</span><span class="special">)</span>
+    <span class="special">{</span> <span class="special">}</span>
+    
+    <span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span>
+    <span class="special">{</span>
+      <span class="keyword">return</span> <span class="identifier">m_ReturnValue</span><span class="special">;</span>
+    <span class="special">}</span>
+    
+    <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span>
+    <span class="special">{</span>
+      <span class="keyword">return</span> <span class="identifier">m_ReturnValue64</span><span class="special">;</span>
+    <span class="special">}</span>
+    
+    <span class="keyword">double</span> <span class="identifier">GetReturnValueFloat</span><span class="special">()</span> <span class="keyword">const</span>
+    <span class="special">{</span>
+      <span class="keyword">return</span> <span class="identifier">m_ReturnValueFloat</span><span class="special">;</span>
+    <span class="special">}</span>
+    
+    <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span>
+    <span class="special">{</span>
+      <span class="keyword">return</span> <span class="identifier">m_LastError</span><span class="special">;</span>
+    <span class="special">}</span>
+    
+  <span class="keyword">private</span><span class="special">:</span>
+    <span class="identifier">DWORD_PTR</span> <span class="identifier">m_ReturnValue</span><span class="special">;</span>
+    <span class="identifier">DWORD64</span> <span class="identifier">m_ReturnValue64</span><span class="special">;</span>
+    <span class="keyword">double</span> <span class="identifier">m_ReturnValueFloat</span><span class="special">;</span>
+    <span class="identifier">DWORD</span> <span class="identifier">m_LastError</span><span class="special">;</span>
+  <span class="special">};</span>
+
+  <span class="keyword">enum</span> <span class="identifier">CallConv</span>
+  <span class="special">{</span>
+    <span class="identifier">CallConv_Default</span><span class="special">,</span> 
+    <span class="identifier">CallConv_CDECL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_STDCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_THISCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_FASTCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_X64</span>
+  <span class="special">};</span>
+
+  <span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">CanWrite</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">IsGuard</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">ProtectRegion</span><span class="special">(</span><span class="identifier">LPVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">Alloc</span><span class="special">(</span><span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetProcessID</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="identifier">IsWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">AllocAndFree</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemoryMgr</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">);</span>
+
+  <span class="special">~</span><span class="identifier">AllocAndFree</span><span class="special">();</span>
+  
+  <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+<span class="keyword">protected</span><span class="special">:</span>
+  <span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
+  <span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
+<span class="special">};</span>
+</pre>
+<a name="hadesmem.reference.memorymgr.description"></a><h5>
+<a name="id859726"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.description">Description</a>
+      </h5>
+<p>
+        The MemoryMgr class provides the most basic memory hacking functionality,
+        and is the basis on which all other HadesMem components are built. It exposes
+        APIs for memory reading, memory writing, function calling, region querying,
+        memory allocation, and instruction cache flushing.
+      </p>
+<p>
+        The AllocAndFree class is an RAII wrapper for remote memory allocation and
+        freeing.
+      </p>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_types"></a><h5>
+<a name="id859747"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_types">MemoryMgr
+        public types</a>
+      </h5>
+<p>
+        TODO: Write this!
+      </p>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h5>
+<a name="id859763"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
+        public construct/copy/destruct/move</a>
+      </h5>
+<p>
+        TODO: Write this!
+      </p>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions"></a><h5>
+<a name="id859783"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_member_functions">MemoryMgr
+        public member functions</a>
+      </h5>
+<p>
+        TODO: Write this!
+      </p>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_types"></a><h5>
+<a name="id859802"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_types">AllocAndFree
+        public types</a>
+      </h5>
+<p>
+        TODO: Write this!
+      </p>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h5>
+<a name="id861458"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
+        public construct/copy/destruct/move</a>
+      </h5>
+<p>
+        TODO: Write this!
+      </p>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions"></a><h5>
+<a name="id861476"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_member_functions">AllocAndFree
+        public member functions</a>
+      </h5>
 <p>
         TODO: Write this!
       </p>

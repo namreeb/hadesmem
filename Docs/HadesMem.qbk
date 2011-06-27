@@ -97,14 +97,21 @@ or the requirements list of your project.
     { };
   
     explicit Process(DWORD ProcID);
+    
     explicit Process(std::wstring const& ProcName);
+    
     Process(std::wstring const& WindowName, std::wstring const& ClassName);
+    
     Process(Process const& Other);
+    
     Process& operator=(Process const& Other);
   
     HANDLE GetHandle() const;    
+    
     DWORD GetID() const;    
+    
     std::wstring GetPath() const;      
+    
     bool IsWoW64() const;
   };
   
@@ -142,6 +149,166 @@ TODO: Write this!
 [endsect] [/ Process]
 
 [section:memorymgr MemoryMgr]
+
+[h4 Synopsis]
+
+  // In header: <HadesMemory/MemoryMgr.hpp>
+
+  class MemoryMgr
+  {
+  public:
+    class Error : public virtual HadesMemError 
+    { };
+
+    explicit MemoryMgr(DWORD ProcID);
+
+    explicit MemoryMgr(std::wstring const& ProcName);
+
+    MemoryMgr(std::wstring const& WindowName, std::wstring const& ClassName);
+
+    class RemoteFunctionRet
+    {
+    public:
+      RemoteFunctionRet() 
+        : m_ReturnValue(0), 
+        m_ReturnValue64(0), 
+        m_ReturnValueFloat(.0), 
+        m_LastError(0)
+      { }
+      
+      RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
+        double ReturnValueFloat, DWORD LastError) 
+        : m_ReturnValue(ReturnValue), 
+        m_ReturnValue64(ReturnValue64), 
+        m_ReturnValueFloat(ReturnValueFloat), 
+        m_LastError(LastError)
+      { }
+      
+      DWORD_PTR GetReturnValue() const
+      {
+        return m_ReturnValue;
+      }
+      
+      DWORD64 GetReturnValue64() const
+      {
+        return m_ReturnValue64;
+      }
+      
+      double GetReturnValueFloat() const
+      {
+        return m_ReturnValueFloat;
+      }
+      
+      DWORD GetLastError() const
+      {
+        return m_LastError;
+      }
+      
+    private:
+      DWORD_PTR m_ReturnValue;
+      DWORD64 m_ReturnValue64;
+      double m_ReturnValueFloat;
+      DWORD m_LastError;
+    };
+  
+    enum CallConv
+    {
+      CallConv_Default, 
+      CallConv_CDECL, 
+      CallConv_STDCALL, 
+      CallConv_THISCALL, 
+      CallConv_FASTCALL, 
+      CallConv_X64
+    };
+
+    RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
+      std::vector<PVOID> const& Args) const;
+
+    template <typename T>
+    T Read(PVOID Address) const;
+
+    template <typename T>
+    T Read(PVOID Address, std::size_t Size) const;
+
+    template <typename T>
+    void Write(PVOID Address, T const& Data) const;
+
+    bool CanRead(LPCVOID Address) const;
+
+    bool CanWrite(LPCVOID Address) const;
+
+    bool IsGuard(LPCVOID Address) const;
+    
+    DWORD ProtectRegion(LPVOID Address, DWORD Protect) const;
+
+    PVOID Alloc(SIZE_T Size) const;
+
+    void Free(PVOID Address) const;
+
+    DWORD GetProcessID() const;
+
+    HANDLE GetProcessHandle() const;
+
+    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+      std::wstring const& Module, std::string const& Function) const;
+
+    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+      std::wstring const& Module, WORD Function) const;
+
+    void FlushCache(LPCVOID Address, SIZE_T Size) const;
+    
+    bool IsWoW64() const;
+  };
+
+  class AllocAndFree
+  {
+  public:
+    AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
+
+    ~AllocAndFree();
+    
+    void Free() const;
+
+    PVOID GetBase() const;
+    
+    SIZE_T GetSize() const;
+
+  protected:
+    AllocAndFree(AllocAndFree const&);
+    AllocAndFree& operator=(AllocAndFree const&);
+  };
+
+[h4 Description]
+
+The MemoryMgr class provides the most basic memory hacking functionality, and 
+is the basis on which all other HadesMem components are built. It exposes APIs 
+for memory reading, memory writing, function calling, region querying, memory 
+allocation, and instruction cache flushing.
+
+The AllocAndFree class is an RAII wrapper for remote memory allocation and 
+freeing.
+
+[h4 MemoryMgr public types]
+
+TODO: Write this!
+
+[h4 MemoryMgr public construct/copy/destruct/move]
+
+TODO: Write this!
+
+[h4 MemoryMgr public member functions]
+
+TODO: Write this!
+
+[h4 AllocAndFree public types]
+
+TODO: Write this!
+
+[h4 AllocAndFree public construct/copy/destruct/move]
+
+TODO: Write this!
+
+[h4 AllocAndFree public member functions]
 
 TODO: Write this!
 
