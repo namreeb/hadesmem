@@ -199,7 +199,7 @@ namespace HadesMem
       Dummy = 0) const;
     
     // Target process
-    Process m_Process;
+    Detail::Process m_Process;
   };
 
   // RAII class for remote memory allocation and freeing

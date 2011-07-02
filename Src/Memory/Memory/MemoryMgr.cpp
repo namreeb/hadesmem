@@ -62,7 +62,7 @@ namespace HadesMem
     HMODULE GetKernel32(MemoryMgr const& MyMemory)
     {
       // Get module snapshot
-      EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
+      Detail::EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
         TH32CS_SNAPMODULE, MyMemory.GetProcessId());
       if (Snap == INVALID_HANDLE_VALUE)
       {
@@ -360,7 +360,7 @@ namespace HadesMem
     Write(pRemoteStub, CodeReal);
 
     // Call stub via creating a remote thread in the target.
-    EnsureCloseHandle const MyThread(CreateRemoteThread(m_Process.
+    Detail::EnsureCloseHandle const MyThread(CreateRemoteThread(m_Process.
       GetHandle(), nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(
       pRemoteStubTemp), nullptr, 0, nullptr));
     if (!MyThread)
@@ -528,7 +528,7 @@ namespace HadesMem
     const
   {
     // Load module as data so we can read the EAT locally
-    EnsureFreeLibrary const LocalMod(LoadLibraryEx(
+    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
       ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!LocalMod)
     {
@@ -567,7 +567,7 @@ namespace HadesMem
     std::wstring const& ModulePath, WORD Ordinal) const
   {
     // Load module as data so we can read the EAT locally
-    EnsureFreeLibrary const LocalMod(LoadLibraryEx(
+    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
       ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!LocalMod)
     {

@@ -28,11 +28,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create process manager for self
-  HadesMem::Process MyProcess(GetCurrentProcessId());
-  HadesMem::Process OtherProcess(MyProcess);
+  HadesMem::Detail::Process MyProcess(GetCurrentProcessId());
+  HadesMem::Detail::Process OtherProcess(MyProcess);
   MyProcess = OtherProcess;
-  BOOST_CHECK_THROW(HadesMem::Process InvalidProc(static_cast<DWORD>(-1)), 
-    HadesMem::HadesMemError);
+  BOOST_CHECK_THROW(HadesMem::Detail::Process InvalidProc(
+    static_cast<DWORD>(-1)), HadesMem::HadesMemError);
     
   // Check process APIs for predictable values where possible, otherwise just 
   // ensure they run without exception

@@ -31,52 +31,55 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace HadesMem
 {
-  // Process managing class
-  class Process
+  namespace Detail
   {
-  public:
-    // Process exception type
-    class Error : public virtual HadesMemError 
-    { };
-  
-    // Open process from process ID
-    explicit Process(DWORD ProcID);
-  
-    // Copy constructor
-    Process(Process const& Other);
-  
-    // Copy assignment
-    Process& operator=(Process Other);
+    // Process managing class
+    class Process
+    {
+    public:
+      // Process exception type
+      class Error : public virtual HadesMemError 
+      { };
     
-    // Destructor
-    ~Process() /*noexcept*/;
+      // Open process from process ID
+      explicit Process(DWORD ProcID);
     
-    // Swap
-    void swap(Process& Other);
-  
-    // Get process handle
-    HANDLE GetHandle() const;
+      // Copy constructor
+      Process(Process const& Other);
     
-    // Get process ID
-    DWORD GetID() const;
+      // Copy assignment
+      Process& operator=(Process Other);
+      
+      // Destructor
+      ~Process() /*noexcept*/;
+      
+      // Swap
+      void swap(Process& Other);
     
-    // Get process path
-    std::wstring GetPath() const;
+      // Get process handle
+      HANDLE GetHandle() const;
+      
+      // Get process ID
+      DWORD GetID() const;
+      
+      // Get process path
+      std::wstring GetPath() const;
+      
+      // Is WoW64 process
+      bool IsWoW64() const;
     
-    // Is WoW64 process
-    bool IsWoW64() const;
-  
-  private:
-    // Implementation
-    class Impl;
-    std::shared_ptr<Impl> m_pImpl;
-  };
-  
-  // Create process
-  Process CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
-    std::wstring const& WorkingDir);
-  
-  // Gets the SeDebugPrivilege
-  void GetSeDebugPrivilege();
+    private:
+      // Implementation
+      class Impl;
+      std::shared_ptr<Impl> m_pImpl;
+    };
+    
+    // Create process
+    Process CreateProcess(std::wstring const& Path, 
+      std::wstring const& Params, 
+      std::wstring const& WorkingDir);
+    
+    // Gets the SeDebugPrivilege
+    void GetSeDebugPrivilege();
+  } // namespace Detail
 } // namespace HadesMem
