@@ -8,11 +8,6 @@ use-project /boost
     Src/Dependencies/Boost 
   ;
 
-use-project /Common 
-  : 
-    Include/Common 
-  ; 
-
 use-project /Dependencies 
   : 
     Src/Dependencies 

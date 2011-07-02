@@ -53,9 +53,9 @@ lib Memory
     [ glob Memory/PeLib/*.cpp ] 
     [ glob Memory/Detail/*.cpp ] 
     [ glob Memory/PeLib/Detail/*.cpp ] 
-    /Common//Common 
     /Dependencies//AsmJit 
     /Dependencies//BeaEngine 
+    /boost//filesystem/<link>shared 
     user32 
     advapi32 
     dbghelp 

@@ -77,19 +77,19 @@ namespace HadesMem
     }
 
     // Get process handle
-    HANDLE Impl::GetHandle() const /*noexcept*/
+    HANDLE GetHandle() const /*noexcept*/
     {
       return *m_Handle;
     }
 
     // Get process ID
-    DWORD Impl::GetID() const /*noexcept*/
+    DWORD GetID() const /*noexcept*/
     {
       return m_ID;
     }
       
     // Get process path
-    std::wstring Impl::GetPath() const
+    std::wstring GetPath() const
     {
       // Note: The QueryFullProcessImageName API is more efficient and 
       // reliable but is only available on Vista+.
@@ -109,14 +109,14 @@ namespace HadesMem
     }
     
     // Is WoW64 process
-    bool Impl::IsWoW64() const /*noexcept*/
+    bool IsWoW64() const /*noexcept*/
     {
       return m_IsWoW64;
     }
     
   private:
     // Get WoW64 status of process and set member var
-    void Impl::SetWoW64()
+    void SetWoW64()
     {
       // Get WoW64 status of self
       BOOL IsWoW64Me = FALSE;
@@ -154,7 +154,7 @@ namespace HadesMem
     }
 
     // Open process given process id
-    void Impl::Open(DWORD ProcID)
+    void Open(DWORD ProcID)
     {
       // Open process
       m_Handle.reset(new EnsureCloseHandle(
