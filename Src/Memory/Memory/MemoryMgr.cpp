@@ -63,7 +63,7 @@ namespace HadesMem
     {
       // Get module snapshot
       EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE, MyMemory.GetProcessID());
+        TH32CS_SNAPMODULE, MyMemory.GetProcessId());
       if (Snap == INVALID_HANDLE_VALUE)
       {
         DWORD const LastError = GetLastError();
@@ -522,18 +522,6 @@ namespace HadesMem
     }
   }
 
-  // Get process ID of target
-  DWORD MemoryMgr::GetProcessID() const
-  {
-    return m_Process.GetID();
-  }
-
-  // Get process handle of target
-  HANDLE MemoryMgr::GetProcessHandle() const
-  {
-    return m_Process.GetHandle();
-  }
-
   // Get address of export in remote process
   FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
     std::wstring const& ModulePath, std::string const& Function) 
@@ -627,8 +615,26 @@ namespace HadesMem
     }
   }
 
+  // Get process handle of target
+  HANDLE MemoryMgr::GetProcessHandle() const
+  {
+    return m_Process.GetHandle();
+  }
+
+  // Get process ID of target
+  DWORD MemoryMgr::GetProcessId() const
+  {
+    return m_Process.GetID();
+  }
+    
+  // Get process path
+  std::wstring MemoryMgr::GetProcessPath() const
+  {
+    return m_Process.GetPath();
+  }
+
   // Is WoW64 process
-  bool MemoryMgr::IsWoW64() const 
+  bool MemoryMgr::IsWoW64Process() const 
   {
     return m_Process.IsWoW64();
   }

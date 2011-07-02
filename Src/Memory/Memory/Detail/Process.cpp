@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include <HadesMemory/Process.hpp>
+#include <HadesMemory/Detail/Process.hpp>
 #include <HadesMemory/Detail/StringBuffer.hpp>
 #include <HadesMemory/Detail/EnsureCleanup.hpp>
 

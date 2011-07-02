@@ -20,8 +20,8 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include <HadesMemory/Process.hpp>
 #include <HadesMemory/Detail/Error.hpp>
+#include <HadesMemory/Detail/Process.hpp>
 
 // C++ Standard Library
 #include <memory>
@@ -140,12 +140,6 @@ namespace HadesMem
     // Free memory
     void Free(PVOID Address) const;
 
-    // Get process ID of target
-    DWORD GetProcessID() const;
-
-    // Get process handle of target
-    HANDLE GetProcessHandle() const;
-
     // Get address of export in remote process (by name)
     FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
       std::wstring const& Module, std::string const& Function) const;
@@ -156,9 +150,18 @@ namespace HadesMem
 
     // Flush instruction cache
     void FlushCache(LPCVOID Address, SIZE_T Size) const;
+
+    // Get process handle of target
+    HANDLE GetProcessHandle() const;
+
+    // Get process ID of target
+    DWORD GetProcessId() const;
+    
+    // Get process path
+    std::wstring GetProcessPath() const;
     
     // Is WoW64 process
-    bool IsWoW64() const;
+    bool IsWoW64Process() const;
 
   private:
     // Read memory (POD types)

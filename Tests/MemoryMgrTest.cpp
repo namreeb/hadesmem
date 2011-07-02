@@ -226,12 +226,6 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     HadesMem::AllocAndFree const MyAllocTest(MyMemory, 0x1000);
   }
   
-  // Test MemoryMgr::GetProcessID
-  BOOST_CHECK_EQUAL(MyMemory.GetProcessID(), GetCurrentProcessId());
-  
-  // Test MemoryMgr::GetProcessHandle
-  BOOST_CHECK_EQUAL(MyMemory.GetProcessHandle(), GetCurrentProcess());
-  
   // Ensure we can find a valid Kernel32 instance
   HMODULE const Kernel32Mod = GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(Kernel32Mod != nullptr);
@@ -251,13 +245,22 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), 10);
   
+  // Test MemoryMgr::GetProcessID
+  BOOST_CHECK_EQUAL(MyMemory.GetProcessId(), GetCurrentProcessId());
+  
+  // Test MemoryMgr::GetProcessHandle
+  BOOST_CHECK_EQUAL(MyMemory.GetProcessHandle(), GetCurrentProcess());
+  
+  // Test MemoryMgr::GetProcessPath
+  BOOST_CHECK(!MyMemory.GetProcessPath().empty());
+  
   // Test MemoryMgr::IsWoW64
 #if defined(_M_AMD64) 
   BOOST_CHECK_EQUAL(MyMemory.IsWoW64(), false);
 #elif defined(_M_IX86) 
   BOOL Wow64Process = FALSE;
   BOOST_REQUIRE(IsWow64Process(MyMemory.GetProcessHandle(), &Wow64Process));
-  BOOST_CHECK_EQUAL(MyMemory.IsWoW64(), (Wow64Process ? true : false));
+  BOOST_CHECK_EQUAL(MyMemory.IsWoW64Process(), (Wow64Process ? true : false));
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

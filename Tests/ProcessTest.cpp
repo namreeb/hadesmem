@@ -18,7 +18,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Hades
-#include <HadesMemory/Process.hpp>
+#include <HadesMemory/Detail/Process.hpp>
 
 // Boost
 #define BOOST_TEST_MODULE ProcessTest
@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     
   // Check process APIs for predictable values where possible, otherwise just 
   // ensure they run without exception
-  BOOST_CHECK(MyProcess.GetHandle() != 0);
-  BOOST_CHECK(MyProcess.GetID() != 0);
+  BOOST_CHECK_EQUAL(MyProcess.GetHandle(), GetCurrentProcess());
+  BOOST_CHECK_EQUAL(MyProcess.GetID(), GetCurrentProcessId());
   BOOST_CHECK(!MyProcess.GetPath().empty());
   
   // Test Process::IsWoW64

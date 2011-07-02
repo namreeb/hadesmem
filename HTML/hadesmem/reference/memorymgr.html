@@ -6,21 +6,21 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="../../index.html" title="HadesMem 0.0.0">
 <link rel="up" href="../reference.html" title="Reference">
-<link rel="prev" href="process.html" title="Process">
+<link rel="prev" href="../reference.html" title="Reference">
 <link rel="next" href="../acknowledge.html" title="Acknowledgements">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="100" height="100" src="../../Images/VelociraptorSq.png"></td></tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="process.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="hadesmem.reference.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
 </h3></div></div></div>
 <a name="hadesmem.reference.memorymgr.synopsis"></a><h5>
-<a name="id857977"></a>
+<a name="id848570"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.synopsis">Synopsis</a>
       </h5>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;
@@ -33,53 +33,21 @@
 
   <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
 
-  <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ProcName</span><span class="special">);</span>
-
-  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WindowName</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ClassName</span><span class="special">);</span>
-
   <span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
-    <span class="identifier">RemoteFunctionRet</span><span class="special">()</span> 
-      <span class="special">:</span> <span class="identifier">m_ReturnValue</span><span class="special">(</span><span class="number">0</span><span class="special">),</span> 
-      <span class="identifier">m_ReturnValue64</span><span class="special">(</span><span class="number">0</span><span class="special">),</span> 
-      <span class="identifier">m_ReturnValueFloat</span><span class="special">(.</span><span class="number">0</span><span class="special">),</span> 
-      <span class="identifier">m_LastError</span><span class="special">(</span><span class="number">0</span><span class="special">)</span>
-    <span class="special">{</span> <span class="special">}</span>
+    <span class="identifier">RemoteFunctionRet</span><span class="special">();</span>
     
     <span class="identifier">RemoteFunctionRet</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">ReturnValue</span><span class="special">,</span> <span class="identifier">DWORD64</span> <span class="identifier">ReturnValue64</span><span class="special">,</span> 
-      <span class="keyword">double</span> <span class="identifier">ReturnValueFloat</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">LastError</span><span class="special">)</span> 
-      <span class="special">:</span> <span class="identifier">m_ReturnValue</span><span class="special">(</span><span class="identifier">ReturnValue</span><span class="special">),</span> 
-      <span class="identifier">m_ReturnValue64</span><span class="special">(</span><span class="identifier">ReturnValue64</span><span class="special">),</span> 
-      <span class="identifier">m_ReturnValueFloat</span><span class="special">(</span><span class="identifier">ReturnValueFloat</span><span class="special">),</span> 
-      <span class="identifier">m_LastError</span><span class="special">(</span><span class="identifier">LastError</span><span class="special">)</span>
-    <span class="special">{</span> <span class="special">}</span>
+      <span class="keyword">double</span> <span class="identifier">ReturnValueFloat</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">LastError</span><span class="special">);</span>
     
-    <span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span>
-    <span class="special">{</span>
-      <span class="keyword">return</span> <span class="identifier">m_ReturnValue</span><span class="special">;</span>
-    <span class="special">}</span>
+    <span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
     
-    <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span>
-    <span class="special">{</span>
-      <span class="keyword">return</span> <span class="identifier">m_ReturnValue64</span><span class="special">;</span>
-    <span class="special">}</span>
+    <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
     
-    <span class="keyword">double</span> <span class="identifier">GetReturnValueFloat</span><span class="special">()</span> <span class="keyword">const</span>
-    <span class="special">{</span>
-      <span class="keyword">return</span> <span class="identifier">m_ReturnValueFloat</span><span class="special">;</span>
-    <span class="special">}</span>
+    <span class="keyword">double</span> <span class="identifier">GetReturnValueFloat</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
     
-    <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span>
-    <span class="special">{</span>
-      <span class="keyword">return</span> <span class="identifier">m_LastError</span><span class="special">;</span>
-    <span class="special">}</span>
-    
-  <span class="keyword">private</span><span class="special">:</span>
-    <span class="identifier">DWORD_PTR</span> <span class="identifier">m_ReturnValue</span><span class="special">;</span>
-    <span class="identifier">DWORD64</span> <span class="identifier">m_ReturnValue64</span><span class="special">;</span>
-    <span class="keyword">double</span> <span class="identifier">m_ReturnValueFloat</span><span class="special">;</span>
-    <span class="identifier">DWORD</span> <span class="identifier">m_LastError</span><span class="special">;</span>
+    <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
 
   <span class="keyword">enum</span> <span class="identifier">CallConv</span>
@@ -116,10 +84,6 @@
 
   <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
-  <span class="identifier">DWORD</span> <span class="identifier">GetProcessID</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-
-  <span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-
   <span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
@@ -127,8 +91,14 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   
-  <span class="keyword">bool</span> <span class="identifier">IsWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
 <span class="keyword">class</span> <span class="identifier">AllocAndFree</span>
@@ -150,7 +120,7 @@
 <span class="special">};</span>
 </pre>
 <a name="hadesmem.reference.memorymgr.description"></a><h5>
-<a name="id859726"></a>
+<a name="id856580"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.description">Description</a>
       </h5>
 <p>
@@ -164,7 +134,7 @@
         freeing.
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_types"></a><h5>
-<a name="id859747"></a>
+<a name="id856601"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_types">MemoryMgr
         public types</a>
       </h5>
@@ -172,7 +142,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h5>
-<a name="id859763"></a>
+<a name="id856618"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
         public construct/copy/destruct/move</a>
       </h5>
@@ -180,7 +150,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions"></a><h5>
-<a name="id859783"></a>
+<a name="id856637"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_member_functions">MemoryMgr
         public member functions</a>
       </h5>
@@ -188,7 +158,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_types"></a><h5>
-<a name="id859802"></a>
+<a name="id856656"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_types">AllocAndFree
         public types</a>
       </h5>
@@ -196,7 +166,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h5>
-<a name="id861458"></a>
+<a name="id856673"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
         public construct/copy/destruct/move</a>
       </h5>
@@ -204,7 +174,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions"></a><h5>
-<a name="id861476"></a>
+<a name="id856691"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_member_functions">AllocAndFree
         public member functions</a>
       </h5>
@@ -221,7 +191,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="process.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

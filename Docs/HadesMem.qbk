@@ -84,70 +84,6 @@ or the requirements list of your project.
 
 [section:reference Reference]
 
-[section:process Process]
-
-[h4 Synopsis]
-
-  // In header: <HadesMemory/Process.hpp>
-
-  class Process
-  {
-  public:
-    class Error : public virtual HadesMemError 
-    { };
-  
-    explicit Process(DWORD ProcID);
-    
-    explicit Process(std::wstring const& ProcName);
-    
-    Process(std::wstring const& WindowName, std::wstring const& ClassName);
-    
-    Process(Process const& Other);
-    
-    Process& operator=(Process const& Other);
-  
-    HANDLE GetHandle() const;    
-    
-    DWORD GetID() const;    
-    
-    std::wstring GetPath() const;      
-    
-    bool IsWoW64() const;
-  };
-  
-  Process CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
-    std::wstring const& WorkingDir);
-  
-  void GetSeDebugPrivilege();
-
-[h4 Description]
-
-The Process class is used for process management in the context of memory 
-hacking. It opens a process using the required access rights for memory 
-hacking, and exposes APIs to access commonly needed data related to a process.
-
-Free functions are provided for process creation, and debug privilege 
-acquisition.
-
-[h4 Process public types]
-
-TODO: Write this!
-
-[h4 Process public construct/copy/destruct/move]
-
-TODO: Write this!
-
-[h4 Process public member functions]
-
-TODO: Write this!
-
-[h4 Public free functions]
-
-TODO: Write this!
-
-[endsect] [/ Process]
-
 [section:memorymgr MemoryMgr]
 
 [h4 Synopsis]
@@ -162,53 +98,21 @@ TODO: Write this!
 
     explicit MemoryMgr(DWORD ProcID);
 
-    explicit MemoryMgr(std::wstring const& ProcName);
-
-    MemoryMgr(std::wstring const& WindowName, std::wstring const& ClassName);
-
     class RemoteFunctionRet
     {
     public:
-      RemoteFunctionRet() 
-        : m_ReturnValue(0), 
-        m_ReturnValue64(0), 
-        m_ReturnValueFloat(.0), 
-        m_LastError(0)
-      { }
+      RemoteFunctionRet();
       
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
-        double ReturnValueFloat, DWORD LastError) 
-        : m_ReturnValue(ReturnValue), 
-        m_ReturnValue64(ReturnValue64), 
-        m_ReturnValueFloat(ReturnValueFloat), 
-        m_LastError(LastError)
-      { }
+        double ReturnValueFloat, DWORD LastError);
       
-      DWORD_PTR GetReturnValue() const
-      {
-        return m_ReturnValue;
-      }
+      DWORD_PTR GetReturnValue() const;
       
-      DWORD64 GetReturnValue64() const
-      {
-        return m_ReturnValue64;
-      }
+      DWORD64 GetReturnValue64() const;
       
-      double GetReturnValueFloat() const
-      {
-        return m_ReturnValueFloat;
-      }
+      double GetReturnValueFloat() const;
       
-      DWORD GetLastError() const
-      {
-        return m_LastError;
-      }
-      
-    private:
-      DWORD_PTR m_ReturnValue;
-      DWORD64 m_ReturnValue64;
-      double m_ReturnValueFloat;
-      DWORD m_LastError;
+      DWORD GetLastError() const;
     };
   
     enum CallConv
@@ -245,10 +149,6 @@ TODO: Write this!
 
     void Free(PVOID Address) const;
 
-    DWORD GetProcessID() const;
-
-    HANDLE GetProcessHandle() const;
-
     FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
       std::wstring const& Module, std::string const& Function) const;
 
@@ -256,8 +156,14 @@ TODO: Write this!
       std::wstring const& Module, WORD Function) const;
 
     void FlushCache(LPCVOID Address, SIZE_T Size) const;
+
+    DWORD GetProcessId() const;
+
+    HANDLE GetProcessHandle() const;
     
-    bool IsWoW64() const;
+    std::wstring GetProcessPath() const;
+    
+    bool IsProcessWoW64() const;
   };
 
   class AllocAndFree
