@@ -20,6 +20,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesCommon/Config.hpp>
+#include <HadesCommon/EnsureCleanup.hpp>
 
 // Boost
 #include <boost/filesystem.hpp>
@@ -55,17 +56,6 @@ namespace Hades
     // Open process from process ID
     MemoryMgr::MemoryMgr(DWORD ProcID) 
       : m_Process(ProcID) 
-    { }
-
-    // Open process from process name
-    MemoryMgr::MemoryMgr(std::wstring const& ProcName) 
-      : m_Process(ProcName) 
-    { }
-
-    // Open process from window name and class
-    MemoryMgr::MemoryMgr(std::wstring const& WindowName, 
-      std::wstring const& ClassName) 
-      : m_Process(WindowName, ClassName) 
     { }
     
     namespace

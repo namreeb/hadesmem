@@ -52,12 +52,6 @@ namespace Hades
       // Open process from process ID
       explicit MemoryMgr(DWORD ProcID);
 
-      // Open process from process name
-      explicit MemoryMgr(std::wstring const& ProcName);
-
-      // Open process from window name and class
-      MemoryMgr(std::wstring const& WindowName, std::wstring const& ClassName);
-
       // MemoryMgr::Call return data
       class RemoteFunctionRet
       {

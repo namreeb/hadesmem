@@ -19,9 +19,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// C++ Standard Library
-#include <string>
-
 // Windows API
 #include <Windows.h>
 #include <Objbase.h>
@@ -571,69 +568,6 @@ namespace Hades
       // 'Handle' being managed
       BOOL m_Success;
     };
-
-    // Special class for releasing a window class
-    class EnsureUnregisterClass
-    {
-    public:
-      // Constructor
-      EnsureUnregisterClass(std::wstring const& ClassName, 
-        HINSTANCE Instance)
-        : m_ClassName(ClassName),
-        m_Instance(Instance)
-      { }
-
-      // Move constructor
-      EnsureUnregisterClass(EnsureUnregisterClass&& MyEnsureCleanup)
-        : m_ClassName(),
-        m_Instance()
-      {
-        *this = std::move(MyEnsureCleanup);
-      }
-
-      // Move assignment operator
-      EnsureUnregisterClass& operator= (EnsureUnregisterClass&&
-        MyEnsureCleanup)
-      {
-        Cleanup();
-
-        m_ClassName = std::move(MyEnsureCleanup.m_ClassName);
-        m_Instance = MyEnsureCleanup.m_Instance;
-
-        MyEnsureCleanup.m_ClassName = std::wstring();
-        MyEnsureCleanup.m_Instance = nullptr;
-
-        return *this;
-      }
-
-      // Destructor
-      ~EnsureUnregisterClass()
-      {
-        Cleanup();
-      }
-
-      // Cleanup the object if the value represents a valid object
-      void Cleanup()
-      {
-        if (!m_ClassName.empty() && m_Instance)
-        {
-          UnregisterClass(m_ClassName.c_str(), m_Instance);
-
-          m_ClassName.clear();
-          m_Instance = 0;
-        }
-      }
-      
-    protected:
-      EnsureUnregisterClass(EnsureUnregisterClass const&);
-      EnsureUnregisterClass& operator=(EnsureUnregisterClass const&);
-
-    private:
-      // 'Handles' being managed
-      std::wstring m_ClassName;
-      HINSTANCE m_Instance;
-    };
-
 
     // Special class for releasing a DC
     class EnsureReleaseDc

@@ -60,8 +60,13 @@ namespace Hades
       // Destructor
       ~StringBuffer()
       {
-        // Commit current buffer
-        Commit();
+        try
+        {
+          // Commit current buffer
+          Commit();
+        }
+        catch (...)
+        { }
       }
 
       // Get pointer to internal buffer
@@ -118,8 +123,7 @@ namespace Hades
       std::vector<CharT> m_Buffer;
     };
 
-    // Make string buffer. Simple helper function to automatically detect 
-    // character type.
+    // Make string buffer. Simple helper function to deduce character type.
     template <class CharT>
     StringBuffer<CharT> MakeStringBuffer(std::basic_string<CharT>& String, 
       std::size_t Size)

@@ -20,12 +20,11 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include <HadesMemory/Fwd.hpp>
 #include <HadesMemory/Error.hpp>
-#include <HadesCommon/EnsureCleanup.hpp>
 
 // C++ Standard Library
 #include <string>
+#include <memory>
 
 // Windows API
 #include <Windows.h>
@@ -45,17 +44,17 @@ namespace Hades
       // Open process from process ID
       explicit Process(DWORD ProcID);
     
-      // Open process from process name
-      explicit Process(std::wstring const& ProcName);
-    
-      // Open process from window name and class
-      Process(std::wstring const& WindowName, std::wstring const& ClassName);
-    
       // Copy constructor
       Process(Process const& Other);
     
       // Copy assignment
-      Process& operator=(Process const& Other);
+      Process& operator=(Process Other);
+      
+      // Destructor
+      ~Process() /*noexcept*/;
+      
+      // Swap
+      void swap(Process& Other);
     
       // Get process handle
       HANDLE GetHandle() const;
@@ -65,25 +64,14 @@ namespace Hades
       
       // Get process path
       std::wstring GetPath() const;
-        
+      
       // Is WoW64 process
       bool IsWoW64() const;
     
     private:
-      // Get WoW64 status of process and set member var
-      void SetWoW64();
-      
-      // Open process given process id
-      void Open(DWORD ProcID);
-    
-      // Process handle
-      Windows::EnsureCloseHandle m_Handle;
-    
-      // Process ID
-      DWORD m_ID;
-      
-      // Is WoW64 process
-      bool m_IsWoW64;
+      // Implementation
+      class Impl;
+      std::shared_ptr<Impl> m_pImpl;
     };
     
     // Create process

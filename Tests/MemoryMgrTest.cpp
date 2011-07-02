@@ -89,8 +89,11 @@ DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c,
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  // Todo: Test other constructors
-  Hades::Memory::MemoryMgr const MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
+  Hades::Memory::MemoryMgr OtherMemory(MyMemory);
+  MyMemory = OtherMemory;
+  BOOST_CHECK_THROW(Hades::Memory::MemoryMgr InvalidMemory(
+    static_cast<DWORD>(-1)), Hades::HadesError);
   
   // Call test function and ensure returned data is valid
   std::vector<PVOID> TestCallArgs;
