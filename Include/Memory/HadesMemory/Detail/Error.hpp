@@ -29,10 +29,10 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows
 #include <Windows.h>
 
-namespace Hades
+namespace HadesMem
 {
   // Base exception class
-  class HadesError : public virtual std::exception, 
+  class HadesMemError : public virtual std::exception, 
     public virtual boost::exception
   { };
   

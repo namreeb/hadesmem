@@ -89,11 +89,11 @@ DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c,
 BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 {
   // Create memory manager for self
-  Hades::Memory::MemoryMgr MyMemory(GetCurrentProcessId());
-  Hades::Memory::MemoryMgr OtherMemory(MyMemory);
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+  HadesMem::MemoryMgr OtherMemory(MyMemory);
   MyMemory = OtherMemory;
-  BOOST_CHECK_THROW(Hades::Memory::MemoryMgr InvalidMemory(
-    static_cast<DWORD>(-1)), Hades::HadesError);
+  BOOST_CHECK_THROW(HadesMem::MemoryMgr InvalidMemory(
+    static_cast<DWORD>(-1)), HadesMem::HadesMemError);
   
   // Call test function and ensure returned data is valid
   std::vector<PVOID> TestCallArgs;
@@ -103,26 +103,26 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x55667788));
   TestCallArgs.push_back(reinterpret_cast<PVOID>(0x99999999));
-  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet = MyMemory.Call(
+  HadesMem::MemoryMgr::RemoteFunctionRet const CallRet = MyMemory.Call(
     reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
-    Hades::Memory::MemoryMgr::CallConv_Default, TestCallArgs);
+    HadesMem::MemoryMgr::CallConv_Default, TestCallArgs);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
   // Test __fastcall and __stdcall under x86
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
-  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetFast = 
+  HadesMem::MemoryMgr::RemoteFunctionRet const CallRetFast = 
     MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestFastCall)), Hades::Memory::MemoryMgr::CallConv_FASTCALL, 
+    &TestFastCall)), HadesMem::MemoryMgr::CallConv_FASTCALL, 
     TestCallArgs);
   BOOST_CHECK_EQUAL(CallRetFast.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetFast.GetLastError(), static_cast<DWORD>(5678));
   
-  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetStd = 
+  HadesMem::MemoryMgr::RemoteFunctionRet const CallRetStd = 
     MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestStdCall)), Hades::Memory::MemoryMgr::CallConv_STDCALL, TestCallArgs);
+    &TestStdCall)), HadesMem::MemoryMgr::CallConv_STDCALL, TestCallArgs);
   BOOST_CHECK_EQUAL(CallRetStd.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetStd.GetLastError(), static_cast<DWORD>(5678));
@@ -132,17 +132,17 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
 
   // Test 64-bit return values in MemoryMgr::Call
   std::vector<PVOID> TestCall64Args;
-  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRet64 = MyMemory.Call(
+  HadesMem::MemoryMgr::RemoteFunctionRet const CallRet64 = MyMemory.Call(
     reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall64Ret)), 
-    Hades::Memory::MemoryMgr::CallConv_Default, TestCall64Args);
+    HadesMem::MemoryMgr::CallConv_Default, TestCall64Args);
   BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
     0x123456787654321LL));
   
   // Test floating point return values in MemoryMgr::Call
   std::vector<PVOID> TestCallFloatArgs;
-  Hades::Memory::MemoryMgr::RemoteFunctionRet const CallRetFloat = 
+  HadesMem::MemoryMgr::RemoteFunctionRet const CallRetFloat = 
     MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestCallFloatRet)), Hades::Memory::MemoryMgr::CallConv_Default, 
+    &TestCallFloatRet)), HadesMem::MemoryMgr::CallConv_Default, 
     TestCallFloatArgs);
   {
     double const epsilon = .001;
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Test AllocAndFree
   {
-    Hades::Memory::AllocAndFree const MyAllocTest(MyMemory, 0x1000);
+    HadesMem::AllocAndFree const MyAllocTest(MyMemory, 0x1000);
   }
   
   // Test MemoryMgr::GetProcessID

@@ -20,9 +20,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include <HadesCommon/Error.hpp>
-#include <HadesCommon/Config.hpp>
-#include <HadesCommon/StringBuffer.hpp>
+#include <HadesMemory/Detail/Error.hpp>
+#include <HadesMemory/Detail/Config.hpp>
+#include <HadesMemory/Detail/StringBuffer.hpp>
 
 // C++ Standard Library
 #include <string>

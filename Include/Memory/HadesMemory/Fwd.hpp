@@ -19,12 +19,9 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-namespace Hades
+namespace HadesMem
 {
-  namespace Memory
-  {
-    // Hades (External)
-    class MemoryMgr;
-    class AllocAndFree;
-  }
+  // Hades (External)
+  class MemoryMgr;
+  class AllocAndFree;
 }

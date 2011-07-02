@@ -20,7 +20,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // Hades
-#include <HadesMemory/Error.hpp>
+#include <HadesMemory/Detail/Error.hpp>
 
 // C++ Standard Library
 #include <string>
@@ -29,57 +29,54 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <Windows.h>
 
-namespace Hades 
+namespace HadesMem
 {
-  namespace Memory
+  // Process managing class
+  class Process
   {
-    // Process managing class
-    class Process
-    {
-    public:
-      // Process exception type
-      class Error : public virtual HadesMemError 
-      { };
+  public:
+    // Process exception type
+    class Error : public virtual HadesMemError 
+    { };
+  
+    // Open process from process ID
+    explicit Process(DWORD ProcID);
+  
+    // Copy constructor
+    Process(Process const& Other);
+  
+    // Copy assignment
+    Process& operator=(Process Other);
     
-      // Open process from process ID
-      explicit Process(DWORD ProcID);
+    // Destructor
+    ~Process() /*noexcept*/;
     
-      // Copy constructor
-      Process(Process const& Other);
+    // Swap
+    void swap(Process& Other);
+  
+    // Get process handle
+    HANDLE GetHandle() const;
     
-      // Copy assignment
-      Process& operator=(Process Other);
-      
-      // Destructor
-      ~Process() /*noexcept*/;
-      
-      // Swap
-      void swap(Process& Other);
+    // Get process ID
+    DWORD GetID() const;
     
-      // Get process handle
-      HANDLE GetHandle() const;
-      
-      // Get process ID
-      DWORD GetID() const;
-      
-      // Get process path
-      std::wstring GetPath() const;
-      
-      // Is WoW64 process
-      bool IsWoW64() const;
+    // Get process path
+    std::wstring GetPath() const;
     
-    private:
-      // Implementation
-      class Impl;
-      std::shared_ptr<Impl> m_pImpl;
-    };
-    
-    // Create process
-    Process CreateProcess(std::wstring const& Path, 
-      std::wstring const& Params, 
-      std::wstring const& WorkingDir);
-    
-    // Gets the SeDebugPrivilege
-    void GetSeDebugPrivilege();
-  } // namespace Memory
-} // namespace Hades
+    // Is WoW64 process
+    bool IsWoW64() const;
+  
+  private:
+    // Implementation
+    class Impl;
+    std::shared_ptr<Impl> m_pImpl;
+  };
+  
+  // Create process
+  Process CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir);
+  
+  // Gets the SeDebugPrivilege
+  void GetSeDebugPrivilege();
+} // namespace HadesMem
