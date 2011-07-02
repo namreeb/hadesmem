@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   
   // Test MemoryMgr::IsWoW64
 #if defined(_M_AMD64) 
-  BOOST_CHECK_EQUAL(MyMemory.IsWoW64(), false);
+  BOOST_CHECK_EQUAL(MyMemory.IsWoW64Process(), false);
 #elif defined(_M_IX86) 
   BOOL Wow64Process = FALSE;
   BOOST_REQUIRE(IsWow64Process(MyMemory.GetProcessHandle(), &Wow64Process));

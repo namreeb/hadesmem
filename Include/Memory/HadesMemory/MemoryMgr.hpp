@@ -30,9 +30,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <utility>
 #include <type_traits>
 
-// Boost
-#include <boost/config.hpp>
-
 // Windows API
 #include <Windows.h>
 
