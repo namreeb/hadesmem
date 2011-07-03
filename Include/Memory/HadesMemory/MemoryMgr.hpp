@@ -231,8 +231,9 @@ namespace HadesMem
   T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_pod<T>::
     value, T>::type* /*Dummy*/) const
   {
+    // Read data
     T Data;
-    this->ReadImpl(Address, &Data, sizeof(Data));
+    ReadImpl(Address, &Data, sizeof(Data));
     return Data;
   }
 
@@ -245,6 +246,10 @@ namespace HadesMem
     // Character type
     typedef typename T::value_type CharT;
 
+    // Ensure chracter type is POD
+    static_assert(std::is_pod<CharT>::value, "Character type of string must "
+      "be POD.");
+    
     // Create buffer to store results
     T Buffer;
 
@@ -271,11 +276,16 @@ namespace HadesMem
     std::is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
     /*Dummy*/) const
   {
-    static_assert(std::is_pod<typename T::value_type>::value, 
-      "Value type of vector must be POD.");
+    // Value type
+    typedef typename T::value_type ValT;
     
+    // Ensure value type is POD
+    static_assert(std::is_pod<ValT>::value, "Value type of vector must be "
+      "POD.");
+    
+    // Read data
     T Data(Size);
-    this->ReadImpl(Address, Data.data(), sizeof(T::value_type) * Size);
+    this->ReadImpl(Address, Data.data(), sizeof(ValT) * Size);
     return Data;
   }
 
@@ -284,6 +294,7 @@ namespace HadesMem
   void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
     enable_if<std::is_pod<T>::value, T>::type* /*Dummy*/) const 
   {
+    // Write memory
     WriteImpl(Address, &Data, sizeof(Data));
   }
 
@@ -293,8 +304,15 @@ namespace HadesMem
     typename std::enable_if<std::is_same<T, std::basic_string<typename T::
     value_type>>::value, T>::type* /*Dummy*/) const
   {
-    std::size_t const RawSize = (Data.size() * sizeof(typename 
-      T::value_type)) + 1;
+    // Character type
+    typedef typename T::value_type CharT;
+
+    // Ensure chracter type is POD
+    static_assert(std::is_pod<CharT>::value, "Character type of string must "
+      "be POD.");
+    
+    // Write memory
+    std::size_t const RawSize = (Data.size() * sizeof(CharT)) + 1;
     WriteImpl(Address, Data.data(), RawSize);
   }
 
@@ -304,7 +322,15 @@ namespace HadesMem
     enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
     T>::type* /*Dummy*/) const
   {
-    std::size_t const RawSize = Data.size() * sizeof(typename T::value_type);
+    // Value type
+    typedef typename T::value_type ValT;
+    
+    // Ensure value type is POD
+    static_assert(std::is_pod<ValT>::value, "Value type of vector must be "
+      "POD.");
+    
+    // Write memory
+    std::size_t const RawSize = Data.size() * sizeof(ValT);
     WriteImpl(Address, Data.data(), RawSize);
   }
 }
