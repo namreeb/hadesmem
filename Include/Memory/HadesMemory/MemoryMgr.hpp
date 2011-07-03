@@ -175,46 +175,15 @@ namespace HadesMem
   class AllocAndFree
   {
   public:
-    AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size) 
-      : m_Memory(MyMemoryMgr), 
-      m_Size(Size), 
-      m_Address(MyMemoryMgr.Alloc(Size)) 
-    { }
-    
-    void Free() const
-    {
-      if (m_Address)
-      {
-        m_Memory.Free(m_Address);
-        m_Address = nullptr;
-      }
-    }
+    AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
 
-    ~AllocAndFree()
-    {
-      try
-      {
-        Free();
-      }
-      catch (std::exception const& e)
-      {
-        OutputDebugStringA(boost::diagnostic_information(e).c_str());
-      }
-      catch (...)
-      {
-        OutputDebugString(L"AllocAndFree::~AllocAndFree: Unknown error.");
-      }
-    }
-
-    PVOID GetBase() const 
-    {
-      return m_Address;
-    }
+    ~AllocAndFree();
     
-    SIZE_T GetSize() const
-    {
-      return m_Size;
-    }
+    void Free() const;
+
+    PVOID GetBase() const;
+    
+    SIZE_T GetSize() const;
 
   protected:
     AllocAndFree(AllocAndFree const&);

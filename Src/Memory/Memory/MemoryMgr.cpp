@@ -775,4 +775,45 @@ namespace HadesMem
       ProtectRegion(Address, OldProtect);
     }
   }
+  
+  AllocAndFree::AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size)
+    : m_Memory(MyMemoryMgr), 
+    m_Size(Size), 
+    m_Address(MyMemoryMgr.Alloc(Size)) 
+  { }
+  
+  AllocAndFree::~AllocAndFree()
+  {
+    try
+    {
+      Free();
+    }
+    catch (std::exception const& e)
+    {
+      OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    }
+    catch (...)
+    {
+      OutputDebugString(L"AllocAndFree::~AllocAndFree: Unknown error.");
+    }
+  }
+  
+  void AllocAndFree::Free() const
+  {
+    if (m_Address)
+    {
+      m_Memory.Free(m_Address);
+      m_Address = nullptr;
+    }
+  }
+  
+  PVOID AllocAndFree::GetBase() const
+  {
+    return m_Address;
+  }
+  
+  SIZE_T AllocAndFree::GetSize() const
+  {
+    return m_Size;
+  }
 }
