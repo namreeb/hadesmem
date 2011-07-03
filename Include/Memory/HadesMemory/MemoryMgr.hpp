@@ -50,40 +50,18 @@ namespace HadesMem
     class RemoteFunctionRet
     {
     public:
-      RemoteFunctionRet() 
-        : m_ReturnValue(0), 
-        m_ReturnValue64(0), 
-        m_ReturnValueFloat(.0), 
-        m_LastError(0)
-      { }
+      RemoteFunctionRet();
       
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
-        double ReturnValueFloat, DWORD LastError) 
-        : m_ReturnValue(ReturnValue), 
-        m_ReturnValue64(ReturnValue64), 
-        m_ReturnValueFloat(ReturnValueFloat), 
-        m_LastError(LastError)
-      { }
+        double ReturnValueFloat, DWORD LastError);
       
-      DWORD_PTR GetReturnValue() const
-      {
-        return m_ReturnValue;
-      }
+      DWORD_PTR GetReturnValue() const;
       
-      DWORD64 GetReturnValue64() const
-      {
-        return m_ReturnValue64;
-      }
+      DWORD64 GetReturnValue64() const;
       
-      double GetReturnValueFloat() const
-      {
-        return m_ReturnValueFloat;
-      }
+      double GetReturnValueFloat() const;
       
-      DWORD GetLastError() const
-      {
-        return m_LastError;
-      }
+      DWORD GetLastError() const;
       
     private:
       DWORD_PTR m_ReturnValue;
@@ -107,17 +85,39 @@ namespace HadesMem
     RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
       std::vector<PVOID> const& Args) const;
 
-    // Read memory
+    // Read memory (POD types)
     template <typename T>
-    T Read(PVOID Address) const;
+    T Read(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
+      T>::type* Dummy = 0) const;
 
-    // Read memory
+    // Read memory (string types)
     template <typename T>
-    T Read(PVOID Address, std::size_t Size) const;
+    T Read(PVOID Address, typename std::enable_if<std::is_same<T, std::
+      basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
+      const;
 
-    // Write memory
+    // Read memory (vector types)
     template <typename T>
-    void Write(PVOID Address, T const& Data) const;
+    T Read(PVOID Address, std::size_t Size, typename std::enable_if<std::
+      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
+      Dummy = 0) const;
+      
+    // Write memory (POD types)
+    template <typename T>
+    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
+      is_pod<T>::value, T>::type* Dummy = 0) const;
+
+    // Write memory (string types)
+    template <typename T>
+    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
+      is_same<T, std::basic_string<typename T::value_type>>::value, T>::
+      type* Dummy = 0) const;
+
+    // Write memory (vector types)
+    template <typename T>
+    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
+      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
+      Dummy = 0) const;
 
     // Whether an address is currently readable
     bool CanRead(LPCVOID Address) const;
@@ -161,39 +161,11 @@ namespace HadesMem
     bool IsWoW64Process() const;
 
   private:
-    // Read memory (POD types)
-    template <typename T>
-    T ReadImpl(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
-      T>::type* Dummy = 0) const;
-
-    // Read memory (string types)
-    template <typename T>
-    T ReadImpl(PVOID Address, typename std::enable_if<std::is_same<T, std::
-      basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
-      const;
-
-    // Read memory (vector types)
-    template <typename T>
-    T ReadImpl(PVOID Address, std::size_t Size, typename std::enable_if<std::
-      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-      Dummy = 0) const;
-
-    // Write memory (POD types)
-    template <typename T>
-    void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_pod<T>::value, T>::type* Dummy = 0) const;
-
-    // Write memory (string types)
-    template <typename T>
-    void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_same<T, std::basic_string<typename T::value_type>>::value, T>::
-      type* Dummy = 0) const;
-
-    // Write memory (vector types)
-    template <typename T>
-    void WriteImpl(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-      Dummy = 0) const;
+    // Read memory
+    void ReadImpl(PVOID Address, PVOID Out, std::size_t OutSize) const;
+      
+    // Write memory
+    void WriteImpl(PVOID Address, LPCVOID In, std::size_t InSize) const;
     
     // Target process
     Detail::Process m_Process;
@@ -254,86 +226,19 @@ namespace HadesMem
     mutable PVOID m_Address;
   };
 
-  // Read memory
-  template <typename T>
-  T MemoryMgr::Read(PVOID Address) const
-  {
-    return this->ReadImpl<T>(Address);
-  }
-
-  // Read memory
-  template <typename T>
-  T MemoryMgr::Read(PVOID Address, std::size_t Size) const
-  {
-    return this->ReadImpl<T>(Address, Size);
-  }
-
-  // Write memory
-  template <typename T>
-  void MemoryMgr::Write(PVOID Address, T const& Data) const
-  {
-    this->WriteImpl(Address, Data);
-  }
-
   // Read memory (POD types)
   template <typename T>
-  T MemoryMgr::ReadImpl(PVOID Address, typename std::enable_if<
-    std::is_pod<T>::value, T>::type* /*Dummy*/) const 
+  T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_pod<T>::
+    value, T>::type* /*Dummy*/) const
   {
-    // Treat attempt to read from a guard page as an error
-    if (IsGuard(Address))
-    {
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Read") << 
-        ErrorString("Attempt to read from guard page."));
-    }
-    
-    // Whether we can read the given address
-    bool const CanReadMem = CanRead(Address);
-
-    // Set page protection for reading
-    DWORD OldProtect = 0;
-    if (!CanReadMem)
-    {
-      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
-    }
-
-    // Read data
-    T Out = T();
-    SIZE_T BytesRead = 0;
-    if (!ReadProcessMemory(m_Process.GetHandle(), Address, &Out, 
-      sizeof(T), &BytesRead) || BytesRead != sizeof(T))
-    {
-      if (!CanReadMem)
-      {
-        try
-        {
-          // Restore original page protections
-          ProtectRegion(Address, OldProtect);
-        }
-        catch (...)
-        { }
-      }
-
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Read") << 
-        ErrorString("Could not read process memory.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Restore original page protections
-    if (!CanReadMem)
-    {
-      ProtectRegion(Address, OldProtect);
-    }
-
-    return Out;
+    T Data;
+    this->ReadImpl(Address, &Data, sizeof(Data));
+    return Data;
   }
 
   // Read memory (string types)
   template <typename T>
-  T MemoryMgr::ReadImpl(PVOID Address, typename std::enable_if<std::is_same<T, 
+  T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_same<T, 
     std::basic_string<typename T::value_type>>::value, T>::type* /*Dummy*/) 
     const
   {
@@ -341,13 +246,13 @@ namespace HadesMem
     typedef typename T::value_type CharT;
 
     // Create buffer to store results
-    std::basic_string<CharT> Buffer;
+    T Buffer;
 
     // Loop until a null terminator is found
     for (CharT* AddressReal = static_cast<CharT*>(Address);; ++AddressReal)
     {
       // Read current character
-      CharT const Current = this->ReadImpl<CharT>(AddressReal);
+      CharT const Current = this->Read<CharT>(AddressReal);
 
       // Return generated string on null terminator
       if (Current == 0)
@@ -355,204 +260,51 @@ namespace HadesMem
         return Buffer;
       }
 
-      // Add character to buffer
+      // Add chaaracter to buffer
       Buffer += Current;
     }
   }
 
   // Read memory (vector types)
   template <typename T>
-  T MemoryMgr::ReadImpl(PVOID Address, std::size_t Size, typename 
-    std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::
-    value, T>::type* /*Dummy*/) const
+  T MemoryMgr::Read(PVOID Address, std::size_t Size, typename std::enable_if<
+    std::is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
+    /*Dummy*/) const
   {
-    // Ensure type to be read is POD
     static_assert(std::is_pod<typename T::value_type>::value, 
-      "MemoryMgr::Read: Value type of vector must be POD.");
-
-    // Treat attempt to read from a guard page as an error
-    if (IsGuard(Address))
-    {
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Read") << 
-        ErrorString("Attempt to read from guard page."));
-    }
-
-    // Calculate 'raw' size of data
-    std::size_t RawSize = Size * sizeof(typename T::value_type);
-
-    // Whether we can read the given address
-    bool const CanReadMem = CanRead(Address);
-
-    // Set page protection for reading
-    DWORD OldProtect = 0;
-    if (!CanReadMem)
-    {
-      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
-    }
-
-    // Read data
-    T Buffer(Size);
-    SIZE_T BytesRead = 0;
-    if (!ReadProcessMemory(m_Process.GetHandle(), Address, Buffer.data(), 
-      RawSize, &BytesRead) || BytesRead != RawSize)
-    {
-      if (!CanReadMem)
-      {
-        try
-        {
-          // Restore original page protections
-          ProtectRegion(Address, OldProtect);
-        }
-        catch (...)
-        { }
-      }
-
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Read") << 
-        ErrorString("Could not read process memory.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Restore original page protections
-    if (!CanReadMem)
-    {
-      ProtectRegion(Address, OldProtect);
-    }
-
-    // Return buffer
-    return Buffer;
+      "Value type of vector must be POD.");
+    
+    T Data(Size);
+    this->ReadImpl(Address, Data.data(), sizeof(T::value_type) * Size);
+    return Data;
   }
 
   // Write memory (POD types)
   template <typename T>
-  void MemoryMgr::WriteImpl(PVOID Address, T const& Data, typename std::
+  void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
     enable_if<std::is_pod<T>::value, T>::type* /*Dummy*/) const 
   {
-    // Treat attempt to write to a guard page as an error
-    if (IsGuard(Address))
-    {
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Write") << 
-        ErrorString("Attempt to write to guard page."));
-    }
-
-    // Whether we can write to the given address
-    bool const CanWriteMem = CanWrite(Address);
-
-    // Set page protections for writing
-    DWORD OldProtect = 0;
-    if (!CanWriteMem)
-    {
-      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
-    }
-
-    // Write data
-    SIZE_T BytesWritten = 0;
-    if (!WriteProcessMemory(m_Process.GetHandle(), Address, &Data, 
-      sizeof(T), &BytesWritten) || BytesWritten != sizeof(T))
-    {
-      if (!CanWriteMem)
-      {
-        try
-        {
-          // Restore original page protections
-          ProtectRegion(Address, OldProtect);
-        }
-        catch (...)
-        { }
-      }
-
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Write") << 
-        ErrorString("Could not write process memory.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Restore original page protections
-    if (!CanWriteMem)
-    {
-      ProtectRegion(Address, OldProtect);
-    }
+    WriteImpl(Address, &Data, sizeof(Data));
   }
 
   // Write memory (string types)
   template <typename T>
-  void MemoryMgr::WriteImpl(PVOID Address, T const& Data, 
+  void MemoryMgr::Write(PVOID Address, T const& Data, 
     typename std::enable_if<std::is_same<T, std::basic_string<typename T::
     value_type>>::value, T>::type* /*Dummy*/) const
   {
-    // Character type
-    typedef typename T::value_type CharT;
-
-    // Convert string to vector
-    std::vector<CharT> DataReal(Data.cbegin(), Data.cend());
-    DataReal.push_back(0);
-
-    // Write string to memory
-    this->WriteImpl(Address, DataReal);
+    std::size_t const RawSize = (Data.size() * sizeof(typename 
+      T::value_type)) + 1;
+    WriteImpl(Address, Data.data(), RawSize);
   }
 
   // Write memory (vector types)
   template <typename T>
-  void MemoryMgr::WriteImpl(PVOID Address, T const& Data, typename std::
+  void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
     enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
     T>::type* /*Dummy*/) const
   {
-    // Ensure type to be written is POD
-    static_assert(std::is_pod<typename T::value_type>::value, 
-      "MemoryMgr::Write: Value type of vector must be POD.");
-
-    // Treat attempt to write to a guard page as an error
-    if (IsGuard(Address))
-    {
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Write") << 
-        ErrorString("Attempt to write to guard page."));
-    }
-
-    // Calculate 'raw' size of data
-    std::size_t RawSize = Data.size() * sizeof(typename T::value_type);
-
-    // Whether we can write to the given address
-    bool const CanWriteMem = CanWrite(Address);
-
-    // Set page protection for writing
-    DWORD OldProtect = 0;
-    if (!CanWriteMem)
-    {
-      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
-    }
-
-    // Read data
-    SIZE_T BytesWritten = 0;
-    if (!WriteProcessMemory(m_Process.GetHandle(), Address, Data.data(), 
-      RawSize, &BytesWritten) || BytesWritten != RawSize)
-    {
-      if (!CanWriteMem)
-      {
-        try
-        {
-          // Restore original page protections
-          ProtectRegion(Address, OldProtect);
-        }
-        catch (...)
-        { }
-      }
-
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Write") << 
-        ErrorString("Could not read process memory.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Restore original page protections
-    if (!CanWriteMem)
-    {
-      ProtectRegion(Address, OldProtect);
-    }
+    std::size_t const RawSize = Data.size() * sizeof(typename T::value_type);
+    WriteImpl(Address, Data.data(), RawSize);
   }
 }

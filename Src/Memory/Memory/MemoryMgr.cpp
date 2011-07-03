@@ -51,6 +51,41 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace HadesMem
 {
+  MemoryMgr::RemoteFunctionRet::RemoteFunctionRet() 
+    : m_ReturnValue(0), 
+    m_ReturnValue64(0), 
+    m_ReturnValueFloat(.0), 
+    m_LastError(0)
+  { }
+  
+  MemoryMgr::RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, 
+    DWORD64 ReturnValue64, double ReturnValueFloat, DWORD LastError) 
+    : m_ReturnValue(ReturnValue), 
+    m_ReturnValue64(ReturnValue64), 
+    m_ReturnValueFloat(ReturnValueFloat), 
+    m_LastError(LastError)
+  { }
+      
+  DWORD_PTR MemoryMgr::RemoteFunctionRet::GetReturnValue() const
+  {
+    return m_ReturnValue;
+  }
+  
+  DWORD64 MemoryMgr::RemoteFunctionRet::GetReturnValue64() const
+  {
+    return m_ReturnValue64;
+  }
+  
+  double MemoryMgr::RemoteFunctionRet::GetReturnValueFloat() const
+  {
+    return m_ReturnValueFloat;
+  }
+  
+  DWORD MemoryMgr::RemoteFunctionRet::GetLastError() const
+  {
+    return m_LastError;
+  }
+  
   // Open process from process ID
   MemoryMgr::MemoryMgr(DWORD ProcID) 
     : m_Process(ProcID) 
@@ -637,5 +672,107 @@ namespace HadesMem
   bool MemoryMgr::IsWoW64Process() const 
   {
     return m_Process.IsWoW64();
+  }
+
+  // Read memory
+  void MemoryMgr::ReadImpl(PVOID Address, PVOID Out, std::size_t OutSize) const 
+  {
+    // Treat attempt to read from a guard page as an error
+    if (IsGuard(Address))
+    {
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Read") << 
+        ErrorString("Attempt to read from guard page."));
+    }
+    
+    // Whether we can read the given address
+    bool const CanReadMem = CanRead(Address);
+
+    // Set page protection for reading
+    DWORD OldProtect = 0;
+    if (!CanReadMem)
+    {
+      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
+    }
+
+    // Read data
+    SIZE_T BytesRead = 0;
+    if (!ReadProcessMemory(m_Process.GetHandle(), Address, Out, 
+      OutSize, &BytesRead) || BytesRead != OutSize)
+    {
+      if (!CanReadMem)
+      {
+        try
+        {
+          // Restore original page protections
+          ProtectRegion(Address, OldProtect);
+        }
+        catch (...)
+        { }
+      }
+
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Read") << 
+        ErrorString("Could not read process memory.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Restore original page protections
+    if (!CanReadMem)
+    {
+      ProtectRegion(Address, OldProtect);
+    }
+  }
+
+  // Write memory
+  void MemoryMgr::WriteImpl(PVOID Address, LPCVOID In, std::size_t InSize) const
+  {
+    // Treat attempt to write to a guard page as an error
+    if (IsGuard(Address))
+    {
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Write") << 
+        ErrorString("Attempt to write to guard page."));
+    }
+
+    // Whether we can write to the given address
+    bool const CanWriteMem = CanWrite(Address);
+
+    // Set page protections for writing
+    DWORD OldProtect = 0;
+    if (!CanWriteMem)
+    {
+      OldProtect = ProtectRegion(Address, PAGE_EXECUTE_READWRITE);
+    }
+
+    // Write data
+    SIZE_T BytesWritten = 0;
+    if (!WriteProcessMemory(m_Process.GetHandle(), Address, In, 
+      InSize, &BytesWritten) || BytesWritten != InSize)
+    {
+      if (!CanWriteMem)
+      {
+        try
+        {
+          // Restore original page protections
+          ProtectRegion(Address, OldProtect);
+        }
+        catch (...)
+        { }
+      }
+
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Write") << 
+        ErrorString("Could not write process memory.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Restore original page protections
+    if (!CanWriteMem)
+    {
+      ProtectRegion(Address, OldProtect);
+    }
   }
 }
