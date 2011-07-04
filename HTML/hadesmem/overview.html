@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Overview</title>
+<link rel="stylesheet" href="../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../index.html" title="HadesMem 0.0.0">
+<link rel="up" href="../index.html" title="HadesMem 0.0.0">
+<link rel="prev" href="../index.html" title="HadesMem 0.0.0">
+<link rel="next" href="lic.html" title="License">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="100" height="100" src="../Images/VelociraptorSq.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="lic.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="hadesmem.overview"></a><a class="link" href="overview.html" title="Overview">Overview</a>
+</h2></div></div></div>
+<a name="hadesmem.overview.introduction"></a><h5>
+<a name="id858102"></a>
+      <a class="link" href="overview.html#hadesmem.overview.introduction">Introduction</a>
+    </h5>
+<p>
+      HadesMem is a C++-based memory hacking library for Windows based applications,
+      with the goal of providing a safe, generic, powerful, and efficient API. All
+      components are useable on remote targets. Furthermore, all components compile
+      for (and work natively on) both IA32 and AMD64.
+    </p>
+<a name="hadesmem.overview.design"></a><h5>
+<a name="id858118"></a>
+      <a class="link" href="overview.html#hadesmem.overview.design">Design</a>
+    </h5>
+<p>
+      HadesMem's design is built around the <code class="computeroutput">MemoryMgr</code>
+      class, which provides all the basic and critical functionality required for
+      the other components to be implemented.
+    </p>
+<p>
+      In terms of language usage, the library aims to exploit modern C++ as much
+      as possible, both to ease implementation, and to make library use as easy and
+      as error-safe as possible.
+    </p>
+<a name="hadesmem.overview.error_handling"></a><h5>
+<a name="id858144"></a>
+      <a class="link" href="overview.html#hadesmem.overview.error_handling">Error Handling</a>
+    </h5>
+<p>
+      Exceptions are typically favoured over error codes. The rationale for this
+      is that memory hacking is quite 'unsable' by nature, and most use cases favour
+      grouping operations in an 'all or nothing' fashion. By using exceptions, the
+      amount of boilerplate code required to use the library is significantly reduced.
+    </p>
+<p>
+      Exceptions in HadesMem are all derived from <code class="computeroutput">HadesMem::HadesMemError</code>,
+      which in turn is derived from both <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
+      and <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">exception</span></code>. Internally, exceptions are built
+      and thrown using the <a href="http://www.boost.org/doc/libs/release/libs/exception/doc/boost-exception.html" target="_top">Boost.Exception</a>
+      libary. When dealing with HadesMem exceptions it is recommended to use this
+      library, as very little information is available from the <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
+      interface, or the exception class type.
+    </p>
+<p>
+      All functions in HadesMem should be considered to throw unless otherwise stated
+      in the documentation. Furthermore, all function in HadesMem should be considered
+      to offer only the 'basic guarantee' unless otherwise stated in the documentation.
+      Work is currently underway to offer the strong or no-throw guarantee wherever
+      possible, but is not yet complete.
+    </p>
+<a name="hadesmem.overview.threading"></a><h5>
+<a name="id858222"></a>
+      <a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
+    </h5>
+<p>
+      Currently no guarantees are made that multiple threads accessing the same HadesMem
+      object will work. Typically it should, but until each function is reviewed
+      and documented it is recommended to synchronise access to shared objects. Work
+      is currently underway to improve the threading guarantees offered by the library,
+      but it is not yet complete.
+    </p>
+<a name="hadesmem.overview.support"></a><h5>
+<a name="id858238"></a>
+      <a class="link" href="overview.html#hadesmem.overview.support">Support</a>
+    </h5>
+<p>
+      Please direct all bug reports and/or feature requests to the issue tracker
+      on the <a href="http://code.google.com/p/hadesmem/" target="_top">project page</a>.
+      If you have something you would like to discuss in private, or if you have
+      a relatively advanced question about the library that can't be answered by
+      looking at the documentation or code, I can be reached via email at raptorfactor@raptorfactor.com.
+    </p>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce (aka RaptorFactor)<p>
+        Distributed under the GNU GPL v3. See accompanying file LICENSE.txt.
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="lic.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

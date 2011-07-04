@@ -7,41 +7,14 @@
     LICENSE.txt.]
 ]
 
-[section:intro Introduction]
+[section:overview Overview]
+
+[h4 Introduction]
 
 HadesMem is a C++-based memory hacking library for Windows based 
 applications, with the goal of providing a safe, generic, powerful, and 
 efficient API. All components are useable on remote targets. Furthermore, all 
 components compile for (and work natively on) both IA32 and AMD64.
-
-[endsect] [/ Introduction]
-
-[section:lic License]
-
-This file is part of HadesMem.
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
-
-[endsect] [/ License]
-
-[section:changes Changes]
-
-Nothing to see here yet.
-
-[endsect] [/ Changes]
-
-[section:overview Overview]
 
 [h4 Design]
 
@@ -83,7 +56,41 @@ reviewed and documented it is recommended to synchronise access to shared
 objects. Work is currently underway to improve the threading guarantees 
 offered by the library, but it is not yet complete.
 
+[h4 Support]
+
+Please direct all bug reports and/or feature requests to the issue tracker on 
+the [@http://code.google.com/p/hadesmem/ project page]. If you have something 
+you would like to discuss in private, or if you have a relatively advanced 
+question about the library that can't be answered by looking at the 
+documentation or code, I can be reached via email at 
+raptorfactor@raptorfactor.com.
+
 [endsect] [/ Overview]
+
+[section:lic License]
+
+This file is part of HadesMem.
+
+HadesMem is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+HadesMem is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
+
+[endsect] [/ License]
+
+[section:changes Changes]
+
+Nothing to see here yet.
+
+[endsect] [/ Changes]
 
 [section:building Building]
 
