@@ -20,7 +20,7 @@
 <a name="hadesmem.reference.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
 </h3></div></div></div>
 <a name="hadesmem.reference.memorymgr.synopsis"></a><h5>
-<a name="id848570"></a>
+<a name="id858531"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.synopsis">Synopsis</a>
       </h5>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;
@@ -64,13 +64,13 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
@@ -120,7 +120,7 @@
 <span class="special">};</span>
 </pre>
 <a name="hadesmem.reference.memorymgr.description"></a><h5>
-<a name="id856580"></a>
+<a name="id866596"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.description">Description</a>
       </h5>
 <p>
@@ -134,7 +134,7 @@
         freeing.
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_types"></a><h5>
-<a name="id856601"></a>
+<a name="id866616"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_types">MemoryMgr
         public types</a>
       </h5>
@@ -142,7 +142,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h5>
-<a name="id856618"></a>
+<a name="id866633"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
         public construct/copy/destruct/move</a>
       </h5>
@@ -150,7 +150,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions"></a><h5>
-<a name="id856637"></a>
+<a name="id866652"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_member_functions">MemoryMgr
         public member functions</a>
       </h5>
@@ -158,7 +158,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_types"></a><h5>
-<a name="id856656"></a>
+<a name="id866671"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_types">AllocAndFree
         public types</a>
       </h5>
@@ -166,7 +166,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h5>
-<a name="id856673"></a>
+<a name="id866688"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
         public construct/copy/destruct/move</a>
       </h5>
@@ -174,7 +174,7 @@
         TODO: Write this!
       </p>
 <a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions"></a><h5>
-<a name="id856691"></a>
+<a name="id866706"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_member_functions">AllocAndFree
         public member functions</a>
       </h5>

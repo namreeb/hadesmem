@@ -41,6 +41,50 @@ Nothing to see here yet.
 
 [endsect] [/ Changes]
 
+[section:overview Overview]
+
+[h4 Design]
+
+HadesMem's design is built around the [classref HadesMem::MemoryMgr MemoryMgr] 
+class, which provides all the basic and critical functionality required for 
+the other components to be implemented.
+
+In terms of language usage, the library aims to exploit modern C++ as much as 
+possible, both to ease implementation, and to make library use as easy and as 
+error-safe as possible.
+
+[h4 Error Handling]
+
+Exceptions are typically favoured over error codes. The rationale for this 
+is that memory hacking is quite 'unsable' by nature, and most use cases favour 
+grouping operations in an 'all or nothing' fashion. By using exceptions, the 
+amount of boilerplate code required to use the library is significantly 
+reduced.
+
+Exceptions in HadesMem are all derived from [classref HadesMem::HadesMemError], 
+which in turn is derived from both `std::exception` and `boost::exception`. 
+Internally, exceptions are built and thrown using the 
+[@http://www.boost.org/doc/libs/release/libs/exception/doc/boost-exception.html 
+Boost.Exception] libary. When dealing with HadesMem exceptions it is 
+recommended to use this library, as very little information is available from 
+the `std::exception` interface, or the exception class type.
+
+All functions in HadesMem should be considered to throw unless otherwise 
+stated in the documentation. Furthermore, all function in HadesMem should 
+be considered to offer only the 'basic guarantee' unless otherwise stated 
+in the documentation. Work is currently underway to offer the strong or 
+no-throw guarantee wherever possible, but is not yet complete. 
+
+[h4 Threading]
+
+Currently no guarantees are made that multiple threads accessing the same 
+HadesMem object will work. Typically it should, but until each function is 
+reviewed and documented it is recommended to synchronise access to shared 
+objects. Work is currently underway to improve the threading guarantees 
+offered by the library, but it is not yet complete.
+
+[endsect] [/ Overview]
+
 [section:building Building]
 
 HadesMem uses the [@http://www.boost.org/boost-build2/ Boost.Build] build 
@@ -129,13 +173,13 @@ or the requirements list of your project.
       std::vector<PVOID> const& Args) const;
 
     template <typename T>
-    T Read(PVOID Address) const;
+    T Read(PVOID Address, unspecified = 0) const;
 
     template <typename T>
-    T Read(PVOID Address, std::size_t Size) const;
+    T Read(PVOID Address, std::size_t Size, unspecified = 0) const;
 
     template <typename T>
-    void Write(PVOID Address, T const& Data) const;
+    void Write(PVOID Address, T const& Data, unspecified = 0) const;
 
     bool CanRead(LPCVOID Address) const;
 
