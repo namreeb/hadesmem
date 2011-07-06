@@ -20,7 +20,7 @@
 <a name="hadesmem.overview"></a><a class="link" href="overview.html" title="Overview">Overview</a>
 </h2></div></div></div>
 <a name="hadesmem.overview.introduction"></a><h5>
-<a name="id854018"></a>
+<a name="id845279"></a>
       <a class="link" href="overview.html#hadesmem.overview.introduction">Introduction</a>
     </h5>
 <p>
@@ -30,7 +30,7 @@
       for (and work natively on) both IA32 and AMD64.
     </p>
 <a name="hadesmem.overview.design"></a><h5>
-<a name="id854034"></a>
+<a name="id845296"></a>
       <a class="link" href="overview.html#hadesmem.overview.design">Design</a>
     </h5>
 <p>
@@ -44,7 +44,7 @@
       as error-safe as possible.
     </p>
 <a name="hadesmem.overview.error_handling"></a><h5>
-<a name="id854060"></a>
+<a name="id845321"></a>
       <a class="link" href="overview.html#hadesmem.overview.error_handling">Error Handling</a>
     </h5>
 <p>
@@ -63,14 +63,52 @@
       interface, or the exception class type.
     </p>
 <p>
+      The tag types commonly used in exceptions thrown by HadesMem are:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput">ErrorFunction</code> - A
+          <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code> naming the function the exception
+          was thrown from.
+        </li>
+<li class="listitem">
+          <code class="computeroutput">ErrorString</code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code> describing the problem.
+        </li>
+<li class="listitem">
+          <code class="computeroutput">ErrorCodeWinRet</code>
+          - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
+          the return value of the Windows API which failed.
+        </li>
+<li class="listitem">
+          <code class="computeroutput">ErrorCodeWinLast</code>
+          - A <code class="computeroutput"><span class="identifier">DWORD</span></code> containing the
+          Windows LastError code.
+        </li>
+<li class="listitem">
+          <code class="computeroutput">ErrorCodeWinOther</code>
+          - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
+          any other relevant Windows error codes or return values.
+        </li>
+<li class="listitem">
+          <code class="computeroutput">ErrorCodeOther</code> -
+          A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
+          miscellaneous error codes.
+        </li>
+</ul></div>
+<p>
       All functions in HadesMem should be considered to throw unless otherwise stated
       in the documentation. Furthermore, all function in HadesMem should be considered
       to offer only the 'basic guarantee' unless otherwise stated in the documentation.
       Work is currently underway to offer the strong or no-throw guarantee wherever
       possible, but is not yet complete.
     </p>
+<p>
+      Libraries used by HadesMem may also throw exceptions (notably Boost and the
+      C++ Standard Library). In most cases, no attempt is made by HadesMem to suppress
+      or 'translate' these exceptions.
+    </p>
 <a name="hadesmem.overview.threading"></a><h5>
-<a name="id854138"></a>
+<a name="id845542"></a>
       <a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
     </h5>
 <p>
@@ -81,7 +119,7 @@
       but it is not yet complete.
     </p>
 <a name="hadesmem.overview.support"></a><h5>
-<a name="id854154"></a>
+<a name="id845559"></a>
       <a class="link" href="overview.html#hadesmem.overview.support">Support</a>
     </h5>
 <p>

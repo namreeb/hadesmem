@@ -42,11 +42,30 @@ Boost.Exception] libary. When dealing with HadesMem exceptions it is
 recommended to use this library, as very little information is available from 
 the `std::exception` interface, or the exception class type.
 
+The tag types commonly used in exceptions thrown by HadesMem are:
+
+* [classref HadesMem::ErrorFunction ErrorFunction] - A `std::string` naming 
+the function the exception was thrown from.
+* [classref HadesMem::ErrorString ErrorString] - A `std::string` describing 
+the problem.
+* [classref HadesMem::ErrorCodeWinRet ErrorCodeWinRet] - A `DWORD_PTR` 
+containing the return value of the Windows API which failed.
+* [classref HadesMem::ErrorCodeWinLast ErrorCodeWinLast] - A `DWORD` 
+containing the Windows LastError code.
+* [classref HadesMem::ErrorCodeWinOther ErrorCodeWinOther] - A `DWORD_PTR` 
+containing any other relevant Windows error codes or return values.
+* [classref HadesMem::ErrorCodeOther ErrorCodeOther] - A `DWORD_PTR` 
+containing miscellaneous error codes.
+
 All functions in HadesMem should be considered to throw unless otherwise 
 stated in the documentation. Furthermore, all function in HadesMem should 
 be considered to offer only the 'basic guarantee' unless otherwise stated 
 in the documentation. Work is currently underway to offer the strong or 
-no-throw guarantee wherever possible, but is not yet complete. 
+no-throw guarantee wherever possible, but is not yet complete.
+
+Libraries used by HadesMem may also throw exceptions (notably Boost and the 
+C++ Standard Library). In most cases, no attempt is made by HadesMem to 
+suppress or 'translate' these exceptions.
 
 [h4 Threading]
 
