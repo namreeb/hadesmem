@@ -31,9 +31,9 @@ boostbook standalone
   :
     HadesMem 
   :
-    <xsl:param>boost.image.src=Images/VelociraptorSq.png
+    <xsl:param>boost.image.src=Images/Logo.png
     <xsl:param>boost.image.alt="\"HadesMem\""
-    <xsl:param>boost.image.w=100
+    <xsl:param>boost.image.w=300
     <xsl:param>boost.image.h=100
     <xsl:param>generate.section.toc.level=3
     <xsl:param>chunk.section.depth=2

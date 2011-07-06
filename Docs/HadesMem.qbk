@@ -277,8 +277,9 @@ TODO: Write this!
 
 HadesMem would not be possible without the help of the following projects:
 
-* [@http://code.google.com/p/asmjit/ AsmJit]
-* [@http://www.beaengine.org/ BeaEngine]
-* [@http://www.boost.org/ Boost]
+* [@http://code.google.com/p/asmjit/ AsmJit] - C++ Library
+* [@http://www.beaengine.org/ BeaEngine] - C Library
+* [@http://www.boost.org/ Boost] - C++ Libraries
+* [@http://www.mmowned.com/forums/members/299012-xel.html Xel @ MMOwned] - Logo
 
 [endsect] [/ Acknowledgements]
