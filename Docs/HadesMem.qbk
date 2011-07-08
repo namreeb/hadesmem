@@ -170,11 +170,6 @@ or the requirements list of your project.
     class RemoteFunctionRet
     {
     public:
-      RemoteFunctionRet();
-      
-      RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
-        double ReturnValueFloat, DWORD LastError);
-      
       DWORD_PTR GetReturnValue() const;
       
       DWORD64 GetReturnValue64() const;
