@@ -19,22 +19,22 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.overview"></a><a class="link" href="overview.html" title="Overview">Overview</a>
 </h2></div></div></div>
-<a name="hadesmem.overview.introduction"></a><h5>
-<a name="id845279"></a>
+<a name="hadesmem.overview.introduction"></a><h4>
+<a name="hadesmem.overview.introduction-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.introduction">Introduction</a>
-    </h5>
+    </h4>
 <p>
       HadesMem is a C++-based memory hacking library for Windows based applications,
       with the goal of providing a safe, generic, powerful, and efficient API. All
       components are useable on remote targets. Furthermore, all components compile
       for (and work natively on) both IA32 and AMD64.
     </p>
-<a name="hadesmem.overview.design"></a><h5>
-<a name="id845296"></a>
+<a name="hadesmem.overview.design"></a><h4>
+<a name="hadesmem.overview.design-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.design">Design</a>
-    </h5>
+    </h4>
 <p>
-      HadesMem's design is built around the <code class="computeroutput">MemoryMgr</code>
+      HadesMem's design is built around the <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">MemoryMgr</span></code>
       class, which provides all the basic and critical functionality required for
       the other components to be implemented.
     </p>
@@ -43,10 +43,10 @@
       as possible, both to ease implementation, and to make library use as easy and
       as error-safe as possible.
     </p>
-<a name="hadesmem.overview.error_handling"></a><h5>
-<a name="id845321"></a>
+<a name="hadesmem.overview.error_handling"></a><h4>
+<a name="hadesmem.overview.error_handling-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.error_handling">Error Handling</a>
-    </h5>
+    </h4>
 <p>
       Exceptions are typically favoured over error codes. The rationale for this
       is that memory hacking is quite 'unsable' by nature, and most use cases favour
@@ -54,7 +54,7 @@
       amount of boilerplate code required to use the library is significantly reduced.
     </p>
 <p>
-      Exceptions in HadesMem are all derived from <code class="computeroutput">HadesMem::HadesMemError</code>,
+      Exceptions in HadesMem are all derived from <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">HadesMemError</span></code>,
       which in turn is derived from both <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
       and <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">exception</span></code>. Internally, exceptions are built
       and thrown using the <a href="http://www.boost.org/doc/libs/release/libs/exception/doc/boost-exception.html" target="_top">Boost.Exception</a>
@@ -67,32 +67,28 @@
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
-          <code class="computeroutput">ErrorFunction</code> - A
-          <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code> naming the function the exception
-          was thrown from.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorFunction</span></code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
+          naming the function the exception was thrown from.
         </li>
 <li class="listitem">
-          <code class="computeroutput">ErrorString</code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code> describing the problem.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorString</span></code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
+          describing the problem.
         </li>
 <li class="listitem">
-          <code class="computeroutput">ErrorCodeWinRet</code>
-          - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
-          the return value of the Windows API which failed.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinRet</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
+          containing the return value of the Windows API which failed.
         </li>
 <li class="listitem">
-          <code class="computeroutput">ErrorCodeWinLast</code>
-          - A <code class="computeroutput"><span class="identifier">DWORD</span></code> containing the
-          Windows LastError code.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinLast</span></code> - A <code class="computeroutput"><span class="identifier">DWORD</span></code>
+          containing the Windows LastError code.
         </li>
 <li class="listitem">
-          <code class="computeroutput">ErrorCodeWinOther</code>
-          - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
-          any other relevant Windows error codes or return values.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinOther</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
+          containing any other relevant Windows error codes or return values.
         </li>
 <li class="listitem">
-          <code class="computeroutput">ErrorCodeOther</code> -
-          A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code> containing
-          miscellaneous error codes.
+          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeOther</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
+          containing miscellaneous error codes.
         </li>
 </ul></div>
 <p>
@@ -107,10 +103,10 @@
       C++ Standard Library). In most cases, no attempt is made by HadesMem to suppress
       or 'translate' these exceptions.
     </p>
-<a name="hadesmem.overview.threading"></a><h5>
-<a name="id845542"></a>
+<a name="hadesmem.overview.threading"></a><h4>
+<a name="hadesmem.overview.threading-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
-    </h5>
+    </h4>
 <p>
       Currently no guarantees are made that multiple threads accessing the same HadesMem
       object will work. Typically it should, but until each function is reviewed
@@ -118,10 +114,10 @@
       is currently underway to improve the threading guarantees offered by the library,
       but it is not yet complete.
     </p>
-<a name="hadesmem.overview.support"></a><h5>
-<a name="id845559"></a>
+<a name="hadesmem.overview.support"></a><h4>
+<a name="hadesmem.overview.support-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.support">Support</a>
-    </h5>
+    </h4>
 <p>
       Please direct all bug reports and/or feature requests to the issue tracker
       on the <a href="http://code.google.com/p/hadesmem/" target="_top">project page</a>.

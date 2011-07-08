@@ -2,19 +2,19 @@
 
 using xsltproc
   : 
-    $(TOP)\Docs\Bin\bin\xsltproc.exe 
+    $(TOP)/Docs/Bin/bin/xsltproc.exe 
   ;
 
 using boostbook
   : 
-    $(TOP)\Docs\Bin\bin\docbook-xsl 
+    $(TOP)/Docs/Bin/docbook-xsl 
   : 
-    $(TOP)\Docs\Bin\bin\docbook-xml 
+    $(TOP)/Docs/Bin/docbook-xml 
   ;
 
 using quickbook
   : 
-    $(TOP)\Docs\Bin\bin\quickbook.exe 
+    $(TOP)/Docs/Bin/bin/quickbook.exe 
   ;
   
 xml HadesMem 

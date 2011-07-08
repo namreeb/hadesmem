@@ -9,24 +9,24 @@
 
 [section:overview Overview]
 
-[h4 Introduction]
+[h3 Introduction]
 
 HadesMem is a C++-based memory hacking library for Windows based 
 applications, with the goal of providing a safe, generic, powerful, and 
 efficient API. All components are useable on remote targets. Furthermore, all 
 components compile for (and work natively on) both IA32 and AMD64.
 
-[h4 Design]
+[h3 Design]
 
-HadesMem's design is built around the [classref HadesMem::MemoryMgr MemoryMgr] 
-class, which provides all the basic and critical functionality required for 
-the other components to be implemented.
+HadesMem's design is built around the `HadesMem::MemoryMgr` class, which 
+provides all the basic and critical functionality required for the other 
+components to be implemented.
 
 In terms of language usage, the library aims to exploit modern C++ as much as 
 possible, both to ease implementation, and to make library use as easy and as 
 error-safe as possible.
 
-[h4 Error Handling]
+[h3 Error Handling]
 
 Exceptions are typically favoured over error codes. The rationale for this 
 is that memory hacking is quite 'unsable' by nature, and most use cases favour 
@@ -34,7 +34,7 @@ grouping operations in an 'all or nothing' fashion. By using exceptions, the
 amount of boilerplate code required to use the library is significantly 
 reduced.
 
-Exceptions in HadesMem are all derived from [classref HadesMem::HadesMemError], 
+Exceptions in HadesMem are all derived from `HadesMem::HadesMemError`, 
 which in turn is derived from both `std::exception` and `boost::exception`. 
 Internally, exceptions are built and thrown using the 
 [@http://www.boost.org/doc/libs/release/libs/exception/doc/boost-exception.html 
@@ -44,18 +44,17 @@ the `std::exception` interface, or the exception class type.
 
 The tag types commonly used in exceptions thrown by HadesMem are:
 
-* [classref HadesMem::ErrorFunction ErrorFunction] - A `std::string` naming 
-the function the exception was thrown from.
-* [classref HadesMem::ErrorString ErrorString] - A `std::string` describing 
-the problem.
-* [classref HadesMem::ErrorCodeWinRet ErrorCodeWinRet] - A `DWORD_PTR` 
-containing the return value of the Windows API which failed.
-* [classref HadesMem::ErrorCodeWinLast ErrorCodeWinLast] - A `DWORD` 
-containing the Windows LastError code.
-* [classref HadesMem::ErrorCodeWinOther ErrorCodeWinOther] - A `DWORD_PTR` 
-containing any other relevant Windows error codes or return values.
-* [classref HadesMem::ErrorCodeOther ErrorCodeOther] - A `DWORD_PTR` 
-containing miscellaneous error codes.
+* `HadesMem::ErrorFunction` - A `std::string` naming the function the 
+exception was thrown from.
+* `HadesMem::ErrorString` - A `std::string` describing the problem.
+* `HadesMem::ErrorCodeWinRet` - A `DWORD_PTR` containing the return value of 
+the Windows API which failed.
+* `HadesMem::ErrorCodeWinLast` - A `DWORD` containing the Windows LastError 
+code.
+* `HadesMem::ErrorCodeWinOther` - A `DWORD_PTR` containing any other relevant 
+Windows error codes or return values.
+* `HadesMem::ErrorCodeOther` - A `DWORD_PTR` containing miscellaneous error 
+codes.
 
 All functions in HadesMem should be considered to throw unless otherwise 
 stated in the documentation. Furthermore, all function in HadesMem should 
@@ -67,7 +66,7 @@ Libraries used by HadesMem may also throw exceptions (notably Boost and the
 C++ Standard Library). In most cases, no attempt is made by HadesMem to 
 suppress or 'translate' these exceptions.
 
-[h4 Threading]
+[h3 Threading]
 
 Currently no guarantees are made that multiple threads accessing the same 
 HadesMem object will work. Typically it should, but until each function is 
@@ -75,7 +74,7 @@ reviewed and documented it is recommended to synchronise access to shared
 objects. Work is currently underway to improve the threading guarantees 
 offered by the library, but it is not yet complete.
 
-[h4 Support]
+[h3 Support]
 
 Please direct all bug reports and/or feature requests to the issue tracker on 
 the [@http://code.google.com/p/hadesmem/ project page]. If you have something 
@@ -156,7 +155,7 @@ or the requirements list of your project.
 
 [section:memorymgr MemoryMgr]
 
-[h4 Synopsis]
+[h3 Synopsis]
 
   // In header: <HadesMemory/MemoryMgr.hpp>
 
@@ -254,7 +253,7 @@ or the requirements list of your project.
     AllocAndFree& operator=(AllocAndFree const&);
   };
 
-[h4 Description]
+[h3 Description]
 
 The MemoryMgr class provides the most basic memory hacking functionality, and 
 is the basis on which all other HadesMem components are built. It exposes APIs 
@@ -264,27 +263,52 @@ allocation, and instruction cache flushing.
 The AllocAndFree class is an RAII wrapper for remote memory allocation and 
 freeing.
 
-[h4 MemoryMgr public types]
+[h3 MemoryMgr public types]
 
 TODO: Write this!
 
-[h4 MemoryMgr public construct/copy/destruct/move]
+[h3 MemoryMgr public construct/copy/destruct/move]
+
+[h4 Process ID Constructor]
+
+    explicit MemoryMgr(DWORD ProcID);
+
+[variablelist
+
+[[Effects:] [Constructs a `MemoryMgr` instance that refers to the specified 
+process.]]
+
+[[Throws:] [Yes]]
+
+]
+
+[h3 MemoryMgr public member functions]
+
+[h4 Member function `Call`]
+
+    RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, std::vector<PVOID> const& Args) const;
+
+[variablelist
+
+[[Effects:] [Calls a function at `Address`, using calling convention `MyCallConv`, with the arguments `Args`.]]
+
+[[Returns:] [A `RemoteFunctionRet` instance.]]
+
+[[Throws:] [Yes]]
+
+[[Notes:] [Floating point arguments are unsupported.]]
+
+]
+
+[h3 AllocAndFree public types]
 
 TODO: Write this!
 
-[h4 MemoryMgr public member functions]
+[h3 AllocAndFree public construct/copy/destruct/move]
 
 TODO: Write this!
 
-[h4 AllocAndFree public types]
-
-TODO: Write this!
-
-[h4 AllocAndFree public construct/copy/destruct/move]
-
-TODO: Write this!
-
-[h4 AllocAndFree public member functions]
+[h3 AllocAndFree public member functions]
 
 TODO: Write this!
 

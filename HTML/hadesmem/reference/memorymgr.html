@@ -19,12 +19,12 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="hadesmem.reference.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
 </h3></div></div></div>
-<a name="hadesmem.reference.memorymgr.synopsis"></a><h5>
-<a name="id852673"></a>
+<a name="hadesmem.reference.memorymgr.synopsis"></a><h4>
+<a name="hadesmem.reference.memorymgr.synopsis-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.synopsis">Synopsis</a>
-      </h5>
-<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;
-</span>
+      </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;</span>
+
 <span class="keyword">class</span> <span class="identifier">MemoryMgr</span>
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
@@ -119,10 +119,10 @@
   <span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
 <span class="special">};</span>
 </pre>
-<a name="hadesmem.reference.memorymgr.description"></a><h5>
-<a name="id854108"></a>
+<a name="hadesmem.reference.memorymgr.description"></a><h4>
+<a name="hadesmem.reference.memorymgr.description-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.description">Description</a>
-      </h5>
+      </h4>
 <p>
         The MemoryMgr class provides the most basic memory hacking functionality,
         and is the basis on which all other HadesMem components are built. It exposes
@@ -133,51 +133,97 @@
         The AllocAndFree class is an RAII wrapper for remote memory allocation and
         freeing.
       </p>
-<a name="hadesmem.reference.memorymgr.memorymgr_public_types"></a><h5>
-<a name="id854129"></a>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_types"></a><h4>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_types-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_types">MemoryMgr
         public types</a>
-      </h5>
+      </h4>
 <p>
         TODO: Write this!
       </p>
-<a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h5>
-<a name="id854146"></a>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
         public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.memorymgr.process_id_constructor"></a><h5>
+<a name="hadesmem.reference.memorymgr.process_id_constructor-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.process_id_constructor">Process
+        ID Constructor</a>
       </h5>
-<p>
-        TODO: Write this!
-      </p>
-<a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions"></a><h5>
-<a name="id854165"></a>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+              instance that refers to the specified process.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions"></a><h4>
+<a name="hadesmem.reference.memorymgr.memorymgr_public_member_functions-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_public_member_functions">MemoryMgr
         public member functions</a>
+      </h4>
+<a name="hadesmem.reference.memorymgr.member_function__code__phrase_role__identifier__call__phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.member_function__code__phrase_role__identifier__call__phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.member_function__code__phrase_role__identifier__call__phrase___code_">Member
+        function <code class="computeroutput"><span class="identifier">Call</span></code></a>
       </h5>
-<p>
-        TODO: Write this!
-      </p>
-<a name="hadesmem.reference.memorymgr.allocandfree_public_types"></a><h5>
-<a name="id854184"></a>
+<pre class="programlisting"><span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Calls a function at <code class="computeroutput"><span class="identifier">Address</span></code>,
+              using calling convention <code class="computeroutput"><span class="identifier">MyCallConv</span></code>,
+              with the arguments <code class="computeroutput"><span class="identifier">Args</span></code>.
+            </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              A <code class="computeroutput"><span class="identifier">RemoteFunctionRet</span></code>
+              instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              Floating point arguments are unsupported.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_types"></a><h4>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_types-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_types">AllocAndFree
         public types</a>
-      </h5>
+      </h4>
 <p>
         TODO: Write this!
       </p>
-<a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h5>
-<a name="id854201"></a>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
         public construct/copy/destruct/move</a>
-      </h5>
+      </h4>
 <p>
         TODO: Write this!
       </p>
-<a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions"></a><h5>
-<a name="id854219"></a>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions"></a><h4>
+<a name="hadesmem.reference.memorymgr.allocandfree_public_member_functions-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_public_member_functions">AllocAndFree
         public member functions</a>
-      </h5>
+      </h4>
 <p>
         TODO: Write this!
       </p>
