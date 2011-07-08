@@ -39,6 +39,7 @@ project Hades
     <runtime-link>shared 
     <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 
+    <toolset>clang:<cxxflags>-std=c++0x 
     <toolset>msvc:<cxxflags>/wd4503 
   : 
     default-build debug 
@@ -64,6 +65,10 @@ install Dist
     <toolset>gcc,<variant>debug,<address-model>64:<location>Dist/GCC/Debug/AMD64
     <toolset>gcc,<variant>release,<address-model>32:<location>Dist/GCC/Release/IA32
     <toolset>gcc,<variant>release,<address-model>64:<location>Dist/GCC/Release/AMD64
+    <toolset>clang,<variant>debug,<address-model>32:<location>Dist/Clang/Debug/IA32
+    <toolset>clang,<variant>debug,<address-model>64:<location>Dist/Clang/Debug/AMD64
+    <toolset>clang,<variant>release,<address-model>32:<location>Dist/Clang/Release/IA32
+    <toolset>clang,<variant>release,<address-model>64:<location>Dist/Clang/Release/AMD64
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
