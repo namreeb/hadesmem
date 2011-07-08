@@ -242,17 +242,17 @@ namespace HadesMem
     // Write return value to memory
     MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       ReturnValueRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+    MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
 
     // Write 64-bit return value to memory
     MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       ReturnValue64Remote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+    MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
 
     // Write floating point return value to memory
     MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       ReturnValueFloatRemote.GetBase()));
-    MyJitFunc.movq(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
+    MyJitFunc.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     // Call kernel32.dll!GetLastError
     MyJitFunc.mov(AsmJit::rax, pGetLastError);
@@ -261,7 +261,7 @@ namespace HadesMem
     // Write error code to memory
     MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       LastErrorRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
 
     // Epilogue
     MyJitFunc.mov(AsmJit::rsp, AsmJit::rbp);
