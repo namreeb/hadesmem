@@ -47,11 +47,6 @@ DWORD64 TestCall64Ret()
   return 0x123456787654321LL;
 }
 
-double TestCallFloatRet()
-{
-  return 1.337;
-}
-
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
 DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c, 
@@ -138,20 +133,6 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
     0x123456787654321LL));
   
-  // Test floating point return values in MemoryMgr::Call
-  std::vector<PVOID> TestCallFloatArgs;
-  HadesMem::MemoryMgr::RemoteFunctionRet const CallRetFloat = 
-    MyMemory.Call(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestCallFloatRet)), HadesMem::MemoryMgr::CallConv_Default, 
-    TestCallFloatArgs);
-  {
-    double const epsilon = .001;
-    double const expected = 1.337;
-    double const recieved = CallRetFloat.GetReturnValueFloat();
-    BOOST_CHECK(std::abs(recieved - expected) <= epsilon * std::abs(
-      recieved));
-  }
-
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
   struct TestPODType
   {

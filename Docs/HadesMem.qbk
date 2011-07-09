@@ -260,20 +260,48 @@ freeing.
 
 [h3 MemoryMgr public types]
 
-TODO: Write this!
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `MemoryMgr` methods when an error occurs.
+
+  class RemoteFunctionRet;
+
+Type containing the return information of a remote function call. Exposes 
+integer and thread-local return values. Floating point return information 
+is currently unsupported. See `RemoteFunctionRet' documentation for more 
+information.
+
+  enum CallConv;
+
+Calling conventions for remote function caller. All calling conventions follow 
+Microsoft specifications. Other compilers and custom calling conventions are 
+currently unsupported.
+
+* CallConv_Default - Default calling convention. Equivalent to 
+`CallConv_STDCALL` on x86 and `CallConv_X64` on x64.
+* CallConv_CDECL - [@http://msdn.microsoft.com/en-us/library/zkwh89ks.aspx 
+__cdecl] calling convention.
+* CallConv_STDCALL - [@http://msdn.microsoft.com/en-us/library/zxk0tw93.aspx 
+__stdcall] calling convention.
+* CallConv_THISCALL - [@http://msdn.microsoft.com/en-us/library/ek8tkfbw.aspx 
+__thiscall] calling convention.
+* CallConv_FASTCALL - [@http://msdn.microsoft.com/en-us/library/6xa169sk.aspx 
+__fastcall] calling convention.
+* CallConv_X64 - [@http://msdn.microsoft.com/en-us/library/ms235286.aspx x64] 
+calling convention.
 
 [h3 MemoryMgr public construct/copy/destruct/move]
 
 [h4 Process ID Constructor]
 
-    explicit MemoryMgr(DWORD ProcID);
+  explicit MemoryMgr(DWORD ProcID);
 
 [variablelist
 
 [[Effects:] [Constructs a `MemoryMgr` instance that refers to the specified 
 process.]]
 
-[[Throws:] [Yes]]
+[[Throws:] [Yes.]]
 
 ]
 
@@ -281,31 +309,131 @@ process.]]
 
 [h4 Member function `Call`]
 
-    RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, std::vector<PVOID> const& Args) const;
+  RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
+    std::vector<PVOID> const& Args) const;
 
 [variablelist
 
-[[Effects:] [Calls a function at `Address`, using calling convention `MyCallConv`, with the arguments `Args`.]]
+[[Effects:] [Calls a function at `Address`, using calling convention 
+`MyCallConv`, with the arguments `Args`.]]
 
 [[Returns:] [A `RemoteFunctionRet` instance.]]
 
-[[Throws:] [Yes]]
+[[Throws:] [Yes.]]
 
-[[Notes:] [Floating point arguments are unsupported.]]
+[[Notes:] [All arguments must be equivalent to integer arguments, with a size 
+equal to or less than the native pointer size of the platform. Floating point 
+arguments are unsupported.]]
 
 ]
 
-[h3 AllocAndFree public types]
-
-TODO: Write this!
-
 [h3 AllocAndFree public construct/copy/destruct/move]
 
-TODO: Write this!
+[h4 Constructor]
+
+  AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
+
+[variablelist
+
+[[Effects:] [Allocates memory block of size `Size` using the `MemoryMgr` 
+object `MyMemoryMgr`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Constructor]
+
+  ~AllocAndFree();
+
+[variablelist
+
+[[Effects:] [Frees the remote memory block (unless already freed manually).]]
+
+[[Throws:] [No. Exceptions thrown when freeing the memor will be swallowed.]]
+
+]
 
 [h3 AllocAndFree public member functions]
 
-TODO: Write this!
+[h4 Member function `Free`]
+
+  void Free() const;
+
+[variablelist
+
+[[Effects:] [Frees the remote memory block (unless already freed manually).]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of remote memory block.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 Member function `GetSize`]
+
+  SIZE_T GetSize() const;
+
+[variablelist
+
+[[Returns:] [Size of remote memory block.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 MemoryMgr::RemoteFunctionRet public member functions]
+
+[h4 Member function `GetReturnValue`]
+
+    DWORD_PTR GetReturnValue() const;
+
+[variablelist
+
+[[Returns:] [The integer return value for the remote function in the native 
+pointer size for the platform.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 Member function `GetReturnValue`]
+
+    DWORD64 GetReturnValue64() const;
+
+[variablelist
+
+[[Returns:] [The 64-bit integer return value for the remote function.]]
+
+[[Throws:] [No.]]
+
+[[Notes:] [Same as GetReturnValue on x64.]]
+
+]
+
+[h4 Member function `GetLastError`]
+
+    DWORD GetLastError() const;
+
+[variablelist
+
+[[Returns:] [The last error code for the remote function. Equivalent to 
+calling the Windows API `GetLastError` in the context of the target process 
+after the function call.]]
+
+[[Throws:] [No.]]
+
+]
 
 [endsect] [/ MemoryMgr]
 

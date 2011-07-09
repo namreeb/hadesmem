@@ -53,20 +53,17 @@ namespace HadesMem
       RemoteFunctionRet();
       
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
-        double ReturnValueFloat, DWORD LastError);
+        DWORD LastError);
       
       DWORD_PTR GetReturnValue() const;
       
       DWORD64 GetReturnValue64() const;
-      
-      double GetReturnValueFloat() const;
       
       DWORD GetLastError() const;
       
     private:
       DWORD_PTR m_ReturnValue;
       DWORD64 m_ReturnValue64;
-      double m_ReturnValueFloat;
       DWORD m_LastError;
     };
   
