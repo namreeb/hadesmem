@@ -264,12 +264,12 @@ or the requirements list of your project.
 [h3 Description]
 
 The MemoryMgr class provides the most basic memory hacking functionality, and 
-is the basis on which all other HadesMem components are built. It exposes APIs 
-for memory reading, memory writing, function calling, region querying, memory 
-allocation, and instruction cache flushing.
+is the basis on which all other HadesMem components are built.
 
-The AllocAndFree class is an RAII wrapper for remote memory allocation and 
-freeing.
+Free functions are provided for other common basic operations which are not 
+specific to a remote process.
+
+The AllocAndFree class is an RAII wrapper for remote memory allocation.
 
 [h3 MemoryMgr public types]
 
