@@ -43,15 +43,9 @@ namespace HadesMem
     
       // Open process from process ID
       explicit Process(DWORD ProcID);
-    
-      // Copy constructor
-      Process(Process const& Other);
-    
-      // Copy assignment
-      Process& operator=(Process Other);
       
       // Destructor
-      ~Process() /*noexcept*/;
+      ~Process();
       
       // Swap
       void swap(Process& Other);

@@ -44,7 +44,7 @@ namespace HadesMem
         // Open process
         if (GetCurrentProcessId() == ProcID)
         {
-          m_Handle.reset(new Detail::EnsureCloseHandle(GetCurrentProcess()));
+          m_Handle.reset(new EnsureCloseHandle(GetCurrentProcess()));
           m_ID = GetCurrentProcessId();
         }
         else
@@ -57,35 +57,21 @@ namespace HadesMem
       }
       
       // Swap
-      void swap(Impl& Rhs) /*noexcept*/
+      void swap(Impl& Rhs)
       {
         m_Handle.swap(Rhs.m_Handle);
         std::swap(m_ID, Rhs.m_ID);
         std::swap(m_IsWoW64, Rhs.m_IsWoW64);
       }
-        
-      // Copy constructor
-      Impl(Impl const& Rhs) /*noexcept*/
-        : m_Handle(Rhs.m_Handle), 
-        m_ID(Rhs.m_ID), 
-        m_IsWoW64(Rhs.m_IsWoW64)
-      { }
-      
-      // Copy-assignment operator
-      Impl& operator=(Impl Rhs) /*noexcept*/
-      {
-        this->swap(Rhs);
-        return *this;
-      }
   
       // Get process handle
-      HANDLE GetHandle() const /*noexcept*/
+      HANDLE GetHandle() const
       {
         return *m_Handle;
       }
   
       // Get process ID
-      DWORD GetID() const /*noexcept*/
+      DWORD GetID() const
       {
         return m_ID;
       }
@@ -97,8 +83,8 @@ namespace HadesMem
         // reliable but is only available on Vista+.
         DWORD const PathSize = 32767;
         std::wstring Path;
-        if (!GetModuleFileNameEx(*m_Handle, nullptr, Detail::MakeStringBuffer(
-          Path, PathSize), PathSize))
+        if (!GetModuleFileNameEx(*m_Handle, nullptr, MakeStringBuffer(Path, 
+          PathSize), PathSize))
         {
           DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
@@ -111,7 +97,7 @@ namespace HadesMem
       }
       
       // Is WoW64 process
-      bool IsWoW64() const /*noexcept*/
+      bool IsWoW64() const
       {
         return m_IsWoW64;
       }
@@ -159,7 +145,7 @@ namespace HadesMem
       void Open(DWORD ProcID)
       {
         // Open process
-        m_Handle.reset(new Detail::EnsureCloseHandle(
+        m_Handle.reset(new EnsureCloseHandle(
           OpenProcess(PROCESS_CREATE_THREAD | 
           PROCESS_QUERY_INFORMATION | 
           PROCESS_VM_OPERATION | 
@@ -181,7 +167,7 @@ namespace HadesMem
       // Note: Using shared pointer because handle does not need to be unique, 
       // and copying it may throw, so sharing it makes exception safe code 
       // far easier to write.
-      std::shared_ptr<Detail::EnsureCloseHandle> m_Handle;
+      std::shared_ptr<EnsureCloseHandle> m_Handle;
     
       // Process ID
       DWORD m_ID;
@@ -191,42 +177,30 @@ namespace HadesMem
     };
     
     // Open process from process id
-    Process::Process(DWORD ProcID) 
+    Process::Process(DWORD ProcID)
       : m_pImpl(new Impl(ProcID))
     { }
-  
-    // Copy constructor
-    Process::Process(Process const& Other) /*noexcept*/
-      : m_pImpl(new Impl(*Other.m_pImpl))
-    { }
-  
-    // Copy assignment
-    Process& Process::operator=(Process Other) /*noexcept*/
-    {
-      this->swap(Other); 
-      return *this;
-    }
     
     // Destructor
     // Note: An empty destructor is required so the compiler can see Impl's 
     // destructor.
-    Process::~Process() /*noexcept*/
+    Process::~Process()
     { }
     
     // Swap
-    void Process::swap(Process& Other) /*noexcept*/
+    void Process::swap(Process& Other)
     {
       m_pImpl.swap(Other.m_pImpl);
     }
   
     // Get process handle
-    HANDLE Process::GetHandle() const /*noexcept*/
+    HANDLE Process::GetHandle() const
     {
       return m_pImpl->GetHandle();
     }
   
     // Get process ID
-    DWORD Process::GetID() const /*noexcept*/
+    DWORD Process::GetID() const
     {
       return m_pImpl->GetID();
     }
@@ -238,7 +212,7 @@ namespace HadesMem
     }
     
     // Is WoW64 process
-    bool Process::IsWoW64() const /*noexcept*/
+    bool Process::IsWoW64() const
     {
       return m_pImpl->IsWoW64();
     }
@@ -291,7 +265,7 @@ namespace HadesMem
           ErrorString("Could not open process token.") << 
           ErrorCodeWinLast(LastError));
       }
-      Detail::EnsureCloseHandle const Token(TempToken);
+      EnsureCloseHandle const Token(TempToken);
   
       // Get the LUID for SE_DEBUG_NAME 
       LUID Luid = { 0, 0 }; // Locally unique identifier

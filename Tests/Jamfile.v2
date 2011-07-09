@@ -20,5 +20,5 @@ project
 test-suite Memory
   :
     [ run MemoryMgrTest.cpp ]
-    [ run ProcessTest.cpp ]
+    [ run Detail/ProcessTest.cpp ]
   ;
