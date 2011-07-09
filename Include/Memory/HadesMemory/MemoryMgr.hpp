@@ -222,21 +222,16 @@ namespace HadesMem
     // Create buffer to store results
     T Buffer;
 
-    // Loop until a null terminator is found
-    for (CharT* AddressReal = static_cast<CharT*>(Address);; ++AddressReal)
+    // Read until a null terminator is found
+    CharT* AddressReal = static_cast<CharT*>(Address);
+    for (CharT Current = this->Read<CharT>(AddressReal); Current != CharT(); 
+      ++AddressReal, Current = this->Read<CharT>(AddressReal))
     {
-      // Read current character
-      CharT const Current = this->Read<CharT>(AddressReal);
-
-      // Return generated string on null terminator
-      if (Current == CharT())
-      {
-        return Buffer;
-      }
-
-      // Add chaaracter to buffer
-      Buffer += Current;
+      Buffer.push_back(Current);
     }
+    
+    // Return buffer
+    return Buffer;
   }
 
   // Read memory (vector types)
