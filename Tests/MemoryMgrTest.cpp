@@ -22,6 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 // C++ Standard Library
 #include <cmath>
+#include <array>
 
 // Boost
 #define BOOST_TEST_MODULE MemoryMgrTest
@@ -142,7 +143,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     long long d;
   };
 
-  // Test MemoryMgr::Read and MemoryMgr::Write for POD types
+  // Test MemoryMgr::Read and MemoryMgr::Write
   TestPODType MyTestPODType = { 1, 0, L'a', 1234567812345678 };
   auto MyNewTestPODType = MyMemory.Read<TestPODType>(&MyTestPODType);
   BOOST_CHECK_EQUAL(MyNewTestPODType.a, MyTestPODType.a);
@@ -156,31 +157,48 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   BOOST_CHECK_EQUAL(MyTestPODType2.c, MyTestPODType.c);
   BOOST_CHECK_EQUAL(MyTestPODType2.d, MyTestPODType.d);
   
-  // Test MemoryMgr::Read and MemoryMgr::Write for std::string
+  // Test MemoryMgr::ReadString and MemoryMgr::WriteString for std::string
   char const* const pTestStringA = "Narrow test string.";
   char* const pTestStringAReal = const_cast<char*>(pTestStringA);
-  auto const NewTestStringA = MyMemory.Read<std::string>(pTestStringAReal);
+  auto const NewTestStringA = MyMemory.ReadString<std::string>(
+    pTestStringAReal);
   BOOST_CHECK_EQUAL(NewTestStringA, pTestStringA);
   auto const TestStringAStr = std::string(pTestStringA);
   auto const TestStringARev = std::string(TestStringAStr.rbegin(), 
     TestStringAStr.rend());
-  MyMemory.Write(pTestStringAReal, TestStringARev);
-  auto const NewTestStringARev = MyMemory.Read<std::string>(pTestStringAReal);
-  BOOST_CHECK_EQUAL(NewTestStringARev, TestStringARev);
+  MyMemory.WriteString(pTestStringAReal, TestStringARev);
+  auto const NewTestStringARev = MyMemory.ReadString<std::string>(
+    pTestStringAReal);
+  BOOST_CHECK_EQUAL_COLLECTIONS(NewTestStringARev.cbegin(), 
+    NewTestStringARev.cend(), TestStringARev.cbegin(), TestStringARev.cend());
   
-  // Test MemoryMgr::Read and MemoryMgr::Write for std::wstring
+  // Test MemoryMgr::ReadString and MemoryMgr::WriteString for std::wstring
   wchar_t const* const pTestStringW = L"Wide test string.";
   wchar_t* const pTestStringWReal = const_cast<wchar_t*>(pTestStringW);
-  auto const NewTestStringW = MyMemory.Read<std::wstring>(pTestStringWReal);
+  auto const NewTestStringW = MyMemory.ReadString<std::wstring>(
+    pTestStringWReal);
   // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
   BOOST_CHECK(NewTestStringW == pTestStringW);
   auto const TestStringWStr = std::wstring(pTestStringW);
   auto const TestStringWRev = std::wstring(TestStringWStr.rbegin(), 
     TestStringWStr.rend());
-  MyMemory.Write(pTestStringWReal, TestStringWRev);
-  auto const NewTestStringWRev = MyMemory.Read<std::wstring>(pTestStringWReal);
+  MyMemory.WriteString(pTestStringWReal, TestStringWRev);
+  auto const NewTestStringWRev = MyMemory.ReadString<std::wstring>(
+    pTestStringWReal);
   // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
-  BOOST_CHECK(NewTestStringWRev == TestStringWRev);
+  BOOST_CHECK_EQUAL_COLLECTIONS(NewTestStringWRev.cbegin(), 
+    NewTestStringWRev.cend(), TestStringWRev.cbegin(), TestStringWRev.cend());
+  
+  // Test MemoryMgr::ReadList and MemoryMgr::WriteList
+  std::array<int, 10> IntList = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
+  std::vector<int> IntListRead = MyMemory.ReadList<std::vector<int>>(&IntList, 
+    10);
+  BOOST_CHECK_EQUAL_COLLECTIONS(IntList.cbegin(), IntList.cend(), 
+    IntListRead.cbegin(), IntListRead.cend());
+  std::vector<int> IntListRev(IntListRead.crbegin(), IntListRead.crend());
+  MyMemory.WriteList(&IntList, IntListRev);
+  BOOST_CHECK_EQUAL_COLLECTIONS(IntList.cbegin(), IntList.cend(), 
+    IntListRev.cbegin(), IntListRev.cend());
   
   // Test MemoryMgr::CanRead
   BOOST_CHECK_EQUAL(MyMemory.CanRead(GetModuleHandle(NULL)), true);

@@ -372,7 +372,7 @@ namespace HadesMem
       pRemoteStub));
 
     // Write stub buffer to process
-    Write(pRemoteStub, CodeReal);
+    WriteList(pRemoteStub, CodeReal);
 
     // Call stub via creating a remote thread in the target.
     Detail::EnsureCloseHandle const MyThread(CreateRemoteThread(m_Process.

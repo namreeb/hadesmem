@@ -40,8 +40,6 @@
     
     <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
     
-    <span class="keyword">double</span> <span class="identifier">GetReturnValueFloat</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-    
     <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
 
@@ -62,10 +60,19 @@
   <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="identifier">T</span> <span class="identifier">ReadString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">ReadList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
   <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">WriteString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">WriteList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
@@ -249,17 +256,172 @@
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_">MemoryMgr
         member function <code class="computeroutput"><span class="identifier">Read</span></code></a>
       </h5>
-<p>
-        TODO: Write this!
-      </p>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+              constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be a POD type.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="identifier">ReadString</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">ReadString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+              constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+              Reads individual characters until a null is encountered.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+              <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">basic_string</span><span class="special">&lt;</span><span class="identifier">CharT</span><span class="special">&gt;</span></code>,
+              where <code class="computeroutput"><span class="identifier">CharT</span></code> is a POD
+              character type. String is read as if it is a C-style character array.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="identifier">ReadList</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">ReadList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+              constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+              Reads <code class="computeroutput"><span class="identifier">Size</span></code> items from
+              <code class="computeroutput"><span class="identifier">Address</span></code> and stores
+              them in a <code class="computeroutput"><span class="identifier">T</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+              <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">U</span><span class="special">&gt;</span></code>,
+              where <code class="computeroutput"><span class="identifier">U</span></code> is a POD type.
+              List is read as if it is a C-style array.
+            </p></dd>
+</dl>
+</div>
 <a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_"></a><h5>
 <a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_">MemoryMgr
         member function <code class="computeroutput"><span class="identifier">Write</span></code></a>
       </h5>
-<p>
-        TODO: Write this!
-      </p>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be a POD type.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="identifier">WriteString</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">WriteString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+              <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">basic_string</span><span class="special">&lt;</span><span class="identifier">CharT</span><span class="special">&gt;</span></code>,
+              where <code class="computeroutput"><span class="identifier">CharT</span></code> is a POD
+              character type. <code class="computeroutput"><span class="identifier">Data</span></code>
+              is written as a C-style character array.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="identifier">WriteList</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">WriteList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+              <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+              <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">U</span><span class="special">&gt;</span></code>,
+              where <code class="computeroutput"><span class="identifier">U</span></code> is a POD type.
+              <code class="computeroutput"><span class="identifier">Data</span></code> is written as
+              a C-style array.
+            </p></dd>
+</dl>
+</div>
 <a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_"></a><h5>
 <a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_-heading"></a>
         <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_">MemoryMgr

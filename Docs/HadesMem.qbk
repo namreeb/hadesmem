@@ -174,8 +174,6 @@ or the requirements list of your project.
       
       DWORD64 GetReturnValue64() const;
       
-      double GetReturnValueFloat() const;
-      
       DWORD GetLastError() const;
     };
   
@@ -196,10 +194,19 @@ or the requirements list of your project.
     T Read(PVOID Address, unspecified = 0) const;
 
     template <typename T>
-    T Read(PVOID Address, std::size_t Size, unspecified = 0) const;
+    T ReadString(PVOID Address, unspecified = 0) const;
+
+    template <typename T>
+    T ReadList(PVOID Address, std::size_t Size, unspecified = 0) const;
 
     template <typename T>
     void Write(PVOID Address, T const& Data, unspecified = 0) const;
+
+    template <typename T>
+    void WriteString(PVOID Address, T const& Data, unspecified = 0) const;
+
+    template <typename T>
+    void WriteList(PVOID Address, T const& Data, unspecified = 0) const;
 
     bool CanRead(LPCVOID Address) const;
 
@@ -329,11 +336,99 @@ arguments are unsupported.]]
 
 [h4 MemoryMgr member function `Read`]
 
-TODO: Write this!
+  template <typename T>
+  T Read(PVOID Address, unspecified = 0) const;
+
+[variablelist
+
+[[Returns:] [Instance of type `T` constructed from memory at `Address`.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be a POD type.]]
+
+]
+
+[h4 MemoryMgr member function `ReadString`]
+
+  template <typename T>
+  T ReadString(PVOID Address, unspecified = 0) const;
+
+[variablelist
+
+[[Returns:] [Instance of type `T` constructed from memory at `Address`. Reads 
+individual characters until a null is encountered.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be of type `std::basic_string<CharT>`, where `CharT` is a 
+POD character type. String is read as if it is a C-style character array.]]
+
+]
+
+[h4 MemoryMgr member function `ReadList`]
+
+  template <typename T>
+  T ReadList(PVOID Address, std::size_t Size, unspecified = 0) const;
+
+[variablelist
+
+[[Returns:] [Instance of type `T` constructed from memory at `Address`. Reads 
+`Size` items from `Address` and stores them in a `T`.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be of type `std::vector<U>`, where `U` is a POD type. 
+List is read as if it is a C-style array.]]
+
+]
 
 [h4 MemoryMgr member function `Write`]
 
-TODO: Write this!
+  template <typename T>
+  void Write(PVOID Address, T const& Data, unspecified = 0) const;
+
+[variablelist
+
+[[Effects:] [Writes `Data` to `Address`.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be a POD type.]]
+
+]
+
+[h4 MemoryMgr member function `WriteString`]
+
+  template <typename T>
+  void WriteString(PVOID Address, T const& Data, unspecified = 0) const;
+
+[variablelist
+
+[[Effects:] [Writes `Data` to `Address`.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be of type `std::basic_string<CharT>`, where `CharT` is a 
+POD character type. `Data` is written as a C-style character array.]]
+
+]
+
+[h4 MemoryMgr member function `WriteList`]
+
+  template <typename T>
+  void WriteList(PVOID Address, T const& Data, unspecified = 0) const;
+
+[variablelist
+
+[[Effects:] [Writes `Data` to `Address`.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [`T` must be of type `std::vector<U>`, where `U` is a POD type. 
+`Data` is written as a C-style array.]]
+
+]
 
 [h4 MemoryMgr member function `CanRead`]
 

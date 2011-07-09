@@ -89,13 +89,13 @@ namespace HadesMem
 
     // Read memory (string types)
     template <typename T>
-    T Read(PVOID Address, typename std::enable_if<std::is_same<T, std::
+    T ReadString(PVOID Address, typename std::enable_if<std::is_same<T, std::
       basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
       const;
 
     // Read memory (vector types)
     template <typename T>
-    T Read(PVOID Address, std::size_t Size, typename std::enable_if<std::
+    T ReadList(PVOID Address, std::size_t Size, typename std::enable_if<std::
       is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
       Dummy = 0) const;
       
@@ -106,13 +106,13 @@ namespace HadesMem
 
     // Write memory (string types)
     template <typename T>
-    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_same<T, std::basic_string<typename T::value_type>>::value, T>::
+    void WriteString(PVOID Address, T const& Data, typename std::enable_if<
+      std::is_same<T, std::basic_string<typename T::value_type>>::value, T>::
       type* Dummy = 0) const;
 
     // Write memory (vector types)
     template <typename T>
-    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
+    void WriteList(PVOID Address, T const& Data, typename std::enable_if<std::
       is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
       Dummy = 0) const;
 
@@ -208,8 +208,8 @@ namespace HadesMem
 
   // Read memory (string types)
   template <typename T>
-  T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_same<T, 
-    std::basic_string<typename T::value_type>>::value, T>::type* /*Dummy*/) 
+  T MemoryMgr::ReadString(PVOID Address, typename std::enable_if<std::is_same<
+    T, std::basic_string<typename T::value_type>>::value, T>::type* /*Dummy*/) 
     const
   {
     // Character type
@@ -229,7 +229,7 @@ namespace HadesMem
       CharT const Current = this->Read<CharT>(AddressReal);
 
       // Return generated string on null terminator
-      if (Current == 0)
+      if (Current == CharT())
       {
         return Buffer;
       }
@@ -241,9 +241,9 @@ namespace HadesMem
 
   // Read memory (vector types)
   template <typename T>
-  T MemoryMgr::Read(PVOID Address, std::size_t Size, typename std::enable_if<
-    std::is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-    /*Dummy*/) const
+  T MemoryMgr::ReadList(PVOID Address, std::size_t Size, typename 
+    std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::
+    value, T>::type* /*Dummy*/) const
   {
     // Value type
     typedef typename T::value_type ValT;
@@ -269,7 +269,7 @@ namespace HadesMem
 
   // Write memory (string types)
   template <typename T>
-  void MemoryMgr::Write(PVOID Address, T const& Data, 
+  void MemoryMgr::WriteString(PVOID Address, T const& Data, 
     typename std::enable_if<std::is_same<T, std::basic_string<typename T::
     value_type>>::value, T>::type* /*Dummy*/) const
   {
@@ -287,7 +287,7 @@ namespace HadesMem
 
   // Write memory (vector types)
   template <typename T>
-  void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
+  void MemoryMgr::WriteList(PVOID Address, T const& Data, typename std::
     enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
     T>::type* /*Dummy*/) const
   {
