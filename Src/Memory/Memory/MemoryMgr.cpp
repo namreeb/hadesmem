@@ -671,6 +671,18 @@ namespace HadesMem
   {
     return m_Process.IsWoW64();
   }
+    
+  // Equality operator
+  bool MemoryMgr::operator==(MemoryMgr const& Rhs) const
+  {
+    return m_Process == Rhs.m_Process;
+  }
+  
+  // Inequality operator
+  bool MemoryMgr::operator!=(MemoryMgr const& Rhs) const
+  {
+    return !(*this == Rhs);
+  }
 
   // Read memory
   void MemoryMgr::ReadImpl(PVOID Address, PVOID Out, std::size_t OutSize) const 

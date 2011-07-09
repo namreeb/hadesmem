@@ -101,6 +101,10 @@
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   
   <span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
 <span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
@@ -708,6 +712,48 @@
 <dt><span class="term">Returns:</span></dt>
 <dd><p>
               Whether process is running under WoW64.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="keyword">operator</span><span class="special">==</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              the same process.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_">MemoryMgr
+        member function <code class="computeroutput"><span class="keyword">operator</span><span class="special">!=</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              a different process.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>

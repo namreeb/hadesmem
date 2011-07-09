@@ -91,6 +91,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Create memory manager for self
   HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
   HadesMem::MemoryMgr OtherMemory(MyMemory);
+  BOOST_CHECK(MyMemory == OtherMemory);
   MyMemory = OtherMemory;
   BOOST_CHECK_THROW(HadesMem::MemoryMgr InvalidMemory(
     static_cast<DWORD>(-1)), HadesMem::HadesMemError);

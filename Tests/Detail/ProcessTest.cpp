@@ -30,6 +30,7 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Create process manager for self
   HadesMem::Detail::Process MyProcess(GetCurrentProcessId());
   HadesMem::Detail::Process OtherProcess(MyProcess);
+  BOOST_CHECK(MyProcess == OtherProcess);
   MyProcess = OtherProcess;
   BOOST_CHECK_THROW(HadesMem::Detail::Process InvalidProc(
     static_cast<DWORD>(-1)), HadesMem::HadesMemError);

@@ -34,6 +34,9 @@ namespace HadesMem
     class Process::Impl
     {
     public:
+      // Allow Process access to internals
+      friend class Process;
+      
       // Constructor
       explicit Impl(DWORD ProcID) 
         : m_Handle(), 
@@ -214,6 +217,18 @@ namespace HadesMem
     bool Process::IsWoW64() const
     {
       return m_pImpl->IsWoW64();
+    }
+    
+    // Equality operator
+    bool Process::operator==(Process const& Rhs) const
+    {
+      return m_pImpl->m_ID == Rhs.m_pImpl->m_ID;
+    }
+    
+    // Inequality operator
+    bool Process::operator!=(Process const& Rhs) const
+    {
+      return !(*this == Rhs);
     }
   } // namespace Detail
 } // namespace HadesMem

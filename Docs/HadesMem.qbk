@@ -235,6 +235,10 @@ or the requirements list of your project.
     std::wstring GetProcessPath() const;
     
     bool IsProcessWoW64() const;
+    
+    bool operator==(MemoryMgr const& Rhs) const;
+    
+    bool operator!=(MemoryMgr const& Rhs) const;
   };
   
   MemoryMgr CreateProcess(std::wstring const& Path, 
@@ -599,6 +603,30 @@ Windows API.]]
 [variablelist
 
 [[Returns:] [Whether process is running under WoW64.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 MemoryMgr member function `operator==`]
+
+  bool operator==(MemoryMgr const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same process.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 MemoryMgr member function `operator!=`]
+
+  bool operator!=(MemoryMgr const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different process.]]
 
 [[Throws:] [No.]]
 
