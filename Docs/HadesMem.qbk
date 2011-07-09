@@ -191,7 +191,7 @@ or the requirements list of your project.
       std::vector<PVOID> const& Args) const;
 
     template <typename T>
-    T Read(PVOID Address, unspecified = 0) const;
+    T Read(PVOID Address) const;
 
     template <typename T>
     T ReadString(PVOID Address, unspecified = 0) const;
@@ -200,7 +200,7 @@ or the requirements list of your project.
     T ReadList(PVOID Address, std::size_t Size, unspecified = 0) const;
 
     template <typename T>
-    void Write(PVOID Address, T const& Data, unspecified = 0) const;
+    void Write(PVOID Address, T const& Data) const;
 
     template <typename T>
     void WriteString(PVOID Address, T const& Data, unspecified = 0) const;
@@ -347,7 +347,7 @@ arguments are unsupported.]]
 [h4 MemoryMgr member function `Read`]
 
   template <typename T>
-  T Read(PVOID Address, unspecified = 0) const;
+  T Read(PVOID Address) const;
 
 [variablelist
 
@@ -396,7 +396,7 @@ List is read as if it is a C-style array.]]
 [h4 MemoryMgr member function `Write`]
 
   template <typename T>
-  void Write(PVOID Address, T const& Data, unspecified = 0) const;
+  void Write(PVOID Address, T const& Data) const;
 
 [variablelist
 
@@ -608,7 +608,7 @@ Windows API.]]
 
 ]
 
-[h4 MemoryMgr member function `operator==`]
+[h4 MemoryMgr equality operator]
 
   bool operator==(MemoryMgr const& Rhs) const;
 
@@ -620,7 +620,7 @@ Windows API.]]
 
 ]
 
-[h4 MemoryMgr member function `operator!=`]
+[h4 MemoryMgr inequality operator]
 
   bool operator!=(MemoryMgr const& Rhs) const;
 

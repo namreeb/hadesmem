@@ -57,7 +57,7 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
   <span class="identifier">T</span> <span class="identifier">ReadString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -66,7 +66,7 @@
   <span class="identifier">T</span> <span class="identifier">ReadList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
   <span class="keyword">void</span> <span class="identifier">WriteString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -268,7 +268,7 @@
         member function <code class="computeroutput"><span class="identifier">Read</span></code></a>
       </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-<span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
@@ -356,7 +356,7 @@
         member function <code class="computeroutput"><span class="identifier">Write</span></code></a>
       </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
-<span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">unspecified</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
@@ -719,10 +719,10 @@
             </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_"></a><h5>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_-heading"></a>
-        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_">MemoryMgr
-        member function <code class="computeroutput"><span class="keyword">operator</span><span class="special">==</span></code></a>
+<a name="hadesmem.reference.memorymgr.memorymgr_equality_operator"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_equality_operator-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_equality_operator">MemoryMgr
+        equality operator</a>
       </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -740,10 +740,10 @@
             </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_"></a><h5>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_-heading"></a>
-        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__keyword__operator__phrase__phrase_role__special______phrase___code_">MemoryMgr
-        member function <code class="computeroutput"><span class="keyword">operator</span><span class="special">!=</span></code></a>
+<a name="hadesmem.reference.memorymgr.memorymgr_inequality_operator"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_inequality_operator-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_inequality_operator">MemoryMgr
+        inequality operator</a>
       </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>

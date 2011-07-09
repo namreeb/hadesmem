@@ -82,8 +82,7 @@ namespace HadesMem
 
     // Read memory (POD types)
     template <typename T>
-    T Read(PVOID Address, typename std::enable_if<std::is_pod<T>::value, 
-      T>::type* Dummy = 0) const;
+    T Read(PVOID Address) const;
 
     // Read memory (string types)
     template <typename T>
@@ -99,8 +98,7 @@ namespace HadesMem
       
     // Write memory (POD types)
     template <typename T>
-    void Write(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_pod<T>::value, T>::type* Dummy = 0) const;
+    void Write(PVOID Address, T const& Data) const;
 
     // Write memory (string types)
     template <typename T>
@@ -209,9 +207,11 @@ namespace HadesMem
 
   // Read memory (POD types)
   template <typename T>
-  T MemoryMgr::Read(PVOID Address, typename std::enable_if<std::is_pod<T>::
-    value, T>::type* /*Dummy*/) const
+  T MemoryMgr::Read(PVOID Address) const
   {
+    // Ensure T is POD
+    static_assert(std::is_pod<T>::value, "MemoryMgr::Read: T must be POD.");
+    
     // Read data
     T Data;
     ReadImpl(Address, &Data, sizeof(Data));
@@ -228,8 +228,8 @@ namespace HadesMem
     typedef typename T::value_type CharT;
 
     // Ensure chracter type is POD
-    static_assert(std::is_pod<CharT>::value, "Character type of string must "
-      "be POD.");
+    static_assert(std::is_pod<CharT>::value, "MemoryMgr::ReadString: "
+      "Character type of string must be POD.");
     
     // Create buffer to store results
     T Buffer;
@@ -256,8 +256,8 @@ namespace HadesMem
     typedef typename T::value_type ValT;
     
     // Ensure value type is POD
-    static_assert(std::is_pod<ValT>::value, "Value type of vector must be "
-      "POD.");
+    static_assert(std::is_pod<ValT>::value, "MemoryMgr::ReadList: Value type "
+      "of vector must be POD.");
     
     // Read data
     T Data(Size);
@@ -267,9 +267,11 @@ namespace HadesMem
 
   // Write memory (POD types)
   template <typename T>
-  void MemoryMgr::Write(PVOID Address, T const& Data, typename std::
-    enable_if<std::is_pod<T>::value, T>::type* /*Dummy*/) const 
+  void MemoryMgr::Write(PVOID Address, T const& Data) const 
   {
+    // Ensure T is POD
+    static_assert(std::is_pod<T>::value, "MemoryMgr::Write: T must be POD.");
+    
     // Write memory
     WriteImpl(Address, &Data, sizeof(Data));
   }
@@ -284,8 +286,8 @@ namespace HadesMem
     typedef typename T::value_type CharT;
 
     // Ensure chracter type is POD
-    static_assert(std::is_pod<CharT>::value, "Character type of string must "
-      "be POD.");
+    static_assert(std::is_pod<CharT>::value, "MemoryMgr::WriteString: "
+      "Character type of string must be POD.");
     
     // Write memory
     std::size_t const RawSize = (Data.size() * sizeof(CharT)) + 1;
@@ -302,8 +304,8 @@ namespace HadesMem
     typedef typename T::value_type ValT;
     
     // Ensure value type is POD
-    static_assert(std::is_pod<ValT>::value, "Value type of vector must be "
-      "POD.");
+    static_assert(std::is_pod<ValT>::value, "MemoryMgr::WriteList: Value type "
+      "of vector must be POD.");
     
     // Write memory
     std::size_t const RawSize = Data.size() * sizeof(ValT);
