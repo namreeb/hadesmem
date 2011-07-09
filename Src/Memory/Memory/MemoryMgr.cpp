@@ -48,6 +48,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Windows API
 #include <Windows.h>
 #include <TlHelp32.h>
+#include <Shellapi.h>
 
 namespace HadesMem
 {
@@ -776,6 +777,106 @@ namespace HadesMem
     if (!CanWriteMem)
     {
       ProtectRegion(Address, OldProtect);
+    }
+  }
+    
+  // Create process
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir)
+  {
+    // Start process
+    SHELLEXECUTEINFO ExecInfo;
+    ZeroMemory(&ExecInfo, sizeof(ExecInfo));
+    ExecInfo.cbSize = sizeof(ExecInfo);
+#ifndef SEE_MASK_NOASYNC 
+#define SEE_MASK_NOASYNC 0x00000100
+#endif
+    ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
+    ExecInfo.lpFile = Path.empty() ? nullptr : Path.c_str();
+    ExecInfo.lpParameters = Params.empty() ? nullptr : Params.c_str();
+    ExecInfo.lpDirectory = WorkingDir.empty() ? nullptr : WorkingDir.c_str();
+    ExecInfo.nShow = SW_SHOWNORMAL;
+    if (!ShellExecuteEx(&ExecInfo))
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("CreateProcess") << 
+        ErrorString("Could not create process.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // Ensure handle is closed
+    Detail::EnsureCloseHandle const MyProc(ExecInfo.hProcess);
+    
+    // Return process object
+    return MemoryMgr(GetProcessId(MyProc));
+  }
+
+  // Gets the SeDebugPrivilege
+  void GetSeDebugPrivilege()
+  {
+    // Open current process token with adjust rights
+    HANDLE TempToken = 0;
+    BOOL const RetVal = OpenProcessToken(GetCurrentProcess(), 
+      TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TempToken);
+    if (!RetVal) 
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("GetSeDebugPrivilege") << 
+        ErrorString("Could not open process token.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    Detail::EnsureCloseHandle const Token(TempToken);
+
+    // Get the LUID for SE_DEBUG_NAME 
+    LUID Luid = { 0, 0 }; // Locally unique identifier
+    if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &Luid)) 
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("GetSeDebugPrivilege") << 
+        ErrorString("Could not look up privilege value for "
+        "SeDebugName.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    if (Luid.LowPart == 0 && Luid.HighPart == 0) 
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("GetSeDebugPrivilege") << 
+        ErrorString("Could not get LUID for SeDebugName.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Process privileges
+    TOKEN_PRIVILEGES Privileges;
+    ZeroMemory(&Privileges, sizeof(Privileges));
+    // Set the privileges we need
+    Privileges.PrivilegeCount = 1;
+    Privileges.Privileges[0].Luid = Luid;
+    Privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+    // Apply the adjusted privileges
+    if (!AdjustTokenPrivileges(Token, FALSE, &Privileges, 
+      sizeof(Privileges), nullptr, nullptr)) 
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("GetSeDebugPrivilege") << 
+        ErrorString("Could not adjust token privileges.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // Ensure privileges were adjusted
+    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("GetSeDebugPrivilege") << 
+        ErrorString("Could not assign all privileges.") << 
+        ErrorCodeWinLast(LastError));
     }
   }
   

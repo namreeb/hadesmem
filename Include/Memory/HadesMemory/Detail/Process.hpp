@@ -67,13 +67,5 @@ namespace HadesMem
       class Impl;
       std::shared_ptr<Impl> m_pImpl;
     };
-    
-    // Create process
-    Process CreateProcess(std::wstring const& Path, 
-      std::wstring const& Params, 
-      std::wstring const& WorkingDir);
-    
-    // Gets the SeDebugPrivilege
-    void GetSeDebugPrivilege();
   } // namespace Detail
 } // namespace HadesMem

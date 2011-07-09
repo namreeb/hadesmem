@@ -236,6 +236,12 @@ or the requirements list of your project.
     
     bool IsProcessWoW64() const;
   };
+  
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir);
+  
+  void GetSeDebugPrivilege();
 
   class AllocAndFree
   {
@@ -595,6 +601,41 @@ Windows API.]]
 [[Returns:] [Whether process is running under WoW64.]]
 
 [[Throws:] [No.]]
+
+]
+
+[h3 Free functions]
+
+[h4 Free function `CreateProcess`]
+
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir);
+
+[variablelist
+
+[[Effects:] [Create process from binary at `Path` with optional parameters 
+`Params` and optional working dir `WorkingDir`.]]
+
+[[Returns:] [Memory manager instance for new process.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Free function `GetSeDebugPrivilege`]
+  
+  void GetSeDebugPrivilege();
+
+[variablelist
+
+[[Effects:] [Sets the [@http://msdn.microsoft.com/en-us/library/bb530716.aspx 
+SeDebugPrivilege] on the calling process.]]
+
+[[Throws:] [Yes.]]
+
+[[Notes:] [Requires the caller to be running with administrator 
+credentials.]]
 
 ]
 

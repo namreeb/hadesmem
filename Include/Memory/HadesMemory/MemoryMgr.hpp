@@ -170,6 +170,14 @@ namespace HadesMem
     // Target process
     Detail::Process m_Process;
   };
+    
+  // Create process
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::wstring const& Params, 
+    std::wstring const& WorkingDir);
+  
+  // Gets the SeDebugPrivilege
+  void GetSeDebugPrivilege();
 
   // RAII class for remote memory allocation and freeing
   class AllocAndFree

@@ -17,6 +17,10 @@ You should have received a copy of the GNU General Public License
 along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// TODO:
+// Test CreateProcess
+// Test GetSeDebugPrivilege
+
 // Hades
 #include <HadesMemory/MemoryMgr.hpp>
 
