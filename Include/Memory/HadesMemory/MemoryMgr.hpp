@@ -50,8 +50,6 @@ namespace HadesMem
     class RemoteFunctionRet
     {
     public:
-      RemoteFunctionRet();
-      
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
         DWORD LastError);
       

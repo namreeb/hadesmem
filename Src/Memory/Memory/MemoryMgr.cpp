@@ -52,12 +52,6 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace HadesMem
 {
-  MemoryMgr::RemoteFunctionRet::RemoteFunctionRet() 
-    : m_ReturnValue(0), 
-    m_ReturnValue64(0), 
-    m_LastError(0)
-  { }
-  
   MemoryMgr::RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, 
     DWORD64 ReturnValue64, DWORD LastError) 
     : m_ReturnValue(ReturnValue), 
