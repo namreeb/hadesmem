@@ -327,6 +327,76 @@ arguments are unsupported.]]
 
 ]
 
+[h4 Member function `Read`]
+
+TODO: Write this!
+
+[h4 Member function `Write`]
+
+TODO: Write this!
+
+[h4 Member function `CanRead`]
+
+  bool CanRead(LPCVOID Address) const;
+
+[variablelist
+
+[[Returns:] [Whether memory region at `Address` is readable.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Member function `CanWrite`]
+
+  bool CanWrite(LPCVOID Address) const;
+
+[variablelist
+
+[[Returns:] [Whether memory region at `Address` is writable.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Member function `CanExecute`]
+
+  bool CanExecute(LPCVOID Address) const;
+
+[variablelist
+
+[[Returns:] [Whether memory region at `Address` is executable.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Member function `IsGuard`]
+
+  bool IsGuard(LPCVOID Address) const;
+
+[variablelist
+
+[[Returns:] [Whether memory region at `Address` is a guard page.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Member function `ProtectRegion`]
+
+  DWORD ProtectRegion(LPVOID Address, DWORD Protect) const;
+
+[variablelist
+
+[[Effects:] [Protect memory region at `Address` with protection `Protect`.]]
+
+[[Returns:] [Previous protection at `Address`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
 [h3 AllocAndFree public construct/copy/destruct/move]
 
 [h4 Constructor]
@@ -342,7 +412,7 @@ object `MyMemoryMgr`.]]
 
 ]
 
-[h4 Constructor]
+[h4 Destructor]
 
   ~AllocAndFree();
 
@@ -407,7 +477,7 @@ pointer size for the platform.]]
 
 ]
 
-[h4 Member function `GetReturnValue`]
+[h4 Member function `GetReturnValue64`]
 
     DWORD64 GetReturnValue64() const;
 

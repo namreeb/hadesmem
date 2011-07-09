@@ -122,6 +122,9 @@ namespace HadesMem
     // Whether an address is currently writable
     bool CanWrite(LPCVOID Address) const;
 
+    // Whether an address is currently executable
+    bool CanExecute(LPCVOID Address) const;
+
     // Whether an address is contained within a guard page
     bool IsGuard(LPCVOID Address) const;
     

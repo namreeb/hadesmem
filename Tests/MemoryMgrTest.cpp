@@ -192,6 +192,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   int const WriteTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.CanWrite(&WriteTestStack), true);
   
+  // Test MemoryMgr::CanExecute
+  BOOST_CHECK_EQUAL(MyMemory.CanExecute(reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestCall))), true);
+  int const ExecuteTestStack = 0;
+  BOOST_CHECK_EQUAL(MyMemory.CanExecute(&ExecuteTestStack), false);
+  
   // Test MemoryMgr::IsGuard
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(GetModuleHandle(NULL)), false);
   int const GuardTestStack = 0;

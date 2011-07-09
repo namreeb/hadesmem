@@ -454,6 +454,30 @@ namespace HadesMem
       (MyMbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY;
   }
 
+  // Whether an address is currently executable
+  bool MemoryMgr::CanExecute(LPCVOID Address) const
+  {
+    // Query page protections
+    MEMORY_BASIC_INFORMATION MyMbi;
+    ZeroMemory(&MyMbi, sizeof(MyMbi));
+    if (VirtualQueryEx(m_Process.GetHandle(), Address, &MyMbi, 
+      sizeof(MyMbi)) != sizeof(MyMbi))
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Write") << 
+        ErrorString("Could not read process memory protection.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Whether memory is currently executable
+    return 
+      (MyMbi.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || 
+      (MyMbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
+      (MyMbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
+      (MyMbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY;
+  }
+
   // Whether an address is contained within a guard page
   bool MemoryMgr::IsGuard(LPCVOID Address) const
   {
