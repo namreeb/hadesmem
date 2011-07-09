@@ -292,7 +292,7 @@ calling convention.
 
 [h3 MemoryMgr public construct/copy/destruct/move]
 
-[h4 Process ID Constructor]
+[h4 MemoryMgr process ID constructor]
 
   explicit MemoryMgr(DWORD ProcID);
 
@@ -307,7 +307,7 @@ process.]]
 
 [h3 MemoryMgr public member functions]
 
-[h4 Member function `Call`]
+[h4 MemoryMgr member function `Call`]
 
   RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
     std::vector<PVOID> const& Args) const;
@@ -327,15 +327,15 @@ arguments are unsupported.]]
 
 ]
 
-[h4 Member function `Read`]
+[h4 MemoryMgr member function `Read`]
 
 TODO: Write this!
 
-[h4 Member function `Write`]
+[h4 MemoryMgr member function `Write`]
 
 TODO: Write this!
 
-[h4 Member function `CanRead`]
+[h4 MemoryMgr member function `CanRead`]
 
   bool CanRead(LPCVOID Address) const;
 
@@ -347,7 +347,7 @@ TODO: Write this!
 
 ]
 
-[h4 Member function `CanWrite`]
+[h4 MemoryMgr member function `CanWrite`]
 
   bool CanWrite(LPCVOID Address) const;
 
@@ -359,7 +359,7 @@ TODO: Write this!
 
 ]
 
-[h4 Member function `CanExecute`]
+[h4 MemoryMgr member function `CanExecute`]
 
   bool CanExecute(LPCVOID Address) const;
 
@@ -371,7 +371,7 @@ TODO: Write this!
 
 ]
 
-[h4 Member function `IsGuard`]
+[h4 MemoryMgr member function `IsGuard`]
 
   bool IsGuard(LPCVOID Address) const;
 
@@ -383,7 +383,7 @@ TODO: Write this!
 
 ]
 
-[h4 Member function `ProtectRegion`]
+[h4 MemoryMgr member function `ProtectRegion`]
 
   DWORD ProtectRegion(LPVOID Address, DWORD Protect) const;
 
@@ -397,9 +397,115 @@ TODO: Write this!
 
 ]
 
+[h4 MemoryMgr member function `Alloc`]
+
+  PVOID Alloc(SIZE_T Size) const;
+
+[variablelist
+
+[[Effects:] [Allocate memory region with size `Size`.]]
+
+[[Returns:] [Base address of memory region.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 MemoryMgr member function `Free`]
+
+  void Free(PVOID Address) const;
+
+[variablelist
+
+[[Effects:] [Free memory region at address `Address`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 MemoryMgr member function `GetRemoteProcAddress`]
+
+  FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+    std::wstring const& Module, std::string const& Function) const;
+
+  FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+    std::wstring const& Module, WORD Function) const;
+
+[variablelist
+
+[[Effects:] [Looks up function `Function` (either by name or ordinal) with 
+module path `Module` at module base `RemoteMod`. Similar to `GetProcAddress` 
+Windows API.]]
+
+[[Returns:] [Address of function.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 MemoryMgr member function `FlushCache`]
+
+  void FlushCache(LPCVOID Address, SIZE_T Size) const;
+
+[variablelist
+
+[[Effects:] [Flush instruction cache at address `Address` with size `Size`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 MemoryMgr member function `GetProcessId`]
+
+  DWORD GetProcessId() const;
+
+[variablelist
+
+[[Returns:] [Process ID of target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 MemoryMgr member function `GetProcessHandle`]
+
+  HANDLE GetProcessHandle() const;
+
+[variablelist
+
+[[Returns:] [Process handle to target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 MemoryMgr member function `GetProcessPath`]
+
+  std::wstring GetProcessPath() const;
+
+[variablelist
+
+[[Returns:] [Path to target.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 MemoryMgr member function `IsProcessWoW64`]
+
+  bool IsProcessWoW64() const;
+
+[variablelist
+
+[[Returns:] [Whether process is running under WoW64.]]
+
+[[Throws:] [No.]]
+
+]
+
 [h3 AllocAndFree public construct/copy/destruct/move]
 
-[h4 Constructor]
+[h4 AllocAndFree constructor]
 
   AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
 
@@ -412,7 +518,7 @@ object `MyMemoryMgr`.]]
 
 ]
 
-[h4 Destructor]
+[h4 AllocAndFree destructor]
 
   ~AllocAndFree();
 
@@ -426,7 +532,7 @@ object `MyMemoryMgr`.]]
 
 [h3 AllocAndFree public member functions]
 
-[h4 Member function `Free`]
+[h4 AllocAndFree member function `Free`]
 
   void Free() const;
 
@@ -438,7 +544,7 @@ object `MyMemoryMgr`.]]
 
 ]
 
-[h4 Member function `GetBase`]
+[h4 AllocAndFree member function `GetBase`]
 
   PVOID GetBase() const;
 
@@ -450,7 +556,7 @@ object `MyMemoryMgr`.]]
 
 ]
 
-[h4 Member function `GetSize`]
+[h4 AllocAndFree member function `GetSize`]
 
   SIZE_T GetSize() const;
 
@@ -464,7 +570,7 @@ object `MyMemoryMgr`.]]
 
 [h3 MemoryMgr::RemoteFunctionRet public member functions]
 
-[h4 Member function `GetReturnValue`]
+[h4 MemoryMgr::RemoteFunctionRet member function `GetReturnValue`]
 
     DWORD_PTR GetReturnValue() const;
 
@@ -477,7 +583,7 @@ pointer size for the platform.]]
 
 ]
 
-[h4 Member function `GetReturnValue64`]
+[h4 MemoryMgr::RemoteFunctionRet member function `GetReturnValue64`]
 
     DWORD64 GetReturnValue64() const;
 
@@ -491,7 +597,7 @@ pointer size for the platform.]]
 
 ]
 
-[h4 Member function `GetLastError`]
+[h4 MemoryMgr::RemoteFunctionRet member function `GetLastError`]
 
     DWORD GetLastError() const;
 
