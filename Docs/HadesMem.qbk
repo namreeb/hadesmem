@@ -1,6 +1,6 @@
 [article HadesMem
   [quickbook 1.5]
-  [version 0.0.0]
+  [version 1.0.0]
   [copyright 2011 Joshua Boyce (aka RaptorFactor)]
   [authors [Boyce, Joshua]]
   [license Distributed under the GNU GPL v3. See accompanying file 
@@ -106,7 +106,11 @@ along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
 
 [section:changes Changes]
 
-Nothing to see here yet.
+[h3 v1.0.0]
+
+* Initial SemVer release. Currently the only API available is the MemoryMgr 
+component, but it should remain stable from now on (until the next major 
+version bump). New components will be added incrementally once stabilized.
 
 [endsect] [/ Changes]
 

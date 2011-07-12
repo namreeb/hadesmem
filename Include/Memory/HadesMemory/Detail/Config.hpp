@@ -22,7 +22,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 // Boost
 #include <boost/config.hpp>
 
-#define HADES_VERSION_MAJOR 0
+#define HADES_VERSION_MAJOR 1
 #define HADES_VERSION_MINOR 0
 #define HADES_VERSION_PATCH 0
 
