@@ -236,21 +236,6 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     HadesMem::AllocAndFree const MyAllocTest(MyMemory, 0x1000);
   }
   
-  // Ensure we can find a valid Kernel32 instance
-  HMODULE const Kernel32Mod = GetModuleHandle(L"kernel32.dll");
-  BOOST_REQUIRE(Kernel32Mod != nullptr);
-  
-  // Ensure we can find Kernel32.dll!GetCurrentProcessId
-  FARPROC const pGetCurrentProcessId = GetProcAddress(Kernel32Mod, 
-    "GetCurrentProcessId");
-  BOOST_REQUIRE(pGetCurrentProcessId != nullptr);
-  
-  // 'Remotely' call Kernel32.dll!GetCurrentProcessId and ensure its result 
-  // matches the local results.
-  // Todo: Test GetRemoteProcAddress with ordinals
-  BOOST_CHECK_EQUAL(MyMemory.GetRemoteProcAddress(Kernel32Mod, 
-    L"kernel32.dll", "GetCurrentProcessId"), pGetCurrentProcessId);
-  
   // Test MemoryMgr::FlushCache
   MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), 10);

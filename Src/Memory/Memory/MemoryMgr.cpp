@@ -161,6 +161,8 @@ namespace HadesMem
     HMODULE const K32Mod = GetKernel32(*this);
     // Get address of kernel32.dll!GetLastError and 
     // kernel32.dll!SetLastError
+    // Todo: Rewrite this code to use the HadesMem::Module API once 
+    // implemented, and remove GetRemoteProcAddress.
     DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
       GetRemoteProcAddress(K32Mod, L"kernel32.dll", "GetLastError"));
     DWORD_PTR const pSetLastError = reinterpret_cast<DWORD_PTR>(

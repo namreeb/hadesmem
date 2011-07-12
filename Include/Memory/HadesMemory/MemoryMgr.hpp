@@ -133,14 +133,6 @@ namespace HadesMem
     // Free memory
     void Free(PVOID Address) const;
 
-    // Get address of export in remote process (by name)
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, std::string const& Function) const;
-
-    // Get address of export in remote process (by ordinal)
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, WORD Function) const;
-
     // Flush instruction cache
     void FlushCache(LPCVOID Address, SIZE_T Size) const;
 
@@ -168,6 +160,14 @@ namespace HadesMem
       
     // Write memory
     void WriteImpl(PVOID Address, LPCVOID In, std::size_t InSize) const;
+
+    // Get address of export in remote process (by name)
+    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+      std::wstring const& Module, std::string const& Function) const;
+
+    // Get address of export in remote process (by ordinal)
+    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
+      std::wstring const& Module, WORD Function) const;
     
     // Target process
     Detail::Process m_Process;

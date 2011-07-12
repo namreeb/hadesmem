@@ -86,12 +86,6 @@
 
   <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
-  <span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-
-  <span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-
   <span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -579,38 +573,6 @@
 <dt><span class="term">Effects:</span></dt>
 <dd><p>
               Free memory region at address <code class="computeroutput"><span class="identifier">Address</span></code>.
-            </p></dd>
-<dt><span class="term">Throws:</span></dt>
-<dd><p>
-              Yes.
-            </p></dd>
-</dl>
-</div>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getremoteprocaddress__phrase___code_"></a><h5>
-<a name="hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getremoteprocaddress__phrase___code_-heading"></a>
-        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getremoteprocaddress__phrase___code_">MemoryMgr
-        member function <code class="computeroutput"><span class="identifier">GetRemoteProcAddress</span></code></a>
-      </h5>
-<pre class="programlisting"><span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-
-<span class="identifier">FARPROC</span> <span class="identifier">GetRemoteProcAddress</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteMod</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-</pre>
-<div class="variablelist">
-<p class="title"><b></b></p>
-<dl>
-<dt><span class="term">Effects:</span></dt>
-<dd><p>
-              Looks up function <code class="computeroutput"><span class="identifier">Function</span></code>
-              (either by name or ordinal) with module path <code class="computeroutput"><span class="identifier">Module</span></code>
-              at module base <code class="computeroutput"><span class="identifier">RemoteMod</span></code>.
-              Similar to <code class="computeroutput"><span class="identifier">GetProcAddress</span></code>
-              Windows API.
-            </p></dd>
-<dt><span class="term">Returns:</span></dt>
-<dd><p>
-              Address of function.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>

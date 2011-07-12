@@ -220,12 +220,6 @@ or the requirements list of your project.
 
     void Free(PVOID Address) const;
 
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, std::string const& Function) const;
-
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, WORD Function) const;
-
     void FlushCache(LPCVOID Address, SIZE_T Size) const;
 
     DWORD GetProcessId() const;
@@ -528,26 +522,6 @@ POD character type. `Data` is written as a C-style character array.]]
 
 ]
 
-[h4 MemoryMgr member function `GetRemoteProcAddress`]
-
-  FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-    std::wstring const& Module, std::string const& Function) const;
-
-  FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-    std::wstring const& Module, WORD Function) const;
-
-[variablelist
-
-[[Effects:] [Looks up function `Function` (either by name or ordinal) with 
-module path `Module` at module base `RemoteMod`. Similar to `GetProcAddress` 
-Windows API.]]
-
-[[Returns:] [Address of function.]]
-
-[[Throws:] [Yes.]]
-
-]
-
 [h4 MemoryMgr member function `FlushCache`]
 
   void FlushCache(LPCVOID Address, SIZE_T Size) const;
@@ -781,11 +755,16 @@ after the function call.]]
 
 [section:acknowledge Acknowledgements]
 
-HadesMem would not be possible without the help of the following projects:
+HadesMem would not be possible without the help of the following 
+projects/people:
 
 * [@http://code.google.com/p/asmjit/ AsmJit] - C++ Library
 * [@http://www.beaengine.org/ BeaEngine] - C Library
 * [@http://www.boost.org/ Boost] - C++ Libraries
 * [@http://www.mmowned.com/forums/members/299012-xel.html Xel @ MMOwned] - Logo
+* [@http://www.mmowned.com/ MMOwned] - Reverse Engineering and Programming 
+Resource
+* [@http://www.gamedeception.net/ Game Deception] - Reverse Engineering and 
+Programming Resource
 
 [endsect] [/ Acknowledgements]
