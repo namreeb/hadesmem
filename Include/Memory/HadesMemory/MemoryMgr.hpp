@@ -169,6 +169,9 @@ namespace HadesMem
     FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
       std::wstring const& Module, WORD Function) const;
     
+    // Get address of Kernel32.dll
+    HMODULE GetKernel32() const;
+    
     // Target process
     Detail::Process m_Process;
   };

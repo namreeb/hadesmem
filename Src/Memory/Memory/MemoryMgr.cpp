@@ -78,65 +78,6 @@ namespace HadesMem
   MemoryMgr::MemoryMgr(DWORD ProcID) 
     : m_Process(ProcID) 
   { }
-  
-  namespace
-  {
-    // Function to find Kernel32.dll
-    HMODULE GetKernel32(MemoryMgr const& MyMemory)
-    {
-      // Get module snapshot
-      Detail::EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE, MyMemory.GetProcessId());
-      if (Snap == INVALID_HANDLE_VALUE)
-      {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
-          ErrorFunction("MemoryMgr::Call") << 
-          ErrorString("Could not get module snapshot.") << 
-          ErrorCodeWinLast(LastError));
-      }
-      
-      // Start module enumeration
-      MODULEENTRY32 ModEntry;
-      ZeroMemory(&ModEntry, sizeof(ModEntry));
-      ModEntry.dwSize = sizeof(ModEntry);
-      if (!Module32First(Snap, &ModEntry))
-      {
-        DWORD const LastError = GetLastError();
-        BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
-          ErrorFunction("MemoryMgr::Call") << 
-          ErrorString("Could not get first module in list.") << 
-          ErrorCodeWinLast(LastError));
-      }
-      
-      // Enumerate module list
-      do
-      {
-        // Find Kernel32.dll
-        if (boost::to_lower_copy(static_cast<std::wstring>(
-          ModEntry.szModule)) == L"kernel32.dll")
-        {
-          return ModEntry.hModule;
-        }
-      } while(Module32Next(Snap, &ModEntry));
-      
-      // If module enumeration stopped for a reason other than EOL return 
-      // an error.
-      DWORD const LastError = GetLastError();
-      if (LastError != ERROR_NO_MORE_FILES)
-      {
-        BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
-          ErrorFunction("MemoryMgr::Call") << 
-          ErrorString("Module enumeration failed.") << 
-          ErrorCodeWinLast(LastError));
-      }
-      
-      // If we reached EOL then return a different error
-      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
-        ErrorFunction("MemoryMgr::Call") << 
-        ErrorString("Could not find Kernel32.dll."));
-    }
-  }
 
   // Call remote function
   MemoryMgr::RemoteFunctionRet MemoryMgr::Call(LPCVOID Address, 
@@ -158,7 +99,7 @@ namespace HadesMem
     AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
 
     // Get address of Kernel32.dll
-    HMODULE const K32Mod = GetKernel32(*this);
+    HMODULE const K32Mod = GetKernel32();
     // Get address of kernel32.dll!GetLastError and 
     // kernel32.dll!SetLastError
     // Todo: Rewrite this code to use the HadesMem::Module API once 
@@ -557,86 +498,6 @@ namespace HadesMem
     }
   }
 
-  // Get address of export in remote process
-  FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
-    std::wstring const& ModulePath, std::string const& Function) 
-    const
-  {
-    // Load module as data so we can read the EAT locally
-    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-      ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
-    if (!LocalMod)
-    {
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
-        ErrorString("Could not load module locally.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Find target function in module
-    FARPROC const LocalFunc = GetProcAddress(LocalMod, Function.c_str());
-    if (!LocalFunc)
-    {
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
-        ErrorString("Could not find target function.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Calculate function delta
-    LONG_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
-      reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
-
-    // Calculate function location in remote process
-    FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
-      reinterpret_cast<DWORD_PTR>(RemoteMod) + FuncDelta);
-
-    // Return remote function location
-    return RemoteFunc;
-  }
-
-  // Get address of export in remote process
-  FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
-    std::wstring const& ModulePath, WORD Ordinal) const
-  {
-    // Load module as data so we can read the EAT locally
-    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
-      ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
-    if (!LocalMod)
-    {
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
-        ErrorString("Could not load module locally.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Find target function in module
-    FARPROC const LocalFunc = GetProcAddress(LocalMod, MAKEINTRESOURCEA(
-      Ordinal));
-    if (!LocalFunc)
-    {
-      DWORD const LastError = GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
-        ErrorString("Could not find target function.") << 
-        ErrorCodeWinLast(LastError));
-    }
-
-    // Calculate function delta
-    DWORD_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
-      reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
-
-    // Calculate function location in remote process
-    FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
-      reinterpret_cast<DWORD_PTR>(RemoteMod) + FuncDelta);
-
-    // Return remote function location
-    return RemoteFunc;
-  }
-
   // Flush instruction cache
   void MemoryMgr::FlushCache(LPCVOID Address, SIZE_T Size) const
   {
@@ -786,6 +647,142 @@ namespace HadesMem
     {
       ProtectRegion(Address, OldProtect);
     }
+  }
+
+  // Get address of export in remote process
+  FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
+    std::wstring const& ModulePath, std::string const& Function) 
+    const
+  {
+    // Load module as data so we can read the EAT locally
+    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
+      ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
+    if (!LocalMod)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+        ErrorString("Could not load module locally.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Find target function in module
+    FARPROC const LocalFunc = GetProcAddress(LocalMod, Function.c_str());
+    if (!LocalFunc)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+        ErrorString("Could not find target function.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Calculate function delta
+    LONG_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
+      reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
+
+    // Calculate function location in remote process
+    FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
+      reinterpret_cast<DWORD_PTR>(RemoteMod) + FuncDelta);
+
+    // Return remote function location
+    return RemoteFunc;
+  }
+
+  // Get address of export in remote process
+  FARPROC MemoryMgr::GetRemoteProcAddress(HMODULE RemoteMod, 
+    std::wstring const& ModulePath, WORD Ordinal) const
+  {
+    // Load module as data so we can read the EAT locally
+    Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
+      ModulePath.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
+    if (!LocalMod)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+        ErrorString("Could not load module locally.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Find target function in module
+    FARPROC const LocalFunc = GetProcAddress(LocalMod, MAKEINTRESOURCEA(
+      Ordinal));
+    if (!LocalFunc)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::GetRemoteProcAddress") << 
+        ErrorString("Could not find target function.") << 
+        ErrorCodeWinLast(LastError));
+    }
+
+    // Calculate function delta
+    DWORD_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
+      reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
+
+    // Calculate function location in remote process
+    FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
+      reinterpret_cast<DWORD_PTR>(RemoteMod) + FuncDelta);
+
+    // Return remote function location
+    return RemoteFunc;
+  }
+
+  // Get address of Kernel32.dll
+  HMODULE MemoryMgr::GetKernel32() const
+  {
+    // Get module snapshot
+    Detail::EnsureCloseSnap Snap = CreateToolhelp32Snapshot(
+      TH32CS_SNAPMODULE, GetProcessId());
+    if (Snap == INVALID_HANDLE_VALUE)
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
+        ErrorFunction("MemoryMgr::Call") << 
+        ErrorString("Could not get module snapshot.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // Start module enumeration
+    MODULEENTRY32 ModEntry;
+    ZeroMemory(&ModEntry, sizeof(ModEntry));
+    ModEntry.dwSize = sizeof(ModEntry);
+    if (!Module32First(Snap, &ModEntry))
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() <<  
+        ErrorFunction("MemoryMgr::Call") << 
+        ErrorString("Could not get first module in list.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // Enumerate module list
+    do
+    {
+      // Find Kernel32.dll
+      if (boost::to_lower_copy(static_cast<std::wstring>(
+        ModEntry.szModule)) == L"kernel32.dll")
+      {
+        return ModEntry.hModule;
+      }
+    } while(Module32Next(Snap, &ModEntry));
+    
+    // If module enumeration stopped for a reason other than EOL return 
+    // an error.
+    DWORD const LastError = GetLastError();
+    if (LastError != ERROR_NO_MORE_FILES)
+    {
+      BOOST_THROW_EXCEPTION(Error() <<  
+        ErrorFunction("MemoryMgr::Call") << 
+        ErrorString("Module enumeration failed.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // If we reached EOL then return a different error
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorFunction("MemoryMgr::Call") << 
+      ErrorString("Could not find Kernel32.dll."));
   }
     
   // Create process
