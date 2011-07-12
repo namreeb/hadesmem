@@ -32,6 +32,17 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE MemoryMgrTest
 #include <boost/test/unit_test.hpp>
 
+BOOST_AUTO_TEST_CASE(ConstructorsTest)
+{
+  // Create memory manager for self
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+  HadesMem::MemoryMgr OtherMemory(MyMemory);
+  BOOST_CHECK(MyMemory == OtherMemory);
+  MyMemory = OtherMemory;
+  BOOST_CHECK_THROW(HadesMem::MemoryMgr InvalidMemory(
+    static_cast<DWORD>(-1)), HadesMem::HadesMemError);
+}
+
 // Test function to be called by MemoryMgr::Call
 DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d, 
   PVOID const e, PVOID const f)
@@ -47,6 +58,7 @@ DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d,
   return 1234;
 }
 
+// Test function to be called by MemoryMgr::Call
 DWORD64 TestCall64Ret()
 {
   return 0x123456787654321LL;
@@ -54,6 +66,7 @@ DWORD64 TestCall64Ret()
 
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
+// Test function to be called by MemoryMgr::Call
 DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c, 
   PVOID const d, PVOID const e, PVOID const f)
 {
@@ -68,6 +81,7 @@ DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c,
   return 1234;
 }
 
+// Test function to be called by MemoryMgr::Call
 DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c, 
   PVOID const d, PVOID const e, PVOID const f)
 {
@@ -85,17 +99,11 @@ DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c,
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-// MemoryMgr component tests
-BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
+BOOST_AUTO_TEST_CASE(CallTest)
 {
   // Create memory manager for self
   HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
-  HadesMem::MemoryMgr OtherMemory(MyMemory);
-  BOOST_CHECK(MyMemory == OtherMemory);
-  MyMemory = OtherMemory;
-  BOOST_CHECK_THROW(HadesMem::MemoryMgr InvalidMemory(
-    static_cast<DWORD>(-1)), HadesMem::HadesMemError);
-  
+
   // Call test function and ensure returned data is valid
   std::vector<PVOID> TestCallArgs;
   TestCallArgs.push_back(nullptr);
@@ -138,7 +146,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
     HadesMem::MemoryMgr::CallConv_Default, TestCall64Args);
   BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
     0x123456787654321LL));
-  
+}
+
+BOOST_AUTO_TEST_CASE(ReadWriteTest)
+{
+  // Create memory manager for self
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+
   // Test POD type for testing MemoryMgr::Read/MemoryMgr::Write
   struct TestPODType
   {
@@ -151,16 +165,12 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Test MemoryMgr::Read and MemoryMgr::Write
   TestPODType MyTestPODType = { 1, 0, L'a', 1234567812345678 };
   auto MyNewTestPODType = MyMemory.Read<TestPODType>(&MyTestPODType);
-  BOOST_CHECK_EQUAL(MyNewTestPODType.a, MyTestPODType.a);
-  BOOST_CHECK_EQUAL(MyNewTestPODType.b, MyTestPODType.b);
-  BOOST_CHECK_EQUAL(MyNewTestPODType.c, MyTestPODType.c);
-  BOOST_CHECK_EQUAL(MyNewTestPODType.d, MyTestPODType.d);
+  BOOST_CHECK_EQUAL(std::memcmp(&MyTestPODType, &MyNewTestPODType, 
+    sizeof(TestPODType)), 0);
   TestPODType MyTestPODType2 = { -1, 0, L'x', 9876543210 };
   MyMemory.Write(&MyTestPODType, MyTestPODType2);
-  BOOST_CHECK_EQUAL(MyTestPODType2.a, MyTestPODType.a);
-  BOOST_CHECK_EQUAL(MyTestPODType2.b, MyTestPODType.b);
-  BOOST_CHECK_EQUAL(MyTestPODType2.c, MyTestPODType.c);
-  BOOST_CHECK_EQUAL(MyTestPODType2.d, MyTestPODType.d);
+  BOOST_CHECK_EQUAL(std::memcmp(&MyTestPODType, &MyTestPODType2, 
+    sizeof(TestPODType)), 0);
   
   // Test MemoryMgr::ReadString and MemoryMgr::WriteString for std::string
   char const* const pTestStringA = "Narrow test string.";
@@ -204,7 +214,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyMemory.WriteList(&IntList, IntListRev);
   BOOST_CHECK_EQUAL_COLLECTIONS(IntList.cbegin(), IntList.cend(), 
     IntListRev.cbegin(), IntListRev.cend());
-  
+}
+
+BOOST_AUTO_TEST_CASE(RegionTest)
+{
+  // Create memory manager for self
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+
   // Test MemoryMgr::CanRead
   BOOST_CHECK_EQUAL(MyMemory.CanRead(GetModuleHandle(NULL)), true);
   int const ReadTestStack = 0;
@@ -226,9 +242,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   int const GuardTestStack = 0;
   BOOST_CHECK_EQUAL(MyMemory.IsGuard(&GuardTestStack), false);
   
-  // Test MemoryMgr::Alloc and MemoryMgr::Free
-  auto pNewMemBlock = MyMemory.Alloc(0x1000);
+  // Test MemoryMgr::Alloc, MemoryMgr::ProtectRegion, and MemoryMgr::Free
+  auto const pNewMemBlock = MyMemory.Alloc(0x1000);
   BOOST_CHECK(pNewMemBlock != nullptr);
+  DWORD OldProtect = MyMemory.ProtectRegion(pNewMemBlock, PAGE_READONLY);
+  BOOST_CHECK_EQUAL(OldProtect, static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
+  OldProtect = MyMemory.ProtectRegion(pNewMemBlock, OldProtect);
+  BOOST_CHECK_EQUAL(OldProtect, static_cast<DWORD>(PAGE_READONLY));
   MyMemory.Free(pNewMemBlock);
   
   // Test AllocAndFree
@@ -239,7 +259,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   // Test MemoryMgr::FlushCache
   MyMemory.FlushCache(reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestCall)), 10);
+}
   
+BOOST_AUTO_TEST_CASE(ProcessInfoTest)
+{
+  // Create memory manager for self
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+
   // Test MemoryMgr::GetProcessID
   BOOST_CHECK_EQUAL(MyMemory.GetProcessId(), GetCurrentProcessId());
   

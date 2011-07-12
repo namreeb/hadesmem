@@ -24,8 +24,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #define BOOST_TEST_MODULE ProcessTest
 #include <boost/test/unit_test.hpp>
 
-// Process component tests
-BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
+BOOST_AUTO_TEST_CASE(ConstructorsTest)
 {
   // Create process manager for self
   HadesMem::Detail::Process MyProcess(GetCurrentProcessId());
@@ -34,7 +33,13 @@ BOOST_AUTO_TEST_CASE(BOOST_TEST_MODULE)
   MyProcess = OtherProcess;
   BOOST_CHECK_THROW(HadesMem::Detail::Process InvalidProc(
     static_cast<DWORD>(-1)), HadesMem::HadesMemError);
-    
+}
+
+BOOST_AUTO_TEST_CASE(ProcessInfoTest)
+{
+  // Create process manager for self
+  HadesMem::Detail::Process MyProcess(GetCurrentProcessId());
+  
   // Check process APIs for predictable values where possible, otherwise just 
   // ensure they run without exception
   BOOST_CHECK_EQUAL(MyProcess.GetHandle(), GetCurrentProcess());
