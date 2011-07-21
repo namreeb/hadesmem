@@ -45,6 +45,21 @@ namespace HadesMem
 
     // Open process from process ID
     explicit MemoryMgr(DWORD ProcID);
+      
+    // Copy constructor
+    MemoryMgr(MemoryMgr const& Other);
+    
+    // Copy assignment operator
+    MemoryMgr& operator=(MemoryMgr const& Other);
+    
+    // Move constructor
+    MemoryMgr(MemoryMgr&& Other);
+    
+    // Move assignment operator
+    MemoryMgr& operator=(MemoryMgr&& Other);
+    
+    // Destructor
+    ~MemoryMgr();
 
     // MemoryMgr::Call return data
     class RemoteFunctionRet
@@ -160,17 +175,6 @@ namespace HadesMem
       
     // Write memory
     void WriteImpl(PVOID Address, LPCVOID In, std::size_t InSize) const;
-
-    // Get address of export in remote process (by name)
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, std::string const& Function) const;
-
-    // Get address of export in remote process (by ordinal)
-    FARPROC GetRemoteProcAddress(HMODULE RemoteMod, 
-      std::wstring const& Module, WORD Function) const;
-    
-    // Get address of Kernel32.dll
-    HMODULE GetKernel32() const;
     
     // Target process
     Detail::Process m_Process;

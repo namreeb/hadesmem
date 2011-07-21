@@ -44,11 +44,20 @@ namespace HadesMem
       // Open process from process ID
       explicit Process(DWORD ProcID);
       
+      // Copy constructor
+      Process(Process const& Other);
+      
+      // Copy assignment operator
+      Process& operator=(Process const& Other);
+      
+      // Move constructor
+      Process(Process&& Other);
+      
+      // Move assignment operator
+      Process& operator=(Process&& Other);
+      
       // Destructor
       ~Process();
-      
-      // Swap
-      void swap(Process& Other);
     
       // Get process handle
       HANDLE GetHandle() const;

@@ -4,16 +4,16 @@
 <title>MemoryMgr</title>
 <link rel="stylesheet" href="../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../index.html" title="HadesMem 1.0.0">
+<link rel="home" href="../../index.html" title="HadesMem 1.1.0">
 <link rel="up" href="../reference.html" title="Reference">
 <link rel="prev" href="../reference.html" title="Reference">
-<link rel="next" href="../acknowledge.html" title="Acknowledgements">
+<link rel="next" href="module.html" title="Module">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../Images/Logo.png"></td></tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="module.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -28,10 +28,19 @@
 <span class="keyword">class</span> <span class="identifier">MemoryMgr</span>
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
-  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
-  <span class="special">{</span> <span class="special">};</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 
   <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
+    
+  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
 
   <span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span>
   <span class="special">{</span>
@@ -214,6 +223,110 @@
 <dt><span class="term">Throws:</span></dt>
 <dd><p>
               Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_copy_constructor"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_copy_constructor-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_copy_constructor">MemoryMgr
+        copy constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+              that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_copy_assignment_operator-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_copy_assignment_operator">MemoryMgr
+        copy assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as the other instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_move_constructor"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_move_constructor-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_move_constructor">MemoryMgr
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+              that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_move_assignment_operator-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_move_assignment_operator">MemoryMgr
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.memorymgr_destructor"></a><h5>
+<a name="hadesmem.reference.memorymgr.memorymgr_destructor-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.memorymgr_destructor">MemoryMgr
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
             </p></dd>
 </dl>
 </div>
@@ -974,7 +1087,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="module.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

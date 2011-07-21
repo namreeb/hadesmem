@@ -39,7 +39,9 @@ project Hades
     <runtime-link>shared 
     <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 
+    <toolset>gcc,<variant>debug:<cxxflags>-fstack-check
     <toolset>clang:<cxxflags>-std=c++0x 
+    <toolset>intel:<cxxflags>/Qstd=c++0x 
     <toolset>msvc:<cxxflags>/wd4503 
   : 
     default-build debug 
