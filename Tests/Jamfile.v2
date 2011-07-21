@@ -19,6 +19,7 @@ project
 
 test-suite Memory
   :
-    [ run MemoryMgrTest.cpp ]
     [ run Detail/ProcessTest.cpp ]
+    [ run MemoryMgrTest.cpp ]
+    [ run ModuleTest.cpp ]
   ;

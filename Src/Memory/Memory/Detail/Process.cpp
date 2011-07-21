@@ -182,18 +182,41 @@ namespace HadesMem
     Process::Process(DWORD ProcID)
       : m_pImpl(new Impl(ProcID))
     { }
+      
+    // Copy constructor
+    Process::Process(Process const& Other)
+      : m_pImpl(Other.m_pImpl)
+    { }
+    
+    // Copy assignment operator
+    Process& Process::operator=(Process const& Other)
+    {
+      this->m_pImpl = Other.m_pImpl;
+      
+      return *this;
+    }
+    
+    // Move constructor
+    Process::Process(Process&& Other)
+      : m_pImpl(std::move(Other.m_pImpl))
+    {
+      Other.m_pImpl.reset();
+    }
+    
+    // Move assignment operator
+    Process& Process::operator=(Process&& Other)
+    {
+      this->m_pImpl = std::move(Other.m_pImpl);
+      Other.m_pImpl.reset();
+      
+      return *this;
+    }
     
     // Destructor
     // Note: An empty destructor is required so the compiler can see Impl's 
     // destructor.
     Process::~Process()
     { }
-    
-    // Swap
-    void Process::swap(Process& Other)
-    {
-      m_pImpl.swap(Other.m_pImpl);
-    }
   
     // Get process handle
     HANDLE Process::GetHandle() const

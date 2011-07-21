@@ -4,8 +4,8 @@
 <title>Changes</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.0.0">
-<link rel="up" href="../index.html" title="HadesMem 1.0.0">
+<link rel="home" href="../index.html" title="HadesMem 1.1.0">
+<link rel="up" href="../index.html" title="HadesMem 1.1.0">
 <link rel="prev" href="lic.html" title="License">
 <link rel="next" href="building.html" title="Building">
 </head>
@@ -19,6 +19,62 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.changes"></a><a class="link" href="changes.html" title="Changes">Changes</a>
 </h2></div></div></div>
+<a name="hadesmem.changes.v1_1_0"></a><h4>
+<a name="hadesmem.changes.v1_1_0-heading"></a>
+      <a class="link" href="changes.html#hadesmem.changes.v1_1_0">v1.1.0</a>
+    </h4>
+<p>
+      <span class="bold"><strong>New Features</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Move support for <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>.
+        </li>
+<li class="listitem">
+          Version macros.
+        </li>
+<li class="listitem">
+          Documented copy/assignment/move constructors/operators for <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>.
+        </li>
+<li class="listitem">
+          Added new <code class="computeroutput"><span class="identifier">Module</span></code> APIs.
+        </li>
+</ul></div>
+<p>
+      <span class="bold"><strong>Bug Fixes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+          Fixed build scripts for users who did not have BJam installed in their
+          %PATH%. This was a bug introduced when Boost.Build changed BJam's name
+          to B2.
+        </li></ul></div>
+<p>
+      <span class="bold"><strong>Changes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Improved compiler detection.
+        </li>
+<li class="listitem">
+          Improved build scripts to allow architecture selection.
+        </li>
+<li class="listitem">
+          Changed <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">Call</span></code> to use the new <code class="computeroutput"><span class="identifier">Module</span></code>
+          APIs for increased stability.
+        </li>
+<li class="listitem">
+          Improved Boost build scripts to only build the libraries that are used
+          by HadesMem. This results in a much faster build time.
+        </li>
+<li class="listitem">
+          Updated Boost to latest trunk.
+        </li>
+<li class="listitem">
+          Added build scripts for Intel. Please note that this platform is still
+          unsupported (as per the documentation). The scripts are there so users
+          can help with the porting process (as are the Clang scripts).
+        </li>
+</ul></div>
 <a name="hadesmem.changes.v1_0_0"></a><h4>
 <a name="hadesmem.changes.v1_0_0-heading"></a>
       <a class="link" href="changes.html#hadesmem.changes.v1_0_0">v1.0.0</a>

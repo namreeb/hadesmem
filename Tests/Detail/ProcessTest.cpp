@@ -33,6 +33,9 @@ BOOST_AUTO_TEST_CASE(ConstructorsTest)
   MyProcess = OtherProcess;
   BOOST_CHECK_THROW(HadesMem::Detail::Process InvalidProc(
     static_cast<DWORD>(-1)), HadesMem::HadesMemError);
+  HadesMem::Detail::Process MovedProcess(std::move(OtherProcess));
+  MyProcess = std::move(MovedProcess);
+  BOOST_CHECK_EQUAL(MyProcess.GetID(), GetCurrentProcessId());
 }
 
 BOOST_AUTO_TEST_CASE(ProcessInfoTest)

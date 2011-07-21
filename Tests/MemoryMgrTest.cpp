@@ -41,6 +41,9 @@ BOOST_AUTO_TEST_CASE(ConstructorsTest)
   MyMemory = OtherMemory;
   BOOST_CHECK_THROW(HadesMem::MemoryMgr InvalidMemory(
     static_cast<DWORD>(-1)), HadesMem::HadesMemError);
+  HadesMem::MemoryMgr MovedMemory(std::move(OtherMemory));
+  MyMemory = std::move(MovedMemory);
+  BOOST_CHECK_EQUAL(MyMemory.GetProcessId(), GetCurrentProcessId());
 }
 
 // Test function to be called by MemoryMgr::Call
