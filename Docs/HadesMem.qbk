@@ -1,6 +1,6 @@
 [article HadesMem
   [quickbook 1.5]
-  [version 1.1.0]
+  [version 1.2.0]
   [copyright 2011 Joshua Boyce (aka RaptorFactor)]
   [authors [Boyce, Joshua]]
   [license Distributed under the GNU GPL v3. See accompanying file 
@@ -84,7 +84,7 @@ are available to detect the HadesMem version.
 * `HADES_VERSION_PATCH` - HadesMem patch version number.
 * `HADES_VERSION_FULL` - Full HadesMem version number in format XXYYZZ.
 * `HADES_VERSION_FULL_STRING` - Full HadesMem version number in format 
-vXXYYZZ, as a narrow C-style string.
+vXX.YY.ZZ, as a narrow C-style string.
 
 [h3 Support]
 
@@ -117,6 +117,24 @@ along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
 [endsect] [/ License]
 
 [section:changes Changes]
+
+[h3 v1.2.0]
+
+[*New Features]
+
+* Added `CreateProcess` overload for argument lists (to ensure correct 
+quoting).
+* Move support for `AllocAndFree`.
+
+[*Bug Fixes]
+
+* Ensure COM is initialized and cleaned up in `CreateProcess`.
+* Fixed documentation for `HADES_VERSION_FULL_STRING`. Format is vXX.YY.ZZ, 
+not vXXYYZZ.
+* Fix critical bug causing problems opening processes other than the 
+current process.
+
+[*Changes]
 
 [h3 v1.1.0]
 
@@ -727,13 +745,21 @@ POD character type. `Data` is written as a C-style character array.]]
 [h4 Free function `CreateProcess`]
 
   MemoryMgr CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
+    std::wstring const& CommandLine, 
+    std::wstring const& WorkingDir);
+  
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::vector<std::wstring> const& Args, 
     std::wstring const& WorkingDir);
 
 [variablelist
 
-[[Effects:] [Create process from binary at `Path` with optional parameters 
-`Params` and optional working dir `WorkingDir`.]]
+[[Effects:1:] [Create process from binary at `Path` with optional command line  
+`CommandLine` and optional working dir `WorkingDir`.]]
+
+[[Effects:2:] [Create process from binary at `Path` with optional argument list  
+`Args` and optional working dir `WorkingDir`. Command line generation is 
+handled by the API.]]
 
 [[Returns:] [Memory manager instance for new process.]]
 
@@ -767,6 +793,32 @@ credentials.]]
 
 [[Effects:] [Allocates memory block of size `Size` using the `MemoryMgr` 
 object `MyMemoryMgr`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 AllocAndFree move constructor]
+
+  AllocAndFree(AllocAndFree&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `AllocAndFree` that refers to the same memory as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 AllocAndFree move assignment operator]
+
+  AllocAndFree& operator=(AllocAndFree&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same memory as `Other` via move 
+semantics. Invalidates `Other`.]]
 
 [[Throws:] [Yes.]]
 

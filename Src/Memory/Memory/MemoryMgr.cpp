@@ -21,6 +21,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <HadesMemory/Module.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Config.hpp>
+#include <HadesMemory/Detail/ArgQuote.hpp>
 #include <HadesMemory/Detail/EnsureCleanup.hpp>
 
 // Boost
@@ -680,9 +681,23 @@ namespace HadesMem
     
   // Create process
   MemoryMgr CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
+    std::wstring const& CommandLine, 
     std::wstring const& WorkingDir)
   {
+    // Initialize COM
+    if (!CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | 
+      COINIT_DISABLE_OLE1DDE))
+    {
+      DWORD const LastError = GetLastError();
+      BOOST_THROW_EXCEPTION(MemoryMgr::Error() << 
+        ErrorFunction("CreateProcess") << 
+        ErrorString("Could not initialize COM.") << 
+        ErrorCodeWinLast(LastError));
+    }
+    
+    // Ensure COM is cleaned up
+    Detail::EnsureCoUninitialize MyComCleanup;
+    
     // Start process
     SHELLEXECUTEINFO ExecInfo;
     ZeroMemory(&ExecInfo, sizeof(ExecInfo));
@@ -692,7 +707,8 @@ namespace HadesMem
 #endif
     ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
     ExecInfo.lpFile = Path.empty() ? nullptr : Path.c_str();
-    ExecInfo.lpParameters = Params.empty() ? nullptr : Params.c_str();
+    ExecInfo.lpParameters = CommandLine.empty() ? nullptr : 
+      CommandLine.c_str();
     ExecInfo.lpDirectory = WorkingDir.empty() ? nullptr : WorkingDir.c_str();
     ExecInfo.nShow = SW_SHOWNORMAL;
     if (!ShellExecuteEx(&ExecInfo))
@@ -709,6 +725,25 @@ namespace HadesMem
     
     // Return process object
     return MemoryMgr(GetProcessId(MyProc));
+  }
+    
+  // Create process
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::vector<std::wstring> const& Args, 
+    std::wstring const& WorkingDir)
+  {
+    // Construct command line.
+    std::wstring CommandLine;
+    Detail::ArgvQuote(Path, CommandLine, false);
+    std::for_each(Args.begin(), Args.end(), 
+      [&] (std::wstring const& Arg) 
+      {
+        CommandLine += L' ';
+        Detail::ArgvQuote(Arg, CommandLine, false);
+      });
+      
+    // Create process
+    return CreateProcess(Path, CommandLine, WorkingDir);
   }
 
   // Gets the SeDebugPrivilege
@@ -783,6 +818,30 @@ namespace HadesMem
     m_Size(Size), 
     m_Address(MyMemoryMgr.Alloc(Size)) 
   { }
+  
+  AllocAndFree::AllocAndFree(AllocAndFree&& Other)
+    : m_Memory(std::move(Other.m_Memory)), 
+    m_Size(Other.m_Size), 
+    m_Address(Other.m_Address) 
+  {
+    Other.m_Size = 0;
+    Other.m_Address = nullptr;
+  }
+  
+  AllocAndFree& AllocAndFree::operator=(AllocAndFree&& Other)
+  {
+    Free();
+    
+    this->m_Memory = std::move(Other.m_Memory);
+    
+    this->m_Size = Other.m_Size;
+    Other.m_Size = 0;
+    
+    this->m_Address = Other.m_Address;
+    Other.m_Address = nullptr;
+    
+    return *this;
+  }
   
   AllocAndFree::~AllocAndFree()
   {

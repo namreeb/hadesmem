@@ -198,6 +198,9 @@ namespace HadesMem
     class EnsureCoUninitialize
     {
     public:
+      EnsureCoUninitialize()
+      { }
+      
       ~EnsureCoUninitialize()
       {
         CoUninitialize();

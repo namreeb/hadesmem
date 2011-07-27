@@ -47,6 +47,12 @@ lib imagehlp
     <name>imagehlp 
   ;
 
+lib ole32
+  : 
+  : 
+    <name>ole32 
+  ;
+
 lib Memory 
   : 
     [ glob Memory/*.cpp ] 
@@ -62,6 +68,7 @@ lib Memory
     shell32 
     psapi 
     imagehlp 
+    ole32 
   : 
     <link>static 
     <include>"../../Include/Memory" 
