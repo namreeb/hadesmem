@@ -24,4 +24,18 @@ namespace HadesMem
   // Hades (External)
   class MemoryMgr;
   class AllocAndFree;
+  class Module;
+  class ModuleList;
+  class Injector;
+  class DosHeader;
+  class ExportDir;
+  class ExportList;
+  class ImportDir;
+  class ImportDirList;
+  class ImportList;
+  class NtHeaders;
+  class PeFile;
+  class Section;
+  class SectionList;
+  class TlsDir;
 }

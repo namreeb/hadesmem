@@ -4,9 +4,9 @@
 <title>Overview</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.1.0">
-<link rel="up" href="../index.html" title="HadesMem 1.1.0">
-<link rel="prev" href="../index.html" title="HadesMem 1.1.0">
+<link rel="home" href="../index.html" title="HadesMem 1.3.0">
+<link rel="up" href="../index.html" title="HadesMem 1.3.0">
+<link rel="prev" href="../index.html" title="HadesMem 1.3.0">
 <link rel="next" href="lic.html" title="License">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -141,9 +141,21 @@
         </li>
 <li class="listitem">
           <code class="computeroutput"><span class="identifier">HADES_VERSION_FULL_STRING</span></code>
-          - Full HadesMem version number in format vXXYYZZ, as a narrow C-style string.
+          - Full HadesMem version number in format vXX.YY.ZZ, as a narrow C-style
+          string.
         </li>
 </ul></div>
+<a name="hadesmem.overview.iterators"></a><h4>
+<a name="hadesmem.overview.iterators-heading"></a>
+      <a class="link" href="overview.html#hadesmem.overview.iterators">Iterators</a>
+    </h4>
+<p>
+      HadesMem iterators are STL-compatible. Iterators are 'lazy' to keep the API
+      performant. Lazy in this context means that data enumeration and initialization
+      is only performed on-demmand, rather than lists being pre-processed. Furthermore,
+      caching is implemented to improve performance when the list is used in multi-pass
+      algorithms.
+    </p>
 <a name="hadesmem.overview.support"></a><h4>
 <a name="hadesmem.overview.support-heading"></a>
       <a class="link" href="overview.html#hadesmem.overview.support">Support</a>

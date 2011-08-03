@@ -40,11 +40,11 @@ namespace HadesMem
       // Constructor
       explicit Impl(DWORD ProcID) 
         : m_Handle(), 
-        m_ID(0), 
+        m_ID(ProcID), 
         m_IsWoW64(false)
       {
         // Open process
-        if (GetCurrentProcessId() == ProcID)
+        if (GetCurrentProcessId() == m_ID)
         {
           m_Handle.reset(new EnsureCloseHandle(GetCurrentProcess()));
           m_ID = GetCurrentProcessId();

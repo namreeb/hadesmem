@@ -1,0 +1,1578 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ImportDir</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../index.html" title="HadesMem 1.3.0">
+<link rel="up" href="../reference.html" title="Reference">
+<link rel="prev" href="exportdir.html" title="ExportDir">
+<link rel="next" href="ntheaders.html" title="NtHeaders">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="exportdir.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="ntheaders.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="hadesmem.reference.importdir"></a><a class="link" href="importdir.html" title="ImportDir">ImportDir</a>
+</h3></div></div></div>
+<a name="hadesmem.reference.importdir.synopsis"></a><h4>
+<a name="hadesmem.reference.importdir.synopsis-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.synopsis">Synopsis</a>
+      </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/PeLib/ImportDir.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">ImportDir</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span>
+  <span class="special">{</span> <span class="special">};</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> 
+    <span class="identifier">PIMAGE_IMPORT_DESCRIPTOR</span> <span class="identifier">pImpDesc</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
+    
+  <span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">ImportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">ImportDir</span><span class="special">();</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetTimeDateStamp</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetForwarderChain</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetNameRaw</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetFirstThunk</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetTimeDateStamp</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">TimeDateStamp</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetForwarderChain</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ForwarderChain</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetNameRaw</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">void</span> <span class="identifier">SetName</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetFirstThunk</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">FirstThunk</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+  
+<span class="keyword">class</span> <span class="identifier">ImportDirList</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+  
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+  
+  <span class="keyword">explicit</span> <span class="identifier">ImportDirList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+  
+  <span class="identifier">ImportDirList</span><span class="special">(</span><span class="identifier">ImportDirList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportDirList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDirList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">ImportThunk</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+
+  <span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">PVOID</span> <span class="identifier">pThunk</span><span class="special">);</span>
+    
+  <span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportThunk</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">ImportThunk</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportThunk</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunk</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">ImportThunk</span><span class="special">();</span>
+  
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">GetAddressOfData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">GetOrdinalRaw</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="identifier">ByOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">GetFunction</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetHint</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetAddressOfData</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">AddressOfData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetOrdinalRaw</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">OrdinalRaw</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">void</span> <span class="identifier">SetFunction</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetHint</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">Hint</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">ImportThunkList</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+  
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+  
+  <span class="keyword">explicit</span> <span class="identifier">ImportThunkList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">FirstThunk</span><span class="special">);</span>
+  
+  <span class="identifier">ImportThunkList</span><span class="special">(</span><span class="identifier">ImportThunkList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ImportThunkList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunkList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+</pre>
+<a name="hadesmem.reference.importdir.description"></a><h4>
+<a name="hadesmem.reference.importdir.description-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.description">Description</a>
+      </h4>
+<p>
+        The <code class="computeroutput"><span class="identifier">ImportDir</span></code> and <code class="computeroutput"><span class="identifier">ImportThunk</span></code> classes provide functionality
+        for working with the import directory of a PE file.
+      </p>
+<p>
+        See the <a href="http://msdn.microsoft.com/en-us/windows/hardware/gg463119" target="_top">PE
+        and COFF Specification</a> for more information on working with the PE
+        file format.
+      </p>
+<p>
+        The <code class="computeroutput"><span class="identifier">ImportDirList</span></code> class provides
+        STL-compatible iterators for import directory enumeration. The <code class="computeroutput"><span class="identifier">ImportThunkList</span></code> class provides STL-compatible
+        iterators for import thunk enumeration.
+      </p>
+<a name="hadesmem.reference.importdir.importdir_public_types"></a><h4>
+<a name="hadesmem.reference.importdir.importdir_public_types-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_public_types">ImportDir
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ImportDir</span></code>
+        methods when an error occurs.
+      </p>
+<a name="hadesmem.reference.importdir.importdir_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.importdir.importdir_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_public_construct_copy_destruct_move">ImportDir
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importdir_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_constructor">ImportDir
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">PIMAGE_IMPORT_DESCRIPTOR</span> <span class="identifier">pImpDesc</span> <span class="special">=</span> 
+  <span class="identifier">nullptr</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportDir</span></code>
+              instance that refers to the specified PE file, and optionally, the
+              specified import descriptor (or the first one in the list by default).
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_copy_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_copy_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_copy_constructor">ImportDir
+        copy constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportDir</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_copy_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_copy_assignment_operator">ImportDir
+        copy assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as the other instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_move_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_move_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_move_constructor">ImportDir
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDir</span><span class="special">(</span><span class="identifier">ImportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportDir</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_move_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_move_assignment_operator">ImportDir
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_destructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_destructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_destructor">ImportDir
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ImportDir</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_public_member_functions"></a><h4>
+<a name="hadesmem.reference.importdir.importdir_public_member_functions-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_public_member_functions">ImportDir
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getbase__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Base address of import directory.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">IsValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether the target is a valid import dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">EnsureValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Throw if the target is an invalid import dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetCharacteristics</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.Characteristics.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetTimeDateStamp</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetTimeDateStamp</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.TimeDateStamp.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getforwarderchain__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getforwarderchain__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getforwarderchain__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetForwarderChain</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetForwarderChain</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.ForwarderChain.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getnameraw__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getnameraw__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getnameraw__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetNameRaw</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetNameRaw</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.Name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getname__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.Name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getfirstthunk__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getfirstthunk__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__getfirstthunk__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">GetFirstThunk</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetFirstThunk</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_DESCRIPTOR.FirstThunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetCharacteristics</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.Characteristics.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetTimeDateStamp</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetTimeDateStamp</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">TimeDateStamp</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.TimeDateStamp.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setforwarderchain__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setforwarderchain__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setforwarderchain__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetForwarderChain</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetForwarderChain</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ForwarderChain</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.ForwarderChain.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setnameraw__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setnameraw__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setnameraw__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetNameRaw</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetNameRaw</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.Name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setname__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setname__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetName</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.Name.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd>
+<p>
+              Length of new name must be equal to or less than the length of the
+              current name. Allocating space for a new string in the file is currently
+              unsupported.
+            </p>
+<p>
+              [Throws:
+            </p>
+<p>
+              Yes.
+            </p>
+</dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setfirstthunk__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setfirstthunk__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_member_function__code__phrase_role__identifier__setfirstthunk__phrase___code_">ImportDir
+        member function <code class="computeroutput"><span class="identifier">SetFirstThunk</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetFirstThunk</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">FirstThunk</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_DESCRIPTOR.FirstThunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_equality_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_equality_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_equality_operator">ImportDir
+        equality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              the same import dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdir_inequality_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importdir_inequality_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdir_inequality_operator">ImportDir
+        inequality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ImportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              a different import dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_public_types"></a><h4>
+<a name="hadesmem.reference.importdir.importdirlist_public_types-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_public_types">ImportDirList
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ImportDirList</span></code>
+        methods when an error occurs.
+      </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+<span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+</pre>
+<p>
+        Iterator type for import dir list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
+        concept. Implementation type unspecified.
+      </p>
+<a name="hadesmem.reference.importdir.importdirlist_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.importdir.importdirlist_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_public_construct_copy_destruct_move">ImportDirList
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importdirlist_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_constructor">ImportDirList
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">ImportDirList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ImportDirList</span></code>
+              instance targetting the PE file specified by <code class="computeroutput"><span class="identifier">MyPeFile</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_move_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_move_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_move_constructor">ImportDirList
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDirList</span><span class="special">(</span><span class="identifier">ImportDirList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ImportDirList</span></code>
+              that refers to the same target <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_move_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_move_assignment_operator">ImportDirList
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportDirList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportDirList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_destructor"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_destructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_destructor">ImportDirList
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ImportDirList</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_public_member_functions"></a><h4>
+<a name="hadesmem.reference.importdir.importdirlist_public_member_functions-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_public_member_functions">ImportDirList
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__begin__phrase___code_">ImportDirList
+        member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for start of import list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__end__phrase___code_">ImportDirList
+        member function <code class="computeroutput"><span class="identifier">end</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for off-the-end of import
+              dir list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ImportDirList
+        member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for start of import dir list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importdirlist_member_function__code__phrase_role__identifier__cend__phrase___code_">ImportDirList
+        member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for off-the-end of import dir list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_public_types"></a><h4>
+<a name="hadesmem.reference.importdir.importthunk_public_types-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_public_types">ImportThunk
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ImportThunk</span></code>
+        methods when an error occurs.
+      </p>
+<a name="hadesmem.reference.importdir.importthunk_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.importdir.importthunk_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_public_construct_copy_destruct_move">ImportThunk
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importthunk_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_constructor">ImportThunk
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">PVOID</span> <span class="identifier">pThunk</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportThunk</span></code>
+              instance that refers to the specified import thunk in the specified
+              PE file.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_copy_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_copy_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_copy_constructor">ImportThunk
+        copy constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportThunk</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_copy_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_copy_assignment_operator">ImportThunk
+        copy assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunk</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as the other instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_move_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_move_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_move_constructor">ImportThunk
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunk</span><span class="special">(</span><span class="identifier">ImportThunk</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ImportThunk</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_move_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_move_assignment_operator">ImportThunk
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunk</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunk</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_destructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_destructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_destructor">ImportThunk
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ImportThunk</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_public_member_functions"></a><h4>
+<a name="hadesmem.reference.importdir.importthunk_public_member_functions-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_public_member_functions">ImportThunk
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getbase__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Base address of import thunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__isvalid__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__isvalid__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">IsValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether the target is a valid import thunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">EnsureValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Throw if the target is an invalid import thunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getaddressofdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getaddressofdata__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getaddressofdata__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetAddressOfData</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetAddressOfData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_THUNK_DATA.u1.AddressOfData.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinalraw__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinalraw__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinalraw__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetOrdinalRaw</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetOrdinalRaw</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_THUNK_DATA.u1.Ordinal.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__byordinal__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__byordinal__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__byordinal__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">ByOrdinal</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">ByOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether import is by ordinal.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinal__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinal__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getordinal__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetOrdinal</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Ordinal portion of IMAGE_THUNK_DATA.u1.Ordinal.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getfunction__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getfunction__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getfunction__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetFunction</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetFunction</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_THUNK_DATA.u1.Function.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__gethint__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__gethint__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__gethint__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetHint</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetHint</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_BY_NAME.Hint.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__getname__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_IMPORT_BY_NAME.Name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setaddressofdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setaddressofdata__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setaddressofdata__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">SetAddressOfData</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfData</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">AddressOfData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_THUNK_DATA.u1.AddressOfData.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setordinalraw__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setordinalraw__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setordinalraw__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">SetOrdinalRaw</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetOrdinalRaw</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">OrdinalRaw</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_THUNK_DATA.u1.Ordinal.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setfunction__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setfunction__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__setfunction__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">SetFunction</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetFunction</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Function</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_THUNK_DATA.u1.Function.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__sethint__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__sethint__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_member_function__code__phrase_role__identifier__sethint__phrase___code_">ImportThunk
+        member function <code class="computeroutput"><span class="identifier">SetHint</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetHint</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">Hint</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_IMPORT_BY_NAME.Hint.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_equality_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_equality_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_equality_operator">ImportThunk
+        equality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              the same import thunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunk_inequality_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importthunk_inequality_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunk_inequality_operator">ImportThunk
+        inequality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ImportThunk</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              a different import thunk.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_public_types"></a><h4>
+<a name="hadesmem.reference.importdir.importthunklist_public_types-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_public_types">ImportThunkList
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ImportThunkList</span></code>
+        methods when an error occurs.
+      </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+<span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+</pre>
+<p>
+        Iterator type for import thunk list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
+        concept. Implementation type unspecified.
+      </p>
+<a name="hadesmem.reference.importdir.importthunklist_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.importdir.importthunklist_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_public_construct_copy_destruct_move">ImportThunkList
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importthunklist_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_constructor">ImportThunkList
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunkList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">FirstThunk</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ImportThunkList</span></code>
+              instance targetting the PE file specified by <code class="computeroutput"><span class="identifier">MyPeFile</span></code>
+              and the first thunk specified by <code class="computeroutput"><span class="identifier">FirstThunk</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_move_constructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_move_constructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_move_constructor">ImportThunkList
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunkList</span><span class="special">(</span><span class="identifier">ImportThunkList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ImportThunkList</span></code>
+              that refers to the same target <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_move_assignment_operator-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_move_assignment_operator">ImportThunkList
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ImportThunkList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ImportThunkList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_destructor"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_destructor-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_destructor">ImportThunkList
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ImportThunkList</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_public_member_functions"></a><h4>
+<a name="hadesmem.reference.importdir.importthunklist_public_member_functions-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_public_member_functions">ImportThunkList
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__begin__phrase___code_">ImportThunkList
+        member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for start of import thunk
+              list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__end__phrase___code_">ImportThunkList
+        member function <code class="computeroutput"><span class="identifier">end</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for off-the-end of import
+              thunk list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ImportThunkList
+        member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for start of import thunk list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
+<a name="hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
+        <a class="link" href="importdir.html#hadesmem.reference.importdir.importthunklist_member_function__code__phrase_role__identifier__cend__phrase___code_">ImportThunkList
+        member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for off-the-end of import thunk list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce (aka RaptorFactor)<p>
+        Distributed under the GNU GPL v3. See accompanying file LICENSE.txt.
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="exportdir.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="ntheaders.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

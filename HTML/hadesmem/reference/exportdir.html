@@ -1,0 +1,1441 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ExportDir</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../index.html" title="HadesMem 1.3.0">
+<link rel="up" href="../reference.html" title="Reference">
+<link rel="prev" href="dosheader.html" title="DosHeader">
+<link rel="next" href="importdir.html" title="ImportDir">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="dosheader.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="importdir.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="hadesmem.reference.exportdir"></a><a class="link" href="exportdir.html" title="ExportDir">ExportDir</a>
+</h3></div></div></div>
+<a name="hadesmem.reference.exportdir.synopsis"></a><h4>
+<a name="hadesmem.reference.exportdir.synopsis-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.synopsis">Synopsis</a>
+      </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/PeLib/ExportDir.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">ExportDir</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+    
+  <span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ExportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">ExportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ExportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">ExportDir</span><span class="special">();</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetTimeDateStamp</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetMajorVersion</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetMinorVersion</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetOrdinalBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetNumberOfFunctions</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetNumberOfNames</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetAddressOfFunctions</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetAddressOfNames</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetAddressOfNameOrdinals</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetTimeDateStamp</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">TimeDateStamp</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetMajorVersion</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">MajorVersion</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetMinorVersion</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">MinorVersion</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetOrdinalBase</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">OrdinalBase</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetNumberOfFunctions</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">NumberOfFunctions</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetNumberOfNames</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">NumberOfNames</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetAddressOfFunctions</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfFunctions</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetAddressOfNames</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfNames</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetAddressOfNameOrdinals</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfNameOrdinals</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">Export</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="identifier">Export</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Ordinal</span><span class="special">);</span>
+    
+  <span class="identifier">Export</span><span class="special">(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Export</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Export</span><span class="special">(</span><span class="identifier">Export</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Export</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Export</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">Export</span><span class="special">();</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetRva</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">GetVa</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarder</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderModule</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderFunction</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">ExportList</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+  
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+  
+  <span class="keyword">explicit</span> <span class="identifier">ExportList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+  
+  <span class="identifier">ExportList</span><span class="special">(</span><span class="identifier">ExportList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">ExportList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+</pre>
+<a name="hadesmem.reference.exportdir.description"></a><h4>
+<a name="hadesmem.reference.exportdir.description-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.description">Description</a>
+      </h4>
+<p>
+        The <code class="computeroutput"><span class="identifier">ExportDir</span></code> and <code class="computeroutput"><span class="identifier">Export</span></code> classes provide functionality for
+        working with the export directory of a PE file.
+      </p>
+<p>
+        See the <a href="http://msdn.microsoft.com/en-us/windows/hardware/gg463119" target="_top">PE
+        and COFF Specification</a> for more information on working with the PE
+        file format.
+      </p>
+<p>
+        The <code class="computeroutput"><span class="identifier">ExportList</span></code> class provides
+        STL-compatible iterators for export enumeration.
+      </p>
+<a name="hadesmem.reference.exportdir.exportdir_public_types"></a><h4>
+<a name="hadesmem.reference.exportdir.exportdir_public_types-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_public_types">ExportDir
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ExportDir</span></code>
+        methods when an error occurs.
+      </p>
+<a name="hadesmem.reference.exportdir.exportdir_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.exportdir.exportdir_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_public_construct_copy_destruct_move">ExportDir
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.exportdir_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_constructor">ExportDir
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ExportDir</span></code>
+              instance that refers to the specified PE file.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_copy_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_copy_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_copy_constructor">ExportDir
+        copy constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ExportDir</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_copy_assignment_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_copy_assignment_operator">ExportDir
+        copy assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as the other instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_move_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_move_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_move_constructor">ExportDir
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportDir</span><span class="special">(</span><span class="identifier">ExportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ExportDir</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_move_assignment_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_move_assignment_operator">ExportDir
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_destructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_destructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_destructor">ExportDir
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ExportDir</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_public_member_functions"></a><h4>
+<a name="hadesmem.reference.exportdir.exportdir_public_member_functions-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_public_member_functions">ExportDir
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Base address of export directory.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">IsValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether the target is a valid export dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">EnsureValid</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Throw if the target is an invalid export dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetCharacteristics</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.Characteristics.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetTimeDateStamp</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetTimeDateStamp</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.TimeDateStamp.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetMajorVersion</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetMajorVersion</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.MajorVersion.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetMinorVersion</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetMinorVersion</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.MinorVersion.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.Name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetOrdinalBase</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetOrdinalBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.Base.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetNumberOfFunctions</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetNumberOfFunctions</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.NumberOfFunctions.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetNumberOfNames</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetNumberOfNames</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.NumberOfNames.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetAddressOfFunctions</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetAddressOfFunctions</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.AddressOfFunctions.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetAddressOfNames</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetAddressOfNames</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.AddressOfNames.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">GetAddressOfNameOrdinals</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetAddressOfNameOrdinals</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetCharacteristics</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.Characteristics.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetTimeDateStamp</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetTimeDateStamp</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">TimeDateStamp</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.TimeDateStamp.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetMajorVersion</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetMajorVersion</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">MajorVersion</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.MajorVersion.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetMinorVersion</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetMinorVersion</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">MinorVersion</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.MinorVersion.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetName</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.Name.
+            </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd>
+<p>
+              Length of new name must be equal to or less than the length of the
+              current name. Allocating space for a new string in the file is currently
+              unsupported.
+            </p>
+<p>
+              [Throws:
+            </p>
+<p>
+              Yes.
+            </p>
+</dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetOrdinalBase</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetOrdinalBase</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">OrdinalBase</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.Base.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetNumberOfFunctions</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetNumberOfFunctions</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">NumberOfFunctions</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.NumberOfFunctions.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetNumberOfNames</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetNumberOfNames</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">NumberOfNames</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.NumberOfNames.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetAddressOfFunctions</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfFunctions</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfFunctions</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.AddressOfFunctions.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetAddressOfNames</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfNames</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfNames</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.AddressOfNames.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_">ExportDir
+        member function <code class="computeroutput"><span class="identifier">SetAddressOfNameOrdinals</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfNameOrdinals</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">AddressOfNameOrdinals</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_equality_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_equality_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_equality_operator">ExportDir
+        equality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              the same export dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportdir_inequality_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.exportdir_inequality_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportdir_inequality_operator">ExportDir
+        inequality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">ExportDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              a different export dir.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.exportdir.export_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_public_construct_copy_destruct_move">Export
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.export_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.export_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_constructor">Export constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">Export</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Ordinal</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">ExportDir</span></code>
+              instance that refers to the specified PE file and ordinal.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_copy_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.export_copy_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_copy_constructor">Export
+        copy constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">Export</span><span class="special">(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">Export</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.export_copy_assignment_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_copy_assignment_operator">Export
+        copy assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">Export</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as the other instance.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_move_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.export_move_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_move_constructor">Export
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">Export</span><span class="special">(</span><span class="identifier">Export</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs an <code class="computeroutput"><span class="identifier">Export</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.export_move_assignment_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_move_assignment_operator">Export
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">Export</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Export</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_destructor"></a><h5>
+<a name="hadesmem.reference.exportdir.export_destructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_destructor">Export destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">Export</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_public_member_functions"></a><h4>
+<a name="hadesmem.reference.exportdir.export_public_member_functions-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_public_member_functions">Export
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetRva</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetRva</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              RVA of export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetVa</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetVa</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              VA of export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Name of export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetForwarder</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarder</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Full unprocessed forwarder of export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetForwarderModule</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderModule</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Name part of export forwarder.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetForwarderFunction</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderFunction</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Function part of export forwarder.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">GetOrdinal</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Ordinal of export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">ByName</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether entry is exported by name.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_">Export
+        member function <code class="computeroutput"><span class="identifier">Forwarded</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether entry is forwarded.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_equality_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.export_equality_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_equality_operator">Export
+        equality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              the same export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.export_inequality_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.export_inequality_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.export_inequality_operator">Export
+        inequality operator</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+              a different export.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_public_types"></a><h4>
+<a name="hadesmem.reference.exportdir.exportlist_public_types-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_public_types">ExportList
+        public types</a>
+      </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+        Exception type thrown by <code class="computeroutput"><span class="identifier">ExportList</span></code>
+        methods when an error occurs.
+      </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+<span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+</pre>
+<p>
+        Iterator type for export list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
+        concept. Implementation type unspecified.
+      </p>
+<a name="hadesmem.reference.exportdir.exportlist_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.exportdir.exportlist_public_construct_copy_destruct_move-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_public_construct_copy_destruct_move">ExportList
+        public construct/copy/destruct/move</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.exportlist_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_constructor">ExportList
+        constructor</a>
+      </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">ExportList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ExportList</span></code>
+              instance targetting the PE file specified by <code class="computeroutput"><span class="identifier">MyPeFile</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_move_constructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_move_constructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_move_constructor">ExportList
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportList</span><span class="special">(</span><span class="identifier">ExportList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">ExportList</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_move_assignment_operator-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_move_assignment_operator">ExportList
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">ExportList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ExportList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_destructor"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_destructor-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_destructor">ExportList
+        destructor</a>
+      </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">ExportList</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Destroys the instance and frees all resources.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              No.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_public_member_functions"></a><h4>
+<a name="hadesmem.reference.exportdir.exportlist_public_member_functions-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_public_member_functions">ExportList
+        public member functions</a>
+      </h4>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_">ExportList
+        member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for start of export list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_">ExportList
+        member function <code class="computeroutput"><span class="identifier">end</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible iterator or const_iterator for off-the-end of export
+              list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ExportList
+        member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for start of export list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
+<a name="hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
+        <a class="link" href="exportdir.html#hadesmem.reference.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_">ExportList
+        member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
+      </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+              STL-compatible const_iterator for off-the-end of export list.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce (aka RaptorFactor)<p>
+        Distributed under the GNU GPL v3. See accompanying file LICENSE.txt.
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="dosheader.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="importdir.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

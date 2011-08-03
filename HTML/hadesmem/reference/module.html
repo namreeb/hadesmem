@@ -4,16 +4,16 @@
 <title>Module</title>
 <link rel="stylesheet" href="../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../index.html" title="HadesMem 1.1.0">
+<link rel="home" href="../../index.html" title="HadesMem 1.3.0">
 <link rel="up" href="../reference.html" title="Reference">
 <link rel="prev" href="memorymgr.html" title="MemoryMgr">
-<link rel="next" href="../acknowledge.html" title="Acknowledgements">
+<link rel="next" href="dosheader.html" title="DosHeader">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../Images/Logo.png"></td></tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="memorymgr.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="memorymgr.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="dosheader.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -73,7 +73,7 @@
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
   
-  <span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
+  <span class="keyword">explicit</span> <span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
   
   <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
   
@@ -102,11 +102,7 @@
       </p>
 <p>
         The <code class="computeroutput"><span class="identifier">ModuleList</span></code> class provides
-        STL-compatible iterators for module enumeration. Module enumeration is 'lazy'
-        to keep the API performant. Lazy in this context means that module lookup
-        and initialization is only performed on-demmand, rather than the list being
-        pre-processed. Furthermore, caching is implemented to improve performance
-        when the list is used in multi-pass algorithms.
+        STL-compatible iterators for module enumeration.
       </p>
 <a name="hadesmem.reference.module.module_public_types"></a><h4>
 <a name="hadesmem.reference.module.module_public_types-heading"></a>
@@ -200,7 +196,7 @@
 <dt><span class="term">Effects:</span></dt>
 <dd><p>
               Constructs a <code class="computeroutput"><span class="identifier">Module</span></code>
-              that refers to the same module as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>
@@ -241,7 +237,7 @@
 <dt><span class="term">Effects:</span></dt>
 <dd><p>
               Constructs a <code class="computeroutput"><span class="identifier">Module</span></code>
-              that refers to the same module as <code class="computeroutput"><span class="identifier">Other</span></code>
+              that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
               via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
@@ -262,7 +258,7 @@
 <dl>
 <dt><span class="term">Effects:</span></dt>
 <dd><p>
-              Sets self to refer to the same module as <code class="computeroutput"><span class="identifier">Other</span></code>
+              Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
               via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
@@ -295,10 +291,10 @@
         <a class="link" href="module.html#hadesmem.reference.module.module_public_member_functions">Module
         public member functions</a>
       </h4>
-<a name="hadesmem.reference.module.module_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.module.module_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
-        <a class="link" href="module.html#hadesmem.reference.module.module_member_function__code__phrase_role__identifier__getbase__phrase___code_">Module
-        member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+<a name="hadesmem.reference.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_"></a><h5>
+<a name="hadesmem.reference.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_-heading"></a>
+        <a class="link" href="module.html#hadesmem.reference.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_">Module
+        member function <code class="computeroutput"><span class="identifier">GetHandle</span></code></a>
       </h5>
 <pre class="programlisting"><span class="identifier">HMODULE</span> <span class="identifier">GetHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -483,6 +479,7 @@
         methods when an error occurs.
       </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+<span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
 </pre>
 <p>
         Iterator type for module list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
@@ -498,7 +495,7 @@
         <a class="link" href="module.html#hadesmem.reference.module.modulelist_constructor">ModuleList
         constructor</a>
       </h5>
-<pre class="programlisting"><span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
@@ -675,7 +672,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="memorymgr.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="../acknowledge.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="memorymgr.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="dosheader.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

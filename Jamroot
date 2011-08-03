@@ -13,6 +13,11 @@ use-project /Dependencies
     Src/Dependencies 
   ;
 
+use-project /Examples 
+  : 
+    Examples 
+  ;
+
 use-project /Memory 
   : 
     Src/Memory 
@@ -52,12 +57,16 @@ project Hades
 build-project Src/Memory 
   ;
 
+build-project Examples 
+  ;
+
 build-project Tests 
   ;
 
 install Dist 
   : 
     Src/Memory 
+    Examples 
   : 
     <toolset>msvc,<variant>debug,<address-model>32:<location>Dist/MSVC/Debug/IA32
     <toolset>msvc,<variant>debug,<address-model>64:<location>Dist/MSVC/Debug/AMD64

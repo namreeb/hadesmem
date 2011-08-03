@@ -4,7 +4,7 @@
 <title>MemoryMgr</title>
 <link rel="stylesheet" href="../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../index.html" title="HadesMem 1.1.0">
+<link rel="home" href="../../index.html" title="HadesMem 1.3.0">
 <link rel="up" href="../reference.html" title="Reference">
 <link rel="prev" href="../reference.html" title="Reference">
 <link rel="next" href="module.html" title="Module">
@@ -846,17 +846,28 @@
         function <code class="computeroutput"><span class="identifier">CreateProcess</span></code></a>
       </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Params</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">CommandLine</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
+
+<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span> 
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
 <dl>
-<dt><span class="term">Effects:</span></dt>
+<dt><span class="term">Effects:1:</span></dt>
 <dd><p>
               Create process from binary at <code class="computeroutput"><span class="identifier">Path</span></code>
-              with optional parameters <code class="computeroutput"><span class="identifier">Params</span></code>
+              with optional command line <code class="computeroutput"><span class="identifier">CommandLine</span></code>
               and optional working dir <code class="computeroutput"><span class="identifier">WorkingDir</span></code>.
+            </p></dd>
+<dt><span class="term">Effects:2:</span></dt>
+<dd><p>
+              Create process from binary at <code class="computeroutput"><span class="identifier">Path</span></code>
+              with optional argument list <code class="computeroutput"><span class="identifier">Args</span></code>
+              and optional working dir <code class="computeroutput"><span class="identifier">WorkingDir</span></code>.
+              Command line generation is handled by the API.
             </p></dd>
 <dt><span class="term">Returns:</span></dt>
 <dd><p>
@@ -913,6 +924,49 @@
               Allocates memory block of size <code class="computeroutput"><span class="identifier">Size</span></code>
               using the <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
               object <code class="computeroutput"><span class="identifier">MyMemoryMgr</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.allocandfree_move_constructor"></a><h5>
+<a name="hadesmem.reference.memorymgr.allocandfree_move_constructor-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_move_constructor">AllocAndFree
+        move constructor</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Constructs a <code class="computeroutput"><span class="identifier">AllocAndFree</span></code>
+              that refers to the same memory as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+            </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+              Yes.
+            </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.memorymgr.allocandfree_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.memorymgr.allocandfree_move_assignment_operator-heading"></a>
+        <a class="link" href="memorymgr.html#hadesmem.reference.memorymgr.allocandfree_move_assignment_operator">AllocAndFree
+        move assignment operator</a>
+      </h5>
+<pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+              Sets self to refer to the same memory as <code class="computeroutput"><span class="identifier">Other</span></code>
+              via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>

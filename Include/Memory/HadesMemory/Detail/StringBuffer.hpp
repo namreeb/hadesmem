@@ -112,6 +112,7 @@ namespace HadesMem
       }
       
     protected:
+      // Disable copying
       StringBuffer(StringBuffer const&);
       StringBuffer& operator=(StringBuffer const&);
   

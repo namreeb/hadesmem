@@ -175,4 +175,20 @@ BOOST_AUTO_TEST_CASE(IteratorTest)
       BOOST_CHECK(M == HadesMem::GetRemoteModule(MyMemory, M.GetName().c_str()));
       BOOST_CHECK(M == HadesMem::GetRemoteModule(MyMemory, M.GetPath().c_str()));
     });
+    
+  // Check known module is found
+  HadesMem::ModuleList ModulesK32Check(MyMemory);
+  auto Iter1 = std::find_if(ModulesK32Check.cbegin(), ModulesK32Check.cend(), 
+    [&] (HadesMem::Module const& M)
+    {
+      return M.GetName() == L"kernel32.dll";
+    });
+  BOOST_CHECK(Iter1 != ModulesK32Check.cend());
+  // Check again with different criteria, testing multipass
+  auto Iter2 = std::find_if(ModulesK32Check.cbegin(), ModulesK32Check.cend(), 
+    [&] (HadesMem::Module const& M)
+    {
+      return M.GetHandle() == GetModuleHandleW(L"kernel32.dll");
+    });
+  BOOST_CHECK(Iter2 != ModulesK32Check.cend());
 }

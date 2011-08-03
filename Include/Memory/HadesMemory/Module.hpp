@@ -128,7 +128,7 @@ namespace HadesMem
     typedef ModuleIter<Module const> const_iterator;
     
     // Constructor
-    ModuleList(MemoryMgr const& MyMemory);
+    explicit ModuleList(MemoryMgr const& MyMemory);
     
     // Move constructor
     ModuleList(ModuleList&& Other);

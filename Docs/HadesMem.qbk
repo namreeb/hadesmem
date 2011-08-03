@@ -1,6 +1,6 @@
 [article HadesMem
   [quickbook 1.5]
-  [version 1.1.0]
+  [version 1.3.0]
   [copyright 2011 Joshua Boyce (aka RaptorFactor)]
   [authors [Boyce, Joshua]]
   [license Distributed under the GNU GPL v3. See accompanying file 
@@ -84,7 +84,15 @@ are available to detect the HadesMem version.
 * `HADES_VERSION_PATCH` - HadesMem patch version number.
 * `HADES_VERSION_FULL` - Full HadesMem version number in format XXYYZZ.
 * `HADES_VERSION_FULL_STRING` - Full HadesMem version number in format 
-vXXYYZZ, as a narrow C-style string.
+vXX.YY.ZZ, as a narrow C-style string.
+
+[h3 Iterators]
+
+HadesMem iterators are STL-compatible. Iterators are 'lazy' to keep the API 
+performant. Lazy in this context means that data enumeration and initialization 
+is only performed on-demmand, rather than lists being pre-processed. Furthermore, 
+caching is implemented to improve performance when the list is used in multi-pass 
+algorithms.
 
 [h3 Support]
 
@@ -117,6 +125,51 @@ along with HadesMem.  If not, see [@http://www.gnu.org/licenses/].
 [endsect] [/ License]
 
 [section:changes Changes]
+
+[h3 v1.3.0]
+
+[*New Features]
+
+* Added new `Injector` APIs.
+* Added new `PeLib` APIs.
+  * `DosHeader`
+  * `ExportDir`
+  * `ImportDir`
+  * `NtHeaders`
+  * `PeFile`
+  * `Section`
+  * `TlsDir`
+* Added experimental `ManualMap` API. Subject to change and availability, not 
+for production use, heavy restrictions (please read docs).
+* Added experimental manual mapping example program.
+
+[*Bug Fixes]
+
+* Added `Module` (and `Injector`) to '''Memory.hpp'''.
+* Fixed Boost build scripts.
+
+[*Changes]
+
+* Improved `Module` tests.
+* Improved documentation.
+
+[h3 v1.2.0]
+
+[*New Features]
+
+* Added `CreateProcess` overload for argument lists (to ensure correct 
+quoting).
+* Move support for `AllocAndFree`.
+
+[*Bug Fixes]
+
+* Ensure COM is initialized and cleaned up in `CreateProcess`.
+* Fixed documentation for `HADES_VERSION_FULL_STRING`. Format is vXX.YY.ZZ, 
+not vXXYYZZ.
+* Fix critical bug causing problems opening processes other than the 
+current process.
+
+[*Changes]
 
 [h3 v1.1.0]
 
@@ -727,13 +780,21 @@ POD character type. `Data` is written as a C-style character array.]]
 [h4 Free function `CreateProcess`]
 
   MemoryMgr CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
+    std::wstring const& CommandLine, 
+    std::wstring const& WorkingDir);
+  
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::vector<std::wstring> const& Args, 
     std::wstring const& WorkingDir);
 
 [variablelist
 
-[[Effects:] [Create process from binary at `Path` with optional parameters 
-`Params` and optional working dir `WorkingDir`.]]
+[[Effects:1:] [Create process from binary at `Path` with optional command line  
+`CommandLine` and optional working dir `WorkingDir`.]]
+
+[[Effects:2:] [Create process from binary at `Path` with optional argument list  
+`Args` and optional working dir `WorkingDir`. Command line generation is 
+handled by the API.]]
 
 [[Returns:] [Memory manager instance for new process.]]
 
@@ -767,6 +828,32 @@ credentials.]]
 
 [[Effects:] [Allocates memory block of size `Size` using the `MemoryMgr` 
 object `MyMemoryMgr`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 AllocAndFree move constructor]
+
+  AllocAndFree(AllocAndFree&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `AllocAndFree` that refers to the same memory as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 AllocAndFree move assignment operator]
+
+  AllocAndFree& operator=(AllocAndFree&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same memory as `Other` via move 
+semantics. Invalidates `Other`.]]
 
 [[Throws:] [Yes.]]
 
@@ -921,7 +1008,7 @@ after the function call.]]
     typedef unspecified iterator;
     typedef unspecified const_iterator;
     
-    ModuleList(MemoryMgr const& MyMemory);
+    explicit ModuleList(MemoryMgr const& MyMemory);
     
     iterator begin();
     
@@ -945,10 +1032,7 @@ The GetRemoteModuleHandle free function provides an 'extension' of the
 `GetModuleHandle` Windows API to allow lookup in a remote process.
 
 The `ModuleList` class provides STL-compatible iterators for module 
-enumeration. Module enumeration is 'lazy' to keep the API performant. Lazy 
-in this context means that module lookup and initialization is only performed 
-on-demmand, rather than the list being pre-processed. Furthermore, caching is 
-implemented to improve performance when the list is used in multi-pass algorithms.
+enumeration.
 
 [h3 Module public types]
 
@@ -1003,7 +1087,7 @@ entry.]]
 
 [variablelist
 
-[[Effects:] [Constructs a `Module` that refers to the same module as 
+[[Effects:] [Constructs a `Module` that refers to the same target as 
 `Other`.]]
 
 [[Throws:] [Yes.]]
@@ -1028,7 +1112,7 @@ entry.]]
 
 [variablelist
 
-[[Effects:] [Constructs a `Module` that refers to the same module as 
+[[Effects:] [Constructs a `Module` that refers to the same target as 
 `Other` via move semantics. Invalidates `Other`.]]
 
 [[Throws:] [Yes.]]
@@ -1041,7 +1125,7 @@ entry.]]
 
 [variablelist
 
-[[Effects:] [Sets self to refer to the same module as `Other` via move 
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
 semantics. Invalidates `Other`.]]
 
 [[Throws:] [Yes.]]
@@ -1062,7 +1146,7 @@ semantics. Invalidates `Other`.]]
 
 [h3 Module public member functions]
 
-[h4 Module member function `GetBase`]
+[h4 Module member function `GetHandle`]
 
   HMODULE GetHandle() const;
 
@@ -1174,6 +1258,7 @@ via name `Name` or ordinal `Ordinal`.]]
 Exception type thrown by `ModuleList` methods when an error occurs.
 
   typedef unspecified iterator;
+  typedef unspecified const_iterator;
   
 Iterator type for module list. Models the 
 [@http://www.sgi.com/tech/stl/ForwardIterator.html ForwardIterator] concept. 
@@ -1183,7 +1268,7 @@ Implementation type unspecified.
 
 [h4 ModuleList constructor]
 
-  ModuleList(MemoryMgr const& MyMemory);
+  explicit ModuleList(MemoryMgr const& MyMemory);
 
 [variablelist
 
@@ -1287,6 +1372,3974 @@ module list.]]
 ]
 
 [endsect] [/ Module]
+
+[section:dosheader DosHeader]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/PeLib/DosHeader.hpp>
+
+  class DosHeader
+  {
+  public:
+    class Error : public virtual HadesMemError;
+
+    explicit DosHeader(PeFile const& MyPeFile);
+      
+    DosHeader(DosHeader const& Other);
+    
+    DosHeader& operator=(DosHeader const& Other);
+    
+    DosHeader(DosHeader&& Other);
+    
+    DosHeader& operator=(DosHeader&& Other);
+    
+    ~DosHeader();
+    
+    PVOID GetBase() const;
+
+    bool IsMagicValid() const;
+
+    void EnsureMagicValid() const;
+
+    WORD GetMagic() const;
+
+    WORD GetBytesOnLastPage() const;
+
+    WORD GetPagesInFile() const;
+
+    WORD GetRelocations() const;
+
+    WORD GetSizeOfHeaderInParagraphs() const;
+
+    WORD GetMinExtraParagraphs() const;
+
+    WORD GetMaxExtraParagraphs() const;
+
+    WORD GetInitialSS() const;
+
+    WORD GetInitialSP() const;
+
+    WORD GetChecksum() const;
+
+    WORD GetInitialIP() const;
+
+    WORD GetInitialCS() const;
+
+    WORD GetRelocTableFileAddr() const;
+
+    WORD GetOverlayNum() const;
+
+    std::array<WORD, 4> GetReservedWords1() const;
+
+    WORD GetOEMID() const;
+
+    WORD GetOEMInfo() const;
+
+    std::array<WORD, 10> GetReservedWords2() const;
+
+    LONG GetNewHeaderOffset() const;
+
+    void SetMagic(WORD Magic) const;
+
+    void SetBytesOnLastPage(WORD BytesOnLastPage) const;
+
+    void SetPagesInFile(WORD PagesInFile) const;
+
+    void SetRelocations(WORD Relocations) const;
+
+    void SetSizeOfHeaderInParagraphs(WORD SizeOfHeaderInParagraphs) const;
+
+    void SetMinExtraParagraphs(WORD MinExtraParagraphs) const;
+
+    void SetMaxExtraParagraphs(WORD MaxExtraParagraphs) const;
+
+    void SetInitialSS(WORD InitialSS) const;
+
+    void SetInitialSP(WORD InitialSP) const;
+
+    void SetChecksum(WORD Checksum) const;
+
+    void SetInitialIP(WORD InitialIP) const;
+
+    void SetInitialCS(WORD InitialCS) const;
+
+    void SetRelocTableFileAddr(WORD RelocTableFileAddr) const;
+
+    void SetOverlayNum(WORD OverlayNum) const;
+
+    void SetReservedWords1(std::array<WORD, 4> const& ReservedWords1) const;
+
+    void SetOEMID(WORD OEMID) const;
+
+    void SetOEMInfo(WORD OEMInfo) const;
+
+    void SetReservedWords2(std::array<WORD, 10> const& ReservedWords2) const;
+
+    void SetNewHeaderOffset(LONG Offset) const;
+    
+    bool operator==(DosHeader const& Rhs) const;
+    
+    bool operator!=(DosHeader const& Rhs) const;
+  };
+
+[h3 Description]
+
+The `DosHeader` class provides functionality for working with the DOS header 
+of a PE file.
+
+See the [@http://msdn.microsoft.com/en-us/windows/hardware/gg463119 PE and 
+COFF Specification] for more information on working with the PE file format.
+
+[h3 DosHeader public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `DosHeader` methods when an error occurs.
+
+[h3 DosHeader public construct/copy/destruct/move]
+
+[h4 DosHeader constructor]
+
+  DosHeader(PeFile const& MyPeFile);
+
+[variablelist
+
+[[Effects:] [Constructs a `DosHeader` instance that refers to the specified 
+PE file.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader copy constructor]
+
+  DosHeader(DosHeader const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `DosHeader` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader copy assignment operator]
+
+  DosHeader& operator=(DosHeader const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader move constructor]
+
+  DosHeader(DosHeader&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `DosHeader` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader move assignment operator]
+
+  DosHeader& operator=(DosHeader&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader destructor]
+
+  ~DosHeader();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 DosHeader public member functions]
+
+[h4 DosHeader member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of DOS header.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `IsValid`]
+
+  bool IsValid() const;
+
+[variablelist
+
+[[Returns:] [Whether the target is a valid DOS header.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `EnsureValid`]
+
+  void EnsureValid() const;
+
+[variablelist
+
+[[Effects:] [Throw if the target is an invalid DOS header.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetMagic`]
+
+  WORD GetMagic() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_magic.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetBytesOnLastPage`]
+
+  WORD GetBytesOnLastPage() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_cblp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetPagesInFile`]
+
+  WORD GetPagesInFile() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_cp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetRelocations`]
+
+  WORD GetRelocations() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_crlc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetSizeOfHeaderInParagraphs`]
+
+  WORD GetSizeOfHeaderInParagraphs() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_cparhdr.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetMinExtraParagraphs`]
+
+  WORD GetMinExtraParagraphs() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_minalloc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetMaxExtraParagraphs`]
+
+  WORD GetMaxExtraParagraphs() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_maxalloc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetInitialSS`]
+
+  WORD GetInitialSS() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_ss.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetInitialSP`]
+
+  WORD GetInitialSP() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_sp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetChecksum`]
+
+  WORD GetChecksum() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_csum.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetInitialIP`]
+
+  WORD GetInitialIP() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_ip.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetInitialCS`]
+
+  WORD GetInitialCS() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_cs.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetRelocTableFileAddr`]
+
+  WORD GetRelocTableFileAddr() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_lfarlc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetOverlayNum`]
+
+  WORD GetOverlayNum() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_ovno.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetReservedWords1`]
+
+  std::array<WORD, 4> GetReservedWords1() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_res.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetOEMID`]
+
+  WORD GetOEMID() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_oemid.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetOEMInfo`]
+
+  WORD GetOEMInfo() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_oeminfo.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetReservedWords2`]
+
+  std::array<WORD, 10> GetReservedWords2() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_res2.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `GetNewHeaderOffset`]
+
+  LONG GetNewHeaderOffset() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_DOS_HEADER.e_lfanew.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetMagic`]
+
+  void SetMagic(WORD Magic) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_magic.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetBytesOnLastPage`]
+
+  void SetBytesOnLastPage(WORD BytesOnLastPage) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_cblp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetPagesInFile`]
+
+  void SetPagesInFile(WORD PagesInFile) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_cp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetRelocations`]
+
+  void SetRelocations(WORD Relocations) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_crlc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetSizeOfHeaderInParagraphs`]
+
+  void SetSizeOfHeaderInParagraphs(WORD SizeOfHeaderInParagraphs) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_cparhdr.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetMinExtraParagraphs`]
+
+  void SetMinExtraParagraphs(WORD MinExtraParagraphs) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_minalloc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetMaxExtraParagraphs`]
+
+  void SetMaxExtraParagraphs(WORD MaxExtraParagraphs) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_maxalloc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetInitialSS`]
+
+  void SetInitialSS(WORD InitialSS) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_ss.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetInitialSP`]
+
+  void SetInitialSP(WORD InitialSP) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_sp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetChecksum`]
+
+  void SetChecksum(WORD Checksum) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_csum.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetInitialIP`]
+
+  void SetInitialIP(WORD InitialIP) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_ip.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetInitialCS`]
+
+  void SetInitialCS(WORD InitialCS) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_cs.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetRelocTableFileAddr`]
+
+  void SetRelocTableFileAddr(WORD RelocTableFileAddr) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_lfarlc.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetOverlayNum`]
+
+  void SetOverlayNum(WORD OverlayNum) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_ovno.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetReservedWords1`]
+
+  void SetReservedWords1(std::array<WORD, 4> const& ReservedWords1) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_res.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetOEMID`]
+
+  void SetOEMID(WORD OEMID) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_oemid.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetOEMInfo`]
+
+  void SetOEMInfo(WORD OEMInfo) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_oeminfo.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetReservedWords2`]
+
+  void SetReservedWords2(std::array<WORD, 10> const& ReservedWords2) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_res2.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader member function `SetNewHeaderOffset`]
+
+  void SetNewHeaderOffset(LONG Offset) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_DOS_HEADER.e_lfanew.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 DosHeader equality operator]
+
+  bool operator==(DosHeader const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 DosHeader inequality operator]
+
+  bool operator!=(DosHeader const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[endsect] [/ DosHeader]
+
+[section:exportdir ExportDir]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/PeLib/ExportDir.hpp>
+
+  class ExportDir
+  {
+  public:
+    class Error : public virtual HadesMemError;
+
+    explicit ExportDir(PeFile const& MyPeFile);
+      
+    ExportDir(ExportDir const& Other);
+    
+    ExportDir& operator=(ExportDir const& Other);
+    
+    ExportDir(ExportDir&& Other);
+    
+    ExportDir& operator=(ExportDir&& Other);
+    
+    ~ExportDir();
+
+    PVOID GetBase() const;
+
+    bool IsValid() const;
+
+    void EnsureValid() const;
+
+    DWORD GetCharacteristics() const;
+
+    DWORD GetTimeDateStamp() const;
+
+    WORD GetMajorVersion() const;
+
+    WORD GetMinorVersion() const;
+
+    std::string GetName() const;
+
+    DWORD GetOrdinalBase() const;
+
+    DWORD GetNumberOfFunctions() const;
+
+    DWORD GetNumberOfNames() const;
+
+    DWORD GetAddressOfFunctions() const;
+
+    DWORD GetAddressOfNames() const;
+
+    DWORD GetAddressOfNameOrdinals() const;
+
+    void SetCharacteristics(DWORD Characteristics) const;
+
+    void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+    void SetMajorVersion(WORD MajorVersion) const;
+
+    void SetMinorVersion(WORD MinorVersion) const;
+
+    void SetOrdinalBase(DWORD OrdinalBase) const;
+
+    void SetNumberOfFunctions(DWORD NumberOfFunctions) const;
+
+    void SetNumberOfNames(DWORD NumberOfNames) const;
+
+    void SetAddressOfFunctions(DWORD AddressOfFunctions) const;
+
+    void SetAddressOfNames(DWORD AddressOfNames) const;
+
+    void SetAddressOfNameOrdinals(DWORD AddressOfNameOrdinals) const;
+    
+    bool operator==(ExportDir const& Rhs) const;
+    
+    bool operator!=(ExportDir const& Rhs) const;
+  };
+
+  class Export
+  {
+  public:
+    Export(PeFile const& MyPeFile, DWORD Ordinal);
+      
+    Export(Export const& Other);
+    
+    Export& operator=(Export const& Other);
+    
+    Export(Export&& Other);
+    
+    Export& operator=(Export&& Other);
+    
+    ~Export();
+
+    DWORD GetRva() const;
+
+    PVOID GetVa() const;
+
+    std::string GetName() const;
+
+    std::string GetForwarder() const;
+    
+    std::string GetForwarderModule() const;
+    
+    std::string GetForwarderFunction() const;
+
+    WORD GetOrdinal() const;
+
+    bool ByName() const;
+
+    bool Forwarded() const;
+    
+    bool operator==(Export const& Rhs) const;
+    
+    bool operator!=(Export const& Rhs) const;
+  };
+  
+  class ExportList
+  {
+  public:
+    class Error : public virtual HadesMemError;
+    
+    typedef unspecified iterator;
+    typedef unspecified const_iterator;
+    
+    explicit ExportList(PeFile const& MyPeFile);
+    
+    ExportList(ExportList&& Other);
+    
+    ExportList& operator=(ExportList&& Other);
+    
+    iterator begin();
+    
+    iterator end();
+    
+    const_iterator begin() const;
+     
+    const_iterator end() const;
+    
+    const_iterator cbegin() const;
+     
+    const_iterator cend() const;
+  };
+
+[h3 Description]
+
+The `ExportDir` and `Export` classes provide functionality for working with 
+the export directory of a PE file.
+
+See the [@http://msdn.microsoft.com/en-us/windows/hardware/gg463119 PE and 
+COFF Specification] for more information on working with the PE file format.
+
+The `ExportList` class provides STL-compatible iterators for export 
+enumeration.
+
+[h3 ExportDir public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ExportDir` methods when an error occurs.
+
+[h3 ExportDir public construct/copy/destruct/move]
+
+[h4 ExportDir constructor]
+
+  ExportDir(PeFile const& MyPeFile);
+
+[variablelist
+
+[[Effects:] [Constructs an `ExportDir` instance that refers to the specified 
+PE file.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir copy constructor]
+
+  ExportDir(ExportDir const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ExportDir` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir copy assignment operator]
+
+  ExportDir& operator=(ExportDir const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir move constructor]
+
+  ExportDir(ExportDir&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ExportDir` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir move assignment operator]
+
+  ExportDir& operator=(ExportDir&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir destructor]
+
+  ~ExportDir();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ExportDir public member functions]
+
+[h4 ExportDir member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of export directory.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `IsValid`]
+
+  bool IsValid() const;
+
+[variablelist
+
+[[Returns:] [Whether the target is a valid export dir.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `EnsureValid`]
+
+  void EnsureValid() const;
+
+[variablelist
+
+[[Effects:] [Throw if the target is an invalid export dir.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetCharacteristics`]
+
+  DWORD GetCharacteristics() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetTimeDateStamp`]
+
+  DWORD GetTimeDateStamp() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetMajorVersion`]
+
+  WORD GetMajorVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.MajorVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetMinorVersion`]
+
+  WORD GetMinorVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.MinorVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetName`]
+
+  std::string GetName() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.Name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetOrdinalBase`]
+
+  DWORD GetOrdinalBase() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.Base.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetNumberOfFunctions`]
+
+  DWORD GetNumberOfFunctions() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.NumberOfFunctions.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetNumberOfNames`]
+
+  DWORD GetNumberOfNames() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.NumberOfNames.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetAddressOfFunctions`]
+
+  DWORD GetAddressOfFunctions() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.AddressOfFunctions.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetAddressOfNames`]
+
+  DWORD GetAddressOfNames() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.AddressOfNames.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `GetAddressOfNameOrdinals`]
+
+  DWORD GetAddressOfNameOrdinals() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetCharacteristics`]
+
+  void SetCharacteristics(DWORD Characteristics) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetTimeDateStamp`]
+
+  void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetMajorVersion`]
+
+  void SetMajorVersion(WORD MajorVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.MajorVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetMinorVersion`]
+
+  void SetMinorVersion(WORD MinorVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.MinorVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetName`]
+
+  void SetName(std::string const& Name) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.Name.]]
+
+[[Notes:] [Length of new name must be equal to or less than the length of the 
+current name. Allocating space for a new string in the file is currently 
+unsupported.]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetOrdinalBase`]
+
+  void SetOrdinalBase(DWORD OrdinalBase) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.Base.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetNumberOfFunctions`]
+
+  void SetNumberOfFunctions(DWORD NumberOfFunctions) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.NumberOfFunctions.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetNumberOfNames`]
+
+  void SetNumberOfNames(DWORD NumberOfNames) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.NumberOfNames.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetAddressOfFunctions`]
+
+  void SetAddressOfFunctions(DWORD AddressOfFunctions) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.AddressOfFunctions.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetAddressOfNames`]
+
+  void SetAddressOfNames(DWORD AddressOfNames) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.AddressOfNames.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir member function `SetAddressOfNameOrdinals`]
+
+  void SetAddressOfNameOrdinals(DWORD AddressOfNameOrdinals) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportDir equality operator]
+
+  bool operator==(ExportDir const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same export dir.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 ExportDir inequality operator]
+
+  bool operator!=(ExportDir const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different export dir.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 Export public construct/copy/destruct/move]
+
+[h4 Export constructor]
+
+  Export(PeFile const& MyPeFile, DWORD Ordinal);
+
+[variablelist
+
+[[Effects:] [Constructs an `ExportDir` instance that refers to the specified 
+PE file and ordinal.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export copy constructor]
+
+  Export(Export const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `Export` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export copy assignment operator]
+
+  Export& operator=(Export const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export move constructor]
+
+  Export(Export&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `Export` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export move assignment operator]
+
+  Export& operator=(Export&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export destructor]
+
+  ~Export();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 Export public member functions]
+
+[h4 Export member function `GetRva`]
+
+  DWORD GetRva() const;
+
+[variablelist
+
+[[Returns:] [RVA of export.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetVa`]
+
+  PVOID GetVa() const;
+
+[variablelist
+
+[[Returns:] [VA of export.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetName`]
+
+  std::string GetName() const;
+
+[variablelist
+
+[[Returns:] [Name of export.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetForwarder`]
+
+  std::string GetForwarder() const;
+
+[variablelist
+
+[[Returns:] [Full unprocessed forwarder of export.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetForwarderModule`]
+
+  std::string GetForwarderModule() const;
+
+[variablelist
+
+[[Returns:] [Name part of export forwarder.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetForwarderFunction`]
+
+  std::string GetForwarderFunction() const;
+
+[variablelist
+
+[[Returns:] [Function part of export forwarder.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `GetOrdinal`]
+
+  WORD GetOrdinal() const;
+
+[variablelist
+
+[[Returns:] [Ordinal of export.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `ByName`]
+
+  bool ByName() const;
+
+[variablelist
+
+[[Returns:] [Whether entry is exported by name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export member function `Forwarded`]
+
+  bool Forwarded() const;
+
+[variablelist
+
+[[Returns:] [Whether entry is forwarded.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Export equality operator]
+
+  bool operator==(Export const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same export.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 Export inequality operator]
+
+  bool operator!=(Export const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different export.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ExportList public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ExportList` methods when an error occurs.
+
+  typedef unspecified iterator;
+  typedef unspecified const_iterator;
+  
+Iterator type for export list. Models the 
+[@http://www.sgi.com/tech/stl/ForwardIterator.html ForwardIterator] concept. 
+Implementation type unspecified.
+
+[h3 ExportList public construct/copy/destruct/move]
+
+[h4 ExportList constructor]
+
+  explicit ExportList(PeFile const& MyPeFile);
+
+[variablelist
+
+[[Effects:] [Constructs a `ExportList` instance targetting the PE file 
+specified by `MyPeFile`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList move constructor]
+
+  ExportList(ExportList&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `ExportList` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList move assignment operator]
+
+  ExportList& operator=(ExportList&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList destructor]
+
+  ~ExportList();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ExportList public member functions]
+
+[h4 ExportList member function `begin`]
+
+  iterator begin();
+  const_iterator begin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for start of export 
+list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList member function `end`]
+
+  iterator end();
+  const_iterator end() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for off-the-end of 
+export list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList member function `cbegin`]
+
+  const_iterator cbegin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for start of export list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ExportList member function `cend`]
+
+  const_iterator cend() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for off-the-end of export list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[endsect] [/ ExportDir]
+
+[section:importdir ImportDir]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/PeLib/ImportDir.hpp>
+  
+  class ImportDir
+  {
+  public:
+    class Error : public virtual HadesMemError
+    { };
+
+    explicit ImportDir(PeFile const& MyPeFile, 
+      PIMAGE_IMPORT_DESCRIPTOR pImpDesc = nullptr);
+      
+    ImportDir(ImportDir const& Other);
+    
+    ImportDir& operator=(ImportDir const& Other);
+    
+    ImportDir(ImportDir&& Other);
+    
+    ImportDir& operator=(ImportDir&& Other);
+    
+    ~ImportDir();
+
+    PVOID GetBase() const;
+
+    bool IsValid() const;
+
+    void EnsureValid() const;
+
+    DWORD GetCharacteristics() const;
+
+    DWORD GetTimeDateStamp() const;
+
+    DWORD GetForwarderChain() const;
+
+    DWORD GetNameRaw() const;
+
+    std::string GetName() const;
+
+    DWORD GetFirstThunk() const;
+
+    void SetCharacteristics(DWORD Characteristics) const;
+
+    void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+    void SetForwarderChain(DWORD ForwarderChain) const;
+
+    void SetNameRaw(DWORD Name) const;
+    
+    void SetName(std::string const& Name) const;
+
+    void SetFirstThunk(DWORD FirstThunk) const;
+    
+    bool operator==(ImportDir const& Rhs) const;
+    
+    bool operator!=(ImportDir const& Rhs) const;
+  };
+    
+  class ImportDirList
+  {
+  public:
+    class Error : public virtual HadesMemError;
+    
+    typedef unspecified iterator;
+    typedef unspecified const_iterator;
+    
+    explicit ImportDirList(PeFile const& MyPeFile);
+    
+    ImportDirList(ImportDirList&& Other);
+    
+    ImportDirList& operator=(ImportDirList&& Other);
+    
+    iterator begin();
+    
+    iterator end();
+    
+    const_iterator begin() const;
+     
+    const_iterator end() const;
+    
+    const_iterator cbegin() const;
+     
+    const_iterator cend() const;
+  };
+  
+  class ImportThunk
+  {
+  public:
+    class Error : public virtual HadesMemError;
+
+    ImportThunk(PeFile const& MyPeFile, PVOID pThunk);
+      
+    ImportThunk(ImportThunk const& Other);
+    
+    ImportThunk& operator=(ImportThunk const& Other);
+    
+    ImportThunk(ImportThunk&& Other);
+    
+    ImportThunk& operator=(ImportThunk&& Other);
+    
+    ~ImportThunk();
+    
+    PVOID GetBase() const;
+
+    bool IsValid() const;
+
+    void EnsureValid() const;
+
+    DWORD_PTR GetAddressOfData() const;
+
+    DWORD_PTR GetOrdinalRaw() const;
+    
+    bool ByOrdinal() const;
+
+    WORD GetOrdinal() const;
+
+    DWORD_PTR GetFunction() const;
+
+    WORD GetHint() const;
+
+    std::string GetName() const;
+
+    void SetAddressOfData(DWORD_PTR AddressOfData) const;
+
+    void SetOrdinalRaw(DWORD_PTR OrdinalRaw) const;
+    
+    void SetFunction(DWORD_PTR Function) const;
+
+    void SetHint(WORD Hint) const;
+    
+    bool operator==(ImportThunk const& Rhs) const;
+    
+    bool operator!=(ImportThunk const& Rhs) const;
+  };
+  
+  class ImportThunkList
+  {
+  public:
+    class Error : public virtual HadesMemError;
+    
+    typedef unspecified iterator;
+    typedef unspecified const_iterator;
+    
+    explicit ImportThunkList(PeFile const& MyPeFile, DWORD FirstThunk);
+    
+    ImportThunkList(ImportThunkList&& Other);
+    
+    ImportThunkList& operator=(ImportThunkList&& Other);
+    
+    iterator begin();
+    
+    iterator end();
+    
+    const_iterator begin() const;
+     
+    const_iterator end() const;
+    
+    const_iterator cbegin() const;
+
+    const_iterator cend() const;
+  };
+
+[h3 Description]
+
+The `ImportDir` and `ImportThunk` classes provide functionality for working 
+with the import directory of a PE file.
+
+See the [@http://msdn.microsoft.com/en-us/windows/hardware/gg463119 PE and 
+COFF Specification] for more information on working with the PE file format.
+
+The `ImportDirList` class provides STL-compatible iterators for import 
+directory  enumeration. The `ImportThunkList` class provides STL-compatible 
+iterators for import thunk enumeration.
+
+[h3 ImportDir public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ImportDir` methods when an error occurs.
+
+[h3 ImportDir public construct/copy/destruct/move]
+
+[h4 ImportDir constructor]
+
+  ImportDir(PeFile const& MyPeFile, PIMAGE_IMPORT_DESCRIPTOR pImpDesc = 
+    nullptr);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportDir` instance that refers to the specified 
+PE file, and optionally, the specified import descriptor (or the first one in 
+the list by default).]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir copy constructor]
+
+  ImportDir(ImportDir const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportDir` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir copy assignment operator]
+
+  ImportDir& operator=(ImportDir const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir move constructor]
+
+  ImportDir(ImportDir&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportDir` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir move assignment operator]
+
+  ImportDir& operator=(ImportDir&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir destructor]
+
+  ~ImportDir();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportDir public member functions]
+
+[h4 ImportDir member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of import directory.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `IsValid`]
+
+  bool IsValid() const;
+
+[variablelist
+
+[[Returns:] [Whether the target is a valid import dir.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `EnsureValid`]
+
+  void EnsureValid() const;
+
+[variablelist
+
+[[Effects:] [Throw if the target is an invalid import dir.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetCharacteristics`]
+
+  DWORD GetCharacteristics() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetTimeDateStamp`]
+
+  DWORD GetTimeDateStamp() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetForwarderChain`]
+
+  DWORD GetForwarderChain() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.ForwarderChain.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetNameRaw`]
+
+  DWORD GetNameRaw() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.Name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetName`]
+
+  std::string GetName() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.Name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `GetFirstThunk`]
+
+  DWORD GetFirstThunk() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_DESCRIPTOR.FirstThunk.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetCharacteristics`]
+
+  void SetCharacteristics(DWORD Characteristics) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetTimeDateStamp`]
+
+  void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetForwarderChain`]
+
+  void SetForwarderChain(DWORD ForwarderChain) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.ForwarderChain.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetNameRaw`]
+
+  void SetNameRaw(DWORD Name) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.Name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetName`]
+
+  void SetName(std::string const& Name) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.Name.]]
+
+[[Notes:] [Length of new name must be equal to or less than the length of the 
+current name. Allocating space for a new string in the file is currently 
+unsupported.]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir member function `SetFirstThunk`]
+
+  void SetFirstThunk(DWORD FirstThunk) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_DESCRIPTOR.FirstThunk.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDir equality operator]
+
+  bool operator==(ImportDir const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same import dir.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 ImportDir inequality operator]
+
+  bool operator!=(ImportDir const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different import dir.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportDirList public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ImportDirList` methods when an error occurs.
+
+  typedef unspecified iterator;
+  typedef unspecified const_iterator;
+  
+Iterator type for import dir list. Models the 
+[@http://www.sgi.com/tech/stl/ForwardIterator.html ForwardIterator] concept. 
+Implementation type unspecified.
+
+[h3 ImportDirList public construct/copy/destruct/move]
+
+[h4 ImportDirList constructor]
+
+  explicit ImportDirList(PeFile const& MyPeFile);
+
+[variablelist
+
+[[Effects:] [Constructs a `ImportDirList` instance targetting the PE file 
+specified by `MyPeFile`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList move constructor]
+
+  ImportDirList(ImportDirList&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `ImportDirList` that refers to the same target 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList move assignment operator]
+
+  ImportDirList& operator=(ImportDirList&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList destructor]
+
+  ~ImportDirList();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportDirList public member functions]
+
+[h4 ImportDirList member function `begin`]
+
+  iterator begin();
+  const_iterator begin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for start of import 
+list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList member function `end`]
+
+  iterator end();
+  const_iterator end() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for off-the-end of 
+import dir list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList member function `cbegin`]
+
+  const_iterator cbegin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for start of import dir list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportDirList member function `cend`]
+
+  const_iterator cend() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for off-the-end of import dir list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h3 ImportThunk public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ImportThunk` methods when an error occurs.
+
+[h3 ImportThunk public construct/copy/destruct/move]
+
+[h4 ImportThunk constructor]
+
+  ImportThunk(PeFile const& MyPeFile, PVOID pThunk);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportThunk` instance that refers to the specified 
+import thunk in the specified PE file.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk copy constructor]
+
+  ImportThunk(ImportThunk const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportThunk` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk copy assignment operator]
+
+  ImportThunk& operator=(ImportThunk const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk move constructor]
+
+  ImportThunk(ImportThunk&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs an `ImportThunk` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk move assignment operator]
+
+  ImportThunk& operator=(ImportThunk&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk destructor]
+
+  ~ImportThunk();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportThunk public member functions]
+
+[h4 ImportThunk member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of import thunk.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `IsValid`]
+
+  bool IsValid() const;
+
+[variablelist
+
+[[Returns:] [Whether the target is a valid import thunk.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `EnsureValid`]
+
+  void EnsureValid() const;
+
+[variablelist
+
+[[Effects:] [Throw if the target is an invalid import thunk.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetAddressOfData`]
+
+  DWORD_PTR GetAddressOfData() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_THUNK_DATA.u1.AddressOfData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetOrdinalRaw`]
+
+  DWORD_PTR GetOrdinalRaw() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_THUNK_DATA.u1.Ordinal.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `ByOrdinal`]
+
+  bool ByOrdinal() const;
+
+[variablelist
+
+[[Returns:] [Whether import is by ordinal.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetOrdinal`]
+
+  WORD GetOrdinal() const;
+
+[variablelist
+
+[[Returns:] [Ordinal portion of IMAGE_THUNK_DATA.u1.Ordinal.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetFunction`]
+
+  DWORD_PTR GetFunction() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_THUNK_DATA.u1.Function.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetHint`]
+
+  WORD GetHint() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_BY_NAME.Hint.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `GetName`]
+
+  std::string GetName() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_IMPORT_BY_NAME.Name.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `SetAddressOfData`]
+
+  void SetAddressOfData(DWORD_PTR AddressOfData) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_THUNK_DATA.u1.AddressOfData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `SetOrdinalRaw`]
+
+  void SetOrdinalRaw(DWORD_PTR OrdinalRaw) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_THUNK_DATA.u1.Ordinal.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `SetFunction`]
+
+  void SetFunction(DWORD_PTR Function) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_THUNK_DATA.u1.Function.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk member function `SetHint`]
+
+  void SetHint(WORD Hint) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_IMPORT_BY_NAME.Hint.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunk equality operator]
+
+  bool operator==(ImportThunk const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same import thunk.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 ImportThunk inequality operator]
+
+  bool operator!=(ImportThunk const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different import thunk.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportThunkList public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `ImportThunkList` methods when an error occurs.
+
+  typedef unspecified iterator;
+  typedef unspecified const_iterator;
+  
+Iterator type for import thunk list. Models the 
+[@http://www.sgi.com/tech/stl/ForwardIterator.html ForwardIterator] concept. 
+Implementation type unspecified.
+
+[h3 ImportThunkList public construct/copy/destruct/move]
+
+[h4 ImportThunkList constructor]
+
+  ImportThunkList(PeFile const& MyPeFile, DWORD FirstThunk);
+
+[variablelist
+
+[[Effects:] [Constructs a `ImportThunkList` instance targetting the PE file 
+specified by `MyPeFile` and the first thunk specified by `FirstThunk`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList move constructor]
+
+  ImportThunkList(ImportThunkList&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `ImportThunkList` that refers to the same target 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList move assignment operator]
+
+  ImportThunkList& operator=(ImportThunkList&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList destructor]
+
+  ~ImportThunkList();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 ImportThunkList public member functions]
+
+[h4 ImportThunkList member function `begin`]
+
+  iterator begin();
+  const_iterator begin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for start of import 
+thunk list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList member function `end`]
+
+  iterator end();
+  const_iterator end() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible iterator or const_iterator for off-the-end of 
+import thunk list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList member function `cbegin`]
+
+  const_iterator cbegin() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for start of import thunk list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 ImportThunkList member function `cend`]
+
+  const_iterator cend() const;
+
+[variablelist
+
+[[Returns:] [STL-compatible const_iterator for off-the-end of import thunk 
+list.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[endsect] [/ ImportDir]
+
+[section:ntheaders NtHeaders]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/PeLib/NtHeaders.hpp>
+
+  class NtHeaders
+  {
+  public:
+    class Error : public virtual HadesMemError;
+
+    enum DataDir
+    {
+      DataDir_Export, 
+      DataDir_Import, 
+      DataDir_Resource, 
+      DataDir_Exception, 
+      DataDir_Security, 
+      DataDir_BaseReloc, 
+      DataDir_Debug, 
+      DataDir_Architecture, 
+      DataDir_GlobalPTR, 
+      DataDir_TLS, 
+      DataDir_LoadConfig, 
+      DataDir_BoundImport, 
+      DataDir_IAT, 
+      DataDir_DelayImport, 
+      DataDir_COMDescriptor
+    };
+
+    explicit NtHeaders(PeFile const& MyPeFile);
+      
+    NtHeaders(NtHeaders const& Other);
+    
+    NtHeaders& operator=(NtHeaders const& Other);
+    
+    NtHeaders(NtHeaders&& Other);
+    
+    NtHeaders& operator=(NtHeaders&& Other);
+    
+    ~NtHeaders();
+
+    PVOID GetBase() const;
+
+    bool IsValid() const;
+
+    void EnsureValid() const;
+
+    DWORD GetSignature() const;
+
+    WORD GetMachine() const;
+
+    WORD GetNumberOfSections() const;
+
+    DWORD GetTimeDateStamp() const;
+
+    DWORD GetPointerToSymbolTable() const;
+
+    DWORD GetNumberOfSymbols() const;
+
+    WORD GetSizeOfOptionalHeader() const;
+
+    WORD GetCharacteristics() const;
+
+    WORD GetMagic() const;
+
+    BYTE GetMajorLinkerVersion() const;
+
+    BYTE GetMinorLinkerVersion() const;
+
+    DWORD GetSizeOfCode() const;
+
+    DWORD GetSizeOfInitializedData() const;
+
+    DWORD GetSizeOfUninitializedData() const;
+
+    DWORD GetAddressOfEntryPoint() const;
+
+    DWORD GetBaseOfCode() const;
+
+  #if defined(_M_IX86) 
+    DWORD GetBaseOfData() const;
+  #endif
+
+    ULONG_PTR GetImageBase() const;
+
+    DWORD GetSectionAlignment() const;
+
+    DWORD GetFileAlignment() const;
+
+    WORD GetMajorOperatingSystemVersion() const;
+
+    WORD GetMinorOperatingSystemVersion() const;
+
+    WORD GetMajorImageVersion() const;
+
+    WORD GetMinorImageVersion() const;
+
+    WORD GetMajorSubsystemVersion() const;
+
+    WORD GetMinorSubsystemVersion() const;
+
+    DWORD GetWin32VersionValue() const;
+
+    DWORD GetSizeOfImage() const;
+
+    DWORD GetSizeOfHeaders() const;
+
+    DWORD GetCheckSum() const;
+
+    WORD GetSubsystem() const;
+
+    WORD GetDllCharacteristics() const;
+
+    ULONG_PTR GetSizeOfStackReserve() const;
+
+    ULONG_PTR GetSizeOfStackCommit() const;
+
+    ULONG_PTR GetSizeOfHeapReserve() const;
+
+    ULONG_PTR GetSizeOfHeapCommit() const;
+
+    DWORD GetLoaderFlags() const;
+
+    DWORD GetNumberOfRvaAndSizes() const;
+
+    DWORD GetDataDirectoryVirtualAddress(DataDir MyDataDir) const;
+
+    DWORD GetDataDirectorySize(DataDir MyDataDir) const;
+
+    void SetSignature(DWORD Signature) const;
+
+    void SetMachine(WORD Machine) const;
+
+    void SetNumberOfSections(WORD NumberOfSections) const;
+
+    void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+    void SetPointerToSymbolTable(DWORD PointerToSymbolTable) const;
+
+    void SetNumberOfSymbols(DWORD NumberOfSymbols) const;
+
+    void SetSizeOfOptionalHeader(WORD SizeOfOptionalHeader) const;
+
+    void SetCharacteristics(WORD Characteristics) const;
+
+    void SetMagic(WORD Magic) const;
+
+    void SetMajorLinkerVersion(BYTE MajorLinkerVersion) const;
+
+    void SetMinorLinkerVersion(BYTE MinorLinkerVersion) const;
+
+    void SetSizeOfCode(DWORD SizeOfCode) const;
+
+    void SetSizeOfInitializedData(DWORD SizeOfInitializedData) const;
+
+    void SetSizeOfUninitializedData(DWORD SizeOfUninitializedData) const;
+
+    void SetAddressOfEntryPoint(DWORD AddressOfEntryPoint) const;
+
+    void SetBaseOfCode(DWORD BaseOfCode) const;
+
+  #if defined(_M_IX86) 
+    void SetBaseOfData(DWORD BaseOfData) const;
+  #endif
+
+    void SetImageBase(ULONG_PTR ImageBase) const;
+
+    void SetSectionAlignment(DWORD SectionAlignment) const;
+
+    void SetFileAlignment(DWORD FileAlignment) const;
+
+    void SetMajorOperatingSystemVersion(
+      WORD MajorOperatingSystemVersion) const;
+
+    void SetMinorOperatingSystemVersion(
+      WORD MinorOperatingSystemVersion) const;
+
+    void SetMajorImageVersion(WORD MajorImageVersion) const;
+
+    void SetMinorImageVersion(WORD MinorImageVersion) const;
+
+    void SetMajorSubsystemVersion(WORD MajorSubsystemVersion) const;
+
+    void SetMinorSubsystemVersion(WORD MinorSubsystemVersion) const;
+
+    void SetWin32VersionValue(DWORD Win32VersionValue) const;
+    
+    void SetSizeOfImage(DWORD SizeOfImage) const;
+
+    void SetSizeOfHeaders(DWORD SizeOfHeaders) const;
+
+    void SetCheckSum(DWORD CheckSum) const;
+
+    void SetSubsystem(WORD Subsystem) const;
+
+    void SetDllCharacteristics(WORD DllCharacteristics) const;
+
+    void SetSizeOfStackReserve(ULONG_PTR SizeOfStackReserve) const;
+
+    void SetSizeOfStackCommit(ULONG_PTR SizeOfStackCommit) const;
+
+    void SetSizeOfHeapReserve(ULONG_PTR SizeOfHeapReserve) const;
+
+    void SetSizeOfHeapCommit(ULONG_PTR SizeOfHeapCommit) const;
+
+    void SetLoaderFlags(DWORD LoaderFlags) const;
+
+    void SetNumberOfRvaAndSizes(DWORD NumberOfRvaAndSizes) const;
+
+    void SetDataDirectoryVirtualAddress(DataDir MyDataDir, 
+      DWORD DataDirectoryVirtualAddress) const;
+
+    void SetDataDirectorySize(DataDir MyDataDir, 
+      DWORD DataDirectorySize) const;
+    
+    bool operator==(NtHeaders const& Rhs) const;
+    
+    bool operator!=(NtHeaders const& Rhs) const;
+  };
+
+[h3 Description]
+
+The `NtHeaders` class provides functionality for working with the NT headers 
+of a PE file.
+
+See the [@http://msdn.microsoft.com/en-us/windows/hardware/gg463119 PE and 
+COFF Specification] for more information on working with the PE file format.
+
+[h3 NtHeaders public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `DosHeader` methods when an error occurs.
+
+  enum DataDir;
+
+Data directories as specified by Microsoft.
+
+[h3 NtHeaders public construct/copy/destruct/move]
+
+[h4 NtHeaders constructor]
+
+  NtHeaders(PeFile const& MyPeFile);
+
+[variablelist
+
+[[Effects:] [Constructs a `NtHeaders` instance that refers to the specified 
+PE file.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders copy constructor]
+
+  NtHeaders(NtHeaders const& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `NtHeaders` that refers to the same target as 
+`Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders copy assignment operator]
+
+  NtHeaders& operator=(NtHeaders const& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as the other instance.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders move constructor]
+
+  NtHeaders(NtHeaders&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `DosHeader` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders move assignment operator]
+
+  NtHeaders& operator=(NtHeaders&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders destructor]
+
+  ~NtHeaders();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 NtHeaders public member functions]
+
+[h4 NtHeaders member function `GetBase`]
+
+  PVOID GetBase() const;
+
+[variablelist
+
+[[Returns:] [Base address of NT headers.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `IsValid`]
+
+  bool IsValid() const;
+
+[variablelist
+
+[[Returns:] [Whether the target is a valid NT headers.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `EnsureValid`]
+
+  void EnsureValid() const;
+
+[variablelist
+
+[[Effects:] [Throw if the target is an invalid NT headers.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSignature`]
+
+  DWORD GetSignature() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.Signature.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMachine`]
+
+  WORD GetMachine() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.Machine.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetNumberOfSections`]
+
+  WORD GetNumberOfSections() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.NumberOfSections.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetTimeDateStamp`]
+
+  DWORD GetTimeDateStamp() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetPointerToSymbolTable`]
+
+  DWORD GetPointerToSymbolTable() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.PointerToSymbolTable.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetNumberOfSymbols`]
+
+  DWORD GetNumberOfSymbols() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.NumberOfSymbols.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfOptionalHeader`]
+
+  WORD GetSizeOfOptionalHeader() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.SizeOfOptionalHeader.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetCharacteristics`]
+
+  WORD GetCharacteristics() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.FileHeader.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMagic`]
+
+  WORD GetMagic() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.Magic.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMajorLinkerVersion`]
+
+  BYTE GetMajorLinkerVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MajorLinkerVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMinorLinkerVersion`]
+
+  BYTE GetMinorLinkerVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MinorLinkerVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfCode`]
+
+  DWORD GetSizeOfCode() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfCode.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfInitializedData`]
+
+  DWORD GetSizeOfInitializedData() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfInitializedData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfUninitializedData`]
+
+  DWORD GetSizeOfUninitializedData() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfUninitializedData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetAddressOfEntryPoint`]
+
+  DWORD GetAddressOfEntryPoint() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.AddressOfEntryPoint.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetBaseOfCode`]
+
+  DWORD GetBaseOfCode() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.BaseOfCode.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetBaseOfData`]
+
+  DWORD GetBaseOfData() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.BaseOfData.]]
+
+[[Notes:] [Available only under IA32.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetImageBase`]
+
+  ULONG_PTR GetImageBase() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.ImageBase.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSectionAlignment`]
+
+  DWORD GetSectionAlignment() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SectionAlignment.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetFileAlignment`]
+
+  DWORD GetFileAlignment() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.FileAlignment.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMajorOperatingSystemVersion`]
+
+  WORD GetMajorOperatingSystemVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MajorOperatingSystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMinorOperatingSystemVersion`]
+
+  WORD GetMinorOperatingSystemVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MinorOperatingSystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMajorImageVersion`]
+
+  WORD GetMajorImageVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MajorImageVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMinorImageVersion`]
+
+  WORD GetMinorImageVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MinorImageVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMajorSubsystemVersion`]
+
+  WORD GetMajorSubsystemVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MajorSubsystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetMinorSubsystemVersion`]
+
+  WORD GetMinorSubsystemVersion() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.MinorSubsystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetWin32VersionValue`]
+
+  DWORD GetWin32VersionValue() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.Win32VersionValue.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfImage`]
+
+  DWORD GetSizeOfImage() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfImage.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfHeaders`]
+
+  DWORD GetSizeOfHeaders() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeaders.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetCheckSum`]
+
+  DWORD GetCheckSum() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.CheckSum.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSubsystem`]
+
+  WORD GetSubsystem() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.Subsystem.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetDllCharacteristics`]
+
+  WORD GetDllCharacteristics() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.DllCharacteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfStackReserve`]
+
+  ULONG_PTR GetSizeOfStackReserve() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfStackReserve.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfStackCommit`]
+
+  ULONG_PTR GetSizeOfStackCommit() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfStackCommit.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfHeapReserve`]
+
+  ULONG_PTR GetSizeOfHeapReserve() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeapReserve.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetSizeOfHeapCommit`]
+
+  ULONG_PTR GetSizeOfHeapCommit() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeapCommit.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetLoaderFlags`]
+
+  DWORD GetLoaderFlags() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.LoaderFlags.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetNumberOfRvaAndSizes`]
+
+  DWORD GetNumberOfRvaAndSizes() const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.NumberOfRvaAndSizes.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetDataDirectoryVirtualAddress`]
+
+  DWORD GetDataDirectoryVirtualAddress(DataDir MyDataDir) const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.DataDirectory\[MyDataDir\]
+.VirtualAddress.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `GetDataDirectorySize`]
+
+  DWORD GetDataDirectorySize(DataDir MyDataDir) const;
+
+[variablelist
+
+[[Returns:] [IMAGE_NT_HEADERS.OptionalHeader.DataDirectory\[MyDataDir\]
+.Size.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSignature`]
+
+  void SetSignature(DWORD Signature) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.Signature.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMachine`]
+
+  void SetMachine(WORD Machine) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.Machine.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetNumberOfSections`]
+
+  void SetNumberOfSections(WORD NumberOfSections) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.NumberOfSections.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetTimeDateStamp`]
+
+  void SetTimeDateStamp(DWORD TimeDateStamp) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.TimeDateStamp.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetPointerToSymbolTable`]
+
+  void SetPointerToSymbolTable(DWORD PointerToSymbolTable) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.PointerToSymbolTable.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetNumberOfSymbols`]
+
+  void SetNumberOfSymbols(DWORD NumberOfSymbols) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.NumberOfSymbols.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfOptionalHeader`]
+
+  void SetSizeOfOptionalHeader(WORD SizeOfOptionalHeader) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.SizeOfOptionalHeader.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetCharacteristics`]
+
+  void SetCharacteristics(WORD Characteristics) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.FileHeader.Characteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMagic`]
+
+  void SetMagic(WORD Magic) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.Magic.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMajorLinkerVersion`]
+
+  void SetMajorLinkerVersion(BYTE MajorLinkerVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MajorLinkerVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMinorLinkerVersion`]
+
+  void SetMinorLinkerVersion(BYTE MinorLinkerVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MinorLinkerVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfCode`]
+
+  void SetSizeOfCode(DWORD SizeOfCode) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfCode.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfInitializedData`]
+
+  void SetSizeOfInitializedData(DWORD SizeOfInitializedData) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfInitializedData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfUninitializedData`]
+
+  void SetSizeOfUninitializedData(DWORD SizeOfUninitializedData) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfUninitializedData.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetAddressOfEntryPoint`]
+
+  void SetAddressOfEntryPoint(DWORD AddressOfEntryPoint) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.AddressOfEntryPoint.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetBaseOfCode`]
+
+  void SetBaseOfCode(DWORD BaseOfCode) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.BaseOfCode.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetBaseOfData`]
+
+  void SetBaseOfData(DWORD BaseOfData) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.BaseOfData.]]
+
+[[Notes:] [Available only under IA32.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetImageBase`]
+
+  void SetImageBase(ULONG_PTR ImageBase) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.ImageBase.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSectionAlignment`]
+
+  void SetSectionAlignment(DWORD SectionAlignment) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SectionAlignment.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetFileAlignment`]
+
+  void SetFileAlignment(DWORD FileAlignment) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.FileAlignment.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMajorOperatingSystemVersion`]
+
+  void SetMajorOperatingSystemVersion(
+      WORD MajorOperatingSystemVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MajorOperatingSystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMinorOperatingSystemVersion`]
+
+  void SetMinorOperatingSystemVersion(
+      WORD MinorOperatingSystemVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MinorOperatingSystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMajorImageVersion`]
+
+  void SetMajorImageVersion(WORD MajorImageVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MajorImageVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMinorImageVersion`]
+
+  void SetMinorImageVersion(WORD MinorImageVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MinorImageVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMajorSubsystemVersion`]
+
+  void SetMajorSubsystemVersion(WORD MajorSubsystemVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MajorSubsystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetMinorSubsystemVersion`]
+
+  void SetMinorSubsystemVersion(WORD MinorSubsystemVersion) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.MinorSubsystemVersion.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetWin32VersionValue`]
+
+  void SetWin32VersionValue(DWORD Win32VersionValue) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.Win32VersionValue.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfImage`]
+
+  void SetSizeOfImage(DWORD SizeOfImage) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfImage.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfHeaders`]
+
+  void SetSizeOfHeaders(DWORD SizeOfHeaders) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeaders.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetCheckSum`]
+
+  void SetCheckSum(DWORD CheckSum) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.CheckSum.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSubsystem`]
+
+  void SetSubsystem(WORD Subsystem) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.Subsystem.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetDllCharacteristics`]
+
+  void SetDllCharacteristics(WORD DllCharacteristics) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.DllCharacteristics.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfStackReserve`]
+
+  void SetSizeOfStackReserve(ULONG_PTR SizeOfStackReserve) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfStackReserve.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfStackCommit`]
+
+  void SetSizeOfStackCommit(ULONG_PTR SizeOfStackCommit) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfStackCommit.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfHeapReserve`]
+
+  void SetSizeOfHeapReserve(ULONG_PTR SizeOfHeapReserve) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeapReserve.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetSizeOfHeapCommit`]
+
+  void SetSizeOfHeapCommit(ULONG_PTR SizeOfHeapCommit) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.SizeOfHeapCommit.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetLoaderFlags`]
+
+  void SetLoaderFlags(DWORD LoaderFlags) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.LoaderFlags.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetNumberOfRvaAndSizes`]
+
+  void SetNumberOfRvaAndSizes(DWORD NumberOfRvaAndSizes) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.NumberOfRvaAndSizes.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetDataDirectoryVirtualAddress`]
+
+  void SetDataDirectoryVirtualAddress(DataDir MyDataDir, 
+      DWORD DataDirectoryVirtualAddress) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.DataDirectory\[MyDataDir\]
+.VirtualAddress.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders member function `SetDataDirectorySize`]
+
+  void SetDataDirectorySize(DataDir MyDataDir, 
+      DWORD DataDirectorySize) const;
+
+[variablelist
+
+[[Effects:] [Sets IMAGE_NT_HEADERS.OptionalHeader.DataDirectory\[MyDataDir\]
+.Size.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 NtHeaders equality operator]
+
+  bool operator==(NtHeaders const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets the same target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h4 NtHeaders inequality operator]
+
+  bool operator!=(NtHeaders const& Rhs) const;
+
+[variablelist
+
+[[Returns:] [Whether `Rhs` represets a different target.]]
+
+[[Throws:] [No.]]
+
+]
+
+[endsect] [/ NtHeaders]
 
 [endsect] [/ Reference]
 

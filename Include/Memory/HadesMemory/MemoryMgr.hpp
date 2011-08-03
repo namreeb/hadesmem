@@ -179,10 +179,15 @@ namespace HadesMem
     // Target process
     Detail::Process m_Process;
   };
+  
+  // Create process
+  MemoryMgr CreateProcess(std::wstring const& Path, 
+    std::wstring const& CommandLine, 
+    std::wstring const& WorkingDir);
     
   // Create process
   MemoryMgr CreateProcess(std::wstring const& Path, 
-    std::wstring const& Params, 
+    std::vector<std::wstring> const& Args, 
     std::wstring const& WorkingDir);
   
   // Gets the SeDebugPrivilege
@@ -193,6 +198,10 @@ namespace HadesMem
   {
   public:
     AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
+    
+    AllocAndFree(AllocAndFree&& Other);
+    
+    AllocAndFree& operator=(AllocAndFree&& Other);
 
     ~AllocAndFree();
     
