@@ -1,36 +1,21 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 #pragma once
 
-// Hades
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/Detail/Process.hpp>
 
-// C++ Standard Library
 #include <memory>
 #include <string>
 #include <vector>
 #include <utility>
 #include <type_traits>
 
-// Windows API
 #include <Windows.h>
 
 namespace HadesMem
@@ -65,13 +50,17 @@ namespace HadesMem
     class RemoteFunctionRet
     {
     public:
+      // Constructor
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
         DWORD LastError);
       
+      // Get return value
       DWORD_PTR GetReturnValue() const;
       
+      // Get 64-bit return value
       DWORD64 GetReturnValue64() const;
       
+      // Get thread last error
       DWORD GetLastError() const;
       
     private:
@@ -101,15 +90,11 @@ namespace HadesMem
 
     // Read memory (string types)
     template <typename T>
-    T ReadString(PVOID Address, typename std::enable_if<std::is_same<T, std::
-      basic_string<typename T::value_type>>::value, T>::type* Dummy = 0) 
-      const;
+    T ReadString(PVOID Address) const;
 
     // Read memory (vector types)
     template <typename T>
-    T ReadList(PVOID Address, std::size_t Size, typename std::enable_if<std::
-      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-      Dummy = 0) const;
+    T ReadList(PVOID Address, std::size_t Size) const;
       
     // Write memory (POD types)
     template <typename T>
@@ -117,15 +102,11 @@ namespace HadesMem
 
     // Write memory (string types)
     template <typename T>
-    void WriteString(PVOID Address, T const& Data, typename std::enable_if<
-      std::is_same<T, std::basic_string<typename T::value_type>>::value, T>::
-      type* Dummy = 0) const;
+    void WriteString(PVOID Address, T const& Data) const;
 
     // Write memory (vector types)
     template <typename T>
-    void WriteList(PVOID Address, T const& Data, typename std::enable_if<std::
-      is_same<T, std::vector<typename T::value_type>>::value, T>::type* 
-      Dummy = 0) const;
+    void WriteList(PVOID Address, T const& Data) const;
 
     // Whether an address is currently readable
     bool CanRead(LPCVOID Address) const;
@@ -197,27 +178,38 @@ namespace HadesMem
   class AllocAndFree
   {
   public:
+    // Constructor
     AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
     
+    // Move constructor
     AllocAndFree(AllocAndFree&& Other);
     
+    // Move assignment operator
     AllocAndFree& operator=(AllocAndFree&& Other);
 
+    // Destructor
     ~AllocAndFree();
     
+    // Free memory
     void Free() const;
 
+    // Get base address of memory block
     PVOID GetBase() const;
     
+    // Get size of memory block
     SIZE_T GetSize() const;
 
   protected:
+    // Disable copying
     AllocAndFree(AllocAndFree const&);
     AllocAndFree& operator=(AllocAndFree const&);
     
   private:
+    // Memory instance
     MemoryMgr m_Memory;
+    // Region size
     SIZE_T m_Size;
+    // Region base
     mutable PVOID m_Address;
   };
 
@@ -225,10 +217,8 @@ namespace HadesMem
   template <typename T>
   T MemoryMgr::Read(PVOID Address) const
   {
-    // Ensure T is POD
     static_assert(std::is_pod<T>::value, "MemoryMgr::Read: T must be POD.");
     
-    // Read data
     T Data;
     ReadImpl(Address, &Data, sizeof(Data));
     return Data;
@@ -236,21 +226,21 @@ namespace HadesMem
 
   // Read memory (string types)
   template <typename T>
-  T MemoryMgr::ReadString(PVOID Address, typename std::enable_if<std::is_same<
-    T, std::basic_string<typename T::value_type>>::value, T>::type* /*Dummy*/) 
-    const
+  T MemoryMgr::ReadString(PVOID Address) const
   {
-    // Character type
     typedef typename T::value_type CharT;
+    typedef typename T::traits_type TraitsT;
+    typedef typename T::allocator_type AllocT;
+    
+    static_assert(std::is_same<T, std::basic_string<CharT, TraitsT, 
+      AllocT>>::value, "MemoryMgr::ReadString: T must be of type "
+      "std::basic_string.");
 
-    // Ensure chracter type is POD
     static_assert(std::is_pod<CharT>::value, "MemoryMgr::ReadString: "
       "Character type of string must be POD.");
     
-    // Create buffer to store results
     T Buffer;
 
-    // Read until a null terminator is found
     CharT* AddressReal = static_cast<CharT*>(Address);
     for (CharT Current = this->Read<CharT>(AddressReal); Current != CharT(); 
       ++AddressReal, Current = this->Read<CharT>(AddressReal))
@@ -258,26 +248,24 @@ namespace HadesMem
       Buffer.push_back(Current);
     }
     
-    // Return buffer
     return Buffer;
   }
 
   // Read memory (vector types)
   template <typename T>
-  T MemoryMgr::ReadList(PVOID Address, std::size_t Size, typename 
-    std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::
-    value, T>::type* /*Dummy*/) const
+  T MemoryMgr::ReadList(PVOID Address, std::size_t Size) const
   {
-    // Value type
-    typedef typename T::value_type ValT;
+    typedef typename T::value_type ValueT;
+    typedef typename T::allocator_type AllocT;
     
-    // Ensure value type is POD
-    static_assert(std::is_pod<ValT>::value, "MemoryMgr::ReadList: Value type "
-      "of vector must be POD.");
+    static_assert(std::is_same<T, std::vector<ValueT, AllocT>>::value, 
+      "MemoryMgr::ReadList: T must be of type std::vector.");
     
-    // Read data
+    static_assert(std::is_pod<ValueT>::value, "MemoryMgr::ReadList: Value "
+      "type of vector must be POD.");
+    
     T Data(Size);
-    this->ReadImpl(Address, Data.data(), sizeof(ValT) * Size);
+    this->ReadImpl(Address, Data.data(), sizeof(ValueT) * Size);
     return Data;
   }
 
@@ -285,46 +273,44 @@ namespace HadesMem
   template <typename T>
   void MemoryMgr::Write(PVOID Address, T const& Data) const 
   {
-    // Ensure T is POD
     static_assert(std::is_pod<T>::value, "MemoryMgr::Write: T must be POD.");
     
-    // Write memory
     WriteImpl(Address, &Data, sizeof(Data));
   }
 
   // Write memory (string types)
   template <typename T>
-  void MemoryMgr::WriteString(PVOID Address, T const& Data, 
-    typename std::enable_if<std::is_same<T, std::basic_string<typename T::
-    value_type>>::value, T>::type* /*Dummy*/) const
+  void MemoryMgr::WriteString(PVOID Address, T const& Data) const
   {
-    // Character type
     typedef typename T::value_type CharT;
-
-    // Ensure chracter type is POD
+    typedef typename T::traits_type TraitsT;
+    typedef typename T::allocator_type AllocT;
+    
+    static_assert(std::is_same<T, std::basic_string<CharT, TraitsT, 
+      AllocT>>::value, "MemoryMgr::WriteString: T must be of type "
+      "std::basic_string.");
+    
     static_assert(std::is_pod<CharT>::value, "MemoryMgr::WriteString: "
       "Character type of string must be POD.");
     
-    // Write memory
     std::size_t const RawSize = (Data.size() * sizeof(CharT)) + 1;
     WriteImpl(Address, Data.data(), RawSize);
   }
 
   // Write memory (vector types)
   template <typename T>
-  void MemoryMgr::WriteList(PVOID Address, T const& Data, typename std::
-    enable_if<std::is_same<T, std::vector<typename T::value_type>>::value, 
-    T>::type* /*Dummy*/) const
+  void MemoryMgr::WriteList(PVOID Address, T const& Data) const
   {
-    // Value type
-    typedef typename T::value_type ValT;
+    typedef typename T::value_type ValueT;
+    typedef typename T::allocator_type AllocT;
     
-    // Ensure value type is POD
-    static_assert(std::is_pod<ValT>::value, "MemoryMgr::WriteList: Value type "
-      "of vector must be POD.");
+    static_assert(std::is_same<T, std::vector<ValueT, AllocT>>::value, 
+      "MemoryMgr::WriteList: T must be of type std::vector.");
     
-    // Write memory
-    std::size_t const RawSize = Data.size() * sizeof(ValT);
+    static_assert(std::is_pod<ValueT>::value, "MemoryMgr::WriteList: Value "
+      "type of vector must be POD.");
+    
+    std::size_t const RawSize = Data.size() * sizeof(ValueT);
     WriteImpl(Address, Data.data(), RawSize);
   }
 }

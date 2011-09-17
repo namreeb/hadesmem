@@ -10,12 +10,13 @@ lib AsmJit
   : 
     [ glob AsmJit/AsmJit/*.cpp ] 
   : 
-    <link>shared 
-    <define>AsmJit_EXPORTS 
+    <link>static 
+    <define>ASMJIT_API="" 
     <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
     <include>"./AsmJit/" 
+    <define>ASMJIT_API="" 
   ;
 
 lib BeaEngine 
@@ -24,10 +25,11 @@ lib BeaEngine
   : 
     <include>"./BeaEngine/beaengineSources/Includes/" 
     <include>"./BeaEngine/include/" 
-    <define>BUILD_BEA_ENGINE_DLL 
-    <link>shared 
+    <define>BEA_ENGINE_STATIC 
+    <link>static 
     <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
     <include>"./BeaEngine/include/" 
+    <define>BEA_ENGINE_STATIC 
   ;

@@ -1,40 +1,24 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 #pragma once
 
-// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 
-// C++ Standard Library
 #include <string>
 #include <vector>
 #include <utility>
 #include <iterator>
 
-// Boost
 #include <boost/optional.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
-// Windows
 #include <Windows.h>
 
 namespace HadesMem
@@ -163,6 +147,9 @@ namespace HadesMem
   public:
     // Constructor
     Export(PeFile const& MyPeFile, DWORD Ordinal);
+    
+    // Constructor
+    Export(PeFile const& MyPeFile, std::string const& Name);
       
     // Copy constructor
     Export(Export const& Other);
@@ -188,15 +175,6 @@ namespace HadesMem
     // Get name
     std::string GetName() const;
 
-    // Get forwarder
-    std::string GetForwarder() const;
-    
-    // Get forwarder module name
-    std::string GetForwarderModule() const;
-    
-    // Get forwarder function name
-    std::string GetForwarderFunction() const;
-
     // Get ordinal
     WORD GetOrdinal() const;
 
@@ -205,6 +183,21 @@ namespace HadesMem
 
     // If entry is forwarded
     bool Forwarded() const;
+
+    // Get forwarder
+    std::string GetForwarder() const;
+    
+    // Get forwarder module name
+    std::string GetForwarderModule() const;
+    
+    // Get forwarder function name
+    std::string GetForwarderFunction() const;
+    
+    // If entry is forwarded by ordinal
+    bool IsForwardedByOrdinal() const;
+    
+    // Get forwarder function ordinal
+    WORD GetForwarderOrdinal() const;
     
     // Equality operator
     bool operator==(Export const& Rhs) const;
@@ -242,6 +235,12 @@ namespace HadesMem
     
     // If entry is forwarded
     bool m_Forwarded;
+    
+    // If entry is forwarded by ordinal
+    bool m_ForwardedByOrdinal;
+    
+    // Forwarder ordinal
+    WORD m_ForwarderOrdinal;
   };
     
   // Forward declaration of ExportIter

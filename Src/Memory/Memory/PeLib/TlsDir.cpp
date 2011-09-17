@@ -1,23 +1,10 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-// Hades
 #include <HadesMemory/PeLib/TlsDir.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
@@ -78,16 +65,13 @@ namespace HadesMem
   // Whether TLS directory is valid
   bool TlsDir::IsValid() const
   {
-    // Get NT headers
     NtHeaders const MyNtHeaders(m_PeFile);
-
-    // Get TLS dir data
+    
     DWORD const DataDirSize(MyNtHeaders.GetDataDirectorySize(NtHeaders::
       DataDir_TLS));
     DWORD const DataDirVa(MyNtHeaders.GetDataDirectoryVirtualAddress(
       NtHeaders::DataDir_TLS));
-
-    // TLS dir is valid if size and rva are valid
+    
     return DataDirSize && DataDirVa;
   }
 
@@ -105,13 +89,10 @@ namespace HadesMem
   // Get base of export dir
   PVOID TlsDir::GetBase() const
   {
-    // Set base pointer on first request
     if (!m_pBase)
     {
-      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-
-      // Get export dir data
+      
       DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
         DataDir_TLS);
       DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
@@ -122,12 +103,10 @@ namespace HadesMem
           ErrorFunction("TlsDir::GetBase") << 
           ErrorString("PE file has no TLS directory."));
       }
-
-      // Get base of TLS dir
+      
       m_pBase = static_cast<PBYTE>(m_PeFile.RvaToVa(DataDirVa));
     }
     
-    // Return cached pointer
     return m_pBase;
   }
 
@@ -182,18 +161,14 @@ namespace HadesMem
   // Get list of TLS callbacks
   std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
   {
-    // Callback list
     std::vector<PIMAGE_TLS_CALLBACK> Callbacks;
-
-    // Get NT headers
+    
     NtHeaders MyNtHeaders(m_PeFile);
-
-    // Get pointer to callback list
+    
     PIMAGE_TLS_CALLBACK* pCallbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(
       m_PeFile.RvaToVa(static_cast<DWORD>(GetAddressOfCallBacks() - 
       MyNtHeaders.GetImageBase())));
-
-    // Loop over all callbacks
+    
     for (PIMAGE_TLS_CALLBACK pCallback = m_Memory.Read<PIMAGE_TLS_CALLBACK>(
       pCallbacks); pCallback; pCallback = m_Memory.Read<PIMAGE_TLS_CALLBACK>(
       ++pCallbacks))
@@ -204,8 +179,7 @@ namespace HadesMem
         pCallbackRealTemp);
       Callbacks.push_back(pCallbackReal);
     }
-
-    // Return callback list
+    
     return Callbacks;
   }
 

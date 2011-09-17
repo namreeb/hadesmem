@@ -1,0 +1,984 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Section</title>
+<link rel="stylesheet" href="../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="up" href="../pelib.html" title="PeLib">
+<link rel="prev" href="pefile.html" title="PeFile">
+<link rel="next" href="tlsdir.html" title="TlsDir">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="pefile.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../pelib.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="tlsdir.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="hadesmem.reference.pelib.section"></a><a class="link" href="section.html" title="Section">Section</a>
+</h4></div></div></div>
+<a name="hadesmem.reference.pelib.section.synopsis"></a><h4>
+<a name="hadesmem.reference.pelib.section.synopsis-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.synopsis">Synopsis</a>
+        </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/PeLib/Section.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">Section</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+  
+  <span class="identifier">Section</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Number</span><span class="special">);</span>
+  
+  <span class="identifier">Section</span><span class="special">(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Section</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Section</span><span class="special">(</span><span class="identifier">Section</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Section</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Section</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">Section</span><span class="special">();</span>
+  
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">WORD</span> <span class="identifier">GetNumber</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetVirtualAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetVirtualSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetSizeOfRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetPointerToRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetPointerToRelocations</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetPointerToLinenumbers</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">WORD</span> <span class="identifier">GetNumberOfRelocations</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">WORD</span> <span class="identifier">GetNumberOfLinenumbers</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">void</span> <span class="identifier">SetName</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">void</span> <span class="identifier">SetVirtualAddress</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">VirtualAddress</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetVirtualSize</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">VirtualSize</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetSizeOfRawData</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">SizeOfRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetPointerToRawData</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetPointerToRelocations</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToRelocations</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetPointerToLinenumbers</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToLinenumbers</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetNumberOfRelocations</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">NumberOfRelocations</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetNumberOfLinenumbers</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">NumberOfLinenumbers</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">SectionList</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+  
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+  <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+  
+  <span class="keyword">explicit</span> <span class="identifier">SectionList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+  
+  <span class="identifier">SectionList</span><span class="special">(</span><span class="identifier">SectionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">SectionList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">SectionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+  
+  <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+  <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+</pre>
+<a name="hadesmem.reference.pelib.section.description"></a><h4>
+<a name="hadesmem.reference.pelib.section.description-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.description">Description</a>
+        </h4>
+<p>
+          The <code class="computeroutput"><span class="identifier">Section</span></code> class provides
+          functionality for working with the sections of a PE file.
+        </p>
+<p>
+          See the <a href="http://msdn.microsoft.com/en-us/windows/hardware/gg463119" target="_top">PE
+          and COFF Specification</a> for more information on working with the
+          PE file format.
+        </p>
+<p>
+          The <code class="computeroutput"><span class="identifier">SectionList</span></code> class provides
+          STL-compatible iterators for section enumeration.
+        </p>
+<a name="hadesmem.reference.pelib.section.section_public_types"></a><h4>
+<a name="hadesmem.reference.pelib.section.section_public_types-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_public_types">Section
+          public types</a>
+        </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+          Exception type thrown by <code class="computeroutput"><span class="identifier">Section</span></code>
+          methods when an error occurs.
+        </p>
+<a name="hadesmem.reference.pelib.section.section_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.pelib.section.section_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_public_construct_copy_destruct_move">Section
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.pelib.section.section_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_constructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_constructor">Section
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Section</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">WORD</span> <span class="identifier">Number</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">Section</span></code>
+                instance that refers to section number <code class="computeroutput"><span class="identifier">Number</span></code>
+                in the PE file.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_copy_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_copy_constructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_copy_constructor">Section
+          copy constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Section</span><span class="special">(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">Section</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_copy_assignment_operator-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_copy_assignment_operator">Section
+          copy assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Section</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as the other instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_move_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_move_constructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_move_constructor">Section
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Section</span><span class="special">(</span><span class="identifier">Section</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">Section</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_move_assignment_operator-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_move_assignment_operator">Section
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Section</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Section</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_destructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_destructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_destructor">Section
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">Section</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_public_member_functions"></a><h4>
+<a name="hadesmem.reference.pelib.section.section_public_member_functions-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_public_member_functions">Section
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getbase__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Base address of section header.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumber__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumber__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumber__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetNumber</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetNumber</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Section number.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getname__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.Name.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualaddress__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualaddress__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualaddress__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetVirtualAddress</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetVirtualAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.VirtualAddress.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualsize__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualsize__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getvirtualsize__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetVirtualSize</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetVirtualSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.Misc.VirtualSize.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getsizeofrawdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getsizeofrawdata__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getsizeofrawdata__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetSizeOfRawData</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetSizeOfRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.SizeOfRawData.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorawdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorawdata__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorawdata__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetPointerToRawData</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetPointerToRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.PointerToRawData.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorelocations__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorelocations__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertorelocations__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetPointerToRelocations</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetPointerToRelocations</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.PointerToRelocations.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertolinenumbers__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertolinenumbers__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getpointertolinenumbers__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetPointerToLinenumbers</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetPointerToLinenumbers</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.PointerToLinenumbers.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberofrelocations__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberofrelocations__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberofrelocations__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetNumberOfRelocations</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetNumberOfRelocations</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.NumberOfRelocations.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberoflinenumbers__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberoflinenumbers__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getnumberoflinenumbers__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetNumberOfLinenumbers</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetNumberOfLinenumbers</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.NumberOfLinenumbers.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">GetCharacteristics</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                IMAGE_SECTION_HEADER.Characteristics.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setname__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setname__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetName</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetName</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.Name.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd>
+<p>
+                Maximum string length is 8-characters.
+              </p>
+<p>
+                [Throws:
+              </p>
+<p>
+                Yes.
+              </p>
+</dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualaddress__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualaddress__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualaddress__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetVirtualAddress</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetVirtualAddress</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">VirtualAddress</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.VirtualAddress.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualsize__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualsize__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setvirtualsize__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetVirtualSize</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetVirtualSize</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">VirtualSize</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.Misc.VirtualSize.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setsizeofrawdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setsizeofrawdata__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setsizeofrawdata__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetSizeOfRawData</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetSizeOfRawData</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">SizeOfRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.SizeOfRawData.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorawdata__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorawdata__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorawdata__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetPointerToRawData</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetPointerToRawData</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.PointerToRawData.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorelocations__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorelocations__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertorelocations__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetPointerToRelocations</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetPointerToRelocations</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToRelocations</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.PointerToRelocations.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertolinenumbers__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertolinenumbers__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setpointertolinenumbers__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetPointerToLinenumbers</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetPointerToLinenumbers</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">PointerToLinenumbers</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.PointerToLinenumbers.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberofrelocations__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberofrelocations__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberofrelocations__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetNumberOfRelocations</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetNumberOfRelocations</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">NumberOfRelocations</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.NumberOfRelocations.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberoflinenumbers__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberoflinenumbers__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setnumberoflinenumbers__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetNumberOfLinenumbers</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetNumberOfLinenumbers</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">NumberOfLinenumbers</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.NumberOfLinenumbers.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">Section
+          member function <code class="computeroutput"><span class="identifier">SetCharacteristics</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets IMAGE_SECTION_HEADER.Characteristics.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_equality_operator"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_equality_operator-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_equality_operator">Section
+          equality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                the same section.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.section_inequality_operator"></a><h5>
+<a name="hadesmem.reference.pelib.section.section_inequality_operator-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.section_inequality_operator">Section
+          inequality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Section</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                a different section.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_types"></a><h4>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_types-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_public_types">SectionList
+          public types</a>
+        </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+          Exception type thrown by <code class="computeroutput"><span class="identifier">SectionList</span></code>
+          methods when an error occurs.
+        </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
+<span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
+</pre>
+<p>
+          Iterator type for section list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
+          concept. Implementation type unspecified.
+        </p>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_public_construct_copy_destruct_move">SectionList
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.pelib.section.sectionlist_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_constructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_constructor">SectionList
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">SectionList</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">SectionList</span></code>
+                instance targetting the PE file specified by <code class="computeroutput"><span class="identifier">MyPeFile</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_move_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_move_constructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_move_constructor">SectionList
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">SectionList</span><span class="special">(</span><span class="identifier">SectionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">SectionList</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_move_assignment_operator-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_move_assignment_operator">SectionList
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">SectionList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">SectionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_destructor"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_destructor-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_destructor">SectionList
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">SectionList</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_member_functions"></a><h4>
+<a name="hadesmem.reference.pelib.section.sectionlist_public_member_functions-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_public_member_functions">SectionList
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__begin__phrase___code_">SectionList
+          member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                STL-compatible iterator or const_iterator for start of section list.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__end__phrase___code_">SectionList
+          member function <code class="computeroutput"><span class="identifier">end</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
+<span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                STL-compatible iterator or const_iterator for off-the-end of section
+                list.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">SectionList
+          member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                STL-compatible const_iterator for start of section list.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
+          <a class="link" href="section.html#hadesmem.reference.pelib.section.sectionlist_member_function__code__phrase_role__identifier__cend__phrase___code_">SectionList
+          member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                STL-compatible const_iterator for off-the-end of section list.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="pefile.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../pelib.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="tlsdir.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

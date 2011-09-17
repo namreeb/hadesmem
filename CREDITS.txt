@@ -1,8 +1,0 @@
-AsmJit - https://code.google.com/p/asmjit/
-BeaEngine - https://code.google.com/p/beaengine/
-Python - http://www.python.org/
-MMOwned - http://www.mmowned.com/
-GameDeception - http://www.gamedeception.net/content/
-Boost - http://www.boost.org/
-RapidXML - http://rapidxml.sourceforge.net/
-Equation Solution - http://www.equation.com/servlet/equation.cmd?call=fortran

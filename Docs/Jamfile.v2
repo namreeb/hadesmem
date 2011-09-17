@@ -36,6 +36,7 @@ boostbook standalone
     <xsl:param>boost.image.w=300
     <xsl:param>boost.image.h=100
     <xsl:param>generate.section.toc.level=3
-    <xsl:param>chunk.section.depth=2
+    <xsl:param>chunk.section.depth=3
     <xsl:param>chunk.first.sections=1
+    <xsl:param>toc.section.depth=4
   ;

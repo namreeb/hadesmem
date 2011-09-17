@@ -1,30 +1,16 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-// Hades
 #include <HadesMemory/PeLib/ImportDir.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 #include <HadesMemory/PeLib/DosHeader.hpp>
 
-// C++ Standard Library
 #include <vector>
 
 namespace HadesMem
@@ -83,16 +69,13 @@ namespace HadesMem
   // Whether import directory is valid
   bool ImportDir::IsValid() const
   {
-    // Get NT headers
     NtHeaders const MyNtHeaders(m_PeFile);
-
-    // Get import dir data
+    
     DWORD const DataDirSize(MyNtHeaders.GetDataDirectorySize(NtHeaders::
       DataDir_Import));
     DWORD const DataDirVa(MyNtHeaders.GetDataDirectoryVirtualAddress(
       NtHeaders::DataDir_Import));
-
-    // Import dir is valid if size and rva are valid
+    
     return DataDirSize && DataDirVa;
   }
 
@@ -110,13 +93,10 @@ namespace HadesMem
   // Get import directory base
   PVOID ImportDir::GetBase() const
   {
-    // Initialize base address if necessary
     if (!m_pBase)
     {
-      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-
-      // Get import dir data
+      
       DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
         DataDir_Import);
       DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
@@ -127,13 +107,11 @@ namespace HadesMem
           ErrorFunction("ImportDir::GetBase") << 
           ErrorString("PE file has no import directory."));
       }
-
-      // Init base address
+      
       m_pBase = static_cast<PIMAGE_IMPORT_DESCRIPTOR>(m_PeFile.RvaToVa(
         DataDirVa));
     }
-
-    // Return base address
+    
     return m_pBase;
   }
 

@@ -1,0 +1,1160 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>MemoryMgr</title>
+<link rel="stylesheet" href="../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="up" href="../core.html" title="Core">
+<link rel="prev" href="../core.html" title="Core">
+<link rel="next" href="module.html" title="Module">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../core.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="module.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="hadesmem.reference.core.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
+</h4></div></div></div>
+<a name="hadesmem.reference.core.memorymgr.synopsis"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.synopsis-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.synopsis">Synopsis</a>
+        </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">MemoryMgr</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
+    
+  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
+
+  <span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+    
+    <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+    
+    <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
+
+  <span class="keyword">enum</span> <span class="identifier">CallConv</span>
+  <span class="special">{</span>
+    <span class="identifier">CallConv_Default</span><span class="special">,</span> 
+    <span class="identifier">CallConv_CDECL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_STDCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_THISCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_FASTCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_X64</span>
+  <span class="special">};</span>
+
+  <span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">ReadString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="identifier">T</span> <span class="identifier">ReadList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">WriteString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+  <span class="keyword">void</span> <span class="identifier">WriteList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">CanWrite</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">IsGuard</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD</span> <span class="identifier">ProtectRegion</span><span class="special">(</span><span class="identifier">LPVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">Alloc</span><span class="special">(</span><span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Params</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
+
+<span class="keyword">void</span> <span class="identifier">GetSeDebugPrivilege</span><span class="special">();</span>
+
+<span class="keyword">class</span> <span class="identifier">AllocAndFree</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemoryMgr</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">);</span>
+
+  <span class="special">~</span><span class="identifier">AllocAndFree</span><span class="special">();</span>
+  
+  <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+<span class="keyword">protected</span><span class="special">:</span>
+  <span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
+  <span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
+<span class="special">};</span>
+</pre>
+<a name="hadesmem.reference.core.memorymgr.description"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.description-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.description">Description</a>
+        </h4>
+<p>
+          The MemoryMgr class provides the most basic memory hacking functionality,
+          and is the basis on which all other HadesMem components are built.
+        </p>
+<p>
+          Free functions are provided for other common basic operations which are
+          not specific to a remote process.
+        </p>
+<p>
+          The AllocAndFree class is an RAII wrapper for remote memory allocation.
+        </p>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_types"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_types-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_types">MemoryMgr
+          public types</a>
+        </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+          Exception type thrown by <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+          methods when an error occurs.
+        </p>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span><span class="special">;</span>
+</pre>
+<p>
+          Type containing the return information of a remote function call. Exposes
+          integer and thread-local return values. Floating point return information
+          is currently unsupported. See `RemoteFunctionRet' documentation for more
+          information.
+        </p>
+<pre class="programlisting"><span class="keyword">enum</span> <span class="identifier">CallConv</span><span class="special">;</span>
+</pre>
+<p>
+          Calling conventions for remote function caller. All calling conventions
+          follow Microsoft specifications. Other compilers and custom calling conventions
+          are currently unsupported.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+              CallConv_Default - Default calling convention. Equivalent to <code class="computeroutput"><span class="identifier">CallConv_STDCALL</span></code> on x86 and <code class="computeroutput"><span class="identifier">CallConv_X64</span></code> on x64.
+            </li>
+<li class="listitem">
+              CallConv_CDECL - <a href="http://msdn.microsoft.com/en-us/library/zkwh89ks.aspx" target="_top">__cdecl</a>
+              calling convention.
+            </li>
+<li class="listitem">
+              CallConv_STDCALL - <a href="http://msdn.microsoft.com/en-us/library/zxk0tw93.aspx" target="_top">__stdcall</a>
+              calling convention.
+            </li>
+<li class="listitem">
+              CallConv_THISCALL - <a href="http://msdn.microsoft.com/en-us/library/ek8tkfbw.aspx" target="_top">__thiscall</a>
+              calling convention.
+            </li>
+<li class="listitem">
+              CallConv_FASTCALL - <a href="http://msdn.microsoft.com/en-us/library/6xa169sk.aspx" target="_top">__fastcall</a>
+              calling convention.
+            </li>
+<li class="listitem">
+              CallConv_X64 - <a href="http://msdn.microsoft.com/en-us/library/ms235286.aspx" target="_top">x64</a>
+              calling convention.
+            </li>
+</ul></div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor">MemoryMgr
+          process ID constructor</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+                instance that refers to the specified process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_constructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_constructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_constructor">MemoryMgr
+          copy constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+                that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator">MemoryMgr
+          copy assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as the other instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_move_constructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_move_constructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_constructor">MemoryMgr
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+                that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator">MemoryMgr
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_destructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_destructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_destructor">MemoryMgr
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_member_functions"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_public_member_functions-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_member_functions">MemoryMgr
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">Call</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Calls a function at <code class="computeroutput"><span class="identifier">Address</span></code>,
+                using calling convention <code class="computeroutput"><span class="identifier">MyCallConv</span></code>,
+                with the arguments <code class="computeroutput"><span class="identifier">Args</span></code>.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                A <code class="computeroutput"><span class="identifier">RemoteFunctionRet</span></code>
+                instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                All arguments must be equivalent to integer arguments, with a size
+                equal to or less than the native pointer size of the platform. Floating
+                point arguments are unsupported.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">Read</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+                constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be a POD type.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">ReadString</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">ReadString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+                constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+                Reads individual characters until a null is encountered.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+                <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">basic_string</span><span class="special">&lt;</span><span class="identifier">CharT</span><span class="special">,</span>
+                <span class="identifier">U</span><span class="special">,</span>
+                <span class="identifier">V</span><span class="special">&gt;</span></code>,
+                where <code class="computeroutput"><span class="identifier">CharT</span></code> is a
+                POD character type, <code class="computeroutput"><span class="identifier">U</span></code>
+                is an optional character traits class, and <code class="computeroutput"><span class="identifier">V</span></code>
+                is an optional allocator. String is read as if it is a C-style character
+                array.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">ReadList</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="identifier">T</span> <span class="identifier">ReadList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Instance of type <code class="computeroutput"><span class="identifier">T</span></code>
+                constructed from memory at <code class="computeroutput"><span class="identifier">Address</span></code>.
+                Reads <code class="computeroutput"><span class="identifier">Size</span></code> items
+                from <code class="computeroutput"><span class="identifier">Address</span></code> and
+                stores them in a <code class="computeroutput"><span class="identifier">T</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+                <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">U</span><span class="special">,</span> <span class="identifier">A</span><span class="special">&gt;</span></code>,
+                where <code class="computeroutput"><span class="identifier">U</span></code> is a POD
+                type, and <code class="computeroutput"><span class="identifier">A</span></code> is an
+                optional allocator. List is read as if it is a C-style array.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">Write</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">Write</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be a POD type.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">WriteString</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">WriteString</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+                <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">basic_string</span><span class="special">&lt;</span><span class="identifier">CharT</span><span class="special">,</span>
+                <span class="identifier">U</span><span class="special">,</span>
+                <span class="identifier">V</span><span class="special">&gt;</span></code>,
+                where <code class="computeroutput"><span class="identifier">CharT</span></code> is a
+                POD character type, <code class="computeroutput"><span class="identifier">U</span></code>
+                is an optional character traits class, and <code class="computeroutput"><span class="identifier">V</span></code>
+                is an optional allocator. <code class="computeroutput"><span class="identifier">Data</span></code>
+                is written as a C-style character array.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">WriteList</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
+<span class="keyword">void</span> <span class="identifier">WriteList</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">T</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Writes <code class="computeroutput"><span class="identifier">Data</span></code> to <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">T</span></code> must be of type
+                <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">U</span><span class="special">,</span> <span class="identifier">A</span><span class="special">&gt;</span></code>,
+                where <code class="computeroutput"><span class="identifier">U</span></code> is a POD
+                type, and <code class="computeroutput"><span class="identifier">A</span></code> is an
+                optional allocator. <code class="computeroutput"><span class="identifier">Data</span></code>
+                is written as a C-style array.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">CanRead</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether memory region at <code class="computeroutput"><span class="identifier">Address</span></code>
+                is readable.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">CanWrite</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanWrite</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether memory region at <code class="computeroutput"><span class="identifier">Address</span></code>
+                is writable.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">CanExecute</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanExecute</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether memory region at <code class="computeroutput"><span class="identifier">Address</span></code>
+                is executable.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">IsGuard</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsGuard</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether memory region at <code class="computeroutput"><span class="identifier">Address</span></code>
+                is a guard page.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">ProtectRegion</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">ProtectRegion</span><span class="special">(</span><span class="identifier">LPVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Protect memory region at <code class="computeroutput"><span class="identifier">Address</span></code>
+                with protection <code class="computeroutput"><span class="identifier">Protect</span></code>.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Previous protection at <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">Alloc</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">Alloc</span><span class="special">(</span><span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Allocate memory region with size <code class="computeroutput"><span class="identifier">Size</span></code>.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Base address of memory region.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">Free</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Free memory region at address <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">FlushCache</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Flush instruction cache at address <code class="computeroutput"><span class="identifier">Address</span></code>
+                with size <code class="computeroutput"><span class="identifier">Size</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">GetProcessId</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Process ID of target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">GetProcessHandle</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Process handle to target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">GetProcessPath</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Path to target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_">MemoryMgr
+          member function <code class="computeroutput"><span class="identifier">IsProcessWoW64</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether process is running under WoW64.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_equality_operator"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_equality_operator-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_equality_operator">MemoryMgr
+          equality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                the same process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_inequality_operator"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr_inequality_operator-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_inequality_operator">MemoryMgr
+          inequality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                a different process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.free_functions"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.free_functions-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_functions">Free functions</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_">Free
+          function <code class="computeroutput"><span class="identifier">CreateProcess</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">CommandLine</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
+
+<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:1:</span></dt>
+<dd><p>
+                Create process from binary at <code class="computeroutput"><span class="identifier">Path</span></code>
+                with optional command line <code class="computeroutput"><span class="identifier">CommandLine</span></code>
+                and optional working dir <code class="computeroutput"><span class="identifier">WorkingDir</span></code>.
+              </p></dd>
+<dt><span class="term">Effects:2:</span></dt>
+<dd><p>
+                Create process from binary at <code class="computeroutput"><span class="identifier">Path</span></code>
+                with optional argument list <code class="computeroutput"><span class="identifier">Args</span></code>
+                and optional working dir <code class="computeroutput"><span class="identifier">WorkingDir</span></code>.
+                Command line generation is handled by the API to ensure correct quoting
+                as per <a href="http://goo.gl/t4ERU" target="_top">this</a> article.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Memory manager instance for new process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_">Free
+          function <code class="computeroutput"><span class="identifier">GetSeDebugPrivilege</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">GetSeDebugPrivilege</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets the <a href="http://msdn.microsoft.com/en-us/library/bb530716.aspx" target="_top">SeDebugPrivilege</a>
+                on the calling process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                Requires the caller to be running with administrator credentials.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_constructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_constructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_constructor">AllocAndFree
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemoryMgr</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Allocates memory block of size <code class="computeroutput"><span class="identifier">Size</span></code>
+                using the <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+                object <code class="computeroutput"><span class="identifier">MyMemoryMgr</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_move_constructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_move_constructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_constructor">AllocAndFree
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">AllocAndFree</span></code>
+                that refers to the same memory as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator">AllocAndFree
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same memory as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_destructor"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_destructor-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_destructor">AllocAndFree
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">AllocAndFree</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Frees the remote memory block (unless already freed manually).
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No. Exceptions thrown when freeing the memor will be swallowed.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_public_member_functions"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_public_member_functions-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_member_functions">AllocAndFree
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_">AllocAndFree
+          member function <code class="computeroutput"><span class="identifier">Free</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Free</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Frees the remote memory block (unless already freed manually).
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_">AllocAndFree
+          member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Base address of remote memory block.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_">AllocAndFree
+          member function <code class="computeroutput"><span class="identifier">GetSize</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Size of remote memory block.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions"></a><h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions">MemoryMgr::RemoteFunctionRet
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_">MemoryMgr::RemoteFunctionRet
+          member function <code class="computeroutput"><span class="identifier">GetReturnValue</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                The integer return value for the remote function in the native pointer
+                size for the platform.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_">MemoryMgr::RemoteFunctionRet
+          member function <code class="computeroutput"><span class="identifier">GetReturnValue64</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                The 64-bit integer return value for the remote function.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                Same as GetReturnValue on x64.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_-heading"></a>
+          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_">MemoryMgr::RemoteFunctionRet
+          member function <code class="computeroutput"><span class="identifier">GetLastError</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                The last error code for the remote function. Equivalent to calling
+                the Windows API <code class="computeroutput"><span class="identifier">GetLastError</span></code>
+                in the context of the target process after the function call.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../core.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="module.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

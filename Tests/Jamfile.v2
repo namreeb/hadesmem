@@ -14,16 +14,19 @@ project
     <toolset>gcc:<cxxflags>-pedantic-errors 
     <library>/Memory//Memory 
     <library>/boost//thread/<link>static 
-    <library>/boost//unit_test_framework/<link>shared 
+    <library>/boost//unit_test_framework/<link>static 
     <toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
   ;
 
 test-suite Memory
   :
     [ run Detail/ProcessTest.cpp ]
+    [ run FindPatternTest.cpp ]
     [ run MemoryMgrTest.cpp ]
     [ run ModuleTest.cpp ]
     [ run InjectorTest.cpp ]
+    [ run RegionTest.cpp ]
+    [ run Experimental/ManualMapTest.cpp : : : <toolset>msvc:<linkflags>/NXCOMPAT:NO ]
     [ run PeLib/DosHeaderTest.cpp ]
     [ run PeLib/ExportDirTest.cpp ]
     [ run PeLib/ImportDirTest.cpp ]

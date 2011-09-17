@@ -1,33 +1,18 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 #pragma once
 
-// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 
-// C++ Standard Library
 #include <string>
 #include <vector>
 
-// Windows API
 #include <Windows.h>
 
 namespace HadesMem
@@ -91,17 +76,35 @@ namespace HadesMem
   class CreateAndInjectData
   {
   public:
+    // Constructor
     CreateAndInjectData(MemoryMgr const& MyMemory, HMODULE Module, 
       DWORD_PTR ExportRet, DWORD ExportLastError);
-    
+      
+    // Copy constructor
     CreateAndInjectData(CreateAndInjectData const& Other);
     
+    // Copy assignment operator
+    CreateAndInjectData& operator=(CreateAndInjectData const& Other);
+    
+    // Move constructor
+    CreateAndInjectData(CreateAndInjectData&& Other);
+    
+    // Move assignment operator
+    CreateAndInjectData& operator=(CreateAndInjectData&& Other);
+    
+    // Destructor
+    ~CreateAndInjectData();
+    
+    // Get memory instance
     MemoryMgr GetMemoryMgr() const;
     
+    // Get module handle
     HMODULE GetModule() const;
     
+    // Get export return value
     DWORD_PTR GetExportRet() const;
     
+    // Get export last error code
     DWORD GetExportLastError() const;
     
   private:

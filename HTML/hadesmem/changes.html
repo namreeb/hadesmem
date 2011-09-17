@@ -4,8 +4,8 @@
 <title>Changes</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.3.0">
-<link rel="up" href="../index.html" title="HadesMem 1.3.0">
+<link rel="home" href="../index.html" title="HadesMem 1.5.0">
+<link rel="up" href="../index.html" title="HadesMem 1.5.0">
 <link rel="prev" href="lic.html" title="License">
 <link rel="next" href="building.html" title="Building">
 </head>
@@ -19,6 +19,139 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.changes"></a><a class="link" href="changes.html" title="Changes">Changes</a>
 </h2></div></div></div>
+<a name="hadesmem.changes.v1_5_0"></a><h4>
+<a name="hadesmem.changes.v1_5_0-heading"></a>
+      <a class="link" href="changes.html#hadesmem.changes.v1_5_0">v1.5.0</a>
+    </h4>
+<p>
+      <span class="bold"><strong>New Features</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Added new <code class="computeroutput"><span class="identifier">FindPattern</span></code> APIs.
+        </li>
+<li class="listitem">
+          Added <code class="computeroutput"><span class="identifier">Export</span><span class="special">::</span><span class="identifier">IsForwardedByOrdinal</span></code> and <code class="computeroutput"><span class="identifier">Export</span><span class="special">::</span><span class="identifier">GetForwarderOrdinal</span></code>.
+        </li>
+</ul></div>
+<p>
+      <span class="bold"><strong>Bug Fixes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Fixed bug in MemoryMgr::CanRead, MemoryMgr::CanWrite, and MemoryMgr::CanExecute
+          that was causing failures in Region unit tests. Attempts to read/write/execute
+          memory marked as MEM_RESERVE (and not MEM_COMMIT) will fail, so check it
+          explicitly.
+        </li>
+<li class="listitem">
+          Support API Set Schema redirection in <code class="computeroutput"><span class="identifier">ManualMap</span></code>.
+          Fixes various failures under Windows 7.
+        </li>
+<li class="listitem">
+          Various minor bug fixes to <code class="computeroutput"><span class="identifier">ManualMap</span></code>.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now attempts
+          to load modules at their preferred base address. Fixes some issues with
+          images without relocation data.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now bumps the
+          load count of dependent modules. Fixes rare issue where dependent module
+          is unloaded by target application.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now correctly
+          writes the entire PE headers to memory rather than just selected structures.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now implements
+          correct path resolution (minus manifest/sxs redirection).
+        </li>
+</ul></div>
+<p>
+      <span class="bold"><strong>Changes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now uses existing
+          instances of DLLs loaded in the target where possible, rather than giving
+          private copies of every module. Done because of stability issues when mapping
+          certain system DLLs which can't be properly initialized more than once
+          per process.
+        </li>
+<li class="listitem">
+          Allow HadesMem to be built targetting Windows 2000 SP4. Please note that
+          this platform is still not officially supported, I'm just making it an
+          'unofficial' option.
+        </li>
+<li class="listitem">
+          Refactored 'ManualMap'.
+        </li>
+</ul></div>
+<a name="hadesmem.changes.v1_4_0"></a><h4>
+<a name="hadesmem.changes.v1_4_0-heading"></a>
+      <a class="link" href="changes.html#hadesmem.changes.v1_4_0">v1.4.0</a>
+    </h4>
+<p>
+      <span class="bold"><strong>New Features</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Added new <code class="computeroutput"><span class="identifier">Region</span></code> APIs.
+        </li>
+<li class="listitem">
+          Added name based constructor for <code class="computeroutput"><span class="identifier">Export</span></code>.
+        </li>
+</ul></div>
+<p>
+      <span class="bold"><strong>Bug Fixes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Fixed handling of forwarded exports in <code class="computeroutput"><span class="identifier">ManualMap</span></code>.
+        </li>
+<li class="listitem">
+          Fixed case-sensitivity of module caching/detection in <code class="computeroutput"><span class="identifier">ManualMap</span></code>.
+        </li>
+<li class="listitem">
+          Fixes case where image contained bound imports and <code class="computeroutput"><span class="identifier">ManualMap</span></code>
+          stopped. Import bindings are now ignored and reprocessed manually.
+        </li>
+<li class="listitem">
+          Fixed import processing to use the OriginalFirstThunk list for parsing,
+          and the FirstThunk list for binding. Fixes x64 import processing.
+        </li>
+<li class="listitem">
+          Fixed <code class="computeroutput"><span class="identifier">Export</span><span class="special">::</span><span class="identifier">GetForwarderFunction</span></code>. Was incorrectly
+          including the delimiter in the string.
+        </li>
+</ul></div>
+<p>
+      <span class="bold"><strong>Changes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          All dependencies are now statically linked.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">ManualMap</span></code> now manually
+          maps all dependencies regardless of whether they already exist in the process
+          or not. The only exception to this is NTDLL, which cannot be mapped twice
+          due to conflicts when calling LdrInitializeThunk.
+        </li>
+<li class="listitem">
+          Make <code class="computeroutput"><span class="identifier">ManualMap</span></code> test target
+          a more difficult module.
+        </li>
+<li class="listitem">
+          Update Boost to latest trunk.
+        </li>
+<li class="listitem">
+          Update BeaEngine to latest trunk.
+        </li>
+</ul></div>
 <a name="hadesmem.changes.v1_3_0"></a><h4>
 <a name="hadesmem.changes.v1_3_0-heading"></a>
       <a class="link" href="changes.html#hadesmem.changes.v1_3_0">v1.3.0</a>
@@ -58,8 +191,8 @@
         </li>
 <li class="listitem">
           Added experimental <code class="computeroutput"><span class="identifier">ManualMap</span></code>
-          API. Subject to change and availability, not for production use, heavy
-          restrictions (please read docs).
+          API. Subject to change and availability, not for production use. Currently
+          undocumented.
         </li>
 <li class="listitem">
           Added experimental manual mapping example program.
@@ -70,10 +203,16 @@
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
-          Added <code class="computeroutput"><span class="identifier">Module</span></code> (and <code class="computeroutput"><span class="identifier">Injector</span></code>) to Memory.hpp.
+          Added missing headers to Memory.hpp.
         </li>
 <li class="listitem">
           Fixed Boost build scripts.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">ReadString</span></code>, <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">ReadList</span></code>,
+          <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">WriteString</span></code>, and <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">WriteList</span></code>
+          now support custom allocators and traits classes (where appliciable) for
+          the containers passed as template arguments.
         </li>
 </ul></div>
 <p>
@@ -81,10 +220,24 @@
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
+          HadesMem is now licensed under the <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">Boost
+          Software License</a>. This is a far more permissive license than the
+          previous one (the GNU GPL v3). Please review the new license before use.
+        </li>
+<li class="listitem">
           Improved <code class="computeroutput"><span class="identifier">Module</span></code> tests.
         </li>
 <li class="listitem">
           Improved documentation.
+        </li>
+<li class="listitem">
+          Updated Boost.
+        </li>
+<li class="listitem">
+          Removed unnecessary template metaprogramming from <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">ReadString</span></code>,
+          <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">ReadList</span></code>, <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">WriteString</span></code>,
+          and <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">WriteList</span></code>. Now using static assertions
+          instead.
         </li>
 </ul></div>
 <a name="hadesmem.changes.v1_2_0"></a><h4>
@@ -190,8 +343,9 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce (aka RaptorFactor)<p>
-        Distributed under the GNU GPL v3. See accompanying file LICENSE.txt.
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>
 </div></td>
 </tr></table>

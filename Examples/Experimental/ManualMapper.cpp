@@ -1,21 +1,9 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 // C++ Standard Library
 #include <string>
@@ -27,6 +15,7 @@ along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/timer.hpp>
 #include <boost/format.hpp>
 #include <boost/version.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
 // Windows
@@ -171,15 +160,16 @@ int wmain(int argc, wchar_t* argv[])
     // Create manual mapper
     HadesMem::ManualMap const MyManualMapper(MyMemory);
     
-    // Inject DLL
-    PVOID ModRemote = MyManualMapper.InjectDll(ModulePath, Export);
+    // Manually map DLL
+    PVOID const ModRemote = MyManualMapper.InjectDll(ModulePath.native(), 
+      Export);
     
-    std::wcout << "Module successfully injected. Base = " << ModRemote << 
+    std::wcout << "Module successfully mapped. Base = " << ModRemote << 
       ".\n";
   }
   catch (std::exception const& e)
   {
-    std::cerr << boost::diagnostic_information(e) << std::endl;
+    std::cout << boost::diagnostic_information(e) << "\n";
   }
   
   // Print elapsed time

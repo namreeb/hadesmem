@@ -1,0 +1,787 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>FindPattern</title>
+<link rel="stylesheet" href="../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="up" href="../core.html" title="Core">
+<link rel="prev" href="region.html" title="Region">
+<link rel="next" href="../pelib.html" title="PeLib">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="../pelib.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="hadesmem.reference.core.findpattern"></a><a class="link" href="findpattern.html" title="FindPattern">FindPattern</a>
+</h4></div></div></div>
+<a name="hadesmem.reference.core.findpattern.synopsis"></a><h4>
+<a name="hadesmem.reference.core.findpattern.synopsis-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.synopsis">Synopsis</a>
+        </h4>
+<pre class="programlisting"> <span class="comment">// In header: &lt;HadesMemory/FindPattern.hpp&gt;</span>
+ 
+ <span class="keyword">class</span> <span class="identifier">FindPattern</span>
+ <span class="special">{</span>
+ <span class="keyword">public</span><span class="special">:</span>
+   <span class="keyword">friend</span> <span class="keyword">class</span> <span class="identifier">Pattern</span><span class="special">;</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
+   <span class="special">{</span> <span class="special">};</span>
+   
+   <span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> 
+     <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
+   
+   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
+   
+   <span class="keyword">enum</span> <span class="identifier">FindFlags</span>
+   <span class="special">{</span>
+     <span class="identifier">FindFlags_None</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> 
+     <span class="identifier">FindFlags_ThrowOnUnmatch</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span> 
+     <span class="identifier">FindFlags_RelativeAddress</span> <span class="special">=</span> <span class="number">2</span><span class="special">,</span> 
+     <span class="identifier">FindFlags_ScanData</span> <span class="special">=</span> <span class="number">4</span>
+   <span class="special">};</span>
+   
+   <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+     <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   
+   <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
+     <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
+   
+   <span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+   
+   <span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   
+   <span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
+   
+   <span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
+   
+   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   
+   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+ <span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">Pattern</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+    <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
+  
+  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+    <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
+   
+   <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+   
+   <span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
+  
+  <span class="keyword">void</span> <span class="identifier">Save</span><span class="special">();</span>
+  
+  <span class="keyword">void</span> <span class="identifier">Update</span><span class="special">(</span><span class="identifier">PBYTE</span> <span class="identifier">Address</span><span class="special">);</span>
+  
+  <span class="identifier">PBYTE</span> <span class="identifier">GetAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">MemoryMgr</span> <span class="identifier">GetMemory</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">GetFlags</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">namespace</span> <span class="identifier">PatternManipulators</span>
+<span class="special">{</span>
+   <span class="keyword">class</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="comment">/*Pat*/</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+     
+		<span class="keyword">friend</span> <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">,</span> 
+		  <span class="identifier">Manipulator</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Manip</span><span class="special">);</span>
+   <span class="special">};</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Save</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   <span class="special">};</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Add</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="keyword">explicit</span> <span class="identifier">Add</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+     
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   <span class="special">};</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Sub</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="keyword">explicit</span> <span class="identifier">Sub</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+     
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   <span class="special">};</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Lea</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   <span class="special">};</span>
+   
+   <span class="keyword">class</span> <span class="identifier">Rel</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+   <span class="special">{</span>
+   <span class="keyword">public</span><span class="special">:</span>
+     <span class="identifier">Rel</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+     
+     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+   <span class="special">};</span>
+<span class="special">}</span>
+</pre>
+<a name="hadesmem.reference.core.findpattern.description"></a><h4>
+<a name="hadesmem.reference.core.findpattern.description-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.description">Description</a>
+        </h4>
+<p>
+          The FindPattern class pattern scanning functionality, both 'manually' and
+          from a pattern file (either in memory or on disk).
+        </p>
+<p>
+          The Pattern class represents a single pattern, and is a wrapper around
+          the FindPattern functionality. It also proivdes support for <code class="computeroutput"><span class="identifier">manually</span></code> finding more complex patterns
+          which require manipulators (manipulators are also available in pattern
+          files). Manipulators have an overloaded output stream operator to facilitate
+          manipulator chaining.
+        </p>
+<p>
+          The PatternManipulators namespace contains all pattern manipulators. Supported
+          manipulators are: Save, Add, Sub, Lea, Rel.
+        </p>
+<p>
+          Patterns are of the format: 
+</p>
+<pre class="programlisting"><span class="identifier">HadesMem</span> <span class="identifier">Patterns</span> <span class="special">(</span><span class="identifier">Flags</span><span class="special">)</span>
+<span class="special">{</span> <span class="identifier">Name1</span><span class="special">,</span> <span class="identifier">Data1</span><span class="special">|</span><span class="identifier">WildCard1</span><span class="special">,</span> <span class="identifier">Data2</span><span class="special">|</span><span class="identifier">WildCard2</span><span class="special">,</span> <span class="special">...</span> <span class="identifier">DataN</span><span class="special">|</span><span class="identifier">WildCardN</span> <span class="special">}</span>
+<span class="special">[</span> <span class="identifier">Manipulator1</span><span class="special">,</span> <span class="identifier">Arg1</span><span class="special">,</span> <span class="identifier">Arg2</span><span class="special">,</span> <span class="special">...,</span> <span class="identifier">ArgN</span> <span class="special">]</span>
+<span class="special">[</span> <span class="identifier">Manipulator2</span><span class="special">,</span> <span class="identifier">Arg1</span><span class="special">,</span> <span class="identifier">Arg2</span><span class="special">,</span> <span class="special">...,</span> <span class="identifier">ArgN</span> <span class="special">]</span>
+<span class="special">{</span> <span class="identifier">Name2</span><span class="special">,</span> <span class="identifier">Data1</span><span class="special">|</span><span class="identifier">WildCard1</span><span class="special">,</span> <span class="identifier">Data2</span><span class="special">|</span><span class="identifier">WildCard2</span><span class="special">,</span> <span class="special">...</span> <span class="identifier">DataN</span><span class="special">|</span><span class="identifier">WildCardN</span> <span class="special">}</span>
+<span class="special">[</span> <span class="identifier">Manipulator1</span><span class="special">,</span> <span class="identifier">Arg1</span><span class="special">,</span> <span class="identifier">Arg2</span><span class="special">,</span> <span class="special">...,</span> <span class="identifier">ArgN</span> <span class="special">]</span>
+<span class="special">[</span> <span class="identifier">Manipulator2</span><span class="special">,</span> <span class="identifier">Arg1</span><span class="special">,</span> <span class="identifier">Arg2</span><span class="special">,</span> <span class="special">...,</span> <span class="identifier">ArgN</span> <span class="special">]</span>
+</pre>
+<p>
+        </p>
+<p>
+          Example: 
+</p>
+<pre class="programlisting"><span class="identifier">HadesMem</span> <span class="identifier">Patterns</span> <span class="special">(</span><span class="identifier">RelativeAddress</span><span class="special">,</span> <span class="identifier">ThrowOnUnmatch</span><span class="special">)</span>
+<span class="special">{</span> <span class="identifier">First</span> <span class="identifier">Call</span><span class="special">,</span> <span class="identifier">E8</span> <span class="special">}</span>
+<span class="special">[</span> <span class="identifier">Add</span><span class="special">,</span> <span class="number">1</span> <span class="special">]</span>
+<span class="special">[</span> <span class="identifier">Rel</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="number">1</span> <span class="special">]</span>
+<span class="special">{</span> <span class="identifier">Zeros</span> <span class="identifier">New</span><span class="special">,</span> <span class="number">00</span> <span class="special">??</span> <span class="number">00</span> <span class="special">}</span>
+<span class="special">[</span> <span class="identifier">Add</span><span class="special">,</span> <span class="number">1</span> <span class="special">]</span>
+<span class="special">[</span> <span class="identifier">Sub</span><span class="special">,</span> <span class="number">1</span> <span class="special">]</span>
+<span class="special">{</span> <span class="identifier">Nop</span> <span class="identifier">Other</span><span class="special">,</span> <span class="number">90</span> <span class="special">}</span>
+</pre>
+<p>
+        </p>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_types"></a><h4>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_types-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_types">FindPattern
+          public types</a>
+        </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+          Exception type thrown by <code class="computeroutput"><span class="identifier">FindPattern</span></code>
+          methods when an error occurs.
+        </p>
+<pre class="programlisting"><span class="keyword">enum</span> <span class="identifier">FindFlags</span><span class="special">;</span>
+</pre>
+<p>
+          Calling conventions for remote function caller. All calling conventions
+          follow Microsoft specifications. Other compilers and custom calling conventions
+          are currently unsupported.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+              FindFlags_None - No flags.
+            </li>
+<li class="listitem">
+              FindFlags_ThrowOnUnmatch - Throw an exception when a match can't be
+              found.
+            </li>
+<li class="listitem">
+              FindFlags_RelativeAddress - Resolve patterns to relative addresses.
+            </li>
+<li class="listitem">
+              FindFlags_ScanData - Scan the data section(s) of the target, instead
+              of the code section(s).
+            </li>
+</ul></div>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move">FindPattern
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.core.findpattern.findpattern_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_constructor">FindPattern
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">FindPattern</span></code>
+                instance that refers to the specified process and module (a null
+                module handle means the owner process).
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_copy_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_copy_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_constructor">FindPattern
+          copy constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">FindPattern</span></code>
+                that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator">FindPattern
+          copy assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as the other instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_move_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_move_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_constructor">FindPattern
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">FindPattern</span></code>
+                that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_move_assignment_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_assignment_operator">FindPattern
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_destructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_destructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_destructor">FindPattern
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_member_functions"></a><h4>
+<a name="hadesmem.reference.core.findpattern.findpattern_public_member_functions-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_member_functions">FindPattern
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_">FindPattern
+          member function <code class="computeroutput"><span class="identifier">Find</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+  <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+<span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
+  <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Attempts to find a match for pattern <code class="computeroutput"><span class="identifier">Data</span></code>,
+                with scan flags <code class="computeroutput"><span class="identifier">Flags</span></code>.
+                If specified, adds returned address to internal cache under name
+                <code class="computeroutput"><span class="identifier">Name</span></code>.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Address of matched pattern, or null of not found.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                <code class="computeroutput"><span class="identifier">Data</span></code> must be of the
+                format "XX XX ?? XX XX ??" where XX are hex bytes, and
+                '??' is a wildcard. Each hex byte or wildcard is separated by a space.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_">FindPattern
+          member function <code class="computeroutput"><span class="identifier">GetAddresses</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Copy of internal address 'cache' (name to pointer lookup).
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_subscript_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_subscript_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_subscript_operator">FindPattern
+          subscript operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Address of pattern match with name <code class="computeroutput"><span class="identifier">Name</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_">FindPattern
+          member function <code class="computeroutput"><span class="identifier">LoadFile</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Loads pattern file from <code class="computeroutput"><span class="identifier">Path</span></code>
+                and processes it.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                Pattern file must be of format described in the overview.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_">FindPattern
+          member function <code class="computeroutput"><span class="identifier">WriteString</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Loads pattern file from memory and processes it.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                Pattern file must be of format described in the overview.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_equality_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_equality_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_equality_operator">FindPattern
+          equality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                the same instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.findpattern_inequality_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.findpattern_inequality_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_inequality_operator">FindPattern
+          inequality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                a different instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move"></a><h4>
+<a name="hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move">Pattern
+          public construct/copy/destruct/move</a>
+        </h4>
+<a name="hadesmem.reference.core.findpattern.pattern_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_constructor">Pattern
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+  <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Wrapper around <code class="computeroutput"><span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">Find</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_name_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_name_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_name_constructor">Pattern
+          name constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+  <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Wrapper around <code class="computeroutput"><span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">Find</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_move_constructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_move_constructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_constructor">Pattern
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">Pattern</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_move_assignment_operator"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_move_assignment_operator-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_assignment_operator">Pattern
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_destructor"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_destructor-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_destructor">Pattern
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_public_member_functions"></a><h4>
+<a name="hadesmem.reference.core.findpattern.pattern_public_member_functions-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_member_functions">Pattern
+          public member functions</a>
+        </h4>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">Save</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Save</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Saves pattern back to parent.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">Update</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Update</span><span class="special">(</span><span class="identifier">PBYTE</span> <span class="identifier">Address</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Updates pattern with new address <code class="computeroutput"><span class="identifier">Address</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">GetAddress</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">PBYTE</span> <span class="identifier">GetAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Address of matched pattern.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">GetMemory</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">GetMemory</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Memory manager instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">GetFlags</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">GetFlags</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Scanning flags.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
+<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_">Pattern
+          member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Base address of target module.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="../pelib.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

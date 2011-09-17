@@ -1,33 +1,18 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
-
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
 #pragma once
 
-// Hades
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/Detail/Config.hpp>
 #include <HadesMemory/Detail/StringBuffer.hpp>
 
-// C++ Standard Library
 #include <string>
 
-// Boost
 #include <boost/lexical_cast.hpp>
 
 namespace boost
@@ -38,13 +23,11 @@ namespace boost
   inline std::string lexical_cast<std::string, std::wstring>(
     std::wstring const& Source)
   {
-    // Empty string optimization
     if (Source.empty())
     {
       return std::string();
     }
 
-    // Caluclate output buffer size
     int const OutSize = WideCharToMultiByte(CP_ACP, 0, Source.c_str(), -1, 
       nullptr, 0, nullptr, nullptr);
     if (!OutSize)
@@ -56,7 +39,6 @@ namespace boost
         HadesMem::ErrorCodeWinLast(LastError));
     }
     
-    // Convert wide string to narrow string
     std::string Dest;
     int const Result = WideCharToMultiByte(CP_ACP, 0, Source.c_str(), -1, 
       HadesMem::Detail::MakeStringBuffer(Dest, OutSize), OutSize, nullptr, 
@@ -70,7 +52,6 @@ namespace boost
         HadesMem::ErrorCodeWinLast(LastError));
     }
     
-    // Return new string
     return Dest;
   }
   
@@ -80,13 +61,11 @@ namespace boost
   inline std::wstring lexical_cast<std::wstring, std::string>(
     std::string const& Source)
   {
-    // Empty string optimization
     if (Source.empty())
     {
       return std::wstring();
     }
-
-    // Caluclate output buffer size
+    
     int const OutSize = MultiByteToWideChar(CP_ACP, 0, Source.c_str(), -1, 
       nullptr, 0);
     if (!OutSize)
@@ -98,7 +77,6 @@ namespace boost
         HadesMem::ErrorCodeWinLast(LastError));
     }
     
-    // Convert narrow string to wide string
     std::wstring Dest;
     int const Result = MultiByteToWideChar(CP_ACP, 0, Source.c_str(), -1, 
       HadesMem::Detail::MakeStringBuffer(Dest, OutSize), OutSize);
@@ -111,7 +89,6 @@ namespace boost
         HadesMem::ErrorCodeWinLast(LastError));
     }
     
-    // Return new string
     return Dest;
   }
   

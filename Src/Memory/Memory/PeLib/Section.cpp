@@ -1,29 +1,15 @@
-/*
-This file is part of HadesMem.
-Copyright (C) 2011 Joshua Boyce (a.k.a. RaptorFactor).
-<http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
+// Copyright Joshua Boyce 2011.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// This file is part of HadesMem.
+// <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-HadesMem is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-HadesMem is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with HadesMem.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-// Hades
 #include <HadesMemory/PeLib/Section.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 
-// C++ Standard Library
 #include <array>
 
 namespace HadesMem
@@ -90,38 +76,29 @@ namespace HadesMem
   // Get section header base
   PVOID Section::GetBase() const
   {
-    // Set base pointer on first request
     if (!m_pBase)
     {
-      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-
-      // Ensure section number is valid
       if (m_SectionNum >= MyNtHeaders.GetNumberOfSections())
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Section::GetBase") << 
           ErrorString("Invalid section number."));
       }
-
-      // Get raw NT headers
+      
       auto const NtHeadersRaw = m_Memory.Read<IMAGE_NT_HEADERS>(
         MyNtHeaders.GetBase());
-
-      // Get pointer to first section
+      
       PIMAGE_SECTION_HEADER pSectionHeader = 
         reinterpret_cast<PIMAGE_SECTION_HEADER>(static_cast<PBYTE>(
         MyNtHeaders.GetBase()) + FIELD_OFFSET(IMAGE_NT_HEADERS, 
         OptionalHeader) + NtHeadersRaw.FileHeader.SizeOfOptionalHeader);
-
-      // Adjust pointer to target section
+      
       pSectionHeader += m_SectionNum;
-
-      // Get base of section header
+      
       m_pBase = reinterpret_cast<PBYTE>(pSectionHeader);
     }
     
-    // Return cached pointer
     return m_pBase;
   }
   
@@ -134,19 +111,16 @@ namespace HadesMem
   // Get name
   std::string Section::GetName() const
   {
-    // Read RVA of module name
     PBYTE const pBase = static_cast<PBYTE>(GetBase());
     std::array<char, 8> const NameData(m_Memory.Read<std::array<char, 8>>(
       pBase + FIELD_OFFSET(IMAGE_SECTION_HEADER, Name)));
-
-    // Convert section name to string
+    
     std::string Name;
     for (std::size_t i = 0; i < 8 && NameData[i]; ++i)
     {
       Name += NameData[i];
     }
-
-    // Return section name
+    
     return Name;
   }
 
