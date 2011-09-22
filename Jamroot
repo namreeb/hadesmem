@@ -38,8 +38,9 @@ project Hades
     <define>_UNICODE 
     <define>STRICT 
     <define>WIN32_LEAN_AND_MEAN 
-    <define>_WIN32_WINNT=_WIN32_WINNT_WIN2K 
-    <define>WINVER=_WIN32_WINNT_WIN2K 
+    <define>NTDDI_VERSION=NTDDI_WINXP 
+    <define>_WIN32_WINNT=_WIN32_WINNT_WINXP 
+    <define>WINVER=_WIN32_WINNT_WINXP 
     <runtime-link>shared 
     <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 

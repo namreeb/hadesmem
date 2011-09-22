@@ -91,20 +91,8 @@ namespace HadesMem
       // Get WoW64 status of process and set member var
       void SetWoW64()
       {
-        typedef BOOL (WINAPI* tIsWow64Process)(HANDLE hProcess, 
-          PBOOL Wow64Process);
-        auto pIsWow64Process = reinterpret_cast<tIsWow64Process>(
-          GetProcAddress(GetModuleHandle(L"kernel32.dll"), "IsWow64Process"));
-        
-        // If IsWow64Process API doesn't exist, assume that the OS doesn't 
-        // support WoW64 and must be x86 only.
-        if (!pIsWow64Process)
-        {
-          m_IsWoW64 = FALSE;
-        }
-
         BOOL IsWoW64Me = FALSE;
-        if (!pIsWow64Process(GetCurrentProcess(), &IsWoW64Me))
+        if (!IsWow64Process(GetCurrentProcess(), &IsWoW64Me))
         {
           DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 
@@ -114,7 +102,7 @@ namespace HadesMem
         }
         
         BOOL IsWoW64 = FALSE;
-        if (!pIsWow64Process(*m_Handle, &IsWoW64))
+        if (!IsWow64Process(*m_Handle, &IsWoW64))
         {
           DWORD const LastError = GetLastError();
           BOOST_THROW_EXCEPTION(Error() << 

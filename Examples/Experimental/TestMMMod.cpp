@@ -13,7 +13,6 @@
 // Boost
 #ifdef HADES_MSVC
 #include <boost/thread.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/exception/all.hpp>
 #endif
 
@@ -24,6 +23,86 @@
 
 // Image base linker 'trick'
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+
+// Fixme: This entire module is a complete mess. Rewrite to move from 'PoC' 
+// quality to at least 'alpha' or 'beta' quality.
+
+typedef EXCEPTION_DISPOSITION
+(NTAPI *PEXCEPTION_ROUTINE_CUSTOM)(
+  struct _EXCEPTION_RECORD *ExceptionRecord,
+  PVOID EstablisherFrame,
+  struct _CONTEXT *ContextRecord,
+  PVOID DispatcherContext);
+  
+typedef struct _EXCEPTION_REGISTRATION_RECORD_CUSTOM
+{
+  struct _EXCEPTION_REGISTRATION_RECORD_CUSTOM *Next;
+  PEXCEPTION_ROUTINE_CUSTOM Handler;
+} EXCEPTION_REGISTRATION_RECORD_CUSTOM, *PEXCEPTION_REGISTRATION_RECORD_CUSTOM;
+
+typedef struct _DISPATCHER_CONTEXT
+{
+  PEXCEPTION_REGISTRATION_RECORD_CUSTOM RegistrationPointer;
+} DISPATCHER_CONTEXT, *PDISPATCHER_CONTEXT;
+
+#define EXCEPTION_CHAIN_END ((PEXCEPTION_REGISTRATION_RECORD_CUSTOM)-1)
+
+LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
+{
+#if defined(_M_AMD64) 
+  ExceptionInfo;
+  return EXCEPTION_CONTINUE_SEARCH;
+#elif defined(_M_IX86) 
+  PVOID pTeb = NtCurrentTeb();
+  if (!pTeb)
+  {
+    MessageBox(nullptr, L"TEB pointer invalid.", L"MMHelper", MB_OK);
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
+
+  PEXCEPTION_REGISTRATION_RECORD_CUSTOM pExceptionList = 
+    *reinterpret_cast<PEXCEPTION_REGISTRATION_RECORD_CUSTOM*>(pTeb);
+  if (!pExceptionList)
+  {
+    MessageBox(nullptr, L"Exception list pointer invalid.", L"MMHelper", 
+      MB_OK);
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
+
+  while (pExceptionList != EXCEPTION_CHAIN_END)
+  {
+    DISPATCHER_CONTEXT DispatcherContext = { 0 };
+
+    EXCEPTION_DISPOSITION Disposition = pExceptionList->Handler(
+      ExceptionInfo->ExceptionRecord, 
+      pExceptionList, 
+      ExceptionInfo->ContextRecord, 
+      &DispatcherContext);
+
+    switch (Disposition)
+    {
+    case ExceptionContinueExecution:
+      return EXCEPTION_CONTINUE_EXECUTION;
+
+    case ExceptionContinueSearch:
+      return EXCEPTION_CONTINUE_SEARCH;
+
+    case ExceptionNestedException:
+    case ExceptionCollidedUnwind:
+      std::abort();
+
+    default:
+      assert(!"Unknown exception disposition.");
+    }
+
+    pExceptionList = pExceptionList->Next;
+  }
+
+  return EXCEPTION_CONTINUE_SEARCH;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+}
 
 #pragma warning(push, 1)
 void TestSEH2()
@@ -57,6 +136,53 @@ void TestRelocs()
   MessageBox(nullptr, L"Testing relocations.", L"MMHelper", MB_OK);
 }
 
+void InitializeSEH()
+{
+#if defined(_M_AMD64) 
+  HadesMem::MemoryMgr MyMemory(GetCurrentProcessId());
+  HadesMem::PeFile MyPeFile(MyMemory, &__ImageBase);
+
+  HadesMem::DosHeader MyDosHeader(MyPeFile);
+  HadesMem::NtHeaders MyNtHeaders(MyPeFile);
+
+  DWORD ExceptDirSize = MyNtHeaders.GetDataDirectorySize(HadesMem::
+    NtHeaders::DataDir_Exception);
+  DWORD ExceptDirRva = MyNtHeaders.GetDataDirectoryVirtualAddress(
+    HadesMem::NtHeaders::DataDir_Exception);
+  if (!ExceptDirSize || !ExceptDirRva)
+  {
+    MessageBox(nullptr, L"Image has no exception directory.", 
+      L"MMHelper", MB_OK);
+    return;
+  }
+
+  PRUNTIME_FUNCTION pExceptDir = static_cast<PRUNTIME_FUNCTION>(
+    MyPeFile.RvaToVa(ExceptDirRva));
+  DWORD NumEntries = 0;
+  for (PRUNTIME_FUNCTION pExceptDirTemp = pExceptDir; pExceptDirTemp->
+    UnwindData; ++pExceptDirTemp)
+  {
+    ++NumEntries;
+  }
+
+  if (!RtlAddFunctionTable(pExceptDir, NumEntries, reinterpret_cast<DWORD_PTR>(
+    &__ImageBase)))
+  {
+    MessageBox(nullptr, L"Could not add function table.", L"MMHelper", MB_OK);
+    return;
+  }
+#elif defined(_M_IX86) 
+  // Add VCH
+  if (!AddVectoredContinueHandler(1, &VectoredHandler))
+  {
+    MessageBox(nullptr, L"Failed to add VCH.", L"MMHelper", MB_OK);
+  }
+
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+}
+
 void TestCPPEH()
 {
   try
@@ -81,7 +207,10 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
   {
     DebugBreak();
   }
-  
+
+  // Initialize exception handling support
+  InitializeSEH();
+
   // Test IAT
   MessageBox(nullptr, L"Testing IAT.", L"MMHelper", MB_OK);
 
@@ -89,23 +218,6 @@ extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
   boost::thread_specific_ptr<std::wstring> TlsTest;
   TlsTest.reset(new std::wstring(L"Testing TLS."));
   MessageBox(nullptr, TlsTest->c_str(), L"MMHelper", MB_OK);
-  
-  // Another TLS test
-  double d = 3.14;
-  d = fabs(d);
-  char buf[20];
-  ZeroMemory(&buf[0], sizeof(buf));
-  sprintf_s(buf, sizeof(buf), "%f", d);
-  MessageBoxA(nullptr, buf, "MMHelper", MB_OK);
-  
-  // One more TLS test
-  // FIXME: Check which OS versions this syntax is supported on and wrap in 
-  // version detection code if needed.
-  // FIXME: Add multi-threading test.
-  __declspec(thread) static int i = 0;
-  i = 50;
-  MessageBoxW(nullptr, boost::lexical_cast<std::wstring>(i).c_str(), 
-    L"MMHelper", MB_OK);
 
   // Test relocs
   typedef void (* tTestRelocs)();

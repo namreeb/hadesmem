@@ -13,8 +13,6 @@
 
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
-
 namespace HadesMem
 {
   // Constructor
@@ -334,7 +332,6 @@ namespace HadesMem
   }
 
   // Constructor
-  // FIXME: Refactor constructors to remove duplicated code.
   Export::Export(PeFile const& MyPeFile, DWORD Ordinal) 
     : m_PeFile(MyPeFile), 
     m_Memory(MyPeFile.GetMemoryMgr()), 
@@ -709,39 +706,6 @@ namespace HadesMem
   bool Export::Forwarded() const
   {
     return m_Forwarded;
-  }
-    
-  // If entry is forwarded by ordinal
-  bool Export::IsForwardedByOrdinal() const
-  {
-    return (GetForwarderFunction()[0] == '#');
-  }
-  
-  // Get forwarder function ordinal
-  WORD Export::GetForwarderOrdinal() const
-  {
-    if (IsForwardedByOrdinal())
-    {
-      WORD ForwarderOrdinal = 0;
-      
-      try
-      {
-        std::string const ForwarderFunction(GetForwarderFunction());
-        ForwarderOrdinal = boost::lexical_cast<WORD>(ForwarderFunction.substr(1));
-      }
-      catch (std::exception const& /*e*/)
-      {
-        BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-          ErrorFunction("Export::GetForwarderOrdinal") << 
-          ErrorString("Invalid forwarder ordinal detected."));
-      }
-      
-      return ForwarderOrdinal;
-    }
-    
-    BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-      ErrorFunction("Export::GetForwarderOrdinal") << 
-      ErrorString("Function is not exported by ordinal."));
   }
   
   // Equality operator

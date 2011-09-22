@@ -161,15 +161,14 @@ int wmain(int argc, wchar_t* argv[])
     HadesMem::ManualMap const MyManualMapper(MyMemory);
     
     // Manually map DLL
-    PVOID const ModRemote = MyManualMapper.InjectDll(ModulePath.native(), 
-      Export);
+    PVOID ModRemote = MyManualMapper.InjectDll(ModulePath.native(), Export);
     
     std::wcout << "Module successfully mapped. Base = " << ModRemote << 
       ".\n";
   }
   catch (std::exception const& e)
   {
-    std::cout << boost::diagnostic_information(e) << "\n";
+    std::cerr << boost::diagnostic_information(e) << std::endl;
   }
   
   // Print elapsed time
