@@ -7,16 +7,20 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/Detail/EnsureCleanup.hpp>
 
+// C++ Standard Library
 #include <string>
 #include <vector>
 
+// Boost
 #include <boost/optional.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
+// Windows API
 #include <Windows.h>
 #include <TlHelp32.h>
 

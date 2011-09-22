@@ -41,16 +41,9 @@ BOOST_AUTO_TEST_CASE(ProcessInfoTest)
 #if defined(_M_AMD64) 
   BOOST_CHECK_EQUAL(MyProcess.IsWoW64(), false);
 #elif defined(_M_IX86) 
-  typedef BOOL (WINAPI* tIsWow64Process)(HANDLE hProcess, 
-    PBOOL Wow64Process);
-  auto pIsWow64Process = reinterpret_cast<tIsWow64Process>(
-    GetProcAddress(GetModuleHandle(L"kernel32.dll"), "IsWow64Process"));
-  if (pIsWow64Process)
-  {
-    BOOL Wow64Process = FALSE;
-    BOOST_REQUIRE(pIsWow64Process(MyProcess.GetHandle(), &Wow64Process));
-    BOOST_CHECK_EQUAL(MyProcess.IsWoW64(), (Wow64Process ? true : false));
-  }
+  BOOL Wow64Process = FALSE;
+  BOOST_REQUIRE(IsWow64Process(MyProcess.GetHandle(), &Wow64Process));
+  BOOST_CHECK_EQUAL(MyProcess.IsWoW64(), (Wow64Process ? true : false));
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

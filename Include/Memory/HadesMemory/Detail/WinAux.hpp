@@ -7,12 +7,15 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/Detail/Config.hpp>
 #include <HadesMemory/Detail/StringBuffer.hpp>
 
+// Boost
 #include <boost/filesystem.hpp>
 
+// Windows API
 #include <Windows.h>
 
 namespace HadesMem
@@ -46,6 +49,7 @@ namespace HadesMem
     // Get path to self (directory)
     inline boost::filesystem::path GetSelfPath()
     {
+      // Get path to self
       DWORD const SelfPathSize = 32767;
       std::wstring SelfFullPath;
       if (!GetModuleFileName(GetHandleToSelf(), Detail::MakeStringBuffer(
@@ -59,12 +63,14 @@ namespace HadesMem
           ErrorCodeWinLast(LastError));
       }
   
+      // Path to self
       return SelfFullPath;
     }
-    
+  
     // Get path to self (directory)
     inline boost::filesystem::path GetSelfDirPath()
     {
+      // Path to self dir
       return GetSelfPath().parent_path();
     }
   }

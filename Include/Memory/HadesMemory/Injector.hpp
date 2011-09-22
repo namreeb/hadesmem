@@ -7,12 +7,15 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 
+// C++ Standard Library
 #include <string>
 #include <vector>
 
+// Windows API
 #include <Windows.h>
 
 namespace HadesMem

@@ -7,12 +7,15 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 
+// C++ Standard Library
 #include <vector>
 
+// Windows
 #include <Windows.h>
 
 namespace HadesMem
@@ -85,7 +88,7 @@ namespace HadesMem
     // Set address of callbacks
     void SetAddressOfCallBacks(DWORD_PTR AddressOfCallbacks) const;
       
-    // TODO: SetCallbacks function
+    // Todo: SetCallbacks function
 
     // Set size of zero fill
     void SetSizeOfZeroFill(DWORD SizeOfZeroFill) const;

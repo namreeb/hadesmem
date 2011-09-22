@@ -7,15 +7,18 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/Detail/Process.hpp>
 
+// C++ Standard Library
 #include <memory>
 #include <string>
 #include <vector>
 #include <utility>
 #include <type_traits>
 
+// Windows API
 #include <Windows.h>
 
 namespace HadesMem
@@ -50,17 +53,13 @@ namespace HadesMem
     class RemoteFunctionRet
     {
     public:
-      // Constructor
       RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
         DWORD LastError);
       
-      // Get return value
       DWORD_PTR GetReturnValue() const;
       
-      // Get 64-bit return value
       DWORD64 GetReturnValue64() const;
       
-      // Get thread last error
       DWORD GetLastError() const;
       
     private:
@@ -178,38 +177,27 @@ namespace HadesMem
   class AllocAndFree
   {
   public:
-    // Constructor
     AllocAndFree(MemoryMgr const& MyMemoryMgr, SIZE_T Size);
     
-    // Move constructor
     AllocAndFree(AllocAndFree&& Other);
     
-    // Move assignment operator
     AllocAndFree& operator=(AllocAndFree&& Other);
 
-    // Destructor
     ~AllocAndFree();
     
-    // Free memory
     void Free() const;
 
-    // Get base address of memory block
     PVOID GetBase() const;
     
-    // Get size of memory block
     SIZE_T GetSize() const;
 
   protected:
-    // Disable copying
     AllocAndFree(AllocAndFree const&);
     AllocAndFree& operator=(AllocAndFree const&);
     
   private:
-    // Memory instance
     MemoryMgr m_Memory;
-    // Region size
     SIZE_T m_Size;
-    // Region base
     mutable PVOID m_Address;
   };
 
@@ -217,8 +205,10 @@ namespace HadesMem
   template <typename T>
   T MemoryMgr::Read(PVOID Address) const
   {
+    // Ensure T is POD
     static_assert(std::is_pod<T>::value, "MemoryMgr::Read: T must be POD.");
     
+    // Read data
     T Data;
     ReadImpl(Address, &Data, sizeof(Data));
     return Data;
@@ -232,15 +222,19 @@ namespace HadesMem
     typedef typename T::traits_type TraitsT;
     typedef typename T::allocator_type AllocT;
     
+    // Ensure type is a string
     static_assert(std::is_same<T, std::basic_string<CharT, TraitsT, 
       AllocT>>::value, "MemoryMgr::ReadString: T must be of type "
       "std::basic_string.");
 
+    // Ensure chracter type is POD
     static_assert(std::is_pod<CharT>::value, "MemoryMgr::ReadString: "
       "Character type of string must be POD.");
     
+    // Create buffer to store results
     T Buffer;
 
+    // Read until a null terminator is found
     CharT* AddressReal = static_cast<CharT*>(Address);
     for (CharT Current = this->Read<CharT>(AddressReal); Current != CharT(); 
       ++AddressReal, Current = this->Read<CharT>(AddressReal))
@@ -248,6 +242,7 @@ namespace HadesMem
       Buffer.push_back(Current);
     }
     
+    // Return buffer
     return Buffer;
   }
 
@@ -258,12 +253,15 @@ namespace HadesMem
     typedef typename T::value_type ValueT;
     typedef typename T::allocator_type AllocT;
     
+    // Ensure type is a string
     static_assert(std::is_same<T, std::vector<ValueT, AllocT>>::value, 
       "MemoryMgr::ReadList: T must be of type std::vector.");
-    
+
+    // Ensure value type is POD
     static_assert(std::is_pod<ValueT>::value, "MemoryMgr::ReadList: Value "
       "type of vector must be POD.");
     
+    // Read data
     T Data(Size);
     this->ReadImpl(Address, Data.data(), sizeof(ValueT) * Size);
     return Data;
@@ -273,8 +271,10 @@ namespace HadesMem
   template <typename T>
   void MemoryMgr::Write(PVOID Address, T const& Data) const 
   {
+    // Ensure T is POD
     static_assert(std::is_pod<T>::value, "MemoryMgr::Write: T must be POD.");
     
+    // Write memory
     WriteImpl(Address, &Data, sizeof(Data));
   }
 
@@ -286,13 +286,16 @@ namespace HadesMem
     typedef typename T::traits_type TraitsT;
     typedef typename T::allocator_type AllocT;
     
+    // Ensure type is a string
     static_assert(std::is_same<T, std::basic_string<CharT, TraitsT, 
       AllocT>>::value, "MemoryMgr::WriteString: T must be of type "
       "std::basic_string.");
-    
+
+    // Ensure chracter type is POD
     static_assert(std::is_pod<CharT>::value, "MemoryMgr::WriteString: "
       "Character type of string must be POD.");
     
+    // Write memory
     std::size_t const RawSize = (Data.size() * sizeof(CharT)) + 1;
     WriteImpl(Address, Data.data(), RawSize);
   }
@@ -304,12 +307,15 @@ namespace HadesMem
     typedef typename T::value_type ValueT;
     typedef typename T::allocator_type AllocT;
     
+    // Ensure type is a string
     static_assert(std::is_same<T, std::vector<ValueT, AllocT>>::value, 
       "MemoryMgr::WriteList: T must be of type std::vector.");
-    
+
+    // Ensure value type is POD
     static_assert(std::is_pod<ValueT>::value, "MemoryMgr::WriteList: Value "
       "type of vector must be POD.");
     
+    // Write memory
     std::size_t const RawSize = Data.size() * sizeof(ValueT);
     WriteImpl(Address, Data.data(), RawSize);
   }

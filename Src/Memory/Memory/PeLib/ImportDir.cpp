@@ -5,12 +5,14 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/PeLib/ImportDir.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 #include <HadesMemory/PeLib/DosHeader.hpp>
 
+// C++ Standard Library
 #include <vector>
 
 namespace HadesMem
@@ -69,13 +71,16 @@ namespace HadesMem
   // Whether import directory is valid
   bool ImportDir::IsValid() const
   {
+    // Get NT headers
     NtHeaders const MyNtHeaders(m_PeFile);
-    
+
+    // Get import dir data
     DWORD const DataDirSize(MyNtHeaders.GetDataDirectorySize(NtHeaders::
       DataDir_Import));
     DWORD const DataDirVa(MyNtHeaders.GetDataDirectoryVirtualAddress(
       NtHeaders::DataDir_Import));
-    
+
+    // Import dir is valid if size and rva are valid
     return DataDirSize && DataDirVa;
   }
 
@@ -93,10 +98,13 @@ namespace HadesMem
   // Get import directory base
   PVOID ImportDir::GetBase() const
   {
+    // Initialize base address if necessary
     if (!m_pBase)
     {
+      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-      
+
+      // Get import dir data
       DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
         DataDir_Import);
       DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
@@ -107,11 +115,13 @@ namespace HadesMem
           ErrorFunction("ImportDir::GetBase") << 
           ErrorString("PE file has no import directory."));
       }
-      
+
+      // Init base address
       m_pBase = static_cast<PIMAGE_IMPORT_DESCRIPTOR>(m_PeFile.RvaToVa(
         DataDirVa));
     }
-    
+
+    // Return base address
     return m_pBase;
   }
 

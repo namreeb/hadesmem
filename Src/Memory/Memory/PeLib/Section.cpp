@@ -5,11 +5,13 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/PeLib/Section.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 
+// C++ Standard Library
 #include <array>
 
 namespace HadesMem
@@ -76,29 +78,38 @@ namespace HadesMem
   // Get section header base
   PVOID Section::GetBase() const
   {
+    // Set base pointer on first request
     if (!m_pBase)
     {
+      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
+
+      // Ensure section number is valid
       if (m_SectionNum >= MyNtHeaders.GetNumberOfSections())
       {
         BOOST_THROW_EXCEPTION(Error() << 
           ErrorFunction("Section::GetBase") << 
           ErrorString("Invalid section number."));
       }
-      
+
+      // Get raw NT headers
       auto const NtHeadersRaw = m_Memory.Read<IMAGE_NT_HEADERS>(
         MyNtHeaders.GetBase());
-      
+
+      // Get pointer to first section
       PIMAGE_SECTION_HEADER pSectionHeader = 
         reinterpret_cast<PIMAGE_SECTION_HEADER>(static_cast<PBYTE>(
         MyNtHeaders.GetBase()) + FIELD_OFFSET(IMAGE_NT_HEADERS, 
         OptionalHeader) + NtHeadersRaw.FileHeader.SizeOfOptionalHeader);
-      
+
+      // Adjust pointer to target section
       pSectionHeader += m_SectionNum;
-      
+
+      // Get base of section header
       m_pBase = reinterpret_cast<PBYTE>(pSectionHeader);
     }
     
+    // Return cached pointer
     return m_pBase;
   }
   
@@ -111,16 +122,19 @@ namespace HadesMem
   // Get name
   std::string Section::GetName() const
   {
+    // Read RVA of module name
     PBYTE const pBase = static_cast<PBYTE>(GetBase());
     std::array<char, 8> const NameData(m_Memory.Read<std::array<char, 8>>(
       pBase + FIELD_OFFSET(IMAGE_SECTION_HEADER, Name)));
-    
+
+    // Convert section name to string
     std::string Name;
     for (std::size_t i = 0; i < 8 && NameData[i]; ++i)
     {
       Name += NameData[i];
     }
-    
+
+    // Return section name
     return Name;
   }
 

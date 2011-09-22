@@ -5,15 +5,15 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/PeLib/ExportDir.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 #include <HadesMemory/PeLib/NtHeaders.hpp>
 #include <HadesMemory/PeLib/DosHeader.hpp>
 
+// C++ Standard Library
 #include <vector>
-
-#include <boost/lexical_cast.hpp>
 
 namespace HadesMem
 {
@@ -70,10 +70,13 @@ namespace HadesMem
   // Get base of export dir
   PVOID ExportDir::GetBase() const
   {
+    // Initialize base address if necessary
     if (!m_pBase)
     {
+      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-      
+
+      // Get export dir data
       DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
         DataDir_Export);
       DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
@@ -84,23 +87,28 @@ namespace HadesMem
           ErrorFunction("ExportDir::GetBase") << 
           ErrorString("PE file has no export directory."));
       }
-      
+
+      // Init base address
       m_pBase = static_cast<PBYTE>(m_PeFile.RvaToVa(DataDirVa));
     }
-    
+
+    // Return base address
     return m_pBase;
   }
 
   // Whether export directory is valid
   bool ExportDir::IsValid() const
   {
+    // Get NT headers
     NtHeaders const MyNtHeaders(m_PeFile);
-    
+
+    // Get export dir data
     DWORD const DataDirSize(MyNtHeaders.GetDataDirectorySize(NtHeaders::
       DataDir_Export));
     DWORD const DataDirVa(MyNtHeaders.GetDataDirectoryVirtualAddress(
       NtHeaders::DataDir_Export));
-    
+
+    // Export dir is valid if size and rva are valid
     return DataDirSize && DataDirVa;
   }
 
@@ -150,16 +158,20 @@ namespace HadesMem
   // Get module name
   std::string ExportDir::GetName() const
   {
+    // Get base of export dir
     PBYTE const pExpDirBase = static_cast<PBYTE>(GetBase());
-    
+
+    // Read RVA of module name
     DWORD const NameRva = m_Memory.Read<DWORD>(pExpDirBase + FIELD_OFFSET(
       IMAGE_EXPORT_DIRECTORY, Name));
-    
+
+    // Ensure there is a module name to process
     if (!NameRva)
     {
       return std::string();
     }
-    
+
+    // Read module name
     return m_Memory.ReadString<std::string>(m_PeFile.RvaToVa(NameRva));
   }
 
@@ -246,23 +258,26 @@ namespace HadesMem
   // Set name
   void ExportDir::SetName(std::string const& Name) const
   {
+    // Get base of export dir
     PBYTE const pExpDirBase = static_cast<PBYTE>(GetBase());
-    
+
+    // Read RVA of module name
     DWORD const NameRva = m_Memory.Read<DWORD>(pExpDirBase + FIELD_OFFSET(
       IMAGE_EXPORT_DIRECTORY, Name));
-    
+
+    // Ensure there is a module name to process
     if (!NameRva)
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorFunction("ExportDir::SetName") << 
         ErrorString("Export dir has no name. Cannot overwrite."));
     }
-    
+
+    // Read module name
     std::string const CurrentName = m_Memory.ReadString<std::string>(
       m_PeFile.RvaToVa(NameRva));
     
-    // FIXME: Support allocating space for a new name rather than just 
-    // overwriting the existing one.
+    // Ensure new name is not longer than the current
     if (Name.size() > CurrentName.size())
     {
       BOOST_THROW_EXCEPTION(Error() << 
@@ -270,6 +285,7 @@ namespace HadesMem
         ErrorString("Cannot overwrite name with longer string."));
     }
     
+    // Set new name
     m_Memory.WriteString(m_PeFile.RvaToVa(NameRva), Name);
   }
 
@@ -334,7 +350,6 @@ namespace HadesMem
   }
 
   // Constructor
-  // FIXME: Refactor constructors to remove duplicated code.
   Export::Export(PeFile const& MyPeFile, DWORD Ordinal) 
     : m_PeFile(MyPeFile), 
     m_Memory(MyPeFile.GetMemoryMgr()), 
@@ -347,51 +362,65 @@ namespace HadesMem
     m_ByName(false), 
     m_Forwarded(false)
   {
+    // Get NT headers
+    NtHeaders const MyNtHeaders(m_PeFile);
+
+    // Get export directory
     ExportDir const MyExportDir(m_PeFile);
-    
+
+    // Current function offset
     DWORD Offset = Ordinal - MyExportDir.GetOrdinalBase();
-    
+
+    // Ensure export number is valid
     if (Offset > MyExportDir.GetNumberOfFunctions())
     {
       BOOST_THROW_EXCEPTION(ExportDir::Error() << 
         ErrorFunction("Export::Export") << 
         ErrorString("Invalid export number."));
     }
-    
-    NtHeaders const MyNtHeaders(m_PeFile);
-    
-    DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
-      DataDir_Export);
-    DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
-      NtHeaders::DataDir_Export);
-    
-    DWORD const ExportDirStart = DataDirVa;
-    DWORD const ExportDirEnd = ExportDirStart + DataDirSize;
-    
+
+    // Get pointer to function name ordinals
+    WORD* pOrdinals = static_cast<WORD*>(m_PeFile.RvaToVa(MyExportDir.
+      GetAddressOfNameOrdinals()));
+    // Get pointer to functions
     DWORD* pFunctions = static_cast<DWORD*>(m_PeFile.RvaToVa(MyExportDir.
       GetAddressOfFunctions()));
-    
+    // Get pointer to function names
+    DWORD* pNames = static_cast<DWORD*>(m_PeFile.RvaToVa(MyExportDir.
+      GetAddressOfNames()));
+
+    // Get data directory size
+    DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
+      DataDir_Export);
+    // Get data directory VA
+    DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
+      NtHeaders::DataDir_Export);
+
+    // Get start of export dir
+    DWORD const ExportDirStart = DataDirVa;
+    // Get end of export dir
+    DWORD const ExportDirEnd = ExportDirStart + DataDirSize;
+
     // Find next exported entry
     for (; !m_Memory.Read<DWORD>(pFunctions + Offset) && 
       Offset <= MyExportDir.GetNumberOfFunctions(); ++Offset)
       ;
-    
+
+    // Ensure export number is valid
     if (Offset > MyExportDir.GetNumberOfFunctions())
     {
       BOOST_THROW_EXCEPTION(ExportDir::Error() << 
         ErrorFunction("Export::Export") << 
         ErrorString("Invalid export number."));
     }
-    
+
+    // Set new ordinal
     Ordinal = Offset + MyExportDir.GetOrdinalBase();
+
+    // Set ordinal
     m_Ordinal = static_cast<WORD>(Ordinal);
 
-    WORD* pOrdinals = static_cast<WORD*>(m_PeFile.RvaToVa(MyExportDir.
-      GetAddressOfNameOrdinals()));
-    
-    DWORD* pNames = static_cast<DWORD*>(m_PeFile.RvaToVa(MyExportDir.
-      GetAddressOfNames()));
-    
+    // Find ordinal name and set (if applicable)
     if (DWORD const NumberOfNames = MyExportDir.GetNumberOfNames())
     {
       std::vector<WORD> NameOrdinals(m_Memory.ReadList<std::vector<WORD>>(
@@ -406,21 +435,24 @@ namespace HadesMem
         m_Name = m_Memory.ReadString<std::string>(m_PeFile.RvaToVa(NameRva));
       }
     }
-    
+
+    // Get function RVA (unchecked)
     DWORD const FuncRva = m_Memory.Read<DWORD>(pFunctions + Offset);
 
     // Check function RVA. If it lies inside the export dir region 
     // then it's a forwarded export. Otherwise it's a regular RVA.
     if (FuncRva > ExportDirStart && FuncRva < ExportDirEnd)
     {
+      // Set export forwarder
       m_Forwarded = true;
       m_Forwarder = m_Memory.ReadString<std::string>(m_PeFile.RvaToVa(FuncRva));
-      
+        
+      // Split forwarder
       std::string::size_type SplitPos = m_Forwarder.rfind('.');
       if (SplitPos != std::string::npos)
       {
         m_ForwarderSplit = std::make_pair(m_Forwarder.substr(0, SplitPos), 
-          m_Forwarder.substr(SplitPos + 1));
+          m_Forwarder.substr(SplitPos));
       }
       else
       {
@@ -431,141 +463,7 @@ namespace HadesMem
     }
     else
     {
-      m_Rva = FuncRva;
-      m_Va = m_PeFile.RvaToVa(FuncRva);
-    }
-  }
-
-  // Constructor
-  Export::Export(PeFile const& MyPeFile, std::string const& Name) 
-    : m_PeFile(MyPeFile), 
-    m_Memory(MyPeFile.GetMemoryMgr()), 
-    m_Rva(0), 
-    m_Va(nullptr), 
-    m_Name(), 
-    m_Forwarder(), 
-    m_ForwarderSplit(), 
-    m_Ordinal(0), 
-    m_ByName(false), 
-    m_Forwarded(false)
-  {
-    ExportDir const MyExportDir(m_PeFile);
-    
-    if (!MyExportDir.GetNumberOfNames())
-    {
-      BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-        ErrorFunction("Export::Export") << 
-        ErrorString("No named exports found."));
-    }
-
-    DWORD* pNames = static_cast<DWORD*>(m_PeFile.RvaToVa(MyExportDir.
-      GetAddressOfNames()));
-    
-    WORD* pOrdinals = static_cast<WORD*>(m_PeFile.RvaToVa(MyExportDir.
-      GetAddressOfNameOrdinals()));
-    
-    // Start of search region for lower bound search (binary search)
-    DWORD* pFirst = static_cast<DWORD*>(MyPeFile.RvaToVa(
-      MyExportDir.GetAddressOfNames()));
-    
-    // End of search region for lower bound search (binary search)
-    DWORD* pLast = static_cast<DWORD*>(MyPeFile.RvaToVa(
-      MyExportDir.GetAddressOfNames()));
-    
-    // Number of entries in export name array
-    DWORD Count = MyExportDir.GetNumberOfNames();
-    
-    // Search step
-    DWORD Step = 0;
-    
-    // Perform binary search of export dir for target
-    while (Count > 0)
-    {
-      // Calculate current bounds
-      pLast = pFirst;
-      Step = Count / 2;
-      pLast += Step;
-      
-      // Get current entry name
-      DWORD const NameRva = m_Memory.Read<DWORD>(pLast);
-      std::string const CurName = m_Memory.ReadString<std::string>(
-        MyPeFile.RvaToVa(NameRva));
-      
-      // Perform lexical lower bound check on entry
-      if (CurName < Name)
-      {
-        pFirst = ++pLast;
-        Count -= Step + 1;
-      }
-      else
-      {
-        Count = Step;
-      }
-    }
-    
-    DWORD const NameRva = m_Memory.Read<DWORD>(pFirst);
-    std::string const CurName = m_Memory.ReadString<std::string>(
-      MyPeFile.RvaToVa(NameRva));
-    m_ByName = true;
-    m_Name = CurName;
-    
-    if (CurName != Name)
-    {
-      BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-        ErrorFunction("Export::Export") << 
-        ErrorString("Could not find target."));
-    }
-    
-    DWORD_PTR Index = (reinterpret_cast<DWORD_PTR>(pFirst) - 
-      reinterpret_cast<DWORD_PTR>(pNames)) / sizeof(DWORD);
-    
-    WORD const NameOrdinal = m_Memory.Read<WORD>(pOrdinals + Index);
-    m_Ordinal = NameOrdinal;
-    
-    if (m_Ordinal > MyExportDir.GetNumberOfFunctions())
-    {
-      BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-        ErrorFunction("Export::Export") << 
-        ErrorString("Ordinal invalid."));
-    }
-
-    DWORD* pFunctions = static_cast<DWORD*>(m_PeFile.RvaToVa(MyExportDir.
-      GetAddressOfFunctions()));
-    
-    DWORD const FuncRva = m_Memory.Read<DWORD>(pFunctions + m_Ordinal);
-    
-    NtHeaders const MyNtHeaders(m_PeFile);
-    
-    DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
-      DataDir_Export);
-    DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
-      NtHeaders::DataDir_Export);
-    
-    DWORD const ExportDirStart = DataDirVa;
-    DWORD const ExportDirEnd = ExportDirStart + DataDirSize;
-    
-    // Check function RVA. If it lies inside the export dir region 
-    // then it's a forwarded export. Otherwise it's a regular RVA.
-    if (FuncRva > ExportDirStart && FuncRva < ExportDirEnd)
-    {
-      m_Forwarded = true;
-      m_Forwarder = m_Memory.ReadString<std::string>(m_PeFile.RvaToVa(FuncRva));
-      
-      std::string::size_type SplitPos = m_Forwarder.rfind('.');
-      if (SplitPos != std::string::npos)
-      {
-        m_ForwarderSplit = std::make_pair(m_Forwarder.substr(0, SplitPos), 
-          m_Forwarder.substr(SplitPos + 1));
-      }
-      else
-      {
-        BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-          ErrorFunction("Export::Export") << 
-          ErrorString("Invalid forwarder string format."));
-      }
-    }
-    else
-    {
+      // Set export RVA/VA
       m_Rva = FuncRva;
       m_Va = m_PeFile.RvaToVa(FuncRva);
     }
@@ -709,39 +607,6 @@ namespace HadesMem
   bool Export::Forwarded() const
   {
     return m_Forwarded;
-  }
-    
-  // If entry is forwarded by ordinal
-  bool Export::IsForwardedByOrdinal() const
-  {
-    return (GetForwarderFunction()[0] == '#');
-  }
-  
-  // Get forwarder function ordinal
-  WORD Export::GetForwarderOrdinal() const
-  {
-    if (IsForwardedByOrdinal())
-    {
-      WORD ForwarderOrdinal = 0;
-      
-      try
-      {
-        std::string const ForwarderFunction(GetForwarderFunction());
-        ForwarderOrdinal = boost::lexical_cast<WORD>(ForwarderFunction.substr(1));
-      }
-      catch (std::exception const& /*e*/)
-      {
-        BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-          ErrorFunction("Export::GetForwarderOrdinal") << 
-          ErrorString("Invalid forwarder ordinal detected."));
-      }
-      
-      return ForwarderOrdinal;
-    }
-    
-    BOOST_THROW_EXCEPTION(ExportDir::Error() << 
-      ErrorFunction("Export::GetForwarderOrdinal") << 
-      ErrorString("Function is not exported by ordinal."));
   }
   
   // Equality operator

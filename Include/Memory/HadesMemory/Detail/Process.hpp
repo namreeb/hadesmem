@@ -7,11 +7,14 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/Detail/Error.hpp>
 
+// C++ Standard Library
 #include <string>
 #include <memory>
 
+// Windows API
 #include <Windows.h>
 
 namespace HadesMem
@@ -67,5 +70,5 @@ namespace HadesMem
       class Impl;
       std::shared_ptr<Impl> m_pImpl;
     };
-  }
-}
+  } // namespace Detail
+} // namespace HadesMem

@@ -5,6 +5,7 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/PeLib/TlsDir.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
@@ -65,13 +66,16 @@ namespace HadesMem
   // Whether TLS directory is valid
   bool TlsDir::IsValid() const
   {
+    // Get NT headers
     NtHeaders const MyNtHeaders(m_PeFile);
-    
+
+    // Get TLS dir data
     DWORD const DataDirSize(MyNtHeaders.GetDataDirectorySize(NtHeaders::
       DataDir_TLS));
     DWORD const DataDirVa(MyNtHeaders.GetDataDirectoryVirtualAddress(
       NtHeaders::DataDir_TLS));
-    
+
+    // TLS dir is valid if size and rva are valid
     return DataDirSize && DataDirVa;
   }
 
@@ -89,10 +93,13 @@ namespace HadesMem
   // Get base of export dir
   PVOID TlsDir::GetBase() const
   {
+    // Set base pointer on first request
     if (!m_pBase)
     {
+      // Get NT headers
       NtHeaders const MyNtHeaders(m_PeFile);
-      
+
+      // Get export dir data
       DWORD const DataDirSize = MyNtHeaders.GetDataDirectorySize(NtHeaders::
         DataDir_TLS);
       DWORD const DataDirVa = MyNtHeaders.GetDataDirectoryVirtualAddress(
@@ -103,10 +110,12 @@ namespace HadesMem
           ErrorFunction("TlsDir::GetBase") << 
           ErrorString("PE file has no TLS directory."));
       }
-      
+
+      // Get base of TLS dir
       m_pBase = static_cast<PBYTE>(m_PeFile.RvaToVa(DataDirVa));
     }
     
+    // Return cached pointer
     return m_pBase;
   }
 
@@ -161,14 +170,18 @@ namespace HadesMem
   // Get list of TLS callbacks
   std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
   {
+    // Callback list
     std::vector<PIMAGE_TLS_CALLBACK> Callbacks;
-    
+
+    // Get NT headers
     NtHeaders MyNtHeaders(m_PeFile);
-    
+
+    // Get pointer to callback list
     PIMAGE_TLS_CALLBACK* pCallbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(
       m_PeFile.RvaToVa(static_cast<DWORD>(GetAddressOfCallBacks() - 
       MyNtHeaders.GetImageBase())));
-    
+
+    // Loop over all callbacks
     for (PIMAGE_TLS_CALLBACK pCallback = m_Memory.Read<PIMAGE_TLS_CALLBACK>(
       pCallbacks); pCallback; pCallback = m_Memory.Read<PIMAGE_TLS_CALLBACK>(
       ++pCallbacks))
@@ -179,7 +192,8 @@ namespace HadesMem
         pCallbackRealTemp);
       Callbacks.push_back(pCallbackReal);
     }
-    
+
+    // Return callback list
     return Callbacks;
   }
 

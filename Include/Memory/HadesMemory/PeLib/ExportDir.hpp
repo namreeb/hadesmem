@@ -7,18 +7,22 @@
 
 #pragma once
 
+// Hades
 #include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Error.hpp>
 #include <HadesMemory/PeLib/PeFile.hpp>
 
+// C++ Standard Library
 #include <string>
 #include <vector>
 #include <utility>
 #include <iterator>
 
+// Boost
 #include <boost/optional.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
+// Windows
 #include <Windows.h>
 
 namespace HadesMem
@@ -147,9 +151,6 @@ namespace HadesMem
   public:
     // Constructor
     Export(PeFile const& MyPeFile, DWORD Ordinal);
-    
-    // Constructor
-    Export(PeFile const& MyPeFile, std::string const& Name);
       
     // Copy constructor
     Export(Export const& Other);
@@ -175,15 +176,6 @@ namespace HadesMem
     // Get name
     std::string GetName() const;
 
-    // Get ordinal
-    WORD GetOrdinal() const;
-
-    // If entry is exported by name
-    bool ByName() const;
-
-    // If entry is forwarded
-    bool Forwarded() const;
-
     // Get forwarder
     std::string GetForwarder() const;
     
@@ -192,12 +184,15 @@ namespace HadesMem
     
     // Get forwarder function name
     std::string GetForwarderFunction() const;
-    
-    // If entry is forwarded by ordinal
-    bool IsForwardedByOrdinal() const;
-    
-    // Get forwarder function ordinal
-    WORD GetForwarderOrdinal() const;
+
+    // Get ordinal
+    WORD GetOrdinal() const;
+
+    // If entry is exported by name
+    bool ByName() const;
+
+    // If entry is forwarded
+    bool Forwarded() const;
     
     // Equality operator
     bool operator==(Export const& Rhs) const;
@@ -235,12 +230,6 @@ namespace HadesMem
     
     // If entry is forwarded
     bool m_Forwarded;
-    
-    // If entry is forwarded by ordinal
-    bool m_ForwardedByOrdinal;
-    
-    // Forwarder ordinal
-    WORD m_ForwarderOrdinal;
   };
     
   // Forward declaration of ExportIter

@@ -7,11 +7,14 @@
 
 #pragma once
 
+// C++ Standard Library
 #include <string>
 #include <stdexcept>
 
+// Boost
 #include <boost/exception/all.hpp>
 
+// Windows
 #include <Windows.h>
 
 namespace HadesMem

@@ -5,10 +5,12 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/Module.hpp>
 #include <HadesMemory/Detail/Config.hpp>
 #include <HadesMemory/Detail/EnsureCleanup.hpp>
 
+// Boost
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -23,6 +25,7 @@ namespace HadesMem
     m_Name(), 
     m_Path()
   {
+    // Grab a new snapshot of the process
     Detail::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
       TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, MyMemory.GetProcessId()));
     if (Snap == INVALID_HANDLE_VALUE)
@@ -33,17 +36,21 @@ namespace HadesMem
         ErrorString("Could not get module snapshot.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Convert module name to lowercase
     std::wstring const ModuleNameLower(boost::to_lower_copy(
       ModuleName));
     
+    // Detect paths
     bool IsPath = (ModuleName.find(L'\\') != std::wstring::npos) || 
       (ModuleName.find(L'/') != std::wstring::npos);
-    
+
+    // Search for module
     MODULEENTRY32 ModEntry;
     ZeroMemory(&ModEntry, sizeof(ModEntry));
     ModEntry.dwSize = sizeof(ModEntry);
     
+    // Module searching predicate function
     auto FindModByName = 
       [&] () -> bool
       {
@@ -69,14 +76,16 @@ namespace HadesMem
         // Nothing found
         return false;
       };
-    
+
+    // Check module was found
     if (!FindModByName())
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorFunction("Module::Module") << 
         ErrorString("Could not find module."));
     }
-    
+
+    // Get module data
     m_Base = ModEntry.hModule;
     m_Size = ModEntry.modBaseSize;
     m_Name = boost::to_lower_copy(static_cast<std::wstring>(
@@ -93,6 +102,7 @@ namespace HadesMem
     m_Name(), 
     m_Path()
   {
+    // Grab a new snapshot of the process
     Detail::EnsureCloseSnap const Snap(CreateToolhelp32Snapshot(
       TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, MyMemory.GetProcessId()));
     if (Snap == INVALID_HANDLE_VALUE)
@@ -103,33 +113,41 @@ namespace HadesMem
         ErrorString("Could not get module snapshot.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Search for module
     MODULEENTRY32 ModEntry;
     ZeroMemory(&ModEntry, sizeof(ModEntry));
     ModEntry.dwSize = sizeof(ModEntry);
     
+    // Module searching predicate function
     auto FindModByHandle = 
       [&] () -> bool
       {
+        // Process entire module list
         for (BOOL MoreMods = Module32First(Snap, &ModEntry); MoreMods; 
           MoreMods = Module32Next(Snap, &ModEntry)) 
         {
+          // Perform handle comparison, or simply return first handle (i.e. 
+          // handle to calling process) if requested target handle is NULL
           if (ModEntry.hModule == Handle || !Handle)
           {
             return true;
           }
         }
         
+        // Nothing found
         return false;
       };
-    
+
+    // Check module was found
     if (!FindModByHandle())
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorFunction("Module::Module") << 
         ErrorString("Could not find module."));
     }
-    
+
+    // Get module data
     m_Base = ModEntry.hModule;
     m_Size = ModEntry.modBaseSize;
     m_Name = boost::to_lower_copy(static_cast<std::wstring>(
@@ -231,6 +249,7 @@ namespace HadesMem
   // Find procedure by name
   FARPROC Module::FindProcedure(std::string const& Name) const
   {
+    // Load module as data so we can read the EAT locally
     Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
       m_Path.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!LocalMod)
@@ -241,7 +260,8 @@ namespace HadesMem
         ErrorString("Could not load module locally.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Find target function in module
     FARPROC const LocalFunc = GetProcAddress(LocalMod, Name.c_str());
     if (!LocalFunc)
     {
@@ -251,19 +271,23 @@ namespace HadesMem
         ErrorString("Could not find target function.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Calculate function delta
     LONG_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
       reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
-    
+
+    // Calculate function location in remote process
     FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
       reinterpret_cast<DWORD_PTR>(m_Base) + FuncDelta);
-    
+
+    // Return remote function location
     return RemoteFunc;
   }
 
   // Find procedure by ordinal
   FARPROC Module::FindProcedure(WORD Ordinal) const
   {
+    // Load module as data so we can read the EAT locally
     Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
       m_Path.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
     if (!LocalMod)
@@ -274,7 +298,8 @@ namespace HadesMem
         ErrorString("Could not load module locally.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Find target function in module
     FARPROC const LocalFunc = GetProcAddress(LocalMod, MAKEINTRESOURCEA(
       Ordinal));
     if (!LocalFunc)
@@ -285,13 +310,16 @@ namespace HadesMem
         ErrorString("Could not find target function.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Calculate function delta
     LONG_PTR const FuncDelta = reinterpret_cast<DWORD_PTR>(LocalFunc) - 
       reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(LocalMod));
-    
+
+    // Calculate function location in remote process
     FARPROC const RemoteFunc = reinterpret_cast<FARPROC>(
       reinterpret_cast<DWORD_PTR>(m_Base) + FuncDelta);
-    
+
+    // Return remote function location
     return RemoteFunc;
   }
   
@@ -310,29 +338,41 @@ namespace HadesMem
   // Get remote module handle
   Module GetRemoteModule(MemoryMgr const& MyMemory, LPCWSTR ModuleName)
   {
+    // Get module list
     ModuleList Modules(MyMemory);
     
+    // If pointer to module name is null, return a handle to the file used 
+    // to create the calling process. (i.e. The first module in the list)
     if (!ModuleName)
     {
       return *Modules.begin();
     }
     
+    // Pointer is non-null, so convert to lowercase C++ string
     std::wstring ModuleNameReal(ModuleName);
     boost::to_lower(ModuleNameReal);
     
+    // Find location of file extension
     auto const PeriodPos = ModuleNameReal.find(L'.');
+    // If no extension is found, assume a DLL is being requested
     if (PeriodPos == std::wstring::npos)
     {
       ModuleNameReal += L".dll";
     }
+    // If there is an 'empty' extension (i.e. a trailing period), this 
+    // indicates no extension (and '.dll' should not be appended). Remove 
+    // the trailing peroid so the string can be used for name/path 
+    // comparisons.
     else if (PeriodPos == ModuleNameReal.size() - 1)
     {
       ModuleNameReal.erase(ModuleNameReal.size() - 1);
     }
     
+    // Detect paths
     bool const IsPath = (ModuleNameReal.find(L'\\') != std::wstring::npos) || 
       (ModuleNameReal.find(L'/') != std::wstring::npos);
     
+    // Find target module
     auto Iter = std::find_if(Modules.begin(), Modules.end(), 
       [&] (Module const& M) -> bool
       {
@@ -345,11 +385,13 @@ namespace HadesMem
           return ModuleNameReal == M.GetName();
         }
       });
+    // Return module handle if target found
     if (Iter != Modules.end())
     {
       return *Iter;
     }
     
+    // Throw if target not found
     BOOST_THROW_EXCEPTION(Module::Error() << 
       ErrorFunction("GetRemoteModule") << 
       ErrorString("Could not find requested module."));

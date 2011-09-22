@@ -4,7 +4,7 @@
 <title>ExportDir</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.3.0">
 <link rel="up" href="../pelib.html" title="PeLib">
 <link rel="prev" href="dosheader.html" title="DosHeader">
 <link rel="next" href="importdir.html" title="ImportDir">
@@ -20,7 +20,7 @@
 <a name="hadesmem.reference.pelib.exportdir"></a><a class="link" href="exportdir.html" title="ExportDir">ExportDir</a>
 </h4></div></div></div>
 <a name="hadesmem.reference.pelib.exportdir.synopsis"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.synopsis-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h0"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/PeLib/ExportDir.hpp&gt;</span>
@@ -116,21 +116,17 @@
 
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 
-  <span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-
-  <span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-
-  <span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarder</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderModule</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">GetForwarderFunction</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
-  <span class="keyword">bool</span> <span class="identifier">IsForwardedByOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
-  <span class="identifier">WORD</span> <span class="identifier">GetForwarderOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Export</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   
@@ -165,7 +161,7 @@
 <span class="special">};</span>
 </pre>
 <a name="hadesmem.reference.pelib.exportdir.description"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.description-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h1"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.description">Description</a>
         </h4>
 <p>
@@ -182,7 +178,7 @@
           STL-compatible iterators for export enumeration.
         </p>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_public_types"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_public_types-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h2"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_public_types">ExportDir
           public types</a>
         </h4>
@@ -193,12 +189,12 @@
           methods when an error occurs.
         </p>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_public_construct_copy_destruct_move-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h3"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_public_construct_copy_destruct_move">ExportDir
           public construct/copy/destruct/move</a>
         </h4>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h4"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_constructor">ExportDir
           constructor</a>
         </h5>
@@ -219,7 +215,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_copy_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_copy_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h5"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_copy_constructor">ExportDir
           copy constructor</a>
         </h5>
@@ -240,7 +236,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_copy_assignment_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h6"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_copy_assignment_operator">ExportDir
           copy assignment operator</a>
         </h5>
@@ -260,7 +256,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_move_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_move_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h7"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_move_constructor">ExportDir
           move constructor</a>
         </h5>
@@ -282,7 +278,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_move_assignment_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h8"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_move_assignment_operator">ExportDir
           move assignment operator</a>
         </h5>
@@ -303,7 +299,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_destructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_destructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h9"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_destructor">ExportDir
           destructor</a>
         </h5>
@@ -323,12 +319,12 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_public_member_functions"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_public_member_functions-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h10"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_public_member_functions">ExportDir
           public member functions</a>
         </h4>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h11"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getbase__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
         </h5>
@@ -348,7 +344,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h12"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">IsValid</span></code></a>
         </h5>
@@ -368,7 +364,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h13"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">EnsureValid</span></code></a>
         </h5>
@@ -388,7 +384,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h14"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetCharacteristics</span></code></a>
         </h5>
@@ -408,7 +404,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h15"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__gettimedatestamp__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetTimeDateStamp</span></code></a>
         </h5>
@@ -428,7 +424,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h16"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getmajorversion__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetMajorVersion</span></code></a>
         </h5>
@@ -448,7 +444,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h17"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getminorversion__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetMinorVersion</span></code></a>
         </h5>
@@ -468,7 +464,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h18"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getname__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
         </h5>
@@ -488,7 +484,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h19"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getordinalbase__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetOrdinalBase</span></code></a>
         </h5>
@@ -508,7 +504,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h20"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberoffunctions__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetNumberOfFunctions</span></code></a>
         </h5>
@@ -528,7 +524,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h21"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getnumberofnames__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetNumberOfNames</span></code></a>
         </h5>
@@ -548,7 +544,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h22"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressoffunctions__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetAddressOfFunctions</span></code></a>
         </h5>
@@ -568,7 +564,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h23"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnames__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetAddressOfNames</span></code></a>
         </h5>
@@ -588,7 +584,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h24"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__getaddressofnameordinals__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">GetAddressOfNameOrdinals</span></code></a>
         </h5>
@@ -608,7 +604,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h25"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetCharacteristics</span></code></a>
         </h5>
@@ -628,7 +624,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h26"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__settimedatestamp__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetTimeDateStamp</span></code></a>
         </h5>
@@ -648,7 +644,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h27"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setmajorversion__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetMajorVersion</span></code></a>
         </h5>
@@ -668,7 +664,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h28"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setminorversion__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetMinorVersion</span></code></a>
         </h5>
@@ -688,7 +684,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h29"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setname__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetName</span></code></a>
         </h5>
@@ -718,7 +714,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h30"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setordinalbase__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetOrdinalBase</span></code></a>
         </h5>
@@ -738,7 +734,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h31"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberoffunctions__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetNumberOfFunctions</span></code></a>
         </h5>
@@ -758,7 +754,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h32"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setnumberofnames__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetNumberOfNames</span></code></a>
         </h5>
@@ -778,7 +774,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h33"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressoffunctions__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetAddressOfFunctions</span></code></a>
         </h5>
@@ -798,7 +794,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h34"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnames__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetAddressOfNames</span></code></a>
         </h5>
@@ -818,7 +814,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h35"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_member_function__code__phrase_role__identifier__setaddressofnameordinals__phrase___code_">ExportDir
           member function <code class="computeroutput"><span class="identifier">SetAddressOfNameOrdinals</span></code></a>
         </h5>
@@ -838,7 +834,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_equality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_equality_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h36"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_equality_operator">ExportDir
           equality operator</a>
         </h5>
@@ -859,7 +855,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportdir_inequality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportdir_inequality_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h37"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportdir_inequality_operator">ExportDir
           inequality operator</a>
         </h5>
@@ -880,14 +876,14 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.export_public_construct_copy_destruct_move-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h38"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_public_construct_copy_destruct_move">Export
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.pelib.exportdir.export_ordinal_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_ordinal_constructor-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_ordinal_constructor">Export
-          ordinal constructor</a>
+<a name="hadesmem.reference.pelib.exportdir.export_constructor"></a><h5>
+<a name="hadesmem.reference.pelib.exportdir.h39"></a>
+          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_constructor">Export
+          constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Export</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Ordinal</span><span class="special">);</span>
 </pre>
@@ -905,29 +901,8 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.exportdir.export_name_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_name_constructor-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_name_constructor">Export
-          name constructor</a>
-        </h5>
-<pre class="programlisting"><span class="identifier">Export</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">);</span>
-</pre>
-<div class="variablelist">
-<p class="title"><b></b></p>
-<dl>
-<dt><span class="term">Effects:</span></dt>
-<dd><p>
-                Constructs an <code class="computeroutput"><span class="identifier">ExportDir</span></code>
-                instance that refers to the specified PE file and name.
-              </p></dd>
-<dt><span class="term">Throws:</span></dt>
-<dd><p>
-                Yes.
-              </p></dd>
-</dl>
-</div>
 <a name="hadesmem.reference.pelib.exportdir.export_copy_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_copy_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h40"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_copy_constructor">Export
           copy constructor</a>
         </h5>
@@ -948,7 +923,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_copy_assignment_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h41"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_copy_assignment_operator">Export
           copy assignment operator</a>
         </h5>
@@ -968,7 +943,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_move_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_move_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h42"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_move_constructor">Export
           move constructor</a>
         </h5>
@@ -990,7 +965,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_move_assignment_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h43"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_move_assignment_operator">Export
           move assignment operator</a>
         </h5>
@@ -1011,7 +986,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_destructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_destructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h44"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_destructor">Export
           destructor</a>
         </h5>
@@ -1031,12 +1006,12 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_public_member_functions"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.export_public_member_functions-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h45"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_public_member_functions">Export
           public member functions</a>
         </h4>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h46"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getrva__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetRva</span></code></a>
         </h5>
@@ -1056,7 +1031,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h47"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getva__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetVa</span></code></a>
         </h5>
@@ -1076,7 +1051,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h48"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getname__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
         </h5>
@@ -1095,68 +1070,8 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_">Export
-          member function <code class="computeroutput"><span class="identifier">GetOrdinal</span></code></a>
-        </h5>
-<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-</pre>
-<div class="variablelist">
-<p class="title"><b></b></p>
-<dl>
-<dt><span class="term">Returns:</span></dt>
-<dd><p>
-                Ordinal of export.
-              </p></dd>
-<dt><span class="term">Throws:</span></dt>
-<dd><p>
-                Yes.
-              </p></dd>
-</dl>
-</div>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_">Export
-          member function <code class="computeroutput"><span class="identifier">ByName</span></code></a>
-        </h5>
-<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-</pre>
-<div class="variablelist">
-<p class="title"><b></b></p>
-<dl>
-<dt><span class="term">Returns:</span></dt>
-<dd><p>
-                Whether entry is exported by name.
-              </p></dd>
-<dt><span class="term">Throws:</span></dt>
-<dd><p>
-                Yes.
-              </p></dd>
-</dl>
-</div>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_">Export
-          member function <code class="computeroutput"><span class="identifier">Forwarded</span></code></a>
-        </h5>
-<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-</pre>
-<div class="variablelist">
-<p class="title"><b></b></p>
-<dl>
-<dt><span class="term">Returns:</span></dt>
-<dd><p>
-                Whether entry is forwarded.
-              </p></dd>
-<dt><span class="term">Throws:</span></dt>
-<dd><p>
-                Yes.
-              </p></dd>
-</dl>
-</div>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h49"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarder__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetForwarder</span></code></a>
         </h5>
@@ -1176,7 +1091,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h50"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwardermodule__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetForwarderModule</span></code></a>
         </h5>
@@ -1196,7 +1111,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h51"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderfunction__phrase___code_">Export
           member function <code class="computeroutput"><span class="identifier">GetForwarderFunction</span></code></a>
         </h5>
@@ -1215,19 +1130,19 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__isforwardedbyordinal__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__isforwardedbyordinal__phrase___code_-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__isforwardedbyordinal__phrase___code_">Export
-          member function <code class="computeroutput"><span class="identifier">IsForwardedByOrdinal</span></code></a>
+<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.exportdir.h52"></a>
+          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getordinal__phrase___code_">Export
+          member function <code class="computeroutput"><span class="identifier">GetOrdinal</span></code></a>
         </h5>
-<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsForwardedByOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
 <dl>
 <dt><span class="term">Returns:</span></dt>
 <dd><p>
-                Whether entry is forwarded by ordinal.
+                Ordinal of export.
               </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>
@@ -1235,19 +1150,39 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderordinal__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderordinal__phrase___code_-heading"></a>
-          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__getforwarderordinal__phrase___code_">Export
-          member function <code class="computeroutput"><span class="identifier">GetForwarderOrdinal</span></code></a>
+<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.exportdir.h53"></a>
+          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__byname__phrase___code_">Export
+          member function <code class="computeroutput"><span class="identifier">ByName</span></code></a>
         </h5>
-<pre class="programlisting"><span class="identifier">WORD</span> <span class="identifier">GetForwarderOrdinal</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">ByName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
 <dl>
 <dt><span class="term">Returns:</span></dt>
 <dd><p>
-                Ordinal for forwarder.
+                Whether entry is exported by name.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<a name="hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_"></a><h5>
+<a name="hadesmem.reference.pelib.exportdir.h54"></a>
+          <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_member_function__code__phrase_role__identifier__forwarded__phrase___code_">Export
+          member function <code class="computeroutput"><span class="identifier">Forwarded</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">Forwarded</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether entry is forwarded.
               </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>
@@ -1256,7 +1191,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_equality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_equality_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h55"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_equality_operator">Export
           equality operator</a>
         </h5>
@@ -1277,7 +1212,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.export_inequality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.export_inequality_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h56"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.export_inequality_operator">Export
           inequality operator</a>
         </h5>
@@ -1298,7 +1233,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_public_types"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_public_types-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h57"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_public_types">ExportList
           public types</a>
         </h4>
@@ -1316,12 +1251,12 @@
           concept. Implementation type unspecified.
         </p>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_public_construct_copy_destruct_move-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h58"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_public_construct_copy_destruct_move">ExportList
           public construct/copy/destruct/move</a>
         </h4>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h59"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_constructor">ExportList
           constructor</a>
         </h5>
@@ -1342,7 +1277,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_move_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_move_constructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h60"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_move_constructor">ExportList
           move constructor</a>
         </h5>
@@ -1364,7 +1299,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_move_assignment_operator-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h61"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_move_assignment_operator">ExportList
           move assignment operator</a>
         </h5>
@@ -1385,7 +1320,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_destructor"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_destructor-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h62"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_destructor">ExportList
           destructor</a>
         </h5>
@@ -1405,12 +1340,12 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_public_member_functions"></a><h4>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_public_member_functions-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h63"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_public_member_functions">ExportList
           public member functions</a>
         </h4>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h64"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__begin__phrase___code_">ExportList
           member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
         </h5>
@@ -1431,7 +1366,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h65"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__end__phrase___code_">ExportList
           member function <code class="computeroutput"><span class="identifier">end</span></code></a>
         </h5>
@@ -1453,7 +1388,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h66"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ExportList
           member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
         </h5>
@@ -1473,7 +1408,7 @@
 </dl>
 </div>
 <a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
+<a name="hadesmem.reference.pelib.exportdir.h67"></a>
           <a class="link" href="exportdir.html#hadesmem.reference.pelib.exportdir.exportlist_member_function__code__phrase_role__identifier__cend__phrase___code_">ExportList
           member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
         </h5>

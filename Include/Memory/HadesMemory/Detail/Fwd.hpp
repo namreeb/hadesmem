@@ -9,6 +9,7 @@
 
 namespace HadesMem
 {
+  // Hades (External)
   class MemoryMgr;
   class AllocAndFree;
   class Module;

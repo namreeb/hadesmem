@@ -5,6 +5,7 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
+// Hades
 #include <HadesMemory/Injector.hpp>
 #include <HadesMemory/Module.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
@@ -14,13 +15,17 @@
 #include <HadesMemory/Detail/StringBuffer.hpp>
 #include <HadesMemory/Detail/EnsureCleanup.hpp>
 
+// Windows API
 #include <Windows.h>
 
+// C++ Standard Library
 #include <algorithm>
 
+// Boost
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
+// AsmJit
 #ifdef HADES_MSVC
 #pragma warning(push, 1)
 #endif
@@ -90,17 +95,23 @@ namespace HadesMem
         ErrorString("Shims enabled for local process."));
     }
     
+    // String to hold 'real' path to module
     boost::filesystem::path PathReal(Path);
       
+    // Check if path resolution was requested
     bool PathResolution = ((Flags & InjectFlag_PathResolution) == 
       InjectFlag_PathResolution);
-    
+
+    // Check whether we need to convert the path from a relative to 
+    // an absolute
     if (PathResolution && PathReal.is_relative())
     {
+      // Convert relative path to absolute path
       PathReal = boost::filesystem::absolute(PathReal, 
         Detail::GetSelfDirPath());
     }
-    
+
+    // Convert path to preferred format
     PathReal.make_preferred();
 
     // Ensure target file exists
@@ -115,18 +126,26 @@ namespace HadesMem
         ErrorFunction("Injector::InjectDll") << 
         ErrorString("Could not find module file."));
     }
-    
+
+    // Get path as string
     std::wstring const PathString(PathReal.native());
+
+    // Calculate the number of bytes needed for the DLL's pathname
     std::size_t const PathBufSize = (PathString.size() + 1) * 
       sizeof(wchar_t);
-    
+
+    // Allocate space in the remote process for the pathname
     AllocAndFree const LibFileRemote(m_Memory, PathBufSize);
+
+    // Copy the DLL's pathname to the remote process' address space
     m_Memory.WriteString(LibFileRemote.GetBase(), PathString);
     
+    // Get address of LoadLibraryW in Kernel32.dll
     Module Kernel32Mod(m_Memory, L"kernel32.dll");
     FARPROC const pLoadLibraryW = Kernel32Mod.FindProcedure("LoadLibraryW");
     DWORD_PTR pLoadLibraryWTemp = reinterpret_cast<DWORD_PTR>(pLoadLibraryW);
-    
+
+    // Load module in remote process using LoadLibraryW
     std::vector<PVOID> Args;
     Args.push_back(LibFileRemote.GetBase());
     MemoryMgr::RemoteFunctionRet RemoteRet = m_Memory.Call(
@@ -140,16 +159,19 @@ namespace HadesMem
         ErrorCodeWinLast(RemoteRet.GetLastError()));
     }
     
+    // Return module base
     return reinterpret_cast<HMODULE>(RemoteRet.GetReturnValue());
   }
 
   // Free DLL
   void Injector::FreeDll(HMODULE ModuleRemote) const
   {
+    // Get address of FreeLibrary in Kernel32.dll
     Module Kernel32Mod(m_Memory, L"kernel32.dll");
     FARPROC const pFreeLibrary = Kernel32Mod.FindProcedure("FreeLibrary");
     DWORD_PTR pFreeLibraryTemp = reinterpret_cast<DWORD_PTR>(pFreeLibrary);
-    
+
+    // Free module in remote process using FreeLibrary
     std::vector<PVOID> Args;
     Args.push_back(reinterpret_cast<PVOID>(ModuleRemote));
     MemoryMgr::RemoteFunctionRet RemoteRet = m_Memory.Call(
@@ -168,11 +190,13 @@ namespace HadesMem
   MemoryMgr::RemoteFunctionRet Injector::CallExport(
     HMODULE RemoteModule, std::string const& Export) const
   {
+    // Get export address
     Module TargetMod(m_Memory, RemoteModule);
     FARPROC const pExportAddr = TargetMod.FindProcedure(Export);
     DWORD_PTR const pExportAddrTemp = reinterpret_cast<DWORD_PTR>(
       pExportAddr);
-    
+
+    // Create a remote thread that calls the desired export
     std::vector<PVOID> ExportArgs;
     ExportArgs.push_back(RemoteModule);
     return m_Memory.Call(reinterpret_cast<PVOID>(pExportAddrTemp), 
@@ -287,8 +311,17 @@ namespace HadesMem
     std::string const& Export, 
     Injector::InjectFlags Flags)
   {
+    // Create filesystem object for path
     boost::filesystem::path const PathReal(Path);
     
+    // Set up args for CreateProcess
+    STARTUPINFO StartInfo;
+    ZeroMemory(&StartInfo, sizeof(StartInfo));
+    StartInfo.cb = sizeof(StartInfo);
+    PROCESS_INFORMATION ProcInfo;
+    ZeroMemory(&ProcInfo, sizeof(ProcInfo));
+
+    // Construct command line.
     std::wstring CommandLine;
     Detail::ArgvQuote(PathReal.native(), CommandLine, false);
     std::for_each(Args.begin(), Args.end(), 
@@ -297,9 +330,12 @@ namespace HadesMem
         CommandLine += L' ';
         Detail::ArgvQuote(Arg, CommandLine, false);
       });
+    
+    // Copy command line to buffer
     std::vector<wchar_t> ProcArgs(CommandLine.cbegin(), CommandLine.cend());
     ProcArgs.push_back(L'\0');
     
+    // Set working directory
     boost::filesystem::path WorkDirReal;
     if (!WorkDir.empty())
     {
@@ -314,11 +350,7 @@ namespace HadesMem
       WorkDirReal = L"./";
     }
 
-    STARTUPINFO StartInfo;
-    ZeroMemory(&StartInfo, sizeof(StartInfo));
-    StartInfo.cb = sizeof(StartInfo);
-    PROCESS_INFORMATION ProcInfo;
-    ZeroMemory(&ProcInfo, sizeof(ProcInfo));
+    // Attempt process creation
     if (!CreateProcess(PathReal.c_str(), ProcArgs.data(), nullptr, nullptr, FALSE, 
       CREATE_SUSPENDED, nullptr, WorkDirReal.c_str(), &StartInfo, &ProcInfo))
     {
@@ -328,12 +360,14 @@ namespace HadesMem
         ErrorString("Could not create process.") << 
         ErrorCodeWinLast(LastError));
     }
-    
+
+    // Ensure cleanup
     Detail::EnsureCloseHandle const ProcHandle(ProcInfo.hProcess);
     Detail::EnsureCloseHandle const ThreadHandle(ProcInfo.hThread);
 
     try
     {
+      // Memory manager instance
       MemoryMgr const MyMemory(ProcInfo.dwProcessId);
       
       // Create Assembler.
@@ -354,19 +388,26 @@ namespace HadesMem
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
-      
+
+      // Get stub size
       DWORD_PTR const StubSize = MyJitFunc.getCodeSize();
-      
+
+      // Allocate memory for stub buffer
       AllocAndFree const StubMemRemote(MyMemory, StubSize);
       PBYTE pRemoteStub = static_cast<PBYTE>(StubMemRemote.GetBase());
       DWORD_PTR pRemoteStubTemp = reinterpret_cast<DWORD_PTR>(pRemoteStub);
-      
+
+      // Create buffer to hold relocated code plus the return value address
       std::vector<BYTE> CodeReal(StubSize);
+
+      // Generate code
       MyJitFunc.relocCode(CodeReal.data(), reinterpret_cast<DWORD_PTR>(
         pRemoteStub));
-      
+
+      // Write stub buffer to process
       MyMemory.WriteList(pRemoteStub, CodeReal);
-      
+
+      // Call stub via creating a remote thread in the target.
       Detail::EnsureCloseHandle const MyThread(CreateRemoteThread(
         MyMemory.GetProcessHandle(), nullptr, 0, 
         reinterpret_cast<LPTHREAD_START_ROUTINE>(pRemoteStubTemp), nullptr, 
@@ -379,7 +420,8 @@ namespace HadesMem
           ErrorString("Could not create remote thread.") << 
           ErrorCodeWinLast(LastError));
       }
-      
+
+      // Wait for the remote thread to terminate
       if (WaitForSingleObject(MyThread, INFINITE) != WAIT_OBJECT_0)
       {
         DWORD const LastError = GetLastError();
@@ -388,16 +430,21 @@ namespace HadesMem
           ErrorString("Could not wait for remote thread.") << 
           ErrorCodeWinLast(LastError));
       }
-      
+
+      // Create DLL injector
       Injector const MyInjector(MyMemory);
+
+      // Inject DLL
       HMODULE const ModBase = MyInjector.InjectDll(Module, Flags);
-      
+
+      // Call export if one has been specified
       MemoryMgr::RemoteFunctionRet ExpRetData(0, 0, 0);
       if (!Export.empty())
       {
         ExpRetData = MyInjector.CallExport(ModBase, Export);
       }
-      
+
+      // Success! Let the process continue execution.
       if (ResumeThread(ProcInfo.hThread) == static_cast<DWORD>(-1))
       {
         DWORD const LastError = GetLastError();
@@ -408,16 +455,18 @@ namespace HadesMem
           ErrorCodeWinRet(ExpRetData.GetReturnValue()) << 
           ErrorCodeWinOther(ExpRetData.GetLastError()));
       }
-      
+
+      // Return data to caller
       return CreateAndInjectData(MyMemory, ModBase, 
         ExpRetData.GetReturnValue(), ExpRetData.GetLastError());
     }
+    // Catch exceptions
     catch (std::exception const& /*e*/)
     {
-      // Terminate process if injection failed, otherwise the 'zombie' process 
-      // would be leaked.
+      // Terminate process if injection failed
       TerminateProcess(ProcInfo.hProcess, 0);
-      
+
+      // Rethrow exception
       throw;
     }
   }

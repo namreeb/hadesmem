@@ -7,11 +7,12 @@
 
 #pragma once
 
+// Boost
 #include <boost/config.hpp>
 
 // Version numbers
 #define HADES_VERSION_MAJOR 1
-#define HADES_VERSION_MINOR 5
+#define HADES_VERSION_MINOR 3
 #define HADES_VERSION_PATCH 0
 
 // Full version number
@@ -41,7 +42,7 @@ HADES_VERSION_MAJOR, HADES_VERSION_MINOR, HADES_VERSION_PATCH)
   #endif
   #define HADES_INTEL
 #elif defined(BOOST_CLANG)
-  // TODO: Do feature checks here.
+  // Todo: Do feature checks here.
   #define HADES_CLANG
 // Detect GCC
 // Note: This check must be last as both ICC and Clang also define __GNUC__ 
