@@ -43,6 +43,12 @@ namespace HadesMem
     // Destructor
     ~Injector();
     
+    // Equality operator
+    bool operator==(Injector const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(Injector const& Rhs) const;
+    
     // Injection flags
     enum InjectFlags
     {
@@ -60,12 +66,6 @@ namespace HadesMem
     // Call export
     MemoryMgr::RemoteFunctionRet CallExport(HMODULE RemoteModule, 
       std::string const& Export) const;
-    
-    // Equality operator
-    bool operator==(Injector const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(Injector const& Rhs) const;
 
   private:
     // MemoryMgr instance

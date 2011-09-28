@@ -11,5 +11,6 @@
 #include <HadesMemory/Region.hpp>
 #include <HadesMemory/Injector.hpp>
 #include <HadesMemory/MemoryMgr.hpp>
+#include <HadesMemory/FindPattern.hpp>
 
 #include <HadesMemory/PeLib/PeLib.hpp>

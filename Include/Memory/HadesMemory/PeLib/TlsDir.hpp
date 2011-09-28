@@ -42,6 +42,12 @@ namespace HadesMem
     
     // Destructor
     ~TlsDir();
+    
+    // Equality operator
+    bool operator==(TlsDir const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(TlsDir const& Rhs) const;
 
     // Get base of TLS dir
     PVOID GetBase() const;
@@ -92,12 +98,6 @@ namespace HadesMem
 
     // Set characteristics
     void SetCharacteristics(DWORD Characteristics) const;
-    
-    // Equality operator
-    bool operator==(TlsDir const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(TlsDir const& Rhs) const;
 
   private:
     // PE file

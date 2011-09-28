@@ -13,7 +13,9 @@ namespace HadesMem
   class AllocAndFree;
   class Module;
   class ModuleList;
+  class FindPattern;
   class Injector;
+  class Region;
   class DosHeader;
   class ExportDir;
   class ExportList;

@@ -59,6 +59,12 @@ namespace HadesMem
     
     // Destructor
     ~Region();
+    
+    // Equality operator
+    bool operator==(Region const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(Region const& Rhs) const;
 
     // Get base address
     PVOID GetBase() const;
@@ -86,12 +92,6 @@ namespace HadesMem
     
     // Dump to file
     void Dump(std::wstring const& Path) const;
-    
-    // Equality operator
-    bool operator==(Region const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(Region const& Rhs) const;
 
   private:
     // MemoryMgr instance

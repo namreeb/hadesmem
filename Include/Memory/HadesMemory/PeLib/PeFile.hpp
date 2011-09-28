@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include <HadesMemory/MemoryMgr.hpp>
 #include <HadesMemory/Detail/Fwd.hpp>
 #include <HadesMemory/Detail/Error.hpp>
-#include <HadesMemory/MemoryMgr.hpp>
 
 #include <Windows.h>
 
@@ -48,6 +48,12 @@ namespace HadesMem
     
     // Destructor
     ~PeFile();
+    
+    // Equality operator
+    bool operator==(PeFile const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(PeFile const& Rhs) const;
 
     // Get memory manager
     MemoryMgr GetMemoryMgr() const;
@@ -60,12 +66,6 @@ namespace HadesMem
 
     // Get file type
     FileType GetType() const;
-    
-    // Equality operator
-    bool operator==(PeFile const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(PeFile const& Rhs) const;
 
   protected:
     // Memory instance

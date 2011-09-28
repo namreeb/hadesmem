@@ -65,6 +65,10 @@
   <span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span> 
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
   <span class="identifier">T</span> <span class="identifier">Read</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
@@ -342,6 +346,10 @@
         </h5>
 <pre class="programlisting"><span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
 <p class="title"><b></b></p>
@@ -351,6 +359,7 @@
                 Calls a function at <code class="computeroutput"><span class="identifier">Address</span></code>,
                 using calling convention <code class="computeroutput"><span class="identifier">MyCallConv</span></code>,
                 with the arguments <code class="computeroutput"><span class="identifier">Args</span></code>.
+                Alternatively, calls multiple functions.
               </p></dd>
 <dt><span class="term">Returns:</span></dt>
 <dd><p>

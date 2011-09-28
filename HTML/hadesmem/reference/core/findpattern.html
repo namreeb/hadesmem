@@ -23,55 +23,55 @@
 <a name="hadesmem.reference.core.findpattern.synopsis-heading"></a>
           <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.synopsis">Synopsis</a>
         </h4>
-<pre class="programlisting"> <span class="comment">// In header: &lt;HadesMemory/FindPattern.hpp&gt;</span>
- 
- <span class="keyword">class</span> <span class="identifier">FindPattern</span>
- <span class="special">{</span>
- <span class="keyword">public</span><span class="special">:</span>
-   <span class="keyword">friend</span> <span class="keyword">class</span> <span class="identifier">Pattern</span><span class="special">;</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
-   <span class="special">{</span> <span class="special">};</span>
-   
-   <span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> 
-     <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
-   
-   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
-   
-   <span class="keyword">enum</span> <span class="identifier">FindFlags</span>
-   <span class="special">{</span>
-     <span class="identifier">FindFlags_None</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> 
-     <span class="identifier">FindFlags_ThrowOnUnmatch</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span> 
-     <span class="identifier">FindFlags_RelativeAddress</span> <span class="special">=</span> <span class="number">2</span><span class="special">,</span> 
-     <span class="identifier">FindFlags_ScanData</span> <span class="special">=</span> <span class="number">4</span>
-   <span class="special">};</span>
-   
-   <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
-     <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   
-   <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
-     <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
-   
-   <span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-   
-   <span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   
-   <span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
-   
-   <span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
-   
-   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   
-   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
- <span class="special">};</span>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/FindPattern.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">FindPattern</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="identifier">Pattern</span><span class="special">;</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
+  <span class="special">{</span> <span class="special">};</span>
+  
+  <span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> 
+    <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
+  
+  <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
+  
+  <span class="keyword">enum</span> <span class="identifier">FindFlags</span>
+  <span class="special">{</span>
+    <span class="identifier">FindFlags_None</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> 
+    <span class="identifier">FindFlags_ThrowOnUnmatch</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span> 
+    <span class="identifier">FindFlags_RelativeAddress</span> <span class="special">=</span> <span class="number">2</span><span class="special">,</span> 
+    <span class="identifier">FindFlags_ScanData</span> <span class="special">=</span> <span class="number">4</span>
+  <span class="special">};</span>
+  
+  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+    <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
+    <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
+  
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
+  
+  <span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
 
 <span class="keyword">class</span> <span class="identifier">Pattern</span>
 <span class="special">{</span>
@@ -82,12 +82,12 @@
   
   <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
     <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
-   
-   <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-   
-   <span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
+  
+  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+  
+  <span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
   
   <span class="keyword">void</span> <span class="identifier">Save</span><span class="special">();</span>
   
@@ -104,50 +104,50 @@
 
 <span class="keyword">namespace</span> <span class="identifier">PatternManipulators</span>
 <span class="special">{</span>
-   <span class="keyword">class</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="comment">/*Pat*/</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-     
-		<span class="keyword">friend</span> <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">,</span> 
-		  <span class="identifier">Manipulator</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Manip</span><span class="special">);</span>
-   <span class="special">};</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Save</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   <span class="special">};</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Add</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="keyword">explicit</span> <span class="identifier">Add</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-     
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   <span class="special">};</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Sub</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="keyword">explicit</span> <span class="identifier">Sub</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-     
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   <span class="special">};</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Lea</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   <span class="special">};</span>
-   
-   <span class="keyword">class</span> <span class="identifier">Rel</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
-   <span class="special">{</span>
-   <span class="keyword">public</span><span class="special">:</span>
-     <span class="identifier">Rel</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-     
-     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-   <span class="special">};</span>
+  <span class="keyword">class</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="comment">/*Pat*/</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+    
+    <span class="keyword">friend</span> <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">,</span> 
+      <span class="identifier">Manipulator</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Manip</span><span class="special">);</span>
+  <span class="special">};</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Save</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Add</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">explicit</span> <span class="identifier">Add</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+    
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Sub</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">explicit</span> <span class="identifier">Sub</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+    
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Lea</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
+  
+  <span class="keyword">class</span> <span class="identifier">Rel</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
+  <span class="special">{</span>
+  <span class="keyword">public</span><span class="special">:</span>
+    <span class="identifier">Rel</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
+    
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="special">};</span>
 <span class="special">}</span>
 </pre>
 <a name="hadesmem.reference.core.findpattern.description"></a><h4>

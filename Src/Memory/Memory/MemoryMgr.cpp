@@ -102,15 +102,36 @@ namespace HadesMem
 
   // Call remote function
   MemoryMgr::RemoteFunctionRet MemoryMgr::Call(LPCVOID Address, 
-    CallConv MyCallConv, std::vector<PVOID> const& Args) const 
+    CallConv MyCallConv, std::vector<PVOID> const& Args) const
   {
-    std::size_t const NumArgs = Args.size();
+    std::vector<LPCVOID> Addresses;
+    Addresses.push_back(Address);
+    std::vector<CallConv> MyCallConvs;
+    MyCallConvs.push_back(MyCallConv);
+    std::vector<std::vector<PVOID>> ArgsFull;
+    ArgsFull.push_back(Args);
+    return Call(Addresses, MyCallConvs, ArgsFull)[0];
+  }
 
+  // Call remote function
+  std::vector<MemoryMgr::RemoteFunctionRet> MemoryMgr::Call(
+    std::vector<LPCVOID> Addresses, 
+    std::vector<CallConv> MyCallConvs, 
+    std::vector<std::vector<PVOID>> const& ArgsFull) const 
+  {
+    if (Addresses.size() != MyCallConvs.size() || 
+      Addresses.size() != ArgsFull.size())
+    {
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorFunction("MemoryMgr::Call") << 
+        ErrorString("Size mismatch in parameters."));
+    }
+    
     AsmJit::Assembler MyJitFunc;
 
-    AllocAndFree const ReturnValueRemote(*this, sizeof(DWORD_PTR));
-    AllocAndFree const ReturnValue64Remote(*this, sizeof(DWORD64));
-    AllocAndFree const LastErrorRemote(*this, sizeof(DWORD));
+    AllocAndFree const ReturnValueRemote(*this, sizeof(DWORD_PTR) * Addresses.size());
+    AllocAndFree const ReturnValue64Remote(*this, sizeof(DWORD64) * Addresses.size());
+    AllocAndFree const LastErrorRemote(*this, sizeof(DWORD) * Addresses.size());
 
     Module Kernel32Mod(*this, L"kernel32.dll");
     DWORD_PTR const pGetLastError = reinterpret_cast<DWORD_PTR>(
@@ -119,182 +140,198 @@ namespace HadesMem
       Kernel32Mod.FindProcedure("SetLastError"));
 
 #if defined(_M_AMD64) 
-    // Check calling convention
-    if (MyCallConv != CallConv_X64 && MyCallConv != CallConv_Default)
+    for (std::size_t i = 0; i < Addresses.size(); ++i)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Call") << 
-        ErrorString("Invalid calling convention."));
-    }
-
-    // Prologue
-    MyJitFunc.push(AsmJit::rbp);
-    MyJitFunc.mov(AsmJit::rbp, AsmJit::rsp);
-
-    // Allocate ghost space
-    MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-
-    // Call kernel32.dll!SetLastError
-    MyJitFunc.mov(AsmJit::rcx, 0);
-    MyJitFunc.mov(AsmJit::rax, pSetLastError);
-    MyJitFunc.call(AsmJit::rax);
-
-    // Cleanup ghost space
-    MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
-
-    // Set up first 4 parameters
-    MyJitFunc.mov(AsmJit::rcx, NumArgs > 0 ? reinterpret_cast<DWORD_PTR>(
-      Args[0]) : 0);
-    MyJitFunc.mov(AsmJit::rdx, NumArgs > 1 ? reinterpret_cast<DWORD_PTR>(
-      Args[1]) : 0);
-    MyJitFunc.mov(AsmJit::r8, NumArgs > 2 ? reinterpret_cast<DWORD_PTR>(
-      Args[2]) : 0);
-    MyJitFunc.mov(AsmJit::r9, NumArgs > 3 ? reinterpret_cast<DWORD_PTR>(
-      Args[3]) : 0);
-
-    // Handle remaining parameters (if any)
-    if (NumArgs > 4)
-    {
-      std::for_each(Args.crbegin(), Args.crend() - 4, 
-        [&MyJitFunc] (PVOID Arg)
+      LPCVOID Address = Addresses[i];
+      CallConv MyCallConv = MyCallConvs[i];
+      std::vector<PVOID> const& Args = ArgsFull[i];
+      std::size_t const NumArgs = Args.size();
+      
+      // Check calling convention
+      if (MyCallConv != CallConv_X64 && MyCallConv != CallConv_Default)
       {
-        MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Arg));
-        MyJitFunc.push(AsmJit::rax);
-      });
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::Call") << 
+          ErrorString("Invalid calling convention."));
+      }
+      
+      // Prologue
+      MyJitFunc.push(AsmJit::rbp);
+      MyJitFunc.mov(AsmJit::rbp, AsmJit::rsp);
+  
+      // Allocate ghost space
+      MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+  
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.mov(AsmJit::rcx, 0);
+      MyJitFunc.mov(AsmJit::rax, pSetLastError);
+      MyJitFunc.call(AsmJit::rax);
+  
+      // Cleanup ghost space
+      MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
+  
+      // Set up first 4 parameters
+      MyJitFunc.mov(AsmJit::rcx, NumArgs > 0 ? reinterpret_cast<DWORD_PTR>(
+        Args[0]) : 0);
+      MyJitFunc.mov(AsmJit::rdx, NumArgs > 1 ? reinterpret_cast<DWORD_PTR>(
+        Args[1]) : 0);
+      MyJitFunc.mov(AsmJit::r8, NumArgs > 2 ? reinterpret_cast<DWORD_PTR>(
+        Args[2]) : 0);
+      MyJitFunc.mov(AsmJit::r9, NumArgs > 3 ? reinterpret_cast<DWORD_PTR>(
+        Args[3]) : 0);
+  
+      // Handle remaining parameters (if any)
+      if (NumArgs > 4)
+      {
+        std::for_each(Args.crbegin(), Args.crend() - 4, 
+          [&MyJitFunc] (PVOID Arg)
+        {
+          MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Arg));
+          MyJitFunc.push(AsmJit::rax);
+        });
+      }
+  
+      // Allocate ghost space
+      MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+  
+      // Call target
+      MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
+      MyJitFunc.call(AsmJit::rax);
+      
+      // Cleanup ghost space
+      MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
+  
+      // Clean up remaining stack space
+      MyJitFunc.add(AsmJit::rsp, 0x8 * (NumArgs - 4));
+  
+      // Write return value to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueRemote.GetBase()) + i * sizeof(DWORD_PTR));
+      MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
+  
+      // Write 64-bit return value to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        ReturnValue64Remote.GetBase()) + i * sizeof(DWORD64));
+      MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
+  
+      // Call kernel32.dll!GetLastError
+      MyJitFunc.mov(AsmJit::rax, pGetLastError);
+      MyJitFunc.call(AsmJit::rax);
+      
+      // Write error code to memory
+      MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+        LastErrorRemote.GetBase()) + i * sizeof(DWORD));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+  
+      // Epilogue
+      MyJitFunc.mov(AsmJit::rsp, AsmJit::rbp);
+      MyJitFunc.pop(AsmJit::rbp);
     }
-
-    // Allocate ghost space
-    MyJitFunc.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-
-    // Call target
-    MyJitFunc.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(Address));
-    MyJitFunc.call(AsmJit::rax);
-    
-    // Cleanup ghost space
-    MyJitFunc.add(AsmJit::rsp, AsmJit::Imm(0x20));
-
-    // Clean up remaining stack space
-    MyJitFunc.add(AsmJit::rsp, 0x8 * (NumArgs - 4));
-
-    // Write return value to memory
-    MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      ReturnValueRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-
-    // Write 64-bit return value to memory
-    MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      ReturnValue64Remote.GetBase()));
-    MyJitFunc.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-
-    // Call kernel32.dll!GetLastError
-    MyJitFunc.mov(AsmJit::rax, pGetLastError);
-    MyJitFunc.call(AsmJit::rax);
-    
-    // Write error code to memory
-    MyJitFunc.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      LastErrorRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
-
-    // Epilogue
-    MyJitFunc.mov(AsmJit::rsp, AsmJit::rbp);
-    MyJitFunc.pop(AsmJit::rbp);
 
     // Return
     MyJitFunc.ret();
 #elif defined(_M_IX86) 
-    // Prologue
-    MyJitFunc.push(AsmJit::ebp);
-    MyJitFunc.mov(AsmJit::ebp, AsmJit::esp);
-
-    // Call kernel32.dll!SetLastError
-    MyJitFunc.push(AsmJit::Imm(0x0));
-    MyJitFunc.mov(AsmJit::eax, pSetLastError);
-    MyJitFunc.call(AsmJit::eax);
-
-    // Get stack arguments offset
-    std::size_t StackArgOffs = 0;
-    switch (MyCallConv)
+    for (std::size_t i = 0; i < Addresses.size(); ++i)
     {
-    case CallConv_THISCALL:
-      StackArgOffs = 1;
-      break;
-
-    case CallConv_FASTCALL:
-      StackArgOffs = 2;
-      break;
-
-    case CallConv_CDECL:
-    case CallConv_STDCALL:
-    case CallConv_Default:
-      StackArgOffs = 0;
-      break;
-
-    default:
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorFunction("MemoryMgr::Call") << 
-        ErrorString("Invalid calling convention."));
-    }
-
-    // Pass first arg in through ECX if 'thiscall' is specified
-    if (MyCallConv == CallConv_THISCALL)
-    {
-      MyJitFunc.mov(AsmJit::ecx, NumArgs ? reinterpret_cast<DWORD_PTR>(
-        Args[0]) : 0);
-    }
-
-    // Pass first two args in through ECX and EDX if 'fastcall' is specified
-    if (MyCallConv == CallConv_FASTCALL)
-    {
-      MyJitFunc.mov(AsmJit::ecx, NumArgs ? reinterpret_cast<DWORD_PTR>(
-        Args[0]) : 0);
-      MyJitFunc.mov(AsmJit::edx, NumArgs > 1 ? reinterpret_cast<DWORD_PTR>(
-        Args[1]) : 0);
-    }
-
-    // Pass all remaining args on stack if there are any left to process.
-    if (NumArgs > StackArgOffs)
-    {
-      std::for_each(Args.crbegin(), Args.crend() - StackArgOffs, 
-        [&] (PVOID Arg)
+      LPCVOID Address = Addresses[i];
+      CallConv MyCallConv = MyCallConvs[i];
+      std::vector<PVOID> const& Args = ArgsFull[i];
+      std::size_t const NumArgs = Args.size();
+      
+      // Prologue
+      MyJitFunc.push(AsmJit::ebp);
+      MyJitFunc.mov(AsmJit::ebp, AsmJit::esp);
+  
+      // Call kernel32.dll!SetLastError
+      MyJitFunc.push(AsmJit::Imm(0x0));
+      MyJitFunc.mov(AsmJit::eax, pSetLastError);
+      MyJitFunc.call(AsmJit::eax);
+  
+      // Get stack arguments offset
+      std::size_t StackArgOffs = 0;
+      switch (MyCallConv)
       {
-        MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Arg));
-        MyJitFunc.push(AsmJit::eax);
-      });
+      case CallConv_THISCALL:
+        StackArgOffs = 1;
+        break;
+  
+      case CallConv_FASTCALL:
+        StackArgOffs = 2;
+        break;
+  
+      case CallConv_CDECL:
+      case CallConv_STDCALL:
+      case CallConv_Default:
+        StackArgOffs = 0;
+        break;
+  
+      default:
+        BOOST_THROW_EXCEPTION(Error() << 
+          ErrorFunction("MemoryMgr::Call") << 
+          ErrorString("Invalid calling convention."));
+      }
+  
+      // Pass first arg in through ECX if 'thiscall' is specified
+      if (MyCallConv == CallConv_THISCALL)
+      {
+        MyJitFunc.mov(AsmJit::ecx, NumArgs ? reinterpret_cast<DWORD_PTR>(
+          Args[0]) : 0);
+      }
+  
+      // Pass first two args in through ECX and EDX if 'fastcall' is specified
+      if (MyCallConv == CallConv_FASTCALL)
+      {
+        MyJitFunc.mov(AsmJit::ecx, NumArgs ? reinterpret_cast<DWORD_PTR>(
+          Args[0]) : 0);
+        MyJitFunc.mov(AsmJit::edx, NumArgs > 1 ? reinterpret_cast<DWORD_PTR>(
+          Args[1]) : 0);
+      }
+  
+      // Pass all remaining args on stack if there are any left to process.
+      if (NumArgs > StackArgOffs)
+      {
+        std::for_each(Args.crbegin(), Args.crend() - StackArgOffs, 
+          [&] (PVOID Arg)
+        {
+          MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Arg));
+          MyJitFunc.push(AsmJit::eax);
+        });
+      }
+      
+      // Call target
+      MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Address));
+      MyJitFunc.call(AsmJit::eax);
+      
+      // Write return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        ReturnValueRemote.GetBase()) + i * sizeof(DWORD_PTR));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      
+      // Write 64-bit return value to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        ReturnValue64Remote.GetBase()) + i * sizeof(DWORD64));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
+      
+      // Call kernel32.dll!GetLastError
+      MyJitFunc.mov(AsmJit::eax, pGetLastError);
+      MyJitFunc.call(AsmJit::eax);
+      
+      // Write error code to memory
+      MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+        LastErrorRemote.GetBase()) + i * sizeof(DWORD));
+      MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+      
+      // Clean up stack if necessary
+      if (MyCallConv == CallConv_CDECL)
+      {
+        MyJitFunc.add(AsmJit::esp, AsmJit::Imm(NumArgs * sizeof(PVOID)));
+      }
+  
+      // Epilogue
+      MyJitFunc.mov(AsmJit::esp, AsmJit::ebp);
+      MyJitFunc.pop(AsmJit::ebp);
     }
-    
-    // Call target
-    MyJitFunc.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(Address));
-    MyJitFunc.call(AsmJit::eax);
-    
-    // Write return value to memory
-    MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      ReturnValueRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    
-    // Write 64-bit return value to memory
-    MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      ReturnValue64Remote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
-    
-    // Call kernel32.dll!GetLastError
-    MyJitFunc.mov(AsmJit::eax, pGetLastError);
-    MyJitFunc.call(AsmJit::eax);
-    
-    // Write return value to memory
-    MyJitFunc.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      LastErrorRemote.GetBase()));
-    MyJitFunc.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    
-    // Clean up stack if necessary
-    if (MyCallConv == CallConv_CDECL)
-    {
-      MyJitFunc.add(AsmJit::esp, AsmJit::Imm(NumArgs * sizeof(PVOID)));
-    }
-
-    // Epilogue
-    MyJitFunc.mov(AsmJit::esp, AsmJit::ebp);
-    MyJitFunc.pop(AsmJit::ebp);
 
     // Return
     MyJitFunc.ret(AsmJit::Imm(0x4));
@@ -336,10 +373,19 @@ namespace HadesMem
         ErrorCodeWinLast(LastError));
     }
     
-    DWORD_PTR const RetVal = Read<DWORD_PTR>(ReturnValueRemote.GetBase());
-    DWORD64 const RetVal64 = Read<DWORD64>(ReturnValue64Remote.GetBase());
-    DWORD const ErrorCode = Read<DWORD>(LastErrorRemote.GetBase());
-    return RemoteFunctionRet(RetVal, RetVal64, ErrorCode);
+    std::vector<RemoteFunctionRet> ReturnVals;
+    for (std::size_t i = 0; i < Addresses.size(); ++i)
+    {
+      DWORD_PTR const RetVal = Read<DWORD_PTR>(static_cast<DWORD_PTR*>(
+        ReturnValueRemote.GetBase()) + i);
+      DWORD64 const RetVal64 = Read<DWORD64>(static_cast<DWORD64*>(
+        ReturnValue64Remote.GetBase()) + i);
+      DWORD const ErrorCode = Read<DWORD>(static_cast<DWORD*>(
+        LastErrorRemote.GetBase()) + i);
+      ReturnVals.push_back(RemoteFunctionRet(RetVal, RetVal64, ErrorCode));
+    }
+    
+    return ReturnVals;
   }
 
   // Whether an address is currently readable
@@ -654,7 +700,7 @@ namespace HadesMem
   {
     std::wstring CommandLine;
     Detail::ArgvQuote(Path, CommandLine, false);
-    std::for_each(Args.begin(), Args.end(), 
+    std::for_each(std::begin(Args), std::end(Args), 
       [&] (std::wstring const& Arg) 
       {
         CommandLine += L' ';

@@ -74,38 +74,61 @@ void TestCPPEH()
   }
 }
 
-extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
+void TestTls()
 {
-  // Break to debugger if present
-  if (IsDebuggerPresent())
-  {
-    DebugBreak();
-  }
-  
-  // Test IAT
-  MessageBox(nullptr, L"Testing IAT.", L"MMHelper", MB_OK);
-
-  // Test TLS
+  // FIXME: Add multi-threading test to check for TLS 'thrashing' (i.e. 
+  // ensure no existing data is being overwritten).
   boost::thread_specific_ptr<std::wstring> TlsTest;
   TlsTest.reset(new std::wstring(L"Testing TLS."));
   MessageBox(nullptr, TlsTest->c_str(), L"MMHelper", MB_OK);
-  
-  // Another TLS test
+}
+
+void TestTls2()
+{
   double d = 3.14;
   d = fabs(d);
   char buf[20];
   ZeroMemory(&buf[0], sizeof(buf));
   sprintf_s(buf, sizeof(buf), "%f", d);
   MessageBoxA(nullptr, buf, "MMHelper", MB_OK);
-  
-  // One more TLS test
+}
+
+void TestTls3()
+{
   // FIXME: Check which OS versions this syntax is supported on and wrap in 
   // version detection code if needed.
   // FIXME: Add multi-threading test.
+  // FIXME: Add multi-threading test to check for TLS 'thrashing' (i.e. 
+  // ensure no existing data is being overwritten).
   __declspec(thread) static int i = 0;
   i = 50;
   MessageBoxW(nullptr, boost::lexical_cast<std::wstring>(i).c_str(), 
     L"MMHelper", MB_OK);
+}
+
+void TestTls4()
+{
+  MessageBox(nullptr, L"at_thread_exit callback", L"MMHelper", MB_OK);
+}
+
+extern "C" __declspec(dllexport) DWORD __stdcall Test(HMODULE /*Module*/)
+{
+  if (IsDebuggerPresent())
+  {
+    DebugBreak();
+  }
+  
+  MessageBox(nullptr, L"Testing IAT.", L"MMHelper", MB_OK);
+  
+  TestTls();
+  
+  TestTls2();
+  
+  TestTls3();
+  
+  // FIXME: Callback not currently being called. Implement TLS callbacks 
+  // correctly.
+  boost::this_thread::at_thread_exit(&TestTls4);
 
   // Test relocs
   typedef void (* tTestRelocs)();

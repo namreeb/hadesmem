@@ -90,14 +90,54 @@
           HadesMem (this document assumes you name the project 'HadesMem').
         </li>
 <li class="listitem">
-          Add /HadesMem//Memory to the source list of your application/library or the requirements
+          Add /HadesMem//HadesMem to the source list of your application/library or the requirements
           list of your project.
         </li>
 <li class="listitem">
           Add <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">HadesMemory</span><span class="special">/</span><span class="identifier">Memory</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>
           to your code.
         </li>
+<li class="listitem">
+          Set the BOOST_ROOT environmental variable and copy b2 to somewhere in your
+          PATH.
+        </li>
 </ol></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        When compiling your Boost.Build based project, explicitly specify the toolset,
+        address-model and debug/release configuration on the command line to ensure
+        that nothing needs to be recompiled and you are using the correct settings.
+        If you've done it right then you should only need to link to Boost and HadesMem
+        (i.e. nothing should be recompiled).
+      </p></td></tr>
+</table></div>
+<p>
+      Sample Jamroot 
+</p>
+<pre class="programlisting"><span class="identifier">use</span><span class="special">-</span><span class="identifier">project</span> <span class="special">/</span><span class="identifier">HadesMem</span> 
+  <span class="special">:</span> 
+    <span class="special">../../</span><span class="identifier">HadesMem</span><span class="special">-</span><span class="identifier">Branches</span><span class="special">-</span><span class="identifier">v1</span><span class="special">.</span><span class="number">0.0</span><span class="special">/</span>
+  <span class="special">;</span>
+
+<span class="identifier">exe</span> <span class="identifier">Test</span>
+  <span class="special">:</span> 
+    <span class="identifier">Test</span><span class="special">.</span><span class="identifier">cpp</span>
+    <span class="special">/</span><span class="identifier">HadesMem</span><span class="comment">//HadesMem</span>
+  <span class="special">;</span>
+</pre>
+<p>
+    </p>
+<p>
+      Sample Command-line: 
+</p>
+<pre class="programlisting"><span class="identifier">b2</span> <span class="identifier">toolset</span><span class="special">=</span><span class="identifier">msvc</span><span class="special">-</span><span class="number">10.0</span> <span class="identifier">address</span><span class="special">-</span><span class="identifier">model</span><span class="special">=</span><span class="number">32</span> <span class="identifier">debug</span>
+</pre>
+<p>
+    </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>

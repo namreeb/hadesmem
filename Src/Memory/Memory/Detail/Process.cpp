@@ -189,16 +189,15 @@ namespace HadesMem
     
     // Move constructor
     Process::Process(Process&& Other)
-      : m_pImpl(std::move(Other.m_pImpl))
+      : m_pImpl()
     {
-      Other.m_pImpl.reset();
+      *this = std::move(Other);
     }
     
     // Move assignment operator
     Process& Process::operator=(Process&& Other)
     {
       this->m_pImpl = std::move(Other.m_pImpl);
-      Other.m_pImpl.reset();
       
       return *this;
     }

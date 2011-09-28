@@ -16,6 +16,7 @@
 
 #include <Windows.h>
 
+#include <iterator>
 #include <algorithm>
 
 #include <boost/filesystem.hpp>
@@ -291,13 +292,14 @@ namespace HadesMem
     
     std::wstring CommandLine;
     Detail::ArgvQuote(PathReal.native(), CommandLine, false);
-    std::for_each(Args.begin(), Args.end(), 
+    std::for_each(std::begin(Args), std::end(Args), 
       [&] (std::wstring const& Arg) 
       {
         CommandLine += L' ';
         Detail::ArgvQuote(Arg, CommandLine, false);
       });
-    std::vector<wchar_t> ProcArgs(CommandLine.cbegin(), CommandLine.cend());
+    std::vector<wchar_t> ProcArgs(std::begin(CommandLine), 
+      std::end(CommandLine));
     ProcArgs.push_back(L'\0');
     
     boost::filesystem::path WorkDirReal;

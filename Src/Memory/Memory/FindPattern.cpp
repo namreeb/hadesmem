@@ -109,7 +109,7 @@ namespace HadesMem
     if (!Module)
     {
       ModuleList Modules(m_Memory);
-      Module = Modules.begin()->GetHandle();
+      Module = std::begin(Modules)->GetHandle();
     }
     
     PBYTE const pBase = reinterpret_cast<PBYTE>(Module);
@@ -119,7 +119,7 @@ namespace HadesMem
     NtHeaders const MyNtHeaders(MyPeFile);
     
     SectionList Sections(MyPeFile);
-    std::for_each(Sections.begin(), Sections.end(), 
+    std::for_each(std::begin(Sections), std::end(Sections), 
       [&, this] (Section const& S)
       {
         if ((S.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == 
@@ -228,8 +228,8 @@ namespace HadesMem
       +(DataRule);
     
     std::vector<unsigned int> DataParsed;
-    auto DataBeg = Data.cbegin();
-    auto DataEnd = Data.cend();
+    auto DataBeg = std::begin(Data);
+    auto DataEnd = std::end(Data);
     bool const Converted = boost::spirit::qi::phrase_parse(
       DataBeg, DataEnd, 
       DataListRule, 
@@ -243,7 +243,7 @@ namespace HadesMem
     }
     
     std::vector<std::pair<BYTE, bool>> DataReal;
-    std::transform(DataParsed.cbegin(), DataParsed.cend(), 
+    std::transform(std::begin(DataParsed), std::end(DataParsed), 
       std::back_inserter(DataReal), 
       [] (unsigned int Current) -> std::pair<BYTE, bool>
       {
@@ -311,7 +311,7 @@ namespace HadesMem
     
     std::vector<std::pair<PBYTE, PBYTE>> const& ScanRegions = 
       ScanDataSecs ? m_DataRegions : m_CodeRegions;
-    for (auto i = ScanRegions.cbegin(); i != ScanRegions.cend(); ++i)
+    for (auto i = std::begin(ScanRegions); i != std::end(ScanRegions); ++i)
     {
       PBYTE const SBegin = i->first;
       PBYTE const SEnd = i->second;
@@ -321,8 +321,8 @@ namespace HadesMem
       std::vector<BYTE> const Buffer(m_Memory.ReadList<std::vector<BYTE>>(
         SBegin, MemSize));
       
-      auto const Iter = std::search(Buffer.cbegin(), Buffer.cend(), 
-        Data.cbegin(), Data.cend(), 
+      auto const Iter = std::search(std::begin(Buffer), std::end(Buffer), 
+        std::begin(Data), std::end(Data), 
         [] (BYTE HCur, std::pair<BYTE, bool> const& NCur)
         {
           return (!NCur.second) || (HCur == NCur.first);
@@ -330,7 +330,7 @@ namespace HadesMem
       
       if (Iter != Buffer.cend())
       {
-        return (SBegin + std::distance(Buffer.cbegin(), Iter));
+        return (SBegin + std::distance(std::begin(Buffer), Iter));
       }
     }
     
@@ -422,8 +422,8 @@ namespace HadesMem
     std::vector<FindFlags> FlagsList;
     std::vector<PatternInfoFull> PatternList;
     
-    auto DataBeg = Data.cbegin();
-    auto DataEnd = Data.cend();
+    auto DataBeg = std::begin(Data);
+    auto DataEnd = std::end(Data);
     bool const Parsed = qi::phrase_parse(DataBeg, DataEnd, 
       (
         L"HadesMem Patterns" >> FlagsRule >> 
@@ -440,13 +440,13 @@ namespace HadesMem
     }
     
     unsigned int Flags = FindFlags_None;
-    std::for_each(FlagsList.cbegin(), FlagsList.cend(), 
+    std::for_each(std::begin(FlagsList), std::end(FlagsList), 
       [&] (FindFlags Flag)
       {
         Flags |= Flag;
       });
     
-    std::for_each(PatternList.cbegin(), PatternList.cend(), 
+    std::for_each(std::begin(PatternList), std::end(PatternList), 
       [&, this] (PatternInfoFull const& P)
       {
         PatternInfo const& PatInfo = P.Pattern;
@@ -454,7 +454,7 @@ namespace HadesMem
           static_cast<FindFlags>(Flags));
         
         std::vector<ManipInfo> const& ManipList = P.Manipulators;
-        std::for_each(ManipList.cbegin(), ManipList.cend(), 
+        std::for_each(std::begin(ManipList), std::end(ManipList), 
           [&] (ManipInfo const& M)
           {
             switch (M.Type)
@@ -592,8 +592,8 @@ namespace HadesMem
     
     m_Finder.m_Addresses[m_Name] = m_Address;
   }
-	
-	// Update address
+  
+  // Update address
   void Pattern::Update(PBYTE Address)
   {
     m_Address = Address;
@@ -630,12 +630,12 @@ namespace HadesMem
     { }
 
     // Manipulator chaining operator overload
-		Pattern& operator<< (Pattern& Pat, Manipulator const& Manip)
-		{
-			Manip.Manipulate(Pat);
-			return Pat;
-		}
-		
+    Pattern& operator<< (Pattern& Pat, Manipulator const& Manip)
+    {
+      Manip.Manipulate(Pat);
+      return Pat;
+    }
+    
     // Manipulate pattern
     void Save::Manipulate(Pattern& Pat) const
     {

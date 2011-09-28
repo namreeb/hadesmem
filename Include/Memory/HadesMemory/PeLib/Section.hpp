@@ -48,6 +48,12 @@ namespace HadesMem
     
     // Destructor
     ~Section();
+    
+    // Equality operator
+    bool operator==(Section const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(Section const& Rhs) const;
 
     // Get section header base
     PVOID GetBase() const;
@@ -114,12 +120,6 @@ namespace HadesMem
 
     // Set characteristics
     void SetCharacteristics(DWORD Characteristics) const;
-    
-    // Equality operator
-    bool operator==(Section const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(Section const& Rhs) const;
 
   private:
     // PE file

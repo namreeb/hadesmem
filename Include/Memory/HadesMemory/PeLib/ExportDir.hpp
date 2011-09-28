@@ -48,6 +48,12 @@ namespace HadesMem
     
     // Destructor
     ~ExportDir();
+    
+    // Equality operator
+    bool operator==(ExportDir const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(ExportDir const& Rhs) const;
 
     // Get base of export dir
     PVOID GetBase() const;
@@ -123,12 +129,6 @@ namespace HadesMem
 
     // Set address of name ordinals
     void SetAddressOfNameOrdinals(DWORD AddressOfNameOrdinals) const;
-    
-    // Equality operator
-    bool operator==(ExportDir const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(ExportDir const& Rhs) const;
 
   private:
     // PE file

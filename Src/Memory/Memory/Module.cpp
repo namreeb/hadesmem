@@ -12,6 +12,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <iterator>
+
 namespace HadesMem
 {
   // Find module by name
@@ -314,7 +316,7 @@ namespace HadesMem
     
     if (!ModuleName)
     {
-      return *Modules.begin();
+      return *std::begin(Modules);
     }
     
     std::wstring ModuleNameReal(ModuleName);
@@ -333,7 +335,7 @@ namespace HadesMem
     bool const IsPath = (ModuleNameReal.find(L'\\') != std::wstring::npos) || 
       (ModuleNameReal.find(L'/') != std::wstring::npos);
     
-    auto Iter = std::find_if(Modules.begin(), Modules.end(), 
+    auto Iter = std::find_if(std::begin(Modules), std::end(Modules), 
       [&] (Module const& M) -> bool
       {
         if (IsPath)
@@ -345,7 +347,7 @@ namespace HadesMem
           return ModuleNameReal == M.GetName();
         }
       });
-    if (Iter != Modules.end())
+    if (Iter != std::end(Modules))
     {
       return *Iter;
     }

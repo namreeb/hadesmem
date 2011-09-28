@@ -146,9 +146,12 @@ DEALINGS IN THE SOFTWARE.
 
 * Added new `FindPattern` APIs.
 * Added `Export::IsForwardedByOrdinal` and `Export::GetForwarderOrdinal`.
+* Added `MemoryMgr::Call` overload to support calling multiple functions from the same 
+thread.
 
 [*Bug Fixes]
 
+* Fixed build process.
 * Fixed bug in MemoryMgr::CanRead, MemoryMgr::CanWrite, and 
 MemoryMgr::CanExecute that was causing failures in Region unit tests. Attempts 
 to read/write/execute memory marked as MEM_RESERVE (and not MEM_COMMIT) will 
@@ -164,6 +167,9 @@ where dependent module is unloaded by target application.
 just selected structures.
 * `ManualMap` now implements correct path resolution (minus manifest/sxs 
 redirection).
+* `ManualMap` now calls TLS callbacks from the same thread as the EP.
+* `ManualMap` now validates the OS version, machine type, etc of modules 
+before attempting to map them.
 
 [*Changes]
 
@@ -330,9 +336,36 @@ Using HadesMem (in a Boost.Build based project):
 
 # Add a /use-project/ directive to your Jamroot targeting HadesMem (this 
 document assumes you name the project 'HadesMem').
-# Add '''/HadesMem//Memory''' to the source list of your application/library 
+# Add '''/HadesMem//HadesMem''' to the source list of your application/library 
 or the requirements list of your project.
 # Add `#include <HadesMemory/Memory.hpp>` to your code.
+# Set the BOOST_ROOT environmental variable and copy b2 to somewhere in your 
+PATH.
+
+[note When compiling your Boost.Build based project, explicitly specify the 
+toolset, address-model and debug/release configuration on the command line to 
+ensure that nothing needs to be recompiled and you are using the correct 
+settings. If you've done it right then you should only need to link to Boost 
+and HadesMem (i.e. nothing should be recompiled).]
+
+Sample Jamroot
+``
+use-project /HadesMem 
+  : 
+    ../../HadesMem-Branches-v1.0.0/
+  ;
+
+exe Test
+  : 
+    Test.cpp
+    /HadesMem//HadesMem
+  ;
+``
+
+Sample Command-line:
+``
+b2 toolset=msvc-10.0 address-model=32 debug
+``
 
 [endsect] [/ Building]
 
@@ -385,6 +418,10 @@ or the requirements list of your project.
 
     RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
       std::vector<PVOID> const& Args) const;
+
+    std::vector<RemoteFunctionRet> Call(std::vector<LPCVOID> Addresses, 
+      std::vector<CallConv> MyCallConvs, 
+      std::vector<std::vector<PVOID>> const& Args) const;
 
     template <typename T>
     T Read(PVOID Address) const;
@@ -582,10 +619,15 @@ semantics. Invalidates `Other`.]]
   RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
     std::vector<PVOID> const& Args) const;
 
+  std::vector<RemoteFunctionRet> Call(std::vector<LPCVOID> Addresses, 
+    std::vector<CallConv> MyCallConvs, 
+    std::vector<std::vector<PVOID>> const& Args) const;
+
 [variablelist
 
 [[Effects:] [Calls a function at `Address`, using calling convention 
-`MyCallConv`, with the arguments `Args`.]]
+`MyCallConv`, with the arguments `Args`. Alternatively, calls multiple 
+functions.]]
 
 [[Returns:] [A `RemoteFunctionRet` instance.]]
 
@@ -2365,45 +2407,45 @@ region list.]]
     
     bool operator!=(FindPattern const& Rhs) const;
   };
-	
-	class Pattern
-	{
-	public:
-	  Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    std::wstring const& Name, FindPattern::FindFlags Flags = 
-	    FindPattern::FindFlags_None);
-	  
-	  Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    FindPattern::FindFlags Flags = FindPattern::FindFlags_None);
+  
+  class Pattern
+  {
+  public:
+    Pattern(FindPattern& Finder, std::wstring const& Data, 
+      std::wstring const& Name, FindPattern::FindFlags Flags = 
+      FindPattern::FindFlags_None);
+    
+    Pattern(FindPattern& Finder, std::wstring const& Data, 
+      FindPattern::FindFlags Flags = FindPattern::FindFlags_None);
     
     Pattern(Pattern&& Other);
     
     Pattern& operator=(Pattern&& Other);
     
     ~Pattern();
-	  
-	  void Save();
-	  
-	  void Update(PBYTE Address);
-	  
-	  PBYTE GetAddress() const;
-	  
-	  MemoryMgr GetMemory() const;
-	  
-	  FindPattern::FindFlags GetFlags() const;
-	  
-	  DWORD_PTR GetBase() const;
-	};
-	
-	namespace PatternManipulators
-	{
+    
+    void Save();
+    
+    void Update(PBYTE Address);
+    
+    PBYTE GetAddress() const;
+    
+    MemoryMgr GetMemory() const;
+    
+    FindPattern::FindFlags GetFlags() const;
+    
+    DWORD_PTR GetBase() const;
+  };
+  
+  namespace PatternManipulators
+  {
     class Manipulator
     {
     public:
       virtual void Manipulate(Pattern& /*Pat*/) const;
       
-			friend Pattern& operator<< (Pattern& Pat, 
-			  Manipulator const& Manip);
+      friend Pattern& operator<< (Pattern& Pat, 
+        Manipulator const& Manip);
     };
     
     class Save : public Manipulator
@@ -2441,7 +2483,7 @@ region list.]]
       
       virtual void Manipulate(Pattern& Pat) const;
     };
-	}
+  }
 
 [h3 Description]
 

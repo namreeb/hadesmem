@@ -12,6 +12,7 @@
 #include <HadesMemory/PeLib/DosHeader.hpp>
 
 #include <vector>
+#include <iterator>
 
 #include <boost/lexical_cast.hpp>
 
@@ -396,13 +397,13 @@ namespace HadesMem
     {
       std::vector<WORD> NameOrdinals(m_Memory.ReadList<std::vector<WORD>>(
         pOrdinals, NumberOfNames));
-      auto NameOrdIter = std::find(NameOrdinals.cbegin(), 
-        NameOrdinals.cend(), Offset);
-      if (NameOrdIter != NameOrdinals.cend())
+      auto NameOrdIter = std::find(std::begin(NameOrdinals), 
+        std::end(NameOrdinals), Offset);
+      if (NameOrdIter != std::end(NameOrdinals))
       {
         m_ByName = true;
         DWORD const NameRva = m_Memory.Read<DWORD>(pNames + std::distance(
-          NameOrdinals.cbegin(), NameOrdIter));
+          std::begin(NameOrdinals), NameOrdIter));
         m_Name = m_Memory.ReadString<std::string>(m_PeFile.RvaToVa(NameRva));
       }
     }

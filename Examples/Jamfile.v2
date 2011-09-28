@@ -25,3 +25,11 @@ lib TestMMMod
   : 
     <link>shared 
   ;
+
+lib HostCLR 
+  : 
+    Experimental/HostCLR.cpp 
+    /Memory//Memory 
+  : 
+    <link>shared 
+  ;

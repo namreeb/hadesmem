@@ -28,7 +28,7 @@ use-project /Tests
     Tests 
   ; 
 
-project Hades 
+project 
   : 
     requirements 
     <define>BOOST_FILESYSTEM_VERSION=3 
@@ -82,4 +82,9 @@ install Dist
     <install-dependencies>on 
     <install-type>SHARED_LIB 
     <install-type>EXE 
+  ;
+
+alias HadesMem
+  : 
+    Src/Memory//Memory
   ;

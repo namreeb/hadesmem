@@ -117,19 +117,19 @@ namespace HadesMem
     // Map to hold addresses
     std::map<std::wstring, PVOID> m_Addresses;
   };
-	
-	// Pattern wrapper
-	class Pattern
-	{
-	public:
-	  // Constructor
-	  Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    std::wstring const& Name, FindPattern::FindFlags Flags = 
-	    FindPattern::FindFlags_None);
-	  
-	  // Constructor
-	  Pattern(FindPattern& Finder, std::wstring const& Data, 
-	    FindPattern::FindFlags Flags = FindPattern::FindFlags_None);
+  
+  // Pattern wrapper
+  class Pattern
+  {
+  public:
+    // Constructor
+    Pattern(FindPattern& Finder, std::wstring const& Data, 
+      std::wstring const& Name, FindPattern::FindFlags Flags = 
+      FindPattern::FindFlags_None);
+    
+    // Constructor
+    Pattern(FindPattern& Finder, std::wstring const& Data, 
+      FindPattern::FindFlags Flags = FindPattern::FindFlags_None);
     
     // Move constructor
     Pattern(Pattern&& Other);
@@ -139,47 +139,47 @@ namespace HadesMem
     
     // Destructor
     ~Pattern();
-	  
-	  // Save back to parent
-	  void Save();
-	  
-	  // Update address
-	  void Update(PBYTE Address);
-	  
+    
+    // Save back to parent
+    void Save();
+    
+    // Update address
+    void Update(PBYTE Address);
+    
     // Get address
-	  PBYTE GetAddress() const;
-	  
+    PBYTE GetAddress() const;
+    
     // Get memory manager
-	  MemoryMgr GetMemory() const;
-	  
+    MemoryMgr GetMemory() const;
+    
     // Get find flags
-	  FindPattern::FindFlags GetFlags() const;
-	  
+    FindPattern::FindFlags GetFlags() const;
+    
     // Get base
-	  DWORD_PTR GetBase() const;
-	  
-	protected:
-	  // Disable copying and assignment
-	  Pattern(Pattern const&);
-	  Pattern& operator=(Pattern const&);
-	    
-	private:
-	  // Parent pattern finder
-	  FindPattern& m_Finder;
-	  
-	  // Pattern name
-	  std::wstring m_Name;
-	  
-	  // Pattern address
-	  PBYTE m_Address;
-	  
-	  // Find flags
-	  FindPattern::FindFlags m_Flags;
-	};
-	
-	namespace PatternManipulators
-	{
-	  // Pattern manipulator base
+    DWORD_PTR GetBase() const;
+    
+  protected:
+    // Disable copying and assignment
+    Pattern(Pattern const&);
+    Pattern& operator=(Pattern const&);
+      
+  private:
+    // Parent pattern finder
+    FindPattern& m_Finder;
+    
+    // Pattern name
+    std::wstring m_Name;
+    
+    // Pattern address
+    PBYTE m_Address;
+    
+    // Find flags
+    FindPattern::FindFlags m_Flags;
+  };
+  
+  namespace PatternManipulators
+  {
+    // Pattern manipulator base
     class Manipulator
     {
     public:
@@ -187,8 +187,8 @@ namespace HadesMem
       virtual void Manipulate(Pattern& /*Pat*/) const;
 
       // Manipulator chaining operator overload
-			friend Pattern& operator<< (Pattern& Pat, 
-			  Manipulator const& Manip);
+      friend Pattern& operator<< (Pattern& Pat, 
+        Manipulator const& Manip);
     };
     
     // Save pattern back to parent
@@ -254,5 +254,5 @@ namespace HadesMem
       // Instruction offset
       DWORD_PTR m_Offset;
     };
-	}
+  }
 }

@@ -43,6 +43,12 @@ namespace HadesMem
     // Destructor
     ~DosHeader();
     
+    // Equality operator
+    bool operator==(DosHeader const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(DosHeader const& Rhs) const;
+    
     // Get base
     PVOID GetBase() const;
 
@@ -165,12 +171,6 @@ namespace HadesMem
 
     // Set new header offset
     void SetNewHeaderOffset(LONG Offset) const;
-    
-    // Equality operator
-    bool operator==(DosHeader const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(DosHeader const& Rhs) const;
 
   private:
     // PE file

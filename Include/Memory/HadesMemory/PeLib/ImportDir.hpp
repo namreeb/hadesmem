@@ -47,6 +47,12 @@ namespace HadesMem
     
     // Destructor
     ~ImportDir();
+    
+    // Equality operator
+    bool operator==(ImportDir const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(ImportDir const& Rhs) const;
 
     // Get import directory base
     PVOID GetBase() const;
@@ -92,12 +98,6 @@ namespace HadesMem
 
     // Set first thunk
     void SetFirstThunk(DWORD FirstThunk) const;
-    
-    // Equality operator
-    bool operator==(ImportDir const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(ImportDir const& Rhs) const;
 
   private:
     // PE file
@@ -272,6 +272,12 @@ namespace HadesMem
     // Destructor
     ~ImportThunk();
     
+    // Equality operator
+    bool operator==(ImportThunk const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(ImportThunk const& Rhs) const;
+    
     // Get base
     PVOID GetBase() const;
 
@@ -317,12 +323,6 @@ namespace HadesMem
     void SetHint(WORD Hint) const;
       
     // TODO: SetName function
-    
-    // Equality operator
-    bool operator==(ImportThunk const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(ImportThunk const& Rhs) const;
 
   private:
     // PE file

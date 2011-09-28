@@ -97,7 +97,6 @@ namespace HadesMem
   // Copy assignment operator
   ManualMap& ManualMap::operator=(ManualMap const& Other)
   {
-
     this->m_Memory = Other.m_Memory;
     this->m_MappedMods = Other.m_MappedMods;
     this->m_ApiSchemaDefaults = Other.m_ApiSchemaDefaults;
@@ -288,7 +287,7 @@ namespace HadesMem
     DWORD const OsMinorVer = VerInfo.dwMinorVersion;
     WORD const PeMajorVer = MyNtHeaders.GetMajorOperatingSystemVersion();
     WORD const PeMinorVer = MyNtHeaders.GetMinorOperatingSystemVersion();
-    if (OsMajorVer < PeMajorVer || (OsMajorVer >= PeMajorVer && 
+    if (OsMajorVer < PeMajorVer || (OsMajorVer == PeMajorVer && 
       OsMinorVer < PeMinorVer))
     {
       BOOST_THROW_EXCEPTION(Error() << 
@@ -303,25 +302,32 @@ namespace HadesMem
     PVOID RemoteBase) const
   {
     // FIXME: Support implicit TLS, i.e. __declspec(thread).
-    // FIXME: Register callback in remote process to ensure TLS is properly 
-    // supported on all new threads etc.
-    // FIXME: Register callback in remote process to call DllMain/TLS again 
-    // with DLL_PROCESS_DETACH on process termination.
-    // FIXME: TLS callbacks should be called from the same thread as the EP.
+    // FIXME: TLS callbacks are currently only being called for manually 
+    // mapped modules on the initial remote thread used to call initialization 
+    // routines for the module. Ensure they are called again on all relevant 
+    // events (thread creation, thread exit, process creation, process exit).
     
-    std::for_each(TlsCallbacks.cbegin(), TlsCallbacks.cend(), 
+    std::vector<LPCVOID> InitRoutines;
+    std::vector<MemoryMgr::CallConv> InitCallConvs;
+    std::vector<std::vector<PVOID>> InitArgs;
+    
+    std::for_each(std::begin(TlsCallbacks), std::end(TlsCallbacks), 
       [&] (PIMAGE_TLS_CALLBACK pCallback) 
     {
-      std::wcout << "TLS Callback: " << pCallback << ".\n";
+      // Without the casts GCC will not print the offset correctly. 
+      // Technically GCCs behaviour is 'correct', and this workaround isn't 
+      // standards conformant, but it will do for now.
+      std::wcout << "TLS Callback: " << reinterpret_cast<PVOID>(
+        reinterpret_cast<DWORD_PTR>(pCallback)) << ".\n";
       std::vector<PVOID> TlsCallArgs;
       TlsCallArgs.push_back(0);
       TlsCallArgs.push_back(reinterpret_cast<PVOID>(DLL_PROCESS_ATTACH));
       TlsCallArgs.push_back(RemoteBase);
-      MemoryMgr::RemoteFunctionRet const TlsRet = m_Memory.Call(
-        static_cast<PBYTE>(RemoteBase) + reinterpret_cast<DWORD_PTR>(
-        pCallback), MemoryMgr::CallConv_Default, TlsCallArgs);
-      std::wcout << "TLS Callback Returned: " << TlsRet.GetReturnValue() 
-        << ".\n";
+      
+      InitRoutines.push_back(static_cast<PBYTE>(RemoteBase) + 
+        reinterpret_cast<DWORD_PTR>(pCallback));
+      InitCallConvs.push_back(MemoryMgr::CallConv_Default);
+      InitArgs.push_back(TlsCallArgs);
     });
         
     PVOID EntryPoint = nullptr;
@@ -341,15 +347,33 @@ namespace HadesMem
       EpArgs.push_back(0);
       EpArgs.push_back(reinterpret_cast<PVOID>(DLL_PROCESS_ATTACH));
       EpArgs.push_back(RemoteBase);
-      MemoryMgr::RemoteFunctionRet const EpRet = m_Memory.Call(EntryPoint, 
-        MemoryMgr::CallConv_Default, EpArgs);
-      std::wcout << "Entry Point Returned: " << EpRet.GetReturnValue() 
-        << ".\n";
-      if (!EpRet.GetReturnValue())
+      
+      InitRoutines.push_back(EntryPoint);
+      InitCallConvs.push_back(MemoryMgr::CallConv_Default);
+      InitArgs.push_back(EpArgs);
+    }
+    
+    std::vector<MemoryMgr::RemoteFunctionRet> const InitRets = m_Memory.Call(
+      InitRoutines, InitCallConvs, InitArgs);
+    for (std::size_t i = 0; i < InitRets.size(); ++i)
+    {
+      if (EntryPoint && i == InitRets.size() - 1)
       {
-        BOOST_THROW_EXCEPTION(Error() << 
-          ErrorFunction("ManualMap::CallInitRoutines") << 
-          ErrorString("Entry point returned FALSE."));
+        MemoryMgr::RemoteFunctionRet const EpRet = InitRets[i];
+        std::wcout << "Entry Point Returned: " << EpRet.GetReturnValue() 
+          << ".\n";
+        if (!EpRet.GetReturnValue())
+        {
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorFunction("ManualMap::CallInitRoutines") << 
+            ErrorString("Entry point returned FALSE."));
+        }
+      }
+      else
+      {
+        MemoryMgr::RemoteFunctionRet const TlsRet = InitRets[i];
+        std::wcout << "TLS Callback Returned: " << TlsRet.GetReturnValue() 
+          << ".\n";
       }
     }
   }
@@ -517,20 +541,20 @@ namespace HadesMem
     std::wstring const FileName(boost::to_lower_copy(
       PathReal.filename().native()));
     auto DefIter = m_ApiSchemaDefaults.find(FileName);
-    if (DefIter != m_ApiSchemaDefaults.cend())
+    if (DefIter != std::end(m_ApiSchemaDefaults))
     {
       auto ExceptIter = m_ApiSchemaExceptions.find(FileName);
-      if (ExceptIter != m_ApiSchemaExceptions.cend())
+      if (ExceptIter != std::end(m_ApiSchemaExceptions))
       {
-        auto FoundIter = std::find_if(ExceptIter->second.cbegin(), 
-          ExceptIter->second.cend(), 
+        auto FoundIter = std::find_if(std::end(ExceptIter->second), 
+          std::end(ExceptIter->second), 
           [&] (ApiSchemaExceptionPair const& Exception)
           {
             return boost::filesystem::equivalent(
               ResolvePath(Exception.first), 
               ResolvePath(Parent));
           });
-        if (FoundIter != ExceptIter->second.cend())
+        if (FoundIter != std::end(ExceptIter->second))
         {
           std::wcout << "Detected API schema redirection (exception).\n";
           PathReal = ResolvePath(FoundIter->second);
@@ -598,75 +622,75 @@ namespace HadesMem
 #if defined(_M_AMD64) 
     unsigned long PebOffset = 0x60;
     unsigned long ApiSchemaOffset = 0x68;
-  	ApiSetMapHeader* pHeader = *reinterpret_cast<ApiSetMapHeader**>(
-  	  __readgsqword(PebOffset) + ApiSchemaOffset);
+    ApiSetMapHeader* pHeader = *reinterpret_cast<ApiSetMapHeader**>(
+      __readgsqword(PebOffset) + ApiSchemaOffset);
 #elif defined(_M_IX86) 
     unsigned long PebOffset = 0x30;
     unsigned long ApiSchemaOffset = 0x38;
-  	ApiSetMapHeader* pHeader = *reinterpret_cast<ApiSetMapHeader**>(
-  	  __readfsdword(PebOffset) + ApiSchemaOffset);
+    ApiSetMapHeader* pHeader = *reinterpret_cast<ApiSetMapHeader**>(
+      __readfsdword(PebOffset) + ApiSchemaOffset);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
     DWORD_PTR HeaderBase = reinterpret_cast<DWORD_PTR>(pHeader);
     
-  	ApiSetModuleEntry* pEntries = reinterpret_cast<ApiSetModuleEntry*>(
-  	  &pHeader[1]);
-  	for (DWORD i = 0; i < pHeader->NumModules; ++i)
-  	{
-  		auto GetName = 
-  		  [] (DWORD_PTR Base, DWORD Offset, WORD Size) -> std::wstring
-  		  {
-  		    wchar_t* Name = reinterpret_cast<wchar_t*>(Base + Offset);
-  		    return std::wstring(Name, Name + Size / 2);
-  		  };
-  		
-  		ApiSetModuleEntry* pEntry = &pEntries[i];
-  		std::wstring EntryName(GetName(HeaderBase, pEntry->OffsetToName, 
-  		  pEntry->NameSize));
-  		EntryName = L"api-" + EntryName + L".dll";
-  		boost::to_lower(EntryName);
-  		
-  		std::wcout << "ApiSetSchema Entry: " << EntryName << "\n";
+    ApiSetModuleEntry* pEntries = reinterpret_cast<ApiSetModuleEntry*>(
+      &pHeader[1]);
+    for (DWORD i = 0; i < pHeader->NumModules; ++i)
+    {
+      auto GetName = 
+        [] (DWORD_PTR Base, DWORD Offset, WORD Size) -> std::wstring
+        {
+          wchar_t* Name = reinterpret_cast<wchar_t*>(Base + Offset);
+          return std::wstring(Name, Name + Size / 2);
+        };
+      
+      ApiSetModuleEntry* pEntry = &pEntries[i];
+      std::wstring EntryName(GetName(HeaderBase, pEntry->OffsetToName, 
+        pEntry->NameSize));
+      EntryName = L"api-" + EntryName + L".dll";
+      boost::to_lower(EntryName);
+      
+      std::wcout << "ApiSetSchema Entry: " << EntryName << "\n";
   
-  		auto pHostsHeader = reinterpret_cast<ApiSetModuleHostsHeader*>(
-  		  reinterpret_cast<DWORD_PTR>(pHeader) + pEntry->OffsetOfHosts);
-  		auto pHosts = reinterpret_cast<ApiSetModuleHost*>(&pHostsHeader[1]);
-  		for (DWORD j = 0; j < pHostsHeader->NumHosts; ++j)
-  		{
-  			ApiSetModuleHost* pHost = &pHosts[j];
-  			std::wstring HostName(GetName(reinterpret_cast<DWORD_PTR>(pHeader), 
-  			  pHost->OffsetOfHostName, pHost->HostNameSize));
-  			boost::to_lower(HostName);
+      auto pHostsHeader = reinterpret_cast<ApiSetModuleHostsHeader*>(
+        reinterpret_cast<DWORD_PTR>(pHeader) + pEntry->OffsetOfHosts);
+      auto pHosts = reinterpret_cast<ApiSetModuleHost*>(&pHostsHeader[1]);
+      for (DWORD j = 0; j < pHostsHeader->NumHosts; ++j)
+      {
+        ApiSetModuleHost* pHost = &pHosts[j];
+        std::wstring HostName(GetName(reinterpret_cast<DWORD_PTR>(pHeader), 
+          pHost->OffsetOfHostName, pHost->HostNameSize));
+        boost::to_lower(HostName);
   
-  			if (j == 0)
-  			{
-				  std::wcout << "\tDefault: " << HostName << "\n";
-				  
-  			  m_ApiSchemaDefaults[EntryName] = HostName;
-  			}
-  			else
-  			{
-  			  std::wstring ImporterName(GetName(HeaderBase, 
-  			    pHost->OffsetOfImportingName, pHost->ImportingNameSize));
-  			  boost::to_lower(ImporterName);
-  			  
-  				std::wcout << "\t" << ImporterName << " -> " << HostName << "\n";
-  				
-  				m_ApiSchemaExceptions[EntryName].push_back(std::make_pair(
-  				  ImporterName, HostName));
-  			}
-  		}
-  	}
-  	
-  	return;
+        if (j == 0)
+        {
+          std::wcout << "\tDefault: " << HostName << "\n";
+          
+          m_ApiSchemaDefaults[EntryName] = HostName;
+        }
+        else
+        {
+          std::wstring ImporterName(GetName(HeaderBase, 
+            pHost->OffsetOfImportingName, pHost->ImportingNameSize));
+          boost::to_lower(ImporterName);
+          
+          std::wcout << "\t" << ImporterName << " -> " << HostName << "\n";
+          
+          m_ApiSchemaExceptions[EntryName].push_back(std::make_pair(
+            ImporterName, HostName));
+        }
+      }
+    }
+    
+    return;
   }
   
   // Add module to cache
   void ManualMap::AddToCache(std::wstring const& Path, HMODULE Base) const
   {
     auto const Iter = m_MappedMods.find(boost::to_lower_copy(Path));
-    if (Iter != m_MappedMods.end())
+    if (Iter != std::end(m_MappedMods))
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorFunction("ManualMap::AddToCache") << 
@@ -680,7 +704,7 @@ namespace HadesMem
   HMODULE ManualMap::LookupCache(std::wstring const& Path) const
   {
     auto const Iter = m_MappedMods.find(boost::to_lower_copy(Path));
-    if (Iter != m_MappedMods.end())
+    if (Iter != std::end(m_MappedMods))
     {
       return Iter->second;
     }
@@ -810,7 +834,7 @@ namespace HadesMem
   void ManualMap::MapSections(PeFile const& MyPeFile, PVOID RemoteBase) const
   {
     SectionList Sections(MyPeFile);
-    std::for_each(Sections.cbegin(), Sections.cend(), 
+    std::for_each(std::begin(Sections), std::end(Sections), 
       [&] (Section const& S)
       {
         std::string const Name(S.GetName());
@@ -994,14 +1018,14 @@ namespace HadesMem
     
     ImportThunkList ImportOrigThunks(MyPeFile, I.GetCharacteristics());
     ImportThunkList ImportFirstThunks(MyPeFile, I.GetFirstThunk());
-    for (auto j = ImportOrigThunks.cbegin(); j != ImportOrigThunks.cend(); ++j)
+    for (auto j = std::begin(ImportOrigThunks); j != std::end(ImportOrigThunks); ++j)
     {
       ImportThunk const& T = *j;
       
       FARPROC FuncAddr = ResolveImportThunk(T, DepPeFile, ParentPath);
       
-      auto ImpThunkFT = ImportFirstThunks.begin();
-      std::advance(ImpThunkFT, std::distance(ImportOrigThunks.cbegin(), j));
+      auto ImpThunkFT = std::begin(ImportFirstThunks);
+      std::advance(ImpThunkFT, std::distance(std::begin(ImportOrigThunks), j));
       ImpThunkFT->SetFunction(reinterpret_cast<DWORD_PTR>(FuncAddr));
     }
   }
@@ -1015,17 +1039,6 @@ namespace HadesMem
       Module RemoteMod(m_Memory, ModulePath);
       
       std::wcout << "Found existing instance of dependent DLL.\n";
-      
-      Injector MyInjector(m_Memory);
-      HMODULE RemoteModTemp = MyInjector.InjectDll(RemoteMod.GetPath());
-      if (RemoteMod.GetHandle() != RemoteModTemp)
-      {
-        BOOST_THROW_EXCEPTION(ManualMap::Error() << 
-          ErrorFunction("ManualMap::FixImports") << 
-          ErrorString("Mismatched base address during load count bump."));
-      }
-      
-      std::wcout << "Bumped load count of dependent DLL.\n";
       
       return RemoteMod.GetHandle();
     }
@@ -1058,6 +1071,8 @@ namespace HadesMem
   // GetModuleHandle, GetModuleFileName, etc), including redirecting indirect 
   // calls through GetProcAddress. Allow manually mapped modules to see other 
   // manually mapped modules.
+  // FIXME: Bump load count of dependent DLLs (use PEB directly to avoid detection 
+  // via 'hooks' on DLL injection such as LdrRegisterDllNotification).
   void ManualMap::FixImports(PeFile const& MyPeFile, 
     std::wstring const& ParentPath) const
   {
@@ -1069,7 +1084,7 @@ namespace HadesMem
     }
     
     ImportDirList ImportDirs(MyPeFile);
-    std::for_each(ImportDirs.begin(), ImportDirs.end(), 
+    std::for_each(std::begin(ImportDirs), std::end(ImportDirs), 
       [&] (ImportDir const& I)
       {
         FixImportDir(MyPeFile, I, ParentPath);
@@ -1095,7 +1110,7 @@ namespace HadesMem
       {
         ModuleName += L".dll";
       }
-      else if (*(ModuleName.end() - 1) == '.')
+      else if (ModuleName[ModuleName.size() - 1] == '.')
       {
         ModuleName += L"dll";
       }
@@ -1107,24 +1122,7 @@ namespace HadesMem
       
       std::wcout << "Forwarder Module (Resolved): " << ModulePath << ".\n";
       
-      HMODULE NewTarget = nullptr;
-      if (ModuleName == L"ntdll.dll")
-      {
-        Module NtdllMod(m_Memory, L"ntdll.dll");
-        NewTarget = NtdllMod.GetHandle();
-      }
-      else
-      {
-        HMODULE const CacheBase = LookupCache(ModulePath.native());
-        if (!CacheBase)
-        {
-          BOOST_THROW_EXCEPTION(Error() << 
-            ErrorFunction("ManualMap::ResolveExport") << 
-            ErrorString("Found unknown forwarder module."));
-        }
-        
-        NewTarget = CacheBase;
-      }
+      HMODULE NewTarget = GetImportModule(ModulePath.native(), ParentPath);
       
       PeFile NewTargetPe(m_Memory, NewTarget);
       if (E.IsForwardedByOrdinal())

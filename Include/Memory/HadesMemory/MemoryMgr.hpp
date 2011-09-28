@@ -45,6 +45,12 @@ namespace HadesMem
     
     // Destructor
     ~MemoryMgr();
+    
+    // Equality operator
+    bool operator==(MemoryMgr const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(MemoryMgr const& Rhs) const;
 
     // MemoryMgr::Call return data
     class RemoteFunctionRet
@@ -83,6 +89,11 @@ namespace HadesMem
     // Call remote function
     RemoteFunctionRet Call(LPCVOID Address, CallConv MyCallConv, 
       std::vector<PVOID> const& Args) const;
+
+    // Call remote function
+    std::vector<RemoteFunctionRet> Call(std::vector<LPCVOID> Addresses, 
+      std::vector<CallConv> MyCallConvs, 
+      std::vector<std::vector<PVOID>> const& Args) const;
 
     // Read memory (POD types)
     template <typename T>
@@ -143,12 +154,6 @@ namespace HadesMem
     
     // Is WoW64 process
     bool IsWoW64Process() const;
-    
-    // Equality operator
-    bool operator==(MemoryMgr const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(MemoryMgr const& Rhs) const;
 
   private:
     // Read memory

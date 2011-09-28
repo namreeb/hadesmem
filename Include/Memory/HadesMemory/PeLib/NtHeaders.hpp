@@ -61,6 +61,12 @@ namespace HadesMem
     
     // Destructor
     ~NtHeaders();
+    
+    // Equality operator
+    bool operator==(NtHeaders const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(NtHeaders const& Rhs) const;
 
     // Get base of NT headers
     PVOID GetBase() const;
@@ -318,12 +324,6 @@ namespace HadesMem
     // Set base of code
     void SetDataDirectorySize(DataDir MyDataDir, 
       DWORD DataDirectorySize) const;
-    
-    // Equality operator
-    bool operator==(NtHeaders const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(NtHeaders const& Rhs) const;
 
   private:
     // PE file

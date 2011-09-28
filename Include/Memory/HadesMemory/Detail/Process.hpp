@@ -43,6 +43,12 @@ namespace HadesMem
       
       // Destructor
       ~Process();
+      
+      // Equality operator
+      bool operator==(Process const& Rhs) const;
+      
+      // Inequality operator
+      bool operator!=(Process const& Rhs) const;
     
       // Get process handle
       HANDLE GetHandle() const;
@@ -55,12 +61,6 @@ namespace HadesMem
       
       // Is WoW64 process
       bool IsWoW64() const;
-      
-      // Equality operator
-      bool operator==(Process const& Rhs) const;
-      
-      // Inequality operator
-      bool operator!=(Process const& Rhs) const;
     
     private:
       // Implementation

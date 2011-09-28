@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <iterator>
 
 namespace HadesMem
 {
@@ -32,17 +33,17 @@ namespace HadesMem
       {
         CommandLine.push_back(L'"');
         
-        for (auto It = Argument.begin(); ;++It)
+        for (auto It = std::begin(Argument); ;++It)
         {
           unsigned NumberBackslashes = 0;
           
-          while (It != Argument.end () && *It == L'\\') 
+          while (It != std::end(Argument) && *It == L'\\') 
           {
             ++It;
             ++NumberBackslashes;
           }
       
-          if (It == Argument.end ())
+          if (It == std::end(Argument))
           {
             // Escape all backslashes, but let the terminating
             // double quotation mark we add below be interpreted

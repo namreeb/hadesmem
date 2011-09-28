@@ -53,6 +53,12 @@ namespace HadesMem
     
     // Destructor
     ~Module();
+    
+    // Equality operator
+    bool operator==(Module const& Rhs) const;
+    
+    // Inequality operator
+    bool operator!=(Module const& Rhs) const;
 
     // Get module handle
     HMODULE GetHandle() const;
@@ -71,12 +77,6 @@ namespace HadesMem
     
     // Find procedure by ordinal
     FARPROC FindProcedure(WORD Ordinal) const;
-    
-    // Equality operator
-    bool operator==(Module const& Rhs) const;
-    
-    // Inequality operator
-    bool operator!=(Module const& Rhs) const;
 
   private:
     // Memory instance
