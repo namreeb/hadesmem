@@ -170,6 +170,12 @@ redirection).
 * `ManualMap` now calls TLS callbacks from the same thread as the EP.
 * `ManualMap` now validates the OS version, machine type, etc of modules 
 before attempting to map them.
+* `Process` was incorrectly allowing x64 processes to open x86 processes. This 
+is something I would like to support, but it will require rewrites to some of 
+the base components for it to work in a bug-free manner, and as such will 
+probably not be implemented until v2.0.0 or later.
+* `Process::SetWoW64` no longer causes a null function pointer call when 
+the IsWoW64Process API cannot be found.
 
 [*Changes]
 
@@ -310,8 +316,12 @@ Supported Compilers:
 
 * [@http://www.microsoft.com/visualstudio/en-us Microsoft Visual C++ 2010] 
 (Express edition not officially supported)
-* [@http://gcc.gnu.org/ GNU GCC 4.6.0] (via 
-[@http://www.equation.com/servlet/equation.cmd?fa=fortran MinGW-w64])
+* [@http://gcc.gnu.org/ GNU GCC 4.6.x] (via 
+[@http://mingw-w64.sourceforge.net/ MinGW-w64])
+
+[warning Extra scripts are present for other compilers, however these are 
+currently unsupported and only present for use by developers and testers who 
+wish to help 'port' the project to support these toolsets.]
 
 Supported Platforms:
 
@@ -331,7 +341,10 @@ Steps to Build:
   # Run Build_Compiler_Configuration_Architecture.bat (Substitute 'Compiler', 
   'Configuration', and 'Architecture' as appropriate).
   # Check output and ensure there are no errors.
-  
+
+[caution If using GCC, depending on which MinGW distribution you are using, 
+you may need to manually configure toolsets in your user-config.jam file.]
+
 Using HadesMem (in a Boost.Build based project):
 
 # Add a /use-project/ directive to your Jamroot targeting HadesMem (this 
@@ -342,30 +355,30 @@ or the requirements list of your project.
 # Set the BOOST_ROOT environmental variable and copy b2 to somewhere in your 
 PATH.
 
-[note When compiling your Boost.Build based project, explicitly specify the 
-toolset, address-model and debug/release configuration on the command line to 
-ensure that nothing needs to be recompiled and you are using the correct 
+[important When compiling your Boost.Build based project, explicitly specify 
+the toolset, address-model and debug/release configuration on the command line 
+to ensure that nothing needs to be recompiled and you are using the correct 
 settings. If you've done it right then you should only need to link to Boost 
 and HadesMem (i.e. nothing should be recompiled).]
 
 Sample Jamroot
-``
-use-project /HadesMem 
+[pre 
+use-project \/HadesMem 
   : 
-    ../../HadesMem-Branches-v1.0.0/
+    ..\/..\/HadesMem-Branches-v1.0.0\/
   ;
 
 exe Test
   : 
     Test.cpp
-    /HadesMem//HadesMem
+    \/HadesMem\/\/HadesMem
   ;
-``
+]
 
 Sample Command-line:
-``
+[pre 
 b2 toolset=msvc-10.0 address-model=32 debug
-``
+]
 
 [endsect] [/ Building]
 
