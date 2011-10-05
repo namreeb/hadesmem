@@ -222,7 +222,7 @@ namespace HadesMem
     
     boost::spirit::qi::rule<DataIter, unsigned int(), SkipWsT> DataRule;
     DataRule %= (qi::hex | 
-      qi::string(L"??")[qi::_val = static_cast<unsigned int>(-1)]);
+      qi::lit(L"??")[qi::_val = static_cast<unsigned int>(-1)]);
     
     qi::rule<DataIter, std::vector<unsigned int>(), SkipWsT> DataListRule = 
       +(DataRule);

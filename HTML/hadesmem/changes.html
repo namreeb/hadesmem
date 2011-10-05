@@ -84,6 +84,17 @@
           <code class="computeroutput"><span class="identifier">ManualMap</span></code> now validates
           the OS version, machine type, etc of modules before attempting to map them.
         </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">Process</span></code> was incorrectly
+          allowing x64 processes to open x86 processes. This is something I would
+          like to support, but it will require rewrites to some of the base components
+          for it to work in a bug-free manner, and as such will probably not be implemented
+          until v2.0.0 or later.
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="identifier">Process</span><span class="special">::</span><span class="identifier">SetWoW64</span></code> no longer causes a null function
+          pointer call when the IsWoW64Process API cannot be found.
+        </li>
 </ul></div>
 <p>
       <span class="bold"><strong>Changes</strong></span>

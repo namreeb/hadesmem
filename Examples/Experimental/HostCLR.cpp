@@ -1,3 +1,15 @@
+#include <HadesMemory/Detail/Config.hpp>
+
+#include <Windows.h>
+
+// WARNING: This code is purely for internal testing. It breaks numerous 
+// 'good practice' guidelines and is not production quality. Do not attempt 
+// to run.
+// FIXME: Clean up or remove before v1.5.0 release.
+
+// This module currently only supported under MSVC
+#ifdef HADES_MSVC
+
 #include <Windows.h>
 #include <process.h>
 #include <metahost.h>
@@ -13,11 +25,6 @@ L"Projects\\DotNetTest\\DotNetTest\\bin\\Debug\\DotNetTest.exe"
 #define NAMESPACE_AND_CLASS L"DotNetTest.Program"
 #define MAIN_METHOD L"Launch"
 #define MAIN_METHOD_ARGS L""
-
-// WARNING: This code is purely for internal testing. It breaks numerous 
-// 'good practice' guidelines and is not production quality. Do not attempt 
-// to run.
-// FIXME: Clean up or remove before v1.5.0 release.
 
 ICLRMetaHostPolicy* pMetaHost = NULL;
 ICLRRuntimeInfo* pRuntimeInfo = NULL;
@@ -105,8 +112,11 @@ void LoadClr()
   hThread = (HANDLE)_beginthreadex(NULL, 0, ThreadMain, NULL, 0, NULL);
 }
 
+#endif
+
 BOOL WINAPI DllMain(HMODULE, DWORD dwReason, LPVOID)
 {
+#ifdef HADES_MSVC
   if (dwReason == DLL_PROCESS_ATTACH)
   {
     LoadClr();
@@ -126,6 +136,10 @@ BOOL WINAPI DllMain(HMODULE, DWORD dwReason, LPVOID)
       CloseHandle(hThread);
     }
   }
+#else
+  UNREFERENCED_PARAMETER(dwReason);
+#endif
 
   return TRUE;
 }
+

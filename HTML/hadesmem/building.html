@@ -33,9 +33,20 @@
           C++ 2010</a> (Express edition not officially supported)
         </li>
 <li class="listitem">
-          <a href="http://gcc.gnu.org/" target="_top">GNU GCC 4.6.0</a> (via <a href="http://www.equation.com/servlet/equation.cmd?fa=fortran" target="_top">MinGW-w64</a>)
+          <a href="http://gcc.gnu.org/" target="_top">GNU GCC 4.6.x</a> (via <a href="http://mingw-w64.sourceforge.net/" target="_top">MinGW-w64</a>)
         </li>
 </ul></div>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../images/warning.png"></td>
+<th align="left">Warning</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        Extra scripts are present for other compilers, however these are currently
+        unsupported and only present for use by developers and testers who wish to
+        help 'port' the project to support these toolsets.
+      </p></td></tr>
+</table></div>
 <p>
       Supported Platforms:
     </p>
@@ -81,6 +92,16 @@
 </ol></div>
         </li>
 </ol></div>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
+<th align="left">Caution</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        If using GCC, depending on which MinGW distribution you are using, you may
+        need to manually configure toolsets in your user-config.jam file.
+      </p></td></tr>
+</table></div>
 <p>
       Using HadesMem (in a Boost.Build based project):
     </p>
@@ -102,10 +123,10 @@
           PATH.
         </li>
 </ol></div>
-<div class="note"><table border="0" summary="Note">
+<div class="important"><table border="0" summary="Important">
 <tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../images/important.png"></td>
+<th align="left">Important</th>
 </tr>
 <tr><td align="left" valign="top"><p>
         When compiling your Boost.Build based project, explicitly specify the toolset,
@@ -116,28 +137,24 @@
       </p></td></tr>
 </table></div>
 <p>
-      Sample Jamroot 
-</p>
-<pre class="programlisting"><span class="identifier">use</span><span class="special">-</span><span class="identifier">project</span> <span class="special">/</span><span class="identifier">HadesMem</span> 
-  <span class="special">:</span> 
-    <span class="special">../../</span><span class="identifier">HadesMem</span><span class="special">-</span><span class="identifier">Branches</span><span class="special">-</span><span class="identifier">v1</span><span class="special">.</span><span class="number">0.0</span><span class="special">/</span>
-  <span class="special">;</span>
+      Sample Jamroot
+    </p>
+<pre class="programlisting">use-project /HadesMem 
+  : 
+    ../../HadesMem-Branches-v1.0.0/
+  ;
 
-<span class="identifier">exe</span> <span class="identifier">Test</span>
-  <span class="special">:</span> 
-    <span class="identifier">Test</span><span class="special">.</span><span class="identifier">cpp</span>
-    <span class="special">/</span><span class="identifier">HadesMem</span><span class="comment">//HadesMem</span>
-  <span class="special">;</span>
+exe Test
+  : 
+    Test.cpp
+    /HadesMem//HadesMem
+  ;
 </pre>
 <p>
+      Sample Command-line:
     </p>
-<p>
-      Sample Command-line: 
-</p>
-<pre class="programlisting"><span class="identifier">b2</span> <span class="identifier">toolset</span><span class="special">=</span><span class="identifier">msvc</span><span class="special">-</span><span class="number">10.0</span> <span class="identifier">address</span><span class="special">-</span><span class="identifier">model</span><span class="special">=</span><span class="number">32</span> <span class="identifier">debug</span>
+<pre class="programlisting">b2 toolset=msvc-10.0 address-model=32 debug
 </pre>
-<p>
-    </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
