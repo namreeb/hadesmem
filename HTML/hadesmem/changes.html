@@ -4,8 +4,8 @@
 <title>Changes</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.5.0">
-<link rel="up" href="../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../index.html" title="HadesMem 1.6.0">
+<link rel="up" href="../index.html" title="HadesMem 1.6.0">
 <link rel="prev" href="lic.html" title="License">
 <link rel="next" href="building.html" title="Building">
 </head>
@@ -19,9 +19,52 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.changes"></a><a class="link" href="changes.html" title="Changes">Changes</a>
 </h2></div></div></div>
-<a name="hadesmem.changes.v1_5_0"></a><h4>
-<a name="hadesmem.changes.v1_5_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_5_0">v1.5.0</a>
+<h4>
+<a name="hadesmem.changes.h0"></a>
+      <span><a name="hadesmem.changes.v1_6_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_6_0">v1.6.0</a>
+    </h4>
+<p>
+      <span class="bold"><strong>New Features</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+          Added new <code class="computeroutput"><span class="identifier">Patcher</span></code> APIs.
+        </li></ul></div>
+<p>
+      <span class="bold"><strong>Bug Fixes</strong></span>
+    </p>
+<p>
+      <span class="bold"><strong>Changes</strong></span>
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Boost is no longer included as part of HadesMem. Please read the updated
+          build instructions.
+        </li>
+<li class="listitem">
+          Removed some unused build scripts and tweaked the GCC scripts. (Again,
+          please check the updated build instructions again.)
+        </li>
+<li class="listitem">
+          Marked the GCC support as 'experimental' as MinGW seems spotty at best.
+        </li>
+<li class="listitem">
+          Compiler detection is now done using Boost.Build rather than preprocessor
+          checks. This means that the header layout of the project can be improved
+          and some include dependencies can be removed.
+        </li>
+<li class="listitem">
+          Updated QuickBook binary.
+        </li>
+<li class="listitem">
+          Updated AsmJit.
+        </li>
+<li class="listitem">
+          Updated BeaEngine.
+        </li>
+</ul></div>
+<h4>
+<a name="hadesmem.changes.h1"></a>
+      <span><a name="hadesmem.changes.v1_5_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_5_0">v1.5.0</a>
     </h4>
 <p>
       <span class="bold"><strong>New Features</strong></span>
@@ -116,9 +159,9 @@
           Refactored 'ManualMap'.
         </li>
 </ul></div>
-<a name="hadesmem.changes.v1_4_0"></a><h4>
-<a name="hadesmem.changes.v1_4_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_4_0">v1.4.0</a>
+<h4>
+<a name="hadesmem.changes.h2"></a>
+      <span><a name="hadesmem.changes.v1_4_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_4_0">v1.4.0</a>
     </h4>
 <p>
       <span class="bold"><strong>New Features</strong></span>
@@ -178,9 +221,9 @@
           Update BeaEngine to latest trunk.
         </li>
 </ul></div>
-<a name="hadesmem.changes.v1_3_0"></a><h4>
-<a name="hadesmem.changes.v1_3_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_3_0">v1.3.0</a>
+<h4>
+<a name="hadesmem.changes.h3"></a>
+      <span><a name="hadesmem.changes.v1_3_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_3_0">v1.3.0</a>
     </h4>
 <p>
       <span class="bold"><strong>New Features</strong></span>
@@ -266,9 +309,9 @@
           instead.
         </li>
 </ul></div>
-<a name="hadesmem.changes.v1_2_0"></a><h4>
-<a name="hadesmem.changes.v1_2_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_2_0">v1.2.0</a>
+<h4>
+<a name="hadesmem.changes.h4"></a>
+      <span><a name="hadesmem.changes.v1_2_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_2_0">v1.2.0</a>
     </h4>
 <p>
       <span class="bold"><strong>New Features</strong></span>
@@ -301,9 +344,9 @@
 <p>
       <span class="bold"><strong>Changes</strong></span>
     </p>
-<a name="hadesmem.changes.v1_1_0"></a><h4>
-<a name="hadesmem.changes.v1_1_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_1_0">v1.1.0</a>
+<h4>
+<a name="hadesmem.changes.h5"></a>
+      <span><a name="hadesmem.changes.v1_1_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_1_0">v1.1.0</a>
     </h4>
 <p>
       <span class="bold"><strong>New Features</strong></span>
@@ -357,9 +400,9 @@
           can help with the porting process (as are the Clang scripts).
         </li>
 </ul></div>
-<a name="hadesmem.changes.v1_0_0"></a><h4>
-<a name="hadesmem.changes.v1_0_0-heading"></a>
-      <a class="link" href="changes.html#hadesmem.changes.v1_0_0">v1.0.0</a>
+<h4>
+<a name="hadesmem.changes.h6"></a>
+      <span><a name="hadesmem.changes.v1_0_0"></a></span><a class="link" href="changes.html#hadesmem.changes.v1_0_0">v1.0.0</a>
     </h4>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
           Initial SemVer release. Currently the only API available is the MemoryMgr
@@ -369,7 +412,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

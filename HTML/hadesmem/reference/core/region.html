@@ -4,7 +4,7 @@
 <title>Region</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
 <link rel="up" href="../core.html" title="Core">
 <link rel="prev" href="injector.html" title="Injector">
 <link rel="next" href="findpattern.html" title="FindPattern">
@@ -19,42 +19,42 @@
 <div class="titlepage"><div><div><h4 class="title">
 <a name="hadesmem.reference.core.region"></a><a class="link" href="region.html" title="Region">Region</a>
 </h4></div></div></div>
-<a name="hadesmem.reference.core.region.synopsis"></a><h4>
-<a name="hadesmem.reference.core.region.synopsis-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.synopsis">Synopsis</a>
+<h4>
+<a name="hadesmem.reference.core.region.h0"></a>
+          <span><a name="hadesmem.reference.core.region.synopsis"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/Region.hpp&gt;</span>
 
 <span class="keyword">class</span> <span class="identifier">Region</span>
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
-  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span>
   <span class="special">{</span> <span class="special">};</span>
-  
+
   <span class="identifier">Region</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">);</span>
-  
+
   <span class="identifier">Region</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">MEMORY_BASIC_INFORMATION</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMbi</span><span class="special">);</span>
 
   <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">PVOID</span> <span class="identifier">GetAllocBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">GetAllocProtect</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">GetState</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">GetProtect</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">GetType</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">SetProtect</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">Dump</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
@@ -63,32 +63,32 @@
 <span class="keyword">public</span><span class="special">:</span>
   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span>
   <span class="special">{</span> <span class="special">};</span>
-    
+
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
-      
+
   <span class="identifier">RegionList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
-  
+
   <span class="identifier">RegionList</span><span class="special">(</span><span class="identifier">RegionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">RegionList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">RegionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
-  
+
   <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-   
+
   <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-   
+
   <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 </pre>
-<a name="hadesmem.reference.core.region.description"></a><h4>
-<a name="hadesmem.reference.core.region.description-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.description">Description</a>
+<h4>
+<a name="hadesmem.reference.core.region.h1"></a>
+          <span><a name="hadesmem.reference.core.region.description"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.description">Description</a>
         </h4>
 <p>
           The <code class="computeroutput"><span class="identifier">Region</span></code> class provides
@@ -98,10 +98,10 @@
           The <code class="computeroutput"><span class="identifier">RegionList</span></code> class provides
           STL-compatible iterators for region enumeration.
         </p>
-<a name="hadesmem.reference.core.region.region_public_types"></a><h4>
-<a name="hadesmem.reference.core.region.region_public_types-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_public_types">Region
-          public types</a>
+<h4>
+<a name="hadesmem.reference.core.region.h2"></a>
+          <span><a name="hadesmem.reference.core.region.region_public_types"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_public_types">Region public
+          types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 </pre>
@@ -109,14 +109,14 @@
           Exception type thrown by <code class="computeroutput"><span class="identifier">Region</span></code>
           methods when an error occurs.
         </p>
-<a name="hadesmem.reference.core.region.region_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.region.region_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_public_construct_copy_destruct_move">Region
+<h4>
+<a name="hadesmem.reference.core.region.h3"></a>
+          <span><a name="hadesmem.reference.core.region.region_public_construct_copy_destruct_move"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_public_construct_copy_destruct_move">Region
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.region.region_address_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.region_address_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_address_constructor">Region
+<h5>
+<a name="hadesmem.reference.core.region.h4"></a>
+          <span><a name="hadesmem.reference.core.region.region_address_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_address_constructor">Region
           address constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">);</span>
@@ -135,9 +135,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_memory_information_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.region_memory_information_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_memory_information_constructor">Region
+<h5>
+<a name="hadesmem.reference.core.region.h5"></a>
+          <span><a name="hadesmem.reference.core.region.region_memory_information_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_memory_information_constructor">Region
           memory information constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">MEMORY_BASIC_INFORMATION</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMbi</span><span class="special">);</span>
@@ -157,9 +157,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_copy_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.region_copy_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_copy_constructor">Region
+<h5>
+<a name="hadesmem.reference.core.region.h6"></a>
+          <span><a name="hadesmem.reference.core.region.region_copy_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_copy_constructor">Region
           copy constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -178,9 +178,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.region.region_copy_assignment_operator-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_copy_assignment_operator">Region
+<h5>
+<a name="hadesmem.reference.core.region.h7"></a>
+          <span><a name="hadesmem.reference.core.region.region_copy_assignment_operator"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_copy_assignment_operator">Region
           copy assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -198,9 +198,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.region_move_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_move_constructor">Region
+<h5>
+<a name="hadesmem.reference.core.region.h8"></a>
+          <span><a name="hadesmem.reference.core.region.region_move_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_move_constructor">Region
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">(</span><span class="identifier">Region</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -220,9 +220,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.region.region_move_assignment_operator-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_move_assignment_operator">Region
+<h5>
+<a name="hadesmem.reference.core.region.h9"></a>
+          <span><a name="hadesmem.reference.core.region.region_move_assignment_operator"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_move_assignment_operator">Region
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Region</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Region</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -241,9 +241,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_destructor"></a><h5>
-<a name="hadesmem.reference.core.region.region_destructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_destructor">Region
+<h5>
+<a name="hadesmem.reference.core.region.h10"></a>
+          <span><a name="hadesmem.reference.core.region.region_destructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_destructor">Region
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">Region</span><span class="special">();</span>
@@ -261,14 +261,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.region.region_public_member_functions-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_public_member_functions">Region
+<h4>
+<a name="hadesmem.reference.core.region.h11"></a>
+          <span><a name="hadesmem.reference.core.region.region_public_member_functions"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_public_member_functions">Region
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getbase__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h12"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getbase__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -286,9 +286,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocbase__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocbase__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h13"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocbase__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocbase__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetAllocBase</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetAllocBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -306,9 +306,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocprotect__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocprotect__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocprotect__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h14"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocprotect__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getallocprotect__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetAllocProtect</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetAllocProtect</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -326,9 +326,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getsize__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getsize__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h15"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getsize__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetSize</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -346,9 +346,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getstate__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getstate__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getstate__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h16"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getstate__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getstate__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetState</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetState</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -366,9 +366,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getprotect__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getprotect__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getprotect__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h17"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getprotect__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__getprotect__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetProtect</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetProtect</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -386,9 +386,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__gettype__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__gettype__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__gettype__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h18"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__gettype__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__gettype__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">GetType</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetType</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -406,9 +406,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__setprotect__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__setprotect__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__setprotect__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h19"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__setprotect__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__setprotect__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">SetProtect</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">SetProtect</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -430,9 +430,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__dump__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__dump__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__dump__phrase___code_">Region
+<h5>
+<a name="hadesmem.reference.core.region.h20"></a>
+          <span><a name="hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__dump__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_member_function__code__phrase_role__identifier__dump__phrase___code_">Region
           member function <code class="computeroutput"><span class="identifier">Dump</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Dump</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -450,9 +450,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_equality_operator"></a><h5>
-<a name="hadesmem.reference.core.region.region_equality_operator-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_equality_operator">Region
+<h5>
+<a name="hadesmem.reference.core.region.h21"></a>
+          <span><a name="hadesmem.reference.core.region.region_equality_operator"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_equality_operator">Region
           equality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -471,9 +471,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.region_inequality_operator"></a><h5>
-<a name="hadesmem.reference.core.region.region_inequality_operator-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.region_inequality_operator">Region
+<h5>
+<a name="hadesmem.reference.core.region.h22"></a>
+          <span><a name="hadesmem.reference.core.region.region_inequality_operator"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.region_inequality_operator">Region
           inequality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Region</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -492,9 +492,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_public_types"></a><h4>
-<a name="hadesmem.reference.core.region.regionlist_public_types-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_types">RegionList
+<h4>
+<a name="hadesmem.reference.core.region.h23"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_public_types"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_types">RegionList
           public types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
@@ -510,14 +510,14 @@
           Iterator type for region list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
           concept. Implementation type unspecified.
         </p>
-<a name="hadesmem.reference.core.region.regionlist_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.region.regionlist_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_construct_copy_destruct_move">RegionList
+<h4>
+<a name="hadesmem.reference.core.region.h24"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_public_construct_copy_destruct_move"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_construct_copy_destruct_move">RegionList
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.region.regionlist_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_constructor">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h25"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_constructor">RegionList
           constructor</a>
         </h5>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">RegionList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
@@ -536,9 +536,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_move_constructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_move_constructor">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h26"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_move_constructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_move_constructor">RegionList
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">RegionList</span><span class="special">(</span><span class="identifier">RegionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -558,9 +558,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_move_assignment_operator-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_move_assignment_operator">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h27"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_move_assignment_operator"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_move_assignment_operator">RegionList
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">RegionList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">RegionList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -579,9 +579,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_destructor"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_destructor-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_destructor">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h28"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_destructor"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_destructor">RegionList
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">RegionList</span><span class="special">();</span>
@@ -599,14 +599,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.region.regionlist_public_member_functions-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_member_functions">RegionList
+<h4>
+<a name="hadesmem.reference.core.region.h29"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_public_member_functions"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_public_member_functions">RegionList
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__begin__phrase___code_">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h30"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__begin__phrase___code_">RegionList
           member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
@@ -625,9 +625,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__end__phrase___code_">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h31"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__end__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__end__phrase___code_">RegionList
           member function <code class="computeroutput"><span class="identifier">end</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
@@ -647,9 +647,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h32"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">RegionList
           member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -667,9 +667,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
-          <a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cend__phrase___code_">RegionList
+<h5>
+<a name="hadesmem.reference.core.region.h33"></a>
+          <span><a name="hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a></span><a class="link" href="region.html#hadesmem.reference.core.region.regionlist_member_function__code__phrase_role__identifier__cend__phrase___code_">RegionList
           member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -690,7 +690,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

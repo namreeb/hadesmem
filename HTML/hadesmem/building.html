@@ -4,8 +4,8 @@
 <title>Building</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.5.0">
-<link rel="up" href="../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../index.html" title="HadesMem 1.6.0">
+<link rel="up" href="../index.html" title="HadesMem 1.6.0">
 <link rel="prev" href="changes.html" title="Changes">
 <link rel="next" href="reference.html" title="Reference">
 </head>
@@ -42,9 +42,8 @@
 <th align="left">Warning</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-        Extra scripts are present for other compilers, however these are currently
-        unsupported and only present for use by developers and testers who wish to
-        help 'port' the project to support these toolsets.
+        GCC support is currently experimental. This is largely due to problems with
+        the toolchain however, so it may take some time to be resolved.
       </p></td></tr>
 </table></div>
 <p>
@@ -62,17 +61,11 @@
           Build Boost.
           <div class="orderedlist"><ol class="orderedlist" type="a">
 <li class="listitem">
-                Navigate to Build/Boost.
+                Please consult the Boost documentation for build instructions. (Please
+                note that by default HadesMem links with the CRT statically.)
               </li>
 <li class="listitem">
-                Run Bootstrap.bat.
-              </li>
-<li class="listitem">
-                Run Build_Compiler_Architecture.bat (Substitute 'Compiler', and 'Architecture'
-                as appropriate).
-              </li>
-<li class="listitem">
-                Check output and ensure there are no errors.
+                Place b2 somewhere in your PATH environmental variable.
               </li>
 </ol></div>
         </li>
@@ -99,7 +92,9 @@
 </tr>
 <tr><td align="left" valign="top"><p>
         If using GCC, depending on which MinGW distribution you are using, you may
-        need to manually configure toolsets in your user-config.jam file.
+        need to manually configure toolsets in your user-config.jam file, and you
+        will probably also have to tweak the build script to point to your MinGW
+        installation directory.
       </p></td></tr>
 </table></div>
 <p>
@@ -118,10 +113,6 @@
           Add <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">HadesMemory</span><span class="special">/</span><span class="identifier">Memory</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>
           to your code.
         </li>
-<li class="listitem">
-          Set the BOOST_ROOT environmental variable and copy b2 to somewhere in your
-          PATH.
-        </li>
 </ol></div>
 <div class="important"><table border="0" summary="Important">
 <tr>
@@ -139,13 +130,13 @@
 <p>
       Sample Jamroot
     </p>
-<pre class="programlisting">use-project /HadesMem 
-  : 
+<pre class="programlisting">use-project /HadesMem
+  :
     ../../HadesMem-Branches-v1.0.0/
   ;
 
 exe Test
-  : 
+  :
     Test.cpp
     /HadesMem//HadesMem
   ;
@@ -158,7 +149,7 @@ exe Test
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

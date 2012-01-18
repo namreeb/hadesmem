@@ -3,11 +3,6 @@ path-constant TOP
     .
   ;
 
-use-project /boost 
-  : 
-    Src/Dependencies/Boost 
-  ;
-
 use-project /Dependencies 
   : 
     Src/Dependencies 
@@ -38,15 +33,22 @@ project
     <define>_UNICODE 
     <define>STRICT 
     <define>WIN32_LEAN_AND_MEAN 
-    <define>_WIN32_WINNT=_WIN32_WINNT_WIN2K 
-    <define>WINVER=_WIN32_WINNT_WIN2K 
-    <runtime-link>shared 
+    <define>_WIN32_WINNT=_WIN32_WINNT_WS03 
+    <define>WINVER=_WIN32_WINNT_WS03 
+    <runtime-link>static 
     <threading>multi 
     <toolset>gcc:<cxxflags>-std=c++0x 
-    <toolset>gcc,<variant>debug:<cxxflags>-fstack-check 
+    <toolset>gcc:<linkflags>"-Wl,--allow-multiple-definition" 
+    <toolset>gcc:<define>BOOST_USE_WINDOWS_H  # For GCC 4.7
+    <toolset>gcc:<define>_GLIBCXX_HAVE_GTHR_DEFAULT # For GCC 4.7
     <toolset>clang:<cxxflags>-std=c++0x 
+    <toolset>clang:<cxxflags>-fsyntax-only 
     <toolset>intel:<cxxflags>/Qstd=c++0x 
     <toolset>msvc:<cxxflags>/wd4503 
+    <toolset>msvc:<define>HADES_MSVC 
+    <toolset>gcc:<define>HADES_GCC 
+    <toolset>clang:<define>HADES_CLANG 
+    <toolset>intel:<define>HADES_INTEL  
   : 
     default-build debug 
   : 

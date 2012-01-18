@@ -12,11 +12,17 @@
 #include <algorithm>
 
 // Boost
+#ifdef HADES_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#endif
 #include <boost/timer.hpp>
-#include <boost/format.hpp>
 #include <boost/version.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#ifdef HADES_GCC
+#pragma GCC diagnostic pop
+#endif
 
 // Windows
 #include <Windows.h>

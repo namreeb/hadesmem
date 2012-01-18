@@ -4,7 +4,7 @@
 <title>MemoryMgr</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
 <link rel="up" href="../core.html" title="Core">
 <link rel="prev" href="../core.html" title="Core">
 <link rel="next" href="module.html" title="Module">
@@ -19,9 +19,9 @@
 <div class="titlepage"><div><div><h4 class="title">
 <a name="hadesmem.reference.core.memorymgr"></a><a class="link" href="memorymgr.html" title="MemoryMgr">MemoryMgr</a>
 </h4></div></div></div>
-<a name="hadesmem.reference.core.memorymgr.synopsis"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.synopsis-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.synopsis">Synopsis</a>
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h0"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.synopsis"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/MemoryMgr.hpp&gt;</span>
 
@@ -31,42 +31,42 @@
   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 
   <span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
-    
+
   <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
 
   <span class="keyword">class</span> <span class="identifier">RemoteFunctionRet</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-    
+
     <span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-    
+
     <span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
 
   <span class="keyword">enum</span> <span class="identifier">CallConv</span>
   <span class="special">{</span>
-    <span class="identifier">CallConv_Default</span><span class="special">,</span> 
-    <span class="identifier">CallConv_CDECL</span><span class="special">,</span> 
-    <span class="identifier">CallConv_STDCALL</span><span class="special">,</span> 
-    <span class="identifier">CallConv_THISCALL</span><span class="special">,</span> 
-    <span class="identifier">CallConv_FASTCALL</span><span class="special">,</span> 
+    <span class="identifier">CallConv_Default</span><span class="special">,</span>
+    <span class="identifier">CallConv_CDECL</span><span class="special">,</span>
+    <span class="identifier">CallConv_STDCALL</span><span class="special">,</span>
+    <span class="identifier">CallConv_THISCALL</span><span class="special">,</span>
+    <span class="identifier">CallConv_FASTCALL</span><span class="special">,</span>
     <span class="identifier">CallConv_X64</span>
   <span class="special">};</span>
 
-  <span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
+  <span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span> 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span> 
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -92,7 +92,7 @@
   <span class="keyword">bool</span> <span class="identifier">CanWrite</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="keyword">bool</span> <span class="identifier">IsGuard</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">ProtectRegion</span><span class="special">(</span><span class="identifier">LPVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="identifier">PVOID</span> <span class="identifier">Alloc</span><span class="special">(</span><span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -104,18 +104,18 @@
   <span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
-<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Params</span><span class="special">,</span> 
+<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Params</span><span class="special">,</span>
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
 
 <span class="keyword">void</span> <span class="identifier">GetSeDebugPrivilege</span><span class="special">();</span>
@@ -126,11 +126,11 @@
   <span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemoryMgr</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">);</span>
 
   <span class="special">~</span><span class="identifier">AllocAndFree</span><span class="special">();</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">Free</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 
 <span class="keyword">protected</span><span class="special">:</span>
@@ -138,9 +138,9 @@
   <span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span> <span class="keyword">const</span><span class="special">&amp;);</span>
 <span class="special">};</span>
 </pre>
-<a name="hadesmem.reference.core.memorymgr.description"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.description-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.description">Description</a>
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h1"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.description"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.description">Description</a>
         </h4>
 <p>
           The MemoryMgr class provides the most basic memory hacking functionality,
@@ -153,9 +153,9 @@
 <p>
           The AllocAndFree class is an RAII wrapper for remote memory allocation.
         </p>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_types"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_types-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_types">MemoryMgr
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h2"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_public_types"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_types">MemoryMgr
           public types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
@@ -204,14 +204,14 @@
               calling convention.
             </li>
 </ul></div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h3"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_construct_copy_destruct_move">MemoryMgr
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h4"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_process_id_constructor">MemoryMgr
           process ID constructor</a>
         </h5>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">ProcID</span><span class="special">);</span>
@@ -230,9 +230,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_constructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_constructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_constructor">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h5"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_copy_constructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_constructor">MemoryMgr
           copy constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -251,9 +251,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h6"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_copy_assignment_operator">MemoryMgr
           copy assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -271,9 +271,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_move_constructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_constructor">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h7"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_move_constructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_constructor">MemoryMgr
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -293,9 +293,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h8"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_move_assignment_operator">MemoryMgr
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">MemoryMgr</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -314,9 +314,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_destructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_destructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_destructor">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h9"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_destructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_destructor">MemoryMgr
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">MemoryMgr</span><span class="special">();</span>
@@ -334,21 +334,21 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_public_member_functions-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_member_functions">MemoryMgr
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h10"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_public_member_functions"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_public_member_functions">MemoryMgr
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h11"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__call__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">Call</span></code></a>
         </h5>
-<pre class="programlisting"><span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span> 
+<pre class="programlisting"><span class="identifier">RemoteFunctionRet</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">CallConv</span> <span class="identifier">MyCallConv</span><span class="special">,</span>
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span> 
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">RemoteFunctionRet</span><span class="special">&gt;</span> <span class="identifier">Call</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">LPCVOID</span><span class="special">&gt;</span> <span class="identifier">Addresses</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">CallConv</span><span class="special">&gt;</span> <span class="identifier">MyCallConvs</span><span class="special">,</span>
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PVOID</span><span class="special">&gt;&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <div class="variablelist">
@@ -378,9 +378,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h12"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__read__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">Read</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -404,9 +404,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h13"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readstring__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">ReadString</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -439,9 +439,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h14"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__readlist__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">ReadList</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -472,9 +472,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h15"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__write__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">Write</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -497,9 +497,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h16"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writestring__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">WriteString</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -530,9 +530,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h17"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__writelist__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">WriteList</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span>
@@ -560,9 +560,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h18"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canread__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">CanRead</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanRead</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -581,9 +581,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h19"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canwrite__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">CanWrite</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanWrite</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -602,9 +602,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h20"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__canexecute__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">CanExecute</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">CanExecute</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -623,9 +623,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h21"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isguard__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">IsGuard</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsGuard</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -644,9 +644,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h22"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__protectregion__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">ProtectRegion</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">ProtectRegion</span><span class="special">(</span><span class="identifier">LPVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">Protect</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -669,9 +669,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h23"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__alloc__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">Alloc</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">Alloc</span><span class="special">(</span><span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -693,9 +693,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h24"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__free__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">Free</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Free</span><span class="special">(</span><span class="identifier">PVOID</span> <span class="identifier">Address</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -713,9 +713,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h25"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__flushcache__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">FlushCache</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">FlushCache</span><span class="special">(</span><span class="identifier">LPCVOID</span> <span class="identifier">Address</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -734,9 +734,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h26"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocessid__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">GetProcessId</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetProcessId</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -754,9 +754,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h27"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesshandle__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">GetProcessHandle</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">HANDLE</span> <span class="identifier">GetProcessHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -774,9 +774,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h28"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__getprocesspath__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">GetProcessPath</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetProcessPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -794,9 +794,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h29"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_member_function__code__phrase_role__identifier__isprocesswow64__phrase___code_">MemoryMgr
           member function <code class="computeroutput"><span class="identifier">IsProcessWoW64</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsProcessWoW64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -814,9 +814,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_equality_operator"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_equality_operator-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_equality_operator">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h30"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_equality_operator"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_equality_operator">MemoryMgr
           equality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -835,9 +835,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_inequality_operator"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr_inequality_operator-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_inequality_operator">MemoryMgr
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h31"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr_inequality_operator"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr_inequality_operator">MemoryMgr
           inequality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -856,21 +856,22 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.free_functions"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.free_functions-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_functions">Free functions</a>
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h32"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.free_functions"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_functions">Free
+          functions</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_">Free
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h33"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__createprocess__phrase___code_">Free
           function <code class="computeroutput"><span class="identifier">CreateProcess</span></code></a>
         </h5>
-<pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">CommandLine</span><span class="special">,</span> 
+<pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">CommandLine</span><span class="special">,</span>
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
 
-<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span> 
+<span class="identifier">MemoryMgr</span> <span class="identifier">CreateProcess</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span>
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkingDir</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
@@ -900,9 +901,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_">Free
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h34"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.free_function__code__phrase_role__identifier__getsedebugprivilege__phrase___code_">Free
           function <code class="computeroutput"><span class="identifier">GetSeDebugPrivilege</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">GetSeDebugPrivilege</span><span class="special">();</span>
@@ -925,14 +926,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h35"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_construct_copy_destruct_move">AllocAndFree
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_constructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_constructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_constructor">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h36"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_constructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_constructor">AllocAndFree
           constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemoryMgr</span><span class="special">,</span> <span class="identifier">SIZE_T</span> <span class="identifier">Size</span><span class="special">);</span>
@@ -952,9 +953,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_move_constructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_constructor">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h37"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_move_constructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_constructor">AllocAndFree
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -974,9 +975,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h38"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_move_assignment_operator">AllocAndFree
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">AllocAndFree</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">AllocAndFree</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -995,9 +996,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_destructor"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_destructor-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_destructor">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h39"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_destructor"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_destructor">AllocAndFree
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">AllocAndFree</span><span class="special">();</span>
@@ -1015,14 +1016,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_public_member_functions-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_member_functions">AllocAndFree
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h40"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_public_member_functions"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_public_member_functions">AllocAndFree
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h41"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__free__phrase___code_">AllocAndFree
           member function <code class="computeroutput"><span class="identifier">Free</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Free</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1040,9 +1041,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h42"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getbase__phrase___code_">AllocAndFree
           member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1060,9 +1061,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_">AllocAndFree
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h43"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.allocandfree_member_function__code__phrase_role__identifier__getsize__phrase___code_">AllocAndFree
           member function <code class="computeroutput"><span class="identifier">GetSize</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">SIZE_T</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1080,14 +1081,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions">MemoryMgr::RemoteFunctionRet
+<h4>
+<a name="hadesmem.reference.core.memorymgr.h44"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_public_member_functions">MemoryMgr::RemoteFunctionRet
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_">MemoryMgr::RemoteFunctionRet
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h45"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue__phrase___code_">MemoryMgr::RemoteFunctionRet
           member function <code class="computeroutput"><span class="identifier">GetReturnValue</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetReturnValue</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1106,9 +1107,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_">MemoryMgr::RemoteFunctionRet
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h46"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getreturnvalue64__phrase___code_">MemoryMgr::RemoteFunctionRet
           member function <code class="computeroutput"><span class="identifier">GetReturnValue64</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD64</span> <span class="identifier">GetReturnValue64</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1130,9 +1131,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_-heading"></a>
-          <a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_">MemoryMgr::RemoteFunctionRet
+<h5>
+<a name="hadesmem.reference.core.memorymgr.h47"></a>
+          <span><a name="hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_"></a></span><a class="link" href="memorymgr.html#hadesmem.reference.core.memorymgr.memorymgr__remotefunctionret_member_function__code__phrase_role__identifier__getlasterror__phrase___code_">MemoryMgr::RemoteFunctionRet
           member function <code class="computeroutput"><span class="identifier">GetLastError</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -1155,7 +1156,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

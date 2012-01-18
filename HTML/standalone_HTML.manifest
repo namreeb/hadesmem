@@ -10,6 +10,7 @@ hadesmem/reference/core/module.html
 hadesmem/reference/core/injector.html
 hadesmem/reference/core/region.html
 hadesmem/reference/core/findpattern.html
+hadesmem/reference/core/patcher.html
 hadesmem/reference/pelib.html
 hadesmem/reference/pelib/dosheader.html
 hadesmem/reference/pelib/exportdir.html

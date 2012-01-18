@@ -4,7 +4,7 @@
 <title>Module</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
 <link rel="up" href="../core.html" title="Core">
 <link rel="prev" href="memorymgr.html" title="MemoryMgr">
 <link rel="next" href="injector.html" title="Injector">
@@ -19,9 +19,9 @@
 <div class="titlepage"><div><div><h4 class="title">
 <a name="hadesmem.reference.core.module"></a><a class="link" href="module.html" title="Module">Module</a>
 </h4></div></div></div>
-<a name="hadesmem.reference.core.module.synopsis"></a><h4>
-<a name="hadesmem.reference.core.module.synopsis-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.synopsis">Synopsis</a>
+<h4>
+<a name="hadesmem.reference.core.module.h0"></a>
+          <span><a name="hadesmem.reference.core.module.synopsis"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/Module.hpp&gt;</span>
 
@@ -29,37 +29,37 @@
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
-  
+
   <span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Handle</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ModuleName</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">MODULEENTRY32</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ModuleEntry</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">(</span><span class="identifier">Module</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">Module</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Module</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="special">~</span><span class="identifier">Module</span><span class="special">();</span>
-  
+
   <span class="identifier">HMODULE</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">FARPROC</span> <span class="identifier">FindProcedure</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">FARPROC</span> <span class="identifier">FindProcedure</span><span class="special">(</span><span class="identifier">WORD</span> <span class="identifier">Ordinal</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
@@ -69,28 +69,28 @@
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
-  
+
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">iterator</span><span class="special">;</span>
   <span class="keyword">typedef</span> <span class="identifier">unspecified</span> <span class="identifier">const_iterator</span><span class="special">;</span>
-  
+
   <span class="keyword">explicit</span> <span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
-  
+
   <span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
-  
+
   <span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 </pre>
-<a name="hadesmem.reference.core.module.description"></a><h4>
-<a name="hadesmem.reference.core.module.description-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.description">Description</a>
+<h4>
+<a name="hadesmem.reference.core.module.h1"></a>
+          <span><a name="hadesmem.reference.core.module.description"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.description">Description</a>
         </h4>
 <p>
           The <code class="computeroutput"><span class="identifier">Module</span></code> class provides
@@ -105,10 +105,10 @@
           The <code class="computeroutput"><span class="identifier">ModuleList</span></code> class provides
           STL-compatible iterators for module enumeration.
         </p>
-<a name="hadesmem.reference.core.module.module_public_types"></a><h4>
-<a name="hadesmem.reference.core.module.module_public_types-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_public_types">Module
-          public types</a>
+<h4>
+<a name="hadesmem.reference.core.module.h2"></a>
+          <span><a name="hadesmem.reference.core.module.module_public_types"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_public_types">Module public
+          types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 </pre>
@@ -116,14 +116,14 @@
           Exception type thrown by <code class="computeroutput"><span class="identifier">Module</span></code>
           methods when an error occurs.
         </p>
-<a name="hadesmem.reference.core.module.module_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.module.module_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_public_construct_copy_destruct_move">Module
+<h4>
+<a name="hadesmem.reference.core.module.h3"></a>
+          <span><a name="hadesmem.reference.core.module.module_public_construct_copy_destruct_move"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_public_construct_copy_destruct_move">Module
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.module.module_handle_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_handle_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_handle_constructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h4"></a>
+          <span><a name="hadesmem.reference.core.module.module_handle_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_handle_constructor">Module
           handle constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Handle</span><span class="special">);</span>
@@ -142,9 +142,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_name_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_name_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_name_constructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h5"></a>
+          <span><a name="hadesmem.reference.core.module.module_name_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_name_constructor">Module
           name constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ModuleName</span><span class="special">);</span>
@@ -163,9 +163,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_module_entry_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_module_entry_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_module_entry_constructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h6"></a>
+          <span><a name="hadesmem.reference.core.module.module_module_entry_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_module_entry_constructor">Module
           module entry constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">MODULEENTRY32</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">ModuleEntry</span><span class="special">);</span>
@@ -184,9 +184,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_copy_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_copy_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_copy_constructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h7"></a>
+          <span><a name="hadesmem.reference.core.module.module_copy_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_copy_constructor">Module
           copy constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -205,9 +205,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.module.module_copy_assignment_operator-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_copy_assignment_operator">Module
+<h5>
+<a name="hadesmem.reference.core.module.h8"></a>
+          <span><a name="hadesmem.reference.core.module.module_copy_assignment_operator"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_copy_assignment_operator">Module
           copy assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -225,9 +225,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_move_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_move_constructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h9"></a>
+          <span><a name="hadesmem.reference.core.module.module_move_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_move_constructor">Module
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">(</span><span class="identifier">Module</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -247,9 +247,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.module.module_move_assignment_operator-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_move_assignment_operator">Module
+<h5>
+<a name="hadesmem.reference.core.module.h10"></a>
+          <span><a name="hadesmem.reference.core.module.module_move_assignment_operator"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_move_assignment_operator">Module
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Module</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -268,9 +268,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_destructor"></a><h5>
-<a name="hadesmem.reference.core.module.module_destructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_destructor">Module
+<h5>
+<a name="hadesmem.reference.core.module.h11"></a>
+          <span><a name="hadesmem.reference.core.module.module_destructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_destructor">Module
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">Module</span><span class="special">();</span>
@@ -288,14 +288,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.module.module_public_member_functions-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_public_member_functions">Module
+<h4>
+<a name="hadesmem.reference.core.module.h12"></a>
+          <span><a name="hadesmem.reference.core.module.module_public_member_functions"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_public_member_functions">Module
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_">Module
+<h5>
+<a name="hadesmem.reference.core.module.h13"></a>
+          <span><a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__gethandle__phrase___code_">Module
           member function <code class="computeroutput"><span class="identifier">GetHandle</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">HMODULE</span> <span class="identifier">GetHandle</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -313,9 +313,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getsize__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getsize__phrase___code_">Module
+<h5>
+<a name="hadesmem.reference.core.module.h14"></a>
+          <span><a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getsize__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getsize__phrase___code_">Module
           member function <code class="computeroutput"><span class="identifier">GetSize</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetSize</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -333,9 +333,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getname__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getname__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getname__phrase___code_">Module
+<h5>
+<a name="hadesmem.reference.core.module.h15"></a>
+          <span><a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getname__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getname__phrase___code_">Module
           member function <code class="computeroutput"><span class="identifier">GetName</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetName</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -353,9 +353,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getpath__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getpath__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getpath__phrase___code_">Module
+<h5>
+<a name="hadesmem.reference.core.module.h16"></a>
+          <span><a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getpath__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__getpath__phrase___code_">Module
           member function <code class="computeroutput"><span class="identifier">GetPath</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">GetPath</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -373,9 +373,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__findprocedure__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__findprocedure__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__findprocedure__phrase___code_">Module
+<h5>
+<a name="hadesmem.reference.core.module.h17"></a>
+          <span><a name="hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__findprocedure__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_member_function__code__phrase_role__identifier__findprocedure__phrase___code_">Module
           member function <code class="computeroutput"><span class="identifier">FindProcedure</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">FARPROC</span> <span class="identifier">FindProcedure</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -400,9 +400,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_equality_operator"></a><h5>
-<a name="hadesmem.reference.core.module.module_equality_operator-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_equality_operator">Module
+<h5>
+<a name="hadesmem.reference.core.module.h18"></a>
+          <span><a name="hadesmem.reference.core.module.module_equality_operator"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_equality_operator">Module
           equality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -421,9 +421,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.module_inequality_operator"></a><h5>
-<a name="hadesmem.reference.core.module.module_inequality_operator-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.module_inequality_operator">Module
+<h5>
+<a name="hadesmem.reference.core.module.h19"></a>
+          <span><a name="hadesmem.reference.core.module.module_inequality_operator"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.module_inequality_operator">Module
           inequality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Module</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -442,13 +442,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.free_functions"></a><h4>
-<a name="hadesmem.reference.core.module.free_functions-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.free_functions">Free functions</a>
+<h4>
+<a name="hadesmem.reference.core.module.h20"></a>
+          <span><a name="hadesmem.reference.core.module.free_functions"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.free_functions">Free
+          functions</a>
         </h4>
-<a name="hadesmem.reference.core.module.free_function__code__phrase_role__identifier__getremotemodule__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.free_function__code__phrase_role__identifier__getremotemodule__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.free_function__code__phrase_role__identifier__getremotemodule__phrase___code_">Free
+<h5>
+<a name="hadesmem.reference.core.module.h21"></a>
+          <span><a name="hadesmem.reference.core.module.free_function__code__phrase_role__identifier__getremotemodule__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.free_function__code__phrase_role__identifier__getremotemodule__phrase___code_">Free
           function <code class="computeroutput"><span class="identifier">GetRemoteModule</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">Module</span> <span class="identifier">GetRemoteModule</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">LPCWSTR</span> <span class="identifier">ModuleName</span><span class="special">);</span>
@@ -470,9 +471,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_public_types"></a><h4>
-<a name="hadesmem.reference.core.module.modulelist_public_types-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_types">ModuleList
+<h4>
+<a name="hadesmem.reference.core.module.h22"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_public_types"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_types">ModuleList
           public types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
@@ -488,14 +489,14 @@
           Iterator type for module list. Models the <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" target="_top">ForwardIterator</a>
           concept. Implementation type unspecified.
         </p>
-<a name="hadesmem.reference.core.module.modulelist_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.module.modulelist_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_construct_copy_destruct_move">ModuleList
+<h4>
+<a name="hadesmem.reference.core.module.h23"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_public_construct_copy_destruct_move"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_construct_copy_destruct_move">ModuleList
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.module.modulelist_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_constructor">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h24"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_constructor">ModuleList
           constructor</a>
         </h5>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
@@ -514,9 +515,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_move_constructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_move_constructor">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h25"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_move_constructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_move_constructor">ModuleList
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">ModuleList</span><span class="special">(</span><span class="identifier">ModuleList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -536,9 +537,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_move_assignment_operator-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_move_assignment_operator">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h26"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_move_assignment_operator"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_move_assignment_operator">ModuleList
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">ModuleList</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">ModuleList</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -557,9 +558,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_destructor"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_destructor-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_destructor">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h27"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_destructor"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_destructor">ModuleList
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">ModuleList</span><span class="special">();</span>
@@ -577,14 +578,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.module.modulelist_public_member_functions-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_member_functions">ModuleList
+<h4>
+<a name="hadesmem.reference.core.module.h28"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_public_member_functions"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_public_member_functions">ModuleList
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__begin__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__begin__phrase___code_">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h29"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__begin__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__begin__phrase___code_">ModuleList
           member function <code class="computeroutput"><span class="identifier">begin</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">begin</span><span class="special">();</span>
@@ -603,9 +604,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__end__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__end__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__end__phrase___code_">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h30"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__end__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__end__phrase___code_">ModuleList
           member function <code class="computeroutput"><span class="identifier">end</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">iterator</span> <span class="identifier">end</span><span class="special">();</span>
@@ -625,9 +626,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cbegin__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h31"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cbegin__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cbegin__phrase___code_">ModuleList
           member function <code class="computeroutput"><span class="identifier">cbegin</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cbegin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -645,9 +646,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cend__phrase___code_-heading"></a>
-          <a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cend__phrase___code_">ModuleList
+<h5>
+<a name="hadesmem.reference.core.module.h32"></a>
+          <span><a name="hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cend__phrase___code_"></a></span><a class="link" href="module.html#hadesmem.reference.core.module.modulelist_member_function__code__phrase_role__identifier__cend__phrase___code_">ModuleList
           member function <code class="computeroutput"><span class="identifier">cend</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">const_iterator</span> <span class="identifier">cend</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -668,7 +669,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

@@ -1,7 +1,7 @@
 [article HadesMem
   [quickbook 1.5]
-  [version 1.5.0]
-  [copyright 2011 Joshua Boyce]
+  [version 1.6.0]
+  [copyright 2011-2012 Joshua Boyce]
   [authors [Boyce, Joshua]]
   [license Distributed under the Boost Software License, Version 1.0. (See 
     accompanying file LICENSE_1_0.txt or copy at 
@@ -16,6 +16,10 @@ HadesMem is a C++-based memory hacking library for Windows based
 applications, with the goal of providing a safe, generic, powerful, and 
 efficient API. All components are useable on remote targets. Furthermore, all 
 components compile for (and work natively on) both IA32 and AMD64.
+
+[caution Whilst every effort is made to make HadesMem safe and rhobust, 
+modifying the memory of another process is inherently dangerous and may impact 
+the stability of the process being modified.]
 
 [h3 Design]
 
@@ -91,9 +95,9 @@ vXX.YY.ZZ, as a narrow C-style string.
 
 HadesMem iterators are STL-compatible. Iterators are 'lazy' to keep the API 
 performant. Lazy in this context means that data enumeration and initialization 
-is only performed on-demmand, rather than lists being pre-processed. Furthermore, 
-caching is implemented to improve performance when the list is used in multi-pass 
-algorithms.
+is only performed on-demmand, rather than lists being pre-processed. 
+Furthermore, caching is implemented to improve performance when the list is 
+used in multi-pass algorithms.
 
 [h3 Support]
 
@@ -140,14 +144,36 @@ DEALINGS IN THE SOFTWARE.
 
 [section:changes Changes]
 
+[h3 v1.6.0]
+
+[*New Features]
+
+* Added new `Patcher` APIs.
+
+[*Bug Fixes]
+
+[*Changes]
+
+* Boost is no longer included as part of HadesMem. Please read the updated 
+build instructions.
+* Removed some unused build scripts and tweaked the GCC scripts. (Again, 
+please check the updated build instructions again.)
+* Marked the GCC support as 'experimental' as MinGW seems spotty at best.
+* Compiler detection is now done using Boost.Build rather than preprocessor 
+checks. This means that the header layout of the project can be improved and 
+some include dependencies can be removed.
+* Updated QuickBook binary.
+* Updated AsmJit.
+* Updated BeaEngine.
+
 [h3 v1.5.0]
 
 [*New Features]
 
 * Added new `FindPattern` APIs.
 * Added `Export::IsForwardedByOrdinal` and `Export::GetForwarderOrdinal`.
-* Added `MemoryMgr::Call` overload to support calling multiple functions from the same 
-thread.
+* Added `MemoryMgr::Call` overload to support calling multiple functions from 
+the same thread.
 
 [*Bug Fixes]
 
@@ -319,9 +345,8 @@ Supported Compilers:
 * [@http://gcc.gnu.org/ GNU GCC 4.6.x] (via 
 [@http://mingw-w64.sourceforge.net/ MinGW-w64])
 
-[warning Extra scripts are present for other compilers, however these are 
-currently unsupported and only present for use by developers and testers who 
-wish to help 'port' the project to support these toolsets.]
+[warning GCC support is currently experimental. This is largely due to 
+problems with the toolchain however, so it may take some time to be resolved.]
 
 Supported Platforms:
 
@@ -331,11 +356,9 @@ later)
 Steps to Build:
 
 # Build Boost.
-  # Navigate to Build/Boost.
-  # Run Bootstrap.bat.
-  # Run Build_Compiler_Architecture.bat (Substitute 'Compiler', and 
-  'Architecture' as appropriate).
-  # Check output and ensure there are no errors.
+  # Please consult the Boost documentation for build instructions. (Please note 
+  that by default HadesMem links with the CRT statically.)
+  # Place b2 somewhere in your PATH environmental variable.
 # Build HadesMem.
   # Navigate to Build/Full.
   # Run Build_Compiler_Configuration_Architecture.bat (Substitute 'Compiler', 
@@ -343,7 +366,9 @@ Steps to Build:
   # Check output and ensure there are no errors.
 
 [caution If using GCC, depending on which MinGW distribution you are using, 
-you may need to manually configure toolsets in your user-config.jam file.]
+you may need to manually configure toolsets in your user-config.jam file, and 
+you will probably also have to tweak the build script to point to your MinGW 
+installation directory.]
 
 Using HadesMem (in a Boost.Build based project):
 
@@ -352,8 +377,6 @@ document assumes you name the project 'HadesMem').
 # Add '''/HadesMem//HadesMem''' to the source list of your application/library 
 or the requirements list of your project.
 # Add `#include <HadesMemory/Memory.hpp>` to your code.
-# Set the BOOST_ROOT environmental variable and copy b2 to somewhere in your 
-PATH.
 
 [important When compiling your Boost.Build based project, explicitly specify 
 the toolset, address-model and debug/release configuration on the command line 
@@ -2876,6 +2899,304 @@ semantics. Invalidates `Other`.]]
 ]
 
 [endsect] [/ FindPattern]
+
+[section:patcher Patcher]
+
+[h3 Synopsis]
+
+  // In header: <HadesMemory/Patcher.hpp>
+  
+  class Patch
+  {
+  public:
+    class Error : public virtual HadesMemError;
+    
+    explicit Patch(MemoryMgr const& MyMemory);
+    
+    virtual ~Patch();
+    
+    virtual void Apply() = 0;
+    
+    virtual void Remove() = 0;
+    
+    bool IsApplied() const;
+  };
+  
+  class PatchRaw : public Patch
+  {
+  public:
+    PatchRaw(MemoryMgr const& MyMemory, PVOID Target, 
+      std::vector<BYTE> const& Data);
+    
+    PatchRaw(PatchRaw&& Other);
+    
+    PatchRaw& operator=(PatchRaw&& Other);
+    
+    virtual ~PatchRaw();
+    
+    virtual void Apply();
+    
+    virtual void Remove();
+  };
+  
+  class PatchDetour : public Patch
+  {
+  public:
+    PatchDetour(MemoryMgr const& MyMemory, PVOID Target, PVOID Detour);
+    
+    PatchDetour(PatchDetour&& Other);
+    
+    PatchDetour& operator=(PatchDetour&& Other);
+    
+    virtual ~PatchDetour();
+    
+    virtual void Apply();
+    
+    virtual void Remove();
+    
+    PVOID GetTrampoline() const;
+  };
+
+[h3 Description]
+
+The `PatchDetour` class provides functionality for creating 'detours' in a 
+remote process, and the `PatchRaw` class provides functionality for creating 
+raw 'byte patches' in a remote process. Both classes inherit from the `Patch` 
+base class. Please note that the `Patch` class is pure virtual and should not 
+be used directly, only as a generic base.
+
+`PatchDetour` uses a disassembler to automatically generate a trampoline, and 
+also provides basic support for relative instruction resolution (primarily to 
+allow hook chains, though other relative instruction types are supported).
+
+Unlike some other hooking libraries, `PatchDetour` does not mix code and data, 
+so targets are less likely to crash when hook chains are performed (either by 
+your own code, or some third party code such as Steam or Fraps).
+
+[warning The destructors of patching objects do not remove the patch. This 
+must be done either explicitly, or via the use of a RAII wrapper over the 
+object.]
+
+[h3 Patch public types]
+
+  class Error : public virtual HadesMemError;
+  
+Exception type thrown by `Patch` methods when an error occurs.
+
+[h3 Patch public member functions]
+
+[h4 Patch member function `Apply`]
+
+  virtual void Apply() = 0;
+
+[variablelist
+
+[[Effects:] [Applies patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Patch member function `Remove`]
+
+  virtual void Remove() = 0;
+
+[variablelist
+
+[[Effects:] [Removes patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 Patch member function `IsApplied`]
+
+  bool IsApplied() const;
+
+[variablelist
+
+[[Returns:] [Whether patch is applied.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 PatchRaw public construct/copy/destruct/move]
+
+[h4 PatchRaw constructor]
+
+  PatchRaw(MemoryMgr const& MyMemory, PVOID Target, 
+    std::vector<BYTE> const& Data);
+
+[variablelist
+
+[[Effects:] [Constructs a `PatchRaw` instance, taking the memory instance for 
+the target process, the target address, and the new data to patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchRaw move constructor]
+
+  PatchRaw(PatchRaw&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `PatchRaw` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchRaw move assignment operator]
+
+  PatchRaw& operator=(PatchRaw&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchRaw destructor]
+
+  virtual ~PatchRaw();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Notes:] [Does not remove patch.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 PatchRaw public member functions]
+
+[h4 PatchRaw member function `Apply`]
+
+  virtual void Apply();
+
+[variablelist
+
+[[Effects:] [Applies patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchRaw member function `Remove`]
+
+  virtual void Remove();
+
+[variablelist
+
+[[Effects:] [Removes patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h3 PatchDetour public construct/copy/destruct/move]
+
+[h4 PatchDetour constructor]
+
+  PatchDetour(MemoryMgr const& MyMemory, PVOID Target, PVOID Detour);
+
+[variablelist
+
+[[Effects:] [Constructs a `PatchDetour` instance, taking the memory instance 
+for the target process, the target address, and the detour address.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchDetour move constructor]
+
+  PatchDetour(PatchDetour&& Other);
+
+[variablelist
+
+[[Effects:] [Constructs a `PatchDetour` that refers to the same target as 
+`Other` via move semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchDetour move assignment operator]
+
+  PatchDetour& operator=(PatchDetour&& Other);
+
+[variablelist
+
+[[Effects:] [Sets self to refer to the same target as `Other` via move 
+semantics. Invalidates `Other`.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchDetour destructor]
+
+  virtual ~PatchDetour();
+
+[variablelist
+
+[[Effects:] [Destroys the instance and frees all resources.]]
+
+[[Notes:] [Does not remove patch.]]
+
+[[Throws:] [No.]]
+
+]
+
+[h3 PatchDetour public member functions]
+
+[h4 PatchDetour member function `Apply`]
+
+  virtual void Apply();
+
+[variablelist
+
+[[Effects:] [Applies patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchDetour member function `Remove`]
+
+  virtual void Remove();
+
+[variablelist
+
+[[Effects:] [Removes patch.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[h4 PatchDetour member function `GetTrampoline`]
+
+  PVOID GetTrampoline() const;
+
+[variablelist
+
+[[Returns:] [Pointer to trampoline to original function.]]
+
+[[Throws:] [Yes.]]
+
+]
+
+[endsect] [/ Patcher]
 
 [endsect] [/ Core]
 

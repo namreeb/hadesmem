@@ -4,24 +4,24 @@
 <title>FindPattern</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
 <link rel="up" href="../core.html" title="Core">
 <link rel="prev" href="region.html" title="Region">
-<link rel="next" href="../pelib.html" title="PeLib">
+<link rel="next" href="patcher.html" title="Patcher">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../../Images/Logo.png"></td></tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="../pelib.html"><img src="../../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="patcher.html"><img src="../../../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
 <a name="hadesmem.reference.core.findpattern"></a><a class="link" href="findpattern.html" title="FindPattern">FindPattern</a>
 </h4></div></div></div>
-<a name="hadesmem.reference.core.findpattern.synopsis"></a><h4>
-<a name="hadesmem.reference.core.findpattern.synopsis-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.synopsis">Synopsis</a>
+<h4>
+<a name="hadesmem.reference.core.findpattern.h0"></a>
+          <span><a name="hadesmem.reference.core.findpattern.synopsis"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/FindPattern.hpp&gt;</span>
 
@@ -29,76 +29,76 @@
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
   <span class="keyword">friend</span> <span class="keyword">class</span> <span class="identifier">Pattern</span><span class="special">;</span>
-  
-  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span> 
+
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span>
   <span class="special">{</span> <span class="special">};</span>
-  
-  <span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> 
+
+  <span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span>
     <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
-  
+
   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
-  
+
   <span class="keyword">enum</span> <span class="identifier">FindFlags</span>
   <span class="special">{</span>
-    <span class="identifier">FindFlags_None</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> 
-    <span class="identifier">FindFlags_ThrowOnUnmatch</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span> 
-    <span class="identifier">FindFlags_RelativeAddress</span> <span class="special">=</span> <span class="number">2</span><span class="special">,</span> 
+    <span class="identifier">FindFlags_None</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span>
+    <span class="identifier">FindFlags_ThrowOnUnmatch</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span>
+    <span class="identifier">FindFlags_RelativeAddress</span> <span class="special">=</span> <span class="number">2</span><span class="special">,</span>
     <span class="identifier">FindFlags_ScanData</span> <span class="special">=</span> <span class="number">4</span>
   <span class="special">};</span>
-  
-  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+
+  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span>
     <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
-  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
+
+  <span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span>
     <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
-  
+
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
 <span class="keyword">class</span> <span class="identifier">Pattern</span>
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
-  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span>
     <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
-  
-  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+
+  <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span>
     <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
-  
+
   <span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">Save</span><span class="special">();</span>
-  
+
   <span class="keyword">void</span> <span class="identifier">Update</span><span class="special">(</span><span class="identifier">PBYTE</span> <span class="identifier">Address</span><span class="special">);</span>
-  
+
   <span class="identifier">PBYTE</span> <span class="identifier">GetAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">MemoryMgr</span> <span class="identifier">GetMemory</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">GetFlags</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="identifier">DWORD_PTR</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 
@@ -108,51 +108,51 @@
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="comment">/*Pat*/</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-    
-    <span class="keyword">friend</span> <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">,</span> 
+
+    <span class="keyword">friend</span> <span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">,</span>
       <span class="identifier">Manipulator</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Manip</span><span class="special">);</span>
   <span class="special">};</span>
-  
+
   <span class="keyword">class</span> <span class="identifier">Save</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
-  
+
   <span class="keyword">class</span> <span class="identifier">Add</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="keyword">explicit</span> <span class="identifier">Add</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-    
+
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
-  
+
   <span class="keyword">class</span> <span class="identifier">Sub</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="keyword">explicit</span> <span class="identifier">Sub</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-    
+
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
-  
+
   <span class="keyword">class</span> <span class="identifier">Lea</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
-  
+
   <span class="keyword">class</span> <span class="identifier">Rel</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Manipulator</span>
   <span class="special">{</span>
   <span class="keyword">public</span><span class="special">:</span>
     <span class="identifier">Rel</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">Size</span><span class="special">,</span> <span class="identifier">DWORD_PTR</span> <span class="identifier">Offset</span><span class="special">);</span>
-    
+
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Manipulate</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="identifier">Pat</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
   <span class="special">};</span>
 <span class="special">}</span>
 </pre>
-<a name="hadesmem.reference.core.findpattern.description"></a><h4>
-<a name="hadesmem.reference.core.findpattern.description-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.description">Description</a>
+<h4>
+<a name="hadesmem.reference.core.findpattern.h1"></a>
+          <span><a name="hadesmem.reference.core.findpattern.description"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.description">Description</a>
         </h4>
 <p>
           The FindPattern class pattern scanning functionality, both 'manually' and
@@ -170,7 +170,7 @@
           manipulators are: Save, Add, Sub, Lea, Rel.
         </p>
 <p>
-          Patterns are of the format: 
+          Patterns are of the format:
 </p>
 <pre class="programlisting"><span class="identifier">HadesMem</span> <span class="identifier">Patterns</span> <span class="special">(</span><span class="identifier">Flags</span><span class="special">)</span>
 <span class="special">{</span> <span class="identifier">Name1</span><span class="special">,</span> <span class="identifier">Data1</span><span class="special">|</span><span class="identifier">WildCard1</span><span class="special">,</span> <span class="identifier">Data2</span><span class="special">|</span><span class="identifier">WildCard2</span><span class="special">,</span> <span class="special">...</span> <span class="identifier">DataN</span><span class="special">|</span><span class="identifier">WildCardN</span> <span class="special">}</span>
@@ -183,7 +183,7 @@
 <p>
         </p>
 <p>
-          Example: 
+          Example:
 </p>
 <pre class="programlisting"><span class="identifier">HadesMem</span> <span class="identifier">Patterns</span> <span class="special">(</span><span class="identifier">RelativeAddress</span><span class="special">,</span> <span class="identifier">ThrowOnUnmatch</span><span class="special">)</span>
 <span class="special">{</span> <span class="identifier">First</span> <span class="identifier">Call</span><span class="special">,</span> <span class="identifier">E8</span> <span class="special">}</span>
@@ -196,9 +196,9 @@
 </pre>
 <p>
         </p>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_types"></a><h4>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_types-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_types">FindPattern
+<h4>
+<a name="hadesmem.reference.core.findpattern.h2"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_public_types"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_types">FindPattern
           public types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
@@ -230,14 +230,14 @@
               of the code section(s).
             </li>
 </ul></div>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move">FindPattern
+<h4>
+<a name="hadesmem.reference.core.findpattern.h3"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_construct_copy_destruct_move">FindPattern
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.findpattern.findpattern_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_constructor">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h4"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_constructor">FindPattern
           constructor</a>
         </h5>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Module</span> <span class="special">=</span> <span class="identifier">nullptr</span><span class="special">);</span>
@@ -257,9 +257,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_copy_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_copy_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_constructor">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h5"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_copy_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_constructor">FindPattern
           copy constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -278,9 +278,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h6"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_copy_assignment_operator">FindPattern
           copy assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -298,9 +298,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_move_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_constructor">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h7"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_move_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_constructor">FindPattern
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -320,9 +320,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_move_assignment_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_assignment_operator">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h8"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_move_assignment_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_move_assignment_operator">FindPattern
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">FindPattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -341,9 +341,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_destructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_destructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_destructor">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h9"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_destructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_destructor">FindPattern
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">FindPattern</span><span class="special">();</span>
@@ -361,20 +361,20 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.findpattern.findpattern_public_member_functions-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_member_functions">FindPattern
+<h4>
+<a name="hadesmem.reference.core.findpattern.h10"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_public_member_functions"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_public_member_functions">FindPattern
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h11"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__find__phrase___code_">FindPattern
           member function <code class="computeroutput"><span class="identifier">Find</span></code></a>
         </h5>
-<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+<pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span>
   <span class="identifier">FindFlags_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
-<span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> 
+<span class="identifier">PVOID</span> <span class="identifier">Find</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span>
   <span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindFlags_None</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
@@ -403,9 +403,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h12"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__getaddresses__phrase___code_">FindPattern
           member function <code class="computeroutput"><span class="identifier">GetAddresses</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">map</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">,</span> <span class="identifier">PVOID</span><span class="special">&gt;</span> <span class="identifier">GetAddresses</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -423,9 +423,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_subscript_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_subscript_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_subscript_operator">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h13"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_subscript_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_subscript_operator">FindPattern
           subscript operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -443,9 +443,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h14"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__loadfile__phrase___code_">FindPattern
           member function <code class="computeroutput"><span class="identifier">LoadFile</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">LoadFile</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">);</span>
@@ -468,9 +468,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h15"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_member_function__code__phrase_role__identifier__writestring__phrase___code_">FindPattern
           member function <code class="computeroutput"><span class="identifier">WriteString</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">LoadFileMemory</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">);</span>
@@ -492,9 +492,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_equality_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_equality_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_equality_operator">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h16"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_equality_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_equality_operator">FindPattern
           equality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -513,9 +513,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.findpattern_inequality_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.findpattern_inequality_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_inequality_operator">FindPattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h17"></a>
+          <span><a name="hadesmem.reference.core.findpattern.findpattern_inequality_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.findpattern_inequality_operator">FindPattern
           inequality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">FindPattern</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -534,18 +534,18 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move">Pattern
+<h4>
+<a name="hadesmem.reference.core.findpattern.h18"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_construct_copy_destruct_move">Pattern
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.core.findpattern.pattern_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_constructor">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h19"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_constructor">Pattern
           constructor</a>
         </h5>
-<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
-  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> 
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Name</span><span class="special">,</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span>
   <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
@@ -561,12 +561,12 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_name_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_name_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_name_constructor">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h20"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_name_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_name_constructor">Pattern
           name constructor</a>
         </h5>
-<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span> 
+<pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">FindPattern</span><span class="special">&amp;</span> <span class="identifier">Finder</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Data</span><span class="special">,</span>
   <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags_None</span><span class="special">);</span>
 </pre>
 <div class="variablelist">
@@ -582,9 +582,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_move_constructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_move_constructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_constructor">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h21"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_move_constructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_constructor">Pattern
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Pattern</span><span class="special">(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -604,9 +604,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_move_assignment_operator-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_assignment_operator">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h22"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_move_assignment_operator"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_move_assignment_operator">Pattern
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">Pattern</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Pattern</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -625,9 +625,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_destructor"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_destructor-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_destructor">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h23"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_destructor"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_destructor">Pattern
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">Pattern</span><span class="special">();</span>
@@ -645,14 +645,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_public_member_functions"></a><h4>
-<a name="hadesmem.reference.core.findpattern.pattern_public_member_functions-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_member_functions">Pattern
+<h4>
+<a name="hadesmem.reference.core.findpattern.h24"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_public_member_functions"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_public_member_functions">Pattern
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h25"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__save__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">Save</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Save</span><span class="special">();</span>
@@ -670,9 +670,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h26"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__update__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">Update</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">Update</span><span class="special">(</span><span class="identifier">PBYTE</span> <span class="identifier">Address</span><span class="special">);</span>
@@ -690,9 +690,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h27"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getaddress__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">GetAddress</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PBYTE</span> <span class="identifier">GetAddress</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -710,9 +710,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h28"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getmemory__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">GetMemory</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">GetMemory</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -730,9 +730,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h29"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getflags__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">GetFlags</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">FindPattern</span><span class="special">::</span><span class="identifier">FindFlags</span> <span class="identifier">GetFlags</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -750,9 +750,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
-          <a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_">Pattern
+<h5>
+<a name="hadesmem.reference.core.findpattern.h30"></a>
+          <span><a name="hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a></span><a class="link" href="findpattern.html#hadesmem.reference.core.findpattern.pattern_member_function__code__phrase_role__identifier__getbase__phrase___code_">Pattern
           member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -773,7 +773,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>
@@ -781,7 +781,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="../pelib.html"><img src="../../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="region.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="patcher.html"><img src="../../../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>
