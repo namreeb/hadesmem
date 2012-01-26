@@ -4,9 +4,9 @@
 <title>Overview</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.5.0">
-<link rel="up" href="../index.html" title="HadesMem 1.5.0">
-<link rel="prev" href="../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../index.html" title="HadesMem 1.6.0">
+<link rel="up" href="../index.html" title="HadesMem 1.6.0">
+<link rel="prev" href="../index.html" title="HadesMem 1.6.0">
 <link rel="next" href="lic.html" title="License">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -19,9 +19,9 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.overview"></a><a class="link" href="overview.html" title="Overview">Overview</a>
 </h2></div></div></div>
-<a name="hadesmem.overview.introduction"></a><h4>
-<a name="hadesmem.overview.introduction-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.introduction">Introduction</a>
+<h4>
+<a name="hadesmem.overview.h0"></a>
+      <span><a name="hadesmem.overview.introduction"></a></span><a class="link" href="overview.html#hadesmem.overview.introduction">Introduction</a>
     </h4>
 <p>
       HadesMem is a C++-based memory hacking library for Windows based applications,
@@ -29,9 +29,20 @@
       components are useable on remote targets. Furthermore, all components compile
       for (and work natively on) both IA32 and AMD64.
     </p>
-<a name="hadesmem.overview.design"></a><h4>
-<a name="hadesmem.overview.design-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.design">Design</a>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
+<th align="left">Caution</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        Whilst every effort is made to make HadesMem safe and rhobust, modifying
+        the memory of another process is inherently dangerous and may impact the
+        stability of the process being modified.
+      </p></td></tr>
+</table></div>
+<h4>
+<a name="hadesmem.overview.h1"></a>
+      <span><a name="hadesmem.overview.design"></a></span><a class="link" href="overview.html#hadesmem.overview.design">Design</a>
     </h4>
 <p>
       HadesMem's design is built around the <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">MemoryMgr</span></code>
@@ -43,9 +54,10 @@
       as possible, both to ease implementation, and to make library use as easy and
       as error-safe as possible.
     </p>
-<a name="hadesmem.overview.error_handling"></a><h4>
-<a name="hadesmem.overview.error_handling-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.error_handling">Error Handling</a>
+<h4>
+<a name="hadesmem.overview.h2"></a>
+      <span><a name="hadesmem.overview.error_handling"></a></span><a class="link" href="overview.html#hadesmem.overview.error_handling">Error
+      Handling</a>
     </h4>
 <p>
       Exceptions are typically favoured over error codes. The rationale for this
@@ -103,9 +115,9 @@
       C++ Standard Library). In most cases, no attempt is made by HadesMem to suppress
       or 'translate' these exceptions.
     </p>
-<a name="hadesmem.overview.threading"></a><h4>
-<a name="hadesmem.overview.threading-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
+<h4>
+<a name="hadesmem.overview.h3"></a>
+      <span><a name="hadesmem.overview.threading"></a></span><a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
     </h4>
 <p>
       Currently no guarantees are made that multiple threads accessing the same HadesMem
@@ -114,9 +126,9 @@
       is currently underway to improve the threading guarantees offered by the library,
       but it is not yet complete.
     </p>
-<a name="hadesmem.overview.versioning"></a><h4>
-<a name="hadesmem.overview.versioning-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.versioning">Versioning</a>
+<h4>
+<a name="hadesmem.overview.h4"></a>
+      <span><a name="hadesmem.overview.versioning"></a></span><a class="link" href="overview.html#hadesmem.overview.versioning">Versioning</a>
     </h4>
 <p>
       HadesMem uses the <a href="http://semver.org/" target="_top">semantic versioning</a>
@@ -145,9 +157,9 @@
           string.
         </li>
 </ul></div>
-<a name="hadesmem.overview.iterators"></a><h4>
-<a name="hadesmem.overview.iterators-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.iterators">Iterators</a>
+<h4>
+<a name="hadesmem.overview.h5"></a>
+      <span><a name="hadesmem.overview.iterators"></a></span><a class="link" href="overview.html#hadesmem.overview.iterators">Iterators</a>
     </h4>
 <p>
       HadesMem iterators are STL-compatible. Iterators are 'lazy' to keep the API
@@ -156,9 +168,9 @@
       caching is implemented to improve performance when the list is used in multi-pass
       algorithms.
     </p>
-<a name="hadesmem.overview.support"></a><h4>
-<a name="hadesmem.overview.support-heading"></a>
-      <a class="link" href="overview.html#hadesmem.overview.support">Support</a>
+<h4>
+<a name="hadesmem.overview.h6"></a>
+      <span><a name="hadesmem.overview.support"></a></span><a class="link" href="overview.html#hadesmem.overview.support">Support</a>
     </h4>
 <p>
       Please direct all bug reports and/or feature requests to the issue tracker
@@ -170,7 +182,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

@@ -231,6 +231,10 @@ namespace HadesMem
   }
 
   // Find procedure by name
+  // FIXME: Due to compatibility shims and other potential redirections/hooks 
+  // this is dangerous and could cause a crash if the function pointers are 
+  // assumed to be equal cross-process. Reimplement 'manually' and verify 
+  // pointers before use.
   FARPROC Module::FindProcedure(std::string const& Name) const
   {
     Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(
@@ -264,6 +268,10 @@ namespace HadesMem
   }
 
   // Find procedure by ordinal
+  // FIXME: Due to compatibility shims and other potential redirections/hooks 
+  // this is dangerous and could cause a crash if the function pointers are 
+  // assumed to be equal cross-process. Reimplement 'manually' and verify 
+  // pointers before use.
   FARPROC Module::FindProcedure(WORD Ordinal) const
   {
     Detail::EnsureFreeLibrary const LocalMod(LoadLibraryEx(

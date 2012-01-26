@@ -4,7 +4,7 @@
 <title>TlsDir</title>
 <link rel="stylesheet" href="../../../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../../../index.html" title="HadesMem 1.5.0">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
 <link rel="up" href="../pelib.html" title="PeLib">
 <link rel="prev" href="section.html" title="Section">
 <link rel="next" href="../experimental.html" title="Experimental">
@@ -19,9 +19,9 @@
 <div class="titlepage"><div><div><h4 class="title">
 <a name="hadesmem.reference.pelib.tlsdir"></a><a class="link" href="tlsdir.html" title="TlsDir">TlsDir</a>
 </h4></div></div></div>
-<a name="hadesmem.reference.pelib.tlsdir.synopsis"></a><h4>
-<a name="hadesmem.reference.pelib.tlsdir.synopsis-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.synopsis">Synopsis</a>
+<h4>
+<a name="hadesmem.reference.pelib.tlsdir.h0"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.synopsis"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.synopsis">Synopsis</a>
         </h4>
 <pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/PeLib/Section.hpp&gt;</span>
 
@@ -31,15 +31,15 @@
   <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 
   <span class="keyword">explicit</span> <span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
-    
+
   <span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">TlsDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">TlsDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="identifier">TlsDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">TlsDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
-  
+
   <span class="special">~</span><span class="identifier">TlsDir</span><span class="special">();</span>
 
   <span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -73,17 +73,17 @@
   <span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 
   <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PIMAGE_TLS_CALLBACK</span><span class="special">&gt;</span> <span class="identifier">GetCallbacks</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-    
+
   <span class="comment">// Todo: SetCallbacks function</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  
+
   <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 </pre>
-<a name="hadesmem.reference.pelib.tlsdir.description"></a><h4>
-<a name="hadesmem.reference.pelib.tlsdir.description-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.description">Description</a>
+<h4>
+<a name="hadesmem.reference.pelib.tlsdir.h1"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.description"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.description">Description</a>
         </h4>
 <p>
           The <code class="computeroutput"><span class="identifier">TlsDir</span></code> class provides
@@ -94,10 +94,10 @@
           and COFF Specification</a> for more information on working with the
           PE file format.
         </p>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_types"></a><h4>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_types-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_types">TlsDir
-          public types</a>
+<h4>
+<a name="hadesmem.reference.pelib.tlsdir.h2"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_types"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_types">TlsDir public
+          types</a>
         </h4>
 <pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
 </pre>
@@ -105,15 +105,14 @@
           Exception type thrown by <code class="computeroutput"><span class="identifier">TlsDir</span></code>
           methods when an error occurs.
         </p>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_construct_copy_destruct_move"></a><h4>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_construct_copy_destruct_move-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_construct_copy_destruct_move">TlsDir
+<h4>
+<a name="hadesmem.reference.pelib.tlsdir.h3"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_construct_copy_destruct_move"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_construct_copy_destruct_move">TlsDir
           public construct/copy/destruct/move</a>
         </h4>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_constructor-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_constructor">TlsDir
-          constructor</a>
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h4"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_constructor"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_constructor">TlsDir constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">PeFile</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyPeFile</span><span class="special">);</span>
 </pre>
@@ -131,9 +130,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_constructor-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_copy_constructor">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h5"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_constructor"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_copy_constructor">TlsDir
           copy constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -152,9 +151,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_assignment_operator-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_copy_assignment_operator">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h6"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_copy_assignment_operator"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_copy_assignment_operator">TlsDir
           copy assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">TlsDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -172,9 +171,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_constructor"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_constructor-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_move_constructor">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h7"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_constructor"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_move_constructor">TlsDir
           move constructor</a>
         </h5>
 <pre class="programlisting"><span class="identifier">TlsDir</span><span class="special">(</span><span class="identifier">Section</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -194,9 +193,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_assignment_operator"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_assignment_operator-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_move_assignment_operator">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h8"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_move_assignment_operator"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_move_assignment_operator">TlsDir
           move assignment operator</a>
         </h5>
 <pre class="programlisting"><span class="identifier">TlsDir</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">TlsDir</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
@@ -215,9 +214,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_destructor"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_destructor-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_destructor">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h9"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_destructor"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_destructor">TlsDir
           destructor</a>
         </h5>
 <pre class="programlisting"><span class="special">~</span><span class="identifier">TlsDir</span><span class="special">();</span>
@@ -235,14 +234,14 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_member_functions"></a><h4>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_member_functions-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_member_functions">TlsDir
+<h4>
+<a name="hadesmem.reference.pelib.tlsdir.h10"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_public_member_functions"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_public_member_functions">TlsDir
           public member functions</a>
         </h4>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getbase__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getbase__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h11"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getbase__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getbase__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetBase</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">PVOID</span> <span class="identifier">GetBase</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -260,9 +259,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h12"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__isvalid__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">IsValid</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">IsValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -280,9 +279,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h13"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__ensurevalid__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">EnsureValid</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">EnsureValid</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -300,9 +299,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getstartaddressofrawdata__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getstartaddressofrawdata__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getstartaddressofrawdata__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h14"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getstartaddressofrawdata__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getstartaddressofrawdata__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetStartAddressOfRawData</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetStartAddressOfRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -320,9 +319,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getendaddressofrawdata__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getendaddressofrawdata__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getendaddressofrawdata__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h15"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getendaddressofrawdata__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getendaddressofrawdata__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetEndAddressOfRawData</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetEndAddressOfRawData</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -340,9 +339,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofindex__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofindex__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofindex__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h16"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofindex__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofindex__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetAddressOfIndex</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetAddressOfIndex</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -360,9 +359,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofcallbacks__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofcallbacks__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofcallbacks__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h17"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofcallbacks__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getaddressofcallbacks__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetAddressOfCallBacks</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetAddressOfCallBacks</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -380,9 +379,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getsizeofzerofill__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getsizeofzerofill__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getsizeofzerofill__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h18"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getsizeofzerofill__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getsizeofzerofill__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetSizeOfZeroFill</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetSizeOfZeroFill</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -400,9 +399,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h19"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcharacteristics__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetCharacteristics</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetCharacteristics</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -420,9 +419,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcallbacks__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcallbacks__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcallbacks__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h20"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcallbacks__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__getcallbacks__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">GetCallbacks</span></code></a>
         </h5>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">PIMAGE_TLS_CALLBACK</span><span class="special">&gt;</span> <span class="identifier">GetCallbacks</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -440,9 +439,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setstartaddressofrawdata__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setstartaddressofrawdata__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setstartaddressofrawdata__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h21"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setstartaddressofrawdata__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setstartaddressofrawdata__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetStartAddressOfRawData</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetStartAddressOfRawData</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">StartAddressOfRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -460,9 +459,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setendaddressofrawdata__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setendaddressofrawdata__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setendaddressofrawdata__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h22"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setendaddressofrawdata__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setendaddressofrawdata__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetEndAddressOfRawData</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetEndAddressOfRawData</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">EndAddressOfRawData</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -480,9 +479,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofindex__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofindex__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofindex__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h23"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofindex__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofindex__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetAddressOfIndex</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfIndex</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">AddressOfIndex</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -500,9 +499,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofcallbacks__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofcallbacks__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofcallbacks__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h24"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofcallbacks__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setaddressofcallbacks__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetAddressOfCallBacks</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetAddressOfCallBacks</span><span class="special">(</span><span class="identifier">DWORD_PTR</span> <span class="identifier">AddressOfCallbacks</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -520,9 +519,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setsizeofzerofill__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setsizeofzerofill__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setsizeofzerofill__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h25"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setsizeofzerofill__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setsizeofzerofill__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetSizeOfZeroFill</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetSizeOfZeroFill</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">SizeOfZeroFill</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -540,9 +539,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h26"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_member_function__code__phrase_role__identifier__setcharacteristics__phrase___code_">TlsDir
           member function <code class="computeroutput"><span class="identifier">SetCharacteristics</span></code></a>
         </h5>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">SetCharacteristics</span><span class="special">(</span><span class="identifier">DWORD</span> <span class="identifier">Characteristics</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -560,9 +559,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_equality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_equality_operator-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_equality_operator">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h27"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_equality_operator"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_equality_operator">TlsDir
           equality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -581,9 +580,9 @@
               </p></dd>
 </dl>
 </div>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_inequality_operator"></a><h5>
-<a name="hadesmem.reference.pelib.tlsdir.tlsdir_inequality_operator-heading"></a>
-          <a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_inequality_operator">TlsDir
+<h5>
+<a name="hadesmem.reference.pelib.tlsdir.h28"></a>
+          <span><a name="hadesmem.reference.pelib.tlsdir.tlsdir_inequality_operator"></a></span><a class="link" href="tlsdir.html#hadesmem.reference.pelib.tlsdir.tlsdir_inequality_operator">TlsDir
           inequality operator</a>
         </h5>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">TlsDir</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -605,7 +604,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2011 Joshua Boyce<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
         file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
       </p>

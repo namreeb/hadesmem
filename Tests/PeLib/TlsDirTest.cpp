@@ -21,6 +21,7 @@
 #define BOOST_TEST_MODULE TlsDirTest
 #ifdef HADES_GCC
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
