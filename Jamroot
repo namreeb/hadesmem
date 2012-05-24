@@ -36,8 +36,10 @@ project
     <define>_UNICODE
     <define>WIN32_LEAN_AND_MEAN
     
-    <define>_CRT_SECURE_NO_WARNINGS # TODO: Wrap dependencies so this isn't required
-    <define>_SCL_SECURE_NO_WARNINGS # TODO: Wrap dependencies so this isn't required
+    # TODO: Wrap includes for dependencies so this isn't required
+    <define>_CRT_SECURE_NO_WARNINGS
+    # TODO: Wrap includes for dependencies so this isn't required
+    <define>_SCL_SECURE_NO_WARNINGS
     
     <define>WINVER=_WIN32_WINNT_VISTA
     <define>_WIN32_WINNT=_WIN32_WINNT_VISTA
