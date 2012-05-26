@@ -1,0 +1,35 @@
+# Src/Dependencies/Jamfile.v2
+
+project 
+  : 
+    requirements 
+    <warnings>off 
+  ;
+
+lib AsmJit 
+  : 
+    [ glob AsmJit/AsmJit/*.cpp ] 
+  : 
+    <link>static 
+    <define>ASMJIT_API="" 
+    <define>_SCL_SECURE_NO_WARNINGS 
+  : 
+  : 
+    <include>"./AsmJit/" 
+    <define>ASMJIT_API="" 
+  ;
+
+lib BeaEngine 
+  : 
+    [ glob BeaEngine/beaengineSources/*.c ] 
+  : 
+    <include>"./BeaEngine/beaengineSources/Includes/" 
+    <include>"./BeaEngine/include/" 
+    <define>BEA_ENGINE_STATIC 
+    <link>static 
+    <define>_SCL_SECURE_NO_WARNINGS 
+  : 
+  : 
+    <include>"./BeaEngine/include/" 
+    <define>BEA_ENGINE_STATIC 
+  ;

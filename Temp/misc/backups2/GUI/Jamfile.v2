@@ -1,0 +1,17 @@
+# GUI/Jamfile.v2
+
+project 
+  : 
+    requirements 
+    <warnings>all 
+  ;
+
+exe MemHack 
+  : 
+    [ glob MemHack/*.cpp ] 
+    /Dependencies//WTL 
+    /Memory//Memory 
+  : 
+    <user-interface>gui 
+    <warnings-as-errors>on 
+  ;
