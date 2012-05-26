@@ -1,0 +1,42 @@
+# Docs/Jamfile.v2
+
+using xsltproc
+  : 
+    $(TOP)/Docs/Bin/bin/xsltproc.exe 
+  ;
+
+using boostbook
+  : 
+    $(TOP)/Docs/Bin/docbook-xsl 
+  : 
+    $(TOP)/Docs/Bin/docbook-xml 
+  ;
+
+using quickbook
+  : 
+    $(TOP)/Docs/Bin/bin/quickbook.exe 
+  ;
+  
+xml HadesMem 
+  : 
+    HadesMem.qbk
+  ;
+
+path-constant images 
+  : 
+    Src/Dependencies/Boost/doc/src 
+  ;
+
+boostbook standalone
+  :
+    HadesMem 
+  :
+    <xsl:param>boost.image.src=Images/Logo.png
+    <xsl:param>boost.image.alt="\"HadesMem\""
+    <xsl:param>boost.image.w=300
+    <xsl:param>boost.image.h=100
+    <xsl:param>generate.section.toc.level=3
+    <xsl:param>chunk.section.depth=3
+    <xsl:param>chunk.first.sections=1
+    <xsl:param>toc.section.depth=4
+  ;

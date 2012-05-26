@@ -1,0 +1,674 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Injector</title>
+<link rel="stylesheet" href="../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="../../../index.html" title="HadesMem 1.6.0">
+<link rel="up" href="../core.html" title="Core">
+<link rel="prev" href="module.html" title="Module">
+<link rel="next" href="region.html" title="Region">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"><img alt="HadesMem" width="300" height="100" src="../../../Images/Logo.png"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="module.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="region.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="hadesmem.reference.core.injector"></a><a class="link" href="injector.html" title="Injector">Injector</a>
+</h4></div></div></div>
+<h4>
+<a name="hadesmem.reference.core.injector.h0"></a>
+          <span><a name="hadesmem.reference.core.injector.synopsis"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.synopsis">Synopsis</a>
+        </h4>
+<pre class="programlisting"><span class="comment">// In header: &lt;HadesMemory/Injector.hpp&gt;</span>
+
+<span class="keyword">class</span> <span class="identifier">Injector</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+
+  <span class="keyword">explicit</span> <span class="identifier">Injector</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
+
+  <span class="identifier">Injector</span><span class="special">(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">Injector</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">Injector</span><span class="special">(</span><span class="identifier">Injector</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">Injector</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Injector</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="special">~</span><span class="identifier">Injector</span><span class="special">();</span>
+
+  <span class="keyword">enum</span> <span class="identifier">InjectFlags</span>
+  <span class="special">{</span>
+    <span class="identifier">InjectFlag_None</span><span class="special">,</span>
+    <span class="identifier">InjectFlag_PathResolution</span>
+  <span class="special">};</span>
+
+  <span class="identifier">HMODULE</span> <span class="identifier">InjectDll</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+    <span class="identifier">InjectFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">InjectFlag_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">void</span> <span class="identifier">FreeDll</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">Module</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">RemoteFunctionRet</span> <span class="identifier">CallExport</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteModule</span><span class="special">,</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Export</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">class</span> <span class="identifier">CreateAndInjectData</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Module</span><span class="special">,</span>
+    <span class="identifier">DWORD_PTR</span> <span class="identifier">ExportRet</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">ExportLastError</span><span class="special">);</span>
+
+  <span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">CreateAndInjectData</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">CreateAndInjectData</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">CreateAndInjectData</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">CreateAndInjectData</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="identifier">CreateAndInjectData</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">CreateAndInjectData</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+
+  <span class="special">~</span><span class="identifier">CreateAndInjectData</span><span class="special">();</span>
+
+  <span class="identifier">MemoryMgr</span> <span class="identifier">GetMemoryMgr</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">HMODULE</span> <span class="identifier">GetModule</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">GetExportRet</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+
+  <span class="identifier">DWORD</span> <span class="identifier">GetExportLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="identifier">CreateAndInjectData</span> <span class="identifier">CreateAndInject</span><span class="special">(</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkDir</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Export</span><span class="special">,</span>
+  <span class="identifier">Injector</span><span class="special">::</span><span class="identifier">InjectFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">Injector</span><span class="special">::</span><span class="identifier">InjectFlag_None</span><span class="special">);</span>
+</pre>
+<h4>
+<a name="hadesmem.reference.core.injector.h1"></a>
+          <span><a name="hadesmem.reference.core.injector.description"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.description">Description</a>
+        </h4>
+<p>
+          The Injector class provides DLL injection and freeing/'ejection' functionality.
+        </p>
+<p>
+          CreateAndInject is a free function is provided to facilitate the injection
+          of a module at process startup, before the entry point of the program is
+          run.
+        </p>
+<p>
+          The CreateAndInjectData class contains return information for the CreateAndInject
+          free function.
+        </p>
+<h4>
+<a name="hadesmem.reference.core.injector.h2"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_public_types"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_public_types">Injector
+          public types</a>
+        </h4>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Error</span> <span class="special">:</span> <span class="keyword">public</span> <span class="keyword">virtual</span> <span class="identifier">HadesMemError</span><span class="special">;</span>
+</pre>
+<p>
+          Exception type thrown by <code class="computeroutput"><span class="identifier">Injector</span></code>
+          methods when an error occurs.
+        </p>
+<pre class="programlisting"><span class="keyword">enum</span> <span class="identifier">InjectFlags</span><span class="special">;</span>
+</pre>
+<p>
+          Injection flags to control behaviour such as path resolution. Necessary
+          because sometimes you will want paths to be resolved completely in the
+          context of your code, and other times you will want paths to be resolved
+          by the PE loader in the context of the target.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+              InjectFlag_None - No injection flags.
+            </li>
+<li class="listitem">
+              InjectFlag_PathResolution - Resolve relative paths in the context of
+              the caller. Default behaviour without this flag is to defer path resolution
+              to the target.
+            </li>
+</ul></div>
+<h4>
+<a name="hadesmem.reference.core.injector.h3"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_public_construct_copy_destruct_move"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_public_construct_copy_destruct_move">Injector
+          public construct/copy/destruct/move</a>
+        </h4>
+<h5>
+<a name="hadesmem.reference.core.injector.h4"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_constructor">Injector
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">Injector</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs an <code class="computeroutput"><span class="identifier">Injector</span></code>
+                instance that refers to the specified target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h5"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_copy_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_copy_constructor">Injector
+          copy constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Injector</span><span class="special">(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs an <code class="computeroutput"><span class="identifier">Injector</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h6"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_copy_assignment_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_copy_assignment_operator">Injector
+          copy assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Injector</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as the other instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h7"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_move_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_move_constructor">Injector
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Injector</span><span class="special">(</span><span class="identifier">Injector</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">Injector</span></code>
+                that refers to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h8"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_move_assignment_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_move_assignment_operator">Injector
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">Injector</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">Injector</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same process as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h9"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_destructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_destructor">Injector
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">Injector</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Destroys the instance and frees all resources.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h4>
+<a name="hadesmem.reference.core.injector.h10"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_public_member_functions"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_public_member_functions">Injector
+          public member functions</a>
+        </h4>
+<h5>
+<a name="hadesmem.reference.core.injector.h11"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__injectdll__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__injectdll__phrase___code_">Injector
+          member function <code class="computeroutput"><span class="identifier">InjectDll</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">HMODULE</span> <span class="identifier">InjectDll</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">InjectFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">InjectFlag_None</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Inject DLL loaded from <code class="computeroutput"><span class="identifier">Path</span></code>
+                using the injection flags <code class="computeroutput"><span class="identifier">Flags</span></code>.
+                Injection is done by calling the Windows API <a href="http://msdn.microsoft.com/en-us/library/ms684175.aspx" target="_top">LoadLibraryW</a>
+                in the context of the remote target.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                A handle to the injected module.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h12"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__freedll__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__freedll__phrase___code_">Injector
+          member function <code class="computeroutput"><span class="identifier">FreeDll</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">FreeDll</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">Module</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Frees a module by calling the Windows API <a href="http://msdn.microsoft.com/en-us/library/ms683152.aspx" target="_top">FreeLibrary</a>
+                in the context of the remote target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h13"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__callexport__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_member_function__code__phrase_role__identifier__callexport__phrase___code_">Injector
+          member function <code class="computeroutput"><span class="identifier">CallExport</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">RemoteFunctionRet</span> <span class="identifier">CallExport</span><span class="special">(</span><span class="identifier">HMODULE</span> <span class="identifier">RemoteModule</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Export</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Calls the export <code class="computeroutput"><span class="identifier">Export</span></code>
+                in module <code class="computeroutput"><span class="identifier">RemoteModule</span></code>,
+                assuming function prototype DWORD_PTR __stdcall Foo(HMODULE).
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                A <code class="computeroutput"><span class="identifier">RemoteFunctionRet</span></code>
+                instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+<dt><span class="term">Notes:</span></dt>
+<dd><p>
+                This is a thin wrapper around <code class="computeroutput"><span class="identifier">MemoryMgr</span><span class="special">::</span><span class="identifier">Call</span></code>,
+                see the <code class="computeroutput"><span class="identifier">MemoryMgr</span></code>
+                documentation for further information.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h14"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_equality_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_equality_operator">Injector
+          equality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">==(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                the same target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h15"></a>
+          <span><a name="hadesmem.reference.core.injector.injector_inequality_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.injector_inequality_operator">Injector
+          inequality operator</a>
+        </h5>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="keyword">operator</span><span class="special">!=(</span><span class="identifier">Injector</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Rhs</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Whether <code class="computeroutput"><span class="identifier">Rhs</span></code> represets
+                a different target.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h4>
+<a name="hadesmem.reference.core.injector.h16"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_public_construct_copy_destruct_move"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_public_construct_copy_destruct_move">CreateAndInjectData
+          public construct/copy/destruct/move</a>
+        </h4>
+<h5>
+<a name="hadesmem.reference.core.injector.h17"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_constructor">CreateAndInjectData
+          constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">MemoryMgr</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">MyMemory</span><span class="special">,</span> <span class="identifier">HMODULE</span> <span class="identifier">Module</span><span class="special">,</span>
+  <span class="identifier">DWORD_PTR</span> <span class="identifier">ExportRet</span><span class="special">,</span> <span class="identifier">DWORD</span> <span class="identifier">ExportLastError</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Creates an injection data wrapper from MemoryMgr instance <code class="computeroutput"><span class="identifier">MyMemory</span></code>, module handle <code class="computeroutput"><span class="identifier">Module</span></code>, export return value <code class="computeroutput"><span class="identifier">ExportRet</span></code>, and export last error
+                code <code class="computeroutput"><span class="identifier">ExportLastError</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h18"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_copy_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_copy_constructor">CreateAndInjectData
+          copy constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">CreateAndInjectData</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">CreateAndInjectData</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h19"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_copy_assignment_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_copy_assignment_operator">CreateAndInjectData
+          copy assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">CreateAndInjectData</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as the other instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h20"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_move_constructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_move_constructor">CreateAndInjectData
+          move constructor</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span><span class="special">(</span><span class="identifier">CreateAndInjectData</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Constructs a <code class="computeroutput"><span class="identifier">CreateAndInjectData</span></code>
+                that refers to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h21"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_move_assignment_operator"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_move_assignment_operator">CreateAndInjectData
+          move assignment operator</a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span><span class="special">&amp;</span> <span class="keyword">operator</span><span class="special">=(</span><span class="identifier">CreateAndInjectData</span><span class="special">&amp;&amp;</span> <span class="identifier">Other</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Sets self to refer to the same target as <code class="computeroutput"><span class="identifier">Other</span></code>
+                via move semantics. Invalidates <code class="computeroutput"><span class="identifier">Other</span></code>.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h22"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_destructor"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_destructor">CreateAndInjectData
+          destructor</a>
+        </h5>
+<pre class="programlisting"><span class="special">~</span><span class="identifier">CreateAndInjectData</span><span class="special">();</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Frees the remote memory block (unless already freed manually).
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h4>
+<a name="hadesmem.reference.core.injector.h23"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_public_member_functions"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_public_member_functions">CreateAndInjectData
+          public member functions</a>
+        </h4>
+<h5>
+<a name="hadesmem.reference.core.injector.h24"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getmemorymgr__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getmemorymgr__phrase___code_">CreateAndInjectData
+          member function <code class="computeroutput"><span class="identifier">GetMemoryMgr</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">MemoryMgr</span> <span class="identifier">GetMemoryMgr</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Memory manager object for new process.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h25"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getmodule__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getmodule__phrase___code_">CreateAndInjectData
+          member function <code class="computeroutput"><span class="identifier">GetModule</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">HMODULE</span> <span class="identifier">GetModule</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Handle to injected module.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h26"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getexportret__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getexportret__phrase___code_">CreateAndInjectData
+          member function <code class="computeroutput"><span class="identifier">GetExportRet</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD_PTR</span> <span class="identifier">GetExportRet</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Return value of export.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h5>
+<a name="hadesmem.reference.core.injector.h27"></a>
+          <span><a name="hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getexportlasterror__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.createandinjectdata_member_function__code__phrase_role__identifier__getexportlasterror__phrase___code_">CreateAndInjectData
+          member function <code class="computeroutput"><span class="identifier">GetExportLastError</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">DWORD</span> <span class="identifier">GetExportLastError</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                Last error code for export.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                No.
+              </p></dd>
+</dl>
+</div>
+<h4>
+<a name="hadesmem.reference.core.injector.h28"></a>
+          <span><a name="hadesmem.reference.core.injector.free_functions"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.free_functions">Free
+          functions</a>
+        </h4>
+<h5>
+<a name="hadesmem.reference.core.injector.h29"></a>
+          <span><a name="hadesmem.reference.core.injector.free_function__code__phrase_role__identifier__createandinject__phrase___code_"></a></span><a class="link" href="injector.html#hadesmem.reference.core.injector.free_function__code__phrase_role__identifier__createandinject__phrase___code_">Free
+          function <code class="computeroutput"><span class="identifier">CreateAndInject</span></code></a>
+        </h5>
+<pre class="programlisting"><span class="identifier">CreateAndInjectData</span> <span class="identifier">CreateAndInject</span><span class="special">(</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Path</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">WorkDir</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&gt;</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Args</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Module</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">Export</span><span class="special">,</span>
+  <span class="identifier">Injector</span><span class="special">::</span><span class="identifier">InjectFlags</span> <span class="identifier">Flags</span> <span class="special">=</span> <span class="identifier">Injector</span><span class="special">::</span><span class="identifier">InjectFlag_None</span><span class="special">);</span>
+</pre>
+<div class="variablelist">
+<p class="title"><b></b></p>
+<dl>
+<dt><span class="term">Effects:</span></dt>
+<dd><p>
+                Create suspended process from binary at <code class="computeroutput"><span class="identifier">Path</span></code>
+                with optional working dir <code class="computeroutput"><span class="identifier">WorkDir</span></code>,
+                optional arguments <code class="computeroutput"><span class="identifier">Args</span></code>.
+                DLL at path <code class="computeroutput"><span class="identifier">Module</span></code>
+                is then injected using optional injection flags <code class="computeroutput"><span class="identifier">Flags</span></code>,
+                and optional export <code class="computeroutput"><span class="identifier">Export</span></code>
+                is run. Process is then resumed.
+              </p></dd>
+<dt><span class="term">Returns:</span></dt>
+<dd><p>
+                A <code class="computeroutput"><span class="identifier">CreateAndInjectData</span></code>
+                instance.
+              </p></dd>
+<dt><span class="term">Throws:</span></dt>
+<dd><p>
+                Yes.
+              </p></dd>
+</dl>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>).
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="module.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../core.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="region.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>
