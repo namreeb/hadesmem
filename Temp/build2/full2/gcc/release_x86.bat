@@ -1,7 +1,0 @@
-set OLDCD=%CD%
-pushd ..\..\..\
-set OLDPATH=%PATH%
-set PATH=%BOOST_ROOT%;%MINGW32%;%MINGW32%\bin\;%PATH%
-b2 -j %NUMBER_OF_PROCESSORS% toolset=gcc address-model=32 release > %OLDCD%\release_x86.txt
-set PATH=%OLDPATH%
-popd
