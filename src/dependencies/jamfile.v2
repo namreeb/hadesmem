@@ -6,30 +6,30 @@ project
     <warnings>off 
   ;
 
-lib AsmJit 
+lib asmjit 
   : 
-    [ glob AsmJit/AsmJit/*.cpp ] 
+    [ glob asmjit/asmjit/*.cpp ] 
   : 
     <link>static 
     <define>ASMJIT_API="" 
     <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
-    <include>"./AsmJit/" 
+    <include>"./asmjit/" 
     <define>ASMJIT_API="" 
   ;
 
-lib BeaEngine 
+lib beaengine 
   : 
-    [ glob BeaEngine/beaengineSources/*.c ] 
+    [ glob beaengine/beaengineSources/*.c ] 
   : 
-    <include>"./BeaEngine/beaengineSources/Includes/" 
-    <include>"./BeaEngine/include/" 
+    <include>"./beaengine/beaengineSources/Includes/" 
+    <include>"./beaengine/include/" 
     <define>BEA_ENGINE_STATIC 
     <link>static 
     <define>_SCL_SECURE_NO_WARNINGS 
   : 
   : 
-    <include>"./BeaEngine/include/" 
+    <include>"./beaengine/include/" 
     <define>BEA_ENGINE_STATIC 
   ;

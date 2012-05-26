@@ -3,22 +3,22 @@ path-constant TOP
     .
   ;
 
-use-project /Dependencies
+use-project /dependencies
   :
     src/dependencies
   ;
 
-use-project /Examples
+use-project /examples
   :
     examples
   ;
 
-use-project /Memory
+use-project /memory
   :
     src/memory
   ;
 
-use-project /Tests
+use-project /tests
   :
     tests
   ; 
@@ -106,7 +106,7 @@ install dist
     <install-type>EXE
   ;
 
-alias HadesMem
+alias hadesmem
   :
-    src/memory//Memory
+    src/memory//memory
   ;

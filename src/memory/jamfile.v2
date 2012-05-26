@@ -1,81 +1,81 @@
-# Src/Memory/Jamfile.v2
+# src/memory/jamfile.v2
 
-project 
-  : 
-    requirements 
-    <toolset>msvc:<warnings>all 
-    <toolset>gcc:<warnings>all 
-    <toolset>msvc:<warnings-as-errors>on 
-    <toolset>gcc:<warnings-as-errors>on 
-    <toolset>gcc:<cxxflags>-Wextra 
-    <toolset>gcc:<cxxflags>-pedantic-errors 
+project
+  :
+    requirements
+    <toolset>msvc:<warnings>all
+    <toolset>gcc:<warnings>all
+    <toolset>msvc:<warnings-as-errors>on
+    <toolset>gcc:<warnings-as-errors>on
+    <toolset>gcc:<cxxflags>-Wextra
+    <toolset>gcc:<cxxflags>-pedantic-errors
   ;
 
-lib user32 
-  : 
-  : 
-    <name>user32 
+lib user32
+  :
+  :
+    <name>user32
   ;
 
-lib advapi32 
-  : 
-  : 
-    <name>advapi32 
+lib advapi32
+  :
+  :
+    <name>advapi32
   ;
 
-lib dbghelp 
-  : 
-  : 
-    <name>dbghelp 
+lib dbghelp
+  :
+  :
+    <name>dbghelp
   ;
 
-lib shell32 
-  : 
-  : 
-    <name>shell32 
+lib shell32
+  :
+  :
+    <name>shell32
   ;
 
-lib psapi 
-  : 
-  : 
-    <name>psapi 
+lib psapi
+  :
+  :
+    <name>psapi
   ;
   
 lib imagehlp
-  : 
-  : 
-    <name>imagehlp 
+  :
+  :
+    <name>imagehlp
   ;
 
 lib ole32
-  : 
-  : 
-    <name>ole32 
+  :
+  :
+    <name>ole32
   ;
 
-lib Memory 
-  : 
-    [ glob Memory/*.cpp ] 
-    [ glob Memory/PeLib/*.cpp ] 
-    [ glob Memory/Detail/*.cpp ] 
-    [ glob Memory/PeLib/Detail/*.cpp ] 
-    [ glob Memory/Experimental/*.cpp ] 
-    /Dependencies//AsmJit 
-    /Dependencies//BeaEngine 
-    /boost//filesystem/<link>static 
-    /boost//thread/<link>static 
-    /boost//date_time/<link>static 
-    user32 
-    advapi32 
-    dbghelp 
-    shell32 
-    psapi 
-    imagehlp 
-    ole32 
+lib memory
+  :
+    [ glob memory/*.cpp ]
+    [ glob memory/pelib/*.cpp ]
+    [ glob memory/detail/*.cpp ]
+    [ glob memory/pelib/detail/*.cpp ]
+    [ glob memory/experimental/*.cpp ]
+    /dependencies//asmjit
+    /dependencies//beaengine
+    /boost//filesystem/<link>static
+    /boost//thread/<link>static
+    /boost//date_time/<link>static
+    user32
+    advapi32
+    dbghelp
+    shell32
+    psapi
+    imagehlp
+    ole32
   : 
     <link>static 
-    <include>"../../Include/Memory" 
+    <include>"../../include/memory"
   : 
   : 
-    <include>"../../Include/Memory" 
+    <include>"../../include/memory"
   ;

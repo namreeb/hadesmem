@@ -1,35 +1,35 @@
-# Examples/Jamfile.v2
+# examples/jamfile.v2
 
-project 
-  : 
-    requirements 
-    <toolset>msvc:<warnings>all 
-    <toolset>gcc:<warnings>all 
-    <toolset>msvc:<warnings-as-errors>on 
-    <toolset>gcc:<warnings-as-errors>on 
-    <toolset>gcc:<cxxflags>-Wextra 
-    <toolset>gcc:<cxxflags>-pedantic-errors 
-    <toolset>gcc:<linkflags>-municode  
+project
+  :
+    requirements
+    <toolset>msvc:<warnings>all
+    <toolset>gcc:<warnings>all
+    <toolset>msvc:<warnings-as-errors>on
+    <toolset>gcc:<warnings-as-errors>on
+    <toolset>gcc:<cxxflags>-Wextra
+    <toolset>gcc:<cxxflags>-pedantic-errors
+    <toolset>gcc:<linkflags>-municode
   ;
 
-exe ManualMapper 
-  : 
-    Experimental/ManualMapper.cpp 
-    /Memory//Memory 
+exe manualmapper
+  :
+    experimental/ManualMapper.cpp
+    /memory//memory
   ;
 
-lib TestMMMod 
-  : 
-    Experimental/TestMMMod.cpp 
-    /Memory//Memory 
-  : 
-    <link>shared 
+lib testmmmod
+  :
+    experimental/TestMMMod.cpp
+    /memory//memory
+  :
+    <link>shared
   ;
 
-lib HostCLR 
-  : 
-    Experimental/HostCLR.cpp 
-    /Memory//Memory 
-  : 
+lib hostclr
+  :
+    experimental/HostCLR.cpp 
+    /memory//memory 
+  :
     <link>shared 
   ;
