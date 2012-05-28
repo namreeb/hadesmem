@@ -8,11 +8,6 @@ use-project /dependencies
     src/dependencies
   ;
 
-use-project /examples
-  :
-    examples
-  ;
-
 use-project /memory
   :
     src/memory
@@ -70,16 +65,12 @@ project
 build-project src/memory
   ;
 
-build-project examples
-  ;
-
 build-project tests
   ;
 
 install dist
   :
-    src/memory 
-    examples 
+    src/memory
   :
     <toolset>msvc,<variant>debug,<address-model>32:<location>dist/msvc/debug/x86
     <toolset>msvc,<variant>debug,<address-model>64:<location>dist/msvc/debug/x64
