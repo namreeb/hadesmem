@@ -4,9 +4,9 @@
 <title>Overview</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.6.0">
-<link rel="up" href="../index.html" title="HadesMem 1.6.0">
-<link rel="prev" href="../index.html" title="HadesMem 1.6.0">
+<link rel="home" href="../index.html" title="HadesMem 2.0.0">
+<link rel="up" href="../index.html" title="HadesMem 2.0.0">
+<link rel="prev" href="../index.html" title="HadesMem 2.0.0">
 <link rel="next" href="lic.html" title="License">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -15,7 +15,7 @@
 <div class="spirit-nav">
 <a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="lic.html"><img src="../images/next.png" alt="Next"></a>
 </div>
-<div class="section">
+<div class="section hadesmem_overview">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.overview"></a><a class="link" href="overview.html" title="Overview">Overview</a>
 </h2></div></div></div>
@@ -37,148 +37,9 @@
 <tr><td align="left" valign="top"><p>
         Whilst every effort is made to make HadesMem safe and rhobust, modifying
         the memory of another process is inherently dangerous and may impact the
-        stability of the process being modified.
+        stability of the process being modified and potentially the system as a whole.
       </p></td></tr>
 </table></div>
-<h4>
-<a name="hadesmem.overview.h1"></a>
-      <span><a name="hadesmem.overview.design"></a></span><a class="link" href="overview.html#hadesmem.overview.design">Design</a>
-    </h4>
-<p>
-      HadesMem's design is built around the <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">MemoryMgr</span></code>
-      class, which provides all the basic and critical functionality required for
-      the other components to be implemented.
-    </p>
-<p>
-      In terms of language usage, the library aims to exploit modern C++ as much
-      as possible, both to ease implementation, and to make library use as easy and
-      as error-safe as possible.
-    </p>
-<h4>
-<a name="hadesmem.overview.h2"></a>
-      <span><a name="hadesmem.overview.error_handling"></a></span><a class="link" href="overview.html#hadesmem.overview.error_handling">Error
-      Handling</a>
-    </h4>
-<p>
-      Exceptions are typically favoured over error codes. The rationale for this
-      is that memory hacking is quite 'unsable' by nature, and most use cases favour
-      grouping operations in an 'all or nothing' fashion. By using exceptions, the
-      amount of boilerplate code required to use the library is significantly reduced.
-    </p>
-<p>
-      Exceptions in HadesMem are all derived from <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">HadesMemError</span></code>,
-      which in turn is derived from both <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
-      and <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">exception</span></code>. Internally, exceptions are built
-      and thrown using the <a href="http://www.boost.org/doc/libs/release/libs/exception/doc/boost-exception.html" target="_top">Boost.Exception</a>
-      libary. When dealing with HadesMem exceptions it is recommended to use this
-      library, as very little information is available from the <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
-      interface, or the exception class type.
-    </p>
-<p>
-      The tag types commonly used in exceptions thrown by HadesMem are:
-    </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorFunction</span></code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
-          naming the function the exception was thrown from.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorString</span></code> - A <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
-          describing the problem.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinRet</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
-          containing the return value of the Windows API which failed.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinLast</span></code> - A <code class="computeroutput"><span class="identifier">DWORD</span></code>
-          containing the Windows LastError code.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeWinOther</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
-          containing any other relevant Windows error codes or return values.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HadesMem</span><span class="special">::</span><span class="identifier">ErrorCodeOther</span></code> - A <code class="computeroutput"><span class="identifier">DWORD_PTR</span></code>
-          containing miscellaneous error codes.
-        </li>
-</ul></div>
-<p>
-      All functions in HadesMem should be considered to throw unless otherwise stated
-      in the documentation. Furthermore, all function in HadesMem should be considered
-      to offer only the 'basic guarantee' unless otherwise stated in the documentation.
-      Work is currently underway to offer the strong or no-throw guarantee wherever
-      possible, but is not yet complete.
-    </p>
-<p>
-      Libraries used by HadesMem may also throw exceptions (notably Boost and the
-      C++ Standard Library). In most cases, no attempt is made by HadesMem to suppress
-      or 'translate' these exceptions.
-    </p>
-<h4>
-<a name="hadesmem.overview.h3"></a>
-      <span><a name="hadesmem.overview.threading"></a></span><a class="link" href="overview.html#hadesmem.overview.threading">Threading</a>
-    </h4>
-<p>
-      Currently no guarantees are made that multiple threads accessing the same HadesMem
-      object will work. Typically it should, but until each function is reviewed
-      and documented it is recommended to synchronise access to shared objects. Work
-      is currently underway to improve the threading guarantees offered by the library,
-      but it is not yet complete.
-    </p>
-<h4>
-<a name="hadesmem.overview.h4"></a>
-      <span><a name="hadesmem.overview.versioning"></a></span><a class="link" href="overview.html#hadesmem.overview.versioning">Versioning</a>
-    </h4>
-<p>
-      HadesMem uses the <a href="http://semver.org/" target="_top">semantic versioning</a>
-      system. Macros are available to detect the HadesMem version.
-    </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HADES_VERSION_MAJOR</span></code> - HadesMem
-          major version number.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HADES_VERSION_MINOR</span></code> - HadesMem
-          minor version number.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HADES_VERSION_PATCH</span></code> - HadesMem
-          patch version number.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HADES_VERSION_FULL</span></code> - Full
-          HadesMem version number in format XXYYZZ.
-        </li>
-<li class="listitem">
-          <code class="computeroutput"><span class="identifier">HADES_VERSION_FULL_STRING</span></code>
-          - Full HadesMem version number in format vXX.YY.ZZ, as a narrow C-style
-          string.
-        </li>
-</ul></div>
-<h4>
-<a name="hadesmem.overview.h5"></a>
-      <span><a name="hadesmem.overview.iterators"></a></span><a class="link" href="overview.html#hadesmem.overview.iterators">Iterators</a>
-    </h4>
-<p>
-      HadesMem iterators are STL-compatible. Iterators are 'lazy' to keep the API
-      performant. Lazy in this context means that data enumeration and initialization
-      is only performed on-demmand, rather than lists being pre-processed. Furthermore,
-      caching is implemented to improve performance when the list is used in multi-pass
-      algorithms.
-    </p>
-<h4>
-<a name="hadesmem.overview.h6"></a>
-      <span><a name="hadesmem.overview.support"></a></span><a class="link" href="overview.html#hadesmem.overview.support">Support</a>
-    </h4>
-<p>
-      Please direct all bug reports and/or feature requests to the issue tracker
-      on the <a href="http://code.google.com/p/hadesmem/" target="_top">project page</a>.
-      If you have something you would like to discuss in private, or if you have
-      a relatively advanced question about the library that can't be answered by
-      looking at the documentation or code, I can be reached via email at raptorfactor@raptorfactor.com.
-    </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>

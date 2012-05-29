@@ -6,33 +6,12 @@ import testing
 project
   :
     requirements
-    <toolset>msvc:<warnings>all
-    <toolset>gcc:<warnings>all
-    <toolset>msvc:<warnings-as-errors>on
-    <toolset>gcc:<warnings-as-errors>on
-    <toolset>gcc:<cxxflags>-Wextra
-    <toolset>gcc:<cxxflags>-pedantic-errors
     <library>/memory//memory
-    <library>/boost//thread/<link>static
     <library>/boost//unit_test_framework/<link>static
-    <toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
+    #<toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
   ;
 
 test-suite memory
   :
-    [ run detail/ProcessTest.cpp ]
-    [ run FindPatternTest.cpp ]
-    [ run InjectorTest.cpp ]
-    [ run MemoryMgrTest.cpp ]
-    [ run ModuleTest.cpp ]
-    [ run PatcherTest.cpp ]
-    [ run RegionTest.cpp ]
-    [ run experimental/ManualMapTest.cpp : : : <toolset>msvc:<linkflags>/NXCOMPAT:NO ]
-    [ run pelib/DosHeaderTest.cpp ]
-    [ run pelib/ExportDirTest.cpp ]
-    [ run pelib/ImportDirTest.cpp ]
-    [ run pelib/NtHeadersTest.cpp ]
-    [ run pelib/PeFileTest.cpp ]
-    [ run pelib/SectionTest.cpp ]
-    [ run pelib/TlsDirTest.cpp ]
+    [ run placeholder.cpp ]
   ;

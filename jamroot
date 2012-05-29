@@ -3,11 +3,6 @@ path-constant TOP
     .
   ;
 
-use-project /dependencies
-  :
-    src/dependencies
-  ;
-
 use-project /memory
   :
     src/memory
@@ -31,11 +26,6 @@ project
     <define>_UNICODE
     <define>WIN32_LEAN_AND_MEAN
     
-    # TODO: Wrap includes for dependencies so this isn't required
-    <define>_CRT_SECURE_NO_WARNINGS
-    # TODO: Wrap includes for dependencies so this isn't required
-    <define>_SCL_SECURE_NO_WARNINGS
-    
     <define>WINVER=_WIN32_WINNT_VISTA
     <define>_WIN32_WINNT=_WIN32_WINNT_VISTA
     
@@ -43,10 +33,11 @@ project
     <threading>multi
     <runtime-link>static
     
+    <warnings>all
+    <warnings-as-errors>on
+    
     <toolset>msvc:<cxxflags>"/sdl /wd4503"
-    # TODO: Work out the reason -std=c++11 needs to be specified last on the command line...
-    # TODO: Re-add these warning flags -pedantic -Wextra -Weffc++ -Wshadow -Wconversion
-    <toolset>gcc:<cxxflags>"-ansi -std=c++11"
+    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -std=c++11"
     <toolset>clang:<cxxflags>"-std=c++11"
     <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     

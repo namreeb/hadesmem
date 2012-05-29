@@ -4,8 +4,8 @@
 <title>Building</title>
 <link rel="stylesheet" href="../boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
-<link rel="home" href="../index.html" title="HadesMem 1.6.0">
-<link rel="up" href="../index.html" title="HadesMem 1.6.0">
+<link rel="home" href="../index.html" title="HadesMem 2.0.0">
+<link rel="up" href="../index.html" title="HadesMem 2.0.0">
 <link rel="prev" href="changes.html" title="Changes">
 <link rel="next" href="reference.html" title="Reference">
 </head>
@@ -15,138 +15,9 @@
 <div class="spirit-nav">
 <a accesskey="p" href="changes.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="reference.html"><img src="../images/next.png" alt="Next"></a>
 </div>
-<div class="section">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<div class="section hadesmem_building"><div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="hadesmem.building"></a><a class="link" href="building.html" title="Building">Building</a>
-</h2></div></div></div>
-<p>
-      HadesMem uses the <a href="http://www.boost.org/boost-build2/" target="_top">Boost.Build</a>
-      build system. If you have not already, it is recommended you familiarize yourself
-      with this framework.
-    </p>
-<p>
-      Supported Compilers:
-    </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">
-          <a href="http://www.microsoft.com/visualstudio/en-us" target="_top">Microsoft Visual
-          C++ 2010</a> (Express edition not officially supported)
-        </li>
-<li class="listitem">
-          <a href="http://gcc.gnu.org/" target="_top">GNU GCC 4.6.x</a> (via <a href="http://mingw-w64.sourceforge.net/" target="_top">MinGW-w64</a>)
-        </li>
-</ul></div>
-<div class="warning"><table border="0" summary="Warning">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../images/warning.png"></td>
-<th align="left">Warning</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-        GCC support is currently experimental. This is largely due to problems with
-        the toolchain however, so it may take some time to be resolved.
-      </p></td></tr>
-</table></div>
-<p>
-      Supported Platforms:
-    </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-          <a href="http://www.microsoft.com/windows/" target="_top">Microsoft Windows</a>
-          (Windows XP SP2 or later)
-        </li></ul></div>
-<p>
-      Steps to Build:
-    </p>
-<div class="orderedlist"><ol class="orderedlist" type="1">
-<li class="listitem">
-          Build Boost.
-          <div class="orderedlist"><ol class="orderedlist" type="a">
-<li class="listitem">
-                Please consult the Boost documentation for build instructions. (Please
-                note that by default HadesMem links with the CRT statically.)
-              </li>
-<li class="listitem">
-                Place b2 somewhere in your PATH environmental variable.
-              </li>
-</ol></div>
-        </li>
-<li class="listitem">
-          Build HadesMem.
-          <div class="orderedlist"><ol class="orderedlist" type="a">
-<li class="listitem">
-                Navigate to Build/Full.
-              </li>
-<li class="listitem">
-                Run Build_Compiler_Configuration_Architecture.bat (Substitute 'Compiler',
-                'Configuration', and 'Architecture' as appropriate).
-              </li>
-<li class="listitem">
-                Check output and ensure there are no errors.
-              </li>
-</ol></div>
-        </li>
-</ol></div>
-<div class="caution"><table border="0" summary="Caution">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
-<th align="left">Caution</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-        If using GCC, depending on which MinGW distribution you are using, you may
-        need to manually configure toolsets in your user-config.jam file, and you
-        will probably also have to tweak the build script to point to your MinGW
-        installation directory.
-      </p></td></tr>
-</table></div>
-<p>
-      Using HadesMem (in a Boost.Build based project):
-    </p>
-<div class="orderedlist"><ol class="orderedlist" type="1">
-<li class="listitem">
-          Add a <span class="emphasis"><em>use-project</em></span> directive to your Jamroot targeting
-          HadesMem (this document assumes you name the project 'HadesMem').
-        </li>
-<li class="listitem">
-          Add /HadesMem//HadesMem to the source list of your application/library or the requirements
-          list of your project.
-        </li>
-<li class="listitem">
-          Add <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">HadesMemory</span><span class="special">/</span><span class="identifier">Memory</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>
-          to your code.
-        </li>
-</ol></div>
-<div class="important"><table border="0" summary="Important">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../images/important.png"></td>
-<th align="left">Important</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-        When compiling your Boost.Build based project, explicitly specify the toolset,
-        address-model and debug/release configuration on the command line to ensure
-        that nothing needs to be recompiled and you are using the correct settings.
-        If you've done it right then you should only need to link to Boost and HadesMem
-        (i.e. nothing should be recompiled).
-      </p></td></tr>
-</table></div>
-<p>
-      Sample Jamroot
-    </p>
-<pre class="programlisting">use-project /HadesMem
-  :
-    ../../HadesMem-Branches-v1.0.0/
-  ;
-
-exe Test
-  :
-    Test.cpp
-    /HadesMem//HadesMem
-  ;
-</pre>
-<p>
-      Sample Command-line:
-    </p>
-<pre class="programlisting">b2 toolset=msvc-10.0 address-model=32 debug
-</pre>
-</div>
+</h2></div></div></div></div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
 <td align="right"><div class="copyright-footer">Copyright &#169; 2011, 2012 Joshua Boyce<p>

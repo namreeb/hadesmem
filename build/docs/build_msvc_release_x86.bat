@@ -1,2 +1,7 @@
-cd ../../
-b2 Docs -j 4 toolset=msvc-10.0 address-model=32 release > Build\Docs\Build_MSVC100_Release_IA32.txt
+set OLDCD=%CD%
+pushd ..\..\
+set OLDPATH=%PATH%
+set PATH=%BOOST_ROOT%;%PATH%
+b2 docs -j %NUMBER_OF_PROCESSORS% toolset=msvc address-model=32 release > %OLDCD%\msvc_release_x86.txt
+set PATH=%OLDPATH%
+popd
