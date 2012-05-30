@@ -5,17 +5,10 @@
 #if defined(HADES_MSVC)
 #pragma warning(push, 1)
 #endif // #if defined(HADES_MSVC)
-#if defined(HADES_INTEL)
-#pragma warning(push)
-#pragma warning(disable: 367 869 1628 1879)
-#endif // #if defined(HADES_INTEL)
 #include <boost/exception/all.hpp>
 #if defined(HADES_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADES_MSVC)
-#if defined(HADES_INTEL)
-#pragma warning(pop)
-#endif // #if defined(HADES_INTEL)
 
 namespace hadesmem
 {

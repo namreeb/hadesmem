@@ -35,7 +35,10 @@ project
     <threading>multi
     <runtime-link>static
     
-    <warnings>all
+    <toolset>msvc:<warnings>all
+    <toolset>gcc:<warnings>all
+    <toolset>clang:<warnings>all
+    <toolset>intel:<warnings>on
     <warnings-as-errors>on
     
     <toolset>msvc:<cxxflags>"/sdl /wd4503"
