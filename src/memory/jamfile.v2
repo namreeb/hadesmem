@@ -3,6 +3,7 @@
 lib memory
   :
     [ glob memory/*.cpp ]
+    /boost//locale/<link>static
   :
     <link>static
     <include>"../../include/memory"

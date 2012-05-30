@@ -13,5 +13,5 @@ project
 
 test-suite memory
   :
-    [ run placeholder.cpp ]
+    [ run process.cpp ]
   ;
