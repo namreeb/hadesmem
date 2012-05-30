@@ -4,7 +4,7 @@
 
 #include <windows.h>
 
-#include "hadesmemory/error.hpp"
+#include "hadesmem/error.hpp"
 
 namespace hadesmem
 {

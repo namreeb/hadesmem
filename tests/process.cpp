@@ -1,6 +1,6 @@
-#include "hadesmemory/process.hpp"
+#include "hadesmem/process.hpp"
 
-#define BOOST_TEST_MODULE placeholder
+#define BOOST_TEST_MODULE process
 #if defined(HADES_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
@@ -26,5 +26,5 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADES_GCC)
 
-BOOST_AUTO_TEST_CASE(placeholder)
+BOOST_AUTO_TEST_CASE(process)
 { }
