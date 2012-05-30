@@ -7,6 +7,7 @@ project
   :
     requirements
     <library>/memory//memory
+    <library>/boost//filesystem/<link>static
     <library>/boost//unit_test_framework/<link>static
     #<toolset>gcc:<linkflags>-Wl,--allow-multiple-definition
   ;
