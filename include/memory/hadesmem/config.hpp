@@ -1,6 +1,11 @@
 #pragma once
 
 #include <boost/config.hpp>
+#include <boost/version.hpp>
+
+#if (BOOST_VERSION < 104900)
+#error "[HadesMem] Boost 1.49.0 or later is required."
+#endif // #if (BOOST_VERSION < 014900)
 
 #if defined(HADESMEM_MSVC)
 #if (_MSC_VER < 1700)
