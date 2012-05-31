@@ -7,6 +7,10 @@
 
 #include "hadesmem/memory.hpp"
 
+#include <array>
+#include <string>
+#include <vector>
+
 #define BOOST_TEST_MODULE memory
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
@@ -65,4 +69,66 @@ BOOST_AUTO_TEST_CASE(query_and_protect)
   BOOST_CHECK_THROW(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE), hadesmem::HadesMemError);
   BOOST_CHECK_THROW(FlushInstructionCache(process, invalid_address, 1), hadesmem::HadesMemError);
   BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::HadesMemError);
+}
+
+BOOST_AUTO_TEST_CASE(ReadWriteTest)
+{
+  hadesmem::Process const process(GetCurrentProcessId());
+  
+  struct TestPODType
+  {
+    int a;
+    char* b;
+    wchar_t c;
+    long long d;
+  };
+  
+  TestPODType MyTestPODType = { 1, 0, L'a', 1234567812345678 };
+  auto MyNewTestPODType = hadesmem::Read<TestPODType>(process, &MyTestPODType);
+  BOOST_CHECK_EQUAL(std::memcmp(&MyTestPODType, &MyNewTestPODType, 
+    sizeof(TestPODType)), 0);
+  TestPODType MyTestPODType2 = { -1, 0, L'x', 9876543210 };
+  hadesmem::Write(process, &MyTestPODType, MyTestPODType2);
+  BOOST_CHECK_EQUAL(std::memcmp(&MyTestPODType, &MyTestPODType2, 
+    sizeof(TestPODType)), 0);
+  
+  char const* const pTestStringA = "Narrow test string.";
+  char* const pTestStringAReal = const_cast<char*>(pTestStringA);
+  auto const NewTestStringA = hadesmem::ReadString<std::string>(process, 
+    pTestStringAReal);
+  BOOST_CHECK_EQUAL(NewTestStringA, pTestStringA);
+  auto const TestStringAStr = std::string(pTestStringA);
+  auto const TestStringARev = std::string(TestStringAStr.rbegin(), 
+    TestStringAStr.rend());
+  hadesmem::WriteString(process, pTestStringAReal, TestStringARev);
+  auto const NewTestStringARev = hadesmem::ReadString<std::string>(process, 
+    pTestStringAReal);
+  BOOST_CHECK_EQUAL_COLLECTIONS(NewTestStringARev.cbegin(), 
+    NewTestStringARev.cend(), TestStringARev.cbegin(), TestStringARev.cend());
+  
+  wchar_t const* const pTestStringW = L"Wide test string.";
+  wchar_t* const pTestStringWReal = const_cast<wchar_t*>(pTestStringW);
+  auto const NewTestStringW = hadesmem::ReadString<std::wstring>(process, 
+    pTestStringWReal);
+  // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
+  BOOST_CHECK(NewTestStringW == pTestStringW);
+  auto const TestStringWStr = std::wstring(pTestStringW);
+  auto const TestStringWRev = std::wstring(TestStringWStr.rbegin(), 
+    TestStringWStr.rend());
+  hadesmem::WriteString(process, pTestStringWReal, TestStringWRev);
+  auto const NewTestStringWRev = hadesmem::ReadString<std::wstring>(process, 
+    pTestStringWReal);
+  // Note: BOOST_CHECK_EQUAL does not support wide strings it seems
+  BOOST_CHECK_EQUAL_COLLECTIONS(NewTestStringWRev.cbegin(), 
+    NewTestStringWRev.cend(), TestStringWRev.cbegin(), TestStringWRev.cend());
+  
+  std::array<int, 10> IntList = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
+  std::vector<int> IntListRead = hadesmem::ReadList<std::vector<int>>(process, 
+    &IntList, 10);
+  BOOST_CHECK_EQUAL_COLLECTIONS(IntList.cbegin(), IntList.cend(), 
+    IntListRead.cbegin(), IntListRead.cend());
+  std::vector<int> IntListRev(IntListRead.crbegin(), IntListRead.crend());
+  hadesmem::WriteList(process, &IntList, IntListRev);
+  BOOST_CHECK_EQUAL_COLLECTIONS(IntList.cbegin(), IntList.cend(), 
+    IntListRev.cbegin(), IntListRev.cend());
 }

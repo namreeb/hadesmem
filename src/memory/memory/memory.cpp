@@ -177,6 +177,50 @@ void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_si
   }
 }
 
+void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size)
+{
+  if (IsGuard(process, address))
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorFunction("Write") << 
+      ErrorString("Attempt to write to guard page."));
+  }
+  
+  bool const can_write = CanWrite(process, address);
+  
+  DWORD old_protect = 0;
+  if (!can_write)
+  {
+    old_protect = Protect(process, address, PAGE_EXECUTE_READWRITE);
+  }
+  
+  SIZE_T bytes_written = 0;
+  if (!WriteProcessMemory(process.GetHandle(), address, in, 
+    in_size, &bytes_written) || bytes_written != in_size)
+  {
+    if (!can_write)
+    {
+      try
+      {
+        Protect(process, address, old_protect);
+      }
+      catch (std::exception const& /*e*/)
+      { }
+    }
+    
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorFunction("Write") << 
+      ErrorString("Could not write process memory.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  if (!can_write)
+  {
+    Protect(process, address, old_protect);
+  }
+}
+
 }
 
 }
