@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
 #include <cstddef>
 
 #include <type_traits>
@@ -17,6 +19,17 @@ namespace hadesmem
 {
 
 class Process;
+
+namespace detail
+{
+
+MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address);
+
+void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_size);
+
+void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size);
+
+}
 
 bool CanRead(Process const& process, LPCVOID address);
 
@@ -126,17 +139,6 @@ void WriteList(Process const& process, PVOID address, T const& data)
   
   std::size_t const raw_size = data.size() * sizeof(ValueT);
   detail::Write(process, address, data.data(), raw_size);
-}
-
-namespace detail
-{
-
-MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address);
-
-void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_size);
-
-void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size);
-
 }
 
 }
