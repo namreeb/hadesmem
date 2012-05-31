@@ -63,7 +63,6 @@ PVOID Alloc(Process const& process, SIZE_T size)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Alloc") << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -77,7 +76,6 @@ void Free(Process const& process, LPVOID address)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Free") << 
       ErrorString("VirtualFreeEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -89,7 +87,6 @@ void FlushInstructionCache(Process const& process, LPCVOID address, SIZE_T size)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("FlushInstructionCache") << 
       ErrorString("FlushInstructionCache failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -105,7 +102,6 @@ DWORD Protect(Process const& process, LPVOID address, DWORD protect)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Protect") << 
       ErrorString("VirtualProtectEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -125,7 +121,6 @@ MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Query") << 
       ErrorString("VirtualQueryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -138,7 +133,6 @@ void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_si
  if (IsGuard(process, address))
   {
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Read") << 
       ErrorString("Attempt to read from guard page."));
   }
   
@@ -166,7 +160,6 @@ void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_si
 
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("MemoryMgr::Read") << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -182,7 +175,6 @@ void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_siz
   if (IsGuard(process, address))
   {
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Write") << 
       ErrorString("Attempt to write to guard page."));
   }
   
@@ -210,7 +202,6 @@ void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_siz
     
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Write") << 
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));
   }

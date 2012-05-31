@@ -79,7 +79,6 @@ void Process::CheckWoW64() const
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Process::CheckWoW64") << 
       ErrorString("Could not detect WoW64 status of current process.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -89,7 +88,6 @@ void Process::CheckWoW64() const
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Process::CheckWoW64") << 
       ErrorString("Could not detect WoW64 status of target process.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -97,7 +95,6 @@ void Process::CheckWoW64() const
   if (is_wow64_me != is_wow64)
   {
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Process::CheckWoW64") << 
       ErrorString("Cross-architecture process manipulation is currently "
         "unsupported."));
   }
@@ -116,7 +113,6 @@ HANDLE Process::Open(DWORD id)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("Process::Open") << 
       ErrorString("OpenProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -154,7 +150,6 @@ std::string GetPath(Process const& process)
   {
       DWORD const last_error = GetLastError();
       BOOST_THROW_EXCEPTION(HadesMemError() << 
-        ErrorFunction("GetPath") << 
         ErrorString("QueryFullProcessImageName failed.") << 
         ErrorCodeWinLast(last_error));
   }
@@ -169,7 +164,6 @@ bool IsWoW64(Process const& process)
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorFunction("IsWoW64") << 
       ErrorString("IsWow64Process failed.") << 
       ErrorCodeWinLast(last_error));
   }

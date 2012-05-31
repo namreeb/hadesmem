@@ -24,7 +24,6 @@ class HadesMemError : public virtual std::exception,
   public virtual boost::exception
 { };
 
-typedef boost::error_info<struct TagErrorFunc, std::string> ErrorFunction;
 typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
 typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR> 
   ErrorCodeWinRet;
