@@ -27,6 +27,8 @@
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
 
+#include "hadesmem/error.hpp"
+
 namespace hadesmem
 {
 
@@ -73,7 +75,7 @@ HANDLE Process::GetHandle() const BOOST_NOEXCEPT
 void Process::CheckWoW64() const
 {
   BOOL is_wow64_me = FALSE;
-  if (!IsWow64Process(GetCurrentProcess(), &is_wow64_me))
+  if (!::IsWow64Process(GetCurrentProcess(), &is_wow64_me))
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
@@ -83,7 +85,7 @@ void Process::CheckWoW64() const
   }
   
   BOOL is_wow64 = FALSE;
-  if (!IsWow64Process(handle_, &is_wow64))
+  if (!::IsWow64Process(handle_, &is_wow64))
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
@@ -103,7 +105,7 @@ void Process::CheckWoW64() const
 
 HANDLE Process::Open(DWORD id)
 {
-  HANDLE handle = OpenProcess(PROCESS_CREATE_THREAD | 
+  HANDLE handle = ::OpenProcess(PROCESS_CREATE_THREAD | 
     PROCESS_QUERY_INFORMATION | 
     PROCESS_VM_OPERATION | 
     PROCESS_VM_READ | 
@@ -147,7 +149,7 @@ std::string GetPath(Process const& process)
 {
   std::array<wchar_t, MAX_PATH> path = { { } };
   DWORD path_len = static_cast<DWORD>(path.size());
-  if (!QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
+  if (!::QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
     &path_len))
   {
       DWORD const last_error = GetLastError();
@@ -163,7 +165,7 @@ std::string GetPath(Process const& process)
 bool IsWoW64(Process const& process)
 {
   BOOL is_wow64 = FALSE;
-  if (!IsWow64Process(process.GetHandle(), &is_wow64))
+  if (!::IsWow64Process(process.GetHandle(), &is_wow64))
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 

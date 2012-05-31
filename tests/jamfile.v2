@@ -11,7 +11,8 @@ project
     <library>/boost//unit_test_framework/<link>static
   ;
 
-test-suite memory
-  :
-    [ run process.cpp ]
+run process.cpp
+  ;
+
+run memory.cpp
   ;

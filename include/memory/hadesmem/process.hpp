@@ -11,7 +11,6 @@
 
 #include <windows.h>
 
-#include "hadesmem/error.hpp"
 #include "hadesmem/config.hpp"
 
 namespace hadesmem

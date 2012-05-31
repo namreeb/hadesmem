@@ -57,11 +57,11 @@ project
   :
     build-dir bin
   ;
-  
-build-project src/memory
-  ;
 
 build-project tests
+  ;
+
+build-project src/memory
   ;
 
 install dist
