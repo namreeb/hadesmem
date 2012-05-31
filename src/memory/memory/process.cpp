@@ -3,22 +3,22 @@
 #include <array>
 #include <utility>
 
-#if defined(HADES_MSVC)
+#if defined(HADESMEM_MSVC)
 #pragma warning(push, 1)
 #pragma warning(disable: 4996)
-#endif // #if defined(HADES_MSVC)
-#if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_MSVC)
+#if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wshadow"
-#endif // #if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_GCC)
 #include <boost/locale.hpp>
-#if defined(HADES_MSVC)
+#if defined(HADESMEM_MSVC)
 #pragma warning(pop)
-#endif // #if defined(HADES_MSVC)
-#if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_MSVC)
+#if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
-#endif // #if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_GCC)
 
 namespace hadesmem
 {
@@ -30,7 +30,7 @@ Process::Process(DWORD id)
   CheckWoW64();
 }
 
-Process::Process(Process&& other)
+Process::Process(Process&& other) BOOST_NOEXCEPT
   : id_(other.id_), 
   handle_(other.handle_)
 {
@@ -38,7 +38,7 @@ Process::Process(Process&& other)
   other.handle_ = nullptr;
 }
 
-Process& Process::operator=(Process&& other)
+Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
 {
   Cleanup();
   
@@ -48,17 +48,17 @@ Process& Process::operator=(Process&& other)
   return *this;
 }
 
-Process::~Process()
+Process::~Process() BOOST_NOEXCEPT
 {
   Cleanup();
 }
 
-DWORD Process::GetId() const
+DWORD Process::GetId() const BOOST_NOEXCEPT
 {
   return id_;
 }
 
-HANDLE Process::GetHandle() const
+HANDLE Process::GetHandle() const BOOST_NOEXCEPT
 {
   return handle_;
 }
@@ -119,26 +119,19 @@ void Process::Cleanup()
 {
   if (handle_)
   {
-    if (!CloseHandle(handle_))
-    {
-      DWORD const last_error = GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
-        ErrorFunction("Process::Cleanup") << 
-        ErrorString("CloseHandle failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
+    BOOST_ASSERT(CloseHandle(handle_));
   }
   
   id_ = 0;
   handle_ = nullptr;
 }
 
-bool operator==(Process const& lhs, Process const& rhs)
+bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-bool operator!=(Process const& lhs, Process const& rhs)
+bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
   return !(lhs == rhs);
 }

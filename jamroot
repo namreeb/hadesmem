@@ -48,10 +48,10 @@ project
     
     <debug-symbols>on
     
-    <toolset>msvc:<define>HADES_MSVC
-    <toolset>gcc:<define>HADES_GCC
-    <toolset>clang:<define>HADES_CLANG
-    <toolset>intel:<define>HADES_INTEL
+    <toolset>msvc:<define>HADESMEM_MSVC
+    <toolset>gcc:<define>HADESMEM_GCC
+    <toolset>clang:<define>HADESMEM_CLANG
+    <toolset>intel:<define>HADESMEM_INTEL
   :
     default-build debug
   :

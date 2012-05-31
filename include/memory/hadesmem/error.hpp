@@ -2,13 +2,13 @@
 
 #include <exception>
 
-#if defined(HADES_MSVC)
+#if defined(HADESMEM_MSVC)
 #pragma warning(push, 1)
-#endif // #if defined(HADES_MSVC)
+#endif // #if defined(HADESMEM_MSVC)
 #include <boost/exception/all.hpp>
-#if defined(HADES_MSVC)
+#if defined(HADESMEM_MSVC)
 #pragma warning(pop)
-#endif // #if defined(HADES_MSVC)
+#endif // #if defined(HADESMEM_MSVC)
 
 namespace hadesmem
 {

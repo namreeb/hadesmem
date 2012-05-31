@@ -1,24 +1,24 @@
 #include "hadesmem/process.hpp"
 
 #define BOOST_TEST_MODULE process
-#if defined(HADES_GCC)
+#if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif // #if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_GCC)
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
-#if defined(HADES_GCC)
+#if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
-#endif // #if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_GCC)
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
 // non-virtual destructor [-Werror=effc++]
-#if defined(HADES_GCC)
+#if defined(HADESMEM_GCC)
 #pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADES_GCC)
+#endif // #if defined(HADESMEM_GCC)
 
 BOOST_AUTO_TEST_CASE(this_process)
 {
