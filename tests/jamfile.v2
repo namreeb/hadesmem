@@ -14,5 +14,14 @@ project
 run process.cpp
   ;
 
-run memory.cpp
+run read.cpp
+  ;
+
+run write.cpp
+  ;
+
+run protect.cpp
+  ;
+
+run alloc.cpp
   ;

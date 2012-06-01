@@ -5,7 +5,7 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/memory.hpp"
+#include "hadesmem/write.hpp"
 
 #include <array>
 #include <string>
@@ -24,6 +24,7 @@
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
 
+#include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 
@@ -34,44 +35,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-BOOST_AUTO_TEST_CASE(query_and_protect)
-{
-  hadesmem::Process const process(GetCurrentProcessId());
-  
-  HMODULE const this_mod = GetModuleHandle(nullptr);
-  BOOST_CHECK(CanRead(process, this_mod));
-  BOOST_CHECK(!CanWrite(process, this_mod));
-  BOOST_CHECK(!CanExecute(process, this_mod));
-  BOOST_CHECK(!IsGuard(process, this_mod));
-  
-  PVOID address = Alloc(process, 0x1000);
-  BOOST_CHECK(CanRead(process, address));
-  BOOST_CHECK(CanWrite(process, address));
-  BOOST_CHECK(CanExecute(process, address));
-  BOOST_CHECK(!IsGuard(process, address));
-  BOOST_CHECK(Protect(process, address, PAGE_NOACCESS) == PAGE_EXECUTE_READWRITE);
-  BOOST_CHECK(!CanRead(process, address));
-  BOOST_CHECK(!CanWrite(process, address));
-  BOOST_CHECK(!CanExecute(process, address));
-  BOOST_CHECK(!IsGuard(process, address));
-  BOOST_CHECK(Protect(process, address, PAGE_EXECUTE) == PAGE_NOACCESS);
-  BOOST_CHECK(CanExecute(process, address));
-  FlushInstructionCache(process, address, 0x1000);
-  Free(process, address);
-  
-  LPVOID const invalid_address = reinterpret_cast<LPVOID>(
-    static_cast<DWORD_PTR>(-1));
-  BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(CanRead(process, invalid_address), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(CanWrite(process, invalid_address), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(CanExecute(process, invalid_address), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(IsGuard(process, invalid_address), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(FlushInstructionCache(process, invalid_address, 1), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::HadesMemError);
-}
-
-BOOST_AUTO_TEST_CASE(ReadWriteTest)
+BOOST_AUTO_TEST_CASE(write)
 {
   hadesmem::Process const process(GetCurrentProcessId());
   
