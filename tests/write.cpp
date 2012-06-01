@@ -56,15 +56,14 @@ BOOST_AUTO_TEST_CASE(write)
   std::vector<char> test_string_buf(test_string.size() + 1);
   std::copy(std::begin(test_string), std::end(test_string), 
     test_string_buf.data());
-  char* const test_string_real = test_string_buf.data();
   std::string const test_string_str(test_string_buf.data());
   BOOST_CHECK_EQUAL_COLLECTIONS(std::begin(test_string), 
     std::end(test_string), std::begin(test_string_str), 
     std::end(test_string_str));
-  auto const test_string_rev = std::string(test_string_str.rbegin(), 
-    test_string_str.rend());
-  WriteString(process, test_string_real, test_string_rev);
-  auto const new_test_string_rev = std::string(test_string_real);
+  auto const test_string_rev = std::string(test_string.rbegin(), 
+    test_string.rend());
+  WriteString(process, test_string_buf.data(), test_string_rev);
+  auto const new_test_string_rev = std::string(test_string_buf.data());
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
     new_test_string_rev.cend(), test_string_rev.cbegin(), test_string_rev.cend());
   
