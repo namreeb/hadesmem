@@ -24,7 +24,6 @@
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
 
-#include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 
@@ -48,34 +47,29 @@ BOOST_AUTO_TEST_CASE(write)
   };
   
   TestPODType test_pod_type = { 1, 0, L'a', 1234567812345678 };
-  auto new_test_pod_type = hadesmem::Read<TestPODType>(process, &test_pod_type);
-  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_pod_type, 
-    sizeof(test_pod_type)), 0);
   TestPODType test_pod_type_2 = { -1, 0, L'x', 9876543210 };
   Write(process, &test_pod_type, test_pod_type_2);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &test_pod_type_2, 
     sizeof(test_pod_type)), 0);
   
-  char const* const test_string = "Narrow test string.";
-  char* const test_string_real = const_cast<char*>(test_string);
-  auto const new_test_string = hadesmem::ReadString<std::string>(process, 
-    test_string_real);
-  BOOST_CHECK_EQUAL(new_test_string, test_string);
-  auto const test_string_str = std::string(test_string);
+  std::string const test_string = "Narrow test string.";
+  std::vector<char> test_string_buf(test_string.size() + 1);
+  std::copy(std::begin(test_string), std::end(test_string), 
+    test_string_buf.data());
+  char* const test_string_real = test_string_buf.data();
+  std::string const test_string_str(test_string_buf.data());
+  BOOST_CHECK_EQUAL_COLLECTIONS(std::begin(test_string), 
+    std::end(test_string), std::begin(test_string_str), 
+    std::end(test_string_str));
   auto const test_string_rev = std::string(test_string_str.rbegin(), 
     test_string_str.rend());
   WriteString(process, test_string_real, test_string_rev);
-  auto const new_test_string_rev = hadesmem::ReadString<std::string>(process, 
-    test_string_real);
+  auto const new_test_string_rev = std::string(test_string_real);
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
     new_test_string_rev.cend(), test_string_rev.cbegin(), test_string_rev.cend());
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
-  std::vector<int> int_list_read = hadesmem::ReadList<std::vector<int>>(process, 
-    &int_list, 10);
-  BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
-    int_list_read.cbegin(), int_list_read.cend());
-  std::vector<int> int_list_rev(int_list_read.crbegin(), int_list_read.crend());
+  std::vector<int> int_list_rev(int_list.crbegin(), int_list.crend());
   WriteList(process, &int_list, int_list_rev);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
     int_list_rev.cbegin(), int_list_rev.cend());
