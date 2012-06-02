@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <boost/config.hpp>
+
 #include <windows.h>
 
 namespace hadesmem
@@ -17,5 +19,33 @@ class Process;
 PVOID Alloc(Process const& process, SIZE_T size);
 
 void Free(Process const& process, LPVOID address);
+
+class Allocator
+{
+public:
+  Allocator(Process const& process, SIZE_T size);
+  
+  Allocator(Allocator&& other) BOOST_NOEXCEPT;
+  
+  Allocator& operator=(Allocator&& other) BOOST_NOEXCEPT;
+  
+  ~Allocator() BOOST_NOEXCEPT;
+  
+  void Free();
+  
+  PVOID GetBase() const BOOST_NOEXCEPT;
+  
+  SIZE_T GetSize() const BOOST_NOEXCEPT;
+  
+private:
+  Allocator(Allocator const& other);
+  Allocator& operator=(Allocator const& other);
+  
+  void FreeUnchecked() BOOST_NOEXCEPT;
+  
+  Process const* process_;
+  PVOID base_;
+  SIZE_T size_;
+};
 
 }

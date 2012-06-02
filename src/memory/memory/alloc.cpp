@@ -7,6 +7,8 @@
 
 #include "hadesmem/alloc.hpp"
 
+#include <boost/assert.hpp>
+
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 
@@ -37,6 +39,67 @@ void Free(Process const& process, LPVOID address)
       ErrorString("VirtualFreeEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
+}
+
+Allocator::Allocator(Process const& process, SIZE_T size)
+  : process_(&process), 
+  base_(Alloc(process, size)), 
+  size_(size)
+{ }
+
+Allocator::Allocator(Allocator&& other) BOOST_NOEXCEPT
+  : process_(other.process_), 
+  base_(other.base_), 
+  size_(other.size_)
+{
+  other.process_ = nullptr;
+  other.base_ = nullptr;
+  other.size_ = 0;
+}
+
+Allocator& Allocator::operator=(Allocator&& other) BOOST_NOEXCEPT
+{
+  FreeUnchecked();
+  
+  std::swap(this->process_, other.process_);
+  std::swap(this->base_, other.base_);
+  std::swap(this->size_, other.size_);
+  
+  return *this;
+}
+
+Allocator::~Allocator() BOOST_NOEXCEPT
+{
+  FreeUnchecked();
+}
+
+void Allocator::Free()
+{
+  return ::hadesmem::Free(*process_, base_);
+}
+
+PVOID Allocator::GetBase() const BOOST_NOEXCEPT
+{
+  return base_;
+}
+
+SIZE_T Allocator::GetSize() const BOOST_NOEXCEPT
+{
+  return size_;
+
+}
+
+void Allocator::FreeUnchecked() BOOST_NOEXCEPT
+{
+  if (!process_)
+  {
+    return;
+  }
+  
+  BOOST_VERIFY(::VirtualFreeEx(process_->GetHandle(), base_, 0, MEM_RELEASE));
+  process_ = nullptr;
+  base_ = nullptr;
+  size_ = 0;
 }
 
 }
