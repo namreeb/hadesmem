@@ -34,7 +34,7 @@ void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_siz
   }
   
   SIZE_T bytes_written = 0;
-  if (!WriteProcessMemory(process.GetHandle(), address, in, 
+  if (!::WriteProcessMemory(process.GetHandle(), address, in, 
     in_size, &bytes_written) || bytes_written != in_size)
   {
     if (!can_write)

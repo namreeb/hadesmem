@@ -32,7 +32,7 @@
 
 BOOST_AUTO_TEST_CASE(protect)
 {
-  hadesmem::Process const process(GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   HMODULE const this_mod = GetModuleHandle(nullptr);
   BOOST_CHECK(CanRead(process, this_mod));

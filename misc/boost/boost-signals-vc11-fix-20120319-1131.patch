@@ -1,0 +1,26 @@
+Index: boost/signals/detail/named_slot_map.hpp
+===================================================================
+--- boost/signals/detail/named_slot_map.hpp	(revision 77395)
++++ boost/signals/detail/named_slot_map.hpp	(working copy)
+@@ -127,7 +127,7 @@
+         || slot_ == other.slot_));
+   }
+ 
+-#if BOOST_WORKAROUND(_MSC_VER, <= 1600)
++#if BOOST_WORKAROUND(_MSC_VER, <= 1700)
+   void decrement();
+   void advance(difference_type);
+ #endif
+Index: libs/signals/src/named_slot_map.cpp
+===================================================================
+--- libs/signals/src/named_slot_map.cpp	(revision 77395)
++++ libs/signals/src/named_slot_map.cpp	(working copy)
+@@ -24,7 +24,7 @@
+ typedef slot_container_type::const_iterator const_group_iterator;
+ 
+ 
+-#if BOOST_WORKAROUND(_MSC_VER, <= 1600)
++#if BOOST_WORKAROUND(_MSC_VER, <= 1700)
+ void named_slot_map_iterator::decrement() { assert(false); }
+ void named_slot_map_iterator::advance(difference_type) { assert(false); }
+ #endif
