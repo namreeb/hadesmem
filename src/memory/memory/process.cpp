@@ -73,6 +73,27 @@ HANDLE Process::GetHandle() const BOOST_NOEXCEPT
   return handle_;
 }
 
+void Process::Cleanup()
+{
+  if (!handle_)
+  {
+    return;
+  }
+  
+  BOOST_ASSERT(id_);
+  
+  if (!CloseHandle(handle_))
+  {
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("CloseHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  id_ = 0;
+  handle_ = nullptr;
+}
+
 void Process::CheckWoW64() const
 {
   BOOL is_wow64_me = FALSE;
@@ -121,15 +142,21 @@ HANDLE Process::Open(DWORD id)
   return handle;
 }
 
-void Process::Cleanup()
+void Process::CleanupUnchecked() BOOST_NOEXCEPT
 {
-  if (handle_)
+  try
   {
-    BOOST_VERIFY(CloseHandle(handle_));
+    Cleanup();
   }
-  
-  id_ = 0;
-  handle_ = nullptr;
+  catch (std::exception const& e)
+  {
+    // WARNING: Handle is leaked if 'Cleanup' fails, but unfortunately there's 
+    // nothing that can be done about it...
+    BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+    
+    id_ = 0;
+    handle_ = nullptr;
+  }
 }
 
 bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT

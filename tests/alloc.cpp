@@ -51,4 +51,11 @@ BOOST_AUTO_TEST_CASE(alloc)
     static_cast<DWORD_PTR>(-1));
   BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::HadesMemError);
   BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::HadesMemError);
+  
+  hadesmem::Allocator allocator(process, 0x1000);
+  BOOST_CHECK(allocator.GetBase());
+  BOOST_CHECK_EQUAL(allocator.GetSize(), static_cast<SIZE_T>(0x1000));
+  BOOST_CHECK_NO_THROW(allocator.Free());
+  BOOST_CHECK(!allocator.GetBase());
+  BOOST_CHECK_EQUAL(allocator.GetSize(), static_cast<SIZE_T>(0));
 }

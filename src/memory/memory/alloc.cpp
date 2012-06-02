@@ -61,6 +61,10 @@ Allocator& Allocator::operator=(Allocator&& other) BOOST_NOEXCEPT
 {
   FreeUnchecked();
   
+  BOOST_ASSERT(process_ == nullptr);
+  BOOST_ASSERT(base_ == nullptr);
+  BOOST_ASSERT(size_ == 0);
+  
   std::swap(this->process_, other.process_);
   std::swap(this->base_, other.base_);
   std::swap(this->size_, other.size_);
@@ -75,7 +79,19 @@ Allocator::~Allocator() BOOST_NOEXCEPT
 
 void Allocator::Free()
 {
-  return ::hadesmem::Free(*process_, base_);
+  if (!process_)
+  {
+    return;
+  }
+  
+  BOOST_ASSERT(base_);
+  BOOST_ASSERT(size_);
+  
+  ::hadesmem::Free(*process_, base_);
+  
+  process_ = nullptr;
+  base_ = nullptr;
+  size_ = 0;
 }
 
 PVOID Allocator::GetBase() const BOOST_NOEXCEPT
@@ -91,15 +107,20 @@ SIZE_T Allocator::GetSize() const BOOST_NOEXCEPT
 
 void Allocator::FreeUnchecked() BOOST_NOEXCEPT
 {
-  if (!process_)
+  try
   {
-    return;
+    Free();
   }
-  
-  BOOST_VERIFY(::VirtualFreeEx(process_->GetHandle(), base_, 0, MEM_RELEASE));
-  process_ = nullptr;
-  base_ = nullptr;
-  size_ = 0;
+  catch (std::exception const& e)
+  {
+    // WARNING: Memory in remote process is leaked if 'Free' fails, but 
+    // unfortunately there's nothing that can be done about it...
+    BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+    
+    process_ = nullptr;
+    base_ = nullptr;
+    size_ = 0;
+  }
 }
 
 }

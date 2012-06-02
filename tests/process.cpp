@@ -29,12 +29,13 @@
 
 BOOST_AUTO_TEST_CASE(this_process)
 {
-  hadesmem::Process const process(GetCurrentProcessId());
+  hadesmem::Process process(GetCurrentProcessId());
   BOOST_CHECK_EQUAL(process.GetId(), GetCurrentProcessId());
   std::string const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());
   BOOST_CHECK(boost::filesystem::exists(path));
   BOOL is_wow64_real = FALSE;
   BOOST_CHECK(IsWow64Process(GetCurrentProcess(), &is_wow64_real));
-  BOOST_CHECK_EQUAL(hadesmem::IsWoW64(process), is_wow64_real != FALSE); 
+  BOOST_CHECK_EQUAL(hadesmem::IsWoW64(process), is_wow64_real != FALSE);
+  BOOST_CHECK_NO_THROW(process.Cleanup());
 }

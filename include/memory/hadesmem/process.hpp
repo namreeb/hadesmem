@@ -33,6 +33,8 @@ public:
   
   HANDLE GetHandle() const BOOST_NOEXCEPT;
   
+  void Cleanup();
+  
 private:
   Process(Process const&);
   Process& operator=(Process const&);
@@ -41,7 +43,7 @@ private:
   
   HANDLE Open(DWORD id);
   
-  void Cleanup();
+  void CleanupUnchecked() BOOST_NOEXCEPT;
   
   DWORD id_;
   HANDLE handle_;
