@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(alloc)
   *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);
   BOOST_CHECK_EQUAL(*static_cast<BYTE*>(address), static_cast<BYTE>(0xFF));
   MEMORY_BASIC_INFORMATION mbi;
-  ZeroMemory(&mbi, sizeof(mbi));
-  BOOST_REQUIRE(VirtualQuery(address, &mbi, sizeof(mbi)));
+  ::ZeroMemory(&mbi, sizeof(mbi));
+  BOOST_REQUIRE(::VirtualQuery(address, &mbi, sizeof(mbi)));
   BOOST_CHECK_EQUAL(mbi.BaseAddress, address);
   BOOST_CHECK_EQUAL(mbi.RegionSize, static_cast<SIZE_T>(0x1000));
   BOOST_CHECK_EQUAL(mbi.State, static_cast<DWORD>(MEM_COMMIT));
