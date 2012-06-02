@@ -124,7 +124,7 @@ void Process::Cleanup()
 {
   if (handle_)
   {
-    BOOST_ASSERT(CloseHandle(handle_));
+    BOOST_VERIFY(CloseHandle(handle_));
   }
   
   id_ = 0;
