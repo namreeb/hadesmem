@@ -19,6 +19,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wshadow"
 #endif // #if defined(HADESMEM_GCC)
+#include <boost/assert.hpp>
 #include <boost/locale.hpp>
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)

@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include <boost/config.hpp>
+
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
