@@ -25,3 +25,6 @@ run protect.cpp
 
 run alloc.cpp
   ;
+
+run module.cpp
+  ;
