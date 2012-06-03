@@ -172,7 +172,6 @@ void Module::Initialize(std::function<bool (MODULEENTRY32 const& entry)> const& 
   ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
   
-  // Process entire module list
   for (BOOL more_mods = Module32First(snap, &entry); more_mods; 
     more_mods = Module32Next(snap, &entry)) 
   {
