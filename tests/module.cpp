@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(module)
     std::locale::classic()), "MODULE.EXE");
   BOOST_CHECK(this_mod.GetPath().size() > this_mod.GetName().size());
   
-  hadesmem::Module const ntdll_mod(process, "ntdll.dll");
+  hadesmem::Module const ntdll_mod(process, "NtDll.DlL");
   BOOST_CHECK(ntdll_mod != this_mod);
   BOOST_CHECK_EQUAL(ntdll_mod.GetHandle(), ::GetModuleHandle(L"ntdll.dll"));
   BOOST_CHECK(ntdll_mod.GetSize() != 0);

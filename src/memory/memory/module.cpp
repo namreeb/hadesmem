@@ -119,8 +119,13 @@ void Module::Initialize(std::string const& path)
   bool const is_path = (path.find('\\') != std::string::npos) || 
     (path.find('/') != std::string::npos);
   
-  std::wstring const path_wide = boost::to_upper_copy(
-    boost::locale::conv::utf_to_utf<wchar_t>(path), 
+  std::wstring const path_wide = 
+    boost::locale::conv::utf_to_utf<wchar_t>(path);
+  // FIXME: Fix the path comparison by more accurately matching the OS's 
+  // rules on case insensitivity for paths.
+  // http://goo.gl/y4wYF
+  // http://goo.gl/Y2bFx
+  std::wstring const path_wide_upper = boost::to_upper_copy(path_wide, 
     std::locale::classic());
   
   auto path_check = 
@@ -132,8 +137,9 @@ void Module::Initialize(std::string const& path)
         return true;
       }
       
+      // FIXME: See note above about path comparisons.
       if (!is_path && boost::to_upper_copy(static_cast<std::wstring>(
-        entry.szModule), std::locale::classic()) == path_wide)
+        entry.szModule), std::locale::classic()) == path_wide_upper)
       {
         return true;
       }
