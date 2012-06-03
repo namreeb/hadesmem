@@ -35,6 +35,10 @@ public:
   
   void Cleanup();
   
+  bool operator==(Process const& other) const BOOST_NOEXCEPT;
+  
+  bool operator!=(Process const& other) const BOOST_NOEXCEPT;
+  
 private:
   Process(Process const&);
   Process& operator=(Process const&);
@@ -48,10 +52,6 @@ private:
   DWORD id_;
   HANDLE handle_;
 };
-
-bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
-
-bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
 
 std::string GetPath(Process const& process);
 

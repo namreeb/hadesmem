@@ -7,6 +7,8 @@
 
 #include "hadesmem/process.hpp"
 
+#include <utility>
+
 #define BOOST_TEST_MODULE process
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
@@ -30,6 +32,11 @@
 BOOST_AUTO_TEST_CASE(this_process)
 {
   hadesmem::Process process(::GetCurrentProcessId());
+  BOOST_CHECK(process == process);
+  hadesmem::Process process_new(::GetCurrentProcessId());
+  BOOST_CHECK(process == process_new);
+  hadesmem::Process const process_moved(std::move(process_new));
+  BOOST_CHECK(process_new != process_moved);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
   std::string const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());

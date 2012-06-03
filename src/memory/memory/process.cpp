@@ -150,8 +150,7 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
   }
   catch (std::exception const& e)
   {
-    // WARNING: Handle is leaked if 'Cleanup' fails, but unfortunately there's 
-    // nothing that can be done about it...
+    // WARNING: Handle is leaked if 'Cleanup' fails.
     BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
     
     id_ = 0;
@@ -159,14 +158,14 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
   }
 }
 
-bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool Process::operator==(Process const& other) const BOOST_NOEXCEPT
 {
-  return lhs.GetId() == rhs.GetId();
+  return this->id_ == other.id_;
 }
 
-bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool Process::operator!=(Process const& other) const BOOST_NOEXCEPT
 {
-  return !(lhs == rhs);
+  return !(*this == other);
 }
 
 std::string GetPath(Process const& process)
