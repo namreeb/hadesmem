@@ -8,6 +8,10 @@
 #include "hadesmem/module.hpp"
 
 #define BOOST_TEST_MODULE module
+#if defined(HADESMEM_MSVC)
+#pragma warning(push, 1)
+#pragma warning(disable:  6326)
+#endif // #if defined(HADESMEM_MSVC)
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
@@ -17,6 +21,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)

@@ -42,7 +42,7 @@ project
     <toolset>intel:<warnings>on
     <warnings-as-errors>on
     
-    <toolset>msvc:<cxxflags>"/sdl /wd4503"
+    <toolset>msvc:<cxxflags>"/analyze /sdl /wd4503"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -std=c++11"
     <toolset>clang:<cxxflags>"-std=c++11"
     <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"

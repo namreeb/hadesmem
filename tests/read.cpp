@@ -12,14 +12,20 @@
 #include <vector>
 
 #define BOOST_TEST_MODULE read
+#if defined(HADESMEM_MSVC)
+#pragma warning(push, 1)
+#pragma warning(disable:  6326)
+#endif // #if defined(HADESMEM_MSVC)
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif // #if defined(HADESMEM_GCC)
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
@@ -51,8 +57,8 @@ BOOST_AUTO_TEST_CASE(read)
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_pod_type, 
     sizeof(test_pod_type)), 0);
   
-  char const* const test_string = "Narrow test string.";
-  char* const test_string_real = const_cast<char*>(test_string);
+  std::string test_string = "Narrow test string.";
+  char* const test_string_real = &test_string[0];
   auto const new_test_string = hadesmem::ReadString<std::string>(process, 
     test_string_real);
   BOOST_CHECK_EQUAL(new_test_string, test_string);

@@ -11,6 +11,7 @@
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(push, 1)
+#pragma warning(disable:  6246 28197)
 #endif // #if defined(HADESMEM_MSVC)
 #include <boost/exception/all.hpp>
 #if defined(HADESMEM_MSVC)
