@@ -53,7 +53,7 @@ private:
   HANDLE handle_;
 };
 
-std::string GetPath(Process const& process);
+std::wstring GetPath(Process const& process);
 
 bool IsWoW64(Process const& process);
 

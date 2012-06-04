@@ -7,11 +7,11 @@
 
 #include "hadesmem/detail/to_upper_ordinal.hpp"
 
+#include <limits>
 #include <vector>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/locale.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
@@ -23,12 +23,6 @@ namespace hadesmem
 
 namespace detail
 {
-
-std::string ToUpperOrdinal(std::string const& str)
-{
-  return boost::locale::conv::utf_to_utf<char>(ToUpperOrdinal(
-    boost::locale::conv::utf_to_utf<wchar_t>(str)));
-}
 
 std::wstring ToUpperOrdinal(std::wstring const& str)
 {

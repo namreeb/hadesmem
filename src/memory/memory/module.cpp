@@ -9,7 +9,6 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -31,7 +30,7 @@ Module::Module(Process const& process, HMODULE handle)
   Initialize(handle);
 }
 
-Module::Module(Process const& process, std::string const& path)
+Module::Module(Process const& process, std::wstring const& path)
   : process_(&process), 
   handle_(nullptr), 
   size_(0), 
@@ -51,12 +50,12 @@ DWORD Module::GetSize() const BOOST_NOEXCEPT
   return size_;
 }
 
-std::string Module::GetName() const BOOST_NOEXCEPT
+std::wstring Module::GetName() const BOOST_NOEXCEPT
 {
   return name_;
 }
 
-std::string Module::GetPath() const BOOST_NOEXCEPT
+std::wstring Module::GetPath() const BOOST_NOEXCEPT
 {
   return path_;
 }
@@ -101,26 +100,22 @@ void Module::Initialize(HMODULE handle)
   InitializeIf(handle_check);
 }
 
-void Module::Initialize(std::string const& path)
+void Module::Initialize(std::wstring const& path)
 {
-  bool const is_path = (path.find('\\') != std::string::npos) || 
-    (path.find('/') != std::string::npos);
+  bool const is_path = (path.find(L'\\') != std::wstring::npos) || 
+    (path.find(L'/') != std::wstring::npos);
   
-  std::wstring const path_wide = 
-    boost::locale::conv::utf_to_utf<wchar_t>(path);
-  std::wstring const path_wide_upper = detail::ToUpperOrdinal(path_wide);
+  std::wstring const path_upper = detail::ToUpperOrdinal(path);
   
   auto path_check = 
     [&] (MODULEENTRY32 const& entry) -> bool
     {
-      if (is_path && boost::filesystem::equivalent(path, 
-        entry.szExePath))
+      if (is_path && boost::filesystem::equivalent(path, entry.szExePath))
       {
         return true;
       }
       
-      if (!is_path && path_wide_upper == detail::ToUpperOrdinal(
-        entry.szModule))
+      if (!is_path && path_upper == detail::ToUpperOrdinal(entry.szModule))
       {
         return true;
       }
@@ -135,8 +130,8 @@ void Module::Initialize(MODULEENTRY32 const& entry)
 {
   handle_ = entry.hModule;
   size_ = entry.modBaseSize;
-  name_ = boost::locale::conv::utf_to_utf<char>(entry.szModule);
-  path_ = boost::locale::conv::utf_to_utf<char>(entry.szExePath);
+  name_ = entry.szModule;
+  path_ = entry.szExePath;
 }
 
 void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> const& check_func)
@@ -179,8 +174,7 @@ void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> const
 
 FARPROC Module::FindProcedureInternal(LPCSTR name) const
 {
-  std::wstring const path_wide = boost::locale::conv::utf_to_utf<wchar_t>(path_);
-  HMODULE const local_module(LoadLibraryEx(path_wide.c_str(), nullptr, 
+  HMODULE const local_module(LoadLibraryEx(path_.c_str(), nullptr, 
     DONT_RESOLVE_DLL_REFERENCES));
   if (!local_module)
   {

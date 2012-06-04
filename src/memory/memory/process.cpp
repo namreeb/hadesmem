@@ -12,7 +12,6 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/locale.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
@@ -155,7 +154,7 @@ bool Process::operator!=(Process const& other) const BOOST_NOEXCEPT
   return !(*this == other);
 }
 
-std::string GetPath(Process const& process)
+std::wstring GetPath(Process const& process)
 {
   std::array<wchar_t, MAX_PATH> path = { { } };
   DWORD path_len = static_cast<DWORD>(path.size());
@@ -168,7 +167,7 @@ std::string GetPath(Process const& process)
         ErrorCodeWinLast(last_error));
   }
   
-  return boost::locale::conv::utf_to_utf<char>(path.data());
+  return path.data();
 }
 
 bool IsWoW64(Process const& process)

@@ -30,15 +30,15 @@ class Module
 public:
   Module(Process const& process, HMODULE handle);
   
-  Module(Process const& process, std::string const& path);
+  Module(Process const& process, std::wstring const& path);
   
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
   DWORD GetSize() const BOOST_NOEXCEPT;
   
-  std::string GetName() const BOOST_NOEXCEPT;
+  std::wstring GetName() const BOOST_NOEXCEPT;
   
-  std::string GetPath() const BOOST_NOEXCEPT;
+  std::wstring GetPath() const BOOST_NOEXCEPT;
   
   FARPROC FindProcedure(std::string const& Name) const;
   
@@ -51,7 +51,7 @@ public:
 private:
   void Initialize(HMODULE handle);
   
-  void Initialize(std::string const& path);
+  void Initialize(std::wstring const& path);
   
   void Initialize(MODULEENTRY32 const& entry);
   
@@ -62,8 +62,8 @@ private:
   Process const* process_;
   HMODULE handle_;
   DWORD size_;
-  std::string name_;
-  std::string path_;
+  std::wstring name_;
+  std::wstring path_;
 };
 
 #if defined(HADESMEM_GCC)

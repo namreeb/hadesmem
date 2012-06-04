@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(this_process)
   hadesmem::Process const process_moved(std::move(process_new));
   BOOST_CHECK(process_new != process_moved);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
-  std::string const path(hadesmem::GetPath(process));
+  std::wstring const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());
   BOOST_CHECK(boost::filesystem::exists(path));
   BOOL is_wow64_real = FALSE;

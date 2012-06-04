@@ -9,7 +9,6 @@
 
 #define BOOST_TEST_MODULE module
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -32,20 +31,20 @@ BOOST_AUTO_TEST_CASE(module)
   hadesmem::Module const this_mod(process, nullptr);
   BOOST_CHECK_EQUAL(this_mod.GetHandle(), GetModuleHandle(nullptr));
   BOOST_CHECK(this_mod.GetSize() != 0);
-  BOOST_CHECK_EQUAL(hadesmem::detail::ToUpperOrdinal(this_mod.GetName()), 
-    "MODULE.EXE");
+  BOOST_CHECK(hadesmem::detail::ToUpperOrdinal(this_mod.GetName()) == 
+    L"MODULE.EXE");
   BOOST_CHECK(this_mod.GetPath().size() > this_mod.GetName().size());
   
-  hadesmem::Module const ntdll_mod(process, "NtDll.DlL");
+  hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
   BOOST_CHECK(ntdll_mod != this_mod);
   BOOST_CHECK_EQUAL(ntdll_mod.GetHandle(), ::GetModuleHandle(L"ntdll.dll"));
   BOOST_CHECK(ntdll_mod.GetSize() != 0);
-  BOOST_CHECK_EQUAL(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()), 
-    "NTDLL.DLL");
+  BOOST_CHECK(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()) == 
+    L"NTDLL.DLL");
   BOOST_CHECK(this_mod.GetPath().size() > this_mod.GetName().size());
   BOOST_CHECK(ntdll_mod.FindProcedure("NtQueryInformationProcess") == 
     ::GetProcAddress(ntdll_mod.GetHandle(), "NtQueryInformationProcess"));
-  hadesmem::Module const ntdll_mod_other(process, "ntdll.dll");
+  hadesmem::Module const ntdll_mod_other(process, L"ntdll.dll");
   BOOST_CHECK(ntdll_mod == ntdll_mod_other);
   hadesmem::Module const ntdll_mod_from_handle(process, 
     ::GetModuleHandle(L"ntdll.dll"));
@@ -55,7 +54,6 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK(sys_path_len && sys_path_len < MAX_PATH);
   std::wstring const ntdll_path = static_cast<std::wstring>(
     system_path.data()) + L"\\nTdLl.DlL";
-  hadesmem::Module const ntdll_mod_from_path(process, 
-    boost::locale::conv::utf_to_utf<char>(ntdll_path));
+  hadesmem::Module const ntdll_mod_from_path(process, ntdll_path);
   BOOST_CHECK(ntdll_mod == ntdll_mod_from_path);
 }

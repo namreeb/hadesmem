@@ -15,8 +15,6 @@ namespace hadesmem
 namespace detail
 {
 
-std::string ToUpperOrdinal(std::string const& str);
-
 std::wstring ToUpperOrdinal(std::wstring const& str);
 
 }
