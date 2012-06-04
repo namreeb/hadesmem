@@ -38,15 +38,13 @@ T Read(Process const& process, PVOID address)
 }
 
 template <typename T>
-T ReadString(Process const& process, PVOID address)
+T ReadString(Process const& process, PVOID address, 
+  typename std::enable_if<std::is_same<T, std::basic_string<typename T::value_type, 
+  typename T::traits_type, typename T::allocator_type>>::value, T>::type* 
+  /*dummy*/ = nullptr)
 {
   typedef typename T::value_type CharT;
-  typedef typename T::traits_type TraitsT;
-  typedef typename T::allocator_type AllocT;
   
-  static_assert(std::is_same<T, std::basic_string<CharT, TraitsT, 
-    AllocT>>::value, "ReadString: T must be of type std::basic_string.");
-
   static_assert(std::is_pod<CharT>::value, "ReadString: Character type of "
     "string must be POD.");
   
@@ -64,13 +62,11 @@ T ReadString(Process const& process, PVOID address)
 }
 
 template <typename T>
-T ReadList(Process const& process, PVOID address, std::size_t size)
+T ReadList(Process const& process, PVOID address, std::size_t size, 
+  typename std::enable_if<std::is_same<T, std::vector<typename T::value_type, 
+  typename T::allocator_type>>::value, T>::type* /*dummy*/ = nullptr)
 {
   typedef typename T::value_type ValueT;
-  typedef typename T::allocator_type AllocT;
-  
-  static_assert(std::is_same<T, std::vector<ValueT, AllocT>>::value, 
-    "ReadList: T must be of type std::vector.");
   
   static_assert(std::is_pod<ValueT>::value, "ReadList: Value type of vector "
     "must be POD.");
