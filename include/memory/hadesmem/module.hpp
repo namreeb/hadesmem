@@ -53,7 +53,9 @@ private:
   
   void Initialize(std::string const& path);
   
-  void Initialize(std::function<bool (MODULEENTRY32 const&)> const& check_func);
+  void Initialize(MODULEENTRY32 const& entry);
+  
+  void InitializeIf(std::function<bool (MODULEENTRY32 const&)> const& check_func);
   
   FARPROC FindProcedureInternal(LPCSTR name) const;
   

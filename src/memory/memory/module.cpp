@@ -98,7 +98,7 @@ void Module::Initialize(HMODULE handle)
       return false;
     };
   
-  Initialize(handle_check);
+  InitializeIf(handle_check);
 }
 
 void Module::Initialize(std::string const& path)
@@ -134,10 +134,18 @@ void Module::Initialize(std::string const& path)
       return false;
     };
   
-  Initialize(path_check);
+  InitializeIf(path_check);
 }
 
-void Module::Initialize(std::function<bool (MODULEENTRY32 const& entry)> const& check_func)
+void Module::Initialize(MODULEENTRY32 const& entry)
+{
+  handle_ = entry.hModule;
+  size_ = entry.modBaseSize;
+  name_ = boost::locale::conv::utf_to_utf<char>(entry.szModule);
+  path_ = boost::locale::conv::utf_to_utf<char>(entry.szExePath);
+}
+
+void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> const& check_func)
 {
   HANDLE const snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
     process_->GetId());
@@ -164,11 +172,7 @@ void Module::Initialize(std::function<bool (MODULEENTRY32 const& entry)> const& 
   {
     if (check_func(entry))
     {
-      handle_ = entry.hModule;
-      size_ = entry.modBaseSize;
-      name_ = boost::locale::conv::utf_to_utf<char>(entry.szModule);
-      path_ = boost::locale::conv::utf_to_utf<char>(entry.szExePath);
-      
+      Initialize(entry);      
       return;
     }
   }
