@@ -12,11 +12,11 @@
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
+#include "hadesmem/detail/to_upper_ordinal.hpp"
 
 namespace hadesmem
 {
@@ -108,12 +108,7 @@ void Module::Initialize(std::string const& path)
   
   std::wstring const path_wide = 
     boost::locale::conv::utf_to_utf<wchar_t>(path);
-  // FIXME: Fix the path comparison by more accurately matching the OS's 
-  // rules on case insensitivity for paths.
-  // http://goo.gl/y4wYF
-  // http://goo.gl/Y2bFx
-  std::wstring const path_wide_upper = boost::to_upper_copy(path_wide, 
-    std::locale::classic());
+  std::wstring const path_wide_upper = detail::ToUpperOrdinal(path_wide);
   
   auto path_check = 
     [&] (MODULEENTRY32 const& entry) -> bool
@@ -124,9 +119,8 @@ void Module::Initialize(std::string const& path)
         return true;
       }
       
-      // FIXME: See note above about path comparisons.
-      if (!is_path && boost::to_upper_copy(static_cast<std::wstring>(
-        entry.szModule), std::locale::classic()) == path_wide_upper)
+      if (!is_path && path_wide_upper == detail::ToUpperOrdinal(
+        entry.szModule))
       {
         return true;
       }

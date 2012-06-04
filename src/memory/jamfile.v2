@@ -1,9 +1,17 @@
 # src/memory/jamfile.v2
 
+lib user32
+  :
+  :
+    <name>user32
+  ;
+
 lib memory
   :
     [ glob memory/*.cpp ]
+    [ glob memory/detail/*.cpp ]
     /boost//locale/<link>static
+    user32
   :
     <link>static
     <include>"../../include/memory"
