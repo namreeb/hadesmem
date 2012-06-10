@@ -7,6 +7,7 @@
 
 #include "hadesmem/module_list.hpp"
 
+#include <boost/none.hpp>
 #include <boost/assert.hpp>
 
 #include "hadesmem/error.hpp"
@@ -26,7 +27,7 @@ ModuleIter::ModuleIter(Process const& process, MODULEENTRY32 const& entry,
   ModuleList* back)
   : process_(&process), 
   back_(back), 
-  module_(new Module(process, entry))
+  module_(Module(process, entry))
 { }
 
 ModuleIter::ModuleIter(ModuleIter const& other)
@@ -36,7 +37,7 @@ ModuleIter::ModuleIter(ModuleIter const& other)
 {
   if (other.module_)
   {
-    module_.reset(new Module(*other.module_));
+    module_ = Module(*other.module_);
   }
   else
   {
@@ -49,7 +50,7 @@ ModuleIter& ModuleIter::operator=(ModuleIter const& other)
 {
   process_ = other.process_;
   back_ = other.back_;
-  module_.reset(new Module(*other.module_));
+  module_ = Module(*other.module_);
   
   return *this;
 }
@@ -69,13 +70,13 @@ ModuleIter& ModuleIter::operator++()
   auto next = back_->Next();
   if (next)
   {
-    module_.reset(new Module(*process_, *next));
+    module_ = Module(*process_, *next);
   }
   else
   {
     process_ = nullptr;
     back_ = nullptr;
-    module_.reset();
+    module_ = boost::none;
   }
   
   return *this;
@@ -144,7 +145,7 @@ ModuleList::iterator ModuleList::end()
   return iterator();
 }
 
-std::unique_ptr<MODULEENTRY32> ModuleList::Next()
+boost::optional<MODULEENTRY32> ModuleList::Next()
 {
   MODULEENTRY32 entry;
   ZeroMemory(&entry, sizeof(entry));
@@ -154,7 +155,7 @@ std::unique_ptr<MODULEENTRY32> ModuleList::Next()
   {
     if (GetLastError() == ERROR_NO_MORE_FILES)
     {
-      return std::unique_ptr<MODULEENTRY32>();
+      return boost::optional<MODULEENTRY32>();
     }
     else
     {
@@ -165,7 +166,7 @@ std::unique_ptr<MODULEENTRY32> ModuleList::Next()
     }
   }
   
-  return std::unique_ptr<MODULEENTRY32>(new MODULEENTRY32(entry));
+  return boost::optional<MODULEENTRY32>(entry);
 }
 
 }

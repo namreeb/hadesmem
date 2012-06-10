@@ -11,20 +11,22 @@
 #include <iterator>
 
 #include <boost/config.hpp>
+#include <boost/optional.hpp>
 
 #include <windows.h>
 #include <tlhelp32.h>
+
+#include "hadesmem/module.hpp"
 
 namespace hadesmem
 {
 
 class Process;
-class Module;
 class ModuleList;
 
 // TODO: Redesign to move most of the work and data to the ModuleList class.
-// TODO: Redesign to avoid all the dynamic memory allocation currently being 
-// done.
+// TODO: Redesign to avoid include dependency on hadesmem::Module and 
+// boost::optional (via pimpl?).
 
 // Inheriting from std::iterator causes the following warning under GCC:
 // error: base class 'struct std::iterator<std::input_iterator_tag, 
@@ -61,7 +63,7 @@ public:
 private:
   Process const* process_;
   ModuleList* back_;
-  std::unique_ptr<Module> module_;
+  boost::optional<Module> module_;
 };
 
 #if defined(HADESMEM_GCC)
@@ -87,7 +89,7 @@ private:
   
   friend class ModuleIter;
   
-  std::unique_ptr<MODULEENTRY32> Next();
+  boost::optional<MODULEENTRY32> Next();
   
   Process const* process_;
   HANDLE snap_;
