@@ -23,6 +23,8 @@ class Module;
 class ModuleList;
 
 // TODO: Redesign to move most of the work and data to the ModuleList class.
+// TODO: Redesign to avoid all the dynamic memory allocation currently being 
+// done.
 
 // Inheriting from std::iterator causes the following warning under GCC:
 // error: base class 'struct std::iterator<std::input_iterator_tag, 
