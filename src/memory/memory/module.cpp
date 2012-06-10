@@ -40,6 +40,16 @@ Module::Module(Process const& process, std::wstring const& path)
   Initialize(path);
 }
 
+Module::Module(Process const& process, MODULEENTRY32 const& entry)
+  : process_(&process), 
+  handle_(nullptr), 
+  size_(0), 
+  name_(), 
+  path_()
+{
+  Initialize(entry);
+}
+
 HMODULE Module::GetHandle() const BOOST_NOEXCEPT
 {
   return handle_;

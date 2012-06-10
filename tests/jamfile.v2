@@ -28,3 +28,6 @@ run alloc.cpp
 
 run module.cpp
   ;
+
+run module_list.cpp
+  ;

@@ -32,6 +32,8 @@ public:
   
   Module(Process const& process, std::wstring const& path);
   
+  Module(Process const& process, MODULEENTRY32 const& entry);
+  
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
   DWORD GetSize() const BOOST_NOEXCEPT;
