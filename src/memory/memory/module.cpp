@@ -134,10 +134,11 @@ void Module::Initialize(MODULEENTRY32 const& entry)
   path_ = entry.szExePath;
 }
 
-void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> const& check_func)
+void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> 
+  const& check_func)
 {
-  HANDLE const snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
-    process_->GetId());
+  HANDLE const snap = CreateToolhelp32Snapshot(
+    TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
   if (snap == INVALID_HANDLE_VALUE)
   {
     DWORD const last_error = GetLastError();
