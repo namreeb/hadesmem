@@ -34,10 +34,14 @@ public:
   
   ModuleIter& operator=(ModuleIter const& other);
   
-  const Module& operator*() const;
-  const Module* operator->() const;
+  Module const& operator*() const;
+  
+  Module const* operator->() const;
+  
   ModuleIter& operator++();
+  
   ModuleIter operator++(int);
+  
   bool equal(ModuleIter const& other) const;
   
 private:
