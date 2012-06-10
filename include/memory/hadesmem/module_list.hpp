@@ -10,6 +10,8 @@
 #include <memory>
 #include <iterator>
 
+#include <boost/config.hpp>
+
 #include <windows.h>
 #include <tlhelp32.h>
 
@@ -17,15 +19,23 @@ namespace hadesmem
 {
 
 class Process;
-
 class Module;
-
 class ModuleList;
+
+// TODO: Redesign to move most of the work and data to the ModuleList class.
+
+// Inheriting from std::iterator causes the following warning under GCC:
+// error: base class 'struct std::iterator<std::input_iterator_tag, 
+// hadesmem::Module>' has a non-virtual destructor [-Werror=effc++]
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif // #if defined(HADESMEM_GCC)
 
 class ModuleIter : public std::iterator<std::input_iterator_tag, Module>
 {
 public:
-  ModuleIter();
+  ModuleIter() BOOST_NOEXCEPT;
   
   ModuleIter(Process const& process, MODULEENTRY32 const& entry, 
     ModuleList* back);
@@ -34,15 +44,17 @@ public:
   
   ModuleIter& operator=(ModuleIter const& other);
   
-  Module const& operator*() const;
+  Module const& operator*() const BOOST_NOEXCEPT;
   
-  Module const* operator->() const;
+  Module const* operator->() const BOOST_NOEXCEPT;
   
   ModuleIter& operator++();
   
   ModuleIter operator++(int);
   
-  bool equal(ModuleIter const& other) const;
+  bool operator==(ModuleIter const& other) BOOST_NOEXCEPT;
+  
+  bool operator!=(ModuleIter const& other) BOOST_NOEXCEPT;
   
 private:
   Process const* process_;
@@ -50,9 +62,9 @@ private:
   std::unique_ptr<Module> module_;
 };
 
-bool operator==(ModuleIter const& lhs, ModuleIter const& rhs);
-
-bool operator!=(ModuleIter const& lhs, ModuleIter const& rhs);
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 
 class ModuleList
 {

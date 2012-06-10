@@ -16,7 +16,7 @@
 namespace hadesmem
 {
 
-ModuleIter::ModuleIter()
+ModuleIter::ModuleIter() BOOST_NOEXCEPT
   : process_(nullptr), 
   back_(nullptr), 
   module_()
@@ -54,12 +54,12 @@ ModuleIter& ModuleIter::operator=(ModuleIter const& other)
   return *this;
 }
 
-const Module& ModuleIter::operator*() const
+const Module& ModuleIter::operator*() const BOOST_NOEXCEPT
 {
   return *module_;
 }
 
-const Module* ModuleIter::operator->() const
+const Module* ModuleIter::operator->() const BOOST_NOEXCEPT
 {
   return &*module_;
 }
@@ -88,7 +88,7 @@ ModuleIter ModuleIter::operator++(int)
   return prev;
 }
 
-bool ModuleIter::equal(ModuleIter const& other) const
+bool ModuleIter::operator==(ModuleIter const& other) BOOST_NOEXCEPT
 {
   return this->process_ == other.process_ && 
     this->back_ == other.back_ && 
@@ -96,14 +96,9 @@ bool ModuleIter::equal(ModuleIter const& other) const
     (!this->module_ && !other.module_));
 }
 
-bool operator==(ModuleIter const& lhs, ModuleIter const& rhs)
+bool ModuleIter::operator!=(ModuleIter const& other) BOOST_NOEXCEPT
 {
-  return lhs.equal(rhs);
-}
-
-bool operator!=(ModuleIter const& lhs, ModuleIter const& rhs)
-{
-  return !lhs.equal(rhs);
+  return !(*this == other);
 }
 
 ModuleList::ModuleList(Process const& process)
