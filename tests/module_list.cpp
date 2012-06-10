@@ -31,25 +31,27 @@ BOOST_AUTO_TEST_CASE(module_list)
   
   hadesmem::ModuleList module_list(process);
   auto iter = module_list.begin();
-  BOOST_CHECK(iter != module_list.end());
   hadesmem::Module const this_mod(process, nullptr);
-  BOOST_CHECK(*iter == this_mod);
-  auto this_iter = iter++;
   BOOST_CHECK(iter != module_list.end());
-  BOOST_CHECK(*this_iter == this_mod);
+  BOOST_CHECK(*iter == this_mod);
   hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
+  BOOST_CHECK(++iter != module_list.end());
   BOOST_CHECK(*iter == ntdll_mod);
   hadesmem::Module const kernel32_mod(process, L"kernel32.dll");
-  auto kernel32_iter = ++iter;
-  BOOST_CHECK(kernel32_iter != module_list.end());
-  BOOST_CHECK(iter != module_list.end());
+  BOOST_CHECK(++iter != module_list.end());
   BOOST_CHECK(*iter == kernel32_mod);
-  BOOST_CHECK(*kernel32_iter == kernel32_mod);
   
-  hadesmem::ModuleList new_module_list(process);
-  std::for_each(new_module_list.begin(), new_module_list.end(), 
+  hadesmem::ModuleList module_list_enum(process);
+  std::for_each(std::begin(module_list_enum), std::end(module_list_enum), 
     [] (hadesmem::Module const& module)
     {
       BOOST_CHECK(module.GetHandle() != nullptr);
     });
+  
+  hadesmem::ModuleList module_list_find(process);
+  BOOST_CHECK(std::find_if(std::begin(module_list_find), std::end(module_list_find), 
+    [] (hadesmem::Module const& module)
+    {
+      return module.GetHandle() == GetModuleHandle(L"user32.dll");
+    }) != std::end(module_list_find));
 }
