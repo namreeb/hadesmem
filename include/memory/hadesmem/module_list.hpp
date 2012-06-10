@@ -10,8 +10,10 @@
 #include <memory>
 #include <iterator>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
 #include <boost/optional.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 #include <tlhelp32.h>
