@@ -9,6 +9,7 @@
 
 #define BOOST_TEST_MODULE module_iterator
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/concept_check.hpp>
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -25,6 +26,8 @@
 
 BOOST_AUTO_TEST_CASE(module_iterator)
 {
+  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ModuleIterator>));
+  
   hadesmem::Process const process(::GetCurrentProcessId());
   
   auto iter = hadesmem::ModuleIterator(process);
