@@ -24,7 +24,7 @@ namespace detail
 {
   struct ModuleIteratorImpl
   {
-    ~ModuleIteratorImpl()
+    ~ModuleIteratorImpl() BOOST_NOEXCEPT
     {
       BOOST_VERIFY(CloseHandle(snap_));
     }
