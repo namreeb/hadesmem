@@ -26,11 +26,11 @@ namespace hadesmem
 class Process;
 class ModuleList;
 
-// TODO: Redesign to move most of the work and data to the ModuleList class.
+// TODO: Redesign into a standalone InputIterator type, without the need for 
+// a parent class.
 // TODO: Redesign to avoid include dependency on hadesmem::Module and 
 // boost::optional (via pimpl?).
 // TODO: Redesign to meet the standard's requirements/interface for iterators.
-// TODO: Redesign to meet the standard's requirements/interface for containers.
 
 // Inheriting from std::iterator causes the following warning under GCC:
 // error: base class 'struct std::iterator<std::input_iterator_tag, 
