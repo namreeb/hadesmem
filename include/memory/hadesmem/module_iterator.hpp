@@ -64,6 +64,8 @@ private:
   
   bool equal(ModuleIterator const& other) const BOOST_NOEXCEPT;
   
+  // Using a shared_ptr to provide shallow copy semantics, as 
+  // required by InputIterator.
   std::shared_ptr<detail::ModuleIteratorImpl> impl_;
 };
 
