@@ -89,7 +89,7 @@ ModuleIterator::ModuleIterator(Process const& process)
   impl_->module_ = Module(*impl_->process_, entry);
 }
 
-ModuleIterator::ModuleIteratorFacade::reference ModuleIterator::dereference() const
+ModuleIterator::ModuleIteratorFacade::reference ModuleIterator::dereference() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
   return *impl_->module_;

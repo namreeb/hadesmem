@@ -58,7 +58,7 @@ private:
     boost::single_pass_traversal_tag
     > ModuleIteratorFacade;
   
-  ModuleIteratorFacade::reference dereference() const;
+  ModuleIteratorFacade::reference dereference() const BOOST_NOEXCEPT;
   
   void increment();
   
