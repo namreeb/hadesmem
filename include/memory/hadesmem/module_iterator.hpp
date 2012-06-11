@@ -58,8 +58,7 @@ private:
   void increment();
   
   bool equal(ModuleIterator const& other) const BOOST_NOEXCEPT;
-
-  struct detail::ModuleIteratorImpl;
+  
   std::shared_ptr<detail::ModuleIteratorImpl> impl_;
 };
 
