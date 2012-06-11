@@ -106,6 +106,9 @@ ModuleList::ModuleList(Process const& process)
   : process_(&process), 
   snap_(nullptr)
 {
+  // TODO: Attempt to call this function at least twice on ERROR_BAD_LENGTH.
+  // Potentially call until success if it can be determined whether or not the 
+  // process started suspended (as per MSDN).
   snap_ = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
     process_->GetId());
   if (snap_ == INVALID_HANDLE_VALUE)
