@@ -35,6 +35,8 @@ namespace detail
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// ModuleIterator satisfies the requirements of an input iterator 
+// (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class ModuleIterator : 
   public boost::iterator_facade<
     ModuleIterator, 
