@@ -23,7 +23,9 @@ class Process;
 
 namespace detail
 {
-  struct ModuleIteratorImpl;
+
+struct ModuleIteratorImpl;
+
 }
 
 // Boost.Iterator causes the following warning under GCC:
