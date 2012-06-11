@@ -33,7 +33,7 @@ struct ModuleIteratorImpl
   
   ~ModuleIteratorImpl() BOOST_NOEXCEPT
   {
-    BOOST_VERIFY(CloseHandle(snap_));
+    BOOST_VERIFY(::CloseHandle(snap_));
   }
   
   Process const* process_;

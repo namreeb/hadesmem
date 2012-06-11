@@ -34,7 +34,7 @@ ModuleIterator::ModuleIterator(Process const& process)
   // TODO: Attempt to call this function at least twice on ERROR_BAD_LENGTH.
   // Potentially call until success if it can be determined whether or not 
   // the process started suspended (as per MSDN).
-  impl_->snap_ = CreateToolhelp32Snapshot(
+  impl_->snap_ = ::CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
     impl_->process_->GetId());
   if (impl_->snap_ == INVALID_HANDLE_VALUE)
@@ -46,16 +46,16 @@ ModuleIterator::ModuleIterator(Process const& process)
   }
   
   MODULEENTRY32 entry;
-  ZeroMemory(&entry, sizeof(entry));
+  ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!Module32First(impl_->snap_, &entry))
+  if (!::Module32First(impl_->snap_, &entry))
   {
     // TODO: More gracefully handle failure when GetLastError returns 
     // ERROR_NO_MORE_FILES. It seems that we can just treat that as an EOL, 
     // however I first want to understand the circumstances under which that 
     // error can occur for the first module in the list (other than an invalid 
     // snapshot type).
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Module32First failed.") << 
       ErrorCodeWinLast(last_error));
@@ -73,18 +73,18 @@ ModuleIterator::ModuleIteratorFacade::reference ModuleIterator::dereference() co
 void ModuleIterator::increment()
 {
   MODULEENTRY32 entry;
-  ZeroMemory(&entry, sizeof(entry));
+  ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!Module32Next(impl_->snap_, &entry))
+  if (!::Module32Next(impl_->snap_, &entry))
   {
-    if (GetLastError() == ERROR_NO_MORE_FILES)
+    if (::GetLastError() == ERROR_NO_MORE_FILES)
     {
       impl_.reset();
       return;
     }
     else
     {
-      DWORD const last_error = GetLastError();
+      DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("Module32Next failed.") << 
         ErrorCodeWinLast(last_error));
