@@ -5,7 +5,7 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/module_list.hpp"
+#include "hadesmem/module_iterator.hpp"
 
 #define BOOST_TEST_MODULE module_iterator
 #include "hadesmem/detail/warning_disable_prefix.hpp"
