@@ -64,13 +64,19 @@ ModuleIterator::ModuleIterator(Process const& process)
   impl_->module_ = Module(*impl_->process_, entry);
 }
 
-ModuleIterator::ModuleIteratorFacade::reference ModuleIterator::dereference() const BOOST_NOEXCEPT
+ModuleIterator::reference ModuleIterator::operator*() const
 {
   BOOST_ASSERT(impl_.get());
   return *impl_->module_;
 }
 
-void ModuleIterator::increment()
+ModuleIterator::pointer ModuleIterator::operator->() const
+{
+  BOOST_ASSERT(impl_.get());
+  return &*impl_->module_;
+}
+
+ModuleIterator& ModuleIterator::operator++()
 {
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
@@ -80,7 +86,7 @@ void ModuleIterator::increment()
     if (::GetLastError() == ERROR_NO_MORE_FILES)
     {
       impl_.reset();
-      return;
+      return *this;
     }
     else
     {
@@ -92,11 +98,25 @@ void ModuleIterator::increment()
   }
   
   impl_->module_ = Module(*impl_->process_, entry);
+  
+  return *this;
 }
 
-bool ModuleIterator::equal(ModuleIterator const& other) const BOOST_NOEXCEPT
+ModuleIterator ModuleIterator::operator++(int)
+{
+  ModuleIterator iter(*this);
+  ++*this;
+  return iter;
+}
+
+bool ModuleIterator::operator==(ModuleIterator const& other)
 {
   return impl_ == other.impl_;
+}
+
+bool ModuleIterator::operator!=(ModuleIterator const& other)
+{
+  return !(*this == other);
 }
 
 }

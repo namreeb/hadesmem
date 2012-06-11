@@ -8,18 +8,18 @@
 #pragma once
 
 #include <memory>
+#include <iterator>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
-#include <boost/iterator/iterator_facade.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
-
-#include "hadesmem/module.hpp"
 
 namespace hadesmem
 {
 
 class Process;
+
+class Module;
 
 namespace detail
 {
@@ -39,33 +39,26 @@ struct ModuleIteratorImpl;
 
 // ModuleIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class ModuleIterator : 
-  public boost::iterator_facade<
-    ModuleIterator, 
-    Module, 
-    boost::single_pass_traversal_tag
-    >
+class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
 {
 public:
   ModuleIterator() BOOST_NOEXCEPT;
   
   ModuleIterator(Process const& process);
   
+  reference operator*() const;
+  
+  pointer operator->() const;
+  
+  ModuleIterator& operator++();
+  
+  ModuleIterator operator++(int);
+  
+  bool operator==(ModuleIterator const& other);
+  
+  bool operator!=(ModuleIterator const& other);
+  
 private:
-  friend class boost::iterator_core_access;
-  
-  typedef boost::iterator_facade<
-    ModuleIterator, 
-    Module, 
-    boost::single_pass_traversal_tag
-    > ModuleIteratorFacade;
-  
-  ModuleIteratorFacade::reference dereference() const BOOST_NOEXCEPT;
-  
-  void increment();
-  
-  bool equal(ModuleIterator const& other) const BOOST_NOEXCEPT;
-  
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
   std::shared_ptr<detail::ModuleIteratorImpl> impl_;
