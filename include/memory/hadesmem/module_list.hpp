@@ -12,7 +12,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
-#include <boost/optional.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
@@ -24,79 +24,43 @@ namespace hadesmem
 {
 
 class Process;
-class ModuleList;
 
-// TODO: Redesign into a standalone InputIterator type, without the need for 
-// a parent class.
-// TODO: Redesign to avoid include dependency on hadesmem::Module and 
-// boost::optional (via pimpl?).
-// TODO: Redesign to meet the standard's requirements/interface for iterators.
+namespace detail
+{
+  struct ModuleIteratorImpl;
+}
 
-// Inheriting from std::iterator causes the following warning under GCC:
-// error: base class 'struct std::iterator<std::input_iterator_tag, 
-// hadesmem::Module>' has a non-virtual destructor [-Werror=effc++]
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADESMEM_GCC)
-
-class ModuleIter : public std::iterator<std::input_iterator_tag, Module>
+class ModuleIterator : 
+  public boost::iterator_facade<
+    ModuleIterator, 
+    Module, 
+    boost::single_pass_traversal_tag
+    >
 {
 public:
-  ModuleIter() BOOST_NOEXCEPT;
+  ModuleIterator() BOOST_NOEXCEPT;
   
-  ModuleIter(Process const& process, MODULEENTRY32 const& entry, 
-    ModuleList* back);
+  ModuleIterator(Process const& process);
   
-  ModuleIter(ModuleIter const& other);
-  
-  ModuleIter& operator=(ModuleIter const& other);
-  
-  Module const& operator*() const BOOST_NOEXCEPT;
-  
-  Module const* operator->() const BOOST_NOEXCEPT;
-  
-  ModuleIter& operator++();
-  
-  ModuleIter operator++(int);
-  
-  bool operator==(ModuleIter const& other) BOOST_NOEXCEPT;
-  
-  bool operator!=(ModuleIter const& other) BOOST_NOEXCEPT;
+  ~ModuleIterator() BOOST_NOEXCEPT;
   
 private:
-  Process const* process_;
-  ModuleList* back_;
-  boost::optional<Module> module_;
-};
+  friend class boost::iterator_core_access;
+  
+  typedef boost::iterator_facade<
+    ModuleIterator, 
+    Module, 
+    boost::single_pass_traversal_tag
+    > ModuleIteratorFacade;
+  
+  ModuleIteratorFacade::reference dereference() const;
+  
+  void increment();
+  
+  bool equal(ModuleIterator const& other) const BOOST_NOEXCEPT;
 
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
-
-class ModuleList
-{
-public:
-  typedef ModuleIter iterator;
-  
-  explicit ModuleList(Process const& process);
-  
-  ~ModuleList();
-  
-  iterator begin();
-  
-  iterator end();
-  
-private:
-  ModuleList(ModuleList const&);
-  ModuleList& operator=(ModuleList const&);
-  
-  friend class ModuleIter;
-  
-  boost::optional<MODULEENTRY32> Next();
-  
-  Process const* process_;
-  HANDLE snap_;
+  struct detail::ModuleIteratorImpl;
+  std::shared_ptr<detail::ModuleIteratorImpl> impl_;
 };
 
 }
