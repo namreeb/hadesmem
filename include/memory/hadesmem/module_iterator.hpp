@@ -66,7 +66,7 @@ private:
   
   std::shared_ptr<detail::ModuleIteratorImpl> impl_;
 };
-    
+
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
