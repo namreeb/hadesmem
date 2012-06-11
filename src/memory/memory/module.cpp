@@ -82,16 +82,32 @@ FARPROC Module::FindProcedure(WORD ordinal) const
 
 bool Module::operator==(Module const& other) const BOOST_NOEXCEPT
 {
-  return this->process_ == other.process_ && 
-    this->handle_ == other.handle_ && 
-    this->size_ == other.size_ && 
-    this->name_ == other.name_ && 
-    this->path_ == other.path_;
+  return this->handle_ == other.handle_;
 }
 
 bool Module::operator!=(Module const& other) const BOOST_NOEXCEPT
 {
   return !(*this == other);
+}
+  
+bool Module::operator<(Module const& other) const BOOST_NOEXCEPT
+{
+  return this->handle_ < other.handle_;
+}
+
+bool Module::operator<=(Module const& other) const BOOST_NOEXCEPT
+{
+  return this->handle_ <= other.handle_;
+}
+
+bool Module::operator>(Module const& other) const BOOST_NOEXCEPT
+{
+  return this->handle_ > other.handle_;
+}
+
+bool Module::operator>=(Module const& other) const BOOST_NOEXCEPT
+{
+  return this->handle_ >= other.handle_;
 }
 
 void Module::Initialize(HMODULE handle)

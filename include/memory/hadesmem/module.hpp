@@ -50,6 +50,14 @@ public:
   
   bool operator!=(Module const& other) const BOOST_NOEXCEPT;
   
+  bool operator<(Module const& other) const BOOST_NOEXCEPT;
+  
+  bool operator<=(Module const& other) const BOOST_NOEXCEPT;
+  
+  bool operator>(Module const& other) const BOOST_NOEXCEPT;
+  
+  bool operator>=(Module const& other) const BOOST_NOEXCEPT;
+  
 private:
   void Initialize(HMODULE handle);
   
