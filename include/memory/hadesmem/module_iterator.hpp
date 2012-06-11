@@ -8,15 +8,11 @@
 #pragma once
 
 #include <memory>
-#include <iterator>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
-
-#include <windows.h>
-#include <tlhelp32.h>
 
 #include "hadesmem/module.hpp"
 
@@ -29,6 +25,15 @@ namespace detail
 {
   struct ModuleIteratorImpl;
 }
+
+// Boost.Iterator causes the following warning under GCC:
+// error: base class 'class boost::iterator_facade<hadesmem::ModuleIterator, 
+// hadesmem::Module, boost::single_pass_traversal_tag>' has a non-virtual 
+// destructor [-Werror=effc++]
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif // #if defined(HADESMEM_GCC)
 
 class ModuleIterator : 
   public boost::iterator_facade<
@@ -59,5 +64,9 @@ private:
   
   std::shared_ptr<detail::ModuleIteratorImpl> impl_;
 };
+    
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 
 }

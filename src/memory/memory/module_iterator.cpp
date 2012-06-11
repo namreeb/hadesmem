@@ -8,10 +8,12 @@
 #include "hadesmem/module_iterator.hpp"
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/none.hpp>
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
+
+#include <windows.h>
+#include <tlhelp32.h>
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/module.hpp"
@@ -24,6 +26,12 @@ namespace detail
 {
   struct ModuleIteratorImpl
   {
+    ModuleIteratorImpl() BOOST_NOEXCEPT
+      : process_(nullptr), 
+      snap_(nullptr), 
+      module_()
+    { }
+    
     ~ModuleIteratorImpl() BOOST_NOEXCEPT
     {
       BOOST_VERIFY(CloseHandle(snap_));
@@ -32,6 +40,10 @@ namespace detail
     Process const* process_;
     HANDLE snap_;
     boost::optional<Module> module_;
+    
+  private:
+    ModuleIteratorImpl(ModuleIteratorImpl const&);
+    ModuleIteratorImpl& operator=(ModuleIteratorImpl const&);
   };
 }
 
