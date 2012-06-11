@@ -42,8 +42,6 @@ public:
   
   ModuleIterator(Process const& process);
   
-  ~ModuleIterator() BOOST_NOEXCEPT;
-  
 private:
   friend class boost::iterator_core_access;
   

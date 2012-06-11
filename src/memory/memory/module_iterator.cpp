@@ -24,6 +24,11 @@ namespace detail
 {
   struct ModuleIteratorImpl
   {
+    ~ModuleIteratorImpl()
+    {
+      BOOST_VERIFY(CloseHandle(snap_));
+    }
+    
     Process const* process_;
     HANDLE snap_;
     boost::optional<Module> module_;
@@ -72,9 +77,6 @@ ModuleIterator::ModuleIterator(Process const& process)
   impl_->module_ = Module(*impl_->process_, entry);
 }
 
-ModuleIterator::~ModuleIterator() BOOST_NOEXCEPT
-{ }
-  
 ModuleIterator::ModuleIteratorFacade::reference ModuleIterator::dereference() const
 {
   BOOST_ASSERT(impl_.get());
