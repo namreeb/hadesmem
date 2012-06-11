@@ -55,12 +55,12 @@ ModuleIter& ModuleIter::operator=(ModuleIter const& other)
   return *this;
 }
 
-const Module& ModuleIter::operator*() const BOOST_NOEXCEPT
+Module const& ModuleIter::operator*() const BOOST_NOEXCEPT
 {
   return *module_;
 }
 
-const Module* ModuleIter::operator->() const BOOST_NOEXCEPT
+Module const* ModuleIter::operator->() const BOOST_NOEXCEPT
 {
   return &*module_;
 }
