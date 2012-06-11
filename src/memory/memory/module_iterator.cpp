@@ -64,13 +64,13 @@ ModuleIterator::ModuleIterator(Process const& process)
   impl_->module_ = Module(*impl_->process_, entry);
 }
 
-ModuleIterator::reference ModuleIterator::operator*() const
+ModuleIterator::reference ModuleIterator::operator*() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
   return *impl_->module_;
 }
 
-ModuleIterator::pointer ModuleIterator::operator->() const
+ModuleIterator::pointer ModuleIterator::operator->() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
   return &*impl_->module_;
@@ -109,12 +109,12 @@ ModuleIterator ModuleIterator::operator++(int)
   return iter;
 }
 
-bool ModuleIterator::operator==(ModuleIterator const& other)
+bool ModuleIterator::operator==(ModuleIterator const& other) BOOST_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
-bool ModuleIterator::operator!=(ModuleIterator const& other)
+bool ModuleIterator::operator!=(ModuleIterator const& other) BOOST_NOEXCEPT
 {
   return !(*this == other);
 }

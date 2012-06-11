@@ -46,17 +46,17 @@ public:
   
   ModuleIterator(Process const& process);
   
-  reference operator*() const;
+  reference operator*() const BOOST_NOEXCEPT;
   
-  pointer operator->() const;
+  pointer operator->() const BOOST_NOEXCEPT;
   
   ModuleIterator& operator++();
   
   ModuleIterator operator++(int);
   
-  bool operator==(ModuleIterator const& other);
+  bool operator==(ModuleIterator const& other) BOOST_NOEXCEPT;
   
-  bool operator!=(ModuleIterator const& other);
+  bool operator!=(ModuleIterator const& other) BOOST_NOEXCEPT;
   
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
