@@ -17,6 +17,7 @@
 #include "hadesmem/region.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
+#include "hadesmem/detail/query_region.hpp"
 #include "hadesmem/detail/region_iterator_impl.hpp"
 
 namespace hadesmem
