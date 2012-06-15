@@ -44,7 +44,7 @@ class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
 public:
   ModuleIterator() BOOST_NOEXCEPT;
   
-  ModuleIterator(Process const& process);
+  explicit ModuleIterator(Process const& process);
   
   reference operator*() const BOOST_NOEXCEPT;
   

@@ -44,7 +44,7 @@ class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
 public:
   RegionIterator() BOOST_NOEXCEPT;
   
-  RegionIterator(Process const& process);
+  explicit RegionIterator(Process const& process);
   
   reference operator*() const BOOST_NOEXCEPT;
   
