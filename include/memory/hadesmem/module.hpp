@@ -20,6 +20,12 @@ namespace hadesmem
 
 class Process;
 
+// hadesmem::Module causes the following warning under GCC:
+// error: 'class hadesmem::Module' has pointer data members 
+// but does not override 'hadesmem::Module(const hadesmem::Module&)' 
+// or 'operator=(const hadesmem::Module&)' [-Werror=effc++]
+// This can be ignored because the pointer data members are non-owning 
+// and shared pointers.
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
