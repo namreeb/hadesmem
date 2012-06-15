@@ -31,3 +31,9 @@ run module.cpp
 
 run module_iterator.cpp
   ;
+
+run region.cpp
+  ;
+
+run region_iterator.cpp
+  ;

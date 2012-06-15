@@ -15,7 +15,7 @@
 
 #include <windows.h>
 
-#include "hadesmem/module.hpp"
+#include "hadesmem/region.hpp"
 
 namespace hadesmem
 {
@@ -25,26 +25,19 @@ class Process;
 namespace detail
 {
 
-struct ModuleIteratorImpl
+struct RegionIteratorImpl
 {
-  ModuleIteratorImpl() BOOST_NOEXCEPT
+  RegionIteratorImpl() BOOST_NOEXCEPT
     : process_(nullptr), 
-    snap_(nullptr), 
-    module_()
+    region_()
   { }
   
-  ~ModuleIteratorImpl() BOOST_NOEXCEPT
-  {
-    BOOST_VERIFY(::CloseHandle(snap_));
-  }
-  
   Process const* process_;
-  HANDLE snap_;
-  boost::optional<Module> module_;
+  boost::optional<Region> region_;
   
 private:
-  ModuleIteratorImpl(ModuleIteratorImpl const&);
-  ModuleIteratorImpl& operator=(ModuleIteratorImpl const&);
+  RegionIteratorImpl(RegionIteratorImpl const&);
+  RegionIteratorImpl& operator=(RegionIteratorImpl const&);
 };
 
 }
