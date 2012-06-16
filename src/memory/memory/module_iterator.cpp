@@ -31,18 +31,31 @@ ModuleIterator::ModuleIterator(Process const& process)
 {
   impl_->process_ = &process;
   
-  // TODO: Attempt to call this function at least twice on ERROR_BAD_LENGTH.
-  // Potentially call until success if it can be determined whether or not 
-  // the process started suspended (as per MSDN).
   impl_->snap_ = ::CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
     impl_->process_->GetId());
   if (impl_->snap_ == INVALID_HANDLE_VALUE)
   {
-    DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("CreateToolhelp32Snapshot failed.") << 
-      ErrorCodeWinLast(last_error));
+    if (GetLastError() == ERROR_BAD_LENGTH)
+    {
+      impl_->snap_ = ::CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
+        impl_->process_->GetId());
+      if (impl_->snap_ == INVALID_HANDLE_VALUE)
+      {
+        DWORD const last_error = GetLastError();
+        BOOST_THROW_EXCEPTION(HadesMemError() << 
+          ErrorString("CreateToolhelp32Snapshot failed.") << 
+          ErrorCodeWinLast(last_error));
+      }
+    }
+    else
+    {
+      DWORD const last_error = GetLastError();
+      BOOST_THROW_EXCEPTION(HadesMemError() << 
+        ErrorString("CreateToolhelp32Snapshot failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
   }
   
   MODULEENTRY32 entry;
@@ -50,12 +63,14 @@ ModuleIterator::ModuleIterator(Process const& process)
   entry.dwSize = sizeof(entry);
   if (!::Module32First(impl_->snap_, &entry))
   {
-    // TODO: More gracefully handle failure when GetLastError returns 
-    // ERROR_NO_MORE_FILES. It seems that we can just treat that as an EOL, 
-    // however I first want to understand the circumstances under which that 
-    // error can occur for the first module in the list (other than an invalid 
-    // snapshot type).
     DWORD const last_error = ::GetLastError();
+    
+    if (last_error == ERROR_NO_MORE_FILES)
+    {
+      impl_.reset();
+      return;
+    }
+    
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Module32First failed.") << 
       ErrorCodeWinLast(last_error));
