@@ -48,15 +48,7 @@ Process::Process(Process const& other)
   : id_(0), 
   handle_(nullptr)
 {
-  HANDLE new_handle = nullptr;
-  if (!DuplicateHandle(GetCurrentProcess(), other.handle_, 
-    GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
-  {
-    DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("DuplicateHandle failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  HANDLE new_handle = Duplicate(other.handle_);
   
   handle_ = new_handle;
   id_ = other.id_;
@@ -64,15 +56,7 @@ Process::Process(Process const& other)
 
 Process& Process::operator=(Process const& other)
 {
-  HANDLE new_handle = nullptr;
-  if (!DuplicateHandle(GetCurrentProcess(), other.handle_, 
-    GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
-  {
-    DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("DuplicateHandle failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  HANDLE new_handle = Duplicate(other.handle_);
   
   Cleanup();
   
@@ -85,10 +69,7 @@ Process& Process::operator=(Process const& other)
 
 Process::~Process() BOOST_NOEXCEPT
 {
-  if (handle_ && handle_ != GetCurrentProcess())
-  {
-    BOOST_VERIFY(CloseHandle(handle_));
-  }
+  CleanupUnchecked();
 }
 
 DWORD Process::GetId() const BOOST_NOEXCEPT
@@ -110,7 +91,7 @@ void Process::Cleanup()
   
   BOOST_ASSERT(id_);
   
-  if (!CloseHandle(handle_))
+  if (!::CloseHandle(handle_))
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
@@ -184,6 +165,21 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
     id_ = 0;
     handle_ = nullptr;
   }
+}
+
+HANDLE Process::Duplicate(HANDLE handle)
+{
+  HANDLE new_handle = nullptr;
+  if (!::DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), 
+    &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
+  {
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("DuplicateHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  return new_handle;
 }
 
 bool Process::operator==(Process const& other) const BOOST_NOEXCEPT
