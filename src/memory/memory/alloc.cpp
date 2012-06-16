@@ -113,6 +113,8 @@ void Allocator::FreeUnchecked() BOOST_NOEXCEPT
   }
   catch (std::exception const& e)
   {
+    (void)e;
+    
     // WARNING: Memory in remote process is leaked if 'Free' fails, but 
     // unfortunately there's nothing that can be done about it...
     BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());

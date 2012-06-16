@@ -159,6 +159,8 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
   }
   catch (std::exception const& e)
   {
+    (void)e;
+    
     // WARNING: Handle is leaked if 'Cleanup' fails.
     BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
     
