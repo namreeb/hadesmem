@@ -24,6 +24,8 @@
 
 BOOST_AUTO_TEST_CASE(this_process)
 {
+  // TODO: Test relational operators.
+  
   hadesmem::Process process(::GetCurrentProcessId());
   BOOST_CHECK(process == process);
   hadesmem::Process process_new(::GetCurrentProcessId());

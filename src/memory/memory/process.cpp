@@ -191,6 +191,26 @@ bool Process::operator!=(Process const& other) const BOOST_NOEXCEPT
 {
   return !(*this == other);
 }
+  
+bool Process::operator<(Process const& other) const BOOST_NOEXCEPT
+{
+  return this->id_ < other.id_;
+}
+
+bool Process::operator<=(Process const& other) const BOOST_NOEXCEPT
+{
+  return this->id_ <= other.id_;
+}
+
+bool Process::operator>(Process const& other) const BOOST_NOEXCEPT
+{
+  return this->id_ > other.id_;
+}
+
+bool Process::operator>=(Process const& other) const BOOST_NOEXCEPT
+{
+  return this->id_ >= other.id_;
+}
 
 std::wstring GetPath(Process const& process)
 {

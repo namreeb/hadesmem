@@ -43,12 +43,22 @@ public:
   
   bool operator!=(Process const& other) const BOOST_NOEXCEPT;
   
+  bool operator<(Process const& other) const BOOST_NOEXCEPT;
+  
+  bool operator<=(Process const& other) const BOOST_NOEXCEPT;
+  
+  bool operator>(Process const& other) const BOOST_NOEXCEPT;
+  
+  bool operator>=(Process const& other) const BOOST_NOEXCEPT;
+  
 private:
   void CheckWoW64() const;
   
   HANDLE Open(DWORD id);
   
   void CleanupUnchecked() BOOST_NOEXCEPT;
+  
+  HANDLE Duplicate(HANDLE handle);
   
   DWORD id_;
   HANDLE handle_;
