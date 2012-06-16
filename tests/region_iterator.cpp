@@ -41,7 +41,12 @@ BOOST_AUTO_TEST_CASE(module_iterator)
   hadesmem::Region last(process, nullptr);
   do
   {
-    last = *iter;
+    hadesmem::Region current = *iter;
+    BOOST_CHECK(current > last);
+    BOOST_CHECK(current >= last);
+    BOOST_CHECK(last < current);
+    BOOST_CHECK(last <= current);
+    last = current;
   } while (++iter != hadesmem::RegionIterator());
   // TODO: Compare our last region with the 'real' last region to ensure they 
   // match.

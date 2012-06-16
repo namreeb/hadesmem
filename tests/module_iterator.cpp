@@ -45,6 +45,9 @@ BOOST_AUTO_TEST_CASE(module_iterator)
     [] (hadesmem::Module const& module)
     {
       BOOST_CHECK(module.GetHandle() != nullptr);
+      BOOST_CHECK(module.GetSize() != 0);
+      BOOST_CHECK(!module.GetName().empty());
+      BOOST_CHECK(!module.GetPath().empty());
     });
   
   BOOST_CHECK(std::find_if(hadesmem::ModuleIterator(process), 

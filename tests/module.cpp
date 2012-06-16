@@ -26,8 +26,6 @@
 
 BOOST_AUTO_TEST_CASE(module)
 {
-  // TODO: Test relational operator overloads for Module
-  
   hadesmem::Process const process(::GetCurrentProcessId());
   
   hadesmem::Module const this_mod(process, nullptr);
@@ -38,6 +36,10 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK(this_mod.GetPath().size() > this_mod.GetName().size());
   hadesmem::Module const this_mod_other(process, GetModuleHandle(nullptr));
   BOOST_CHECK(this_mod == this_mod_other);
+  BOOST_CHECK(this_mod >= this_mod_other);
+  BOOST_CHECK(this_mod <= this_mod_other);
+  BOOST_CHECK(!(this_mod > this_mod_other));
+  BOOST_CHECK(!(this_mod < this_mod_other));
   
   hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
   BOOST_CHECK(ntdll_mod != this_mod);
@@ -60,4 +62,13 @@ BOOST_AUTO_TEST_CASE(module)
     system_path.data()) + L"\\nTdLl.DlL";
   hadesmem::Module const ntdll_mod_from_path(process, ntdll_path);
   BOOST_CHECK(ntdll_mod == ntdll_mod_from_path);
+  
+  if (GetModuleHandle(nullptr) < GetModuleHandle(L"ntdll.dll"))
+  {
+    BOOST_CHECK(this_mod < ntdll_mod);
+  }
+  else
+  {
+    BOOST_CHECK(this_mod > ntdll_mod);
+  }
 }
