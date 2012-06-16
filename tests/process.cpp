@@ -30,6 +30,14 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK(process == process_new);
   hadesmem::Process const process_moved(std::move(process_new));
   BOOST_CHECK(process_new != process_moved);
+  hadesmem::Process process_copy(process);
+  BOOST_CHECK(process_copy == process);
+  BOOST_CHECK(process_copy != process_new);
+  process = process_copy;
+  BOOST_CHECK(process == process_copy);
+  process_new = std::move(process_copy);
+  BOOST_CHECK(process == process_new);
+  BOOST_CHECK(process != process_copy);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
   std::wstring const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());

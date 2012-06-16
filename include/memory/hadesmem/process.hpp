@@ -23,6 +23,10 @@ class Process
 public:
   explicit Process(DWORD id);
   
+  Process(Process const& other);
+  
+  Process& operator=(Process const& other);
+  
   Process(Process&& other) BOOST_NOEXCEPT;
   
   Process& operator=(Process&& other) BOOST_NOEXCEPT;
@@ -40,9 +44,6 @@ public:
   bool operator!=(Process const& other) const BOOST_NOEXCEPT;
   
 private:
-  Process(Process const&);
-  Process& operator=(Process const&);
-  
   void CheckWoW64() const;
   
   HANDLE Open(DWORD id);

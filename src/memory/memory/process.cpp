@@ -44,9 +44,51 @@ Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
   return *this;
 }
 
+Process::Process(Process const& other)
+  : id_(0), 
+  handle_(nullptr)
+{
+  HANDLE new_handle = nullptr;
+  if (!DuplicateHandle(GetCurrentProcess(), other.handle_, 
+    GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
+  {
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("DuplicateHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  handle_ = new_handle;
+  id_ = other.id_;
+}
+
+Process& Process::operator=(Process const& other)
+{
+  HANDLE new_handle = nullptr;
+  if (!DuplicateHandle(GetCurrentProcess(), other.handle_, 
+    GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
+  {
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("DuplicateHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  Cleanup();
+  
+  handle_ = new_handle;
+  
+  id_ = other.id_;
+  
+  return *this;
+}
+
 Process::~Process() BOOST_NOEXCEPT
 {
-  Cleanup();
+  if (handle_ && handle_ != GetCurrentProcess())
+  {
+    BOOST_VERIFY(CloseHandle(handle_));
+  }
 }
 
 DWORD Process::GetId() const BOOST_NOEXCEPT
