@@ -35,7 +35,10 @@ struct ModuleIteratorImpl
   
   ~ModuleIteratorImpl() BOOST_NOEXCEPT
   {
-    BOOST_VERIFY(::CloseHandle(snap_));
+    if (snap_ && snap_ != INVALID_HANDLE_VALUE)
+    {
+      BOOST_VERIFY(::CloseHandle(snap_));
+    }
   }
   
   Process const* process_;
