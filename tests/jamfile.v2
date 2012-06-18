@@ -37,3 +37,6 @@ run region.cpp
 
 run region_iterator.cpp
   ;
+
+run process_iterator.cpp
+  ;

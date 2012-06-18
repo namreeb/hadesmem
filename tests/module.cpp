@@ -26,7 +26,8 @@
 
 BOOST_AUTO_TEST_CASE(module)
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId(), 
+    hadesmem::ProcessAccess::kFull);
   
   hadesmem::Module const this_mod(process, nullptr);
   BOOST_CHECK_EQUAL(this_mod.GetHandle(), GetModuleHandle(nullptr));

@@ -28,7 +28,8 @@
 
 BOOST_AUTO_TEST_CASE(read)
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId(), 
+    hadesmem::ProcessAccess::kFull);
   
   struct TestPODType
   {
