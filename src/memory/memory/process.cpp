@@ -213,7 +213,7 @@ bool Process::operator>=(Process const& other) const BOOST_NOEXCEPT
 
 std::wstring GetPath(Process const& process)
 {
-  std::array<wchar_t, MAX_PATH> path = { 0 };
+  std::array<wchar_t, MAX_PATH> path = { { 0 } };
   DWORD path_len = static_cast<DWORD>(path.size());
   if (!::QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
     &path_len))

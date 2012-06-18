@@ -68,7 +68,6 @@ private:
   
   DWORD id_;
   HANDLE handle_;
-  ProcessAccess access_;
 };
 
 std::wstring GetPath(Process const& process);
