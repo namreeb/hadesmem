@@ -28,8 +28,7 @@ BOOST_AUTO_TEST_CASE(module_iterator)
 {
   BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ModuleIterator>));
   
-  hadesmem::Process const process(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kFull);
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   auto iter = hadesmem::ModuleIterator(process);
   hadesmem::Module const this_mod(process, nullptr);

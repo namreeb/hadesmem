@@ -26,11 +26,9 @@ BOOST_AUTO_TEST_CASE(this_process)
 {
   // TODO: Test relational operators.
   
-  hadesmem::Process process(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kFull);
+  hadesmem::Process process(::GetCurrentProcessId());
   BOOST_CHECK(process == process);
-  hadesmem::Process process_new(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kFull);
+  hadesmem::Process process_new(::GetCurrentProcessId());
   BOOST_CHECK(process == process_new);
   hadesmem::Process const process_moved(std::move(process_new));
   BOOST_CHECK(process_new != process_moved);
@@ -43,9 +41,6 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK(process == process_new);
   BOOST_CHECK(process != process_copy);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
-  hadesmem::Process const process_limited(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kLimited);
-  BOOST_CHECK(process == process_limited);
   std::wstring const path(GetPath(process));
   BOOST_CHECK(!path.empty());
   BOOST_CHECK(boost::filesystem::exists(path));
@@ -53,5 +48,4 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
   BOOST_CHECK_EQUAL(IsWoW64(process), is_wow64_real != FALSE);
   BOOST_CHECK_NO_THROW(process.Cleanup());
-  BOOST_CHECK_NO_THROW(GetPath(process_limited));
 }

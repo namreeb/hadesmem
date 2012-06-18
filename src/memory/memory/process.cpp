@@ -19,18 +19,16 @@
 namespace hadesmem
 {
 
-Process::Process(DWORD id, ProcessAccess access)
+Process::Process(DWORD id)
   : id_(id), 
-  handle_(Open(id, access)), 
-  access_(access)
+  handle_(Open(id))
 {
   CheckWoW64();
 }
 
 Process::Process(Process&& other) BOOST_NOEXCEPT
   : id_(other.id_), 
-  handle_(other.handle_), 
-  access_(other.access_)
+  handle_(other.handle_)
 {
   other.id_ = 0;
   other.handle_ = nullptr;
@@ -42,15 +40,13 @@ Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
   
   std::swap(this->id_, other.id_);
   std::swap(this->handle_, other.handle_);
-  std::swap(this->access_, other.access_);
   
   return *this;
 }
 
 Process::Process(Process const& other)
   : id_(0), 
-  handle_(nullptr), 
-  access_(other.access_)
+  handle_(nullptr)
 {
   HANDLE new_handle = Duplicate(other.handle_);
   
@@ -66,7 +62,6 @@ Process& Process::operator=(Process const& other)
   
   handle_ = new_handle;
   id_ = other.id_;
-  access_ = other.access_;
   
   return *this;
 }
@@ -84,16 +79,6 @@ DWORD Process::GetId() const BOOST_NOEXCEPT
 HANDLE Process::GetHandle() const BOOST_NOEXCEPT
 {
   return handle_;
-}
-
-bool Process::IsFull() const BOOST_NOEXCEPT
-{
-  return access_ == ProcessAccess::kFull;
-}
-
-bool Process::IsLimited() const BOOST_NOEXCEPT
-{
-  return access_ == ProcessAccess::kLimited;
 }
 
 void Process::Cleanup()
@@ -145,16 +130,11 @@ void Process::CheckWoW64() const
   }
 }
 
-HANDLE Process::Open(DWORD id, ProcessAccess access)
+HANDLE Process::Open(DWORD id)
 {
   BOOST_ASSERT(id != 0);
-  BOOST_ASSERT(access == ProcessAccess::kFull || 
-    access == ProcessAccess::kLimited);
   
-  DWORD const access_flags = access == ProcessAccess::kFull ? 
-    PROCESS_ALL_ACCESS : 
-    PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_DUP_HANDLE;
-  HANDLE handle = ::OpenProcess(access_flags, FALSE, id);
+  HANDLE handle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
   if (!handle)
   {
     DWORD const last_error = GetLastError();

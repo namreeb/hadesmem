@@ -24,8 +24,7 @@
 
 BOOST_AUTO_TEST_CASE(alloc)
 {
-  hadesmem::Process const process(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kFull);
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   PVOID address = Alloc(process, 0x1000);
   *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);

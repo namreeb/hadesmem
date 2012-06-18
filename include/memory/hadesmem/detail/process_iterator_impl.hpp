@@ -15,7 +15,7 @@
 
 #include <windows.h>
 
-#include "hadesmem/process.hpp"
+#include "hadesmem/process_entry.hpp"
 
 namespace hadesmem
 {
@@ -27,7 +27,7 @@ struct ProcessIteratorImpl
 {
   ProcessIteratorImpl() BOOST_NOEXCEPT
     : snap_(nullptr), 
-    process_(0)
+    process_()
   { }
   
   ~ProcessIteratorImpl() BOOST_NOEXCEPT
@@ -39,7 +39,7 @@ struct ProcessIteratorImpl
   }
   
   HANDLE snap_;
-  DWORD process_;
+  boost::optional<ProcessEntry> process_;
   
 private:
   ProcessIteratorImpl(ProcessIteratorImpl const&);

@@ -24,8 +24,7 @@
 
 BOOST_AUTO_TEST_CASE(region)
 {
-  hadesmem::Process const process(::GetCurrentProcessId(), 
-    hadesmem::ProcessAccess::kFull);
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   hadesmem::Region const first_region(process, nullptr);
   

@@ -30,25 +30,24 @@ BOOST_AUTO_TEST_CASE(process_iterator)
   auto iter = hadesmem::ProcessIterator(0);
   BOOST_CHECK(iter != hadesmem::ProcessIterator());
   BOOST_CHECK(++iter != hadesmem::ProcessIterator());
-  BOOST_CHECK(*iter);
-  DWORD const second_id = *iter;
+  BOOST_CHECK(iter->id != 0);
+  DWORD const second_id = iter->id;
   BOOST_CHECK(++iter != hadesmem::ProcessIterator());
-  DWORD const third_id = *iter;
+  DWORD const third_id = iter->id;
   BOOST_CHECK(second_id != third_id);
+  
+  std::for_each(hadesmem::ProcessIterator(0), 
+    hadesmem::ProcessIterator(), 
+    [] (hadesmem::ProcessEntry const& entry)
+    {
+      BOOST_CHECK(!entry.name.empty());
+    });
   
   auto this_iter = std::find_if(hadesmem::ProcessIterator(0), 
     hadesmem::ProcessIterator(), 
-    [] (DWORD id)
+    [] (hadesmem::ProcessEntry const& entry)
     {
-      return id == ::GetCurrentProcessId();
+      return entry.id == ::GetCurrentProcessId();
     });
   BOOST_CHECK(this_iter != hadesmem::ProcessIterator());
-  
-  hadesmem::Process const this_full(*this_iter, 
-    hadesmem::ProcessAccess::kFull);
-  hadesmem::Process const this_limited(*this_iter, 
-    hadesmem::ProcessAccess::kLimited);
-  BOOST_CHECK(this_full == this_limited);
-  BOOST_CHECK_NO_THROW(GetPath(this_full));
-  BOOST_CHECK_NO_THROW(GetPath(this_limited));
 }

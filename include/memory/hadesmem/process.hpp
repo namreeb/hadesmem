@@ -27,7 +27,7 @@ enum class ProcessAccess
 class Process
 {
 public:
-  explicit Process(DWORD id, ProcessAccess access);
+  explicit Process(DWORD id);
   
   Process(Process const& other);
   
@@ -42,10 +42,6 @@ public:
   DWORD GetId() const BOOST_NOEXCEPT;
   
   HANDLE GetHandle() const BOOST_NOEXCEPT;
-  
-  bool IsFull() const BOOST_NOEXCEPT;
-  
-  bool IsLimited() const BOOST_NOEXCEPT;
   
   void Cleanup();
   
@@ -64,7 +60,7 @@ public:
 private:
   void CheckWoW64() const;
   
-  HANDLE Open(DWORD id, ProcessAccess access);
+  HANDLE Open(DWORD id);
   
   void CleanupUnchecked() BOOST_NOEXCEPT;
   

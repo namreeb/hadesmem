@@ -16,6 +16,8 @@
 
 #include <windows.h>
 
+#include "hadesmem/process_entry.hpp"
+
 namespace hadesmem
 {
 
@@ -39,7 +41,8 @@ struct ProcessIteratorImpl;
 
 // ModuleIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class ProcessIterator : public std::iterator<std::input_iterator_tag, DWORD>
+class ProcessIterator : public std::iterator<std::input_iterator_tag, 
+  ProcessEntry>
 {
 public:
   ProcessIterator() BOOST_NOEXCEPT;
