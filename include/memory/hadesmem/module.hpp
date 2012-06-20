@@ -34,19 +34,29 @@ class Process;
 class Module
 {
 public:
-  Module(Process const& process, HMODULE handle);
+  Module(Process const* process, HMODULE handle);
   
-  Module(Process const& process, std::wstring const& path);
+  Module(Process const* process, std::wstring const& path);
   
-  Module(Process const& process, MODULEENTRY32 const& entry);
+  Module(Process const* process, MODULEENTRY32 const& entry);
+  
+  Module(Module const& other);
+  
+  Module& operator=(Module const& other);
+  
+  Module(Module&& other) BOOST_NOEXCEPT;
+  
+  Module& operator=(Module&& other) BOOST_NOEXCEPT;
+  
+  ~Module() BOOST_NOEXCEPT;
   
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
   DWORD GetSize() const BOOST_NOEXCEPT;
   
-  std::wstring GetName() const BOOST_NOEXCEPT;
+  std::wstring GetName() const;
   
-  std::wstring GetPath() const BOOST_NOEXCEPT;
+  std::wstring GetPath() const;
   
   FARPROC FindProcedure(std::string const& Name) const;
   

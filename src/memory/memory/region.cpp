@@ -14,14 +14,49 @@
 namespace hadesmem
 {
 
-Region::Region(Process const& process, LPCVOID address)
-  : process_(&process), 
-  mbi_(detail::Query(process, address))
+Region::Region(Process const* process, LPCVOID address)
+  : process_(process), 
+  mbi_(detail::Query(*process, address))
 { }
 
-Region::Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT
-  : process_(&process), 
+Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT
+  : process_(process), 
   mbi_(mbi)
+{ }
+
+Region::Region(Region const& other) BOOST_NOEXCEPT
+  : process_(other.process_), 
+  mbi_(other.mbi_)
+{ }
+
+Region& Region::operator=(Region const& other) BOOST_NOEXCEPT
+{
+  process_ = other.process_;
+  mbi_ = other.mbi_;
+  
+  return *this;
+}
+
+Region::Region(Region&& other) BOOST_NOEXCEPT
+  : process_(other.process_), 
+  mbi_(other.mbi_)
+{
+  other.process_ = nullptr;
+  ZeroMemory(&other.mbi_, sizeof(other.mbi_));
+}
+
+Region& Region::operator=(Region&& other) BOOST_NOEXCEPT
+{
+  process_ = other.process_;
+  mbi_ = other.mbi_;
+  
+  other.process_ = nullptr;
+  ZeroMemory(&other.mbi_, sizeof(other.mbi_));
+  
+  return *this;
+}
+
+Region::~Region() BOOST_NOEXCEPT
 { }
 
 PVOID Region::GetBase() const BOOST_NOEXCEPT

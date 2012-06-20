@@ -5,7 +5,7 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/write.hpp"
+#include "hadesmem/detail/write_impl.hpp"
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"

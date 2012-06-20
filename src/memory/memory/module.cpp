@@ -20,8 +20,8 @@
 namespace hadesmem
 {
 
-Module::Module(Process const& process, HMODULE handle)
-  : process_(&process), 
+Module::Module(Process const* process, HMODULE handle)
+  : process_(process), 
   handle_(nullptr), 
   size_(0), 
   name_(), 
@@ -30,8 +30,8 @@ Module::Module(Process const& process, HMODULE handle)
   Initialize(handle);
 }
 
-Module::Module(Process const& process, std::wstring const& path)
-  : process_(&process), 
+Module::Module(Process const* process, std::wstring const& path)
+  : process_(process), 
   handle_(nullptr), 
   size_(0), 
   name_(), 
@@ -40,8 +40,8 @@ Module::Module(Process const& process, std::wstring const& path)
   Initialize(path);
 }
 
-Module::Module(Process const& process, MODULEENTRY32 const& entry)
-  : process_(&process), 
+Module::Module(Process const* process, MODULEENTRY32 const& entry)
+  : process_(process), 
   handle_(nullptr), 
   size_(0), 
   name_(), 
@@ -49,6 +49,55 @@ Module::Module(Process const& process, MODULEENTRY32 const& entry)
 {
   Initialize(entry);
 }
+
+Module::Module(Module const& other)
+  : process_(other.process_), 
+  handle_(other.handle_), 
+  size_(other.size_), 
+  name_(other.name_), 
+  path_(other.path_)
+{ }
+
+Module& Module::operator=(Module const& other)
+{
+  process_ = other.process_;
+  handle_ = other.handle_;
+  size_ = other.size_;
+  name_ = other.name_;
+  path_ = other.path_;
+  
+  return *this;
+}
+
+Module::Module(Module&& other) BOOST_NOEXCEPT
+  : process_(other.process_), 
+  handle_(other.handle_), 
+  size_(other.size_), 
+  name_(std::move(other.name_)), 
+  path_(std::move(other.path_))
+{
+  other.process_ = nullptr;
+  other.handle_ = nullptr;
+  other.size_ = 0;
+}
+
+Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
+{
+  process_ = other.process_;
+  handle_ = other.handle_;
+  size_ = other.size_;
+  name_ = std::move(other.name_);
+  path_ = std::move(other.path_);
+  
+  other.handle_ = nullptr;
+  other.process_ = nullptr;
+  other.size_ = 0;
+  
+  return *this;
+}
+
+Module::~Module() BOOST_NOEXCEPT
+{ }
 
 HMODULE Module::GetHandle() const BOOST_NOEXCEPT
 {
@@ -60,12 +109,12 @@ DWORD Module::GetSize() const BOOST_NOEXCEPT
   return size_;
 }
 
-std::wstring Module::GetName() const BOOST_NOEXCEPT
+std::wstring Module::GetName() const
 {
   return name_;
 }
 
-std::wstring Module::GetPath() const BOOST_NOEXCEPT
+std::wstring Module::GetPath() const
 {
   return path_;
 }

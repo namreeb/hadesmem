@@ -30,9 +30,19 @@ class Process;
 class Region
 {
 public:
-  Region(Process const& process, LPCVOID address);
+  Region(Process const* process, LPCVOID address);
   
-  Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+  Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+  
+  Region(Region const& other) BOOST_NOEXCEPT;
+  
+  Region& operator=(Region const& other) BOOST_NOEXCEPT;
+  
+  Region(Region&& other) BOOST_NOEXCEPT;
+  
+  Region& operator=(Region&& other) BOOST_NOEXCEPT;
+  
+  ~Region() BOOST_NOEXCEPT;
   
   PVOID GetBase() const BOOST_NOEXCEPT;
   

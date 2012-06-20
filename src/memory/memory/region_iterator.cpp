@@ -27,14 +27,41 @@ RegionIterator::RegionIterator() BOOST_NOEXCEPT
   : impl_()
 { }
 
-RegionIterator::RegionIterator(Process const& process)
+RegionIterator::RegionIterator(Process const* process)
   : impl_(new detail::RegionIteratorImpl)
 {
-  impl_->process_ = &process;
+  impl_->process_ = process;
   
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, nullptr);
-  impl_->region_ = Region(process, mbi);
+  MEMORY_BASIC_INFORMATION mbi = detail::Query(*impl_->process_, nullptr);
+  impl_->region_ = Region(impl_->process_, mbi);
 }
+
+RegionIterator::RegionIterator(RegionIterator const& other) BOOST_NOEXCEPT
+  : impl_(other.impl_)
+{ }
+
+RegionIterator& RegionIterator::operator=(RegionIterator const& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = other.impl_;
+  
+  return *this;
+}
+
+RegionIterator::RegionIterator(RegionIterator&& other) BOOST_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+RegionIterator& RegionIterator::operator=(RegionIterator&& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+  
+  return *this;
+}
+
+RegionIterator::~RegionIterator() BOOST_NOEXCEPT
+{ }
 
 RegionIterator::reference RegionIterator::operator*() const BOOST_NOEXCEPT
 {
@@ -56,7 +83,7 @@ RegionIterator& RegionIterator::operator++()
     SIZE_T const size = impl_->region_->GetSize();
     void const* const next = static_cast<char const* const>(base) + size;
     MEMORY_BASIC_INFORMATION mbi = detail::Query(*impl_->process_, next);
-    impl_->region_ = Region(*impl_->process_, mbi);
+    impl_->region_ = Region(impl_->process_, mbi);
   }
   catch (std::exception const& /*e*/)
   {

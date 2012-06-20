@@ -26,10 +26,10 @@ ModuleIterator::ModuleIterator() BOOST_NOEXCEPT
   : impl_()
 { }
 
-ModuleIterator::ModuleIterator(Process const& process)
+ModuleIterator::ModuleIterator(Process const* process)
   : impl_(new detail::ModuleIteratorImpl)
 {
-  impl_->process_ = &process;
+  impl_->process_ = process;
   
   impl_->snap_ = ::CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
@@ -76,8 +76,35 @@ ModuleIterator::ModuleIterator(Process const& process)
       ErrorCodeWinLast(last_error));
   }
   
-  impl_->module_ = Module(*impl_->process_, entry);
+  impl_->module_ = Module(impl_->process_, entry);
 }
+
+ModuleIterator::ModuleIterator(ModuleIterator const& other) BOOST_NOEXCEPT
+  : impl_(other.impl_)
+{ }
+
+ModuleIterator& ModuleIterator::operator=(ModuleIterator const& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = other.impl_;
+  
+  return *this;
+}
+
+ModuleIterator::ModuleIterator(ModuleIterator&& other) BOOST_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+  
+  return *this;
+}
+
+ModuleIterator::~ModuleIterator() BOOST_NOEXCEPT
+{ }
 
 ModuleIterator::reference ModuleIterator::operator*() const BOOST_NOEXCEPT
 {
@@ -112,7 +139,7 @@ ModuleIterator& ModuleIterator::operator++()
     }
   }
   
-  impl_->module_ = Module(*impl_->process_, entry);
+  impl_->module_ = Module(impl_->process_, entry);
   
   return *this;
 }

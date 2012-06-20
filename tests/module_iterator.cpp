@@ -30,18 +30,18 @@ BOOST_AUTO_TEST_CASE(module_iterator)
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  auto iter = hadesmem::ModuleIterator(process);
-  hadesmem::Module const this_mod(process, nullptr);
+  auto iter = hadesmem::ModuleIterator(&process);
+  hadesmem::Module const this_mod(&process, nullptr);
   BOOST_CHECK(iter != hadesmem::ModuleIterator());
   BOOST_CHECK(*iter == this_mod);
-  hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
+  hadesmem::Module const ntdll_mod(&process, L"NtDll.DlL");
   BOOST_CHECK(++iter != hadesmem::ModuleIterator());
   BOOST_CHECK(*iter == ntdll_mod);
-  hadesmem::Module const kernel32_mod(process, L"kernel32.dll");
+  hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
   BOOST_CHECK(++iter != hadesmem::ModuleIterator());
   BOOST_CHECK(*iter == kernel32_mod);
   
-  std::for_each(hadesmem::ModuleIterator(process), hadesmem::ModuleIterator(), 
+  std::for_each(hadesmem::ModuleIterator(&process), hadesmem::ModuleIterator(), 
     [] (hadesmem::Module const& module)
     {
       BOOST_CHECK(module.GetHandle() != nullptr);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(module_iterator)
       BOOST_CHECK(!module.GetPath().empty());
     });
   
-  BOOST_CHECK(std::find_if(hadesmem::ModuleIterator(process), 
+  BOOST_CHECK(std::find_if(hadesmem::ModuleIterator(&process), 
     hadesmem::ModuleIterator(), 
     [] (hadesmem::Module const& module)
     {

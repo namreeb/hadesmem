@@ -15,17 +15,12 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/write_impl.hpp"
+
 namespace hadesmem
 {
 
 class Process;
-
-namespace detail
-{
-
-void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size);
-
-}
 
 template <typename T>
 void Write(Process const& process, PVOID address, T const& data)

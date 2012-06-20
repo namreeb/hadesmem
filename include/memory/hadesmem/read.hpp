@@ -15,17 +15,12 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/read_impl.hpp"
+
 namespace hadesmem
 {
 
 class Process;
-
-namespace detail
-{
-
-void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_size);
-
-}
 
 template <typename T>
 T Read(Process const& process, PVOID address)

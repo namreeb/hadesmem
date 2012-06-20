@@ -78,6 +78,33 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   impl_->process_ = new_entry;
 }
 
+ProcessIterator::ProcessIterator(ProcessIterator const& other) BOOST_NOEXCEPT
+  : impl_(other.impl_)
+{ }
+
+ProcessIterator& ProcessIterator::operator=(ProcessIterator const& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = other.impl_;
+  
+  return *this;
+}
+
+ProcessIterator::ProcessIterator(ProcessIterator&& other) BOOST_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other) 
+  BOOST_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+  
+  return *this;
+}
+
+ProcessIterator::~ProcessIterator() BOOST_NOEXCEPT
+{ }
+
 ProcessIterator::reference ProcessIterator::operator*() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());

@@ -26,24 +26,6 @@ Process::Process(DWORD id)
   CheckWoW64();
 }
 
-Process::Process(Process&& other) BOOST_NOEXCEPT
-  : id_(other.id_), 
-  handle_(other.handle_)
-{
-  other.id_ = 0;
-  other.handle_ = nullptr;
-}
-
-Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
-{
-  Cleanup();
-  
-  std::swap(this->id_, other.id_);
-  std::swap(this->handle_, other.handle_);
-  
-  return *this;
-}
-
 Process::Process(Process const& other)
   : id_(0), 
   handle_(nullptr)
@@ -62,6 +44,27 @@ Process& Process::operator=(Process const& other)
   
   handle_ = new_handle;
   id_ = other.id_;
+  
+  return *this;
+}
+
+Process::Process(Process&& other) BOOST_NOEXCEPT
+  : id_(other.id_), 
+  handle_(other.handle_)
+{
+  other.id_ = 0;
+  other.handle_ = nullptr;
+}
+
+Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
+{
+  Cleanup();
+  
+  id_ = other.id_;
+  handle_ = other.handle_;
+  
+  other.id_ = 0;
+  other.handle_ = nullptr;
   
   return *this;
 }

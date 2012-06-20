@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(region)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::Region const first_region(process, nullptr);
+  hadesmem::Region const first_region(&process, nullptr);
   
   if (first_region.GetState() != MEM_FREE)
   {
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(region)
   BOOST_CHECK(first_region.GetSize() != 0);
   BOOST_CHECK(first_region.GetState() != 0);
   
-  hadesmem::Region const second_region(process, static_cast<char const* const>(
+  hadesmem::Region const second_region(&process, static_cast<char const* const>(
     first_region.GetBase()) + first_region.GetSize());
   BOOST_CHECK(first_region < second_region);
   BOOST_CHECK(first_region <= second_region);

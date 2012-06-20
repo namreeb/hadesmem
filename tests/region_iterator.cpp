@@ -30,15 +30,15 @@ BOOST_AUTO_TEST_CASE(module_iterator)
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  auto iter = hadesmem::RegionIterator(process);
-  hadesmem::Region const first_region(process, nullptr);
+  auto iter = hadesmem::RegionIterator(&process);
+  hadesmem::Region const first_region(&process, nullptr);
   BOOST_CHECK(iter != hadesmem::RegionIterator());
   BOOST_CHECK(*iter == first_region);
-  hadesmem::Region const second_region(process, static_cast<char const* const>(
+  hadesmem::Region const second_region(&process, static_cast<char const* const>(
     first_region.GetBase()) + first_region.GetSize());
   BOOST_CHECK(++iter != hadesmem::RegionIterator());
   BOOST_CHECK(*iter == second_region);
-  hadesmem::Region last(process, nullptr);
+  hadesmem::Region last(&process, nullptr);
   do
   {
     hadesmem::Region current = *iter;
@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE(module_iterator)
   // TODO: Compare our last region with the 'real' last region to ensure they 
   // match.
   
-  std::for_each(hadesmem::RegionIterator(process), hadesmem::RegionIterator(), 
+  std::for_each(hadesmem::RegionIterator(&process), hadesmem::RegionIterator(), 
     [&] (hadesmem::Region const& region)
     {
-      hadesmem::Region const other(process, region.GetBase());
+      hadesmem::Region const other(&process, region.GetBase());
       BOOST_CHECK(region == other);
       
       if (region.GetState() != MEM_FREE)
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(module_iterator)
     });
   
   HMODULE const user32_mod = GetModuleHandle(L"user32.dll");
-  BOOST_CHECK(std::find_if(hadesmem::RegionIterator(process), 
+  BOOST_CHECK(std::find_if(hadesmem::RegionIterator(&process), 
     hadesmem::RegionIterator(), 
     [user32_mod] (hadesmem::Region const& region)
     {

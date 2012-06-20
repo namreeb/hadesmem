@@ -47,6 +47,16 @@ class ProcessIterator : public std::iterator<std::input_iterator_tag,
 public:
   ProcessIterator() BOOST_NOEXCEPT;
   
+  ProcessIterator(ProcessIterator const& other) BOOST_NOEXCEPT;
+  
+  ProcessIterator& operator=(ProcessIterator const& other) BOOST_NOEXCEPT;
+  
+  ProcessIterator(ProcessIterator&& other) BOOST_NOEXCEPT;
+  
+  ProcessIterator& operator=(ProcessIterator&& other) BOOST_NOEXCEPT;
+  
+  ~ProcessIterator() BOOST_NOEXCEPT;
+  
   explicit ProcessIterator(int dummy);
   
   reference operator*() const BOOST_NOEXCEPT;

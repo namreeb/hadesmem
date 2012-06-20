@@ -65,9 +65,13 @@ Allocator& Allocator::operator=(Allocator&& other) BOOST_NOEXCEPT
   BOOST_ASSERT(base_ == nullptr);
   BOOST_ASSERT(size_ == 0);
   
-  std::swap(this->process_, other.process_);
-  std::swap(this->base_, other.base_);
-  std::swap(this->size_, other.size_);
+  process_ = other.process_;
+  base_ = other.base_;
+  size_ = other.size_;
+  
+  other.process_ = nullptr;
+  other.base_ = nullptr;
+  other.size_ = 0;
   
   return *this;
 }
