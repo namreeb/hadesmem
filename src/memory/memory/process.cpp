@@ -134,7 +134,7 @@ HANDLE Process::Open(DWORD id)
 {
   BOOST_ASSERT(id != 0);
   
-  HANDLE handle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+  HANDLE handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
   if (!handle)
   {
     DWORD const last_error = GetLastError();
@@ -170,7 +170,7 @@ HANDLE Process::Duplicate(HANDLE handle)
   
   HANDLE new_handle = nullptr;
   if (!::DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), 
-    &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
+    &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
