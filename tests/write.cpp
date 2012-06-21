@@ -46,6 +46,8 @@ BOOST_AUTO_TEST_CASE(write)
   
   std::string const test_string = "Narrow test string.";
   std::vector<char> test_string_buf(test_string.size() + 1);
+  using std::begin;
+  using std::end;
   std::copy(begin(test_string), end(test_string), 
     test_string_buf.data());
   std::string const test_string_str(test_string_buf.data());
