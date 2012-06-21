@@ -69,7 +69,7 @@ Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-Process::~Process() BOOST_NOEXCEPT
+Process::~Process()
 {
   CleanupUnchecked();
 }
@@ -184,34 +184,44 @@ HANDLE Process::Duplicate(HANDLE handle)
   return new_handle;
 }
 
-bool Process::operator==(Process const& other) const BOOST_NOEXCEPT
+bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
-  return this->id_ == other.id_;
+  return lhs.GetId() == rhs.GetId();
 }
 
-bool Process::operator!=(Process const& other) const BOOST_NOEXCEPT
+bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
-  return !(*this == other);
-}
-  
-bool Process::operator<(Process const& other) const BOOST_NOEXCEPT
-{
-  return this->id_ < other.id_;
+  return !(lhs == rhs);
 }
 
-bool Process::operator<=(Process const& other) const BOOST_NOEXCEPT
+bool operator<(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
-  return this->id_ <= other.id_;
+  return lhs.GetId() < rhs.GetId();
 }
 
-bool Process::operator>(Process const& other) const BOOST_NOEXCEPT
+bool operator<=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
-  return this->id_ > other.id_;
+  return lhs.GetId() <= rhs.GetId();
 }
 
-bool Process::operator>=(Process const& other) const BOOST_NOEXCEPT
+bool operator>(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
 {
-  return this->id_ >= other.id_;
+  return lhs.GetId() > rhs.GetId();
+}
+
+bool operator>=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetId() >= rhs.GetId();
+}
+
+std::ostream& operator<<(std::ostream& lhs, Process const& rhs)
+{
+  return (lhs << rhs.GetId());
+}
+
+std::wostream& operator<<(std::wostream& lhs, Process const& rhs)
+{
+  return (lhs << rhs.GetId());
 }
 
 std::wstring GetPath(Process const& process)

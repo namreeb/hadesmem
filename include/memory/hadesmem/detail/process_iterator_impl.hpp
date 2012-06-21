@@ -30,7 +30,7 @@ struct ProcessIteratorImpl
     process_()
   { }
   
-  ~ProcessIteratorImpl() BOOST_NOEXCEPT
+  ~ProcessIteratorImpl()
   {
     if (snap_ && snap_ != INVALID_HANDLE_VALUE)
     {

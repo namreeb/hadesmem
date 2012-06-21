@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iosfwd>
+
 #include <boost/config.hpp>
 
 #include <windows.h>
@@ -15,17 +17,6 @@ namespace hadesmem
 {
 
 class Process;
-
-// hadesmem::Region causes the following warning under GCC:
-// error: 'class hadesmem::Module' has pointer data members 
-// but does not override 'hadesmem::Module(const hadesmem::Module&)' 
-// or 'operator=(const hadesmem::Module&)' [-Werror=effc++]
-// This can be ignored because the pointer data members are non-owning 
-// and shared pointers.
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADESMEM_GCC)
 
 class Region
 {
@@ -42,7 +33,7 @@ public:
   
   Region& operator=(Region&& other) BOOST_NOEXCEPT;
   
-  ~Region() BOOST_NOEXCEPT;
+  ~Region();
   
   PVOID GetBase() const BOOST_NOEXCEPT;
   
@@ -58,25 +49,27 @@ public:
   
   DWORD GetType() const BOOST_NOEXCEPT;
   
-  bool operator==(Region const& other) const BOOST_NOEXCEPT;
-  
-  bool operator!=(Region const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<(Region const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<=(Region const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>(Region const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>=(Region const& other) const BOOST_NOEXCEPT;
-  
 private:
   Process const* process_;
   MEMORY_BASIC_INFORMATION mbi_;
 };
 
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
+bool operator==(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+bool operator!=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+bool operator<(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+bool operator<=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+bool operator>(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+bool operator>=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
+
+// TODO: Tests.
+std::ostream& operator<<(std::ostream& lhs, Region const& rhs);
+
+// TODO: Tests.
+std::wostream& operator<<(std::wostream& lhs, Region const& rhs);
 
 }

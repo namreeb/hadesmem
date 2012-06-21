@@ -26,7 +26,7 @@ namespace detail
 
 std::wstring ToUpperOrdinal(std::wstring const& str)
 {
-  std::vector<wchar_t> str_buf(std::begin(str), std::end(str));
+  std::vector<wchar_t> str_buf(begin(str), end(str));
   str_buf.push_back(0);
   
   BOOST_ASSERT(str_buf.size() < (std::numeric_limits<DWORD>::max)());

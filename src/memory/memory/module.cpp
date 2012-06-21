@@ -16,6 +16,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/to_upper_ordinal.hpp"
+#include "hadesmem/detail/module_find_procedure.hpp"
 
 namespace hadesmem
 {
@@ -96,8 +97,13 @@ Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-Module::~Module() BOOST_NOEXCEPT
+Module::~Module()
 { }
+
+Process const* Module::GetProcess() const BOOST_NOEXCEPT
+{
+  return process_;
+}
 
 HMODULE Module::GetHandle() const BOOST_NOEXCEPT
 {
@@ -117,46 +123,6 @@ std::wstring Module::GetName() const
 std::wstring Module::GetPath() const
 {
   return path_;
-}
-
-FARPROC Module::FindProcedure(std::string const& name) const
-{
-  return FindProcedureInternal(name.c_str());
-}
-
-FARPROC Module::FindProcedure(WORD ordinal) const
-{
-  return FindProcedureInternal(MAKEINTRESOURCEA(ordinal));
-}
-
-bool Module::operator==(Module const& other) const BOOST_NOEXCEPT
-{
-  return this->handle_ == other.handle_;
-}
-
-bool Module::operator!=(Module const& other) const BOOST_NOEXCEPT
-{
-  return !(*this == other);
-}
-  
-bool Module::operator<(Module const& other) const BOOST_NOEXCEPT
-{
-  return this->handle_ < other.handle_;
-}
-
-bool Module::operator<=(Module const& other) const BOOST_NOEXCEPT
-{
-  return this->handle_ <= other.handle_;
-}
-
-bool Module::operator>(Module const& other) const BOOST_NOEXCEPT
-{
-  return this->handle_ > other.handle_;
-}
-
-bool Module::operator>=(Module const& other) const BOOST_NOEXCEPT
-{
-  return this->handle_ >= other.handle_;
 }
 
 void Module::Initialize(HMODULE handle)
@@ -185,6 +151,9 @@ void Module::Initialize(std::wstring const& path)
   auto path_check = 
     [&] (MODULEENTRY32 const& entry) -> bool
     {
+      // TODO: Investigate whether 'equivalent' is the right API to use here. 
+      // Not sure whether it matches the behavior of Windows in terms of 
+      // following symlinks/hardlinks/etc.
       if (is_path && boost::filesystem::equivalent(path, entry.szExePath))
       {
         return true;
@@ -209,13 +178,13 @@ void Module::Initialize(MODULEENTRY32 const& entry)
   path_ = entry.szExePath;
 }
 
-void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)> 
-  const& check_func)
+void Module::InitializeIf(EntryCallback const& check_func)
 {
   HANDLE const snap = CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
   if (snap == INVALID_HANDLE_VALUE)
   {
+    // TODO: Improve handling of ERROR_BAD_LENGTH.
     DWORD const last_error = GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("CreateToolhelp32Snapshot failed.") << 
@@ -242,46 +211,62 @@ void Module::InitializeIf(std::function<bool (MODULEENTRY32 const& entry)>
     }
   }
   
+  // TODO: Improve error handling when the error code returned by the module 
+  // enumeration APIs is something other than ERROR_NO_MORE_FILES.
   DWORD const last_error = GetLastError();
   BOOST_THROW_EXCEPTION(HadesMemError() << 
     ErrorString("Could not find module.") << 
     ErrorCodeWinLast(last_error));
 }
 
-FARPROC Module::FindProcedureInternal(LPCSTR name) const
+bool operator==(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
 {
-  HMODULE const local_module(LoadLibraryEx(path_.c_str(), nullptr, 
-    DONT_RESOLVE_DLL_REFERENCES));
-  if (!local_module)
-  {
-    DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("Could not load module locally.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if FreeLibrary fails.
-    BOOST_VERIFY(FreeLibrary(local_module));
-  };
-  
-  FARPROC const local_func = GetProcAddress(local_module, name);
-  if (!local_func)
-  {
-    DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("Could not find target function.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  LONG_PTR const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
-    reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(local_module));
-  
-  FARPROC const remote_func = reinterpret_cast<FARPROC>(
-    reinterpret_cast<DWORD_PTR>(handle_) + func_delta);
-  
-  return remote_func;
+  return lhs.GetHandle() == rhs.GetHandle();
+}
+
+bool operator!=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
+
+bool operator<(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetHandle() < rhs.GetHandle();
+}
+
+bool operator<=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetHandle() <= rhs.GetHandle();
+}
+
+bool operator>(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetHandle() > rhs.GetHandle();
+}
+
+bool operator>=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetHandle() >= rhs.GetHandle();
+}
+
+std::ostream& operator<<(std::ostream& lhs, Module const& rhs)
+{
+  return (lhs << rhs.GetHandle());
+}
+
+std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
+{
+  return (lhs << rhs.GetHandle());
+}
+
+FARPROC FindProcedure(Module const& module, std::string const& name)
+{
+  return detail::FindProcedureInternal(module, name.c_str());
+}
+
+FARPROC FindProcedure(Module const& module, WORD ordinal)
+{
+  return detail::FindProcedureInternal(module, MAKEINTRESOURCEA(ordinal));
 }
 
 }

@@ -33,7 +33,7 @@ struct ModuleIteratorImpl
     module_()
   { }
   
-  ~ModuleIteratorImpl() BOOST_NOEXCEPT
+  ~ModuleIteratorImpl()
   {
     if (snap_ && snap_ != INVALID_HANDLE_VALUE)
     {

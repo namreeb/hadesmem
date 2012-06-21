@@ -76,7 +76,7 @@ Allocator& Allocator::operator=(Allocator&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-Allocator::~Allocator() BOOST_NOEXCEPT
+Allocator::~Allocator()
 {
   FreeUnchecked();
 }

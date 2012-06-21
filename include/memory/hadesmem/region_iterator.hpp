@@ -54,7 +54,7 @@ public:
   
   RegionIterator& operator=(RegionIterator&& other) BOOST_NOEXCEPT;
   
-  ~RegionIterator() BOOST_NOEXCEPT;
+  ~RegionIterator();
   
   reference operator*() const BOOST_NOEXCEPT;
   

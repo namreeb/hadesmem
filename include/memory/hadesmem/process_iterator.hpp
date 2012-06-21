@@ -55,7 +55,7 @@ public:
   
   ProcessIterator& operator=(ProcessIterator&& other) BOOST_NOEXCEPT;
   
-  ~ProcessIterator() BOOST_NOEXCEPT;
+  ~ProcessIterator();
   
   explicit ProcessIterator(int dummy);
   

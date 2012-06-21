@@ -102,7 +102,7 @@ ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other)
   return *this;
 }
 
-ProcessIterator::~ProcessIterator() BOOST_NOEXCEPT
+ProcessIterator::~ProcessIterator()
 { }
 
 ProcessIterator::reference ProcessIterator::operator*() const BOOST_NOEXCEPT

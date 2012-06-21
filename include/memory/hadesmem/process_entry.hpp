@@ -20,7 +20,7 @@ namespace hadesmem
 
 struct ProcessEntry
 {
-  ProcessEntry() BOOST_NOEXCEPT
+  ProcessEntry() 
     : id(0), 
     threads(0), 
     parent(0), 

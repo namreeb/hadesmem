@@ -46,12 +46,11 @@ BOOST_AUTO_TEST_CASE(write)
   
   std::string const test_string = "Narrow test string.";
   std::vector<char> test_string_buf(test_string.size() + 1);
-  std::copy(std::begin(test_string), std::end(test_string), 
+  std::copy(begin(test_string), end(test_string), 
     test_string_buf.data());
   std::string const test_string_str(test_string_buf.data());
-  BOOST_CHECK_EQUAL_COLLECTIONS(std::begin(test_string), 
-    std::end(test_string), std::begin(test_string_str), 
-    std::end(test_string_str));
+  BOOST_CHECK_EQUAL_COLLECTIONS(begin(test_string), end(test_string), 
+    begin(test_string_str), end(test_string_str));
   auto const test_string_rev = std::string(test_string.rbegin(), 
     test_string.rend());
   WriteString(process, test_string_buf.data(), test_string_rev);

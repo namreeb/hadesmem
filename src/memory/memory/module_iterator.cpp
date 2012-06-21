@@ -103,7 +103,7 @@ ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other)
   return *this;
 }
 
-ModuleIterator::~ModuleIterator() BOOST_NOEXCEPT
+ModuleIterator::~ModuleIterator()
 { }
 
 ModuleIterator::reference ModuleIterator::operator*() const BOOST_NOEXCEPT

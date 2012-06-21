@@ -34,9 +34,17 @@ T Read(Process const& process, PVOID address)
 
 template <typename T>
 T ReadString(Process const& process, PVOID address, 
-  typename std::enable_if<std::is_same<T, std::basic_string<typename T::value_type, 
-  typename T::traits_type, typename T::allocator_type>>::value, T>::type* 
-  /*dummy*/ = nullptr)
+  typename std::enable_if<
+    std::is_same<
+      T, 
+      std::basic_string<
+        typename T::value_type, 
+        typename T::traits_type, 
+        typename T::allocator_type
+        >
+      >::value, 
+    T
+    >::type* /*dummy*/ = nullptr)
 {
   typedef typename T::value_type CharT;
   
@@ -58,8 +66,16 @@ T ReadString(Process const& process, PVOID address,
 
 template <typename T>
 T ReadList(Process const& process, PVOID address, std::size_t size, 
-  typename std::enable_if<std::is_same<T, std::vector<typename T::value_type, 
-  typename T::allocator_type>>::value, T>::type* /*dummy*/ = nullptr)
+  typename std::enable_if<
+    std::is_same<
+      T, 
+      std::vector<
+        typename T::value_type, 
+        typename T::allocator_type
+        >
+      >::value, 
+    T
+    >::type* /*dummy*/ = nullptr)
 {
   typedef typename T::value_type ValueT;
   

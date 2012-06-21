@@ -60,7 +60,7 @@ RegionIterator& RegionIterator::operator=(RegionIterator&& other)
   return *this;
 }
 
-RegionIterator::~RegionIterator() BOOST_NOEXCEPT
+RegionIterator::~RegionIterator()
 { }
 
 RegionIterator::reference RegionIterator::operator*() const BOOST_NOEXCEPT

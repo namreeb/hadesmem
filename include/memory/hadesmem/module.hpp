@@ -20,17 +20,6 @@ namespace hadesmem
 
 class Process;
 
-// hadesmem::Module causes the following warning under GCC:
-// error: 'class hadesmem::Module' has pointer data members 
-// but does not override 'hadesmem::Module(const hadesmem::Module&)' 
-// or 'operator=(const hadesmem::Module&)' [-Werror=effc++]
-// This can be ignored because the pointer data members are non-owning 
-// and shared pointers.
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADESMEM_GCC)
-
 class Module
 {
 public:
@@ -48,7 +37,9 @@ public:
   
   Module& operator=(Module&& other) BOOST_NOEXCEPT;
   
-  ~Module() BOOST_NOEXCEPT;
+  ~Module();
+  
+  Process const* GetProcess() const BOOST_NOEXCEPT;
   
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
@@ -58,22 +49,6 @@ public:
   
   std::wstring GetPath() const;
   
-  FARPROC FindProcedure(std::string const& Name) const;
-  
-  FARPROC FindProcedure(WORD Ordinal) const;
-  
-  bool operator==(Module const& other) const BOOST_NOEXCEPT;
-  
-  bool operator!=(Module const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<(Module const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<=(Module const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>(Module const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>=(Module const& other) const BOOST_NOEXCEPT;
-  
 private:
   void Initialize(HMODULE handle);
   
@@ -81,9 +56,8 @@ private:
   
   void Initialize(MODULEENTRY32 const& entry);
   
-  void InitializeIf(std::function<bool (MODULEENTRY32 const&)> const& check_func);
-  
-  FARPROC FindProcedureInternal(LPCSTR name) const;
+  typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;
+  void InitializeIf(EntryCallback const& check_func);
   
   Process const* process_;
   HMODULE handle_;
@@ -92,8 +66,26 @@ private:
   std::wstring path_;
 };
 
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
+bool operator==(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+bool operator!=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+bool operator<(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+bool operator<=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+bool operator>(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+bool operator>=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+
+// TODO: Tests.
+std::ostream& operator<<(std::ostream& lhs, Module const& rhs);
+
+// TODO: Tests.
+std::wostream& operator<<(std::wostream& lhs, Module const& rhs);
+
+FARPROC FindProcedure(Module const& module, std::string const& name);
+
+FARPROC FindProcedure(Module const& module, WORD ordinal);
 
 }

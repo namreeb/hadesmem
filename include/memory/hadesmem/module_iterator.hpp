@@ -54,7 +54,7 @@ public:
   
   ModuleIterator& operator=(ModuleIterator&& other) BOOST_NOEXCEPT;
   
-  ~ModuleIterator() BOOST_NOEXCEPT;
+  ~ModuleIterator();
   
   reference operator*() const BOOST_NOEXCEPT;
   

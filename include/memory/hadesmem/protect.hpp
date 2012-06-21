@@ -14,13 +14,6 @@ namespace hadesmem
 
 class Process;
 
-namespace detail
-{
-
-MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address);
-
-}
-
 bool CanRead(Process const& process, LPCVOID address);
 
 bool CanWrite(Process const& process, LPCVOID address);

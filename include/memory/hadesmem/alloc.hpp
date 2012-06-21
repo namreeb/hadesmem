@@ -29,7 +29,7 @@ public:
   
   Allocator& operator=(Allocator&& other) BOOST_NOEXCEPT;
   
-  ~Allocator() BOOST_NOEXCEPT;
+  ~Allocator();
   
   void Free();
   

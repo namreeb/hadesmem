@@ -18,12 +18,6 @@
 namespace hadesmem
 {
 
-enum class ProcessAccess
-{
-  kFull, 
-  kLimited
-};
-
 class Process
 {
 public:
@@ -37,25 +31,13 @@ public:
   
   Process& operator=(Process&& other) BOOST_NOEXCEPT;
   
-  ~Process() BOOST_NOEXCEPT;
+  ~Process();
   
   DWORD GetId() const BOOST_NOEXCEPT;
   
   HANDLE GetHandle() const BOOST_NOEXCEPT;
   
   void Cleanup();
-  
-  bool operator==(Process const& other) const BOOST_NOEXCEPT;
-  
-  bool operator!=(Process const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<(Process const& other) const BOOST_NOEXCEPT;
-  
-  bool operator<=(Process const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>(Process const& other) const BOOST_NOEXCEPT;
-  
-  bool operator>=(Process const& other) const BOOST_NOEXCEPT;
   
 private:
   void CheckWoW64() const;
@@ -69,6 +51,24 @@ private:
   DWORD id_;
   HANDLE handle_;
 };
+
+bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+bool operator<(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+bool operator<=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+bool operator>(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+bool operator>=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+
+// TODO: Tests.
+std::ostream& operator<<(std::ostream& lhs, Process const& rhs);
+
+// TODO: Tests.
+std::wostream& operator<<(std::wostream& lhs, Process const& rhs);
 
 std::wstring GetPath(Process const& process);
 

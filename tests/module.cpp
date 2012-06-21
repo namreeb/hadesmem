@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()) == 
     L"NTDLL.DLL");
   BOOST_CHECK(this_mod.GetPath().size() > this_mod.GetName().size());
-  BOOST_CHECK(ntdll_mod.FindProcedure("NtQueryInformationProcess") == 
+  BOOST_CHECK(FindProcedure(ntdll_mod, "NtQueryInformationProcess") == 
     ::GetProcAddress(ntdll_mod.GetHandle(), "NtQueryInformationProcess"));
   hadesmem::Module const ntdll_mod_other(&process, L"ntdll.dll");
   BOOST_CHECK(ntdll_mod == ntdll_mod_other);

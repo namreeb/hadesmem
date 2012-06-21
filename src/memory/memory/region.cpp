@@ -10,6 +10,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
+#include "hadesmem/detail/query_region.hpp"
 
 namespace hadesmem
 {
@@ -56,7 +57,7 @@ Region& Region::operator=(Region&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-Region::~Region() BOOST_NOEXCEPT
+Region::~Region()
 { }
 
 PVOID Region::GetBase() const BOOST_NOEXCEPT
@@ -94,34 +95,44 @@ DWORD Region::GetType() const BOOST_NOEXCEPT
   return mbi_.Type;
 }
 
-bool Region::operator==(Region const& other) const BOOST_NOEXCEPT
+bool operator==(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return this->GetBase() == other.GetBase();
+  return lhs.GetBase() == rhs.GetBase();
 }
 
-bool Region::operator!=(Region const& other) const BOOST_NOEXCEPT
+bool operator!=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return !(*this == other);
+  return !(lhs == rhs);
 }
 
-bool Region::operator<(Region const& other) const BOOST_NOEXCEPT
+bool operator<(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return this->GetBase() < other.GetBase();
+  return lhs.GetBase() < rhs.GetBase();
 }
 
-bool Region::operator<=(Region const& other) const BOOST_NOEXCEPT
+bool operator<=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return this->GetBase() <= other.GetBase();
+  return lhs.GetBase() <= rhs.GetBase();
 }
 
-bool Region::operator>(Region const& other) const BOOST_NOEXCEPT
+bool operator>(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return this->GetBase() > other.GetBase();
+  return lhs.GetBase() > rhs.GetBase();
 }
 
-bool Region::operator>=(Region const& other) const BOOST_NOEXCEPT
+bool operator>=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT
 {
-  return this->GetBase() >= other.GetBase();
+  return lhs.GetBase() >= rhs.GetBase();
+}
+
+std::ostream& operator<<(std::ostream& lhs, Region const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
+
+std::wostream& operator<<(std::wostream& lhs, Region const& rhs)
+{
+  return (lhs << rhs.GetBase());
 }
 
 }
