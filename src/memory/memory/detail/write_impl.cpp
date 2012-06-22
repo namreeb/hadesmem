@@ -17,7 +17,8 @@ namespace hadesmem
 namespace detail
 {
 
-void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size)
+void Write(Process const& process, PVOID address, LPCVOID in, 
+  std::size_t in_size)
 {
   if (IsGuard(process, address))
   {
@@ -47,7 +48,7 @@ void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_siz
       { }
     }
     
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));

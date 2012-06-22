@@ -36,7 +36,7 @@ std::wstring ToUpperOrdinal(std::wstring const& str)
     static_cast<DWORD>(str_buf.size()));
   if (num_converted != str_buf.size())
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("CharUpperBuff failed.") << 
       ErrorCodeWinRet(num_converted) << 

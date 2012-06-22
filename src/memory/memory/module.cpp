@@ -185,7 +185,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
   if (snap == INVALID_HANDLE_VALUE)
   {
     // TODO: Improve handling of ERROR_BAD_LENGTH.
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("CreateToolhelp32Snapshot failed.") << 
       ErrorCodeWinLast(last_error));
@@ -194,15 +194,15 @@ void Module::InitializeIf(EntryCallback const& check_func)
   BOOST_SCOPE_EXIT_ALL(&)
   {
     // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(CloseHandle(snap));
+    BOOST_VERIFY(::CloseHandle(snap));
   };
   
   MODULEENTRY32 entry;
-  ZeroMemory(&entry, sizeof(entry));
+  ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
   
-  for (BOOL more_mods = Module32First(snap, &entry); more_mods; 
-    more_mods = Module32Next(snap, &entry)) 
+  for (BOOL more_mods = ::Module32First(snap, &entry); more_mods; 
+    more_mods = ::Module32Next(snap, &entry)) 
   {
     if (check_func(entry))
     {
@@ -213,7 +213,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
   
   // TODO: Improve error handling when the error code returned by the module 
   // enumeration APIs is something other than ERROR_NO_MORE_FILES.
-  DWORD const last_error = GetLastError();
+  DWORD const last_error = ::GetLastError();
   BOOST_THROW_EXCEPTION(HadesMemError() << 
     ErrorString("Could not find module.") << 
     ErrorCodeWinLast(last_error));

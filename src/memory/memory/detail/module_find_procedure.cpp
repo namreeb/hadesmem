@@ -23,11 +23,11 @@ namespace detail
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
-  HMODULE const local_module(LoadLibraryEx(module.GetPath().c_str(), nullptr, 
-    DONT_RESOLVE_DLL_REFERENCES));
+  HMODULE const local_module(::LoadLibraryEx(module.GetPath().c_str(), 
+    nullptr, DONT_RESOLVE_DLL_REFERENCES));
   if (!local_module)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not load module locally.") << 
       ErrorCodeWinLast(last_error));
@@ -36,13 +36,13 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   BOOST_SCOPE_EXIT_ALL(&)
   {
     // WARNING: Handle is leaked if FreeLibrary fails.
-    BOOST_VERIFY(FreeLibrary(local_module));
+    BOOST_VERIFY(::FreeLibrary(local_module));
   };
   
-  FARPROC const local_func = GetProcAddress(local_module, name);
+  FARPROC const local_func = ::GetProcAddress(local_module, name);
   if (!local_func)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not find target function.") << 
       ErrorCodeWinLast(last_error));

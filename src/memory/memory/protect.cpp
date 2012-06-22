@@ -64,7 +64,7 @@ DWORD Protect(Process const& process, LPVOID address, DWORD protect)
   if (!::VirtualProtectEx(process.GetHandle(), mbi.BaseAddress, mbi.RegionSize, 
     protect, &old_protect))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("VirtualProtectEx failed.") << 
       ErrorCodeWinLast(last_error));

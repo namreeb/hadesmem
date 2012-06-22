@@ -19,11 +19,11 @@ namespace detail
 MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi;
-  ZeroMemory(&mbi, sizeof(mbi));
+  ::ZeroMemory(&mbi, sizeof(mbi));
   if (::VirtualQueryEx(process.GetHandle(), address, &mbi, sizeof(mbi)) != 
     sizeof(mbi))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("VirtualQueryEx failed.") << 
       ErrorCodeWinLast(last_error));

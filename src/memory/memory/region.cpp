@@ -43,7 +43,7 @@ Region::Region(Region&& other) BOOST_NOEXCEPT
   mbi_(other.mbi_)
 {
   other.process_ = nullptr;
-  ZeroMemory(&other.mbi_, sizeof(other.mbi_));
+  ::ZeroMemory(&other.mbi_, sizeof(other.mbi_));
 }
 
 Region& Region::operator=(Region&& other) BOOST_NOEXCEPT
@@ -52,7 +52,7 @@ Region& Region::operator=(Region&& other) BOOST_NOEXCEPT
   mbi_ = other.mbi_;
   
   other.process_ = nullptr;
-  ZeroMemory(&other.mbi_, sizeof(other.mbi_));
+  ::ZeroMemory(&other.mbi_, sizeof(other.mbi_));
   
   return *this;
 }

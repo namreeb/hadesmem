@@ -95,7 +95,7 @@ void Process::Cleanup()
   
   if (!::CloseHandle(handle_))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("CloseHandle failed.") << 
       ErrorCodeWinLast(last_error));
@@ -110,7 +110,7 @@ void Process::CheckWoW64() const
   BOOL is_wow64_me = FALSE;
   if (!::IsWow64Process(GetCurrentProcess(), &is_wow64_me))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not detect WoW64 status of current process.") << 
       ErrorCodeWinLast(last_error));
@@ -119,7 +119,7 @@ void Process::CheckWoW64() const
   BOOL is_wow64 = FALSE;
   if (!::IsWow64Process(handle_, &is_wow64))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not detect WoW64 status of target process.") << 
       ErrorCodeWinLast(last_error));
@@ -140,7 +140,7 @@ HANDLE Process::Open(DWORD id)
   HANDLE handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
   if (!handle)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("OpenProcess failed.") << 
       ErrorCodeWinLast(last_error));
@@ -172,10 +172,10 @@ HANDLE Process::Duplicate(HANDLE handle)
   BOOST_ASSERT(handle != nullptr);
   
   HANDLE new_handle = nullptr;
-  if (!::DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), 
-    &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
+  if (!::DuplicateHandle(::GetCurrentProcess(), handle, 
+    ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("DuplicateHandle failed.") << 
       ErrorCodeWinLast(last_error));
@@ -231,7 +231,7 @@ std::wstring GetPath(Process const& process)
   if (!::QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
     &path_len))
   {
-      DWORD const last_error = GetLastError();
+      DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("QueryFullProcessImageName failed.") << 
         ErrorCodeWinLast(last_error));
@@ -245,7 +245,7 @@ bool IsWoW64(Process const& process)
   BOOL is_wow64 = FALSE;
   if (!::IsWow64Process(process.GetHandle(), &is_wow64))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("IsWow64Process failed.") << 
       ErrorCodeWinLast(last_error));

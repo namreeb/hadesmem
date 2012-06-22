@@ -17,7 +17,8 @@ namespace hadesmem
 namespace detail
 {
 
-void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_size)
+void Read(Process const& process, LPVOID address, LPVOID out, 
+  std::size_t out_size)
 {
  if (IsGuard(process, address))
   {
@@ -47,7 +48,7 @@ void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_si
       { }
     }
 
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));

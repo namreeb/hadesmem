@@ -33,10 +33,10 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   {
     if (GetLastError() == ERROR_BAD_LENGTH)
     {
-      impl_->snap_ = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+      impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
       if (impl_->snap_ == INVALID_HANDLE_VALUE)
       {
-        DWORD const last_error = GetLastError();
+        DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(HadesMemError() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
@@ -44,7 +44,7 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
     }
     else
     {
-      DWORD const last_error = GetLastError();
+      DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));

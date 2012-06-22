@@ -43,7 +43,7 @@ ModuleIterator::ModuleIterator(Process const* process)
         impl_->process_->GetId());
       if (impl_->snap_ == INVALID_HANDLE_VALUE)
       {
-        DWORD const last_error = GetLastError();
+        DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(HadesMemError() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
@@ -51,7 +51,7 @@ ModuleIterator::ModuleIterator(Process const* process)
     }
     else
     {
-      DWORD const last_error = GetLastError();
+      DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));
@@ -64,7 +64,6 @@ ModuleIterator::ModuleIterator(Process const* process)
   if (!::Module32First(impl_->snap_, &entry))
   {
     DWORD const last_error = ::GetLastError();
-    
     if (last_error == ERROR_NO_MORE_FILES)
     {
       impl_.reset();
@@ -125,18 +124,16 @@ ModuleIterator& ModuleIterator::operator++()
   entry.dwSize = sizeof(entry);
   if (!::Module32Next(impl_->snap_, &entry))
   {
-    if (::GetLastError() == ERROR_NO_MORE_FILES)
+    DWORD const last_error = ::GetLastError();
+    if (last_error == ERROR_NO_MORE_FILES)
     {
       impl_.reset();
       return *this;
     }
-    else
-    {
-      DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
-        ErrorString("Module32Next failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
+    
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Module32Next failed.") << 
+      ErrorCodeWinLast(last_error));
   }
   
   impl_->module_ = Module(impl_->process_, entry);
