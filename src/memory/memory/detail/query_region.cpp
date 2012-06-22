@@ -32,6 +32,40 @@ MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
   return mbi;
 }
 
+bool CanRead(MEMORY_BASIC_INFORMATION const& mbi)
+{
+  return (mbi.State != MEM_RESERVE) && 
+    ((mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
+    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
+    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
+    (mbi.Protect & PAGE_READONLY) == PAGE_READONLY || 
+    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
+    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+}
+
+bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi)
+{
+  return (mbi.State != MEM_RESERVE) && 
+    ((mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
+    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
+    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
+    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+}
+
+bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi)
+{
+  return (mbi.State != MEM_RESERVE) && 
+    ((mbi.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || 
+    (mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
+    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
+    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY);
+}
+
+bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi)
+{
+  return (mbi.Protect & PAGE_GUARD) == PAGE_GUARD;
+}
+
 }
 
 }

@@ -17,48 +17,30 @@ namespace hadesmem
 bool CanRead(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
-  
-  return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
-    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
-    (mbi.Protect & PAGE_READONLY) == PAGE_READONLY || 
-    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
-    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+  return detail::CanRead(mbi);
 }
 
 bool CanWrite(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
-  
-  return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
-    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
-    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+  return detail::CanWrite(mbi);
 }
 
 bool CanExecute(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
-  
-  return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || 
-    (mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
-    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY);
+  return detail::CanExecute(mbi);
 }
 
 bool IsGuard(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
-  
-  return (mbi.Protect & PAGE_GUARD) == PAGE_GUARD;
+  return detail::IsGuard(mbi);
 }
 
 DWORD Protect(Process const& process, LPVOID address, DWORD protect)
 {
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
   
   DWORD old_protect = 0;
   if (!::VirtualProtectEx(process.GetHandle(), mbi.BaseAddress, mbi.RegionSize, 

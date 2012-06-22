@@ -19,6 +19,13 @@ namespace detail
 
 MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address);
 
+bool CanRead(MEMORY_BASIC_INFORMATION const& mbi);
+
+bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi);
+
+bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi);
+
+bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi);
 }
 
 }

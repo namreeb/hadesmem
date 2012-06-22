@@ -10,6 +10,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
+#include "hadesmem/detail/query_region.hpp"
 
 namespace hadesmem
 {
@@ -20,13 +21,15 @@ namespace detail
 void Write(Process const& process, PVOID address, LPCVOID in, 
   std::size_t in_size)
 {
-  if (IsGuard(process, address))
+  MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
+  
+  if (IsGuard(mbi))
   {
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Attempt to write to guard page."));
   }
   
-  bool const can_write = CanWrite(process, address);
+  bool const can_write = CanWrite(mbi);
   
   DWORD old_protect = 0;
   if (!can_write)

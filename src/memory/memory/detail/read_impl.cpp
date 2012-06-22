@@ -10,6 +10,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
+#include "hadesmem/detail/query_region.hpp"
 
 namespace hadesmem
 {
@@ -20,13 +21,15 @@ namespace detail
 void Read(Process const& process, LPVOID address, LPVOID out, 
   std::size_t out_size)
 {
- if (IsGuard(process, address))
+  MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
+  
+ if (IsGuard(mbi))
   {
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Attempt to read from guard page."));
   }
   
-  bool const can_read = CanRead(process, address);
+  bool const can_read = CanRead(mbi);
 
   DWORD old_protect = 0;
   if (!can_read)
