@@ -48,7 +48,10 @@ void Read(Process const& process, LPVOID address, LPVOID out,
         Protect(process, address, old_protect);
       }
       catch (std::exception const& /*e*/)
-      { }
+      {
+        (void)e;
+        BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+      }
     }
 
     DWORD const last_error = ::GetLastError();

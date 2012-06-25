@@ -49,7 +49,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   }
   
   LONG_PTR const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
-    reinterpret_cast<DWORD_PTR>(static_cast<HMODULE>(local_module));
+    reinterpret_cast<DWORD_PTR>(local_module);
   
   FARPROC const remote_func = reinterpret_cast<FARPROC>(
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
