@@ -29,26 +29,29 @@ BOOST_AUTO_TEST_CASE(process_list)
   BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessList::
     const_iterator>));
   
-  hadesmem::ProcessList const process_list;
-  auto iter = process_list.begin();
-  BOOST_CHECK(iter != process_list.end());
-  BOOST_CHECK(++iter != process_list.end());
+  using std::begin;
+  using std::end;
+  
+  hadesmem::ProcessList const process_list_1;
+  auto iter = begin(process_list_1);
+  BOOST_CHECK(iter != end(process_list_1));
+  BOOST_CHECK(++iter != end(process_list_1));
   BOOST_CHECK(iter->id != 0);
   DWORD const second_id = iter->id;
-  BOOST_CHECK(++iter != process_list.end());
+  BOOST_CHECK(++iter != end(process_list_1));
   DWORD const third_id = iter->id;
   BOOST_CHECK(second_id != third_id);
   
-  std::for_each(process_list.begin(), process_list.end(), 
+  std::for_each(begin(process_list_1), end(process_list_1), 
     [] (hadesmem::ProcessEntry const& entry)
     {
       BOOST_CHECK(!entry.name.empty());
     });
   
-  auto this_iter = std::find_if(process_list.begin(), process_list.end(), 
+  auto this_iter = std::find_if(begin(process_list_1), end(process_list_1), 
     [] (hadesmem::ProcessEntry const& entry)
     {
       return entry.id == ::GetCurrentProcessId();
     });
-  BOOST_CHECK(this_iter != process_list.end());
+  BOOST_CHECK(this_iter != end(process_list_1));
 }
