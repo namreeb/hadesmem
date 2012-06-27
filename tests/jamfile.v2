@@ -14,6 +14,9 @@ project
 run process.cpp
   ;
 
+run process_list.cpp
+  ;
+
 run read.cpp
   ;
 
@@ -29,14 +32,11 @@ run alloc.cpp
 run module.cpp
   ;
 
-run module_iterator.cpp
+run module_list.cpp
   ;
 
 run region.cpp
   ;
 
-run region_iterator.cpp
-  ;
-
-run process_iterator.cpp
+run region_list.cpp
   ;

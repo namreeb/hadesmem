@@ -5,16 +5,15 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/process_iterator.hpp"
+#include "hadesmem/process_list.hpp"
 
-#define BOOST_TEST_MODULE process_iterator
+#define BOOST_TEST_MODULE process_list
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/concept_check.hpp>
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/process.hpp"
+#include "hadesmem/process_iterator.hpp"
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -23,31 +22,33 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-BOOST_AUTO_TEST_CASE(process_iterator)
+BOOST_AUTO_TEST_CASE(process_list)
 {
-  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessIterator>));
+  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessList::
+    iterator>));
+  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessList::
+    const_iterator>));
   
-  auto iter = hadesmem::ProcessIterator(0);
-  BOOST_CHECK(iter != hadesmem::ProcessIterator());
-  BOOST_CHECK(++iter != hadesmem::ProcessIterator());
+  hadesmem::ProcessList const process_list;
+  auto iter = process_list.begin();
+  BOOST_CHECK(iter != process_list.end());
+  BOOST_CHECK(++iter != process_list.end());
   BOOST_CHECK(iter->id != 0);
   DWORD const second_id = iter->id;
-  BOOST_CHECK(++iter != hadesmem::ProcessIterator());
+  BOOST_CHECK(++iter != process_list.end());
   DWORD const third_id = iter->id;
   BOOST_CHECK(second_id != third_id);
   
-  std::for_each(hadesmem::ProcessIterator(0), 
-    hadesmem::ProcessIterator(), 
+  std::for_each(process_list.begin(), process_list.end(), 
     [] (hadesmem::ProcessEntry const& entry)
     {
       BOOST_CHECK(!entry.name.empty());
     });
   
-  auto this_iter = std::find_if(hadesmem::ProcessIterator(0), 
-    hadesmem::ProcessIterator(), 
+  auto this_iter = std::find_if(process_list.begin(), process_list.end(), 
     [] (hadesmem::ProcessEntry const& entry)
     {
       return entry.id == ::GetCurrentProcessId();
     });
-  BOOST_CHECK(this_iter != hadesmem::ProcessIterator());
+  BOOST_CHECK(this_iter != process_list.end());
 }

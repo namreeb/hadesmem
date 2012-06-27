@@ -5,9 +5,9 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/region_iterator.hpp"
+#include "hadesmem/region_list.hpp"
 
-#define BOOST_TEST_MODULE region_iterator
+#define BOOST_TEST_MODULE region_list
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/concept_check.hpp>
 #include <boost/test/unit_test.hpp>
@@ -16,6 +16,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/region.hpp"
 #include "hadesmem/process.hpp"
+#include "hadesmem/region_iterator.hpp"
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -24,19 +25,24 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-BOOST_AUTO_TEST_CASE(module_iterator)
+BOOST_AUTO_TEST_CASE(region_list)
 {
-  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::RegionIterator>));
+  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::RegionList::
+    iterator>));
+  BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::RegionList::
+    const_iterator>));
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  auto iter = hadesmem::RegionIterator(&process);
+  hadesmem::RegionList const region_list(&process);
+  auto iter = region_list.begin();
   hadesmem::Region const first_region(&process, nullptr);
-  BOOST_CHECK(iter != hadesmem::RegionIterator());
+  BOOST_CHECK(iter != region_list.end());
   BOOST_CHECK(*iter == first_region);
-  hadesmem::Region const second_region(&process, static_cast<char const* const>(
-    first_region.GetBase()) + first_region.GetSize());
-  BOOST_CHECK(++iter != hadesmem::RegionIterator());
+  hadesmem::Region const second_region(&process, 
+    static_cast<char const* const>(first_region.GetBase()) + 
+    first_region.GetSize());
+  BOOST_CHECK(++iter != region_list.end());
   BOOST_CHECK(*iter == second_region);
   hadesmem::Region last(&process, nullptr);
   do
@@ -47,11 +53,11 @@ BOOST_AUTO_TEST_CASE(module_iterator)
     BOOST_CHECK(last < current);
     BOOST_CHECK(last <= current);
     last = current;
-  } while (++iter != hadesmem::RegionIterator());
+  } while (++iter != region_list.end());
   // TODO: Compare our last region with the 'real' last region to ensure they 
   // match.
   
-  std::for_each(hadesmem::RegionIterator(&process), hadesmem::RegionIterator(), 
+  std::for_each(region_list.begin(), region_list.end(), 
     [&] (hadesmem::Region const& region)
     {
       hadesmem::Region const other(&process, region.GetBase());
@@ -72,10 +78,9 @@ BOOST_AUTO_TEST_CASE(module_iterator)
     });
   
   HMODULE const user32_mod = GetModuleHandle(L"user32.dll");
-  BOOST_CHECK(std::find_if(hadesmem::RegionIterator(&process), 
-    hadesmem::RegionIterator(), 
+  BOOST_CHECK(std::find_if(region_list.begin(), region_list.end(), 
     [user32_mod] (hadesmem::Region const& region)
     {
       return region.GetBase() == user32_mod;
-    }) != hadesmem::RegionIterator());
+    }) != region_list.end());
 }
