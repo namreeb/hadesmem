@@ -39,8 +39,6 @@ public:
   
   ~Module();
   
-  Process const* GetProcess() const BOOST_NOEXCEPT;
-  
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
   DWORD GetSize() const BOOST_NOEXCEPT;

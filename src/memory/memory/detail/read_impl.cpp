@@ -21,6 +21,9 @@ namespace detail
 void Read(Process const& process, LPVOID address, LPVOID out, 
   std::size_t out_size)
 {
+  BOOST_ASSERT(out != nullptr);
+  BOOST_ASSERT(out_size != 0);
+  
   MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
   
  if (IsGuard(mbi))

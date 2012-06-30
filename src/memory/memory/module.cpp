@@ -28,6 +28,8 @@ Module::Module(Process const* process, HMODULE handle)
   name_(), 
   path_()
 {
+  BOOST_ASSERT(process != nullptr);
+  
   Initialize(handle);
 }
 
@@ -38,6 +40,8 @@ Module::Module(Process const* process, std::wstring const& path)
   name_(), 
   path_()
 {
+  BOOST_ASSERT(process != nullptr);
+  
   Initialize(path);
 }
 
@@ -48,6 +52,8 @@ Module::Module(Process const* process, MODULEENTRY32 const& entry)
   name_(), 
   path_()
 {
+  BOOST_ASSERT(process != nullptr);
+  
   Initialize(entry);
 }
 
@@ -99,11 +105,6 @@ Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
 
 Module::~Module()
 { }
-
-Process const* Module::GetProcess() const BOOST_NOEXCEPT
-{
-  return process_;
-}
 
 HMODULE Module::GetHandle() const BOOST_NOEXCEPT
 {

@@ -21,6 +21,9 @@ namespace detail
 void Write(Process const& process, PVOID address, LPCVOID in, 
   std::size_t in_size)
 {
+  BOOST_ASSERT(in != nullptr);
+  BOOST_ASSERT(in_size != 0);
+  
   MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
   
   if (IsGuard(mbi))

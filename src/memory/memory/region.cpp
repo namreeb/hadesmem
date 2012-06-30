@@ -18,12 +18,16 @@ namespace hadesmem
 Region::Region(Process const* process, LPCVOID address)
   : process_(process), 
   mbi_(detail::Query(*process, address))
-{ }
+{
+  BOOST_ASSERT(process != nullptr);
+}
 
 Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT
   : process_(process), 
   mbi_(mbi)
-{ }
+{
+  BOOST_ASSERT(process != nullptr);
+}
 
 Region::Region(Region const& other) BOOST_NOEXCEPT
   : process_(other.process_), 

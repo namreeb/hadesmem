@@ -18,7 +18,9 @@ namespace hadesmem
 
 ModuleList::ModuleList(Process const* process) BOOST_NOEXCEPT
   : process_(process)
-{ }
+{
+  BOOST_ASSERT(process != nullptr);
+}
 
 ModuleList::ModuleList(ModuleList const& other) BOOST_NOEXCEPT
   : process_(other.process_)

@@ -45,7 +45,9 @@ Allocator::Allocator(Process const& process, SIZE_T size)
   : process_(&process), 
   base_(Alloc(process, size)), 
   size_(size)
-{ }
+{
+  BOOST_ASSERT(size != 0);
+}
 
 Allocator::Allocator(Allocator&& other) BOOST_NOEXCEPT
   : process_(other.process_), 
@@ -88,8 +90,8 @@ void Allocator::Free()
     return;
   }
   
-  BOOST_ASSERT(base_);
-  BOOST_ASSERT(size_);
+  BOOST_ASSERT(base_ != nullptr);
+  BOOST_ASSERT(size_ != 0);
   
   ::hadesmem::Free(*process_, base_);
   
@@ -106,7 +108,6 @@ PVOID Allocator::GetBase() const BOOST_NOEXCEPT
 SIZE_T Allocator::GetSize() const BOOST_NOEXCEPT
 {
   return size_;
-
 }
 
 void Allocator::FreeUnchecked() BOOST_NOEXCEPT

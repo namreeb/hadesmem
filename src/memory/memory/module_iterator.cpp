@@ -29,6 +29,9 @@ ModuleIterator::ModuleIterator() BOOST_NOEXCEPT
 ModuleIterator::ModuleIterator(Process const* process)
   : impl_(new detail::ModuleIteratorImpl)
 {
+  BOOST_ASSERT(impl_.get());
+  BOOST_ASSERT(process != nullptr);
+  
   impl_->process_ = process;
   
   impl_->snap_ = ::CreateToolhelp32Snapshot(
@@ -119,6 +122,8 @@ ModuleIterator::pointer ModuleIterator::operator->() const BOOST_NOEXCEPT
 
 ModuleIterator& ModuleIterator::operator++()
 {
+  BOOST_ASSERT(impl_.get());
+  
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);

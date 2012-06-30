@@ -23,6 +23,8 @@ namespace detail
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
+  BOOST_ASSERT(name != nullptr);
+  
   HMODULE const local_module(::LoadLibraryEx(module.GetPath().c_str(), 
     nullptr, DONT_RESOLVE_DLL_REFERENCES));
   if (!local_module)

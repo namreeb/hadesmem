@@ -30,6 +30,9 @@ RegionIterator::RegionIterator() BOOST_NOEXCEPT
 RegionIterator::RegionIterator(Process const* process)
   : impl_(new detail::RegionIteratorImpl)
 {
+  BOOST_ASSERT(impl_.get());
+  BOOST_ASSERT(process != nullptr);
+  
   impl_->process_ = process;
   
   MEMORY_BASIC_INFORMATION mbi = detail::Query(*impl_->process_, nullptr);
@@ -79,6 +82,7 @@ RegionIterator& RegionIterator::operator++()
 {
   try
   {
+    BOOST_ASSERT(impl_.get());
     void const* const base = impl_->region_->GetBase();
     SIZE_T const size = impl_->region_->GetSize();
     void const* const next = static_cast<char const* const>(base) + size;
