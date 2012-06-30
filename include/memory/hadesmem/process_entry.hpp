@@ -14,6 +14,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
+#include <tlhelp32.h>
 
 namespace hadesmem
 {
@@ -26,6 +27,14 @@ struct ProcessEntry
     parent(0), 
     priority(0), 
     name()
+  { }
+  
+  ProcessEntry(PROCESSENTRY32 const& entry)
+    : id(entry.th32ProcessID), 
+    threads(entry.cntThreads), 
+    parent(entry.th32ParentProcessID), 
+    priority(entry.pcPriClassBase), 
+    name(entry.szExeFile)
   { }
   
   DWORD id;

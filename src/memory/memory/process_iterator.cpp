@@ -71,13 +71,7 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
       ErrorCodeWinLast(last_error));
   }
   
-  ProcessEntry new_entry;
-  new_entry.id = entry.th32ProcessID;
-  new_entry.threads = entry.cntThreads;
-  new_entry.priority = entry.pcPriClassBase;
-  new_entry.name = entry.szExeFile;
-  
-  impl_->process_ = new_entry;
+  impl_->process_ = ProcessEntry(entry);
 }
 
 ProcessIterator::ProcessIterator(ProcessIterator const& other) BOOST_NOEXCEPT
@@ -142,13 +136,7 @@ ProcessIterator& ProcessIterator::operator++()
     }
   }
   
-  ProcessEntry new_entry;
-  new_entry.id = entry.th32ProcessID;
-  new_entry.threads = entry.cntThreads;
-  new_entry.priority = entry.pcPriClassBase;
-  new_entry.name = entry.szExeFile;
-  
-  impl_->process_ = new_entry;
+  impl_->process_ = ProcessEntry(entry);
   
   return *this;
 }

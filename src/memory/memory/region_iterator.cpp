@@ -35,7 +35,8 @@ RegionIterator::RegionIterator(Process const* process)
   
   impl_->process_ = process;
   
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(*impl_->process_, nullptr);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, 
+    nullptr);
   impl_->region_ = Region(impl_->process_, mbi);
 }
 
@@ -83,10 +84,11 @@ RegionIterator& RegionIterator::operator++()
   try
   {
     BOOST_ASSERT(impl_.get());
+    
     void const* const base = impl_->region_->GetBase();
     SIZE_T const size = impl_->region_->GetSize();
     void const* const next = static_cast<char const* const>(base) + size;
-    MEMORY_BASIC_INFORMATION mbi = detail::Query(*impl_->process_, next);
+    MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, next);
     impl_->region_ = Region(impl_->process_, mbi);
   }
   catch (std::exception const& /*e*/)

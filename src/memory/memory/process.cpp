@@ -30,7 +30,7 @@ Process::Process(Process const& other)
   : id_(0), 
   handle_(nullptr)
 {
-  HANDLE new_handle = Duplicate(other.handle_);
+  HANDLE const new_handle = Duplicate(other.handle_);
   
   handle_ = new_handle;
   id_ = other.id_;
@@ -38,7 +38,7 @@ Process::Process(Process const& other)
 
 Process& Process::operator=(Process const& other)
 {
-  HANDLE new_handle = Duplicate(other.handle_);
+  HANDLE const new_handle = Duplicate(other.handle_);
   
   Cleanup();
   
@@ -137,7 +137,7 @@ HANDLE Process::Open(DWORD id)
 {
   BOOST_ASSERT(id != 0);
   
-  HANDLE handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
+  HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();

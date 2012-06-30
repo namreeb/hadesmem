@@ -16,25 +16,25 @@ namespace hadesmem
 
 bool CanRead(Process const& process, LPCVOID address)
 {
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
   return detail::CanRead(mbi);
 }
 
 bool CanWrite(Process const& process, LPCVOID address)
 {
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
   return detail::CanWrite(mbi);
 }
 
 bool CanExecute(Process const& process, LPCVOID address)
 {
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
   return detail::CanExecute(mbi);
 }
 
 bool IsGuard(Process const& process, LPCVOID address)
 {
-  MEMORY_BASIC_INFORMATION mbi = detail::Query(process, address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
   return detail::IsGuard(mbi);
 }
 
