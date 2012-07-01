@@ -52,7 +52,23 @@ BOOST_AUTO_TEST_CASE(allocator)
   hadesmem::Allocator allocator_1(process, 0x1000);
   BOOST_CHECK(allocator_1.GetBase());
   BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
-  BOOST_CHECK_NO_THROW(allocator_1.Free());
+  
+  hadesmem::Allocator allocator_2(std::move(allocator_1));
+  BOOST_CHECK(allocator_2.GetBase());
+  BOOST_CHECK_EQUAL(allocator_2.GetSize(), static_cast<SIZE_T>(0x1000));
+  
   BOOST_CHECK(!allocator_1.GetBase());
   BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0));
+  BOOST_CHECK_NO_THROW(allocator_1.Free());
+  
+  allocator_1 = std::move(allocator_2);
+  BOOST_CHECK(allocator_1.GetBase());
+  BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
+  
+  BOOST_CHECK(!allocator_2.GetBase());
+  BOOST_CHECK_EQUAL(allocator_2.GetSize(), static_cast<SIZE_T>(0));
+  BOOST_CHECK_NO_THROW(allocator_2.Free());
+  
+  BOOST_CHECK_NO_THROW(allocator_1.Free());
+  
 }
