@@ -26,7 +26,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-BOOST_AUTO_TEST_CASE(read)
+BOOST_AUTO_TEST_CASE(read_pod)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
@@ -42,12 +42,22 @@ BOOST_AUTO_TEST_CASE(read)
   auto new_test_pod_type = hadesmem::Read<TestPODType>(process, &test_pod_type);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_pod_type, 
     sizeof(test_pod_type)), 0);
+}
+
+BOOST_AUTO_TEST_CASE(read_string)
+{
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   std::string test_string = "Narrow test string.";
   char* const test_string_real = &test_string[0];
   auto const new_test_string = hadesmem::ReadString<std::string>(process, 
     test_string_real);
   BOOST_CHECK_EQUAL(new_test_string, test_string);
+}
+
+BOOST_AUTO_TEST_CASE(read_vector)
+{
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
   std::vector<int> int_list_read = hadesmem::ReadList<std::vector<int>>(process, 

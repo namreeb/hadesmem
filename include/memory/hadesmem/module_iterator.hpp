@@ -64,9 +64,9 @@ public:
   
   ModuleIterator operator++(int);
   
-  bool operator==(ModuleIterator const& other) BOOST_NOEXCEPT;
+  bool operator==(ModuleIterator const& other) const BOOST_NOEXCEPT;
   
-  bool operator!=(ModuleIterator const& other) BOOST_NOEXCEPT;
+  bool operator!=(ModuleIterator const& other) const BOOST_NOEXCEPT;
   
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 

@@ -153,12 +153,14 @@ ModuleIterator ModuleIterator::operator++(int)
   return iter;
 }
 
-bool ModuleIterator::operator==(ModuleIterator const& other) BOOST_NOEXCEPT
+bool ModuleIterator::operator==(ModuleIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
-bool ModuleIterator::operator!=(ModuleIterator const& other) BOOST_NOEXCEPT
+bool ModuleIterator::operator!=(ModuleIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return !(*this == other);
 }

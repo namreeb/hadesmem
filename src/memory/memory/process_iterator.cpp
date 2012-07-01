@@ -148,12 +148,14 @@ ProcessIterator ProcessIterator::operator++(int)
   return iter;
 }
 
-bool ProcessIterator::operator==(ProcessIterator const& other) BOOST_NOEXCEPT
+bool ProcessIterator::operator==(ProcessIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
-bool ProcessIterator::operator!=(ProcessIterator const& other) BOOST_NOEXCEPT
+bool ProcessIterator::operator!=(ProcessIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return !(*this == other);
 }

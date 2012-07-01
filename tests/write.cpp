@@ -26,7 +26,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-BOOST_AUTO_TEST_CASE(write)
+BOOST_AUTO_TEST_CASE(write_pod)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
@@ -43,6 +43,11 @@ BOOST_AUTO_TEST_CASE(write)
   Write(process, &test_pod_type, test_pod_type_2);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &test_pod_type_2, 
     sizeof(test_pod_type)), 0);
+}
+
+BOOST_AUTO_TEST_CASE(write_string)
+{
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   std::string const test_string = "Narrow test string.";
   std::vector<char> test_string_buf(test_string.size() + 1);
@@ -59,6 +64,12 @@ BOOST_AUTO_TEST_CASE(write)
   auto const new_test_string_rev = std::string(test_string_buf.data());
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
     new_test_string_rev.cend(), test_string_rev.cbegin(), test_string_rev.cend());
+  
+}
+
+BOOST_AUTO_TEST_CASE(write_vector)
+{
+  hadesmem::Process const process(::GetCurrentProcessId());
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
   std::vector<int> int_list_rev(int_list.crbegin(), int_list.crend());

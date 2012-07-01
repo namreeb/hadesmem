@@ -41,6 +41,14 @@ BOOST_AUTO_TEST_CASE(process_list)
   BOOST_CHECK(++iter != end(process_list_1));
   DWORD const third_id = iter->id;
   BOOST_CHECK(second_id != third_id);
+}
+
+BOOST_AUTO_TEST_CASE(process_list_algorithm)
+{
+  using std::begin;
+  using std::end;
+  
+  hadesmem::ProcessList const process_list_1;
   
   std::for_each(begin(process_list_1), end(process_list_1), 
     [] (hadesmem::ProcessEntry const& entry)
@@ -48,7 +56,8 @@ BOOST_AUTO_TEST_CASE(process_list)
       BOOST_CHECK(!entry.name.empty());
     });
   
-  auto this_iter = std::find_if(begin(process_list_1), end(process_list_1), 
+  auto const this_iter = std::find_if(begin(process_list_1), 
+    end(process_list_1), 
     [] (hadesmem::ProcessEntry const& entry)
     {
       return entry.id == ::GetCurrentProcessId();

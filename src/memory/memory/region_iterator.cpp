@@ -106,12 +106,14 @@ RegionIterator RegionIterator::operator++(int)
   return iter;
 }
 
-bool RegionIterator::operator==(RegionIterator const& other) BOOST_NOEXCEPT
+bool RegionIterator::operator==(RegionIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
-bool RegionIterator::operator!=(RegionIterator const& other) BOOST_NOEXCEPT
+bool RegionIterator::operator!=(RegionIterator const& other) const 
+  BOOST_NOEXCEPT
 {
   return !(*this == other);
 }

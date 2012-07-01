@@ -46,6 +46,16 @@ BOOST_AUTO_TEST_CASE(module_list)
   hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
   BOOST_CHECK(++iter != end(module_list_1));
   BOOST_CHECK(*iter == kernel32_mod);
+}
+
+BOOST_AUTO_TEST_CASE(module_list_algorithm)
+{
+  hadesmem::Process const process(::GetCurrentProcessId());
+  
+  using std::begin;
+  using std::end;
+  
+  hadesmem::ModuleList const module_list_1(&process);
   
   std::for_each(begin(module_list_1), end(module_list_1), 
     [] (hadesmem::Module const& module)
@@ -56,9 +66,11 @@ BOOST_AUTO_TEST_CASE(module_list)
       BOOST_CHECK(!module.GetPath().empty());
     });
   
-  BOOST_CHECK(std::find_if(begin(module_list_1), end(module_list_1), 
+  auto const user32_iter = std::find_if(begin(module_list_1), 
+    end(module_list_1), 
     [] (hadesmem::Module const& module)
     {
       return module.GetHandle() == GetModuleHandle(L"user32.dll");
-    }) != end(module_list_1));
+    });
+  BOOST_CHECK(user32_iter != end(module_list_1));
 }
