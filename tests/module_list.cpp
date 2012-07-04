@@ -24,6 +24,8 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::ModuleList::iterator)
+
 BOOST_AUTO_TEST_CASE(module_list)
 {
   BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ModuleList::iterator>));
@@ -36,16 +38,21 @@ BOOST_AUTO_TEST_CASE(module_list)
   using std::end;
   
   hadesmem::ModuleList const module_list_1(&process);
+  hadesmem::ModuleList module_list_2(module_list_1);
+  hadesmem::ModuleList module_list_3(std::move(module_list_2));
+  module_list_2 = std::move(module_list_3);
+  BOOST_CHECK_NE(begin(module_list_2), end(module_list_2));
+  
   auto iter = begin(module_list_1);
   hadesmem::Module const this_mod(&process, nullptr);
-  BOOST_CHECK(iter != end(module_list_1));
-  BOOST_CHECK(*iter == this_mod);
+  BOOST_CHECK_NE(iter, end(module_list_1));
+  BOOST_CHECK_EQUAL(*iter, this_mod);
   hadesmem::Module const ntdll_mod(&process, L"NtDll.DlL");
-  BOOST_CHECK(++iter != end(module_list_1));
-  BOOST_CHECK(*iter == ntdll_mod);
+  BOOST_CHECK_NE(++iter, end(module_list_1));
+  BOOST_CHECK_EQUAL(*iter, ntdll_mod);
   hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
-  BOOST_CHECK(++iter != end(module_list_1));
-  BOOST_CHECK(*iter == kernel32_mod);
+  BOOST_CHECK_NE(++iter, end(module_list_1));
+  BOOST_CHECK_EQUAL(*iter, kernel32_mod);
 }
 
 BOOST_AUTO_TEST_CASE(module_list_algorithm)
@@ -60,8 +67,8 @@ BOOST_AUTO_TEST_CASE(module_list_algorithm)
   std::for_each(begin(module_list_1), end(module_list_1), 
     [] (hadesmem::Module const& module)
     {
-      BOOST_CHECK(module.GetHandle() != nullptr);
-      BOOST_CHECK(module.GetSize() != 0);
+      BOOST_CHECK_NE(module.GetHandle(), static_cast<void*>(nullptr));
+      BOOST_CHECK_NE(module.GetSize(), 0U);
       BOOST_CHECK(!module.GetName().empty());
       BOOST_CHECK(!module.GetPath().empty());
     });
@@ -72,5 +79,5 @@ BOOST_AUTO_TEST_CASE(module_list_algorithm)
     {
       return module.GetHandle() == GetModuleHandle(L"user32.dll");
     });
-  BOOST_CHECK(user32_iter != end(module_list_1));
+  BOOST_CHECK_NE(user32_iter, end(module_list_1));
 }

@@ -44,13 +44,14 @@ BOOST_AUTO_TEST_CASE(protect)
   BOOST_CHECK(CanWrite(process, address));
   BOOST_CHECK(CanExecute(process, address));
   BOOST_CHECK(!IsGuard(process, address));
-  BOOST_CHECK(Protect(process, address, PAGE_NOACCESS) == 
-    PAGE_EXECUTE_READWRITE);
+  BOOST_CHECK_EQUAL(Protect(process, address, PAGE_NOACCESS), 
+    static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
   BOOST_CHECK(!CanRead(process, address));
   BOOST_CHECK(!CanWrite(process, address));
   BOOST_CHECK(!CanExecute(process, address));
   BOOST_CHECK(!IsGuard(process, address));
-  BOOST_CHECK(Protect(process, address, PAGE_EXECUTE) == PAGE_NOACCESS);
+  BOOST_CHECK_EQUAL(Protect(process, address, PAGE_EXECUTE), 
+    static_cast<DWORD>(PAGE_NOACCESS));
   BOOST_CHECK(CanExecute(process, address));
 }
 
@@ -69,5 +70,5 @@ BOOST_AUTO_TEST_CASE(query_and_protect_invalid)
   BOOST_CHECK_THROW(IsGuard(process, invalid_address), 
     hadesmem::HadesMemError);
   BOOST_CHECK_THROW(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE), 
-  hadesmem::HadesMemError);
+    hadesmem::HadesMemError);
 }

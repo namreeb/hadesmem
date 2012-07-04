@@ -20,6 +20,10 @@ PVOID Alloc(Process const& process, SIZE_T size);
 
 void Free(Process const& process, LPVOID address);
 
+// TODO: Equality and inequality operator overloads for Allocator.
+// TODO: Relational operator overloads for Allocator.
+// TODO: Stream operator overloads for Allocator.
+
 class Allocator
 {
 public:

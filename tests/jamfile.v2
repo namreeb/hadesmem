@@ -40,3 +40,21 @@ run region.cpp
 
 run region_list.cpp
   ;
+
+compile-fail read_pod_fail.cpp
+  ;
+
+compile-fail read_string_fail.cpp
+  ;
+
+compile-fail read_list_fail.cpp
+  ;
+
+compile-fail write_pod_fail.cpp
+  ;
+
+compile-fail write_string_fail.cpp
+  ;
+
+compile-fail write_list_fail.cpp
+  ;

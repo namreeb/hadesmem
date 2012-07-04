@@ -27,19 +27,19 @@ BOOST_AUTO_TEST_CASE(this_process)
   // TODO: Test relational operators.
   
   hadesmem::Process process(::GetCurrentProcessId());
-  BOOST_CHECK(process == process);
+  BOOST_CHECK_EQUAL(process, process);
   hadesmem::Process process_new(::GetCurrentProcessId());
-  BOOST_CHECK(process == process_new);
+  BOOST_CHECK_EQUAL(process, process_new);
   hadesmem::Process const process_moved(std::move(process_new));
-  BOOST_CHECK(process_new != process_moved);
+  BOOST_CHECK_NE(process_new, process_moved);
   hadesmem::Process process_copy(process);
-  BOOST_CHECK(process_copy == process);
-  BOOST_CHECK(process_copy != process_new);
+  BOOST_CHECK_EQUAL(process_copy, process);
+  BOOST_CHECK_NE(process_copy, process_new);
   process = process_copy;
-  BOOST_CHECK(process == process_copy);
+  BOOST_CHECK_EQUAL(process, process_copy);
   process_new = std::move(process_copy);
-  BOOST_CHECK(process == process_new);
-  BOOST_CHECK(process != process_copy);
+  BOOST_CHECK_EQUAL(process, process_new);
+  BOOST_CHECK_NE(process, process_copy);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
   std::wstring const path(GetPath(process));
   BOOST_CHECK(!path.empty());
