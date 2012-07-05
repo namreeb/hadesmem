@@ -65,7 +65,7 @@ T ReadString(Process const& process, PVOID address,
 }
 
 template <typename T>
-T ReadList(Process const& process, PVOID address, std::size_t size, 
+T ReadVector(Process const& process, PVOID address, std::size_t size, 
   typename std::enable_if<
     std::is_same<
       T, 
@@ -79,7 +79,7 @@ T ReadList(Process const& process, PVOID address, std::size_t size,
 {
   typedef typename T::value_type ValueT;
   
-  static_assert(std::is_pod<ValueT>::value, "ReadList: Value type of vector "
+  static_assert(std::is_pod<ValueT>::value, "ReadVector: Value type of vector "
     "must be POD.");
   
   T data(size);

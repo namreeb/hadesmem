@@ -7,7 +7,7 @@
 
 #include "hadesmem/read.hpp"
 
-#define BOOST_TEST_MODULE write_pod_fail
+#define BOOST_TEST_MODULE read_pod_fail
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -27,7 +27,7 @@ struct non_pod_type
   virtual void foo() { }
 };
 
-BOOST_AUTO_TEST_CASE(write_pod_fail)
+BOOST_AUTO_TEST_CASE(read_pod_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   

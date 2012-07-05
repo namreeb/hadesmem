@@ -29,5 +29,5 @@ BOOST_AUTO_TEST_CASE(write_list_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  WriteList(process, nullptr, non_list_type());
+  WriteVector(process, nullptr, non_list_type());
 }

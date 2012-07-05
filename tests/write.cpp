@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(write_vector)
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
   std::vector<int> int_list_rev(int_list.crbegin(), int_list.crend());
-  WriteList(process, &int_list, int_list_rev);
+  WriteVector(process, &int_list, int_list_rev);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
     int_list_rev.cbegin(), int_list_rev.cend());
 }

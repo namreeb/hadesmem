@@ -32,9 +32,17 @@ void Write(Process const& process, PVOID address, T const& data)
 
 template <typename T>
 void WriteString(Process const& process, PVOID address, T const& data, 
-  typename std::enable_if<std::is_same<T, std::basic_string<typename T::value_type, 
-  typename T::traits_type, typename T::allocator_type>>::value, T>::type* 
-  /*dummy*/ = nullptr)
+  typename std::enable_if<
+    std::is_same<
+      T, 
+      std::basic_string<
+        typename T::value_type, 
+        typename T::traits_type, 
+        typename T::allocator_type
+        >
+      >::value, 
+    T
+    >::type* /*dummy*/ = nullptr)
 {
   typedef typename T::value_type CharT;
   
@@ -46,9 +54,17 @@ void WriteString(Process const& process, PVOID address, T const& data,
 }
 
 template <typename T>
-void WriteList(Process const& process, PVOID address, T const& data, 
-  typename std::enable_if<std::is_same<T, std::vector<typename T::value_type, 
-  typename T::allocator_type>>::value, T>::type* /*dummy*/ = nullptr)
+void WriteVector(Process const& process, PVOID address, T const& data, 
+  typename std::enable_if<
+    std::is_same<
+      T, 
+      std::vector<
+        typename T::value_type, 
+        typename T::allocator_type
+        >
+      >::value, 
+    T
+    >::type* /*dummy*/ = nullptr)
 {
   typedef typename T::value_type ValueT;
   

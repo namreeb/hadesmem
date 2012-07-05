@@ -7,7 +7,7 @@
 
 #include "hadesmem/read.hpp"
 
-#define BOOST_TEST_MODULE write_list_fail
+#define BOOST_TEST_MODULE read_list_fail
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -25,9 +25,9 @@
 struct non_list_type
 { };
 
-BOOST_AUTO_TEST_CASE(write_list_fail)
+BOOST_AUTO_TEST_CASE(read_list_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ReadList<non_list_type>(process, nullptr);
+  hadesmem::ReadVector<non_list_type>(process, nullptr);
 }

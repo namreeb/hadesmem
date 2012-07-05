@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(read_vector)
   hadesmem::Process const process(::GetCurrentProcessId());
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
-  std::vector<int> int_list_read = hadesmem::ReadList<std::vector<int>>(process, 
-    &int_list, 10);
+  std::vector<int> int_list_read = hadesmem::ReadVector<std::vector<int>>(
+    process, &int_list, 10);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
     int_list_read.cbegin(), int_list_read.cend());
 }
