@@ -25,8 +25,8 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
   BOOST_ASSERT(name != nullptr);
   
-  HMODULE const local_module(::LoadLibraryEx(module.GetPath().c_str(), 
-    nullptr, DONT_RESOLVE_DLL_REFERENCES));
+  HMODULE const local_module = ::LoadLibraryEx(module.GetPath().c_str(), 
+    nullptr, DONT_RESOLVE_DLL_REFERENCES);
   if (!local_module)
   {
     DWORD const last_error = ::GetLastError();
