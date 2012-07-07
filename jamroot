@@ -3,6 +3,11 @@ path-constant TOP
     .
   ;
 
+use-project /asmjit
+  :
+    src/asmjit
+  ;
+
 use-project /memory
   :
     src/memory
@@ -11,7 +16,7 @@ use-project /memory
 use-project /tests
   :
     tests
-  ; 
+  ;
 
 project
   :
@@ -36,14 +41,8 @@ project
     <threading>multi
     <runtime-link>static
     
-    <toolset>msvc:<warnings>all
-    <toolset>gcc:<warnings>all
-    <toolset>clang:<warnings>all
-    <toolset>intel:<warnings>on
-    <warnings-as-errors>on
-    
-    <toolset>msvc:<cxxflags>"/analyze /sdl /wd4503"
-    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -std=c++11"
+    <toolset>msvc:<cxxflags>"/wd4503"
+    <toolset>gcc:<cxxflags>"-std=c++11"
     <toolset>clang:<cxxflags>"-std=c++11"
     <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     
@@ -59,10 +58,10 @@ project
     build-dir bin
   ;
 
-build-project tests
+build-project src/memory
   ;
 
-build-project src/memory
+build-project tests
   ;
 
 install dist

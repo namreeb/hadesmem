@@ -1,5 +1,20 @@
 # src/memory/jamfile.v2
 
+project 
+  :
+    requirements
+    
+    <toolset>msvc:<warnings>all
+    <toolset>gcc:<warnings>all
+    <toolset>clang:<warnings>all
+    <toolset>intel:<warnings>on
+    
+    <toolset>msvc:<cxxflags>"/analyze /sdl"
+    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
+    
+    <warnings-as-errors>on
+  ;
+
 lib user32
   :
   :
@@ -11,6 +26,7 @@ lib memory
     [ glob memory/*.cpp ]
     [ glob memory/detail/*.cpp ]
     /boost//locale/<link>static
+    /asmjit//asmjit
     user32
   :
     <link>static
