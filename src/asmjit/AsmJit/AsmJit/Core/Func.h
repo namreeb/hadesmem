@@ -259,7 +259,7 @@ struct FuncBuilderX : public FuncPrototype
 
   template<typename T>
   inline void setReturnTypeT()
-  { setReturnValueRaw(TypeId<ASMJIT_TYPE_TO_TYPE(T)>::Id); }
+  { setReturnTypeRaw(TypeId<ASMJIT_TYPE_TO_TYPE(T)>::Id); }
 
   template<typename T>
   inline void setArgumentT(uint32_t id)

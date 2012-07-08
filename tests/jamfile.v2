@@ -41,6 +41,9 @@ run region.cpp
 run region_list.cpp
   ;
 
+run call.cpp
+  ;
+
 compile-fail read_pod_fail.cpp
   ;
 
