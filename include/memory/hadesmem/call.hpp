@@ -13,6 +13,7 @@
 #include <boost/any.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/function_types/result_type.hpp>
+#include <boost/function_types/function_arity.hpp>
 #include <boost/function_types/parameter_types.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -38,8 +39,6 @@ enum class CallConv
   kCdecl
 };
 
-// std::vector<boost::any> const& args
-
 template <typename FuncT>
 typename boost::function_types::result_type<FuncT>::type Call(Process const& process, CallConv call_conv, PVOID address, 
   typename boost::mpl::at<boost::function_types::parameter_types<FuncT>, boost::mpl::int_<0>>::type arg0, 
@@ -60,23 +59,38 @@ typename boost::function_types::result_type<FuncT>::type Call(Process const& pro
     asmjit_call_conv = AsmJit::kX86FuncConvCompatFastCall;
     break;
   case CallConv::kStdcall:
-    asmjit_call_conv = AsmJit::kX86FuncConvStdCall;
+    asmjit_call_conv = AsmJit::kX86FuncConvCompatStdCall;
     break;
   case CallConv::kCdecl:
-    asmjit_call_conv = AsmJit::kX86FuncConvCDecl;
+    asmjit_call_conv = AsmJit::kX86FuncConvCompatCDecl;
     break;
   default:
-    BOOST_ASSERT(false);
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Invalid calling convention."));
   }
   
-  AsmJit::X86Compiler c;
-  c.newFunc(asmjit_call_conv, AsmJit::FuncBuilder2<ResultT, Arg0T, Arg1T>());
-  //compiler.getFunc()->setHint(kFuncHintNaked, true);
+  int const num_args = boost::function_types::function_arity<FuncT>::value;
+  /*if (args.size() != num_args)
+  {
+    BOOST_THROW_EXCEPTION(HadesError() << 
+      ErrorString("Invalid number of arguments."));
+  }*/
   
-  AsmJit::GpVar a0(c.newGpVar());
-  c.mov(a0, AsmJit::imm(arg0));
-  AsmJit::GpVar a1(c.newGpVar());
-  c.mov(a1, AsmJit::imm(arg1));
+  static_assert(std::is_integral<ResultT>::value, "Unsupported result type.");
+  static_assert(sizeof(ResultT) == sizeof(PVOID), "Unsupported result size.");
+  
+  ResultT ret_val;
+  
+  AsmJit::X86Compiler c;
+  c.newFunc(AsmJit::kX86FuncConvCompatStdCall, AsmJit::FuncBuilder1<DWORD, LPVOID>());
+  //c.getFunc()->setHint(kFuncHintNaked, true);
+  
+  std::vector<AsmJit::GpVar> asmjit_call_args;
+  asmjit_call_args.emplace_back(c.newGpVar());
+  c.mov(asmjit_call_args[0], AsmJit::imm(arg0));
+  asmjit_call_args.emplace_back(c.newGpVar());
+  c.mov(asmjit_call_args[1], AsmJit::imm(arg1));
+  
   AsmJit::GpVar r0(c.newGpVar());
   
   AsmJit::X86CompilerFuncCall* ctx = c.call(address);
@@ -85,18 +99,25 @@ typename boost::function_types::result_type<FuncT>::type Call(Process const& pro
   func_proto.addArgumentT<Arg0T>();
   func_proto.addArgumentT<Arg1T>();
   ctx->setPrototype(asmjit_call_conv, func_proto);
-  ctx->setArgument(0, a0);
-  ctx->setArgument(1, a1);
+  ctx->setArgument(0, asmjit_call_args[0]);
+  ctx->setArgument(1, asmjit_call_args[1]);
   ctx->setReturn(r0);
   
-  c.ret(r0);
+  c.mov(AsmJit::sysint_ptr_abs(&ret_val), r0);
+  
+  AsmJit::GpVar r1(c.newGpVar(AsmJit::kX86VarTypeGpd));
+  c.mov(r1, AsmJit::Imm(0));
+  
+  c.ret(r1);
   c.endFunc();
   
   void* func_local = c.make();
   
-  FuncT func_local_real = asmjit_cast<FuncT>(func_local);
+  LPTHREAD_START_ROUTINE func_local_real = asmjit_cast<LPTHREAD_START_ROUTINE>(func_local);
   
-  auto ret_val = func_local_real(arg0, arg1);
+  // Why the hell doesn't the return value work?
+  /*DWORD test_ret = */func_local_real(nullptr);
+  //BOOST_ASSERT(test_ret == 0);
   
   return ret_val;
 }

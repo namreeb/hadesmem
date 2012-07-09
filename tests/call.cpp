@@ -22,7 +22,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-int call_test_target(int a, int b)
+intptr_t call_test_target(int a, int b)
 {
   return a * b;
 }
@@ -33,6 +33,6 @@ BOOST_AUTO_TEST_CASE(call)
   
   int const arg0 = 5;
   int const arg1 = 10;
-  int result = hadesmem::Call<int (*)(int, int)>(process, hadesmem::CallConv::kDefault, reinterpret_cast<void*>(&call_test_target), arg0, arg1);
+  intptr_t const result = hadesmem::Call<intptr_t (*)(int, int)>(process, hadesmem::CallConv::kStdcall, reinterpret_cast<void*>(&call_test_target), arg0, arg1);
   BOOST_CHECK_EQUAL(result, arg0 * arg1);
 }
