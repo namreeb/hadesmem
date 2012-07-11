@@ -49,9 +49,4 @@ RemoteFunctionRet Call(Process const& process,
   CallConv call_conv, 
   std::vector<PVOID> const& args);
 
-std::vector<RemoteFunctionRet> Call(Process const& process, 
-  std::vector<LPCVOID> addresses, 
-  std::vector<CallConv> call_convs, 
-  std::vector<std::vector<PVOID>> const& args);
-
 }
