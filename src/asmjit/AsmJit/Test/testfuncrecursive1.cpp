@@ -4,7 +4,7 @@
 // [License]
 // Zlib - See COPYING file in this package.
 
-// This file is used as a dummy test. It's changed during development.
+// Recursive function call test.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,33 +12,43 @@
 
 #include <AsmJit/AsmJit.h>
 
-// This is type of function we will generate
-typedef void (*MyFn)(void);
-
-static void dummyFunc(void)
-{
-
-}
+// Type of generated function.
+typedef int (*MyFn)(int);
 
 int main(int argc, char* argv[])
 {
   using namespace AsmJit;
 
   // ==========================================================================
-  // Log compiler output.
-  FileLogger logger(stderr);
-  logger.setLogBinary(true);
-
   // Create compiler.
   Compiler c;
+
+  // Log compiler output.
+  FileLogger logger(stderr);
   c.setLogger(&logger);
 
-  c.newFunction(CALL_CONV_DEFAULT, FunctionBuilder0<Void>());
-  c.getFunction()->setHint(FUNCTION_HINT_NAKED, true);
+  ECall* ctx;
+  Label skip(c.newLabel());
 
-  ECall* ctx = c.call((void*)dummyFunc);
-  ctx->setPrototype(CALL_CONV_DEFAULT, FunctionBuilder0<Void>());
+  EFunction* func = c.newFunction(CALL_CONV_DEFAULT, FunctionBuilder1<int, int>());
+  func->setHint(FUNCTION_HINT_NAKED, true);
 
+  GPVar var(c.argGP(0));
+  c.cmp(var, imm(1));
+  c.jle(skip);
+
+  GPVar tmp(c.newGP(VARIABLE_TYPE_INT32));
+  c.mov(tmp, var);
+  c.dec(tmp);
+
+  ctx = c.call(func->getEntryLabel());
+  ctx->setPrototype(CALL_CONV_DEFAULT, FunctionBuilder1<int, int>());
+  ctx->setArgument(0, tmp);
+  ctx->setReturn(tmp);
+  c.mul(c.newGP(VARIABLE_TYPE_INT32), var, tmp);
+
+  c.bind(skip);
+  c.ret(var);
   c.endFunction();
   // ==========================================================================
 
@@ -46,8 +56,7 @@ int main(int argc, char* argv[])
   // Make the function.
   MyFn fn = function_cast<MyFn>(c.make());
 
-  // Call it.
-  // printf("Result %llu\n", (unsigned long long)fn());
+  printf("Factorial 5 == %d\n", fn(5));
 
   // Free the generated function if it's not needed anymore.
   MemoryManager::getGlobal()->free((void*)fn);

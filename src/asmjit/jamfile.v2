@@ -8,8 +8,7 @@ project
 
 lib asmjit 
   : 
-    [ glob asmjit/AsmJit/Core/*.cpp ] 
-    [ glob asmjit/AsmJit/X86/*.cpp ] 
+    [ glob asmjit/AsmJit/*.cpp ] 
   : 
     <link>static 
     <define>ASMJIT_API="" 
