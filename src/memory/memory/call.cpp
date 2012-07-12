@@ -24,26 +24,18 @@
 
 // TODO: Rewrite, clean up, etc...
 // TODO: Split code gen into detail funcs etc.
-// TODO: Try and convert to use Compiler instead of Assembler.
 
 namespace hadesmem
 {
 
-RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, 
-  DWORD64 ReturnValue64, DWORD LastError) 
+RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD LastError)
   : m_ReturnValue(ReturnValue), 
-  m_ReturnValue64(ReturnValue64), 
   m_LastError(LastError)
 { }
 
 DWORD_PTR RemoteFunctionRet::GetReturnValue() const
 {
   return m_ReturnValue;
-}
-
-DWORD64 RemoteFunctionRet::GetReturnValue64() const
-{
-  return m_ReturnValue64;
 }
 
 DWORD RemoteFunctionRet::GetLastError() const
@@ -57,7 +49,6 @@ RemoteFunctionRet Call(Process const& process,
   std::vector<PVOID> const& args)
 {
   Allocator const return_value_remote(process, sizeof(DWORD_PTR));
-  Allocator const return_value_64_remote(process, sizeof(DWORD64));
   Allocator const last_error_remote(process, sizeof(DWORD));
 
   Module kernel32(&process, L"kernel32.dll");
@@ -73,11 +64,6 @@ RemoteFunctionRet Call(Process const& process,
   compiler.newFunction(AsmJit::CALL_CONV_COMPAT_STDCALL, AsmJit::FunctionBuilder1<int, int>());
   
   std::size_t const num_args = args.size();
-  
-  (void)num_args;
-  (void)address;
-  (void)get_last_error;
-  (void)set_last_error;
   
   unsigned int asmjit_call_conv = 0;
   switch (call_conv)
@@ -189,9 +175,8 @@ RemoteFunctionRet Call(Process const& process,
   }
   
   DWORD_PTR const ret_val = Read<DWORD_PTR>(process, return_value_remote.GetBase());
-  DWORD64 const ret_val_64 = Read<DWORD64>(process, return_value_64_remote.GetBase());
   DWORD const error_code = Read<DWORD>(process, last_error_remote.GetBase());
-  return RemoteFunctionRet(ret_val, ret_val_64, error_code);
+  return RemoteFunctionRet(ret_val, error_code);
 }
 
 }
