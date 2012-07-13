@@ -36,6 +36,11 @@ DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d,
   return 1234;
 }
 
+DWORD64 TestCall64Ret()
+{
+  return 0x123456787654321LL;
+}
+
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
 DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c, 
@@ -105,4 +110,11 @@ BOOST_AUTO_TEST_CASE(call)
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
+  
+  std::vector<PVOID> TestCall64Args;
+  hadesmem::RemoteFunctionRet const CallRet64 = Call(process, 
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall64Ret)), 
+    hadesmem::CallConv::kDefault, TestCall64Args);
+  BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
+    0x123456787654321LL));
 }

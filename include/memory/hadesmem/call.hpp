@@ -19,14 +19,18 @@ class Process;
 class RemoteFunctionRet
 {
 public:
-  RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD LastError);
+  RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
+    DWORD LastError);
   
   DWORD_PTR GetReturnValue() const;
+  
+  DWORD64 GetReturnValue64() const;
   
   DWORD GetLastError() const;
   
 private:
   DWORD_PTR m_ReturnValue;
+  DWORD64 m_ReturnValue64;
   DWORD m_LastError;
 };
 
@@ -44,5 +48,10 @@ RemoteFunctionRet Call(Process const& process,
   LPCVOID address, 
   CallConv call_conv, 
   std::vector<PVOID> const& args);
+
+std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
+  std::vector<LPCVOID> addresses, 
+  std::vector<CallConv> call_convs, 
+  std::vector<std::vector<PVOID>> const& args_full);
 
 }
