@@ -63,17 +63,19 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<CallConv> call_convs, 
   std::vector<std::vector<PVOID>> const& args_full);
 
+// TODO: Improve and clean up this mess, move to different file, etc.
+
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 10
-#endif
+#endif // #ifndef HADESMEM_CALL_MAX_ARGS
 
 #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_REPEAT
 #error "[HadesMem] HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor repeat limit."
-#endif
+#endif // #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_REPEAT
 
 #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_ITERATION
 #error "[HadesMem] HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor iteration limit."
-#endif
+#endif // #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_ITERATION
 
 #define HADESMEM_CALL_DEFINE_ARG(z, n, unused) , typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>, n>::type a##n
 
@@ -96,6 +98,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
 
 #define BOOST_PP_LOCAL_LIMITS (1, HADESMEM_CALL_MAX_ARGS)
 
+// TODO: Document why this is necessary.
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
