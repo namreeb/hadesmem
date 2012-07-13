@@ -89,7 +89,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   DWORD_PTR const set_last_error = reinterpret_cast<DWORD_PTR>(
     FindProcedure(kernel32, "SetLastError"));
   
-  AsmJit::Assembler assembler;
+  AsmJit::X86Assembler assembler;
   
 #if defined(_M_AMD64)
   for (std::size_t i = 0; i < addresses.size(); ++i)
