@@ -22,15 +22,15 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-DWORD_PTR TestCall(PVOID const a, PVOID const b, PVOID const c, PVOID const d, 
-  PVOID const e, PVOID const f)
+DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, unsigned int d, 
+  unsigned int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
-  BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
-  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
-  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
+  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>(0x11223344));
+  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(0xAABBCCDD));
+  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0x55667788));
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0x99999999));
   
   SetLastError(5678);
   return 1234;
@@ -77,17 +77,13 @@ DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c,
 BOOST_AUTO_TEST_CASE(call)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
-
-  std::vector<PVOID> TestCallArgs;
-  TestCallArgs.push_back(nullptr);
-  TestCallArgs.push_back(reinterpret_cast<PVOID>(-1));
-  TestCallArgs.push_back(reinterpret_cast<PVOID>(0x11223344));
-  TestCallArgs.push_back(reinterpret_cast<PVOID>(0xAABBCCDD));
-  TestCallArgs.push_back(reinterpret_cast<PVOID>(0x55667788));
-  TestCallArgs.push_back(reinterpret_cast<PVOID>(0x99999999));
-  hadesmem::RemoteFunctionRet const CallRet = Call(process, 
-    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
-    hadesmem::CallConv::kDefault, TestCallArgs);
+  
+  typedef DWORD_PTR (*TestFuncT)(void const*, void const*, unsigned int, 
+    unsigned int, unsigned int, unsigned int);
+  hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
+    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
+    hadesmem::CallConv::kDefault, nullptr, reinterpret_cast<PVOID>(-1), 
+    0x11223344, 0xAABBCCDD, 0x55667788, 0x99999999);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
