@@ -14,6 +14,7 @@
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
 #include <boost/function_types/result_type.hpp>
+#include <boost/function_types/function_arity.hpp>
 #include <boost/function_types/parameter_types.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -88,6 +89,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
   BOOST_PP_REPEAT(n, HADESMEM_CALL_DEFINE_ARG, ~))\
 {\
   typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
+  static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
   std::vector<PVOID> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
