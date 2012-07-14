@@ -83,7 +83,9 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
 typedef typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>, n>::type A##n;\
 static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value, "Currently only integral or pointer types are supported.");\
 static_assert(sizeof(A##n) <= sizeof(PVOID), "Currently only memsize (or smaller) types are supported.");\
-args.push_back((PVOID)(a##n));\
+union U##n { A##n a; PVOID p; } u##n;\
+u##n.a = a##n;\
+args.push_back(u##n.p);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT>\
@@ -98,17 +100,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
 
 #define BOOST_PP_LOCAL_LIMITS (1, HADESMEM_CALL_MAX_ARGS)
 
-// TODO: Document why this is necessary.
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#endif // #if defined(HADESMEM_GCC)
-
 #include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 
