@@ -27,7 +27,7 @@ DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, unsigned int d,
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>(0x11223344));
+  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
   BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(0xAABBCCDD));
   BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0x55667788));
   BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0x99999999));
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
     hadesmem::CallConv::kDefault, nullptr, reinterpret_cast<PVOID>(-1), 
-    0x11223344, 0xAABBCCDD, 0x55667788, 0x99999999);
+    'c', 0xAABBCCDD, 0x55667788, 0x99999999);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
