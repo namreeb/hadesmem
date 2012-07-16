@@ -55,6 +55,10 @@ enum class CallConv
 
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
+  CallConv call_conv);
+
+RemoteFunctionRet Call(Process const& process, 
+  LPCVOID address, 
   CallConv call_conv, 
   std::vector<PVOID> const& args);
 
