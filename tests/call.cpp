@@ -22,8 +22,8 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, unsigned int d, 
-  unsigned int e, unsigned int f)
+DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, 
+  unsigned int d, unsigned int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
@@ -43,8 +43,8 @@ DWORD64 TestCall64Ret()
 
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
-DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c, 
-  PVOID const d, PVOID const e, PVOID const f)
+DWORD_PTR __fastcall TestFastCall(void const* a, void const* b, 
+  unsigned int c, unsigned int d, unsigned int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
@@ -57,8 +57,8 @@ DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c,
   return 1234;
 }
 
-DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c, 
-  PVOID const d, PVOID const e, PVOID const f)
+DWORD_PTR __stdcall TestStdCall(void const* a, void const* b, unsigned int c, 
+  unsigned int d, unsigned int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
