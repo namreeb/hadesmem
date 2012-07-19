@@ -55,10 +55,6 @@ enum class CallConv
 
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
-  CallConv call_conv);
-
-RemoteFunctionRet Call(Process const& process, 
-  LPCVOID address, 
   CallConv call_conv, 
   std::vector<PVOID> const& args);
 
@@ -68,6 +64,15 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<std::vector<PVOID>> const& args_full);
 
 // TODO: Improve and clean up this mess, move to different file, etc.
+
+template <typename FuncT>
+RemoteFunctionRet Call(Process const& process, 
+  LPCVOID address, 
+  CallConv call_conv)
+{
+  static_assert(boost::function_types::function_arity<FuncT>::value == 0, "Invalid number of arguments.");
+  return Call(process, address, call_conv, std::vector<PVOID>());
+}
 
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 10

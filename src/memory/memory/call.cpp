@@ -52,13 +52,6 @@ DWORD RemoteFunctionRet::GetLastError() const
 
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
-  CallConv call_conv)
-{
-  return Call(process, address, call_conv, std::vector<PVOID>());
-}
-
-RemoteFunctionRet Call(Process const& process, 
-  LPCVOID address, 
   CallConv call_conv, 
   std::vector<PVOID> const& args)
 {

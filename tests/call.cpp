@@ -28,9 +28,9 @@ DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, unsigned int d,
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
   BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
-  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(0xAABBCCDD));
-  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0x55667788));
-  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0x99999999));
+  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
+  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
   
   SetLastError(5678);
   return 1234;
@@ -48,10 +48,10 @@ DWORD_PTR __fastcall TestFastCall(PVOID const a, PVOID const b, PVOID const c,
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
-  BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
-  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
-  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
+  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
+  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
+  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
   
   SetLastError(5678);
   return 1234;
@@ -62,10 +62,10 @@ DWORD_PTR __stdcall TestStdCall(PVOID const a, PVOID const b, PVOID const c,
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, reinterpret_cast<PVOID>(0x11223344));
-  BOOST_CHECK_EQUAL(d, reinterpret_cast<PVOID>(0xAABBCCDD));
-  BOOST_CHECK_EQUAL(e, reinterpret_cast<PVOID>(0x55667788));
-  BOOST_CHECK_EQUAL(f, reinterpret_cast<PVOID>(0x99999999));
+  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
+  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
+  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
   
   SetLastError(5678);
   return 1234;
@@ -78,28 +78,39 @@ BOOST_AUTO_TEST_CASE(call)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
+  struct ImplicitConvTest
+  {
+    operator int() const
+    {
+      return 42;
+    }
+  };
+  
   typedef DWORD_PTR (*TestFuncT)(void const*, void const*, unsigned int, 
     unsigned int, unsigned int, unsigned int);
   hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
     hadesmem::CallConv::kDefault, nullptr, reinterpret_cast<PVOID>(-1), 
-    'c', 0xAABBCCDD, 0x55667788, 0x99999999);
+    'c', ImplicitConvTest(), 0xDEAFBEEF, 0xBAADF00D);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
   hadesmem::RemoteFunctionRet const CallRetFast = 
-    Call(process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestFastCall)), hadesmem::CallConv::kFastCall, 
-    TestCallArgs);
+    hadesmem::Call<TestFuncT>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestFastCall)), 
+    hadesmem::CallConv::kFastCall, nullptr, reinterpret_cast<PVOID>(-1), 
+    'c', ImplicitConvTest(), 0xDEAFBEEF, 0xBAADF00D);
   BOOST_CHECK_EQUAL(CallRetFast.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetFast.GetLastError(), static_cast<DWORD>(5678));
   
   hadesmem::RemoteFunctionRet const CallRetStd = 
-    Call(process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestStdCall)), hadesmem::CallConv::kStdCall, TestCallArgs);
+    hadesmem::Call<TestFuncT>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestStdCall)), hadesmem::CallConv::kStdCall, 
+    nullptr, reinterpret_cast<PVOID>(-1), 'c', ImplicitConvTest(), 0xDEAFBEEF, 
+    0xBAADF00D);
   BOOST_CHECK_EQUAL(CallRetStd.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetStd.GetLastError(), static_cast<DWORD>(5678));
@@ -107,10 +118,9 @@ BOOST_AUTO_TEST_CASE(call)
 #error "[HadesMem] Unsupported architecture."
 #endif
   
-  std::vector<PVOID> TestCall64Args;
-  hadesmem::RemoteFunctionRet const CallRet64 = Call(process, 
-    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall64Ret)), 
-    hadesmem::CallConv::kDefault, TestCall64Args);
+  hadesmem::RemoteFunctionRet const CallRet64 = hadesmem::Call<DWORD64 (*)()>(
+    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestCall64Ret)), hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
     0x123456787654321LL));
 }
