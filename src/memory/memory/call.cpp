@@ -66,21 +66,68 @@ DWORD RemoteFunctionRet::GetLastError() const
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<PVOID> const& args)
+  std::vector<boost::variant<PVOID, double>> const& args)
 {
   std::vector<LPCVOID> addresses;
   addresses.push_back(address);
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
-  std::vector<std::vector<PVOID>> args_full;
+  std::vector<std::vector<boost::variant<PVOID, double>>> args_full;
   args_full.push_back(args);
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
+class X64ArgParser : public boost::static_visitor<>
+{
+public:
+  X64ArgParser(AsmJit::X86Assembler* assembler, std::size_t num_args)
+    : assembler_(assembler), 
+    num_args_(num_args)
+  { }
+  
+  void operator()(PVOID arg)
+  {
+    switch (num_args_)
+    {
+    case 1:
+      assembler_->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(arg));
+      break;
+    case 2:
+      assembler_->mov(AsmJit::rdx, reinterpret_cast<DWORD_PTR>(arg));
+      break;
+    case 3:
+      assembler_->mov(AsmJit::r8, reinterpret_cast<DWORD_PTR>(arg));
+      break;
+    case 4:
+      assembler_->mov(AsmJit::r9, reinterpret_cast<DWORD_PTR>(arg));
+      break;
+    default:
+      assembler_->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->push(AsmJit::rax);
+      break;
+    }
+    
+    --num_args_;
+  }
+  
+  void operator()(double arg)
+  {
+    (void)arg;
+    BOOST_ASSERT(false);
+  }
+  
+private:
+  AsmJit::X86Assembler* assembler_;
+  std::size_t num_args_;
+};
+
+// TODO: Investigate whether it's possible to use the AsmJit compiler to add 
+// FP support after all...
+
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<PVOID>> const& args_full) 
+  std::vector<std::vector<boost::variant<PVOID, double>>> const& args_full) 
 {
   if (addresses.size() != call_convs.size() || 
     addresses.size() != args_full.size())
@@ -113,7 +160,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
-    std::vector<PVOID> const& args = args_full[i];
+    std::vector<boost::variant<PVOID, double>> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
     // Check calling convention
@@ -139,26 +186,9 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     // Cleanup ghost space
     assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
 
-    // Set up first 4 parameters
-    assembler.mov(AsmJit::rcx, num_args > 0 ? reinterpret_cast<DWORD_PTR>(
-      args[0]) : 0);
-    assembler.mov(AsmJit::rdx, num_args > 1 ? reinterpret_cast<DWORD_PTR>(
-      args[1]) : 0);
-    assembler.mov(AsmJit::r8, num_args > 2 ? reinterpret_cast<DWORD_PTR>(
-      args[2]) : 0);
-    assembler.mov(AsmJit::r9, num_args > 3 ? reinterpret_cast<DWORD_PTR>(
-      args[3]) : 0);
-
-    // Handle remaining parameters (if any)
-    if (num_args > 4)
-    {
-      std::for_each(args.crbegin(), args.crend() - 4, 
-        [&assembler] (PVOID arg)
-      {
-        assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
-        assembler.push(AsmJit::rax);
-      });
-    }
+    // Set up parameters
+    X64ArgParser arg_parser(&assembler, num_args);
+    std::for_each(args.rbegin(), args.rend(), boost::apply_visitor(arg_parser));
 
     // Allocate ghost space
     assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));

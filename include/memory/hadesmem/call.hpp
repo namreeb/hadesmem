@@ -12,6 +12,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/mpl/at.hpp>
+#include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
 #include <boost/function_types/result_type.hpp>
 #include <boost/function_types/function_arity.hpp>
@@ -64,12 +65,12 @@ enum class CallConv
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<PVOID> const& args);
+  std::vector<boost::variant<PVOID, double>> const& args);
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<PVOID>> const& args_full);
+  std::vector<std::vector<boost::variant<PVOID, double>>> const& args_full);
 
 // TODO: Improve and clean up this mess, move to different file, etc.
 
@@ -79,7 +80,7 @@ RemoteFunctionRet Call(Process const& process,
   CallConv call_conv)
 {
   static_assert(boost::function_types::function_arity<FuncT>::value == 0, "Invalid number of arguments.");
-  return Call(process, address, call_conv, std::vector<PVOID>());
+  return Call(process, address, call_conv, std::vector<boost::variant<PVOID, double>>());
 }
 
 #ifndef HADESMEM_CALL_MAX_ARGS
@@ -96,12 +97,19 @@ RemoteFunctionRet Call(Process const& process,
 
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
 typedef typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>, n>::type A##n;\
-static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value, "Currently only integral or pointer types are supported.");\
+static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value || std::is_floating_point<A##n>::value, "Currently only integral, pointer, or floating point types are supported.");\
 static_assert(sizeof(A##n) <= sizeof(PVOID), "Currently only memsize (or smaller) types are supported.");\
 static_assert(std::is_convertible<T##n, A##n>::value, "Can not convert argument to type specified in function prototype.");\
-union U##n { A##n a; PVOID p; } u##n;\
-u##n.a = static_cast<A##n>(t##n);\
-args.push_back(u##n.p);\
+if (std::is_integral<A##n>::value || std::is_pointer<A##n>::value)\
+{\
+  union U##n { A##n a; PVOID p; } u##n;\
+  u##n.a = static_cast<A##n>(t##n);\
+  args.push_back(u##n.p);\
+}\
+else\
+{\
+  args.push_back(t##n);\
+}\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -109,7 +117,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T,&& t))\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
-  std::vector<PVOID> args;\
+  std::vector<boost::variant<PVOID, double>> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   return Call(process, address, call_conv, args);\
 }\
