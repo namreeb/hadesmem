@@ -124,6 +124,8 @@ private:
 // TODO: Investigate whether it's possible to use the AsmJit compiler to add 
 // FP support after all...
 
+// TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
+
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
