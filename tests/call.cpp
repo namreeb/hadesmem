@@ -22,15 +22,23 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-DWORD_PTR TestCall(void const* a, void const* b, unsigned int c, 
-  unsigned int d, unsigned int e, unsigned int f)
+namespace
+{
+
+struct DummyType { };
+DummyType dummy_glob;
+
+}
+
+DWORD_PTR TestCall(void const* a, DummyType const* b, char c, 
+  wchar_t d, int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
-  BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
-  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
-  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
-  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
+  BOOST_CHECK_EQUAL(b, &dummy_glob);
+  BOOST_CHECK_EQUAL(c, 'c');
+  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(e, -1234);
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   
   SetLastError(5678);
   return 1234;
@@ -43,29 +51,29 @@ DWORD64 TestCall64Ret()
 
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
-DWORD_PTR __fastcall TestFastCall(void const* a, void const* b, 
-  unsigned int c, unsigned int d, unsigned int e, unsigned int f)
+DWORD_PTR __fastcall TestFastCall(void const* a, DummyType const* b, char c, 
+  wchar_t d, int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
-  BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
-  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
-  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
-  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
+  BOOST_CHECK_EQUAL(b, &dummy_glob);
+  BOOST_CHECK_EQUAL(c, 'c');
+  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(e, -1234);
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   
   SetLastError(5678);
   return 1234;
 }
 
-DWORD_PTR __stdcall TestStdCall(void const* a, void const* b, unsigned int c, 
-  unsigned int d, unsigned int e, unsigned int f)
+DWORD_PTR __stdcall TestStdCall(void const* a, DummyType const* b, char c, 
+  wchar_t d, int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
-  BOOST_CHECK_EQUAL(b, reinterpret_cast<PVOID>(-1));
-  BOOST_CHECK_EQUAL(c, static_cast<unsigned int>('c'));
-  BOOST_CHECK_EQUAL(d, static_cast<unsigned int>(42));
-  BOOST_CHECK_EQUAL(e, static_cast<unsigned int>(0xDEAFBEEF));
-  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xBAADF00D));
+  BOOST_CHECK_EQUAL(b, &dummy_glob);
+  BOOST_CHECK_EQUAL(c, 'c');
+  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(e, -1234);
+  BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   
   SetLastError(5678);
   return 1234;
@@ -82,16 +90,16 @@ BOOST_AUTO_TEST_CASE(call)
   {
     operator int() const
     {
-      return 42;
+      return -1234;
     }
   };
   
-  typedef DWORD_PTR (*TestFuncT)(void const*, void const*, unsigned int, 
-    unsigned int, unsigned int, unsigned int);
+  typedef DWORD_PTR (*TestFuncT)(void const* a, DummyType const* b, char c, 
+  wchar_t d, int e, unsigned int f);
   hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
-    hadesmem::CallConv::kDefault, nullptr, reinterpret_cast<PVOID>(-1), 
-    'c', ImplicitConvTest(), 0xDEAFBEEF, 0xBAADF00D);
+    hadesmem::CallConv::kDefault, nullptr, &dummy_glob, 'c', L'd', 
+    ImplicitConvTest(), 0xDEAFBEEF);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
@@ -100,8 +108,8 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::RemoteFunctionRet const CallRetFast = 
     hadesmem::Call<TestFuncT>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&TestFastCall)), 
-    hadesmem::CallConv::kFastCall, nullptr, reinterpret_cast<PVOID>(-1), 
-    'c', ImplicitConvTest(), 0xDEAFBEEF, 0xBAADF00D);
+    hadesmem::CallConv::kFastCall, nullptr, &dummy_glob, 'c', L'd', 
+    ImplicitConvTest(), 0xDEAFBEEF);
   BOOST_CHECK_EQUAL(CallRetFast.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetFast.GetLastError(), static_cast<DWORD>(5678));
@@ -109,8 +117,7 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::RemoteFunctionRet const CallRetStd = 
     hadesmem::Call<TestFuncT>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&TestStdCall)), hadesmem::CallConv::kStdCall, 
-    nullptr, reinterpret_cast<PVOID>(-1), 'c', ImplicitConvTest(), 0xDEAFBEEF, 
-    0xBAADF00D);
+    nullptr, &dummy_glob, 'c', L'd', ImplicitConvTest(), 0xDEAFBEEF);
   BOOST_CHECK_EQUAL(CallRetStd.GetReturnValue(), static_cast<DWORD_PTR>(
     1234));
   BOOST_CHECK_EQUAL(CallRetStd.GetLastError(), static_cast<DWORD>(5678));
