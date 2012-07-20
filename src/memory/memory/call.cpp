@@ -29,9 +29,12 @@ namespace hadesmem
 {
 
 RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, 
-  DWORD64 ReturnValue64, DWORD LastError)
+  DWORD64 ReturnValue64, float ReturnValueFloat, double ReturnValueDouble, 
+  DWORD LastError)
   : m_ReturnValue(ReturnValue), 
   m_ReturnValue64(ReturnValue64), 
+  m_ReturnValueFloat(ReturnValueFloat), 
+  m_ReturnValueDouble(ReturnValueDouble), 
   m_LastError(LastError)
 { }
 
@@ -43,6 +46,16 @@ DWORD_PTR RemoteFunctionRet::GetReturnValue() const
 DWORD64 RemoteFunctionRet::GetReturnValue64() const
 {
   return m_ReturnValue64;
+}
+
+float RemoteFunctionRet::GetReturnValueFloat() const
+{
+  return m_ReturnValueFloat;
+}
+
+double RemoteFunctionRet::GetReturnValueDouble() const
+{
+  return m_ReturnValueDouble;
 }
 
 DWORD RemoteFunctionRet::GetLastError() const
@@ -79,6 +92,10 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   Allocator const return_value_remote(process, sizeof(DWORD_PTR) * 
     addresses.size());
   Allocator const return_value_64_remote(process, sizeof(DWORD64) * 
+    addresses.size());
+  Allocator const return_value_float_remote(process, sizeof(float) * 
+    addresses.size());
+  Allocator const return_value_double_remote(process, sizeof(double) * 
     addresses.size());
   Allocator const last_error_remote(process, sizeof(DWORD) * 
     addresses.size());
@@ -165,6 +182,14 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
+    
+    // Write float return value to memory
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_float_remote.GetBase()) + i * sizeof(float));
+    assembler.movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
+    
+    // Write double return value to memory
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
+    assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::rax, get_last_error);
@@ -264,6 +289,14 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
     
+    // Write float return value to memory
+    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(return_value_float_remote.GetBase()) + i * sizeof(float));
+    assembler.fst(AsmJit::dword_ptr(AsmJit::ecx));
+    
+    // Write double return value to memory
+    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
+    assembler.fst(AsmJit::qword_ptr(AsmJit::ecx));
+    
     // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::eax, get_last_error);
     assembler.call(AsmJit::eax);
@@ -334,9 +367,11 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_value_remote.GetBase()) + i);
     DWORD64 const ret_val_64 = Read<DWORD64>(process, static_cast<DWORD64*>(
       return_value_64_remote.GetBase()) + i);
+    float const ret_val_float = Read<float>(process, static_cast<float*>(return_value_float_remote.GetBase()) + i);
+    double const ret_val_double = Read<double>(process, static_cast<double*>(return_value_double_remote.GetBase()) + i);
     DWORD const error_code = Read<DWORD>(process, static_cast<DWORD*>(
       last_error_remote.GetBase()) + i);
-    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, error_code));
+    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, error_code));
   }
   
   return return_vals;

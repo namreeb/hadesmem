@@ -25,21 +25,29 @@ namespace hadesmem
 
 class Process;
 
+// TODO: Clean up style.
+// TODO: Support 'long double' return values.
 class RemoteFunctionRet
 {
 public:
   RemoteFunctionRet(DWORD_PTR ReturnValue, DWORD64 ReturnValue64, 
-    DWORD LastError);
+    float ReturnValueFloat, double ReturnValueDouble, DWORD LastError);
   
   DWORD_PTR GetReturnValue() const;
   
   DWORD64 GetReturnValue64() const;
+  
+  float GetReturnValueFloat() const;
+  
+  double GetReturnValueDouble() const;
   
   DWORD GetLastError() const;
   
 private:
   DWORD_PTR m_ReturnValue;
   DWORD64 m_ReturnValue64;
+  float m_ReturnValueFloat;
+  double m_ReturnValueDouble;
   DWORD m_LastError;
 };
 

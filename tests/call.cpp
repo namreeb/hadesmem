@@ -49,6 +49,16 @@ DWORD64 TestCall64Ret()
   return 0x123456787654321LL;
 }
 
+float TestCallFloatRet()
+{
+  return 1.234f;
+}
+
+double TestCallDoubleRet()
+{
+  return 9.876;
+}
+
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
 DWORD_PTR __fastcall TestFastCall(void const* a, DummyType const* b, char c, 
@@ -130,4 +140,15 @@ BOOST_AUTO_TEST_CASE(call)
     &TestCall64Ret)), hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRet64.GetReturnValue64(), static_cast<DWORD64>(
     0x123456787654321LL));
+  
+  hadesmem::RemoteFunctionRet const CallRetFloat = hadesmem::Call<float (*)()>(
+    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestCallFloatRet)), hadesmem::CallConv::kDefault);
+  BOOST_CHECK_EQUAL(CallRetFloat.GetReturnValueFloat(), 1.234f);
+  
+  hadesmem::RemoteFunctionRet const CallRetDouble = 
+    hadesmem::Call<double (*)()>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestCallDoubleRet)), 
+    hadesmem::CallConv::kDefault);
+  BOOST_CHECK_EQUAL(CallRetDouble.GetReturnValueDouble(), 9.876);
 }
