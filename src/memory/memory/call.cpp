@@ -28,39 +28,45 @@
 namespace hadesmem
 {
 
-RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR ReturnValue, 
-  DWORD64 ReturnValue64, float ReturnValueFloat, double ReturnValueDouble, 
-  DWORD LastError)
-  : m_ReturnValue(ReturnValue), 
-  m_ReturnValue64(ReturnValue64), 
-  m_ReturnValueFloat(ReturnValueFloat), 
-  m_ReturnValueDouble(ReturnValueDouble), 
-  m_LastError(LastError)
+RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR return_int_ptr, 
+  DWORD64 return_int_64, float return_float, double return_double, 
+  long double return_long_double, DWORD last_error)
+  : int_ptr_(return_int_ptr), 
+  int_64_(return_int_64), 
+  float_(return_float), 
+  double_(return_double), 
+  long_double_(return_long_double), 
+  last_error_(last_error)
 { }
 
 DWORD_PTR RemoteFunctionRet::GetReturnValue() const
 {
-  return m_ReturnValue;
+  return int_ptr_;
 }
 
 DWORD64 RemoteFunctionRet::GetReturnValue64() const
 {
-  return m_ReturnValue64;
+  return int_64_;
 }
 
 float RemoteFunctionRet::GetReturnValueFloat() const
 {
-  return m_ReturnValueFloat;
+  return float_;
 }
 
 double RemoteFunctionRet::GetReturnValueDouble() const
 {
-  return m_ReturnValueDouble;
+  return double_;
+}
+
+long double RemoteFunctionRet::GetReturnValueLongDouble() const
+{
+  return long_double_;
 }
 
 DWORD RemoteFunctionRet::GetLastError() const
 {
-  return m_LastError;
+  return last_error_;
 }
 
 RemoteFunctionRet Call(Process const& process, 
@@ -230,6 +236,9 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     addresses.size());
   Allocator const return_value_double_remote(process, sizeof(double) * 
     addresses.size());
+  static_assert(sizeof(double) == sizeof(long double), "Size of long double is invalid.");
+  Allocator const return_value_long_double_remote(process, 
+    sizeof(long double) * addresses.size());
   Allocator const last_error_remote(process, sizeof(DWORD) * 
     addresses.size());
 
@@ -324,6 +333,10 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     
     // Write double return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
+    assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
+
+    // Write long double return value to memory
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_long_double_remote.GetBase()) + i * sizeof(long double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     // Call kernel32.dll!GetLastError
@@ -504,9 +517,10 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_value_64_remote.GetBase()) + i);
     float const ret_val_float = Read<float>(process, static_cast<float*>(return_value_float_remote.GetBase()) + i);
     double const ret_val_double = Read<double>(process, static_cast<double*>(return_value_double_remote.GetBase()) + i);
+    long double const ret_val_long_double = Read<long double>(process, static_cast<long double*>(return_value_long_double_remote.GetBase()) + i);
     DWORD const error_code = Read<DWORD>(process, static_cast<DWORD*>(
       last_error_remote.GetBase()) + i);
-    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, error_code));
+    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, ret_val_long_double, error_code));
   }
   
   return return_vals;
