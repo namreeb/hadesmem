@@ -1,0 +1,7 @@
+# examples/jamfile.v2
+
+exe memhack
+  :
+    [ glob memhack/*.cpp ]
+    /memory//memory
+  ;

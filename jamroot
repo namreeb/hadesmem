@@ -18,6 +18,11 @@ use-project /tests
     tests
   ;
 
+use-project /examples
+  :
+    examples
+  ;
+
 project
   :
     requirements
@@ -64,9 +69,13 @@ build-project src/memory
 build-project tests
   ;
 
+build-project examples
+  ;
+
 install dist
   :
     src/memory
+    examples
   :
     <toolset>msvc,<variant>debug,<address-model>32:<location>dist/msvc/debug/x86
     <toolset>msvc,<variant>debug,<address-model>64:<location>dist/msvc/debug/x64
