@@ -66,13 +66,13 @@ DWORD RemoteFunctionRet::GetLastError() const
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<boost::variant<PVOID, double>> const& args)
+  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args)
 {
   std::vector<LPCVOID> addresses;
   addresses.push_back(address);
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
-  std::vector<std::vector<boost::variant<PVOID, double>>> args_full;
+  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> args_full;
   args_full.push_back(args);
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
@@ -110,8 +110,52 @@ public:
     --num_args_;
   }
   
-  void operator()(double arg)
+  void operator()(detail::WrappedFloat arg_wrapped)
   {
+    float arg = arg_wrapped.f;
+    union FloatConv
+    {
+      float f;
+      DWORD i;
+    };
+        
+    FloatConv float_conv;
+    float_conv.f = arg;
+    
+    switch (num_args_)
+    {
+    case 1:
+      assembler_->push(static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 2:
+      assembler_->push(static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 3:
+      assembler_->push(static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 4:
+      assembler_->push(static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    default:
+      assembler_->mov(AsmJit::eax, float_conv.i);
+      assembler_->push(AsmJit::eax);
+      break;
+    }
+    
+    --num_args_;
+  }
+  
+  void operator()(detail::WrappedDouble arg_wrapped)
+  {
+    double arg = arg_wrapped.d;
     union DoubleConv
     {
       double d;
@@ -169,7 +213,7 @@ private:
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<boost::variant<PVOID, double>>> const& args_full) 
+  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> const& args_full) 
 {
   if (addresses.size() != call_convs.size() || 
     addresses.size() != args_full.size())
@@ -208,7 +252,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
-    std::vector<boost::variant<PVOID, double>> const& args = args_full[i];
+    std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
     // Check calling convention

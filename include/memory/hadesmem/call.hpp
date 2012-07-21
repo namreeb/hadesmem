@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/any.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
@@ -62,15 +63,21 @@ enum class CallConv
   kX64
 };
 
+namespace detail
+{
+  struct WrappedFloat { float f; };
+  struct WrappedDouble { double d; };
+}
+
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<boost::variant<PVOID, double>> const& args);
+  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args);
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<boost::variant<PVOID, double>>> const& args_full);
+  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> const& args_full);
 
 // TODO: Improve and clean up this mess, move to different file, etc.
 
@@ -80,7 +87,7 @@ RemoteFunctionRet Call(Process const& process,
   CallConv call_conv)
 {
   static_assert(boost::function_types::function_arity<FuncT>::value == 0, "Invalid number of arguments.");
-  return Call(process, address, call_conv, std::vector<boost::variant<PVOID, double>>());
+  return Call(process, address, call_conv, std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>());
 }
 
 #ifndef HADESMEM_CALL_MAX_ARGS
@@ -108,7 +115,24 @@ if (std::is_integral<A##n>::value || std::is_pointer<A##n>::value)\
 }\
 else\
 {\
-  args.push_back(t##n);\
+  /*static_assert(std::is_same<float, A##n>::value || std::is_same<double, A##n>::value, "Currently only floats and doubles are supported.");*/\
+  static_assert(!std::is_same<float, double>::value, "Floats and doubles are the same. Wrong!");\
+  boost::any temp_any;\
+  temp_any = static_cast<A##n>(t##n);\
+  if (std::is_same<float, A##n>::value)\
+  {\
+    detail::WrappedFloat wrapped_float = { boost::any_cast<float>(temp_any) };\
+    args.push_back(wrapped_float);\
+  }\
+  else if (std::is_same<double, A##n>::value)\
+  {\
+    detail::WrappedDouble wrapped_double = { boost::any_cast<double>(temp_any) };\
+    args.push_back(wrapped_double);\
+  }\
+  else\
+  {\
+    BOOST_ASSERT("Currently only floats and doubles are supported." && false);\
+  }\
 }\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
@@ -117,7 +141,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T,&& t))\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
-  std::vector<boost::variant<PVOID, double>> args;\
+  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   return Call(process, address, call_conv, args);\
 }\

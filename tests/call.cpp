@@ -31,12 +31,12 @@ DummyType dummy_glob;
 }
 
 DWORD_PTR TestCall(double a, DummyType const* b, char c, 
-  wchar_t d, int e, unsigned int f)
+  float d, int e, unsigned int f)
 {
   BOOST_CHECK_EQUAL(a, 1337.6666);
   BOOST_CHECK_EQUAL(b, &dummy_glob);
   BOOST_CHECK_EQUAL(c, 'c');
-  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(d, 9081.736455f);
   BOOST_CHECK_EQUAL(e, -1234);
   BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   
@@ -105,10 +105,10 @@ BOOST_AUTO_TEST_CASE(call)
   };
   
   typedef DWORD_PTR (*TestFuncT)(double a, DummyType const* b, char c, 
-  wchar_t d, int e, unsigned int f);
+  float d, int e, unsigned int f);
   hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
-    hadesmem::CallConv::kDefault, 1337.6666, &dummy_glob, 'c', L'd', 
+    hadesmem::CallConv::kDefault, 1337.6666, &dummy_glob, 'c', 9081.736455f, 
     ImplicitConvTest(), 0xDEAFBEEF);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
