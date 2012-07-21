@@ -117,7 +117,6 @@ if (std::is_integral<A##n>::value || std::is_pointer<A##n>::value)\
 }\
 else\
 {\
-  /*static_assert(std::is_same<float, A##n>::value || std::is_same<double, A##n>::value, "Currently only floats and doubles are supported.");*/\
   static_assert(!std::is_same<float, double>::value, "Floats and doubles are the same. Wrong!");\
   boost::any temp_any;\
   temp_any = static_cast<A##n>(t##n);\
