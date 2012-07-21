@@ -112,8 +112,48 @@ public:
   
   void operator()(double arg)
   {
-    (void)arg;
-    BOOST_ASSERT(false);
+    union DoubleConv
+    {
+      double d;
+      DWORD64 i;
+    };
+    
+    DoubleConv double_conv;
+    double_conv.d = arg;
+    
+    switch (num_args_)
+    {
+    case 1:
+      assembler_->push(static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 2:
+      assembler_->push(static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 3:
+      assembler_->push(static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    case 4:
+      assembler_->push(static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp));
+      assembler_->add(AsmJit::rsp, 0x8);
+      break;
+    default:
+      assembler_->mov(AsmJit::rax, double_conv.i);
+      assembler_->push(AsmJit::rax);
+      break;
+    }
+    
+    --num_args_;
   }
   
 private:
@@ -154,8 +194,14 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     FindProcedure(kernel32, "GetLastError"));
   DWORD_PTR const set_last_error = reinterpret_cast<DWORD_PTR>(
     FindProcedure(kernel32, "SetLastError"));
+  DWORD_PTR const is_debugger_present = reinterpret_cast<DWORD_PTR>(
+    FindProcedure(kernel32, "IsDebuggerPresent"));
+  DWORD_PTR const debug_break = reinterpret_cast<DWORD_PTR>(
+    FindProcedure(kernel32, "DebugBreak"));
   
   AsmJit::X86Assembler assembler;
+  
+  std::vector<AsmJit::Label> label_nodebug;
   
 #if defined(_M_AMD64)
   for (std::size_t i = 0; i < addresses.size(); ++i)
@@ -176,7 +222,20 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     // Prologue
     assembler.push(AsmJit::rbp);
     assembler.mov(AsmJit::rbp, AsmJit::rsp);
-
+    
+    // Call kernel32.dll!IsDebuggerPresent
+    assembler.mov(AsmJit::rax, is_debugger_present);
+    assembler.call(AsmJit::rax);
+    
+    // Call kernel32.dll!DebugBreak if IsDebuggerPresent returns TRUE
+    label_nodebug.emplace_back(assembler.newLabel());
+    assembler.test(AsmJit::rax, AsmJit::rax);
+    assembler.jz(label_nodebug[i]);
+    assembler.mov(AsmJit::rax, debug_break);
+    assembler.call(AsmJit::rax);
+    
+    assembler.bind(label_nodebug[i]);
+    
     // Allocate ghost space
     assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
 
