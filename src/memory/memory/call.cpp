@@ -72,26 +72,26 @@ DWORD RemoteFunctionRet::GetLastError() const
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args)
+  std::vector<CallArg> const& args)
 {
   std::vector<LPCVOID> addresses;
   addresses.push_back(address);
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
-  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> args_full;
+  std::vector<std::vector<CallArg>> args_full;
   args_full.push_back(args);
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
-class X64ArgParser : public boost::static_visitor<>
+class X64ArgVisitor
 {
 public:
-  X64ArgParser(AsmJit::X86Assembler* assembler, std::size_t num_args)
+  X64ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args)
     : assembler_(assembler), 
     num_args_(num_args)
   { }
   
-  void operator()(PVOID arg)
+  void Visit(void* arg)
   {
     switch (num_args_)
     {
@@ -116,9 +116,8 @@ public:
     --num_args_;
   }
   
-  void operator()(detail::WrappedFloat arg_wrapped)
+  void Visit(float arg)
   {
-    float arg = arg_wrapped.f;
     union FloatConv
     {
       float f;
@@ -159,9 +158,8 @@ public:
     --num_args_;
   }
   
-  void operator()(detail::WrappedDouble arg_wrapped)
+  void Visit(double arg)
   {
-    double arg = arg_wrapped.d;
     union DoubleConv
     {
       double d;
@@ -219,7 +217,7 @@ private:
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> const& args_full) 
+  std::vector<std::vector<CallArg>> const& args_full) 
 {
   if (addresses.size() != call_convs.size() || 
     addresses.size() != args_full.size())
@@ -261,7 +259,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
-    std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args = args_full[i];
+    std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
     // Check calling convention
@@ -286,7 +284,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.jz(label_nodebug[i]);
     assembler.mov(AsmJit::rax, debug_break);
     assembler.call(AsmJit::rax);
-    
     assembler.bind(label_nodebug[i]);
     
     // Allocate ghost space
@@ -301,8 +298,12 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
 
     // Set up parameters
-    X64ArgParser arg_parser(&assembler, num_args);
-    std::for_each(args.rbegin(), args.rend(), boost::apply_visitor(arg_parser));
+    X64ArgVisitor arg_visitor(&assembler, num_args);
+    std::for_each(args.rbegin(), args.rend(), 
+      [&] (CallArg const& arg)
+      {
+        arg.Visit(&arg_visitor);
+      });
 
     // Allocate ghost space
     assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));

@@ -11,9 +11,8 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/any.hpp>
+#include <boost/assert.hpp>
 #include <boost/mpl/at.hpp>
-#include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
 #include <boost/function_types/result_type.hpp>
 #include <boost/function_types/function_arity.hpp>
@@ -65,21 +64,106 @@ enum class CallConv
   kX64
 };
 
-namespace detail
+// TODO: Long double support.
+
+class CallArg
 {
-  struct WrappedFloat { float f; };
-  struct WrappedDouble { double d; };
-}
+public:
+  template <typename T>
+  CallArg(T t)
+    : type_(ArgType::kPtrType), 
+    arg_()
+  {
+    static_assert(std::is_integral<T>::value || 
+      std::is_pointer<T>::value || 
+      std::is_same<float, typename std::remove_cv<T>::type>::value || 
+      std::is_same<double, typename std::remove_cv<T>::type>::value, 
+      "Invalid argument type.");
+    
+    Initialize(t);
+  }
+  
+  template <typename V>
+  void Visit(V* v) const
+  {
+    switch (type_)
+    {
+    case ArgType::kPtrType:
+      v->Visit(arg_.p);
+      break;
+    case ArgType::kFloatType:
+      v->Visit(arg_.f);
+      break;
+    case ArgType::kDoubleType:
+      v->Visit(arg_.d);
+      break;
+    default:
+      BOOST_ASSERT("Invalid type." && false);
+    }
+  }
+  
+private:
+  template <typename T>
+  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || std::is_pointer<T>::value>::type* dummy = nullptr)
+  {
+    (void)dummy;
+    
+    type_ = ArgType::kPtrType;
+    union Conv
+    {
+      T t;
+      void* p;
+    };
+    Conv conv;
+    conv.t = t;
+    arg_.p = conv.p;
+  }
+  
+  template <typename T>
+  void Initialize(T t, typename std::enable_if<std::is_same<float, typename std::remove_cv<T>::type>::value>::type* dummy = nullptr)
+  {
+    (void)dummy;
+    
+    type_ = ArgType::kFloatType;
+    arg_.f = t;
+  }
+  
+  template <typename T>
+  void Initialize(T t, typename std::enable_if<std::is_same<double, typename std::remove_cv<T>::type>::value>::type* dummy = nullptr)
+  {
+    (void)dummy;
+    
+    type_ = ArgType::kDoubleType;
+    arg_.d = t;
+  }
+  
+  enum class ArgType
+  {
+    kPtrType, 
+    kFloatType, 
+    kDoubleType
+  };
+  
+  union Arg
+  {
+    void* p;
+    float f;
+    double d;
+  };
+  
+  ArgType type_;
+  Arg arg_;
+};
 
 RemoteFunctionRet Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
-  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> const& args);
+  std::vector<CallArg> const& args);
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
-  std::vector<std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>> const& args_full);
+  std::vector<std::vector<CallArg>> const& args_full);
 
 // TODO: Improve and clean up this mess, move to different file, etc.
 
@@ -89,7 +173,7 @@ RemoteFunctionRet Call(Process const& process,
   CallConv call_conv)
 {
   static_assert(boost::function_types::function_arity<FuncT>::value == 0, "Invalid number of arguments.");
-  return Call(process, address, call_conv, std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>>());
+  return Call(process, address, call_conv, std::vector<CallArg>());
 }
 
 #ifndef HADESMEM_CALL_MAX_ARGS
@@ -109,32 +193,7 @@ typedef typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>,
 static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value || std::is_floating_point<A##n>::value, "Currently only integral, pointer, or floating point types are supported.");\
 static_assert(sizeof(A##n) <= sizeof(PVOID), "Currently only memsize (or smaller) types are supported.");\
 static_assert(std::is_convertible<T##n, A##n>::value, "Can not convert argument to type specified in function prototype.");\
-if (std::is_integral<A##n>::value || std::is_pointer<A##n>::value)\
-{\
-  union U##n { A##n a; PVOID p; } u##n;\
-  u##n.a = static_cast<A##n>(t##n);\
-  args.push_back(u##n.p);\
-}\
-else\
-{\
-  static_assert(!std::is_same<float, double>::value, "Floats and doubles are the same. Wrong!");\
-  boost::any temp_any;\
-  temp_any = static_cast<A##n>(t##n);\
-  if (std::is_same<float, A##n>::value)\
-  {\
-    detail::WrappedFloat wrapped_float = { boost::any_cast<float>(temp_any) };\
-    args.push_back(wrapped_float);\
-  }\
-  else if (std::is_same<double, A##n>::value)\
-  {\
-    detail::WrappedDouble wrapped_double = { boost::any_cast<double>(temp_any) };\
-    args.push_back(wrapped_double);\
-  }\
-  else\
-  {\
-    BOOST_ASSERT("Currently only floats and doubles are supported." && false);\
-  }\
-}\
+args.push_back(static_cast<A##n>(t##n));\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -142,7 +201,7 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T,&& t))\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
-  std::vector<boost::variant<PVOID, detail::WrappedFloat, detail::WrappedDouble>> args;\
+  std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   return Call(process, address, call_conv, args);\
 }\
