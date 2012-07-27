@@ -189,7 +189,8 @@ typedef typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>,
 static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value || std::is_floating_point<A##n>::value, "Currently only integral, pointer, or floating point types are supported.");\
 static_assert(sizeof(A##n) <= sizeof(PVOID), "Currently only memsize (or smaller) types are supported.");\
 static_assert(std::is_convertible<T##n, A##n>::value, "Can not convert argument to type specified in function prototype.");\
-args.push_back(static_cast<A##n>(t##n));\
+A##n a##n = t##n;\
+args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
