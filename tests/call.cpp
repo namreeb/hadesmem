@@ -151,5 +151,4 @@ BOOST_AUTO_TEST_CASE(call)
     reinterpret_cast<DWORD_PTR>(&TestCallDoubleRet)), 
     hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRetDouble.GetReturnValueDouble(), 9.876);
-  BOOST_CHECK_EQUAL(CallRetDouble.GetReturnValueLongDouble(), 9.876);
 }

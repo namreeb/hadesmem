@@ -30,8 +30,7 @@ class RemoteFunctionRet
 {
 public:
   RemoteFunctionRet(DWORD_PTR return_int_ptr, DWORD64 return_int_64, 
-    float return_float, double return_double, long double return_long_double, 
-    DWORD last_error);
+    float return_float, double return_double, DWORD last_error);
   
   DWORD_PTR GetReturnValue() const;
   
@@ -41,8 +40,6 @@ public:
   
   double GetReturnValueDouble() const;
   
-  long double GetReturnValueLongDouble() const;
-  
   DWORD GetLastError() const;
   
 private:
@@ -50,7 +47,6 @@ private:
   DWORD64 int_64_;
   float float_;
   double double_;
-  long double long_double_;
   DWORD last_error_;
 };
 
@@ -89,13 +85,13 @@ public:
     switch (type_)
     {
     case ArgType::kPtrType:
-      v->Visit(arg_.p);
+      (*v)(arg_.p);
       break;
     case ArgType::kFloatType:
-      v->Visit(arg_.f);
+      (*v)(arg_.f);
       break;
     case ArgType::kDoubleType:
-      v->Visit(arg_.d);
+      (*v)(arg_.d);
       break;
     default:
       BOOST_ASSERT("Invalid type." && false);

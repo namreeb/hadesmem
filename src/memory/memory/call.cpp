@@ -30,12 +30,11 @@ namespace hadesmem
 
 RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR return_int_ptr, 
   DWORD64 return_int_64, float return_float, double return_double, 
-  long double return_long_double, DWORD last_error)
+  DWORD last_error)
   : int_ptr_(return_int_ptr), 
   int_64_(return_int_64), 
   float_(return_float), 
   double_(return_double), 
-  long_double_(return_long_double), 
   last_error_(last_error)
 { }
 
@@ -57,11 +56,6 @@ float RemoteFunctionRet::GetReturnValueFloat() const
 double RemoteFunctionRet::GetReturnValueDouble() const
 {
   return double_;
-}
-
-long double RemoteFunctionRet::GetReturnValueLongDouble() const
-{
-  return long_double_;
 }
 
 DWORD RemoteFunctionRet::GetLastError() const
@@ -91,7 +85,7 @@ public:
     num_args_(num_args)
   { }
   
-  void Visit(void* arg)
+  void operator()(void* arg)
   {
     switch (num_args_)
     {
@@ -116,8 +110,10 @@ public:
     --num_args_;
   }
   
-  void Visit(float arg)
+  void operator()(float arg)
   {
+    static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
+    
     union FloatConv
     {
       float f;
@@ -158,8 +154,10 @@ public:
     --num_args_;
   }
   
-  void Visit(double arg)
+  void operator()(double arg)
   {
+    static_assert(sizeof(double) == sizeof(DWORD64), "Invalid type sizes.");
+    
     union DoubleConv
     {
       double d;
@@ -212,6 +210,8 @@ private:
 // TODO: Investigate whether it's possible to use the AsmJit compiler to add 
 // FP support after all...
 
+// TODO: Long double support.
+
 // TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
@@ -234,9 +234,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     addresses.size());
   Allocator const return_value_double_remote(process, sizeof(double) * 
     addresses.size());
-  static_assert(sizeof(double) == sizeof(long double), "Size of long double is invalid.");
-  Allocator const return_value_long_double_remote(process, 
-    sizeof(long double) * addresses.size());
   Allocator const last_error_remote(process, sizeof(DWORD) * 
     addresses.size());
 
@@ -335,11 +332,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     // Write double return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
-
-    // Write long double return value to memory
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_long_double_remote.GetBase()) + i * sizeof(long double));
-    assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
-
+    
     // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::rax, get_last_error);
     assembler.call(AsmJit::rax);
@@ -516,12 +509,13 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_value_remote.GetBase()) + i);
     DWORD64 const ret_val_64 = Read<DWORD64>(process, static_cast<DWORD64*>(
       return_value_64_remote.GetBase()) + i);
-    float const ret_val_float = Read<float>(process, static_cast<float*>(return_value_float_remote.GetBase()) + i);
-    double const ret_val_double = Read<double>(process, static_cast<double*>(return_value_double_remote.GetBase()) + i);
-    long double const ret_val_long_double = Read<long double>(process, static_cast<long double*>(return_value_long_double_remote.GetBase()) + i);
+    float const ret_val_float = Read<float>(process, static_cast<float*>(
+      return_value_float_remote.GetBase()) + i);
+    double const ret_val_double = Read<double>(process, static_cast<double*>(
+      return_value_double_remote.GetBase()) + i);
     DWORD const error_code = Read<DWORD>(process, static_cast<DWORD*>(
       last_error_remote.GetBase()) + i);
-    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, ret_val_long_double, error_code));
+    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, error_code));
   }
   
   return return_vals;
