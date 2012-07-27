@@ -270,29 +270,45 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.push(AsmJit::rbp);
     assembler.mov(AsmJit::rbp, AsmJit::rsp);
     
+    // Allocate ghost space
+    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+    
     // Call kernel32.dll!IsDebuggerPresent
     assembler.mov(AsmJit::rax, is_debugger_present);
     assembler.call(AsmJit::rax);
     
-    // Call kernel32.dll!DebugBreak if IsDebuggerPresent returns TRUE
+    // Cleanup ghost space
+    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
+    
+    // Test if kernel32.dll!DebugBreak returned TRUE.
     label_nodebug.emplace_back(assembler.newLabel());
     assembler.test(AsmJit::rax, AsmJit::rax);
     assembler.jz(label_nodebug[i]);
+    
+    // Allocate ghost space
+    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+    
+    // Call kernel32.dll!DebugBreak
     assembler.mov(AsmJit::rax, debug_break);
     assembler.call(AsmJit::rax);
+    
+    // Cleanup ghost space
+    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
+    
+    // After call to kernel32.dll!DebugBreak
     assembler.bind(label_nodebug[i]);
     
     // Allocate ghost space
     assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-
+    
     // Call kernel32.dll!SetLastError
     assembler.mov(AsmJit::rcx, 0);
     assembler.mov(AsmJit::rax, set_last_error);
     assembler.call(AsmJit::rax);
-
+    
     // Cleanup ghost space
     assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
-
+    
     // Set up parameters
     X64ArgVisitor arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
@@ -300,25 +316,25 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       {
         arg.Visit(&arg_visitor);
       });
-
+    
     // Allocate ghost space
     assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-
+    
     // Call target
     assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
     assembler.call(AsmJit::rax);
     
     // Cleanup ghost space
     assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
-
+    
     // Clean up remaining stack space
     assembler.add(AsmJit::rsp, 0x8 * (num_args - 4));
-
+    
     // Write return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_value_remote.GetBase()) + i * sizeof(DWORD_PTR));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-
+    
     // Write 64-bit return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
@@ -332,20 +348,26 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
+    // Allocate ghost space
+    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+    
     // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::rax, get_last_error);
     assembler.call(AsmJit::rax);
+    
+    // Cleanup ghost space
+    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
     
     // Write error code to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       last_error_remote.GetBase()) + i * sizeof(DWORD));
     assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
-
+    
     // Epilogue
     assembler.mov(AsmJit::rsp, AsmJit::rbp);
     assembler.pop(AsmJit::rbp);
   }
-
+  
   // Return
   assembler.ret();
 #elif defined(_M_IX86)
