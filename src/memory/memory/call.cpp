@@ -146,8 +146,9 @@ public:
       assembler_->add(AsmJit::rsp, 0x8);
       break;
     default:
-      assembler_->mov(AsmJit::eax, float_conv.i);
-      assembler_->push(AsmJit::eax);
+      assembler_->xor_(AsmJit::rax, AsmJit::rax);
+      assembler_->mov(AsmJit::rax, float_conv.i);
+      assembler_->push(AsmJit::rax);
       break;
     }
     
