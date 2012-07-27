@@ -60,8 +60,6 @@ enum class CallConv
   kX64
 };
 
-// TODO: Long double support.
-
 class CallArg
 {
 public:

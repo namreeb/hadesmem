@@ -23,7 +23,12 @@
 #include "hadesmem/process.hpp"
 
 // TODO: Rewrite, clean up, etc...
+
 // TODO: Split code gen into detail funcs etc.
+
+// TODO: Long double support.
+
+// TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
 
 namespace hadesmem
 {
@@ -207,13 +212,6 @@ private:
   AsmJit::X86Assembler* assembler_;
   std::size_t num_args_;
 };
-
-// TODO: Investigate whether it's possible to use the AsmJit compiler to add 
-// FP support after all...
-
-// TODO: Long double support.
-
-// TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 

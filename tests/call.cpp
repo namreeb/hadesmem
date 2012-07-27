@@ -31,7 +31,7 @@ DummyType dummy_glob;
 }
 
 DWORD_PTR TestCall(double a, DummyType const* b, char c, 
-  float d, int e, unsigned int f, float g, double h)
+  float d, int e, unsigned int f, float g, double h, void const* i)
 {
   BOOST_CHECK_EQUAL(a, 1337.6666);
   BOOST_CHECK_EQUAL(b, &dummy_glob);
@@ -41,6 +41,7 @@ DWORD_PTR TestCall(double a, DummyType const* b, char c,
   BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   BOOST_CHECK_EQUAL(g, 1234.56f);
   BOOST_CHECK_EQUAL(h, 9876.54);
+  BOOST_CHECK_EQUAL(i, static_cast<void const*>(nullptr));
   
   SetLastError(5678);
   return 1234;
@@ -63,33 +64,35 @@ double TestCallDoubleRet()
 
 #if defined(_M_AMD64) 
 #elif defined(_M_IX86) 
-DWORD_PTR __fastcall TestFastCall(void const* a, DummyType const* b, char c, 
-  wchar_t d, int e, unsigned int f)
+DWORD_PTR __fastcall TestFastCall(double a, DummyType const* b, char c, 
+  float d, int e, unsigned int f, float g, double h, void const* i)
 {
-  BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(a, 1337.6666);
   BOOST_CHECK_EQUAL(b, &dummy_glob);
   BOOST_CHECK_EQUAL(c, 'c');
-  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(d, 9081.736455f);
   BOOST_CHECK_EQUAL(e, -1234);
   BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   BOOST_CHECK_EQUAL(g, 1234.56f);
   BOOST_CHECK_EQUAL(h, 9876.54);
+  BOOST_CHECK_EQUAL(i, static_cast<void const*>(nullptr));
   
   SetLastError(5678);
   return 1234;
 }
 
-DWORD_PTR __stdcall TestStdCall(void const* a, DummyType const* b, char c, 
-  wchar_t d, int e, unsigned int f)
+DWORD_PTR __stdcall TestStdCall(double a, DummyType const* b, char c, 
+  float d, int e, unsigned int f, float g, double h, void const* i)
 {
-  BOOST_CHECK_EQUAL(a, static_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(a, 1337.6666);
   BOOST_CHECK_EQUAL(b, &dummy_glob);
   BOOST_CHECK_EQUAL(c, 'c');
-  BOOST_CHECK_EQUAL(d, L'd');
+  BOOST_CHECK_EQUAL(d, 9081.736455f);
   BOOST_CHECK_EQUAL(e, -1234);
   BOOST_CHECK_EQUAL(f, static_cast<unsigned int>(0xDEAFBEEF));
   BOOST_CHECK_EQUAL(g, 1234.56f);
   BOOST_CHECK_EQUAL(h, 9876.54);
+  BOOST_CHECK_EQUAL(i, static_cast<void const*>(nullptr));
   
   SetLastError(5678);
   return 1234;
@@ -111,11 +114,11 @@ BOOST_AUTO_TEST_CASE(call)
   };
   
   typedef DWORD_PTR (*TestFuncT)(double a, DummyType const* b, char c, 
-  float d, int e, unsigned int f, float g, double h);
+    float d, int e, unsigned int f, float g, double h, void const* i);
   hadesmem::RemoteFunctionRet const CallRet = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestCall)), 
     hadesmem::CallConv::kDefault, 1337.6666, &dummy_glob, 'c', 9081.736455f, 
-    ImplicitConvTest(), 0xDEAFBEEF, 1234.56f, 9876.54);
+    ImplicitConvTest(), 0xDEAFBEEF, 1234.56f, 9876.54, nullptr);
   BOOST_CHECK_EQUAL(CallRet.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.GetLastError(), static_cast<DWORD>(5678));
   
