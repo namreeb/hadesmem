@@ -30,6 +30,8 @@
 
 // TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
 
+// TODO: Rerewrite x64 assembly to only modify RSP in the prologue/epilogue.
+
 namespace hadesmem
 {
 
