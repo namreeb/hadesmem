@@ -32,6 +32,15 @@
 
 // TODO: Rerewrite x64 assembly to only modify RSP in the prologue/epilogue.
 
+// TODO: Remove zero-extension where unnecessary on x64.
+
+// TODO: Support return values larger than 64-bits (via the 'secret' first 
+// parameter).
+
+// TODO: Support parameters larger than 64-bits (passed via address).
+
+// TODO: Look into EH and what is necessary to support it.
+
 namespace hadesmem
 {
 
