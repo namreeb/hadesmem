@@ -30,7 +30,9 @@
 
 // TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
 
-// TODO: Rerewrite x64 assembly to only modify RSP in the prologue/epilogue.
+// TODO: Rerewrite x64 assembly to only modify RSP in the prologue/epilogue. 
+// This also means that the prologue/epilogue needs to be lifted out of the 
+// multi-call loop.
 
 // TODO: Remove zero-extension where unnecessary on x64.
 
@@ -40,6 +42,9 @@
 // TODO: Support parameters larger than 64-bits (passed via address).
 
 // TODO: Look into EH and what is necessary to support it.
+
+// TODO: Provide templated GetReturnValue for use in generic programming. Or, 
+// alternatively look into genericizing all of the return value code.
 
 namespace hadesmem
 {
@@ -98,12 +103,13 @@ class X64ArgVisitor
 public:
   X64ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args)
     : assembler_(assembler), 
-    num_args_(num_args)
+    num_args_(num_args), 
+    cur_arg_(num_args)
   { }
   
   void operator()(void* arg)
   {
-    switch (num_args_)
+    switch (cur_arg_)
     {
     case 1:
       assembler_->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(arg));
@@ -118,12 +124,11 @@ public:
       assembler_->mov(AsmJit::r9, reinterpret_cast<DWORD_PTR>(arg));
       break;
     default:
-      assembler_->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
-      assembler_->push(AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), reinterpret_cast<DWORD_PTR>(arg));
       break;
     }
     
-    --num_args_;
+    --cur_arg_;
   }
   
   void operator()(float arg)
@@ -139,36 +144,32 @@ public:
     FloatConv float_conv;
     float_conv.f = arg;
     
-    switch (num_args_)
+    switch (cur_arg_)
     {
     case 1:
-      assembler_->push(static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 2:
-      assembler_->push(static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 3:
-      assembler_->push(static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 4:
-      assembler_->push(static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     default:
       assembler_->xor_(AsmJit::rax, AsmJit::rax);
       assembler_->mov(AsmJit::rax, float_conv.i);
-      assembler_->push(AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
       break;
     }
     
-    --num_args_;
+    --cur_arg_;
   }
   
   void operator()(double arg)
@@ -184,44 +185,41 @@ public:
     DoubleConv double_conv;
     double_conv.d = arg;
     
-    switch (num_args_)
+    switch (cur_arg_)
     {
     case 1:
-      assembler_->push(static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 2:
-      assembler_->push(static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 3:
-      assembler_->push(static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     case 4:
-      assembler_->push(static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp));
-      assembler_->add(AsmJit::rsp, 0x8);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
       break;
     default:
       assembler_->mov(AsmJit::rax, double_conv.i);
-      assembler_->push(AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
       break;
     }
     
-    --num_args_;
+    --cur_arg_;
   }
   
 private:
   AsmJit::X86Assembler* assembler_;
   std::size_t num_args_;
+  std::size_t cur_arg_;
 };
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
@@ -277,48 +275,34 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
         ErrorString("Invalid calling convention."));
     }
     
-    // Prologue
-    assembler.push(AsmJit::rbp);
-    assembler.mov(AsmJit::rbp, AsmJit::rsp);
+    std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), num_args * 0x8);
+    BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
+    stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
+    stack_offs += 16;
+    stack_offs += 8;
     
-    // Allocate ghost space
-    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
+    assembler.sub(AsmJit::rsp, stack_offs);
     
     // Call kernel32.dll!IsDebuggerPresent
     assembler.mov(AsmJit::rax, is_debugger_present);
     assembler.call(AsmJit::rax);
-    
-    // Cleanup ghost space
-    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
     
     // Test if kernel32.dll!DebugBreak returned TRUE.
     label_nodebug.emplace_back(assembler.newLabel());
     assembler.test(AsmJit::rax, AsmJit::rax);
     assembler.jz(label_nodebug[i]);
     
-    // Allocate ghost space
-    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-    
     // Call kernel32.dll!DebugBreak
     assembler.mov(AsmJit::rax, debug_break);
     assembler.call(AsmJit::rax);
     
-    // Cleanup ghost space
-    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
-    
     // After call to kernel32.dll!DebugBreak
     assembler.bind(label_nodebug[i]);
-    
-    // Allocate ghost space
-    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
     
     // Call kernel32.dll!SetLastError
     assembler.mov(AsmJit::rcx, 0);
     assembler.mov(AsmJit::rax, set_last_error);
     assembler.call(AsmJit::rax);
-    
-    // Cleanup ghost space
-    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
     
     // Set up parameters
     X64ArgVisitor arg_visitor(&assembler, num_args);
@@ -328,18 +312,9 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
         arg.Visit(&arg_visitor);
       });
     
-    // Allocate ghost space
-    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-    
     // Call target
     assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
     assembler.call(AsmJit::rax);
-    
-    // Cleanup ghost space
-    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
-    
-    // Clean up remaining stack space
-    assembler.add(AsmJit::rsp, 0x8 * (num_args - 4));
     
     // Write return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
@@ -359,24 +334,16 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
-    // Allocate ghost space
-    assembler.sub(AsmJit::rsp, AsmJit::Imm(0x20));
-    
     // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::rax, get_last_error);
     assembler.call(AsmJit::rax);
-    
-    // Cleanup ghost space
-    assembler.add(AsmJit::rsp, AsmJit::Imm(0x20));
     
     // Write error code to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       last_error_remote.GetBase()) + i * sizeof(DWORD));
     assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
     
-    // Epilogue
-    assembler.mov(AsmJit::rsp, AsmJit::rbp);
-    assembler.pop(AsmJit::rbp);
+    assembler.add(AsmJit::rsp, stack_offs);
   }
   
   // Return
