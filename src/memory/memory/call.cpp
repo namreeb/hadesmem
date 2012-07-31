@@ -28,14 +28,6 @@
 
 // TODO: Long double support.
 
-// TODO: Ensure stack alignment is correct under x64 (should be 16-byte).
-
-// TODO: Rerewrite x64 assembly to only modify RSP in the prologue/epilogue. 
-// This also means that the prologue/epilogue needs to be lifted out of the 
-// multi-call loop.
-
-// TODO: Remove zero-extension where unnecessary on x64.
-
 // TODO: Support return values larger than 64-bits (via the 'secret' first 
 // parameter).
 
@@ -124,7 +116,8 @@ public:
       assembler_->mov(AsmJit::r9, reinterpret_cast<DWORD_PTR>(arg));
       break;
     default:
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
       break;
     }
     
@@ -259,7 +252,25 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   std::vector<AsmJit::Label> label_nodebug;
   
+  using std::begin;
+  using std::end;
+  auto const max_args_list = std::max_element(begin(args_full), 
+    end(args_full), 
+    [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
+    {
+      return args1.size() < args2.size();
+    });
+  std::size_t const max_num_args = max_args_list->size();
+  
 #if defined(_M_AMD64)
+  std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), max_num_args * 0x8);
+  BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
+  stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
+  stack_offs += 16;
+  stack_offs += 8;
+  
+  assembler.sub(AsmJit::rsp, stack_offs);
+  
   for (std::size_t i = 0; i < addresses.size(); ++i)
   {
     LPCVOID address = addresses[i];
@@ -267,7 +278,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
-    // Check calling convention
     if (call_conv != CallConv::kX64 && 
       call_conv != CallConv::kDefault)
     {
@@ -275,36 +285,22 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
         ErrorString("Invalid calling convention."));
     }
     
-    std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), num_args * 0x8);
-    BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
-    stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
-    stack_offs += 16;
-    stack_offs += 8;
-    
-    assembler.sub(AsmJit::rsp, stack_offs);
-    
-    // Call kernel32.dll!IsDebuggerPresent
     assembler.mov(AsmJit::rax, is_debugger_present);
     assembler.call(AsmJit::rax);
     
-    // Test if kernel32.dll!DebugBreak returned TRUE.
     label_nodebug.emplace_back(assembler.newLabel());
     assembler.test(AsmJit::rax, AsmJit::rax);
     assembler.jz(label_nodebug[i]);
     
-    // Call kernel32.dll!DebugBreak
     assembler.mov(AsmJit::rax, debug_break);
     assembler.call(AsmJit::rax);
     
-    // After call to kernel32.dll!DebugBreak
     assembler.bind(label_nodebug[i]);
     
-    // Call kernel32.dll!SetLastError
     assembler.mov(AsmJit::rcx, 0);
     assembler.mov(AsmJit::rax, set_last_error);
     assembler.call(AsmJit::rax);
     
-    // Set up parameters
     X64ArgVisitor arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
@@ -312,41 +308,33 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
         arg.Visit(&arg_visitor);
       });
     
-    // Call target
     assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
     assembler.call(AsmJit::rax);
     
-    // Write return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_value_remote.GetBase()) + i * sizeof(DWORD_PTR));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
     
-    // Write 64-bit return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
     
-    // Write float return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_float_remote.GetBase()) + i * sizeof(float));
     assembler.movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
-    // Write double return value to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
-    // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::rax, get_last_error);
     assembler.call(AsmJit::rax);
     
-    // Write error code to memory
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       last_error_remote.GetBase()) + i * sizeof(DWORD));
     assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
-    
-    assembler.add(AsmJit::rsp, stack_offs);
   }
   
-  // Return
+  assembler.add(AsmJit::rsp, stack_offs);
+  
   assembler.ret();
 #elif defined(_M_IX86)
   for (std::size_t i = 0; i < addresses.size(); ++i)
@@ -431,11 +419,13 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
     
     // Write float return value to memory
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(return_value_float_remote.GetBase()) + i * sizeof(float));
+    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+      return_value_float_remote.GetBase()) + i * sizeof(float));
     assembler.fst(AsmJit::dword_ptr(AsmJit::ecx));
     
     // Write double return value to memory
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
+    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+      return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.fst(AsmJit::qword_ptr(AsmJit::ecx));
     
     // Call kernel32.dll!GetLastError
@@ -514,7 +504,8 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_value_double_remote.GetBase()) + i);
     DWORD const error_code = Read<DWORD>(process, static_cast<DWORD*>(
       last_error_remote.GetBase()) + i);
-    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, ret_val_float, ret_val_double, error_code));
+    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, 
+      ret_val_float, ret_val_double, error_code));
   }
   
   return return_vals;

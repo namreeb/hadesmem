@@ -9,10 +9,10 @@ project
     <toolset>clang:<warnings>all
     <toolset>intel:<warnings>on
     
+    <warnings-as-errors>on
+    
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
-    
-    <warnings-as-errors>on
   ;
 
 lib user32

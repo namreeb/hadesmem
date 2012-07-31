@@ -72,7 +72,10 @@ public:
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
       std::is_same<double, typename std::remove_cv<T>::type>::value, 
-      "Invalid argument type.");
+      "Only integral, pointer, or floating point types are supported.");
+    
+    static_assert(sizeof(T) <= sizeof(void*), 
+      "Currently only memsize (or smaller) types are supported.");
     
     Initialize(t);
   }
@@ -98,10 +101,9 @@ public:
   
 private:
   template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || std::is_pointer<T>::value>::type* dummy = nullptr)
+  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || 
+    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr)
   {
-    (void)dummy;
-    
     type_ = ArgType::kPtrType;
     union Conv
     {
@@ -114,19 +116,17 @@ private:
   }
   
   template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_same<float, typename std::remove_cv<T>::type>::value>::type* dummy = nullptr)
+  void Initialize(T t, typename std::enable_if<std::is_same<float, 
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr)
   {
-    (void)dummy;
-    
     type_ = ArgType::kFloatType;
     arg_.f = t;
   }
   
   template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_same<double, typename std::remove_cv<T>::type>::value>::type* dummy = nullptr)
+  void Initialize(T t, typename std::enable_if<std::is_same<double, 
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr)
   {
-    (void)dummy;
-    
     type_ = ArgType::kDoubleType;
     arg_.d = t;
   }
@@ -161,39 +161,29 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
 
 // TODO: Improve and clean up this mess, move to different file, etc.
 
-template <typename FuncT>
-RemoteFunctionRet Call(Process const& process, 
-  LPCVOID address, 
-  CallConv call_conv)
-{
-  static_assert(boost::function_types::function_arity<FuncT>::value == 0, "Invalid number of arguments.");
-  return Call(process, address, call_conv, std::vector<CallArg>());
-}
-
 #ifndef HADESMEM_CALL_MAX_ARGS
-#define HADESMEM_CALL_MAX_ARGS 10
+#define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
 
-#if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_REPEAT
-#error "[HadesMem] HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor repeat limit."
-#endif // #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_REPEAT
+static_assert(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT, 
+  "HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor repeat limit.");
 
-#if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_ITERATION
-#error "[HadesMem] HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor iteration limit."
-#endif // #if HADESMEM_CALL_MAX_ARGS > BOOST_PP_LIMIT_ITERATION
+static_assert(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION, 
+  "HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor iteration limit.");
 
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
-typedef typename boost::mpl::at_c<boost::function_types::parameter_types<FuncT>, n>::type A##n;\
-static_assert(std::is_integral<A##n>::value || std::is_pointer<A##n>::value || std::is_floating_point<A##n>::value, "Currently only integral, pointer, or floating point types are supported.");\
-static_assert(sizeof(A##n) <= sizeof(PVOID), "Currently only memsize (or smaller) types are supported.");\
-static_assert(std::is_convertible<T##n, A##n>::value, "Can not convert argument to type specified in function prototype.");\
+typedef typename boost::mpl::at_c<\
+  boost::function_types::parameter_types<FuncT>, \
+  n>::type A##n;\
+static_assert(std::is_convertible<T##n, A##n>::value, \
+  "Can not convert argument to type specified in function prototype.");\
 A##n a##n = t##n;\
 args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_conv \
-  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T,&& t))\
+  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
   std::vector<CallArg> args;\
@@ -201,9 +191,18 @@ RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_co
   return Call(process, address, call_conv, args);\
 }\
 
-#define BOOST_PP_LOCAL_LIMITS (1, HADESMEM_CALL_MAX_ARGS)
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
 #include BOOST_PP_LOCAL_ITERATE()
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 
