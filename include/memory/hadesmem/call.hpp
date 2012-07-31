@@ -42,7 +42,69 @@ public:
   
   DWORD GetLastError() const;
   
+  template <typename T>
+  T GetReturnValue() const
+  {
+    static_assert(std::is_integral<T>::value || 
+      std::is_pointer<T>::value || 
+      std::is_same<float, typename std::remove_cv<T>::type>::value || 
+      std::is_same<double, typename std::remove_cv<T>::type>::value, 
+      "Only integral, pointer, or floating point types are supported.");
+    
+    static_assert(sizeof(T) <= sizeof(void*), 
+      "Currently only memsize (or smaller) types are supported.");
+    
+    return GetReturnValueImpl<T>();
+  }
+  
 private:
+  template <typename T>
+  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+  {
+    union Conv
+    {
+      T t;
+      DWORD64 d;
+    };
+    Conv conv;
+    conv.d = GetReturnValue64();
+    return conv.t;
+  }
+  
+  template <typename T>
+  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) != sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+  {
+    union Conv
+    {
+      T t;
+      DWORD_PTR d;
+    };
+    Conv conv;
+    conv.d = GetReturnValue();
+    return conv.t;
+  }
+  
+  template <typename T>
+  T GetReturnValueImpl(typename std::enable_if<std::is_integral<T>::value || 
+    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) const
+  {
+    return GetReturnValueIntImpl<T>();
+  }
+  
+  template <typename T>
+  T GetReturnValueImpl(typename std::enable_if<std::is_same<float, 
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) const
+  {
+    return GetReturnValueFloat();
+  }
+  
+  template <typename T>
+  T GetReturnValueImpl(typename std::enable_if<std::is_same<double, 
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) const
+  {
+    return GetReturnValueDouble();
+  }
+  
   DWORD_PTR int_ptr_;
   DWORD64 int_64_;
   float float_;
