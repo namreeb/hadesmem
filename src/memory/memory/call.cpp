@@ -35,9 +35,6 @@
 
 // TODO: Look into EH and what is necessary to support it.
 
-// TODO: Provide templated GetReturnValue for use in generic programming. Or, 
-// alternatively look into genericizing all of the return value code.
-
 namespace hadesmem
 {
 

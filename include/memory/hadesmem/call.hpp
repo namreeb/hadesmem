@@ -8,6 +8,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
@@ -59,7 +60,8 @@ public:
   
 private:
   template <typename T>
-  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) == 
+    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
   {
     union Conv
     {
@@ -72,7 +74,8 @@ private:
   }
   
   template <typename T>
-  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) != sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) != 
+    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
   {
     union Conv
     {
@@ -244,13 +247,17 @@ args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-RemoteFunctionRet Call(Process const& process, LPCVOID address, CallConv call_conv \
+std::pair<typename boost::function_types::result_type<FuncT>::type, DWORD> \
+  Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
-  static_assert(boost::function_types::function_arity<FuncT>::value == n, "Invalid number of arguments.");\
+  static_assert(boost::function_types::function_arity<FuncT>::value == n, \
+    "Invalid number of arguments.");\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
-  return Call(process, address, call_conv, args);\
+  RemoteFunctionRet const ret = Call(process, address, call_conv, args);\
+  typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
+  return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());\
 }\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
