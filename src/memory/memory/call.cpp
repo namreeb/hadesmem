@@ -87,6 +87,8 @@ RemoteFunctionRet Call(Process const& process,
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
+#if defined(_M_AMD64)
+
 class X64ArgVisitor
 {
 public:
@@ -212,6 +214,78 @@ private:
   std::size_t cur_arg_;
 };
 
+#elif defined(_M_IX86)
+
+class X86ArgVisitor
+{
+public:
+  X86ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args, 
+    CallConv call_conv)
+    : assembler_(assembler), 
+    num_args_(num_args), 
+    cur_arg_(num_args), 
+    call_conv_(call_conv)
+  { }
+  
+  void operator()(void* arg)
+  {
+    switch (cur_arg_)
+    {
+    case 1:
+      switch (call_conv_)
+      {
+      case CallConv::kThisCall:
+      case CallConv::kFastCall:
+        assembler_->mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(arg));
+        break;
+      default:
+        assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->push(AsmJit::eax);
+        break;
+      }
+      break;
+    case 2:
+      switch (call_conv_)
+      {
+      case CallConv::kFastCall:
+        assembler_->mov(AsmJit::edx, reinterpret_cast<DWORD_PTR>(arg));
+        break;
+      default:
+        assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->push(AsmJit::eax);
+        break;
+      }
+      break;
+    default:
+      assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->push(AsmJit::eax);
+      break;
+    }
+    
+    --cur_arg_;
+  }
+  
+  void operator()(float arg)
+  {
+    BOOST_ASSERT(arg && false);
+  }
+  
+  void operator()(double arg)
+  {
+    BOOST_ASSERT(arg && false);
+  }
+  
+private:
+  AsmJit::X86Assembler* assembler_;
+  std::size_t num_args_;
+  std::size_t cur_arg_;
+  CallConv call_conv_;
+};
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> addresses, 
   std::vector<CallConv> call_convs, 
@@ -249,6 +323,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   std::vector<AsmJit::Label> label_nodebug;
   
+#if defined(_M_AMD64)
   using std::begin;
   using std::end;
   auto const max_args_list = std::max_element(begin(args_full), 
@@ -259,7 +334,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     });
   std::size_t const max_num_args = max_args_list->size();
   
-#if defined(_M_AMD64)
   std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), max_num_args * 0x8);
   BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
   stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
@@ -338,115 +412,72 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
-    std::vector<PVOID> const& args = args_full[i];
+    std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
-    // Prologue
     assembler.push(AsmJit::ebp);
     assembler.mov(AsmJit::ebp, AsmJit::esp);
-
-    // Call kernel32.dll!SetLastError
-    assembler.push(AsmJit::Imm(0x0));
+    
+    assembler.mov(AsmJit::eax, is_debugger_present);
+    assembler.call(AsmJit::eax);
+    
+    label_nodebug.emplace_back(assembler.newLabel());
+    assembler.test(AsmJit::eax, AsmJit::eax);
+    assembler.jz(label_nodebug[i]);
+    
+    assembler.mov(AsmJit::eax, debug_break);
+    assembler.call(AsmJit::eax);
+    
+    assembler.bind(label_nodebug[i]);
+    
+    assembler.push(AsmJit::imm(0x0));
     assembler.mov(AsmJit::eax, set_last_error);
     assembler.call(AsmJit::eax);
-
-    // Get stack arguments offset
-    std::size_t stack_arg_offs = 0;
-    switch (call_conv)
-    {
-    case CallConv::kThisCall:
-      stack_arg_offs = 1;
-      break;
-
-    case CallConv::kFastCall:
-      stack_arg_offs = 2;
-      break;
-
-    case CallConv::kCdecl:
-    case CallConv::kStdCall:
-    case CallConv::kDefault:
-      stack_arg_offs = 0;
-      break;
-
-    default:
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
-        ErrorString("Invalid calling convention."));
-    }
-
-    // Pass first arg in through ECX if 'thiscall' is specified
-    if (call_conv == CallConv::kThisCall)
-    {
-      assembler.mov(AsmJit::ecx, num_args ? reinterpret_cast<DWORD_PTR>(
-        args[0]) : 0);
-    }
-
-    // Pass first two args in through ECX and EDX if 'fastcall' is specified
-    if (call_conv == CallConv::kFastCall)
-    {
-      assembler.mov(AsmJit::ecx, num_args ? reinterpret_cast<DWORD_PTR>(
-        args[0]) : 0);
-      assembler.mov(AsmJit::edx, num_args > 1 ? reinterpret_cast<DWORD_PTR>(
-        args[1]) : 0);
-    }
-
-    // Pass all remaining args on stack if there are any left to process.
-    if (num_args > stack_arg_offs)
-    {
-      std::for_each(args.crbegin(), args.crend() - stack_arg_offs, 
-        [&] (PVOID arg)
-      {
-        assembler.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
-        assembler.push(AsmJit::eax);
-      });
-    }
     
-    // Call target
+    X86ArgVisitor arg_visitor(&assembler, num_args, call_conv);
+    std::for_each(args.rbegin(), args.rend(), 
+      [&] (CallArg const& arg)
+      {
+        arg.Visit(&arg_visitor);
+      });
+    
     assembler.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(address));
     assembler.call(AsmJit::eax);
     
-    // Write return value to memory
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       return_value_remote.GetBase()) + i * sizeof(DWORD_PTR));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     
-    // Write 64-bit return value to memory
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
     
-    // Write float return value to memory
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       return_value_float_remote.GetBase()) + i * sizeof(float));
     assembler.fst(AsmJit::dword_ptr(AsmJit::ecx));
     
-    // Write double return value to memory
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.fst(AsmJit::qword_ptr(AsmJit::ecx));
     
-    // Call kernel32.dll!GetLastError
     assembler.mov(AsmJit::eax, get_last_error);
     assembler.call(AsmJit::eax);
     
-    // Write error code to memory
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       last_error_remote.GetBase()) + i * sizeof(DWORD));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     
-    // Clean up stack if necessary
     if (call_conv == CallConv::kCdecl)
     {
       assembler.add(AsmJit::esp, AsmJit::Imm(num_args * sizeof(PVOID)));
     }
-
-    // Epilogue
+    
     assembler.mov(AsmJit::esp, AsmJit::ebp);
     assembler.pop(AsmJit::ebp);
   }
-
-  // Return
-  assembler.ret(AsmJit::Imm(0x4));
+  
+  assembler.ret(AsmJit::imm(0x4));
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
