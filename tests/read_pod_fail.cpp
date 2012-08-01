@@ -25,6 +25,8 @@
 struct non_pod_type
 {
   virtual void foo() { }
+  
+  virtual ~non_pod_type() { }
 };
 
 BOOST_AUTO_TEST_CASE(read_pod_fail)
