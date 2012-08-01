@@ -136,8 +136,10 @@ public:
       std::is_same<double, typename std::remove_cv<T>::type>::value, 
       "Only integral, pointer, or floating point types are supported.");
     
-    static_assert(sizeof(T) <= sizeof(void*), 
-      "Currently only memsize (or smaller) types are supported.");
+    static_assert(sizeof(T) <= sizeof(void*) || 
+      std::is_same<double, typename std::remove_cv<T>::type>::value, 
+      "Currently only memsize (or smaller) types are supported (doubles "
+      "excepted).");
     
     Initialize(t);
   }

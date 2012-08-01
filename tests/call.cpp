@@ -108,6 +108,7 @@ double TestCallDoubleRet()
 }
 
 #if defined(_M_AMD64)
+
 #elif defined(_M_IX86)
 
 class ThiscallDummy
@@ -171,10 +172,6 @@ BOOST_AUTO_TEST_CASE(call)
     0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
   BOOST_CHECK_EQUAL(CallIntRet.first, static_cast<DWORD_PTR>(0x12345678));
   
-#if defined(_M_AMD64)
-  // Floating point args currently unsupported under x86.
-  // TODO: Fix this.
-  
   typedef float (*TestFloatT)(float a, float b, float c, float d, float e, 
     float f);
   auto const CallFloatRet = hadesmem::Call<TestFloatT>(
@@ -208,6 +205,8 @@ BOOST_AUTO_TEST_CASE(call)
     ImplicitConvTest(), 0xDEAFBEEF, 1234.56f, 9876.54, &dummy_glob, 1234, 5678);
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
+  
+#if defined(_M_AMD64)
   
 #elif defined(_M_IX86)
   

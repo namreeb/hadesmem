@@ -267,12 +267,43 @@ public:
   
   void operator()(float arg)
   {
-    BOOST_ASSERT(arg && false);
+    static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
+    
+    union FloatConv
+    {
+      float f;
+      DWORD i;
+    };
+        
+    FloatConv float_conv;
+    float_conv.f = arg;
+    
+    assembler_->mov(AsmJit::eax, float_conv.i);
+    assembler_->push(AsmJit::eax);
+    
+    --cur_arg_;
   }
   
   void operator()(double arg)
   {
-    BOOST_ASSERT(arg && false);
+    static_assert(sizeof(double) == sizeof(DWORD64), "Invalid type sizes.");
+    
+    union DoubleConv
+    {
+      double d;
+      DWORD64 i;
+    };
+    
+    DoubleConv double_conv;
+    double_conv.d = arg;
+    
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+    assembler_->push(AsmJit::eax);
+    
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>(double_conv.i));
+    assembler_->push(AsmJit::eax);
+    
+    --cur_arg_;
   }
   
 private:
@@ -390,10 +421,12 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
     
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_float_remote.GetBase()) + i * sizeof(float));
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+      return_value_float_remote.GetBase()) + i * sizeof(float));
     assembler.movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(return_value_double_remote.GetBase()) + i * sizeof(double));
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+      return_value_double_remote.GetBase()) + i * sizeof(double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
     assembler.mov(AsmJit::rax, get_last_error);
@@ -470,7 +503,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     
     if (call_conv == CallConv::kCdecl)
     {
-      assembler.add(AsmJit::esp, AsmJit::Imm(num_args * sizeof(PVOID)));
+      assembler.add(AsmJit::esp, AsmJit::imm(num_args * sizeof(PVOID)));
     }
     
     assembler.mov(AsmJit::esp, AsmJit::ebp);
