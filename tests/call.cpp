@@ -107,8 +107,26 @@ double TestCallDoubleRet()
   return 9.876;
 }
 
-#if defined(_M_AMD64) 
-#elif defined(_M_IX86) 
+#if defined(_M_AMD64)
+#elif defined(_M_IX86)
+
+class ThiscallDummy
+{
+public:
+  DWORD_PTR TestIntegerThis(int a, int b, int c, int d, int e, int f) const
+  {
+    BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
+    BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
+    BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
+    BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
+    BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
+    BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
+    
+    SetLastError(0x87654321);
+    
+    return 0x12345678;
+  }
+};
 
 DWORD_PTR __fastcall TestIntegerFast(int a, int b, int c, int d, int e, int f)
 {
@@ -138,7 +156,7 @@ DWORD_PTR __stdcall TestIntegerStd(int a, int b, int c, int d, int e, int f)
   return 0x12345678;
 }
 
-#else 
+#else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
@@ -153,7 +171,7 @@ BOOST_AUTO_TEST_CASE(call)
     0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
   BOOST_CHECK_EQUAL(CallIntRet.first, static_cast<DWORD_PTR>(0x12345678));
   
-#if defined(_M_AMD64) 
+#if defined(_M_AMD64)
   // Floating point args currently unsupported under x86.
   // TODO: Fix this.
   
@@ -191,7 +209,7 @@ BOOST_AUTO_TEST_CASE(call)
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
-#elif defined(_M_IX86) 
+#elif defined(_M_IX86)
   
   auto const CallIntFastRet = hadesmem::Call<TestIntegerT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
@@ -207,7 +225,25 @@ BOOST_AUTO_TEST_CASE(call)
   BOOST_CHECK_EQUAL(CallIntStdRet.first, static_cast<DWORD_PTR>(0x12345678));
   BOOST_CHECK_EQUAL(CallIntStdRet.second, static_cast<DWORD>(0x87654321));
   
-#else 
+  ThiscallDummy thiscall_dummy;
+  auto test_integer_this_temp = &ThiscallDummy::TestIntegerThis;
+  union Conv
+  {
+    decltype(test_integer_this_temp) m;
+    PVOID i;
+  };
+  Conv conv;
+  conv.m = test_integer_this_temp;
+  PVOID test_integer_this = conv.i;
+  typedef DWORD_PTR (*TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
+    int c, int d, int e, int f);
+  auto const CallIntThisRet = hadesmem::Call<TestIntegerThisT>(
+    process, test_integer_this, hadesmem::CallConv::kThisCall, &thiscall_dummy, 
+      0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
+  BOOST_CHECK_EQUAL(CallIntThisRet.first, static_cast<DWORD_PTR>(0x12345678));
+  BOOST_CHECK_EQUAL(CallIntThisRet.second, static_cast<DWORD>(0x87654321));
+  
+#else
 #error "[HadesMem] Unsupported architecture."
 #endif
   
