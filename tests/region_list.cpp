@@ -16,7 +16,6 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/region.hpp"
 #include "hadesmem/process.hpp"
-#include "hadesmem/region_iterator.hpp"
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
