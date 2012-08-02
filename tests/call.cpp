@@ -224,16 +224,17 @@ BOOST_AUTO_TEST_CASE(call)
   BOOST_CHECK_EQUAL(CallIntStdRet.first, static_cast<DWORD_PTR>(0x12345678));
   BOOST_CHECK_EQUAL(CallIntStdRet.second, static_cast<DWORD>(0x87654321));
   
-  ThiscallDummy thiscall_dummy;
   auto test_integer_this_temp = &ThiscallDummy::TestIntegerThis;
+  typedef decltype(test_integer_this_temp) TestIntegerThisFnT;
   union Conv
   {
-    decltype(test_integer_this_temp) m;
+    TestIntegerThisFnT m;
     PVOID i;
   };
   Conv conv;
   conv.m = test_integer_this_temp;
   PVOID test_integer_this = conv.i;
+  ThiscallDummy thiscall_dummy;
   typedef DWORD_PTR (*TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
     int c, int d, int e, int f);
   auto const CallIntThisRet = hadesmem::Call<TestIntegerThisT>(

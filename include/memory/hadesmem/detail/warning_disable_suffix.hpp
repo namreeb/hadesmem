@@ -12,3 +12,7 @@
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
+
+#if defined(HADESMEM_INTEL)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)

@@ -22,3 +22,8 @@
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_GCC)
+
+#if defined(HADESMEM_INTEL)
+#pragma warning(push, 1)
+#pragma warning(disable: 66 177)
+#endif // #if defined(HADESMEM_MSVC)
