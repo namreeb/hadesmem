@@ -116,7 +116,8 @@ public:
       break;
     default:
       assembler_->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
+        AsmJit::rax);
       break;
     }
     
@@ -139,25 +140,34 @@ public:
     switch (cur_arg_)
     {
     case 1:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 2:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 3:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 4:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(float_conv.i));
+      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     default:
       assembler_->xor_(AsmJit::rax, AsmJit::rax);
       assembler_->mov(AsmJit::rax, float_conv.i);
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
+        AsmJit::rax);
       break;
     }
     
@@ -180,28 +190,41 @@ public:
     switch (cur_arg_)
     {
     case 1:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
+        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 2:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
+        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 3:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
+        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     case 4:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, num_args_ * 8));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
+        static_cast<DWORD>(double_conv.i));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
+        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
+        num_args_ * 8));
       break;
     default:
       assembler_->mov(AsmJit::rax, double_conv.i);
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), AsmJit::rax);
+      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
+        AsmJit::rax);
       break;
     }
     
@@ -297,7 +320,8 @@ public:
     DoubleConv double_conv;
     double_conv.d = arg;
     
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>((double_conv.i >> 32) & 
+      0xFFFFFFFF));
     assembler_->push(AsmJit::eax);
     
     assembler_->mov(AsmJit::eax, static_cast<DWORD>(double_conv.i));
@@ -365,7 +389,8 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     });
   std::size_t const max_num_args = max_args_list->size();
   
-  std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), max_num_args * 0x8);
+  std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
+    max_num_args * 0x8);
   BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
   stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
   stack_offs += 16;
