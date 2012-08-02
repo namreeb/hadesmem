@@ -76,25 +76,24 @@ BOOST_AUTO_TEST_CASE(process_list_algorithm)
   
   hadesmem::RegionList const region_list_1(&process);
   
-  std::for_each(begin(region_list_1), end(region_list_1), 
-    [&] (hadesmem::Region const& region)
+  for (auto const& region : region_list_1)
+  {
+    hadesmem::Region const other(&process, region.GetBase());
+    BOOST_CHECK_EQUAL(region, other);
+    
+    if (region.GetState() != MEM_FREE)
     {
-      hadesmem::Region const other(&process, region.GetBase());
-      BOOST_CHECK_EQUAL(region, other);
-      
-      if (region.GetState() != MEM_FREE)
-      {
-        BOOST_CHECK_NE(region.GetBase(), static_cast<void*>(nullptr));
-        BOOST_CHECK_NE(region.GetAllocBase(), static_cast<void*>(nullptr));
-        BOOST_CHECK_NE(region.GetAllocProtect(), 0U);
-        BOOST_CHECK_NE(region.GetType(), 0U);
-      }
-      
-      region.GetProtect();
-      
-      BOOST_CHECK_NE(region.GetSize(), 0U);
-      BOOST_CHECK_NE(region.GetState(), 0U);
-    });
+      BOOST_CHECK_NE(region.GetBase(), static_cast<void*>(nullptr));
+      BOOST_CHECK_NE(region.GetAllocBase(), static_cast<void*>(nullptr));
+      BOOST_CHECK_NE(region.GetAllocProtect(), 0U);
+      BOOST_CHECK_NE(region.GetType(), 0U);
+    }
+    
+    region.GetProtect();
+    
+    BOOST_CHECK_NE(region.GetSize(), 0U);
+    BOOST_CHECK_NE(region.GetState(), 0U);
+  }
   
   HMODULE const user32_mod = GetModuleHandle(L"user32.dll");
   auto user32_iter = std::find_if(begin(region_list_1), end(region_list_1), 

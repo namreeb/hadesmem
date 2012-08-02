@@ -63,14 +63,13 @@ BOOST_AUTO_TEST_CASE(module_list_algorithm)
   
   hadesmem::ModuleList const module_list_1(&process);
   
-  std::for_each(begin(module_list_1), end(module_list_1), 
-    [] (hadesmem::Module const& module)
-    {
-      BOOST_CHECK_NE(module.GetHandle(), static_cast<void*>(nullptr));
-      BOOST_CHECK_NE(module.GetSize(), 0U);
-      BOOST_CHECK(!module.GetName().empty());
-      BOOST_CHECK(!module.GetPath().empty());
-    });
+  for (auto const& module : module_list_1)
+  {
+    BOOST_CHECK_NE(module.GetHandle(), static_cast<void*>(nullptr));
+    BOOST_CHECK_NE(module.GetSize(), 0U);
+    BOOST_CHECK(!module.GetName().empty());
+    BOOST_CHECK(!module.GetPath().empty());
+  }
   
   auto const user32_iter = std::find_if(begin(module_list_1), 
     end(module_list_1), 

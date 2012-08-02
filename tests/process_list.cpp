@@ -57,11 +57,10 @@ BOOST_AUTO_TEST_CASE(process_list_algorithm)
   
   hadesmem::ProcessList const process_list_1;
   
-  std::for_each(begin(process_list_1), end(process_list_1), 
-    [] (hadesmem::ProcessEntry const& entry)
-    {
-      BOOST_CHECK(!entry.name.empty());
-    });
+  for (auto const& entry : process_list_1)
+  {
+    BOOST_CHECK(!entry.name.empty());
+  }
   
   auto const this_iter = std::find_if(begin(process_list_1), 
     end(process_list_1), 
