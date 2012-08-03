@@ -24,6 +24,8 @@
 
 // TODO: BOOST_NOEXCEPT annotations.
 
+// TODO: Improve and clean up this mess, move details to different files, etc.
+
 namespace hadesmem
 {
 
@@ -224,8 +226,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
-
-// TODO: Improve and clean up this mess, move to different file, etc.
 
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
