@@ -221,8 +221,8 @@ RemoteFunctionRet Call(Process const& process,
   std::vector<CallArg> const& args);
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
-  std::vector<LPCVOID> addresses, 
-  std::vector<CallConv> call_convs, 
+  std::vector<LPCVOID> const& addresses, 
+  std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
 
 // TODO: Improve and clean up this mess, move to different file, etc.
