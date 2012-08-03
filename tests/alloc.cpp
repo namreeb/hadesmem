@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(allocator)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::Allocator allocator_1(process, 0x1000);
+  hadesmem::Allocator allocator_1(&process, 0x1000);
   BOOST_CHECK(allocator_1.GetBase());
   BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
   

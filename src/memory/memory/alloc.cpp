@@ -41,9 +41,9 @@ void Free(Process const& process, LPVOID address)
   }
 }
 
-Allocator::Allocator(Process const& process, SIZE_T size)
-  : process_(&process), 
-  base_(Alloc(process, size)), 
+Allocator::Allocator(Process const* process, SIZE_T size)
+  : process_(process), 
+  base_(Alloc(*process, size)), 
   size_(size)
 {
   BOOST_ASSERT(size != 0);

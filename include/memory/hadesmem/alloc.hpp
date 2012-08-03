@@ -27,7 +27,7 @@ void Free(Process const& process, LPVOID address);
 class Allocator
 {
 public:
-  Allocator(Process const& process, SIZE_T size);
+  Allocator(Process const* process, SIZE_T size);
   
   Allocator(Allocator&& other) BOOST_NOEXCEPT;
   

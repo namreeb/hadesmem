@@ -353,15 +353,17 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       ErrorString("Size mismatch in parameters."));
   }
   
-  Allocator const return_value_remote(process, sizeof(DWORD_PTR) * 
+  // TODO: Consolidate allocations.
+  
+  Allocator const return_value_remote(&process, sizeof(DWORD_PTR) * 
     addresses.size());
-  Allocator const return_value_64_remote(process, sizeof(DWORD64) * 
+  Allocator const return_value_64_remote(&process, sizeof(DWORD64) * 
     addresses.size());
-  Allocator const return_value_float_remote(process, sizeof(float) * 
+  Allocator const return_value_float_remote(&process, sizeof(float) * 
     addresses.size());
-  Allocator const return_value_double_remote(process, sizeof(double) * 
+  Allocator const return_value_double_remote(&process, sizeof(double) * 
     addresses.size());
-  Allocator const last_error_remote(process, sizeof(DWORD) * 
+  Allocator const last_error_remote(&process, sizeof(DWORD) * 
     addresses.size());
 
   Module kernel32(&process, L"kernel32.dll");
@@ -542,7 +544,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   DWORD_PTR const stub_size = assembler.getCodeSize();
   
-  Allocator const stub_mem_remote(process, stub_size);
+  Allocator const stub_mem_remote(&process, stub_size);
   PBYTE const stub_remote = static_cast<PBYTE>(stub_mem_remote.GetBase());
   DWORD_PTR const stub_remote_temp = reinterpret_cast<DWORD_PTR>(stub_remote);
   
