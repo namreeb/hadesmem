@@ -107,6 +107,16 @@ double TestCallDoubleRet()
   return 9.876;
 }
 
+void MultiThreadSet(DWORD last_error)
+{
+  SetLastError(last_error);
+}
+
+DWORD MultiThreadGet()
+{
+  return GetLastError();
+}
+
 #if defined(_M_AMD64)
 
 #elif defined(_M_IX86)
@@ -262,4 +272,27 @@ BOOST_AUTO_TEST_CASE(call)
     reinterpret_cast<DWORD_PTR>(&TestCallDoubleRet)), 
     hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRetDouble.first, 9.876);
+  
+  hadesmem::MultiCall multi_call(&process);
+  multi_call.Add<void (*)(DWORD last_error)>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
+    hadesmem::CallConv::kDefault, 0x1337);
+  multi_call.Add<DWORD (*)()>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
+    hadesmem::CallConv::kDefault);
+  multi_call.Add<void (*)(DWORD last_error)>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
+    hadesmem::CallConv::kDefault, 0x1234);
+  multi_call.Add<DWORD (*)()>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
+    hadesmem::CallConv::kDefault);
+  std::vector<hadesmem::RemoteFunctionRet> multi_call_ret = multi_call.Call();
+  BOOST_CHECK_EQUAL(multi_call_ret[0].GetLastError(), 
+  static_cast<DWORD>(0x1337));
+  BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValue(), 
+  static_cast<DWORD_PTR>(0x1337));
+  BOOST_CHECK_EQUAL(multi_call_ret[2].GetLastError(), 
+  static_cast<DWORD>(0x1234));
+  BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValue(), 
+  static_cast<DWORD_PTR>(0x1234));
 }

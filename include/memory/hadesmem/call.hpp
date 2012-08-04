@@ -278,4 +278,66 @@ std::pair<typename boost::function_types::result_type<FuncT>::type, DWORD> \
 
 #undef HADESMEM_CALL_ADD_ARG
 
+class MultiCall
+{
+public:
+  MultiCall(Process const* process)
+    : process_(process), 
+    addresses_(), 
+    call_convs_(), 
+    args_()
+  { }
+  
+#define HADESMEM_CALL_ADD_ARG(z, n, unused) \
+typedef typename boost::mpl::at_c<\
+  boost::function_types::parameter_types<FuncT>, \
+  n>::type A##n;\
+static_assert(std::is_convertible<T##n, A##n>::value, \
+  "Can not convert argument to type specified in function prototype.");\
+A##n a##n = t##n;\
+args.push_back(a##n);\
+
+#define BOOST_PP_LOCAL_MACRO(n)\
+template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
+  void Add(Process const& process, LPCVOID address, CallConv call_conv \
+  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
+{\
+  static_assert(boost::function_types::function_arity<FuncT>::value == n, \
+    "Invalid number of arguments.");\
+  std::vector<CallArg> args;\
+  BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
+  addresses_.push_back(address);\
+  call_convs_.push_back(call_conv);\
+  args_.push_back(args);\
+}\
+
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
+
+#include BOOST_PP_LOCAL_ITERATE()
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
+
+#undef HADESMEM_CALL_DEFINE_ARG
+
+#undef HADESMEM_CALL_ADD_ARG
+  
+  std::vector<RemoteFunctionRet> Call()
+  {
+    return hadesmem::CallMulti(*process_, addresses_, call_convs_, args_);
+  }
+  
+private:
+  Process const* process_;
+  std::vector<LPCVOID> addresses_; 
+  std::vector<CallConv> call_convs_; 
+  std::vector<std::vector<CallArg>> args_;
+};
+
 }

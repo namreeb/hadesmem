@@ -378,7 +378,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   AsmJit::X86Assembler assembler;
   
-  std::vector<AsmJit::Label> label_nodebug;
+  AsmJit::Label label_nodebug(assembler.newLabel());
   
 #if defined(_M_AMD64)
   using std::begin;
@@ -400,6 +400,21 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   assembler.sub(AsmJit::rsp, stack_offs);
   
+  assembler.mov(AsmJit::rax, is_debugger_present);
+  assembler.call(AsmJit::rax);
+  
+  assembler.test(AsmJit::rax, AsmJit::rax);
+  assembler.jz(label_nodebug);
+  
+  assembler.mov(AsmJit::rax, debug_break);
+  assembler.call(AsmJit::rax);
+  
+  assembler.bind(label_nodebug);
+  
+  assembler.mov(AsmJit::rcx, 0);
+  assembler.mov(AsmJit::rax, set_last_error);
+  assembler.call(AsmJit::rax);
+  
   for (std::size_t i = 0; i < addresses.size(); ++i)
   {
     LPCVOID address = addresses[i];
@@ -413,22 +428,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("Invalid calling convention."));
     }
-    
-    assembler.mov(AsmJit::rax, is_debugger_present);
-    assembler.call(AsmJit::rax);
-    
-    label_nodebug.emplace_back(assembler.newLabel());
-    assembler.test(AsmJit::rax, AsmJit::rax);
-    assembler.jz(label_nodebug[i]);
-    
-    assembler.mov(AsmJit::rax, debug_break);
-    assembler.call(AsmJit::rax);
-    
-    assembler.bind(label_nodebug[i]);
-    
-    assembler.mov(AsmJit::rcx, 0);
-    assembler.mov(AsmJit::rax, set_last_error);
-    assembler.call(AsmJit::rax);
     
     X64ArgVisitor arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
@@ -468,31 +467,31 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   
   assembler.ret();
 #elif defined(_M_IX86)
+  
+  assembler.push(AsmJit::ebp);
+  assembler.mov(AsmJit::ebp, AsmJit::esp);
+  
+  assembler.mov(AsmJit::eax, is_debugger_present);
+  assembler.call(AsmJit::eax);
+  
+  assembler.test(AsmJit::eax, AsmJit::eax);
+  assembler.jz(label_nodebug);
+  
+  assembler.mov(AsmJit::eax, debug_break);
+  assembler.call(AsmJit::eax);
+  
+  assembler.bind(label_nodebug);
+  
+  assembler.push(AsmJit::imm(0x0));
+  assembler.mov(AsmJit::eax, set_last_error);
+  assembler.call(AsmJit::eax);
+  
   for (std::size_t i = 0; i < addresses.size(); ++i)
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
-    
-    assembler.push(AsmJit::ebp);
-    assembler.mov(AsmJit::ebp, AsmJit::esp);
-    
-    assembler.mov(AsmJit::eax, is_debugger_present);
-    assembler.call(AsmJit::eax);
-    
-    label_nodebug.emplace_back(assembler.newLabel());
-    assembler.test(AsmJit::eax, AsmJit::eax);
-    assembler.jz(label_nodebug[i]);
-    
-    assembler.mov(AsmJit::eax, debug_break);
-    assembler.call(AsmJit::eax);
-    
-    assembler.bind(label_nodebug[i]);
-    
-    assembler.push(AsmJit::imm(0x0));
-    assembler.mov(AsmJit::eax, set_last_error);
-    assembler.call(AsmJit::eax);
     
     X86ArgVisitor arg_visitor(&assembler, num_args, call_conv);
     std::for_each(args.rbegin(), args.rend(), 
