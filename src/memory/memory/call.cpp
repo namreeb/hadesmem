@@ -531,10 +531,10 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     {
       assembler.add(AsmJit::esp, AsmJit::imm(num_args * sizeof(PVOID)));
     }
-    
-    assembler.mov(AsmJit::esp, AsmJit::ebp);
-    assembler.pop(AsmJit::ebp);
   }
+  
+  assembler.mov(AsmJit::esp, AsmJit::ebp);
+  assembler.pop(AsmJit::ebp);
   
   assembler.ret(AsmJit::imm(0x4));
 #else
