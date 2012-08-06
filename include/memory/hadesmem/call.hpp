@@ -268,11 +268,20 @@ std::pair<typename boost::function_types::result_type<FuncT>::type, DWORD> \
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif // #if defined(HADESMEM_GCC)
+
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
+
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 
@@ -281,11 +290,54 @@ std::pair<typename boost::function_types::result_type<FuncT>::type, DWORD> \
 class MultiCall
 {
 public:
-  MultiCall(Process const* process)
+  explicit MultiCall(Process const* process)
     : process_(process), 
     addresses_(), 
     call_convs_(), 
     args_()
+  { }
+  
+  MultiCall(MultiCall const& other)
+    : process_(other.process_), 
+    addresses_(other.addresses_), 
+    call_convs_(other.call_convs_), 
+    args_(other.args_)
+  { }
+  
+  MultiCall& operator=(MultiCall const& other)
+  {
+    process_ = other.process_;
+    addresses_ = other.addresses_;
+    call_convs_ = other.call_convs_;
+    args_ = other.args_;
+    
+    return *this;
+  }
+  
+  MultiCall(MultiCall&& other) BOOST_NOEXCEPT
+    : process_(other.process_), 
+    addresses_(std::move(other.addresses_)), 
+    call_convs_(std::move(other.call_convs_)), 
+    args_(std::move(other.args_))
+  {
+    other.process_ = nullptr;
+  }
+  
+  MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT
+  {
+    process_ = other.process_;
+    other.process_ = nullptr;
+    
+    addresses_ = std::move(other.addresses_);
+    
+    call_convs_ = std::move(other.call_convs_);
+    
+    args_ = std::move(other.args_);
+    
+    return *this;
+  }
+  
+  ~MultiCall()
   { }
   
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
@@ -318,11 +370,20 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif // #if defined(HADESMEM_GCC)
+
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
+
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 

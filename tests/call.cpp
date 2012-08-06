@@ -289,8 +289,10 @@ BOOST_AUTO_TEST_CASE(call)
 #pragma warning(disable: 6387)
 #endif // #if defined(HADESMEM_MSVC)
   
-  FARPROC const get_proc_address = GetProcAddress(kernel32_mod, 
+  FARPROC const get_proc_address_tmp = GetProcAddress(kernel32_mod, 
     "GetProcAddress");
+  PVOID const get_proc_address = reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(get_proc_address_tmp));
   BOOST_REQUIRE(get_proc_address != 0);
   
 #if defined(HADESMEM_MSVC)
@@ -298,7 +300,7 @@ BOOST_AUTO_TEST_CASE(call)
 #endif // #if defined(HADESMEM_MSVC)
   
   auto const CallWin = 
-    hadesmem::Call<FARPROC (*)(HMODULE, LPCSTR)>(process, get_proc_address, 
+    hadesmem::Call<PVOID (*)(HMODULE, LPCSTR)>(process, get_proc_address, 
     CallConvWinapi, kernel32_mod, "GetProcAddress");
   BOOST_CHECK_EQUAL(CallWin.first, get_proc_address);
   
