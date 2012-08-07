@@ -52,7 +52,9 @@ T ReadString(Process const& process, PVOID address,
     "string must be POD.");
   
   T data;
-
+  
+  // TODO: Optimize to only check page protections once, also look into 
+  // reading data in chunks rather than byte-by-byte.
   CharT* address_real = static_cast<CharT*>(address);
   for (CharT current = Read<CharT>(process, address_real); 
     current != CharT(); 
