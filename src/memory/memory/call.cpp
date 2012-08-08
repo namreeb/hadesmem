@@ -31,9 +31,11 @@
 // TODO: Support return values larger than 64-bits (via the 'secret' first 
 // parameter).
 
+// TODO: Support 64-bit parameters under x86.
+
 // TODO: Support parameters larger than 64-bits (passed via address).
 
-// TODO: Look into EH and what is necessary to support it.
+// TODO: Improve safety via EH.
 
 namespace hadesmem
 {
