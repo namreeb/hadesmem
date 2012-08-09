@@ -37,6 +37,8 @@
 
 // TODO: Improve safety via EH.
 
+// TODO: Support 'void' return type.
+
 namespace hadesmem
 {
 
