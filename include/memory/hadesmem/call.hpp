@@ -141,9 +141,10 @@ public:
       "Only integral, pointer, or floating point types are supported.");
     
     static_assert(sizeof(T) <= sizeof(void*) || 
-      std::is_same<double, typename std::remove_cv<T>::type>::value, 
+      std::is_same<double, typename std::remove_cv<T>::type>::value || 
+      (std::is_integral<T>::value && sizeof(T) <= sizeof(DWORD64)), 
       "Currently only memsize (or smaller) types are supported (doubles "
-      "excepted).");
+      "and 64-bit integrals excepted).");
     
     Initialize(t);
   }
@@ -162,6 +163,9 @@ public:
     case ArgType::kDoubleType:
       (*v)(arg_.d);
       break;
+    case ArgType::kInt64Type:
+      (*v)(arg_.i);
+      break;
     default:
       BOOST_ASSERT("Invalid type." && false);
     }
@@ -169,8 +173,8 @@ public:
   
 private:
   template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || 
-    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr)
+  void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(T) <= 
+    sizeof(DWORD_PTR)>::type* /*dummy*/ = 0)
   {
     type_ = ArgType::kPtrType;
     union Conv
@@ -181,6 +185,28 @@ private:
     Conv conv;
     conv.t = t;
     arg_.p = conv.p;
+  }
+  
+  template <typename T>
+  void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(void*) != 
+    sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = 0)
+  {
+    type_ = ArgType::kInt64Type;
+    union Conv
+    {
+      T t;
+      DWORD64 i;
+    };
+    Conv conv;
+    conv.t = t;
+    arg_.i = conv.i;
+  }
+  
+  template <typename T>
+  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || 
+    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr)
+  {
+    InitializeIntegralImpl(t);
   }
   
   template <typename T>
@@ -203,7 +229,8 @@ private:
   {
     kPtrType, 
     kFloatType, 
-    kDoubleType
+    kDoubleType, 
+    kInt64Type
   };
   
   union Arg
@@ -211,6 +238,7 @@ private:
     void* p;
     float f;
     double d;
+    DWORD64 i;
   };
   
   ArgType type_;

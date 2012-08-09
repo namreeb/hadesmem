@@ -31,13 +31,14 @@
 // TODO: Support return values larger than 64-bits (via the 'secret' first 
 // parameter).
 
-// TODO: Support 64-bit parameters under x86.
-
 // TODO: Support parameters larger than 64-bits (passed via address).
 
 // TODO: Improve safety via EH.
 
 // TODO: Support 'void' return type.
+
+// TODO: Thiscall improvements. (Sanity check that first arg is a pointer type
+// etc.)
 
 namespace hadesmem
 {
@@ -235,6 +236,11 @@ public:
     --cur_arg_;
   }
   
+  void operator()(DWORD64 /*arg*/)
+  {
+    BOOST_ASSERT("Invalid argument type." && false);
+  }
+  
 private:
   AsmJit::X86Assembler* assembler_;
   std::size_t num_args_;
@@ -329,6 +335,18 @@ public:
     assembler_->push(AsmJit::eax);
     
     assembler_->mov(AsmJit::eax, static_cast<DWORD>(double_conv.i));
+    assembler_->push(AsmJit::eax);
+    
+    --cur_arg_;
+  }
+  
+  void operator()(DWORD64 arg)
+  {
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>((arg >> 32) & 
+      0xFFFFFFFF));
+    assembler_->push(AsmJit::eax);
+    
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>(arg));
     assembler_->push(AsmJit::eax);
     
     --cur_arg_;

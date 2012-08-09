@@ -92,6 +92,13 @@ DWORD_PTR TestMixed(double a, void const* b, char c, float d, int e,
   return 1234;
 }
 
+int TestInteger64(DWORD64 a)
+{
+  BOOST_CHECK_EQUAL(a, 0xAAAAAAAABBBBBBBBULL);
+  
+  return 0;
+}
+
 DWORD64 TestCall64Ret()
 {
   return 0x123456787654321LL;
@@ -167,6 +174,13 @@ DWORD_PTR __stdcall TestIntegerStd(int a, int b, int c, int d, int e, int f)
   return 0x12345678;
 }
 
+int __fastcall TestInteger64Fast(DWORD64 a)
+{
+  BOOST_CHECK_EQUAL(a, 0xAAAAAAAABBBBBBBBULL);
+  
+  return 0;
+}
+
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -216,6 +230,10 @@ BOOST_AUTO_TEST_CASE(call)
   BOOST_CHECK_EQUAL(CallRet.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(CallRet.second, static_cast<DWORD>(5678));
   
+  hadesmem::Call<int (*)(DWORD64 a)>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestInteger64)), 
+    hadesmem::CallConv::kDefault, 0xAAAAAAAABBBBBBBBULL);
+  
 #if defined(_M_AMD64)
   
 #elif defined(_M_IX86)
@@ -252,6 +270,10 @@ BOOST_AUTO_TEST_CASE(call)
       0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
   BOOST_CHECK_EQUAL(CallIntThisRet.first, static_cast<DWORD_PTR>(0x12345678));
   BOOST_CHECK_EQUAL(CallIntThisRet.second, static_cast<DWORD>(0x87654321));
+  
+  hadesmem::Call<int (*)(DWORD64 a)>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestInteger64Fast)), 
+    hadesmem::CallConv::kFastCall, 0xAAAAAAAABBBBBBBBULL);
   
 #else
 #error "[HadesMem] Unsupported architecture."
