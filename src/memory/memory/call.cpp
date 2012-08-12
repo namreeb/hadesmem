@@ -40,6 +40,8 @@
 // TODO: Thiscall improvements. (Sanity check that first arg is a pointer type
 // etc.)
 
+// TODO: Consolidate return value allocations.
+
 namespace hadesmem
 {
 
@@ -374,8 +376,6 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Size mismatch in parameters."));
   }
-  
-  // TODO: Consolidate allocations.
   
   Allocator const return_value_remote(&process, sizeof(DWORD_PTR) * 
     addresses.size());
