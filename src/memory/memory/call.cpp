@@ -42,6 +42,8 @@
 
 // TODO: Consolidate return value allocations.
 
+// TODO: Support function pointers and member-function pointers.
+
 namespace hadesmem
 {
 
