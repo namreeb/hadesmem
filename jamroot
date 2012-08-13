@@ -2,6 +2,11 @@ path-constant TOP
   :
     .
   ;
+import boost
+  ;
+
+boost.use-project
+  ;
 
 use-project /asmjit
   :
