@@ -22,9 +22,12 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 
-// TODO: Rewrite, clean up, etc...
+// TODO: Improve and clean up this mess, move details to different files, 
+// split code gen into detail funcs, etc.
 
 // TODO: Split code gen into detail funcs etc.
+
+// TODO: BOOST_NOEXCEPT annotations.
 
 // TODO: Long double support.
 
@@ -43,6 +46,8 @@
 // TODO: Consolidate return value allocations.
 
 // TODO: Support function pointers and member-function pointers.
+
+// TODO: Improve genericity of return value handling.
 
 namespace hadesmem
 {

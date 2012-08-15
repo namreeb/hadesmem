@@ -22,10 +22,6 @@
 
 #include <windows.h>
 
-// TODO: BOOST_NOEXCEPT annotations.
-
-// TODO: Improve and clean up this mess, move details to different files, etc.
-
 namespace hadesmem
 {
 
