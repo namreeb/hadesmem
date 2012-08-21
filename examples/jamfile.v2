@@ -1,7 +1,24 @@
 # examples/jamfile.v2
 
+project 
+  :
+    requirements
+    
+    <toolset>msvc:<warnings>all
+    <toolset>gcc:<warnings>all
+    <toolset>clang:<warnings>all
+    <toolset>intel:<warnings>on
+    
+    <warnings-as-errors>on
+    
+    <toolset>msvc:<cxxflags>"/analyze /sdl"
+    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
+  ;
+
 exe memhack
   :
     [ glob memhack/*.cpp ]
     /memory//memory
+    /boost//locale/<link>static
+    /boost//filesystem/<link>static
   ;
