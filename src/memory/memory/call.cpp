@@ -38,11 +38,6 @@
 
 // TODO: Improve safety via EH.
 
-// TODO: Support 'void' return type.
-
-// TODO: Thiscall improvements. (Sanity check that first arg is a pointer type
-// etc.)
-
 // TODO: Consolidate return value allocations.
 
 // TODO: Support function pointers and member-function pointers.

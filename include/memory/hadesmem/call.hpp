@@ -251,6 +251,35 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
 
+template <typename T>
+struct VoidToInt
+{
+  typedef T type;
+};
+
+template <>
+struct VoidToInt<void>
+{
+  typedef int type;
+};
+
+template <typename FuncT>
+void ThiscallCheck(CallConv call_conv)
+{
+  if (call_conv == CallConv::kThisCall)
+  {
+    BOOST_ASSERT(
+      boost::function_types::function_arity<FuncT>::value > 0 && 
+      (std::is_pointer<
+      boost::mpl::at_c<
+      boost::function_types::parameter_types<FuncT>, 
+      0>::type
+      >::value) && 
+      "First argument to a __thiscall function should be a pointer to a "
+      "class instance.");
+  }
+}
+
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
@@ -272,16 +301,19 @@ args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-std::pair<typename boost::function_types::result_type<FuncT>::type, DWORD> \
+std::pair<typename VoidToInt<\
+  typename boost::function_types::result_type<FuncT>::type>::type, DWORD> \
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, \
     "Invalid number of arguments.");\
+  ThiscallCheck<FuncT>(call_conv);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   RemoteFunctionRet const ret = Call(process, address, call_conv, args);\
-  typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
+  typedef typename VoidToInt<\
+    typename boost::function_types::result_type<FuncT>::type>::type ResultT;\
   return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());\
 }\
 

@@ -117,6 +117,9 @@ double TestCallDoubleRet()
   return 9.876;
 }
 
+void TestCallVoidRet()
+{ }
+
 void MultiThreadSet(DWORD last_error)
 {
   SetLastError(last_error);
@@ -298,7 +301,13 @@ BOOST_AUTO_TEST_CASE(call)
     reinterpret_cast<DWORD_PTR>(&TestCallDoubleRet)), 
     hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRetDouble.first, 9.876);
-  
+
+  auto const CallRetVoid = 
+    hadesmem::Call<void (*)()>(process, reinterpret_cast<PVOID>(
+    reinterpret_cast<DWORD_PTR>(&TestCallVoidRet)), 
+    hadesmem::CallConv::kDefault);
+  BOOST_CHECK_EQUAL(CallRetVoid.second, 0);
+
 #if defined(_M_AMD64)
   auto const CallConvWinapi = hadesmem::CallConv::kDefault;
 #elif defined(_M_IX86)
