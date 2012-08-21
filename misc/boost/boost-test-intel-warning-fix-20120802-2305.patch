@@ -1,0 +1,26 @@
+Index: boost/test/tools/floating_point_comparison.hpp
+===================================================================
+--- boost/test/tools/floating_point_comparison.hpp	(revision 79848)
++++ boost/test/tools/floating_point_comparison.hpp	(working copy)
+@@ -302,6 +302,10 @@
+ 
+ namespace {
+ check_is_close_t const& check_is_close = unit_test::ut_detail::static_constant<check_is_close_t>::value;
++
++struct check_is_close_dummy { check_is_close_dummy() { (void)check_is_close; } };
++check_is_close_dummy check_is_close_dummy_;
++
+ }
+ 
+ //____________________________________________________________________________//
+@@ -324,6 +328,10 @@
+ 
+ namespace {
+ check_is_small_t const& check_is_small = unit_test::ut_detail::static_constant<check_is_small_t>::value;
++
++struct check_is_small_dummy { check_is_small_dummy() { (void)check_is_small; } };
++check_is_small_dummy check_is_small_dummy_;
++
+ }
+ 
+ //____________________________________________________________________________//
