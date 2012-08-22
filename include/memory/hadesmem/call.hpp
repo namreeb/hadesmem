@@ -30,21 +30,24 @@ class Process;
 class RemoteFunctionRet
 {
 public:
-  RemoteFunctionRet(DWORD_PTR return_int_ptr, DWORD64 return_int_64, 
-    float return_float, double return_double, DWORD last_error);
+  RemoteFunctionRet(DWORD_PTR return_int_ptr, 
+    DWORD64 return_int_64, 
+    float return_float, 
+    double return_double, 
+    DWORD last_error) BOOST_NOEXCEPT;
   
-  DWORD_PTR GetReturnValue() const;
+  DWORD_PTR GetReturnValue() const BOOST_NOEXCEPT;
   
-  DWORD64 GetReturnValue64() const;
+  DWORD64 GetReturnValue64() const BOOST_NOEXCEPT;
   
-  float GetReturnValueFloat() const;
+  float GetReturnValueFloat() const BOOST_NOEXCEPT;
   
-  double GetReturnValueDouble() const;
+  double GetReturnValueDouble() const BOOST_NOEXCEPT;
   
-  DWORD GetLastError() const;
+  DWORD GetLastError() const BOOST_NOEXCEPT;
   
   template <typename T>
-  T GetReturnValue() const
+  T GetReturnValue() const BOOST_NOEXCEPT
   {
     static_assert(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
@@ -58,7 +61,7 @@ public:
 private:
   template <typename T>
   T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) == 
-    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const BOOST_NOEXCEPT
   {
     union Conv
     {
@@ -72,7 +75,7 @@ private:
   
   template <typename T>
   T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) != 
-    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const
+    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const BOOST_NOEXCEPT
   {
     union Conv
     {
@@ -86,21 +89,24 @@ private:
   
   template <typename T>
   T GetReturnValueImpl(typename std::enable_if<std::is_integral<T>::value || 
-    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) const
+    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) const 
+    BOOST_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>();
   }
   
   template <typename T>
   T GetReturnValueImpl(typename std::enable_if<std::is_same<float, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) const
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
+    const BOOST_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
   
   template <typename T>
   T GetReturnValueImpl(typename std::enable_if<std::is_same<double, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) const
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
+    const BOOST_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
@@ -126,7 +132,7 @@ class CallArg
 {
 public:
   template <typename T>
-  CallArg(T t)
+  CallArg(T t) BOOST_NOEXCEPT
     : type_(ArgType::kPtrType), 
     arg_()
   {
@@ -170,7 +176,7 @@ public:
 private:
   template <typename T>
   void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(T) <= 
-    sizeof(DWORD_PTR)>::type* /*dummy*/ = 0)
+    sizeof(DWORD_PTR)>::type* /*dummy*/ = 0) BOOST_NOEXCEPT
   {
     type_ = ArgType::kPtrType;
     union Conv
@@ -185,7 +191,8 @@ private:
   
   template <typename T>
   void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(void*) != 
-    sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = 0)
+    sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = 0) 
+    BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
     union Conv
@@ -200,14 +207,15 @@ private:
   
   template <typename T>
   void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || 
-    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr)
+    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) BOOST_NOEXCEPT
   {
     InitializeIntegralImpl(t);
   }
   
   template <typename T>
   void Initialize(T t, typename std::enable_if<std::is_same<float, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr)
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
+    BOOST_NOEXCEPT
   {
     type_ = ArgType::kFloatType;
     arg_.f = t;
@@ -215,7 +223,8 @@ private:
   
   template <typename T>
   void Initialize(T t, typename std::enable_if<std::is_same<double, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr)
+    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
+    BOOST_NOEXCEPT
   {
     type_ = ArgType::kDoubleType;
     arg_.d = t;

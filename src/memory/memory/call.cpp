@@ -29,8 +29,6 @@
 
 // TODO: Split code gen into detail funcs etc.
 
-// TODO: BOOST_NOEXCEPT annotations.
-
 // TODO: Long double support.
 
 // TODO: Support return values larger than 64-bits (via the 'secret' first 
@@ -46,8 +44,10 @@ namespace hadesmem
 {
 
 RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR return_int_ptr, 
-  DWORD64 return_int_64, float return_float, double return_double, 
-  DWORD last_error)
+  DWORD64 return_int_64, 
+  float return_float, 
+  double return_double, 
+  DWORD last_error) BOOST_NOEXCEPT
   : int_ptr_(return_int_ptr), 
   int_64_(return_int_64), 
   float_(return_float), 
@@ -55,27 +55,27 @@ RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR return_int_ptr,
   last_error_(last_error)
 { }
 
-DWORD_PTR RemoteFunctionRet::GetReturnValue() const
+DWORD_PTR RemoteFunctionRet::GetReturnValue() const BOOST_NOEXCEPT
 {
   return int_ptr_;
 }
 
-DWORD64 RemoteFunctionRet::GetReturnValue64() const
+DWORD64 RemoteFunctionRet::GetReturnValue64() const BOOST_NOEXCEPT
 {
   return int_64_;
 }
 
-float RemoteFunctionRet::GetReturnValueFloat() const
+float RemoteFunctionRet::GetReturnValueFloat() const BOOST_NOEXCEPT
 {
   return float_;
 }
 
-double RemoteFunctionRet::GetReturnValueDouble() const
+double RemoteFunctionRet::GetReturnValueDouble() const BOOST_NOEXCEPT
 {
   return double_;
 }
 
-DWORD RemoteFunctionRet::GetLastError() const
+DWORD RemoteFunctionRet::GetLastError() const BOOST_NOEXCEPT
 {
   return last_error_;
 }
@@ -99,7 +99,8 @@ RemoteFunctionRet Call(Process const& process,
 class X64ArgVisitor
 {
 public:
-  X64ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args)
+  X64ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args) 
+    BOOST_NOEXCEPT
     : assembler_(assembler), 
     num_args_(num_args), 
     cur_arg_(num_args)
@@ -255,7 +256,7 @@ class X86ArgVisitor
 {
 public:
   X86ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args, 
-    CallConv call_conv)
+    CallConv call_conv) BOOST_NOEXCEPT
     : assembler_(assembler), 
     num_args_(num_args), 
     cur_arg_(num_args), 
@@ -309,7 +310,7 @@ public:
       float f;
       DWORD i;
     };
-        
+    
     FloatConv float_conv;
     float_conv.f = arg;
     
