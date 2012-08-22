@@ -7,6 +7,8 @@
 
 #include "hadesmem/call.hpp"
 
+#include <cstddef>
+
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -367,6 +369,18 @@ private:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
+struct ReturnValueRemote
+{
+  DWORD_PTR return_value;
+  DWORD64 return_value_64;
+  float return_value_float;
+  double return_value_double;
+  DWORD last_error;
+};
+
+static_assert(std::is_pod<ReturnValueRemote>::value, 
+  "ReturnValueRemote type must be POD.");
+
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
@@ -379,15 +393,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       ErrorString("Size mismatch in parameters."));
   }
   
-  Allocator const return_value_remote(&process, sizeof(DWORD_PTR) * 
-    addresses.size());
-  Allocator const return_value_64_remote(&process, sizeof(DWORD64) * 
-    addresses.size());
-  Allocator const return_value_float_remote(&process, sizeof(float) * 
-    addresses.size());
-  Allocator const return_value_double_remote(&process, sizeof(double) * 
-    addresses.size());
-  Allocator const last_error_remote(&process, sizeof(DWORD) * 
+  Allocator const return_values_remote(&process, sizeof(ReturnValueRemote) * 
     addresses.size());
 
   Module kernel32(&process, L"kernel32.dll");
@@ -464,26 +470,31 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.call(AsmJit::rax);
     
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_value_remote.GetBase()) + i * sizeof(DWORD_PTR));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
     
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_64));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
     
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_value_float_remote.GetBase()) + i * sizeof(float));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_float));
     assembler.movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_value_double_remote.GetBase()) + i * sizeof(double));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_double));
     assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
     
     assembler.mov(AsmJit::rax, get_last_error);
     assembler.call(AsmJit::rax);
     
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      last_error_remote.GetBase()) + i * sizeof(DWORD));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, last_error));
     assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
   }
   
@@ -526,29 +537,34 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     
     assembler.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(address));
     assembler.call(AsmJit::eax);
-    
+
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_value_remote.GetBase()) + i * sizeof(DWORD_PTR));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_value_64_remote.GetBase()) + i * sizeof(DWORD64));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_64));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
     
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_value_float_remote.GetBase()) + i * sizeof(float));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_float));
     assembler.fst(AsmJit::dword_ptr(AsmJit::ecx));
     
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_value_double_remote.GetBase()) + i * sizeof(double));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_double));
     assembler.fst(AsmJit::qword_ptr(AsmJit::ecx));
     
     assembler.mov(AsmJit::eax, get_last_error);
     assembler.call(AsmJit::eax);
     
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      last_error_remote.GetBase()) + i * sizeof(DWORD));
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, last_error));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     
     if (call_conv == CallConv::kCdecl)
@@ -601,24 +617,25 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       ErrorString("Could not wait for remote thread.") << 
       ErrorCodeWinLast(LastError));
   }
+
+  std::vector<ReturnValueRemote> return_vals_remote = 
+    ReadVector<std::vector<ReturnValueRemote>>(process, 
+    return_values_remote.GetBase(), addresses.size());
   
   std::vector<RemoteFunctionRet> return_vals;
-  for (std::size_t i = 0; i < addresses.size(); ++i)
-  {
-    DWORD_PTR const ret_val = Read<DWORD_PTR>(process, static_cast<DWORD_PTR*>(
-      return_value_remote.GetBase()) + i);
-    DWORD64 const ret_val_64 = Read<DWORD64>(process, static_cast<DWORD64*>(
-      return_value_64_remote.GetBase()) + i);
-    float const ret_val_float = Read<float>(process, static_cast<float*>(
-      return_value_float_remote.GetBase()) + i);
-    double const ret_val_double = Read<double>(process, static_cast<double*>(
-      return_value_double_remote.GetBase()) + i);
-    DWORD const error_code = Read<DWORD>(process, static_cast<DWORD*>(
-      last_error_remote.GetBase()) + i);
-    return_vals.push_back(RemoteFunctionRet(ret_val, ret_val_64, 
-      ret_val_float, ret_val_double, error_code));
-  }
+  return_vals.reserve(addresses.size());
   
+  std::transform(begin(return_vals_remote), end(return_vals_remote), 
+    std::back_inserter(return_vals), 
+    [] (ReturnValueRemote const& r)
+    {
+      return RemoteFunctionRet(r.return_value, 
+        r.return_value_64, 
+        r.return_value_float, 
+        r.return_value_double, 
+        r.last_error);
+    });
+
   return return_vals;
 }
 

@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(call)
     hadesmem::Call<void (*)()>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&TestCallVoidRet)), 
     hadesmem::CallConv::kDefault);
-  BOOST_CHECK_EQUAL(CallRetVoid.second, 0);
+  BOOST_CHECK_EQUAL(CallRetVoid.second, 0U);
 
 #if defined(_M_AMD64)
   auto const CallConvWinapi = hadesmem::CallConv::kDefault;

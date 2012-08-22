@@ -263,23 +263,6 @@ struct VoidToInt<void>
   typedef int type;
 };
 
-template <typename FuncT>
-void ThiscallCheck(CallConv call_conv)
-{
-  if (call_conv == CallConv::kThisCall)
-  {
-    BOOST_ASSERT(
-      boost::function_types::function_arity<FuncT>::value > 0 && 
-      (std::is_pointer<
-      boost::mpl::at_c<
-      boost::function_types::parameter_types<FuncT>, 
-      0>::type
-      >::value) && 
-      "First argument to a __thiscall function should be a pointer to a "
-      "class instance.");
-  }
-}
-
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
@@ -308,7 +291,6 @@ std::pair<typename VoidToInt<\
 {\
   static_assert(boost::function_types::function_arity<FuncT>::value == n, \
     "Invalid number of arguments.");\
-  ThiscallCheck<FuncT>(call_conv);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   RemoteFunctionRet const ret = Call(process, address, call_conv, args);\
