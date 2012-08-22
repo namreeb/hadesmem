@@ -40,10 +40,6 @@
 
 // TODO: Improve safety via EH.
 
-// TODO: Consolidate return value allocations.
-
-// TODO: Support function pointers and member-function pointers.
-
 // TODO: Improve genericity of return value handling.
 
 namespace hadesmem
