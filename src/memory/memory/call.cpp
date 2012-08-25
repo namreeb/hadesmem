@@ -27,18 +27,7 @@
 // TODO: Improve and clean up this mess, move details to different files, 
 // split code gen into detail funcs, etc.
 
-// TODO: Split code gen into detail funcs etc.
-
-// TODO: Long double support.
-
-// TODO: Support return values larger than 64-bits (via the 'secret' first 
-// parameter).
-
-// TODO: Support parameters larger than 64-bits (passed via address).
-
 // TODO: Improve safety via EH.
-
-// TODO: Improve genericity of return value handling.
 
 namespace hadesmem
 {
@@ -634,6 +623,61 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     });
 
   return return_vals;
+}
+
+MultiCall::MultiCall(Process const* process)
+  : process_(process), 
+  addresses_(), 
+  call_convs_(), 
+  args_()
+{ }
+
+MultiCall::MultiCall(MultiCall const& other)
+  : process_(other.process_), 
+  addresses_(other.addresses_), 
+  call_convs_(other.call_convs_), 
+  args_(other.args_)
+{ }
+
+MultiCall& MultiCall::operator=(MultiCall const& other)
+{
+  process_ = other.process_;
+  addresses_ = other.addresses_;
+  call_convs_ = other.call_convs_;
+  args_ = other.args_;
+
+  return *this;
+}
+
+MultiCall::MultiCall(MultiCall&& other) BOOST_NOEXCEPT
+  : process_(other.process_), 
+  addresses_(std::move(other.addresses_)), 
+  call_convs_(std::move(other.call_convs_)), 
+  args_(std::move(other.args_))
+{
+  other.process_ = nullptr;
+}
+
+MultiCall& MultiCall::operator=(MultiCall&& other) BOOST_NOEXCEPT
+{
+  process_ = other.process_;
+  other.process_ = nullptr;
+
+  addresses_ = std::move(other.addresses_);
+
+  call_convs_ = std::move(other.call_convs_);
+
+  args_ = std::move(other.args_);
+
+  return *this;
+}
+
+MultiCall::~MultiCall()
+{ }
+
+std::vector<RemoteFunctionRet> MultiCall::Call() const
+{
+  return hadesmem::CallMulti(*process_, addresses_, call_convs_, args_);
 }
 
 }

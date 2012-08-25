@@ -27,6 +27,16 @@ namespace hadesmem
 
 class Process;
 
+enum class CallConv
+{
+  kDefault, 
+  kCdecl, 
+  kStdCall, 
+  kThisCall, 
+  kFastCall, 
+  kX64
+};
+
 class RemoteFunctionRet
 {
 public:
@@ -116,16 +126,6 @@ private:
   float float_;
   double double_;
   DWORD last_error_;
-};
-
-enum class CallConv
-{
-  kDefault, 
-  kCdecl, 
-  kStdCall, 
-  kThisCall, 
-  kFastCall, 
-  kX64
 };
 
 class CallArg
@@ -337,55 +337,17 @@ std::pair<typename VoidToInt<\
 class MultiCall
 {
 public:
-  explicit MultiCall(Process const* process)
-    : process_(process), 
-    addresses_(), 
-    call_convs_(), 
-    args_()
-  { }
+  explicit MultiCall(Process const* process);
   
-  MultiCall(MultiCall const& other)
-    : process_(other.process_), 
-    addresses_(other.addresses_), 
-    call_convs_(other.call_convs_), 
-    args_(other.args_)
-  { }
+  MultiCall(MultiCall const& other);
   
-  MultiCall& operator=(MultiCall const& other)
-  {
-    process_ = other.process_;
-    addresses_ = other.addresses_;
-    call_convs_ = other.call_convs_;
-    args_ = other.args_;
-    
-    return *this;
-  }
+  MultiCall& operator=(MultiCall const& other);
   
-  MultiCall(MultiCall&& other) BOOST_NOEXCEPT
-    : process_(other.process_), 
-    addresses_(std::move(other.addresses_)), 
-    call_convs_(std::move(other.call_convs_)), 
-    args_(std::move(other.args_))
-  {
-    other.process_ = nullptr;
-  }
+  MultiCall(MultiCall&& other) BOOST_NOEXCEPT;
   
-  MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT
-  {
-    process_ = other.process_;
-    other.process_ = nullptr;
-    
-    addresses_ = std::move(other.addresses_);
-    
-    call_convs_ = std::move(other.call_convs_);
-    
-    args_ = std::move(other.args_);
-    
-    return *this;
-  }
+  MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT;
   
-  ~MultiCall()
-  { }
+  ~MultiCall();
   
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
 typedef typename boost::mpl::at_c<\
@@ -436,10 +398,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 
 #undef HADESMEM_CALL_ADD_ARG
   
-  std::vector<RemoteFunctionRet> Call()
-  {
-    return hadesmem::CallMulti(*process_, addresses_, call_convs_, args_);
-  }
+  std::vector<RemoteFunctionRet> Call() const;
   
 private:
   Process const* process_;
