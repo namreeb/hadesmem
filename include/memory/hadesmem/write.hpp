@@ -49,7 +49,8 @@ void WriteString(Process const& process, PVOID address, T const& data,
   static_assert(std::is_pod<CharT>::value, "WriteString: Character "
     "type of string must be POD.");
   
-  std::size_t const raw_size = (data.size() * sizeof(CharT)) + 1;
+  std::size_t const raw_size = (data.size() * sizeof(CharT)) + 
+    (1 * sizeof(CharT));
   detail::Write(process, address, data.data(), raw_size);
 }
 
