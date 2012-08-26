@@ -65,7 +65,6 @@ BOOST_AUTO_TEST_CASE(write_string)
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
     new_test_string_rev.cend(), test_string_rev.cbegin(), 
     test_string_rev.cend());
-  
 }
 
 BOOST_AUTO_TEST_CASE(write_vector)
