@@ -372,12 +372,8 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
 {
-  if (addresses.size() != call_convs.size() || 
-    addresses.size() != args_full.size())
-  {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("Size mismatch in parameters."));
-  }
+  BOOST_ASSERT(addresses.size() == call_convs.size() && 
+    addresses.size() == args_full.size());
   
   Allocator const return_values_remote(&process, sizeof(ReturnValueRemote) * 
     addresses.size());
@@ -437,13 +433,9 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     CallConv call_conv = call_convs[i];
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
-    
-    if (call_conv != CallConv::kX64 && 
-      call_conv != CallConv::kDefault)
-    {
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
-        ErrorString("Invalid calling convention."));
-    }
+
+    BOOST_ASSERT(call_conv == CallConv::kX64 || 
+      call_conv == CallConv::kDefault);
     
     X64ArgVisitor arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
