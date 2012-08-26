@@ -63,7 +63,8 @@ BOOST_AUTO_TEST_CASE(write_string)
   WriteString(process, test_string_buf.data(), test_string_rev);
   auto const new_test_string_rev = std::string(test_string_buf.data());
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
-    new_test_string_rev.cend(), test_string_rev.cbegin(), test_string_rev.cend());
+    new_test_string_rev.cend(), test_string_rev.cbegin(), 
+    test_string_rev.cend());
   
 }
 
