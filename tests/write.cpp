@@ -43,6 +43,44 @@ BOOST_AUTO_TEST_CASE(write_pod)
   Write(process, &test_pod_type, test_pod_type_2);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &test_pod_type_2, 
     sizeof(test_pod_type)), 0);
+
+  TestPODType test_pod_type_3 = { 1, 0, L'a', 1234567812345678 };
+  char test_pod_raw[sizeof(TestPODType)] = {};
+  std::copy(reinterpret_cast<char*>(&test_pod_type_2), 
+    reinterpret_cast<char*>(&test_pod_type_2) + sizeof(TestPODType), 
+    &test_pod_raw[0]);
+  BOOST_CHECK_NE(std::memcmp(&test_pod_type_3, &test_pod_type_2, 
+    sizeof(test_pod_type_3)), 0);
+  Write(process, &test_pod_type_3, test_pod_raw);
+  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type_3, &test_pod_type_2, 
+    sizeof(test_pod_type_3)), 0);
+
+  TestPODType test_pod_type_4 = { 1, 0, L'a', 1234567812345678 };
+  Write(process, &test_pod_type_4, test_pod_raw, sizeof(TestPODType));
+  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type_4, &test_pod_type_2, 
+    sizeof(test_pod_type_4)), 0);
+
+  TestPODType test_pod_type_5 = { 1, 0, L'a', 1234567812345678 };
+  char const* const test_pod_raw_beg = test_pod_raw;
+  char const* const test_pod_raw_end = test_pod_raw + sizeof(TestPODType);
+  Write(process, &test_pod_type_5, test_pod_raw_beg, test_pod_raw_end);
+  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type_5, &test_pod_type_2, 
+    sizeof(test_pod_type_5)), 0);
+
+  int int_arr_1[] = { 1, 2, 3, 4, 5 };
+  int new_inner_1[] = { 9, 8 };
+  Write(process, int_arr_1, new_inner_1, sizeof(new_inner_1) / sizeof(int));
+  int expected_arr_1[] = { 9, 8, 3, 4, 5 };
+  BOOST_CHECK_EQUAL(std::memcmp(&int_arr_1[0], &expected_arr_1[0], 
+    sizeof(int_arr_1)), 0);
+
+  int int_arr_2[] = { 1, 2, 3, 4, 5 };
+  int new_inner_2[] = { 9, 8 };
+  Write(process, int_arr_2, new_inner_2, new_inner_2 + 
+    (sizeof(new_inner_2) / sizeof(int)));
+  int expected_arr_2[] = { 9, 8, 3, 4, 5 };
+  BOOST_CHECK_EQUAL(std::memcmp(&int_arr_2[0], &expected_arr_2[0], 
+    sizeof(int_arr_2)), 0);
 }
 
 BOOST_AUTO_TEST_CASE(write_string)
@@ -65,6 +103,29 @@ BOOST_AUTO_TEST_CASE(write_string)
   BOOST_CHECK_EQUAL_COLLECTIONS(new_test_string_rev.cbegin(), 
     new_test_string_rev.cend(), test_string_rev.cbegin(), 
     test_string_rev.cend());
+
+  char const test_array_string[] = "TestArrayString";
+  char test_array[sizeof(test_array_string)] = { };
+  WriteString(process, test_array, test_array_string);
+  BOOST_CHECK_EQUAL(std::memcmp(test_array_string, test_array, 
+    sizeof(test_array_string)), 0);
+
+  char const test_ptr_string_data[] = "TestPtrString";
+  char const* const test_ptr_string = test_ptr_string_data;
+  char test_array_2[sizeof(test_ptr_string_data)] = { };
+  WriteString(process, test_array_2, test_ptr_string);
+  BOOST_CHECK_EQUAL(std::memcmp(test_ptr_string_data, test_array_2, 
+    sizeof(test_ptr_string_data)), 0);
+
+  struct Foo
+  {
+    char str[7];
+  };
+  Foo foo = { "FooBar" };
+  char const* const test_replacement_beg = "Bar";
+  WriteString(process, &foo.str, test_replacement_beg, 
+    test_replacement_beg + 3);
+  BOOST_CHECK_EQUAL(std::string(foo.str), std::string("BarBar"));
 }
 
 BOOST_AUTO_TEST_CASE(write_vector)

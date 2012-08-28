@@ -39,8 +39,21 @@ BOOST_AUTO_TEST_CASE(read_pod)
   };
   
   TestPODType test_pod_type = { 1, 0, L'a', 1234567812345678 };
-  auto new_test_pod_type = hadesmem::Read<TestPODType>(process, &test_pod_type);
+  auto new_test_pod_type = hadesmem::Read<TestPODType>(process, 
+    &test_pod_type);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_pod_type, 
+    sizeof(test_pod_type)), 0);
+
+  auto const new_test_array = 
+    hadesmem::Read<std::array<char, sizeof(TestPODType)>>(process, 
+    &test_pod_type);
+  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_array[0], 
+    sizeof(test_pod_type)), 0);
+
+  auto const new_test_array_2 = 
+    hadesmem::Read<char, sizeof(TestPODType)>(process, 
+    &test_pod_type);
+  BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_array_2[0], 
     sizeof(test_pod_type)), 0);
 }
 

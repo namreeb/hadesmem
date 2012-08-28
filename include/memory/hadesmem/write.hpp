@@ -25,54 +25,80 @@ class Process;
 template <typename T>
 void Write(Process const& process, PVOID address, T const& data)
 {
-  static_assert(std::is_pod<T>::value, "Write: T must be POD.");
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
   
   detail::Write(process, address, &data, sizeof(data));
 }
 
 template <typename T>
-void WriteString(Process const& process, PVOID address, T const& data, 
-  typename std::enable_if<
-    std::is_same<
-      T, 
-      std::basic_string<
-        typename T::value_type, 
-        typename T::traits_type, 
-        typename T::allocator_type
-        >
-      >::value, 
-    T
-    >::type* /*dummy*/ = nullptr)
+void Write(Process const& process, PVOID address, T const* ptr, 
+  std::size_t count)
 {
-  typedef typename T::value_type CharT;
-  
-  static_assert(std::is_pod<CharT>::value, "WriteString: Character "
-    "type of string must be POD.");
-  
-  std::size_t const raw_size = (data.size() * sizeof(CharT)) + 
-    (1 * sizeof(CharT));
-  detail::Write(process, address, data.data(), raw_size);
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
+
+  std::size_t const raw_size = std::distance(ptr, ptr + count) * sizeof(T);
+  detail::Write(process, address, ptr, raw_size);
 }
 
 template <typename T>
-void WriteVector(Process const& process, PVOID address, T const& data, 
-  typename std::enable_if<
-    std::is_same<
-      T, 
-      std::vector<
-        typename T::value_type, 
-        typename T::allocator_type
-        >
-      >::value, 
-    T
-    >::type* /*dummy*/ = nullptr)
+void Write(Process const& process, PVOID address, T const* beg, 
+  T const* end)
 {
-  typedef typename T::value_type ValueT;
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
+
+  Write(process, address, beg, std::distance(beg, end));
+}
+
+// NOTE: This will not write a null terminator.
+template <typename T>
+void WriteString(Process const& process, PVOID address, T const* const beg, 
+  T const* const end)
+{
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "WriteString: Character type of "
+    "string must be trivially copyable.");
+
+  Write(process, address, beg, std::distance(beg, end));
+}
+
+template <typename T>
+void WriteString(Process const& process, PVOID address, 
+  std::basic_string<T> const& data)
+{
+  return WriteString(process, address, data.c_str(), data.c_str() + 
+    data.size() + 1);
+}
+
+template <typename T>
+void WriteString(Process const& process, PVOID address, T const* const str)
+{
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "WriteString: Character type of "
+    "string must be trivially copyable.");
+
+  WriteString(process, address, std::basic_string<T>(str));
+}
+
+// TODO: Support other container types that model the same STL container 
+// style (e.g. boost::vector).
+template <typename T>
+void WriteVector(Process const& process, PVOID address, 
+  std::vector<T> const& data)
+{
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // GCC.
+  static_assert(std::is_pod<T>::value, "WriteList: Value type of vector "
+    "must be trivially copyable.");
   
-  static_assert(std::is_pod<ValueT>::value, "WriteList: Value type of "
-    "vector must be POD.");
-  
-  std::size_t const raw_size = data.size() * sizeof(ValueT);
+  std::size_t const raw_size = data.size() * sizeof(T);
   detail::Write(process, address, data.data(), raw_size);
 }
 
