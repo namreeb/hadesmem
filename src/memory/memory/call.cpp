@@ -393,10 +393,8 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   AsmJit::Label label_nodebug(assembler.newLabel());
   
 #if defined(_M_AMD64)
-  using std::begin;
-  using std::end;
-  auto const max_args_list = std::max_element(begin(args_full), 
-    end(args_full), 
+  auto const max_args_list = std::max_element(std::begin(args_full), 
+    std::end(args_full), 
     [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
     {
       return args1.size() < args2.size();
@@ -603,7 +601,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   std::vector<RemoteFunctionRet> return_vals;
   return_vals.reserve(addresses.size());
   
-  std::transform(begin(return_vals_remote), end(return_vals_remote), 
+  std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     std::back_inserter(return_vals), 
     [] (ReturnValueRemote const& r)
     {

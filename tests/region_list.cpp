@@ -35,23 +35,20 @@ BOOST_AUTO_TEST_CASE(region_list)
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  using std::begin;
-  using std::end;
-  
   hadesmem::RegionList const region_list_1(&process);
   hadesmem::RegionList region_list_2(region_list_1);
   hadesmem::RegionList region_list_3(std::move(region_list_2));
   region_list_2 = std::move(region_list_3);
-  BOOST_CHECK_NE(begin(region_list_2), end(region_list_2));
+  BOOST_CHECK_NE(std::begin(region_list_2), std::end(region_list_2));
   
-  auto iter = begin(region_list_1);
+  auto iter = std::begin(region_list_1);
   hadesmem::Region const first_region(&process, nullptr);
-  BOOST_CHECK_NE(iter, end(region_list_1));
+  BOOST_CHECK_NE(iter, std::end(region_list_1));
   BOOST_CHECK_EQUAL(*iter, first_region);
   hadesmem::Region const second_region(&process, 
     static_cast<char const* const>(first_region.GetBase()) + 
     first_region.GetSize());
-  BOOST_CHECK_NE(++iter, end(region_list_1));
+  BOOST_CHECK_NE(++iter, std::end(region_list_1));
   BOOST_CHECK_EQUAL(*iter, second_region);
   hadesmem::Region last(&process, nullptr);
   do
@@ -62,7 +59,7 @@ BOOST_AUTO_TEST_CASE(region_list)
     BOOST_CHECK_LT(last,current);
     BOOST_CHECK_LE(last, current);
     last = current;
-  } while (++iter != end(region_list_1));
+  } while (++iter != std::end(region_list_1));
   // TODO: Compare our last region with the 'real' last region to ensure they 
   // match.
 }
@@ -70,9 +67,6 @@ BOOST_AUTO_TEST_CASE(region_list)
 BOOST_AUTO_TEST_CASE(process_list_algorithm)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
-  
-  using std::begin;
-  using std::end;
   
   hadesmem::RegionList const region_list_1(&process);
   
@@ -96,10 +90,11 @@ BOOST_AUTO_TEST_CASE(process_list_algorithm)
   }
   
   HMODULE const user32_mod = GetModuleHandle(L"user32.dll");
-  auto user32_iter = std::find_if(begin(region_list_1), end(region_list_1), 
+  auto user32_iter = std::find_if(std::begin(region_list_1), 
+    std::end(region_list_1), 
     [user32_mod] (hadesmem::Region const& region)
     {
       return region.GetBase() == user32_mod;
     });
-  BOOST_CHECK_NE(user32_iter, end(region_list_1));
+  BOOST_CHECK_NE(user32_iter, std::end(region_list_1));
 }
