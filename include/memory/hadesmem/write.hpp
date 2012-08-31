@@ -16,6 +16,7 @@
 #include <windows.h>
 
 #include "hadesmem/detail/write_impl.hpp"
+#include "hadesmem/detail/type_traits.hpp"
 
 namespace hadesmem
 {
@@ -60,10 +61,8 @@ template <typename T>
 void WriteString(Process const& process, PVOID address, T const* const beg, 
   T const* const end)
 {
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
-  static_assert(std::is_pod<T>::value, "WriteString: Character type of "
-    "string must be trivially copyable.");
+  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
+    "character type.");
 
   Write(process, address, beg, std::distance(beg, end));
 }
@@ -72,6 +71,9 @@ template <typename T>
 void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
 {
+  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
+    "character type.");
+
   return WriteString(process, address, data.c_str(), data.c_str() + 
     data.size() + 1);
 }
@@ -79,10 +81,8 @@ void WriteString(Process const& process, PVOID address,
 template <typename T>
 void WriteString(Process const& process, PVOID address, T const* const str)
 {
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
-  static_assert(std::is_pod<T>::value, "WriteString: Character type of "
-    "string must be trivially copyable.");
+  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
+    "character type.");
 
   WriteString(process, address, std::basic_string<T>(str));
 }

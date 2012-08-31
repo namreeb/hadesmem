@@ -17,6 +17,7 @@
 #include <windows.h>
 
 #include "hadesmem/detail/read_impl.hpp"
+#include "hadesmem/detail/type_traits.hpp"
 
 namespace hadesmem
 {
@@ -68,11 +69,9 @@ T ReadString(Process const& process, PVOID address,
 {
   typedef typename T::value_type CharT;
 
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
-  static_assert(std::is_pod<CharT>::value, "ReadString: Character type of "
-    "string must be trivially copyable.");
-  
+  static_assert(detail::IsCharType<CharT>::value, "WriteString: Invalid "
+    "character type.");
+
   T data;
   
   // TODO: Optimize to only check page protections once, also look into 
