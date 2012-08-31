@@ -28,7 +28,7 @@ template <typename T>
 T Read(Process const& process, PVOID address)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "Read: T must be trivially copyable.");
   
   T data;
@@ -40,7 +40,7 @@ template <typename T, std::size_t N>
 std::array<T, N> Read(Process const& process, PVOID address)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "Read: T must be trivially copyable.");
 
   std::array<T, N> data;
@@ -108,7 +108,7 @@ T ReadVector(Process const& process, PVOID address, std::size_t size,
   typedef typename T::value_type ValueT;
 
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<ValueT>::value, "ReadVector: Value type of vector "
     "must be trivially copyable.");
   

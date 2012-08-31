@@ -27,7 +27,7 @@ template <typename T>
 void Write(Process const& process, PVOID address, T const& data)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
   
   detail::Write(process, address, &data, sizeof(data));
@@ -38,7 +38,7 @@ void Write(Process const& process, PVOID address, T const* ptr,
   std::size_t count)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
 
   std::size_t const raw_size = std::distance(ptr, ptr + count) * sizeof(T);
@@ -50,7 +50,7 @@ void Write(Process const& process, PVOID address, T const* beg,
   T const* end)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "Write: T must be trivially copyable.");
 
   Write(process, address, beg, std::distance(beg, end));
@@ -94,7 +94,7 @@ void WriteVector(Process const& process, PVOID address,
   std::vector<T> const& data)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // GCC.
+  // libstdc++.
   static_assert(std::is_pod<T>::value, "WriteList: Value type of vector "
     "must be trivially copyable.");
   
