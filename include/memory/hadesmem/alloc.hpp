@@ -20,10 +20,6 @@ PVOID Alloc(Process const& process, SIZE_T size);
 
 void Free(Process const& process, LPVOID address);
 
-// TODO: Equality and inequality operator overloads for Allocator.
-// TODO: Relational operator overloads for Allocator.
-// TODO: Stream operator overloads for Allocator.
-
 class Allocator
 {
 public:
@@ -51,5 +47,21 @@ private:
   PVOID base_;
   SIZE_T size_;
 };
+
+bool operator==(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+bool operator!=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+bool operator<(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+bool operator<=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+bool operator>(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+bool operator>=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT;
+
+std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs);
+
+std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs);
 
 }

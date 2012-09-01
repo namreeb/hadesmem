@@ -29,6 +29,16 @@
 
 // TODO: Improve safety via EH.
 
+// TODO: Add support for more 'complex' argument and return types, including 
+// struct/class/union, long double, SIMD types, etc. A good reference for 
+// calling conventions is available at http://goo.gl/5rUxn.
+
+// TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
+// externally instead of being regenerated for every call.
+
+// TODO: Ensure upcasting in Call is done using unsigned types (zero 
+// extension rather than sign extension).
+
 namespace hadesmem
 {
 

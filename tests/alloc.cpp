@@ -45,6 +45,8 @@ BOOST_AUTO_TEST_CASE(alloc)
   BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::HadesMemError);
 }
 
+// TODO: Test Allocator stream overloads.
+
 BOOST_AUTO_TEST_CASE(allocator)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -70,5 +72,24 @@ BOOST_AUTO_TEST_CASE(allocator)
   BOOST_CHECK_NO_THROW(allocator_2.Free());
   
   BOOST_CHECK_NO_THROW(allocator_1.Free());
-  
+
+  hadesmem::Allocator allocator_3(&process, 0x1000);
+  hadesmem::Allocator allocator_4(&process, 0x1000);
+  BOOST_CHECK_EQUAL(allocator_3, allocator_3);
+  BOOST_CHECK_NE(allocator_3, allocator_4);
+  BOOST_CHECK_NE(allocator_4, allocator_3);
+  if (allocator_3 > allocator_4)
+  {
+    BOOST_CHECK_GT(allocator_3, allocator_4);
+    BOOST_CHECK_GE(allocator_3, allocator_4);
+    BOOST_CHECK(!(allocator_3 < allocator_4));
+    BOOST_CHECK(!(allocator_3 <= allocator_4));
+  }
+  else
+  {
+    BOOST_CHECK_GT(allocator_4, allocator_3);
+    BOOST_CHECK_GE(allocator_4, allocator_3);
+    BOOST_CHECK(!(allocator_4 < allocator_3));
+    BOOST_CHECK(!(allocator_4 <= allocator_3));
+  }
 }

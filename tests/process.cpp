@@ -25,6 +25,7 @@
 BOOST_AUTO_TEST_CASE(this_process)
 {
   // TODO: Test relational operators.
+  // TODO: Test stream overloads.
   
   hadesmem::Process process(::GetCurrentProcessId());
   BOOST_CHECK_EQUAL(process, process);

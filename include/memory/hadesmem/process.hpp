@@ -64,10 +64,8 @@ bool operator>(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
 
 bool operator>=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
 
-// TODO: Tests.
 std::ostream& operator<<(std::ostream& lhs, Process const& rhs);
 
-// TODO: Tests.
 std::wostream& operator<<(std::wostream& lhs, Process const& rhs);
 
 std::wstring GetPath(Process const& process);

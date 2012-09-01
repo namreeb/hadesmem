@@ -76,10 +76,8 @@ bool operator>(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
 
 bool operator>=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
 
-// TODO: Tests.
 std::ostream& operator<<(std::ostream& lhs, Module const& rhs);
 
-// TODO: Tests.
 std::wostream& operator<<(std::wostream& lhs, Module const& rhs);
 
 FARPROC FindProcedure(Module const& module, std::string const& name);

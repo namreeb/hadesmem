@@ -130,4 +130,44 @@ void Allocator::FreeUnchecked() BOOST_NOEXCEPT
   }
 }
 
+bool operator==(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetBase() == rhs.GetBase();
+}
+
+bool operator!=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
+
+bool operator<(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetBase() < rhs.GetBase();
+}
+
+bool operator<=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetBase() <= rhs.GetBase();
+}
+
+bool operator>(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetBase() > rhs.GetBase();
+}
+
+bool operator>=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+{
+  return lhs.GetBase() >= rhs.GetBase();
+}
+
+std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
+
+std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
+
 }

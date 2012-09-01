@@ -28,6 +28,8 @@
 // ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
 BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
 
+// TODO: Test Module stream overloads.
+
 BOOST_AUTO_TEST_CASE(module)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
