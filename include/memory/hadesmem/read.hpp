@@ -29,7 +29,8 @@ T Read(Process const& process, PVOID address)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
   // libstdc++.
-  static_assert(std::is_pod<T>::value, "Read: T must be trivially copyable.");
+  static_assert(std::is_trivial<T>::value, "Read: T must be trivially "
+    "copyable.");
   
   T data;
   detail::Read(process, address, &data, sizeof(data));
@@ -41,7 +42,11 @@ std::array<T, N> Read(Process const& process, PVOID address)
 {
   // TODO: Update to use std::is_trivially_copyable trait when available in 
   // libstdc++.
-  static_assert(std::is_pod<T>::value, "Read: T must be trivially copyable.");
+  static_assert(std::is_trivial<T>::value, "Read: T must be trivially "
+    "copyable.");
+
+  static_assert(std::is_default_constructible<T>::value, "Read: T must be "
+    "default constructible.");
 
   std::array<T, N> data;
   detail::Read(process, address, data.data(), sizeof(T) * N);
@@ -109,8 +114,11 @@ T ReadVector(Process const& process, PVOID address, std::size_t size,
 
   // TODO: Update to use std::is_trivially_copyable trait when available in 
   // libstdc++.
-  static_assert(std::is_pod<ValueT>::value, "ReadVector: Value type of vector "
-    "must be trivially copyable.");
+  static_assert(std::is_trivial<ValueT>::value, "ReadVector: Value type of "
+    "vector must be trivially copyable.");
+
+  static_assert(std::is_default_constructible<T>::value, "ReadVector: Value "
+    "type of vector must be default constructible.");
   
   T data(size);
   detail::Read(process, address, data.data(), sizeof(ValueT) * size);
