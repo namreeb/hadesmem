@@ -166,8 +166,7 @@ public:
   
 private:
   template <typename T>
-  void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(T) <= 
-    sizeof(DWORD_PTR)>::type* /*dummy*/ = 0) BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::false_type const&) BOOST_NOEXCEPT
   {
     type_ = ArgType::kPtrType;
     union Conv
@@ -181,9 +180,7 @@ private:
   }
   
   template <typename T>
-  void InitializeIntegralImpl(T t, typename std::enable_if<sizeof(void*) != 
-    sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64)>::type* /*dummy*/ = 0) 
-    BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::true_type const&) BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
     union Conv
@@ -197,25 +194,19 @@ private:
   }
   
   template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_integral<T>::value || 
-    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) BOOST_NOEXCEPT
+  void Initialize(T t) BOOST_NOEXCEPT
   {
-    InitializeIntegralImpl(t);
+    InitializeIntegralImpl(t, std::integral_constant<bool, 
+      (sizeof(void*) != sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64))>());
   }
   
-  template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_same<float, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
-    BOOST_NOEXCEPT
+  void Initialize(float t) BOOST_NOEXCEPT
   {
     type_ = ArgType::kFloatType;
     arg_.f = t;
   }
   
-  template <typename T>
-  void Initialize(T t, typename std::enable_if<std::is_same<double, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
-    BOOST_NOEXCEPT
+  void Initialize(double t) BOOST_NOEXCEPT
   {
     type_ = ArgType::kDoubleType;
     arg_.d = t;
