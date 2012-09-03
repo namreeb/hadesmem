@@ -181,15 +181,29 @@ void Module::Initialize(MODULEENTRY32 const& entry)
 
 void Module::InitializeIf(EntryCallback const& check_func)
 {
-  HANDLE const snap = CreateToolhelp32Snapshot(
+  HANDLE snap = ::CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
   if (snap == INVALID_HANDLE_VALUE)
   {
-    // TODO: Improve handling of ERROR_BAD_LENGTH.
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("CreateToolhelp32Snapshot failed.") << 
-      ErrorCodeWinLast(last_error));
+    if (GetLastError() == ERROR_BAD_LENGTH)
+    {
+      snap = ::CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
+      if (snap == INVALID_HANDLE_VALUE)
+      {
+        DWORD const last_error = ::GetLastError();
+        BOOST_THROW_EXCEPTION(HadesMemError() << 
+          ErrorString("CreateToolhelp32Snapshot failed.") << 
+          ErrorCodeWinLast(last_error));
+      }
+    }
+    else
+    {
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(HadesMemError() << 
+        ErrorString("CreateToolhelp32Snapshot failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
   }
   
   BOOST_SCOPE_EXIT_ALL(&)

@@ -53,38 +53,20 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
-// TODO: Support other string types that model the same STL container 
-// style (e.g. boost::basic_string). Perhaps remove the enable_if altogether 
-// and just rely on users to use the API with sensible types (and improve 
-// diagnostics for cases where dependent type names or functions don't 
-// exist through use of BCCL or similar).
 template <typename T>
-T ReadString(Process const& process, PVOID address, 
-  typename std::enable_if<
-    std::is_same<
-      T, 
-      std::basic_string<
-        typename T::value_type, 
-        typename T::traits_type, 
-        typename T::allocator_type
-        >
-      >::value, 
-    T
-    >::type* /*dummy*/ = nullptr)
+std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
-  typedef typename T::value_type CharT;
-
-  static_assert(detail::IsCharType<CharT>::value, "WriteString: Invalid "
+  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
     "character type.");
 
-  T data;
+  std::basic_string<T> data;
   
   // TODO: Optimize to only check page protections once, also look into 
   // reading data in chunks rather than byte-by-byte.
-  CharT* address_real = static_cast<CharT*>(address);
-  for (CharT current = Read<CharT>(process, address_real); 
-    current != CharT(); 
-    ++address_real, current = Read<CharT>(process, address_real))
+  T* address_real = static_cast<T*>(address);
+  for (T current = Read<T>(process, address_real); 
+    current != T(); 
+    ++address_real, current = Read<T>(process, address_real))
   {
     data.push_back(current);
   }
@@ -92,36 +74,20 @@ T ReadString(Process const& process, PVOID address,
   return data;
 }
 
-// TODO: Support other container types that model the same STL container 
-// style (e.g. boost::vector). Perhaps remove the enable_if altogether 
-// and just rely on users to use the API with sensible types (and improve 
-// diagnostics for cases where dependent type names or functions don't 
-// exist through use of BCCL or similar).
 template <typename T>
-T ReadVector(Process const& process, PVOID address, std::size_t size, 
-  typename std::enable_if<
-    std::is_same<
-      T, 
-      std::vector<
-        typename T::value_type, 
-        typename T::allocator_type
-        >
-      >::value, 
-    T
-    >::type* /*dummy*/ = nullptr)
+std::vector<T> ReadVector(Process const& process, PVOID address, 
+  std::size_t size)
 {
-  typedef typename T::value_type ValueT;
-
   // TODO: Update to use std::is_trivially_copyable trait when available in 
   // libstdc++.
-  static_assert(std::is_trivial<ValueT>::value, "ReadVector: Value type of "
+  static_assert(std::is_trivial<T>::value, "ReadVector: Value type of "
     "vector must be trivially copyable.");
 
   static_assert(std::is_default_constructible<T>::value, "ReadVector: Value "
     "type of vector must be default constructible.");
   
-  T data(size);
-  detail::Read(process, address, data.data(), sizeof(ValueT) * size);
+  std::vector<T> data(size);
+  detail::Read(process, address, data.data(), sizeof(T) * size);
   return data;
 }
 

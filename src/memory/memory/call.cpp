@@ -605,7 +605,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
   }
 
   std::vector<ReturnValueRemote> return_vals_remote = 
-    ReadVector<std::vector<ReturnValueRemote>>(process, 
+    ReadVector<ReturnValueRemote>(process, 
     return_values_remote.GetBase(), addresses.size());
   
   std::vector<RemoteFunctionRet> return_vals;

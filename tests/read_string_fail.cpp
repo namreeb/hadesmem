@@ -22,12 +22,9 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-struct non_string_type
-{ };
-
 BOOST_AUTO_TEST_CASE(read_string_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ReadString<non_string_type>(process, nullptr);
+  hadesmem::ReadString<int>(process, nullptr);
 }

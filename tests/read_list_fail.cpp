@@ -22,12 +22,15 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-struct non_list_type
-{ };
+struct NotDefaultConstructible
+{
+  NotDefaultConstructible(int)
+  { }
+};
 
 BOOST_AUTO_TEST_CASE(read_list_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ReadVector<non_list_type>(process, nullptr);
+  hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr);
 }

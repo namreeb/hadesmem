@@ -26,6 +26,10 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// TODO: Provide the appropriate stream operator overload to allow this (also 
+// ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
+BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
+
 BOOST_AUTO_TEST_CASE(read_pod)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -60,12 +64,18 @@ BOOST_AUTO_TEST_CASE(read_pod)
 BOOST_AUTO_TEST_CASE(read_string)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
-  
+
   std::string test_string = "Narrow test string.";
   char* const test_string_real = &test_string[0];
-  auto const new_test_string = hadesmem::ReadString<std::string>(process, 
+  auto const new_test_string = hadesmem::ReadString<char>(process, 
     test_string_real);
   BOOST_CHECK_EQUAL(new_test_string, test_string);
+
+  std::wstring wide_test_string = L"Narrow test string.";
+  wchar_t* const wide_test_string_real = &wide_test_string[0];
+  auto const wide_new_test_string = hadesmem::ReadString<wchar_t>(process, 
+    wide_test_string_real);
+  BOOST_CHECK_EQUAL(wide_new_test_string, wide_test_string);
 }
 
 BOOST_AUTO_TEST_CASE(read_vector)
@@ -73,7 +83,7 @@ BOOST_AUTO_TEST_CASE(read_vector)
   hadesmem::Process const process(::GetCurrentProcessId());
   
   std::array<int, 10> int_list = {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
-  std::vector<int> int_list_read = hadesmem::ReadVector<std::vector<int>>(
+  std::vector<int> int_list_read = hadesmem::ReadVector<int>(
     process, &int_list, 10);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
     int_list_read.cbegin(), int_list_read.cend());
