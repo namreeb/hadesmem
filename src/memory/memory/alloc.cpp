@@ -7,6 +7,8 @@
 
 #include "hadesmem/alloc.hpp"
 
+#include <iostream>
+
 #include <boost/assert.hpp>
 
 #include "hadesmem/error.hpp"

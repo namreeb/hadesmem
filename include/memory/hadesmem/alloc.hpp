@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iosfwd>
+
 #include <boost/config.hpp>
 
 #include <windows.h>

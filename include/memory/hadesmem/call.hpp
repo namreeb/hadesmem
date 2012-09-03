@@ -65,13 +65,12 @@ public:
       std::is_same<double, typename std::remove_cv<T>::type>::value, 
       "Only integral, pointer, or floating point types are supported.");
     
-    return GetReturnValueImpl<T>();
+    return GetReturnValueImpl(T());
   }
   
 private:
   template <typename T>
-  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) == 
-    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::true_type const&) const BOOST_NOEXCEPT
   {
     union Conv
     {
@@ -84,8 +83,7 @@ private:
   }
   
   template <typename T>
-  T GetReturnValueIntImpl(typename std::enable_if<sizeof(T) != 
-    sizeof(DWORD64)>::type* /*dummy*/ = nullptr) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::false_type const&) const BOOST_NOEXCEPT
   {
     union Conv
     {
@@ -98,25 +96,18 @@ private:
   }
   
   template <typename T>
-  T GetReturnValueImpl(typename std::enable_if<std::is_integral<T>::value || 
-    std::is_pointer<T>::value>::type* /*dummy*/ = nullptr) const 
-    BOOST_NOEXCEPT
+  T GetReturnValueImpl(T /*t*/) const BOOST_NOEXCEPT
   {
-    return GetReturnValueIntImpl<T>();
+    return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
+      (sizeof(T) == sizeof(DWORD64))>());
   }
   
-  template <typename T>
-  T GetReturnValueImpl(typename std::enable_if<std::is_same<float, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
-    const BOOST_NOEXCEPT
+  float GetReturnValueImpl(float /*t*/) const BOOST_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
   
-  template <typename T>
-  T GetReturnValueImpl(typename std::enable_if<std::is_same<double, 
-    typename std::remove_cv<T>::type>::value>::type* /*dummy*/ = nullptr) 
-    const BOOST_NOEXCEPT
+  double GetReturnValueImpl(double /*t*/) const BOOST_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
