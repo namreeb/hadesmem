@@ -43,44 +43,114 @@
 namespace hadesmem
 {
 
-RemoteFunctionRet::RemoteFunctionRet(DWORD_PTR return_int_ptr, 
+CallResult::CallResult(DWORD_PTR return_int_ptr, 
+  DWORD32 return_int_32, 
   DWORD64 return_int_64, 
   float return_float, 
   double return_double, 
   DWORD last_error) BOOST_NOEXCEPT
   : int_ptr_(return_int_ptr), 
+  int_32_(return_int_32), 
   int_64_(return_int_64), 
   float_(return_float), 
   double_(return_double), 
   last_error_(last_error)
 { }
 
-DWORD_PTR RemoteFunctionRet::GetReturnValue() const BOOST_NOEXCEPT
+CallResult::CallResult(CallResult const& other) BOOST_NOEXCEPT
+  : int_ptr_(other.int_ptr_), 
+  int_32_(other.int_32_), 
+  int_64_(other.int_64_), 
+  float_(other.float_), 
+  double_(other.double_), 
+  last_error_(other.last_error_)
+{ }
+
+CallResult& CallResult::operator=(CallResult const& other) BOOST_NOEXCEPT
+{
+  int_ptr_ = other.int_ptr_;
+  int_32_ = other.int_32_;
+  int_64_ = other.int_64_;
+  float_ = other.float_;
+  double_ = other.double_;
+  last_error_ = other.last_error_;
+
+  return *this;
+}
+
+CallResult::CallResult(CallResult&& other) BOOST_NOEXCEPT
+  : int_ptr_(other.int_ptr_), 
+  int_32_(other.int_32_), 
+  int_64_(other.int_64_), 
+  float_(other.float_), 
+  double_(other.double_), 
+  last_error_(other.last_error_)
+{
+  other.int_ptr_ = 0;
+  other.int_32_ = 0;
+  other.int_64_ = 0;
+  other.float_ = 0;
+  other.double_ = 0;
+  other.last_error_ = 0;
+}
+
+CallResult& CallResult::operator=(CallResult&& other) BOOST_NOEXCEPT
+{
+  int_ptr_ = other.int_ptr_;
+  other.int_ptr_ = 0;
+
+  int_64_ = other.int_64_;
+  other.int_64_ = 0;
+
+  int_32_ = other.int_32_;
+  other.int_32_ = 0;
+
+  float_ = other.float_;
+  other.float_ = 0;
+
+  double_ = other.double_;
+  other.double_ = 0;
+
+  last_error_ = other.last_error_;
+  other.last_error_ = 0;
+
+  return *this;
+}
+
+CallResult::~CallResult()
+{ }
+
+DWORD_PTR CallResult::GetReturnValueIntPtr() const BOOST_NOEXCEPT
 {
   return int_ptr_;
 }
 
-DWORD64 RemoteFunctionRet::GetReturnValue64() const BOOST_NOEXCEPT
+DWORD32 CallResult::GetReturnValueInt32() const BOOST_NOEXCEPT
+{
+  return int_32_;
+}
+
+DWORD64 CallResult::GetReturnValueInt64() const BOOST_NOEXCEPT
 {
   return int_64_;
 }
 
-float RemoteFunctionRet::GetReturnValueFloat() const BOOST_NOEXCEPT
+float CallResult::GetReturnValueFloat() const BOOST_NOEXCEPT
 {
   return float_;
 }
 
-double RemoteFunctionRet::GetReturnValueDouble() const BOOST_NOEXCEPT
+double CallResult::GetReturnValueDouble() const BOOST_NOEXCEPT
 {
   return double_;
 }
 
-DWORD RemoteFunctionRet::GetLastError() const BOOST_NOEXCEPT
+DWORD CallResult::GetLastError() const BOOST_NOEXCEPT
 {
   return last_error_;
 }
 
-RemoteFunctionRet Call(Process const& process, 
+CallResult Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args)
@@ -106,32 +176,37 @@ public:
     cur_arg_(num_args)
   { }
   
-  void operator()(void* arg)
+  void operator()(DWORD32 arg)
+  {
+    return (*this)(static_cast<DWORD64>(arg));
+  }
+
+  void operator()(DWORD64 arg)
   {
     switch (cur_arg_)
     {
     case 1:
-      assembler_->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::rcx, arg);
       break;
     case 2:
-      assembler_->mov(AsmJit::rdx, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::rdx, arg);
       break;
     case 3:
-      assembler_->mov(AsmJit::r8, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::r8, arg);
       break;
     case 4:
-      assembler_->mov(AsmJit::r9, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::r9, arg);
       break;
     default:
-      assembler_->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::rax, arg);
       assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
         AsmJit::rax);
       break;
     }
-    
+
     --cur_arg_;
   }
-  
+
   void operator()(float arg)
   {
     static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
@@ -239,11 +314,6 @@ public:
     --cur_arg_;
   }
   
-  void operator()(DWORD64 /*arg*/)
-  {
-    BOOST_ASSERT("Invalid argument type." && false);
-  }
-  
 private:
   AsmJit::X86Assembler* assembler_;
   std::size_t num_args_;
@@ -263,7 +333,7 @@ public:
     call_conv_(call_conv)
   { }
   
-  void operator()(void* arg)
+  void operator()(DWORD32 arg)
   {
     switch (cur_arg_)
     {
@@ -272,10 +342,10 @@ public:
       {
       case CallConv::kThisCall:
       case CallConv::kFastCall:
-        assembler_->mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->mov(AsmJit::ecx, arg);
         break;
       default:
-        assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->mov(AsmJit::eax, arg);
         assembler_->push(AsmJit::eax);
         break;
       }
@@ -284,23 +354,37 @@ public:
       switch (call_conv_)
       {
       case CallConv::kFastCall:
-        assembler_->mov(AsmJit::edx, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->mov(AsmJit::edx, arg);
         break;
       default:
-        assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+        assembler_->mov(AsmJit::eax, arg);
         assembler_->push(AsmJit::eax);
         break;
       }
       break;
     default:
-      assembler_->mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(arg));
+      assembler_->mov(AsmJit::eax, arg);
       assembler_->push(AsmJit::eax);
       break;
     }
     
     --cur_arg_;
   }
-  
+
+  void operator()(DWORD64 arg)
+  {
+    // TODO: Test __fastcall with a 64-bit arg to ensure this is correct.
+
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>((arg >> 32) & 
+      0xFFFFFFFF));
+    assembler_->push(AsmJit::eax);
+
+    assembler_->mov(AsmJit::eax, static_cast<DWORD>(arg));
+    assembler_->push(AsmJit::eax);
+
+    --cur_arg_;
+  }
+
   void operator()(float arg)
   {
     static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
@@ -343,18 +427,6 @@ public:
     --cur_arg_;
   }
   
-  void operator()(DWORD64 arg)
-  {
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>((arg >> 32) & 
-      0xFFFFFFFF));
-    assembler_->push(AsmJit::eax);
-    
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>(arg));
-    assembler_->push(AsmJit::eax);
-    
-    --cur_arg_;
-  }
-  
 private:
   AsmJit::X86Assembler* assembler_;
   std::size_t num_args_;
@@ -369,6 +441,7 @@ private:
 struct ReturnValueRemote
 {
   DWORD_PTR return_value;
+  DWORD32 return_value_32;
   DWORD64 return_value_64;
   float return_value_float;
   double return_value_double;
@@ -378,7 +451,7 @@ struct ReturnValueRemote
 static_assert(detail::IsTriviallyCopyable<ReturnValueRemote>::value, 
   "ReturnValueRemote type must be trivially copyable.");
 
-std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
+std::vector<CallResult> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
@@ -460,7 +533,12 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
       offsetof(ReturnValueRemote, return_value));
     assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-    
+
+    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_32));
+    assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
+
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
       offsetof(ReturnValueRemote, return_value_64));
@@ -482,7 +560,7 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
       offsetof(ReturnValueRemote, last_error));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::rax);
+    assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
   }
   
   assembler.add(AsmJit::rsp, stack_offs);
@@ -529,7 +607,12 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
       return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
       offsetof(ReturnValueRemote, return_value));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    
+
+    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
+      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
+      offsetof(ReturnValueRemote, return_value_32));
+    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
+
     assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
       return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
       offsetof(ReturnValueRemote, return_value_64));
@@ -609,14 +692,15 @@ std::vector<RemoteFunctionRet> CallMulti(Process const& process,
     ReadVector<ReturnValueRemote>(process, 
     return_values_remote.GetBase(), addresses.size());
   
-  std::vector<RemoteFunctionRet> return_vals;
+  std::vector<CallResult> return_vals;
   return_vals.reserve(addresses.size());
   
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     std::back_inserter(return_vals), 
     [] (ReturnValueRemote const& r)
     {
-      return RemoteFunctionRet(r.return_value, 
+      return CallResult(r.return_value, 
+        r.return_value_32, 
         r.return_value_64, 
         r.return_value_float, 
         r.return_value_double, 
@@ -676,7 +760,7 @@ MultiCall& MultiCall::operator=(MultiCall&& other) BOOST_NOEXCEPT
 MultiCall::~MultiCall()
 { }
 
-std::vector<RemoteFunctionRet> MultiCall::Call() const
+std::vector<CallResult> MultiCall::Call() const
 {
   return hadesmem::CallMulti(*process_, addresses_, call_convs_, args_);
 }

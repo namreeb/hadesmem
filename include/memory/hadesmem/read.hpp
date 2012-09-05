@@ -27,8 +27,8 @@ class Process;
 template <typename T>
 T Read(Process const& process, PVOID address)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Read: T must be "
-    "trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
+    "copyable.");
   
   T data;
   detail::Read(process, address, &data, sizeof(data));
@@ -38,11 +38,11 @@ T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 std::array<T, N> Read(Process const& process, PVOID address)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Read: T must be "
-    "trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
+    "copyable.");
 
-  static_assert(std::is_default_constructible<T>::value, "Read: T must be "
-    "default constructible.");
+  static_assert(std::is_default_constructible<T>::value, "T must be default "
+    "constructible.");
 
   std::array<T, N> data;
   detail::Read(process, address, data.data(), sizeof(T) * N);
@@ -54,8 +54,7 @@ std::array<T, N> Read(Process const& process, PVOID address)
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
-  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
-    "character type.");
+  static_assert(detail::IsCharType<T>::value, "Invalid character type.");
 
   std::basic_string<T> data;
   
@@ -78,11 +77,11 @@ template <typename T>
 std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t size)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "ReadVector: Value "
-    "type of vector must be trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "Value type of vector "
+    "must be trivially copyable.");
 
-  static_assert(std::is_default_constructible<T>::value, "ReadVector: Value "
-    "type of vector must be default constructible.");
+  static_assert(std::is_default_constructible<T>::value, "Value type of "
+    "vector must be default constructible.");
   
   std::vector<T> data(size);
   detail::Read(process, address, data.data(), sizeof(T) * size);

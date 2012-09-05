@@ -26,8 +26,8 @@ class Process;
 template <typename T>
 void Write(Process const& process, PVOID address, T const& data)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Write: T must be "
-    "trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
+    "copyable.");
   
   detail::Write(process, address, &data, sizeof(data));
 }
@@ -36,8 +36,8 @@ template <typename T>
 void Write(Process const& process, PVOID address, T const* ptr, 
   std::size_t count)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Write: T must be "
-    "trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
+    "copyable.");
 
   std::size_t const raw_size = std::distance(ptr, ptr + count) * sizeof(T);
   detail::Write(process, address, ptr, raw_size);
@@ -47,8 +47,8 @@ template <typename T>
 void Write(Process const& process, PVOID address, T const* beg, 
   T const* end)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Write: T must be "
-    "trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
+    "copyable.");
 
   Write(process, address, beg, std::distance(beg, end));
 }
@@ -58,8 +58,7 @@ template <typename T>
 void WriteString(Process const& process, PVOID address, T const* const beg, 
   T const* const end)
 {
-  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
-    "character type.");
+  static_assert(detail::IsCharType<T>::value, "Invalid character type.");
 
   Write(process, address, beg, std::distance(beg, end));
 }
@@ -70,8 +69,7 @@ template <typename T>
 void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
 {
-  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
-    "character type.");
+  static_assert(detail::IsCharType<T>::value, "Invalid character type.");
 
   return WriteString(process, address, data.c_str(), data.c_str() + 
     data.size() + 1);
@@ -80,8 +78,7 @@ void WriteString(Process const& process, PVOID address,
 template <typename T>
 void WriteString(Process const& process, PVOID address, T const* const str)
 {
-  static_assert(detail::IsCharType<T>::value, "WriteString: Invalid "
-    "character type.");
+  static_assert(detail::IsCharType<T>::value, "Invalid character type.");
 
   WriteString(process, address, std::basic_string<T>(str));
 }
@@ -92,8 +89,8 @@ template <typename T>
 void WriteVector(Process const& process, PVOID address, 
   std::vector<T> const& data)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "WriteList: Value "
-    "type of vector must be trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "Value type of vector "
+    "must be trivially copyable.");
   
   std::size_t const raw_size = data.size() * sizeof(T);
   detail::Write(process, address, data.data(), raw_size);

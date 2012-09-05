@@ -352,13 +352,13 @@ BOOST_AUTO_TEST_CASE(call)
   multi_call.Add<DWORD (*)()>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
     hadesmem::CallConv::kDefault);
-  std::vector<hadesmem::RemoteFunctionRet> multi_call_ret = multi_call.Call();
+  std::vector<hadesmem::CallResult> multi_call_ret = multi_call.Call();
   BOOST_CHECK_EQUAL(multi_call_ret[0].GetLastError(), 
   static_cast<DWORD>(0x1337));
-  BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValue(), 
+  BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValueIntPtr(), 
   static_cast<DWORD_PTR>(0x1337));
   BOOST_CHECK_EQUAL(multi_call_ret[2].GetLastError(), 
   static_cast<DWORD>(0x1234));
-  BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValue(), 
+  BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValueIntPtr(), 
   static_cast<DWORD_PTR>(0x1234));
 }

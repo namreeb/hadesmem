@@ -37,18 +37,31 @@ enum class CallConv
   kX64
 };
 
-class RemoteFunctionRet
+class CallResult
 {
 public:
-  RemoteFunctionRet(DWORD_PTR return_int_ptr, 
+  CallResult(DWORD_PTR return_int_ptr, 
+    DWORD32 return_int_32, 
     DWORD64 return_int_64, 
     float return_float, 
     double return_double, 
     DWORD last_error) BOOST_NOEXCEPT;
+
+  CallResult(CallResult const& other) BOOST_NOEXCEPT;
+
+  CallResult& operator=(CallResult const& other) BOOST_NOEXCEPT;
+
+  CallResult(CallResult&& other) BOOST_NOEXCEPT;
+
+  CallResult& operator=(CallResult&& other) BOOST_NOEXCEPT;
+
+  ~CallResult();
   
-  DWORD_PTR GetReturnValue() const BOOST_NOEXCEPT;
-  
-  DWORD64 GetReturnValue64() const BOOST_NOEXCEPT;
+  DWORD_PTR GetReturnValueIntPtr() const BOOST_NOEXCEPT;
+
+  DWORD32 GetReturnValueInt32() const BOOST_NOEXCEPT;
+
+  DWORD64 GetReturnValueInt64() const BOOST_NOEXCEPT;
   
   float GetReturnValueFloat() const BOOST_NOEXCEPT;
   
@@ -75,10 +88,10 @@ private:
     union Conv
     {
       T t;
-      DWORD64 d;
+      DWORD64 i;
     };
     Conv conv;
-    conv.d = GetReturnValue64();
+    conv.i = GetReturnValueInt64();
     return conv.t;
   }
   
@@ -88,10 +101,10 @@ private:
     union Conv
     {
       T t;
-      DWORD_PTR d;
+      DWORD32 i;
     };
     Conv conv;
-    conv.d = GetReturnValue();
+    conv.i = GetReturnValueInt32();
     return conv.t;
   }
   
@@ -113,6 +126,7 @@ private:
   }
   
   DWORD_PTR int_ptr_;
+  DWORD32 int_32_;
   DWORD64 int_64_;
   float float_;
   double double_;
@@ -124,7 +138,7 @@ class CallArg
 public:
   template <typename T>
   CallArg(T t) BOOST_NOEXCEPT
-    : type_(ArgType::kPtrType), 
+    : type_(ArgType::kInvalidType), 
     arg_()
   {
     static_assert(std::is_integral<T>::value || 
@@ -132,12 +146,6 @@ public:
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
       std::is_same<double, typename std::remove_cv<T>::type>::value, 
       "Only integral, pointer, or floating point types are supported.");
-    
-    static_assert(sizeof(T) <= sizeof(void*) || 
-      std::is_same<double, typename std::remove_cv<T>::type>::value || 
-      (std::is_integral<T>::value && sizeof(T) <= sizeof(DWORD64)), 
-      "Currently only memsize (or smaller) types are supported (doubles "
-      "and 64-bit integrals excepted).");
     
     Initialize(t);
   }
@@ -147,8 +155,14 @@ public:
   {
     switch (type_)
     {
-    case ArgType::kPtrType:
-      (*v)(arg_.p);
+    case ArgType::kInvalidType:
+      BOOST_ASSERT("Invalid type." && false);
+      break;
+    case ArgType::kInt32Type:
+      (*v)(arg_.i32);
+      break;
+    case ArgType::kInt64Type:
+      (*v)(arg_.i64);
       break;
     case ArgType::kFloatType:
       (*v)(arg_.f);
@@ -156,11 +170,9 @@ public:
     case ArgType::kDoubleType:
       (*v)(arg_.d);
       break;
-    case ArgType::kInt64Type:
-      (*v)(arg_.i);
-      break;
     default:
       BOOST_ASSERT("Invalid type." && false);
+      break;
     }
   }
   
@@ -168,15 +180,15 @@ private:
   template <typename T>
   void InitializeIntegralImpl(T t, std::false_type const&) BOOST_NOEXCEPT
   {
-    type_ = ArgType::kPtrType;
+    type_ = ArgType::kInt32Type;
     union Conv
     {
       T t;
-      void* p;
+      DWORD32 i;
     };
     Conv conv;
     conv.t = t;
-    arg_.p = conv.p;
+    arg_.i32 = conv.i;
   }
   
   template <typename T>
@@ -190,14 +202,14 @@ private:
     };
     Conv conv;
     conv.t = t;
-    arg_.i = conv.i;
+    arg_.i64 = conv.i;
   }
   
   template <typename T>
   void Initialize(T t) BOOST_NOEXCEPT
   {
     InitializeIntegralImpl(t, std::integral_constant<bool, 
-      (sizeof(void*) != sizeof(DWORD64) && sizeof(T) == sizeof(DWORD64))>());
+      (sizeof(T) == sizeof(DWORD64))>());
   }
   
   void Initialize(float t) BOOST_NOEXCEPT
@@ -214,30 +226,31 @@ private:
   
   enum class ArgType
   {
-    kPtrType, 
+    kInvalidType, 
+    kInt32Type, 
+    kInt64Type, 
     kFloatType, 
-    kDoubleType, 
-    kInt64Type
+    kDoubleType
   };
   
   union Arg
   {
-    void* p;
+    DWORD32 i32;
+    DWORD64 i64;
     float f;
     double d;
-    DWORD64 i;
   };
   
   ArgType type_;
   Arg arg_;
 };
 
-RemoteFunctionRet Call(Process const& process, 
+CallResult Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args);
 
-std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
+std::vector<CallResult> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
@@ -284,7 +297,7 @@ std::pair<typename VoidToInt<\
     "Invalid number of arguments.");\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
-  RemoteFunctionRet const ret = Call(process, address, call_conv, args);\
+  CallResult const ret = Call(process, address, call_conv, args);\
   typedef typename VoidToInt<\
     typename boost::function_types::result_type<FuncT>::type>::type ResultT;\
   return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());\
@@ -380,7 +393,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 
 #undef HADESMEM_CALL_ADD_ARG
   
-  std::vector<RemoteFunctionRet> Call() const;
+  std::vector<CallResult> Call() const;
   
 private:
   Process const* process_;
