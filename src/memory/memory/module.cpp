@@ -226,12 +226,19 @@ void Module::InitializeIf(EntryCallback const& check_func)
     }
   }
   
-  // TODO: Improve error handling when the error code returned by the module 
-  // enumeration APIs is something other than ERROR_NO_MORE_FILES.
   DWORD const last_error = ::GetLastError();
-  BOOST_THROW_EXCEPTION(HadesMemError() << 
-    ErrorString("Could not find module.") << 
-    ErrorCodeWinLast(last_error));
+  if (last_error == ERROR_NO_MORE_FILES)
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Could not find module.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  else
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Module enumeration failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
 }
 
 bool operator==(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT

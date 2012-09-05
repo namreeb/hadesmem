@@ -23,6 +23,7 @@
 #include "hadesmem/write.hpp"
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
+#include "hadesmem/detail/type_traits.hpp"
 
 // TODO: Improve and clean up this mess, move details to different files, 
 // split code gen into detail funcs, etc.
@@ -374,8 +375,8 @@ struct ReturnValueRemote
   DWORD last_error;
 };
 
-static_assert(std::is_pod<ReturnValueRemote>::value, 
-  "ReturnValueRemote type must be POD.");
+static_assert(detail::IsTriviallyCopyable<ReturnValueRemote>::value, 
+  "ReturnValueRemote type must be trivially copyable.");
 
 std::vector<RemoteFunctionRet> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 

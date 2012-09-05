@@ -27,10 +27,8 @@ class Process;
 template <typename T>
 T Read(Process const& process, PVOID address)
 {
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // libstdc++.
-  static_assert(std::is_trivial<T>::value, "Read: T must be trivially "
-    "copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "Read: T must be "
+    "trivially copyable.");
   
   T data;
   detail::Read(process, address, &data, sizeof(data));
@@ -40,10 +38,8 @@ T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 std::array<T, N> Read(Process const& process, PVOID address)
 {
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // libstdc++.
-  static_assert(std::is_trivial<T>::value, "Read: T must be trivially "
-    "copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "Read: T must be "
+    "trivially copyable.");
 
   static_assert(std::is_default_constructible<T>::value, "Read: T must be "
     "default constructible.");
@@ -53,6 +49,8 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
+// TODO: Support other container types that model the same STL container 
+// style (e.g. boost::basic_string).
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
@@ -74,14 +72,14 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
   return data;
 }
 
+// TODO: Support other container types that model the same STL container 
+// style (e.g. boost::vector).
 template <typename T>
 std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t size)
 {
-  // TODO: Update to use std::is_trivially_copyable trait when available in 
-  // libstdc++.
-  static_assert(std::is_trivial<T>::value, "ReadVector: Value type of "
-    "vector must be trivially copyable.");
+  static_assert(detail::IsTriviallyCopyable<T>::value, "ReadVector: Value "
+    "type of vector must be trivially copyable.");
 
   static_assert(std::is_default_constructible<T>::value, "ReadVector: Value "
     "type of vector must be default constructible.");

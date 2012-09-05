@@ -26,6 +26,18 @@ struct IsCharType
     std::is_same<T, char32_t>::value;
 };
 
+template <typename T>
+struct IsTriviallyCopyable
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  // TODO: Update to use std::is_trivially_copyable trait when available in 
+  // libstdc++.
+  static bool const value = std::is_trivial<T>::value;
+#else
+  static bool const value = std::is_trivially_copyable<T>::value;
+#endif
+};
+
 }
 
 }
