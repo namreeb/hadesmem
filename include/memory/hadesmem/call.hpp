@@ -30,6 +30,7 @@ class Process;
 enum class CallConv
 {
   kDefault, 
+  kWinApi, 
   kCdecl, 
   kStdCall, 
   kThisCall, 

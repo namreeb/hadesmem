@@ -513,11 +513,13 @@ std::vector<CallResult> CallMulti(Process const& process,
   {
     LPCVOID address = addresses[i];
     CallConv call_conv = call_convs[i];
+    (void)call_conv;
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
 
-    BOOST_ASSERT(call_conv == CallConv::kX64 || 
-      call_conv == CallConv::kDefault);
+    BOOST_ASSERT(call_conv == CallConv::kDefault || 
+      call_conv == CallConv::kWinApi || 
+      call_conv == CallConv::kX64);
     
     X64ArgVisitor arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
@@ -637,7 +639,7 @@ std::vector<CallResult> CallMulti(Process const& process,
       offsetof(ReturnValueRemote, last_error));
     assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     
-    if (call_conv == CallConv::kCdecl)
+    if (call_conv == CallConv::kDefault || call_conv == CallConv::kCdecl)
     {
       assembler.add(AsmJit::esp, AsmJit::imm(num_args * sizeof(PVOID)));
     }
@@ -663,12 +665,12 @@ std::vector<CallResult> CallMulti(Process const& process,
   
   WriteVector(process, stub_remote, code_real);
   
-  HANDLE const thread_remote = CreateRemoteThread(process.GetHandle(), 
+  HANDLE const thread_remote = ::CreateRemoteThread(process.GetHandle(), 
     nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(stub_remote_temp), 
     nullptr, 0, nullptr);
   if (!thread_remote)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not create remote thread.") << 
       ErrorCodeWinLast(last_error));
@@ -680,9 +682,9 @@ std::vector<CallResult> CallMulti(Process const& process,
     BOOST_VERIFY(::CloseHandle(thread_remote));
   };
   
-  if (WaitForSingleObject(thread_remote, INFINITE) != WAIT_OBJECT_0)
+  if (::WaitForSingleObject(thread_remote, INFINITE) != WAIT_OBJECT_0)
   {
-    DWORD const LastError = GetLastError();
+    DWORD const LastError = ::GetLastError();
     BOOST_THROW_EXCEPTION(HadesMemError() << 
       ErrorString("Could not wait for remote thread.") << 
       ErrorCodeWinLast(LastError));
