@@ -307,14 +307,6 @@ BOOST_AUTO_TEST_CASE(call)
     reinterpret_cast<DWORD_PTR>(&TestCallVoidRet)), 
     hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(CallRetVoid.second, 0U);
-
-#if defined(_M_AMD64)
-  auto const CallConvWinapi = hadesmem::CallConv::kDefault;
-#elif defined(_M_IX86)
-  auto const CallConvWinapi = hadesmem::CallConv::kStdCall;
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
   
   HMODULE const kernel32_mod = GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(kernel32_mod != 0);
@@ -336,7 +328,7 @@ BOOST_AUTO_TEST_CASE(call)
   
   auto const CallWin = 
     hadesmem::Call<PVOID (*)(HMODULE, LPCSTR)>(process, get_proc_address, 
-    CallConvWinapi, kernel32_mod, "GetProcAddress");
+    hadesmem::CallConv::kWinApi, kernel32_mod, "GetProcAddress");
   BOOST_CHECK_EQUAL(CallWin.first, get_proc_address);
   
   hadesmem::MultiCall multi_call(&process);
