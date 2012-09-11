@@ -22,6 +22,8 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/static_assert.hpp"
+
 namespace hadesmem
 {
 
@@ -73,11 +75,10 @@ public:
   template <typename T>
   T GetReturnValue() const BOOST_NOEXCEPT
   {
-    static_assert(std::is_integral<T>::value || 
+    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
-      std::is_same<double, typename std::remove_cv<T>::type>::value, 
-      "Only integral, pointer, or floating point types are supported.");
+      std::is_same<double, typename std::remove_cv<T>::type>::value);
     
     return GetReturnValueImpl(T());
   }
@@ -142,11 +143,10 @@ public:
     : type_(ArgType::kInvalidType), 
     arg_()
   {
-    static_assert(std::is_integral<T>::value || 
+    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
-      std::is_same<double, typename std::remove_cv<T>::type>::value, 
-      "Only integral, pointer, or floating point types are supported.");
+      std::is_same<double, typename std::remove_cv<T>::type>::value);
     
     Initialize(t);
   }
@@ -272,18 +272,15 @@ struct VoidToInt<void>
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
 
-static_assert(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT, 
-  "HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor repeat limit.");
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 
-static_assert(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION, 
-  "HADESMEM_CALL_MAX_ARGS exceeds Boost.Preprocessor iteration limit.");
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
 
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
 typedef typename boost::mpl::at_c<\
   boost::function_types::parameter_types<FuncT>, \
   n>::type A##n;\
-static_assert(std::is_convertible<T##n, A##n>::value, \
-  "Can not convert argument to type specified in function prototype.");\
+HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
 A##n a##n = t##n;\
 args.push_back(a##n);\
 
@@ -294,8 +291,7 @@ std::pair<typename VoidToInt<\
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
-  static_assert(boost::function_types::function_arity<FuncT>::value == n, \
-    "Invalid number of arguments.");\
+  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value == n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   CallResult const ret = Call(process, address, call_conv, args);\
@@ -349,8 +345,7 @@ public:
 typedef typename boost::mpl::at_c<\
   boost::function_types::parameter_types<FuncT>, \
   n>::type A##n;\
-static_assert(std::is_convertible<T##n, A##n>::value, \
-  "Can not convert argument to type specified in function prototype.");\
+HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
 A##n a##n = t##n;\
 args.push_back(a##n);\
 
@@ -359,8 +354,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
   void Add(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
-  static_assert(boost::function_types::function_arity<FuncT>::value == n, \
-    "Invalid number of arguments.");\
+  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value == n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   addresses_.push_back(address);\

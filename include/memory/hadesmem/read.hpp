@@ -18,6 +18,7 @@
 
 #include "hadesmem/detail/read_impl.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
 {
@@ -27,8 +28,7 @@ class Process;
 template <typename T>
 T Read(Process const& process, PVOID address)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
-    "copyable.");
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   T data;
   detail::Read(process, address, &data, sizeof(data));
@@ -38,11 +38,9 @@ T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 std::array<T, N> Read(Process const& process, PVOID address)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "T must be trivially "
-    "copyable.");
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  static_assert(std::is_default_constructible<T>::value, "T must be default "
-    "constructible.");
+  HADESMEM_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
   std::array<T, N> data;
   detail::Read(process, address, data.data(), sizeof(T) * N);
@@ -54,7 +52,7 @@ std::array<T, N> Read(Process const& process, PVOID address)
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
-  static_assert(detail::IsCharType<T>::value, "Invalid character type.");
+  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
   std::basic_string<T> data;
   
@@ -77,11 +75,9 @@ template <typename T>
 std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t size)
 {
-  static_assert(detail::IsTriviallyCopyable<T>::value, "Value type of vector "
-    "must be trivially copyable.");
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  static_assert(std::is_default_constructible<T>::value, "Value type of "
-    "vector must be default constructible.");
+  HADESMEM_STATIC_ASSERT(std::is_default_constructible<T>::value);
   
   std::vector<T> data(size);
   detail::Read(process, address, data.data(), sizeof(T) * size);

@@ -209,7 +209,7 @@ public:
 
   void operator()(float arg)
   {
-    static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
+    HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
     
     union FloatConv
     {
@@ -259,7 +259,7 @@ public:
   
   void operator()(double arg)
   {
-    static_assert(sizeof(double) == sizeof(DWORD64), "Invalid type sizes.");
+    HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
     
     union DoubleConv
     {
@@ -387,7 +387,7 @@ public:
 
   void operator()(float arg)
   {
-    static_assert(sizeof(float) == sizeof(DWORD), "Invalid type sizes.");
+    HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
     
     union FloatConv
     {
@@ -406,7 +406,7 @@ public:
   
   void operator()(double arg)
   {
-    static_assert(sizeof(double) == sizeof(DWORD64), "Invalid type sizes.");
+    HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
     
     union DoubleConv
     {
@@ -448,8 +448,8 @@ struct ReturnValueRemote
   DWORD last_error;
 };
 
-static_assert(detail::IsTriviallyCopyable<ReturnValueRemote>::value, 
-  "ReturnValueRemote type must be trivially copyable.");
+// ReturnValueRemote must be POD because of 'offsetof' usage.
+HADESMEM_STATIC_ASSERT(std::is_pod<ReturnValueRemote>::value);
 
 std::vector<CallResult> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
@@ -681,7 +681,8 @@ std::vector<CallResult> CallMulti(Process const& process,
     // WARNING: Handle is leaked if FreeLibrary fails.
     BOOST_VERIFY(::CloseHandle(thread_remote));
   };
-  
+
+  // TODO: Allow customizable timeout.
   if (::WaitForSingleObject(thread_remote, INFINITE) != WAIT_OBJECT_0)
   {
     DWORD const LastError = ::GetLastError();

@@ -22,11 +22,12 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
-// TODO: Test argument combinations more thorougly.
+// TODO: Test argument combinations more thoroughly.
 // TODO: Test multi-call.
 // TODO: Test all possible Call overloads.
 // TODO: Test that bad call-conv/address/etc fails as expected.
 // TODO: Fix naming/style/etc.
+// TODO: Test return value types with the form static_cast(decltype(Call())).
 
 namespace
 {
