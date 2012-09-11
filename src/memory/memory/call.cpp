@@ -24,6 +24,8 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/call_arg_visitor_x86.hpp"
+#include "hadesmem/detail/call_arg_visitor_x64.hpp"
 
 // TODO: Improve and clean up this mess, move details to different files, 
 // split code gen into detail funcs, etc.
@@ -36,9 +38,6 @@
 
 // TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
 // externally instead of being regenerated for every call.
-
-// TODO: Ensure upcasting in Call is done using unsigned types (zero 
-// extension rather than sign extension).
 
 namespace hadesmem
 {
@@ -164,280 +163,6 @@ CallResult Call(Process const& process,
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
-#if defined(_M_AMD64)
-
-class X64ArgVisitor
-{
-public:
-  X64ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args) 
-    BOOST_NOEXCEPT
-    : assembler_(assembler), 
-    num_args_(num_args), 
-    cur_arg_(num_args)
-  { }
-  
-  void operator()(DWORD32 arg)
-  {
-    return (*this)(static_cast<DWORD64>(arg));
-  }
-
-  void operator()(DWORD64 arg)
-  {
-    switch (cur_arg_)
-    {
-    case 1:
-      assembler_->mov(AsmJit::rcx, arg);
-      break;
-    case 2:
-      assembler_->mov(AsmJit::rdx, arg);
-      break;
-    case 3:
-      assembler_->mov(AsmJit::r8, arg);
-      break;
-    case 4:
-      assembler_->mov(AsmJit::r9, arg);
-      break;
-    default:
-      assembler_->mov(AsmJit::rax, arg);
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-        AsmJit::rax);
-      break;
-    }
-
-    --cur_arg_;
-  }
-
-  void operator()(float arg)
-  {
-    HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
-    
-    union FloatConv
-    {
-      float f;
-      DWORD i;
-    };
-        
-    FloatConv float_conv;
-    float_conv.f = arg;
-    
-    switch (cur_arg_)
-    {
-    case 1:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 2:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 3:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 4:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(float_conv.i));
-      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    default:
-      assembler_->xor_(AsmJit::rax, AsmJit::rax);
-      assembler_->mov(AsmJit::rax, float_conv.i);
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-        AsmJit::rax);
-      break;
-    }
-    
-    --cur_arg_;
-  }
-  
-  void operator()(double arg)
-  {
-    HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
-    
-    union DoubleConv
-    {
-      double d;
-      DWORD64 i;
-    };
-    
-    DoubleConv double_conv;
-    double_conv.d = arg;
-    
-    switch (cur_arg_)
-    {
-    case 1:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 2:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 3:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    case 4:
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-        static_cast<DWORD>(double_conv.i));
-      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-        static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
-      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
-        num_args_ * 8));
-      break;
-    default:
-      assembler_->mov(AsmJit::rax, double_conv.i);
-      assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-        AsmJit::rax);
-      break;
-    }
-    
-    --cur_arg_;
-  }
-  
-private:
-  AsmJit::X86Assembler* assembler_;
-  std::size_t num_args_;
-  std::size_t cur_arg_;
-};
-
-#elif defined(_M_IX86)
-
-class X86ArgVisitor
-{
-public:
-  X86ArgVisitor(AsmJit::X86Assembler* assembler, std::size_t num_args, 
-    CallConv call_conv) BOOST_NOEXCEPT
-    : assembler_(assembler), 
-    num_args_(num_args), 
-    cur_arg_(num_args), 
-    call_conv_(call_conv)
-  { }
-  
-  void operator()(DWORD32 arg)
-  {
-    switch (cur_arg_)
-    {
-    case 1:
-      switch (call_conv_)
-      {
-      case CallConv::kThisCall:
-      case CallConv::kFastCall:
-        assembler_->mov(AsmJit::ecx, arg);
-        break;
-      default:
-        assembler_->mov(AsmJit::eax, arg);
-        assembler_->push(AsmJit::eax);
-        break;
-      }
-      break;
-    case 2:
-      switch (call_conv_)
-      {
-      case CallConv::kFastCall:
-        assembler_->mov(AsmJit::edx, arg);
-        break;
-      default:
-        assembler_->mov(AsmJit::eax, arg);
-        assembler_->push(AsmJit::eax);
-        break;
-      }
-      break;
-    default:
-      assembler_->mov(AsmJit::eax, arg);
-      assembler_->push(AsmJit::eax);
-      break;
-    }
-    
-    --cur_arg_;
-  }
-
-  void operator()(DWORD64 arg)
-  {
-    // TODO: Test __fastcall with a 64-bit arg to ensure this is correct.
-
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>((arg >> 32) & 
-      0xFFFFFFFF));
-    assembler_->push(AsmJit::eax);
-
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>(arg));
-    assembler_->push(AsmJit::eax);
-
-    --cur_arg_;
-  }
-
-  void operator()(float arg)
-  {
-    HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
-    
-    union FloatConv
-    {
-      float f;
-      DWORD i;
-    };
-    
-    FloatConv float_conv;
-    float_conv.f = arg;
-    
-    assembler_->mov(AsmJit::eax, float_conv.i);
-    assembler_->push(AsmJit::eax);
-    
-    --cur_arg_;
-  }
-  
-  void operator()(double arg)
-  {
-    HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
-    
-    union DoubleConv
-    {
-      double d;
-      DWORD64 i;
-    };
-    
-    DoubleConv double_conv;
-    double_conv.d = arg;
-    
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>((double_conv.i >> 32) & 
-      0xFFFFFFFF));
-    assembler_->push(AsmJit::eax);
-    
-    assembler_->mov(AsmJit::eax, static_cast<DWORD>(double_conv.i));
-    assembler_->push(AsmJit::eax);
-    
-    --cur_arg_;
-  }
-  
-private:
-  AsmJit::X86Assembler* assembler_;
-  std::size_t num_args_;
-  std::size_t cur_arg_;
-  CallConv call_conv_;
-};
-
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
 struct ReturnValueRemote
 {
   DWORD_PTR return_value;
@@ -521,7 +246,7 @@ std::vector<CallResult> CallMulti(Process const& process,
       call_conv == CallConv::kWinApi || 
       call_conv == CallConv::kX64);
     
-    X64ArgVisitor arg_visitor(&assembler, num_args);
+    detail::ArgVisitor64 arg_visitor(&assembler, num_args);
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
       {
@@ -595,7 +320,7 @@ std::vector<CallResult> CallMulti(Process const& process,
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
     
-    X86ArgVisitor arg_visitor(&assembler, num_args, call_conv);
+    detail::ArgVisitor32 arg_visitor(&assembler, num_args, call_conv);
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
       {

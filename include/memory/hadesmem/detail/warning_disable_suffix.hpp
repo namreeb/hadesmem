@@ -16,3 +16,7 @@
 #if defined(HADESMEM_INTEL)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)

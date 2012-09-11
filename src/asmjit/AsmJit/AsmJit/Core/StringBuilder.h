@@ -38,7 +38,7 @@ struct StringBuilder
   ASMJIT_API StringBuilder() ASMJIT_NOTHROW;
   ASMJIT_API ~StringBuilder() ASMJIT_NOTHROW;
 
-  inline StringBuilder(_DontInitialize&) ASMJIT_NOTHROW {}
+  inline StringBuilder(_DontInitialize const&) ASMJIT_NOTHROW {}
 
   // --------------------------------------------------------------------------
   // [Accessors]

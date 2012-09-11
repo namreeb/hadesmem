@@ -10,9 +10,7 @@
 #include <memory>
 #include <iterator>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 namespace hadesmem
 {

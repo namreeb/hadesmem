@@ -27,3 +27,8 @@
 #pragma warning(push, 1)
 #pragma warning(disable: 66 177)
 #endif // #if defined(HADESMEM_MSVC)
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu"
+#endif // #if defined(HADESMEM_GCC)

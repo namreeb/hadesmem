@@ -8,12 +8,11 @@
 #pragma once
 
 #include <string>
+#include <iosfwd>
 
 #include <boost/config.hpp>
 
 #include <windows.h>
-
-#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
