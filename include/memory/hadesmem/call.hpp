@@ -292,7 +292,8 @@ std::pair<typename VoidToInt<\
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
-  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value == n);\
+  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
+    == n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   CallResult const ret = Call(process, address, call_conv, args);\
@@ -355,7 +356,8 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
   void Add(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
-  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value == n);\
+  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
+    == n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   addresses_.push_back(address);\

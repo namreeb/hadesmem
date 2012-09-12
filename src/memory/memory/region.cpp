@@ -22,7 +22,8 @@ Region::Region(Process const* process, LPCVOID address)
   BOOST_ASSERT(process != nullptr);
 }
 
-Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT
+Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+  BOOST_NOEXCEPT
   : process_(process), 
   mbi_(mbi)
 {
