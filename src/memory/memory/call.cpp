@@ -24,6 +24,9 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/call_remote_data.hpp"
+#include "hadesmem/detail/call_codegen_x86.hpp"
+#include "hadesmem/detail/call_codegen_x64.hpp"
 #include "hadesmem/detail/call_arg_visitor_x86.hpp"
 #include "hadesmem/detail/call_arg_visitor_x64.hpp"
 
@@ -163,19 +166,6 @@ CallResult Call(Process const& process,
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
-struct ReturnValueRemote
-{
-  DWORD_PTR return_value;
-  DWORD32 return_value_32;
-  DWORD64 return_value_64;
-  float return_value_float;
-  double return_value_double;
-  DWORD last_error;
-};
-
-// ReturnValueRemote must be POD because of 'offsetof' usage.
-HADESMEM_STATIC_ASSERT(std::is_pod<ReturnValueRemote>::value);
-
 std::vector<CallResult> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
@@ -184,9 +174,6 @@ std::vector<CallResult> CallMulti(Process const& process,
   BOOST_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
   
-  Allocator const return_values_remote(&process, sizeof(ReturnValueRemote) * 
-    addresses.size());
-
   Module kernel32(&process, L"kernel32.dll");
   DWORD_PTR const get_last_error = reinterpret_cast<DWORD_PTR>(
     FindProcedure(kernel32, "GetLastError"));
@@ -196,184 +183,20 @@ std::vector<CallResult> CallMulti(Process const& process,
     FindProcedure(kernel32, "IsDebuggerPresent"));
   DWORD_PTR const debug_break = reinterpret_cast<DWORD_PTR>(
     FindProcedure(kernel32, "DebugBreak"));
-  
+
+  Allocator const return_values_remote(&process, 
+    sizeof(detail::CallResultRemote) * addresses.size());
+
   AsmJit::X86Assembler assembler;
   
-  AsmJit::Label label_nodebug(assembler.newLabel());
-  
 #if defined(_M_AMD64)
-  auto const max_args_list = std::max_element(std::begin(args_full), 
-    std::end(args_full), 
-    [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
-    {
-      return args1.size() < args2.size();
-    });
-  std::size_t const max_num_args = max_args_list->size();
-  
-  std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
-    max_num_args * 0x8);
-  BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
-  stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
-  stack_offs += 16;
-  stack_offs += 8;
-  
-  assembler.sub(AsmJit::rsp, stack_offs);
-  
-  assembler.mov(AsmJit::rax, is_debugger_present);
-  assembler.call(AsmJit::rax);
-  
-  assembler.test(AsmJit::rax, AsmJit::rax);
-  assembler.jz(label_nodebug);
-  
-  assembler.mov(AsmJit::rax, debug_break);
-  assembler.call(AsmJit::rax);
-  
-  assembler.bind(label_nodebug);
-  
-  assembler.mov(AsmJit::rcx, 0);
-  assembler.mov(AsmJit::rax, set_last_error);
-  assembler.call(AsmJit::rax);
-  
-  for (std::size_t i = 0; i < addresses.size(); ++i)
-  {
-    LPCVOID address = addresses[i];
-    CallConv call_conv = call_convs[i];
-    (void)call_conv;
-    std::vector<CallArg> const& args = args_full[i];
-    std::size_t const num_args = args.size();
-
-    BOOST_ASSERT(call_conv == CallConv::kDefault || 
-      call_conv == CallConv::kWinApi || 
-      call_conv == CallConv::kX64);
-    
-    detail::ArgVisitor64 arg_visitor(&assembler, num_args);
-    std::for_each(args.rbegin(), args.rend(), 
-      [&] (CallArg const& arg)
-      {
-        arg.Visit(&arg_visitor);
-      });
-    
-    assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
-    assembler.call(AsmJit::rax);
-    
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value));
-    assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_32));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
-
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_64));
-    assembler.mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-    
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_float));
-    assembler.movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
-    
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_double));
-    assembler.movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
-    
-    assembler.mov(AsmJit::rax, get_last_error);
-    assembler.call(AsmJit::rax);
-    
-    assembler.mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, last_error));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
-  }
-  
-  assembler.add(AsmJit::rsp, stack_offs);
-  
-  assembler.ret();
+  detail::GenerateCallCode64(&assembler, addresses, call_convs, args_full, 
+    get_last_error, set_last_error, is_debugger_present, debug_break, 
+    return_values_remote.GetBase());
 #elif defined(_M_IX86)
-  
-  assembler.push(AsmJit::ebp);
-  assembler.mov(AsmJit::ebp, AsmJit::esp);
-  
-  assembler.mov(AsmJit::eax, is_debugger_present);
-  assembler.call(AsmJit::eax);
-  
-  assembler.test(AsmJit::eax, AsmJit::eax);
-  assembler.jz(label_nodebug);
-  
-  assembler.mov(AsmJit::eax, debug_break);
-  assembler.call(AsmJit::eax);
-  
-  assembler.bind(label_nodebug);
-  
-  assembler.push(AsmJit::imm(0x0));
-  assembler.mov(AsmJit::eax, set_last_error);
-  assembler.call(AsmJit::eax);
-  
-  for (std::size_t i = 0; i < addresses.size(); ++i)
-  {
-    LPCVOID address = addresses[i];
-    CallConv call_conv = call_convs[i];
-    std::vector<CallArg> const& args = args_full[i];
-    std::size_t const num_args = args.size();
-    
-    detail::ArgVisitor32 arg_visitor(&assembler, num_args, call_conv);
-    std::for_each(args.rbegin(), args.rend(), 
-      [&] (CallArg const& arg)
-      {
-        arg.Visit(&arg_visitor);
-      });
-    
-    assembler.mov(AsmJit::eax, reinterpret_cast<DWORD_PTR>(address));
-    assembler.call(AsmJit::eax);
-
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_32));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_64));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
-    
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_float));
-    assembler.fst(AsmJit::dword_ptr(AsmJit::ecx));
-    
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, return_value_double));
-    assembler.fst(AsmJit::qword_ptr(AsmJit::ecx));
-    
-    assembler.mov(AsmJit::eax, get_last_error);
-    assembler.call(AsmJit::eax);
-    
-    assembler.mov(AsmJit::ecx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote.GetBase()) + i * sizeof(ReturnValueRemote) + 
-      offsetof(ReturnValueRemote, last_error));
-    assembler.mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-    
-    if (call_conv == CallConv::kDefault || call_conv == CallConv::kCdecl)
-    {
-      assembler.add(AsmJit::esp, AsmJit::imm(num_args * sizeof(PVOID)));
-    }
-  }
-  
-  assembler.mov(AsmJit::esp, AsmJit::ebp);
-  assembler.pop(AsmJit::ebp);
-  
-  assembler.ret(AsmJit::imm(0x4));
+  detail::GenerateCallCode32(&assembler, addresses, call_convs, args_full, 
+    get_last_error, set_last_error, is_debugger_present, debug_break, 
+    return_values_remote.GetBase());
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -416,8 +239,8 @@ std::vector<CallResult> CallMulti(Process const& process,
       ErrorCodeWinLast(LastError));
   }
 
-  std::vector<ReturnValueRemote> return_vals_remote = 
-    ReadVector<ReturnValueRemote>(process, 
+  std::vector<detail::CallResultRemote> return_vals_remote = 
+    ReadVector<detail::CallResultRemote>(process, 
     return_values_remote.GetBase(), addresses.size());
   
   std::vector<CallResult> return_vals;
@@ -425,7 +248,7 @@ std::vector<CallResult> CallMulti(Process const& process,
   
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     std::back_inserter(return_vals), 
-    [] (ReturnValueRemote const& r)
+    [] (detail::CallResultRemote const& r)
     {
       return CallResult(r.return_value, 
         r.return_value_32, 

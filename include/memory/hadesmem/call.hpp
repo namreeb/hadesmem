@@ -23,6 +23,7 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/union_cast.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
@@ -86,29 +87,17 @@ public:
   
 private:
   template <typename T>
-  T GetReturnValueIntImpl(std::true_type const&) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::true_type) const BOOST_NOEXCEPT
   {
-    union Conv
-    {
-      T t;
-      DWORD64 i;
-    };
-    Conv conv;
-    conv.i = GetReturnValueInt64();
-    return conv.t;
+    detail::UnionCast<DWORD64, T> union_cast(GetReturnValueInt64());
+    return union_cast.GetTo();
   }
   
   template <typename T>
-  T GetReturnValueIntImpl(std::false_type const&) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::false_type) const BOOST_NOEXCEPT
   {
-    union Conv
-    {
-      T t;
-      DWORD32 i;
-    };
-    Conv conv;
-    conv.i = GetReturnValueInt32();
-    return conv.t;
+    detail::UnionCast<DWORD32, T> union_cast(GetReturnValueInt32());
+    return union_cast.GetTo();
   }
   
   template <typename T>
@@ -180,31 +169,19 @@ public:
   
 private:
   template <typename T>
-  void InitializeIntegralImpl(T t, std::false_type const&) BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::false_type) BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt32Type;
-    union Conv
-    {
-      T t;
-      DWORD32 i;
-    };
-    Conv conv;
-    conv.t = t;
-    arg_.i32 = conv.i;
+    detail::UnionCast<T, DWORD32> union_cast(t);
+    arg_.i32 = union_cast.GetTo();
   }
   
   template <typename T>
-  void InitializeIntegralImpl(T t, std::true_type const&) BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::true_type) BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
-    union Conv
-    {
-      T t;
-      DWORD64 i;
-    };
-    Conv conv;
-    conv.t = t;
-    arg_.i64 = conv.i;
+    detail::UnionCast<T, DWORD64> union_cast(t);
+    arg_.i64 = union_cast.GetTo();
   }
   
   template <typename T>
