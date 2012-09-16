@@ -20,15 +20,10 @@
 #include "hadesmem/read.hpp"
 #include "hadesmem/alloc.hpp"
 #include "hadesmem/error.hpp"
-#include "hadesmem/write.hpp"
-#include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/call_codegen.hpp"
 #include "hadesmem/detail/call_remote_data.hpp"
-#include "hadesmem/detail/call_codegen_x86.hpp"
-#include "hadesmem/detail/call_codegen_x64.hpp"
-#include "hadesmem/detail/call_arg_visitor_x86.hpp"
-#include "hadesmem/detail/call_arg_visitor_x64.hpp"
 
 // TODO: Improve and clean up this mess, move details to different files, 
 // split code gen into detail funcs, etc.
@@ -173,48 +168,18 @@ std::vector<CallResult> CallMulti(Process const& process,
 {
   BOOST_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
-  
-  Module kernel32(&process, L"kernel32.dll");
-  DWORD_PTR const get_last_error = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "GetLastError"));
-  DWORD_PTR const set_last_error = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "SetLastError"));
-  DWORD_PTR const is_debugger_present = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "IsDebuggerPresent"));
-  DWORD_PTR const debug_break = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "DebugBreak"));
 
   Allocator const return_values_remote(&process, 
     sizeof(detail::CallResultRemote) * addresses.size());
 
-  AsmJit::X86Assembler assembler;
-  
-#if defined(_M_AMD64)
-  detail::GenerateCallCode64(&assembler, addresses, call_convs, args_full, 
-    get_last_error, set_last_error, is_debugger_present, debug_break, 
-    return_values_remote.GetBase());
-#elif defined(_M_IX86)
-  detail::GenerateCallCode32(&assembler, addresses, call_convs, args_full, 
-    get_last_error, set_last_error, is_debugger_present, debug_break, 
-    return_values_remote.GetBase());
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-  
-  DWORD_PTR const stub_size = assembler.getCodeSize();
-  
-  Allocator const stub_mem_remote(&process, stub_size);
-  PBYTE const stub_remote = static_cast<PBYTE>(stub_mem_remote.GetBase());
-  DWORD_PTR const stub_remote_temp = reinterpret_cast<DWORD_PTR>(stub_remote);
-  
-  std::vector<BYTE> code_real(stub_size);
-  assembler.relocCode(code_real.data(), reinterpret_cast<DWORD_PTR>(
-    stub_remote));
-  
-  WriteVector(process, stub_remote, code_real);
-  
+  Allocator const code_remote(detail::GenerateCallCode(process, addresses, 
+    call_convs, args_full, return_values_remote.GetBase()));
+  LPTHREAD_START_ROUTINE code_remote_pfn = 
+    reinterpret_cast<LPTHREAD_START_ROUTINE>(
+    reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
+
   HANDLE const thread_remote = ::CreateRemoteThread(process.GetHandle(), 
-    nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(stub_remote_temp), 
+    nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(code_remote_pfn), 
     nullptr, 0, nullptr);
   if (!thread_remote)
   {
@@ -313,7 +278,7 @@ MultiCall::~MultiCall()
 
 std::vector<CallResult> MultiCall::Call() const
 {
-  return hadesmem::CallMulti(*process_, addresses_, call_convs_, args_);
+  return CallMulti(*process_, addresses_, call_convs_, args_);
 }
 
 }
