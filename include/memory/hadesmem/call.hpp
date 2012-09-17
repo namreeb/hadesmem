@@ -234,6 +234,9 @@ std::vector<CallResult> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
 
+namespace detail
+{
+
 template <typename T>
 struct VoidToInt
 {
@@ -245,6 +248,8 @@ struct VoidToInt<void>
 {
   typedef int type;
 };
+
+}
 
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
@@ -264,7 +269,7 @@ args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-std::pair<typename VoidToInt<\
+std::pair<typename detail::VoidToInt<\
   typename boost::function_types::result_type<FuncT>::type>::type, DWORD> \
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
@@ -274,7 +279,7 @@ std::pair<typename VoidToInt<\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   CallResult const ret = Call(process, address, call_conv, args);\
-  typedef typename VoidToInt<\
+  typedef typename detail::VoidToInt<\
     typename boost::function_types::result_type<FuncT>::type>::type ResultT;\
   return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());\
 }\

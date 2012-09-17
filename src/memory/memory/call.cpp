@@ -25,9 +25,6 @@
 #include "hadesmem/detail/call_codegen.hpp"
 #include "hadesmem/detail/call_remote_data.hpp"
 
-// TODO: Improve and clean up this mess, move details to different files, 
-// split code gen into detail funcs, etc.
-
 // TODO: Improve safety via EH.
 
 // TODO: Add support for more 'complex' argument and return types, including 

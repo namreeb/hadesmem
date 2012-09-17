@@ -16,6 +16,6 @@ lib asmjit
     <define>ASMJIT_API="" 
   : 
   : 
-    <include>"./asmjit/src/asmjit/" 
+    <include>"./asmjit/src/" 
     <define>ASMJIT_API="" 
   ;
