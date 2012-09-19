@@ -32,5 +32,4 @@ void FreeDll(Process const& process, HMODULE module);
 
 // TODO: Add CreateAndInject functionality.
 
-
 }
