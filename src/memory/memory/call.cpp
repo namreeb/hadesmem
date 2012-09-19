@@ -228,7 +228,9 @@ MultiCall::MultiCall(Process const* process)
   addresses_(), 
   call_convs_(), 
   args_()
-{ }
+{
+  BOOST_ASSERT(process != nullptr);
+}
 
 MultiCall::MultiCall(MultiCall const& other)
   : process_(other.process_), 

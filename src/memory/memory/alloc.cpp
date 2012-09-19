@@ -48,6 +48,7 @@ Allocator::Allocator(Process const* process, SIZE_T size)
   base_(Alloc(*process, size)), 
   size_(size)
 {
+  BOOST_ASSERT(process != nullptr);
   BOOST_ASSERT(size != 0);
 }
 
