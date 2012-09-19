@@ -30,6 +30,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
 void FreeDll(Process const& process, HMODULE module);
 
+// TODO: Add CreateAndInject functionality.
 
 
 }
