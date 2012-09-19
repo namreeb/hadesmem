@@ -31,7 +31,7 @@ Allocator GenerateCallCode(Process const& process,
   std::vector<std::vector<CallArg>> const& args_full, 
   PVOID return_values_remote)
 {
-  Module kernel32(&process, L"kernel32.dll");
+  Module const kernel32(&process, L"kernel32.dll");
   DWORD_PTR const get_last_error = reinterpret_cast<DWORD_PTR>(
     FindProcedure(kernel32, "GetLastError"));
   DWORD_PTR const set_last_error = reinterpret_cast<DWORD_PTR>(
