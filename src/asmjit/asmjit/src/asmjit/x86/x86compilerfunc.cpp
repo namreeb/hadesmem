@@ -949,7 +949,7 @@ CompilerItem* X86CompilerFuncRet::translate(CompilerContext& cc) ASMJIT_NOTHROW
   uint32_t retValType = getFunc()->getDecl()->getReturnType();
   uint32_t i;
 
-  switch ((int)retValType)
+  switch (retValType)
   {
     case kX86VarTypeGpd:
     case kX86VarTypeGpq:

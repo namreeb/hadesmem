@@ -57,7 +57,7 @@ Else()
 EndIf()
 
 # =============================================================================
-# [AsmJit - Libraries]
+# [AsmJit - Dependencies]
 # =============================================================================
 
 Set(ASMJIT_DEPS "")
@@ -121,8 +121,8 @@ Set(ASMJIT_SRC_TEST "")
 
 AsmJitAddSrc(ASMJIT_SRC asmjit
   asmjit.h
-  core.h
   config.h
+  core.h
   x86.h
 )
 

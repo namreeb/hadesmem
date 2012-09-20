@@ -38,6 +38,18 @@ struct IsTriviallyCopyable
 #endif
 };
 
+template <typename T>
+struct IsDefaultConstructible
+{
+#if defined(HADESMEM_CLANG)
+  // TODO: Update to use std::is_default_constructible trait when available in 
+  // libstdc++.
+  static bool const value = true;
+#else
+  static bool const value = std::is_default_constructible<T>::value;
+#endif
+};
+
 }
 
 }

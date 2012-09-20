@@ -40,7 +40,7 @@ std::array<T, N> Read(Process const& process, PVOID address)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  HADESMEM_STATIC_ASSERT(std::is_default_constructible<T>::value);
+  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
 
   std::array<T, N> data;
   detail::Read(process, address, data.data(), sizeof(T) * N);
@@ -77,7 +77,7 @@ std::vector<T> ReadVector(Process const& process, PVOID address,
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  HADESMEM_STATIC_ASSERT(std::is_default_constructible<T>::value);
+  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
   std::vector<T> data(size);
   detail::Read(process, address, data.data(), sizeof(T) * size);
