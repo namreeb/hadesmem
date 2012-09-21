@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(call)
     hadesmem::CallConv::kDefault);
   BOOST_CHECK_EQUAL(call_ret_void.second, 0U);
   
-  HMODULE const kernel32_mod = GetModuleHandle(L"kernel32.dll");
+  HMODULE const kernel32_mod = ::GetModuleHandle(L"kernel32.dll");
   BOOST_REQUIRE(kernel32_mod != 0);
   
 #if defined(HADESMEM_MSVC)
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(call)
 #pragma warning(disable: 6387)
 #endif // #if defined(HADESMEM_MSVC)
   
-  FARPROC const get_proc_address_tmp = GetProcAddress(kernel32_mod, 
+  FARPROC const get_proc_address_tmp = ::GetProcAddress(kernel32_mod, 
     "GetProcAddress");
   PVOID const get_proc_address = reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(get_proc_address_tmp));
