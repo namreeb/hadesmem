@@ -120,7 +120,6 @@ std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module,
     export_arg);
 }
 
-// Constructor
 CreateAndInjectData::CreateAndInjectData(Process const& process, 
   HMODULE module, DWORD_PTR export_ret, DWORD export_last_error) 
   : process_(process), 
