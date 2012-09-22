@@ -75,6 +75,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
 
+    (void)call_convs;
     BOOST_ASSERT(call_convs[i] == CallConv::kDefault || 
       call_convs[i] == CallConv::kWinApi || 
       call_convs[i] == CallConv::kX64);

@@ -154,10 +154,6 @@ DWORD MultiThreadGet()
   return GetLastError();
 }
 
-#if defined(_M_AMD64)
-
-#elif defined(_M_IX86)
-
 class ThiscallDummy
 {
 public:
@@ -175,6 +171,10 @@ public:
     return 0x12345678;
   }
 };
+
+#if defined(_M_AMD64)
+
+#elif defined(_M_IX86)
 
 DWORD_PTR __fastcall TestIntegerFast(int a, int b, int c, int d, int e, int f)
 {
@@ -264,27 +264,17 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::Call<int (*)(DWORD64 a)>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&TestInteger64)), 
     hadesmem::CallConv::kDefault, 0xAAAAAAAABBBBBBBBULL);
-  
+
+  // Clang does not yet implement MSVC-style __thiscall
+#if !defined(HADESMEM_CLANG)
+
 #if defined(_M_AMD64)
-  
+  hadesmem::CallConv const thiscall_call_conv = hadesmem::CallConv::kDefault;
 #elif defined(_M_IX86)
-  
-  auto const call_int_fast_ret = hadesmem::Call<TestIntegerT>(
-    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestIntegerFast)), hadesmem::CallConv::kFastCall, 0xAAAAAAAA, 0xBBBBBBBB, 
-    0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
-  BOOST_CHECK_EQUAL(call_int_fast_ret.first, 
-    static_cast<DWORD_PTR>(0x12345678));
-  BOOST_CHECK_EQUAL(call_int_fast_ret.second, static_cast<DWORD>(0x87654321));
-  
-  auto const call_int_std_ret = hadesmem::Call<TestIntegerT>(
-    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-    &TestIntegerStd)), hadesmem::CallConv::kStdCall, 0xAAAAAAAA, 0xBBBBBBBB, 
-    0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
-  BOOST_CHECK_EQUAL(call_int_std_ret.first, 
-    static_cast<DWORD_PTR>(0x12345678));
-  BOOST_CHECK_EQUAL(call_int_std_ret.second, static_cast<DWORD>(0x87654321));
-  
+  hadesmem::CallConv const thiscall_call_conv = hadesmem::CallConv::kThisCall;
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
   hadesmem::detail::UnionCast<decltype(&ThiscallDummy::TestIntegerThis), 
     PVOID> mem_fn_to_pvoid(&ThiscallDummy::TestIntegerThis);
   PVOID test_integer_this = mem_fn_to_pvoid.GetTo();
@@ -292,16 +282,45 @@ BOOST_AUTO_TEST_CASE(call)
   typedef DWORD_PTR (*TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
     int c, int d, int e, int f);
   auto const call_int_this_ret = hadesmem::Call<TestIntegerThisT>(
-    process, test_integer_this, hadesmem::CallConv::kThisCall, &thiscall_dummy, 
-      0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
+    process, test_integer_this, thiscall_call_conv, &thiscall_dummy, 
+    0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
   BOOST_CHECK_EQUAL(call_int_this_ret.first, 
     static_cast<DWORD_PTR>(0x12345678));
   BOOST_CHECK_EQUAL(call_int_this_ret.second, static_cast<DWORD>(0x87654321));
+
+#endif // #if !defined(HADESMEM_CLANG)
+
+#if defined(_M_AMD64)
   
+#elif defined(_M_IX86)
+
+  auto const call_int_fast_ret = hadesmem::Call<TestIntegerT>(
+    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestIntegerFast)), hadesmem::CallConv::kFastCall, 0xAAAAAAAA, 0xBBBBBBBB, 
+    0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
+  BOOST_CHECK_EQUAL(call_int_fast_ret.first, 
+    static_cast<DWORD_PTR>(0x12345678));
+  BOOST_CHECK_EQUAL(call_int_fast_ret.second, static_cast<DWORD>(0x87654321));
+
+  auto const call_int_std_ret = hadesmem::Call<TestIntegerT>(
+    process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &TestIntegerStd)), hadesmem::CallConv::kStdCall, 0xAAAAAAAA, 0xBBBBBBBB, 
+    0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
+  BOOST_CHECK_EQUAL(call_int_std_ret.first, 
+    static_cast<DWORD_PTR>(0x12345678));
+  BOOST_CHECK_EQUAL(call_int_std_ret.second, static_cast<DWORD>(0x87654321));
+
+  // Clang does not yet implement MSVC-style __fastcall (it seems to do so 
+  // for the 'regular' case, but will do things differently when faced 
+  // with a 64-bit integer as the first parameter).
+#if !defined(HADESMEM_CLANG)
+
   hadesmem::Call<int (*)(DWORD64 a)>(process, reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&TestInteger64Fast)), 
     hadesmem::CallConv::kFastCall, 0xAAAAAAAABBBBBBBBULL);
-  
+
+#endif // #if !defined(HADESMEM_CLANG)
+
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
