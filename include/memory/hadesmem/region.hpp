@@ -23,7 +23,8 @@ class Region
 public:
   Region(Process const* process, LPCVOID address);
   
-  Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+  Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+    BOOST_NOEXCEPT;
   
   Region(Region const& other) BOOST_NOEXCEPT;
   
