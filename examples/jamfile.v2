@@ -21,4 +21,5 @@ exe memhack
     /memory//memory
     /boost//locale/<link>static
     /boost//filesystem/<link>static
+    /boost//program_options/<link>static
   ;
