@@ -54,8 +54,11 @@ run region_list.cpp
   
 run call.cpp
   ;
-
+  
 run injector.cpp
+  ;
+
+run patcher.cpp
   ;
 
 compile-fail read_pod_fail.cpp
