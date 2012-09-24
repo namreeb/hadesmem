@@ -29,9 +29,9 @@ public:
 
   virtual ~Patch();
 
-  virtual void Apply();
+  virtual void Apply() = 0;
 
-  virtual void Remove();
+  virtual void Remove() = 0;
 
   bool IsApplied() const;
 
