@@ -8,7 +8,7 @@
 #include "hadesmem/detail/call_codegen.hpp"
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <AsmJit/AsmJit.h>
+#include <asmjit/asmjit.h>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/call.hpp"

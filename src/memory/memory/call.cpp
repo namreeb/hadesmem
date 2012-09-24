@@ -13,10 +13,6 @@
 #include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <AsmJit/AsmJit.h>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include "hadesmem/read.hpp"
 #include "hadesmem/alloc.hpp"
 #include "hadesmem/error.hpp"
