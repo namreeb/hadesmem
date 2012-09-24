@@ -1,0 +1,22 @@
+# src/beaengine/jamfile.v2
+
+project 
+  : 
+    requirements 
+
+    <warnings>off 
+  ;
+
+lib beaengine 
+  : 
+    [ glob beaengine/beaengineSources/*.c ] 
+  : 
+    <include>"./beaengine/beaengineSources/Includes/" 
+    <include>"./beaengine/include/" 
+    <define>BEA_ENGINE_STATIC 
+    <link>static 
+  : 
+  : 
+    <include>"./beaengine/include/" 
+    <define>BEA_ENGINE_STATIC 
+  ;

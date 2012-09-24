@@ -7,10 +7,15 @@ import boost
 
 boost.use-project
   ;
-
+  
 use-project /asmjit
   :
     src/asmjit
+  ;
+
+use-project /beaengine
+  :
+    src/beaengine
   ;
 
 use-project /memory
@@ -53,9 +58,6 @@ project
     
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i486"
-    <toolset>gcc:<cxxflags>"-std=c++11"
-    <toolset>clang:<cxxflags>"-std=c++11"
-    <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     
     <debug-symbols>on
     

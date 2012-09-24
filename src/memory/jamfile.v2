@@ -10,6 +10,10 @@ project
     <toolset>intel:<warnings>on
     
     <warnings-as-errors>on
+
+    <toolset>gcc:<cxxflags>"-std=c++11"
+    <toolset>clang:<cxxflags>"-std=c++11"
+    <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
@@ -28,6 +32,7 @@ lib memory
 	/boost//headers
     /boost//filesystem/<link>static
     /asmjit//asmjit
+    /beaengine//beaengine
     user32
   :
     <link>static
