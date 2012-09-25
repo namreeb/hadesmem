@@ -17,6 +17,7 @@ using namespace boost::assign;
 #include "hadesmem/alloc.hpp"
 #include "hadesmem/error.hpp"
 #include "hadesmem/read.hpp"
+#include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 
 // Boost.Test causes the following warning under GCC:
@@ -37,22 +38,31 @@ using namespace boost::assign;
 namespace
 {
   
-DWORD HookMe()
+std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_1;
+std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_2;
+
+DWORD __stdcall HookMe()
 {
   std::string const foo("Foo");
   BOOST_CHECK_EQUAL(foo, "Foo");
   return 0x1234;
 }
 
-std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_1;
-
-DWORD HookMe_Hook()
+DWORD __stdcall HookMe_Hook()
 {
-  BOOST_CHECK(g_ptr_detour_1->GetTrampoline() != nullptr);
-  auto const ptr_orig = reinterpret_cast<DWORD (*)()>(
-    reinterpret_cast<DWORD_PTR>(g_ptr_detour_1->GetTrampoline()));
+  BOOST_CHECK(g_ptr_detour_2->GetTrampoline() != nullptr);
+  auto const ptr_orig = reinterpret_cast<DWORD (__stdcall *)()>(
+    reinterpret_cast<DWORD_PTR>(g_ptr_detour_2->GetTrampoline()));
   BOOST_CHECK_EQUAL(ptr_orig(), static_cast<DWORD>(0x1234));
   return 0x1337;
+}
+
+DWORD GetCurrentProcessId_Hook()
+{
+  BOOST_CHECK(g_ptr_detour_1->GetTrampoline() != nullptr);
+  auto const ptr_orig = reinterpret_cast<DWORD (WINAPI*)()>(
+    reinterpret_cast<DWORD_PTR>(g_ptr_detour_1->GetTrampoline()));
+  return ptr_orig() * 2;
 }
 
 }
@@ -66,11 +76,11 @@ BOOST_AUTO_TEST_CASE(patcher)
   data_1 += 0x00, 0x11, 0x22, 0x33, 0x44;
   BOOST_REQUIRE(data_1.size() == 5);
   hadesmem::PatchRaw patch_1(&process, test_mem_1.GetBase(), data_1);
-  auto const orig_1 = hadesmem::ReadVector<BYTE>(process, test_mem_1.GetBase(), 
-    5);
+  auto const orig_1 = hadesmem::ReadVector<BYTE>(process, 
+    test_mem_1.GetBase(), 5);
   patch_1.Apply();
-  auto const apply_1 = hadesmem::ReadVector<BYTE>(process, test_mem_1.GetBase(), 
-    5);
+  auto const apply_1 = hadesmem::ReadVector<BYTE>(process, 
+    test_mem_1.GetBase(), 5);
   patch_1.Remove();
   auto const remove_1 = hadesmem::ReadVector<BYTE>(process, 
     test_mem_1.GetBase(), 5);
@@ -78,19 +88,39 @@ BOOST_AUTO_TEST_CASE(patcher)
   BOOST_CHECK(orig_1 != apply_1);
   BOOST_CHECK(data_1 == apply_1);
 
+  DWORD const proc_id = GetCurrentProcessId();
+  hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
+  typedef DWORD (WINAPI * GetCurrentProcessIdFunc)();
+  GetCurrentProcessIdFunc const get_current_process_id = 
+    reinterpret_cast<GetCurrentProcessIdFunc>(reinterpret_cast<DWORD_PTR>(
+    hadesmem::FindProcedure(kernel32_mod, "GetCurrentProcessId")));
+  BOOST_CHECK_EQUAL(get_current_process_id(), GetCurrentProcessId());
+  g_ptr_detour_1.reset(new hadesmem::PatchDetour(&process, 
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(get_current_process_id)), 
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&GetCurrentProcessId_Hook))));
+  BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id);
+  g_ptr_detour_1->Apply();
+  BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id * 2);
+  g_ptr_detour_1->Remove();
+  BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id);
+  g_ptr_detour_1->Apply();
+  BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id * 2);
+  g_ptr_detour_1->Remove();
+  BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id);
+
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
   DWORD_PTR const ptr_hook_me = reinterpret_cast<DWORD_PTR>(&HookMe);
   DWORD_PTR const ptr_hook_me_hook = reinterpret_cast<DWORD_PTR>(&HookMe_Hook);
-  g_ptr_detour_1.reset(new hadesmem::PatchDetour(&process, 
+  g_ptr_detour_2.reset(new hadesmem::PatchDetour(&process, 
     reinterpret_cast<PVOID>(ptr_hook_me), 
     reinterpret_cast<PVOID>(ptr_hook_me_hook)));
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  g_ptr_detour_1->Apply();
+  g_ptr_detour_2->Apply();
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
-  g_ptr_detour_1->Remove();
+  g_ptr_detour_2->Remove();
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  g_ptr_detour_1->Apply();
+  g_ptr_detour_2->Apply();
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
-  g_ptr_detour_1->Remove();
+  g_ptr_detour_2->Remove();
   BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
 }
