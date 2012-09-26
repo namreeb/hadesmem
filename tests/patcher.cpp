@@ -30,10 +30,6 @@ using namespace boost::assign;
 // TODO: Patcher constructor tests.
 // TODO: Improve hook target checks.
 // TODO: Fix annoying UAC popup (with manifest).
-// TODO: Fix test under Clang and ICC. (Convert to use functions written 
-// in assembly to ensure it's not caused by compiler-specific call conv 
-// issues triggering incomplete parts of Patcher such as relative instruction 
-// conversion. First though, just try an explicit call conv.)
 
 namespace
 {
