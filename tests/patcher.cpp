@@ -39,23 +39,6 @@ namespace
 {
   
 std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_1;
-std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_2;
-
-DWORD __stdcall HookMe()
-{
-  std::string const foo("Foo");
-  BOOST_CHECK_EQUAL(foo, "Foo");
-  return 0x1234;
-}
-
-DWORD __stdcall HookMe_Hook()
-{
-  BOOST_CHECK(g_ptr_detour_2->GetTrampoline() != nullptr);
-  auto const ptr_orig = reinterpret_cast<DWORD (__stdcall *)()>(
-    reinterpret_cast<DWORD_PTR>(g_ptr_detour_2->GetTrampoline()));
-  BOOST_CHECK_EQUAL(ptr_orig(), static_cast<DWORD>(0x1234));
-  return 0x1337;
-}
 
 DWORD GetCurrentProcessId_Hook()
 {
@@ -90,14 +73,15 @@ BOOST_AUTO_TEST_CASE(patcher)
 
   DWORD const proc_id = GetCurrentProcessId();
   hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
-  typedef DWORD (WINAPI * GetCurrentProcessIdFunc)();
-  GetCurrentProcessIdFunc const get_current_process_id = 
-    reinterpret_cast<GetCurrentProcessIdFunc>(reinterpret_cast<DWORD_PTR>(
+  auto const get_current_process_id = 
+    reinterpret_cast<DWORD (WINAPI *)()>(reinterpret_cast<DWORD_PTR>(
     hadesmem::FindProcedure(kernel32_mod, "GetCurrentProcessId")));
   BOOST_CHECK_EQUAL(get_current_process_id(), GetCurrentProcessId());
   g_ptr_detour_1.reset(new hadesmem::PatchDetour(&process, 
-    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(get_current_process_id)), 
-    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&GetCurrentProcessId_Hook))));
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    get_current_process_id)), 
+    reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+    &GetCurrentProcessId_Hook))));
   BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id);
   g_ptr_detour_1->Apply();
   BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id * 2);
@@ -107,20 +91,4 @@ BOOST_AUTO_TEST_CASE(patcher)
   BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id * 2);
   g_ptr_detour_1->Remove();
   BOOST_CHECK_EQUAL(GetCurrentProcessId(), proc_id);
-
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  DWORD_PTR const ptr_hook_me = reinterpret_cast<DWORD_PTR>(&HookMe);
-  DWORD_PTR const ptr_hook_me_hook = reinterpret_cast<DWORD_PTR>(&HookMe_Hook);
-  g_ptr_detour_2.reset(new hadesmem::PatchDetour(&process, 
-    reinterpret_cast<PVOID>(ptr_hook_me), 
-    reinterpret_cast<PVOID>(ptr_hook_me_hook)));
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  g_ptr_detour_2->Apply();
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
-  g_ptr_detour_2->Remove();
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
-  g_ptr_detour_2->Apply();
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1337));
-  g_ptr_detour_2->Remove();
-  BOOST_CHECK_EQUAL(HookMe(), static_cast<DWORD>(0x1234));
 }
