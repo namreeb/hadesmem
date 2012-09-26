@@ -30,6 +30,9 @@ using namespace boost::assign;
 // TODO: Patcher constructor tests.
 // TODO: Improve hook target checks.
 // TODO: Fix annoying UAC popup (with manifest).
+// TODO: Test Patcher on functions using 'manually' generated code to 
+// ensure all cases are covered, and that the tests are consistent (which 
+// the Windows API testing is not...).
 
 namespace
 {
