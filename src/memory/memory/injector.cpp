@@ -25,6 +25,15 @@
 #include "hadesmem/detail/self_path.hpp"
 #include "hadesmem/detail/argv_quote.hpp"
 
+// TODO: .NET injection (without DLL dependency if possible).
+// TODO: Cross-session injection.
+// TODO: IAT injection (to allow execution of code before Dllmain of other 
+// modules are executed).
+// TODO: Get address of kernel32!LoadLibraryW 'manually' instead of using 
+// local GetProcAddress and pointer arithmetic (whilst this works in all 
+// normal cases, it will fail when the injector has shims enabled, and may 
+// not work as expected when the injectee has shims enabled).
+
 namespace hadesmem
 {
 

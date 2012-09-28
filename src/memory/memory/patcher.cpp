@@ -22,8 +22,20 @@
 #include "hadesmem/process.hpp"
 
 // TODO: Replace FlushInstructionCache calls with a wrapper.
-
-// TODO: Move TODO iteams in list to here (woo! meta-todo!).
+// TODO: Class function hooking (ecx preservation). (xchg ecx, [esp]; push ecx)
+// TODO: Fastcall function hooking (ecx and edx preservation).
+// TODO: VEH hooking (INT3, DR, invalid instruction, etc).
+// TODO: Improved relative instruction rebuilding (incl conditionals). x64 has 
+// far more relative instructions than x86.
+// TODO: VMT hooking.
+// TODO: IAT/EAT hooking.
+// TODO: Hotpatching support for Windows API code (and other code compatible 
+// with hotpatching). Allows thread-safe hooking.
+// TODO: Explicitly support hook chains (and test).
+// TODO: Use relative jumps where possible (detect delta at runtime).
+// TODO: Detect cases where hooking may overflow past the end of a function, 
+// and fail (provide policy or flag to allow overriding this behaviour). 
+// Examples may be instructions such as INT3, RET, JMP, etc.
 
 namespace hadesmem
 {

@@ -27,6 +27,7 @@
 // TODO: Test argument combinations more thoroughly.
 // TODO: Improve multi-call testing.
 // TODO: Test all possible Call overloads.
+// TODO: Compile-fail tests.
 
 namespace
 {

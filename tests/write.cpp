@@ -26,6 +26,9 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// TODO: Improve tests by doing checks both before and after writes.
+// TODO: Don't read/write data on the stack.
+
 BOOST_AUTO_TEST_CASE(write_pod)
 {
   hadesmem::Process const process(::GetCurrentProcessId());

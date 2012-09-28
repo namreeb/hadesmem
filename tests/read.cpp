@@ -26,6 +26,9 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// TODO: Improve tests by doing checks both before and after writes.
+// TODO: Don't read/write data on the stack.
+
 // TODO: Provide the appropriate stream operator overload to allow this (also 
 // ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
 BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
