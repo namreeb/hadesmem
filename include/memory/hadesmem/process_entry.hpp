@@ -9,9 +9,7 @@
 
 #include <string>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 #include <tlhelp32.h>
@@ -19,29 +17,56 @@
 namespace hadesmem
 {
 
-struct ProcessEntry
+class ProcessEntry
 {
+public:
   ProcessEntry() 
-    : id(0), 
-    threads(0), 
-    parent(0), 
-    priority(0), 
-    name()
+    : id_(0), 
+    threads_(0), 
+    parent_(0), 
+    priority_(0), 
+    name_()
   { }
   
   ProcessEntry(PROCESSENTRY32 const& entry)
-    : id(entry.th32ProcessID), 
-    threads(entry.cntThreads), 
-    parent(entry.th32ParentProcessID), 
-    priority(entry.pcPriClassBase), 
-    name(entry.szExeFile)
+    : id_(entry.th32ProcessID), 
+    threads_(entry.cntThreads), 
+    parent_(entry.th32ParentProcessID), 
+    priority_(entry.pcPriClassBase), 
+    name_(entry.szExeFile)
   { }
+
+  DWORD GetId() const BOOST_NOEXCEPT
+  {
+    return id_;
+  }
+
+  DWORD GetThreads() const BOOST_NOEXCEPT
+  {
+    return threads_;
+  }
+
+  DWORD GetParentId() const BOOST_NOEXCEPT
+  {
+    return parent_;
+  }
+
+  DWORD GetPriority() const BOOST_NOEXCEPT
+  {
+    return priority_;
+  }
+
+  std::wstring GetName() const
+  {
+    return name_;
+  }
   
-  DWORD id;
-  DWORD threads;
-  DWORD parent;
-  DWORD priority;
-  std::wstring name;
+private:
+  DWORD id_;
+  DWORD threads_;
+  DWORD parent_;
+  DWORD priority_;
+  std::wstring name_;
 };
 
 }

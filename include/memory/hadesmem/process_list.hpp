@@ -17,7 +17,7 @@ namespace hadesmem
 
 class Process;
 
-struct ProcessEntry;
+class ProcessEntry;
 
 namespace detail
 {

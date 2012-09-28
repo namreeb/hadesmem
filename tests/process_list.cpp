@@ -40,10 +40,10 @@ BOOST_AUTO_TEST_CASE(process_list)
   auto iter = std::begin(process_list_1);
   BOOST_CHECK_NE(iter, std::end(process_list_1));
   BOOST_CHECK_NE(++iter, std::end(process_list_1));
-  BOOST_CHECK_NE(iter->id, 0U);
-  DWORD const second_id = iter->id;
+  BOOST_CHECK_NE(iter->GetId(), 0U);
+  DWORD const second_id = iter->GetId();
   BOOST_CHECK_NE(++iter, std::end(process_list_1));
-  DWORD const third_id = iter->id;
+  DWORD const third_id = iter->GetId();
   BOOST_CHECK_NE(second_id, third_id);
 }
 
@@ -53,14 +53,14 @@ BOOST_AUTO_TEST_CASE(process_list_algorithm)
   
   for (auto const& entry : process_list_1)
   {
-    BOOST_CHECK(!entry.name.empty());
+    BOOST_CHECK(!entry.GetName().empty());
   }
   
   auto const this_iter = std::find_if(std::begin(process_list_1), 
     std::end(process_list_1), 
     [] (hadesmem::ProcessEntry const& entry)
     {
-      return entry.id == ::GetCurrentProcessId();
+      return entry.GetId() == ::GetCurrentProcessId();
     });
   BOOST_CHECK_NE(this_iter, std::end(process_list_1));
 }

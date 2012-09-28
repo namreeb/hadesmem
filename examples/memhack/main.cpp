@@ -50,16 +50,16 @@ int main()
     for (auto const& process_entry : processes)
     {
       std::wcout << "\n";
-      std::wcout << "ID: " << process_entry.id << "\n";
-      std::wcout << "Threads: " << process_entry.threads << "\n";
-      std::wcout << "Parent: " << process_entry.parent << "\n";
-      std::wcout << "Priority: " << process_entry.priority << "\n";
-      std::wcout << "Name: " << process_entry.name << "\n";
+      std::wcout << "ID: " << process_entry.GetId() << "\n";
+      std::wcout << "Threads: " << process_entry.GetThreads() << "\n";
+      std::wcout << "Parent: " << process_entry.GetParentId() << "\n";
+      std::wcout << "Priority: " << process_entry.GetPriority() << "\n";
+      std::wcout << "Name: " << process_entry.GetName() << "\n";
 
       std::unique_ptr<hadesmem::Process> process;
       try
       {
-        process.reset(new hadesmem::Process(process_entry.id));
+        process.reset(new hadesmem::Process(process_entry.GetId()));
       }
       catch (...)
       {
