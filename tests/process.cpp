@@ -15,6 +15,8 @@
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
+#include "hadesmem/error.hpp"
+
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
 // non-virtual destructor [-Werror=effc++]
@@ -42,11 +44,12 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK_EQUAL(process, process_new);
   BOOST_CHECK_NE(process, process_copy);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
-  std::wstring const path(GetPath(process));
+  std::wstring const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());
   BOOST_CHECK(boost::filesystem::exists(path));
   BOOL is_wow64_real = FALSE;
   BOOST_CHECK(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
-  BOOST_CHECK_EQUAL(IsWoW64(process), is_wow64_real != FALSE);
+  BOOST_CHECK_EQUAL(hadesmem::IsWoW64(process), is_wow64_real != FALSE);
   BOOST_CHECK_NO_THROW(process.Cleanup());
+  BOOST_CHECK_THROW(hadesmem::GetSeDebugPrivilege(), hadesmem::HadesMemError);
 }

@@ -18,6 +18,12 @@ project
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
   ;
+  
+lib advapi32
+  :
+  :
+    <name>advapi32
+  ;
 
 lib user32
   :
@@ -33,6 +39,7 @@ lib memory
     /boost//filesystem/<link>static
     /asmjit//asmjit
     /beaengine//beaengine
+	advapi32
     user32
   :
     <link>static

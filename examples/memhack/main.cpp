@@ -44,6 +44,17 @@ int main()
 
     std::cout << "HadesMem MemHack\n";
 
+    try
+    {
+      hadesmem::GetSeDebugPrivilege();
+
+      std::wcout << "\nAcquired SeDebugPrivilege.\n";
+    }
+    catch (std::exception const& /*e*/)
+    {
+      std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
+    }
+
     std::wcout << "\nProcesses:\n";
 
     hadesmem::ProcessList const processes;

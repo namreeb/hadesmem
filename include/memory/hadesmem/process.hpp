@@ -71,4 +71,6 @@ std::wstring GetPath(Process const& process);
 
 bool IsWoW64(Process const& process);
 
+void GetSeDebugPrivilege();
+
 }

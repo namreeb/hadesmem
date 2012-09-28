@@ -13,6 +13,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
+#include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
@@ -253,6 +254,49 @@ bool IsWoW64(Process const& process)
   }
   
   return is_wow64 != FALSE;
+}
+
+void GetSeDebugPrivilege()
+{
+  HANDLE process_token = 0;
+  if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | 
+    TOKEN_QUERY, &process_token)) 
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("OpenProcessToken failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  BOOST_SCOPE_EXIT_ALL(&)
+  {
+    // WARNING: Handle is leaked if CloseHandle fails.
+    BOOST_VERIFY(::CloseHandle(process_token));
+  };
+
+  LUID luid = { 0, 0 };
+  if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("LookupPrivilegeValue failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  TOKEN_PRIVILEGES privileges;
+  ::ZeroMemory(&privileges, sizeof(privileges));
+  privileges.PrivilegeCount = 1;
+  privileges.Privileges[0].Luid = luid;
+  privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+  if (!::AdjustTokenPrivileges(process_token, FALSE, &privileges, 
+    sizeof(privileges), nullptr, nullptr) || 
+    ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("AdjustTokenPrivileges failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
 }
 
 }

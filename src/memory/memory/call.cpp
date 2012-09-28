@@ -184,7 +184,7 @@ std::vector<CallResult> CallMulti(Process const& process,
   
   BOOST_SCOPE_EXIT_ALL(&)
   {
-    // WARNING: Handle is leaked if FreeLibrary fails.
+    // WARNING: Handle is leaked if CloseHandle fails.
     BOOST_VERIFY(::CloseHandle(thread_remote));
   };
 
