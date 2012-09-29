@@ -34,12 +34,13 @@ lib user32
 lib memory
   :
     [ glob memory/*.cpp ]
+    [ glob memory/pelib/*.cpp ]
     [ glob memory/detail/*.cpp ]
-	/boost//headers
+    /boost//headers
     /boost//filesystem/<link>static
     /asmjit//asmjit
     /beaengine//beaengine
-	advapi32
+    advapi32
     user32
   :
     <link>static

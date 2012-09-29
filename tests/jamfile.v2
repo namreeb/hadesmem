@@ -65,6 +65,9 @@ run injector.cpp
 run patcher.cpp
   ;
 
+run pelib/pefile.cpp
+  ;
+
 compile-fail read_pod_fail.cpp
   ;
 
