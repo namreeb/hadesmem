@@ -51,7 +51,7 @@ public:
     return parent_;
   }
 
-  DWORD GetPriority() const BOOST_NOEXCEPT
+  LONG GetPriority() const BOOST_NOEXCEPT
   {
     return priority_;
   }
@@ -65,7 +65,7 @@ private:
   DWORD id_;
   DWORD threads_;
   DWORD parent_;
-  DWORD priority_;
+  LONG priority_;
   std::wstring name_;
 };
 

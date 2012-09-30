@@ -38,7 +38,8 @@ void Write(Process const& process, PVOID address, T const* ptr,
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  std::size_t const raw_size = std::distance(ptr, ptr + count) * sizeof(T);
+  std::size_t const raw_size = static_cast<std::size_t>(
+    std::distance(ptr, ptr + count)) * sizeof(T);
   detail::Write(process, address, ptr, raw_size);
 }
 
@@ -48,7 +49,9 @@ void Write(Process const& process, PVOID address, T const* beg,
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  Write(process, address, beg, std::distance(beg, end));
+  std::size_t const count = static_cast<std::size_t>(
+    std::distance(beg, end));
+  Write(process, address, beg, count);
 }
 
 // NOTE: This will not write a null terminator.
@@ -58,7 +61,9 @@ void WriteString(Process const& process, PVOID address, T const* const beg,
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
-  Write(process, address, beg, std::distance(beg, end));
+  std::size_t const count = static_cast<std::size_t>(
+    std::distance(beg, end));
+  Write(process, address, beg, count);
 }
 
 // TODO: Support other container types that model the same STL container 

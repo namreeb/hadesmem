@@ -17,6 +17,7 @@ project
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
+    <toolset>clang:<cxxflags>"-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
   ;
   
 lib advapi32

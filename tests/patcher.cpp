@@ -27,6 +27,13 @@ using namespace boost::assign;
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// Boost.Test causes the following warning under Clang:
+// error: declaration requires a global constructor 
+// [-Werror,-Wglobal-constructors]
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#endif // #if defined(HADESMEM_CLANG)
+
 // TODO: Patcher constructor tests.
 // TODO: Improve hook target checks.
 // TODO: Fix annoying UAC popup (with manifest).
@@ -36,8 +43,17 @@ using namespace boost::assign;
 
 namespace
 {
-  
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#endif // #if defined(HADESMEM_CLANG)  
+
 std::shared_ptr<hadesmem::PatchDetour> g_ptr_detour_1;
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_CLANG)  
 
 DWORD GetCurrentProcessId_Hook()
 {

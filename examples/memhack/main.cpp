@@ -24,12 +24,17 @@
 #include "hadesmem/process_list.hpp"
 #include "hadesmem/process_entry.hpp"
 
+namespace
+{
+
 std::wstring PtrToString(void const* const ptr)
 {
   std::wostringstream str;
   str.imbue(std::locale::classic());
   str << std::hex << reinterpret_cast<DWORD_PTR>(ptr);
   return str.str();
+}
+
 }
 
 int main()
@@ -72,7 +77,7 @@ int main()
       {
         process.reset(new hadesmem::Process(process_entry.GetId()));
       }
-      catch (...)
+      catch (std::exception const& /*e*/)
       {
         std::wcout << "\nCould not open process for further inspection.\n\n";
         continue;

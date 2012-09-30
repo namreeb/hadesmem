@@ -193,8 +193,8 @@ void PatchDetour::Apply()
 
   DISASM my_disasm;
   ZeroMemory(&my_disasm, sizeof(my_disasm));
-  my_disasm.EIP = reinterpret_cast<long long>(buffer.data());
-  my_disasm.VirtualAddr = reinterpret_cast<long long>(target_);
+  my_disasm.EIP = reinterpret_cast<DWORD_PTR>(buffer.data());
+  my_disasm.VirtualAddr = reinterpret_cast<unsigned long long>(target_);
 #if defined(_M_AMD64) 
   my_disasm.Archi = 64;
 #elif defined(_M_IX86) 
@@ -206,12 +206,14 @@ void PatchDetour::Apply()
   unsigned int instr_size = 0;
   do
   {
-    int const len = Disasm(&my_disasm);
-    if (len == UNKNOWN_OPCODE)
+    int const len_tmp = Disasm(&my_disasm);
+    if (len_tmp == UNKNOWN_OPCODE)
     {
       BOOST_THROW_EXCEPTION(HadesMemError() << 
         ErrorString("Disassembly failed."));
     }
+
+    unsigned int const len = static_cast<unsigned int>(len_tmp);
 
     // TODO: Support more types of relative instructions
     if ((my_disasm.Instruction.BranchType == JmpType) && 
@@ -295,7 +297,7 @@ void PatchDetour::WriteJump(PVOID address, LPCVOID target)
   assembler.ret();
 #elif defined(_M_IX86) 
   // JMP <Target, Relative>
-  assembler.jmp(reinterpret_cast<DWORD_PTR>(target));
+  assembler.jmp(reinterpret_cast<sysint_t>(target));
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

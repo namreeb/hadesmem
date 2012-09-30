@@ -84,10 +84,10 @@ PVOID PeFile::RvaToVa(DWORD rva) const
     return RvaToVaForImage(rva);
   case PeFileType::Data:
     return RvaToVaForData(rva);
-  default:
-    BOOST_ASSERT(false);
-    return nullptr;
   }
+
+  BOOST_ASSERT(false);
+  return nullptr;
 }
 
 PVOID PeFile::RvaToVaForImage(DWORD rva) const

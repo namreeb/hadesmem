@@ -24,6 +24,13 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// Boost.Test causes the following warning under Clang:
+// error: declaration requires a global constructor 
+// [-Werror,-Wglobal-constructors]
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#endif // #if defined(HADESMEM_CLANG)
+
 BOOST_AUTO_TEST_CASE(this_process)
 {
   // TODO: Test relational operators.

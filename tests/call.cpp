@@ -24,6 +24,13 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif // #if defined(HADESMEM_GCC)
 
+// Boost.Test causes the following warning under Clang:
+// error: declaration requires a global constructor 
+// [-Werror,-Wglobal-constructors]
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#endif // #if defined(HADESMEM_CLANG)
+
 // TODO: Test argument combinations more thoroughly.
 // TODO: Improve multi-call testing.
 // TODO: Test all possible Call overloads.
@@ -58,8 +65,6 @@ HADESMEM_STATIC_ASSERT(std::is_same<
   decltype(hadesmem::Call<VoidRetFuncT>(std::declval<hadesmem::Process>(), 
   nullptr, hadesmem::CallConv::kDefault).first), 
   int>::value);
-
-}
 
 DWORD_PTR TestInteger(int a, int b, int c, int d, int e, int f)
 {
@@ -155,6 +160,9 @@ DWORD MultiThreadGet()
   return GetLastError();
 }
 
+// Clang does not yet implement MSVC-style __thiscall
+#if !defined(HADESMEM_CLANG)
+
 class ThiscallDummy
 {
 public:
@@ -166,12 +174,14 @@ public:
     BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
     BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
     BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
-    
+
     SetLastError(0x87654321);
-    
+
     return 0x12345678;
   }
 };
+
+#endif // #if !defined(HADESMEM_CLANG)
 
 #if defined(_M_AMD64)
 
@@ -205,16 +215,25 @@ DWORD_PTR __stdcall TestIntegerStd(int a, int b, int c, int d, int e, int f)
   return 0x12345678;
 }
 
+// Clang does not yet implement MSVC-style __fastcall (it seems to do so 
+// for the 'regular' case, but will do things differently when faced 
+// with a 64-bit integer as the first parameter).
+#if !defined(HADESMEM_CLANG)
+
 int __fastcall TestInteger64Fast(DWORD64 a)
 {
   BOOST_CHECK_EQUAL(a, 0xAAAAAAAABBBBBBBBULL);
-  
+
   return 0;
 }
+
+#endif // #if !defined(HADESMEM_CLANG)
 
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+}
 
 BOOST_AUTO_TEST_CASE(call)
 {

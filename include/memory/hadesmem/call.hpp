@@ -130,8 +130,8 @@ class CallArg
 public:
   template <typename T>
   CallArg(T t) BOOST_NOEXCEPT
-    : type_(ArgType::kInvalidType), 
-    arg_()
+    : arg_(), 
+    type_(ArgType::kInvalidType)
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
@@ -160,9 +160,6 @@ public:
       break;
     case ArgType::kDoubleType:
       (*v)(arg_.d);
-      break;
-    default:
-      BOOST_ASSERT("Invalid type." && false);
       break;
     }
   }
@@ -220,8 +217,8 @@ private:
     double d;
   };
   
-  ArgType type_;
   Arg arg_;
+  ArgType type_;
 };
 
 CallResult Call(Process const& process, 
@@ -296,6 +293,15 @@ std::pair<typename detail::VoidToInt<\
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_GCC)
 
+// TODO: Investigate whether it's 'correct' to disable -Wsign-conversion here, 
+// or whether it should be left enabled (so users can benefit from the warning 
+// if they so desire).
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif // #if defined(HADESMEM_CLANG)
+
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
@@ -305,6 +311,10 @@ std::pair<typename detail::VoidToInt<\
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_CLANG)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 
@@ -359,6 +369,15 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_GCC)
 
+// TODO: Investigate whether it's 'correct' to disable -Wsign-conversion here, 
+// or whether it should be left enabled (so users can benefit from the warning 
+// if they so desire).
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif // #if defined(HADESMEM_CLANG)
+
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
@@ -368,6 +387,10 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_GCC)
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_CLANG)
 
 #undef HADESMEM_CALL_DEFINE_ARG
 

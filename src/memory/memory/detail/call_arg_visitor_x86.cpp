@@ -39,10 +39,14 @@ void ArgVisitor32::operator()(DWORD32 arg) BOOST_NOEXCEPT
     {
     case CallConv::kThisCall:
     case CallConv::kFastCall:
-      assembler_->mov(AsmJit::ecx, arg);
+      assembler_->mov(AsmJit::ecx, static_cast<sysint_t>(arg));
       break;
-    default:
-      assembler_->mov(AsmJit::eax, arg);
+    case CallConv::kDefault:
+    case CallConv::kWinApi:
+    case CallConv::kCdecl:
+    case CallConv::kStdCall:
+    case CallConv::kX64:
+      assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
       assembler_->push(AsmJit::eax);
       break;
     }
@@ -51,16 +55,21 @@ void ArgVisitor32::operator()(DWORD32 arg) BOOST_NOEXCEPT
     switch (call_conv_)
     {
     case CallConv::kFastCall:
-      assembler_->mov(AsmJit::edx, arg);
+      assembler_->mov(AsmJit::edx, static_cast<sysint_t>(arg));
       break;
-    default:
-      assembler_->mov(AsmJit::eax, arg);
+    case CallConv::kDefault:
+    case CallConv::kWinApi:
+    case CallConv::kCdecl:
+    case CallConv::kStdCall:
+    case CallConv::kThisCall:
+    case CallConv::kX64:
+      assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
       assembler_->push(AsmJit::eax);
       break;
     }
     break;
   default:
-    assembler_->mov(AsmJit::eax, arg);
+    assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
     assembler_->push(AsmJit::eax);
     break;
   }
@@ -72,11 +81,11 @@ void ArgVisitor32::operator()(DWORD64 arg) BOOST_NOEXCEPT
 {
   // TODO: Test __fastcall with a 64-bit arg to ensure this is correct.
 
-  assembler_->mov(AsmJit::eax, static_cast<DWORD>((arg >> 32) & 
-    0xFFFFFFFF));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+    (arg >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
-  assembler_->mov(AsmJit::eax, static_cast<DWORD>(arg));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(arg)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -95,7 +104,7 @@ void ArgVisitor32::operator()(float arg) BOOST_NOEXCEPT
   FloatConv float_conv;
   float_conv.f = arg;
 
-  assembler_->mov(AsmJit::eax, float_conv.i);
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(float_conv.i));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -114,11 +123,12 @@ void ArgVisitor32::operator()(double arg) BOOST_NOEXCEPT
   DoubleConv double_conv;
   double_conv.d = arg;
 
-  assembler_->mov(AsmJit::eax, static_cast<DWORD>((double_conv.i >> 32) & 
-    0xFFFFFFFF));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+    (double_conv.i >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
-  assembler_->mov(AsmJit::eax, static_cast<DWORD>(double_conv.i));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+    double_conv.i)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;

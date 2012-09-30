@@ -11,32 +11,20 @@
 #include <random>
 #include <iostream>
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push, 1)
-#pragma warning(disable: 4996 4512 6295 6334)
-#pragma warning(disable: 28159)
-#endif // #if defined(HADESMEM_MSVC)
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
-#endif // #if defined(HADESMEM_GCC)
+#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 // Required for ::_CrtSetDbgFlag.
 // Does not compile under GCC.
 #if !defined(HADESMEM_GCC)
+// Macro unused under Clang.
+#if !defined(HADESMEM_CLANG)
 #define _CRTDBG_MAP_ALLOC
+#endif // #if !defined(HADESMEM_CLANG)
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif // #if !defined(HADESMEM_GCC)
@@ -73,7 +61,7 @@ void DisableUserModeCallbackExceptionFilter()
   DWORD flags;
   if (get_policy && set_policy && get_policy(&flags))
   {
-    set_policy(flags & ~PROCESS_CALLBACK_FILTER_ENABLED);
+    set_policy(flags & static_cast<DWORD>(~PROCESS_CALLBACK_FILTER_ENABLED));
   }
 }
 

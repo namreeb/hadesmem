@@ -18,7 +18,19 @@ namespace hadesmem
 
 class HadesMemError : public virtual std::exception, 
   public virtual boost::exception
-{ };
+{
+private:
+  // This function exists to 'anchor' the class, and stop the compiler from 
+  // copying vtable and RTTI info into every object file that includes 
+  // this header. (Caught by -Wweak-vtables under Clang.)
+  // More information from the LLVM Coding Standards:
+  // If a class is defined in a header file and has a vtable (either it has 
+  // virtual methods or it derives from classes with virtual methods), it must 
+  // always have at least one out-of-line virtual method in the class. Without 
+  // this, the compiler will copy the vtable and RTTI into every .o file that 
+  // #includes the header, bloating .o file sizes and increasing link times.
+  virtual void Anchor() const;
+};
 
 typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
 typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR> 
