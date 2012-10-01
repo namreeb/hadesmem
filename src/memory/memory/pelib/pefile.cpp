@@ -21,6 +21,67 @@
 namespace hadesmem
 {
 
+namespace pelib
+{
+
+namespace
+{
+
+PVOID RvaToVaForImage(Process const& /*process*/, PeFile const& pe_file, 
+  DWORD rva)
+{
+  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
+  // base address of the PE file).
+  return rva ? (static_cast<PBYTE>(pe_file.GetBase()) + rva) : nullptr;
+}
+
+PVOID RvaToVaForData(Process const& process, PeFile const& pe_file, DWORD rva)
+{
+  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
+  // base address of the PE file).
+  if (!rva)
+  {
+    return nullptr;
+  }
+
+  PVOID const base = pe_file.GetBase();
+
+  auto const dos_header = Read<IMAGE_DOS_HEADER>(process, base);
+  if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Invalid DOS header."));
+  }
+
+  PBYTE const ptr_nt_headers = static_cast<PBYTE>(base) + dos_header.e_lfanew;
+  auto const nt_headers = Read<IMAGE_NT_HEADERS>(process, ptr_nt_headers);
+  if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Invalid NT headers."));
+  }
+
+  auto const ptr_section_hdr = ptr_nt_headers + 
+    offsetof(IMAGE_NT_HEADERS, OptionalHeader) + 
+    nt_headers.FileHeader.SizeOfOptionalHeader;
+  auto const section_hdrs = ReadVector<IMAGE_SECTION_HEADER>(process, 
+    ptr_section_hdr, nt_headers.FileHeader.NumberOfSections);
+  for (auto const& section_hdr : section_hdrs)
+  {
+    if (section_hdr.VirtualAddress <= rva && 
+      (section_hdr.VirtualAddress + section_hdr.Misc.VirtualSize) > rva)
+    {
+      rva -= section_hdr.VirtualAddress;
+      rva += section_hdr.PointerToRawData;
+      return static_cast<PBYTE>(base) + rva;
+    }
+  }
+
+  return nullptr;
+}
+
+}
+
 PeFile::PeFile(Process const* process, PVOID base, PeFileType type)
   : process_(process), 
   base_(base), 
@@ -78,70 +139,6 @@ PeFileType PeFile::GetType() const BOOST_NOEXCEPT
   return type_;
 }
 
-PVOID PeFile::RvaToVa(DWORD rva) const
-{
-  switch (type_)
-  {
-  case PeFileType::Image:
-    return RvaToVaForImage(rva);
-  case PeFileType::Data:
-    return RvaToVaForData(rva);
-  }
-
-  BOOST_ASSERT(false);
-  return nullptr;
-}
-
-PVOID PeFile::RvaToVaForImage(DWORD rva) const
-{
-  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
-  // base address of the PE file).
-  return rva ? (static_cast<PBYTE>(base_) + rva) : nullptr;
-}
-
-PVOID PeFile::RvaToVaForData(DWORD rva) const
-{
-  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
-  // base address of the PE file).
-  if (!rva)
-  {
-    return nullptr;
-  }
-
-  auto const dos_header = Read<IMAGE_DOS_HEADER>(*process_, base_);
-  if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
-  {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("Invalid DOS header."));
-  }
-
-  PBYTE const ptr_nt_headers = static_cast<PBYTE>(base_) + dos_header.e_lfanew;
-  auto const nt_headers = Read<IMAGE_NT_HEADERS>(*process_, ptr_nt_headers);
-  if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
-  {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("Invalid NT headers."));
-  }
-
-  auto const ptr_section_hdr = ptr_nt_headers + 
-    offsetof(IMAGE_NT_HEADERS, OptionalHeader) + 
-    nt_headers.FileHeader.SizeOfOptionalHeader;
-  auto const section_hdrs = ReadVector<IMAGE_SECTION_HEADER>(*process_, 
-    ptr_section_hdr, nt_headers.FileHeader.NumberOfSections);
-  for (auto const& section_hdr : section_hdrs)
-  {
-    if (section_hdr.VirtualAddress <= rva && 
-      (section_hdr.VirtualAddress + section_hdr.Misc.VirtualSize) > rva)
-    {
-      rva -= section_hdr.VirtualAddress;
-      rva += section_hdr.PointerToRawData;
-      return static_cast<PBYTE>(base_) + rva;
-    }
-  }
-
-  return nullptr;
-}
-
 bool operator==(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
@@ -180,6 +177,22 @@ std::ostream& operator<<(std::ostream& lhs, PeFile const& rhs)
 std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 {
   return (lhs << rhs.GetBase());
+}
+
+PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
+{
+  switch (pe_file.GetType())
+  {
+  case PeFileType::Image:
+    return RvaToVaForImage(process, pe_file, rva);
+  case PeFileType::Data:
+    return RvaToVaForData(process, pe_file, rva);
+  }
+
+  BOOST_ASSERT(false);
+  return nullptr;
+}
+
 }
 
 }

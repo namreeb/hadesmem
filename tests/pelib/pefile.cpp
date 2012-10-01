@@ -35,25 +35,26 @@ BOOST_AUTO_TEST_CASE(pefile)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::PeFile pefile_1(&process, GetModuleHandle(nullptr), 
-    hadesmem::PeFileType::Image);
-  hadesmem::PeFile pefile_2(pefile_1);
+  hadesmem::pelib::PeFile pefile_1(&process, GetModuleHandle(nullptr), 
+    hadesmem::pelib::PeFileType::Image);
+  hadesmem::pelib::PeFile pefile_2(pefile_1);
   BOOST_CHECK_EQUAL(pefile_1, pefile_2);
   pefile_1 = pefile_2;
   BOOST_CHECK_EQUAL(pefile_1, pefile_2);
-  hadesmem::PeFile pefile_3(std::move(pefile_2));
+  hadesmem::pelib::PeFile pefile_3(std::move(pefile_2));
   BOOST_CHECK_EQUAL(pefile_1, pefile_3);
-  hadesmem::PeFile pefile_4(pefile_1);
+  hadesmem::pelib::PeFile pefile_4(pefile_1);
   pefile_1 = std::move(pefile_4);
   BOOST_CHECK_EQUAL(pefile_1, pefile_3);
 
   // TODO: Also test PeFileType::Data.
   // TODO: Actually test that RvaToVa is returning the correct value.
-  hadesmem::PeFile const pefile_5(&process, GetModuleHandle(nullptr), 
-    hadesmem::PeFileType::Image);
+  hadesmem::pelib::PeFile const pefile_5(&process, GetModuleHandle(nullptr), 
+    hadesmem::pelib::PeFileType::Image);
   BOOST_CHECK_EQUAL(pefile_5.GetBase(), reinterpret_cast<PVOID>(
     GetModuleHandle(nullptr)));
   BOOST_CHECK_EQUAL(static_cast<int>(pefile_5.GetType()), static_cast<int>(
-    hadesmem::PeFileType::Image));
-  BOOST_CHECK_EQUAL(pefile_5.RvaToVa(0), static_cast<PVOID>(nullptr));
+    hadesmem::pelib::PeFileType::Image));
+  BOOST_CHECK_EQUAL(RvaToVa(process, pefile_5, 0), 
+    static_cast<PVOID>(nullptr));
 }

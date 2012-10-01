@@ -18,6 +18,9 @@ namespace hadesmem
 
 class Process;
 
+namespace pelib
+{
+
 enum class PeFileType
 {
   Image, 
@@ -70,5 +73,9 @@ bool operator>=(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT;
 std::ostream& operator<<(std::ostream& lhs, PeFile const& rhs);
 
 std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs);
+
+PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva);
+
+}
 
 }
