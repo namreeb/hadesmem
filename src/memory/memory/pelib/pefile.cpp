@@ -10,7 +10,9 @@
 #include <cstddef>
 #include <iostream>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"

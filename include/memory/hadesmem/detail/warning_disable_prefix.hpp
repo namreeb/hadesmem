@@ -38,6 +38,7 @@
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #pragma GCC diagnostic ignored "-Wweak-vtables"
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunreachable-code"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

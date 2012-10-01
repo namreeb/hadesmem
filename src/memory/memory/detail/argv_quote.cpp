@@ -32,7 +32,7 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
 
     for (auto it = std::begin(argument); ;++it)
     {
-      int num_backslashes = 0;
+      std::size_t num_backslashes = 0;
 
       while (it != std::end(argument) && *it == L'\\') 
       {
