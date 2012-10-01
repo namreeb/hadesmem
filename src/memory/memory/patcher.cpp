@@ -219,14 +219,14 @@ void PatchDetour::Apply()
     if ((my_disasm.Instruction.BranchType == JmpType) && 
       (my_disasm.Instruction.AddrValue != 0)) 
     {
-      WriteJump(tramp_cur, reinterpret_cast<PVOID>(my_disasm.
-        Instruction.AddrValue));
+      WriteJump(tramp_cur, reinterpret_cast<PVOID>(static_cast<DWORD_PTR>(
+        my_disasm.Instruction.AddrValue)));
       tramp_cur += GetJumpSize();
     }
     else
     {
-      auto cur_raw = ReadVector<BYTE>(*process_, 
-        reinterpret_cast<PVOID>(my_disasm.VirtualAddr), len);
+      auto cur_raw = ReadVector<BYTE>(*process_, reinterpret_cast<PVOID>(
+        static_cast<DWORD_PTR>(my_disasm.VirtualAddr)), len);
       WriteVector(*process_, tramp_cur, cur_raw);
       tramp_cur += len;
     }
