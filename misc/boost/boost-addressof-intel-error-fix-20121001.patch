@@ -1,0 +1,17 @@
+Index: boost/utility/addressof.hpp
+===================================================================
+--- boost/utility/addressof.hpp	(revision 80805)
++++ boost/utility/addressof.hpp	(working copy)
+@@ -55,9 +55,10 @@
+     return boost::detail::addressof_impl<T>::f( v, 0 );
+ 
+ #else
++    
++    boost::detail::addr_impl_ref<T> t( v );
++    return boost::detail::addressof_impl<T>::f( t , 0 );
+ 
+-    return boost::detail::addressof_impl<T>::f( boost::detail::addr_impl_ref<T>( v ), 0 );
+-
+ #endif
+ }
+ 

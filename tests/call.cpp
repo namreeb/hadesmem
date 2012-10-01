@@ -391,16 +391,16 @@ BOOST_AUTO_TEST_CASE(call)
   BOOST_CHECK_EQUAL(call_win.first, get_proc_address);
   
   hadesmem::MultiCall multi_call(&process);
-  multi_call.Add<void (*)(DWORD last_error)>(process, reinterpret_cast<PVOID>(
+  multi_call.Add<void (*)(DWORD last_error)>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
     hadesmem::CallConv::kDefault, 0x1337);
-  multi_call.Add<DWORD (*)()>(process, reinterpret_cast<PVOID>(
+  multi_call.Add<DWORD (*)()>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
     hadesmem::CallConv::kDefault);
-  multi_call.Add<void (*)(DWORD last_error)>(process, reinterpret_cast<PVOID>(
+  multi_call.Add<void (*)(DWORD last_error)>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
     hadesmem::CallConv::kDefault, 0x1234);
-  multi_call.Add<DWORD (*)()>(process, reinterpret_cast<PVOID>(
+  multi_call.Add<DWORD (*)()>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
     hadesmem::CallConv::kDefault);
   std::vector<hadesmem::CallResult> multi_call_ret = multi_call.Call();

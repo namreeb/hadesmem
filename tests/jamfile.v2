@@ -10,7 +10,7 @@ project
     <toolset>msvc:<warnings>all
     <toolset>gcc:<warnings>all
     <toolset>clang:<warnings>all
-    <toolset>intel:<warnings>on
+    <toolset>intel:<warnings>all
     
     <warnings-as-errors>on
 

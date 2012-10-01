@@ -345,7 +345,7 @@ args.push_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-  void Add(Process const& process, LPCVOID address, CallConv call_conv \
+  void Add(LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
 {\
   HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
