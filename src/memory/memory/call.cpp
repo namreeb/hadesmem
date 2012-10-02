@@ -42,6 +42,7 @@ namespace hadesmem
 
 namespace
 {
+
 struct CallResultRemote
 {
   DWORD_PTR return_value;
