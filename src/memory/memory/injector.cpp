@@ -23,7 +23,6 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/self_path.hpp"
-#include "hadesmem/detail/argv_quote.hpp"
 
 // TODO: .NET injection (without DLL dependency if possible).
 // TODO: Cross-session injection.
@@ -36,6 +35,63 @@
 
 namespace hadesmem
 {
+
+namespace
+{
+
+void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
+  bool force)
+{
+  // Unless we're told otherwise, don't quote unless we actually
+  // need to do so --- hopefully avoid problems if programs won't
+  // parse quotes properly
+  if (!force && !argument.empty() && argument.find_first_of(L" \t\n\v\"") 
+    == argument.npos)
+  {
+    command_line->append(argument);
+  }
+  else 
+  {
+    command_line->push_back(L'"');
+
+    for (auto it = std::begin(argument); ;++it)
+    {
+      std::size_t num_backslashes = 0;
+
+      while (it != std::end(argument) && *it == L'\\') 
+      {
+        ++it;
+        ++num_backslashes;
+      }
+
+      if (it == std::end(argument))
+      {
+        // Escape all backslashes, but let the terminating
+        // double quotation mark we add below be interpreted
+        // as a metacharacter.
+        command_line->append(num_backslashes * 2, L'\\');
+        break;
+      }
+      else if (*it == L'"')
+      {
+        // Escape all backslashes and the following
+        // double quotation mark.
+        command_line->append(num_backslashes * 2 + 1, L'\\');
+        command_line->push_back(*it);
+      }
+      else
+      {
+        // Backslashes aren't special here.
+        command_line->append(num_backslashes, L'\\');
+        command_line->push_back(*it);
+      }
+    }
+
+    command_line->push_back(L'"');
+  }
+}
+
+}
 
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
@@ -219,12 +275,12 @@ CreateAndInjectData CreateAndInject(
   boost::filesystem::path const path_real(path);
 
   std::wstring command_line;
-  detail::ArgvQuote(&command_line, path_real.native(), false);
+  ArgvQuote(&command_line, path_real.native(), false);
   std::for_each(std::begin(args), std::end(args), 
     [&] (std::wstring const& arg) 
   {
     command_line += L' ';
-    detail::ArgvQuote(&command_line, arg, false);
+    ArgvQuote(&command_line, arg, false);
   });
   std::vector<wchar_t> proc_args(std::begin(command_line), 
     std::end(command_line));
