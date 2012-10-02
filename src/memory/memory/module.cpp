@@ -16,10 +16,52 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/to_upper_ordinal.hpp"
-#include "hadesmem/detail/module_find_procedure.hpp"
 
 namespace hadesmem
 {
+
+namespace
+{
+
+FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
+{
+  BOOST_ASSERT(name != nullptr);
+  
+  HMODULE const local_module = ::LoadLibraryEx(module.GetPath().c_str(), 
+    nullptr, DONT_RESOLVE_DLL_REFERENCES);
+  if (!local_module)
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Could not load module locally.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  BOOST_SCOPE_EXIT_ALL(&)
+  {
+    // WARNING: Handle is leaked if FreeLibrary fails.
+    BOOST_VERIFY(::FreeLibrary(local_module));
+  };
+  
+  FARPROC const local_func = ::GetProcAddress(local_module, name);
+  if (!local_func)
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Could not find target function.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  
+  DWORD_PTR const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
+    reinterpret_cast<DWORD_PTR>(local_module);
+  
+  FARPROC const remote_func = reinterpret_cast<FARPROC>(
+    reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
+  
+  return remote_func;
+}
+
+}
 
 Module::Module(Process const* process, HMODULE handle)
   : process_(process), 
@@ -283,12 +325,12 @@ std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 
 FARPROC FindProcedure(Module const& module, std::string const& name)
 {
-  return detail::FindProcedureInternal(module, name.c_str());
+  return FindProcedureInternal(module, name.c_str());
 }
 
 FARPROC FindProcedure(Module const& module, WORD ordinal)
 {
-  return detail::FindProcedureInternal(module, MAKEINTRESOURCEA(ordinal));
+  return FindProcedureInternal(module, MAKEINTRESOURCEA(ordinal));
 }
 
 }
