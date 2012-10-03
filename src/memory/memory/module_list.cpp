@@ -11,10 +11,6 @@
 #include <boost/assert.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/module.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/detail/module_iterator_impl.hpp"
 #include <windows.h>
 #include <tlhelp32.h>
 
