@@ -93,8 +93,6 @@ void Process::Cleanup()
     return;
   }
   
-  BOOST_ASSERT(id_);
-  
   if (!::CloseHandle(handle_))
   {
     DWORD const last_error = ::GetLastError();
@@ -137,8 +135,6 @@ void Process::CheckWoW64() const
 
 HANDLE Process::Open(DWORD id)
 {
-  BOOST_ASSERT(id != 0);
-  
   HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
   if (!handle)
   {
