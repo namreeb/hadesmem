@@ -45,14 +45,8 @@ public:
   PVOID GetBase() const BOOST_NOEXCEPT;
 
   PeFileType GetType() const BOOST_NOEXCEPT;
-
-  PVOID RvaToVa(DWORD rva) const;
   
 private:
-  PVOID RvaToVaForImage(DWORD rva) const;
-
-  PVOID RvaToVaForData(DWORD rva) const;
-
   Process const* process_;
   PVOID base_;
   PeFileType type_;
