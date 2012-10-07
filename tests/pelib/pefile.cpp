@@ -55,6 +55,8 @@ BOOST_AUTO_TEST_CASE(pefile)
     GetModuleHandle(nullptr)));
   BOOST_CHECK_EQUAL(static_cast<int>(pefile_5.GetType()), static_cast<int>(
     hadesmem::pelib::PeFileType::Image));
-  BOOST_CHECK_EQUAL(RvaToVa(process, pefile_5, 0), 
+  BOOST_CHECK_EQUAL(hadesmem::pelib::RvaToVa(process, pefile_5, 0), 
     static_cast<PVOID>(nullptr));
+  BOOST_CHECK_EQUAL(hadesmem::pelib::RvaToVa(process, pefile_5, 0x1000), 
+    static_cast<PBYTE>(pefile_5.GetBase()) + 0x1000);
 }
