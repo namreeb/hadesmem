@@ -248,6 +248,8 @@ struct VoidToInt<void>
 
 }
 
+// TODO: Investigate whether 'universal' (&&) references should be used here.
+
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
@@ -335,6 +337,8 @@ public:
   
   ~MultiCall();
   
+// TODO: Investigate whether 'universal' (&&) references should be used here.
+
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
 typedef typename boost::mpl::at_c<\
   boost::function_types::parameter_types<FuncT>, \
