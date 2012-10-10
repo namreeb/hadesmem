@@ -117,7 +117,7 @@ int main()
     EnableBottomUpRand();
     ImbueAllDefault();
 
-    std::cout << "HadesMem MemHack\n";
+    std::cout << "HadesMem Dumper\n";
 
     boost::program_options::options_description opts_desc(
       "General options");
