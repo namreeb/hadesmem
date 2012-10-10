@@ -20,11 +20,19 @@ project
     <toolset>clang:<cxxflags>"-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
   ;
 
-exe memhack
+lib common
   :
-    [ glob memhack/*.cpp ]
+    [ glob common/*.cpp ]
     /memory//memory
     /boost//locale/<link>static
     /boost//filesystem/<link>static
+  :
+    <link>static
+  ;
+
+exe dump
+  :
+    [ glob dump/*.cpp ]
+    common
     /boost//program_options/<link>static
   ;

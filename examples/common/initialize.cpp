@@ -11,11 +11,11 @@
 #include <random>
 #include <iostream>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 // Required for ::_CrtSetDbgFlag.
@@ -29,7 +29,7 @@
 #include <crtdbg.h>
 #endif // #if !defined(HADESMEM_GCC)
 
-#include "hadesmem/error.hpp"
+#include <hadesmem/error.hpp>
 
 #ifndef PROCESS_CALLBACK_FILTER_ENABLED
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1
