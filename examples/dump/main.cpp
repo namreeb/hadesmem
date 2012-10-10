@@ -135,7 +135,7 @@ int main()
 
     if (var_map.count("help"))
     {
-      std::cout << opts_desc << '\n';
+      std::cout << '\n' << opts_desc << '\n';
       return 1;
     }
 
