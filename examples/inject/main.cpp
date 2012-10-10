@@ -11,12 +11,15 @@
 #include <iostream>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/injector.hpp>
+#include <hadesmem/detail/self_path.hpp>
 
 #include "../common/initialize.hpp"
 
@@ -53,6 +56,7 @@ int main()
       ("path", boost::program_options::wvalue<std::wstring>(), "module path")
       ("path-resolution", "perform path resolution")
       ("export", boost::program_options::value<std::string>(), "export name")
+      ("free", "unload module")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -94,14 +98,37 @@ int main()
     }
 
     hadesmem::Process const process(pid);
+    
     std::wstring const path = var_map["path"].as<std::wstring>();
-    int const flags = var_map.count("path-resolution") ? 
-      hadesmem::InjectFlags::kPathResolution : 
-      hadesmem::InjectFlags::kNone;
-    HMODULE const module = hadesmem::InjectDll(process, path, flags);
+    bool const path_resolution = var_map.count("path-resolution") != 0;
 
-    std::wcout << "\nSuccessfully injected module at base address " << 
-      PtrToString(module) << ".\n";
+    bool const inject = var_map.count("free") == 0;
+
+    HMODULE module = nullptr;
+
+    if (inject)
+    {
+      int const flags = path_resolution ? 
+        hadesmem::InjectFlags::kPathResolution : 
+      hadesmem::InjectFlags::kNone;
+      module = hadesmem::InjectDll(process, path, flags);
+
+      std::wcout << "\nSuccessfully injected module at base address " << 
+        PtrToString(module) << ".\n";
+    }
+    else
+    {
+      boost::filesystem::path path_real(path);
+      if (path_resolution && path_real.is_relative())
+      {
+        path_real = boost::filesystem::absolute(path_real, 
+          hadesmem::detail::GetSelfDirPath());
+      }
+      path_real.make_preferred();
+
+      hadesmem::Module const remote_module(&process, path_real.native());
+      module = remote_module.GetHandle();
+    }
 
     if (var_map.count("export"))
     {
@@ -112,6 +139,11 @@ int main()
       std::wcout << "Successfully called module export.\n";
       std::wcout << "Return: " << export_ret.first << ".\n";
       std::wcout << "LastError: " << export_ret.second << ".\n";
+    }
+
+    if (!inject)
+    {
+      hadesmem::FreeDll(process, module);
     }
   }
   catch (std::exception const& e)
