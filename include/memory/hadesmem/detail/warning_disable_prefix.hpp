@@ -46,4 +46,5 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #pragma GCC diagnostic ignored "-Wexit-time-destructors"
 #pragma GCC diagnostic ignored "-Wcovered-switch-default"
+#pragma GCC diagnostic ignored "-Wconditional-uninitialized"
 #endif // #if defined(HADESMEM_CLANG)

@@ -36,3 +36,15 @@ exe dump
     common
     /boost//program_options/<link>static
   ;
+
+lib injecttest
+  :
+    [ glob injecttest/*.cpp ]
+  ;
+
+exe inject
+  :
+    [ glob inject/*.cpp ]
+    common
+    /boost//program_options/<link>static
+  ;

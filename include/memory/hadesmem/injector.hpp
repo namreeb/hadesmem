@@ -24,9 +24,12 @@ class Process;
 
 struct InjectFlags
 {
-  static int const kNone = 0;
-  static int const kPathResolution = 1 << 0;
-  static int const kInvalidFlagMaxValue = 1 << 1;
+  enum
+  {
+    kNone = 0, 
+    kPathResolution = 1 << 0, 
+    kInvalidFlagMaxValue = 1 << 1
+  };
 };
 
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
