@@ -66,8 +66,6 @@ void WriteString(Process const& process, PVOID address, T const* const beg,
   Write(process, address, beg, count);
 }
 
-// TODO: Support other container types that model the same STL container 
-// style (e.g. boost::basic_string).
 template <typename T>
 void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
@@ -86,8 +84,6 @@ void WriteString(Process const& process, PVOID address, T const* const str)
   WriteString(process, address, std::basic_string<T>(str));
 }
 
-// TODO: Support other container types that model the same STL container 
-// style (e.g. boost::vector).
 template <typename T>
 void WriteVector(Process const& process, PVOID address, 
   std::vector<T> const& data)

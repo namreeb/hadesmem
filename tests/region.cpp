@@ -7,6 +7,9 @@
 
 #include "hadesmem/region.hpp"
 
+#include <locale>
+#include <sstream>
+
 #define BOOST_TEST_MODULE region
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
@@ -28,6 +31,10 @@
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
+
+// TODO: Provide the appropriate stream operator overload to allow this (also 
+// ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
+BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
 
 BOOST_AUTO_TEST_CASE(region)
 {
@@ -70,7 +77,7 @@ BOOST_AUTO_TEST_CASE(region)
   BOOST_CHECK_NE(first_region, second_region);
   BOOST_CHECK_LT(first_region, second_region);
   BOOST_CHECK_LE(first_region, second_region);
-  BOOST_CHECK_GT(second_region,first_region);
+  BOOST_CHECK_GT(second_region, first_region);
   BOOST_CHECK_GE(second_region, first_region);
   BOOST_CHECK(!(first_region > second_region));
   BOOST_CHECK(!(first_region >= second_region));
@@ -79,4 +86,20 @@ BOOST_AUTO_TEST_CASE(region)
   BOOST_CHECK_GE(first_region, first_region);
   BOOST_CHECK_LE(first_region, first_region);
   BOOST_CHECK_EQUAL(first_region, first_region);
+
+  std::stringstream second_region_str_1;
+  second_region_str_1.imbue(std::locale::classic());
+  second_region_str_1 << second_region.GetBase();
+  std::stringstream second_region_str_2;
+  second_region_str_2.imbue(std::locale::classic());
+  second_region_str_2 << second_region;
+  BOOST_CHECK_EQUAL(second_region_str_1.str(), second_region_str_2.str());
+
+  std::wstringstream second_region_str_3;
+  second_region_str_3.imbue(std::locale::classic());
+  second_region_str_3 << second_region.GetBase();
+  std::wstringstream second_region_str_4;
+  second_region_str_4.imbue(std::locale::classic());
+  second_region_str_4 << second_region;
+  BOOST_CHECK_EQUAL(second_region_str_3.str(), second_region_str_4.str());
 }

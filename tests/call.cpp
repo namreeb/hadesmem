@@ -239,7 +239,8 @@ BOOST_AUTO_TEST_CASE(call)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  typedef DWORD_PTR (*TestIntegerT)(int a, int b, int c, int d, int e, int f);
+  typedef DWORD_PTR (*TestIntegerT)(unsigned int a, unsigned int b, 
+    unsigned int c, unsigned int d, unsigned int e, unsigned int f);
   auto const call_int_ret = hadesmem::Call<TestIntegerT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
     &TestInteger)), hadesmem::CallConv::kDefault, 0xAAAAAAAA, 0xBBBBBBBB, 
@@ -269,14 +270,14 @@ BOOST_AUTO_TEST_CASE(call)
       return -1234;
     }
   };
-  
+  unsigned int const lvalue_int = 0xDEAFBEEF;
   typedef DWORD_PTR (*TestFuncT)(double a, void const* b, char c, 
     float d, int e, unsigned int f, float g, double h, DummyType const* i, 
     int j, int k, DWORD64 l);
   auto const call_ret = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestMixed)), 
     hadesmem::CallConv::kDefault, 1337.6666, nullptr, 'c', 9081.736455f, 
-    ImplicitConvTest(), 0xDEAFBEEF, 1234.56f, 9876.54, &dummy_glob, 1234, 
+    ImplicitConvTest(), lvalue_int, 1234.56f, 9876.54, &dummy_glob, 1234, 
     5678, 0xAAAAAAAABBBBBBBBULL);
   BOOST_CHECK_EQUAL(call_ret.first, static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(call_ret.second, static_cast<DWORD>(5678));
@@ -393,13 +394,13 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::MultiCall multi_call(&process);
   multi_call.Add<void (*)(DWORD last_error)>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
-    hadesmem::CallConv::kDefault, 0x1337);
+    hadesmem::CallConv::kDefault, 0x1337UL);
   multi_call.Add<DWORD (*)()>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
     hadesmem::CallConv::kDefault);
   multi_call.Add<void (*)(DWORD last_error)>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadSet)), 
-    hadesmem::CallConv::kDefault, 0x1234);
+    hadesmem::CallConv::kDefault, 0x1234UL);
   multi_call.Add<DWORD (*)()>(reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(&MultiThreadGet)), 
     hadesmem::CallConv::kDefault);

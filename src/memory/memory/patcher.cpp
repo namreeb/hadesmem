@@ -21,9 +21,6 @@
 #include "hadesmem/write.hpp"
 #include "hadesmem/process.hpp"
 
-// TODO: Replace FlushInstructionCache calls with a wrapper.
-// TODO: Class function hooking (ecx preservation). (xchg ecx, [esp]; push ecx)
-// TODO: Fastcall function hooking (ecx and edx preservation).
 // TODO: VEH hooking (INT3, DR, invalid instruction, etc).
 // TODO: Improved relative instruction rebuilding (incl conditionals). x64 has 
 // far more relative instructions than x86.
@@ -39,6 +36,23 @@
 
 namespace hadesmem
 {
+
+namespace
+{
+
+void FlushInstructionCache(Process const& process, LPCVOID address, 
+  SIZE_T size)
+{
+  if (!::FlushInstructionCache(process.GetHandle(), address, size))
+  {
+    DWORD const last_error = GetLastError();
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("FlushInstructionCache failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+}
+
+}
 
 Patch::Patch(Process const* process) 
   : process_(process), 
@@ -111,13 +125,7 @@ void PatchRaw::Apply()
 
   WriteVector(*process_, target_, data_);
 
-  if (!FlushInstructionCache(process_->GetHandle(), target_, data_.size()))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("FlushInstructionCache failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  FlushInstructionCache(*process_, target_, data_.size());
 
   applied_ = true;
 }
@@ -131,21 +139,17 @@ void PatchRaw::Remove()
 
   WriteVector(*process_, target_, orig_);
 
-  if (!FlushInstructionCache(process_->GetHandle(), target_, orig_.size()))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("FlushInstructionCache failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  FlushInstructionCache(*process_, target_, orig_.size());
 
   applied_ = false;
 }
 
-PatchDetour::PatchDetour(Process const* process, PVOID target, LPCVOID detour) 
+PatchDetour::PatchDetour(Process const* process, PVOID target, LPCVOID detour, 
+  int flags) 
   : Patch(process), 
   target_(target), 
   detour_(detour), 
+  flags_(flags), 
   trampoline_(), 
   orig_()
 { }
@@ -154,11 +158,13 @@ PatchDetour::PatchDetour(PatchDetour&& other)
   : Patch(std::forward<Patch>(other)), 
   target_(other.target_), 
   detour_(other.detour_), 
+  flags_(other.flags_), 
   trampoline_(std::move(other.trampoline_)), 
   orig_(std::move(other.orig_))
 {
   other.target_ = nullptr;
   other.detour_ = nullptr;
+  other.flags_ = DetourFlags::kNone;
 }
 
 PatchDetour& PatchDetour::operator=(PatchDetour&& other)
@@ -168,6 +174,8 @@ PatchDetour& PatchDetour::operator=(PatchDetour&& other)
   other.target_ = nullptr;
   detour_ = other.detour_;
   other.detour_ = nullptr;
+  flags_ = other.flags_;
+  other.flags_ = DetourFlags::kNone;
   trampoline_ = std::move(other.trampoline_);
   orig_ = std::move(other.orig_);
   return *this;
@@ -216,6 +224,8 @@ void PatchDetour::Apply()
     unsigned int const len = static_cast<unsigned int>(len_tmp);
 
     // TODO: Support more types of relative instructions
+    // TODO: Fix support for unsupported jump types (e.g. on x64 
+    // 'JMP QWORD PTR [ ADDR ]' where ADDR is relative).
     if ((my_disasm.Instruction.BranchType == JmpType) && 
       (my_disasm.Instruction.AddrValue != 0)) 
     {
@@ -240,26 +250,14 @@ void PatchDetour::Apply()
   WriteJump(tramp_cur, static_cast<PBYTE>(target_) + instr_size);
   tramp_cur += GetJumpSize();
 
-  if (!FlushInstructionCache(process_->GetHandle(), trampoline_->GetBase(),
-    instr_size + GetJumpSize()))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("FlushInstructionCache failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  FlushInstructionCache(*process_, trampoline_->GetBase(), 
+    instr_size + GetJumpSize());
 
   orig_ = ReadVector<BYTE>(*process_, target_, GetJumpSize());
 
   WriteJump(target_, detour_);
 
-  if (!FlushInstructionCache(process_->GetHandle(), target_, orig_.size()))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
-      ErrorString("FlushInstructionCache failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  FlushInstructionCache(*process_, target_, orig_.size());
   
   applied_ = true;
 }

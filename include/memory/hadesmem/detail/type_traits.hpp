@@ -43,7 +43,9 @@ struct IsDefaultConstructible
 {
 #if defined(HADESMEM_CLANG)
   // TODO: Update to use std::is_default_constructible trait when available in 
-  // libstdc++.
+  // libstdc++. In the meantime it should be safe to mark every type as 
+  // default constructible as even if it isn't, it will result in a 
+  // compile-time error anyway.
   static bool const value = true;
 #else
   static bool const value = std::is_default_constructible<T>::value;

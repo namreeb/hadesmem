@@ -129,7 +129,7 @@ class CallArg
 {
 public:
   template <typename T>
-  CallArg(T t) BOOST_NOEXCEPT
+  explicit CallArg(T t) BOOST_NOEXCEPT
     : arg_(), 
     type_(ArgType::kInvalidType)
   {
@@ -248,8 +248,6 @@ struct VoidToInt<void>
 
 }
 
-// TODO: Investigate whether 'universal' (&&) references should be used here.
-
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
@@ -263,15 +261,15 @@ typedef typename boost::mpl::at_c<\
   boost::function_types::parameter_types<FuncT>, \
   n>::type A##n;\
 HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
-A##n a##n = t##n;\
-args.push_back(a##n);\
+A##n const a##n(t##n);\
+args.emplace_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 std::pair<typename detail::VoidToInt<\
   typename boost::function_types::result_type<FuncT>::type>::type, DWORD> \
   Call(Process const& process, LPCVOID address, CallConv call_conv \
-  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
+  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
   HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
     == n);\
@@ -295,12 +293,8 @@ std::pair<typename detail::VoidToInt<\
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_GCC)
 
-// TODO: Investigate whether it's 'correct' to disable -Wsign-conversion here, 
-// or whether it should be left enabled (so users can benefit from the warning 
-// if they so desire).
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_CLANG)
 
@@ -318,10 +312,6 @@ std::pair<typename detail::VoidToInt<\
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
 
-#undef HADESMEM_CALL_DEFINE_ARG
-
-#undef HADESMEM_CALL_ADD_ARG
-
 class MultiCall
 {
 public:
@@ -337,20 +327,10 @@ public:
   
   ~MultiCall();
   
-// TODO: Investigate whether 'universal' (&&) references should be used here.
-
-#define HADESMEM_CALL_ADD_ARG(z, n, unused) \
-typedef typename boost::mpl::at_c<\
-  boost::function_types::parameter_types<FuncT>, \
-  n>::type A##n;\
-HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
-A##n a##n = t##n;\
-args.push_back(a##n);\
-
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
   void Add(LPCVOID address, CallConv call_conv \
-  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, t))\
+  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
   HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
     == n);\
@@ -373,12 +353,8 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_GCC)
 
-// TODO: Investigate whether it's 'correct' to disable -Wsign-conversion here, 
-// or whether it should be left enabled (so users can benefit from the warning 
-// if they so desire).
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif // #if defined(HADESMEM_CLANG)
 
@@ -395,8 +371,6 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
-
-#undef HADESMEM_CALL_DEFINE_ARG
 
 #undef HADESMEM_CALL_ADD_ARG
   

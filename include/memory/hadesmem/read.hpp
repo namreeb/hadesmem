@@ -47,8 +47,6 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
-// TODO: Support other container types that model the same STL container 
-// style (e.g. boost::basic_string).
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
@@ -69,8 +67,6 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
   return data;
 }
 
-// TODO: Support other container types that model the same STL container 
-// style (e.g. boost::vector).
 template <typename T>
 std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t size)

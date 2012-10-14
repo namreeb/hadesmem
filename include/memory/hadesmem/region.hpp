@@ -67,10 +67,8 @@ bool operator>(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
 
 bool operator>=(Region const& lhs, Region const& rhs) BOOST_NOEXCEPT;
 
-// TODO: Tests.
 std::ostream& operator<<(std::ostream& lhs, Region const& rhs);
 
-// TODO: Tests.
 std::wostream& operator<<(std::wostream& lhs, Region const& rhs);
 
 }

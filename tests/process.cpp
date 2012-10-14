@@ -7,6 +7,8 @@
 
 #include "hadesmem/process.hpp"
 
+#include <locale>
+#include <sstream>
 #include <utility>
 
 #define BOOST_TEST_MODULE process
@@ -33,9 +35,6 @@
 
 BOOST_AUTO_TEST_CASE(this_process)
 {
-  // TODO: Test relational operators.
-  // TODO: Test stream overloads.
-  
   hadesmem::Process process(::GetCurrentProcessId());
   BOOST_CHECK_EQUAL(process, process);
   hadesmem::Process process_new(::GetCurrentProcessId());
@@ -50,7 +49,28 @@ BOOST_AUTO_TEST_CASE(this_process)
   process_new = std::move(process_copy);
   BOOST_CHECK_EQUAL(process, process_new);
   BOOST_CHECK_NE(process, process_copy);
+  BOOST_CHECK_LT(process_copy, process);
+  BOOST_CHECK_LE(process_copy, process);
+  BOOST_CHECK_GT(process, process_copy);
+  BOOST_CHECK_GE(process, process_copy);
+  BOOST_CHECK(!(process_copy > process));
+  BOOST_CHECK(!(process_copy >= process));
+  BOOST_CHECK(!(process < process_copy));
+  BOOST_CHECK(!(process <= process_copy));
+  BOOST_CHECK_GE(process, process);
+  BOOST_CHECK_LE(process, process);
   BOOST_CHECK_EQUAL(process.GetId(), ::GetCurrentProcessId());
+  std::stringstream process_str_1;
+  process_str_1.imbue(std::locale::classic());
+  process_str_1 << process;
+  DWORD process_id_1;
+  process_str_1 >> process_id_1;
+  BOOST_CHECK_EQUAL(process.GetId(), process_id_1);
+  std::wstringstream process_str_2;
+  process_str_2 << process;
+  DWORD process_id_2;
+  process_str_2 >> process_id_2;
+  BOOST_CHECK_EQUAL(process.GetId(), process_id_2);
   std::wstring const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());
   BOOST_CHECK(boost::filesystem::exists(path));

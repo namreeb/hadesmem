@@ -67,8 +67,9 @@ BOOST_AUTO_TEST_CASE(region_list)
     BOOST_CHECK_LE(last, current);
     last = current;
   } while (++iter != std::end(region_list_1));
-  // TODO: Compare our last region with the 'real' last region to ensure they 
-  // match.
+
+  BOOST_CHECK_THROW(hadesmem::Region(&process, static_cast<char const* const>(
+    last.GetBase()) + last.GetSize()), hadesmem::HadesMemError);
 }
 
 BOOST_AUTO_TEST_CASE(process_list_algorithm)

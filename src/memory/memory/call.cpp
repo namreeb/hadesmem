@@ -421,8 +421,6 @@ void ArgVisitor32::operator()(DWORD32 arg) BOOST_NOEXCEPT
 
 void ArgVisitor32::operator()(DWORD64 arg) BOOST_NOEXCEPT
 {
-  // TODO: Test __fastcall with a 64-bit arg to ensure this is correct.
-
   assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
     (arg >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);

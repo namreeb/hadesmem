@@ -16,6 +16,7 @@
 namespace hadesmem
 {
 
+// TODO: Change name to just 'Error'.
 class HadesMemError : public virtual std::exception, 
   public virtual boost::exception
 {

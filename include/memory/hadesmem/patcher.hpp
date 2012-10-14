@@ -71,10 +71,21 @@ private:
   std::vector<BYTE> orig_;
 };
 
+struct DetourFlags
+{
+  enum
+  {
+    kNone = 0, 
+    kThiscall = 1 << 0, 
+    kFastcall = 1 << 1, 
+    kInvalidFlagMaxValue = 1 << 2
+  };
+};
+
 class PatchDetour : public Patch
 {
 public:
-  PatchDetour(Process const* process, PVOID target, LPCVOID detour);
+  PatchDetour(Process const* process, PVOID target, LPCVOID detour, int flags);
 
   PatchDetour(PatchDetour&& other);
 
@@ -98,6 +109,7 @@ private:
 
   PVOID target_;
   LPCVOID detour_;
+  int flags_;
   std::unique_ptr<Allocator> trampoline_;
   std::vector<BYTE> orig_;
 };
