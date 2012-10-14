@@ -94,12 +94,47 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
 
   try
   {
-    T* current_address = static_cast<T*>(address);
-    for (T current = detail::ReadUnchecked<T>(process, current_address); 
-      current != T(); 
-      current = detail::ReadUnchecked<T>(process, ++current_address))
+    std::size_t cur_chunk_len = 0;
+    std::size_t cur_chunk_size = 0;
+    PBYTE cur_address = static_cast<PBYTE>(address);
+    PBYTE const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
+      mbi.RegionSize;
+
+    for (;;)
     {
-      data.push_back(current);
+      std::size_t const kChunkLen = 128;
+      std::size_t const kChunkSizeBytes = kChunkLen * sizeof(T);
+      if (cur_address + kChunkSizeBytes > region_end)
+      {
+        cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
+          reinterpret_cast<DWORD_PTR>(cur_address));
+        cur_chunk_len = (cur_chunk_size - (cur_chunk_size % sizeof(T))) / 
+          sizeof(T);
+      }
+      else
+      {
+        cur_chunk_size = kChunkSizeBytes;
+        cur_chunk_len = kChunkLen;
+      }
+
+      std::vector<BYTE> buf(cur_chunk_size);
+      detail::Read(process, cur_address, buf.data(), cur_chunk_size);
+
+      T const* buf_ptr = static_cast<T const*>(static_cast<void const*>(
+        buf.data()));
+      std::size_t elems_remaining = cur_chunk_len;
+      for (T current = *buf_ptr; current != T() && elems_remaining; 
+        current = *++buf_ptr, --elems_remaining)
+      {
+        data.push_back(current);
+      }
+
+      if (*buf_ptr == T() || cur_address + cur_chunk_size == region_end)
+      {
+        break;
+      }
+
+      cur_address += cur_chunk_size;
     }
   }
   catch (std::exception const& /*e*/)

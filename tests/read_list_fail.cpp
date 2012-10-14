@@ -29,6 +29,8 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
+// TODO: Rename this test.
+
 struct NotDefaultConstructible
 {
   NotDefaultConstructible(int)
@@ -39,5 +41,5 @@ BOOST_AUTO_TEST_CASE(read_list_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr);
+  hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr, 1);
 }

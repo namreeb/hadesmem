@@ -29,6 +29,8 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
+// TODO: Rename this test.
+
 struct non_list_type
 { };
 
