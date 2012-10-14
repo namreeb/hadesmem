@@ -70,9 +70,12 @@ std::array<T, N> Read(Process const& process, PVOID address)
 }
 
 template <typename T>
-std::basic_string<T> ReadString(Process const& process, PVOID address)
+std::basic_string<T> ReadString(Process const& process, PVOID address, 
+  std::size_t chunk_len = 128)
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
+
+  BOOST_ASSERT(chunk_len != 0);
 
   MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
 
@@ -102,8 +105,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
 
     for (;;)
     {
-      std::size_t const kChunkLen = 128;
-      std::size_t const kChunkSizeBytes = kChunkLen * sizeof(T);
+      std::size_t const kChunkSizeBytes = chunk_len * sizeof(T);
       if (cur_address + kChunkSizeBytes > region_end)
       {
         cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
@@ -114,7 +116,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
       else
       {
         cur_chunk_size = kChunkSizeBytes;
-        cur_chunk_len = kChunkLen;
+        cur_chunk_len = chunk_len;
       }
 
       std::vector<BYTE> buf(cur_chunk_size);
@@ -158,24 +160,6 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
   if (!can_read)
   {
     Protect(process, address, old_protect);
-  }
-
-  return data;
-}
-
-template <typename T>
-std::basic_string<T> ReadString(Process const& process, PVOID address, 
-  std::size_t max_len)
-{
-  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
-
-  std::basic_string<T> data(max_len, T());
-  detail::Read(process, address, &data[0], sizeof(T) * max_len);
-
-  std::size_t const null_offs = data.find(T());
-  if (null_offs != std::basic_string<T>::npos)
-  {
-    data.erase(null_offs);
   }
 
   return data;

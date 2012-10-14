@@ -87,16 +87,11 @@ BOOST_AUTO_TEST_CASE(read_string)
     wide_test_string_real);
   BOOST_CHECK_EQUAL(wide_new_test_string, wide_test_string);
 
-  std::string const foo = "foo";
-  BOOST_CHECK_EQUAL(foo.find(char()), std::string::npos);
-
-  std::string test_string_too_long = "LongerThan10Characters";
-  char* const test_string_too_long_real = &test_string_too_long[0];
-  auto const test_string_shortened = hadesmem::ReadString<char>(process, 
-    test_string_too_long_real, 10);
-  BOOST_CHECK_EQUAL(test_string_shortened.size(), 
-    static_cast<std::size_t>(10));
-  BOOST_CHECK_EQUAL(test_string_shortened, test_string_too_long.substr(0, 10));
+  std::string test_string_2 = "Narrow test string.";
+  char* const test_string_real_2 = &test_string_2[0];
+  auto const new_test_string_2 = hadesmem::ReadString<char>(process, 
+    test_string_real_2, 1);
+  BOOST_CHECK_EQUAL(new_test_string_2, test_string_2);
 }
 
 BOOST_AUTO_TEST_CASE(read_vector)
