@@ -69,6 +69,23 @@ void Read(Process const& process, LPVOID address, LPVOID out,
   }
 }
 
+void ReadUnchecked(Process const& process, LPVOID address, LPVOID out, 
+  std::size_t out_size)
+{
+  BOOST_ASSERT(out != nullptr);
+  BOOST_ASSERT(out_size != 0);
+  
+  SIZE_T bytes_read = 0;
+  if (!::ReadProcessMemory(process.GetHandle(), address, out, 
+    out_size, &bytes_read) || bytes_read != out_size)
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("Could not read process memory.") << 
+      ErrorCodeWinLast(last_error));
+  }
+}
+
 }
 
 }

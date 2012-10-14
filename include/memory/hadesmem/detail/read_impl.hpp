@@ -19,7 +19,11 @@ class Process;
 namespace detail
 {
 
-void Read(Process const& process, LPVOID address, LPVOID out, std::size_t out_size);
+void Read(Process const& process, LPVOID address, LPVOID out, 
+  std::size_t out_size);
+
+void ReadUnchecked(Process const& process, LPVOID address, LPVOID out, 
+  std::size_t out_size);
 
 }
 
