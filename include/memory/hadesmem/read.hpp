@@ -105,8 +105,8 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
     for (;;)
     {
-      std::size_t const kChunkSizeBytes = chunk_len * sizeof(T);
-      if (cur_address + kChunkSizeBytes > region_end)
+      std::size_t const chunk_size_bytes = chunk_len * sizeof(T);
+      if (cur_address + chunk_size_bytes > region_end)
       {
         cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
           reinterpret_cast<DWORD_PTR>(cur_address));
@@ -115,7 +115,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
       }
       else
       {
-        cur_chunk_size = kChunkSizeBytes;
+        cur_chunk_size = chunk_size_bytes;
         cur_chunk_len = chunk_len;
       }
 
