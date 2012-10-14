@@ -224,14 +224,39 @@ void PatchDetour::Apply()
     unsigned int const len = static_cast<unsigned int>(len_tmp);
 
     // TODO: Support more types of relative instructions
-    // TODO: Fix support for unsupported jump types (e.g. on x64 
-    // 'JMP QWORD PTR [ ADDR ]' where ADDR is relative).
+    // TODO: Fix support for unsupported jump types.
     if ((my_disasm.Instruction.BranchType == JmpType) && 
       (my_disasm.Instruction.AddrValue != 0)) 
     {
-      WriteJump(tramp_cur, reinterpret_cast<PVOID>(static_cast<DWORD_PTR>(
-        my_disasm.Instruction.AddrValue)));
-      tramp_cur += GetJumpSize();
+#if defined(_M_AMD64) 
+      // Nasty hack to work around a common instruction found in Windows APIs 
+      // which simply 'wrap' the same API in another module (kernel32 wrapping 
+      // kernelbase, etc)
+      // TODO: Find a better way to detect and generalize resolution and 
+      // rebuilding of indirect jumps.
+      auto buf_cur = reinterpret_cast<PBYTE>(my_disasm.EIP);
+      // Detect JMP QWORD PTR [ RIP+REL32 ]
+      // 48 is a REX.W prefix
+      // FF is the opcode byte
+      // 25 is the ModR/M byte, the extended opcode field is /4 and the 
+      // rest means the operand is a memory operand at [RIP+sdword] (which 
+      // the rex.w makes a qword)
+      if (buf_cur[0] == 0x48 && buf_cur[1] == 0xFF && buf_cur[2] == 0x25)
+      {
+        WriteIndirectJump(tramp_cur, reinterpret_cast<PVOID>(
+          static_cast<DWORD_PTR>(my_disasm.Instruction.AddrValue)));
+        tramp_cur += GetIndirectJumpSize();
+      }
+      else
+#elif defined(_M_IX86) 
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+      {
+        WriteJump(tramp_cur, reinterpret_cast<PVOID>(static_cast<DWORD_PTR>(
+          my_disasm.Instruction.AddrValue)));
+        tramp_cur += GetJumpSize();
+      }
     }
     else
     {
@@ -316,6 +341,47 @@ void PatchDetour::WriteJump(PVOID address, LPCVOID target)
   WriteVector(*process_, address, jump_buf);
 }
 
+void PatchDetour::WriteIndirectJump(PVOID address, LPCVOID target)
+{
+  AsmJit::X86Assembler assembler;
+
+#if defined(_M_AMD64) 
+  // TODO: Find a better way of doing this. Keeping in mind that the target 
+  // address may be outside the 2GB range of a REL32, and that no registers 
+  // may be 'dirtied'.
+  // PUSH RAX
+  // MOV RAX, TARGET_ABS
+  // MOV RAX, QWORD PTR [RAX]
+  // XCHG RAX, QWORD PTR [RSP]
+  // RET
+  assembler.push(AsmJit::rax);
+  assembler.mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(target));
+  assembler.mov(AsmJit::rax, AsmJit::qword_ptr(AsmJit::rax));
+  assembler.xchg(AsmJit::rax, AsmJit::qword_ptr(AsmJit::rsp));
+  assembler.ret();
+#elif defined(_M_IX86) 
+  // TODO: Find a target to test this on.
+  (void)target;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+  DWORD_PTR const stub_size = assembler.getCodeSize();
+
+  if (stub_size != GetIndirectJumpSize())
+  {
+    BOOST_THROW_EXCEPTION(HadesMemError() << 
+      ErrorString("Unexpected stub size."));
+  }
+
+  std::vector<BYTE> jump_buf(stub_size);
+
+  assembler.relocCode(jump_buf.data(), reinterpret_cast<DWORD_PTR>(
+    address));
+
+  WriteVector(*process_, address, jump_buf);
+}
+
 unsigned int PatchDetour::GetJumpSize() const
 {
 #if defined(_M_AMD64) 
@@ -325,6 +391,21 @@ unsigned int PatchDetour::GetJumpSize() const
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+  return jump_size;
+}
+
+unsigned int PatchDetour::GetIndirectJumpSize() const
+{
+#if defined(_M_AMD64) 
+  unsigned int jump_size = 19;
+#elif defined(_M_IX86) 
+  unsigned int jump_size = 0;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+  BOOST_ASSERT(jump_size);
 
   return jump_size;
 }

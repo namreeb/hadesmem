@@ -105,7 +105,11 @@ private:
 
   void WriteJump(PVOID address, LPCVOID target);
 
+  void WriteIndirectJump(PVOID address, LPCVOID target);
+
   unsigned int GetJumpSize() const;
+
+  unsigned int GetIndirectJumpSize() const;
 
   PVOID target_;
   LPCVOID detour_;

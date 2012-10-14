@@ -128,14 +128,7 @@ BOOST_AUTO_TEST_CASE(patcher)
   BOOST_CHECK(data_1 == apply_1);
 
   DWORD const proc_id = GetProcessId(GetCurrentProcess());
-  // Patcher does not currently support rebuilding most instructions, and 
-  // where kernel32 redirects to kernelbase on x64 it uses a JMP QWORD PTR 
-  // which is currently unsupported. Avoid this by getting the 'real' function.
-  // TODO: Fix the above nasty hack by rewriting Patcher to include a 
-  // half-decent code rebuilder.
-  std::wstring const kernel32_mod_name = GetModuleHandle(L"kernelbase.dll") ? 
-    L"kernelbase.dll" : L"kernel32.dll";
-  hadesmem::Module const kernel32_mod(&process, kernel32_mod_name);
+  hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
   auto const get_process_id = 
     reinterpret_cast<DWORD (WINAPI *)(HANDLE)>(reinterpret_cast<DWORD_PTR>(
     hadesmem::FindProcedure(kernel32_mod, "GetProcessId")));
