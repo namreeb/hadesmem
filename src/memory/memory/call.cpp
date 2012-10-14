@@ -769,7 +769,7 @@ std::vector<CallResult> CallMulti(Process const& process,
   if (!thread_remote)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not create remote thread.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -784,7 +784,7 @@ std::vector<CallResult> CallMulti(Process const& process,
   if (::WaitForSingleObject(thread_remote, INFINITE) != WAIT_OBJECT_0)
   {
     DWORD const LastError = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not wait for remote thread.") << 
       ErrorCodeWinLast(LastError));
   }

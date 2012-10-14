@@ -33,6 +33,8 @@
 // TODO: Detect cases where hooking may overflow past the end of a function, 
 // and fail (provide policy or flag to allow overriding this behaviour). 
 // Examples may be instructions such as INT3, RET, JMP, etc.
+// TODO: Remove AsmJit dependency for this component? It doesn't seem suited 
+// to generating the required instructions.
 
 namespace hadesmem
 {
@@ -46,7 +48,7 @@ void FlushInstructionCache(Process const& process, LPCVOID address,
   if (!::FlushInstructionCache(process.GetHandle(), address, size))
   {
     DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("FlushInstructionCache failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -217,7 +219,7 @@ void PatchDetour::Apply()
     int const len_tmp = Disasm(&my_disasm);
     if (len_tmp == UNKNOWN_OPCODE)
     {
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Disassembly failed."));
     }
 
@@ -329,7 +331,7 @@ void PatchDetour::WriteJump(PVOID address, LPCVOID target)
 
   if (stub_size != GetJumpSize())
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Unexpected stub size."));
   }
 
@@ -370,7 +372,7 @@ void PatchDetour::WriteIndirectJump(PVOID address, LPCVOID target)
 
   if (stub_size != GetIndirectJumpSize())
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Unexpected stub size."));
   }
 

@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(alloc)
   
   LPVOID const invalid_address = reinterpret_cast<LPVOID>(
     static_cast<DWORD_PTR>(-1));
-  BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::HadesMemError);
-  BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::HadesMemError);
+  BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::Error);
+  BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::Error);
 }
 
 // TODO: Test Allocator stream overloads.

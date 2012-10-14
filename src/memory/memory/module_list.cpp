@@ -47,7 +47,7 @@ ModuleIterator::ModuleIterator(Process const* process)
       if (impl_->snap_ == INVALID_HANDLE_VALUE)
       {
         DWORD const last_error = ::GetLastError();
-        BOOST_THROW_EXCEPTION(HadesMemError() << 
+        BOOST_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -55,7 +55,7 @@ ModuleIterator::ModuleIterator(Process const* process)
     else
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -73,7 +73,7 @@ ModuleIterator::ModuleIterator(Process const* process)
       return;
     }
     
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Module32First failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -136,7 +136,7 @@ ModuleIterator& ModuleIterator::operator++()
       return *this;
     }
     
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Module32Next failed.") << 
       ErrorCodeWinLast(last_error));
   }

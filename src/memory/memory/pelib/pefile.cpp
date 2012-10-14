@@ -49,7 +49,7 @@ PVOID RvaToVaForData(Process const& process, PeFile const& pe_file, DWORD rva)
   auto const dos_header = Read<IMAGE_DOS_HEADER>(process, base);
   if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Invalid DOS header."));
   }
 
@@ -57,7 +57,7 @@ PVOID RvaToVaForData(Process const& process, PeFile const& pe_file, DWORD rva)
   auto const nt_headers = Read<IMAGE_NT_HEADERS>(process, ptr_nt_headers);
   if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Invalid NT headers."));
   }
 

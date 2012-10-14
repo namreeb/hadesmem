@@ -105,7 +105,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   HMODULE const shim_eng_mod = GetModuleHandle(L"ShimEng.dll");
   if (shim_eng_mod)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Shims enabled for local process."));
   }
 
@@ -129,7 +129,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   // let LoadLibraryW do the check for us.
   if (path_resolution && !boost::filesystem::exists(path_real))
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module file."));
   }
 
@@ -150,7 +150,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
     static_cast<LPCWSTR>(lib_file_remote.GetBase()));
   if (!load_library_ret.first)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Call to LoadLibraryW in remote process failed.") << 
       ErrorCodeWinLast(load_library_ret.second));
   }
@@ -169,7 +169,7 @@ void FreeDll(Process const& process, HMODULE module)
     Call<FreeLibraryFuncT>(process, free_library, CallConv::kWinApi, module);
   if (!free_library_ret.first)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Call to FreeLibrary in remote process failed.") << 
       ErrorCodeWinLast(free_library_ret.second));
   }
@@ -312,7 +312,7 @@ CreateAndInjectData CreateAndInject(
     &proc_info))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not create process.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -355,7 +355,7 @@ CreateAndInjectData CreateAndInject(
     if (!remote_thread)
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Could not create remote thread.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -370,7 +370,7 @@ CreateAndInjectData CreateAndInject(
     if (::WaitForSingleObject(remote_thread, INFINITE) != WAIT_OBJECT_0)
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Could not wait for remote thread.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -387,7 +387,7 @@ CreateAndInjectData CreateAndInject(
     if (::ResumeThread(proc_info.hThread) == static_cast<DWORD>(-1))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Could not resume process.") << 
         ErrorCodeWinLast(last_error) << 
         ErrorCodeWinRet(export_ret.first) << 

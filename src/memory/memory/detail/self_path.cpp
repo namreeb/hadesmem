@@ -30,7 +30,7 @@ HMODULE GetHandleToSelf()
   if (!::VirtualQuery(this_func_ptr, &mem_info, sizeof(mem_info)))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Failed to query memory.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -46,7 +46,7 @@ std::wstring GetSelfPath()
   if (!path_out_len || ::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("GetModuleFileName failed.") << 
       ErrorCodeWinLast(last_error));
   }

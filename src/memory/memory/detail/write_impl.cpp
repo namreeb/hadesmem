@@ -28,7 +28,7 @@ void Write(Process const& process, PVOID address, LPCVOID in,
   
   if (IsGuard(mbi))
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Attempt to write to guard page."));
   }
   
@@ -58,7 +58,7 @@ void Write(Process const& process, PVOID address, LPCVOID in,
     }
     
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));
   }

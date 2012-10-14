@@ -78,5 +78,5 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
   BOOST_CHECK_EQUAL(hadesmem::IsWoW64(process), is_wow64_real != FALSE);
   BOOST_CHECK_NO_THROW(process.Cleanup());
-  BOOST_CHECK_THROW(hadesmem::GetSeDebugPrivilege(), hadesmem::HadesMemError);
+  BOOST_CHECK_THROW(hadesmem::GetSeDebugPrivilege(), hadesmem::Error);
 }

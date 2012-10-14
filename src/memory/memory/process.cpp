@@ -96,7 +96,7 @@ void Process::Cleanup()
   if (!::CloseHandle(handle_))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("CloseHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -111,7 +111,7 @@ void Process::CheckWoW64() const
   if (!::IsWow64Process(GetCurrentProcess(), &is_wow64_me))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not detect WoW64 status of current process.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -120,14 +120,14 @@ void Process::CheckWoW64() const
   if (!::IsWow64Process(handle_, &is_wow64))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not detect WoW64 status of target process.") << 
       ErrorCodeWinLast(last_error));
   }
   
   if (is_wow64_me != is_wow64)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Cross-architecture process manipulation is currently "
         "unsupported."));
   }
@@ -139,7 +139,7 @@ HANDLE Process::Open(DWORD id)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -174,7 +174,7 @@ HANDLE Process::Duplicate(HANDLE handle)
     ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("DuplicateHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -230,7 +230,7 @@ std::wstring GetPath(Process const& process)
     &path_len))
   {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("QueryFullProcessImageName failed.") << 
         ErrorCodeWinLast(last_error));
   }
@@ -244,7 +244,7 @@ bool IsWoW64(Process const& process)
   if (!::IsWow64Process(process.GetHandle(), &is_wow64))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("IsWow64Process failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -259,7 +259,7 @@ void GetSeDebugPrivilege()
     TOKEN_QUERY, &process_token)) 
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcessToken failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -274,7 +274,7 @@ void GetSeDebugPrivilege()
   if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("LookupPrivilegeValue failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -289,7 +289,7 @@ void GetSeDebugPrivilege()
     ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("AdjustTokenPrivileges failed.") << 
       ErrorCodeWinLast(last_error));
   }

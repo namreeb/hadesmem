@@ -69,13 +69,13 @@ BOOST_AUTO_TEST_CASE(query_and_protect_invalid)
   LPVOID const invalid_address = reinterpret_cast<LPVOID>(
     static_cast<DWORD_PTR>(-1));
   BOOST_CHECK_THROW(CanRead(process, invalid_address), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
   BOOST_CHECK_THROW(CanWrite(process, invalid_address), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
   BOOST_CHECK_THROW(CanExecute(process, invalid_address), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
   BOOST_CHECK_THROW(IsGuard(process, invalid_address), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
   BOOST_CHECK_THROW(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
 }

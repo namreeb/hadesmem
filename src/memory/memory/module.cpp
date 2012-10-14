@@ -32,7 +32,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   if (!local_module)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not load module locally.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -47,7 +47,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   if (!local_func)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find target function.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -234,7 +234,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
       if (snap == INVALID_HANDLE_VALUE)
       {
         DWORD const last_error = ::GetLastError();
-        BOOST_THROW_EXCEPTION(HadesMemError() << 
+        BOOST_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -242,7 +242,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
     else
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(HadesMemError() << 
+      BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -271,13 +271,13 @@ void Module::InitializeIf(EntryCallback const& check_func)
   DWORD const last_error = ::GetLastError();
   if (last_error == ERROR_NO_MORE_FILES)
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module.") << 
       ErrorCodeWinLast(last_error));
   }
   else
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Module enumeration failed.") << 
       ErrorCodeWinLast(last_error));
   }

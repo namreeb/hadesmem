@@ -28,7 +28,7 @@ void Read(Process const& process, LPVOID address, LPVOID out,
   
  if (IsGuard(mbi))
   {
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Attempt to read from guard page."));
   }
   
@@ -58,7 +58,7 @@ void Read(Process const& process, LPVOID address, LPVOID out,
     }
 
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));
   }

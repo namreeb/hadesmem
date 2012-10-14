@@ -10,7 +10,7 @@
 namespace hadesmem
 {
 
-void HadesMemError::Anchor() const
+void Error::Anchor() const
 { }
 
 }

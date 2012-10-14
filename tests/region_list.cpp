@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(region_list)
   } while (++iter != std::end(region_list_1));
 
   BOOST_CHECK_THROW(hadesmem::Region(&process, static_cast<char const* const>(
-    last.GetBase()) + last.GetSize()), hadesmem::HadesMemError);
+    last.GetBase()) + last.GetSize()), hadesmem::Error);
 }
 
 BOOST_AUTO_TEST_CASE(process_list_algorithm)

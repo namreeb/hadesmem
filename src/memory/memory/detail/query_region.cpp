@@ -24,7 +24,7 @@ MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
     sizeof(mbi))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualQueryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }

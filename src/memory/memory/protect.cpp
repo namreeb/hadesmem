@@ -47,7 +47,7 @@ DWORD Protect(Process const& process, LPVOID address, DWORD protect)
     protect, &old_protect))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(HadesMemError() << 
+    BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualProtectEx failed.") << 
       ErrorCodeWinLast(last_error));
   }

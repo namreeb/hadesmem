@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK(!(this_mod > this_mod_other));
   BOOST_CHECK(!(this_mod < this_mod_other));
   BOOST_CHECK_THROW(FindProcedure(this_mod, "non_existant_export"), 
-    hadesmem::HadesMemError);
+    hadesmem::Error);
   hadesmem::Module this_mod_copy(this_mod);
   BOOST_CHECK_EQUAL(this_mod, this_mod_copy);
   hadesmem::Module this_mod_moved(std::move(this_mod_copy));
