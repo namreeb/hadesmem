@@ -122,7 +122,14 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
   path_real.make_preferred();
 
-  // Ensure target file exists
+  bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
+  if (add_path && path_real.is_relative())
+  {
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("Cannot modify search order unless an absolute path "
+      "or path resolution is used."));
+  }
+
   // Note: Only performing this check when path resolution is enabled, 
   // because otherwise we would need to perform the check in the context 
   // of the remote process, which is not possible to do without 
@@ -143,12 +150,15 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
   Module const kernel32_mod(&process, L"kernel32.dll");
   LPCVOID const load_library = reinterpret_cast<LPCVOID>(
-    reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, "LoadLibraryW")));
+    reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, 
+    "LoadLibraryExW")));
 
-  typedef HMODULE (*LoadLibraryFuncT)(LPCWSTR lpFileName);
+  typedef HMODULE (*LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
+    DWORD dwFlags);
   std::pair<HMODULE, DWORD> const load_library_ret = 
-    Call<LoadLibraryFuncT>(process, load_library, CallConv::kWinApi, 
-    static_cast<LPCWSTR>(lib_file_remote.GetBase()));
+    Call<LoadLibraryExFuncT>(process, load_library, CallConv::kWinApi, 
+    static_cast<LPCWSTR>(lib_file_remote.GetBase()), nullptr, 
+    add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.first)
   {
     BOOST_THROW_EXCEPTION(Error() << 
@@ -303,68 +313,6 @@ CreateAndInjectData CreateAndInject(
     work_dir_real = L"./";
   }
 
-  // NOTE: Adding a path to the child process's environment requires modifying 
-  // the environment for the current process, launching the child, then 
-  // restoring the original environment for the current process. This is not 
-  // 'thread-safe' in the sense that environment is global state that could 
-  // be observed by and affect the behavior of other threads. Document as 
-  // such. (This is unfortunately the way MSDN recommends you do this, as per 
-  // http://goo.gl/PE6z7.)
-  bool const add_to_env = !!(flags & InjectFlags::kAddPathToEnvironment);
-
-  std::vector<wchar_t> env_path_buf_orig;
-  if (add_to_env)
-  {
-    DWORD const env_path_buf_len = GetEnvironmentVariable(L"PATH", nullptr, 0);
-    if (!env_path_buf_len)
-    {
-      DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorString("GetEnvironmentVariable failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
-
-    env_path_buf_orig.resize(env_path_buf_len);
-    DWORD const get_env_path_ret = GetEnvironmentVariable(L"PATH", 
-      env_path_buf_orig.data(), env_path_buf_len);
-    // Checking for a buffer size mismatch in case of a race condition on the 
-    // contents of the environmental variable. Technically we could recover 
-    // here, but this should never happen in a well written program (as changes 
-    // to the environment should be synchronized across threads), so it's 
-    // better to just error out.
-    if (!get_env_path_ret || get_env_path_ret > env_path_buf_len)
-    {
-      DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorString("GetEnvironmentVariable failed.") << 
-        ErrorCodeWinRet(get_env_path_ret) << 
-        ErrorCodeWinLast(last_error));
-    }
-
-    // NOTE: Resolving the module dir relative to the location of the 
-    // executing module. Document as such.
-    boost::filesystem::path module_dir(module);
-    if (module_dir.is_relative())
-    {
-      module_dir = boost::filesystem::absolute(path_real, 
-        detail::GetSelfDirPath());
-    }
-    module_dir = module_dir.parent_path();
-    module_dir.make_preferred();
-
-    std::wstring env_path_new = env_path_buf_orig.data();
-    env_path_new += L";";
-    env_path_new += module_dir.native();
-
-    if (!SetEnvironmentVariable(L"PATH", env_path_new.c_str()))
-    {
-      DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorString("SetEnvironmentVariable failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
-  }
-
   STARTUPINFO start_info;
   ZeroMemory(&start_info, sizeof(start_info));
   start_info.cb = sizeof(start_info);
@@ -374,11 +322,6 @@ CreateAndInjectData CreateAndInject(
     FALSE, CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT, nullptr, 
     work_dir_real.c_str(), &start_info, &proc_info))
   {
-    if (add_to_env)
-    {
-      SetEnvironmentVariable(L"PATH", env_path_buf_orig.data());
-    }
-
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("CreateProcess failed.") << 
@@ -391,17 +334,6 @@ CreateAndInjectData CreateAndInject(
     BOOST_VERIFY(::CloseHandle(proc_info.hProcess));
     BOOST_VERIFY(::CloseHandle(proc_info.hThread));
   };
-
-  if (add_to_env)
-  {
-    if (!SetEnvironmentVariable(L"PATH", env_path_buf_orig.data()))
-    {
-      DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
-        ErrorString("SetEnvironmentVariable failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
-  }
 
   try
   {

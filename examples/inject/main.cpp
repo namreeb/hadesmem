@@ -60,6 +60,7 @@ int main()
       ("path-resolution", "perform path resolution")
       ("export", boost::program_options::value<std::string>(), "export name")
       ("free", "unload module")
+      ("add-path", "add module dir to %PATH%")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -104,6 +105,7 @@ int main()
     
     std::wstring const path = var_map["path"].as<std::wstring>();
     bool const path_resolution = var_map.count("path-resolution") != 0;
+    bool const add_path = var_map.count("add-path") != 0;
 
     bool const inject = var_map.count("free") == 0;
 
@@ -111,9 +113,16 @@ int main()
 
     if (inject)
     {
-      int const flags = path_resolution ? 
-        hadesmem::InjectFlags::kPathResolution : 
-      hadesmem::InjectFlags::kNone;
+      int flags = hadesmem::InjectFlags::kNone;
+      if (path_resolution)
+      {
+        flags |= hadesmem::InjectFlags::kPathResolution;
+      }
+      if (add_path)
+      {
+        flags |= hadesmem::InjectFlags::kAddToSearchOrder;
+      }
+
       module = hadesmem::InjectDll(process, path, flags);
 
       std::wcout << "\nSuccessfully injected module at base address " << 

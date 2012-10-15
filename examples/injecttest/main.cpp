@@ -14,10 +14,14 @@ extern "C" __declspec(dllexport) DWORD Load(LPCVOID /*module*/);
 
 extern "C" __declspec(dllexport) DWORD Free(LPCVOID /*module*/);
 
+extern "C" __declspec(dllimport) DWORD InjectTestDep_Foo();
+
 bool g_alloced_console = false;
 
 extern "C" __declspec(dllexport) DWORD Load(LPCVOID /*module*/)
 {
+  InjectTestDep_Foo();
+
   if (!AllocConsole())
   {
     return GetLastError();
