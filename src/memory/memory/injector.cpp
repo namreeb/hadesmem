@@ -32,9 +32,6 @@
 // local GetProcAddress and pointer arithmetic (whilst this works in all 
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
-// TODO: Support adding DLL directory to %PATH% in InjectDll (keeping in mind 
-// that CreateAndInject calls InjectDll, so that case needs to be detected 
-// and handled to avoid 'doubling up').
 
 namespace hadesmem
 {
