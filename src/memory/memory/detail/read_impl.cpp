@@ -11,6 +11,7 @@
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
 #include "hadesmem/detail/query_region.hpp"
+#include "hadesmem/detail/protect_guard.hpp"
 
 namespace hadesmem
 {
@@ -23,50 +24,20 @@ void Read(Process const& process, LPVOID address, LPVOID out,
 {
   BOOST_ASSERT(out != nullptr);
   BOOST_ASSERT(out_size != 0);
-  
-  MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
-  
- if (IsGuard(mbi))
-  {
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Attempt to read from guard page."));
-  }
-  
-  bool const can_read = CanRead(mbi);
 
-  DWORD old_protect = 0;
-  if (!can_read)
-  {
-    old_protect = Protect(process, address, PAGE_EXECUTE_READWRITE);
-  }
+  ProtectGuard protect_guard(&process, address, ProtectGuardType::kRead);
   
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(process.GetHandle(), address, out, 
     out_size, &bytes_read) || bytes_read != out_size)
   {
-    if (!can_read)
-    {
-      try
-      {
-        Protect(process, address, old_protect);
-      }
-      catch (std::exception const& e)
-      {
-        (void)e;
-        BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
-      }
-    }
-
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));
   }
-  
-  if (!can_read)
-  {
-    Protect(process, address, old_protect);
-  }
+
+  protect_guard.Restore();
 }
 
 void ReadUnchecked(Process const& process, LPVOID address, LPVOID out, 

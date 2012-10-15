@@ -11,6 +11,7 @@
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
 #include "hadesmem/detail/query_region.hpp"
+#include "hadesmem/detail/protect_guard.hpp"
 
 namespace hadesmem
 {
@@ -23,50 +24,20 @@ void Write(Process const& process, PVOID address, LPCVOID in,
 {
   BOOST_ASSERT(in != nullptr);
   BOOST_ASSERT(in_size != 0);
-  
-  MEMORY_BASIC_INFORMATION const mbi = Query(process, address);
-  
-  if (IsGuard(mbi))
-  {
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Attempt to write to guard page."));
-  }
-  
-  bool const can_write = CanWrite(mbi);
-  
-  DWORD old_protect = 0;
-  if (!can_write)
-  {
-    old_protect = Protect(process, address, PAGE_EXECUTE_READWRITE);
-  }
+
+  ProtectGuard protect_guard(&process, address, ProtectGuardType::kWrite);
   
   SIZE_T bytes_written = 0;
   if (!::WriteProcessMemory(process.GetHandle(), address, in, 
     in_size, &bytes_written) || bytes_written != in_size)
   {
-    if (!can_write)
-    {
-      try
-      {
-        Protect(process, address, old_protect);
-      }
-      catch (std::exception const& e)
-      {
-        (void)e;
-        BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
-      }
-    }
-    
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));
   }
-  
-  if (!can_write)
-  {
-    Protect(process, address, old_protect);
-  }
+
+  protect_guard.Restore();
 }
 
 }

@@ -23,8 +23,9 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/protect.hpp"
 #include "hadesmem/detail/read_impl.hpp"
-#include "hadesmem/detail/query_region.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/query_region.hpp"
+#include "hadesmem/detail/protect_guard.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
@@ -77,90 +78,55 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
   BOOST_ASSERT(chunk_len != 0);
 
-  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-
-  if (detail::IsGuard(mbi))
-  {
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Attempt to read from guard page."));
-  }
-
-  bool const can_read = detail::CanRead(mbi);
-
-  DWORD old_protect = 0;
-  if (!can_read)
-  {
-    old_protect = Protect(process, address, PAGE_EXECUTE_READWRITE);
-  }
+  detail::ProtectGuard protect_guard(&process, address, 
+    detail::ProtectGuardType::kRead);
 
   std::basic_string<T> data;
 
-  try
+  PBYTE cur_address = static_cast<PBYTE>(address);
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+  PBYTE const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
+    mbi.RegionSize;
+
+  for (;;)
   {
     std::size_t cur_chunk_len = 0;
     std::size_t cur_chunk_size = 0;
-    PBYTE cur_address = static_cast<PBYTE>(address);
-    PBYTE const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
-      mbi.RegionSize;
 
-    for (;;)
+    if (cur_address + (chunk_len * sizeof(T)) > region_end)
     {
-      std::size_t const chunk_size_bytes = chunk_len * sizeof(T);
-      if (cur_address + chunk_size_bytes > region_end)
-      {
-        cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
-          reinterpret_cast<DWORD_PTR>(cur_address));
-        cur_chunk_len = (cur_chunk_size - (cur_chunk_size % sizeof(T))) / 
-          sizeof(T);
-      }
-      else
-      {
-        cur_chunk_size = chunk_size_bytes;
-        cur_chunk_len = chunk_len;
-      }
-
-      std::vector<BYTE> buf(cur_chunk_size);
-      detail::Read(process, cur_address, buf.data(), cur_chunk_size);
-
-      T const* buf_ptr = static_cast<T const*>(static_cast<void const*>(
-        buf.data()));
-      std::size_t elems_remaining = cur_chunk_len;
-      for (T current = *buf_ptr; current != T() && elems_remaining; 
-        current = *++buf_ptr, --elems_remaining)
-      {
-        data.push_back(current);
-      }
-
-      if (*buf_ptr == T() || cur_address + cur_chunk_size == region_end)
-      {
-        break;
-      }
-
-      cur_address += cur_chunk_size;
+      cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
+        reinterpret_cast<DWORD_PTR>(cur_address));
+      cur_chunk_len = (cur_chunk_size - (cur_chunk_size % sizeof(T))) / 
+        sizeof(T);
     }
-  }
-  catch (std::exception const& /*e*/)
-  {
-    if (!can_read)
+    else
     {
-      try
-      {
-        Protect(process, address, old_protect);
-      }
-      catch (std::exception const& e)
-      {
-        (void)e;
-        BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
-      }
+      cur_chunk_size = chunk_len * sizeof(T);
+      cur_chunk_len = chunk_len;
     }
 
-    throw;
+    std::vector<BYTE> buf(cur_chunk_size);
+    detail::Read(process, cur_address, buf.data(), cur_chunk_size);
+
+    T const* buf_beg = static_cast<T const*>(static_cast<void const*>(
+      buf.data()));
+    T const* buf_end = buf_beg + cur_chunk_len;
+    for (T current = *buf_beg; current != T() && buf_beg != buf_end; 
+      current = *++buf_beg)
+    {
+      data.push_back(current);
+    }
+
+    if (buf_beg != buf_end || cur_address + cur_chunk_size == region_end)
+    {
+      break;
+    }
+
+    cur_address += cur_chunk_size;
   }
 
-  if (!can_read)
-  {
-    Protect(process, address, old_protect);
-  }
+  protect_guard.Restore();
 
   return data;
 }
