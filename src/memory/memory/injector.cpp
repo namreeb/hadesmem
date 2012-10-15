@@ -32,8 +32,9 @@
 // local GetProcAddress and pointer arithmetic (whilst this works in all 
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
-// TODO: Support adding DLL directory to %PATH% in CreateAndInject.
-// TODO: Support adding DLL directory to search order in InjectDll.
+// TODO: Support adding DLL directory to %PATH% in InjectDll (keeping in mind 
+// that CreateAndInject calls InjectDll, so that case needs to be detected 
+// and handled to avoid 'doubling up').
 
 namespace hadesmem
 {
@@ -45,8 +46,8 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
   bool force)
 {
   // Unless we're told otherwise, don't quote unless we actually
-  // need to do so --- hopefully avoid problems if programs won't
-  // parse quotes properly
+  // need to do so (and hopefully avoid problems if programs won't
+  // parse quotes properly).
   if (!force && !argument.empty() && argument.find_first_of(L" \t\n\v\"") 
     == argument.npos)
   {
@@ -302,18 +303,85 @@ CreateAndInjectData CreateAndInject(
     work_dir_real = L"./";
   }
 
+  // NOTE: Adding a path to the child process's environment requires modifying 
+  // the environment for the current process, launching the child, then 
+  // restoring the original environment for the current process. This is not 
+  // 'thread-safe' in the sense that environment is global state that could 
+  // be observed by and affect the behavior of other threads. Document as 
+  // such. (This is unfortunately the way MSDN recommends you do this, as per 
+  // http://goo.gl/PE6z7.)
+  bool const add_to_env = !!(flags & InjectFlags::kAddPathToEnvironment);
+
+  std::vector<wchar_t> env_path_buf_orig;
+  if (add_to_env)
+  {
+    DWORD const env_path_buf_len = GetEnvironmentVariable(L"PATH", nullptr, 0);
+    if (!env_path_buf_len)
+    {
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("GetEnvironmentVariable failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+
+    env_path_buf_orig.resize(env_path_buf_len);
+    DWORD const get_env_path_ret = GetEnvironmentVariable(L"PATH", 
+      env_path_buf_orig.data(), env_path_buf_len);
+    // Checking for a buffer size mismatch in case of a race condition on the 
+    // contents of the environmental variable. Technically we could recover 
+    // here, but this should never happen in a well written program (as changes 
+    // to the environment should be synchronized across threads), so it's 
+    // better to just error out.
+    if (!get_env_path_ret || get_env_path_ret > env_path_buf_len)
+    {
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("GetEnvironmentVariable failed.") << 
+        ErrorCodeWinRet(get_env_path_ret) << 
+        ErrorCodeWinLast(last_error));
+    }
+
+    // NOTE: Resolving the module dir relative to the location of the 
+    // executing module. Document as such.
+    boost::filesystem::path module_dir(module);
+    if (module_dir.is_relative())
+    {
+      module_dir = boost::filesystem::absolute(path_real, 
+        detail::GetSelfDirPath());
+    }
+    module_dir = module_dir.parent_path();
+    module_dir.make_preferred();
+
+    std::wstring env_path_new = env_path_buf_orig.data();
+    env_path_new += L";";
+    env_path_new += module_dir.native();
+
+    if (!SetEnvironmentVariable(L"PATH", env_path_new.c_str()))
+    {
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("SetEnvironmentVariable failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+  }
+
   STARTUPINFO start_info;
   ZeroMemory(&start_info, sizeof(start_info));
   start_info.cb = sizeof(start_info);
   PROCESS_INFORMATION proc_info;
   ZeroMemory(&proc_info, sizeof(proc_info));
   if (!::CreateProcess(path_real.c_str(), proc_args.data(), nullptr, nullptr, 
-    FALSE, CREATE_SUSPENDED, nullptr, work_dir_real.c_str(), &start_info, 
-    &proc_info))
+    FALSE, CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT, nullptr, 
+    work_dir_real.c_str(), &start_info, &proc_info))
   {
+    if (add_to_env)
+    {
+      SetEnvironmentVariable(L"PATH", env_path_buf_orig.data());
+    }
+
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not create process.") << 
+      ErrorString("CreateProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
 
@@ -323,6 +391,17 @@ CreateAndInjectData CreateAndInject(
     BOOST_VERIFY(::CloseHandle(proc_info.hProcess));
     BOOST_VERIFY(::CloseHandle(proc_info.hThread));
   };
+
+  if (add_to_env)
+  {
+    if (!SetEnvironmentVariable(L"PATH", env_path_buf_orig.data()))
+    {
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("SetEnvironmentVariable failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+  }
 
   try
   {

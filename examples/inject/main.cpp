@@ -23,6 +23,9 @@
 
 #include "../common/initialize.hpp"
 
+// TODO: Add support for CreateAndInject.
+// TODO: Add support for kAddPathToEnvironment flag.
+
 namespace
 {
 

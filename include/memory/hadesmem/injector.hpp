@@ -28,7 +28,8 @@ struct InjectFlags
   {
     kNone = 0, 
     kPathResolution = 1 << 0, 
-    kInvalidFlagMaxValue = 1 << 1
+    kAddPathToEnvironment = 1 << 1, 
+    kInvalidFlagMaxValue = 1 << 2
   };
 };
 

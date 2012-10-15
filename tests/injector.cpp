@@ -58,10 +58,14 @@ BOOST_AUTO_TEST_CASE(injector)
   // Free kernel32.dll in remote process.
   hadesmem::FreeDll(process, kernel32_mod_new_2);
 
-  // Todo: Test path resolution.
+  // Todo: Test kPathResolution flag.
 
   // TODO: Test export calling in CreateAndInject.
   // TODO: Test work dir, args, etc in CreateAndInject.
+  // TODO: Ensure TerminateProcess returns success on processes that have 
+  // already been terminated.
+  // TODO: Test kAddPathToEnvironment flag.
+  // TODO: Check more of the CreateAndInjectData functions.
   hadesmem::CreateAndInjectData const inject_data = hadesmem::CreateAndInject(
     hadesmem::detail::GetSelfPath(), L"", std::vector<std::wstring>(), 
     L"d3d9.dll", "", nullptr, hadesmem::InjectFlags::kNone);
