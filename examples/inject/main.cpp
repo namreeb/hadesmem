@@ -24,7 +24,6 @@
 #include "../common/initialize.hpp"
 
 // TODO: Add support for CreateAndInject.
-// TODO: Add support for kAddPathToEnvironment flag.
 
 namespace
 {
@@ -56,11 +55,11 @@ int main()
     opts_desc.add_options()
       ("help", "produce help message")
       ("pid", boost::program_options::value<DWORD>(), "process id")
-      ("path", boost::program_options::wvalue<std::wstring>(), "module path")
+      ("module", boost::program_options::wvalue<std::wstring>(), "module path")
       ("path-resolution", "perform path resolution")
       ("export", boost::program_options::value<std::string>(), "export name")
       ("free", "unload module")
-      ("add-path", "add module dir to %PATH%")
+      ("add-path", "add module dir to serach order")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
