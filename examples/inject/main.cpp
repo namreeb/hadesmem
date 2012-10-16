@@ -23,7 +23,8 @@
 
 #include "../common/initialize.hpp"
 
-// TODO: Add support for CreateAndInject.
+// TODO: Add support for for passing args, work dir, etc to CreateAndInject.
+// e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN?
 
 namespace
 {
@@ -60,6 +61,8 @@ int main()
       ("export", boost::program_options::value<std::string>(), "export name")
       ("free", "unload module")
       ("add-path", "add module dir to serach order")
+      ("exe-path", boost::program_options::wvalue<std::wstring>(), 
+      "process exe path")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -75,86 +78,107 @@ int main()
       return 1;
     }
 
-    if (!var_map.count("pid"))
-    {
-      std::cerr << "Error! Process ID must be specified.\n";
-      return 1;
-    }
-
     if (!var_map.count("module"))
     {
       std::cerr << "Error! Module path must be specified.\n";
       return 1;
     }
-
-    DWORD const pid = var_map["pid"].as<DWORD>();
-
-    try
-    {
-      hadesmem::GetSeDebugPrivilege();
-
-      std::wcout << "\nAcquired SeDebugPrivilege.\n";
-    }
-    catch (std::exception const& /*e*/)
-    {
-      std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
-    }
-
-    hadesmem::Process const process(pid);
     
-    std::wstring const path = var_map["module"].as<std::wstring>();
+    bool const has_pid = var_map.count("pid") != 0;
+    bool const has_exe_path = var_map.count("exe-path") != 0;
+    if ((has_pid && has_exe_path) || (!has_pid && !has_exe_path))
+    {
+      std::cerr << "Error! A process ID or an executable path must be "
+        "specified.\n";
+      return 1;
+    }
+
+    bool const inject = var_map.count("free") == 0;
+    if (!inject && has_exe_path)
+    {
+      std::cerr << "Error! Modules can only be unloaded from running "
+        "targets.\n";
+      return 1;
+    }
+
+    std::wstring const module_path = var_map["module"].as<std::wstring>();
     bool const path_resolution = var_map.count("path-resolution") != 0;
     bool const add_path = var_map.count("add-path") != 0;
 
-    bool const inject = var_map.count("free") == 0;
-
-    HMODULE module = nullptr;
-
-    if (inject)
+    int flags = hadesmem::InjectFlags::kNone;
+    if (path_resolution)
     {
-      int flags = hadesmem::InjectFlags::kNone;
-      if (path_resolution)
+      flags |= hadesmem::InjectFlags::kPathResolution;
+    }
+    if (add_path)
+    {
+      flags |= hadesmem::InjectFlags::kAddToSearchOrder;
+    }
+
+    if (has_pid)
+    {
+      try
       {
-        flags |= hadesmem::InjectFlags::kPathResolution;
+        hadesmem::GetSeDebugPrivilege();
+
+        std::wcout << "\nAcquired SeDebugPrivilege.\n";
       }
-      if (add_path)
+      catch (std::exception const& /*e*/)
       {
-        flags |= hadesmem::InjectFlags::kAddToSearchOrder;
+        std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
       }
 
-      module = hadesmem::InjectDll(process, path, flags);
+      DWORD const pid = var_map["pid"].as<DWORD>();
 
-      std::wcout << "\nSuccessfully injected module at base address " << 
-        PtrToString(module) << ".\n";
+      hadesmem::Process const process(pid);
+      
+      HMODULE module = nullptr;
+
+      if (inject)
+      {
+        module = hadesmem::InjectDll(process, module_path, flags);
+
+        std::wcout << "\nSuccessfully injected module at base address " << 
+          PtrToString(module) << ".\n";
+      }
+      else
+      {
+        boost::filesystem::path path_real(module_path);
+        if (path_resolution && path_real.is_relative())
+        {
+          path_real = boost::filesystem::absolute(path_real, 
+            hadesmem::detail::GetSelfDirPath());
+        }
+        path_real.make_preferred();
+
+        hadesmem::Module const remote_module(&process, path_real.native());
+        module = remote_module.GetHandle();
+      }
+
+      if (var_map.count("export"))
+      {
+        std::string const export_name = var_map["export"].as<std::string>();
+        std::pair<DWORD_PTR, DWORD> const export_ret = hadesmem::CallExport(
+          process, module, export_name, nullptr);
+
+        std::wcout << "Successfully called module export.\n";
+        std::wcout << "Return: " << export_ret.first << ".\n";
+        std::wcout << "LastError: " << export_ret.second << ".\n";
+      }
+
+      if (!inject)
+      {
+        hadesmem::FreeDll(process, module);
+      }
     }
     else
     {
-      boost::filesystem::path path_real(path);
-      if (path_resolution && path_real.is_relative())
-      {
-        path_real = boost::filesystem::absolute(path_real, 
-          hadesmem::detail::GetSelfDirPath());
-      }
-      path_real.make_preferred();
-
-      hadesmem::Module const remote_module(&process, path_real.native());
-      module = remote_module.GetHandle();
-    }
-
-    if (var_map.count("export"))
-    {
-      std::string const export_name = var_map["export"].as<std::string>();
-      std::pair<DWORD_PTR, DWORD> const export_ret = hadesmem::CallExport(
-        process, module, export_name, module);
-
-      std::wcout << "Successfully called module export.\n";
-      std::wcout << "Return: " << export_ret.first << ".\n";
-      std::wcout << "LastError: " << export_ret.second << ".\n";
-    }
-
-    if (!inject)
-    {
-      hadesmem::FreeDll(process, module);
+      std::wstring const exe_path = var_map["exe-path"].as<std::wstring>();
+      std::string const export_name = var_map.count("export") ? 
+        var_map["export"].as<std::string>() : "";
+      hadesmem::CreateAndInjectData const inject_data = 
+        hadesmem::CreateAndInject(exe_path, L"", std::vector<std::wstring>(), 
+        module_path, export_name, nullptr, flags);
     }
   }
   catch (std::exception const& e)
