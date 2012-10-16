@@ -81,7 +81,7 @@ int main()
       return 1;
     }
 
-    if (!var_map.count("path"))
+    if (!var_map.count("module"))
     {
       std::cerr << "Error! Module path must be specified.\n";
       return 1;
@@ -102,7 +102,7 @@ int main()
 
     hadesmem::Process const process(pid);
     
-    std::wstring const path = var_map["path"].as<std::wstring>();
+    std::wstring const path = var_map["module"].as<std::wstring>();
     bool const path_resolution = var_map.count("path-resolution") != 0;
     bool const add_path = var_map.count("add-path") != 0;
 
