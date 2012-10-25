@@ -25,13 +25,20 @@
 #include "hadesmem/detail/self_path.hpp"
 
 // TODO: .NET injection (without DLL dependency if possible).
-// TODO: Cross-session injection.
+// TODO: Cross-session injection (also cross-winsta and cross-desktop 
+// injection). RtlCreateUserThread can apparently inject across sessions but 
+// creates a 'native' thread rather than a Win32 thread which causes issues. 
+// A better solution is probably to use a broker process. Can the target's 
+// WinSta and Desktop just be read from the PEB?
 // TODO: IAT injection (to allow execution of code before Dllmain of other 
 // modules are executed). Include support for .NET target processes.
 // TODO: Get address of kernel32!LoadLibraryW 'manually' instead of using 
 // local GetProcAddress and pointer arithmetic (whilst this works in all 
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
+// TODO: Add flag to keep process paused after creation for debugging.
+// TODO: Improve CallExport API (or at least review it to work out what the 
+// best way to handle calling arbitrary exports is).
 
 namespace hadesmem
 {

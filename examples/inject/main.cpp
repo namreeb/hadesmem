@@ -25,6 +25,8 @@
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
 // e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN?
+// TODO: Fix flag names (--run, etc).
+// TODO: Add flag to keep process paused after creation for debugging.
 
 namespace
 {
