@@ -19,7 +19,7 @@
 #include "hadesmem/error.hpp"
 
 // TODO: Add API to get process base address even when the process has not 
-// yet completed initilization (created with CREATE_SUSPENDED). Read PEB from 
+// yet completed initialization (created with CREATE_SUSPENDED). Read PEB from 
 // TEB and then read ImageBase from PEB.
 // TODO: Add IsInitialized, IsProtected, etc APIs taking a PID. 
 // (http://goo.gl/CNbbh)
