@@ -29,8 +29,6 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
-// TODO: Test PeFile stream overloads.
-
 BOOST_AUTO_TEST_CASE(pefile)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -59,4 +57,18 @@ BOOST_AUTO_TEST_CASE(pefile)
     static_cast<PVOID>(nullptr));
   BOOST_CHECK_EQUAL(hadesmem::pelib::RvaToVa(process, pefile_5, 0x1000), 
     static_cast<PBYTE>(pefile_5.GetBase()) + 0x1000);
+
+  hadesmem::pelib::PeFile pefile_6(&process, GetModuleHandle(L"ntdll.dll"), 
+    hadesmem::pelib::PeFileType::Image);
+
+  std::stringstream test_str_1;
+  test_str_1.imbue(std::locale::classic());
+  test_str_1 << pefile_5;
+  std::stringstream test_str_2;
+  test_str_2 << pefile_5.GetBase();
+  BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
+  std::stringstream test_str_3;
+  test_str_3.imbue(std::locale::classic());
+  test_str_3 << pefile_6;
+  BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
 }

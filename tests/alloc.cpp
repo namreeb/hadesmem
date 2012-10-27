@@ -7,6 +7,8 @@
 
 #include "hadesmem/alloc.hpp"
 
+#include <sstream>
+
 #define BOOST_TEST_MODULE alloc
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
@@ -51,8 +53,6 @@ BOOST_AUTO_TEST_CASE(alloc)
   BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::Error);
   BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::Error);
 }
-
-// TODO: Test Allocator stream overloads.
 
 BOOST_AUTO_TEST_CASE(allocator)
 {
@@ -99,4 +99,15 @@ BOOST_AUTO_TEST_CASE(allocator)
     BOOST_CHECK(!(allocator_4 < allocator_3));
     BOOST_CHECK(!(allocator_4 <= allocator_3));
   }
+
+  std::stringstream test_str_1;
+  test_str_1.imbue(std::locale::classic());
+  test_str_1 << allocator_3;
+  std::stringstream test_str_2;
+  test_str_2 << allocator_3.GetBase();
+  BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
+  std::stringstream test_str_3;
+  test_str_3.imbue(std::locale::classic());
+  test_str_3 << allocator_4.GetBase();
+  BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
 }

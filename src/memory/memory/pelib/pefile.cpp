@@ -26,19 +26,20 @@ namespace pelib
 
 namespace
 {
+  
+// TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
+// base address of the PE file) (Compare to ImageRvaToVa?). If this is 
+// changed the logic for some other components which relies on a 0 RVA 
+// returning nullptr may need to be updated.
 
 PVOID RvaToVaForImage(Process const& /*process*/, PeFile const& pe_file, 
   DWORD rva)
 {
-  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
-  // base address of the PE file).
   return rva ? (static_cast<PBYTE>(pe_file.GetBase()) + rva) : nullptr;
 }
 
 PVOID RvaToVaForData(Process const& process, PeFile const& pe_file, DWORD rva)
 {
-  // TODO: Ensure it's correct to return nullptr for a 0 rva (rather than the 
-  // base address of the PE file).
   if (!rva)
   {
     return nullptr;

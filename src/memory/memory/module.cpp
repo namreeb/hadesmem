@@ -194,9 +194,6 @@ void Module::Initialize(std::wstring const& path)
   auto path_check = 
     [&] (MODULEENTRY32 const& entry) -> bool
     {
-      // TODO: Investigate whether 'equivalent' is the right API to use here. 
-      // Not sure whether it matches the behavior of Windows in terms of 
-      // following symlinks/hardlinks/etc.
       if (is_path && boost::filesystem::equivalent(path, entry.szExePath))
       {
         return true;

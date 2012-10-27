@@ -35,10 +35,7 @@
 
 // TODO: Improve tests by doing checks both before and after writes.
 // TODO: Don't read/write data on the stack.
-// TODO: Test reads on guard pages, noaccess pages, etc.
 
-// TODO: Provide the appropriate stream operator overload to allow this (also 
-// ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
 BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
 
 BOOST_AUTO_TEST_CASE(read_pod)
@@ -70,6 +67,17 @@ BOOST_AUTO_TEST_CASE(read_pod)
     &test_pod_type);
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type, &new_test_array_2[0], 
     sizeof(test_pod_type)), 0);
+
+  PVOID const noaccess_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS);
+  BOOST_REQUIRE(noaccess_page != nullptr);
+  hadesmem::Read<void*>(process, noaccess_page);
+
+  PVOID const guard_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE | PAGE_GUARD);
+  BOOST_REQUIRE(guard_page != nullptr);
+  BOOST_CHECK_THROW(hadesmem::Read<void*>(process, guard_page), 
+    hadesmem::Error);
 }
 
 BOOST_AUTO_TEST_CASE(read_string)

@@ -63,9 +63,6 @@ run call.cpp
 run injector.cpp
   ;
 
-run patcher.cpp
-  ;
-
 run pelib/pefile.cpp
   ;
 
@@ -75,7 +72,7 @@ compile-fail read_pod_fail.cpp
 compile-fail read_string_fail.cpp
   ;
 
-compile-fail read_list_fail.cpp
+compile-fail read_vector_fail.cpp
   ;
 
 compile-fail write_pod_fail.cpp
@@ -84,5 +81,5 @@ compile-fail write_pod_fail.cpp
 compile-fail write_string_fail.cpp
   ;
 
-compile-fail write_list_fail.cpp
+compile-fail write_vector_fail.cpp
   ;

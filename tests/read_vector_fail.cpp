@@ -5,9 +5,9 @@
 // This file is part of HadesMem.
 // <http://www.raptorfactor.com/> <raptorfactor@raptorfactor.com>
 
-#include "hadesmem/write.hpp"
+#include "hadesmem/read.hpp"
 
-#define BOOST_TEST_MODULE write_list_fail
+#define BOOST_TEST_MODULE read_vector_fail
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -29,14 +29,15 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
-// TODO: Rename this test.
+struct NotDefaultConstructible
+{
+  NotDefaultConstructible(int)
+  { }
+};
 
-struct non_list_type
-{ };
-
-BOOST_AUTO_TEST_CASE(write_list_fail)
+BOOST_AUTO_TEST_CASE(read_vector_fail)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  WriteVector(process, nullptr, non_list_type());
+  hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr, 1);
 }

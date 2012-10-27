@@ -31,11 +31,7 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
-// TODO: Provide the appropriate stream operator overload to allow this (also 
-// ensuring the streams used by Boost.Test are imbued with a UTF-8 locale).
 BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
-
-// TODO: Test Module stream overloads.
 
 BOOST_AUTO_TEST_CASE(module)
 {
@@ -95,4 +91,15 @@ BOOST_AUTO_TEST_CASE(module)
   {
     BOOST_CHECK_GT(this_mod, ntdll_mod);
   }
+
+  std::stringstream test_str_1;
+  test_str_1.imbue(std::locale::classic());
+  test_str_1 << this_mod;
+  std::stringstream test_str_2;
+  test_str_2 << this_mod.GetHandle();
+  BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
+  std::stringstream test_str_3;
+  test_str_3.imbue(std::locale::classic());
+  test_str_3 << ntdll_mod;
+  BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
 }

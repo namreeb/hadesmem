@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(injector)
   // TODO: Check more of the CreateAndInjectData functions.
   // TODO: Enumerate module list and ensure the target module has actually 
   // been loaded (will require a debug flag to not resume the target).
-  // Avoid accidentally creating a fork bomb.
+  // Check for presence of d3d9.dll to avoid accidentally creating a fork bomb.
   if (GetModuleHandle(L"d3d9.dll") == nullptr)
   {
     hadesmem::CreateAndInjectData const inject_data = 

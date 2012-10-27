@@ -35,7 +35,6 @@
 
 // TODO: Improve tests by doing checks both before and after writes.
 // TODO: Don't read/write data on the stack.
-// TODO: Test writes on guard pages, noaccess pages, etc.
 
 BOOST_AUTO_TEST_CASE(write_pod)
 {
@@ -92,6 +91,17 @@ BOOST_AUTO_TEST_CASE(write_pod)
   int expected_arr_2[] = { 9, 8, 3, 4, 5 };
   BOOST_CHECK_EQUAL(std::memcmp(&int_arr_2[0], &expected_arr_2[0], 
     sizeof(int_arr_2)), 0);
+
+  PVOID const noaccess_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS);
+  BOOST_REQUIRE(noaccess_page != nullptr);
+  hadesmem::Write(process, noaccess_page, static_cast<void*>(nullptr));
+
+  PVOID const guard_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE | PAGE_GUARD);
+  BOOST_REQUIRE(guard_page != nullptr);
+  BOOST_CHECK_THROW(hadesmem::Write(process, guard_page, 
+    static_cast<void*>(nullptr)), hadesmem::Error);
 }
 
 BOOST_AUTO_TEST_CASE(write_string)
