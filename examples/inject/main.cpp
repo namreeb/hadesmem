@@ -25,8 +25,6 @@
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
 // e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN?
-// TODO: Fix flag names (--run, etc).
-// TODO: Add flag to keep process paused after creation for debugging.
 
 namespace
 {
@@ -63,8 +61,7 @@ int main()
       ("export", boost::program_options::value<std::string>(), "export name")
       ("free", "unload module")
       ("add-path", "add module dir to serach order")
-      ("exe-path", boost::program_options::wvalue<std::wstring>(), 
-      "process exe path")
+      ("run", boost::program_options::wvalue<std::wstring>(), "process path")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -87,8 +84,8 @@ int main()
     }
     
     bool const has_pid = var_map.count("pid") != 0;
-    bool const has_exe_path = var_map.count("exe-path") != 0;
-    if ((has_pid && has_exe_path) || (!has_pid && !has_exe_path))
+    bool const create_proc = var_map.count("run") != 0;
+    if ((has_pid && create_proc) || (!has_pid && !create_proc))
     {
       std::cerr << "Error! A process ID or an executable path must be "
         "specified.\n";
@@ -96,7 +93,7 @@ int main()
     }
 
     bool const inject = var_map.count("free") == 0;
-    if (!inject && has_exe_path)
+    if (!inject && create_proc)
     {
       std::cerr << "Error! Modules can only be unloaded from running "
         "targets.\n";
@@ -161,7 +158,7 @@ int main()
       {
         std::string const export_name = var_map["export"].as<std::string>();
         std::pair<DWORD_PTR, DWORD> const export_ret = hadesmem::CallExport(
-          process, module, export_name, nullptr);
+          process, module, export_name);
 
         std::wcout << "Successfully called module export.\n";
         std::wcout << "Return: " << export_ret.first << ".\n";
@@ -175,12 +172,12 @@ int main()
     }
     else
     {
-      std::wstring const exe_path = var_map["exe-path"].as<std::wstring>();
+      std::wstring const exe_path = var_map["run"].as<std::wstring>();
       std::string const export_name = var_map.count("export") ? 
         var_map["export"].as<std::string>() : "";
       hadesmem::CreateAndInjectData const inject_data = 
         hadesmem::CreateAndInject(exe_path, L"", std::vector<std::wstring>(), 
-        module_path, export_name, nullptr, flags);
+        module_path, export_name, flags);
     }
   }
   catch (std::exception const& e)

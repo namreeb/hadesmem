@@ -39,7 +39,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 void FreeDll(Process const& process, HMODULE module);
 
 std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module, 
-  std::string const& export_name, LPCVOID export_arg);
+  std::string const& export_name);
 
 class CreateAndInjectData
 {
@@ -78,7 +78,6 @@ CreateAndInjectData CreateAndInject(
   std::vector<std::wstring> const& args, 
   std::wstring const& module, 
   std::string const& export_name, 
-  LPCVOID export_arg, 
   int flags);
 
 }

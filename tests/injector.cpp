@@ -43,11 +43,12 @@ BOOST_AUTO_TEST_CASE(injector)
     L"kernel32.dll", hadesmem::InjectFlags::kNone);
   BOOST_CHECK_EQUAL(kernel32_mod, kernel32_mod_new);
 
-  // Call Kernel32.dll!FreeLibrary and ensure the return value and 
+  // Call Kernel32.dll!GetCurrentProcessId and ensure the return value and 
   // last error code are their expected values.
+  SetLastError(0);
   std::pair<DWORD_PTR, DWORD> const export_ret = 
-    CallExport(process, kernel32_mod_new, "FreeLibrary", kernel32_mod_new);
-  BOOST_CHECK_NE(export_ret.first, static_cast<DWORD_PTR>(0));
+    CallExport(process, kernel32_mod_new, "GetCurrentProcessId");
+  BOOST_CHECK_EQUAL(export_ret.first, GetCurrentProcessId());
   BOOST_CHECK_EQUAL(export_ret.second, 0UL);
 
   // Perform injection test again so we can test the FreeDll API.
@@ -62,19 +63,24 @@ BOOST_AUTO_TEST_CASE(injector)
 
   // TODO: Test export calling in CreateAndInject.
   // TODO: Test work dir, args, etc in CreateAndInject.
-  // TODO: Ensure TerminateProcess returns success on processes that have 
-  // already been terminated.
-  // TODO: Test kAddPathToEnvironment flag.
+  // TODO: Test kAddToSearchOrder flag.
   // TODO: Check more of the CreateAndInjectData functions.
-  hadesmem::CreateAndInjectData const inject_data = hadesmem::CreateAndInject(
-    hadesmem::detail::GetSelfPath(), L"", std::vector<std::wstring>(), 
-    L"d3d9.dll", "", nullptr, hadesmem::InjectFlags::kNone);
-  BOOL const terminated = ::TerminateProcess(
-    inject_data.GetProcess().GetHandle(), 0);
-  DWORD const last_error = ::GetLastError();
-  BOOST_CHECK_NE(terminated, 0);
-  if (!terminated)
+  // TODO: Enumerate module list and ensure the target module has actually 
+  // been loaded (will require a debug flag to not resume the target).
+  // Avoid accidentally creating a fork bomb.
+  if (GetModuleHandle(L"d3d9.dll") == nullptr)
   {
-    BOOST_CHECK_NE(last_error, 0UL);
+    hadesmem::CreateAndInjectData const inject_data = 
+      hadesmem::CreateAndInject(hadesmem::detail::GetSelfPath(), L"", 
+      std::vector<std::wstring>(), L"d3d9.dll", "", 
+      hadesmem::InjectFlags::kNone);
+    BOOL const terminated = ::TerminateProcess(
+      inject_data.GetProcess().GetHandle(), 0);
+    DWORD const last_error = ::GetLastError();
+    BOOST_CHECK_NE(terminated, 0);
+    if (!terminated)
+    {
+      BOOST_CHECK_NE(last_error, 0UL);
+    }
   }
 }

@@ -37,8 +37,6 @@
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
 // TODO: Add flag to keep process paused after creation for debugging.
-// TODO: Improve CallExport API (or at least review it to work out what the 
-// best way to handle calling arbitrary exports is).
 
 namespace hadesmem
 {
@@ -192,14 +190,13 @@ void FreeDll(Process const& process, HMODULE module)
 
 // TODO: Configurable timeout.
 std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module, 
-  std::string const& export_name, LPCVOID export_arg)
+  std::string const& export_name)
 {
   Module const module_remote(&process, module);
   LPCVOID const export_ptr = reinterpret_cast<LPCVOID>(
     reinterpret_cast<DWORD_PTR>(FindProcedure(module_remote, export_name)));
 
-  return Call<DWORD_PTR(*)(LPCVOID)>(process, export_ptr, CallConv::kDefault, 
-    export_arg);
+  return Call<DWORD_PTR(*)()>(process, export_ptr, CallConv::kDefault);
 }
 
 CreateAndInjectData::CreateAndInjectData(Process const& process, 
@@ -286,7 +283,6 @@ CreateAndInjectData CreateAndInject(
   std::vector<std::wstring> const& args, 
   std::wstring const& module, 
   std::string const& export_name, 
-  LPCVOID export_arg, 
   int flags)
 {
   boost::filesystem::path const path_real(path);
@@ -396,7 +392,7 @@ CreateAndInjectData CreateAndInject(
     if (!export_name.empty())
     {
       // TODO: Configurable timeout.
-      export_ret = CallExport(process, remote_module, export_name, export_arg);
+      export_ret = CallExport(process, remote_module, export_name);
     }
 
     if (::ResumeThread(proc_info.hThread) == static_cast<DWORD>(-1))
