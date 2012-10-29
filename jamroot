@@ -58,6 +58,10 @@ project
     
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i486"
+	# --export-all-symbols is required because of a bug in Clang's dllexport 
+	# syWindows 
+	# support. Remove once this has been fixed.
+	<toolset>clang:<linkflags>"-Wl,--export-all-symbols"
 	<toolset>clang:<linkflags>"-Wl,--allow-multiple-definition" 
     
     <debug-symbols>on

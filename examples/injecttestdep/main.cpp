@@ -10,9 +10,19 @@
 BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, 
   LPVOID /*reserved*/);
 
-extern "C" __declspec(dllexport) DWORD InjectTestDep_Foo();
+// This is required because of a bug in Clang's dllexport support on Windows, 
+// this is worked around by using a linker flag to export all symbols 
+// unconditionally.
+// TODO: Remove this hack once Clang has been fixed.
+#ifdef HADESMEM_CLANG
+#define HADESMEM_DLLEXPORT  
+#else
+#define HADESMEM_DLLEXPORT __declspec(dllexport)
+#endif
 
-extern "C" __declspec(dllexport) DWORD InjectTestDep_Foo()
+extern "C" HADESMEM_DLLEXPORT DWORD InjectTestDep_Foo();
+
+extern "C" HADESMEM_DLLEXPORT DWORD InjectTestDep_Foo()
 {
   return 0;
 }
