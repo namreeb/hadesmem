@@ -7,6 +7,10 @@
 
 #pragma once
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/config.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <windows.h>
 
 namespace hadesmem
@@ -28,19 +32,19 @@ class ProtectGuard
 public:
   ProtectGuard(Process const* process, PVOID address, ProtectGuardType type);
 
-  ProtectGuard(ProtectGuard const& other);
+  ProtectGuard(ProtectGuard const& other) BOOST_NOEXCEPT;
 
-  ProtectGuard& operator=(ProtectGuard const& other);
+  ProtectGuard& operator=(ProtectGuard const& other) BOOST_NOEXCEPT;
 
-  ProtectGuard(ProtectGuard&& other);
+  ProtectGuard(ProtectGuard&& other) BOOST_NOEXCEPT;
 
-  ProtectGuard& operator=(ProtectGuard&& other);
+  ProtectGuard& operator=(ProtectGuard&& other) BOOST_NOEXCEPT;
 
   ~ProtectGuard();
 
   void Restore();
 
-  void RestoreUnchecked();
+  void RestoreUnchecked() BOOST_NOEXCEPT;
 
 private:
   Process const* process_;

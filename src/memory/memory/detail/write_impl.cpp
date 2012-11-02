@@ -19,17 +19,17 @@ namespace hadesmem
 namespace detail
 {
 
-void Write(Process const& process, PVOID address, LPCVOID in, 
-  std::size_t in_size)
+void Write(Process const& process, PVOID address, LPCVOID data, 
+  std::size_t len)
 {
-  BOOST_ASSERT(in != nullptr);
-  BOOST_ASSERT(in_size != 0);
+  BOOST_ASSERT(data != nullptr);
+  BOOST_ASSERT(len != 0);
 
   ProtectGuard protect_guard(&process, address, ProtectGuardType::kWrite);
   
   SIZE_T bytes_written = 0;
-  if (!::WriteProcessMemory(process.GetHandle(), address, in, 
-    in_size, &bytes_written) || bytes_written != in_size)
+  if (!::WriteProcessMemory(process.GetHandle(), address, data, 
+    len, &bytes_written) || bytes_written != len)
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 

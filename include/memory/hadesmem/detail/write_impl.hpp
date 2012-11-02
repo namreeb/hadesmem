@@ -19,7 +19,8 @@ class Process;
 namespace detail
 {
 
-void Write(Process const& process, PVOID address, LPCVOID in, std::size_t in_size);
+void Write(Process const& process, PVOID address, LPCVOID data, 
+  std::size_t len);
 
 }
 

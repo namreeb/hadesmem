@@ -19,17 +19,17 @@ namespace hadesmem
 namespace detail
 {
 
-void Read(Process const& process, LPVOID address, LPVOID out, 
-  std::size_t out_size)
+void Read(Process const& process, LPVOID address, LPVOID data, 
+  std::size_t len)
 {
-  BOOST_ASSERT(out != nullptr);
-  BOOST_ASSERT(out_size != 0);
+  BOOST_ASSERT(data != nullptr);
+  BOOST_ASSERT(len != 0);
 
   ProtectGuard protect_guard(&process, address, ProtectGuardType::kRead);
   
   SIZE_T bytes_read = 0;
-  if (!::ReadProcessMemory(process.GetHandle(), address, out, 
-    out_size, &bytes_read) || bytes_read != out_size)
+  if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 
+    &bytes_read) || bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
@@ -40,15 +40,15 @@ void Read(Process const& process, LPVOID address, LPVOID out,
   protect_guard.Restore();
 }
 
-void ReadUnchecked(Process const& process, LPVOID address, LPVOID out, 
-  std::size_t out_size)
+void ReadUnchecked(Process const& process, LPVOID address, LPVOID data, 
+  std::size_t len)
 {
-  BOOST_ASSERT(out != nullptr);
-  BOOST_ASSERT(out_size != 0);
+  BOOST_ASSERT(data != nullptr);
+  BOOST_ASSERT(len != 0);
   
   SIZE_T bytes_read = 0;
-  if (!::ReadProcessMemory(process.GetHandle(), address, out, 
-    out_size, &bytes_read) || bytes_read != out_size)
+  if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 
+    &bytes_read) || bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 

@@ -89,15 +89,13 @@ private:
   template <typename T>
   T GetReturnValueIntImpl(std::true_type) const BOOST_NOEXCEPT
   {
-    detail::UnionCast<DWORD64, T> union_cast(GetReturnValueInt64());
-    return union_cast.GetTo();
+    return detail::UnionCast<T>(GetReturnValueInt64());
   }
   
   template <typename T>
   T GetReturnValueIntImpl(std::false_type) const BOOST_NOEXCEPT
   {
-    detail::UnionCast<DWORD32, T> union_cast(GetReturnValueInt32());
-    return union_cast.GetTo();
+    return detail::UnionCast<T>(GetReturnValueInt32());
   }
   
   template <typename T>
@@ -169,16 +167,14 @@ private:
   void InitializeIntegralImpl(T t, std::false_type) BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt32Type;
-    detail::UnionCast<T, DWORD32> union_cast(t);
-    arg_.i32 = union_cast.GetTo();
+    arg_.i32 = detail::UnionCast<DWORD32>(t);
   }
   
   template <typename T>
   void InitializeIntegralImpl(T t, std::true_type) BOOST_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
-    detail::UnionCast<T, DWORD64> union_cast(t);
-    arg_.i64 = union_cast.GetTo();
+    arg_.i64 = detail::UnionCast<DWORD64>(t);
   }
   
   template <typename T>

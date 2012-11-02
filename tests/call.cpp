@@ -166,14 +166,13 @@ DWORD MultiThreadGet()
 class ThiscallDummy
 {
 public:
-  DWORD_PTR TestIntegerThis(int a, int b, int c, int d, int e, int f) const
+  DWORD_PTR TestIntegerThis(int a, int b, int c, int d, int e) const
   {
     BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
     BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
     BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
     BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
     BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
-    BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
 
     SetLastError(0x87654321);
 
@@ -295,16 +294,15 @@ BOOST_AUTO_TEST_CASE(call)
   hadesmem::CallConv const thiscall_call_conv = hadesmem::CallConv::kThisCall;
 #else
 #error "[HadesMem] Unsupported architecture."
-#endif
-  hadesmem::detail::UnionCast<decltype(&ThiscallDummy::TestIntegerThis), 
-    PVOID> mem_fn_to_pvoid(&ThiscallDummy::TestIntegerThis);
-  PVOID test_integer_this = mem_fn_to_pvoid.GetTo();
+#endif  
+  PVOID test_integer_this = hadesmem::detail::UnionCast<PVOID>(
+    &ThiscallDummy::TestIntegerThis);
   ThiscallDummy thiscall_dummy;
   typedef DWORD_PTR (*TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
-    int c, int d, int e, int f);
+    int c, int d, int e);
   auto const call_int_this_ret = hadesmem::Call<TestIntegerThisT>(
     process, test_integer_this, thiscall_call_conv, &thiscall_dummy, 
-    0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF);
+    0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE);
   BOOST_CHECK_EQUAL(call_int_this_ret.first, 
     static_cast<DWORD_PTR>(0x12345678));
   BOOST_CHECK_EQUAL(call_int_this_ret.second, static_cast<DWORD>(0x87654321));

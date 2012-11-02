@@ -43,7 +43,7 @@ ProtectGuard::ProtectGuard(Process const* process, PVOID address,
   }
 }
 
-ProtectGuard::ProtectGuard(ProtectGuard const& other)
+ProtectGuard::ProtectGuard(ProtectGuard const& other) BOOST_NOEXCEPT
   : process_(other.process_), 
   address_(other.address_), 
   type_(other.type_), 
@@ -51,7 +51,7 @@ ProtectGuard::ProtectGuard(ProtectGuard const& other)
   old_protect_(other.old_protect_)
 { }
 
-ProtectGuard& ProtectGuard::operator=(ProtectGuard const& other)
+ProtectGuard& ProtectGuard::operator=(ProtectGuard const& other) BOOST_NOEXCEPT
 {
   process_ = other.process_;
   address_ = other.address_;
@@ -62,7 +62,7 @@ ProtectGuard& ProtectGuard::operator=(ProtectGuard const& other)
   return *this;
 }
 
-ProtectGuard::ProtectGuard(ProtectGuard&& other)
+ProtectGuard::ProtectGuard(ProtectGuard&& other) BOOST_NOEXCEPT
   : process_(other.process_), 
   address_(other.address_), 
   type_(other.type_), 
@@ -70,7 +70,7 @@ ProtectGuard::ProtectGuard(ProtectGuard&& other)
   old_protect_(other.old_protect_)
 { }
 
-ProtectGuard& ProtectGuard::operator=(ProtectGuard&& other)
+ProtectGuard& ProtectGuard::operator=(ProtectGuard&& other) BOOST_NOEXCEPT
 {
   process_ = other.process_;
   other.process_ = nullptr;
@@ -109,7 +109,7 @@ void ProtectGuard::Restore()
   old_protect_ = 0;
 }
 
-void ProtectGuard::RestoreUnchecked()
+void ProtectGuard::RestoreUnchecked() BOOST_NOEXCEPT
 {
   try
   {

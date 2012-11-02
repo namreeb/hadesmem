@@ -7,6 +7,14 @@
 
 #pragma once
 
+#include <type_traits>
+
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/config.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
+#include "hadesmem/detail/static_assert.hpp"
+
 namespace hadesmem
 {
 
@@ -14,14 +22,20 @@ namespace detail
 {
 
 template <typename From, typename To>
-union UnionCast
+union UnionCastImpl
 {
 public:
-  UnionCast(From from)
+  // C++11 does not require members of a union to be POD, but this union 
+  // should only be used to perform casts between known safe (for a very 
+  // lax definition of 'safe') types which are always POD.
+  HADESMEM_STATIC_ASSERT(std::is_pod<To>::value);
+  HADESMEM_STATIC_ASSERT(std::is_pod<From>::value);
+
+  explicit UnionCastImpl(From from) BOOST_NOEXCEPT
     : from_(from)
   { }
 
-  To GetTo() const
+  To GetTo() const BOOST_NOEXCEPT
   {
     return to_;
   }
@@ -30,6 +44,12 @@ private:
   From from_;
   To to_;
 };
+
+template <typename To, typename From>
+To UnionCast(From from) BOOST_NOEXCEPT
+{
+  return UnionCastImpl<From, To>(from).GetTo();
+}
 
 }
 
