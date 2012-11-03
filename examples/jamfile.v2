@@ -16,7 +16,7 @@ project
     <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
-    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion"
+    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing"
     <toolset>clang:<cxxflags>"-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
   ;
 
