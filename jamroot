@@ -54,7 +54,7 @@ project
     
     <architecture>x86
     <threading>multi
-    <runtime-link>shared
+    <runtime-link>static
     
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i486"
