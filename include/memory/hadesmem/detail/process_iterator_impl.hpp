@@ -34,6 +34,7 @@ struct ProcessIteratorImpl
   {
     if (snap_ && snap_ != INVALID_HANDLE_VALUE)
     {
+      // WARNING: Handle is leaked if CloseHandle fails.
       BOOST_VERIFY(::CloseHandle(snap_));
     }
   }

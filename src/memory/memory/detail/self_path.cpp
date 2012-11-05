@@ -25,7 +25,7 @@ HMODULE GetHandleToSelf()
 {
   MEMORY_BASIC_INFORMATION mem_info;
   ZeroMemory(&mem_info, sizeof(mem_info));
-  PVOID this_func_ptr = reinterpret_cast<PVOID>(
+  auto const this_func_ptr = reinterpret_cast<LPCVOID>(
     reinterpret_cast<DWORD_PTR>(&GetHandleToSelf));
   if (!::VirtualQuery(this_func_ptr, &mem_info, sizeof(mem_info)))
   {

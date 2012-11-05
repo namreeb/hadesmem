@@ -37,7 +37,7 @@
 
 void DisableUserModeCallbackExceptionFilter()
 {
-  HMODULE const k32_mod = GetModuleHandle(L"kernel32");
+  HMODULE const k32_mod = ::GetModuleHandle(L"kernel32");
   if (!k32_mod)
   {
     DWORD const last_error = ::GetLastError();
@@ -82,7 +82,7 @@ void EnableCrtDebugFlags()
 
 void EnableTerminationOnHeapCorruption()
 {
-  if (!::HeapSetInformation(GetProcessHeap(), 
+  if (!::HeapSetInformation(::GetProcessHeap(), 
     HeapEnableTerminationOnCorruption, nullptr, 0))
   {
     DWORD const last_error = ::GetLastError();

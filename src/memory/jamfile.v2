@@ -40,7 +40,6 @@ lib memory
     /boost//headers
     /boost//filesystem/<link>static
     /asmjit//asmjit
-    /beaengine//beaengine
     advapi32
     user32
   :

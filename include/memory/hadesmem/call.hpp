@@ -244,6 +244,95 @@ struct VoidToInt<void>
 
 }
 
+#ifndef BOOST_NO_VARIADIC_TEMPLATES
+
+namespace detail
+{
+
+template <typename FuncT>
+struct FuncResultT
+{ };
+
+template <typename R, typename... Args>
+struct FuncResultT<R (*)(Args...)>
+{
+  typedef R type;
+};
+
+template <typename FuncT>
+struct FuncArity
+{ };
+
+template <typename R, typename... Args>
+struct FuncArity<R (*)(Args...)>
+{
+  static int const value = sizeof...(Args);
+};
+
+template<unsigned int N, typename Head, typename... Tail>
+struct GetArgN : GetArgN<N - 1, Tail...>
+{ };
+
+template<typename Head, typename... Tail>
+struct GetArgN<0, Head, Tail...>
+{
+  // Silence a GCC warning about the lack of a virtual destructor when this 
+  // type is used as a base class. This type is never actually created, so 
+  // just define the destructor to shut GCC up, as there is no runtime 
+  // performance penalty.
+  virtual ~GetArgN() { }
+
+  typedef Head type;
+};
+
+template <int N, typename FuncT>
+struct FuncArgT
+{ };
+
+template <int N, typename R, typename... Args>
+struct FuncArgT<N, R (*)(Args...)>
+{
+  typedef typename GetArgN<N, Args...>::type type;
+};
+
+template <typename FuncT, int N>
+inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/)
+{
+  return;
+}
+
+template <typename FuncT, int N, typename T, typename... Args>
+void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
+{
+  typedef typename FuncArgT<N, FuncT>::type RealT;
+  HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
+  RealT const real_arg(std::forward<T>(arg));
+  call_args->emplace_back(real_arg);
+  return BuildCallArgs<FuncT, N + 1>(call_args, std::forward<Args>(args)...);
+}
+
+}
+
+template <typename FuncT, typename... Args>
+std::pair<typename detail::VoidToInt<
+  typename detail::FuncResultT<FuncT>::type>::type, DWORD> 
+  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Args&&... args)
+{
+  HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
+
+  std::vector<CallArg> call_args;
+  call_args.reserve(sizeof...(args));
+  detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
+
+  CallResult const ret = Call(process, address, call_conv, call_args);
+  typedef typename detail::VoidToInt<
+    typename detail::FuncResultT<FuncT>::type>::type ResultT;
+  return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());
+}
+
+#else // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
@@ -308,6 +397,8 @@ std::pair<typename detail::VoidToInt<\
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
 
+#endif // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+
 class MultiCall
 {
 public:
@@ -322,7 +413,25 @@ public:
   MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT;
   
   ~MultiCall();
-  
+
+#ifndef BOOST_NO_VARIADIC_TEMPLATES
+
+  template <typename FuncT, typename... Args>
+  void Add(LPCVOID address, CallConv call_conv, Args&&... args)
+  {
+    HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
+
+    std::vector<CallArg> call_args;
+    call_args.reserve(sizeof...(args));
+    detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
+
+    addresses_.push_back(address);
+    call_convs_.push_back(call_conv);
+    args_.push_back(call_args);
+  }
+
+#else // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
   void Add(LPCVOID address, CallConv call_conv \
@@ -369,6 +478,8 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #endif // #if defined(HADESMEM_CLANG)
 
 #undef HADESMEM_CALL_ADD_ARG
+
+#endif // #ifndef BOOST_NO_VARIADIC_TEMPLATES
   
   std::vector<CallResult> Call() const;
   

@@ -324,14 +324,14 @@ Allocator GenerateCallCode(Process const& process,
   PVOID return_values_remote)
 {
   Module const kernel32(&process, L"kernel32.dll");
-  DWORD_PTR const get_last_error = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "GetLastError"));
-  DWORD_PTR const set_last_error = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "SetLastError"));
-  DWORD_PTR const is_debugger_present = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "IsDebuggerPresent"));
-  DWORD_PTR const debug_break = reinterpret_cast<DWORD_PTR>(
-    FindProcedure(kernel32, "DebugBreak"));
+  auto const get_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
+    kernel32, "GetLastError"));
+  auto const set_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
+    kernel32, "SetLastError"));
+  auto const is_debugger_present = reinterpret_cast<DWORD_PTR>(FindProcedure(
+    kernel32, "IsDebuggerPresent"));
+  auto const debug_break = reinterpret_cast<DWORD_PTR>(FindProcedure(
+    kernel32, "DebugBreak"));
 
   AsmJit::X86Assembler assembler;
   

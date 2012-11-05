@@ -1,33 +1,30 @@
-path-constant TOP
-  :
-    .
-  ;
+# Import module for Boost support.
 import boost
   ;
 
+# Use Boost libraries.
 boost.use-project
   ;
-  
+ 
+# Use AsmJit library. 
 use-project /asmjit
   :
     src/asmjit
   ;
-
-use-project /beaengine
-  :
-    src/beaengine
-  ;
-
+  
+# Use HadesMem library.
 use-project /memory
   :
     src/memory
   ;
 
+# Use HadesMem tests.
 use-project /tests
   :
     tests
   ;
 
+# Use HadesMem examples.
 use-project /examples
   :
     examples
@@ -37,58 +34,91 @@ project
   :
     requirements
     
+	# Allow Boost to #include <windows.h> rather than doing its own forward 
+	# declarations of the APIs it needs.
     <define>BOOST_USE_WINDOWS_H
+
+	# Disallow use of deprected Boost APIs.
     <define>BOOST_SYSTEM_NO_DEPRECATED
     <define>BOOST_FILESYSTEM_NO_DEPRECATED
     
+	# Enforce strict Windows typedefs.
     <define>STRICT
-    <define>UNICODE
-    <define>_UNICODE
+
+	# Exclude headers that are not commonly used. Especially useful to stop 
+	# the automatic inclusion of the Winsock v1 headers, which causes 
+	# when you then include the Winsock v2 headers afterwards.
     <define>WIN32_LEAN_AND_MEAN
     
+	# Force use of Unicode APIs, entry point, etc.
+	<define>UNICODE
+    <define>_UNICODE
+    
+	# Disable warnings about use of 'unsafe' CRT and STL functions.
     <define>_CRT_SECURE_NO_WARNINGS
     <define>_SCL_SECURE_NO_WARNINGS
     
+	# Minimum supported OS is Windows Vista
     <define>WINVER=_WIN32_WINNT_VISTA
     <define>_WIN32_WINNT=_WIN32_WINNT_VISTA
     
+	# Compile for x86/x64, with static linking to the multi-threaded runtime.
     <architecture>x86
     <threading>multi
     <runtime-link>static
     
+	# Disable warning caused by some Boost components. This warning can 
+	# safely be ignored as it does not affect program correctness.
+	# "The decorated name was longer than the compiler limit (4096), and was 
+	# truncated."
     <toolset>msvc:<cxxflags>"/wd4503"
-    <toolset>gcc,<address-model>32:<cxxflags>"-march=i486"
+	# Required for atomics library.
+    <toolset>gcc,<address-model>32:<cxxflags>"-march=pentium4"
 	# --export-all-symbols is required because of a bug in Clang's dllexport  
 	# support. Remove once this has been fixed.
 	<toolset>clang:<linkflags>"-Wl,--export-all-symbols"
+	# Required for Boost.
 	<toolset>clang:<linkflags>"-Wl,--allow-multiple-definition" 
     
+	# Enable generation of debugging symbols, even under release mode.
     <debug-symbols>on
     
+	# Define some preprocessor macros for easy tool detection within 
+	# HadesMem.
     <toolset>msvc:<define>HADESMEM_MSVC
     <toolset>gcc:<define>HADESMEM_GCC
     <toolset>clang:<define>HADESMEM_CLANG
     <toolset>intel:<define>HADESMEM_INTEL
   :
+	# Build under debug mode by default.
     default-build debug
   :
+	# Output to 'bin' directory.
     build-dir bin
   ;
 
+# Build HadesMem library.
 build-project src/memory
   ;
 
+# Build HadesMem tests.
 build-project tests
   ;
 
+# Build HadesMem examples.
 build-project examples
   ;
 
+# Install to 'dist' directory.
 install dist
   :
+	# Install library and examples.
     src/memory
     examples
   :
+	# Give each toolset, variant, and architecture combination its own 
+	# directory.
+
     <toolset>msvc,<variant>debug,<address-model>32:<location>dist/msvc/debug/x86
     <toolset>msvc,<variant>debug,<address-model>64:<location>dist/msvc/debug/x64
     <toolset>msvc,<variant>release,<address-model>32:<location>dist/msvc/release/x86
@@ -109,11 +139,15 @@ install dist
     <toolset>intel,<variant>release,<address-model>32:<location>dist/intel/release/x86
     <toolset>intel,<variant>release,<address-model>64:<location>dist/intel/release/x64
     
+	# Automatically pull in dependencies.
     <install-dependencies>on
+
+	# Install both EXEs and DLLs.
     <install-type>SHARED_LIB
     <install-type>EXE
   ;
 
+# Allow easy consumption by 3rd parties.
 alias hadesmem
   :
     src/memory//memory

@@ -34,15 +34,14 @@ ModuleIterator::ModuleIterator(Process const* process)
   
   impl_->process_ = process;
   
-  impl_->snap_ = ::CreateToolhelp32Snapshot(
-    TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
+  impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
     impl_->process_->GetId());
   if (impl_->snap_ == INVALID_HANDLE_VALUE)
   {
-    if (GetLastError() == ERROR_BAD_LENGTH)
+    if (::GetLastError() == ERROR_BAD_LENGTH)
     {
       impl_->snap_ = ::CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, 
+        TH32CS_SNAPMODULE, 
         impl_->process_->GetId());
       if (impl_->snap_ == INVALID_HANDLE_VALUE)
       {

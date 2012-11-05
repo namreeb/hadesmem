@@ -52,10 +52,10 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorCodeWinLast(last_error));
   }
   
-  DWORD_PTR const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
+  auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
     reinterpret_cast<DWORD_PTR>(local_module);
   
-  FARPROC const remote_func = reinterpret_cast<FARPROC>(
+  auto const remote_func = reinterpret_cast<FARPROC>(
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
   
   return remote_func;
@@ -221,13 +221,13 @@ void Module::Initialize(MODULEENTRY32 const& entry)
 void Module::InitializeIf(EntryCallback const& check_func)
 {
   HANDLE snap = ::CreateToolhelp32Snapshot(
-    TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
+    TH32CS_SNAPMODULE, process_->GetId());
   if (snap == INVALID_HANDLE_VALUE)
   {
     if (GetLastError() == ERROR_BAD_LENGTH)
     {
       snap = ::CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, process_->GetId());
+        TH32CS_SNAPMODULE, process_->GetId());
       if (snap == INVALID_HANDLE_VALUE)
       {
         DWORD const last_error = ::GetLastError();

@@ -33,7 +33,7 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   if (impl_->snap_ == INVALID_HANDLE_VALUE)
   {
-    if (GetLastError() == ERROR_BAD_LENGTH)
+    if (::GetLastError() == ERROR_BAD_LENGTH)
     {
       impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
       if (impl_->snap_ == INVALID_HANDLE_VALUE)

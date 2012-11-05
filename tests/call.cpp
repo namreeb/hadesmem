@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(call)
   
   FARPROC const get_proc_address_tmp = ::GetProcAddress(kernel32_mod, 
     "GetProcAddress");
-  PVOID const get_proc_address = reinterpret_cast<PVOID>(
+  auto const get_proc_address = reinterpret_cast<PVOID>(
     reinterpret_cast<DWORD_PTR>(get_proc_address_tmp));
   BOOST_REQUIRE(get_proc_address != 0);
   

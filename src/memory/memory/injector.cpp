@@ -25,17 +25,21 @@
 #include "hadesmem/detail/self_path.hpp"
 
 // TODO: .NET injection (without DLL dependency if possible).
+
 // TODO: Cross-session injection (also cross-winsta and cross-desktop 
 // injection). RtlCreateUserThread can apparently inject across sessions but 
 // creates a 'native' thread rather than a Win32 thread which causes issues. 
 // A better solution is probably to use a broker process. Can the target's 
 // WinSta and Desktop just be read from the PEB?
+
 // TODO: IAT injection (to allow execution of code before Dllmain of other 
 // modules are executed). Include support for .NET target processes.
+
 // TODO: Get address of kernel32!LoadLibraryW 'manually' instead of using 
 // local GetProcAddress and pointer arithmetic (whilst this works in all 
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
+
 // TODO: Add flag to keep process paused after creation for debugging.
 
 namespace hadesmem
@@ -105,7 +109,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
   // Do not continue if Shim Engine is enabled for local process, 
   // otherwise it could interfere with the address resolution.
-  HMODULE const shim_eng_mod = GetModuleHandle(L"ShimEng.dll");
+  HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
   if (shim_eng_mod)
   {
     BOOST_THROW_EXCEPTION(Error() << 
@@ -151,7 +155,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   WriteString(process, lib_file_remote.GetBase(), path_string);
 
   Module const kernel32_mod(&process, L"kernel32.dll");
-  LPCVOID const load_library = reinterpret_cast<LPCVOID>(
+  auto const load_library = reinterpret_cast<LPCVOID>(
     reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, 
     "LoadLibraryExW")));
 
@@ -174,7 +178,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(&process, L"kernel32.dll");
-  LPCVOID const free_library = reinterpret_cast<LPCVOID>(
+  auto const free_library = reinterpret_cast<LPCVOID>(
     reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, "FreeLibrary")));
 
   typedef BOOL (*FreeLibraryFuncT)(HMODULE hModule);
@@ -193,7 +197,7 @@ std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module,
   std::string const& export_name)
 {
   Module const module_remote(&process, module);
-  LPCVOID const export_ptr = reinterpret_cast<LPCVOID>(
+  auto const export_ptr = reinterpret_cast<LPCVOID>(
     reinterpret_cast<DWORD_PTR>(FindProcedure(module_remote, export_name)));
 
   return Call<DWORD_PTR(*)()>(process, export_ptr, CallConv::kDefault);
@@ -314,10 +318,10 @@ CreateAndInjectData CreateAndInject(
   }
 
   STARTUPINFO start_info;
-  ZeroMemory(&start_info, sizeof(start_info));
+  ::ZeroMemory(&start_info, sizeof(start_info));
   start_info.cb = sizeof(start_info);
   PROCESS_INFORMATION proc_info;
-  ZeroMemory(&proc_info, sizeof(proc_info));
+  ::ZeroMemory(&proc_info, sizeof(proc_info));
   if (!::CreateProcess(path_real.c_str(), proc_args.data(), nullptr, nullptr, 
     FALSE, CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT, nullptr, 
     work_dir_real.c_str(), &start_info, &proc_info))
@@ -332,6 +336,8 @@ CreateAndInjectData CreateAndInject(
   {
     // WARNING: Handle is leaked if CloseHandle fails.
     BOOST_VERIFY(::CloseHandle(proc_info.hProcess));
+
+    // WARNING: Handle is leaked if CloseHandle fails.
     BOOST_VERIFY(::CloseHandle(proc_info.hThread));
   };
 
@@ -357,7 +363,7 @@ CreateAndInjectData CreateAndInject(
 
     Write(process, stub_remote.GetBase(), return_instr);
 
-    LPTHREAD_START_ROUTINE stub_remote_pfn = 
+    auto const stub_remote_pfn = 
       reinterpret_cast<LPTHREAD_START_ROUTINE>(
       reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
 
@@ -412,7 +418,7 @@ CreateAndInjectData CreateAndInject(
   {
     // Terminate process if injection failed, otherwise the 'zombie' process 
     // would be leaked.
-    TerminateProcess(proc_info.hProcess, 0);
+    ::TerminateProcess(proc_info.hProcess, 0);
 
     throw;
   }

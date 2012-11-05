@@ -21,6 +21,25 @@
 namespace hadesmem
 {
 
+namespace
+{
+
+bool IsWoW64Process(HANDLE handle)
+{
+  BOOL is_wow64 = FALSE;
+  if (!::IsWow64Process(handle, &is_wow64))
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("IsWoW64Process failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return is_wow64 != FALSE;
+}
+
+}
+
 Process::Process(DWORD id)
   : id_(id), 
   handle_(Open(id))
@@ -107,25 +126,7 @@ void Process::Cleanup()
 
 void Process::CheckWoW64() const
 {
-  BOOL is_wow64_me = FALSE;
-  if (!::IsWow64Process(GetCurrentProcess(), &is_wow64_me))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not detect WoW64 status of current process.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  BOOL is_wow64 = FALSE;
-  if (!::IsWow64Process(handle_, &is_wow64))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not detect WoW64 status of target process.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  if (is_wow64_me != is_wow64)
+  if (IsWoW64Process(::GetCurrentProcess()) != IsWoW64Process(handle_))
   {
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Cross-architecture process manipulation is currently "
@@ -240,16 +241,7 @@ std::wstring GetPath(Process const& process)
 
 bool IsWoW64(Process const& process)
 {
-  BOOL is_wow64 = FALSE;
-  if (!::IsWow64Process(process.GetHandle(), &is_wow64))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("IsWow64Process failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return is_wow64 != FALSE;
+  return IsWoW64Process(process.GetHandle());
 }
 
 void GetSeDebugPrivilege()

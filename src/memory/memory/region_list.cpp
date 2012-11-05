@@ -87,7 +87,7 @@ RegionIterator& RegionIterator::operator++()
     
     void const* const base = impl_->region_->GetBase();
     SIZE_T const size = impl_->region_->GetSize();
-    void const* const next = static_cast<char const* const>(base) + size;
+    auto const next = static_cast<char const* const>(base) + size;
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, next);
     impl_->region_ = Region(impl_->process_, mbi);
   }
