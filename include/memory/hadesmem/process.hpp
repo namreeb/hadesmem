@@ -14,6 +14,8 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/smart_handle.hpp"
+
 namespace hadesmem
 {
 
@@ -48,7 +50,7 @@ private:
   HANDLE Duplicate(HANDLE handle);
   
   DWORD id_;
-  HANDLE handle_;
+  detail::SmartHandle handle_;
 };
 
 bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;

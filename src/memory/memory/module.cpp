@@ -9,11 +9,11 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 #include "hadesmem/detail/to_upper_ordinal.hpp"
 
 namespace hadesmem
@@ -21,6 +21,20 @@ namespace hadesmem
 
 namespace
 {
+
+struct EnsureFreeLibrary
+{
+  explicit EnsureFreeLibrary(HMODULE module)
+    : module_(module)
+  { }
+
+  ~EnsureFreeLibrary()
+  {
+    BOOST_VERIFY(::FreeLibrary(module_));
+  }
+
+  HMODULE module_;
+};
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
@@ -35,12 +49,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorString("LoadLibraryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
-  
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if FreeLibrary fails.
-    BOOST_VERIFY(::FreeLibrary(local_module));
-  };
+  EnsureFreeLibrary const local_module_free(local_module);
   
   FARPROC const local_func = ::GetProcAddress(local_module, name);
   if (!local_func)
@@ -97,24 +106,15 @@ BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE handle)
 
 bool IsPathEquivalent(std::wstring const& path1, std::wstring const& path2)
 {
-  HANDLE const handle1 = GetFileHandleForQuery(path1);
+  detail::SmartHandle const handle1(GetFileHandleForQuery(path1), 
+    INVALID_HANDLE_VALUE);
+  detail::SmartHandle const handle2(GetFileHandleForQuery(path2), 
+    INVALID_HANDLE_VALUE);
 
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(handle1));
-  };
-
-  HANDLE const handle2 = GetFileHandleForQuery(path2);
-
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(handle2));
-  };
-
-  BY_HANDLE_FILE_INFORMATION const info1 = GetFileInformationByHandle(handle1);
-  BY_HANDLE_FILE_INFORMATION const info2 = GetFileInformationByHandle(handle2);
+  BY_HANDLE_FILE_INFORMATION const info1 = GetFileInformationByHandle(
+    handle1.GetHandle());
+  BY_HANDLE_FILE_INFORMATION const info2 = GetFileInformationByHandle(
+    handle2.GetHandle());
 
   return info1.dwVolumeSerialNumber == info2.dwVolumeSerialNumber
     && info1.nFileIndexHigh == info2.nFileIndexHigh
@@ -288,15 +288,15 @@ void Module::Initialize(MODULEENTRY32 const& entry)
 
 void Module::InitializeIf(EntryCallback const& check_func)
 {
-  HANDLE snap = ::CreateToolhelp32Snapshot(
-    TH32CS_SNAPMODULE, process_->GetId());
-  if (snap == INVALID_HANDLE_VALUE)
+  detail::SmartHandle snap(::CreateToolhelp32Snapshot(
+    TH32CS_SNAPMODULE, process_->GetId()), INVALID_HANDLE_VALUE);
+  if (snap.GetHandle() == snap.GetInvalid())
   {
     if (GetLastError() == ERROR_BAD_LENGTH)
     {
       snap = ::CreateToolhelp32Snapshot(
         TH32CS_SNAPMODULE, process_->GetId());
-      if (snap == INVALID_HANDLE_VALUE)
+      if (snap.GetHandle() == snap.GetInvalid())
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -313,18 +313,12 @@ void Module::InitializeIf(EntryCallback const& check_func)
     }
   }
   
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(snap));
-  };
-  
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
   
-  for (BOOL more_mods = ::Module32First(snap, &entry); more_mods; 
-    more_mods = ::Module32Next(snap, &entry)) 
+  for (BOOL more_mods = ::Module32First(snap.GetHandle(), &entry); more_mods; 
+    more_mods = ::Module32Next(snap.GetHandle(), &entry)) 
   {
     if (check_func(entry))
     {

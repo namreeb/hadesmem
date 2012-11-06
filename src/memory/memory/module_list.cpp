@@ -36,14 +36,13 @@ ModuleIterator::ModuleIterator(Process const* process)
   
   impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
     impl_->process_->GetId());
-  if (impl_->snap_ == INVALID_HANDLE_VALUE)
+  if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
   {
     if (::GetLastError() == ERROR_BAD_LENGTH)
     {
-      impl_->snap_ = ::CreateToolhelp32Snapshot(
-        TH32CS_SNAPMODULE, 
+      impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
         impl_->process_->GetId());
-      if (impl_->snap_ == INVALID_HANDLE_VALUE)
+      if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -63,7 +62,7 @@ ModuleIterator::ModuleIterator(Process const* process)
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!::Module32First(impl_->snap_, &entry))
+  if (!::Module32First(impl_->snap_.GetHandle(), &entry))
   {
     DWORD const last_error = ::GetLastError();
     if (last_error == ERROR_NO_MORE_FILES)
@@ -123,7 +122,7 @@ ModuleIterator& ModuleIterator::operator++()
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!::Module32Next(impl_->snap_, &entry))
+  if (!::Module32Next(impl_->snap_.GetHandle(), &entry))
   {
     DWORD const last_error = ::GetLastError();
     if (last_error == ERROR_NO_MORE_FILES)

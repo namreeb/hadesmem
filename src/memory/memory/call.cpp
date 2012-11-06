@@ -12,10 +12,6 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/scope_exit.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
-#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <asmjit/asmjit.h>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -26,6 +22,7 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/type_traits.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
 // TODO: Improve safety via EH.
@@ -700,10 +697,10 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
 
-  HANDLE const thread_remote = ::CreateRemoteThread(process.GetHandle(), 
-    nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(code_remote_pfn), 
-    nullptr, 0, nullptr);
-  if (!thread_remote)
+  detail::SmartHandle const thread_remote(::CreateRemoteThread(
+    process.GetHandle(), nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(
+    code_remote_pfn), nullptr, 0, nullptr));
+  if (!thread_remote.GetHandle())
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
@@ -711,14 +708,9 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
       ErrorCodeWinLast(last_error));
   }
   
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(thread_remote));
-  };
-
   // TODO: Allow customizable timeout.
-  if (::WaitForSingleObject(thread_remote, INFINITE) != WAIT_OBJECT_0)
+  if (::WaitForSingleObject(thread_remote.GetHandle(), INFINITE) != 
+    WAIT_OBJECT_0)
   {
     DWORD const LastError = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 

@@ -13,7 +13,6 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/filesystem.hpp>
-#include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/call.hpp"
@@ -23,6 +22,7 @@
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/self_path.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 
 // TODO: .NET injection (without DLL dependency if possible).
 
@@ -329,14 +329,8 @@ CreateAndInjectData CreateAndInject(
       ErrorCodeWinLast(last_error));
   }
 
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(proc_info.hProcess));
-
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(proc_info.hThread));
-  };
+  detail::SmartHandle const proc_handle(proc_info.hProcess);
+  detail::SmartHandle const thread_handle(proc_info.hThread);
 
   try
   {
@@ -364,9 +358,9 @@ CreateAndInjectData CreateAndInject(
       reinterpret_cast<LPTHREAD_START_ROUTINE>(
       reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
 
-    HANDLE const remote_thread = ::CreateRemoteThread(process.GetHandle(), 
-      nullptr, 0, stub_remote_pfn, nullptr, 0, nullptr);
-    if (!remote_thread)
+    detail::SmartHandle const remote_thread(::CreateRemoteThread(
+      process.GetHandle(), nullptr, 0, stub_remote_pfn, nullptr, 0, nullptr));
+    if (!remote_thread.GetHandle())
     {
       DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(Error() << 
@@ -374,14 +368,9 @@ CreateAndInjectData CreateAndInject(
         ErrorCodeWinLast(last_error));
     }
 
-    BOOST_SCOPE_EXIT_ALL(&)
-    {
-      // WARNING: Handle is leaked if CloseHandle fails.
-      BOOST_VERIFY(::CloseHandle(remote_thread));
-    };
-
     // TODO: Add a sensible timeout.
-    if (::WaitForSingleObject(remote_thread, INFINITE) != WAIT_OBJECT_0)
+    if (::WaitForSingleObject(remote_thread.GetHandle(), INFINITE) != 
+      WAIT_OBJECT_0)
     {
       DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(Error() << 
@@ -398,7 +387,7 @@ CreateAndInjectData CreateAndInject(
       export_ret = CallExport(process, remote_module, export_name);
     }
 
-    if (::ResumeThread(proc_info.hThread) == static_cast<DWORD>(-1))
+    if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
     {
       DWORD const last_error = ::GetLastError();
       BOOST_THROW_EXCEPTION(Error() << 
@@ -415,7 +404,7 @@ CreateAndInjectData CreateAndInject(
   {
     // Terminate process if injection failed, otherwise the 'zombie' process 
     // would be leaked.
-    ::TerminateProcess(proc_info.hProcess, 0);
+    ::TerminateProcess(proc_handle.GetHandle(), 0);
 
     throw;
   }

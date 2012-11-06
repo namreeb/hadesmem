@@ -26,20 +26,11 @@ namespace detail
 struct ProcessIteratorImpl
 {
   ProcessIteratorImpl() BOOST_NOEXCEPT
-    : snap_(nullptr), 
+    : snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     process_()
   { }
   
-  ~ProcessIteratorImpl()
-  {
-    if (snap_ && snap_ != INVALID_HANDLE_VALUE)
-    {
-      // WARNING: Handle is leaked if CloseHandle fails.
-      BOOST_VERIFY(::CloseHandle(snap_));
-    }
-  }
-  
-  HANDLE snap_;
+  SmartHandle snap_;
   boost::optional<ProcessEntry> process_;
   
 private:

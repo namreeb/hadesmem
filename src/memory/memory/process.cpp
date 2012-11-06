@@ -13,7 +13,6 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
@@ -51,7 +50,7 @@ Process::Process(Process const& other)
   : id_(0), 
   handle_(nullptr)
 {
-  HANDLE const new_handle = Duplicate(other.handle_);
+  HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
   
   handle_ = new_handle;
   id_ = other.id_;
@@ -59,7 +58,7 @@ Process::Process(Process const& other)
 
 Process& Process::operator=(Process const& other)
 {
-  HANDLE const new_handle = Duplicate(other.handle_);
+  HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
   
   Cleanup();
   
@@ -71,10 +70,9 @@ Process& Process::operator=(Process const& other)
 
 Process::Process(Process&& other) BOOST_NOEXCEPT
   : id_(other.id_), 
-  handle_(other.handle_)
+  handle_(std::move(other.handle_))
 {
   other.id_ = 0;
-  other.handle_ = nullptr;
 }
 
 Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
@@ -82,10 +80,9 @@ Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
   Cleanup();
   
   id_ = other.id_;
-  handle_ = other.handle_;
+  handle_ = std::move(other.handle_);
   
   other.id_ = 0;
-  other.handle_ = nullptr;
   
   return *this;
 }
@@ -102,31 +99,19 @@ DWORD Process::GetId() const BOOST_NOEXCEPT
 
 HANDLE Process::GetHandle() const BOOST_NOEXCEPT
 {
-  return handle_;
+  return handle_.GetHandle();
 }
 
 void Process::Cleanup()
 {
-  if (!handle_)
-  {
-    return;
-  }
-  
-  if (!::CloseHandle(handle_))
-  {
-    DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("CloseHandle failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
+  handle_.Cleanup();
   id_ = 0;
-  handle_ = nullptr;
 }
 
 void Process::CheckWoW64() const
 {
-  if (IsWoW64Process(::GetCurrentProcess()) != IsWoW64Process(handle_))
+  if (IsWoW64Process(::GetCurrentProcess()) != 
+    IsWoW64Process(handle_.GetHandle()))
   {
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Cross-architecture process manipulation is currently "
@@ -246,21 +231,16 @@ bool IsWoW64(Process const& process)
 
 void GetSeDebugPrivilege()
 {
-  HANDLE process_token = 0;
+  HANDLE process_token_temp = 0;
   if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | 
-    TOKEN_QUERY, &process_token)) 
+    TOKEN_QUERY, &process_token_temp)) 
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcessToken failed.") << 
       ErrorCodeWinLast(last_error));
   }
-
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    // WARNING: Handle is leaked if CloseHandle fails.
-    BOOST_VERIFY(::CloseHandle(process_token));
-  };
+  detail::SmartHandle const process_token(process_token_temp);
 
   LUID luid = { 0, 0 };
   if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
@@ -276,7 +256,7 @@ void GetSeDebugPrivilege()
   privileges.PrivilegeCount = 1;
   privileges.Privileges[0].Luid = luid;
   privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-  if (!::AdjustTokenPrivileges(process_token, FALSE, &privileges, 
+  if (!::AdjustTokenPrivileges(process_token.GetHandle(), FALSE, &privileges, 
     sizeof(privileges), nullptr, nullptr) || 
     ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
   {

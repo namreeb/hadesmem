@@ -16,6 +16,7 @@
 #include <windows.h>
 
 #include "hadesmem/module.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
 {
@@ -29,21 +30,12 @@ struct ModuleIteratorImpl
 {
   ModuleIteratorImpl() BOOST_NOEXCEPT
     : process_(nullptr), 
-    snap_(nullptr), 
+    snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     module_()
   { }
   
-  ~ModuleIteratorImpl()
-  {
-    if (snap_ && snap_ != INVALID_HANDLE_VALUE)
-    {
-      // WARNING: Handle is leaked if CloseHandle fails.
-      BOOST_VERIFY(::CloseHandle(snap_));
-    }
-  }
-  
   Process const* process_;
-  HANDLE snap_;
+  SmartHandle snap_;
   boost::optional<Module> module_;
   
 private:

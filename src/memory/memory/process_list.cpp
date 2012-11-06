@@ -31,12 +31,12 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   BOOST_ASSERT(impl_.get());
   
   impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if (impl_->snap_ == INVALID_HANDLE_VALUE)
+  if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
   {
     if (::GetLastError() == ERROR_BAD_LENGTH)
     {
       impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-      if (impl_->snap_ == INVALID_HANDLE_VALUE)
+      if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
@@ -56,7 +56,7 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   PROCESSENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!::Process32First(impl_->snap_, &entry))
+  if (!::Process32First(impl_->snap_.GetHandle(), &entry))
   {
     DWORD const last_error = ::GetLastError();
     
@@ -117,7 +117,7 @@ ProcessIterator& ProcessIterator::operator++()
   PROCESSENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
   entry.dwSize = sizeof(entry);
-  if (!::Process32Next(impl_->snap_, &entry))
+  if (!::Process32Next(impl_->snap_.GetHandle(), &entry))
   {
     if (::GetLastError() == ERROR_NO_MORE_FILES)
     {
