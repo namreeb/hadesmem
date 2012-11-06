@@ -98,9 +98,6 @@ ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other)
   return *this;
 }
 
-ProcessIterator::~ProcessIterator()
-{ }
-
 ProcessIterator::reference ProcessIterator::operator*() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
@@ -179,9 +176,6 @@ ProcessList& ProcessList::operator=(ProcessList&& /*other*/) BOOST_NOEXCEPT
 {
   return *this;
 }
-
-ProcessList::~ProcessList()
-{ }
 
 ProcessList::iterator ProcessList::begin()
 {

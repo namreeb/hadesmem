@@ -52,8 +52,6 @@ public:
   
   ModuleIterator& operator=(ModuleIterator&& other) BOOST_NOEXCEPT;
   
-  ~ModuleIterator();
-  
   reference operator*() const BOOST_NOEXCEPT;
   
   pointer operator->() const BOOST_NOEXCEPT;
@@ -84,16 +82,6 @@ public:
   typedef ModuleIterator const_iterator;
   
   explicit ModuleList(Process const* process) BOOST_NOEXCEPT;
-  
-  ModuleList(ModuleList const& other) BOOST_NOEXCEPT;
-  
-  ModuleList& operator=(ModuleList const& other) BOOST_NOEXCEPT;
-  
-  ModuleList(ModuleList&& other) BOOST_NOEXCEPT;
-  
-  ModuleList& operator=(ModuleList&& other) BOOST_NOEXCEPT;
-  
-  ~ModuleList();
   
   iterator begin();
   

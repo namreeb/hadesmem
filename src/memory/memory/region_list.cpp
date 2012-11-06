@@ -64,9 +64,6 @@ RegionIterator& RegionIterator::operator=(RegionIterator&& other)
   return *this;
 }
 
-RegionIterator::~RegionIterator()
-{ }
-
 RegionIterator::reference RegionIterator::operator*() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
@@ -147,9 +144,6 @@ RegionList& RegionList::operator=(RegionList&& other) BOOST_NOEXCEPT
   
   return *this;
 }
-
-RegionList::~RegionList()
-{ }
 
 RegionList::iterator RegionList::begin()
 {

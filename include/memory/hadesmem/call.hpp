@@ -438,8 +438,6 @@ public:
   MultiCall(MultiCall&& other) BOOST_NOEXCEPT;
   
   MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT;
-  
-  ~MultiCall();
 
 #ifndef BOOST_NO_VARIADIC_TEMPLATES
 

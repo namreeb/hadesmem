@@ -797,9 +797,6 @@ MultiCall& MultiCall::operator=(MultiCall&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-MultiCall::~MultiCall()
-{ }
-
 std::vector<CallResultRaw> MultiCall::Call() const
 {
   return CallMulti(*process_, addresses_, call_convs_, args_);

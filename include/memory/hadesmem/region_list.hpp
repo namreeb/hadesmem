@@ -54,8 +54,6 @@ public:
   
   RegionIterator& operator=(RegionIterator&& other) BOOST_NOEXCEPT;
   
-  ~RegionIterator();
-  
   reference operator*() const BOOST_NOEXCEPT;
   
   pointer operator->() const BOOST_NOEXCEPT;
@@ -94,8 +92,6 @@ public:
   RegionList(RegionList&& other) BOOST_NOEXCEPT;
   
   RegionList& operator=(RegionList&& other) BOOST_NOEXCEPT;
-  
-  ~RegionList();
   
   iterator begin();
   

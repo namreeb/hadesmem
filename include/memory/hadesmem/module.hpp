@@ -37,8 +37,6 @@ public:
   
   Module& operator=(Module&& other) BOOST_NOEXCEPT;
   
-  ~Module();
-  
   HMODULE GetHandle() const BOOST_NOEXCEPT;
   
   DWORD GetSize() const BOOST_NOEXCEPT;

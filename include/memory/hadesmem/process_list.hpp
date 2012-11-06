@@ -53,8 +53,6 @@ public:
   
   ProcessIterator& operator=(ProcessIterator&& other) BOOST_NOEXCEPT;
   
-  ~ProcessIterator();
-  
   reference operator*() const BOOST_NOEXCEPT;
   
   pointer operator->() const BOOST_NOEXCEPT;
@@ -92,8 +90,6 @@ public:
   ProcessList(ProcessList&& other) BOOST_NOEXCEPT;
   
   ProcessList& operator=(ProcessList&& other) BOOST_NOEXCEPT;
-  
-  ~ProcessList();
   
   iterator begin();
   

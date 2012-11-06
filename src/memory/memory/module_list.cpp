@@ -104,9 +104,6 @@ ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other)
   return *this;
 }
 
-ModuleIterator::~ModuleIterator()
-{ }
-
 ModuleIterator::reference ModuleIterator::operator*() const BOOST_NOEXCEPT
 {
   BOOST_ASSERT(impl_.get());
@@ -169,35 +166,6 @@ ModuleList::ModuleList(Process const* process) BOOST_NOEXCEPT
 {
   BOOST_ASSERT(process != nullptr);
 }
-
-ModuleList::ModuleList(ModuleList const& other) BOOST_NOEXCEPT
-  : process_(other.process_)
-{ }
-
-ModuleList& ModuleList::operator=(ModuleList const& other) BOOST_NOEXCEPT
-{
-  process_ = other.process_;
-  
-  return *this;
-}
-
-ModuleList::ModuleList(ModuleList&& other) BOOST_NOEXCEPT
-  : process_(other.process_)
-{
-  other.process_ = nullptr;
-}
-
-ModuleList& ModuleList::operator=(ModuleList&& other) BOOST_NOEXCEPT
-{
-  process_ = other.process_;
-  
-  other.process_ = nullptr;
-  
-  return *this;
-}
-
-ModuleList::~ModuleList()
-{ }
 
 ModuleList::iterator ModuleList::begin()
 {

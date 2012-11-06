@@ -258,9 +258,6 @@ CreateAndInjectData& CreateAndInjectData::operator=(
   return *this;
 }
 
-CreateAndInjectData::~CreateAndInjectData()
-{ }
-
 Process CreateAndInjectData::GetProcess() const
 {
   return process_;

@@ -30,41 +30,6 @@ Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi)
   BOOST_ASSERT(process != nullptr);
 }
 
-Region::Region(Region const& other) BOOST_NOEXCEPT
-  : process_(other.process_), 
-  mbi_(other.mbi_)
-{ }
-
-Region& Region::operator=(Region const& other) BOOST_NOEXCEPT
-{
-  process_ = other.process_;
-  mbi_ = other.mbi_;
-  
-  return *this;
-}
-
-Region::Region(Region&& other) BOOST_NOEXCEPT
-  : process_(other.process_), 
-  mbi_(other.mbi_)
-{
-  other.process_ = nullptr;
-  ::ZeroMemory(&other.mbi_, sizeof(other.mbi_));
-}
-
-Region& Region::operator=(Region&& other) BOOST_NOEXCEPT
-{
-  process_ = other.process_;
-  mbi_ = other.mbi_;
-  
-  other.process_ = nullptr;
-  ::ZeroMemory(&other.mbi_, sizeof(other.mbi_));
-  
-  return *this;
-}
-
-Region::~Region()
-{ }
-
 PVOID Region::GetBase() const BOOST_NOEXCEPT
 {
   return mbi_.BaseAddress;

@@ -56,8 +56,6 @@ public:
 
   CreateAndInjectData& operator=(CreateAndInjectData&& Other) BOOST_NOEXCEPT;
 
-  ~CreateAndInjectData();
-
   Process GetProcess() const;
 
   HMODULE GetModule() const BOOST_NOEXCEPT;

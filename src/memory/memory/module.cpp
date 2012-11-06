@@ -145,9 +145,6 @@ Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-Module::~Module()
-{ }
-
 HMODULE Module::GetHandle() const BOOST_NOEXCEPT
 {
   return handle_;

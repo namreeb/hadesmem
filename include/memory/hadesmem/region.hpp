@@ -26,16 +26,6 @@ public:
   Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
     BOOST_NOEXCEPT;
   
-  Region(Region const& other) BOOST_NOEXCEPT;
-  
-  Region& operator=(Region const& other) BOOST_NOEXCEPT;
-  
-  Region(Region&& other) BOOST_NOEXCEPT;
-  
-  Region& operator=(Region&& other) BOOST_NOEXCEPT;
-  
-  ~Region();
-  
   PVOID GetBase() const BOOST_NOEXCEPT;
   
   PVOID GetAllocBase() const BOOST_NOEXCEPT;
