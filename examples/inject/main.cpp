@@ -157,12 +157,12 @@ int main()
       if (var_map.count("export"))
       {
         std::string const export_name = var_map["export"].as<std::string>();
-        std::pair<DWORD_PTR, DWORD> const export_ret = hadesmem::CallExport(
-          process, module, export_name);
+        auto const export_ret = hadesmem::CallExport(process, module, 
+          export_name);
 
         std::wcout << "Successfully called module export.\n";
-        std::wcout << "Return: " << export_ret.first << ".\n";
-        std::wcout << "LastError: " << export_ret.second << ".\n";
+        std::wcout << "Return: " << export_ret.GetReturnValue() << ".\n";
+        std::wcout << "LastError: " << export_ret.GetLastError() << ".\n";
       }
 
       if (!inject)

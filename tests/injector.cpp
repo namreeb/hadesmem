@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(injector)
   // Call Kernel32.dll!GetCurrentProcessId and ensure the return value and 
   // last error code are their expected values.
   SetLastError(0);
-  std::pair<DWORD_PTR, DWORD> const export_ret = 
+  auto const export_ret = 
     CallExport(process, kernel32_mod_new, "GetCurrentProcessId");
-  BOOST_CHECK_EQUAL(export_ret.first, GetCurrentProcessId());
-  BOOST_CHECK_EQUAL(export_ret.second, 0UL);
+  BOOST_CHECK_EQUAL(export_ret.GetReturnValue(), GetCurrentProcessId());
+  BOOST_CHECK_EQUAL(export_ret.GetLastError(), 0UL);
 
   // Perform injection test again so we can test the FreeDll API.
   HMODULE const kernel32_mod_new_2 = hadesmem::InjectDll(process, 

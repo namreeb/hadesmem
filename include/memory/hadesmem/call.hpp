@@ -42,26 +42,57 @@ enum class CallConv
   kX64
 };
 
+template <typename T>
 class CallResult
 {
 public:
-  CallResult(DWORD_PTR return_int_ptr, 
+  CallResult(T const& result, DWORD last_error)
+    : result_(result), 
+    last_error_(last_error)
+  { }
+
+  T GetReturnValue() const
+  {
+    return result_;
+  }
+
+  DWORD GetLastError() const
+  {
+    return last_error_;
+  }
+
+private:
+  T result_;
+  DWORD last_error_;
+};
+
+template <>
+class CallResult<void>
+{
+public:
+  CallResult(DWORD last_error)
+    : last_error_(last_error)
+  { }
+
+  DWORD GetLastError() const
+  {
+    return last_error_;
+  }
+
+private:
+  DWORD last_error_;
+};
+
+class CallResultRaw
+{
+public:
+  CallResultRaw(DWORD_PTR return_int_ptr, 
     DWORD32 return_int_32, 
     DWORD64 return_int_64, 
     float return_float, 
     double return_double, 
     DWORD last_error) BOOST_NOEXCEPT;
 
-  CallResult(CallResult const& other) BOOST_NOEXCEPT;
-
-  CallResult& operator=(CallResult const& other) BOOST_NOEXCEPT;
-
-  CallResult(CallResult&& other) BOOST_NOEXCEPT;
-
-  CallResult& operator=(CallResult&& other) BOOST_NOEXCEPT;
-
-  ~CallResult();
-  
   DWORD_PTR GetReturnValueIntPtr() const BOOST_NOEXCEPT;
 
   DWORD32 GetReturnValueInt32() const BOOST_NOEXCEPT;
@@ -217,12 +248,12 @@ private:
   ArgType type_;
 };
 
-CallResult Call(Process const& process, 
+CallResultRaw Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args);
 
-std::vector<CallResult> CallMulti(Process const& process, 
+std::vector<CallResultRaw> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
@@ -231,16 +262,16 @@ namespace detail
 {
 
 template <typename T>
-struct VoidToInt
+CallResult<T> CallResultRawToCallResult(CallResultRaw const& result)
 {
-  typedef T type;
-};
+  return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
+}
 
 template <>
-struct VoidToInt<void>
+inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 {
-  typedef int type;
-};
+  return CallResult<void>(result.GetLastError());
+}
 
 }
 
@@ -314,9 +345,8 @@ void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
 }
 
 template <typename FuncT, typename... Args>
-std::pair<typename detail::VoidToInt<
-  typename detail::FuncResultT<FuncT>::type>::type, DWORD> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+CallResult<typename detail::FuncResultT<FuncT>::type> Call(
+  Process const& process, LPCVOID address, CallConv call_conv, 
   Args&&... args)
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
@@ -325,10 +355,9 @@ std::pair<typename detail::VoidToInt<
   call_args.reserve(sizeof...(args));
   detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
 
-  CallResult const ret = Call(process, address, call_conv, call_args);
-  typedef typename detail::VoidToInt<
-    typename detail::FuncResultT<FuncT>::type>::type ResultT;
-  return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());
+  CallResultRaw const ret = Call(process, address, call_conv, call_args);
+  typedef typename detail::FuncResultT<FuncT>::type ResultT;
+  return detail::CallResultRawToCallResult<ResultT>(ret);
 }
 
 #else // #ifndef BOOST_NO_VARIADIC_TEMPLATES
@@ -351,8 +380,7 @@ args.emplace_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-std::pair<typename detail::VoidToInt<\
-  typename boost::function_types::result_type<FuncT>::type>::type, DWORD> \
+CallResult<typename boost::function_types::result_type<FuncT>::type> \
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
@@ -360,10 +388,9 @@ std::pair<typename detail::VoidToInt<\
     == n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
-  CallResult const ret = Call(process, address, call_conv, args);\
-  typedef typename detail::VoidToInt<\
-    typename boost::function_types::result_type<FuncT>::type>::type ResultT;\
-  return std::make_pair(ret.GetReturnValue<ResultT>(), ret.GetLastError());\
+  CallResultRaw const ret = Call(process, address, call_conv, args);\
+  typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
+return detail::CallResultRawToCallResult<ResultT>(ret);\
 }\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
@@ -481,7 +508,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 
 #endif // #ifndef BOOST_NO_VARIADIC_TEMPLATES
   
-  std::vector<CallResult> Call() const;
+  std::vector<CallResultRaw> Call() const;
   
 private:
   Process const* process_;

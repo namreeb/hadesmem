@@ -15,6 +15,7 @@
 
 #include <windows.h>
 
+#include "hadesmem/call.hpp"
 #include "hadesmem/process.hpp"
 
 namespace hadesmem
@@ -38,7 +39,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
 void FreeDll(Process const& process, HMODULE module);
 
-std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module, 
+CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
   std::string const& export_name);
 
 class CreateAndInjectData

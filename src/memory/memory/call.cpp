@@ -625,7 +625,7 @@ void ArgVisitor64::operator()(double arg) BOOST_NOEXCEPT
 
 #endif // #if defined(_M_AMD64)
   
-CallResult::CallResult(DWORD_PTR return_int_ptr, 
+CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr, 
   DWORD32 return_int_32, 
   DWORD64 return_int_64, 
   float return_float, 
@@ -639,100 +639,37 @@ CallResult::CallResult(DWORD_PTR return_int_ptr,
   last_error_(last_error)
 { }
 
-CallResult::CallResult(CallResult const& other) BOOST_NOEXCEPT
-  : int_ptr_(other.int_ptr_), 
-  int_32_(other.int_32_), 
-  int_64_(other.int_64_), 
-  float_(other.float_), 
-  double_(other.double_), 
-  last_error_(other.last_error_)
-{ }
-
-CallResult& CallResult::operator=(CallResult const& other) BOOST_NOEXCEPT
-{
-  int_ptr_ = other.int_ptr_;
-  int_32_ = other.int_32_;
-  int_64_ = other.int_64_;
-  float_ = other.float_;
-  double_ = other.double_;
-  last_error_ = other.last_error_;
-
-  return *this;
-}
-
-CallResult::CallResult(CallResult&& other) BOOST_NOEXCEPT
-  : int_ptr_(other.int_ptr_), 
-  int_32_(other.int_32_), 
-  int_64_(other.int_64_), 
-  float_(other.float_), 
-  double_(other.double_), 
-  last_error_(other.last_error_)
-{
-  other.int_ptr_ = 0;
-  other.int_32_ = 0;
-  other.int_64_ = 0;
-  other.float_ = 0;
-  other.double_ = 0;
-  other.last_error_ = 0;
-}
-
-CallResult& CallResult::operator=(CallResult&& other) BOOST_NOEXCEPT
-{
-  int_ptr_ = other.int_ptr_;
-  other.int_ptr_ = 0;
-
-  int_64_ = other.int_64_;
-  other.int_64_ = 0;
-
-  int_32_ = other.int_32_;
-  other.int_32_ = 0;
-
-  float_ = other.float_;
-  other.float_ = 0;
-
-  double_ = other.double_;
-  other.double_ = 0;
-
-  last_error_ = other.last_error_;
-  other.last_error_ = 0;
-
-  return *this;
-}
-
-CallResult::~CallResult()
-{ }
-
-DWORD_PTR CallResult::GetReturnValueIntPtr() const BOOST_NOEXCEPT
+DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const BOOST_NOEXCEPT
 {
   return int_ptr_;
 }
 
-DWORD32 CallResult::GetReturnValueInt32() const BOOST_NOEXCEPT
+DWORD32 CallResultRaw::GetReturnValueInt32() const BOOST_NOEXCEPT
 {
   return int_32_;
 }
 
-DWORD64 CallResult::GetReturnValueInt64() const BOOST_NOEXCEPT
+DWORD64 CallResultRaw::GetReturnValueInt64() const BOOST_NOEXCEPT
 {
   return int_64_;
 }
 
-float CallResult::GetReturnValueFloat() const BOOST_NOEXCEPT
+float CallResultRaw::GetReturnValueFloat() const BOOST_NOEXCEPT
 {
   return float_;
 }
 
-double CallResult::GetReturnValueDouble() const BOOST_NOEXCEPT
+double CallResultRaw::GetReturnValueDouble() const BOOST_NOEXCEPT
 {
   return double_;
 }
 
-DWORD CallResult::GetLastError() const BOOST_NOEXCEPT
+DWORD CallResultRaw::GetLastError() const BOOST_NOEXCEPT
 {
   return last_error_;
 }
 
-CallResult Call(Process const& process, 
+CallResultRaw Call(Process const& process, 
   LPCVOID address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args)
@@ -746,7 +683,7 @@ CallResult Call(Process const& process,
   return CallMulti(process, addresses, call_convs, args_full)[0];
 }
 
-std::vector<CallResult> CallMulti(Process const& process, 
+std::vector<CallResultRaw> CallMulti(Process const& process, 
   std::vector<LPCVOID> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
@@ -793,14 +730,14 @@ std::vector<CallResult> CallMulti(Process const& process,
     ReadVector<CallResultRemote>(process, 
     return_values_remote.GetBase(), addresses.size());
   
-  std::vector<CallResult> return_vals;
+  std::vector<CallResultRaw> return_vals;
   return_vals.reserve(addresses.size());
   
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     std::back_inserter(return_vals), 
     [] (CallResultRemote const& r)
     {
-      return CallResult(r.return_value, 
+      return CallResultRaw(r.return_value, 
         r.return_value_32, 
         r.return_value_64, 
         r.return_value_float, 
@@ -863,7 +800,7 @@ MultiCall& MultiCall::operator=(MultiCall&& other) BOOST_NOEXCEPT
 MultiCall::~MultiCall()
 { }
 
-std::vector<CallResult> MultiCall::Call() const
+std::vector<CallResultRaw> MultiCall::Call() const
 {
   return CallMulti(*process_, addresses_, call_convs_, args_);
 }

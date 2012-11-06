@@ -161,18 +161,18 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
   typedef HMODULE (*LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
     DWORD dwFlags);
-  std::pair<HMODULE, DWORD> const load_library_ret = 
+  auto const load_library_ret = 
     Call<LoadLibraryExFuncT>(process, load_library, CallConv::kWinApi, 
     static_cast<LPCWSTR>(lib_file_remote.GetBase()), nullptr, 
     add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
-  if (!load_library_ret.first)
+  if (!load_library_ret.GetReturnValue())
   {
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Call to LoadLibraryW in remote process failed.") << 
-      ErrorCodeWinLast(load_library_ret.second));
+      ErrorCodeWinLast(load_library_ret.GetLastError()));
   }
 
-  return load_library_ret.first;
+  return load_library_ret.GetReturnValue();
 }
 
 void FreeDll(Process const& process, HMODULE module)
@@ -182,18 +182,18 @@ void FreeDll(Process const& process, HMODULE module)
     reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, "FreeLibrary")));
 
   typedef BOOL (*FreeLibraryFuncT)(HMODULE hModule);
-  std::pair<BOOL, DWORD> const free_library_ret = 
+  auto const free_library_ret = 
     Call<FreeLibraryFuncT>(process, free_library, CallConv::kWinApi, module);
-  if (!free_library_ret.first)
+  if (!free_library_ret.GetReturnValue())
   {
     BOOST_THROW_EXCEPTION(Error() << 
       ErrorString("Call to FreeLibrary in remote process failed.") << 
-      ErrorCodeWinLast(free_library_ret.second));
+      ErrorCodeWinLast(free_library_ret.GetLastError()));
   }
 }
 
 // TODO: Configurable timeout.
-std::pair<DWORD_PTR, DWORD> CallExport(Process const& process, HMODULE module, 
+CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
   std::string const& export_name)
 {
   Module const module_remote(&process, module);
@@ -394,7 +394,7 @@ CreateAndInjectData CreateAndInject(
 
     HMODULE const remote_module = InjectDll(process, module, flags);
 
-    std::pair<DWORD_PTR, DWORD> export_ret(0, 0);
+    CallResult<DWORD_PTR> export_ret(0, 0);
     if (!export_name.empty())
     {
       // TODO: Configurable timeout.
@@ -407,12 +407,12 @@ CreateAndInjectData CreateAndInject(
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Could not resume process.") << 
         ErrorCodeWinLast(last_error) << 
-        ErrorCodeWinRet(export_ret.first) << 
-        ErrorCodeWinOther(export_ret.second));
+        ErrorCodeWinRet(export_ret.GetReturnValue()) << 
+        ErrorCodeWinOther(export_ret.GetLastError()));
     }
 
-    return CreateAndInjectData(process, remote_module, export_ret.first, 
-      export_ret.second);
+    return CreateAndInjectData(process, remote_module, 
+      export_ret.GetReturnValue(), export_ret.GetLastError());
   }
   catch (std::exception const& /*e*/)
   {
