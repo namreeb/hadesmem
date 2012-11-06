@@ -9,7 +9,6 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -33,7 +32,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not load module locally.") << 
+      ErrorString("LoadLibraryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
   
@@ -48,7 +47,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not find target function.") << 
+      ErrorString("GetProcAddress failed.") << 
       ErrorCodeWinLast(last_error));
   }
   
@@ -59,6 +58,73 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
   
   return remote_func;
+}
+
+HANDLE GetFileHandleForQuery(std::wstring const& path)
+{
+  HANDLE const handle = ::CreateFile(path.c_str(), 
+    0, 
+    FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 
+    nullptr, 
+    OPEN_EXISTING, 
+    FILE_FLAG_BACKUP_SEMANTICS, 
+    nullptr);
+  if (handle == INVALID_HANDLE_VALUE)
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("CreateFile failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return handle;
+}
+
+BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE handle)
+{
+  BY_HANDLE_FILE_INFORMATION info;
+  ::ZeroMemory(&info, sizeof(info));
+  if (!GetFileInformationByHandle(handle, &info))
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("GetFileInformationByHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return info;
+}
+
+bool IsPathEquivalent(std::wstring const& path1, std::wstring const& path2)
+{
+  HANDLE const handle1 = GetFileHandleForQuery(path1);
+
+  BOOST_SCOPE_EXIT_ALL(&)
+  {
+    // WARNING: Handle is leaked if CloseHandle fails.
+    BOOST_VERIFY(::CloseHandle(handle1));
+  };
+
+  HANDLE const handle2 = GetFileHandleForQuery(path2);
+
+  BOOST_SCOPE_EXIT_ALL(&)
+  {
+    // WARNING: Handle is leaked if CloseHandle fails.
+    BOOST_VERIFY(::CloseHandle(handle2));
+  };
+
+  BY_HANDLE_FILE_INFORMATION const info1 = GetFileInformationByHandle(handle1);
+  BY_HANDLE_FILE_INFORMATION const info2 = GetFileInformationByHandle(handle2);
+
+  return info1.dwVolumeSerialNumber == info2.dwVolumeSerialNumber
+    && info1.nFileIndexHigh == info2.nFileIndexHigh
+    && info1.nFileIndexLow == info2.nFileIndexLow
+    && info1.nFileSizeHigh == info2.nFileSizeHigh
+    && info1.nFileSizeLow == info2.nFileSizeLow
+    && info1.ftLastWriteTime.dwLowDateTime == 
+    info2.ftLastWriteTime.dwLowDateTime
+    && info1.ftLastWriteTime.dwHighDateTime == 
+    info2.ftLastWriteTime.dwHighDateTime;
 }
 
 }
@@ -191,14 +257,19 @@ void Module::Initialize(std::wstring const& path)
   auto path_check = 
     [&] (MODULEENTRY32 const& entry) -> bool
     {
-      if (is_path && boost::filesystem::equivalent(path, entry.szExePath))
+      if (is_path)
       {
-        return true;
+        if (IsPathEquivalent(path, entry.szExePath))
+        {
+          return true;
+        }
       }
-      
-      if (!is_path && path_upper == detail::ToUpperOrdinal(entry.szModule))
+      else
       {
-        return true;
+        if (path_upper == detail::ToUpperOrdinal(entry.szModule))
+        {
+          return true;
+        }
       }
       
       return false;

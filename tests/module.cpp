@@ -9,7 +9,6 @@
 
 #define BOOST_TEST_MODULE module
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
