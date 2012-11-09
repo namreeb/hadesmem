@@ -9,10 +9,6 @@
 
 #include <iostream>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 
