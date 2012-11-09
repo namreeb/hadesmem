@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <boost/config.hpp>
-#include <boost/version.hpp>
-
 #define HADESMEM_VERSION_MAJOR 2
 #define HADESMEM_VERSION_MINOR 0
 #define HADESMEM_VERSION_PATCH 0
@@ -21,3 +18,27 @@ HADESMEM_VERSION_STRING_GEN_EXP(x, y, z)
 
 #define HADESMEM_VERSION_STRING HADESMEM_VERSION_STRING_GEN(\
 HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
+
+#if defined(HADESMEM_MSVC)
+#define HADESMEM_NO_DELETED_FUNCTIONS
+#endif
+
+#if defined(HADESMEM_MSVC)
+#define HADESMEM_NO_NOEXCEPT
+#endif
+
+#if defined(HADESMEM_MSVC)
+#define HADESMEM_NO_VARIADIC_TEMPLATES
+#endif
+
+#if defined(HADESMEM_NO_DELETED_FUNCTIONS)
+#define HADESMEM_DELETED_FUNCTION 
+#else
+#define HADESMEM_DELETED_FUNCTION = delete
+#endif
+
+#if defined(HADESMEM_NO_NOEXCEPT)
+#define HADESMEM_NOEXCEPT 
+#else
+#define HADESMEM_NOEXCEPT noexcept
+#endif

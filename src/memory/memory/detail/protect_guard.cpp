@@ -43,7 +43,7 @@ ProtectGuard::ProtectGuard(Process const* process, PVOID address,
   }
 }
 
-ProtectGuard::ProtectGuard(ProtectGuard const& other) BOOST_NOEXCEPT
+ProtectGuard::ProtectGuard(ProtectGuard&& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   address_(other.address_), 
   type_(other.type_), 
@@ -51,26 +51,7 @@ ProtectGuard::ProtectGuard(ProtectGuard const& other) BOOST_NOEXCEPT
   old_protect_(other.old_protect_)
 { }
 
-ProtectGuard& ProtectGuard::operator=(ProtectGuard const& other) BOOST_NOEXCEPT
-{
-  process_ = other.process_;
-  address_ = other.address_;
-  type_ = other.type_;
-  can_read_or_write_ = other.can_read_or_write_;
-  old_protect_ = other.old_protect_;
-
-  return *this;
-}
-
-ProtectGuard::ProtectGuard(ProtectGuard&& other) BOOST_NOEXCEPT
-  : process_(other.process_), 
-  address_(other.address_), 
-  type_(other.type_), 
-  can_read_or_write_(other.can_read_or_write_), 
-  old_protect_(other.old_protect_)
-{ }
-
-ProtectGuard& ProtectGuard::operator=(ProtectGuard&& other) BOOST_NOEXCEPT
+ProtectGuard& ProtectGuard::operator=(ProtectGuard&& other) HADESMEM_NOEXCEPT
 {
   process_ = other.process_;
   other.process_ = nullptr;
@@ -109,7 +90,7 @@ void ProtectGuard::Restore()
   old_protect_ = 0;
 }
 
-void ProtectGuard::RestoreUnchecked() BOOST_NOEXCEPT
+void ProtectGuard::RestoreUnchecked() HADESMEM_NOEXCEPT
 {
   try
   {

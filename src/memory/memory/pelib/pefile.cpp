@@ -89,13 +89,13 @@ PeFile::PeFile(Process const* process, PVOID base, PeFileType type)
   assert(base != 0);
 }
 
-PeFile::PeFile(PeFile const& other) BOOST_NOEXCEPT
+PeFile::PeFile(PeFile const& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   base_(other.base_), 
   type_(other.type_)
 { }
 
-PeFile& PeFile::operator=(PeFile const& other) BOOST_NOEXCEPT
+PeFile& PeFile::operator=(PeFile const& other) HADESMEM_NOEXCEPT
 {
   process_ = other.process_;
   base_ = other.base_;
@@ -104,7 +104,7 @@ PeFile& PeFile::operator=(PeFile const& other) BOOST_NOEXCEPT
   return *this;
 }
 
-PeFile::PeFile(PeFile&& other) BOOST_NOEXCEPT
+PeFile::PeFile(PeFile&& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   base_(other.base_), 
   type_(other.type_)
@@ -113,7 +113,7 @@ PeFile::PeFile(PeFile&& other) BOOST_NOEXCEPT
   other.base_ = nullptr;
 }
 
-PeFile& PeFile::operator=(PeFile&& other) BOOST_NOEXCEPT
+PeFile& PeFile::operator=(PeFile&& other) HADESMEM_NOEXCEPT
 {
   process_ = other.process_;
   other.process_ = nullptr;
@@ -127,42 +127,42 @@ PeFile& PeFile::operator=(PeFile&& other) BOOST_NOEXCEPT
 PeFile::~PeFile()
 { }
 
-PVOID PeFile::GetBase() const BOOST_NOEXCEPT
+PVOID PeFile::GetBase() const HADESMEM_NOEXCEPT
 {
   return base_;
 }
 
-PeFileType PeFile::GetType() const BOOST_NOEXCEPT
+PeFileType PeFile::GetType() const HADESMEM_NOEXCEPT
 {
   return type_;
 }
 
-bool operator==(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator==(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-bool operator!=(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator!=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-bool operator<(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator<(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-bool operator<=(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator<=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-bool operator>(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator>(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-bool operator>=(PeFile const& lhs, PeFile const& rhs) BOOST_NOEXCEPT
+bool operator>=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

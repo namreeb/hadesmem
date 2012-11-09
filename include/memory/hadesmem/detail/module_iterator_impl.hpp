@@ -8,12 +8,12 @@
 #pragma once
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
+#include "hadesmem/config.hpp"
 #include "hadesmem/module.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
 
@@ -27,7 +27,7 @@ namespace detail
 
 struct ModuleIteratorImpl
 {
-  ModuleIteratorImpl() BOOST_NOEXCEPT
+  ModuleIteratorImpl() HADESMEM_NOEXCEPT
     : process_(nullptr), 
     snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     module_()
@@ -38,8 +38,9 @@ struct ModuleIteratorImpl
   boost::optional<Module> module_;
   
 private:
-  ModuleIteratorImpl(ModuleIteratorImpl const&);
-  ModuleIteratorImpl& operator=(ModuleIteratorImpl const&);
+  ModuleIteratorImpl(ModuleIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
+  ModuleIteratorImpl& operator=(ModuleIteratorImpl const&) 
+    HADESMEM_DELETED_FUNCTION;
 };
 
 }

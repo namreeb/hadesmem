@@ -10,7 +10,7 @@
 #include <memory>
 #include <iterator>
 
-#include <boost/config.hpp>
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -41,29 +41,29 @@ class ProcessIterator : public std::iterator<std::input_iterator_tag,
   ProcessEntry>
 {
 public:
-  ProcessIterator() BOOST_NOEXCEPT;
+  ProcessIterator() HADESMEM_NOEXCEPT;
 
   explicit ProcessIterator(int dummy);
 
-  ProcessIterator(ProcessIterator const& other) BOOST_NOEXCEPT;
+  ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT;
   
-  ProcessIterator& operator=(ProcessIterator const& other) BOOST_NOEXCEPT;
+  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_NOEXCEPT;
   
-  ProcessIterator(ProcessIterator&& other) BOOST_NOEXCEPT;
+  ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT;
   
-  ProcessIterator& operator=(ProcessIterator&& other) BOOST_NOEXCEPT;
+  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_NOEXCEPT;
   
-  reference operator*() const BOOST_NOEXCEPT;
+  reference operator*() const HADESMEM_NOEXCEPT;
   
-  pointer operator->() const BOOST_NOEXCEPT;
+  pointer operator->() const HADESMEM_NOEXCEPT;
   
   ProcessIterator& operator++();
   
   ProcessIterator operator++(int);
   
-  bool operator==(ProcessIterator const& other) const BOOST_NOEXCEPT;
+  bool operator==(ProcessIterator const& other) const HADESMEM_NOEXCEPT;
   
-  bool operator!=(ProcessIterator const& other) const BOOST_NOEXCEPT;
+  bool operator!=(ProcessIterator const& other) const HADESMEM_NOEXCEPT;
   
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
@@ -81,23 +81,23 @@ public:
   typedef ProcessIterator iterator;
   typedef ProcessIterator const_iterator;
   
-  explicit ProcessList() BOOST_NOEXCEPT;
+  explicit ProcessList() HADESMEM_NOEXCEPT;
   
-  ProcessList(ProcessList const& other) BOOST_NOEXCEPT;
+  ProcessList(ProcessList const& other) HADESMEM_NOEXCEPT;
   
-  ProcessList& operator=(ProcessList const& other) BOOST_NOEXCEPT;
+  ProcessList& operator=(ProcessList const& other) HADESMEM_NOEXCEPT;
   
-  ProcessList(ProcessList&& other) BOOST_NOEXCEPT;
+  ProcessList(ProcessList&& other) HADESMEM_NOEXCEPT;
   
-  ProcessList& operator=(ProcessList&& other) BOOST_NOEXCEPT;
+  ProcessList& operator=(ProcessList&& other) HADESMEM_NOEXCEPT;
   
   iterator begin();
   
   const_iterator begin() const;
   
-  iterator end() BOOST_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT;
   
-  const_iterator end() const BOOST_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT;
 };
 
 }

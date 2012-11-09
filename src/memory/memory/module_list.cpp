@@ -18,7 +18,7 @@
 namespace hadesmem
 {
 
-ModuleIterator::ModuleIterator() BOOST_NOEXCEPT
+ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
@@ -75,37 +75,37 @@ ModuleIterator::ModuleIterator(Process const* process)
   impl_->module_ = Module(impl_->process_, entry);
 }
 
-ModuleIterator::ModuleIterator(ModuleIterator const& other) BOOST_NOEXCEPT
+ModuleIterator::ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
   : impl_(other.impl_)
 { }
 
 ModuleIterator& ModuleIterator::operator=(ModuleIterator const& other) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   impl_ = other.impl_;
   
   return *this;
 }
 
-ModuleIterator::ModuleIterator(ModuleIterator&& other) BOOST_NOEXCEPT
+ModuleIterator::ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
   : impl_(std::move(other.impl_))
 { }
 
 ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   impl_ = std::move(other.impl_);
   
   return *this;
 }
 
-ModuleIterator::reference ModuleIterator::operator*() const BOOST_NOEXCEPT
+ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
   return *impl_->module_;
 }
 
-ModuleIterator::pointer ModuleIterator::operator->() const BOOST_NOEXCEPT
+ModuleIterator::pointer ModuleIterator::operator->() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
   return &*impl_->module_;
@@ -145,18 +145,18 @@ ModuleIterator ModuleIterator::operator++(int)
 }
 
 bool ModuleIterator::operator==(ModuleIterator const& other) const 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
 bool ModuleIterator::operator!=(ModuleIterator const& other) const 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   return !(*this == other);
 }
 
-ModuleList::ModuleList(Process const* process) BOOST_NOEXCEPT
+ModuleList::ModuleList(Process const* process) HADESMEM_NOEXCEPT
   : process_(process)
 {
   assert(process != nullptr);
@@ -172,12 +172,12 @@ ModuleList::const_iterator ModuleList::begin() const
   return ModuleList::iterator(process_);
 }
 
-ModuleList::iterator ModuleList::end() BOOST_NOEXCEPT
+ModuleList::iterator ModuleList::end() HADESMEM_NOEXCEPT
 {
   return ModuleList::iterator();
 }
 
-ModuleList::const_iterator ModuleList::end() const BOOST_NOEXCEPT
+ModuleList::const_iterator ModuleList::end() const HADESMEM_NOEXCEPT
 {
   return ModuleList::iterator();
 }

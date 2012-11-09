@@ -8,12 +8,12 @@
 #pragma once
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
+#include "hadesmem/config.hpp"
 #include "hadesmem/region.hpp"
 
 namespace hadesmem
@@ -26,7 +26,7 @@ namespace detail
 
 struct RegionIteratorImpl
 {
-  RegionIteratorImpl() BOOST_NOEXCEPT
+  RegionIteratorImpl() HADESMEM_NOEXCEPT
     : process_(nullptr), 
     region_()
   { }
@@ -35,8 +35,9 @@ struct RegionIteratorImpl
   boost::optional<Region> region_;
   
 private:
-  RegionIteratorImpl(RegionIteratorImpl const&);
-  RegionIteratorImpl& operator=(RegionIteratorImpl const&);
+  RegionIteratorImpl(RegionIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
+  RegionIteratorImpl& operator=(RegionIteratorImpl const&) 
+    HADESMEM_DELETED_FUNCTION;
 };
 
 }

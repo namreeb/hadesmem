@@ -10,9 +10,7 @@
 #include <memory>
 #include <iterator>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -42,29 +40,29 @@ struct RegionIteratorImpl;
 class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
 {
 public:
-  RegionIterator() BOOST_NOEXCEPT;
+  RegionIterator() HADESMEM_NOEXCEPT;
   
   explicit RegionIterator(Process const* process);
   
-  RegionIterator(RegionIterator const& other) BOOST_NOEXCEPT;
+  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT;
   
-  RegionIterator& operator=(RegionIterator const& other) BOOST_NOEXCEPT;
+  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT;
   
-  RegionIterator(RegionIterator&& other) BOOST_NOEXCEPT;
+  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT;
   
-  RegionIterator& operator=(RegionIterator&& other) BOOST_NOEXCEPT;
+  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT;
   
-  reference operator*() const BOOST_NOEXCEPT;
+  reference operator*() const HADESMEM_NOEXCEPT;
   
-  pointer operator->() const BOOST_NOEXCEPT;
+  pointer operator->() const HADESMEM_NOEXCEPT;
   
   RegionIterator& operator++();
   
   RegionIterator operator++(int);
   
-  bool operator==(RegionIterator const& other) const BOOST_NOEXCEPT;
+  bool operator==(RegionIterator const& other) const HADESMEM_NOEXCEPT;
   
-  bool operator!=(RegionIterator const& other) const BOOST_NOEXCEPT;
+  bool operator!=(RegionIterator const& other) const HADESMEM_NOEXCEPT;
   
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
@@ -83,23 +81,23 @@ public:
   typedef RegionIterator iterator;
   typedef RegionIterator const_iterator;
   
-  explicit RegionList(Process const* process) BOOST_NOEXCEPT;
+  explicit RegionList(Process const* process) HADESMEM_NOEXCEPT;
   
-  RegionList(RegionList const& other) BOOST_NOEXCEPT;
+  RegionList(RegionList const& other) HADESMEM_NOEXCEPT;
   
-  RegionList& operator=(RegionList const& other) BOOST_NOEXCEPT;
+  RegionList& operator=(RegionList const& other) HADESMEM_NOEXCEPT;
   
-  RegionList(RegionList&& other) BOOST_NOEXCEPT;
+  RegionList(RegionList&& other) HADESMEM_NOEXCEPT;
   
-  RegionList& operator=(RegionList&& other) BOOST_NOEXCEPT;
+  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT;
   
   iterator begin();
   
   const_iterator begin() const;
   
-  iterator end() BOOST_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT;
   
-  const_iterator end() const BOOST_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT;
   
 private:
   Process const* process_;

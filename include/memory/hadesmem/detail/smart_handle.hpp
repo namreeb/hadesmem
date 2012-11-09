@@ -9,13 +9,10 @@
 
 #include <cassert>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include <windows.h>
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -27,12 +24,12 @@ class SmartHandle
 {
 public:
   explicit SmartHandle(HANDLE handle = nullptr, HANDLE invalid = nullptr) 
-    BOOST_NOEXCEPT
+    HADESMEM_NOEXCEPT
     : handle_(handle), 
     invalid_(invalid)
   { }
 
-  SmartHandle& operator=(HANDLE handle) BOOST_NOEXCEPT
+  SmartHandle& operator=(HANDLE handle) HADESMEM_NOEXCEPT
   {
     CleanupUnchecked();
 
@@ -41,14 +38,14 @@ public:
     return *this;
   }
 
-  SmartHandle(SmartHandle&& other) BOOST_NOEXCEPT
+  SmartHandle(SmartHandle&& other) HADESMEM_NOEXCEPT
     : handle_(other.handle_), 
     invalid_(other.invalid_)
   {
     other.handle_ = nullptr;
   }
 
-  SmartHandle& operator=(SmartHandle&& other) BOOST_NOEXCEPT
+  SmartHandle& operator=(SmartHandle&& other) HADESMEM_NOEXCEPT
   {
     CleanupUnchecked();
 
@@ -60,17 +57,17 @@ public:
     return *this;
   }
 
-  ~SmartHandle() BOOST_NOEXCEPT
+  ~SmartHandle()
   {
     CleanupUnchecked();
   }
 
-  HANDLE GetHandle() const
+  HANDLE GetHandle() const HADESMEM_NOEXCEPT
   {
     return handle_;
   }
 
-  HANDLE GetInvalid() const
+  HANDLE GetInvalid() const HADESMEM_NOEXCEPT
   {
     return invalid_;
   }
@@ -94,10 +91,10 @@ public:
   }
 
 private:
-  SmartHandle(SmartHandle const& other);
-  SmartHandle& operator=(SmartHandle const& other);
+  SmartHandle(SmartHandle const& other) HADESMEM_DELETED_FUNCTION;
+  SmartHandle& operator=(SmartHandle const& other) HADESMEM_DELETED_FUNCTION;
 
-  void CleanupUnchecked() BOOST_NOEXCEPT
+  void CleanupUnchecked() HADESMEM_NOEXCEPT
   {
     try
     {

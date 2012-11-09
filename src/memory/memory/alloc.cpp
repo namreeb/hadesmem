@@ -50,7 +50,7 @@ Allocator::Allocator(Process const* process, SIZE_T size)
   assert(size != 0);
 }
 
-Allocator::Allocator(Allocator&& other) BOOST_NOEXCEPT
+Allocator::Allocator(Allocator&& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   base_(other.base_), 
   size_(other.size_)
@@ -60,7 +60,7 @@ Allocator::Allocator(Allocator&& other) BOOST_NOEXCEPT
   other.size_ = 0;
 }
 
-Allocator& Allocator::operator=(Allocator&& other) BOOST_NOEXCEPT
+Allocator& Allocator::operator=(Allocator&& other) HADESMEM_NOEXCEPT
 {
   FreeUnchecked();
   
@@ -101,17 +101,17 @@ void Allocator::Free()
   size_ = 0;
 }
 
-PVOID Allocator::GetBase() const BOOST_NOEXCEPT
+PVOID Allocator::GetBase() const HADESMEM_NOEXCEPT
 {
   return base_;
 }
 
-SIZE_T Allocator::GetSize() const BOOST_NOEXCEPT
+SIZE_T Allocator::GetSize() const HADESMEM_NOEXCEPT
 {
   return size_;
 }
 
-void Allocator::FreeUnchecked() BOOST_NOEXCEPT
+void Allocator::FreeUnchecked() HADESMEM_NOEXCEPT
 {
   try
   {
@@ -131,32 +131,32 @@ void Allocator::FreeUnchecked() BOOST_NOEXCEPT
   }
 }
 
-bool operator==(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator==(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-bool operator!=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator!=(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-bool operator<(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator<(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-bool operator<=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator<=(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-bool operator>(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator>(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-bool operator>=(Allocator const& lhs, Allocator const& rhs) BOOST_NOEXCEPT
+bool operator>=(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -10,7 +10,7 @@
 #include <memory>
 #include <iterator>
 
-#include <boost/config.hpp>
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -40,29 +40,29 @@ struct ModuleIteratorImpl;
 class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
 {
 public:
-  ModuleIterator() BOOST_NOEXCEPT;
+  ModuleIterator() HADESMEM_NOEXCEPT;
   
   explicit ModuleIterator(Process const* process);
   
-  ModuleIterator(ModuleIterator const& other) BOOST_NOEXCEPT;
+  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT;
   
-  ModuleIterator& operator=(ModuleIterator const& other) BOOST_NOEXCEPT;
+  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT;
   
-  ModuleIterator(ModuleIterator&& other) BOOST_NOEXCEPT;
+  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT;
   
-  ModuleIterator& operator=(ModuleIterator&& other) BOOST_NOEXCEPT;
+  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT;
   
-  reference operator*() const BOOST_NOEXCEPT;
+  reference operator*() const HADESMEM_NOEXCEPT;
   
-  pointer operator->() const BOOST_NOEXCEPT;
+  pointer operator->() const HADESMEM_NOEXCEPT;
   
   ModuleIterator& operator++();
   
   ModuleIterator operator++(int);
   
-  bool operator==(ModuleIterator const& other) const BOOST_NOEXCEPT;
+  bool operator==(ModuleIterator const& other) const HADESMEM_NOEXCEPT;
   
-  bool operator!=(ModuleIterator const& other) const BOOST_NOEXCEPT;
+  bool operator!=(ModuleIterator const& other) const HADESMEM_NOEXCEPT;
   
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
@@ -81,15 +81,15 @@ public:
   typedef ModuleIterator iterator;
   typedef ModuleIterator const_iterator;
   
-  explicit ModuleList(Process const* process) BOOST_NOEXCEPT;
+  explicit ModuleList(Process const* process) HADESMEM_NOEXCEPT;
   
   iterator begin();
   
   const_iterator begin() const;
   
-  iterator end() BOOST_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT;
   
-  const_iterator end() const BOOST_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT;
   
 private:
   Process const* process_;

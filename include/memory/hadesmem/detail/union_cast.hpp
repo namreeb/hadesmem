@@ -9,10 +9,7 @@
 
 #include <type_traits>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
+#include "hadesmem/config.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
@@ -31,11 +28,11 @@ public:
   HADESMEM_STATIC_ASSERT(std::is_pod<To>::value);
   HADESMEM_STATIC_ASSERT(std::is_pod<From>::value);
 
-  explicit UnionCastImpl(From from) BOOST_NOEXCEPT
+  explicit UnionCastImpl(From from) HADESMEM_NOEXCEPT
     : from_(from)
   { }
 
-  To GetTo() const BOOST_NOEXCEPT
+  To GetTo() const HADESMEM_NOEXCEPT
   {
     return to_;
   }
@@ -46,7 +43,7 @@ private:
 };
 
 template <typename To, typename From>
-To UnionCast(From from) BOOST_NOEXCEPT
+To UnionCast(From from) HADESMEM_NOEXCEPT
 {
   return UnionCastImpl<From, To>(from).GetTo();
 }

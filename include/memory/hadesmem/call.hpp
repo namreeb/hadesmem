@@ -23,6 +23,7 @@
 
 #include <windows.h>
 
+#include "hadesmem/config.hpp"
 #include "hadesmem/detail/union_cast.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
@@ -46,17 +47,22 @@ template <typename T>
 class CallResult
 {
 public:
-  CallResult(T const& result, DWORD last_error)
+  HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+    std::is_pointer<T>::value || 
+    std::is_same<float, typename std::remove_cv<T>::type>::value || 
+    std::is_same<double, typename std::remove_cv<T>::type>::value);
+
+  CallResult(T const& result, DWORD last_error) HADESMEM_NOEXCEPT
     : result_(result), 
     last_error_(last_error)
   { }
 
-  T GetReturnValue() const
+  T GetReturnValue() const HADESMEM_NOEXCEPT
   {
     return result_;
   }
 
-  DWORD GetLastError() const
+  DWORD GetLastError() const HADESMEM_NOEXCEPT
   {
     return last_error_;
   }
@@ -70,11 +76,11 @@ template <>
 class CallResult<void>
 {
 public:
-  CallResult(DWORD last_error)
+  CallResult(DWORD last_error) HADESMEM_NOEXCEPT
     : last_error_(last_error)
   { }
 
-  DWORD GetLastError() const
+  DWORD GetLastError() const HADESMEM_NOEXCEPT
   {
     return last_error_;
   }
@@ -91,22 +97,22 @@ public:
     DWORD64 return_int_64, 
     float return_float, 
     double return_double, 
-    DWORD last_error) BOOST_NOEXCEPT;
+    DWORD last_error) HADESMEM_NOEXCEPT;
 
-  DWORD_PTR GetReturnValueIntPtr() const BOOST_NOEXCEPT;
+  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT;
 
-  DWORD32 GetReturnValueInt32() const BOOST_NOEXCEPT;
+  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT;
 
-  DWORD64 GetReturnValueInt64() const BOOST_NOEXCEPT;
+  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT;
   
-  float GetReturnValueFloat() const BOOST_NOEXCEPT;
+  float GetReturnValueFloat() const HADESMEM_NOEXCEPT;
   
-  double GetReturnValueDouble() const BOOST_NOEXCEPT;
+  double GetReturnValueDouble() const HADESMEM_NOEXCEPT;
   
-  DWORD GetLastError() const BOOST_NOEXCEPT;
+  DWORD GetLastError() const HADESMEM_NOEXCEPT;
   
   template <typename T>
-  T GetReturnValue() const BOOST_NOEXCEPT
+  T GetReturnValue() const HADESMEM_NOEXCEPT
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
@@ -118,30 +124,30 @@ public:
   
 private:
   template <typename T>
-  T GetReturnValueIntImpl(std::true_type) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
     return detail::UnionCast<T>(GetReturnValueInt64());
   }
   
   template <typename T>
-  T GetReturnValueIntImpl(std::false_type) const BOOST_NOEXCEPT
+  T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
     return detail::UnionCast<T>(GetReturnValueInt32());
   }
   
   template <typename T>
-  T GetReturnValueImpl(T /*t*/) const BOOST_NOEXCEPT
+  T GetReturnValueImpl(T /*t*/) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
   }
   
-  float GetReturnValueImpl(float /*t*/) const BOOST_NOEXCEPT
+  float GetReturnValueImpl(float /*t*/) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
   
-  double GetReturnValueImpl(double /*t*/) const BOOST_NOEXCEPT
+  double GetReturnValueImpl(double /*t*/) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
@@ -158,7 +164,7 @@ class CallArg
 {
 public:
   template <typename T>
-  explicit CallArg(T t) BOOST_NOEXCEPT
+  explicit CallArg(T t) HADESMEM_NOEXCEPT
     : arg_(), 
     type_(ArgType::kInvalidType)
   {
@@ -195,33 +201,33 @@ public:
   
 private:
   template <typename T>
-  void InitializeIntegralImpl(T t, std::false_type) BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::false_type) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt32Type;
     arg_.i32 = detail::UnionCast<DWORD32>(t);
   }
   
   template <typename T>
-  void InitializeIntegralImpl(T t, std::true_type) BOOST_NOEXCEPT
+  void InitializeIntegralImpl(T t, std::true_type) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
     arg_.i64 = detail::UnionCast<DWORD64>(t);
   }
   
   template <typename T>
-  void Initialize(T t) BOOST_NOEXCEPT
+  void Initialize(T t) HADESMEM_NOEXCEPT
   {
     InitializeIntegralImpl(t, std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
   }
   
-  void Initialize(float t) BOOST_NOEXCEPT
+  void Initialize(float t) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kFloatType;
     arg_.f = t;
   }
   
-  void Initialize(double t) BOOST_NOEXCEPT
+  void Initialize(double t) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kDoubleType;
     arg_.d = t;
@@ -262,20 +268,22 @@ namespace detail
 {
 
 template <typename T>
-CallResult<T> CallResultRawToCallResult(CallResultRaw const& result)
+CallResult<T> CallResultRawToCallResult(CallResultRaw const& result) 
+  HADESMEM_NOEXCEPT
 {
   return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
 }
 
 template <>
-inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
+inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result) 
+  HADESMEM_NOEXCEPT
 {
   return CallResult<void>(result.GetLastError());
 }
 
 }
 
-#ifndef BOOST_NO_VARIADIC_TEMPLATES
+#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
 namespace detail
 {
@@ -327,7 +335,8 @@ struct FuncArgT<N, R (*)(Args...)>
 };
 
 template <typename FuncT, int N>
-inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/)
+inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/) 
+  HADESMEM_NOEXCEPT
 {
   return;
 }
@@ -360,7 +369,7 @@ CallResult<typename detail::FuncResultT<FuncT>::type> Call(
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
 
-#else // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
 #ifndef HADESMEM_CALL_MAX_ARGS
 #define HADESMEM_CALL_MAX_ARGS 20
@@ -424,7 +433,7 @@ return detail::CallResultRawToCallResult<ResultT>(ret);\
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
 
-#endif // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
 class MultiCall
 {
@@ -435,9 +444,9 @@ public:
   
   MultiCall& operator=(MultiCall const& other);
   
-  MultiCall(MultiCall&& other) BOOST_NOEXCEPT;
+  MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT;
   
-  MultiCall& operator=(MultiCall&& other) BOOST_NOEXCEPT;
+  MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT;
 
 #ifndef BOOST_NO_VARIADIC_TEMPLATES
 

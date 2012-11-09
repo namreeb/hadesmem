@@ -11,11 +11,10 @@
 #include <vector>
 #include <utility>
 
-#include <boost/config.hpp>
-
 #include <windows.h>
 
 #include "hadesmem/call.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/process.hpp"
 
 namespace hadesmem
@@ -52,17 +51,17 @@ public:
 
   CreateAndInjectData& operator=(CreateAndInjectData const& Other);
 
-  CreateAndInjectData(CreateAndInjectData&& Other) BOOST_NOEXCEPT;
+  CreateAndInjectData(CreateAndInjectData&& Other) HADESMEM_NOEXCEPT;
 
-  CreateAndInjectData& operator=(CreateAndInjectData&& Other) BOOST_NOEXCEPT;
+  CreateAndInjectData& operator=(CreateAndInjectData&& Other) HADESMEM_NOEXCEPT;
 
   Process GetProcess() const;
 
-  HMODULE GetModule() const BOOST_NOEXCEPT;
+  HMODULE GetModule() const HADESMEM_NOEXCEPT;
 
-  DWORD_PTR GetExportRet() const BOOST_NOEXCEPT;
+  DWORD_PTR GetExportRet() const HADESMEM_NOEXCEPT;
 
-  DWORD GetExportLastError() const BOOST_NOEXCEPT;
+  DWORD GetExportLastError() const HADESMEM_NOEXCEPT;
 
 private:
   Process process_;

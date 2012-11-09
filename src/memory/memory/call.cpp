@@ -59,15 +59,15 @@ class ArgVisitor32
 {
 public:
   ArgVisitor32(AsmJit::X86Assembler* assembler, std::size_t num_args, 
-    CallConv call_conv) BOOST_NOEXCEPT;
+    CallConv call_conv) HADESMEM_NOEXCEPT;
 
-  void operator()(DWORD32 arg) BOOST_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_NOEXCEPT;
 
-  void operator()(DWORD64 arg) BOOST_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_NOEXCEPT;
 
-  void operator()(float arg) BOOST_NOEXCEPT;
+  void operator()(float arg) HADESMEM_NOEXCEPT;
 
-  void operator()(double arg) BOOST_NOEXCEPT;
+  void operator()(double arg) HADESMEM_NOEXCEPT;
 
 private:
   AsmJit::X86Assembler* assembler_;
@@ -84,15 +84,15 @@ class ArgVisitor64
 {
 public:
   ArgVisitor64(AsmJit::X86Assembler* assembler, std::size_t num_args) 
-    BOOST_NOEXCEPT;
+    HADESMEM_NOEXCEPT;
 
-  void operator()(DWORD32 arg) BOOST_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_NOEXCEPT;
 
-  void operator()(DWORD64 arg) BOOST_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_NOEXCEPT;
 
-  void operator()(float arg) BOOST_NOEXCEPT;
+  void operator()(float arg) HADESMEM_NOEXCEPT;
 
-  void operator()(double arg) BOOST_NOEXCEPT;
+  void operator()(double arg) HADESMEM_NOEXCEPT;
 
 private:
   AsmJit::X86Assembler* assembler_;
@@ -362,14 +362,14 @@ Allocator GenerateCallCode(Process const& process,
 #if defined(_M_IX86)
 
 ArgVisitor32::ArgVisitor32(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args, CallConv call_conv) BOOST_NOEXCEPT
+  std::size_t num_args, CallConv call_conv) HADESMEM_NOEXCEPT
   : assembler_(assembler), 
   num_args_(num_args), 
   cur_arg_(num_args), 
   call_conv_(call_conv)
 { }
 
-void ArgVisitor32::operator()(DWORD32 arg) BOOST_NOEXCEPT
+void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
 {
   switch (cur_arg_)
   {
@@ -416,7 +416,7 @@ void ArgVisitor32::operator()(DWORD32 arg) BOOST_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(DWORD64 arg) BOOST_NOEXCEPT
+void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 {
   assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
     (arg >> 32) & 0xFFFFFFFF)));
@@ -428,7 +428,7 @@ void ArgVisitor32::operator()(DWORD64 arg) BOOST_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(float arg) BOOST_NOEXCEPT
+void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
@@ -447,7 +447,7 @@ void ArgVisitor32::operator()(float arg) BOOST_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(double arg) BOOST_NOEXCEPT
+void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
@@ -476,18 +476,18 @@ void ArgVisitor32::operator()(double arg) BOOST_NOEXCEPT
 #if defined(_M_AMD64)
 
 ArgVisitor64::ArgVisitor64(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args) BOOST_NOEXCEPT
+  std::size_t num_args) HADESMEM_NOEXCEPT
   : assembler_(assembler), 
   num_args_(num_args), 
   cur_arg_(num_args)
 { }
 
-void ArgVisitor64::operator()(DWORD32 arg) BOOST_NOEXCEPT
+void ArgVisitor64::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
 {
   return (*this)(static_cast<DWORD64>(arg));
 }
 
-void ArgVisitor64::operator()(DWORD64 arg) BOOST_NOEXCEPT
+void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 {
   switch (cur_arg_)
   {
@@ -513,7 +513,7 @@ void ArgVisitor64::operator()(DWORD64 arg) BOOST_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor64::operator()(float arg) BOOST_NOEXCEPT
+void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
@@ -563,7 +563,7 @@ void ArgVisitor64::operator()(float arg) BOOST_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor64::operator()(double arg) BOOST_NOEXCEPT
+void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
@@ -627,7 +627,7 @@ CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr,
   DWORD64 return_int_64, 
   float return_float, 
   double return_double, 
-  DWORD last_error) BOOST_NOEXCEPT
+  DWORD last_error) HADESMEM_NOEXCEPT
   : int_ptr_(return_int_ptr), 
   int_32_(return_int_32), 
   int_64_(return_int_64), 
@@ -636,32 +636,32 @@ CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr,
   last_error_(last_error)
 { }
 
-DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const BOOST_NOEXCEPT
+DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
 {
   return int_ptr_;
 }
 
-DWORD32 CallResultRaw::GetReturnValueInt32() const BOOST_NOEXCEPT
+DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
 {
   return int_32_;
 }
 
-DWORD64 CallResultRaw::GetReturnValueInt64() const BOOST_NOEXCEPT
+DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
 {
   return int_64_;
 }
 
-float CallResultRaw::GetReturnValueFloat() const BOOST_NOEXCEPT
+float CallResultRaw::GetReturnValueFloat() const HADESMEM_NOEXCEPT
 {
   return float_;
 }
 
-double CallResultRaw::GetReturnValueDouble() const BOOST_NOEXCEPT
+double CallResultRaw::GetReturnValueDouble() const HADESMEM_NOEXCEPT
 {
   return double_;
 }
 
-DWORD CallResultRaw::GetLastError() const BOOST_NOEXCEPT
+DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
 {
   return last_error_;
 }
@@ -766,7 +766,7 @@ MultiCall& MultiCall::operator=(MultiCall const& other)
   return *this;
 }
 
-MultiCall::MultiCall(MultiCall&& other) BOOST_NOEXCEPT
+MultiCall::MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   addresses_(std::move(other.addresses_)), 
   call_convs_(std::move(other.call_convs_)), 
@@ -775,7 +775,7 @@ MultiCall::MultiCall(MultiCall&& other) BOOST_NOEXCEPT
   other.process_ = nullptr;
 }
 
-MultiCall& MultiCall::operator=(MultiCall&& other) BOOST_NOEXCEPT
+MultiCall& MultiCall::operator=(MultiCall&& other) HADESMEM_NOEXCEPT
 {
   process_ = other.process_;
   other.process_ = nullptr;

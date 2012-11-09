@@ -64,14 +64,14 @@ Process& Process::operator=(Process const& other)
   return *this;
 }
 
-Process::Process(Process&& other) BOOST_NOEXCEPT
+Process::Process(Process&& other) HADESMEM_NOEXCEPT
   : id_(other.id_), 
   handle_(std::move(other.handle_))
 {
   other.id_ = 0;
 }
 
-Process& Process::operator=(Process&& other) BOOST_NOEXCEPT
+Process& Process::operator=(Process&& other) HADESMEM_NOEXCEPT
 {
   Cleanup();
   
@@ -88,12 +88,12 @@ Process::~Process()
   CleanupUnchecked();
 }
 
-DWORD Process::GetId() const BOOST_NOEXCEPT
+DWORD Process::GetId() const HADESMEM_NOEXCEPT
 {
   return id_;
 }
 
-HANDLE Process::GetHandle() const BOOST_NOEXCEPT
+HANDLE Process::GetHandle() const HADESMEM_NOEXCEPT
 {
   return handle_.GetHandle();
 }
@@ -129,7 +129,7 @@ HANDLE Process::Open(DWORD id)
   return handle;
 }
 
-void Process::CleanupUnchecked() BOOST_NOEXCEPT
+void Process::CleanupUnchecked() HADESMEM_NOEXCEPT
 {
   try
   {
@@ -164,32 +164,32 @@ HANDLE Process::Duplicate(HANDLE handle)
   return new_handle;
 }
 
-bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator!=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-bool operator<(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator<(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-bool operator<=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator<=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-bool operator>(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator>(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-bool operator>=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT
+bool operator>=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }

@@ -10,10 +10,9 @@
 #include <string>
 #include <iosfwd>
 
-#include <boost/config.hpp>
-
 #include <windows.h>
 
+#include "hadesmem/config.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
@@ -28,15 +27,15 @@ public:
   
   Process& operator=(Process const& other);
   
-  Process(Process&& other) BOOST_NOEXCEPT;
+  Process(Process&& other) HADESMEM_NOEXCEPT;
   
-  Process& operator=(Process&& other) BOOST_NOEXCEPT;
+  Process& operator=(Process&& other) HADESMEM_NOEXCEPT;
   
   ~Process();
   
-  DWORD GetId() const BOOST_NOEXCEPT;
+  DWORD GetId() const HADESMEM_NOEXCEPT;
   
-  HANDLE GetHandle() const BOOST_NOEXCEPT;
+  HANDLE GetHandle() const HADESMEM_NOEXCEPT;
   
   void Cleanup();
   
@@ -45,7 +44,7 @@ private:
   
   HANDLE Open(DWORD id);
   
-  void CleanupUnchecked() BOOST_NOEXCEPT;
+  void CleanupUnchecked() HADESMEM_NOEXCEPT;
   
   HANDLE Duplicate(HANDLE handle);
   
@@ -53,17 +52,17 @@ private:
   detail::SmartHandle handle_;
 };
 
-bool operator==(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator!=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator!=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator<(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator<(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator<=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator<=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator>(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator>(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator>=(Process const& lhs, Process const& rhs) BOOST_NOEXCEPT;
+bool operator>=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
 
 std::ostream& operator<<(std::ostream& lhs, Process const& rhs);
 

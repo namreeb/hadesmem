@@ -7,11 +7,9 @@
 
 #pragma once
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include <windows.h>
+
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -23,13 +21,13 @@ namespace detail
 
 MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address);
 
-bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT;
 
-bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT;
 
-bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT;
 
-bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) BOOST_NOEXCEPT;
+bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT;
 }
 
 }

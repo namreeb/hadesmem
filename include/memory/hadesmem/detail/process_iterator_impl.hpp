@@ -8,12 +8,12 @@
 #pragma once
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
+#include "hadesmem/config.hpp"
 #include "hadesmem/process_entry.hpp"
 
 namespace hadesmem
@@ -24,7 +24,7 @@ namespace detail
 
 struct ProcessIteratorImpl
 {
-  ProcessIteratorImpl() BOOST_NOEXCEPT
+  ProcessIteratorImpl() HADESMEM_NOEXCEPT
     : snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     process_()
   { }
@@ -33,8 +33,9 @@ struct ProcessIteratorImpl
   boost::optional<ProcessEntry> process_;
   
 private:
-  ProcessIteratorImpl(ProcessIteratorImpl const&);
-  ProcessIteratorImpl& operator=(ProcessIteratorImpl const&);
+  ProcessIteratorImpl(ProcessIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
+  ProcessIteratorImpl& operator=(ProcessIteratorImpl const&) 
+    HADESMEM_DELETED_FUNCTION;
 };
 
 }

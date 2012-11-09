@@ -17,7 +17,7 @@
 namespace hadesmem
 {
 
-ProcessIterator::ProcessIterator() BOOST_NOEXCEPT
+ProcessIterator::ProcessIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
@@ -70,37 +70,37 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   impl_->process_ = ProcessEntry(entry);
 }
 
-ProcessIterator::ProcessIterator(ProcessIterator const& other) BOOST_NOEXCEPT
+ProcessIterator::ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT
   : impl_(other.impl_)
 { }
 
 ProcessIterator& ProcessIterator::operator=(ProcessIterator const& other) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   impl_ = other.impl_;
   
   return *this;
 }
 
-ProcessIterator::ProcessIterator(ProcessIterator&& other) BOOST_NOEXCEPT
+ProcessIterator::ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT
   : impl_(std::move(other.impl_))
 { }
 
 ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   impl_ = std::move(other.impl_);
   
   return *this;
 }
 
-ProcessIterator::reference ProcessIterator::operator*() const BOOST_NOEXCEPT
+ProcessIterator::reference ProcessIterator::operator*() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
   return *impl_->process_;
 }
 
-ProcessIterator::pointer ProcessIterator::operator->() const BOOST_NOEXCEPT
+ProcessIterator::pointer ProcessIterator::operator->() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
   return &*impl_->process_;
@@ -142,33 +142,33 @@ ProcessIterator ProcessIterator::operator++(int)
 }
 
 bool ProcessIterator::operator==(ProcessIterator const& other) const 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   return impl_ == other.impl_;
 }
 
 bool ProcessIterator::operator!=(ProcessIterator const& other) const 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   return !(*this == other);
 }
 
-ProcessList::ProcessList() BOOST_NOEXCEPT
+ProcessList::ProcessList() HADESMEM_NOEXCEPT
 { }
 
-ProcessList::ProcessList(ProcessList const& /*other*/) BOOST_NOEXCEPT
+ProcessList::ProcessList(ProcessList const& /*other*/) HADESMEM_NOEXCEPT
 { }
 
 ProcessList& ProcessList::operator=(ProcessList const& /*other*/) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
 {
   return *this;
 }
 
-ProcessList::ProcessList(ProcessList&& /*other*/) BOOST_NOEXCEPT
+ProcessList::ProcessList(ProcessList&& /*other*/) HADESMEM_NOEXCEPT
 { }
 
-ProcessList& ProcessList::operator=(ProcessList&& /*other*/) BOOST_NOEXCEPT
+ProcessList& ProcessList::operator=(ProcessList&& /*other*/) HADESMEM_NOEXCEPT
 {
   return *this;
 }
@@ -183,12 +183,12 @@ ProcessList::const_iterator ProcessList::begin() const
   return ProcessList::iterator(0);
 }
 
-ProcessList::iterator ProcessList::end() BOOST_NOEXCEPT
+ProcessList::iterator ProcessList::end() HADESMEM_NOEXCEPT
 {
   return ProcessList::iterator();
 }
 
-ProcessList::const_iterator ProcessList::end() const BOOST_NOEXCEPT
+ProcessList::const_iterator ProcessList::end() const HADESMEM_NOEXCEPT
 {
   return ProcessList::iterator();
 }

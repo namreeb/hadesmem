@@ -10,10 +10,10 @@
 #include <string>
 #include <functional>
 
-#include <boost/config.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
+
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -33,13 +33,13 @@ public:
   
   Module& operator=(Module const& other);
   
-  Module(Module&& other) BOOST_NOEXCEPT;
+  Module(Module&& other) HADESMEM_NOEXCEPT;
   
-  Module& operator=(Module&& other) BOOST_NOEXCEPT;
+  Module& operator=(Module&& other) HADESMEM_NOEXCEPT;
   
-  HMODULE GetHandle() const BOOST_NOEXCEPT;
+  HMODULE GetHandle() const HADESMEM_NOEXCEPT;
   
-  DWORD GetSize() const BOOST_NOEXCEPT;
+  DWORD GetSize() const HADESMEM_NOEXCEPT;
   
   std::wstring GetName() const;
   
@@ -62,17 +62,17 @@ private:
   std::wstring path_;
 };
 
-bool operator==(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator!=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator!=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator<(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator<(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator<=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator<=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator>(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator>(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
-bool operator>=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT;
+bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
 
 std::ostream& operator<<(std::ostream& lhs, Module const& rhs);
 

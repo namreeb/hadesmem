@@ -231,7 +231,7 @@ CreateAndInjectData& CreateAndInjectData::operator=(
 }
 
 CreateAndInjectData::CreateAndInjectData(CreateAndInjectData&& other) 
-  BOOST_NOEXCEPT
+  HADESMEM_NOEXCEPT
   : process_(std::move(other.process_)), 
   module_(other.module_), 
   export_ret_(other.export_ret_), 
@@ -243,7 +243,7 @@ CreateAndInjectData::CreateAndInjectData(CreateAndInjectData&& other)
 }
 
 CreateAndInjectData& CreateAndInjectData::operator=(
-  CreateAndInjectData&& other) BOOST_NOEXCEPT
+  CreateAndInjectData&& other) HADESMEM_NOEXCEPT
 {
   process_ = std::move(other.process_);
 
@@ -264,17 +264,17 @@ Process CreateAndInjectData::GetProcess() const
   return process_;
 }
 
-HMODULE CreateAndInjectData::GetModule() const BOOST_NOEXCEPT
+HMODULE CreateAndInjectData::GetModule() const HADESMEM_NOEXCEPT
 {
   return module_;
 }
 
-DWORD_PTR CreateAndInjectData::GetExportRet() const BOOST_NOEXCEPT
+DWORD_PTR CreateAndInjectData::GetExportRet() const HADESMEM_NOEXCEPT
 {
   return export_ret_;
 }
 
-DWORD CreateAndInjectData::GetExportLastError() const BOOST_NOEXCEPT
+DWORD CreateAndInjectData::GetExportLastError() const HADESMEM_NOEXCEPT
 {
   return export_last_error_;
 }

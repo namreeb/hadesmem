@@ -9,10 +9,10 @@
 
 #include <string>
 
-#include <boost/config.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
+
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -36,22 +36,22 @@ public:
     name_(entry.szExeFile)
   { }
 
-  DWORD GetId() const BOOST_NOEXCEPT
+  DWORD GetId() const HADESMEM_NOEXCEPT
   {
     return id_;
   }
 
-  DWORD GetThreads() const BOOST_NOEXCEPT
+  DWORD GetThreads() const HADESMEM_NOEXCEPT
   {
     return threads_;
   }
 
-  DWORD GetParentId() const BOOST_NOEXCEPT
+  DWORD GetParentId() const HADESMEM_NOEXCEPT
   {
     return parent_;
   }
 
-  LONG GetPriority() const BOOST_NOEXCEPT
+  LONG GetPriority() const HADESMEM_NOEXCEPT
   {
     return priority_;
   }

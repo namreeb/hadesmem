@@ -20,8 +20,9 @@ namespace hadesmem
 namespace
 {
 
-struct EnsureFreeLibrary
+class EnsureFreeLibrary
 {
+public:
   explicit EnsureFreeLibrary(HMODULE module)
     : module_(module)
   { }
@@ -30,6 +31,11 @@ struct EnsureFreeLibrary
   {
     BOOST_VERIFY(::FreeLibrary(module_));
   }
+
+private:
+  EnsureFreeLibrary(EnsureFreeLibrary const& other) HADESMEM_DELETED_FUNCTION;
+  EnsureFreeLibrary& operator=(EnsureFreeLibrary const& other) 
+    HADESMEM_DELETED_FUNCTION;
 
   HMODULE module_;
 };
@@ -182,7 +188,7 @@ Module& Module::operator=(Module const& other)
   return *this;
 }
 
-Module::Module(Module&& other) BOOST_NOEXCEPT
+Module::Module(Module&& other) HADESMEM_NOEXCEPT
   : process_(other.process_), 
   handle_(other.handle_), 
   size_(other.size_), 
@@ -194,7 +200,7 @@ Module::Module(Module&& other) BOOST_NOEXCEPT
   other.size_ = 0;
 }
 
-Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
+Module& Module::operator=(Module&& other) HADESMEM_NOEXCEPT
 {
   process_ = other.process_;
   handle_ = other.handle_;
@@ -209,12 +215,12 @@ Module& Module::operator=(Module&& other) BOOST_NOEXCEPT
   return *this;
 }
 
-HMODULE Module::GetHandle() const BOOST_NOEXCEPT
+HMODULE Module::GetHandle() const HADESMEM_NOEXCEPT
 {
   return handle_;
 }
 
-DWORD Module::GetSize() const BOOST_NOEXCEPT
+DWORD Module::GetSize() const HADESMEM_NOEXCEPT
 {
   return size_;
 }
@@ -340,32 +346,32 @@ void Module::InitializeIf(EntryCallback const& check_func)
   }
 }
 
-bool operator==(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetHandle() == rhs.GetHandle();
 }
 
-bool operator!=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator!=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-bool operator<(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator<(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetHandle() < rhs.GetHandle();
 }
 
-bool operator<=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator<=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetHandle() <= rhs.GetHandle();
 }
 
-bool operator>(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator>(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetHandle() > rhs.GetHandle();
 }
 
-bool operator>=(Module const& lhs, Module const& rhs) BOOST_NOEXCEPT
+bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetHandle() >= rhs.GetHandle();
 }
