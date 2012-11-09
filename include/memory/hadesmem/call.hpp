@@ -8,11 +8,11 @@
 #pragma once
 
 #include <vector>
+#include <cassert>
 #include <utility>
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
@@ -176,7 +176,7 @@ public:
     switch (type_)
     {
     case ArgType::kInvalidType:
-      BOOST_ASSERT("Invalid type." && false);
+      assert("Invalid type." && false);
       break;
     case ArgType::kInt32Type:
       (*v)(arg_.i32);

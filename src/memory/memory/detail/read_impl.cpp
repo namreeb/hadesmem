@@ -22,8 +22,8 @@ namespace detail
 void Read(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
-  BOOST_ASSERT(data != nullptr);
-  BOOST_ASSERT(len != 0);
+  assert(data != nullptr);
+  assert(len != 0);
 
   ProtectGuard protect_guard(&process, address, ProtectGuardType::kRead);
   
@@ -43,8 +43,8 @@ void Read(Process const& process, LPVOID address, LPVOID data,
 void ReadUnchecked(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
-  BOOST_ASSERT(data != nullptr);
-  BOOST_ASSERT(len != 0);
+  assert(data != nullptr);
+  assert(len != 0);
   
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 

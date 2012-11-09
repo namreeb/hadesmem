@@ -7,6 +7,8 @@
 
 #include "hadesmem/patcher.hpp"
 
+#include <cassert>
+
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <asmjit/asmjit.h>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -407,7 +409,7 @@ unsigned int PatchDetour::GetIndirectJumpSize() const
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-  BOOST_ASSERT(jump_size);
+  assert(jump_size);
 
   return jump_size;
 }

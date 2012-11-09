@@ -19,7 +19,7 @@ Region::Region(Process const* process, LPCVOID address)
   : process_(process), 
   mbi_(detail::Query(*process, address))
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
 }
 
 Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
@@ -27,7 +27,7 @@ Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi)
   : process_(process), 
   mbi_(mbi)
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
 }
 
 PVOID Region::GetBase() const BOOST_NOEXCEPT

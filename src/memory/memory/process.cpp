@@ -144,7 +144,7 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
     (void)e;
     
     // WARNING: Handle is leaked if 'Cleanup' fails.
-    BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+    assert(boost::diagnostic_information(e).c_str() && false);
     
     id_ = 0;
     handle_ = nullptr;
@@ -153,7 +153,7 @@ void Process::CleanupUnchecked() BOOST_NOEXCEPT
 
 HANDLE Process::Duplicate(HANDLE handle)
 {
-  BOOST_ASSERT(handle != nullptr);
+  assert(handle != nullptr);
   
   HANDLE new_handle = nullptr;
   if (!::DuplicateHandle(::GetCurrentProcess(), handle, 

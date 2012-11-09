@@ -117,8 +117,10 @@ void ProtectGuard::RestoreUnchecked() BOOST_NOEXCEPT
   }
   catch (std::exception const& e)
   {
+    // WARNING: Protection is not restored if 'Restore' fails.
+
     (void)e;
-    BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+    assert(boost::diagnostic_information(e).c_str() && false);
   }
 }
 

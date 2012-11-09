@@ -8,7 +8,6 @@
 #pragma once
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"

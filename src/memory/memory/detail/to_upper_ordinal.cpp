@@ -9,10 +9,7 @@
 
 #include <limits>
 #include <vector>
-
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <cassert>
 
 #include <windows.h>
 
@@ -29,7 +26,7 @@ std::wstring ToUpperOrdinal(std::wstring const& str)
   std::vector<wchar_t> str_buf(std::begin(str), std::end(str));
   str_buf.push_back(0);
   
-  BOOST_ASSERT(str_buf.size() < (std::numeric_limits<DWORD>::max)());
+  assert(str_buf.size() < (std::numeric_limits<DWORD>::max)());
   DWORD const num_converted = ::CharUpperBuff(str_buf.data(), 
     static_cast<DWORD>(str_buf.size()));
   if (num_converted != str_buf.size())

@@ -9,10 +9,10 @@
 
 #include <ctime>
 #include <random>
+#include <cassert>
 #include <iostream>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
@@ -126,7 +126,7 @@ std::locale ImbueAllDefault()
   std::locale const locale = gen("");
 
   // Ensure the locale uses a UTF-8 backend. 
-  BOOST_ASSERT(std::use_facet<boost::locale::info>(locale).utf8());
+  assert(std::use_facet<boost::locale::info>(locale).utf8());
 
   return ImbueAll(locale);
 }

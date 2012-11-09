@@ -28,7 +28,7 @@ ProcessIterator::ProcessIterator() BOOST_NOEXCEPT
 ProcessIterator::ProcessIterator(int /*dummy*/)
   : impl_(new detail::ProcessIteratorImpl)
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   
   impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
@@ -100,19 +100,19 @@ ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other)
 
 ProcessIterator::reference ProcessIterator::operator*() const BOOST_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   return *impl_->process_;
 }
 
 ProcessIterator::pointer ProcessIterator::operator->() const BOOST_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   return &*impl_->process_;
 }
 
 ProcessIterator& ProcessIterator::operator++()
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   
   PROCESSENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));

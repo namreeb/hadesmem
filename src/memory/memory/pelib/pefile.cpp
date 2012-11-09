@@ -7,12 +7,9 @@
 
 #include "hadesmem/pelib/pefile.hpp"
 
+#include <cassert>
 #include <cstddef>
 #include <iostream>
-
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"
@@ -88,8 +85,8 @@ PeFile::PeFile(Process const* process, PVOID base, PeFileType type)
   base_(base), 
   type_(type)
 {
-  BOOST_ASSERT(process != nullptr);
-  BOOST_ASSERT(base != 0);
+  assert(process != nullptr);
+  assert(base != 0);
 }
 
 PeFile::PeFile(PeFile const& other) BOOST_NOEXCEPT
@@ -190,7 +187,7 @@ PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     return RvaToVaForData(process, pe_file, rva);
   }
 
-  BOOST_ASSERT(false);
+  assert(false);
   return nullptr;
 }
 

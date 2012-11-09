@@ -230,7 +230,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
   std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
     max_num_args * 0x8);
-  BOOST_ASSERT(stack_offs % 16 == 0 || stack_offs % 16 == 8);
+  assert(stack_offs % 16 == 0 || stack_offs % 16 == 8);
   stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
   stack_offs += 16;
   stack_offs += 8;
@@ -259,7 +259,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     (void)call_convs;
-    BOOST_ASSERT(call_convs[i] == CallConv::kDefault || 
+    assert(call_convs[i] == CallConv::kDefault || 
       call_convs[i] == CallConv::kWinApi || 
       call_convs[i] == CallConv::kX64);
 
@@ -685,7 +685,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
 {
-  BOOST_ASSERT(addresses.size() == call_convs.size() && 
+  assert(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
 
   Allocator const return_values_remote(&process, 
@@ -746,7 +746,7 @@ MultiCall::MultiCall(Process const* process)
   call_convs_(), 
   args_()
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
 }
 
 MultiCall::MultiCall(MultiCall const& other)

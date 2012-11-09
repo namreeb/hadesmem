@@ -8,10 +8,7 @@
 #include "hadesmem/detail/self_path.hpp"
 
 #include <array>
-
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/filesystem.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <cassert>
 
 #include "hadesmem/error.hpp"
 
@@ -56,8 +53,22 @@ std::wstring GetSelfPath()
 
 std::wstring GetSelfDirPath()
 {
-  boost::filesystem::path const path(GetSelfPath());
-  return path.parent_path().native();
+  std::wstring self_path(GetSelfPath());
+  std::size_t const backslash_separator = self_path.rfind(L'\\');
+  std::size_t const forwardslash_separator = self_path.rfind(L'/');
+  std::size_t separator = 0;
+  if (backslash_separator == std::wstring::npos || 
+    forwardslash_separator == std::wstring::npos)
+  {
+    separator = (std::min)(backslash_separator, forwardslash_separator);
+  }
+  else
+  {
+    separator = (std::max)(backslash_separator, forwardslash_separator);
+  }
+  assert(separator != std::wstring::npos);
+  self_path.erase(self_path.begin() + separator, self_path.end());
+  return self_path;
 }
 
 }

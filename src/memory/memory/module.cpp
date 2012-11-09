@@ -7,9 +7,7 @@
 
 #include "hadesmem/module.hpp"
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <cassert>
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
@@ -38,7 +36,7 @@ struct EnsureFreeLibrary
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
-  BOOST_ASSERT(name != nullptr);
+  assert(name != nullptr);
   
   HMODULE const local_module = ::LoadLibraryEx(module.GetPath().c_str(), 
     nullptr, DONT_RESOLVE_DLL_REFERENCES);
@@ -136,7 +134,7 @@ Module::Module(Process const* process, HMODULE handle)
   name_(), 
   path_()
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
   
   Initialize(handle);
 }
@@ -148,7 +146,7 @@ Module::Module(Process const* process, std::wstring const& path)
   name_(), 
   path_()
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
   
   Initialize(path);
 }
@@ -160,7 +158,7 @@ Module::Module(Process const* process, MODULEENTRY32 const& entry)
   name_(), 
   path_()
 {
-  BOOST_ASSERT(process != nullptr);
+  assert(process != nullptr);
   
   Initialize(entry);
 }

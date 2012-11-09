@@ -8,6 +8,7 @@
 #include "hadesmem/injector.hpp"
 
 #include <array>
+#include <cassert>
 #include <iterator>
 #include <algorithm>
 
@@ -105,7 +106,7 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
 {
-  BOOST_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
+  assert((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
 
   // Do not continue if Shim Engine is enabled for local process, 
   // otherwise it could interfere with the address resolution.

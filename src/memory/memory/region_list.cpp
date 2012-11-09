@@ -7,10 +7,6 @@
 
 #include "hadesmem/region_list.hpp"
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include <windows.h>
 
 #include "hadesmem/error.hpp"
@@ -30,8 +26,8 @@ RegionIterator::RegionIterator() BOOST_NOEXCEPT
 RegionIterator::RegionIterator(Process const* process)
   : impl_(new detail::RegionIteratorImpl)
 {
-  BOOST_ASSERT(impl_.get());
-  BOOST_ASSERT(process != nullptr);
+  assert(impl_.get());
+  assert(process != nullptr);
   
   impl_->process_ = process;
   
@@ -66,13 +62,13 @@ RegionIterator& RegionIterator::operator=(RegionIterator&& other)
 
 RegionIterator::reference RegionIterator::operator*() const BOOST_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   return *impl_->region_;
 }
 
 RegionIterator::pointer RegionIterator::operator->() const BOOST_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  assert(impl_.get());
   return &*impl_->region_;
 }
 
@@ -80,7 +76,7 @@ RegionIterator& RegionIterator::operator++()
 {
   try
   {
-    BOOST_ASSERT(impl_.get());
+    assert(impl_.get());
     
     void const* const base = impl_->region_->GetBase();
     SIZE_T const size = impl_->region_->GetSize();

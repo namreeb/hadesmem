@@ -7,8 +7,9 @@
 
 #pragma once
 
+#include <cassert>
+
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -107,7 +108,7 @@ private:
       (void)e;
 
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      BOOST_ASSERT_MSG(false, boost::diagnostic_information(e).c_str());
+      assert(boost::diagnostic_information(e).c_str() && false);
 
       handle_ = invalid_;
     }
