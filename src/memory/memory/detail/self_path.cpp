@@ -54,9 +54,9 @@ std::wstring GetSelfPath()
 std::wstring GetSelfDirPath()
 {
   std::wstring self_path(GetSelfPath());
-  std::size_t const backslash_separator = self_path.rfind(L'\\');
-  std::size_t const forwardslash_separator = self_path.rfind(L'/');
-  std::size_t separator = 0;
+  std::wstring::size_type const backslash_separator = self_path.rfind(L'\\');
+  std::wstring::size_type const forwardslash_separator = self_path.rfind(L'/');
+  std::wstring::size_type separator = 0;
   if (backslash_separator == std::wstring::npos || 
     forwardslash_separator == std::wstring::npos)
   {
@@ -67,7 +67,7 @@ std::wstring GetSelfDirPath()
     separator = (std::max)(backslash_separator, forwardslash_separator);
   }
   assert(separator != std::wstring::npos);
-  self_path.erase(self_path.begin() + separator, self_path.end());
+  self_path.erase(separator);
   return self_path;
 }
 
