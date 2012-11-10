@@ -26,11 +26,3 @@ void EnableTerminationOnHeapCorruption();
 // Custom 'bottom up randomization' implementation similar to that of EMET.
 // Modified version of code by Didier Stevens (http://goo.gl/LzOAA).
 void EnableBottomUpRand();
-
-// Generates a new UTF-8 based locale object, sets the global locale, and 
-// imbues all known static streams.
-std::locale ImbueAllDefault();
-
-// Sets the global locale, and imbues all existing static streams with the 
-// new locale (including 3rd party libraries like Boost.Filesystem).
-std::locale ImbueAll(std::locale const& locale);

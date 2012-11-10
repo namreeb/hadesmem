@@ -47,7 +47,6 @@ int main()
     EnableCrtDebugFlags();
     EnableTerminationOnHeapCorruption();
     EnableBottomUpRand();
-    ImbueAllDefault();
 
     std::cout << "HadesMem Injector\n";
 

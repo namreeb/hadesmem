@@ -448,7 +448,7 @@ public:
   
   MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT;
 
-#ifndef BOOST_NO_VARIADIC_TEMPLATES
+#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
   template <typename FuncT, typename... Args>
   void Add(LPCVOID address, CallConv call_conv, Args&&... args)
@@ -464,7 +464,7 @@ public:
     args_.push_back(call_args);
   }
 
-#else // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -513,7 +513,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 
 #undef HADESMEM_CALL_ADD_ARG
 
-#endif // #ifndef BOOST_NO_VARIADIC_TEMPLATES
+#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
   std::vector<CallResultRaw> Call() const;
   
