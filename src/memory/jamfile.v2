@@ -10,10 +10,6 @@ project
     <toolset>intel:<warnings>all
     
     <warnings-as-errors>on
-
-    <toolset>gcc:<cxxflags>"-std=c++11"
-    <toolset>clang:<cxxflags>"-std=c++11"
-    <toolset>intel:<cxxflags>"/Qstd=c++0x /Qwd2586"
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing"
@@ -25,13 +21,25 @@ lib advapi32
   :
     <name>advapi32
   ;
+  
+lib shell32
+  :
+  :
+    <name>shell32
+  ;
+
+lib shlwapi
+  :
+  :
+    <name>shlwapi
+  ;
 
 lib user32
   :
   :
     <name>user32
   ;
-
+  
 lib memory
   :
     [ glob memory/*.cpp ]
@@ -41,6 +49,8 @@ lib memory
     /boost//filesystem/<link>static
     /asmjit//asmjit
     advapi32
+	shell32
+	shlwapi
     user32
   :
     <link>static

@@ -67,11 +67,11 @@ project
     <threading>multi
     <runtime-link>static
     
-	# Disable warning caused by some Boost components. This warning can 
-	# safely be ignored as it does not affect program correctness.
-	# "The decorated name was longer than the compiler limit (4096), and was 
-	# truncated."
+	# Disable warning relating to the length of decorated names caused by 
+	# some Boost components. This warning can safely be ignored as it does 
+	# not affect program correctness.
     <toolset>msvc:<cxxflags>"/wd4503"
+    <toolset>intel:<cxxflags>"/Qwd2586"
 	# Required for atomics library.
     <toolset>gcc,<address-model>32:<cxxflags>"-march=pentium4"
 	# --export-all-symbols is required because of a bug in Clang's dllexport  
@@ -79,6 +79,11 @@ project
 	<toolset>clang:<linkflags>"-Wl,--export-all-symbols"
 	# Required for Boost.
 	<toolset>clang:<linkflags>"-Wl,--allow-multiple-definition" 
+
+	# Enable C++11 Mode
+    <toolset>gcc:<cxxflags>"-std=c++11"
+    <toolset>clang:<cxxflags>"-std=c++11"
+    <toolset>intel:<cxxflags>"/Qstd=c++11"
     
 	# Enable generation of debugging symbols, even under release mode.
     <debug-symbols>on

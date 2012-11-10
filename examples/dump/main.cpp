@@ -8,13 +8,14 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
 #include <iostream>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/program_options.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
+#include <windows.h>
+#include <shellapi.h>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/process.hpp>
@@ -105,6 +106,96 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   DumpRegions(*process);
 }
 
+class CommandLineOpts
+{
+public:
+  CommandLineOpts()
+    : help_(false), 
+    pid_(0)
+  { }
+
+  void SetHelp(bool help)
+  {
+    help_ = help;
+  }
+
+  bool GetHelp() const
+  {
+    return help_;
+  }
+
+  void SetPid(DWORD pid)
+  {
+    pid_ = pid;
+  }
+
+  DWORD GetPid() const
+  {
+    return pid_;
+  }
+
+private:
+  bool help_;
+  DWORD pid_;
+};
+
+CommandLineOpts ParseCommandLine(int argc, wchar_t** argv)
+{
+  CommandLineOpts opts;
+
+  for (int i = 1; i < argc; ++i)
+  {
+    std::wstring const current_arg(argv[i]);
+    if (current_arg == L"--help")
+    {
+      opts.SetHelp(true);
+    }
+    else if (current_arg == L"--pid")
+    {
+      if (i + 1 < argc)
+      {
+        std::wstringstream pid_str(argv[i + 1]);
+        DWORD pid = 0;
+        pid_str >> pid;
+        opts.SetPid(pid);
+        ++i;
+      }
+      else
+      {
+        BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+          hadesmem::ErrorString("Please specify a process ID."));
+      }
+    }
+    else
+    {
+      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+        hadesmem::ErrorString("Unrecognized argument."));
+    }
+  }
+
+  return opts;
+}
+
+class EnsureLocalFree
+{
+public:
+  explicit EnsureLocalFree(HLOCAL handle)
+    : handle_(handle)
+  { }
+
+  ~EnsureLocalFree()
+  {
+    BOOST_VERIFY(::LocalFree(handle_));
+  }
+
+private:
+  EnsureLocalFree(EnsureLocalFree const& other) HADESMEM_DELETED_FUNCTION;
+  EnsureLocalFree& operator=(EnsureLocalFree const& other) 
+    HADESMEM_DELETED_FUNCTION;
+
+  HLOCAL handle_;
+};
+
 }
 
 int main()
@@ -118,30 +209,27 @@ int main()
 
     std::cout << "HadesMem Dumper\n";
 
-    boost::program_options::options_description opts_desc(
-      "General options");
-    opts_desc.add_options()
-      ("help", "produce help message")
-      ("pid", boost::program_options::value<DWORD>(), "process id")
-      ;
-
-    std::vector<std::wstring> const args = boost::program_options::
-      split_winmain(GetCommandLine());
-    boost::program_options::variables_map var_map;
-    boost::program_options::store(boost::program_options::wcommand_line_parser(
-      args).options(opts_desc).run(), var_map);
-    boost::program_options::notify(var_map);
-
-    if (var_map.count("help"))
+    int argc = 0;
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    if (!argv)
     {
-      std::cout << '\n' << opts_desc << '\n';
-      return 1;
+      DWORD const last_error = ::GetLastError();
+      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+        hadesmem::ErrorString("CommandLineToArgvW failed.") << 
+        hadesmem::ErrorCodeWinLast(last_error));
     }
+    EnsureLocalFree ensure_free_command_line(reinterpret_cast<HLOCAL>(argv));
 
-    DWORD pid = 0;
-    if (var_map.count("pid"))
+    CommandLineOpts const opts(ParseCommandLine(argc, argv));
+
+    if (opts.GetHelp())
     {
-      pid = var_map["pid"].as<DWORD>();
+      std::cout << 
+        "\nOptions:\n"
+        "  --help\t\tproduce help message\n"
+        "  --pid arg\t\tprocess id\n";
+
+      return 1;
     }
 
     try
@@ -154,7 +242,9 @@ int main()
     {
       std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
     }
-    
+
+    DWORD const pid = opts.GetPid();
+
     if (pid)
     {
       hadesmem::ProcessList const processes;
@@ -163,7 +253,15 @@ int main()
         {
           return process_entry.GetId() == pid;
         });
-      DumpProcessEntry(*iter);
+      if (iter != std::end(processes))
+      {
+        DumpProcessEntry(*iter);
+      }
+      else
+      {
+        BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+          hadesmem::ErrorString("Failed to find requested process."));
+      }
     }
     else
     {
@@ -175,10 +273,12 @@ int main()
         DumpProcessEntry(process_entry);
       }
     }
+
+    return 0;
   }
   catch (std::exception const& e)
   {
-    std::cerr << "Error!\n";
+    std::cerr << "\nError!\n";
     std::cerr << boost::diagnostic_information(e) << "\n";
 
     return 1;
