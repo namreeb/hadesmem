@@ -273,7 +273,7 @@ int main()
     std::cout << "HadesMem Injector\n";
 
     int argc = 0;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    LPWSTR* argv = ::CommandLineToArgvW(::GetCommandLine(), &argc);
     if (!argv)
     {
       DWORD const last_error = ::GetLastError();
@@ -367,10 +367,10 @@ int main()
       else
       {
         std::wstring path_real(module_path);
-        if (path_resolution && PathIsRelative(path_real.c_str()))
+        if (path_resolution && ::PathIsRelative(path_real.c_str()))
         {
           std::array<wchar_t, MAX_PATH> absolute_path = { { 0 } };
-          if (!PathCombine(absolute_path.data(), 
+          if (!::PathCombine(absolute_path.data(), 
             hadesmem::detail::GetSelfDirPath().c_str(), 
             path_real.c_str()))
           {

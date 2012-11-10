@@ -97,7 +97,7 @@ BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE handle)
 {
   BY_HANDLE_FILE_INFORMATION info;
   ::ZeroMemory(&info, sizeof(info));
-  if (!GetFileInformationByHandle(handle, &info))
+  if (!::GetFileInformationByHandle(handle, &info))
   {
     DWORD const last_error = ::GetLastError();
     BOOST_THROW_EXCEPTION(Error() << 

@@ -210,7 +210,7 @@ int main()
     std::cout << "HadesMem Dumper\n";
 
     int argc = 0;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    LPWSTR* argv = ::CommandLineToArgvW(::GetCommandLine(), &argc);
     if (!argv)
     {
       DWORD const last_error = ::GetLastError();
