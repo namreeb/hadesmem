@@ -83,7 +83,7 @@ public:
   {
     if (IsValid())
     {
-      return *reinterpret_cast<T const*>(&t_);
+      return *static_cast<T const*>(static_cast<void const*>(&t_));
     }
 
     BOOST_THROW_EXCEPTION(Error() << 
@@ -99,7 +99,7 @@ public:
   {
     if (IsValid())
     {
-      return reinterpret_cast<T const*>(&t_);
+      return static_cast<T const*>(static_cast<void const*>(&t_));
     }
 
     BOOST_THROW_EXCEPTION(Error() << 
