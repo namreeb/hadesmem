@@ -409,29 +409,11 @@ return detail::CallResultRawToCallResult<ResultT>(ret);\
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif // #if defined(HADESMEM_CLANG)
-
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_CLANG)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
@@ -487,29 +469,11 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif // #if defined(HADESMEM_CLANG)
-
 #include BOOST_PP_LOCAL_ITERATE()
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_CLANG)
 
 #undef HADESMEM_CALL_ADD_ARG
 
