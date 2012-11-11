@@ -34,6 +34,28 @@ public:
     Create(t);
   }
 
+  Optional(Optional const& other)
+    : valid_(false), 
+    t_()
+  {
+    if (other.IsValid())
+    {
+      Create(*other);
+    }
+  }
+
+  Optional& operator=(Optional const& other)
+  {
+    Destroy();
+
+    if (other.IsValid())
+    {
+      Create(*other);
+    }
+
+    return *this;
+  }
+
   Optional& operator=(T const& t)
   {
     Destroy();
@@ -85,9 +107,6 @@ public:
   }
 
 private:
-  Optional(Optional const& other) HADESMEM_DELETED_FUNCTION;
-  Optional& operator=(Optional const& other) HADESMEM_DELETED_FUNCTION;
-
   void Destroy()
   {
     if (IsValid())
