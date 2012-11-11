@@ -13,7 +13,6 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/config.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
 #include <boost/function_types/result_type.hpp>
