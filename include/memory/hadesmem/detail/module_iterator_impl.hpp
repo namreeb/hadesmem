@@ -7,14 +7,11 @@
 
 #pragma once
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/optional.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
-
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
 #include "hadesmem/module.hpp"
+#include "hadesmem/detail/optional.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
@@ -35,7 +32,7 @@ struct ModuleIteratorImpl
   
   Process const* process_;
   SmartHandle snap_;
-  boost::optional<Module> module_;
+  Optional<Module> module_;
   
 private:
   ModuleIteratorImpl(ModuleIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
