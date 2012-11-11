@@ -111,7 +111,7 @@ private:
   {
     if (IsValid())
     {
-      reinterpret_cast<T*>(&t_)->~T();
+      static_cast<T*>(static_cast<void*>(&t_))->~T();
       valid_ = false;
     }
   }
