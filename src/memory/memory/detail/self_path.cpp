@@ -32,7 +32,7 @@ HMODULE GetHandleToSelf()
       ErrorCodeWinLast(last_error));
   }
 
-  return reinterpret_cast<HMODULE>(mem_info.AllocationBase);
+  return static_cast<HMODULE>(mem_info.AllocationBase);
 }
 
 std::wstring GetSelfPath()
