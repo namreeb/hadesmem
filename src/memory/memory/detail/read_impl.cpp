@@ -32,7 +32,7 @@ void Read(Process const& process, LPVOID address, LPVOID data,
     &bytes_read) || bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -51,7 +51,7 @@ void ReadUnchecked(Process const& process, LPVOID address, LPVOID data,
     &bytes_read) || bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not read process memory.") << 
       ErrorCodeWinLast(last_error));
   }

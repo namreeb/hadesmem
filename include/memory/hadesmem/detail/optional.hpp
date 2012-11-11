@@ -86,7 +86,7 @@ public:
       return *static_cast<T const*>(static_cast<void const*>(&t_));
     }
 
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Type is invalid."));
   }
 
@@ -102,7 +102,7 @@ public:
       return static_cast<T const*>(static_cast<void const*>(&t_));
     }
 
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Type is invalid."));
   }
 

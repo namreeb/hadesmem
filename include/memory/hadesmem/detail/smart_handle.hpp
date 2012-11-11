@@ -87,7 +87,7 @@ public:
     if (!::CloseHandle(handle_))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("CloseHandle failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -110,7 +110,7 @@ private:
       (void)e;
 
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      assert(boost::diagnostic_information(e).c_str() && false);
+      assert(e.what() && false);
 
       handle_ = invalid_;
     }

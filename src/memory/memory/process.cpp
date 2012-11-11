@@ -25,7 +25,7 @@ bool IsWoW64Process(HANDLE handle)
   if (!::IsWow64Process(handle, &is_wow64))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("IsWoW64Process failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -109,7 +109,7 @@ void Process::CheckWoW64() const
   if (IsWoW64Process(::GetCurrentProcess()) != 
     IsWoW64Process(handle_.GetHandle()))
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Cross-architecture process manipulation is currently "
         "unsupported."));
   }
@@ -121,7 +121,7 @@ HANDLE Process::Open(DWORD id)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -140,7 +140,7 @@ void Process::CleanupUnchecked() HADESMEM_NOEXCEPT
     (void)e;
     
     // WARNING: Handle is leaked if 'Cleanup' fails.
-    assert(boost::diagnostic_information(e).c_str() && false);
+    assert(e.what() && false);
     
     id_ = 0;
     handle_ = nullptr;
@@ -156,7 +156,7 @@ HANDLE Process::Duplicate(HANDLE handle)
     ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("DuplicateHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -212,7 +212,7 @@ std::wstring GetPath(Process const& process)
     &path_len))
   {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("QueryFullProcessImageName failed.") << 
         ErrorCodeWinLast(last_error));
   }
@@ -232,7 +232,7 @@ void GetSeDebugPrivilege()
     TOKEN_QUERY, &process_token_temp)) 
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcessToken failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -242,7 +242,7 @@ void GetSeDebugPrivilege()
   if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("LookupPrivilegeValue failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -257,7 +257,7 @@ void GetSeDebugPrivilege()
     ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("AdjustTokenPrivileges failed.") << 
       ErrorCodeWinLast(last_error));
   }

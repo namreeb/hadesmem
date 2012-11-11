@@ -29,7 +29,9 @@ public:
 
   ~EnsureFreeLibrary()
   {
-    BOOST_VERIFY(::FreeLibrary(module_));
+    BOOL const success = ::FreeLibrary(module_);
+    (void)success;
+    assert(success);
   }
 
 private:
@@ -49,7 +51,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   if (!local_module)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("LoadLibraryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -59,7 +61,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   if (!local_func)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("GetProcAddress failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -85,7 +87,7 @@ HANDLE GetFileHandleForQuery(std::wstring const& path)
   if (handle == INVALID_HANDLE_VALUE)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("CreateFile failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -100,7 +102,7 @@ BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE handle)
   if (!::GetFileInformationByHandle(handle, &info))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("GetFileInformationByHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -303,7 +305,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
       if (!snap.IsValid())
       {
         DWORD const last_error = ::GetLastError();
-        BOOST_THROW_EXCEPTION(Error() << 
+        HADESMEM_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -311,7 +313,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
     else
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -334,13 +336,13 @@ void Module::InitializeIf(EntryCallback const& check_func)
   DWORD const last_error = ::GetLastError();
   if (last_error == ERROR_NO_MORE_FILES)
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module.") << 
       ErrorCodeWinLast(last_error));
   }
   else
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Module enumeration failed.") << 
       ErrorCodeWinLast(last_error));
   }

@@ -10,6 +10,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 #include <windows.h>
 #include <shellapi.h>
@@ -162,13 +163,13 @@ CommandLineOpts ParseCommandLine(int argc, wchar_t** argv)
       }
       else
       {
-        BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+        HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
           hadesmem::ErrorString("Please specify a process ID."));
       }
     }
     else
     {
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("Unrecognized argument."));
     }
   }
@@ -185,7 +186,9 @@ public:
 
   ~EnsureLocalFree()
   {
-    BOOST_VERIFY(::LocalFree(handle_));
+    HLOCAL const mem = ::LocalFree(handle_);
+    (void)mem;
+    assert(!mem);
   }
 
 private:
@@ -214,7 +217,7 @@ int main()
     if (!argv)
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("CommandLineToArgvW failed.") << 
         hadesmem::ErrorCodeWinLast(last_error));
     }
@@ -259,7 +262,7 @@ int main()
       }
       else
       {
-        BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+        HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
           hadesmem::ErrorString("Failed to find requested process."));
       }
     }
@@ -279,7 +282,7 @@ int main()
   catch (std::exception const& e)
   {
     std::cerr << "\nError!\n";
-    std::cerr << boost::diagnostic_information(e) << "\n";
+    std::cerr << e.what() << "\n";
 
     return 1;
   }

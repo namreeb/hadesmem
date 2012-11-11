@@ -10,7 +10,16 @@
 namespace hadesmem
 {
 
-void Error::Anchor() const
-{ }
+Error::Error()
+  : what_()
+{
+  what_ += "Exception type: ";
+  what_ += typeid(*this).name();
+}
+
+char const* Error::what() const HADESMEM_NOEXCEPT
+{
+  return what_.c_str();
+}
 
 }

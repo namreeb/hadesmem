@@ -46,7 +46,6 @@ lib memory
     [ glob memory/pelib/*.cpp ]
     [ glob memory/detail/*.cpp ]
     /boost//headers
-    /boost//filesystem/<link>static
     /asmjit//asmjit
     advapi32
 	shell32

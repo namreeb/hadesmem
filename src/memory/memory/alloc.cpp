@@ -22,7 +22,7 @@ PVOID Alloc(Process const& process, SIZE_T size)
   if (!address)
   {
     DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -35,7 +35,7 @@ void Free(Process const& process, LPVOID address)
   if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
   {
     DWORD const last_error = GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualFreeEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -121,9 +121,8 @@ void Allocator::FreeUnchecked() HADESMEM_NOEXCEPT
   {
     (void)e;
     
-    // WARNING: Memory in remote process is leaked if 'Free' fails, but 
-    // unfortunately there's nothing that can be done about it...
-    assert(boost::diagnostic_information(e).c_str() && false);
+    // WARNING: Memory in remote process is leaked if 'Free' fails
+    assert(e.what() && false);
     
     process_ = nullptr;
     base_ = nullptr;

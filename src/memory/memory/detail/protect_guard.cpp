@@ -30,7 +30,7 @@ ProtectGuard::ProtectGuard(Process const* process, PVOID address,
 
   if (IsGuard(mbi))
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Attempt to write to guard page."));
   }
 
@@ -98,10 +98,10 @@ void ProtectGuard::RestoreUnchecked() HADESMEM_NOEXCEPT
   }
   catch (std::exception const& e)
   {
-    // WARNING: Protection is not restored if 'Restore' fails.
-
     (void)e;
-    assert(boost::diagnostic_information(e).c_str() && false);
+
+    // WARNING: Protection is not restored if 'Restore' fails.
+    assert(e.what() && false);
   }
 }
 

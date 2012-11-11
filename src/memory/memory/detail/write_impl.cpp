@@ -34,7 +34,7 @@ void Write(Process const& process, PVOID address, LPCVOID data,
     len, &bytes_written) || bytes_written != len)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));
   }

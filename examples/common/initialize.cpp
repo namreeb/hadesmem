@@ -36,7 +36,7 @@ void DisableUserModeCallbackExceptionFilter()
   if (!k32_mod)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("GetModuleHandle failed.") << 
       hadesmem::ErrorCodeWinLast(last_error));
   }
@@ -81,7 +81,7 @@ void EnableTerminationOnHeapCorruption()
     HeapEnableTerminationOnCorruption, nullptr, 0))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("HeapSetInformation failed.") << 
       hadesmem::ErrorCodeWinLast(last_error));
   }
@@ -101,7 +101,7 @@ void EnableBottomUpRand()
     if (!::VirtualAlloc(NULL, kAllocSize64K, MEM_RESERVE, PAGE_NOACCESS))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("VirtualAlloc failed.") << 
         hadesmem::ErrorCodeWinLast(last_error));
     }

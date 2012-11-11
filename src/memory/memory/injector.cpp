@@ -106,7 +106,7 @@ bool FileExists(std::wstring const& path)
   if (attrib == INVALID_FILE_ATTRIBUTES)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("GetFileAttributes failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -126,7 +126,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
   if (shim_eng_mod)
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Shims enabled for local process."));
   }
 
@@ -142,7 +142,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
       path_real.c_str()))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("PathCombine failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -152,7 +152,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
   if (add_path && PathIsRelative(path_real.c_str()))
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Cannot modify search order unless an absolute path "
       "or path resolution is used."));
   }
@@ -164,7 +164,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   // let LoadLibraryW do the check for us.
   if (path_resolution && !FileExists(path_real))
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module file."));
   }
 
@@ -187,7 +187,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
     add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Call to LoadLibraryW in remote process failed.") << 
       ErrorCodeWinLast(load_library_ret.GetLastError()));
   }
@@ -206,7 +206,7 @@ void FreeDll(Process const& process, HMODULE module)
     Call<FreeLibraryFuncT>(process, free_library, CallConv::kWinApi, module);
   if (!free_library_ret.GetReturnValue())
   {
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Call to FreeLibrary in remote process failed.") << 
       ErrorCodeWinLast(free_library_ret.GetLastError()));
   }
@@ -342,7 +342,7 @@ CreateAndInjectData CreateAndInject(
     work_dir_real.c_str(), &start_info, &proc_info))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("CreateProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -381,7 +381,7 @@ CreateAndInjectData CreateAndInject(
     if (!remote_thread.GetHandle())
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("Could not create remote thread.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -391,7 +391,7 @@ CreateAndInjectData CreateAndInject(
       WAIT_OBJECT_0)
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("Could not wait for remote thread.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -408,7 +408,7 @@ CreateAndInjectData CreateAndInject(
     if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("Could not resume process.") << 
         ErrorCodeWinLast(last_error) << 
         ErrorCodeWinRet(export_ret.GetReturnValue()) << 
