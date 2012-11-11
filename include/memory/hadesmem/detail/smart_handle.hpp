@@ -72,6 +72,11 @@ public:
     return invalid_;
   }
 
+  bool IsValid() const HADESMEM_NOEXCEPT
+  {
+    return GetHandle() != GetInvalid();
+  }
+
   void Cleanup()
   {
     if (handle_ == invalid_)

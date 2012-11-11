@@ -30,15 +30,17 @@ ModuleIterator::ModuleIterator(Process const* process)
   
   impl_->process_ = process;
   
-  impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-    impl_->process_->GetId());
-  if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
+  impl_->snap_ = detail::SmartHandle(
+    ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
+    impl_->process_->GetId()), INVALID_HANDLE_VALUE);
+  if (!impl_->snap_.IsValid())
   {
     if (::GetLastError() == ERROR_BAD_LENGTH)
     {
-      impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-        impl_->process_->GetId());
-      if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
+      impl_->snap_ = detail::SmartHandle(
+        ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
+        impl_->process_->GetId()), INVALID_HANDLE_VALUE);
+      if (!impl_->snap_.IsValid())
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 

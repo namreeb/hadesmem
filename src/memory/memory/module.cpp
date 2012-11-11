@@ -294,13 +294,13 @@ void Module::InitializeIf(EntryCallback const& check_func)
 {
   detail::SmartHandle snap(::CreateToolhelp32Snapshot(
     TH32CS_SNAPMODULE, process_->GetId()), INVALID_HANDLE_VALUE);
-  if (snap.GetHandle() == snap.GetInvalid())
+  if (!snap.IsValid())
   {
     if (GetLastError() == ERROR_BAD_LENGTH)
     {
       snap = ::CreateToolhelp32Snapshot(
         TH32CS_SNAPMODULE, process_->GetId());
-      if (snap.GetHandle() == snap.GetInvalid())
+      if (!snap.IsValid())
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 

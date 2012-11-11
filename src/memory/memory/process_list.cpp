@@ -26,13 +26,15 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
 {
   assert(impl_.get());
   
-  impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
+  impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
+    TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+  if (!impl_->snap_.IsValid())
   {
     if (::GetLastError() == ERROR_BAD_LENGTH)
     {
-      impl_->snap_ = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-      if (impl_->snap_.GetHandle() == INVALID_HANDLE_VALUE)
+      impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
+        TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+      if (!impl_->snap_.IsValid())
       {
         DWORD const last_error = ::GetLastError();
         BOOST_THROW_EXCEPTION(Error() << 
