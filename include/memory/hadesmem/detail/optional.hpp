@@ -24,14 +24,12 @@ class Optional
 public:
   Optional() HADESMEM_NOEXCEPT
     : valid_(false), 
-    t_(), 
-    p_(&t_)
+    t_()
   { }
 
   explicit Optional(T const& t)
     : valid_(true), 
-    t_(), 
-    p_(&t_)
+    t_()
   {
     Create(t);
   }
@@ -63,7 +61,7 @@ public:
   {
     if (IsValid())
     {
-      return *static_cast<T const*>(p_);
+      return *reinterpret_cast<T const*>(&t_);
     }
 
     BOOST_THROW_EXCEPTION(Error() << 
@@ -79,7 +77,7 @@ public:
   {
     if (IsValid())
     {
-      return static_cast<T const*>(p_);
+      return reinterpret_cast<T const*>(&t_);
     }
 
     BOOST_THROW_EXCEPTION(Error() << 
@@ -94,22 +92,20 @@ private:
   {
     if (IsValid())
     {
-      static_cast<T*>(p_)->~T();
-      p_ = nullptr;
+      reinterpret_cast<T*>(&t_)->~T();
       valid_ = false;
     }
   }
 
   void Create(T const& t)
   {
-    p_ = new (&t_) T(t);
+    new (&t_) T(t);
     valid_ = true;
   }
 
   bool valid_;
   typename std::aligned_storage<sizeof(T), 
     std::alignment_of<T>::value>::type t_;
-  void* p_;
 };
 
 }
