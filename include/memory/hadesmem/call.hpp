@@ -13,14 +13,13 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
-#include <boost/function_types/parameter_types.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
+#include "hadesmem/detail/func_args.hpp"
 #include "hadesmem/detail/func_arity.hpp"
 #include "hadesmem/detail/union_cast.hpp"
 #include "hadesmem/detail/func_result.hpp"
@@ -287,32 +286,6 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 namespace detail
 {
 
-template<unsigned int N, typename Head, typename... Tail>
-struct GetArgN : GetArgN<N - 1, Tail...>
-{ };
-
-template<typename Head, typename... Tail>
-struct GetArgN<0, Head, Tail...>
-{
-  // Silence a GCC warning about the lack of a virtual destructor when this 
-  // type is used as a base class. This type is never actually created, so 
-  // just define the destructor to shut GCC up, as there is no runtime 
-  // performance penalty.
-  virtual ~GetArgN() { }
-
-  typedef Head type;
-};
-
-template <int N, typename FuncT>
-struct FuncArgT
-{ };
-
-template <int N, typename R, typename... Args>
-struct FuncArgT<N, R (*)(Args...)>
-{
-  typedef typename GetArgN<N, Args...>::type type;
-};
-
 template <typename FuncT, int N>
 inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/) 
   HADESMEM_NOEXCEPT
@@ -323,10 +296,11 @@ inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/)
 template <typename FuncT, int N, typename T, typename... Args>
 void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
 {
-  typedef typename FuncArgT<N, FuncT>::type RealT;
+  typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
+  typedef typename std::tuple_element<N, FuncArgs>::type RealT;
   HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   RealT const real_arg(std::forward<T>(arg));
-  call_args->emplace_back(real_arg);
+  call_args->emplace_back(std::move(real_arg));
   return BuildCallArgs<FuncT, N + 1>(call_args, std::forward<Args>(args)...);
 }
 
@@ -359,12 +333,13 @@ HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
 
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
-typedef typename boost::mpl::at_c<\
-  boost::function_types::parameter_types<FuncT>, \
-  n>::type A##n;\
+typedef typename std::tuple_element<\
+  n, \
+  detail::FuncArgs<FuncT>::type\
+  >::type A##n;\
 HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
 A##n const a##n(t##n);\
-args.emplace_back(a##n);\
+args.emplace_back(std::move(a##n));\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
