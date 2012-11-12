@@ -279,6 +279,25 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
   return CallResult<void>(result.GetLastError());
 }
 
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
+
+template <typename FuncT, int N, typename T>
+void AddCallArg(std::vector<CallArg>* call_args, T&& arg)
+{
+  typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
+  typedef typename std::tuple_element<N, FuncArgs>::type RealT;
+  HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
+  RealT const real_arg(std::forward<T>(arg));
+  call_args->emplace_back(std::move(real_arg));
+}
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
+
 }
 
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
@@ -296,11 +315,7 @@ inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/)
 template <typename FuncT, int N, typename T, typename... Args>
 void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
 {
-  typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
-  typedef typename std::tuple_element<N, FuncArgs>::type RealT;
-  HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
-  RealT const real_arg(std::forward<T>(arg));
-  call_args->emplace_back(std::move(real_arg));
+  AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
   return BuildCallArgs<FuncT, N + 1>(call_args, std::forward<Args>(args)...);
 }
 
@@ -333,13 +348,7 @@ HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
 
 #define HADESMEM_CALL_ADD_ARG(z, n, unused) \
-typedef typename std::tuple_element<\
-  n, \
-  detail::FuncArgs<FuncT>::type\
-  >::type A##n;\
-HADESMEM_STATIC_ASSERT(std::is_convertible<T##n, A##n>::value);\
-A##n const a##n(t##n);\
-args.emplace_back(std::move(a##n));\
+  detail::AddCallArg<FuncT, n>(&args, std::forward<T##n>(t##n));
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -358,16 +367,7 @@ return detail::CallResultRawToCallResult<ResultT>(ret);\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif // #if defined(HADESMEM_MSVC)
-
 #include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
@@ -418,16 +418,7 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif // #if defined(HADESMEM_MSVC)
-
 #include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
 
 #undef HADESMEM_CALL_ADD_ARG
 
