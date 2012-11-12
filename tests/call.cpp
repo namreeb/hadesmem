@@ -99,8 +99,7 @@ double TestDouble(double a, double b, double c, double d, double e, double f)
 }
 
 DWORD_PTR TestMixed(double a, void const* b, char c, float d, int e, 
-  unsigned int f, float g, double h, DummyType const* i, int j, int k, 
-  DWORD64 l)
+  unsigned int f, float g, double h, DummyType const* i, DWORD64 j)
 {
   BOOST_CHECK_EQUAL(a, 1337.6666);
   BOOST_CHECK_EQUAL(b, static_cast<void const*>(nullptr));
@@ -111,9 +110,7 @@ DWORD_PTR TestMixed(double a, void const* b, char c, float d, int e,
   BOOST_CHECK_EQUAL(g, 1234.56f);
   BOOST_CHECK_EQUAL(h, 9876.54);
   BOOST_CHECK_EQUAL(i, &dummy_glob);
-  BOOST_CHECK_EQUAL(j, 1234);
-  BOOST_CHECK_EQUAL(k, 5678);
-  BOOST_CHECK_EQUAL(l, 0xAAAAAAAABBBBBBBBULL);
+  BOOST_CHECK_EQUAL(j, 0xAAAAAAAABBBBBBBBULL);
   
   SetLastError(5678);
   return 1234;
@@ -267,12 +264,12 @@ BOOST_AUTO_TEST_CASE(call)
   unsigned int const lvalue_int = 0xDEAFBEEF;
   typedef DWORD_PTR (*TestFuncT)(double a, void const* b, char c, 
     float d, int e, unsigned int f, float g, double h, DummyType const* i, 
-    int j, int k, DWORD64 l);
+    DWORD64 j);
   auto const call_ret = hadesmem::Call<TestFuncT>(
     process, reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(&TestMixed)), 
     hadesmem::CallConv::kDefault, 1337.6666, nullptr, 'c', 9081.736455f, 
-    ImplicitConvTest(), lvalue_int, 1234.56f, 9876.54, &dummy_glob, 1234, 
-    5678, 0xAAAAAAAABBBBBBBBULL);
+    ImplicitConvTest(), lvalue_int, 1234.56f, 9876.54, &dummy_glob, 
+    0xAAAAAAAABBBBBBBBULL);
   BOOST_CHECK_EQUAL(call_ret.GetReturnValue(), static_cast<DWORD_PTR>(1234));
   BOOST_CHECK_EQUAL(call_ret.GetLastError(), static_cast<DWORD>(5678));
   

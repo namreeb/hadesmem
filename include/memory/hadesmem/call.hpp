@@ -15,15 +15,15 @@
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
-#include <boost/function_types/result_type.hpp>
-#include <boost/function_types/function_arity.hpp>
 #include <boost/function_types/parameter_types.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
+#include "hadesmem/detail/func_arity.hpp"
 #include "hadesmem/detail/union_cast.hpp"
+#include "hadesmem/detail/func_result.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
@@ -287,26 +287,6 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 namespace detail
 {
 
-template <typename FuncT>
-struct FuncResultT
-{ };
-
-template <typename R, typename... Args>
-struct FuncResultT<R (*)(Args...)>
-{
-  typedef R type;
-};
-
-template <typename FuncT>
-struct FuncArity
-{ };
-
-template <typename R, typename... Args>
-struct FuncArity<R (*)(Args...)>
-{
-  static int const value = sizeof...(Args);
-};
-
 template<unsigned int N, typename Head, typename... Tail>
 struct GetArgN : GetArgN<N - 1, Tail...>
 { };
@@ -353,7 +333,7 @@ void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
 }
 
 template <typename FuncT, typename... Args>
-CallResult<typename detail::FuncResultT<FuncT>::type> Call(
+CallResult<typename detail::FuncResult<FuncT>::type> Call(
   Process const& process, LPCVOID address, CallConv call_conv, 
   Args&&... args)
 {
@@ -364,14 +344,14 @@ CallResult<typename detail::FuncResultT<FuncT>::type> Call(
   detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
 
   CallResultRaw const ret = Call(process, address, call_conv, call_args);
-  typedef typename detail::FuncResultT<FuncT>::type ResultT;
+  typedef typename detail::FuncResult<FuncT>::type ResultT;
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
 #ifndef HADESMEM_CALL_MAX_ARGS
-#define HADESMEM_CALL_MAX_ARGS 20
+#define HADESMEM_CALL_MAX_ARGS 10
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
 
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
@@ -388,16 +368,16 @@ args.emplace_back(a##n);\
 
 #define BOOST_PP_LOCAL_MACRO(n)\
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-CallResult<typename boost::function_types::result_type<FuncT>::type> \
+CallResult<typename detail::FuncResult<FuncT>::type> \
   Call(Process const& process, LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
-  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
-    == n);\
+  HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n);\
   std::vector<CallArg> args;\
+  args.reserve(n);\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   CallResultRaw const ret = Call(process, address, call_conv, args);\
-  typedef typename boost::function_types::result_type<FuncT>::type ResultT;\
+  typedef typename detail::FuncResult<FuncT>::type ResultT;\
 return detail::CallResultRawToCallResult<ResultT>(ret);\
 }\
 
@@ -452,9 +432,9 @@ template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
   void Add(LPCVOID address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
-  HADESMEM_STATIC_ASSERT(boost::function_types::function_arity<FuncT>::value \
-    == n);\
+  HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n);\
   std::vector<CallArg> args;\
+  args.reserve(n);\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   addresses_.push_back(address);\
   call_convs_.push_back(call_conv);\
