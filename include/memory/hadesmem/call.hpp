@@ -362,7 +362,7 @@ CallResult<typename detail::FuncResult<FuncT>::type> \
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG, ~)\
   CallResultRaw const ret = Call(process, address, call_conv, args);\
   typedef typename detail::FuncResult<FuncT>::type ResultT;\
-return detail::CallResultRawToCallResult<ResultT>(ret);\
+  return detail::CallResultRawToCallResult<ResultT>(ret);\
 }\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
