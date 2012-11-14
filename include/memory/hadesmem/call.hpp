@@ -356,7 +356,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 1);
   std::vector<CallArg> args;
-  args.reserve(1);
   HADESMEM_CALL_ADD_ARG(0)
   CallResultRaw const ret = Call(process, address, call_conv, args);
   typedef typename detail::FuncResult<FuncT>::type ResultT;
@@ -370,7 +369,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 2);
   std::vector<CallArg> args;
-  args.reserve(2);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   CallResultRaw const ret = Call(process, address, call_conv, args);
@@ -385,7 +383,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 3);
   std::vector<CallArg> args;
-  args.reserve(3);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -401,7 +398,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 4);
   std::vector<CallArg> args;
-  args.reserve(4);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -419,7 +415,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 5);
   std::vector<CallArg> args;
-  args.reserve(5);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -438,7 +433,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 6);
   std::vector<CallArg> args;
-  args.reserve(6);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -458,7 +452,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 7);
   std::vector<CallArg> args;
-  args.reserve(7);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -479,7 +472,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 8);
   std::vector<CallArg> args;
-  args.reserve(8);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -502,7 +494,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 9);
   std::vector<CallArg> args;
-  args.reserve(9);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -526,7 +517,6 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 10);
   std::vector<CallArg> args;
-  args.reserve(10);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -601,7 +591,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0)
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 1);
   std::vector<CallArg> args;
-  args.reserve(1);
   HADESMEM_CALL_ADD_ARG(0)
   addresses_.push_back(address);
   call_convs_.push_back(call_conv);
@@ -613,7 +602,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1)
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 2);
   std::vector<CallArg> args;
-  args.reserve(2);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   addresses_.push_back(address);
@@ -626,7 +614,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2)
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 3);
   std::vector<CallArg> args;
-  args.reserve(3);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -641,7 +628,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 4);
   std::vector<CallArg> args;
-  args.reserve(4);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -658,7 +644,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 5);
   std::vector<CallArg> args;
-  args.reserve(5);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -676,7 +661,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 6);
   std::vector<CallArg> args;
-  args.reserve(6);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -695,7 +679,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 7);
   std::vector<CallArg> args;
-  args.reserve(7);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -715,7 +698,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 8);
   std::vector<CallArg> args;
-  args.reserve(8);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -736,7 +718,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 9);
   std::vector<CallArg> args;
-  args.reserve(9);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
@@ -758,7 +739,6 @@ void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2,
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 10);
   std::vector<CallArg> args;
-  args.reserve(10);
   HADESMEM_CALL_ADD_ARG(0)
   HADESMEM_CALL_ADD_ARG(1)
   HADESMEM_CALL_ADD_ARG(2)
