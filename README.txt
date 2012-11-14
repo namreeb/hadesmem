@@ -2,6 +2,5 @@ PLEASE READ THE LICENSE AGREEMENTS FOR HADESMEM AND THE LIBRARIES IT DEPENDS ON 
 
 HadesMem license can be found at /COPYING.txt
 AsmJit license can be found at /src/asmjit/AsmJit/COPYING.txt
-BeaEngine license can be found at <placeholder>.
 
 HadesMem documentation can be found at /html/index.html.
