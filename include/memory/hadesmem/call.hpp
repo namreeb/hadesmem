@@ -70,7 +70,7 @@ template <>
 class CallResult<void>
 {
 public:
-  CallResult(DWORD last_error) HADESMEM_NOEXCEPT
+  explicit CallResult(DWORD last_error) HADESMEM_NOEXCEPT
     : last_error_(last_error)
   { }
 
