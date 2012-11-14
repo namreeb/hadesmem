@@ -302,14 +302,14 @@ namespace detail
 {
 
 template <typename FuncT, int N>
-inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/) 
-  HADESMEM_NOEXCEPT
+void BuildCallArgs(std::vector<CallArg>* /*call_args*/) HADESMEM_NOEXCEPT
 {
   return;
 }
 
 template <typename FuncT, int N, typename T, typename... Args>
-void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, Args&&... args)
+void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, 
+  Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
   return BuildCallArgs<FuncT, N + 1>(call_args, std::forward<Args>(args)...);
