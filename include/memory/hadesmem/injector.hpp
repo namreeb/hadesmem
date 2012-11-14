@@ -53,7 +53,8 @@ public:
 
   CreateAndInjectData(CreateAndInjectData&& Other) HADESMEM_NOEXCEPT;
 
-  CreateAndInjectData& operator=(CreateAndInjectData&& Other) HADESMEM_NOEXCEPT;
+  CreateAndInjectData& operator=(CreateAndInjectData&& Other) 
+    HADESMEM_NOEXCEPT;
 
   Process GetProcess() const;
 
