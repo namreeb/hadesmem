@@ -102,14 +102,14 @@ public:
   DWORD GetLastError() const HADESMEM_NOEXCEPT;
   
   template <typename T>
-  T GetReturnValue() const HADESMEM_NOEXCEPT
+  typename std::remove_cv<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
       std::is_same<double, typename std::remove_cv<T>::type>::value);
     
-    return GetReturnValueImpl(T());
+    return GetReturnValueImpl(typename std::remove_cv<T>::type());
   }
   
 private:
