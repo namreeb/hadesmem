@@ -12,8 +12,8 @@ project
     <warnings-as-errors>on
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
-    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing"
-    <toolset>clang:<cxxflags>"-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
+    <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5"
+    <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
   ;
   
 lib advapi32
