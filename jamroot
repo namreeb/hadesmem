@@ -78,10 +78,14 @@ project
 	# support. Remove once this has been fixed.
 	<toolset>clang:<linkflags>"-Wl,--export-all-symbols"
 	# Required for Boost.
-	<toolset>clang:<linkflags>"-Wl,--allow-multiple-definition" 
+	<toolset>clang:<linkflags>"-Wl,--allow-multiple-definition"
 	# Increase max argument count of MSVC's fake variadics to allow a similar 
-	# increase in HadesMem's fake variadics.
+	# increase in HadesMem's fake variadics (specifically in the use of 
+	# std::tuple).
 	<toolset>msvc:<define>_VARIADIC_MAX=10
+	# Enable checks for signed overflow in debug builds
+	<toolset>gcc,<variant>debug:<cxxflags>"-ftrapv"
+	<toolset>clang,<variant>debug:<cxxflags>"-ftrapv"
 
 	# Enable C++11 Mode
     <toolset>gcc:<cxxflags>"-std=c++11"
