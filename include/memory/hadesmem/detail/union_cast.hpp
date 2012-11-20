@@ -24,6 +24,14 @@ public:
   HADESMEM_STATIC_ASSERT(std::is_pod<To>::value);
   HADESMEM_STATIC_ASSERT(std::is_pod<From>::value);
 
+  // C++ does not require members of a union to have the same size or 
+  // alignment requirements, however because this particular union is only to 
+  // be used to convert between known 'safe' types of the same size, this 
+  // should always be true.
+  HADESMEM_STATIC_ASSERT(sizeof(From) == sizeof(To));
+  HADESMEM_STATIC_ASSERT(std::alignment_of<From>::value == 
+    std::alignment_of<To>::value);
+
   explicit UnionCastImpl(From from) HADESMEM_NOEXCEPT
     : from_(from)
   { }

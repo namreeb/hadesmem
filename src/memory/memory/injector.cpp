@@ -171,16 +171,14 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   WriteString(process, lib_file_remote.GetBase(), path_real);
 
   Module const kernel32_mod(&process, L"kernel32.dll");
-  auto const load_library = reinterpret_cast<LPCVOID>(
-    reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, 
-    "LoadLibraryExW")));
+  auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
 
   typedef HMODULE (*LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
     DWORD dwFlags);
   auto const load_library_ret = 
-    Call<LoadLibraryExFuncT>(process, load_library, CallConv::kWinApi, 
-    static_cast<LPCWSTR>(lib_file_remote.GetBase()), nullptr, 
-    add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
+    Call<LoadLibraryExFuncT>(process, reinterpret_cast<FnPtr>(load_library), 
+    CallConv::kWinApi, static_cast<LPCWSTR>(lib_file_remote.GetBase()), 
+    nullptr, add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -194,12 +192,12 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(&process, L"kernel32.dll");
-  auto const free_library = reinterpret_cast<LPCVOID>(
-    reinterpret_cast<DWORD_PTR>(FindProcedure(kernel32_mod, "FreeLibrary")));
+  auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
 
   typedef BOOL (*FreeLibraryFuncT)(HMODULE hModule);
   auto const free_library_ret = 
-    Call<FreeLibraryFuncT>(process, free_library, CallConv::kWinApi, module);
+    Call<FreeLibraryFuncT>(process, reinterpret_cast<FnPtr>(free_library), 
+    CallConv::kWinApi, module);
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -213,10 +211,10 @@ CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
   std::string const& export_name)
 {
   Module const module_remote(&process, module);
-  auto const export_ptr = reinterpret_cast<LPCVOID>(
-    reinterpret_cast<DWORD_PTR>(FindProcedure(module_remote, export_name)));
+  auto const export_ptr = FindProcedure(module_remote, export_name);
 
-  return Call<DWORD_PTR(*)()>(process, export_ptr, CallConv::kDefault);
+  return Call<DWORD_PTR(*)()>(process, reinterpret_cast<FnPtr>(export_ptr), 
+    CallConv::kDefault);
 }
 
 CreateAndInjectData::CreateAndInjectData(Process const& process, 

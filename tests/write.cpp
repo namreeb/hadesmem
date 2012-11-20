@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(write_pod)
 
   TestPODType test_pod_type_3 = { 1, 0, L'a', 1234567812345678 };
   char test_pod_raw[sizeof(TestPODType)] = {};
-  std::copy(reinterpret_cast<char*>(&test_pod_type_2), 
-    reinterpret_cast<char*>(&test_pod_type_2) + sizeof(TestPODType), 
+  std::copy(reinterpret_cast<unsigned char*>(&test_pod_type_2), 
+    reinterpret_cast<unsigned char*>(&test_pod_type_2) + sizeof(TestPODType), 
     &test_pod_raw[0]);
   BOOST_CHECK_NE(std::memcmp(&test_pod_type_3, &test_pod_type_2, 
     sizeof(test_pod_type_3)), 0);

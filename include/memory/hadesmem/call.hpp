@@ -13,7 +13,6 @@
 #include "hadesmem/config.hpp"
 #include "hadesmem/detail/func_args.hpp"
 #include "hadesmem/detail/func_arity.hpp"
-#include "hadesmem/detail/union_cast.hpp"
 #include "hadesmem/detail/func_result.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
@@ -116,20 +115,54 @@ private:
   template <typename T>
   T GetReturnValueIntImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    return detail::UnionCast<T>(GetReturnValueInt64());
+    HADESMEM_STATIC_ASSERT(std::alignment_of<T>::value == 
+      std::alignment_of<DWORD64>::value);
+    return static_cast<T>(GetReturnValueInt64());
   }
-  
+
   template <typename T>
   T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    return detail::UnionCast<T>(GetReturnValueInt32());
+    HADESMEM_STATIC_ASSERT(std::alignment_of<T>::value == 
+      std::alignment_of<DWORD32>::value);
+    return static_cast<T>(GetReturnValueInt32());
   }
-  
+
+  template <typename T>
+  T* GetReturnValuePtrImpl(std::true_type) const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_STATIC_ASSERT(std::alignment_of<T*>::value == 
+      std::alignment_of<DWORD64>::value);
+    return reinterpret_cast<T*>(GetReturnValueInt64());
+  }
+
+  template <typename T>
+  T* GetReturnValuePtrImpl(std::false_type) const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_STATIC_ASSERT(std::alignment_of<T*>::value == 
+      std::alignment_of<DWORD32>::value);
+    return reinterpret_cast<T*>(GetReturnValueInt32());
+  }
+
   template <typename T>
   T GetReturnValueImpl(T /*t*/) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
+  }
+
+  template <typename T>
+  T* GetReturnValueImpl(T* /*t*/) const HADESMEM_NOEXCEPT
+  {
+    return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
+      (sizeof(void*) == sizeof(DWORD64))>());
+  }
+
+  template <typename T>
+  T const* GetReturnValueImpl(T const* /*t*/) const HADESMEM_NOEXCEPT
+  {
+    return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
+      (sizeof(void*) == sizeof(DWORD64))>());
   }
   
   float GetReturnValueImpl(float /*t*/) const HADESMEM_NOEXCEPT
@@ -194,14 +227,28 @@ private:
   void InitializeIntegralImpl(T t, std::false_type) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt32Type;
-    arg_.i32 = detail::UnionCast<DWORD32>(t);
+    arg_.i32 = static_cast<DWORD32>(t);
   }
   
   template <typename T>
   void InitializeIntegralImpl(T t, std::true_type) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
-    arg_.i64 = detail::UnionCast<DWORD64>(t);
+    arg_.i64 = static_cast<DWORD64>(t);
+  }
+
+  template <typename T>
+  void InitializePointerImpl(T const* t, std::false_type) HADESMEM_NOEXCEPT
+  {
+    type_ = ArgType::kInt32Type;
+    arg_.i32 = reinterpret_cast<DWORD32>(t);
+  }
+
+  template <typename T>
+  void InitializePointerImpl(T const* t, std::true_type) HADESMEM_NOEXCEPT
+  {
+    type_ = ArgType::kInt64Type;
+    arg_.i64 = reinterpret_cast<DWORD64>(t);
   }
   
   template <typename T>
@@ -209,6 +256,19 @@ private:
   {
     InitializeIntegralImpl(t, std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
+  }
+
+  template <typename T>
+  void Initialize(T const* t) HADESMEM_NOEXCEPT
+  {
+    InitializePointerImpl(t, std::integral_constant<bool, 
+      (sizeof(void*) == sizeof(DWORD64))>());
+  }
+
+  template <typename T>
+  void Initialize(T* t) HADESMEM_NOEXCEPT
+  {
+    Initialize(static_cast<T const*>(t));
   }
   
   void Initialize(float t) HADESMEM_NOEXCEPT
@@ -244,13 +304,16 @@ private:
   ArgType type_;
 };
 
+typedef void (*FnPtr)();
+HADESMEM_STATIC_ASSERT(sizeof(FnPtr) == sizeof(void*));
+
 CallResultRaw Call(Process const& process, 
-  LPCVOID address, 
+  FnPtr address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args);
 
 std::vector<CallResultRaw> CallMulti(Process const& process, 
-  std::vector<LPCVOID> const& addresses, 
+  std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full);
 
@@ -315,7 +378,7 @@ void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg,
 
 template <typename FuncT, typename... Args>
 CallResult<typename detail::FuncResult<FuncT>::type> Call(
-  Process const& process, LPCVOID address, CallConv call_conv, 
+  Process const& process, FnPtr address, CallConv call_conv, 
   Args&&... args)
 {
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
@@ -339,7 +402,7 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
 
 template <typename FuncT>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv)
+  Call(Process const& process, FnPtr address, CallConv call_conv)
 {
   HADESMEM_CHECK_FUNC_ARITY(0);
   std::vector<CallArg> args;
@@ -350,7 +413,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 
 template <typename FuncT, typename T0>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0)
 {
   HADESMEM_CHECK_FUNC_ARITY(1);
@@ -363,7 +426,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 
 template <typename FuncT, typename T0, typename T1>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1)
 {
   HADESMEM_CHECK_FUNC_ARITY(2);
@@ -377,7 +440,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 
 template <typename FuncT, typename T0, typename T1, typename T2>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2)
 {
   HADESMEM_CHECK_FUNC_ARITY(3);
@@ -392,7 +455,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3)
 {
   HADESMEM_CHECK_FUNC_ARITY(4);
@@ -409,7 +472,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4)
 {
   HADESMEM_CHECK_FUNC_ARITY(5);
@@ -427,7 +490,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4, typename T5>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5)
 {
   HADESMEM_CHECK_FUNC_ARITY(6);
@@ -446,7 +509,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4, typename T5, typename T6>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6)
 {
   HADESMEM_CHECK_FUNC_ARITY(7);
@@ -466,7 +529,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4, typename T5, typename T6, typename T7>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7)
 {
   HADESMEM_CHECK_FUNC_ARITY(8);
@@ -487,7 +550,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4, typename T5, typename T6, typename T7, typename T8>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, 
   T8&& t8)
 {
@@ -510,7 +573,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>
 template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
   typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
 CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, LPCVOID address, CallConv call_conv, 
+  Call(Process const& process, FnPtr address, CallConv call_conv, 
   T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, 
   T8&& t8, T9&& t9)
 {
@@ -549,7 +612,7 @@ public:
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
   template <typename FuncT, typename... Args>
-  void Add(LPCVOID address, CallConv call_conv, Args&&... args)
+  void Add(FnPtr address, CallConv call_conv, Args&&... args)
   {
     HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
 
@@ -565,7 +628,7 @@ public:
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
   template <typename FuncT>
-  void Add(LPCVOID address, CallConv call_conv)
+  void Add(FnPtr address, CallConv call_conv)
   {
     HADESMEM_CHECK_FUNC_ARITY(0);
     std::vector<CallArg> args;
@@ -575,7 +638,7 @@ public:
   }
 
   template <typename FuncT, typename T0>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0)
+  void Add(FnPtr address, CallConv call_conv, T0&& t0)
   {
     HADESMEM_CHECK_FUNC_ARITY(1);
     std::vector<CallArg> args;
@@ -586,7 +649,7 @@ public:
   }
 
   template <typename FuncT, typename T0, typename T1>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1)
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1)
   {
     HADESMEM_CHECK_FUNC_ARITY(2);
     std::vector<CallArg> args;
@@ -598,7 +661,7 @@ public:
   }
 
   template <typename FuncT, typename T0, typename T1, typename T2>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2)
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2)
   {
     HADESMEM_CHECK_FUNC_ARITY(3);
     std::vector<CallArg> args;
@@ -611,7 +674,7 @@ public:
   }
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3)
   {
     HADESMEM_CHECK_FUNC_ARITY(4);
@@ -627,7 +690,7 @@ public:
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4)
   {
     HADESMEM_CHECK_FUNC_ARITY(5);
@@ -644,7 +707,7 @@ public:
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4, typename T5>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4, T5&& t5)
   {
     HADESMEM_CHECK_FUNC_ARITY(6);
@@ -662,7 +725,7 @@ public:
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4, typename T5, typename T6>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4, T5&& t5, T6&& t6)
   {
     HADESMEM_CHECK_FUNC_ARITY(7);
@@ -681,7 +744,7 @@ public:
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4, typename T5, typename T6, typename T7>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7)
   {
     HADESMEM_CHECK_FUNC_ARITY(8);
@@ -701,7 +764,7 @@ public:
 
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4, typename T5, typename T6, typename T7, typename T8>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, T8&& t8)
   {
     HADESMEM_CHECK_FUNC_ARITY(9);
@@ -723,7 +786,7 @@ public:
   template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
     typename T4, typename T5, typename T6, typename T7, typename T8, 
     typename T9>
-  void Add(LPCVOID address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
+  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
     T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, T8&& t8, T9&& t9)
   {
     HADESMEM_CHECK_FUNC_ARITY(10);
@@ -753,7 +816,7 @@ public:
   
 private:
   Process const* process_;
-  std::vector<LPCVOID> addresses_; 
+  std::vector<FnPtr> addresses_; 
   std::vector<CallConv> call_convs_; 
   std::vector<std::vector<CallArg>> args_;
 };

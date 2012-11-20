@@ -101,7 +101,7 @@ private:
 #if defined(_M_IX86)
 
 void GenerateCallCode32(AsmJit::X86Assembler* assembler, 
-  std::vector<LPCVOID> const& addresses, 
+  std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full, 
   DWORD_PTR get_last_error, 
@@ -132,7 +132,7 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
   for (std::size_t i = 0; i < addresses.size(); ++i)
   {
-    LPCVOID address = addresses[i];
+    FnPtr address = addresses[i];
     CallConv call_conv = call_convs[i];
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
@@ -205,7 +205,7 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 #if defined(_M_AMD64)
 
 void GenerateCallCode64(AsmJit::X86Assembler* assembler, 
-  std::vector<LPCVOID> const& addresses, 
+  std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full, 
   DWORD_PTR get_last_error, 
@@ -250,7 +250,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
   for (std::size_t i = 0; i < addresses.size(); ++i)
   {
-    LPCVOID address = addresses[i];
+    FnPtr address = addresses[i];
     std::vector<CallArg> const& args = args_full[i];
     std::size_t const num_args = args.size();
 
@@ -311,7 +311,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 #endif // #if defined(_M_AMD64)
 
 Allocator GenerateCallCode(Process const& process, 
-  std::vector<LPCVOID> const& addresses, 
+  std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full, 
   PVOID return_values_remote)
@@ -663,11 +663,11 @@ DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
 }
 
 CallResultRaw Call(Process const& process, 
-  LPCVOID address, 
+  FnPtr address, 
   CallConv call_conv, 
   std::vector<CallArg> const& args)
 {
-  std::vector<LPCVOID> addresses;
+  std::vector<FnPtr> addresses;
   addresses.push_back(address);
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
@@ -677,7 +677,7 @@ CallResultRaw Call(Process const& process,
 }
 
 std::vector<CallResultRaw> CallMulti(Process const& process, 
-  std::vector<LPCVOID> const& addresses, 
+  std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
 {
