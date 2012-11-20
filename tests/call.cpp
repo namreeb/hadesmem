@@ -296,6 +296,9 @@ BOOST_AUTO_TEST_CASE(call)
   // compilers will lay out the structures representing pointer to member 
   // functions with the function address first (and other data after).
   // The C++ standard strictly forbids casting between the types below.
+  // The C++ standard also forbids type punning using the technique below (aka 
+  // doing a store to a union using one type then doing a load from the union 
+  // using another type).
   // TODO: Find a way to do this without relying on undefined behavior.
   union FuncConv
   {
