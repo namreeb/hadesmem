@@ -20,19 +20,22 @@ class Optional
 public:
   Optional() HADESMEM_NOEXCEPT
     : valid_(false), 
-    t_()
+    t_(nullptr), 
+    buf_()
   { }
 
   explicit Optional(T const& t)
     : valid_(true), 
-    t_()
+    t_(nullptr), 
+    buf_()
   {
     Create(t);
   }
 
   Optional(Optional const& other)
     : valid_(false), 
-    t_()
+    t_(nullptr), 
+    buf_()
   {
     if (other.IsValid())
     {
@@ -79,7 +82,7 @@ public:
   {
     if (IsValid())
     {
-      return *static_cast<T const*>(static_cast<void const*>(&t_));
+      return *t_;
     }
 
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -95,7 +98,7 @@ public:
   {
     if (IsValid())
     {
-      return static_cast<T const*>(static_cast<void const*>(&t_));
+      return t_;
     }
 
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -107,20 +110,21 @@ private:
   {
     if (IsValid())
     {
-      static_cast<T*>(static_cast<void*>(&t_))->~T();
+      t_->~T();
       valid_ = false;
     }
   }
 
   void Create(T const& t)
   {
-    new (&t_) T(t);
+    t_ = new (&buf_) T(t);
     valid_ = true;
   }
 
   bool valid_;
+  T* t_;
   typename std::aligned_storage<sizeof(T), 
-    std::alignment_of<T>::value>::type t_;
+    std::alignment_of<T>::value>::type buf_;
 };
 
 }
