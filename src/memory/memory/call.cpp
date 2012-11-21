@@ -3,6 +3,7 @@
 
 #include "hadesmem/call.hpp"
 
+#include <cstring>
 #include <cstddef>
 #include <algorithm>
 #include <type_traits>
@@ -428,16 +429,10 @@ void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
-  union FloatConv
-  {
-    float f;
-    DWORD i;
-  };
+  DWORD arg_conv;
+  std::memcpy(&arg_conv, &arg, sizeof(arg));
 
-  FloatConv float_conv;
-  float_conv.f = arg;
-
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(float_conv.i));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg_conv));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -447,21 +442,15 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
-  union DoubleConv
-  {
-    double d;
-    DWORD64 i;
-  };
-
-  DoubleConv double_conv;
-  double_conv.d = arg;
+  DWORD64 arg_conv;
+  std::memcpy(&arg_conv, &arg, sizeof(arg));
 
   assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
-    (double_conv.i >> 32) & 0xFFFFFFFF)));
+    (arg_conv >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
   assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
-    double_conv.i)));
+    arg_conv)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -513,44 +502,38 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
-  union FloatConv
-  {
-    float f;
-    DWORD i;
-  };
-
-  FloatConv float_conv;
-  float_conv.f = arg;
+  DWORD arg_conv;
+  std::memcpy(&arg_conv, &arg, sizeof(arg));
 
   switch (cur_arg_)
   {
   case 1:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(float_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 2:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(float_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 3:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(float_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 4:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(float_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   default:
     assembler_->xor_(AsmJit::rax, AsmJit::rax);
-    assembler_->mov(AsmJit::rax, float_conv.i);
+    assembler_->mov(AsmJit::rax, arg_conv);
     assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
       AsmJit::rax);
     break;
@@ -563,51 +546,45 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 {
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
-  union DoubleConv
-  {
-    double d;
-    DWORD64 i;
-  };
-
-  DoubleConv double_conv;
-  double_conv.d = arg;
+  DWORD64 arg_conv;
+  std::memcpy(&arg_conv, &arg, sizeof(arg));
 
   switch (cur_arg_)
   {
   case 1:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(double_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
     assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 2:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(double_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
     assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 3:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(double_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
     assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   case 4:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(double_conv.i));
+      static_cast<DWORD>(arg_conv));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((double_conv.i >> 32) & 0xFFFFFFFF));
+      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
     assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
       num_args_ * 8));
     break;
   default:
-    assembler_->mov(AsmJit::rax, double_conv.i);
+    assembler_->mov(AsmJit::rax, arg_conv);
     assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
       AsmJit::rax);
     break;
