@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "hadesmem/config.hpp"
 
 namespace hadesmem
