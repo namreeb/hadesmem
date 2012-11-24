@@ -2,6 +2,7 @@
 !MESSAGE This makefile is currently still under active development. 
 !MESSAGE Please use the Boost.Build system to build the library.
 !MESSAGE WARNING WARNING WARNING
+!MESSAGE
 
 EXAMPLES_COMMON_BASENAME = examples_common
 
@@ -10,6 +11,7 @@ EXAMPLES_SRC=..\examples
 HADESMEM_INC=..\include\memory
 
 ASMJIT_INC=..\src\asmjit\asmjit\src
+ASMJIT_SRC=..\src\asmjit\asmjit\src\asmjit
 
 !IFNDEF ARCH
 !IF ! [ cl 2>&1 | find "x86" > NUL ]
@@ -29,8 +31,8 @@ PLATFORM_LDFLAGS = /SAFESEH
 MT         = mt.exe
 CCNODBG    = cl.exe /nologo /O2 /DNDEBUG
 CCDEBUG    = cl.exe /nologo /Od /Gm /Zi /D_DEBUG /RTC1
-CFLAGS     = /I $(HADESMEM_INC) /nologo /W4 /analyze /sdl /WX /EHsc 
-CFLAGS     = $(CFLAGS) /fp:precise /c /GS /GR /FD
+CWARNINGS  = /W4 /analyze /sdl /WX 
+CFLAGS     = $(CFLAGS) /EHsc /fp:precise /c /GS /GR /FD
 CFLAGS     = $(CFLAGS) /DWIN32 /D_UNICODE /DUNICODE /D_CRT_SECURE_NO_WARNINGS 
 CFLAGS     = $(CFLAGS) /D_SCL_SECURE_NO_WARNINGS /DHADESMEM_MSVC 
 CFLAGS     = $(CFLAGS) /DWINVER=_WIN32_WINNT_VISTA 
@@ -40,7 +42,7 @@ LDFLAGS    = $(LDFLAGS) $(PLATFORM_LDFLAGS)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 LNKEXE     = link.exe
-LFLAGS     = /nologo /WX /machine:$(ARCH)
+LFLAGS     = /nologo /machine:$(ARCH)
 
 CFGSET     = FALSE
 !IF "$(OBJDIR)" == ""
@@ -64,6 +66,9 @@ DIRINC = $(DIRBASE)\include
 DIRBIN = $(DIRBASE)\bin
 
 OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
+  $(DIROBJ)\asmjit \
+  $(DIROBJ)\asmjit\core \
+  $(DIROBJ)\asmjit\x86 \
   $(DIROBJ)\hadesmem \
   $(DIROBJ)\hadesmem\detail \
   $(DIROBJ)\examples\common \
@@ -74,6 +79,7 @@ OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
   
 HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\hadesmem.pdb
 EXAMPLES_COMMON_PDBNAME = $(DIROBJ)\examples\common\examples_common.pdb
+ASMJIT_PDBNAME = $(DIROBJ)\asmjit\asmjit.pdb
 
 # Target configuration
 !IF "$(CFG)" == "release"
@@ -90,6 +96,7 @@ CC     = $(CC) $(RTLIB)
 CFGSET = TRUE
 HADESMEM = $(DIRLIB)\hadesmem.lib
 EXAMPLES_COMMON = $(DIRLIB)\examples_common.lib
+ASMJIT = $(DIRLIB)\asmjit.lib
 !ENDIF
 
 !IF "$(CFGSET)" == "FALSE"
@@ -119,22 +126,34 @@ EXAMPLES_COMMON = $(DIRLIB)\examples_common.lib
 
 !IF "$(CFGSET)" == "TRUE"
 
-all: $(HADESMEM) $(EXAMPLES_COMMON)
+all: $(HADESMEM) $(EXAMPLES_COMMON) $(ASMJIT)
 
 $(HADESMEM): $(OUTPUT_DIRS)
-  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) \
-    /Fo$(DIROBJ)\hadesmem\ $(HADESMEM_SRC)\*.cpp
-  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) \
-    /Fo$(DIROBJ)\hadesmem\detail\ $(HADESMEM_SRC)\detail\*.cpp
-  $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\hadesmem\*.obj \
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) /I $(ASMJIT_INC) \
+    /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\hadesmem\ $(HADESMEM_SRC)\*.cpp
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) /I $(ASMJIT_INC) \
+    /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\hadesmem\detail\ \
+	$(HADESMEM_SRC)\detail\*.cpp
+  $(LNKLIB) $(LFLAGS) /WX /out:$(HADESMEM) $(DIROBJ)\hadesmem\*.obj \
     $(DIROBJ)\hadesmem\detail\*.obj
   -xcopy $(DIROBJ)\hadesmem\*.pdb $(DIRLIB) /y
 
 $(EXAMPLES_COMMON): $(OUTPUT_DIRS)
-  $(CC) $(CFLAGS) /Fd$(EXAMPLES_COMMON_PDBNAME) \
-    /Fo$(DIROBJ)\examples\common\ $(EXAMPLES_SRC)\common\*.cpp
-  $(LNKLIB) $(LFLAGS) /out:$(EXAMPLES_COMMON) $(DIROBJ)\examples\common\*.obj
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) \
+    /Fd$(EXAMPLES_COMMON_PDBNAME) /Fo$(DIROBJ)\examples\common\ \
+	$(EXAMPLES_SRC)\common\*.cpp
+  $(LNKLIB) $(LFLAGS) /WX /out:$(EXAMPLES_COMMON) \
+    $(DIROBJ)\examples\common\*.obj
   -xcopy $(DIROBJ)\examples\common\*.pdb $(DIRLIB) /y
+
+$(ASMJIT): $(OUTPUT_DIRS)
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(ASMJIT_PDBNAME) \
+    /Fo$(DIROBJ)\asmjit\core\ $(ASMJIT_SRC)\core\*.cpp
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(ASMJIT_PDBNAME) \
+    /Fo$(DIROBJ)\asmjit\x86\ $(ASMJIT_SRC)\x86\*.cpp
+  $(LNKLIB) $(LFLAGS) /out:$(ASMJIT) $(DIROBJ)\asmjit\core\*.obj \
+    $(DIROBJ)\asmjit\x86\*.obj
+  -xcopy $(DIROBJ)\asmjit\*.pdb $(DIRLIB) /y
 
 $(OUTPUT_DIRS):
   @if not exist "$(@)" mkdir "$(@)"
