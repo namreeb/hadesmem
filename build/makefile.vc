@@ -106,7 +106,8 @@ OUT_LIBS = $(HADESMEM)
 all: $(OUT_LIBS)
 
 $(HADESMEM): $(OUTPUT_DIRS)
-  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\ $(HADESMEM_SRC)\*.cpp $(HADESMEM_SRC)\detail\*.cpp
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\ \
+    $(HADESMEM_SRC)\*.cpp $(HADESMEM_SRC)\detail\*.cpp
   $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\*.obj
   -xcopy $(DIROBJ)\*.pdb $(DIRLIB) /y
 
