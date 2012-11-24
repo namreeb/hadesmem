@@ -1,0 +1,126 @@
+HADESMEM_BASENAME = hadesmem
+
+HADESMEM_SRC=..\src\memory\memory
+HADESMEM_INC=..\include\memory
+ASMJIT_INC=..\src\asmjit\asmjit\src
+
+!IFNDEF ARCH
+!IF ! [ cl 2>&1 | find "x86" > NUL ]
+ARCH = x86
+!ELSE IF ! [ cl 2>&1 | find "x64" > NUL ]
+ARCH = x64
+!ELSE
+!ERROR Unable to auto-detect toolchain architecture! \
+If cl.exe is in your PATH rerun nmake with ARCH=<arch>.
+!ENDIF
+!ENDIF
+
+!IF "$(ARCH)" == "x86"
+PLATFORM_LDFLAGS = /SAFESEH
+!ENDIF
+
+MT         = mt.exe
+CCNODBG    = cl.exe /nologo /O2 /DNDEBUG
+CCDEBUG    = cl.exe /nologo /Od /Gm /Zi /D_DEBUG /RTC1
+CFLAGS     = /I $(HADESMEM_INC) /nologo /W4 /analyze /sdl /WX /EHsc 
+CFLAGS     = $(CFLAGS) /fp:precise /c /GS /GR /FD
+CFLAGS     = $(CFLAGS) /DWIN32 /D_UNICODE /DUNICODE /D_CRT_SECURE_NO_WARNINGS 
+CFLAGS     = $(CFLAGS) /D_SCL_SECURE_NO_WARNINGS /DHADESMEM_MSVC 
+CFLAGS     = $(CFLAGS) /DWINVER=_WIN32_WINNT_VISTA 
+CFLAGS     = $(CFLAGS) /D_WIN32_WINNT=_WIN32_WINNT_VISTA /D_VARIADIC_MAX=10
+LDFLAGS    = /LARGEADDRESSAWARE /MANIFEST /NXCOMPAT /DYNAMICBASE
+LDFLAGS    = $(LDFLAGS) $(PLATFORM_LDFLAGS)
+LNKDLL     = link.exe /DLL
+LNKLIB     = link.exe /lib
+LNKEXE     = link.exe
+LFLAGS     = /nologo /WX /machine:$(ARCH)
+
+CFGSET     = FALSE
+!IF "$(OBJDIR)" == ""
+OUTDIR = ..\obj\
+!ELSE
+OUTDIR = $(OBJDIR)
+!ENDIF
+
+!IF "$(RTLIBCFG)" == "static"
+RTLIB  = /MT
+RTLIBD = /MTd
+!ELSE
+RTLIB   = /MD
+RTLIBD  = /MDd
+!ENDIF
+DIRBASE = $(OUTDIR)\$(CFG)\$(ARCH)
+DIROBJ = $(DIRBASE)\obj
+DIRLIB = $(DIRBASE)\lib
+DIRINC = $(DIRBASE)\include
+DIRBIN = $(DIRBASE)\bin
+HADESMEM_PDBNAME = $(DIROBJ)\$(HADESMEM_BASENAME).pdb
+OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) $(DIROBJ)
+
+# Target configuration
+!IF "$(CFG)" == "release"
+CC             = $(CCNODBG)
+STATICLIBBUILD = TRUE
+!ELSE IF "$(CFG)" == "debug"
+CC             = $(CCDEBUG)
+RTLIB          = $(RTLIBD)
+STATICLIBBUILD = TRUE
+HADESMEM_BASENAME = $(HADESMEM_BASENAME)_debug
+!ENDIF
+
+!IF "$(STATICLIBBUILD)" == "TRUE"
+CC     = $(CC) $(RTLIB)
+CFGSET = TRUE
+HADESMEM = $(DIRLIB)\$(HADESMEM_BASENAME).lib
+!ENDIF
+
+!IF "$(CFGSET)" == "FALSE"
+!MESSAGE Usage: nmake /f makefile.vc [CFG=<config>]
+!MESSAGE .          [OBJDIR=<path>] [RTLIBCFG=<rtlib>] [<target>]
+!MESSAGE
+!MESSAGE where <config> is one of:
+!MESSAGE -  release                       - release static library
+!MESSAGE -  debug                         - debug static library
+!MESSAGE
+!MESSAGE <target> may be:
+!MESSAGE -  clean                         - perform a clean for CFG
+!MESSAGE -  experimental                  - build CFG with experimental
+!MESSAGE .                                  features enabled.
+!MESSAGE - (empty) or all                 - build all targets for CFG
+!MESSAGE
+!MESSAGE RTLIBCFG controls the runtime library linkage - 'static' or 'dynamic'.
+!MESSAGE OBJDIR is the path where you like to build (obj, bins, etc.),
+!MESSAGE   defaults to ..\obj
+
+!IF "$(CFG)" != ""
+!MESSAGE
+!ERROR please choose a valid configuration instead of "$(CFG)"
+!ENDIF
+
+!ENDIF
+
+!IF "$(CFGSET)" == "TRUE"
+
+OUT_LIBS = $(HADESMEM)
+
+all: $(OUT_LIBS)
+
+$(HADESMEM): $(OUTPUT_DIRS)
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\ $(HADESMEM_SRC)\*.cpp $(HADESMEM_SRC)\detail\*.cpp
+  $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\*.obj
+  -xcopy $(DIROBJ)\*.pdb $(DIRLIB) /y
+
+$(OUTPUT_DIRS):
+  @if not exist "$(@)" mkdir "$(@)"
+
+clean::
+  @-erase /s $(DIROBJ)\*.dll 2> NUL
+  @-erase /s $(DIROBJ)\*.exp 2> NUL
+  @-erase /s $(DIROBJ)\*.idb 2> NUL
+  @-erase /s $(DIROBJ)\*.lib 2> NUL
+  @-erase /s $(DIROBJ)\*.obj 2> NUL
+  @-erase /s $(DIROBJ)\*.pch 2> NUL
+  @-erase /s $(DIROBJ)\*.pdb 2> NUL
+  @-erase /s $(DIROBJ)\*.res 2> NUL
+
+!ENDIF
