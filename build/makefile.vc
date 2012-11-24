@@ -49,13 +49,21 @@ RTLIBD = /MTd
 RTLIB   = /MD
 RTLIBD  = /MDd
 !ENDIF
+
 DIRBASE = $(OUTDIR)\$(CFG)\$(ARCH)
 DIROBJ = $(DIRBASE)\obj
 DIRLIB = $(DIRBASE)\lib
 DIRINC = $(DIRBASE)\include
 DIRBIN = $(DIRBASE)\bin
-HADESMEM_PDBNAME = $(DIROBJ)\$(HADESMEM_BASENAME).pdb
-OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) $(DIROBJ)
+HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\$(HADESMEM_BASENAME).pdb
+OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
+  $(DIROBJ)\hadesmem \
+  $(DIROBJ)\hadesmem\detail \
+  $(DIROBJ)\examples\common \
+  $(DIROBJ)\examples\dump \
+  $(DIROBJ)\examples\inject \
+  $(DIROBJ)\examples\injecttest \
+  $(DIROBJ)\examples\injecttestdep
 
 # Target configuration
 !IF "$(CFG)" == "release"
@@ -101,15 +109,16 @@ HADESMEM = $(DIRLIB)\$(HADESMEM_BASENAME).lib
 
 !IF "$(CFGSET)" == "TRUE"
 
-OUT_LIBS = $(HADESMEM)
-
-all: $(OUT_LIBS)
+all: $(HADESMEM)
 
 $(HADESMEM): $(OUTPUT_DIRS)
-  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) /Fo$(DIROBJ)\ \
-    $(HADESMEM_SRC)\*.cpp $(HADESMEM_SRC)\detail\*.cpp
-  $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\*.obj
-  -xcopy $(DIROBJ)\*.pdb $(DIRLIB) /y
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) \
+    /Fo$(DIROBJ)\hadesmem\ $(HADESMEM_SRC)\*.cpp
+  $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) \
+    /Fo$(DIROBJ)\hadesmem\detail\ $(HADESMEM_SRC)\detail\*.cpp
+  $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\hadesmem\*.obj \
+    $(DIROBJ)\hadesmem\detail\*.obj
+  -xcopy $(DIROBJ)\hadesmem\*.pdb $(DIRLIB) /y
 
 $(OUTPUT_DIRS):
   @if not exist "$(@)" mkdir "$(@)"
