@@ -1,4 +1,3 @@
-HADESMEM_BASENAME = hadesmem
 EXAMPLES_COMMON_BASENAME = examples_common
 
 HADESMEM_SRC=..\src\memory\memory
@@ -40,7 +39,7 @@ LFLAGS     = /nologo /WX /machine:$(ARCH)
 
 CFGSET     = FALSE
 !IF "$(OBJDIR)" == ""
-OUTDIR = ..\obj\
+OUTDIR = ..\obj\msvc\
 !ELSE
 OUTDIR = $(OBJDIR)
 !ENDIF
@@ -68,8 +67,8 @@ OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
   $(DIROBJ)\examples\injecttest \
   $(DIROBJ)\examples\injecttestdep
   
-HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\$(HADESMEM_BASENAME).pdb
-EXAMPLES_COMMON_PDBNAME = $(DIROBJ)\examples\common\$(EXAMPLES_COMMON_BASENAME).pdb
+HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\hadesmem.pdb
+EXAMPLES_COMMON_PDBNAME = $(DIROBJ)\examples\common\examples_common.pdb
 
 # Target configuration
 !IF "$(CFG)" == "release"
@@ -79,15 +78,13 @@ STATICLIBBUILD = TRUE
 CC             = $(CCDEBUG)
 RTLIB          = $(RTLIBD)
 STATICLIBBUILD = TRUE
-HADESMEM_BASENAME = $(HADESMEM_BASENAME)_debug
-EXAMPLES_COMMON_BASENAME = $(EXAMPLES_COMMON_BASENAME)_debug
 !ENDIF
 
 !IF "$(STATICLIBBUILD)" == "TRUE"
 CC     = $(CC) $(RTLIB)
 CFGSET = TRUE
-HADESMEM = $(DIRLIB)\$(HADESMEM_BASENAME).lib
-EXAMPLES_COMMON = $(DIRLIB)\$(EXAMPLES_COMMON_BASENAME).lib
+HADESMEM = $(DIRLIB)\hadesmem.lib
+EXAMPLES_COMMON = $(DIRLIB)\examples_common.lib
 !ENDIF
 
 !IF "$(CFGSET)" == "FALSE"
