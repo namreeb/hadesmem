@@ -1,7 +1,10 @@
 HADESMEM_BASENAME = hadesmem
+EXAMPLES_COMMON_BASENAME = examples_common
 
 HADESMEM_SRC=..\src\memory\memory
+EXAMPLES_SRC=..\examples
 HADESMEM_INC=..\include\memory
+
 ASMJIT_INC=..\src\asmjit\asmjit\src
 
 !IFNDEF ARCH
@@ -55,7 +58,7 @@ DIROBJ = $(DIRBASE)\obj
 DIRLIB = $(DIRBASE)\lib
 DIRINC = $(DIRBASE)\include
 DIRBIN = $(DIRBASE)\bin
-HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\$(HADESMEM_BASENAME).pdb
+
 OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
   $(DIROBJ)\hadesmem \
   $(DIROBJ)\hadesmem\detail \
@@ -64,6 +67,9 @@ OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
   $(DIROBJ)\examples\inject \
   $(DIROBJ)\examples\injecttest \
   $(DIROBJ)\examples\injecttestdep
+  
+HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\$(HADESMEM_BASENAME).pdb
+EXAMPLES_COMMON_PDBNAME = $(DIROBJ)\examples\common\$(EXAMPLES_COMMON_BASENAME).pdb
 
 # Target configuration
 !IF "$(CFG)" == "release"
@@ -74,12 +80,14 @@ CC             = $(CCDEBUG)
 RTLIB          = $(RTLIBD)
 STATICLIBBUILD = TRUE
 HADESMEM_BASENAME = $(HADESMEM_BASENAME)_debug
+EXAMPLES_COMMON_BASENAME = $(EXAMPLES_COMMON_BASENAME)_debug
 !ENDIF
 
 !IF "$(STATICLIBBUILD)" == "TRUE"
 CC     = $(CC) $(RTLIB)
 CFGSET = TRUE
 HADESMEM = $(DIRLIB)\$(HADESMEM_BASENAME).lib
+EXAMPLES_COMMON = $(DIRLIB)\$(EXAMPLES_COMMON_BASENAME).lib
 !ENDIF
 
 !IF "$(CFGSET)" == "FALSE"
@@ -109,7 +117,7 @@ HADESMEM = $(DIRLIB)\$(HADESMEM_BASENAME).lib
 
 !IF "$(CFGSET)" == "TRUE"
 
-all: $(HADESMEM)
+all: $(HADESMEM) $(EXAMPLES_COMMON)
 
 $(HADESMEM): $(OUTPUT_DIRS)
   $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(HADESMEM_PDBNAME) \
@@ -119,6 +127,12 @@ $(HADESMEM): $(OUTPUT_DIRS)
   $(LNKLIB) $(LFLAGS) /out:$(HADESMEM) $(DIROBJ)\hadesmem\*.obj \
     $(DIROBJ)\hadesmem\detail\*.obj
   -xcopy $(DIROBJ)\hadesmem\*.pdb $(DIRLIB) /y
+
+$(EXAMPLES_COMMON): $(OUTPUT_DIRS)
+  $(CC) $(CFLAGS) /Fd$(EXAMPLES_COMMON_PDBNAME) \
+    /Fo$(DIROBJ)\examples\common\ $(EXAMPLES_SRC)\common\*.cpp
+  $(LNKLIB) $(LFLAGS) /out:$(EXAMPLES_COMMON) $(DIROBJ)\examples\common\*.obj
+  -xcopy $(DIROBJ)\examples\common\*.pdb $(DIRLIB) /y
 
 $(OUTPUT_DIRS):
   @if not exist "$(@)" mkdir "$(@)"
