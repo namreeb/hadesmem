@@ -4,14 +4,12 @@
 !MESSAGE WARNING WARNING WARNING
 !MESSAGE
 
-EXAMPLES_COMMON_BASENAME = examples_common
+ASMJIT_INC=..\src\asmjit\asmjit\src
+ASMJIT_SRC=..\src\asmjit\asmjit\src\asmjit
 
 HADESMEM_SRC=..\src\memory\memory
 EXAMPLES_SRC=..\examples
 HADESMEM_INC=..\include\memory
-
-ASMJIT_INC=..\src\asmjit\asmjit\src
-ASMJIT_SRC=..\src\asmjit\asmjit\src\asmjit
 
 !IFNDEF ARCH
 !IF ! [ cl 2>&1 | find "x86" > NUL ]
@@ -37,6 +35,7 @@ CFLAGS     = $(CFLAGS) /DWIN32 /D_UNICODE /DUNICODE /D_CRT_SECURE_NO_WARNINGS
 CFLAGS     = $(CFLAGS) /D_SCL_SECURE_NO_WARNINGS /DHADESMEM_MSVC 
 CFLAGS     = $(CFLAGS) /DWINVER=_WIN32_WINNT_VISTA 
 CFLAGS     = $(CFLAGS) /D_WIN32_WINNT=_WIN32_WINNT_VISTA /D_VARIADIC_MAX=10
+CFLAGS     = $(CFLAGS) /DASMJIT_API= 
 LDFLAGS    = /LARGEADDRESSAWARE /MANIFEST /NXCOMPAT /DYNAMICBASE
 LDFLAGS    = $(LDFLAGS) $(PLATFORM_LDFLAGS)
 LNKDLL     = link.exe /DLL
@@ -77,9 +76,14 @@ OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
   $(DIROBJ)\examples\injecttest \
   $(DIROBJ)\examples\injecttestdep
   
+ASMJIT_PDBNAME = $(DIROBJ)\asmjit\asmjit.pdb
 HADESMEM_PDBNAME = $(DIROBJ)\hadesmem\hadesmem.pdb
 EXAMPLES_COMMON_PDBNAME = $(DIROBJ)\examples\common\examples_common.pdb
-ASMJIT_PDBNAME = $(DIROBJ)\asmjit\asmjit.pdb
+EXAMPLES_DUMP_PDBNAME = $(DIROBJ)\examples\dump\dump.pdb
+EXAMPLES_INJECT_PDBNAME = $(DIROBJ)\examples\inject\inject.pdb
+EXAMPLES_INJECTTEST_PDBNAME = $(DIROBJ)\examples\injecttest\injecttest.pdb
+EXAMPLES_INJECTTESTDEP_PDBNAME = \
+  $(DIROBJ)\examples\injecttestdep\injecttestdep.pdb
 
 # Target configuration
 !IF "$(CFG)" == "release"
@@ -94,10 +98,19 @@ STATICLIBBUILD = TRUE
 !IF "$(STATICLIBBUILD)" == "TRUE"
 CC     = $(CC) $(RTLIB)
 CFGSET = TRUE
+ASMJIT = $(DIRLIB)\asmjit.lib
 HADESMEM = $(DIRLIB)\hadesmem.lib
 EXAMPLES_COMMON = $(DIRLIB)\examples_common.lib
-ASMJIT = $(DIRLIB)\asmjit.lib
+EXAMPLES_DUMP = $(DIRBIN)\dump.exe
+EXAMPLES_INJECT = $(DIRBIN)\inject.exe
+EXAMPLES_INJECTTEST = $(DIRBIN)\injecttest.dll
+EXAMPLES_INJECTTESTDEP = $(DIRBIN)\injecttestdep.dll
+EXAMPLES_ALL = $(EXAMPLES_COMMON) $(EXAMPLES_DUMP) $(EXAMPLES_INJECT) \
+ $(EXAMPLES_INJECTTEST) $(EXAMPLES_INJECTTESTDEP)
 !ENDIF
+
+HADESMEM_DEPENDENT_LIBS = kernel32.lib user32.lib advapi32.lib shell32.lib \
+  shlwapi.lib $(ASMJIT) 
 
 !IF "$(CFGSET)" == "FALSE"
 !MESSAGE Usage: nmake /f makefile.vc [CFG=<config>]
@@ -109,8 +122,6 @@ ASMJIT = $(DIRLIB)\asmjit.lib
 !MESSAGE
 !MESSAGE <target> may be:
 !MESSAGE -  clean                         - perform a clean for CFG
-!MESSAGE -  experimental                  - build CFG with experimental
-!MESSAGE .                                  features enabled.
 !MESSAGE - (empty) or all                 - build all targets for CFG
 !MESSAGE
 !MESSAGE RTLIBCFG controls the runtime library linkage - 'static' or 'dynamic'.
@@ -126,7 +137,7 @@ ASMJIT = $(DIRLIB)\asmjit.lib
 
 !IF "$(CFGSET)" == "TRUE"
 
-all: $(HADESMEM) $(EXAMPLES_COMMON) $(ASMJIT)
+all: $(HADESMEM) $(ASMJIT) $(EXAMPLES_ALL)
 
 $(HADESMEM): $(OUTPUT_DIRS)
   $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) /I $(ASMJIT_INC) \
@@ -145,13 +156,50 @@ $(EXAMPLES_COMMON): $(OUTPUT_DIRS)
   $(LNKLIB) $(LFLAGS) /WX /out:$(EXAMPLES_COMMON) \
     $(DIROBJ)\examples\common\*.obj
   -xcopy $(DIROBJ)\examples\common\*.pdb $(DIRLIB) /y
+  
+$(EXAMPLES_DUMP): $(OUTPUT_DIRS) $(HADESMEM) $(EXAMPLES_COMMON)
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) \
+    /Fd$(EXAMPLES_DUMP_PDBNAME) /Fo$(DIROBJ)\examples\dump\ \
+	$(EXAMPLES_SRC)\dump\*.cpp
+  $(LNKEXE) $(LFLAGS) /WX /out:$(EXAMPLES_DUMP) \
+    $(DIROBJ)\examples\dump\*.obj $(EXAMPLES_COMMON) $(HADESMEM) \
+	$(HADESMEM_DEPENDENT_LIBS)
+  -xcopy $(DIROBJ)\examples\dump\*.pdb $(DIRBIN) /y
+  
+$(EXAMPLES_INJECT): $(OUTPUT_DIRS) $(HADESMEM) $(EXAMPLES_COMMON)
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) \
+    /Fd$(EXAMPLES_INJECT_PDBNAME) /Fo$(DIROBJ)\examples\inject\ \
+	$(EXAMPLES_SRC)\inject\*.cpp
+  $(LNKEXE) $(LFLAGS) /WX /out:$(EXAMPLES_INJECT) \
+    $(DIROBJ)\examples\inject\*.obj $(EXAMPLES_COMMON) $(HADESMEM) \
+	$(HADESMEM_DEPENDENT_LIBS)
+  -xcopy $(DIROBJ)\examples\inject\*.pdb $(DIRBIN) /y
+  
+$(EXAMPLES_INJECTTEST): $(OUTPUT_DIRS) $(HADESMEM) $(EXAMPLES_COMMON) \
+  $(EXAMPLES_INJECTTESTDEP)
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) \
+    /Fd$(EXAMPLES_INJECTTEST_PDBNAME) /Fo$(DIROBJ)\examples\injecttest\ \
+	$(EXAMPLES_SRC)\injecttest\*.cpp
+  $(LNKDLL) $(LFLAGS) /WX /out:$(EXAMPLES_INJECTTEST) \
+    $(DIROBJ)\examples\injecttest\*.obj $(EXAMPLES_COMMON) $(HADESMEM) \
+	$(HADESMEM_DEPENDENT_LIBS)  $(DIRBIN)\injecttestdep.lib
+  -xcopy $(DIROBJ)\examples\injecttest\*.pdb $(DIRBIN) /y
+  
+$(EXAMPLES_INJECTTESTDEP): $(OUTPUT_DIRS) $(HADESMEM) $(EXAMPLES_COMMON)
+  $(CC) $(CFLAGS) $(CWARNINGS) /I $(HADESMEM_INC) \
+    /Fd$(EXAMPLES_INJECTTESTDEP_PDBNAME) /Fo$(DIROBJ)\examples\injecttestdep\ \
+	$(EXAMPLES_SRC)\injecttestdep\*.cpp
+  $(LNKDLL) $(LFLAGS) /WX /out:$(EXAMPLES_INJECTTESTDEP) \
+    $(DIROBJ)\examples\injecttestdep\*.obj $(EXAMPLES_COMMON) $(HADESMEM) \
+	$(HADESMEM_DEPENDENT_LIBS)
+  -xcopy $(DIROBJ)\examples\injecttestdep\*.pdb $(DIRBIN) /y
 
 $(ASMJIT): $(OUTPUT_DIRS)
   $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(ASMJIT_PDBNAME) \
     /Fo$(DIROBJ)\asmjit\core\ $(ASMJIT_SRC)\core\*.cpp
   $(CC) $(CFLAGS) /I $(ASMJIT_INC) /Fd$(ASMJIT_PDBNAME) \
     /Fo$(DIROBJ)\asmjit\x86\ $(ASMJIT_SRC)\x86\*.cpp
-  $(LNKLIB) $(LFLAGS) /out:$(ASMJIT) $(DIROBJ)\asmjit\core\*.obj \
+  $(LNKLIB) $(LFLAGS) /ignore:4221 /out:$(ASMJIT) $(DIROBJ)\asmjit\core\*.obj \
     $(DIROBJ)\asmjit\x86\*.obj
   -xcopy $(DIROBJ)\asmjit\*.pdb $(DIRLIB) /y
 
