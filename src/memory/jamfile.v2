@@ -44,11 +44,13 @@ lib memory
   :
     [ glob memory/*.cpp ]
     [ glob memory/detail/*.cpp ]
+    /boost//exception/<link>static
+    /boost//filesystem/<link>static
     /boost//headers
     /asmjit//asmjit
     advapi32
-	shell32
-	shlwapi
+    shell32
+    shlwapi
     user32
   :
     <link>static
