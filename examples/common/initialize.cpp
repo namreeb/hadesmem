@@ -5,8 +5,12 @@
 
 #include <ctime>
 #include <random>
-#include <cassert>
 #include <iostream>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/locale.hpp>
+#include <boost/filesystem.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 // Required for ::_CrtSetDbgFlag.
@@ -102,4 +106,48 @@ void EnableBottomUpRand()
         hadesmem::ErrorCodeWinLast(last_error));
     }
   }
+}
+
+std::locale ImbueAllDefault()
+{
+  // Use the Windows API backend to (hopefully) provide consistent behaviour 
+  // across different compilers and standard library implementations (as 
+  // opposed to the standard library backend).
+  auto backend = boost::locale::localization_backend_manager::global();
+  backend.select("winapi"); 
+
+  boost::locale::generator gen(backend);
+
+  std::locale const locale = gen("");
+
+  // Ensure the locale uses a UTF-8 backend. 
+  assert(std::use_facet<boost::locale::info>(locale).utf8());
+
+  return ImbueAll(locale);
+}
+
+std::locale ImbueAll(std::locale const& locale)
+{
+  auto const old_loc = std::locale::global(locale);
+
+  std::cin.imbue(locale);
+  std::cout.imbue(locale);
+  std::cerr.imbue(locale);
+  std::clog.imbue(locale);
+
+  std::wcin.imbue(locale);
+  std::wcout.imbue(locale);
+  std::wcerr.imbue(locale);
+  std::wclog.imbue(locale);
+
+  boost::filesystem::path::imbue(locale);
+
+  // According to comments in the Boost.Locale examples, this is needed 
+  // to prevent the C standard library performing string conversions 
+  // instead of the C++ standard library on some platforms. Unfortunately, 
+  // it is not specified which platforms this applies to, so I'm unsure 
+  // if this is ever relevant to Windows, but it's better safe than sorry.
+  std::ios_base::sync_with_stdio(false); 
+
+  return old_loc;
 }

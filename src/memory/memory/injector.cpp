@@ -8,8 +8,11 @@
 #include <iterator>
 #include <algorithm>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/filesystem.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <windows.h>
-#include <shlwapi.h>
 
 #include "hadesmem/call.hpp"
 #include "hadesmem/alloc.hpp"
@@ -96,20 +99,6 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
   }
 }
 
-bool FileExists(std::wstring const& path)
-{
-  DWORD const attrib = ::GetFileAttributes(path.c_str());
-  if (attrib == INVALID_FILE_ATTRIBUTES)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("GetFileAttributes failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-
-  return !(attrib & FILE_ATTRIBUTE_DIRECTORY);
-}
-
 }
 
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
@@ -126,27 +115,19 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
       ErrorString("Shims enabled for local process."));
   }
 
-  std::wstring path_real(path);
+   boost::filesystem::path path_real(path);
 
   bool const path_resolution = !!(flags & InjectFlags::kPathResolution);
 
-  if (path_resolution && PathIsRelative(path_real.c_str()))
+  if (path_resolution && path_real.is_relative())
   {
-    std::array<wchar_t, MAX_PATH> absolute_path = { { 0 } };
-    if (!PathCombine(absolute_path.data(), 
-      detail::GetSelfDirPath().c_str(), 
-      path_real.c_str()))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("PathCombine failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
-    path_real = absolute_path.data();
+    path_real = boost::filesystem::absolute(path_real, 
+      detail::GetSelfDirPath());
   }
+  path_real.make_preferred();
 
   bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
-  if (add_path && PathIsRelative(path_real.c_str()))
+  if (add_path && path_real.is_relative())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Cannot modify search order unless an absolute path "
@@ -158,17 +139,18 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   // of the remote process, which is not possible to do without 
   // introducing race conditions and other potential problems. So we just 
   // let LoadLibraryW do the check for us.
-  if (path_resolution && !FileExists(path_real))
+  if (path_resolution && !boost::filesystem::exists(path_real))
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module file."));
   }
 
-  std::size_t const path_buf_size = (path_real.size() + 1) * 
+  std::wstring const path_string(path_real.native());
+  std::size_t const path_buf_size = (path_string.size() + 1) * 
     sizeof(wchar_t);
 
   Allocator const lib_file_remote(&process, path_buf_size);
-  WriteString(process, lib_file_remote.GetBase(), path_real);
+  WriteString(process, lib_file_remote.GetBase(), path_string);
 
   Module const kernel32_mod(&process, L"kernel32.dll");
   auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
@@ -300,8 +282,10 @@ CreateAndInjectData CreateAndInject(
   std::string const& export_name, 
   int flags)
 {
+  boost::filesystem::path const path_real(path);
+  
   std::wstring command_line;
-  ArgvQuote(&command_line, path, false);
+  ArgvQuote(&command_line, path_real.native(), false);
   std::for_each(std::begin(args), std::end(args), 
     [&] (std::wstring const& arg) 
   {
@@ -312,14 +296,14 @@ CreateAndInjectData CreateAndInject(
     std::end(command_line));
   proc_args.push_back(L'\0');
 
-  std::wstring work_dir_real;
+  boost::filesystem::path work_dir_real;
   if (!work_dir.empty())
   {
     work_dir_real = work_dir;
   }
-  else if (path.rfind(L'\\') != std::string::npos)
+  else if (path_real.has_parent_path())
   {
-    work_dir_real = path.substr(0, path.rfind(L'\\') + 1);
+    work_dir_real = path_real.parent_path();
   }
   else
   {
@@ -331,7 +315,7 @@ CreateAndInjectData CreateAndInject(
   start_info.cb = sizeof(start_info);
   PROCESS_INFORMATION proc_info;
   ::ZeroMemory(&proc_info, sizeof(proc_info));
-  if (!::CreateProcess(path.c_str(), proc_args.data(), nullptr, nullptr, 
+  if (!::CreateProcess(path_real.c_str(), proc_args.data(), nullptr, nullptr, 
     FALSE, CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT, nullptr, 
     work_dir_real.c_str(), &start_info, &proc_info))
   {

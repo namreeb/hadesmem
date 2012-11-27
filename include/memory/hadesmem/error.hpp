@@ -3,89 +3,35 @@
 
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <typeinfo>
 #include <exception>
 
-#include <windows.h>
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/exception/all.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
 
-namespace detail
+class Error : public virtual std::exception, 
+  public virtual boost::exception
 {
-
-template <typename Tag, typename T>
-class ErrorInfo
-{
-public:
-  typedef Tag tag_type;
-  typedef T value_type;
-
-  explicit ErrorInfo(T const& t)
-    : t_(t)
-  { }
-
-  T const& Value() const
-  {
-    return t_;
-  }
-
 private:
-  T t_;
+  // This function exists to 'anchor' the class, and stop the compiler from 
+  // copying vtable and RTTI info into every object file that includes 
+  // this header.
+  virtual void Anchor() const;
 };
 
-}
-
-typedef detail::ErrorInfo<struct TagErrorString, std::string> ErrorString;
-typedef detail::ErrorInfo<struct TagErrorCodeWinRet, DWORD_PTR> 
+typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
+typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR> 
   ErrorCodeWinRet;
-typedef detail::ErrorInfo<struct TagErrorCodeWinLast, DWORD> ErrorCodeWinLast;
-typedef detail::ErrorInfo<struct TagErrorCodeWinOther, DWORD_PTR> 
+typedef boost::error_info<struct TagErrorCodeWinLast, DWORD> ErrorCodeWinLast;
+typedef boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR> 
   ErrorCodeWinOther;
-typedef detail::ErrorInfo<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
-typedef detail::ErrorInfo<struct TagErrorFunc, std::string> ErrorFunc;
-typedef detail::ErrorInfo<struct TagErrorFile, std::string> ErrorFile;
-typedef detail::ErrorInfo<struct TagErrorLine, int> ErrorLine;
-
-class Error : public std::exception
-{
-public:
-  Error();
-  
-  virtual char const* what() const HADESMEM_NOEXCEPT;
-
-private:
-  template <typename T>
-  void Add(T const& t) const
-  {
-    std::stringstream str;
-    str << t.Value();
-    what_ += "\n[" + std::string(typeid(typename T::tag_type*).name()) + "] = " 
-      + str.str();
-  }
-
-  template <typename Tag, typename T>
-  friend Error const& operator<<(Error const& x, 
-    detail::ErrorInfo<Tag, T> const& e);
-
-  mutable std::string what_;
-};
-
-template <typename Tag, typename T>
-Error const& operator<<(Error const& x, detail::ErrorInfo<Tag, T> const& e)
-{
-  x.Add(e);
-  return x;
-}
-
-#define HADESMEM_THROW_EXCEPTION(x)\
-  throw (x << \
-  hadesmem::ErrorFunc(HADESMEM_CURRENT_FUNCTION) << \
-  hadesmem::ErrorFile(__FILE__) << \
-  hadesmem::ErrorLine(__LINE__))
+typedef boost::error_info<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
 
 }
+
+#define HADESMEM_THROW_EXCEPTION(x) BOOST_THROW_EXCEPTION(x)

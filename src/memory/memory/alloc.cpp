@@ -118,7 +118,7 @@ void Allocator::FreeUnchecked() HADESMEM_NOEXCEPT
     (void)e;
     
     // WARNING: Memory in remote process is leaked if 'Free' fails
-    assert(e.what() && false);
+    assert(boost::diagnostic_information(e).c_str() && false);
     
     process_ = nullptr;
     base_ = nullptr;

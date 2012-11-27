@@ -5,9 +5,12 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/optional.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/config.hpp"
 #include "hadesmem/region.hpp"
-#include "hadesmem/detail/optional.hpp"
 
 namespace hadesmem
 {
@@ -25,7 +28,7 @@ struct RegionIteratorImpl
   { }
   
   Process const* process_;
-  Optional<Region> region_;
+  boost::optional<Region> region_;
   
 private:
   RegionIteratorImpl(RegionIteratorImpl const&) HADESMEM_DELETED_FUNCTION;

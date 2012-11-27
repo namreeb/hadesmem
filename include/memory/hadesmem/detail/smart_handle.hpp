@@ -106,8 +106,8 @@ private:
       (void)e;
 
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      assert(e.what() && false);
-
+      assert(boost::diagnostic_information(e).c_str() && false);
+      
       handle_ = invalid_;
     }
   }

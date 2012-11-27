@@ -8,11 +8,13 @@
 #include <iostream>
 #include <algorithm>
 
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/program_options.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
 #include <windows.h>
-#include <shellapi.h>
 
 #include <hadesmem/error.hpp>
-#include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/process.hpp>
@@ -103,101 +105,9 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   DumpRegions(*process);
 }
 
-class CommandLineOpts
-{
-public:
-  CommandLineOpts()
-    : help_(false), 
-    pid_(0)
-  { }
-
-  void SetHelp(bool help)
-  {
-    help_ = help;
-  }
-
-  bool GetHelp() const
-  {
-    return help_;
-  }
-
-  void SetPid(DWORD pid)
-  {
-    pid_ = pid;
-  }
-
-  DWORD GetPid() const
-  {
-    return pid_;
-  }
-
-private:
-  bool help_;
-  DWORD pid_;
-};
-
-CommandLineOpts ParseCommandLine(int argc, wchar_t** argv)
-{
-  CommandLineOpts opts;
-
-  for (int i = 1; i < argc; ++i)
-  {
-    std::wstring const current_arg(argv[i]);
-    if (current_arg == L"--help")
-    {
-      opts.SetHelp(true);
-    }
-    else if (current_arg == L"--pid")
-    {
-      if (i + 1 < argc)
-      {
-        std::wstringstream pid_str(argv[i + 1]);
-        DWORD pid = 0;
-        pid_str >> pid;
-        opts.SetPid(pid);
-        ++i;
-      }
-      else
-      {
-        HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-          hadesmem::ErrorString("Please specify a process ID."));
-      }
-    }
-    else
-    {
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-        hadesmem::ErrorString("Unrecognized argument."));
-    }
-  }
-
-  return opts;
 }
 
-class EnsureLocalFree
-{
-public:
-  explicit EnsureLocalFree(HLOCAL handle)
-    : handle_(handle)
-  { }
-
-  ~EnsureLocalFree()
-  {
-    HLOCAL const mem = ::LocalFree(handle_);
-    (void)mem;
-    assert(!mem);
-  }
-
-private:
-  EnsureLocalFree(EnsureLocalFree const& other) HADESMEM_DELETED_FUNCTION;
-  EnsureLocalFree& operator=(EnsureLocalFree const& other) 
-    HADESMEM_DELETED_FUNCTION;
-
-  HLOCAL handle_;
-};
-
-}
-
-int main()
+int main(int /*argc*/, char* /*argv*/[]) 
 {
   try
   {
@@ -205,30 +115,34 @@ int main()
     EnableCrtDebugFlags();
     EnableTerminationOnHeapCorruption();
     EnableBottomUpRand();
+    ImbueAllDefault();
 
     std::cout << "HadesMem Dumper\n";
 
-    int argc = 0;
-    LPWSTR* argv = ::CommandLineToArgvW(::GetCommandLine(), &argc);
-    if (!argv)
+    boost::program_options::options_description opts_desc(
+      "General options");
+    opts_desc.add_options()
+      ("help", "produce help message")
+      ("pid", boost::program_options::value<DWORD>(), "process id")
+      ;
+
+    std::vector<std::wstring> const args = boost::program_options::
+      split_winmain(GetCommandLine());
+    boost::program_options::variables_map var_map;
+    boost::program_options::store(boost::program_options::wcommand_line_parser(
+      args).options(opts_desc).run(), var_map);
+    boost::program_options::notify(var_map);
+
+    if (var_map.count("help"))
     {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-        hadesmem::ErrorString("CommandLineToArgvW failed.") << 
-        hadesmem::ErrorCodeWinLast(last_error));
-    }
-    EnsureLocalFree ensure_free_command_line(reinterpret_cast<HLOCAL>(argv));
-
-    CommandLineOpts const opts(ParseCommandLine(argc, argv));
-
-    if (opts.GetHelp())
-    {
-      std::cout << 
-        "\nOptions:\n"
-        "  --help\t\tproduce help message\n"
-        "  --pid arg\t\tprocess id\n";
-
+      std::cout << '\n' << opts_desc << '\n';
       return 1;
+    }
+
+    DWORD pid = 0;
+    if (var_map.count("pid"))
+    {
+      pid = var_map["pid"].as<DWORD>();
     }
 
     try
@@ -241,8 +155,6 @@ int main()
     {
       std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
     }
-
-    DWORD const pid = opts.GetPid();
 
     if (pid)
     {
@@ -278,7 +190,7 @@ int main()
   catch (std::exception const& e)
   {
     std::cerr << "\nError!\n";
-    std::cerr << e.what() << "\n";
+    std::cerr << boost::diagnostic_information(e) << '\n';
 
     return 1;
   }

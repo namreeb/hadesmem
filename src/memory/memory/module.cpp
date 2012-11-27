@@ -5,6 +5,10 @@
 
 #include <cassert>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/filesystem.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
@@ -69,64 +73,6 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
   
   return remote_func;
-}
-
-HANDLE GetFileHandleForQuery(std::wstring const& path)
-{
-  HANDLE const handle = ::CreateFile(path.c_str(), 
-    0, 
-    FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 
-    nullptr, 
-    OPEN_EXISTING, 
-    FILE_FLAG_BACKUP_SEMANTICS, 
-    nullptr);
-  if (handle == INVALID_HANDLE_VALUE)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("CreateFile failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-
-  return handle;
-}
-
-BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE handle)
-{
-  BY_HANDLE_FILE_INFORMATION info;
-  ::ZeroMemory(&info, sizeof(info));
-  if (!::GetFileInformationByHandle(handle, &info))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("GetFileInformationByHandle failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-
-  return info;
-}
-
-bool IsPathEquivalent(std::wstring const& path1, std::wstring const& path2)
-{
-  detail::SmartHandle const handle1(GetFileHandleForQuery(path1), 
-    INVALID_HANDLE_VALUE);
-  detail::SmartHandle const handle2(GetFileHandleForQuery(path2), 
-    INVALID_HANDLE_VALUE);
-
-  BY_HANDLE_FILE_INFORMATION const info1 = GetFileInformationByHandle(
-    handle1.GetHandle());
-  BY_HANDLE_FILE_INFORMATION const info2 = GetFileInformationByHandle(
-    handle2.GetHandle());
-
-  return info1.dwVolumeSerialNumber == info2.dwVolumeSerialNumber
-    && info1.nFileIndexHigh == info2.nFileIndexHigh
-    && info1.nFileIndexLow == info2.nFileIndexLow
-    && info1.nFileSizeHigh == info2.nFileSizeHigh
-    && info1.nFileSizeLow == info2.nFileSizeLow
-    && info1.ftLastWriteTime.dwLowDateTime == 
-    info2.ftLastWriteTime.dwLowDateTime
-    && info1.ftLastWriteTime.dwHighDateTime == 
-    info2.ftLastWriteTime.dwHighDateTime;
 }
 
 }
@@ -261,7 +207,7 @@ void Module::Initialize(std::wstring const& path)
     {
       if (is_path)
       {
-        if (IsPathEquivalent(path, entry.szExePath))
+        if (boost::filesystem::equivalent(path, entry.szExePath))
         {
           return true;
         }

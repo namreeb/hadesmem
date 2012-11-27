@@ -97,7 +97,7 @@ void ProtectGuard::RestoreUnchecked() HADESMEM_NOEXCEPT
     (void)e;
 
     // WARNING: Protection is not restored if 'Restore' fails.
-    assert(e.what() && false);
+    assert(boost::diagnostic_information(e).c_str() && false);
   }
 }
 

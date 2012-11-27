@@ -5,9 +5,12 @@
 
 #include <windows.h>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/optional.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/config.hpp"
 #include "hadesmem/process_entry.hpp"
-#include "hadesmem/detail/optional.hpp"
 
 namespace hadesmem
 {
@@ -23,7 +26,7 @@ struct ProcessIteratorImpl
   { }
   
   SmartHandle snap_;
-  Optional<ProcessEntry> process_;
+  boost::optional<ProcessEntry> process_;
   
 private:
   ProcessIteratorImpl(ProcessIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
