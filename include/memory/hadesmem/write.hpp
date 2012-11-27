@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -25,7 +26,7 @@ void Write(Process const& process, PVOID address, T const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
-  detail::Write(process, address, &data, sizeof(data));
+  detail::Write(process, address, std::addressof(data), sizeof(data));
 }
 
 template <typename T>

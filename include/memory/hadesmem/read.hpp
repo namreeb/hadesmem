@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 #include <cassert>
@@ -35,7 +36,7 @@ T ReadUnchecked(Process const& process, PVOID address)
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   T data;
-  ReadUnchecked(process, address, &data, sizeof(data));
+  ReadUnchecked(process, address, std::addressof(data), sizeof(data));
   return data;
 }
 
@@ -47,7 +48,7 @@ T Read(Process const& process, PVOID address)
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   T data;
-  detail::Read(process, address, &data, sizeof(data));
+  detail::Read(process, address, std::addressof(data), sizeof(data));
   return data;
 }
 
