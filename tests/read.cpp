@@ -74,6 +74,11 @@ BOOST_AUTO_TEST_CASE(read_pod)
   BOOST_REQUIRE(guard_page != nullptr);
   BOOST_CHECK_THROW(hadesmem::Read<void*>(process, guard_page), 
     hadesmem::Error);
+
+  PVOID const execute_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE);
+  BOOST_REQUIRE(execute_page != nullptr);
+  hadesmem::Read<void*>(process, execute_page);
 }
 
 BOOST_AUTO_TEST_CASE(read_string)

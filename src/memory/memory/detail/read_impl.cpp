@@ -22,16 +22,8 @@ void Read(Process const& process, LPVOID address, LPVOID data,
   assert(len != 0);
 
   ProtectGuard protect_guard(&process, address, ProtectGuardType::kRead);
-  
-  SIZE_T bytes_read = 0;
-  if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 
-    &bytes_read) || bytes_read != len)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not read process memory.") << 
-      ErrorCodeWinLast(last_error));
-  }
+
+  ReadUnchecked(process, address, data, len);
 
   protect_guard.Restore();
 }

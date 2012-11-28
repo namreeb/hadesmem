@@ -98,6 +98,11 @@ BOOST_AUTO_TEST_CASE(write_pod)
   BOOST_REQUIRE(guard_page != nullptr);
   BOOST_CHECK_THROW(hadesmem::Write(process, guard_page, 
     static_cast<void*>(nullptr)), hadesmem::Error);
+
+  PVOID const readonly_page = VirtualAlloc(nullptr, sizeof(void*), 
+    MEM_RESERVE | MEM_COMMIT, PAGE_READONLY);
+  BOOST_REQUIRE(readonly_page != nullptr);
+  hadesmem::Write<void*>(process, readonly_page, static_cast<void*>(nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(write_string)
