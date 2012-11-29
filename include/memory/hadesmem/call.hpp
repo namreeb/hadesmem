@@ -376,6 +376,7 @@ void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg,
 
 }
 
+// TODO: Detect calling convention from function pointer type.
 template <typename FuncT, typename... Args>
 CallResult<typename detail::FuncResult<FuncT>::type> Call(
   Process const& process, FnPtr address, CallConv call_conv, 
@@ -611,6 +612,7 @@ public:
 
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
+  // TODO: Detect calling convention from function pointer type.
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)
   {
