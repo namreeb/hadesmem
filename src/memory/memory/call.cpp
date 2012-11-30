@@ -28,6 +28,9 @@
 // struct/class/union, long double, SIMD types, etc. A good reference for 
 // calling conventions is available at http://goo.gl/5rUxn.
 
+// TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated 
+// code, 'private' functions, obfuscated code, etc).
+
 // TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
 // externally instead of being regenerated for every call.
 
