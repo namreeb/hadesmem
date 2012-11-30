@@ -27,7 +27,7 @@
 #include <hadesmem/error.hpp>
 
 #ifndef PROCESS_CALLBACK_FILTER_ENABLED
-#define PROCESS_CALLBACK_FILTER_ENABLED 0x1
+#define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
 #endif // #ifndef PROCESS_CALLBACK_FILTER_ENABLED
 
 void DisableUserModeCallbackExceptionFilter()
@@ -56,7 +56,7 @@ void DisableUserModeCallbackExceptionFilter()
   DWORD flags;
   if (get_policy && set_policy && get_policy(&flags))
   {
-    set_policy(flags & static_cast<DWORD>(~PROCESS_CALLBACK_FILTER_ENABLED));
+    set_policy(flags & ~PROCESS_CALLBACK_FILTER_ENABLED);
   }
 }
 
