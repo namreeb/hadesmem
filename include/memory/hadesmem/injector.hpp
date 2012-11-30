@@ -43,15 +43,6 @@ public:
   CreateAndInjectData(Process const& process, HMODULE module, 
     DWORD_PTR export_ret, DWORD export_last_error);
 
-  CreateAndInjectData(CreateAndInjectData const& Other);
-
-  CreateAndInjectData& operator=(CreateAndInjectData const& Other);
-
-  CreateAndInjectData(CreateAndInjectData&& Other) HADESMEM_NOEXCEPT;
-
-  CreateAndInjectData& operator=(CreateAndInjectData&& Other) 
-    HADESMEM_NOEXCEPT;
-
   Process GetProcess() const;
 
   HMODULE GetModule() const HADESMEM_NOEXCEPT;

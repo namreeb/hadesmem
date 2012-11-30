@@ -40,14 +40,6 @@ public:
   
   explicit ModuleIterator(Process const* process);
   
-  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT;
-  
-  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT;
-  
-  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT;
-  
-  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT;
-  
   reference operator*() const HADESMEM_NOEXCEPT;
   
   pointer operator->() const HADESMEM_NOEXCEPT;

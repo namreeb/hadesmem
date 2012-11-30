@@ -40,14 +40,6 @@ public:
   
   explicit RegionIterator(Process const* process);
   
-  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT;
-  
-  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT;
-  
-  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT;
-  
-  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT;
-  
   reference operator*() const HADESMEM_NOEXCEPT;
   
   pointer operator->() const HADESMEM_NOEXCEPT;
@@ -78,14 +70,6 @@ public:
   typedef RegionIterator const_iterator;
   
   explicit RegionList(Process const* process) HADESMEM_NOEXCEPT;
-  
-  RegionList(RegionList const& other) HADESMEM_NOEXCEPT;
-  
-  RegionList& operator=(RegionList const& other) HADESMEM_NOEXCEPT;
-  
-  RegionList(RegionList&& other) HADESMEM_NOEXCEPT;
-  
-  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT;
   
   iterator begin();
   

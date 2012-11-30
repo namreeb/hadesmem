@@ -32,11 +32,6 @@ struct ModuleIteratorImpl
   Process const* process_;
   SmartHandle snap_;
   boost::optional<Module> module_;
-  
-private:
-  ModuleIteratorImpl(ModuleIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
-  ModuleIteratorImpl& operator=(ModuleIteratorImpl const&) 
-    HADESMEM_DELETED_FUNCTION;
 };
 
 }

@@ -29,11 +29,6 @@ struct RegionIteratorImpl
   
   Process const* process_;
   boost::optional<Region> region_;
-  
-private:
-  RegionIteratorImpl(RegionIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
-  RegionIteratorImpl& operator=(RegionIteratorImpl const&) 
-    HADESMEM_DELETED_FUNCTION;
 };
 
 }

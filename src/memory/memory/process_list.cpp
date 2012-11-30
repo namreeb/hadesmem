@@ -68,30 +68,6 @@ ProcessIterator::ProcessIterator(int /*dummy*/)
   impl_->process_ = ProcessEntry(entry);
 }
 
-ProcessIterator::ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT
-  : impl_(other.impl_)
-{ }
-
-ProcessIterator& ProcessIterator::operator=(ProcessIterator const& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = other.impl_;
-  
-  return *this;
-}
-
-ProcessIterator::ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
-{ }
-
-ProcessIterator& ProcessIterator::operator=(ProcessIterator&& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = std::move(other.impl_);
-  
-  return *this;
-}
-
 ProcessIterator::reference ProcessIterator::operator*() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
@@ -153,23 +129,6 @@ bool ProcessIterator::operator!=(ProcessIterator const& other) const
 
 ProcessList::ProcessList() HADESMEM_NOEXCEPT
 { }
-
-ProcessList::ProcessList(ProcessList const& /*other*/) HADESMEM_NOEXCEPT
-{ }
-
-ProcessList& ProcessList::operator=(ProcessList const& /*other*/) 
-  HADESMEM_NOEXCEPT
-{
-  return *this;
-}
-
-ProcessList::ProcessList(ProcessList&& /*other*/) HADESMEM_NOEXCEPT
-{ }
-
-ProcessList& ProcessList::operator=(ProcessList&& /*other*/) HADESMEM_NOEXCEPT
-{
-  return *this;
-}
 
 ProcessList::iterator ProcessList::begin()
 {

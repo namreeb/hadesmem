@@ -73,30 +73,6 @@ ModuleIterator::ModuleIterator(Process const* process)
   impl_->module_ = Module(impl_->process_, entry);
 }
 
-ModuleIterator::ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
-  : impl_(other.impl_)
-{ }
-
-ModuleIterator& ModuleIterator::operator=(ModuleIterator const& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = other.impl_;
-  
-  return *this;
-}
-
-ModuleIterator::ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
-{ }
-
-ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = std::move(other.impl_);
-  
-  return *this;
-}
-
 ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());

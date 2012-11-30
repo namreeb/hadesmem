@@ -25,14 +25,6 @@ public:
   
   Module(Process const* process, MODULEENTRY32 const& entry);
   
-  Module(Module const& other);
-  
-  Module& operator=(Module const& other);
-  
-  Module(Module&& other) HADESMEM_NOEXCEPT;
-  
-  Module& operator=(Module&& other) HADESMEM_NOEXCEPT;
-  
   HMODULE GetHandle() const HADESMEM_NOEXCEPT;
   
   DWORD GetSize() const HADESMEM_NOEXCEPT;

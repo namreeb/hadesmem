@@ -32,30 +32,6 @@ RegionIterator::RegionIterator(Process const* process)
   impl_->region_ = Region(impl_->process_, mbi);
 }
 
-RegionIterator::RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT
-  : impl_(other.impl_)
-{ }
-
-RegionIterator& RegionIterator::operator=(RegionIterator const& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = other.impl_;
-  
-  return *this;
-}
-
-RegionIterator::RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
-{ }
-
-RegionIterator& RegionIterator::operator=(RegionIterator&& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = std::move(other.impl_);
-  
-  return *this;
-}
-
 RegionIterator::reference RegionIterator::operator*() const HADESMEM_NOEXCEPT
 {
   assert(impl_.get());
@@ -110,32 +86,6 @@ bool RegionIterator::operator!=(RegionIterator const& other) const
 RegionList::RegionList(Process const* process) HADESMEM_NOEXCEPT
   : process_(process)
 { }
-
-RegionList::RegionList(RegionList const& other) HADESMEM_NOEXCEPT
-  : process_(other.process_)
-{ }
-
-RegionList& RegionList::operator=(RegionList const& other) HADESMEM_NOEXCEPT
-{
-  process_ = other.process_;
-  
-  return *this;
-}
-
-RegionList::RegionList(RegionList&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_)
-{
-  other.process_ = nullptr;
-}
-
-RegionList& RegionList::operator=(RegionList&& other) HADESMEM_NOEXCEPT
-{
-  process_ = other.process_;
-  
-  other.process_ = nullptr;
-  
-  return *this;
-}
 
 RegionList::iterator RegionList::begin()
 {

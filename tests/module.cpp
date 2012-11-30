@@ -50,10 +50,8 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK_EQUAL(this_mod, this_mod_copy);
   hadesmem::Module this_mod_moved(std::move(this_mod_copy));
   BOOST_CHECK_EQUAL(this_mod_moved, this_mod);
-  BOOST_CHECK(this_mod_moved != this_mod_copy);
   this_mod_copy = std::move(this_mod_moved);
   BOOST_CHECK_EQUAL(this_mod_copy, this_mod);
-  BOOST_CHECK_NE(this_mod_copy, this_mod_moved);
   
   hadesmem::Module const ntdll_mod(&process, L"NtDll.DlL");
   BOOST_CHECK_NE(ntdll_mod, this_mod);

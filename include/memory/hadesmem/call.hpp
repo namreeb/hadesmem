@@ -183,6 +183,25 @@ private:
   DWORD last_error_;
 };
 
+namespace detail
+{
+
+template <typename T>
+CallResult<T> CallResultRawToCallResult(CallResultRaw const& result) 
+  HADESMEM_NOEXCEPT
+{
+  return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
+}
+
+template <>
+inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result) 
+  HADESMEM_NOEXCEPT
+{
+  return CallResult<void>(result.GetLastError());
+}
+
+}
+
 class CallArg
 {
 public:
@@ -319,20 +338,6 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
 
 namespace detail
 {
-
-template <typename T>
-CallResult<T> CallResultRawToCallResult(CallResultRaw const& result) 
-  HADESMEM_NOEXCEPT
-{
-  return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
-}
-
-template <>
-inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result) 
-  HADESMEM_NOEXCEPT
-{
-  return CallResult<void>(result.GetLastError());
-}
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(push)

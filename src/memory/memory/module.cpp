@@ -113,52 +113,6 @@ Module::Module(Process const* process, MODULEENTRY32 const& entry)
   Initialize(entry);
 }
 
-Module::Module(Module const& other)
-  : process_(other.process_), 
-  handle_(other.handle_), 
-  size_(other.size_), 
-  name_(other.name_), 
-  path_(other.path_)
-{ }
-
-Module& Module::operator=(Module const& other)
-{
-  process_ = other.process_;
-  handle_ = other.handle_;
-  size_ = other.size_;
-  name_ = other.name_;
-  path_ = other.path_;
-  
-  return *this;
-}
-
-Module::Module(Module&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_), 
-  handle_(other.handle_), 
-  size_(other.size_), 
-  name_(std::move(other.name_)), 
-  path_(std::move(other.path_))
-{
-  other.process_ = nullptr;
-  other.handle_ = nullptr;
-  other.size_ = 0;
-}
-
-Module& Module::operator=(Module&& other) HADESMEM_NOEXCEPT
-{
-  process_ = other.process_;
-  handle_ = other.handle_;
-  size_ = other.size_;
-  name_ = std::move(other.name_);
-  path_ = std::move(other.path_);
-  
-  other.handle_ = nullptr;
-  other.process_ = nullptr;
-  other.size_ = 0;
-  
-  return *this;
-}
-
 HMODULE Module::GetHandle() const HADESMEM_NOEXCEPT
 {
   return handle_;

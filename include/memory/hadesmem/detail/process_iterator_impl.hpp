@@ -11,6 +11,7 @@
 
 #include "hadesmem/config.hpp"
 #include "hadesmem/process_entry.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
 {
@@ -27,11 +28,6 @@ struct ProcessIteratorImpl
   
   SmartHandle snap_;
   boost::optional<ProcessEntry> process_;
-  
-private:
-  ProcessIteratorImpl(ProcessIteratorImpl const&) HADESMEM_DELETED_FUNCTION;
-  ProcessIteratorImpl& operator=(ProcessIteratorImpl const&) 
-    HADESMEM_DELETED_FUNCTION;
 };
 
 }

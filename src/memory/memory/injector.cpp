@@ -207,53 +207,6 @@ CreateAndInjectData::CreateAndInjectData(Process const& process,
   export_last_error_(export_last_error)
 { }
 
-CreateAndInjectData::CreateAndInjectData(CreateAndInjectData const& other)
-  : process_(other.process_), 
-  module_(other.module_), 
-  export_ret_(other.export_ret_), 
-  export_last_error_(other.export_last_error_)
-{ }
-
-CreateAndInjectData& CreateAndInjectData::operator=(
-  CreateAndInjectData const& other)
-{
-  process_ = other.process_;
-  module_ = other.module_;
-  export_ret_ = other.export_ret_;
-  export_last_error_ = other.export_last_error_;
-
-  return *this;
-}
-
-CreateAndInjectData::CreateAndInjectData(CreateAndInjectData&& other) 
-  HADESMEM_NOEXCEPT
-  : process_(std::move(other.process_)), 
-  module_(other.module_), 
-  export_ret_(other.export_ret_), 
-  export_last_error_(other.export_last_error_)
-{
-  other.module_ = nullptr;
-  other.export_ret_ = 0;
-  other.export_last_error_ = 0;
-}
-
-CreateAndInjectData& CreateAndInjectData::operator=(
-  CreateAndInjectData&& other) HADESMEM_NOEXCEPT
-{
-  process_ = std::move(other.process_);
-
-  module_ = other.module_;
-  other.module_ = nullptr;
-
-  export_ret_ = other.export_ret_;
-  other.export_ret_ = 0;
-
-  export_last_error_ = other.export_last_error_;
-  other.export_last_error_ = 0;
-
-  return *this;
-}
-
 Process CreateAndInjectData::GetProcess() const
 {
   return process_;

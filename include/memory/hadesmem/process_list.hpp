@@ -40,14 +40,6 @@ public:
   ProcessIterator() HADESMEM_NOEXCEPT;
 
   explicit ProcessIterator(int dummy);
-
-  ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT;
-  
-  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_NOEXCEPT;
-  
-  ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT;
-  
-  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_NOEXCEPT;
   
   reference operator*() const HADESMEM_NOEXCEPT;
   
@@ -76,16 +68,8 @@ class ProcessList
 public:
   typedef ProcessIterator iterator;
   typedef ProcessIterator const_iterator;
-  
-  explicit ProcessList() HADESMEM_NOEXCEPT;
-  
-  ProcessList(ProcessList const& other) HADESMEM_NOEXCEPT;
-  
-  ProcessList& operator=(ProcessList const& other) HADESMEM_NOEXCEPT;
-  
-  ProcessList(ProcessList&& other) HADESMEM_NOEXCEPT;
-  
-  ProcessList& operator=(ProcessList&& other) HADESMEM_NOEXCEPT;
+
+  ProcessList() HADESMEM_NOEXCEPT;
   
   iterator begin();
   
