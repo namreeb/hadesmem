@@ -227,8 +227,8 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
   std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
     max_num_args * 0x8);
-  assert(stack_offs % 16 == 0 || stack_offs % 16 == 8);
-  stack_offs = (stack_offs % 16) ? (stack_offs + 8) : stack_offs;
+  stack_offs += (stack_offs % 16);
+  // TODO: Fix argument handling code to not require the extra scratch space.
   stack_offs += 16;
   stack_offs += 8;
 
@@ -489,9 +489,10 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
     assembler_->mov(AsmJit::r9, arg);
     break;
   default:
-    assembler_->mov(AsmJit::rax, arg);
-    assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-      AsmJit::rax);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+      static_cast<DWORD>(arg));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
+      static_cast<DWORD>((arg >> 32) & 0xFFFFFFFF));
     break;
   }
 
@@ -505,37 +506,33 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
   DWORD arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
+  std::size_t const scratch_offs = num_args_ * 8;
+
   switch (cur_arg_)
   {
   case 1:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 2:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 3:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   default:
-    assembler_->xor_(AsmJit::rax, AsmJit::rax);
-    assembler_->mov(AsmJit::rax, arg_conv);
-    assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-      AsmJit::rax);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+      arg_conv);
     break;
   }
 
@@ -549,44 +546,48 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
+  DWORD const arg_low = static_cast<DWORD>(arg_conv);
+  DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF);
+
+  std::size_t const scratch_offs = num_args_ * 8;
+
   switch (cur_arg_)
   {
   case 1:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
+      arg_high);
     assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 2:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
+      arg_high);
     assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 3:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), 
+      arg_low);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
+      arg_high);
     assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8), 
-      static_cast<DWORD>(arg_conv));
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, num_args_ * 8 + 4), 
-      static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF));
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), 
+      arg_low);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
+      arg_high);
     assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
-      num_args_ * 8));
+      scratch_offs));
     break;
   default:
-    assembler_->mov(AsmJit::rax, arg_conv);
-    assembler_->mov(AsmJit::qword_ptr(AsmJit::rsp, cur_arg_ * 8 - 8), 
-      AsmJit::rax);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+      arg_low);
+    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
+      arg_high);
     break;
   }
 
