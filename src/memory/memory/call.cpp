@@ -291,12 +291,12 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_float));
-    assembler->movd(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
+    assembler->movss(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_double));
-    assembler->movq(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
+    assembler->movsd(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rax, get_last_error);
     assembler->call(AsmJit::rax);
