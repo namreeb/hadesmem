@@ -14,6 +14,10 @@ project
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
+
+    # Enable checks for truncation in MSVC (leaving other default flags 
+    # enabled as well)
+    <toolset>msvc,<variant>debug:<cxxflags>"/RTCcsu"
   ;
 
 lib common

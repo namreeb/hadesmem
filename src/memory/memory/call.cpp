@@ -34,6 +34,12 @@
 // TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
 // externally instead of being regenerated for every call.
 
+HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
+HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
+
 namespace hadesmem
 {
 
@@ -422,7 +428,8 @@ void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
     (arg >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(arg)));
+  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(arg & 
+    0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -453,7 +460,7 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
   assembler_->push(AsmJit::eax);
 
   assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
-    arg_conv)));
+    arg_conv & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -493,7 +500,7 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
     break;
   default:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
-      static_cast<DWORD>(arg));
+      static_cast<DWORD>(arg & 0xFFFFFFFF));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
       static_cast<DWORD>((arg >> 32) & 0xFFFFFFFF));
     break;
@@ -557,7 +564,7 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
-  DWORD const arg_low = static_cast<DWORD>(arg_conv);
+  DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFF);
   DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF);
 
   std::size_t const scratch_offs = num_args_ * 8;
