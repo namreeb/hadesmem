@@ -514,22 +514,30 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
   switch (cur_arg_)
   {
   case 1:
+  case 2:
+  case 3:
+  case 4:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
+    break;
+  default:
+    break;
+  }
+
+  switch (cur_arg_)
+  {
+  case 1:
     assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 2:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 3:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
     assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
@@ -557,32 +565,32 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   switch (cur_arg_)
   {
   case 1:
+  case 2:
+  case 3:
+  case 4:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
       arg_high);
+    break;
+  default:
+    break;
+  }
+
+  switch (cur_arg_)
+  {
+  case 1:
     assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 2:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
-      arg_high);
     assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 3:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), 
-      arg_low);
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
-      arg_high);
     assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
   case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), 
-      arg_low);
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
-      arg_high);
     assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
       scratch_offs));
     break;
