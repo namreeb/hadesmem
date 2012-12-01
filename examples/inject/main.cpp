@@ -21,6 +21,7 @@
 #include <hadesmem/injector.hpp>
 #include <hadesmem/detail/self_path.hpp>
 
+// TODO: Don't use a relative path
 #include "../common/initialize.hpp"
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.

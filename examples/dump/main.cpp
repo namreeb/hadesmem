@@ -23,6 +23,7 @@
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
 
+// TODO: Don't use a relative path
 #include "../common/initialize.hpp"
 
 namespace
