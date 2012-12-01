@@ -64,7 +64,8 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
-// TODO: Clean up this function.
+// TODO: Rewrite majority of function to not depend on T, then move the logic 
+// to an implementation file.
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address, 
   std::size_t chunk_len = 128)
@@ -78,52 +79,36 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
   std::basic_string<T> data;
 
-  PBYTE cur_address = static_cast<PBYTE>(address);
   MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-  PBYTE const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
+  PVOID const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
     mbi.RegionSize;
 
-  for (;;)
+  T* cur = static_cast<T*>(address);
+  while (cur + 1 < region_end)
   {
-    std::size_t cur_chunk_len = 0;
-    std::size_t cur_chunk_size = 0;
+    std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_end) - 
+      reinterpret_cast<DWORD_PTR>(cur);
+    std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
+      len_to_end);
+    std::size_t const buf_len = buf_len_bytes / sizeof(T);
 
-    if (cur_address + (chunk_len * sizeof(T)) > region_end)
-    {
-      cur_chunk_size = reinterpret_cast<std::size_t>(region_end - 
-        reinterpret_cast<DWORD_PTR>(cur_address));
-      cur_chunk_len = (cur_chunk_size - (cur_chunk_size % sizeof(T))) / 
-        sizeof(T);
-    }
-    else
-    {
-      cur_chunk_size = chunk_len * sizeof(T);
-      cur_chunk_len = chunk_len;
-    }
+    std::vector<T> buf(buf_len);
+    detail::Read(process, cur, buf.data(), buf.size() * sizeof(T));
 
-    std::vector<BYTE> buf(cur_chunk_size);
-    detail::Read(process, cur_address, buf.data(), cur_chunk_size);
+    auto const iter = std::find(std::begin(buf), std::end(buf), T());
+    std::copy(std::begin(buf), iter, std::back_inserter(data));
 
-    T const* buf_beg = static_cast<T const*>(static_cast<void const*>(
-      buf.data()));
-    T const* buf_end = buf_beg + cur_chunk_len;
-    for (T current = *buf_beg; current != T() && buf_beg != buf_end; 
-      current = *++buf_beg)
+    if (iter != std::end(buf))
     {
-      data.push_back(current);
+      protect_guard.Restore();
+      return data;
     }
 
-    if (buf_beg != buf_end || cur_address + cur_chunk_size == region_end)
-    {
-      break;
-    }
-
-    cur_address += cur_chunk_size;
+    cur += buf_len;
   }
 
-  protect_guard.Restore();
-
-  return data;
+  BOOST_THROW_EXCEPTION(Error() << 
+    ErrorString("Attempt to read across a region boundary."));
 }
 
 template <typename T>
