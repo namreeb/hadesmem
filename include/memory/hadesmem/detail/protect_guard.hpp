@@ -41,10 +41,10 @@ private:
   ProtectGuard& operator=(ProtectGuard const& other) HADESMEM_DELETED_FUNCTION;
 
   Process const* process_;
-  PVOID address_;
   ProtectGuardType type_;
   bool can_read_or_write_;
   DWORD old_protect_;
+  MEMORY_BASIC_INFORMATION mbi_;
 };
 
 }

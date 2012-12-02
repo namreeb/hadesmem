@@ -16,6 +16,11 @@
 #include "hadesmem/detail/type_traits.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
+// NOTE: Writes which span across region boundaries are not explicitly handled 
+// or supported. They may work simply by chance (or if the user changes the 
+// memory page protections preemptively in preparation for the read), however 
+// this is not guaranteed to work, even in the aforementioned scenario.
+
 namespace hadesmem
 {
 

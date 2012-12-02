@@ -6,6 +6,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/query_region.hpp"
+#include "hadesmem/detail/protect_region.hpp"
 
 namespace hadesmem
 {
@@ -37,18 +38,7 @@ bool IsGuard(Process const& process, LPCVOID address)
 DWORD Protect(Process const& process, LPVOID address, DWORD protect)
 {
   MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-  
-  DWORD old_protect = 0;
-  if (!::VirtualProtectEx(process.GetHandle(), mbi.BaseAddress, mbi.RegionSize, 
-    protect, &old_protect))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("VirtualProtectEx failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return old_protect;
+  return detail::Protect(process, mbi, protect);
 }
 
 }

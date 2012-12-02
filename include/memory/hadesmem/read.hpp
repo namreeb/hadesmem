@@ -22,6 +22,11 @@
 #include "hadesmem/detail/protect_guard.hpp"
 #include "hadesmem/detail/static_assert.hpp"
 
+// NOTE: Reads which span across region boundaries are not explicitly handled 
+// or supported. They may work simply by chance (or if the user changes the 
+// memory page protections preemptively in preparation for the read), however 
+// this is not guaranteed to work, even in the aforementioned scenario.
+
 namespace hadesmem
 {
 
@@ -66,6 +71,8 @@ std::array<T, N> Read(Process const& process, PVOID address)
 
 // TODO: Rewrite majority of function to not depend on T, then move the logic 
 // to an implementation file.
+// TODO: Reduce number of unnecessary calls to VirtualQuery/VirtualProtect by 
+// changing protection of entire region up-front.
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address, 
   std::size_t chunk_len = 128)
