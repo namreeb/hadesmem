@@ -34,6 +34,10 @@
 // TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
 // externally instead of being regenerated for every call.
 
+// TODO: Once the JIT-once rewrite is complete, transition to using code 
+// generated at compile-time with FASM and stored in a binary 'blob' (embedded 
+// in the source). This will remove the dependency on AsmJit.
+
 HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
