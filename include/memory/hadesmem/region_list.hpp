@@ -22,15 +22,6 @@ struct RegionIteratorImpl;
 
 }
 
-// Inheriting from std::iterator causes the following warning under GCC:
-// error: base class 'struct std::iterator<std::input_iterator_tag, 
-// hadesmem::Region>' has a non-virtual destructor [-Werror=effc++]
-// This can be ignored because iterators are not manipulated polymorphically.
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADESMEM_GCC)
-
 // RegionIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
@@ -57,10 +48,6 @@ private:
   // required by InputIterator.
   std::shared_ptr<detail::RegionIteratorImpl> impl_;
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
 
 class RegionList
 {
