@@ -24,6 +24,8 @@
 
 // TODO: Improve safety via EH.
 
+// TODO: Clean up ASM code and code generation.
+
 // TODO: Add support for more 'complex' argument and return types, including 
 // struct/class/union, long double, SIMD types, etc. A good reference for 
 // calling conventions is available at http://goo.gl/5rUxn.
@@ -388,14 +390,14 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
     {
     case CallConv::kThisCall:
     case CallConv::kFastCall:
-      assembler_->mov(AsmJit::ecx, static_cast<sysint_t>(arg));
+      assembler_->mov(AsmJit::ecx, AsmJit::uimm(arg));
       break;
     case CallConv::kDefault:
     case CallConv::kWinApi:
     case CallConv::kCdecl:
     case CallConv::kStdCall:
     case CallConv::kX64:
-      assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
+      assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
       assembler_->push(AsmJit::eax);
       break;
     }
@@ -404,7 +406,7 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
     switch (call_conv_)
     {
     case CallConv::kFastCall:
-      assembler_->mov(AsmJit::edx, static_cast<sysint_t>(arg));
+      assembler_->mov(AsmJit::edx, AsmJit::uimm(arg));
       break;
     case CallConv::kDefault:
     case CallConv::kWinApi:
@@ -412,13 +414,13 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
     case CallConv::kStdCall:
     case CallConv::kThisCall:
     case CallConv::kX64:
-      assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
+      assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
       assembler_->push(AsmJit::eax);
       break;
     }
     break;
   default:
-    assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg));
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
     assembler_->push(AsmJit::eax);
     break;
   }
@@ -428,11 +430,11 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 {
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
     (arg >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(arg & 
+  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(arg & 
     0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
@@ -446,7 +448,7 @@ void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
   DWORD arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(arg_conv));
+  assembler_->mov(AsmJit::eax, AsmJit::uimm(arg_conv));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -459,11 +461,11 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
     (arg_conv >> 32) & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
-  assembler_->mov(AsmJit::eax, static_cast<sysint_t>(static_cast<DWORD>(
+  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
     arg_conv & 0xFFFFFFFF)));
   assembler_->push(AsmJit::eax);
 
