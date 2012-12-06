@@ -34,10 +34,6 @@ project
   :
     requirements
     
-    # Allow Boost to #include <windows.h> rather than doing its own forward 
-    # declarations of the APIs it needs.
-    <define>BOOST_USE_WINDOWS_H
-
     # Disallow use of deprected Boost APIs.
     <define>BOOST_SYSTEM_NO_DEPRECATED
     <define>BOOST_FILESYSTEM_NO_DEPRECATED
@@ -45,11 +41,6 @@ project
     # Enforce strict Windows typedefs.
     <define>STRICT
 
-    # Exclude headers that are not commonly used. Especially useful to stop 
-    # the automatic inclusion of the Winsock v1 headers, which causes 
-    # when you then include the Winsock v2 headers afterwards.
-    <define>WIN32_LEAN_AND_MEAN
-    
     # Force use of Unicode APIs, entry point, etc.
     <define>UNICODE
     <define>_UNICODE
