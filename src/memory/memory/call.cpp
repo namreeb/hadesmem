@@ -131,19 +131,19 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   assembler->push(AsmJit::ebp);
   assembler->mov(AsmJit::ebp, AsmJit::esp);
 
-  assembler->mov(AsmJit::eax, static_cast<sysint_t>(is_debugger_present));
+  assembler->mov(AsmJit::eax, AsmJit::uimm(is_debugger_present));
   assembler->call(AsmJit::eax);
 
   assembler->test(AsmJit::eax, AsmJit::eax);
   assembler->jz(label_nodebug);
 
-  assembler->mov(AsmJit::eax, static_cast<sysint_t>(debug_break));
+  assembler->mov(AsmJit::eax, AsmJit::uimm(debug_break));
   assembler->call(AsmJit::eax);
 
   assembler->bind(label_nodebug);
 
   assembler->push(AsmJit::imm(0x0));
-  assembler->mov(AsmJit::eax, static_cast<sysint_t>(set_last_error));
+  assembler->mov(AsmJit::eax, AsmJit::uimm(set_last_error));
   assembler->call(AsmJit::eax);
 
   for (std::size_t i = 0; i < addresses.size(); ++i)
@@ -163,41 +163,41 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::eax, reinterpret_cast<sysint_t>(address));
     assembler->call(AsmJit::eax);
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_32)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_64)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_float)));
     assembler->fst(AsmJit::dword_ptr(AsmJit::ecx));
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_double)));
     assembler->fst(AsmJit::qword_ptr(AsmJit::ecx));
 
-    assembler->mov(AsmJit::eax, static_cast<sysint_t>(get_last_error));
+    assembler->mov(AsmJit::eax, AsmJit::uimm(get_last_error));
     assembler->call(AsmJit::eax);
 
-    assembler->mov(AsmJit::ecx, static_cast<sysint_t>(
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, last_error)));
@@ -205,8 +205,7 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
     if (call_conv == CallConv::kDefault || call_conv == CallConv::kCdecl)
     {
-      assembler->add(AsmJit::esp, static_cast<sysint_t>(
-        num_args * sizeof(PVOID)));
+      assembler->add(AsmJit::esp, AsmJit::uimm(num_args * sizeof(PVOID)));
     }
   }
 
