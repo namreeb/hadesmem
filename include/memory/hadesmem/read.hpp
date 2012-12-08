@@ -69,10 +69,6 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
-// TODO: Rewrite majority of function to not depend on T, then move the logic 
-// to an implementation file.
-// TODO: Reduce number of unnecessary calls to VirtualQuery/VirtualProtect by 
-// changing protection of entire region up-front.
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address, 
   std::size_t chunk_len = 128)
@@ -93,14 +89,16 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
   T* cur = static_cast<T*>(address);
   while (cur + 1 < region_end)
   {
-    std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_end) - 
+    std::size_t const len_to_end = 
+      reinterpret_cast<DWORD_PTR>(region_end) - 
       reinterpret_cast<DWORD_PTR>(cur);
     std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
       len_to_end);
     std::size_t const buf_len = buf_len_bytes / sizeof(T);
 
     std::vector<T> buf(buf_len);
-    detail::Read(process, cur, buf.data(), buf.size() * sizeof(T));
+    detail::ReadUnchecked(process, cur, buf.data(), 
+      buf.size() * sizeof(T));
 
     auto const iter = std::find(std::begin(buf), std::end(buf), T());
     std::copy(std::begin(buf), iter, std::back_inserter(data));
