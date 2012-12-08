@@ -4,7 +4,7 @@
 #if defined(HADESMEM_MSVC)
 #pragma warning(push, 1)
 #pragma warning(disable: 4996)
-#pragma warning(disable: 6246 6326 6385 6386 28197)
+#pragma warning(disable: 6246 6326 6334 6385 6386 28197)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_GCC)
