@@ -8,6 +8,10 @@
 #include <utility>
 #include <type_traits>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/mpl/at.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
@@ -348,7 +352,7 @@ template <typename FuncT, int N, typename T>
 void AddCallArg(std::vector<CallArg>* call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
-  typedef typename std::tuple_element<N, FuncArgs>::type RealT;
+  typedef typename boost::mpl::at<FuncArgs, boost::mpl::int_<N>>::type RealT;
   HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   RealT const real_arg(std::forward<T>(arg));
   call_args->emplace_back(std::move(real_arg));

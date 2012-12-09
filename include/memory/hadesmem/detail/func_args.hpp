@@ -3,7 +3,9 @@
 
 #pragma once
 
-#include <utility>
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/mpl/vector.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/config.hpp"
 
@@ -22,7 +24,7 @@ struct FuncArgs
 template <typename R, typename... Args>
 struct FuncArgs<R (*)(Args...)>
 {
-  typedef std::tuple<Args...> type;
+  typedef boost::mpl::vector<Args...> type;
 };
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
@@ -38,67 +40,67 @@ struct FuncArgs<R (*)()>
 template <typename R, typename A0>
 struct FuncArgs<R (*)(A0)>
 {
-  typedef std::tuple<A0> type;
+  typedef boost::mpl::vector<A0> type;
 };
 
 template <typename R, typename A0, typename A1>
 struct FuncArgs<R (*)(A0, A1)>
 {
-  typedef std::tuple<A0, A1> type;
+  typedef boost::mpl::vector<A0, A1> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2>
 struct FuncArgs<R (*)(A0, A1, A2)>
 {
-  typedef std::tuple<A0, A1, A2> type;
+  typedef boost::mpl::vector<A0, A1, A2> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3>
 struct FuncArgs<R (*)(A0, A1, A2, A3)>
 {
-  typedef std::tuple<A0, A1, A2, A3> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4, typename A5>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4, A5> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4, typename A5, typename A6>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4, A5, A6> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4, typename A5, typename A6, typename A7>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4, A5, A6, A7> type;
+  typedef boost::mpl::vectortuple<A0, A1, A2, A3, A4, A5, A6, A7> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4, typename A5, typename A6, typename A7, typename A8>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4, A5, A6, A7, A8> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7, A8> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
   typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)>
 {
-  typedef std::tuple<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9> type;
 };
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
