@@ -10,6 +10,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/mpl/at.hpp>
+#include <boost/preprocessor.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
@@ -352,7 +353,7 @@ template <typename FuncT, int N, typename T>
 void AddCallArg(std::vector<CallArg>* call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
-  typedef typename boost::mpl::at<FuncArgs, boost::mpl::int_<N>>::type RealT;
+  typedef typename boost::mpl::at_c<FuncArgs, N>::type RealT;
   HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   RealT const real_arg(std::forward<T>(arg));
   call_args->emplace_back(std::move(real_arg));
@@ -407,205 +408,51 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
-#define HADESMEM_CALL_ADD_ARG(n) \
-  detail::AddCallArg<FuncT, n>(&args, std::forward<T##n>(t##n))
+// TODO: Support limits higher than this in FuncArgs, FuncArity, etc 
+// implementations for MSVC.
+#ifndef HADESMEM_CALL_MAX_ARGS
+#define HADESMEM_CALL_MAX_ARGS 10
+#endif // #ifndef HADESMEM_CALL_MAX_ARGS
+
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
+
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
 
 #define HADESMEM_CHECK_FUNC_ARITY(n) \
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
 
-template <typename FuncT>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv)
-{
-  HADESMEM_CHECK_FUNC_ARITY(0);
-  std::vector<CallArg> args;
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#define HADESMEM_CALL_ADD_ARG(n) \
+  detail::AddCallArg<FuncT, n>(&args, std::forward<T##n>(t##n))
 
-template <typename FuncT, typename T0>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0)
-{
-  HADESMEM_CHECK_FUNC_ARITY(1);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#define HADESMEM_CALL_ADD_ARG_WRAPPER(z, n, unused) \
+  HADESMEM_CALL_ADD_ARG(n);
 
-template <typename FuncT, typename T0, typename T1>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1)
-{
-  HADESMEM_CHECK_FUNC_ARITY(2);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#define BOOST_PP_LOCAL_MACRO(n) \
+template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
+CallResult<typename detail::FuncResult<FuncT>::type>\
+  Call(Process const& process, FnPtr address, CallConv call_conv \
+  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
+{\
+  HADESMEM_CHECK_FUNC_ARITY(n);\
+  std::vector<CallArg> args;\
+  BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
+  CallResultRaw const ret = Call(process, address, call_conv, args);\
+  typedef typename detail::FuncResult<FuncT>::type ResultT;\
+  return detail::CallResultRawToCallResult<ResultT>(ret);\
+}\
 
-template <typename FuncT, typename T0, typename T1, typename T2>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2)
-{
-  HADESMEM_CHECK_FUNC_ARITY(3);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3)
-{
-  HADESMEM_CHECK_FUNC_ARITY(4);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4)
-{
-  HADESMEM_CHECK_FUNC_ARITY(5);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#include BOOST_PP_LOCAL_ITERATE()
 
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4, typename T5>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5)
-{
-  HADESMEM_CHECK_FUNC_ARITY(6);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  HADESMEM_CALL_ADD_ARG(5);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
-
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4, typename T5, typename T6>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6)
-{
-  HADESMEM_CHECK_FUNC_ARITY(7);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  HADESMEM_CALL_ADD_ARG(5);
-  HADESMEM_CALL_ADD_ARG(6);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
-
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4, typename T5, typename T6, typename T7>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7)
-{
-  HADESMEM_CHECK_FUNC_ARITY(8);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  HADESMEM_CALL_ADD_ARG(5);
-  HADESMEM_CALL_ADD_ARG(6);
-  HADESMEM_CALL_ADD_ARG(7);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
-
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4, typename T5, typename T6, typename T7, typename T8>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, 
-  T8&& t8)
-{
-  HADESMEM_CHECK_FUNC_ARITY(9);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  HADESMEM_CALL_ADD_ARG(5);
-  HADESMEM_CALL_ADD_ARG(6);
-  HADESMEM_CALL_ADD_ARG(7);
-  HADESMEM_CALL_ADD_ARG(8);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
-
-template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-  typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
-CallResult<typename detail::FuncResult<FuncT>::type> 
-  Call(Process const& process, FnPtr address, CallConv call_conv, 
-  T0&& t0, T1&& t1, T2&& t2, T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, 
-  T8&& t8, T9&& t9)
-{
-  HADESMEM_CHECK_FUNC_ARITY(10);
-  std::vector<CallArg> args;
-  HADESMEM_CALL_ADD_ARG(0);
-  HADESMEM_CALL_ADD_ARG(1);
-  HADESMEM_CALL_ADD_ARG(2);
-  HADESMEM_CALL_ADD_ARG(3);
-  HADESMEM_CALL_ADD_ARG(4);
-  HADESMEM_CALL_ADD_ARG(5);
-  HADESMEM_CALL_ADD_ARG(6);
-  HADESMEM_CALL_ADD_ARG(7);
-  HADESMEM_CALL_ADD_ARG(8);
-  HADESMEM_CALL_ADD_ARG(9);
-  CallResultRaw const ret = Call(process, address, call_conv, args);
-  typedef typename detail::FuncResult<FuncT>::type ResultT;
-  return detail::CallResultRawToCallResult<ResultT>(ret);
-}
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
@@ -643,188 +490,37 @@ public:
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
-  template <typename FuncT>
-  void Add(FnPtr address, CallConv call_conv)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(0);
-    std::vector<CallArg> args;
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#define BOOST_PP_LOCAL_MACRO(n) \
+  template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
+  void Add(FnPtr address, CallConv call_conv \
+    BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
+  {\
+    HADESMEM_CHECK_FUNC_ARITY(n);\
+    std::vector<CallArg> args;\
+    BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
+    addresses_.push_back(address);\
+    call_convs_.push_back(call_conv);\
+    args_.push_back(args);\
+  }\
 
-  template <typename FuncT, typename T0>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(1);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-  template <typename FuncT, typename T0, typename T1>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(2);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
-  template <typename FuncT, typename T0, typename T1, typename T2>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(3);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#include BOOST_PP_LOCAL_ITERATE()
 
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(4);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(5);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4, typename T5>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4, T5&& t5)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(6);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    HADESMEM_CALL_ADD_ARG(5);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4, typename T5, typename T6>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4, T5&& t5, T6&& t6)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(7);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    HADESMEM_CALL_ADD_ARG(5);
-    HADESMEM_CALL_ADD_ARG(6);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4, typename T5, typename T6, typename T7>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(8);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    HADESMEM_CALL_ADD_ARG(5);
-    HADESMEM_CALL_ADD_ARG(6);
-    HADESMEM_CALL_ADD_ARG(7);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4, typename T5, typename T6, typename T7, typename T8>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, T8&& t8)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(9);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    HADESMEM_CALL_ADD_ARG(5);
-    HADESMEM_CALL_ADD_ARG(6);
-    HADESMEM_CALL_ADD_ARG(7);
-    HADESMEM_CALL_ADD_ARG(8);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  template <typename FuncT, typename T0, typename T1, typename T2, typename T3, 
-    typename T4, typename T5, typename T6, typename T7, typename T8, 
-    typename T9>
-  void Add(FnPtr address, CallConv call_conv, T0&& t0, T1&& t1, T2&& t2, 
-    T3&& t3, T4&& t4, T5&& t5, T6&& t6, T7&& t7, T8&& t8, T9&& t9)
-  {
-    HADESMEM_CHECK_FUNC_ARITY(10);
-    std::vector<CallArg> args;
-    HADESMEM_CALL_ADD_ARG(0);
-    HADESMEM_CALL_ADD_ARG(1);
-    HADESMEM_CALL_ADD_ARG(2);
-    HADESMEM_CALL_ADD_ARG(3);
-    HADESMEM_CALL_ADD_ARG(4);
-    HADESMEM_CALL_ADD_ARG(5);
-    HADESMEM_CALL_ADD_ARG(6);
-    HADESMEM_CALL_ADD_ARG(7);
-    HADESMEM_CALL_ADD_ARG(8);
-    HADESMEM_CALL_ADD_ARG(9);
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
+#undef HADESMEM_CHECK_FUNC_ARITY
 
 #undef HADESMEM_CALL_ADD_ARG
 
-#undef HADESMEM_CHECK_FUNC_ARITY
+#undef HADESMEM_CALL_ADD_ARG_WRAPPER
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
