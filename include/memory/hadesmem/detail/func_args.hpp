@@ -86,7 +86,7 @@ template <typename R, typename A0, typename A1, typename A2, typename A3,
   typename A4, typename A5, typename A6, typename A7>
 struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7)>
 {
-  typedef boost::mpl::vectortuple<A0, A1, A2, A3, A4, A5, A6, A7> type;
+  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7> type;
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3, 
