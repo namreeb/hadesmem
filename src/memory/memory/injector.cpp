@@ -291,9 +291,9 @@ CreateAndInjectData CreateAndInject(
     // enumeration will fail if LdrInitializeThunk has not been called, 
     // and Injector::InjectDll (and the APIs it uses) depend on the 
     // module enumeration APIs.
-#if defined(_M_AMD64) 
+#if defined(HADESMEM_ARCH_X64) 
     std::array<BYTE, 1> return_instr = { { 0xC3 } };
-#elif defined(_M_IX86) 
+#elif defined(HADESMEM_ARCH_X86) 
     std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
 #else 
 #error "[HadesMem] Unsupported architecture."

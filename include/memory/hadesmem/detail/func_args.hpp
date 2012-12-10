@@ -9,6 +9,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/config.hpp"
+#include "hadesmem/detail/static_assert.hpp"
 
 namespace hadesmem
 {
@@ -30,6 +31,10 @@ struct FuncArgs<R (*)(Args...)>
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
+
+HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
+
 template <typename FuncT>
 struct FuncArgs
 { };

@@ -65,7 +65,7 @@ struct CallResultRemote
 // CallResultRemote must be POD because of 'offsetof' usage.
 HADESMEM_STATIC_ASSERT(std::is_pod<CallResultRemote>::value);
 
-#if defined(_M_IX86)
+#if defined(HADESMEM_ARCH_X86)
 
 class ArgVisitor32
 {
@@ -88,9 +88,9 @@ private:
   CallConv call_conv_;
 };
 
-#endif // #if defined(_M_IX86)
+#endif // #if defined(HADESMEM_ARCH_X86)
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_ARCH_X64)
 
 class ArgVisitor64
 {
@@ -112,9 +112,9 @@ private:
   std::size_t cur_arg_;
 };
 
-#endif // #if defined(_M_AMD64)
+#endif // #if defined(HADESMEM_ARCH_X64)
 
-#if defined(_M_IX86)
+#if defined(HADESMEM_ARCH_X86)
 
 void GenerateCallCode32(AsmJit::X86Assembler* assembler, 
   std::vector<FnPtr> const& addresses, 
@@ -215,9 +215,9 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   assembler->ret(0x4);
 }
 
-#endif // #if defined(_M_IX86)
+#endif // #if defined(HADESMEM_ARCH_X86)
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_ARCH_X64)
 
 void GenerateCallCode64(AsmJit::X86Assembler* assembler, 
   std::vector<FnPtr> const& addresses, 
@@ -323,7 +323,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   assembler->ret();
 }
 
-#endif // #if defined(_M_AMD64)
+#endif // #if defined(HADESMEM_ARCH_X64)
 
 Allocator GenerateCallCode(Process const& process, 
   std::vector<FnPtr> const& addresses, 
@@ -343,11 +343,11 @@ Allocator GenerateCallCode(Process const& process,
 
   AsmJit::X86Assembler assembler;
   
-#if defined(_M_AMD64)
+#if defined(HADESMEM_ARCH_X64)
   GenerateCallCode64(&assembler, addresses, call_convs, args_full, 
     get_last_error, set_last_error, is_debugger_present, debug_break, 
     return_values_remote);
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_ARCH_X86)
   GenerateCallCode32(&assembler, addresses, call_convs, args_full, 
     get_last_error, set_last_error, is_debugger_present, debug_break, 
     return_values_remote);
@@ -370,7 +370,7 @@ Allocator GenerateCallCode(Process const& process,
 
 }
 
-#if defined(_M_IX86)
+#if defined(HADESMEM_ARCH_X86)
 
 ArgVisitor32::ArgVisitor32(AsmJit::X86Assembler* assembler, 
   std::size_t num_args, CallConv call_conv) HADESMEM_NOEXCEPT
@@ -471,9 +471,9 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-#endif // #if defined(_M_IX86)
+#endif // #if defined(HADESMEM_ARCH_X86)
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_ARCH_X64)
 
 ArgVisitor64::ArgVisitor64(AsmJit::X86Assembler* assembler, 
   std::size_t num_args) HADESMEM_NOEXCEPT
@@ -617,7 +617,7 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-#endif // #if defined(_M_AMD64)
+#endif // #if defined(HADESMEM_ARCH_X64)
   
 CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr, 
   DWORD32 return_int_32, 
