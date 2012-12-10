@@ -5,6 +5,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/mpl/vector.hpp>
+#include <boost/preprocessor.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/config.hpp"
@@ -33,75 +34,25 @@ template <typename FuncT>
 struct FuncArgs
 { };
 
-template <typename R>
-struct FuncArgs<R (*)()>
-{ };
+#define BOOST_PP_LOCAL_MACRO(n) \
+template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+struct FuncArgs<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+{ \
+  typedef boost::mpl::vector<BOOST_PP_ENUM_PARAMS(n, T)> type; \
+}; \
 
-template <typename R, typename A0>
-struct FuncArgs<R (*)(A0)>
-{
-  typedef boost::mpl::vector<A0> type;
-};
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-template <typename R, typename A0, typename A1>
-struct FuncArgs<R (*)(A0, A1)>
-{
-  typedef boost::mpl::vector<A0, A1> type;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
-template <typename R, typename A0, typename A1, typename A2>
-struct FuncArgs<R (*)(A0, A1, A2)>
-{
-  typedef boost::mpl::vector<A0, A1, A2> type;
-};
+#include BOOST_PP_LOCAL_ITERATE()
 
-template <typename R, typename A0, typename A1, typename A2, typename A3>
-struct FuncArgs<R (*)(A0, A1, A2, A3)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7, A8> type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
-struct FuncArgs<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)>
-{
-  typedef boost::mpl::vector<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9> type;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 

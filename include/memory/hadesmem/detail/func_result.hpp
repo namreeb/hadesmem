@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/preprocessor.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/config.hpp"
 
 namespace hadesmem
@@ -29,77 +33,25 @@ template <typename FuncT>
 struct FuncResult
 { };
 
-template <typename R>
-struct FuncResult<R (*)()>
-{
-  typedef R type;
-};
+#define BOOST_PP_LOCAL_MACRO(n) \
+  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+struct FuncResult<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+{ \
+  typedef R type; \
+}; \
 
-template <typename R, typename A0>
-struct FuncResult<R (*)(A0)>
-{
-  typedef R type;
-};
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-template <typename R, typename A0, typename A1>
-struct FuncResult<R (*)(A0, A1)>
-{
-  typedef R type;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
-template <typename R, typename A0, typename A1, typename A2>
-struct FuncResult<R (*)(A0, A1, A2)>
-{
-  typedef R type;
-};
+#include BOOST_PP_LOCAL_ITERATE()
 
-template <typename R, typename A0, typename A1, typename A2, typename A3>
-struct FuncResult<R (*)(A0, A1, A2, A3)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4, A5)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4, A5, A6)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4, A5, A6, A7)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8)>
-{
-  typedef R type;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
-struct FuncResult<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)>
-{
-  typedef R type;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 

@@ -17,28 +17,32 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_NO_DELETED_FUNCTIONS
-#endif
+#endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_NO_NOEXCEPT
-#endif
+#endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_NO_VARIADIC_TEMPLATES
-#endif
+#endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_NO_DELETED_FUNCTIONS)
 #define HADESMEM_DELETED_FUNCTION 
-#else
+#else // #if defined(HADESMEM_NO_DELETED_FUNCTIONS)
 #define HADESMEM_DELETED_FUNCTION = delete
-#endif
+#endif // #if defined(HADESMEM_NO_DELETED_FUNCTIONS)
 
 #if defined(HADESMEM_NO_NOEXCEPT)
 #define HADESMEM_NOEXCEPT 
 #define HADESMEM_NOEXCEPT_IF(Pred) 
 #define HADESMEM_NOEXCEPT_EXPR(Expr) false
-#else
+#else // #if defined(HADESMEM_NO_NOEXCEPT)
 #define HADESMEM_NOEXCEPT noexcept
 #define HADESMEM_NOEXCEPT_IF(Pred) noexcept((Pred))
 #define HADESMEM_NOEXCEPT_EXPR(Expr) noexcept((Expr))
-#endif
+#endif // #if defined(HADESMEM_NO_NOEXCEPT)
+
+#ifndef HADESMEM_CALL_MAX_ARGS
+#define HADESMEM_CALL_MAX_ARGS 10
+#endif // #ifndef HADESMEM_CALL_MAX_ARGS

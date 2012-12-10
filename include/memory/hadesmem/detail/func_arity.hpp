@@ -3,6 +3,12 @@
 
 #pragma once
 
+#include <cstddef>
+
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/preprocessor.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/config.hpp"
 
 namespace hadesmem
@@ -29,77 +35,25 @@ template <typename FuncT>
 struct FuncArity
 { };
 
-template <typename R>
-struct FuncArity<R (*)()>
-{
-  static std::size_t const value = 0;
-};
+#define BOOST_PP_LOCAL_MACRO(n) \
+  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+struct FuncArity<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+{ \
+  static std::size_t const value = n; \
+}; \
 
-template <typename R, typename A0>
-struct FuncArity<R (*)(A0)>
-{
-  static std::size_t const value = 1;
-};
+#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
-template <typename R, typename A0, typename A1>
-struct FuncArity<R (*)(A0, A1)>
-{
-  static std::size_t const value = 2;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
 
-template <typename R, typename A0, typename A1, typename A2>
-struct FuncArity<R (*)(A0, A1, A2)>
-{
-  static std::size_t const value = 3;
-};
+#include BOOST_PP_LOCAL_ITERATE()
 
-template <typename R, typename A0, typename A1, typename A2, typename A3>
-struct FuncArity<R (*)(A0, A1, A2, A3)>
-{
-  static std::size_t const value = 4;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4)>
-{
-  static std::size_t const value = 5;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4, A5)>
-{
-  static std::size_t const value = 6;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4, A5, A6)>
-{
-  static std::size_t const value = 7;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4, A5, A6, A7)>
-{
-  static std::size_t const value = 8;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8)>
-{
-  static std::size_t const value = 9;
-};
-
-template <typename R, typename A0, typename A1, typename A2, typename A3, 
-  typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
-struct FuncArity<R (*)(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)>
-{
-  static std::size_t const value = 10;
-};
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 

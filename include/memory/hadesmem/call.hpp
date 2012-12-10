@@ -408,12 +408,6 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
-// TODO: Support limits higher than this in FuncArgs, FuncArity, etc 
-// implementations for MSVC.
-#ifndef HADESMEM_CALL_MAX_ARGS
-#define HADESMEM_CALL_MAX_ARGS 10
-#endif // #ifndef HADESMEM_CALL_MAX_ARGS
-
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
