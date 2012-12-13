@@ -309,9 +309,8 @@ BOOST_AUTO_TEST_CASE(call)
   func_conv.pmfn = &ThiscallDummy::TestIntegerThis;
   auto const test_integer_this = func_conv.pfn;
   ThiscallDummy thiscall_dummy;
-  typedef DWORD_PTR (*TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
-    int c, int d, int e);
-  auto const call_int_this_ret = hadesmem::Call<TestIntegerThisT>(
+  auto const call_int_this_ret = 
+    hadesmem::Call<decltype(&ThiscallDummy::TestIntegerThis)>(
     process, test_integer_this, thiscall_call_conv, &thiscall_dummy, 
     0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE);
   BOOST_CHECK_EQUAL(call_int_this_ret.GetReturnValue(), 
