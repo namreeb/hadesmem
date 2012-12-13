@@ -176,10 +176,8 @@ void FreeDll(Process const& process, HMODULE module)
   Module const kernel32_mod(&process, L"kernel32.dll");
   auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
 
-  typedef BOOL (*FreeLibraryFuncT)(HMODULE hModule);
-  auto const free_library_ret = 
-    Call<FreeLibraryFuncT>(process, reinterpret_cast<FnPtr>(free_library), 
-    CallConv::kWinApi, module);
+  auto const free_library_ret = Call<decltype(&FreeLibrary)>(process, 
+    reinterpret_cast<FnPtr>(free_library), CallConv::kWinApi, module);
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
