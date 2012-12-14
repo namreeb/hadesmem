@@ -3,6 +3,18 @@
 
 #pragma once
 
+#if defined(__clang__)
+#define HADESMEM_CLANG
+#elif defined(__INTEL_COMPILER)
+#define HADESMEM_INTEL
+#elif defined(__GNUC__)
+#define HADESMEM_GCC
+#elif defined(_MSC_VER)
+#define HADESMEM_MSVC
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+
 #define HADESMEM_VERSION_MAJOR 2
 #define HADESMEM_VERSION_MINOR 0
 #define HADESMEM_VERSION_PATCH 0

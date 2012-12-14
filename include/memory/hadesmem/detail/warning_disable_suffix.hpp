@@ -1,6 +1,8 @@
 // Copyright (C) 2010-2012 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include "hadesmem/config.hpp"
+
 #if defined(HADESMEM_MSVC)
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)

@@ -13,6 +13,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/process.hpp"
 
 // Boost.Test causes the following warning under GCC:

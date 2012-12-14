@@ -3,6 +3,8 @@
 
 #include <windows.h>
 
+#include <hadesmem/config.hpp>
+
 BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, 
   LPVOID /*reserved*/);
 

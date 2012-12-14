@@ -43,10 +43,12 @@ exe inject
 lib injecttestdep
   :
     [ glob injecttestdep/*.cpp ]
+    common
   ;
 
 lib injecttest
   :
     [ glob injecttest/*.cpp ]
+    common
 	injecttestdep
   ;

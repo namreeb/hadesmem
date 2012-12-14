@@ -9,6 +9,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/self_path.hpp"
 

@@ -9,6 +9,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/detail/to_upper_ordinal.hpp"
 

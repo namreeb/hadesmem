@@ -85,13 +85,6 @@ project
     
     # Enable generation of debugging symbols, even under release mode.
     <debug-symbols>on
-    
-    # Define some preprocessor macros for easy tool detection within 
-    # HadesMem.
-    <toolset>msvc:<define>HADESMEM_MSVC
-    <toolset>gcc:<define>HADESMEM_GCC
-    <toolset>clang:<define>HADESMEM_CLANG
-    <toolset>intel:<define>HADESMEM_INTEL
   :
     # Build under debug mode by default.
     default-build debug

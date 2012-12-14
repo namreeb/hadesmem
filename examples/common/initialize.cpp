@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <hadesmem/config.hpp>
 #include <windows.h>
 // Required for ::_CrtSetDbgFlag.
 // Does not compile under GCC.

@@ -5,6 +5,8 @@
 
 #include <type_traits>
 
+#include "hadesmem/config.hpp"
+
 namespace hadesmem
 {
 
