@@ -87,25 +87,29 @@ struct FuncResult
 { };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   typedef R type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const> \
 { \
   typedef R type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) volatile> \
 { \
   typedef R type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const volatile> \
 { \
   typedef R type; \

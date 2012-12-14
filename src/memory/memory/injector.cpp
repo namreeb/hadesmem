@@ -155,12 +155,10 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   Module const kernel32_mod(&process, L"kernel32.dll");
   auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
 
-  typedef HMODULE (*LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
-    DWORD dwFlags);
-  auto const load_library_ret = 
-    Call<LoadLibraryExFuncT>(process, reinterpret_cast<FnPtr>(load_library), 
-    CallConv::kWinApi, static_cast<LPCWSTR>(lib_file_remote.GetBase()), 
-    nullptr, add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
+  auto const load_library_ret = Call<decltype(&LoadLibraryExW)>(process, 
+    reinterpret_cast<FnPtr>(load_library), CallConv::kWinApi, 
+    static_cast<LPCWSTR>(lib_file_remote.GetBase()), nullptr, 
+    add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 

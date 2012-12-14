@@ -89,25 +89,29 @@ struct FuncArity
 { };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   static std::size_t const value = n + 1; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const> \
 { \
   static std::size_t const value = n + 1; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) volatile> \
 { \
   static std::size_t const value = n + 1; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const volatile> \
 { \
   static std::size_t const value = n + 1; \

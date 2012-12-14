@@ -88,28 +88,36 @@ struct FuncArgs
 { };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-  template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArgs<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
-  typedef boost::mpl::vector<T* BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
+  typedef boost::mpl::vector<T* \
+    BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArgs<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const> \
 { \
-  typedef boost::mpl::vector<T const* BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
+  typedef boost::mpl::vector<T const* \
+    BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArgs<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) volatile> \
 { \
-  typedef boost::mpl::vector<T volatile* BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
+  typedef boost::mpl::vector<T volatile* \
+    BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
 }; \
 \
-template <typename R, typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R, typename T \
+  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArgs<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const volatile> \
 { \
-  typedef boost::mpl::vector<T const volatile* BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
+  typedef boost::mpl::vector<T const volatile* \
+    BOOST_PP_ENUM_TRAILING_PARAMS(n, T)> type; \
 }; \
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
@@ -128,7 +136,7 @@ struct FuncArgs<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 #elif defined(HADESMEM_ARCH_X86)
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArgs<R (__cdecl*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   typedef boost::mpl::vector<BOOST_PP_ENUM_PARAMS(n, T)> type; \
