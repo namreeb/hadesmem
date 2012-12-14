@@ -18,15 +18,15 @@ BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/,
 #define HADESMEM_DLLEXPORT __declspec(dllexport)
 #endif
 
-extern "C" HADESMEM_DLLEXPORT DWORD Load(LPCVOID /*module*/);
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/);
 
-extern "C" HADESMEM_DLLEXPORT DWORD Free(LPCVOID /*module*/);
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID /*module*/);
 
-extern "C" __declspec(dllimport) DWORD InjectTestDep_Foo();
+extern "C" __declspec(dllimport) DWORD_PTR InjectTestDep_Foo();
 
 bool g_alloced_console = false;
 
-extern "C" HADESMEM_DLLEXPORT DWORD Load(LPCVOID /*module*/)
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/)
 {
   InjectTestDep_Foo();
 
@@ -40,7 +40,7 @@ extern "C" HADESMEM_DLLEXPORT DWORD Load(LPCVOID /*module*/)
   return 0;
 }
 
-extern "C" HADESMEM_DLLEXPORT DWORD Free(LPCVOID /*module*/)
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID /*module*/)
 {
   if (g_alloced_console)
   {

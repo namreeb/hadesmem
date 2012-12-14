@@ -18,9 +18,9 @@ BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/,
 #define HADESMEM_DLLEXPORT __declspec(dllexport)
 #endif
 
-extern "C" HADESMEM_DLLEXPORT DWORD InjectTestDep_Foo();
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR InjectTestDep_Foo();
 
-extern "C" HADESMEM_DLLEXPORT DWORD InjectTestDep_Foo()
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
 {
   return 0;
 }
