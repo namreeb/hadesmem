@@ -371,13 +371,13 @@ namespace detail
 {
 
 template <typename FuncT, int N>
-inline void BuildCallArgs(std::vector<CallArg>* /*call_args*/) HADESMEM_NOEXCEPT
+void BuildCallArgs(std::vector<CallArg>* /*call_args*/) HADESMEM_NOEXCEPT
 {
   return;
 }
 
 template <typename FuncT, int N, typename T, typename... Args>
-inline void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, 
+void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, 
   Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));

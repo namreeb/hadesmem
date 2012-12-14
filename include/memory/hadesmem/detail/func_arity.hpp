@@ -24,59 +24,11 @@ template <typename FuncT>
 struct FuncArity
 { };
 
-template <typename R, typename T, typename... Args>
-struct FuncArity<R (T::*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args) + 1;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncArity<R (T::*)(Args...) const>
-{
-  static std::size_t const value = sizeof...(Args) + 1;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncArity<R (T::*)(Args...) volatile>
-{
-  static std::size_t const value = sizeof...(Args) + 1;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncArity<R (T::*)(Args...) const volatile>
-{
-  static std::size_t const value = sizeof...(Args) + 1;
-};
-
-#if defined(HADESMEM_ARCH_X64)
-
 template <typename R, typename... Args>
 struct FuncArity<R (*)(Args...)>
 {
   static std::size_t const value = sizeof...(Args);
 };
-
-#elif defined(HADESMEM_ARCH_X86)
-
-template <typename R, typename... Args>
-struct FuncArity<R (__cdecl*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args>
-struct FuncArity<R (__stdcall*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args>
-struct FuncArity<R (__fastcall*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-#endif
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
@@ -89,74 +41,24 @@ struct FuncArity
 { };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  static std::size_t const value = n + 1; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const> \
-{ \
-  static std::size_t const value = n + 1; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) volatile> \
-{ \
-  static std::size_t const value = n + 1; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const volatile> \
-{ \
-  static std::size_t const value = n + 1; \
-}; \
-\
-
-#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
-
-#include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_ARCH_X64)
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncArity<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   static std::size_t const value = n; \
 }; \
 
-#elif defined(HADESMEM_ARCH_X86)
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (__cdecl*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  static std::size_t const value = n; \
-}; \
-\
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (__stdcall*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  static std::size_t const value = n; \
-}; \
-\
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (__fastcall*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  static std::size_t const value = n; \
-}; \
-
-#endif
-
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
+
 #include BOOST_PP_LOCAL_ITERATE()
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 

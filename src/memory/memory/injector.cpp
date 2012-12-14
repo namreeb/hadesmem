@@ -155,10 +155,12 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   Module const kernel32_mod(&process, L"kernel32.dll");
   auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
 
-  auto const load_library_ret = Call<decltype(&LoadLibraryExW)>(process, 
-    reinterpret_cast<FnPtr>(load_library), CallConv::kWinApi, 
-    static_cast<LPCWSTR>(lib_file_remote.GetBase()), nullptr, 
-    add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
+  typedef HMODULE (*LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
+    DWORD dwFlags);
+  auto const load_library_ret = 
+    Call<LoadLibraryExFuncT>(process, reinterpret_cast<FnPtr>(load_library), 
+    CallConv::kWinApi, static_cast<LPCWSTR>(lib_file_remote.GetBase()), 
+    nullptr, add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -174,8 +176,10 @@ void FreeDll(Process const& process, HMODULE module)
   Module const kernel32_mod(&process, L"kernel32.dll");
   auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
 
-  auto const free_library_ret = Call<decltype(&FreeLibrary)>(process, 
-    reinterpret_cast<FnPtr>(free_library), CallConv::kWinApi, module);
+  typedef BOOL (*FreeLibraryFuncT)(HMODULE hModule);
+  auto const free_library_ret = 
+    Call<FreeLibraryFuncT>(process, reinterpret_cast<FnPtr>(free_library), 
+    CallConv::kWinApi, module);
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 

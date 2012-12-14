@@ -22,59 +22,11 @@ template <typename FuncT>
 struct FuncResult
 { };
 
-template <typename R, typename T, typename... Args>
-struct FuncResult<R (T::*)(Args...)>
-{
-  typedef R type;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncResult<R (T::*)(Args...) const>
-{
-  typedef R type;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncResult<R (T::*)(Args...) volatile>
-{
-  typedef R type;
-};
-
-template <typename R, typename T, typename... Args>
-struct FuncResult<R (T::*)(Args...) const volatile>
-{
-  typedef R type;
-};
-
-#if defined(HADESMEM_ARCH_X64)
-
 template <typename R, typename... Args>
 struct FuncResult<R (*)(Args...)>
 {
   typedef R type;
 };
-
-#elif defined(HADESMEM_ARCH_X86)
-
-template <typename R, typename... Args>
-struct FuncResult<R (__cdecl*)(Args...)>
-{
-  typedef R type;
-};
-
-template <typename R, typename... Args>
-struct FuncResult<R (__stdcall*)(Args...)>
-{
-  typedef R type;
-};
-
-template <typename R, typename... Args>
-struct FuncResult<R (__fastcall*)(Args...)>
-{
-  typedef R type;
-};
-
-#endif
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
@@ -87,74 +39,24 @@ struct FuncResult
 { };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  typedef R type; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const> \
-{ \
-  typedef R type; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) volatile> \
-{ \
-  typedef R type; \
-}; \
-\
-template <typename R, typename T \
-  BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (T::*)(BOOST_PP_ENUM_PARAMS(n, T)) const volatile> \
-{ \
-  typedef R type; \
-}; \
-\
-
-#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
-
-#include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_ARCH_X64)
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
+  template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
 struct FuncResult<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   typedef R type; \
 }; \
 
-#elif defined(HADESMEM_ARCH_X86)
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (__cdecl*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  typedef R type; \
-}; \
-\
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (__stdcall*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  typedef R type; \
-}; \
-\
-template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (__fastcall*)(BOOST_PP_ENUM_PARAMS(n, T))> \
-{ \
-  typedef R type; \
-}; \
-
-#endif
-
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
 
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
+
 #include BOOST_PP_LOCAL_ITERATE()
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
