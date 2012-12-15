@@ -336,14 +336,17 @@ CreateAndInjectData CreateAndInject(
       export_ret = CallExport(process, remote_module, export_name);
     }
 
-    if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
+    if (flags & InjectFlags::kKeepSuspended)
     {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Could not resume process.") << 
-        ErrorCodeWinLast(last_error) << 
-        ErrorCodeWinRet(export_ret.GetReturnValue()) << 
-        ErrorCodeWinOther(export_ret.GetLastError()));
+      if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_THROW_EXCEPTION(Error() << 
+          ErrorString("Could not resume process.") << 
+          ErrorCodeWinLast(last_error) << 
+          ErrorCodeWinRet(export_ret.GetReturnValue()) << 
+          ErrorCodeWinOther(export_ret.GetLastError()));
+      }
     }
 
     return CreateAndInjectData(process, remote_module, 

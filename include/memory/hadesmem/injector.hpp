@@ -25,7 +25,8 @@ struct InjectFlags
     kNone = 0, 
     kPathResolution = 1 << 0, 
     kAddToSearchOrder = 1 << 1, 
-    kInvalidFlagMaxValue = 1 << 2
+    kKeepSuspended = 1 << 2, 
+    kInvalidFlagMaxValue = 1 << 3
   };
 };
 
