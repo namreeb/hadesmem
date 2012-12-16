@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2012 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "initialize.hpp"
+#include "hadesmem/detail/initialize.hpp"
 
 #include <ctime>
 #include <random>
@@ -30,6 +30,12 @@
 #ifndef PROCESS_CALLBACK_FILTER_ENABLED
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
 #endif // #ifndef PROCESS_CALLBACK_FILTER_ENABLED
+
+namespace hadesmem
+{
+
+namespace detail
+{
 
 void DisableUserModeCallbackExceptionFilter()
 {
@@ -151,4 +157,8 @@ std::locale ImbueAll(std::locale const& locale)
   std::ios_base::sync_with_stdio(false); 
 
   return old_loc;
+}
+
+}
+
 }

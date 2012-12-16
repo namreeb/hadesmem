@@ -16,39 +16,37 @@ project
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
   ;
 
-lib common
-  :
-    [ glob common/*.cpp ]
-    /memory//memory
-    /boost//locale/<link>static
-    /boost//filesystem/<link>static
-  :
-    <link>static
-  ;
-
 exe dump
   :
     [ glob dump/*.cpp ]
-    common
+    /memory//memory
+    /boost//locale/<link>static
+    /boost//filesystem/<link>static
     /boost//program_options/<link>static
   ;
   
 exe inject
   :
     [ glob inject/*.cpp ]
-    common
+    /memory//memory
+    /boost//locale/<link>static
+    /boost//filesystem/<link>static
     /boost//program_options/<link>static
   ;
 
 lib injecttestdep
   :
     [ glob injecttestdep/*.cpp ]
-    common
+    /memory//memory
+    /boost//locale/<link>static
+    /boost//filesystem/<link>static
   ;
 
 lib injecttest
   :
     [ glob injecttest/*.cpp ]
-    common
 	injecttestdep
+    /memory//memory
+    /boost//locale/<link>static
+    /boost//filesystem/<link>static
   ;

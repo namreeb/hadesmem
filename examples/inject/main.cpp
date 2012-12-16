@@ -20,9 +20,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/injector.hpp>
 #include <hadesmem/detail/self_path.hpp>
-
-// TODO: Don't use a relative path
-#include "../common/initialize.hpp"
+#include <hadesmem/detail/initialize.hpp>
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
 // e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN?
@@ -44,11 +42,11 @@ int main(int argc, char* /*argv*/[])
 {
   try
   {
-    DisableUserModeCallbackExceptionFilter();
-    EnableCrtDebugFlags();
-    EnableTerminationOnHeapCorruption();
-    EnableBottomUpRand();
-    ImbueAllDefault();
+    hadesmem::detail::DisableUserModeCallbackExceptionFilter();
+    hadesmem::detail::EnableCrtDebugFlags();
+    hadesmem::detail::EnableTerminationOnHeapCorruption();
+    hadesmem::detail::EnableBottomUpRand();
+    hadesmem::detail::ImbueAllDefault();
 
     std::cout << "HadesMem Injector\n";
 

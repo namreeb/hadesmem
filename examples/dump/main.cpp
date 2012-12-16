@@ -22,9 +22,7 @@
 #include <hadesmem/region_list.hpp>
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
-
-// TODO: Don't use a relative path
-#include "../common/initialize.hpp"
+#include <hadesmem/detail/initialize.hpp>
 
 namespace
 {
@@ -112,11 +110,11 @@ int main(int /*argc*/, char* /*argv*/[])
 {
   try
   {
-    DisableUserModeCallbackExceptionFilter();
-    EnableCrtDebugFlags();
-    EnableTerminationOnHeapCorruption();
-    EnableBottomUpRand();
-    ImbueAllDefault();
+    hadesmem::detail::DisableUserModeCallbackExceptionFilter();
+    hadesmem::detail::EnableCrtDebugFlags();
+    hadesmem::detail::EnableTerminationOnHeapCorruption();
+    hadesmem::detail::EnableBottomUpRand();
+    hadesmem::detail::ImbueAllDefault();
 
     std::cout << "HadesMem Dumper\n";
 

@@ -48,6 +48,7 @@ lib memory
   :
     [ glob memory/*.cpp ]
     [ glob memory/detail/*.cpp ]
+    /boost//locale/<link>static
     /boost//exception/<link>static
     /boost//filesystem/<link>static
     /boost//headers

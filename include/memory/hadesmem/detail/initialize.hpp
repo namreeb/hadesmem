@@ -7,6 +7,12 @@
 
 #include <windows.h>
 
+namespace hadesmem
+{
+
+namespace detail
+{
+
 // Disables the user-mode callback exception filter present in 64-bit versions 
 // of Windows. Microsoft Support article KB976038 (http://goo.gl/tlIsu).
 void DisableUserModeCallbackExceptionFilter();
@@ -30,3 +36,7 @@ std::locale ImbueAllDefault();
 // Sets the global locale, and imbues all existing static streams with the 
 // new locale (including 3rd party libraries like Boost.Filesystem).
 std::locale ImbueAll(std::locale const& locale);
+
+}
+
+}
