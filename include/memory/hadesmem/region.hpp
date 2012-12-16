@@ -17,9 +17,9 @@ class Process;
 class Region
 {
 public:
-  Region(Process const* process, LPCVOID address);
+  explicit Region(Process const* process, LPCVOID address);
   
-  Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+  explicit Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
     HADESMEM_NOEXCEPT;
   
   PVOID GetBase() const HADESMEM_NOEXCEPT;

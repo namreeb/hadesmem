@@ -24,7 +24,7 @@ public:
     name_()
   { }
   
-  ProcessEntry(PROCESSENTRY32 const& entry)
+  explicit ProcessEntry(PROCESSENTRY32 const& entry)
     : id_(entry.th32ProcessID), 
     threads_(entry.cntThreads), 
     parent_(entry.th32ParentProcessID), 

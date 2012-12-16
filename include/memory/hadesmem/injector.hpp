@@ -41,7 +41,7 @@ CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
 class CreateAndInjectData
 {
 public:
-  CreateAndInjectData(Process const& process, HMODULE module, 
+  explicit CreateAndInjectData(Process const& process, HMODULE module, 
     DWORD_PTR export_ret, DWORD export_last_error);
 
   Process GetProcess() const;

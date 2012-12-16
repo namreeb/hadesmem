@@ -46,7 +46,7 @@ public:
     std::is_same<float, typename std::remove_cv<T>::type>::value || 
     std::is_same<double, typename std::remove_cv<T>::type>::value);
 
-  CallResult(T const& result, DWORD last_error) HADESMEM_NOEXCEPT
+  explicit CallResult(T const& result, DWORD last_error) HADESMEM_NOEXCEPT
     : result_(result), 
     last_error_(last_error)
   { }
@@ -86,7 +86,7 @@ private:
 class CallResultRaw
 {
 public:
-  CallResultRaw(DWORD_PTR return_int_ptr, 
+  explicit CallResultRaw(DWORD_PTR return_int_ptr, 
     DWORD32 return_int_32, 
     DWORD64 return_int_64, 
     float return_float, 

@@ -19,11 +19,11 @@ class Process;
 class Module
 {
 public:
-  Module(Process const* process, HMODULE handle);
+  explicit Module(Process const* process, HMODULE handle);
   
-  Module(Process const* process, std::wstring const& path);
+  explicit Module(Process const* process, std::wstring const& path);
   
-  Module(Process const* process, MODULEENTRY32 const& entry);
+  explicit Module(Process const* process, MODULEENTRY32 const& entry);
   
   HMODULE GetHandle() const HADESMEM_NOEXCEPT;
   
