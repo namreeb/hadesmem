@@ -24,7 +24,8 @@ enum class ProtectGuardType
 class ProtectGuard
 {
 public:
-  ProtectGuard(Process const* process, PVOID address, ProtectGuardType type);
+  explicit ProtectGuard(Process const* process, PVOID address, 
+    ProtectGuardType type);
 
   ProtectGuard(ProtectGuard&& other) HADESMEM_NOEXCEPT;
 
