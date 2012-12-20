@@ -45,7 +45,17 @@ private:
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
   assert(name != nullptr);
-  
+
+  // Do not continue if Shim Engine is enabled for local process, 
+  // otherwise it could interfere with the address resolution.
+  // TODO: Work around this with 'manual' export lookup or similar.
+  HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
+  if (shim_eng_mod)
+  {
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Shims enabled for local process."));
+  }
+
   HMODULE const local_module = ::LoadLibraryEx(module.GetPath().c_str(), 
     nullptr, DONT_RESOLVE_DLL_REFERENCES);
   if (!local_module)

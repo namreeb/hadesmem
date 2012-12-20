@@ -106,15 +106,6 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 {
   assert((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
 
-  // Do not continue if Shim Engine is enabled for local process, 
-  // otherwise it could interfere with the address resolution.
-  HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
-  if (shim_eng_mod)
-  {
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Shims enabled for local process."));
-  }
-
    boost::filesystem::path path_real(path);
 
   bool const path_resolution = !!(flags & InjectFlags::kPathResolution);
