@@ -1,5 +1,9 @@
 # src/asmjit/jamfile.v2
 
+# Use AsmJit library
+import os ;
+local ASMJIT_ROOT = [ os.environ ASMJIT_ROOT ] ;
+
 project 
   : 
     requirements 
@@ -9,14 +13,14 @@ project
 
 lib asmjit 
   : 
-    [ glob asmjit/src/asmjit/*.cpp ] 
-    [ glob asmjit/src/asmjit/core/*.cpp ] 
-    [ glob asmjit/src/asmjit/x86/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/core/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/x86/*.cpp ] 
   : 
-    <link>static 
-    <define>ASMJIT_API="" 
+    <link>static
+    <define>ASMJIT_API=""
   : 
   : 
-    <include>"./asmjit/src/" 
-    <define>ASMJIT_API="" 
+    <include>"$(ASMJIT_ROOT)/asmjit/src/"
+    <define>ASMJIT_API=""
   ;
