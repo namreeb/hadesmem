@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iosfwd>
+#include <memory>
 
 #include <windows.h>
 
@@ -38,12 +39,9 @@ public:
 private:
   Allocator(Allocator const& other) HADESMEM_DELETED_FUNCTION;
   Allocator& operator=(Allocator const& other) HADESMEM_DELETED_FUNCTION;
-  
-  void FreeUnchecked() HADESMEM_NOEXCEPT;
-  
-  Process const* process_;
-  PVOID base_;
-  SIZE_T size_;
+
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 bool operator==(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT;

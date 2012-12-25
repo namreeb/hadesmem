@@ -37,93 +37,102 @@ void Free(Process const& process, LPVOID address)
   }
 }
 
-Allocator::Allocator(Process const* process, SIZE_T size)
-  : process_(process), 
-  base_(Alloc(*process, size)), 
-  size_(size)
+struct Allocator::Impl
 {
-  assert(process != nullptr);
-  assert(size != 0);
-}
+  Impl(Process const* process, SIZE_T size)
+    : process_(process), 
+    base_(Alloc(*process, size)), 
+    size_(size)
+  {
+    assert(process != nullptr);
+    assert(size != 0);
+  }
+
+  void Free()
+  {
+    if (!process_)
+    {
+      return;
+    }
+
+    assert(base_ != nullptr);
+    assert(size_ != 0);
+
+    ::hadesmem::Free(*process_, base_);
+
+    process_ = nullptr;
+    base_ = nullptr;
+    size_ = 0;
+  }
+
+  void FreeUnchecked() HADESMEM_NOEXCEPT
+  {
+    try
+    {
+      Free();
+    }
+    catch (std::exception const& e)
+    {
+      (void)e;
+
+      // WARNING: Memory in remote process is leaked if 'Free' fails
+      assert(boost::diagnostic_information(e).c_str() && false);
+
+      process_ = nullptr;
+      base_ = nullptr;
+      size_ = 0;
+    }
+  }
+
+  Process const* process_;
+  PVOID base_;
+  SIZE_T size_;
+};
+
+Allocator::Allocator(Process const* process, SIZE_T size)
+  : impl_(new Impl(process, size))
+{ }
 
 Allocator::Allocator(Allocator&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_), 
-  base_(other.base_), 
-  size_(other.size_)
-{
-  other.process_ = nullptr;
-  other.base_ = nullptr;
-  other.size_ = 0;
-}
+  : impl_(std::move(other.impl_))
+{ }
 
 Allocator& Allocator::operator=(Allocator&& other) HADESMEM_NOEXCEPT
 {
-  FreeUnchecked();
-  
-  assert(process_ == nullptr);
-  assert(base_ == nullptr);
-  assert(size_ == 0);
-  
-  process_ = other.process_;
-  base_ = other.base_;
-  size_ = other.size_;
-  
-  other.process_ = nullptr;
-  other.base_ = nullptr;
-  other.size_ = 0;
+  if (impl_)
+  {
+    impl_->FreeUnchecked();
+  }
+
+  impl_ = std::move(other.impl_);
   
   return *this;
 }
 
 Allocator::~Allocator()
 {
-  FreeUnchecked();
+  if (impl_)
+  {
+    impl_->FreeUnchecked();
+  }
 }
 
 void Allocator::Free()
 {
-  if (!process_)
+  if (impl_)
   {
-    return;
+    impl_->Free();
   }
-  
-  assert(base_ != nullptr);
-  assert(size_ != 0);
-  
-  ::hadesmem::Free(*process_, base_);
-  
-  process_ = nullptr;
-  base_ = nullptr;
-  size_ = 0;
 }
 
 PVOID Allocator::GetBase() const HADESMEM_NOEXCEPT
 {
-  return base_;
+  return impl_->base_;
 }
 
 SIZE_T Allocator::GetSize() const HADESMEM_NOEXCEPT
 {
-  return size_;
-}
-
-void Allocator::FreeUnchecked() HADESMEM_NOEXCEPT
-{
-  try
-  {
-    Free();
-  }
-  catch (std::exception const& e)
-  {
-    (void)e;
-    
-    // WARNING: Memory in remote process is leaked if 'Free' fails
-    assert(boost::diagnostic_information(e).c_str() && false);
-    
-    process_ = nullptr;
-    base_ = nullptr;
-    size_ = 0;
-  }
+  return impl_->size_;
 }
 
 bool operator==(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT
