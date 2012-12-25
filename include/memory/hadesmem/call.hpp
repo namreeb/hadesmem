@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <cassert>
 #include <utility>
@@ -91,7 +92,17 @@ public:
     DWORD64 return_int_64, 
     float return_float, 
     double return_double, 
-    DWORD last_error) HADESMEM_NOEXCEPT;
+    DWORD last_error);
+
+  CallResultRaw(CallResultRaw const& other);
+
+  CallResultRaw& operator=(CallResultRaw const& other);
+
+  CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT;
+
+  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_NOEXCEPT;
+
+  ~CallResultRaw();
 
   DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT;
 
@@ -179,13 +190,9 @@ private:
   {
     return GetReturnValueDouble();
   }
-  
-  DWORD_PTR int_ptr_;
-  DWORD32 int_32_;
-  DWORD64 int_64_;
-  float float_;
-  double double_;
-  DWORD last_error_;
+
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 namespace detail
@@ -459,6 +466,8 @@ public:
   
   MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT;
 
+  ~MultiCall();
+
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
   template <typename FuncT, typename... Args>
@@ -470,9 +479,7 @@ public:
     call_args.reserve(sizeof...(args));
     detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
 
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(call_args);
+    AddImpl(address, call_conv, call_args);
   }
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
@@ -485,9 +492,7 @@ public:
     HADESMEM_CHECK_FUNC_ARITY(n);\
     std::vector<CallArg> args;\
     BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
-    addresses_.push_back(address);\
-    call_convs_.push_back(call_conv);\
-    args_.push_back(args);\
+    AddImpl(address, call_conv, args);\
   }\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
@@ -514,10 +519,11 @@ public:
   std::vector<CallResultRaw> Call() const;
   
 private:
-  Process const* process_;
-  std::vector<FnPtr> addresses_; 
-  std::vector<CallConv> call_convs_; 
-  std::vector<std::vector<CallArg>> args_;
+  void AddImpl(FnPtr address, CallConv call_conv, 
+    std::vector<CallArg> const& args);
+
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }

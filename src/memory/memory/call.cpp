@@ -618,49 +618,110 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 }
 
 #endif // #if defined(HADESMEM_ARCH_X64)
-  
-CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr, 
-  DWORD32 return_int_32, 
-  DWORD64 return_int_64, 
-  float return_float, 
-  double return_double, 
-  DWORD last_error) HADESMEM_NOEXCEPT
-  : int_ptr_(return_int_ptr), 
-  int_32_(return_int_32), 
-  int_64_(return_int_64), 
-  float_(return_float), 
-  double_(return_double), 
-  last_error_(last_error)
+
+struct CallResultRaw::Impl
+{
+  Impl(DWORD_PTR return_int_ptr, DWORD32 return_int_32, DWORD64 return_int_64, 
+    float return_float, double return_double, DWORD last_error) 
+    HADESMEM_NOEXCEPT
+    : int_ptr_(return_int_ptr), 
+    int_32_(return_int_32), 
+    int_64_(return_int_64), 
+    float_(return_float), 
+    double_(return_double), 
+    last_error_(last_error)
+  { }
+
+  Impl(Impl const& other) HADESMEM_NOEXCEPT
+    : int_ptr_(other.int_ptr_), 
+    int_32_(other.int_32_), 
+    int_64_(other.int_64_), 
+    float_(other.float_), 
+    double_(other.double_), 
+    last_error_(other.last_error_)
+  { }
+
+  Impl& operator=(Impl const& other) HADESMEM_NOEXCEPT
+  {
+    int_ptr_ = other.int_ptr_;
+    int_32_ = other.int_32_;
+    int_64_ = other.int_64_;
+    float_ = other.float_;
+    double_ = other.double_;
+    last_error_ = other.last_error_;
+
+    return *this;
+  }
+
+  DWORD_PTR int_ptr_;
+  DWORD32 int_32_;
+  DWORD64 int_64_;
+  float float_;
+  double double_;
+  DWORD last_error_;
+};
+
+CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr, DWORD32 return_int_32, 
+  DWORD64 return_int_64, float return_float, double return_double, 
+  DWORD last_error)
+  : impl_(new Impl(return_int_ptr, return_int_32, return_int_64, 
+  return_float, return_double, last_error))
+{ }
+
+CallResultRaw::CallResultRaw(CallResultRaw const& other)
+  : impl_(new Impl(*other.impl_))
+{ }
+
+CallResultRaw& CallResultRaw::operator=(CallResultRaw const& other)
+{
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+
+  return *this;
+}
+
+CallResultRaw::CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+CallResultRaw& CallResultRaw::operator=(CallResultRaw&& other) 
+  HADESMEM_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+
+  return *this;
+}
+
+CallResultRaw::~CallResultRaw()
 { }
 
 DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
 {
-  return int_ptr_;
+  return impl_->int_ptr_;
 }
 
 DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
 {
-  return int_32_;
+  return impl_->int_32_;
 }
 
 DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
 {
-  return int_64_;
+  return impl_->int_64_;
 }
 
 float CallResultRaw::GetReturnValueFloat() const HADESMEM_NOEXCEPT
 {
-  return float_;
+  return impl_->float_;
 }
 
 double CallResultRaw::GetReturnValueDouble() const HADESMEM_NOEXCEPT
 {
-  return double_;
+  return impl_->double_;
 }
 
 DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
 {
-  return last_error_;
+  return impl_->last_error_;
 }
 
 CallResultRaw Call(Process const& process, 
@@ -737,58 +798,89 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   return return_vals;
 }
 
+struct MultiCall::Impl
+{
+  Impl(Process const* process)
+    : process_(process), 
+    addresses_(), 
+    call_convs_(), 
+    args_()
+  {
+    assert(process != nullptr);
+  }
+
+  Impl(Impl const& other)
+    : process_(other.process_), 
+    addresses_(other.addresses_), 
+    call_convs_(other.call_convs_), 
+    args_(other.args_)
+  { }
+
+  Impl& operator=(Impl const& other)
+  {
+    process_ = other.process_;
+    addresses_ = other.addresses_;
+    call_convs_ = other.call_convs_;
+    args_ = other.args_;
+
+    return *this;
+  }
+
+  void AddImpl(FnPtr address, CallConv call_conv, 
+    std::vector<CallArg> const& args)
+  {
+    addresses_.push_back(address);
+    call_convs_.push_back(call_conv);
+    args_.push_back(args);
+  }
+
+  Process const* process_;
+  std::vector<FnPtr> addresses_; 
+  std::vector<CallConv> call_convs_; 
+  std::vector<std::vector<CallArg>> args_;
+};
+
 MultiCall::MultiCall(Process const* process)
-  : process_(process), 
-  addresses_(), 
-  call_convs_(), 
-  args_()
+  : impl_(new Impl(process))
 {
   assert(process != nullptr);
 }
 
 MultiCall::MultiCall(MultiCall const& other)
-  : process_(other.process_), 
-  addresses_(other.addresses_), 
-  call_convs_(other.call_convs_), 
-  args_(other.args_)
+  : impl_(new Impl(*other.impl_))
 { }
 
 MultiCall& MultiCall::operator=(MultiCall const& other)
 {
-  process_ = other.process_;
-  addresses_ = other.addresses_;
-  call_convs_ = other.call_convs_;
-  args_ = other.args_;
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
 
   return *this;
 }
 
 MultiCall::MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_), 
-  addresses_(std::move(other.addresses_)), 
-  call_convs_(std::move(other.call_convs_)), 
-  args_(std::move(other.args_))
-{
-  other.process_ = nullptr;
-}
+  : impl_(std::move(other.impl_))
+{ }
 
 MultiCall& MultiCall::operator=(MultiCall&& other) HADESMEM_NOEXCEPT
 {
-  process_ = other.process_;
-  other.process_ = nullptr;
-
-  addresses_ = std::move(other.addresses_);
-
-  call_convs_ = std::move(other.call_convs_);
-
-  args_ = std::move(other.args_);
+  impl_ = std::move(other.impl_);
 
   return *this;
 }
 
+MultiCall::~MultiCall()
+{ }
+
 std::vector<CallResultRaw> MultiCall::Call() const
 {
-  return CallMulti(*process_, addresses_, call_convs_, args_);
+  return CallMulti(*impl_->process_, impl_->addresses_, impl_->call_convs_, 
+    impl_->args_);
+}
+
+void MultiCall::AddImpl(FnPtr address, CallConv call_conv, 
+  std::vector<CallArg> const& args)
+{
+  impl_->AddImpl(address, call_conv, args);
 }
 
 }
