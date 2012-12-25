@@ -276,13 +276,13 @@ private:
     Initialize(static_cast<T const*>(t));
   }
 
-  void Initialize(DWORD32 t)
+  void Initialize(DWORD32 t) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt32Type;
     arg_.i32 = t;
   }
 
-  void Initialize(DWORD64 t)
+  void Initialize(DWORD64 t) HADESMEM_NOEXCEPT
   {
     type_ = ArgType::kInt64Type;
     arg_.i64 = t;
