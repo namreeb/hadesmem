@@ -255,51 +255,37 @@ public:
   
 private:
   template <typename T>
-  void InitializeIntegralImpl(T t, std::false_type) HADESMEM_NOEXCEPT
-  {
-    type_ = ArgType::kInt32Type;
-    arg_.i32 = static_cast<DWORD32>(t);
-  }
-  
-  template <typename T>
-  void InitializeIntegralImpl(T t, std::true_type) HADESMEM_NOEXCEPT
-  {
-    type_ = ArgType::kInt64Type;
-    arg_.i64 = static_cast<DWORD64>(t);
-  }
-
-  template <typename T>
-  void InitializePointerImpl(T const* t, std::false_type) HADESMEM_NOEXCEPT
-  {
-    type_ = ArgType::kInt32Type;
-    arg_.i32 = reinterpret_cast<DWORD32>(t);
-  }
-
-  template <typename T>
-  void InitializePointerImpl(T const* t, std::true_type) HADESMEM_NOEXCEPT
-  {
-    type_ = ArgType::kInt64Type;
-    arg_.i64 = reinterpret_cast<DWORD64>(t);
-  }
-  
-  template <typename T>
   void Initialize(T t) HADESMEM_NOEXCEPT
   {
-    InitializeIntegralImpl(t, std::integral_constant<bool, 
-      (sizeof(T) == sizeof(DWORD64))>());
+    typedef typename std::conditional<sizeof(T) == sizeof(DWORD64), DWORD64, 
+      DWORD32>::type D;
+    Initialize(static_cast<D>(t));
   }
 
   template <typename T>
   void Initialize(T const* t) HADESMEM_NOEXCEPT
   {
-    InitializePointerImpl(t, std::integral_constant<bool, 
-      (sizeof(void*) == sizeof(DWORD64))>());
+    typedef typename std::conditional<sizeof(T const*) == sizeof(DWORD64), 
+      DWORD64, DWORD32>::type D;
+    Initialize(reinterpret_cast<D>(t));
   }
 
   template <typename T>
   void Initialize(T* t) HADESMEM_NOEXCEPT
   {
     Initialize(static_cast<T const*>(t));
+  }
+
+  void Initialize(DWORD32 t)
+  {
+    type_ = ArgType::kInt32Type;
+    arg_.i32 = t;
+  }
+
+  void Initialize(DWORD64 t)
+  {
+    type_ = ArgType::kInt64Type;
+    arg_.i64 = t;
   }
   
   void Initialize(float t) HADESMEM_NOEXCEPT
