@@ -87,12 +87,8 @@ private:
 class CallResultRaw
 {
 public:
-  explicit CallResultRaw(DWORD_PTR return_int_ptr, 
-    DWORD32 return_int_32, 
-    DWORD64 return_int_64, 
-    float return_float, 
-    double return_double, 
-    DWORD last_error);
+  explicit CallResultRaw(DWORD64 return_int_64, float return_float, 
+    double return_double, DWORD last_error);
 
   CallResultRaw(CallResultRaw const& other);
 
@@ -104,92 +100,96 @@ public:
 
   ~CallResultRaw();
 
-  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT;
-
-  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT;
-
-  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT;
-  
-  float GetReturnValueFloat() const HADESMEM_NOEXCEPT;
-  
-  double GetReturnValueDouble() const HADESMEM_NOEXCEPT;
-  
   DWORD GetLastError() const HADESMEM_NOEXCEPT;
   
   template <typename T>
-  typename std::remove_cv<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
+  typename std::decay<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
-      std::is_same<float, typename std::remove_cv<T>::type>::value || 
-      std::is_same<double, typename std::remove_cv<T>::type>::value);
+      std::is_same<float, typename std::decay<T>::type>::value || 
+      std::is_same<double, typename std::decay<T>::type>::value);
     
-    return GetReturnValueImpl(typename std::remove_cv<T>::type());
+    typedef typename std::decay<T>::type U;
+    return GetReturnValueImpl<U>(std::is_pointer<U>());
   }
   
 private:
   template <typename T>
   T GetReturnValueIntImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::alignment_of<T>::value == 
-      std::alignment_of<DWORD64>::value);
+    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
   T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::alignment_of<T>::value == 
-      std::alignment_of<DWORD32>::value);
+    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt32());
   }
 
   template <typename T>
-  T* GetReturnValuePtrImpl(std::true_type) const HADESMEM_NOEXCEPT
+  T GetReturnValuePtrImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::alignment_of<T*>::value == 
-      std::alignment_of<DWORD64>::value);
-    return reinterpret_cast<T*>(GetReturnValueInt64());
+    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
+    return reinterpret_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
-  T* GetReturnValuePtrImpl(std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValuePtrImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::alignment_of<T*>::value == 
-      std::alignment_of<DWORD32>::value);
-    return reinterpret_cast<T*>(GetReturnValueInt32());
+    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
+    return reinterpret_cast<T>(GetReturnValueInt32());
   }
 
   template <typename T>
-  T GetReturnValueImpl(T /*t*/) const HADESMEM_NOEXCEPT
+  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
+    -> typename std::enable_if<std::is_same<float, T>::value, T>::type
+  {
+    return GetReturnValueFloat();
+  }
+
+  template <typename T>
+  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
+    -> typename std::enable_if<std::is_same<double, T>::value, T>::type
+  {
+    return GetReturnValueDouble();
+  }
+
+  template <typename T>
+  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
+    -> typename std::enable_if<std::is_integral<T>::value, T>::type
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
   }
 
   template <typename T>
-  T* GetReturnValueImpl(T* /*t*/) const HADESMEM_NOEXCEPT
+  T GetReturnValueImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
+    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
     return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
       (sizeof(void*) == sizeof(DWORD64))>());
   }
 
   template <typename T>
-  T const* GetReturnValueImpl(T const* /*t*/) const HADESMEM_NOEXCEPT
+  T GetReturnValueImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
-      (sizeof(void*) == sizeof(DWORD64))>());
+    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+      std::is_floating_point<T>::value);
+    return GetReturnValueIntOrFloatImpl<T>();
   }
-  
-  float GetReturnValueImpl(float /*t*/) const HADESMEM_NOEXCEPT
-  {
-    return GetReturnValueFloat();
-  }
-  
-  double GetReturnValueImpl(double /*t*/) const HADESMEM_NOEXCEPT
-  {
-    return GetReturnValueDouble();
-  }
+
+  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT;
+
+  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT;
+
+  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT;
+
+  float GetReturnValueFloat() const HADESMEM_NOEXCEPT;
+
+  double GetReturnValueDouble() const HADESMEM_NOEXCEPT;
 
   struct Impl;
   std::unique_ptr<Impl> impl_;

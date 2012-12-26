@@ -54,8 +54,6 @@ namespace
 
 struct CallResultRemote
 {
-  DWORD_PTR return_value;
-  DWORD32 return_value_32;
   DWORD64 return_value_64;
   float return_value_float;
   double return_value_double;
@@ -166,18 +164,6 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value)));
-    assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
-      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_32)));
-    assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
-
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
-      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
       offsetof(CallResultRemote, return_value_64)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
@@ -283,16 +269,6 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
     assembler->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
     assembler->call(AsmJit::rax);
-
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value));
-    assembler->mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
-
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_32));
-    assembler->mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(CallResultRemote) + 
@@ -430,11 +406,11 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
 void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 {
   assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    (arg >> 32) & 0xFFFFFFFF)));
+    (arg >> 32) & 0xFFFFFFFFUL)));
   assembler_->push(AsmJit::eax);
 
   assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(arg & 
-    0xFFFFFFFF)));
+    0xFFFFFFFFUL)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -461,11 +437,11 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
   assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    (arg_conv >> 32) & 0xFFFFFFFF)));
+    (arg_conv >> 32) & 0xFFFFFFFFUL)));
   assembler_->push(AsmJit::eax);
 
   assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    arg_conv & 0xFFFFFFFF)));
+    arg_conv & 0xFFFFFFFFUL)));
   assembler_->push(AsmJit::eax);
 
   --cur_arg_;
@@ -505,9 +481,9 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
     break;
   default:
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
-      static_cast<DWORD>(arg & 0xFFFFFFFF));
+      static_cast<DWORD>(arg & 0xFFFFFFFFUL));
     assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
-      static_cast<DWORD>((arg >> 32) & 0xFFFFFFFF));
+      static_cast<DWORD>((arg >> 32) & 0xFFFFFFFFUL));
     break;
   }
 
@@ -569,8 +545,8 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
 
-  DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFF);
-  DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFF);
+  DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL);
+  DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFFUL);
 
   std::size_t const scratch_offs = num_args_ * 8;
 
@@ -621,21 +597,16 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 
 struct CallResultRaw::Impl
 {
-  Impl(DWORD_PTR return_int_ptr, DWORD32 return_int_32, DWORD64 return_int_64, 
-    float return_float, double return_double, DWORD last_error) 
-    HADESMEM_NOEXCEPT
-    : int_ptr_(return_int_ptr), 
-    int_32_(return_int_32), 
-    int_64_(return_int_64), 
+  Impl(DWORD64 return_int_64, float return_float, double return_double, 
+    DWORD last_error) HADESMEM_NOEXCEPT
+    : int_64_(return_int_64), 
     float_(return_float), 
     double_(return_double), 
     last_error_(last_error)
   { }
 
   Impl(Impl const& other) HADESMEM_NOEXCEPT
-    : int_ptr_(other.int_ptr_), 
-    int_32_(other.int_32_), 
-    int_64_(other.int_64_), 
+    : int_64_(other.int_64_), 
     float_(other.float_), 
     double_(other.double_), 
     last_error_(other.last_error_)
@@ -643,8 +614,6 @@ struct CallResultRaw::Impl
 
   Impl& operator=(Impl const& other) HADESMEM_NOEXCEPT
   {
-    int_ptr_ = other.int_ptr_;
-    int_32_ = other.int_32_;
     int_64_ = other.int_64_;
     float_ = other.float_;
     double_ = other.double_;
@@ -653,19 +622,15 @@ struct CallResultRaw::Impl
     return *this;
   }
 
-  DWORD_PTR int_ptr_;
-  DWORD32 int_32_;
   DWORD64 int_64_;
   float float_;
   double double_;
   DWORD last_error_;
 };
 
-CallResultRaw::CallResultRaw(DWORD_PTR return_int_ptr, DWORD32 return_int_32, 
-  DWORD64 return_int_64, float return_float, double return_double, 
-  DWORD last_error)
-  : impl_(new Impl(return_int_ptr, return_int_32, return_int_64, 
-  return_float, return_double, last_error))
+CallResultRaw::CallResultRaw(DWORD64 return_int_64, float return_float, 
+  double return_double, DWORD last_error)
+  : impl_(new Impl(return_int_64, return_float, return_double, last_error))
 { }
 
 CallResultRaw::CallResultRaw(CallResultRaw const& other)
@@ -696,12 +661,12 @@ CallResultRaw::~CallResultRaw()
 
 DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
 {
-  return impl_->int_ptr_;
+  return static_cast<DWORD_PTR>(impl_->int_64_ & static_cast<DWORD_PTR>(-1));
 }
 
 DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
 {
-  return impl_->int_32_;
+  return static_cast<DWORD32>(impl_->int_64_ & 0xFFFFFFFFUL);
 }
 
 DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
@@ -787,9 +752,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
     std::back_inserter(return_vals), 
     [] (CallResultRemote const& r)
     {
-      return CallResultRaw(r.return_value, 
-        r.return_value_32, 
-        r.return_value_64, 
+      return CallResultRaw(r.return_value_64, 
         r.return_value_float, 
         r.return_value_double, 
         r.last_error);
