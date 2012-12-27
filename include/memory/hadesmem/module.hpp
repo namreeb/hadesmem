@@ -30,9 +30,9 @@ public:
 
   Module& operator=(Module const& other);
 
-  Module(Module&& other);
+  Module(Module&& other) HADESMEM_NOEXCEPT;
 
-  Module& operator=(Module&& other);
+  Module& operator=(Module&& other) HADESMEM_NOEXCEPT;
 
   ~Module();
   
