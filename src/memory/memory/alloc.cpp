@@ -48,6 +48,11 @@ struct Allocator::Impl
     assert(size != 0);
   }
 
+  ~Impl()
+  {
+    FreeUnchecked();
+  }
+
   void Free()
   {
     if (!process_)
@@ -99,30 +104,17 @@ Allocator::Allocator(Allocator&& other) HADESMEM_NOEXCEPT
 
 Allocator& Allocator::operator=(Allocator&& other) HADESMEM_NOEXCEPT
 {
-  if (impl_)
-  {
-    impl_->FreeUnchecked();
-  }
-
   impl_ = std::move(other.impl_);
   
   return *this;
 }
 
 Allocator::~Allocator()
-{
-  if (impl_)
-  {
-    impl_->FreeUnchecked();
-  }
-}
+{ }
 
 void Allocator::Free()
 {
-  if (impl_)
-  {
-    impl_->Free();
-  }
+  impl_->Free();
 }
 
 PVOID Allocator::GetBase() const HADESMEM_NOEXCEPT
