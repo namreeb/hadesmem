@@ -24,7 +24,7 @@ struct FuncArgs
 { };
 
 template <typename R, typename... Args>
-struct FuncArgs<R (*)(Args...)>
+struct FuncArgs<R (Args...)>
 {
   typedef boost::mpl::vector<Args...> type;
 };
@@ -41,7 +41,7 @@ struct FuncArgs
 
 #define BOOST_PP_LOCAL_MACRO(n) \
 template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArgs<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+struct FuncArgs<R (BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   typedef boost::mpl::vector<BOOST_PP_ENUM_PARAMS(n, T)> type; \
 }; \

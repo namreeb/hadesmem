@@ -23,7 +23,7 @@ struct FuncResult
 { };
 
 template <typename R, typename... Args>
-struct FuncResult<R (*)(Args...)>
+struct FuncResult<R (Args...)>
 {
   typedef R type;
 };
@@ -40,7 +40,7 @@ struct FuncResult
 
 #define BOOST_PP_LOCAL_MACRO(n) \
   template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncResult<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+struct FuncResult<R (BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   typedef R type; \
 }; \

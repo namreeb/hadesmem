@@ -25,7 +25,7 @@ struct FuncArity
 { };
 
 template <typename R, typename... Args>
-struct FuncArity<R (*)(Args...)>
+struct FuncArity<R (Args...)>
 {
   static std::size_t const value = sizeof...(Args);
 };
@@ -42,7 +42,7 @@ struct FuncArity
 
 #define BOOST_PP_LOCAL_MACRO(n) \
   template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \
-struct FuncArity<R (*)(BOOST_PP_ENUM_PARAMS(n, T))> \
+struct FuncArity<R (BOOST_PP_ENUM_PARAMS(n, T))> \
 { \
   static std::size_t const value = n; \
 }; \
