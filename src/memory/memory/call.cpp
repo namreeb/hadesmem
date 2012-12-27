@@ -607,17 +607,6 @@ struct CallResultRaw::Impl
     results_.last_error = last_error;
   }
 
-  Impl(Impl const& other) HADESMEM_NOEXCEPT
-    : results_(other.results_)
-  { }
-
-  Impl& operator=(Impl const& other) HADESMEM_NOEXCEPT
-  {
-    results_ = other.results_;
-
-    return *this;
-  }
-
   CallResultRemote results_;
 };
 
