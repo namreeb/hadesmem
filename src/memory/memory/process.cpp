@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
 {
@@ -31,133 +32,154 @@ bool IsWoW64Process(HANDLE handle)
 
 }
 
-Process::Process(DWORD id)
-  : id_(id), 
-  handle_(Open(id))
+struct Process::Impl
 {
-  CheckWoW64();
-}
+  Impl(DWORD id)
+    : id_(id), 
+    handle_(Open(id))
+  {
+    CheckWoW64();
+  }
+
+  Impl(Impl const& other)
+  {
+    HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
+
+    handle_ = new_handle;
+    id_ = other.id_;
+  }
+
+  Impl& operator=(Impl const& other)
+  {
+    HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
+
+    Cleanup();
+
+    handle_ = new_handle;
+    id_ = other.id_;
+
+    return *this;
+  }
+
+  ~Impl()
+  {
+    CleanupUnchecked();
+  }
+
+  void Cleanup()
+  {
+    handle_.Cleanup();
+    id_ = 0;
+  }
+
+  void CheckWoW64() const
+  {
+    if (IsWoW64Process(::GetCurrentProcess()) != 
+      IsWoW64Process(handle_.GetHandle()))
+    {
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("Cross-architecture process manipulation is currently "
+        "unsupported."));
+    }
+  }
+
+  // TODO: This does not depend on class internals. Move elsewhere.
+  HANDLE Open(DWORD id)
+  {
+    HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
+    if (!handle)
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("OpenProcess failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+
+    return handle;
+  }
+
+  void CleanupUnchecked() HADESMEM_NOEXCEPT
+  {
+    try
+    {
+      Cleanup();
+    }
+    catch (std::exception const& e)
+    {
+      (void)e;
+
+      // WARNING: Handle is leaked if 'Cleanup' fails.
+      assert(boost::diagnostic_information(e).c_str() && false);
+
+      id_ = 0;
+      handle_ = nullptr;
+    }
+  }
+
+  // TODO: This does not depend on class internals. Move elsewhere.
+  HANDLE Duplicate(HANDLE handle)
+  {
+    assert(handle != nullptr);
+
+    HANDLE new_handle = nullptr;
+    if (!::DuplicateHandle(::GetCurrentProcess(), handle, 
+      ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("DuplicateHandle failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+
+    return new_handle;
+  }
+
+  DWORD id_;
+  detail::SmartHandle handle_;
+};
+
+Process::Process(DWORD id)
+  : impl_(new Impl(id))
+{ }
 
 Process::Process(Process const& other)
-  : id_(0), 
-  handle_(nullptr)
-{
-  HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
-  
-  handle_ = new_handle;
-  id_ = other.id_;
-}
+  : impl_(new Impl(*other.impl_))
+{ }
 
 Process& Process::operator=(Process const& other)
 {
-  HANDLE const new_handle = Duplicate(other.handle_.GetHandle());
-  
-  Cleanup();
-  
-  handle_ = new_handle;
-  id_ = other.id_;
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
   
   return *this;
 }
 
 Process::Process(Process&& other) HADESMEM_NOEXCEPT
-  : id_(other.id_), 
-  handle_(std::move(other.handle_))
-{
-  other.id_ = 0;
-}
+  : impl_(std::move(other.impl_))
+{ }
 
 Process& Process::operator=(Process&& other) HADESMEM_NOEXCEPT
 {
-  Cleanup();
-  
-  id_ = other.id_;
-  handle_ = std::move(other.handle_);
-  
-  other.id_ = 0;
+  impl_ = std::move(other.impl_);
   
   return *this;
 }
 
 Process::~Process()
-{
-  CleanupUnchecked();
-}
+{ }
 
 DWORD Process::GetId() const HADESMEM_NOEXCEPT
 {
-  return id_;
+  return impl_->id_;
 }
 
 HANDLE Process::GetHandle() const HADESMEM_NOEXCEPT
 {
-  return handle_.GetHandle();
+  return impl_->handle_.GetHandle();
 }
 
 void Process::Cleanup()
 {
-  handle_.Cleanup();
-  id_ = 0;
-}
-
-void Process::CheckWoW64() const
-{
-  if (IsWoW64Process(::GetCurrentProcess()) != 
-    IsWoW64Process(handle_.GetHandle()))
-  {
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Cross-architecture process manipulation is currently "
-        "unsupported."));
-  }
-}
-
-HANDLE Process::Open(DWORD id)
-{
-  HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
-  if (!handle)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("OpenProcess failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return handle;
-}
-
-void Process::CleanupUnchecked() HADESMEM_NOEXCEPT
-{
-  try
-  {
-    Cleanup();
-  }
-  catch (std::exception const& e)
-  {
-    (void)e;
-    
-    // WARNING: Handle is leaked if 'Cleanup' fails.
-    assert(boost::diagnostic_information(e).c_str() && false);
-    
-    id_ = 0;
-    handle_ = nullptr;
-  }
-}
-
-HANDLE Process::Duplicate(HANDLE handle)
-{
-  assert(handle != nullptr);
-  
-  HANDLE new_handle = nullptr;
-  if (!::DuplicateHandle(::GetCurrentProcess(), handle, 
-    ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("DuplicateHandle failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return new_handle;
+  impl_->Cleanup();
 }
 
 bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT

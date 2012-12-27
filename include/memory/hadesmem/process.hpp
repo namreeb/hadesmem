@@ -5,11 +5,11 @@
 
 #include <string>
 #include <iosfwd>
+#include <memory>
 
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
-#include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
 {
@@ -36,16 +36,8 @@ public:
   void Cleanup();
   
 private:
-  void CheckWoW64() const;
-  
-  HANDLE Open(DWORD id);
-  
-  void CleanupUnchecked() HADESMEM_NOEXCEPT;
-  
-  HANDLE Duplicate(HANDLE handle);
-  
-  DWORD id_;
-  detail::SmartHandle handle_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
