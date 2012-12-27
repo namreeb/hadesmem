@@ -175,20 +175,54 @@ bool ModuleIterator::operator!=(ModuleIterator const& other) const
   return !(*this == other);
 }
 
-ModuleList::ModuleList(Process const* process) HADESMEM_NOEXCEPT
-  : process_(process)
+struct ModuleList::Impl
 {
-  assert(process != nullptr);
+  Impl(Process const* process) HADESMEM_NOEXCEPT
+    : process_(process)
+  {
+    assert(process != nullptr);
+  }
+
+  Process const* process_;
+};
+
+ModuleList::ModuleList(Process const* process) HADESMEM_NOEXCEPT
+  : impl_(new Impl(process))
+{ }
+
+ModuleList::ModuleList(ModuleList const& other)
+  : impl_(new Impl(*other.impl_))
+{ }
+
+ModuleList& ModuleList::operator=(ModuleList const& other)
+{
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+
+  return *this;
 }
+
+ModuleList::ModuleList(ModuleList&& other) HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+ModuleList& ModuleList::operator=(ModuleList&& other) HADESMEM_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+
+  return *this;
+}
+
+ModuleList::~ModuleList()
+{ }
 
 ModuleList::iterator ModuleList::begin()
 {
-  return ModuleList::iterator(process_);
+  return ModuleList::iterator(impl_->process_);
 }
 
 ModuleList::const_iterator ModuleList::begin() const
 {
-  return ModuleList::iterator(process_);
+  return ModuleList::iterator(impl_->process_);
 }
 
 ModuleList::iterator ModuleList::end() HADESMEM_NOEXCEPT
