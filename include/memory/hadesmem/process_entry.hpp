@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <windows.h>
 #include <tlhelp32.h>
@@ -16,53 +17,33 @@ namespace hadesmem
 class ProcessEntry
 {
 public:
-  ProcessEntry() 
-    : id_(0), 
-    threads_(0), 
-    parent_(0), 
-    priority_(0), 
-    name_()
-  { }
+  ProcessEntry();
   
-  explicit ProcessEntry(PROCESSENTRY32 const& entry)
-    : id_(entry.th32ProcessID), 
-    threads_(entry.cntThreads), 
-    parent_(entry.th32ParentProcessID), 
-    priority_(entry.pcPriClassBase), 
-    name_(entry.szExeFile)
-  { }
+  explicit ProcessEntry(PROCESSENTRY32 const& entry);
 
-  DWORD GetId() const HADESMEM_NOEXCEPT
-  {
-    return id_;
-  }
+  ProcessEntry(ProcessEntry const& other);
 
-  DWORD GetThreads() const HADESMEM_NOEXCEPT
-  {
-    return threads_;
-  }
+  ProcessEntry& operator=(ProcessEntry const& other);
 
-  DWORD GetParentId() const HADESMEM_NOEXCEPT
-  {
-    return parent_;
-  }
+  ProcessEntry(ProcessEntry&& other) HADESMEM_NOEXCEPT;
 
-  LONG GetPriority() const HADESMEM_NOEXCEPT
-  {
-    return priority_;
-  }
+  ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_NOEXCEPT;
 
-  std::wstring GetName() const
-  {
-    return name_;
-  }
+  ~ProcessEntry();
+
+  DWORD GetId() const HADESMEM_NOEXCEPT;
+
+  DWORD GetThreads() const HADESMEM_NOEXCEPT;
+
+  DWORD GetParentId() const HADESMEM_NOEXCEPT;
+
+  LONG GetPriority() const HADESMEM_NOEXCEPT;
+
+  std::wstring GetName() const;
   
 private:
-  DWORD id_;
-  DWORD threads_;
-  DWORD parent_;
-  LONG priority_;
-  std::wstring name_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }
