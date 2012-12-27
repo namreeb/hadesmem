@@ -190,32 +190,73 @@ CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
     CallConv::kDefault);
 }
 
+struct CreateAndInjectData::Impl
+{
+  Impl(Process const& process, HMODULE module, DWORD_PTR export_ret, 
+    DWORD export_last_error)
+    : process_(process), 
+    module_(module), 
+    export_ret_(export_ret), 
+    export_last_error_(export_last_error)
+  { }
+
+  Process process_;
+  HMODULE module_;
+  DWORD_PTR export_ret_;
+  DWORD export_last_error_;
+};
+
 CreateAndInjectData::CreateAndInjectData(Process const& process, 
   HMODULE module, DWORD_PTR export_ret, DWORD export_last_error) 
-  : process_(process), 
-  module_(module), 
-  export_ret_(export_ret), 
-  export_last_error_(export_last_error)
+  : impl_(new Impl(process, module, export_ret, export_last_error))
+{ }
+
+CreateAndInjectData::CreateAndInjectData(CreateAndInjectData const& other)
+  : impl_(new Impl(*other.impl_))
+{ }
+
+CreateAndInjectData& CreateAndInjectData::operator=(
+  CreateAndInjectData const& other)
+{
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+
+  return *this;
+}
+
+CreateAndInjectData::CreateAndInjectData(CreateAndInjectData&& other) 
+  HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+CreateAndInjectData& CreateAndInjectData::operator=(
+  CreateAndInjectData&& other) HADESMEM_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+
+  return *this;
+}
+
+CreateAndInjectData::~CreateAndInjectData()
 { }
 
 Process CreateAndInjectData::GetProcess() const
 {
-  return process_;
+  return impl_->process_;
 }
 
 HMODULE CreateAndInjectData::GetModule() const HADESMEM_NOEXCEPT
 {
-  return module_;
+  return impl_->module_;
 }
 
 DWORD_PTR CreateAndInjectData::GetExportRet() const HADESMEM_NOEXCEPT
 {
-  return export_ret_;
+  return impl_->export_ret_;
 }
 
 DWORD CreateAndInjectData::GetExportLastError() const HADESMEM_NOEXCEPT
 {
-  return export_last_error_;
+  return impl_->export_last_error_;
 }
 
 CreateAndInjectData CreateAndInject(

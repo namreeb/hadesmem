@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <utility>
@@ -44,6 +45,17 @@ public:
   explicit CreateAndInjectData(Process const& process, HMODULE module, 
     DWORD_PTR export_ret, DWORD export_last_error);
 
+  CreateAndInjectData(CreateAndInjectData const& other);
+
+  CreateAndInjectData& operator=(CreateAndInjectData const& other);
+
+  CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_NOEXCEPT;
+
+  CreateAndInjectData& operator=(CreateAndInjectData&& other) 
+    HADESMEM_NOEXCEPT;
+
+  ~CreateAndInjectData();
+
   Process GetProcess() const;
 
   HMODULE GetModule() const HADESMEM_NOEXCEPT;
@@ -53,10 +65,8 @@ public:
   DWORD GetExportLastError() const HADESMEM_NOEXCEPT;
 
 private:
-  Process process_;
-  HMODULE module_;
-  DWORD_PTR export_ret_;
-  DWORD export_last_error_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 CreateAndInjectData CreateAndInject(
