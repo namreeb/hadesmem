@@ -413,10 +413,10 @@ BOOST_AUTO_TEST_CASE(call)
   std::vector<hadesmem::CallResultRaw> multi_call_ret = multi_call.Call();
   BOOST_CHECK_EQUAL(multi_call_ret[0].GetLastError(), 
     static_cast<DWORD>(0x1337));
-  BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValueIntPtr(), 
+  BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValue<DWORD_PTR>(), 
     static_cast<DWORD_PTR>(0x1337));
   BOOST_CHECK_EQUAL(multi_call_ret[2].GetLastError(), 
     static_cast<DWORD>(0x1234));
-  BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValueIntPtr(), 
+  BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValue<DWORD_PTR>(), 
     static_cast<DWORD_PTR>(0x1234));
 }
