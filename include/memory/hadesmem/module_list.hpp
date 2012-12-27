@@ -15,13 +15,6 @@ class Process;
 
 class Module;
 
-namespace detail
-{
-
-struct ModuleIteratorImpl;
-
-}
-
 // ModuleIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
@@ -30,6 +23,16 @@ public:
   ModuleIterator() HADESMEM_NOEXCEPT;
   
   explicit ModuleIterator(Process const* process);
+
+  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT;
+
+  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT;
+
+  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT;
+
+  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT;
+
+  ~ModuleIterator();
   
   reference operator*() const HADESMEM_NOEXCEPT;
   
@@ -46,7 +49,8 @@ public:
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  std::shared_ptr<detail::ModuleIteratorImpl> impl_;
+  struct Impl;
+  std::shared_ptr<Impl> impl_;
 };
 
 class ModuleList

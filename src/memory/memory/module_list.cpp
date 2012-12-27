@@ -3,23 +3,41 @@
 
 #include "hadesmem/module_list.hpp"
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/optional.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <windows.h>
 #include <tlhelp32.h>
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/module.hpp"
 #include "hadesmem/process.hpp"
-#include "hadesmem/detail/module_iterator_impl.hpp"
+#include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
 {
+
+struct ModuleIterator::Impl
+{
+  Impl() HADESMEM_NOEXCEPT
+    : process_(nullptr), 
+    snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
+    module_()
+  { }
+  
+  Process const* process_;
+  detail::SmartHandle snap_;
+  boost::optional<Module> module_;
+};
 
 ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
 ModuleIterator::ModuleIterator(Process const* process)
-  : impl_(new detail::ModuleIteratorImpl)
+  : impl_(new Impl())
 {
   assert(impl_.get());
   assert(process != nullptr);
@@ -72,6 +90,33 @@ ModuleIterator::ModuleIterator(Process const* process)
   
   impl_->module_ = Module(impl_->process_, entry);
 }
+
+ModuleIterator::ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
+  : impl_(other.impl_)
+{ }
+
+ModuleIterator& ModuleIterator::operator=(ModuleIterator const& other) 
+  HADESMEM_NOEXCEPT
+{
+  impl_ = other.impl_;
+
+  return *this;
+}
+
+ModuleIterator::ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other) 
+  HADESMEM_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+
+  return *this;
+}
+
+ModuleIterator::~ModuleIterator()
+{ }
 
 ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
 {
