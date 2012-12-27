@@ -755,23 +755,6 @@ struct MultiCall::Impl
     assert(process != nullptr);
   }
 
-  Impl(Impl const& other)
-    : process_(other.process_), 
-    addresses_(other.addresses_), 
-    call_convs_(other.call_convs_), 
-    args_(other.args_)
-  { }
-
-  Impl& operator=(Impl const& other)
-  {
-    process_ = other.process_;
-    addresses_ = other.addresses_;
-    call_convs_ = other.call_convs_;
-    args_ = other.args_;
-
-    return *this;
-  }
-
   void AddImpl(FnPtr address, CallConv call_conv, 
     std::vector<CallArg> const& args)
   {
