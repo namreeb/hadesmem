@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <functional>
 
@@ -24,6 +25,16 @@ public:
   explicit Module(Process const* process, std::wstring const& path);
   
   explicit Module(Process const* process, MODULEENTRY32 const& entry);
+
+  Module(Module const& other);
+
+  Module& operator=(Module const& other);
+
+  Module(Module&& other);
+
+  Module& operator=(Module&& other);
+
+  ~Module();
   
   HMODULE GetHandle() const HADESMEM_NOEXCEPT;
   
@@ -34,20 +45,8 @@ public:
   std::wstring GetPath() const;
   
 private:
-  void Initialize(HMODULE handle);
-  
-  void Initialize(std::wstring const& path);
-  
-  void Initialize(MODULEENTRY32 const& entry);
-  
-  typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;
-  void InitializeIf(EntryCallback const& check_func);
-  
-  Process const* process_;
-  HMODULE handle_;
-  DWORD size_;
-  std::wstring name_;
-  std::wstring path_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;
