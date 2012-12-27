@@ -22,7 +22,7 @@ struct ProcessIteratorImpl;
 
 }
 
-// ModuleIterator satisfies the requirements of an input iterator 
+// ProcessIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class ProcessIterator : public std::iterator<std::input_iterator_tag, 
   ProcessEntry>
