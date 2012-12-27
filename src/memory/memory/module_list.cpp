@@ -36,6 +36,7 @@ ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
+// TOOD: Clean this up.
 ModuleIterator::ModuleIterator(Process const* process)
   : impl_(new Impl())
 {
@@ -186,7 +187,7 @@ struct ModuleList::Impl
   Process const* process_;
 };
 
-ModuleList::ModuleList(Process const* process) HADESMEM_NOEXCEPT
+ModuleList::ModuleList(Process const* process)
   : impl_(new Impl(process))
 { }
 

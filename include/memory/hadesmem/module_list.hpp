@@ -60,7 +60,7 @@ public:
   typedef ModuleIterator iterator;
   typedef ModuleIterator const_iterator;
   
-  explicit ModuleList(Process const* process) HADESMEM_NOEXCEPT;
+  explicit ModuleList(Process const* process);
 
   ModuleList(ModuleList const& other);
 
