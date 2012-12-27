@@ -109,7 +109,7 @@ public:
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::decay<T>::type>::value || 
       std::is_same<double, typename std::decay<T>::type>::value);
-    
+
     typedef typename std::decay<T>::type U;
     return GetReturnValueImpl<U>(std::is_pointer<U>());
   }
@@ -125,6 +125,7 @@ private:
   template <typename T>
   T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
+    HADESMEM_STATIC_ASSERT(sizeof(T) <= sizeof(DWORD32));
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt32());
   }
