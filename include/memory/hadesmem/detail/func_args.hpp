@@ -17,12 +17,11 @@ namespace hadesmem
 namespace detail
 {
 
+template <typename FuncT>
+struct FuncArgs;
+
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
  
-template <typename FuncT>
-struct FuncArgs
-{ };
-
 template <typename R, typename... Args>
 struct FuncArgs<R (Args...)>
 {
@@ -34,10 +33,6 @@ struct FuncArgs<R (Args...)>
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
-
-template <typename FuncT>
-struct FuncArgs
-{ };
 
 #define BOOST_PP_LOCAL_MACRO(n) \
 template <typename R BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)> \

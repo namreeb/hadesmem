@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(call)
   // with a 64-bit integer as the first parameter).
 #if !defined(HADESMEM_CLANG)
 
-  hadesmem::Call<int (*)(DWORD64 a)>(process, reinterpret_cast<hadesmem::FnPtr>(
+  hadesmem::Call<int (DWORD64 a)>(process, reinterpret_cast<hadesmem::FnPtr>(
     &TestInteger64Fast), hadesmem::CallConv::kFastCall, 0xAAAAAAAABBBBBBBBULL);
 
 #endif // #if !defined(HADESMEM_CLANG)
