@@ -599,33 +599,26 @@ struct CallResultRaw::Impl
 {
   Impl(DWORD64 return_int_64, float return_float, double return_double, 
     DWORD last_error) HADESMEM_NOEXCEPT
-    : int_64_(return_int_64), 
-    float_(return_float), 
-    double_(return_double), 
-    last_error_(last_error)
-  { }
+    : results_()
+  {
+    results_.return_value_64 = return_int_64;
+    results_.return_value_float = return_float;
+    results_.return_value_double = return_double;
+    results_.last_error = last_error;
+  }
 
   Impl(Impl const& other) HADESMEM_NOEXCEPT
-    : int_64_(other.int_64_), 
-    float_(other.float_), 
-    double_(other.double_), 
-    last_error_(other.last_error_)
+    : results_(other.results_)
   { }
 
   Impl& operator=(Impl const& other) HADESMEM_NOEXCEPT
   {
-    int_64_ = other.int_64_;
-    float_ = other.float_;
-    double_ = other.double_;
-    last_error_ = other.last_error_;
+    results_ = other.results_;
 
     return *this;
   }
 
-  DWORD64 int_64_;
-  float float_;
-  double double_;
-  DWORD last_error_;
+  CallResultRemote results_;
 };
 
 CallResultRaw::CallResultRaw(DWORD64 return_int_64, float return_float, 
@@ -661,32 +654,33 @@ CallResultRaw::~CallResultRaw()
 
 DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
 {
-  return static_cast<DWORD_PTR>(impl_->int_64_ & static_cast<DWORD_PTR>(-1));
+  return static_cast<DWORD_PTR>(impl_->results_.return_value_64 & 
+    static_cast<DWORD_PTR>(-1));
 }
 
 DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
 {
-  return static_cast<DWORD32>(impl_->int_64_ & 0xFFFFFFFFUL);
+  return static_cast<DWORD32>(impl_->results_.return_value_64 & 0xFFFFFFFFUL);
 }
 
 DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
 {
-  return impl_->int_64_;
+  return impl_->results_.return_value_64;
 }
 
 float CallResultRaw::GetReturnValueFloat() const HADESMEM_NOEXCEPT
 {
-  return impl_->float_;
+  return impl_->results_.return_value_float;
 }
 
 double CallResultRaw::GetReturnValueDouble() const HADESMEM_NOEXCEPT
 {
-  return impl_->double_;
+  return impl_->results_.return_value_double;
 }
 
 DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
 {
-  return impl_->last_error_;
+  return impl_->results_.last_error;
 }
 
 CallResultRaw Call(Process const& process, 
