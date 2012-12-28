@@ -15,13 +15,6 @@ class Process;
 
 class ProcessEntry;
 
-namespace detail
-{
-
-struct ProcessIteratorImpl;
-
-}
-
 // ProcessIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class ProcessIterator : public std::iterator<std::input_iterator_tag, 
@@ -31,6 +24,16 @@ public:
   ProcessIterator() HADESMEM_NOEXCEPT;
 
   explicit ProcessIterator(int dummy);
+
+  ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT;
+
+  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_NOEXCEPT;
+
+  ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT;
+
+  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_NOEXCEPT;
+
+  ~ProcessIterator();
   
   reference operator*() const HADESMEM_NOEXCEPT;
   
@@ -47,7 +50,8 @@ public:
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  std::shared_ptr<detail::ProcessIteratorImpl> impl_;
+  struct Impl;
+  std::shared_ptr<Impl> impl_;
 };
 
 class ProcessList
