@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <windows.h>
 
 #include "hadesmem/config.hpp"
@@ -41,11 +43,8 @@ private:
   ProtectGuard(ProtectGuard const& other) HADESMEM_DELETED_FUNCTION;
   ProtectGuard& operator=(ProtectGuard const& other) HADESMEM_DELETED_FUNCTION;
 
-  Process const* process_;
-  ProtectGuardType type_;
-  bool can_read_or_write_;
-  DWORD old_protect_;
-  MEMORY_BASIC_INFORMATION mbi_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }
