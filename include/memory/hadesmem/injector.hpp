@@ -10,14 +10,15 @@
 
 #include <windows.h>
 
-#include "hadesmem/call.hpp"
 #include "hadesmem/config.hpp"
-#include "hadesmem/process.hpp"
 
 namespace hadesmem
 {
 
 class Process;
+
+template <typename T>
+class CallResult;
 
 struct InjectFlags
 {

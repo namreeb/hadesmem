@@ -14,6 +14,7 @@
 
 #include <windows.h>
 
+#include <hadesmem/call.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
