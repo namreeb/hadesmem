@@ -3,6 +3,8 @@
 
 #include "hadesmem/region.hpp"
 
+#include <ostream>
+
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
@@ -11,54 +13,93 @@
 namespace hadesmem
 {
 
-Region::Region(Process const* process, LPCVOID address)
-  : process_(process), 
-  mbi_(detail::Query(*process, address))
+struct Region::Impl
 {
-  assert(process != nullptr);
+  Impl(Process const* process, LPCVOID address)
+    : process_(process), 
+    mbi_(detail::Query(*process, address))
+  {
+    assert(process != nullptr);
+  }
+
+  Impl(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+    HADESMEM_NOEXCEPT
+    : process_(process), 
+    mbi_(mbi)
+  {
+    assert(process != nullptr);
+  }
+
+  Process const* process_;
+  MEMORY_BASIC_INFORMATION mbi_;
+};
+
+Region::Region(Process const* process, LPCVOID address)
+  : impl_(new Impl(process, address))
+{ }
+
+Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi)
+  : impl_(new Impl(process, mbi))
+{ }
+
+Region::Region(Region const& other)
+  : impl_(new Impl(*other.impl_))
+{ }
+
+Region& Region::operator=(Region const& other)
+{
+  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+
+  return *this;
 }
 
-Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
-  HADESMEM_NOEXCEPT
-  : process_(process), 
-  mbi_(mbi)
+Region::Region(Region&& other) HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+Region& Region::operator=(Region&& other) HADESMEM_NOEXCEPT
 {
-  assert(process != nullptr);
+  impl_ = std::move(other.impl_);
+
+  return *this;
 }
+
+Region::~Region()
+{ }
 
 PVOID Region::GetBase() const HADESMEM_NOEXCEPT
 {
-  return mbi_.BaseAddress;
+  return impl_->mbi_.BaseAddress;
 }
 
 PVOID Region::GetAllocBase() const HADESMEM_NOEXCEPT
 {
-  return mbi_.AllocationBase;
+  return impl_->mbi_.AllocationBase;
 }
 
 DWORD Region::GetAllocProtect() const HADESMEM_NOEXCEPT
 {
-  return mbi_.AllocationProtect;
+  return impl_->mbi_.AllocationProtect;
 }
 
 SIZE_T Region::GetSize() const HADESMEM_NOEXCEPT
 {
-  return mbi_.RegionSize;
+  return impl_->mbi_.RegionSize;
 }
 
 DWORD Region::GetState() const HADESMEM_NOEXCEPT
 {
-  return mbi_.State;
+  return impl_->mbi_.State;
 }
 
 DWORD Region::GetProtect() const HADESMEM_NOEXCEPT
 {
-  return mbi_.Protect;
+  return impl_->mbi_.Protect;
 }
 
 DWORD Region::GetType() const HADESMEM_NOEXCEPT
 {
-  return mbi_.Type;
+  return impl_->mbi_.Type;
 }
 
 bool operator==(Region const& lhs, Region const& rhs) HADESMEM_NOEXCEPT

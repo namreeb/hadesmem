@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iosfwd>
+#include <memory>
 
 #include <windows.h>
 
@@ -19,8 +20,17 @@ class Region
 public:
   explicit Region(Process const* process, LPCVOID address);
   
-  explicit Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
-    HADESMEM_NOEXCEPT;
+  explicit Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi);
+
+  Region(Region const& other);
+
+  Region& operator=(Region const& other);
+
+  Region(Region&& other) HADESMEM_NOEXCEPT;
+
+  Region& operator=(Region&& other) HADESMEM_NOEXCEPT;
+
+  ~Region();
   
   PVOID GetBase() const HADESMEM_NOEXCEPT;
   
@@ -37,8 +47,8 @@ public:
   DWORD GetType() const HADESMEM_NOEXCEPT;
   
 private:
-  Process const* process_;
-  MEMORY_BASIC_INFORMATION mbi_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 bool operator==(Region const& lhs, Region const& rhs) HADESMEM_NOEXCEPT;

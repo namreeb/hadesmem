@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(region)
   
   hadesmem::Region const first_region(&process, nullptr);
   hadesmem::Region first_region_2(first_region);
-  hadesmem::Region first_region_3(std::move(first_region));
+  hadesmem::Region first_region_3(std::move(first_region_2));
   first_region_2 = std::move(first_region_3);
   BOOST_CHECK_EQUAL(first_region, first_region_2);
   
