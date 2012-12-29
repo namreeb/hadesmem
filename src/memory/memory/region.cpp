@@ -4,6 +4,7 @@
 #include "hadesmem/region.hpp"
 
 #include <ostream>
+#include <utility>
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"

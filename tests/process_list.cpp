@@ -3,6 +3,8 @@
 
 #include "hadesmem/process_list.hpp"
 
+#include <utility>
+
 #define BOOST_TEST_MODULE process_list
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/concept_check.hpp>

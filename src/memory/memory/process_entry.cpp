@@ -3,6 +3,8 @@
 
 #include "hadesmem/process_entry.hpp"
 
+#include <utility>
+
 namespace hadesmem
 {
 

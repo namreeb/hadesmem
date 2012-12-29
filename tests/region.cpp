@@ -5,6 +5,7 @@
 
 #include <locale>
 #include <sstream>
+#include <utility>
 
 #define BOOST_TEST_MODULE region
 #include "hadesmem/detail/warning_disable_prefix.hpp"

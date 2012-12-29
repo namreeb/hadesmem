@@ -4,6 +4,7 @@
 #include "hadesmem/alloc.hpp"
 
 #include <sstream>
+#include <utility>
 
 #define BOOST_TEST_MODULE alloc
 #include "hadesmem/detail/warning_disable_prefix.hpp"

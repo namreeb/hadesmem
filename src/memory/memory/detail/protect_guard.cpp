@@ -3,6 +3,8 @@
 
 #include "hadesmem/detail/protect_guard.hpp"
 
+#include <utility>
+
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"

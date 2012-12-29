@@ -4,6 +4,7 @@
 #include "hadesmem/module.hpp"
 
 #include <cassert>
+#include <utility>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/filesystem.hpp>

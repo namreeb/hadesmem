@@ -3,6 +3,8 @@
 
 #include "hadesmem/region_list.hpp"
 
+#include <utility>
+
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"

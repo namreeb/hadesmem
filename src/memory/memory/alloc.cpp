@@ -3,6 +3,7 @@
 
 #include "hadesmem/alloc.hpp"
 
+#include <utility>
 #include <iostream>
 
 #include "hadesmem/error.hpp"
