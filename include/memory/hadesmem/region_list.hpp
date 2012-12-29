@@ -15,13 +15,6 @@ class Process;
 
 class Region;
 
-namespace detail
-{
-
-struct RegionIteratorImpl;
-
-}
-
 // RegionIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
@@ -30,6 +23,16 @@ public:
   RegionIterator() HADESMEM_NOEXCEPT;
   
   explicit RegionIterator(Process const* process);
+
+  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT;
+
+  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT;
+
+  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT;
+
+  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT;
+
+  ~RegionIterator();
   
   reference operator*() const HADESMEM_NOEXCEPT;
   
@@ -46,7 +49,8 @@ public:
 private:
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  std::shared_ptr<detail::RegionIteratorImpl> impl_;
+  struct Impl;
+  std::shared_ptr<Impl> impl_;
 };
 
 class RegionList

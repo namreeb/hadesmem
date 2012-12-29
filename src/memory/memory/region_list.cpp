@@ -3,24 +3,40 @@
 
 #include "hadesmem/region_list.hpp"
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/optional.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <windows.h>
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/region.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/protect.hpp"
 #include "hadesmem/detail/query_region.hpp"
-#include "hadesmem/detail/region_iterator_impl.hpp"
 
 namespace hadesmem
 {
+
+struct RegionIterator::Impl
+{
+  Impl() HADESMEM_NOEXCEPT
+    : process_(nullptr), 
+    region_()
+  { }
+
+  Process const* process_;
+  boost::optional<Region> region_;
+};
 
 RegionIterator::RegionIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
+// TODO: Clean this up.
 RegionIterator::RegionIterator(Process const* process)
-  : impl_(new detail::RegionIteratorImpl)
+  : impl_(new Impl())
 {
   assert(impl_.get());
   assert(process != nullptr);
@@ -31,6 +47,33 @@ RegionIterator::RegionIterator(Process const* process)
     nullptr);
   impl_->region_ = Region(impl_->process_, mbi);
 }
+
+RegionIterator::RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT
+  : impl_(other.impl_)
+{ }
+
+RegionIterator& RegionIterator::operator=(RegionIterator const& other) 
+  HADESMEM_NOEXCEPT
+{
+  impl_ = other.impl_;
+
+  return *this;
+}
+
+RegionIterator::RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT
+  : impl_(std::move(other.impl_))
+{ }
+
+RegionIterator& RegionIterator::operator=(RegionIterator&& other) 
+  HADESMEM_NOEXCEPT
+{
+  impl_ = std::move(other.impl_);
+
+  return *this;
+}
+
+RegionIterator::~RegionIterator()
+{ }
 
 RegionIterator::reference RegionIterator::operator*() const HADESMEM_NOEXCEPT
 {
