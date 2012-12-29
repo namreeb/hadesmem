@@ -60,7 +60,17 @@ public:
   typedef RegionIterator iterator;
   typedef RegionIterator const_iterator;
   
-  explicit RegionList(Process const* process) HADESMEM_NOEXCEPT;
+  explicit RegionList(Process const* process);
+
+  RegionList(RegionList const& other);
+
+  RegionList& operator=(RegionList const& other);
+
+  RegionList(RegionList&& other) HADESMEM_NOEXCEPT;
+
+  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT;
+
+  ~RegionList();
   
   iterator begin();
   
@@ -71,7 +81,8 @@ public:
   const_iterator end() const HADESMEM_NOEXCEPT;
   
 private:
-  Process const* process_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }
