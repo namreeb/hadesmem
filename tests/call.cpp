@@ -56,14 +56,15 @@ HADESMEM_STATIC_ASSERT(std::is_same<
   nullptr, hadesmem::CallConv::kDefault).GetReturnValue()), 
   DummyType*>::value);
 
-DWORD_PTR TestInteger(int a, int b, int c, int d, int e, int f)
+DWORD_PTR TestInteger(unsigned int a, unsigned int b, unsigned int c, 
+  unsigned int d, unsigned int e, unsigned int f)
 {
-  BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
-  BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
-  BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
-  BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
-  BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
-  BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
+  BOOST_CHECK_EQUAL(a, 0xAAAAAAAAU);
+  BOOST_CHECK_EQUAL(b, 0xBBBBBBBBU);
+  BOOST_CHECK_EQUAL(c, 0xCCCCCCCCU);
+  BOOST_CHECK_EQUAL(d, 0xDDDDDDDDU);
+  BOOST_CHECK_EQUAL(e, 0xEEEEEEEEU);
+  BOOST_CHECK_EQUAL(f, 0xFFFFFFFFU);
   
   SetLastError(0x87654321);
   
@@ -158,13 +159,14 @@ DWORD MultiThreadGet()
 class ThiscallDummy
 {
 public:
-  DWORD_PTR TestIntegerThis(int a, int b, int c, int d, int e) const
+  DWORD_PTR TestIntegerThis(unsigned int a, unsigned int b, unsigned int c, 
+    unsigned int d, unsigned int e) const
   {
-    BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
-    BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
-    BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
-    BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
-    BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
+    BOOST_CHECK_EQUAL(a, 0xAAAAAAAAU);
+    BOOST_CHECK_EQUAL(b, 0xBBBBBBBBU);
+    BOOST_CHECK_EQUAL(c, 0xCCCCCCCCU);
+    BOOST_CHECK_EQUAL(d, 0xDDDDDDDDU);
+    BOOST_CHECK_EQUAL(e, 0xEEEEEEEEU);
 
     SetLastError(0x87654321);
 
@@ -178,28 +180,30 @@ public:
 
 #elif defined(HADESMEM_ARCH_X86)
 
-DWORD_PTR __fastcall TestIntegerFast(int a, int b, int c, int d, int e, int f)
+DWORD_PTR __fastcall TestIntegerFast(unsigned int a, unsigned int b, 
+  unsigned int c, unsigned int d, unsigned int e, unsigned int f)
 {
-  BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
-  BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
-  BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
-  BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
-  BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
-  BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
+  BOOST_CHECK_EQUAL(a, 0xAAAAAAAAU);
+  BOOST_CHECK_EQUAL(b, 0xBBBBBBBBU);
+  BOOST_CHECK_EQUAL(c, 0xCCCCCCCCU);
+  BOOST_CHECK_EQUAL(d, 0xDDDDDDDDU);
+  BOOST_CHECK_EQUAL(e, 0xEEEEEEEEU);
+  BOOST_CHECK_EQUAL(f, 0xFFFFFFFFU);
   
   SetLastError(0x87654321);
   
   return 0x12345678;
 }
 
-DWORD_PTR __stdcall TestIntegerStd(int a, int b, int c, int d, int e, int f)
+DWORD_PTR __stdcall TestIntegerStd(unsigned int a, unsigned int b, 
+  unsigned int c, unsigned int d, unsigned int e, unsigned int f)
 {
-  BOOST_CHECK_EQUAL(a, static_cast<int>(0xAAAAAAAA));
-  BOOST_CHECK_EQUAL(b, static_cast<int>(0xBBBBBBBB));
-  BOOST_CHECK_EQUAL(c, static_cast<int>(0xCCCCCCCC));
-  BOOST_CHECK_EQUAL(d, static_cast<int>(0xDDDDDDDD));
-  BOOST_CHECK_EQUAL(e, static_cast<int>(0xEEEEEEEE));
-  BOOST_CHECK_EQUAL(f, static_cast<int>(0xFFFFFFFF));
+  BOOST_CHECK_EQUAL(a, 0xAAAAAAAAU);
+  BOOST_CHECK_EQUAL(b, 0xBBBBBBBBU);
+  BOOST_CHECK_EQUAL(c, 0xCCCCCCCCU);
+  BOOST_CHECK_EQUAL(d, 0xDDDDDDDDU);
+  BOOST_CHECK_EQUAL(e, 0xEEEEEEEEU);
+  BOOST_CHECK_EQUAL(f, 0xFFFFFFFFU);
   
   SetLastError(0x87654321);
   
@@ -310,8 +314,9 @@ BOOST_AUTO_TEST_CASE(call)
   func_conv.pmfn = &ThiscallDummy::TestIntegerThis;
   auto const test_integer_this = func_conv.pfn;
   ThiscallDummy thiscall_dummy;
-  typedef DWORD_PTR (TestIntegerThisT)(ThiscallDummy* instance, int a, int b, 
-    int c, int d, int e);
+  typedef DWORD_PTR (TestIntegerThisT)(ThiscallDummy* instance, 
+    unsigned int a, unsigned int b, unsigned int c, unsigned int d, 
+    unsigned int e);
   auto const call_int_this_ret = hadesmem::Call<TestIntegerThisT>(
     process, test_integer_this, thiscall_call_conv, &thiscall_dummy, 
     0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE);
@@ -412,11 +417,11 @@ BOOST_AUTO_TEST_CASE(call)
     &MultiThreadGet), hadesmem::CallConv::kDefault);
   std::vector<hadesmem::CallResultRaw> multi_call_ret = multi_call.Call();
   BOOST_CHECK_EQUAL(multi_call_ret[0].GetLastError(), 
-    static_cast<DWORD>(0x1337));
+    0x1337UL);
   BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValue<DWORD_PTR>(), 
-    static_cast<DWORD_PTR>(0x1337));
+    0x1337U);
   BOOST_CHECK_EQUAL(multi_call_ret[2].GetLastError(), 
-    static_cast<DWORD>(0x1234));
+    0x1234UL);
   BOOST_CHECK_EQUAL(multi_call_ret[3].GetReturnValue<DWORD_PTR>(), 
-    static_cast<DWORD_PTR>(0x1234));
+    0x1234U);
 }
