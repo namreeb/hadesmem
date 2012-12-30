@@ -40,7 +40,7 @@ project
     
     # Enforce strict Windows typedefs.
     <define>STRICT
-
+    
     # Force use of Unicode APIs, entry point, etc.
     <define>UNICODE
     <define>_UNICODE
@@ -77,9 +77,9 @@ project
     # Enable checks for signed overflow in debug builds
     <toolset>gcc,<variant>debug:<cxxflags>"-ftrapv"
     <toolset>clang,<variant>debug:<cxxflags>"-ftrapv"
-	# Enable undefined behaviour checking in debug builds
-	<toolset>clang,<variant>debug:<cxxflags>"-fsanitize=undefined -fsanitize=unsigned-integer-overflow"
-
+    # Enable undefined behaviour checking in debug builds
+    <toolset>clang,<variant>debug:<cxxflags>"-fsanitize=undefined -fsanitize=unsigned-integer-overflow"
+    
     # Enable C++11 Mode
     <toolset>gcc:<cxxflags>"-std=c++11"
     <toolset>clang:<cxxflags>"-std=c++11"
@@ -116,7 +116,7 @@ install dist
   :
     # Give each toolset, variant, and architecture combination its own 
     # directory.
-
+    
     <toolset>msvc,<variant>debug,<address-model>32:<location>dist/msvc/debug/x86
     <toolset>msvc,<variant>debug,<address-model>64:<location>dist/msvc/debug/x64
     <toolset>msvc,<variant>release,<address-model>32:<location>dist/msvc/release/x86
@@ -139,7 +139,7 @@ install dist
     
     # Automatically pull in dependencies.
     <install-dependencies>on
-
+    
     # Install both EXEs and DLLs.
     <install-type>SHARED_LIB
     <install-type>EXE
