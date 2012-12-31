@@ -73,39 +73,33 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
 struct Module::Impl
 {
-  explicit Impl(Process const* process, HMODULE handle)
-    : process_(process), 
+  explicit Impl(Process const& process, HMODULE handle)
+    : process_(&process), 
     handle_(nullptr), 
     size_(0), 
     name_(), 
     path_()
   {
-    BOOST_ASSERT(process != nullptr);
-
     Initialize(handle);
   }
 
-  explicit Impl(Process const* process, std::wstring const& path)
-    : process_(process), 
+  explicit Impl(Process const& process, std::wstring const& path)
+    : process_(&process), 
     handle_(nullptr), 
     size_(0), 
     name_(), 
     path_()
   {
-    BOOST_ASSERT(process != nullptr);
-
     Initialize(path);
   }
 
-  explicit Impl(Process const* process, MODULEENTRY32 const& entry)
-    : process_(process), 
+  explicit Impl(Process const& process, MODULEENTRY32 const& entry)
+    : process_(&process), 
     handle_(nullptr), 
     size_(0), 
     name_(), 
     path_()
   {
-    BOOST_ASSERT(process != nullptr);
-
     Initialize(entry);
   }
 
@@ -228,15 +222,15 @@ struct Module::Impl
   std::wstring path_;
 };
 
-Module::Module(Process const* process, HMODULE handle)
+Module::Module(Process const& process, HMODULE handle)
   : impl_(new Impl(process, handle))
 { }
 
-Module::Module(Process const* process, std::wstring const& path)
+Module::Module(Process const& process, std::wstring const& path)
   : impl_(new Impl(process, path))
 { }
 
-Module::Module(Process const* process, MODULEENTRY32 const& entry)
+Module::Module(Process const& process, MODULEENTRY32 const& entry)
   : impl_(new Impl(process, entry))
 { }
 

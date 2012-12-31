@@ -141,10 +141,10 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
   std::size_t const path_buf_size = (path_string.size() + 1) * 
     sizeof(wchar_t);
 
-  Allocator const lib_file_remote(&process, path_buf_size);
+  Allocator const lib_file_remote(process, path_buf_size);
   WriteString(process, lib_file_remote.GetBase(), path_string);
 
-  Module const kernel32_mod(&process, L"kernel32.dll");
+  Module const kernel32_mod(process, L"kernel32.dll");
   auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
 
   typedef HMODULE (LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
@@ -165,7 +165,7 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
 
 void FreeDll(Process const& process, HMODULE module)
 {
-  Module const kernel32_mod(&process, L"kernel32.dll");
+  Module const kernel32_mod(process, L"kernel32.dll");
   auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
 
   typedef BOOL (FreeLibraryFuncT)(HMODULE hModule);
@@ -184,7 +184,7 @@ void FreeDll(Process const& process, HMODULE module)
 CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
   std::string const& export_name)
 {
-  Module const module_remote(&process, module);
+  Module const module_remote(process, module);
   auto const export_ptr = FindProcedure(module_remote, export_name);
 
   return Call<DWORD_PTR()>(process, reinterpret_cast<FnPtr>(export_ptr), 
@@ -332,7 +332,7 @@ CreateAndInjectData CreateAndInject(
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    Allocator const stub_remote(&process, sizeof(return_instr));
+    Allocator const stub_remote(process, sizeof(return_instr));
 
     Write(process, stub_remote.GetBase(), return_instr);
 

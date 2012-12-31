@@ -312,7 +312,7 @@ Allocator GenerateCallCode(Process const& process,
   std::vector<std::vector<CallArg>> const& args_full, 
   PVOID return_values_remote)
 {
-  Module const kernel32(&process, L"kernel32.dll");
+  Module const kernel32(process, L"kernel32.dll");
   auto const get_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
     kernel32, "GetLastError"));
   auto const set_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
@@ -338,7 +338,7 @@ Allocator GenerateCallCode(Process const& process,
   
   DWORD_PTR const stub_size = assembler.getCodeSize();
   
-  Allocator stub_mem_remote(&process, stub_size);
+  Allocator stub_mem_remote(process, stub_size);
   
   std::vector<BYTE> code_real(stub_size);
   assembler.relocCode(code_real.data(), reinterpret_cast<DWORD_PTR>(
@@ -699,7 +699,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   BOOST_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
 
-  Allocator const return_values_remote(&process, 
+  Allocator const return_values_remote(process, 
     sizeof(CallResultRemote) * addresses.size());
 
   Allocator const code_remote(GenerateCallCode(process, addresses, 
@@ -751,14 +751,12 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
 
 struct MultiCall::Impl
 {
-  Impl(Process const* process)
-    : process_(process), 
+  Impl(Process const& process)
+    : process_(&process), 
     addresses_(), 
     call_convs_(), 
     args_()
-  {
-    BOOST_ASSERT(process != nullptr);
-  }
+  { }
 
   void AddImpl(FnPtr address, CallConv call_conv, 
     std::vector<CallArg> const& args)
@@ -774,11 +772,9 @@ struct MultiCall::Impl
   std::vector<std::vector<CallArg>> args_;
 };
 
-MultiCall::MultiCall(Process const* process)
+MultiCall::MultiCall(Process const& process)
   : impl_(new Impl(process))
-{
-  BOOST_ASSERT(process != nullptr);
-}
+{ }
 
 MultiCall::MultiCall(MultiCall const& other)
   : impl_(new Impl(*other.impl_))

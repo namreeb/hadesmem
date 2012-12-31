@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(region)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::Region const first_region(&process, nullptr);
+  hadesmem::Region const first_region(process, nullptr);
   hadesmem::Region first_region_2(first_region);
   hadesmem::Region first_region_3(std::move(first_region_2));
   first_region_2 = std::move(first_region_3);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(region)
   BOOST_CHECK_NE(first_region.GetSize(), 0U);
   BOOST_CHECK_NE(first_region.GetState(), 0U);
 
-  hadesmem::Region const first_region_other(&process, static_cast<PBYTE>(
+  hadesmem::Region const first_region_other(process, static_cast<PBYTE>(
     first_region.GetBase()) + 1);
   BOOST_CHECK_EQUAL(first_region.GetBase(), first_region_other.GetBase());
   BOOST_CHECK_EQUAL(first_region.GetAllocBase(), 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(region)
     first_region_other.GetProtect());
   BOOST_CHECK_EQUAL(first_region.GetType(), first_region_other.GetType());
   
-  hadesmem::Region const second_region(&process, static_cast<char const* const>(
+  hadesmem::Region const second_region(process, static_cast<char const* const>(
     first_region.GetBase()) + first_region.GetSize());
   BOOST_CHECK_NE(first_region, second_region);
   BOOST_CHECK_LT(first_region, second_region);

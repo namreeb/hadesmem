@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(allocator)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::Allocator allocator_1(&process, 0x1000);
+  hadesmem::Allocator allocator_1(process, 0x1000);
   BOOST_CHECK(allocator_1.GetBase());
   BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
   
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(allocator)
   
   BOOST_CHECK_NO_THROW(allocator_1.Free());
 
-  hadesmem::Allocator allocator_3(&process, 0x1000);
-  hadesmem::Allocator allocator_4(&process, 0x1000);
+  hadesmem::Allocator allocator_3(process, 0x1000);
+  hadesmem::Allocator allocator_4(process, 0x1000);
   BOOST_CHECK_EQUAL(allocator_3, allocator_3);
   BOOST_CHECK_NE(allocator_3, allocator_4);
   BOOST_CHECK_NE(allocator_4, allocator_3);

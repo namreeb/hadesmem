@@ -25,7 +25,7 @@ void Read(Process const& process, LPVOID address, LPVOID data,
   BOOST_ASSERT(data != nullptr);
   BOOST_ASSERT(len != 0);
 
-  ProtectGuard protect_guard(&process, address, ProtectGuardType::kRead);
+  ProtectGuard protect_guard(process, address, ProtectGuardType::kRead);
 
   ReadUnchecked(process, address, data, len);
 

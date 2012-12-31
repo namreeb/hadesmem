@@ -39,20 +39,20 @@ BOOST_AUTO_TEST_CASE(module_list)
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ModuleList const module_list_1(&process);
+  hadesmem::ModuleList const module_list_1(process);
   hadesmem::ModuleList module_list_2(module_list_1);
   hadesmem::ModuleList module_list_3(std::move(module_list_2));
   module_list_2 = std::move(module_list_3);
   BOOST_CHECK_NE(std::begin(module_list_2), std::end(module_list_2));
   
   auto iter = std::begin(module_list_1);
-  hadesmem::Module const this_mod(&process, nullptr);
+  hadesmem::Module const this_mod(process, nullptr);
   BOOST_CHECK_NE(iter, std::end(module_list_1));
   BOOST_CHECK_EQUAL(*iter, this_mod);
-  hadesmem::Module const ntdll_mod(&process, L"NtDll.DlL");
+  hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
   BOOST_CHECK_NE(++iter, std::end(module_list_1));
   BOOST_CHECK_EQUAL(*iter, ntdll_mod);
-  hadesmem::Module const kernel32_mod(&process, L"kernel32.dll");
+  hadesmem::Module const kernel32_mod(process, L"kernel32.dll");
   BOOST_CHECK_NE(++iter, std::end(module_list_1));
   BOOST_CHECK_EQUAL(*iter, kernel32_mod);
 }
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(module_list_algorithm)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::ModuleList const module_list_1(&process);
+  hadesmem::ModuleList const module_list_1(process);
   
   for (auto const& module : module_list_1)
   {

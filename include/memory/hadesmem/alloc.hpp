@@ -22,7 +22,7 @@ void Free(Process const& process, LPVOID address);
 class Allocator
 {
 public:
-  explicit Allocator(Process const* process, SIZE_T size);
+  explicit Allocator(Process const& process, SIZE_T size);
   
   Allocator(Allocator&& other) HADESMEM_NOEXCEPT;
   

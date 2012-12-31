@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(call)
     hadesmem::CallConv::kWinApi, kernel32_mod, "GetProcAddress");
   BOOST_CHECK_EQUAL(call_win.GetReturnValue(), get_proc_address_tmp);
   
-  hadesmem::MultiCall multi_call(&process);
+  hadesmem::MultiCall multi_call(process);
   multi_call.Add<void (DWORD last_error)>(reinterpret_cast<hadesmem::FnPtr>(
     &MultiThreadSet), hadesmem::CallConv::kDefault, 0x1337UL);
   multi_call.Add<DWORD ()>(reinterpret_cast<hadesmem::FnPtr>(

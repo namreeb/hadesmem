@@ -20,30 +20,26 @@ namespace hadesmem
 
 struct Region::Impl
 {
-  explicit Impl(Process const* process, LPCVOID address)
-    : process_(process), 
-    mbi_(detail::Query(*process, address))
-  {
-    BOOST_ASSERT(process != nullptr);
-  }
+  explicit Impl(Process const& process, LPCVOID address)
+    : process_(&process), 
+    mbi_(detail::Query(process, address))
+  { }
 
-  explicit Impl(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+  explicit Impl(Process const& process, MEMORY_BASIC_INFORMATION const& mbi) 
     HADESMEM_NOEXCEPT
-    : process_(process), 
+    : process_(&process), 
     mbi_(mbi)
-  {
-    BOOST_ASSERT(process != nullptr);
-  }
+  { }
 
   Process const* process_;
   MEMORY_BASIC_INFORMATION mbi_;
 };
 
-Region::Region(Process const* process, LPCVOID address)
+Region::Region(Process const& process, LPCVOID address)
   : impl_(new Impl(process, address))
 { }
 
-Region::Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi)
+Region::Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi)
   : impl_(new Impl(process, mbi))
 { }
 

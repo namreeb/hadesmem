@@ -22,7 +22,7 @@ class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
 public:
   ModuleIterator() HADESMEM_NOEXCEPT;
   
-  explicit ModuleIterator(Process const* process);
+  explicit ModuleIterator(Process const& process);
 
   ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT;
 
@@ -60,7 +60,7 @@ public:
   typedef ModuleIterator iterator;
   typedef ModuleIterator const_iterator;
   
-  explicit ModuleList(Process const* process);
+  explicit ModuleList(Process const& process);
 
   ModuleList(ModuleList const& other);
 

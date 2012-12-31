@@ -41,22 +41,22 @@ BOOST_AUTO_TEST_CASE(region_list)
   
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::RegionList const region_list_1(&process);
+  hadesmem::RegionList const region_list_1(process);
   hadesmem::RegionList region_list_2(region_list_1);
   hadesmem::RegionList region_list_3(std::move(region_list_2));
   region_list_2 = std::move(region_list_3);
   BOOST_CHECK_NE(std::begin(region_list_2), std::end(region_list_2));
   
   auto iter = std::begin(region_list_1);
-  hadesmem::Region const first_region(&process, nullptr);
+  hadesmem::Region const first_region(process, nullptr);
   BOOST_CHECK_NE(iter, std::end(region_list_1));
   BOOST_CHECK_EQUAL(*iter, first_region);
-  hadesmem::Region const second_region(&process, 
+  hadesmem::Region const second_region(process, 
     static_cast<char const* const>(first_region.GetBase()) + 
     first_region.GetSize());
   BOOST_CHECK_NE(++iter, std::end(region_list_1));
   BOOST_CHECK_EQUAL(*iter, second_region);
-  hadesmem::Region last(&process, nullptr);
+  hadesmem::Region last(process, nullptr);
   do
   {
     hadesmem::Region current = *iter;
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(region_list)
     last = current;
   } while (++iter != std::end(region_list_1));
 
-  BOOST_CHECK_THROW(hadesmem::Region(&process, static_cast<char const* const>(
+  BOOST_CHECK_THROW(hadesmem::Region(process, static_cast<char const* const>(
     last.GetBase()) + last.GetSize()), hadesmem::Error);
 }
 
@@ -75,11 +75,11 @@ BOOST_AUTO_TEST_CASE(process_list_algorithm)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
   
-  hadesmem::RegionList const region_list_1(&process);
+  hadesmem::RegionList const region_list_1(process);
   
   for (auto const& region : region_list_1)
   {
-    hadesmem::Region const other(&process, region.GetBase());
+    hadesmem::Region const other(process, region.GetBase());
     BOOST_CHECK_EQUAL(region, other);
     
     if (region.GetState() != MEM_FREE)

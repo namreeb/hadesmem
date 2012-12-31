@@ -25,7 +25,7 @@ void Write(Process const& process, PVOID address, LPCVOID data,
   BOOST_ASSERT(data != nullptr);
   BOOST_ASSERT(len != 0);
 
-  ProtectGuard protect_guard(&process, address, ProtectGuardType::kWrite);
+  ProtectGuard protect_guard(process, address, ProtectGuardType::kWrite);
   
   SIZE_T bytes_written = 0;
   if (!::WriteProcessMemory(process.GetHandle(), address, data, 

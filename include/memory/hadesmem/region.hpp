@@ -18,9 +18,9 @@ class Process;
 class Region
 {
 public:
-  explicit Region(Process const* process, LPCVOID address);
+  explicit Region(Process const& process, LPCVOID address);
   
-  explicit Region(Process const* process, MEMORY_BASIC_INFORMATION const& mbi);
+  explicit Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi);
 
   Region(Region const& other);
 

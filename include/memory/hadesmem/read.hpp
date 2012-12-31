@@ -81,7 +81,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
   BOOST_ASSERT(chunk_len != 0);
 
-  detail::ProtectGuard protect_guard(&process, address, 
+  detail::ProtectGuard protect_guard(process, address, 
     detail::ProtectGuardType::kRead);
 
   std::basic_string<T> data;

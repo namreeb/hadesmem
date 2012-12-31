@@ -22,7 +22,7 @@ class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
 public:
   RegionIterator() HADESMEM_NOEXCEPT;
   
-  explicit RegionIterator(Process const* process);
+  explicit RegionIterator(Process const& process);
 
   RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT;
 
@@ -60,7 +60,7 @@ public:
   typedef RegionIterator iterator;
   typedef RegionIterator const_iterator;
   
-  explicit RegionList(Process const* process);
+  explicit RegionList(Process const& process);
 
   RegionList(RegionList const& other);
 

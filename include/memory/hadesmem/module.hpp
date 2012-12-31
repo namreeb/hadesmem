@@ -20,11 +20,11 @@ class Process;
 class Module
 {
 public:
-  explicit Module(Process const* process, HMODULE handle);
+  explicit Module(Process const& process, HMODULE handle);
   
-  explicit Module(Process const* process, std::wstring const& path);
+  explicit Module(Process const& process, std::wstring const& path);
   
-  explicit Module(Process const* process, MODULEENTRY32 const& entry);
+  explicit Module(Process const& process, MODULEENTRY32 const& entry);
 
   Module(Module const& other);
 

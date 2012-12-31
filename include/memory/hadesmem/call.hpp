@@ -443,7 +443,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
 class MultiCall
 {
 public:
-  explicit MultiCall(Process const* process);
+  explicit MultiCall(Process const& process);
   
   MultiCall(MultiCall const& other);
   

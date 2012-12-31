@@ -40,13 +40,12 @@ ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
 { }
 
 // TOOD: Clean this up.
-ModuleIterator::ModuleIterator(Process const* process)
+ModuleIterator::ModuleIterator(Process const& process)
   : impl_(new Impl())
 {
   BOOST_ASSERT(impl_.get());
-  BOOST_ASSERT(process != nullptr);
   
-  impl_->process_ = process;
+  impl_->process_ = &process;
   
   impl_->snap_ = detail::SmartHandle(
     ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
@@ -92,7 +91,7 @@ ModuleIterator::ModuleIterator(Process const* process)
       ErrorCodeWinLast(last_error));
   }
   
-  impl_->module_ = Module(impl_->process_, entry);
+  impl_->module_ = Module(*impl_->process_, entry);
 }
 
 ModuleIterator::ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
@@ -155,7 +154,7 @@ ModuleIterator& ModuleIterator::operator++()
       ErrorCodeWinLast(last_error));
   }
   
-  impl_->module_ = Module(impl_->process_, entry);
+  impl_->module_ = Module(*impl_->process_, entry);
   
   return *this;
 }
@@ -181,16 +180,14 @@ bool ModuleIterator::operator!=(ModuleIterator const& other) const
 
 struct ModuleList::Impl
 {
-  Impl(Process const* process) HADESMEM_NOEXCEPT
-    : process_(process)
-  {
-    BOOST_ASSERT(process != nullptr);
-  }
+  Impl(Process const& process) HADESMEM_NOEXCEPT
+    : process_(&process)
+  { }
 
   Process const* process_;
 };
 
-ModuleList::ModuleList(Process const* process)
+ModuleList::ModuleList(Process const& process)
   : impl_(new Impl(process))
 { }
 
@@ -221,12 +218,12 @@ ModuleList::~ModuleList()
 
 ModuleList::iterator ModuleList::begin()
 {
-  return ModuleList::iterator(impl_->process_);
+  return ModuleList::iterator(*impl_->process_);
 }
 
 ModuleList::const_iterator ModuleList::begin() const
 {
-  return ModuleList::iterator(impl_->process_);
+  return ModuleList::iterator(*impl_->process_);
 }
 
 ModuleList::iterator ModuleList::end() HADESMEM_NOEXCEPT

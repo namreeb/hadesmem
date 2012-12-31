@@ -150,7 +150,7 @@ int main(int argc, char* /*argv*/[])
         }
         path_real.make_preferred();
 
-        hadesmem::Module const remote_module(&process, path_real.native());
+        hadesmem::Module const remote_module(process, path_real.native());
         module = remote_module.GetHandle();
       }
 

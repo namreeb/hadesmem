@@ -24,10 +24,13 @@ namespace hadesmem
 
 struct RegionIterator::Impl
 {
-  explicit Impl() HADESMEM_NOEXCEPT
-    : process_(nullptr), 
+  explicit Impl(Process const& process) HADESMEM_NOEXCEPT
+    : process_(&process), 
     region_()
-  { }
+  {
+    MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, nullptr);
+    region_ = Region(process, mbi);
+  }
 
   Process const* process_;
   boost::optional<Region> region_;
@@ -37,19 +40,9 @@ RegionIterator::RegionIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
 
-// TODO: Clean this up.
-RegionIterator::RegionIterator(Process const* process)
-  : impl_(new Impl())
-{
-  BOOST_ASSERT(impl_.get());
-  BOOST_ASSERT(process != nullptr);
-  
-  impl_->process_ = process;
-  
-  MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, 
-    nullptr);
-  impl_->region_ = Region(impl_->process_, mbi);
-}
+RegionIterator::RegionIterator(Process const& process)
+  : impl_(new Impl(process))
+{ }
 
 RegionIterator::RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT
   : impl_(other.impl_)
@@ -100,7 +93,7 @@ RegionIterator& RegionIterator::operator++()
     SIZE_T const size = impl_->region_->GetSize();
     auto const next = static_cast<char const* const>(base) + size;
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, next);
-    impl_->region_ = Region(impl_->process_, mbi);
+    impl_->region_ = Region(*impl_->process_, mbi);
   }
   catch (std::exception const& /*e*/)
   {
@@ -131,14 +124,14 @@ bool RegionIterator::operator!=(RegionIterator const& other) const
 
 struct RegionList::Impl
 {
-  Impl(Process const* process)
-    : process_(process)
+  Impl(Process const& process)
+    : process_(&process)
   { }
 
   Process const* process_;
 };
 
-RegionList::RegionList(Process const* process)
+RegionList::RegionList(Process const& process)
   : impl_(new Impl(process))
 { }
 
@@ -169,12 +162,12 @@ RegionList::~RegionList()
 
 RegionList::iterator RegionList::begin()
 {
-  return RegionList::iterator(impl_->process_);
+  return RegionList::iterator(*impl_->process_);
 }
 
 RegionList::const_iterator RegionList::begin() const
 {
-  return RegionList::iterator(impl_->process_);
+  return RegionList::iterator(*impl_->process_);
 }
 
 RegionList::iterator RegionList::end() HADESMEM_NOEXCEPT

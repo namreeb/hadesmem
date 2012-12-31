@@ -19,12 +19,12 @@ namespace detail
 
 struct ProtectGuard::Impl
 {
-  explicit Impl(Process const* process, PVOID address, ProtectGuardType type)
-    : process_(process), 
+  explicit Impl(Process const& process, PVOID address, ProtectGuardType type)
+    : process_(&process), 
     type_(type), 
     can_read_or_write_(false), 
     old_protect_(0), 
-    mbi_(Query(*process_, address))
+    mbi_(Query(process, address))
   {
     if (IsGuard(mbi_))
     {
@@ -37,7 +37,7 @@ struct ProtectGuard::Impl
 
     if (!can_read_or_write_)
     {
-      old_protect_ = Protect(*process, mbi_, PAGE_EXECUTE_READWRITE);
+      old_protect_ = Protect(process, mbi_, PAGE_EXECUTE_READWRITE);
     }
   }
 
@@ -83,7 +83,7 @@ struct ProtectGuard::Impl
   MEMORY_BASIC_INFORMATION mbi_;
 };
 
-ProtectGuard::ProtectGuard(Process const* process, PVOID address, 
+ProtectGuard::ProtectGuard(Process const& process, PVOID address, 
   ProtectGuardType type)
   : impl_(new Impl(process, address, type))
 { }

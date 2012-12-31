@@ -39,7 +39,7 @@ void DumpRegions(hadesmem::Process const& process)
 {
   std::wcout << "\nRegions:\n";
 
-  hadesmem::RegionList const regions(&process);
+  hadesmem::RegionList const regions(process);
   for (auto const& region : regions)
   {
     std::wcout << "\n";
@@ -63,7 +63,7 @@ void DumpModules(hadesmem::Process const& process)
 {
   std::wcout << "\nModules:\n";
 
-  hadesmem::ModuleList const modules(&process);
+  hadesmem::ModuleList const modules(process);
   for (auto const& module : modules)
   {
     std::wcout << "\n";
