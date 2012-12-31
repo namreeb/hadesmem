@@ -59,10 +59,14 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorString("GetProcAddress failed.") << 
       ErrorCodeWinLast(last_error));
   }
+
+  BOOST_ASSERT(reinterpret_cast<void const*>(local_func) > local_module);
   
   auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
     reinterpret_cast<DWORD_PTR>(local_module);
-  
+
+  BOOST_ASSERT(module.GetSize() > func_delta);
+
   auto const remote_func = reinterpret_cast<FARPROC>(
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
   
