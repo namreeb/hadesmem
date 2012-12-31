@@ -69,6 +69,7 @@ std::array<T, N> Read(Process const& process, PVOID address)
   return data;
 }
 
+// TODO: Clean up this function.
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address, 
   std::size_t chunk_len = 128)
