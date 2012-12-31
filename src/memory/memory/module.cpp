@@ -8,6 +8,7 @@
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/filesystem.hpp>
+#include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
@@ -20,28 +21,6 @@ namespace hadesmem
 
 namespace
 {
-
-class EnsureFreeLibrary
-{
-public:
-  explicit EnsureFreeLibrary(HMODULE module)
-    : module_(module)
-  { }
-
-  ~EnsureFreeLibrary()
-  {
-    BOOL const success = ::FreeLibrary(module_);
-    (void)success;
-    assert(success);
-  }
-
-private:
-  EnsureFreeLibrary(EnsureFreeLibrary const& other) HADESMEM_DELETED_FUNCTION;
-  EnsureFreeLibrary& operator=(EnsureFreeLibrary const& other) 
-    HADESMEM_DELETED_FUNCTION;
-
-  HMODULE module_;
-};
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
@@ -66,7 +45,13 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorString("LoadLibraryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
-  EnsureFreeLibrary const local_module_free(local_module);
+
+  BOOST_SCOPE_EXIT_ALL(&)
+  {
+    BOOL const success = ::FreeLibrary(local_module);
+    (void)success;
+    assert(success);
+  };
   
   FARPROC const local_func = ::GetProcAddress(local_module, name);
   if (!local_func)
