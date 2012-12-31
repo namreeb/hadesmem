@@ -17,8 +17,6 @@ namespace hadesmem
 class ProcessEntry
 {
 public:
-  ProcessEntry();
-  
   explicit ProcessEntry(PROCESSENTRY32 const& entry);
 
   ProcessEntry(ProcessEntry const& other);
