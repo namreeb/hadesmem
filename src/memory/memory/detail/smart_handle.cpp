@@ -3,7 +3,9 @@
 
 #include "hadesmem/detail/smart_handle.hpp"
 
-#include <cassert>
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/assert.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include "hadesmem/error.hpp"
 
@@ -97,7 +99,7 @@ void SmartHandle::CleanupUnchecked() HADESMEM_NOEXCEPT
     (void)e;
 
     // WARNING: Handle is leaked if 'Cleanup' fails.
-    assert(boost::diagnostic_information(e).c_str() && false);
+    BOOST_ASSERT(boost::diagnostic_information(e).c_str() && false);
 
     handle_ = invalid_;
   }

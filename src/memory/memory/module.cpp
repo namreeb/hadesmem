@@ -3,10 +3,10 @@
 
 #include "hadesmem/module.hpp"
 
-#include <cassert>
 #include <utility>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -24,7 +24,7 @@ namespace
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
-  assert(name != nullptr);
+  BOOST_ASSERT(name != nullptr);
 
   // Do not continue if Shim Engine is enabled for local process, 
   // otherwise it could interfere with the address resolution.
@@ -48,9 +48,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
   BOOST_SCOPE_EXIT_ALL(&)
   {
-    BOOL const success = ::FreeLibrary(local_module);
-    (void)success;
-    assert(success);
+    BOOST_VERIFY(::FreeLibrary(local_module));
   };
   
   FARPROC const local_func = ::GetProcAddress(local_module, name);
@@ -82,7 +80,7 @@ struct Module::Impl
     name_(), 
     path_()
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
 
     Initialize(handle);
   }
@@ -94,7 +92,7 @@ struct Module::Impl
     name_(), 
     path_()
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
 
     Initialize(path);
   }
@@ -106,7 +104,7 @@ struct Module::Impl
     name_(), 
     path_()
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
 
     Initialize(entry);
   }

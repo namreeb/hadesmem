@@ -3,6 +3,10 @@
 
 #include "hadesmem/region.hpp"
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include <ostream>
 #include <utility>
 
@@ -20,7 +24,7 @@ struct Region::Impl
     : process_(process), 
     mbi_(detail::Query(*process, address))
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
   }
 
   explicit Impl(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
@@ -28,7 +32,7 @@ struct Region::Impl
     : process_(process), 
     mbi_(mbi)
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
   }
 
   Process const* process_;

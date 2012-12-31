@@ -4,12 +4,12 @@
 #include "hadesmem/injector.hpp"
 
 #include <array>
-#include <cassert>
 #include <utility>
 #include <iterator>
 #include <algorithm>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
 #include <boost/filesystem.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -105,7 +105,7 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
 {
-  assert((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
+  BOOST_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
 
    boost::filesystem::path path_real(path);
 

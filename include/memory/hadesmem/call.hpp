@@ -5,11 +5,11 @@
 
 #include <memory>
 #include <vector>
-#include <cassert>
 #include <utility>
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -237,7 +237,7 @@ public:
     switch (type_)
     {
     case ArgType::kInvalidType:
-      assert("Invalid type." && false);
+      BOOST_ASSERT(false);
       break;
     case ArgType::kInt32Type:
       (*v)(arg_.i32);

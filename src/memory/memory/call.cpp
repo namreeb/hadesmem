@@ -10,6 +10,10 @@
 #include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
+#include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <asmjit/asmjit.h>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -257,7 +261,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     (void)call_convs;
-    assert(call_convs[i] == CallConv::kDefault || 
+    BOOST_ASSERT(call_convs[i] == CallConv::kDefault || 
       call_convs[i] == CallConv::kWinApi || 
       call_convs[i] == CallConv::kX64);
 
@@ -692,7 +696,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
 {
-  assert(addresses.size() == call_convs.size() && 
+  BOOST_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
 
   Allocator const return_values_remote(&process, 
@@ -753,7 +757,7 @@ struct MultiCall::Impl
     call_convs_(), 
     args_()
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
   }
 
   void AddImpl(FnPtr address, CallConv call_conv, 
@@ -773,7 +777,7 @@ struct MultiCall::Impl
 MultiCall::MultiCall(Process const* process)
   : impl_(new Impl(process))
 {
-  assert(process != nullptr);
+  BOOST_ASSERT(process != nullptr);
 }
 
 MultiCall::MultiCall(MultiCall const& other)

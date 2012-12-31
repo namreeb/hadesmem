@@ -3,7 +3,9 @@
 
 #include "hadesmem/detail/write_impl.hpp"
 
-#include <cassert>
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/assert.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include "hadesmem/error.hpp"
 #include "hadesmem/process.hpp"
@@ -20,8 +22,8 @@ namespace detail
 void Write(Process const& process, PVOID address, LPCVOID data, 
   std::size_t len)
 {
-  assert(data != nullptr);
-  assert(len != 0);
+  BOOST_ASSERT(data != nullptr);
+  BOOST_ASSERT(len != 0);
 
   ProtectGuard protect_guard(&process, address, ProtectGuardType::kWrite);
   

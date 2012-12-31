@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -42,8 +43,8 @@ ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
 ModuleIterator::ModuleIterator(Process const* process)
   : impl_(new Impl())
 {
-  assert(impl_.get());
-  assert(process != nullptr);
+  BOOST_ASSERT(impl_.get());
+  BOOST_ASSERT(process != nullptr);
   
   impl_->process_ = process;
   
@@ -123,19 +124,19 @@ ModuleIterator::~ModuleIterator()
 
 ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   return *impl_->module_;
 }
 
 ModuleIterator::pointer ModuleIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   return &*impl_->module_;
 }
 
 ModuleIterator& ModuleIterator::operator++()
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
@@ -183,7 +184,7 @@ struct ModuleList::Impl
   Impl(Process const* process) HADESMEM_NOEXCEPT
     : process_(process)
   {
-    assert(process != nullptr);
+    BOOST_ASSERT(process != nullptr);
   }
 
   Process const* process_;

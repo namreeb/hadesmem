@@ -7,10 +7,13 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <cassert>
 #include <cstddef>
 #include <exception>
 #include <type_traits>
+
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
@@ -76,7 +79,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
-  assert(chunk_len != 0);
+  BOOST_ASSERT(chunk_len != 0);
 
   detail::ProtectGuard protect_guard(&process, address, 
     detail::ProtectGuardType::kRead);

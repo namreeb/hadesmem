@@ -4,6 +4,7 @@
 #include "hadesmem/process_list.hpp"
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -38,7 +39,7 @@ ProcessIterator::ProcessIterator() HADESMEM_NOEXCEPT
 ProcessIterator::ProcessIterator(int /*dummy*/)
   : impl_(new Impl())
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   
   impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
     TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
@@ -116,19 +117,19 @@ ProcessIterator::~ProcessIterator()
 
 ProcessIterator::reference ProcessIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   return *impl_->process_;
 }
 
 ProcessIterator::pointer ProcessIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   return &*impl_->process_;
 }
 
 ProcessIterator& ProcessIterator::operator++()
 {
-  assert(impl_.get());
+  BOOST_ASSERT(impl_.get());
   
   PROCESSENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));

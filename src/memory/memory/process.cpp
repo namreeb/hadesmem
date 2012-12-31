@@ -7,6 +7,10 @@
 #include <utility>
 #include <iostream>
 
+#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <boost/assert.hpp>
+#include "hadesmem/detail/warning_disable_suffix.hpp"
+
 #include "hadesmem/error.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
 
@@ -109,7 +113,7 @@ struct Process::Impl
       (void)e;
 
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      assert(boost::diagnostic_information(e).c_str() && false);
+      BOOST_ASSERT(boost::diagnostic_information(e).c_str() && false);
 
       id_ = 0;
       handle_ = nullptr;
@@ -119,7 +123,7 @@ struct Process::Impl
   // TODO: This does not depend on class internals. Move elsewhere.
   HANDLE Duplicate(HANDLE handle)
   {
-    assert(handle != nullptr);
+    BOOST_ASSERT(handle != nullptr);
 
     HANDLE new_handle = nullptr;
     if (!::DuplicateHandle(::GetCurrentProcess(), handle, 
