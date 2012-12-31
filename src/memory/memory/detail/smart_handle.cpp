@@ -7,6 +7,8 @@
 
 #include "hadesmem/error.hpp"
 
+// TODO: PImpl this class?
+
 namespace hadesmem
 {
 
