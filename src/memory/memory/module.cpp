@@ -90,7 +90,7 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
 struct Module::Impl
 {
-  Impl(Process const* process, HMODULE handle)
+  explicit Impl(Process const* process, HMODULE handle)
     : process_(process), 
     handle_(nullptr), 
     size_(0), 
@@ -102,7 +102,7 @@ struct Module::Impl
     Initialize(handle);
   }
 
-  Impl(Process const* process, std::wstring const& path)
+  explicit Impl(Process const* process, std::wstring const& path)
     : process_(process), 
     handle_(nullptr), 
     size_(0), 
@@ -114,7 +114,7 @@ struct Module::Impl
     Initialize(path);
   }
 
-  Impl(Process const* process, MODULEENTRY32 const& entry)
+  explicit Impl(Process const* process, MODULEENTRY32 const& entry)
     : process_(process), 
     handle_(nullptr), 
     size_(0), 

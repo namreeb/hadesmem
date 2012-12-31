@@ -10,7 +10,7 @@ namespace hadesmem
 
 struct ProcessEntry::Impl
 {
-  Impl() 
+  explicit Impl() 
     : id_(0), 
     threads_(0), 
     parent_(0), 
@@ -18,7 +18,7 @@ struct ProcessEntry::Impl
     name_()
   { }
 
-  Impl(PROCESSENTRY32 const& entry)
+  explicit Impl(PROCESSENTRY32 const& entry)
     : id_(entry.th32ProcessID), 
     threads_(entry.cntThreads), 
     parent_(entry.th32ParentProcessID), 

@@ -19,7 +19,7 @@ namespace detail
 
 struct ProtectGuard::Impl
 {
-  Impl(Process const* process, PVOID address, ProtectGuardType type)
+  explicit Impl(Process const* process, PVOID address, ProtectGuardType type)
     : process_(process), 
     type_(type), 
     can_read_or_write_(false), 

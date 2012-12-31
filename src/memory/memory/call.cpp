@@ -598,8 +598,8 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 
 struct CallResultRaw::Impl
 {
-  Impl(DWORD64 return_int_64, float return_float, double return_double, 
-    DWORD last_error) HADESMEM_NOEXCEPT
+  explicit Impl(DWORD64 return_int_64, float return_float, 
+    double return_double, DWORD last_error) HADESMEM_NOEXCEPT
     : results_()
   {
     results_.return_value_64 = return_int_64;

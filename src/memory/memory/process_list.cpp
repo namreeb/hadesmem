@@ -21,7 +21,7 @@ namespace hadesmem
 
 struct ProcessIterator::Impl
 {
-  Impl() HADESMEM_NOEXCEPT
+  explicit Impl() HADESMEM_NOEXCEPT
     : snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     process_()
   { }

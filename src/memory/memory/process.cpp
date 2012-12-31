@@ -34,7 +34,7 @@ bool IsWoW64Process(HANDLE handle)
 
 struct Process::Impl
 {
-  Impl(DWORD id)
+  explicit Impl(DWORD id)
     : id_(id), 
     handle_(Open(id))
   {

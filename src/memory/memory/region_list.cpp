@@ -23,7 +23,7 @@ namespace hadesmem
 
 struct RegionIterator::Impl
 {
-  Impl() HADESMEM_NOEXCEPT
+  explicit Impl() HADESMEM_NOEXCEPT
     : process_(nullptr), 
     region_()
   { }

@@ -16,14 +16,14 @@ namespace hadesmem
 
 struct Region::Impl
 {
-  Impl(Process const* process, LPCVOID address)
+  explicit Impl(Process const* process, LPCVOID address)
     : process_(process), 
     mbi_(detail::Query(*process, address))
   {
     assert(process != nullptr);
   }
 
-  Impl(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
+  explicit Impl(Process const* process, MEMORY_BASIC_INFORMATION const& mbi) 
     HADESMEM_NOEXCEPT
     : process_(process), 
     mbi_(mbi)

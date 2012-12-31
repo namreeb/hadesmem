@@ -23,7 +23,7 @@ namespace hadesmem
 
 struct ModuleIterator::Impl
 {
-  Impl() HADESMEM_NOEXCEPT
+  explicit Impl() HADESMEM_NOEXCEPT
     : process_(nullptr), 
     snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
     module_()

@@ -40,7 +40,7 @@ void Free(Process const& process, LPVOID address)
 
 struct Allocator::Impl
 {
-  Impl(Process const* process, SIZE_T size)
+  explicit Impl(Process const* process, SIZE_T size)
     : process_(process), 
     base_(Alloc(*process, size)), 
     size_(size)

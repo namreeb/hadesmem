@@ -193,7 +193,7 @@ CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
 
 struct CreateAndInjectData::Impl
 {
-  Impl(Process const& process, HMODULE module, DWORD_PTR export_ret, 
+  explicit Impl(Process const& process, HMODULE module, DWORD_PTR export_ret, 
     DWORD export_last_error)
     : process_(process), 
     module_(module), 
