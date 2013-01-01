@@ -43,6 +43,7 @@ lib user32
 lib memory
   :
     [ glob memory/*.cpp ]
+    [ glob memory/pelib/*.cpp ]
     [ glob memory/detail/*.cpp ]
     /boost//locale/<link>static
     /boost//exception/<link>static
