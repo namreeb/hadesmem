@@ -60,7 +60,8 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorCodeWinLast(last_error));
   }
 
-  BOOST_ASSERT(reinterpret_cast<void const*>(local_func) > local_module);
+  BOOST_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
+    reinterpret_cast<DWORD_PTR>(local_module));
   
   auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
     reinterpret_cast<DWORD_PTR>(local_module);
