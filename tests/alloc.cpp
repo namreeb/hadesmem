@@ -94,6 +94,7 @@ BOOST_AUTO_TEST_CASE(allocator)
   test_str_1.imbue(std::locale::classic());
   test_str_1 << allocator_3;
   std::stringstream test_str_2;
+  test_str_2.imbue(std::locale::classic());
   test_str_2 << allocator_3.GetBase();
   BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
   std::stringstream test_str_3;

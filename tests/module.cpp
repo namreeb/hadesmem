@@ -92,6 +92,7 @@ BOOST_AUTO_TEST_CASE(module)
   test_str_1.imbue(std::locale::classic());
   test_str_1 << this_mod;
   std::stringstream test_str_2;
+  test_str_2.imbue(std::locale::classic());
   test_str_2 << this_mod.GetHandle();
   BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
   std::stringstream test_str_3;
