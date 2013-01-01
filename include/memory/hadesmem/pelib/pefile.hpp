@@ -37,6 +37,10 @@ public:
   ~PeFile();
 
   PVOID GetBase() const HADESMEM_NOEXCEPT;
+
+  PeFileType GetType() const HADESMEM_NOEXCEPT;
+
+  PVOID RvaToVa(DWORD rva) const;
   
 private:
   struct Impl;
