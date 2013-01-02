@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
+#include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"
 #include "hadesmem/config.hpp"
 #include "hadesmem/module.hpp"
@@ -36,10 +37,10 @@ BOOST_AUTO_TEST_CASE(dos_header)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
 
-  hadesmem::PeFile pe_file(process, GetModuleHandle(nullptr), 
+  hadesmem::PeFile pe_file_1(process, GetModuleHandle(nullptr), 
     hadesmem::PeFileType::Image);
 
-  hadesmem::DosHeader dos_header_1(process, pe_file);
+  hadesmem::DosHeader dos_header_1(process, pe_file_1);
 
   hadesmem::DosHeader dos_header_2(dos_header_1);
   BOOST_CHECK_EQUAL(dos_header_1, dos_header_2);
@@ -54,12 +55,12 @@ BOOST_AUTO_TEST_CASE(dos_header)
   for (auto const& mod : modules)
   {
     // TODO: Also test FileType_Data
-    HadesMem::PeFile const pe_file(process, mod.GetHandle(), 
+    hadesmem::PeFile const pe_file(process, mod.GetHandle(), 
       hadesmem::PeFileType::Data);
       
-    HadesMem::DosHeader dos_header(pe_file);
+    hadesmem::DosHeader dos_header(process, pe_file);
         
-    auto const dos_header_raw = Read<IMAGE_DOS_HEADER>(process, 
+    auto const dos_header_raw = hadesmem::Read<IMAGE_DOS_HEADER>(process, 
       pe_file.GetBase());
       
     BOOST_CHECK_EQUAL(dos_header.IsValid(), true);
@@ -85,7 +86,7 @@ BOOST_AUTO_TEST_CASE(dos_header)
     dos_header.SetReservedWords2(dos_header.GetReservedWords2());
     dos_header.SetNewHeaderOffset(dos_header.GetNewHeaderOffset());
       
-    auto const dos_header_raw_new = Read<IMAGE_DOS_HEADER>(process, 
+    auto const dos_header_raw_new = hadesmem::Read<IMAGE_DOS_HEADER>(process, 
       pe_file.GetBase());
       
     BOOST_CHECK_EQUAL(std::memcmp(&dos_header_raw, &dos_header_raw_new, 
@@ -98,9 +99,9 @@ BOOST_AUTO_TEST_CASE(dos_header)
     test_str_2.imbue(std::locale::classic());
     test_str_2 << pe_file.GetBase();
     BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
-    if (mod.GetBase() != GetModuleHandle(L"ntdll"))
+    if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
     {
-      PeFile const pe_file_ntdll(process, GetModuleHandle(L"ntdll"), 
+      hadesmem::PeFile const pe_file_ntdll(process, GetModuleHandle(L"ntdll"), 
         hadesmem::PeFileType::Image);
       std::stringstream test_str_3;
       test_str_3.imbue(std::locale::classic());

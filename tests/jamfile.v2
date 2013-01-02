@@ -58,8 +58,11 @@ run call.cpp
   
 run injector.cpp
   ;
-
+  
 run pelib/pe_file.cpp
+  ;
+
+run pelib/dos_header.cpp
   ;
 
 compile-fail read_pod_fail.cpp

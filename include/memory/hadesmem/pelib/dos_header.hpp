@@ -35,7 +35,7 @@ public:
 
   PVOID GetBase() const HADESMEM_NOEXCEPT;
   
-  bool IsValid() const HADESMEM_NOEXCEPT;
+  bool IsValid() const;
   
   void EnsureValid() const;
   
