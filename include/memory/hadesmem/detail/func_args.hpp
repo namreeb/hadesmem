@@ -25,6 +25,10 @@ struct FuncArgs;
 template <typename R, typename... Args>
 struct FuncArgs<R (Args...)>
 {
+  // Using Boost.MPL because Intel C++ (2013, Update 1) chokes when using 
+  // std::tuple and MSVC 2012 uses faux variadics, so require a preprocessor 
+  // definition to increase the number of specializations.
+  // TODO: Find a better solution to this.
   typedef boost::mpl::vector<Args...> type;
 };
 
