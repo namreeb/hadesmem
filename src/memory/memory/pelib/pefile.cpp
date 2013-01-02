@@ -3,6 +3,7 @@
 
 #include "hadesmem/pelib/pefile.hpp"
 
+#include <cstddef>
 #include <utility>
 #include <iostream>
 
@@ -24,14 +25,14 @@ struct PeFile::Impl
 {
   explicit Impl(Process const& process, PVOID address, PeFileType type)
     : process_(&process), 
-    base_(address), 
+    base_(static_cast<PBYTE>(address)), 
     type_(type)
   {
     BOOST_ASSERT(base_ != 0);
   }
 
   Process const* process_;
-  PVOID base_;
+  PBYTE base_;
   PeFileType type_;
 };
 
@@ -117,7 +118,7 @@ std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
 {
   PeFileType const type = pefile.GetType();
-  void* base = pefile.GetBase();
+  PBYTE base = static_cast<PBYTE>(pefile.GetBase());
 
   if (type == PeFileType::Data)
   {
@@ -133,7 +134,7 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
         ErrorString("Invalid DOS header."));
     }
 
-    BYTE* ptr_nt_headers = static_cast<BYTE*>(base) + dos_header.e_lfanew;
+    BYTE* ptr_nt_headers = base + dos_header.e_lfanew;
     IMAGE_NT_HEADERS const nt_headers = Read<IMAGE_NT_HEADERS>(process, 
       ptr_nt_headers);
     if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
@@ -159,7 +160,7 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
         rva -= section_header.VirtualAddress;
         rva += section_header.PointerToRawData;
 
-        return static_cast<BYTE*>(base) + rva;
+        return base + rva;
       }
 
       section_header = Read<IMAGE_SECTION_HEADER>(process, 
@@ -170,7 +171,7 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
   }
   else if (type == PeFileType::Image)
   {
-    return rva ? (static_cast<BYTE*>(base) + rva) : nullptr;
+    return rva ? (base + rva) : nullptr;
   }
   else
   {
