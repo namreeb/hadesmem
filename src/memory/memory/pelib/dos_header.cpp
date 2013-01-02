@@ -18,7 +18,7 @@
 #include "hadesmem/error.hpp"
 #include "hadesmem/write.hpp"
 #include "hadesmem/process.hpp"
-#include "hadesmem/pelib/pefile.hpp"
+#include "hadesmem/pelib/pe_file.hpp"
 
 namespace hadesmem
 {

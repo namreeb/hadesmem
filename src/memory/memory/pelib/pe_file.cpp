@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2012 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/pelib/pefile.hpp"
+#include "hadesmem/pelib/pe_file.hpp"
 
 #include <cstddef>
 #include <utility>
