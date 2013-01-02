@@ -50,13 +50,15 @@ BOOST_AUTO_TEST_CASE(pefile)
     hadesmem::PeFileType::Image);
   BOOST_CHECK_EQUAL(pe_file_this.GetBase(), GetModuleHandle(nullptr));
   BOOST_CHECK(pe_file_this.GetType() == hadesmem::PeFileType::Image);
-  BOOST_CHECK_EQUAL(pe_file_this.RvaToVa(0), static_cast<void*>(nullptr));
+  BOOST_CHECK_EQUAL(hadesmem::RvaToVa(process, pe_file_this, 0), 
+    static_cast<void*>(nullptr));
 
   hadesmem::PeFile pe_file_ntdll(process, GetModuleHandle(L"ntdll"), 
     hadesmem::PeFileType::Image);
   BOOST_CHECK_EQUAL(pe_file_ntdll.GetBase(), GetModuleHandle(L"ntdll"));
   BOOST_CHECK(pe_file_ntdll.GetType() == hadesmem::PeFileType::Image);
-  BOOST_CHECK_EQUAL(pe_file_ntdll.RvaToVa(0), static_cast<void*>(nullptr));
+  BOOST_CHECK_EQUAL(hadesmem::RvaToVa(process, pe_file_ntdll, 0), 
+    static_cast<void*>(nullptr));
 
   BOOST_CHECK_EQUAL(pe_file_this, pe_file_this);
   BOOST_CHECK_NE(pe_file_this, pe_file_ntdll);

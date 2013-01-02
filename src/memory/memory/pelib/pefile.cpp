@@ -74,70 +74,6 @@ PeFileType PeFile::GetType() const HADESMEM_NOEXCEPT
   return impl_->type_;
 }
 
-PVOID PeFile::RvaToVa(DWORD rva) const
-{
-  if (impl_->type_ == PeFileType::Data)
-  {
-    if (!rva)
-    {
-      return nullptr;
-    }
-
-    IMAGE_DOS_HEADER const dos_header = Read<IMAGE_DOS_HEADER>(
-      *impl_->process_, impl_->base_);
-    if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
-    {
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Invalid DOS header."));
-    }
-
-    BYTE* ptr_nt_headers = static_cast<BYTE*>(impl_->base_) + 
-      dos_header.e_lfanew;
-    IMAGE_NT_HEADERS const nt_headers = Read<IMAGE_NT_HEADERS>(
-      *impl_->process_, ptr_nt_headers);
-    if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
-    {
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Invalid NT headers."));
-    }
-
-    IMAGE_SECTION_HEADER* ptr_section_header = 
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(ptr_nt_headers + offsetof(
-      IMAGE_NT_HEADERS, OptionalHeader) + nt_headers.FileHeader.
-      SizeOfOptionalHeader);
-    IMAGE_SECTION_HEADER section_header = Read<IMAGE_SECTION_HEADER>(
-      *impl_->process_, ptr_section_header);
-
-    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
-
-    for (WORD i = 0; i < num_sections; ++i)
-    {
-      if (section_header.VirtualAddress <= rva && (section_header.
-        VirtualAddress + section_header.Misc.VirtualSize) > rva)
-      {
-        rva -= section_header.VirtualAddress;
-        rva += section_header.PointerToRawData;
-
-        return static_cast<BYTE*>(impl_->base_) + rva;
-      }
-
-      section_header = Read<IMAGE_SECTION_HEADER>(*impl_->process_, 
-        ++ptr_section_header);
-    }
-
-    return nullptr;
-  }
-  else if (impl_->type_ == PeFileType::Image)
-  {
-    return rva ? (static_cast<BYTE*>(impl_->base_) + rva) : nullptr;
-  }
-  else
-  {
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Unhandled file type."));
-  }
-}
-
 bool operator==(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
@@ -176,6 +112,71 @@ std::ostream& operator<<(std::ostream& lhs, PeFile const& rhs)
 std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 {
   return (lhs << rhs.GetBase());
+}
+
+PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
+{
+  PeFileType const type = pefile.GetType();
+  void* base = pefile.GetBase();
+
+  if (type == PeFileType::Data)
+  {
+    if (!rva)
+    {
+      return nullptr;
+    }
+
+    IMAGE_DOS_HEADER const dos_header = Read<IMAGE_DOS_HEADER>(process, base);
+    if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
+    {
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("Invalid DOS header."));
+    }
+
+    BYTE* ptr_nt_headers = static_cast<BYTE*>(base) + dos_header.e_lfanew;
+    IMAGE_NT_HEADERS const nt_headers = Read<IMAGE_NT_HEADERS>(process, 
+      ptr_nt_headers);
+    if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
+    {
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("Invalid NT headers."));
+    }
+
+    IMAGE_SECTION_HEADER* ptr_section_header = 
+      reinterpret_cast<PIMAGE_SECTION_HEADER>(ptr_nt_headers + offsetof(
+      IMAGE_NT_HEADERS, OptionalHeader) + nt_headers.FileHeader.
+      SizeOfOptionalHeader);
+    IMAGE_SECTION_HEADER section_header = Read<IMAGE_SECTION_HEADER>(
+      process, ptr_section_header);
+
+    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
+
+    for (WORD i = 0; i < num_sections; ++i)
+    {
+      if (section_header.VirtualAddress <= rva && (section_header.
+        VirtualAddress + section_header.Misc.VirtualSize) > rva)
+      {
+        rva -= section_header.VirtualAddress;
+        rva += section_header.PointerToRawData;
+
+        return static_cast<BYTE*>(base) + rva;
+      }
+
+      section_header = Read<IMAGE_SECTION_HEADER>(process, 
+        ++ptr_section_header);
+    }
+
+    return nullptr;
+  }
+  else if (type == PeFileType::Image)
+  {
+    return rva ? (static_cast<BYTE*>(base) + rva) : nullptr;
+  }
+  else
+  {
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Unhandled file type."));
+  }
 }
 
 }
