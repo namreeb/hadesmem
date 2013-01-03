@@ -13,15 +13,15 @@ namespace hadesmem
 namespace detail
 {
 
-template <typename T>
+template <typename T, typename U = typename std::remove_cv<T>::type>
 struct IsCharType
 {
-  static bool const value = std::is_same<T, char>::value || 
-    std::is_same<T, signed char>::value || 
-    std::is_same<T, unsigned char>::value || 
-    std::is_same<T, wchar_t>::value || 
-    std::is_same<T, char16_t>::value || 
-    std::is_same<T, char32_t>::value;
+  static bool const value = std::is_same<U, char>::value || 
+    std::is_same<U, signed char>::value || 
+    std::is_same<U, unsigned char>::value || 
+    std::is_same<U, wchar_t>::value || 
+    std::is_same<U, char16_t>::value || 
+    std::is_same<U, char32_t>::value;
 };
 
 template <typename T>
