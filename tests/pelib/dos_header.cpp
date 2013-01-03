@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE dos_header
+#define BOOST_TEST_MODULE cur_dos_header
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -55,49 +55,52 @@ BOOST_AUTO_TEST_CASE(dos_header)
   for (auto const& mod : modules)
   {
     // TODO: Also test FileType_Data
-    hadesmem::PeFile const pe_file(process, mod.GetHandle(), 
+    hadesmem::PeFile const cur_pe_file(process, mod.GetHandle(), 
       hadesmem::PeFileType::Data);
       
-    hadesmem::DosHeader dos_header(process, pe_file);
+    hadesmem::DosHeader cur_dos_header(process, cur_pe_file);
         
     auto const dos_header_raw = hadesmem::Read<IMAGE_DOS_HEADER>(process, 
-      dos_header.GetBase());
+      cur_dos_header.GetBase());
       
-    BOOST_CHECK_EQUAL(dos_header.IsValid(), true);
-    dos_header.EnsureValid();
-    dos_header.SetMagic(dos_header.GetMagic());
-    dos_header.SetBytesOnLastPage(dos_header.GetBytesOnLastPage());
-    dos_header.SetPagesInFile(dos_header.GetPagesInFile());
-    dos_header.SetRelocations(dos_header.GetRelocations());
-    dos_header.SetSizeOfHeaderInParagraphs(dos_header.
+    BOOST_CHECK_EQUAL(cur_dos_header.IsValid(), true);
+    cur_dos_header.EnsureValid();
+    cur_dos_header.SetMagic(cur_dos_header.GetMagic());
+    cur_dos_header.SetBytesOnLastPage(cur_dos_header.GetBytesOnLastPage());
+    cur_dos_header.SetPagesInFile(cur_dos_header.GetPagesInFile());
+    cur_dos_header.SetRelocations(cur_dos_header.GetRelocations());
+    cur_dos_header.SetSizeOfHeaderInParagraphs(cur_dos_header.
       GetSizeOfHeaderInParagraphs());
-    dos_header.SetMinExtraParagraphs(dos_header.GetMinExtraParagraphs());
-    dos_header.SetMaxExtraParagraphs(dos_header.GetMaxExtraParagraphs());
-    dos_header.SetInitialSS(dos_header.GetInitialSS());
-    dos_header.SetInitialSP(dos_header.GetInitialSP());
-    dos_header.SetChecksum(dos_header.GetChecksum());
-    dos_header.SetInitialIP(dos_header.GetInitialIP());
-    dos_header.SetInitialCS(dos_header.GetInitialCS());
-    dos_header.SetRelocTableFileAddr(dos_header.GetRelocTableFileAddr());
-    dos_header.SetOverlayNum(dos_header.GetOverlayNum());
-    dos_header.SetReservedWords1(dos_header.GetReservedWords1());
-    dos_header.SetOEMID(dos_header.GetOEMID());
-    dos_header.SetOEMInfo(dos_header.GetOEMInfo());
-    dos_header.SetReservedWords2(dos_header.GetReservedWords2());
-    dos_header.SetNewHeaderOffset(dos_header.GetNewHeaderOffset());
+    cur_dos_header.SetMinExtraParagraphs(
+      cur_dos_header.GetMinExtraParagraphs());
+    cur_dos_header.SetMaxExtraParagraphs(
+      cur_dos_header.GetMaxExtraParagraphs());
+    cur_dos_header.SetInitialSS(cur_dos_header.GetInitialSS());
+    cur_dos_header.SetInitialSP(cur_dos_header.GetInitialSP());
+    cur_dos_header.SetChecksum(cur_dos_header.GetChecksum());
+    cur_dos_header.SetInitialIP(cur_dos_header.GetInitialIP());
+    cur_dos_header.SetInitialCS(cur_dos_header.GetInitialCS());
+    cur_dos_header.SetRelocTableFileAddr(
+      cur_dos_header.GetRelocTableFileAddr());
+    cur_dos_header.SetOverlayNum(cur_dos_header.GetOverlayNum());
+    cur_dos_header.SetReservedWords1(cur_dos_header.GetReservedWords1());
+    cur_dos_header.SetOEMID(cur_dos_header.GetOEMID());
+    cur_dos_header.SetOEMInfo(cur_dos_header.GetOEMInfo());
+    cur_dos_header.SetReservedWords2(cur_dos_header.GetReservedWords2());
+    cur_dos_header.SetNewHeaderOffset(cur_dos_header.GetNewHeaderOffset());
       
     auto const dos_header_raw_new = hadesmem::Read<IMAGE_DOS_HEADER>(process, 
-      pe_file.GetBase());
+      cur_pe_file.GetBase());
       
     BOOST_CHECK_EQUAL(std::memcmp(&dos_header_raw, &dos_header_raw_new, 
       sizeof(dos_header_raw)), 0);
 
     std::stringstream test_str_1;
     test_str_1.imbue(std::locale::classic());
-    test_str_1 << dos_header;
+    test_str_1 << cur_dos_header;
     std::stringstream test_str_2;
     test_str_2.imbue(std::locale::classic());
-    test_str_2 << dos_header.GetBase();
+    test_str_2 << cur_dos_header.GetBase();
     BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
     if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
     {

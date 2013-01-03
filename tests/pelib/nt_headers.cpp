@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE nt_headers
+#define BOOST_TEST_MODULE cur_nt_headers
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -55,85 +55,91 @@ BOOST_AUTO_TEST_CASE(nt_headers)
   for (auto const& mod : modules)
   {
     // TODO: Also test FileType_Data
-    hadesmem::PeFile const pe_file(process, mod.GetHandle(), 
+    hadesmem::PeFile const cur_pe_file(process, mod.GetHandle(), 
       hadesmem::PeFileType::Data);
       
-    hadesmem::NtHeaders nt_headers(process, pe_file);
+    hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
         
     auto const nt_headers_raw = hadesmem::Read<IMAGE_NT_HEADERS>(process, 
-      nt_headers.GetBase());
+      cur_nt_headers.GetBase());
       
-    BOOST_CHECK_EQUAL(nt_headers.IsValid(), true);
-    nt_headers.EnsureValid();
-    nt_headers.SetSignature(nt_headers.GetSignature());
-    nt_headers.SetMachine(nt_headers.GetMachine());
-    nt_headers.SetNumberOfSections(nt_headers.GetNumberOfSections());
-    nt_headers.SetTimeDateStamp(nt_headers.GetTimeDateStamp());
-    nt_headers.SetPointerToSymbolTable(nt_headers.
+    BOOST_CHECK_EQUAL(cur_nt_headers.IsValid(), true);
+    cur_nt_headers.EnsureValid();
+    cur_nt_headers.SetSignature(cur_nt_headers.GetSignature());
+    cur_nt_headers.SetMachine(cur_nt_headers.GetMachine());
+    cur_nt_headers.SetNumberOfSections(cur_nt_headers.GetNumberOfSections());
+    cur_nt_headers.SetTimeDateStamp(cur_nt_headers.GetTimeDateStamp());
+    cur_nt_headers.SetPointerToSymbolTable(cur_nt_headers.
       GetPointerToSymbolTable());
-    nt_headers.SetNumberOfSymbols(nt_headers.GetNumberOfSymbols());
-    nt_headers.SetSizeOfOptionalHeader(nt_headers.
+    cur_nt_headers.SetNumberOfSymbols(cur_nt_headers.GetNumberOfSymbols());
+    cur_nt_headers.SetSizeOfOptionalHeader(cur_nt_headers.
       GetSizeOfOptionalHeader());
-    nt_headers.SetCharacteristics(nt_headers.GetCharacteristics());
-    nt_headers.SetMagic(nt_headers.GetMagic());
-    nt_headers.SetMajorLinkerVersion(nt_headers.GetMajorLinkerVersion());
-    nt_headers.SetMinorLinkerVersion(nt_headers.GetMinorLinkerVersion());
-    nt_headers.SetSizeOfCode(nt_headers.GetSizeOfCode());
-    nt_headers.SetSizeOfInitializedData(nt_headers.
+    cur_nt_headers.SetCharacteristics(cur_nt_headers.GetCharacteristics());
+    cur_nt_headers.SetMagic(cur_nt_headers.GetMagic());
+    cur_nt_headers.SetMajorLinkerVersion(
+      cur_nt_headers.GetMajorLinkerVersion());
+    cur_nt_headers.SetMinorLinkerVersion(
+      cur_nt_headers.GetMinorLinkerVersion());
+    cur_nt_headers.SetSizeOfCode(cur_nt_headers.GetSizeOfCode());
+    cur_nt_headers.SetSizeOfInitializedData(cur_nt_headers.
       GetSizeOfInitializedData());
-    nt_headers.SetSizeOfUninitializedData(nt_headers.
+    cur_nt_headers.SetSizeOfUninitializedData(cur_nt_headers.
       GetSizeOfUninitializedData());
-    nt_headers.SetAddressOfEntryPoint(nt_headers.GetAddressOfEntryPoint());
-    nt_headers.SetBaseOfCode(nt_headers.GetBaseOfCode());
+    cur_nt_headers.SetAddressOfEntryPoint(
+      cur_nt_headers.GetAddressOfEntryPoint());
+    cur_nt_headers.SetBaseOfCode(cur_nt_headers.GetBaseOfCode());
 #if defined(_M_IX86) 
-    nt_headers.SetBaseOfData(nt_headers.GetBaseOfData());
+    cur_nt_headers.SetBaseOfData(cur_nt_headers.GetBaseOfData());
 #endif
-    nt_headers.SetImageBase(nt_headers.GetImageBase());
-    nt_headers.SetSectionAlignment(nt_headers.GetSectionAlignment());
-    nt_headers.SetFileAlignment(nt_headers.GetFileAlignment());
-    nt_headers.SetMajorOperatingSystemVersion(nt_headers.
+    cur_nt_headers.SetImageBase(cur_nt_headers.GetImageBase());
+    cur_nt_headers.SetSectionAlignment(cur_nt_headers.GetSectionAlignment());
+    cur_nt_headers.SetFileAlignment(cur_nt_headers.GetFileAlignment());
+    cur_nt_headers.SetMajorOperatingSystemVersion(cur_nt_headers.
       GetMajorOperatingSystemVersion());
-    nt_headers.SetMinorOperatingSystemVersion(nt_headers.
+    cur_nt_headers.SetMinorOperatingSystemVersion(cur_nt_headers.
       GetMinorOperatingSystemVersion());
-    nt_headers.SetMajorImageVersion(nt_headers.GetMajorImageVersion());
-    nt_headers.SetMinorImageVersion(nt_headers.GetMinorImageVersion());
-    nt_headers.SetMajorSubsystemVersion(nt_headers.
+    cur_nt_headers.SetMajorImageVersion(cur_nt_headers.GetMajorImageVersion());
+    cur_nt_headers.SetMinorImageVersion(cur_nt_headers.GetMinorImageVersion());
+    cur_nt_headers.SetMajorSubsystemVersion(cur_nt_headers.
       GetMajorSubsystemVersion());
-    nt_headers.SetMinorSubsystemVersion(nt_headers.
+    cur_nt_headers.SetMinorSubsystemVersion(cur_nt_headers.
       GetMinorSubsystemVersion());
-    nt_headers.SetWin32VersionValue(nt_headers.GetWin32VersionValue());
-    nt_headers.SetSizeOfImage(nt_headers.GetSizeOfImage());
-    nt_headers.SetSizeOfHeaders(nt_headers.GetSizeOfHeaders());
-    nt_headers.SetCheckSum(nt_headers.GetCheckSum());
-    nt_headers.SetSubsystem(nt_headers.GetSubsystem());
-    nt_headers.SetDllCharacteristics(nt_headers.GetDllCharacteristics());
-    nt_headers.SetSizeOfStackReserve(nt_headers.GetSizeOfStackReserve());
-    nt_headers.SetSizeOfStackCommit(nt_headers.GetSizeOfStackCommit());
-    nt_headers.SetSizeOfHeapReserve(nt_headers.GetSizeOfHeapReserve());
-    nt_headers.SetSizeOfHeapCommit(nt_headers.GetSizeOfHeapCommit());
-    nt_headers.SetLoaderFlags(nt_headers.GetLoaderFlags());
-    nt_headers.SetNumberOfRvaAndSizes(nt_headers.GetNumberOfRvaAndSizes());
-    for (std::size_t i = 0; i < nt_headers.GetNumberOfRvaAndSizes(); ++i)
+    cur_nt_headers.SetWin32VersionValue(cur_nt_headers.GetWin32VersionValue());
+    cur_nt_headers.SetSizeOfImage(cur_nt_headers.GetSizeOfImage());
+    cur_nt_headers.SetSizeOfHeaders(cur_nt_headers.GetSizeOfHeaders());
+    cur_nt_headers.SetCheckSum(cur_nt_headers.GetCheckSum());
+    cur_nt_headers.SetSubsystem(cur_nt_headers.GetSubsystem());
+    cur_nt_headers.SetDllCharacteristics(
+      cur_nt_headers.GetDllCharacteristics());
+    cur_nt_headers.SetSizeOfStackReserve(
+      cur_nt_headers.GetSizeOfStackReserve());
+    cur_nt_headers.SetSizeOfStackCommit(cur_nt_headers.GetSizeOfStackCommit());
+    cur_nt_headers.SetSizeOfHeapReserve(cur_nt_headers.GetSizeOfHeapReserve());
+    cur_nt_headers.SetSizeOfHeapCommit(cur_nt_headers.GetSizeOfHeapCommit());
+    cur_nt_headers.SetLoaderFlags(cur_nt_headers.GetLoaderFlags());
+    cur_nt_headers.SetNumberOfRvaAndSizes(
+      cur_nt_headers.GetNumberOfRvaAndSizes());
+    for (std::size_t i = 0; i < cur_nt_headers.GetNumberOfRvaAndSizes(); ++i)
     {
       auto data_dir = static_cast<hadesmem::PeDataDir>(i);
-      nt_headers.SetDataDirectoryVirtualAddress(data_dir, 
-        nt_headers.GetDataDirectoryVirtualAddress(data_dir));
-      nt_headers.SetDataDirectorySize(data_dir, 
-        nt_headers.GetDataDirectorySize(data_dir));
+      cur_nt_headers.SetDataDirectoryVirtualAddress(data_dir, 
+        cur_nt_headers.GetDataDirectoryVirtualAddress(data_dir));
+      cur_nt_headers.SetDataDirectorySize(data_dir, 
+        cur_nt_headers.GetDataDirectorySize(data_dir));
     }
       
     auto const nt_headers_raw_new = hadesmem::Read<IMAGE_NT_HEADERS>(process, 
-      nt_headers.GetBase());
+      cur_nt_headers.GetBase());
       
     BOOST_CHECK_EQUAL(std::memcmp(&nt_headers_raw, &nt_headers_raw_new, 
       sizeof(nt_headers_raw)), 0);
 
     std::stringstream test_str_1;
     test_str_1.imbue(std::locale::classic());
-    test_str_1 << nt_headers;
+    test_str_1 << cur_nt_headers;
     std::stringstream test_str_2;
     test_str_2.imbue(std::locale::classic());
-    test_str_2 << nt_headers.GetBase();
+    test_str_2 << cur_nt_headers.GetBase();
     BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
     if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
     {
