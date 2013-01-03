@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <utility>
 #include <iostream>
-#include <type_traits>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
@@ -18,7 +17,6 @@
 #include "hadesmem/read.hpp"
 #include "hadesmem/error.hpp"
 #include "hadesmem/write.hpp"
-#include "hadesmem/config.hpp"
 #include "hadesmem/process.hpp"
 #include "hadesmem/pelib/pe_file.hpp"
 #include "hadesmem/pelib/dos_header.hpp"
@@ -336,9 +334,8 @@ DWORD NtHeaders::GetDataDirectoryVirtualAddress(PeDataDir data_dir) const
 
   return Read<DWORD>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_NT_HEADERS, OptionalHeader.DataDirectory[0]) + 
-    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
-    sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
-    VirtualAddress));
+    static_cast<DWORD>(data_dir) * sizeof(IMAGE_DATA_DIRECTORY) + offsetof(
+    IMAGE_DATA_DIRECTORY, VirtualAddress));
 }
 
 DWORD NtHeaders::GetDataDirectorySize(PeDataDir data_dir) const
@@ -350,8 +347,8 @@ DWORD NtHeaders::GetDataDirectorySize(PeDataDir data_dir) const
 
   return Read<DWORD>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_NT_HEADERS, OptionalHeader.DataDirectory[0]) + 
-    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
-    sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size));
+    static_cast<DWORD>(data_dir) * sizeof(IMAGE_DATA_DIRECTORY) + offsetof(
+    IMAGE_DATA_DIRECTORY, Size));
 }
 
 void NtHeaders::SetSignature(DWORD signature) const
@@ -599,8 +596,7 @@ void NtHeaders::SetDataDirectoryVirtualAddress(PeDataDir data_dir,
   }
 
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
-    OptionalHeader.DataDirectory[0]) + 
-    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
     VirtualAddress), data_directory_virtual_address);
 }
@@ -614,8 +610,7 @@ void NtHeaders::SetDataDirectorySize(PeDataDir data_dir,
   }
 
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
-    OptionalHeader.DataDirectory[0]) + 
-    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size), 
     data_directory_size);
 }

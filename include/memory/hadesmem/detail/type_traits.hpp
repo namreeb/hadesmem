@@ -50,21 +50,6 @@ struct IsDefaultConstructible
 #endif
 };
 
-template <typename T>
-struct UnderlyingType
-{
-#if defined(HADESMEM_CLANG)
-  // The Clang toolchain I'm using currently does not support 
-  // std::underlying_type. Using 'unsigned int' here as there's nothing else 
-  // to do other than pick a sensible default (which I can do because I know 
-  // all the places this trait is being used).
-  // TODO: Update to use std::underlying_type when available.
-  typedef unsigned int type;
-#else
-  typedef typename std::underlying_type<T>::type type;
-#endif
-};
-
 }
 
 }
