@@ -94,18 +94,19 @@ BOOST_AUTO_TEST_CASE(dos_header)
 
     std::stringstream test_str_1;
     test_str_1.imbue(std::locale::classic());
-    test_str_1 << pe_file;
+    test_str_1 << dos_header;
     std::stringstream test_str_2;
     test_str_2.imbue(std::locale::classic());
-    test_str_2 << pe_file.GetBase();
+    test_str_2 << dos_header.GetBase();
     BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
     if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
     {
       hadesmem::PeFile const pe_file_ntdll(process, GetModuleHandle(L"ntdll"), 
         hadesmem::PeFileType::Image);
+      hadesmem::DosHeader const dos_header_ntdll(process, pe_file_ntdll);
       std::stringstream test_str_3;
       test_str_3.imbue(std::locale::classic());
-      test_str_3 << pe_file_ntdll.GetBase();
+      test_str_3 << dos_header_ntdll.GetBase();
       BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
     }
   }
