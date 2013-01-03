@@ -336,7 +336,7 @@ DWORD NtHeaders::GetDataDirectoryVirtualAddress(PeDataDir data_dir) const
 
   return Read<DWORD>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_NT_HEADERS, OptionalHeader.DataDirectory[0]) + 
-    static_cast<typename detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
     VirtualAddress));
 }
@@ -350,7 +350,7 @@ DWORD NtHeaders::GetDataDirectorySize(PeDataDir data_dir) const
 
   return Read<DWORD>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_NT_HEADERS, OptionalHeader.DataDirectory[0]) + 
-    static_cast<typename detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size));
 }
 
@@ -600,7 +600,7 @@ void NtHeaders::SetDataDirectoryVirtualAddress(PeDataDir data_dir,
 
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.DataDirectory[0]) + 
-    static_cast<typename detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
     VirtualAddress), data_directory_virtual_address);
 }
@@ -615,7 +615,7 @@ void NtHeaders::SetDataDirectorySize(PeDataDir data_dir,
 
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.DataDirectory[0]) + 
-    static_cast<typename detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
+    static_cast<detail::UnderlyingType<PeDataDir>::type>(data_dir) * 
     sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size), 
     data_directory_size);
 }
