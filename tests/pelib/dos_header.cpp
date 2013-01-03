@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(dos_header)
     hadesmem::DosHeader dos_header(process, pe_file);
         
     auto const dos_header_raw = hadesmem::Read<IMAGE_DOS_HEADER>(process, 
-      pe_file.GetBase());
+      dos_header.GetBase());
       
     BOOST_CHECK_EQUAL(dos_header.IsValid(), true);
     dos_header.EnsureValid();
