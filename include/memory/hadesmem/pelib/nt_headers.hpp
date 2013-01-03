@@ -18,7 +18,7 @@ class Process;
 
 class PeFile;
 
-enum class PeDataDir
+enum class PeDataDir : unsigned int
 {
   Export, 
   Import, 
