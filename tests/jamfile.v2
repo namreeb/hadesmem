@@ -61,8 +61,11 @@ run injector.cpp
   
 run pelib/pe_file.cpp
   ;
-
+  
 run pelib/dos_header.cpp
+  ;
+
+run pelib/nt_headers.cpp
   ;
 
 compile-fail read_pod_fail.cpp
