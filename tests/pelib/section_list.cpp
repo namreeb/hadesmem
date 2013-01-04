@@ -61,16 +61,19 @@ BOOST_AUTO_TEST_CASE(section_list)
   for (auto const& mod : modules)
   {
     // TODO: Also test FileType_Data
-    hadesmem::PeFile const cur_pe_file(process, mod.GetHandle(), 
+    hadesmem::PeFile const pe_file(process, mod.GetHandle(), 
       hadesmem::PeFileType::Data);
+
+    hadesmem::NtHeaders const nt_headers(process, pe_file);
+    WORD const num_sections = nt_headers.GetNumberOfSections();
 
     // Assume every module has at least one section.
     // TODO: Better tests.
-    bool has_section = false;
-    hadesmem::SectionList sections(process, cur_pe_file);
+    hadesmem::SectionList sections(process, pe_file);
+    WORD section_count = 0;
     for (auto const& section : sections)
     {
-      has_section = true;
+      section_count += 1;
 
       auto const section_header_raw = hadesmem::Read<IMAGE_SECTION_HEADER>(
         process, section.GetBase());
@@ -110,7 +113,7 @@ BOOST_AUTO_TEST_CASE(section_list)
         BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
       }
     }
-    BOOST_CHECK(has_section);
+    BOOST_CHECK(section_count == num_sections);
 
     // Assume every module has a '.text' section.
     // TODO: Better tests.
