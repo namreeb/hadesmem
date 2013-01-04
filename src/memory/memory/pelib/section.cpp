@@ -3,6 +3,7 @@
 
 #include "hadesmem/pelib/section.hpp"
 
+#include <array>
 #include <cstddef>
 #include <utility>
 #include <iostream>
