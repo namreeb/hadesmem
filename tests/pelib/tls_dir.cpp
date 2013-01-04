@@ -37,7 +37,6 @@
 BOOST_AUTO_TEST_CASE(tls_dir)
 {
   // Use threads and TSS to ensure that at least one module has a TLS dir
-  static __declspec(thread) int tls_dummy = 0;
   boost::thread_specific_ptr<int> tss_dummy;
   tss_dummy.reset(new int(1234));
 
