@@ -23,7 +23,8 @@ namespace hadesmem
 
 struct PeFile::Impl
 {
-  explicit Impl(Process const& process, PVOID address, PeFileType type)
+  explicit Impl(Process const& process, PVOID address, PeFileType type) 
+    HADESMEM_NOEXCEPT
     : process_(&process), 
     base_(static_cast<PBYTE>(address)), 
     type_(type)

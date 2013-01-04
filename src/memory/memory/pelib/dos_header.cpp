@@ -25,7 +25,8 @@ namespace hadesmem
 
 struct DosHeader::Impl
 {
-  explicit Impl(Process const& process, PeFile const& pe_file)
+  explicit Impl(Process const& process, PeFile const& pe_file) 
+    HADESMEM_NOEXCEPT
     : process_(&process), 
     pe_file_(&pe_file), 
     base_(static_cast<PBYTE>(pe_file.GetBase()))
