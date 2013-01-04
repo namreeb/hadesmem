@@ -36,7 +36,7 @@ struct Section::Impl
     : process_(&process), 
     pe_file_(&pe_file), 
     number_(number), 
-    base_(static_cast<PBYTE>(pe_file.GetBase()))
+    base_(nullptr)
   {
     NtHeaders const nt_headers(process, pe_file);
     if (number >= nt_headers.GetNumberOfSections())
