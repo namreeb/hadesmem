@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(section)
   {
     // TODO: Also test FileType_Data
     hadesmem::PeFile const cur_pe_file(process, mod.GetHandle(), 
-      hadesmem::PeFileType::Data);
+      hadesmem::PeFileType::Image);
 
     // Assume every module has at least one section.
     // TODO: Better tests.

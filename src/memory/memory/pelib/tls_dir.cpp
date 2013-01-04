@@ -34,6 +34,7 @@ struct TlsDir::Impl
   {
     NtHeaders const nt_headers(process, pe_file);
 
+    // TODO: Some sort of API to handle this common case.
     DWORD const data_dir_size = nt_headers.GetDataDirectorySize(
       PeDataDir::TLS);
     DWORD const data_dir_va = nt_headers.GetDataDirectoryVirtualAddress(
@@ -128,10 +129,9 @@ std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
 
   NtHeaders nt_headers(*impl_->process_, *impl_->pe_file_);
 
-  // TODO: Fix this. This will be wrong for PE files on-disk (and probably 
-  // manually mapped ones too?).
-  auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(
-    GetAddressOfCallBacks() + nt_headers.GetImageBase());
+  auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(RvaToVa(
+    *impl_->process_, *impl_->pe_file_, static_cast<DWORD>(
+    GetAddressOfCallBacks() - nt_headers.GetImageBase())));
   
   for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*impl_->process_, 
     callbacks_raw); 

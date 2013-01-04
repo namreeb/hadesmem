@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(section_list)
   {
     // TODO: Also test FileType_Data
     hadesmem::PeFile const pe_file(process, mod.GetHandle(), 
-      hadesmem::PeFileType::Data);
+      hadesmem::PeFileType::Image);
 
     hadesmem::NtHeaders const nt_headers(process, pe_file);
     WORD const num_sections = nt_headers.GetNumberOfSections();

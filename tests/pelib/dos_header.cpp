@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(dos_header)
   {
     // TODO: Also test FileType_Data
     hadesmem::PeFile const cur_pe_file(process, mod.GetHandle(), 
-      hadesmem::PeFileType::Data);
+      hadesmem::PeFileType::Image);
       
     hadesmem::DosHeader cur_dos_header(process, cur_pe_file);
         

@@ -130,6 +130,8 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
       return nullptr;
     }
 
+    // TODO: Rewrite to use SectionList etc...
+
     IMAGE_DOS_HEADER const dos_header = Read<IMAGE_DOS_HEADER>(process, base);
     if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
     {
