@@ -54,11 +54,11 @@ struct Section::Impl
   }
 
   explicit Impl(Process const& process, PeFile const& pe_file, WORD number, 
-    PIMAGE_SECTION_HEADER base)
+    PVOID base)
     : process_(&process), 
     pe_file_(&pe_file), 
     number_(number), 
-    base_(reinterpret_cast<PBYTE>(base))
+    base_(static_cast<PBYTE>(base))
   { }
 
   Process const* process_;
@@ -72,7 +72,7 @@ Section::Section(Process const& process, PeFile const& pe_file, WORD number)
 { }
 
 Section::Section(Process const& process, PeFile const& pe_file, WORD number, 
-  PIMAGE_SECTION_HEADER base)
+  PVOID base)
   : impl_(new Impl(process, pe_file, number, base))
 { }
 

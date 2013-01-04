@@ -81,7 +81,7 @@ private:
   friend class SectionIterator;
 
   explicit Section(Process const& process, PeFile const& pe_file, WORD number, 
-    PIMAGE_SECTION_HEADER base);
+    PVOID base);
 
   struct Impl;
   std::unique_ptr<Impl> impl_;
