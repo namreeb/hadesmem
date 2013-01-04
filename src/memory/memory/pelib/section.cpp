@@ -21,6 +21,11 @@
 #include "hadesmem/pelib/pe_file.hpp"
 #include "hadesmem/pelib/nt_headers.hpp"
 
+// TODO: Fix the code so this hack can be removed.
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic ignored "-Wextended-offsetof"
+#endif
+
 namespace hadesmem
 {
 
