@@ -24,8 +24,6 @@ public:
   
   explicit Module(Process const& process, std::wstring const& path);
   
-  explicit Module(Process const& process, MODULEENTRY32 const& entry);
-
   Module(Module const& other);
 
   Module& operator=(Module const& other);
@@ -45,6 +43,10 @@ public:
   std::wstring GetPath() const;
   
 private:
+  friend class ModuleIterator;
+
+  explicit Module(Process const& process, MODULEENTRY32 const& entry);
+
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };

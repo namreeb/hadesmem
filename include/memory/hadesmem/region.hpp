@@ -20,8 +20,6 @@ class Region
 public:
   explicit Region(Process const& process, LPCVOID address);
   
-  explicit Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi);
-
   Region(Region const& other);
 
   Region& operator=(Region const& other);
@@ -47,6 +45,10 @@ public:
   DWORD GetType() const HADESMEM_NOEXCEPT;
   
 private:
+  friend class RegionIterator;
+
+  explicit Region(Process const& process, MEMORY_BASIC_INFORMATION const& mbi);
+
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };
