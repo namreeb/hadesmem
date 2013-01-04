@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(section_list)
     auto text_iter = std::find_if(std::begin(sections), std::end(sections), 
       [] (hadesmem::Section const& section)
       {
-        return section.GetName() == ".text";
+        return section.GetName() == ".data";
       });
     BOOST_CHECK(text_iter != std::end(sections));
   }
