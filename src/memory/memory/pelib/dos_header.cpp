@@ -39,7 +39,9 @@ struct DosHeader::Impl
 
 DosHeader::DosHeader(Process const& process, PeFile const& pefile)
   : impl_(new Impl(process, pefile))
-{ }
+{
+  EnsureValid();
+}
 
 DosHeader::DosHeader(DosHeader const& other)
   : impl_(new Impl(*other.impl_))

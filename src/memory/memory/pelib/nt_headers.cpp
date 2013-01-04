@@ -37,7 +37,6 @@ struct NtHeaders::Impl
     base_(nullptr)
   {
     DosHeader dos_header(process, pe_file);
-    dos_header.EnsureValid();
     base_ = static_cast<PBYTE>(dos_header.GetBase()) + 
       dos_header.GetNewHeaderOffset();
   }
@@ -49,7 +48,9 @@ struct NtHeaders::Impl
 
 NtHeaders::NtHeaders(Process const& process, PeFile const& pefile)
   : impl_(new Impl(process, pefile))
-{ }
+{
+  EnsureValid();
+}
 
 NtHeaders::NtHeaders(NtHeaders const& other)
   : impl_(new Impl(*other.impl_))
