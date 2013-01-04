@@ -97,6 +97,9 @@ RegionIterator& RegionIterator::operator++()
   }
   catch (std::exception const& /*e*/)
   {
+    // TODO: Check whether this is the right thing to do. We should only 
+    // flag as the 'end' once we've actually reached the end of the list. If 
+    // the iteration fails we should throw an exception.
     impl_.reset();
   }
   

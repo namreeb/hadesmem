@@ -35,7 +35,7 @@ public:
 
   PVOID GetBase() const HADESMEM_NOEXCEPT;
 
-  WORD GetNumber() const;
+  WORD GetNumber() const HADESMEM_NOEXCEPT;
 
   std::string GetName() const;
 

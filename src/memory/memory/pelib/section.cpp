@@ -106,7 +106,7 @@ PVOID Section::GetBase() const HADESMEM_NOEXCEPT
   return impl_->base_;
 }
 
-WORD Section::GetNumber() const
+WORD Section::GetNumber() const HADESMEM_NOEXCEPT
 {
   return impl_->number_;
 }

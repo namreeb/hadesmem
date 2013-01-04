@@ -67,8 +67,11 @@ run pelib/dos_header.cpp
   
 run pelib/nt_headers.cpp
   ;
-
+  
 run pelib/section.cpp
+  ;
+
+run pelib/section_list.cpp
   ;
 
 compile-fail read_pod_fail.cpp
