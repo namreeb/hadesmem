@@ -112,7 +112,7 @@ SectionIterator& SectionIterator::operator++()
   }
 
   PIMAGE_SECTION_HEADER new_base = reinterpret_cast<PIMAGE_SECTION_HEADER>(
-    impl_->section_->GetBase()) + number;
+    impl_->section_->GetBase()) + 1;
   impl_->section_ = Section(*impl_->process_, *impl_->pe_file_, number + 1, 
     new_base);
   
