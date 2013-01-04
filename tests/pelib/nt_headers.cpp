@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE cur_nt_headers
+#define BOOST_TEST_MODULE nt_headers
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
