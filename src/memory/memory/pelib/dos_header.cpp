@@ -171,7 +171,7 @@ WORD DosHeader::GetOverlayNum() const
 
 std::array<WORD, 4> DosHeader::GetReservedWords1() const
 {
-  return Read<std::array<WORD, 4>>(*impl_->process_, impl_->base_ + offsetof(
+  return Read<WORD, 4>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_DOS_HEADER, e_res));
 }
 
@@ -189,7 +189,7 @@ WORD DosHeader::GetOEMInfo() const
 
 std::array<WORD, 10> DosHeader::GetReservedWords2() const
 {
-  return Read<std::array<WORD, 10>>(*impl_->process_, impl_->base_ + offsetof(
+  return Read<WORD, 10>(*impl_->process_, impl_->base_ + offsetof(
     IMAGE_DOS_HEADER, e_res2));
 }
 
