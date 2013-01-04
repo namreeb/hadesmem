@@ -19,6 +19,8 @@ project
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
     
     <library>/memory//memory
+    <library>/boost//thread/<link>static
+    <library>/boost//date_time/<link>static
     <library>/boost//filesystem/<link>static
     <library>/boost//unit_test_framework/<link>static
   ;
@@ -70,8 +72,11 @@ run pelib/nt_headers.cpp
   
 run pelib/section.cpp
   ;
-
+  
 run pelib/section_list.cpp
+  ;
+
+run pelib/tls_dir.cpp
   ;
 
 compile-fail read_pod_fail.cpp
