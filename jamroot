@@ -34,6 +34,9 @@ project
   :
     requirements
     
+    # Tell Boost to use windows.h
+    <define>BOOST_USE_WINDOWS_H
+    
     # Disallow use of deprected Boost APIs.
     <define>BOOST_SYSTEM_NO_DEPRECATED
     <define>BOOST_FILESYSTEM_NO_DEPRECATED

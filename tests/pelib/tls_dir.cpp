@@ -8,7 +8,7 @@
 
 #define BOOST_TEST_MODULE tls_dir
 #include "hadesmem/detail/warning_disable_prefix.hpp"
-#include <boost/thread.hpp>
+#include <boost/thread/tss.hpp>
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(tls_dir)
 
     std::stringstream test_str_1;
     test_str_1.imbue(std::locale::classic());
-    test_str_1 << cur_tls_dir;
+    test_str_1 << *cur_tls_dir;
     std::stringstream test_str_2;
     test_str_2.imbue(std::locale::classic());
     test_str_2 << cur_tls_dir->GetBase();

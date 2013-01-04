@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(section_list)
     WORD section_count = 0;
     for (auto const& section : sections)
     {
-      section_count += 1;
+      section_count = static_cast<WORD>(section_count + 1);
 
       auto const section_header_raw = hadesmem::Read<IMAGE_SECTION_HEADER>(
         process, section.GetBase());
