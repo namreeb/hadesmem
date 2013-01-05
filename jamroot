@@ -67,7 +67,7 @@ project
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>intel:<cxxflags>"/Qwd2586"
     # Required for atomics library.
-    <toolset>gcc,<address-model>32:<cxxflags>"-march=pentium4"
+    <toolset>gcc,<address-model>32:<cxxflags>"-march=i686"
     # --export-all-symbols is required because of a bug in Clang's dllexport  
     # support. Remove once this has been fixed.
     <toolset>clang:<linkflags>"-Wl,--export-all-symbols"
