@@ -130,46 +130,18 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
       return nullptr;
     }
 
-    // TODO: Rewrite to use SectionList etc...
-
-    IMAGE_DOS_HEADER const dos_header = Read<IMAGE_DOS_HEADER>(process, base);
-    if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
+    SectionList sections(process, pefile);
+    for (auto const& section : sections)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Invalid DOS header."));
-    }
-
-    BYTE* ptr_nt_headers = base + dos_header.e_lfanew;
-    IMAGE_NT_HEADERS const nt_headers = Read<IMAGE_NT_HEADERS>(process, 
-      ptr_nt_headers);
-    if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
-    {
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Invalid NT headers."));
-    }
-
-    IMAGE_SECTION_HEADER* ptr_section_header = 
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(ptr_nt_headers + offsetof(
-      IMAGE_NT_HEADERS, OptionalHeader) + nt_headers.FileHeader.
-      SizeOfOptionalHeader);
-    IMAGE_SECTION_HEADER section_header = Read<IMAGE_SECTION_HEADER>(
-      process, ptr_section_header);
-
-    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
-
-    for (WORD i = 0; i < num_sections; ++i)
-    {
-      if (section_header.VirtualAddress <= rva && (section_header.
-        VirtualAddress + section_header.Misc.VirtualSize) > rva)
+      DWORD const virtual_beg = section.GetVirtualAddress();
+      DWORD const virtual_end = virtual_beg + section.GetVirtualSize();
+      if (virtual_beg <= rva && rva < virtual_end)
       {
-        rva -= section_header.VirtualAddress;
-        rva += section_header.PointerToRawData;
+        rva -= virtual_beg;
+        rva += section.GetPointerToRawData();
 
         return base + rva;
       }
-
-      section_header = Read<IMAGE_SECTION_HEADER>(process, 
-        ++ptr_section_header);
     }
 
     return nullptr;
