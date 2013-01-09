@@ -86,7 +86,6 @@ public:
 
 private:
   AsmJit::X86Assembler* assembler_;
-  std::size_t num_args_;
   std::size_t cur_arg_;
   CallConv call_conv_;
 };
@@ -356,7 +355,6 @@ Allocator GenerateCallCode(Process const& process,
 ArgVisitor32::ArgVisitor32(AsmJit::X86Assembler* assembler, 
   std::size_t num_args, CallConv call_conv) HADESMEM_NOEXCEPT
   : assembler_(assembler), 
-  num_args_(num_args), 
   cur_arg_(num_args), 
   call_conv_(call_conv)
 { }

@@ -24,6 +24,8 @@ extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID module);
 
 extern "C" __declspec(dllimport) DWORD_PTR InjectTestDep_Foo();
 
+extern bool g_alloced_console;
+
 bool g_alloced_console = false;
 
 extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/)
