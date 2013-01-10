@@ -45,7 +45,8 @@
 // normal cases, it will fail when the injector has shims enabled, and may 
 // not work as expected when the injectee has shims enabled).
 
-// TODO: Add flag to keep process paused after creation for debugging.
+// TODO: Add a way to easily resume targets created with the kKeepSuspended 
+// flag.
 
 namespace hadesmem
 {
