@@ -46,8 +46,8 @@ struct NtHeaders::Impl
   PBYTE base_;
 };
 
-NtHeaders::NtHeaders(Process const& process, PeFile const& pefile)
-  : impl_(new Impl(process, pefile))
+NtHeaders::NtHeaders(Process const& process, PeFile const& pe_file)
+  : impl_(new Impl(process, pe_file))
 {
   EnsureValid();
 }

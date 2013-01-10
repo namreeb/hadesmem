@@ -37,8 +37,8 @@ struct DosHeader::Impl
   PBYTE base_;
 };
 
-DosHeader::DosHeader(Process const& process, PeFile const& pefile)
-  : impl_(new Impl(process, pefile))
+DosHeader::DosHeader(Process const& process, PeFile const& pe_file)
+  : impl_(new Impl(process, pe_file))
 {
   EnsureValid();
 }
