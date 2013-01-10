@@ -29,8 +29,13 @@
 // TODO: Cross-session injection (also cross-winsta and cross-desktop 
 // injection). RtlCreateUserThread can apparently inject across sessions but 
 // creates a 'native' thread rather than a Win32 thread which causes issues. 
-// A better solution is probably to use a broker process. Can the target's 
-// WinSta and Desktop just be read from the PEB?
+// NtCreateThreadEx apparently sets up the correct activation context and 
+// allows for loading the CLR etc. Investigate this.
+// A better solution is probably to use a broker process, though that's not as 
+// easy for library users to integrate into their apps. Also important for 
+// a broker process is getting the right WinSta and Desktop (confirm that this 
+// is the case, we may be able to just use CreateRemoteThread anyway). Can the 
+// target's WinSta and Desktop just be read from the PEB?
 
 // TODO: IAT injection (to allow execution of code before Dllmain of other 
 // modules are executed). Include support for .NET target processes.
