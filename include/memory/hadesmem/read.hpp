@@ -114,7 +114,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
     cur += buf_len;
   }
 
-  BOOST_THROW_EXCEPTION(Error() << 
+  HADESMEM_THROW_EXCEPTION(Error() << 
     ErrorString("Attempt to read across a region boundary."));
 }
 
