@@ -70,7 +70,7 @@ HADESMEM_STATIC_ASSERT(std::is_pod<CallResultRemote>::value);
 
 #if defined(HADESMEM_ARCH_X86)
 
-class ArgVisitor32
+class ArgVisitor32 : public boost::static_visitor<>
 {
 public:
   ArgVisitor32(AsmJit::X86Assembler* assembler, std::size_t num_args, 
@@ -94,7 +94,7 @@ private:
 
 #if defined(HADESMEM_ARCH_X64)
 
-class ArgVisitor64
+class ArgVisitor64 : public boost::static_visitor<>
 {
 public:
   ArgVisitor64(AsmJit::X86Assembler* assembler, std::size_t num_args) 
@@ -159,7 +159,8 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
-      arg.Visit(&arg_visitor);
+      auto variant = arg.GetVariant();
+      boost::apply_visitor(arg_visitor, variant);
     });
 
     assembler->mov(AsmJit::eax, reinterpret_cast<sysint_t>(address));
@@ -268,7 +269,8 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
-      arg.Visit(&arg_visitor);
+      auto variant = arg.GetVariant();
+      boost::apply_visitor(arg_visitor, variant);
     });
 
     assembler->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));

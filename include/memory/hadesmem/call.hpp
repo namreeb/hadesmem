@@ -11,11 +11,13 @@
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>
 #include <boost/mpl/at.hpp>
+#include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include <windows.h>
 
+#include "hadesmem/error.hpp"
 #include "hadesmem/config.hpp"
 #include "hadesmem/detail/func_args.hpp"
 #include "hadesmem/detail/func_arity.hpp"
@@ -220,8 +222,7 @@ class CallArg
 public:
   template <typename T>
   explicit CallArg(T t) HADESMEM_NOEXCEPT
-    : arg_(), 
-    type_(ArgType::kInvalidType)
+    : arg_()
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
@@ -231,27 +232,9 @@ public:
     Initialize(t);
   }
   
-  template <typename V>
-  void Visit(V* v) const
+  boost::variant<DWORD32, DWORD64, float, double> GetVariant() const
   {
-    switch (type_)
-    {
-    case ArgType::kInvalidType:
-      BOOST_ASSERT(false);
-      break;
-    case ArgType::kInt32Type:
-      (*v)(arg_.i32);
-      break;
-    case ArgType::kInt64Type:
-      (*v)(arg_.i64);
-      break;
-    case ArgType::kFloatType:
-      (*v)(arg_.f);
-      break;
-    case ArgType::kDoubleType:
-      (*v)(arg_.d);
-      break;
-    }
+    return arg_;
   }
   
 private:
@@ -279,47 +262,26 @@ private:
 
   void Initialize(DWORD32 t) HADESMEM_NOEXCEPT
   {
-    type_ = ArgType::kInt32Type;
-    arg_.i32 = t;
+    arg_ = t;
   }
 
   void Initialize(DWORD64 t) HADESMEM_NOEXCEPT
   {
-    type_ = ArgType::kInt64Type;
-    arg_.i64 = t;
+    arg_ = t;
   }
   
   void Initialize(float t) HADESMEM_NOEXCEPT
   {
-    type_ = ArgType::kFloatType;
-    arg_.f = t;
+    arg_ = t;
   }
   
   void Initialize(double t) HADESMEM_NOEXCEPT
   {
-    type_ = ArgType::kDoubleType;
-    arg_.d = t;
+    arg_ = t;
   }
   
-  enum class ArgType
-  {
-    kInvalidType, 
-    kInt32Type, 
-    kInt64Type, 
-    kFloatType, 
-    kDoubleType
-  };
-  
-  union Arg
-  {
-    DWORD32 i32;
-    DWORD64 i64;
-    float f;
-    double d;
-  };
-  
+  typedef boost::variant<DWORD32, DWORD64, float, double> Arg;
   Arg arg_;
-  ArgType type_;
 };
 
 typedef void (*FnPtr)();
