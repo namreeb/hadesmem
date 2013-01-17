@@ -76,6 +76,9 @@ run pelib/section.cpp
 run pelib/section_list.cpp
   ;
 
+run pelib/export_dir.cpp
+  ;
+
 run pelib/tls_dir.cpp
   ;
 
