@@ -33,17 +33,6 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
-// This is required because of a bug in Clang's dllexport support on Windows, 
-// this is worked around by using a linker flag to export all symbols 
-// unconditionally.
-// TODO: Remove this hack once Clang has been fixed.
-// TODO: Move this to config header.
-#ifdef HADESMEM_CLANG
-#define HADESMEM_DLLEXPORT  
-#else
-#define HADESMEM_DLLEXPORT __declspec(dllexport)
-#endif
-
 // Export something to ensure tests pass...
 extern "C" HADESMEM_DLLEXPORT void Dummy();
 extern "C" HADESMEM_DLLEXPORT void Dummy()
@@ -100,7 +89,8 @@ BOOST_AUTO_TEST_CASE(export_dir)
     cur_export_dir->SetNumberOfFunctions(cur_export_dir->
       GetNumberOfFunctions());
     cur_export_dir->SetNumberOfNames(cur_export_dir->GetNumberOfNames());
-    cur_export_dir->SetAddressOfFunctions(cur_export_dir->GetAddressOfFunctions());
+    cur_export_dir->SetAddressOfFunctions(cur_export_dir->
+      GetAddressOfFunctions());
     cur_export_dir->SetAddressOfNames(cur_export_dir->
       GetAddressOfNames());
     cur_export_dir->SetAddressOfNameOrdinals(cur_export_dir->
