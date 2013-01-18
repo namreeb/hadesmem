@@ -4,8 +4,8 @@
 #include "hadesmem/pelib/pe_file.hpp"
 
 #include <cstddef>
+#include <ostream>
 #include <utility>
-#include <iostream>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>

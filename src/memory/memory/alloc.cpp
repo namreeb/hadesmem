@@ -4,7 +4,7 @@
 #include "hadesmem/alloc.hpp"
 
 #include <utility>
-#include <iostream>
+#include <ostream>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>

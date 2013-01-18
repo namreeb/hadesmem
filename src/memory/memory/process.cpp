@@ -4,8 +4,8 @@
 #include "hadesmem/process.hpp"
 
 #include <array>
+#include <ostream>
 #include <utility>
-#include <iostream>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/assert.hpp>

@@ -3,6 +3,7 @@
 
 #include "hadesmem/module.hpp"
 
+#include <ostream>
 #include <utility>
 
 #include "hadesmem/detail/warning_disable_prefix.hpp"
