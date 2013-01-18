@@ -118,10 +118,10 @@ std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
   return (lhs << rhs.GetBase());
 }
 
-PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
+PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
 {
-  PeFileType const type = pefile.GetType();
-  PBYTE base = static_cast<PBYTE>(pefile.GetBase());
+  PeFileType const type = pe_file.GetType();
+  PBYTE base = static_cast<PBYTE>(pe_file.GetBase());
 
   if (type == PeFileType::Data)
   {
@@ -130,7 +130,7 @@ PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva)
       return nullptr;
     }
 
-    SectionList sections(process, pefile);
+    SectionList sections(process, pe_file);
     for (auto const& section : sections)
     {
       DWORD const virtual_beg = section.GetVirtualAddress();

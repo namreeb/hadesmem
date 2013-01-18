@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE pefile
+#define BOOST_TEST_MODULE pe_file
 #include "hadesmem/detail/warning_disable_prefix.hpp"
 #include <boost/test/unit_test.hpp>
 #include "hadesmem/detail/warning_disable_suffix.hpp"
@@ -30,7 +30,7 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
-BOOST_AUTO_TEST_CASE(pefile)
+BOOST_AUTO_TEST_CASE(pe_file)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
 

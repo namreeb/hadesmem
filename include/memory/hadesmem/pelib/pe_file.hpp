@@ -63,6 +63,6 @@ std::ostream& operator<<(std::ostream& lhs, PeFile const& rhs);
 
 std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs);
 
-PVOID RvaToVa(Process const& process, PeFile const& pefile, DWORD rva);
+PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva);
 
 }
