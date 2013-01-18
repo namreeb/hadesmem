@@ -101,7 +101,8 @@ BOOST_AUTO_TEST_CASE(tls_dir)
     std::stringstream test_str_2;
     test_str_2.imbue(std::locale::classic());
     test_str_2 << cur_tls_dir->GetBase();
-    
+    BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
+
     // TODO: Ensure that base address is different across modules (similar to 
     // other tests).
   }

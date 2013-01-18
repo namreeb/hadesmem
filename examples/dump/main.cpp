@@ -20,9 +20,12 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/region_list.hpp>
+#include <hadesmem/pelib/export.hpp>
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/detail/initialize.hpp>
+#include <hadesmem/pelib/export_list.hpp>
 
 namespace
 {
@@ -59,6 +62,41 @@ void DumpRegions(hadesmem::Process const& process)
   }
 }
 
+void DumpExports(hadesmem::Process const& process, 
+  hadesmem::Module const& module)
+{
+  std::wcout << "\n\tExports:\n";
+
+  hadesmem::PeFile pe_file(process, module.GetHandle(), 
+    hadesmem::PeFileType::Image);
+  hadesmem::ExportList exports(process, pe_file);
+  for (auto const& e : exports)
+  {
+    std::wcout << std::boolalpha;
+    std::wcout << "\n";
+    std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
+    std::wcout << "\t\tVA: " << PtrToString(e.GetVa()) << "\n";
+    std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
+    std::wcout << "\t\tOrdinal: " << e.GetOrdinal() << "\n";
+    std::wcout << "\t\tByName: " << e.ByName() << "\n";
+    std::wcout << "\t\tByOrdinal: " << e.ByOrdinal() << "\n";
+    std::wcout << "\t\tIsForwarded: " << e.IsForwarded() << "\n";
+    std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";
+    std::wcout << "\t\tForwarderModule: " << e.GetForwarderModule().c_str() << 
+      "\n";
+    std::wcout << "\t\tForwarderFunction: " << 
+      e.GetForwarderFunction().c_str() << "\n";
+    std::wcout << "\t\tIsForwardedByOrdinal: " << e.IsForwardedByOrdinal() << 
+      "\n";
+    if (e.IsForwardedByOrdinal())
+    {
+      std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal() << 
+        "\n";
+    }
+    std::wcout << std::noboolalpha;
+  }
+}
+
 void DumpModules(hadesmem::Process const& process)
 {
   std::wcout << "\nModules:\n";
@@ -72,6 +110,8 @@ void DumpModules(hadesmem::Process const& process)
       << "\n";
     std::wcout << "\tName: " << module.GetName() << "\n";
     std::wcout << "\tPath: " << module.GetPath() << "\n";
+
+    DumpExports(process, module);
   }
 }
 
