@@ -18,6 +18,8 @@ class Process;
 
 class PeFile;
 
+// TODO: Constructor to create Export by name (optimize using binary search).
+
 class Export
 {
 public:
