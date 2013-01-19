@@ -81,8 +81,11 @@ run pelib/tls_dir.cpp
   
 run pelib/export_dir.cpp
   ;
-
+  
 run pelib/export_list.cpp
+  ;
+
+run pelib/import_dir_list.cpp
   ;
 
 compile-fail read_pod_fail.cpp

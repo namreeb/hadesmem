@@ -30,6 +30,9 @@
 // memory page protections preemptively in preparation for the read), however 
 // this is not guaranteed to work, even in the aforementioned scenario.
 
+// TODO: Fix cross-region reads (and writes?). This has already come up in 
+// real world code with the import dumper.
+
 namespace hadesmem
 {
 
@@ -86,36 +89,38 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
   std::basic_string<T> data;
 
-  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-  PVOID const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
-    mbi.RegionSize;
-
-  T* cur = static_cast<T*>(address);
-  while (cur + 1 < region_end)
+  for (;;)
   {
-    std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_end) - 
-      reinterpret_cast<DWORD_PTR>(cur);
-    std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
-      len_to_end);
-    std::size_t const buf_len = buf_len_bytes / sizeof(T);
+    MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+    PVOID const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
+      mbi.RegionSize;
 
-    std::vector<T> buf(buf_len);
-    detail::ReadUnchecked(process, cur, buf.data(), buf.size() * sizeof(T));
-
-    auto const iter = std::find(std::begin(buf), std::end(buf), T());
-    std::copy(std::begin(buf), iter, std::back_inserter(data));
-
-    if (iter != std::end(buf))
+    T* cur = static_cast<T*>(address);
+    while (cur + 1 < region_end)
     {
-      protect_guard.Restore();
-      return data;
+      std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_end) - 
+        reinterpret_cast<DWORD_PTR>(cur);
+      std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
+        len_to_end);
+      std::size_t const buf_len = buf_len_bytes / sizeof(T);
+
+      std::vector<T> buf(buf_len);
+      detail::ReadUnchecked(process, cur, buf.data(), buf.size() * sizeof(T));
+
+      auto const iter = std::find(std::begin(buf), std::end(buf), T());
+      std::copy(std::begin(buf), iter, std::back_inserter(data));
+
+      if (iter != std::end(buf))
+      {
+        protect_guard.Restore();
+        return data;
+      }
+
+      cur += buf_len;
     }
 
-    cur += buf_len;
+    address = region_end;
   }
-
-  HADESMEM_THROW_EXCEPTION(Error() << 
-    ErrorString("Attempt to read across a region boundary."));
 }
 
 template <typename T>

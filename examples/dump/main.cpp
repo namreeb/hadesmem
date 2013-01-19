@@ -24,8 +24,12 @@
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/pelib/export_list.hpp>
+#include <hadesmem/pelib/import_thunk.hpp>
+#include <hadesmem/pelib/import_dir_list.hpp>
+#include <hadesmem/pelib/import_thunk_list.hpp>
 
 namespace
 {
@@ -104,6 +108,52 @@ void DumpExports(hadesmem::Process const& process,
   }
 }
 
+void DumpImports(hadesmem::Process const& process, 
+  hadesmem::Module const& module)
+{
+  std::wcout << "\n\tImport Dirs:\n";
+
+  hadesmem::PeFile pe_file(process, module.GetHandle(), 
+    hadesmem::PeFileType::Image);
+  hadesmem::ImportDirList import_dirs(process, pe_file);
+  for (auto const& dir : import_dirs)
+  {
+    std::wcout << std::boolalpha;
+
+    std::wcout << "\n";
+    std::wcout << "\t\tCharacteristics: " << std::hex << dir.GetCharacteristics() << std::dec << "\n";
+    std::wcout << "\t\tTimeDateStamp: " << dir.GetTimeDateStamp() << "\n";
+    std::wcout << "\t\tForwarderChain: " << dir.GetForwarderChain() << "\n";
+    std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec << "\n";
+    std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
+    std::wcout << "\t\tFirstThunk: " << dir.GetFirstThunk() << "\n";
+
+    std::wcout << "\n\t\tImport Thunks:\n";
+
+    hadesmem::ImportThunkList import_thunks(process, pe_file, 
+      dir.GetCharacteristics());
+    for (auto const& thunk : import_thunks)
+    {
+      std::wcout << "\n";
+      std::wcout << "\t\t\tAddressOfData: " << thunk.GetAddressOfData() << "\n";
+      std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
+      std::wcout << "\t\t\tByOrdinal: " << thunk.ByOrdinal() << "\n";
+      if (thunk.ByOrdinal())
+      {
+        std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+      }
+      else
+      {
+        std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
+        std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
+      }
+      std::wcout << "\t\t\tFunction: " << thunk.GetFunction() << "\n";
+    }
+
+    std::wcout << std::noboolalpha;
+  }
+}
+
 void DumpModules(hadesmem::Process const& process)
 {
   std::wcout << "\nModules:\n";
@@ -119,6 +169,8 @@ void DumpModules(hadesmem::Process const& process)
     std::wcout << "\tPath: " << module.GetPath() << "\n";
 
     DumpExports(process, module);
+
+    DumpImports(process, module);
   }
 }
 
