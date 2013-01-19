@@ -126,9 +126,18 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << "\t\tForwarderChain: " << dir.GetForwarderChain() << "\n";
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec << "\n";
     std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
-    std::wcout << "\t\tFirstThunk: " << dir.GetFirstThunk() << "\n";
+    std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk() << std::dec << "\n";
 
     std::wcout << "\n\t\tImport Thunks:\n";
+
+    if (!dir.GetCharacteristics())
+    {
+      // TODO: Support modules with no INT. Perhaps detect at runtime which 
+      // import thunk list to use (by default -- allow customization of 
+      // course)?
+      std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
+      continue;
+    }
 
     hadesmem::ImportThunkList import_thunks(process, pe_file, 
       dir.GetCharacteristics());
@@ -147,7 +156,7 @@ void DumpImports(hadesmem::Process const& process,
         std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
         std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
       }
-      std::wcout << "\t\t\tFunction: " << thunk.GetFunction() << "\n";
+      std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction() << std::dec << "\n";
     }
 
     std::wcout << std::noboolalpha;
