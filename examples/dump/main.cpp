@@ -121,20 +121,22 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << std::boolalpha;
 
     std::wcout << "\n";
-    std::wcout << "\t\tCharacteristics: " << std::hex << dir.GetCharacteristics() << std::dec << "\n";
+    std::wcout << "\t\tCharacteristics: " << std::hex << 
+      dir.GetCharacteristics() << std::dec << "\n";
     std::wcout << "\t\tTimeDateStamp: " << dir.GetTimeDateStamp() << "\n";
     std::wcout << "\t\tForwarderChain: " << dir.GetForwarderChain() << "\n";
-    std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec << "\n";
+    std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << 
+      std::dec << "\n";
     std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
-    std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk() << std::dec << "\n";
+    std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk() << 
+      std::dec << "\n";
 
     std::wcout << "\n\t\tImport Thunks:\n";
 
+    // Images without an INT are valid, but after an image like this is loaded 
+    // it is impossible to recover the name table.
     if (!dir.GetCharacteristics())
     {
-      // TODO: Support modules with no INT. Perhaps detect at runtime which 
-      // import thunk list to use (by default -- allow customization of 
-      // course)?
       std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
       continue;
     }
@@ -144,7 +146,8 @@ void DumpImports(hadesmem::Process const& process,
     for (auto const& thunk : import_thunks)
     {
       std::wcout << "\n";
-      std::wcout << "\t\t\tAddressOfData: " << thunk.GetAddressOfData() << "\n";
+      std::wcout << "\t\t\tAddressOfData: " << thunk.GetAddressOfData() 
+        << "\n";
       std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
       std::wcout << "\t\t\tByOrdinal: " << thunk.ByOrdinal() << "\n";
       if (thunk.ByOrdinal())
@@ -156,7 +159,8 @@ void DumpImports(hadesmem::Process const& process,
         std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
         std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
       }
-      std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction() << std::dec << "\n";
+      std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction() << 
+        std::dec << "\n";
     }
 
     std::wcout << std::noboolalpha;
