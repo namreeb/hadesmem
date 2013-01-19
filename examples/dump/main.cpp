@@ -90,8 +90,15 @@ void DumpExports(hadesmem::Process const& process,
       "\n";
     if (e.IsForwardedByOrdinal())
     {
-      std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal() << 
-        "\n";
+      try
+      {
+        std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal() << 
+          "\n";
+      }
+      catch (std::exception const& /*e*/)
+      {
+        std::wcout << "\t\tForwarderOrdinal Invalid.\n";
+      }
     }
     std::wcout << std::noboolalpha;
   }
