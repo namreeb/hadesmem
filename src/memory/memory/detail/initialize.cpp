@@ -76,7 +76,6 @@ void EnableCrtDebugFlags()
 #if !defined(HADESMEM_GCC)
   int dbg_flags = ::_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
   dbg_flags |= _CRTDBG_ALLOC_MEM_DF;
-  dbg_flags |= _CRTDBG_DELAY_FREE_MEM_DF;
   dbg_flags |= _CRTDBG_LEAK_CHECK_DF;
   ::_CrtSetDbgFlag(dbg_flags);
 #endif // #if !defined(HADESMEM_GCC)
