@@ -149,8 +149,8 @@ void DumpImports(hadesmem::Process const& process,
     for (auto const& thunk : import_thunks)
     {
       std::wcout << "\n";
-      std::wcout << "\t\t\tAddressOfData: " << thunk.GetAddressOfData() 
-        << "\n";
+      std::wcout << "\t\t\tAddressOfData: " << std::hex << 
+        thunk.GetAddressOfData() << std::dec << "\n";
       std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
       std::wcout << "\t\t\tByOrdinal: " << thunk.ByOrdinal() << "\n";
       if (thunk.ByOrdinal())
