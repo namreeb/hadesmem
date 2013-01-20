@@ -85,23 +85,26 @@ void DumpExports(hadesmem::Process const& process,
     std::wcout << "\t\tByName: " << e.ByName() << "\n";
     std::wcout << "\t\tByOrdinal: " << e.ByOrdinal() << "\n";
     std::wcout << "\t\tIsForwarded: " << e.IsForwarded() << "\n";
-    std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";
-    std::wcout << "\t\tForwarderModule: " << e.GetForwarderModule().c_str() << 
-      "\n";
-    std::wcout << "\t\tForwarderFunction: " << 
-      e.GetForwarderFunction().c_str() << "\n";
-    std::wcout << "\t\tIsForwardedByOrdinal: " << e.IsForwardedByOrdinal() << 
-      "\n";
-    if (e.IsForwardedByOrdinal())
+    if (e.IsForwarded())
     {
-      try
+      std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";
+      std::wcout << "\t\tForwarderModule: " << e.GetForwarderModule().c_str() 
+        << "\n";
+      std::wcout << "\t\tForwarderFunction: " << 
+        e.GetForwarderFunction().c_str() << "\n";
+      std::wcout << "\t\tIsForwardedByOrdinal: " << e.IsForwardedByOrdinal() << 
+        "\n";
+      if (e.IsForwardedByOrdinal())
       {
-        std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal() << 
-          "\n";
-      }
-      catch (std::exception const& /*e*/)
-      {
-        std::wcout << "\t\tForwarderOrdinal Invalid.\n";
+        try
+        {
+          std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal() << 
+            "\n";
+        }
+        catch (std::exception const& /*e*/)
+        {
+          std::wcout << "\t\tForwarderOrdinal Invalid.\n";
+        }
       }
     }
     std::wcout << std::noboolalpha;
