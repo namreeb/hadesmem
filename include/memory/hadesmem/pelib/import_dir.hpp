@@ -36,7 +36,7 @@ public:
 
   PVOID GetBase() const HADESMEM_NOEXCEPT;
 
-  DWORD GetCharacteristics() const;
+  DWORD GetOriginalFirstThunk() const;
 
   DWORD GetTimeDateStamp() const;
 
@@ -48,7 +48,7 @@ public:
 
   DWORD GetFirstThunk() const;
 
-  void SetCharacteristics(DWORD characteristics) const;
+  void SetOriginalFirstThunk(DWORD original_first_thunk) const;
 
   void SetTimeDateStamp(DWORD time_date_stamp) const;
 

@@ -94,10 +94,10 @@ PVOID ImportDir::GetBase() const HADESMEM_NOEXCEPT
   return impl_->base_;
 }
 
-DWORD ImportDir::GetCharacteristics() const
+DWORD ImportDir::GetOriginalFirstThunk() const
 {
   return Read<DWORD>(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
-    IMAGE_IMPORT_DESCRIPTOR, Characteristics));
+    IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk));
 }
 
 DWORD ImportDir::GetTimeDateStamp() const
@@ -130,10 +130,10 @@ DWORD ImportDir::GetFirstThunk() const
     IMAGE_IMPORT_DESCRIPTOR, FirstThunk));
 }
 
-void ImportDir::SetCharacteristics(DWORD characteristics) const
+void ImportDir::SetOriginalFirstThunk(DWORD original_first_thunk) const
 {
   return Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
-    IMAGE_IMPORT_DESCRIPTOR, Characteristics), characteristics);
+    IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), original_first_thunk);
 }
 
 void ImportDir::SetTimeDateStamp(DWORD time_date_stamp) const

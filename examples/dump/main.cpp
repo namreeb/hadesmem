@@ -124,8 +124,8 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << std::boolalpha;
 
     std::wcout << "\n";
-    std::wcout << "\t\tCharacteristics: " << std::hex << 
-      dir.GetCharacteristics() << std::dec << "\n";
+    std::wcout << "\t\tOriginalFirstThunk: " << std::hex << 
+      dir.GetOriginalFirstThunk() << std::dec << "\n";
     std::wcout << "\t\tTimeDateStamp: " << dir.GetTimeDateStamp() << "\n";
     std::wcout << "\t\tForwarderChain: " << dir.GetForwarderChain() << "\n";
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << 
@@ -138,7 +138,7 @@ void DumpImports(hadesmem::Process const& process,
 
     // Images without an INT are valid, but after an image like this is loaded 
     // it is impossible to recover the name table.
-    if (!dir.GetCharacteristics())
+    if (!dir.GetOriginalFirstThunk())
     {
       std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
       continue;
@@ -147,14 +147,14 @@ void DumpImports(hadesmem::Process const& process,
     // Some modules (packed modules are the only ones I've found so far) have 
     // import directories where the IAT RVA is the same as the INT RVA which 
     // effectively means there is no INT once the module is loaded.
-    if (dir.GetCharacteristics() == dir.GetFirstThunk())
+    if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
     {
       std::wcout << "\n\t\t\tWARNING! IAT is same as INT for this module.\n";
       continue;
     }
 
     hadesmem::ImportThunkList import_thunks(process, pe_file, 
-      dir.GetCharacteristics());
+      dir.GetOriginalFirstThunk());
     for (auto const& thunk : import_thunks)
     {
       std::wcout << "\n";

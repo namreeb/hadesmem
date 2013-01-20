@@ -36,6 +36,8 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
+// TODO: Split up and improve these import tests.
+
 // Export something to ensure tests pass...
 extern "C" HADESMEM_DLLEXPORT void Dummy();
 extern "C" HADESMEM_DLLEXPORT void Dummy()
@@ -73,7 +75,7 @@ BOOST_AUTO_TEST_CASE(import_dir_list)
       BOOST_CHECK(iter != std::end(import_dirs));
 
       hadesmem::ImportThunkList import_thunks(process, cur_pe_file, 
-        iter->GetCharacteristics());
+        iter->GetOriginalFirstThunk());
       auto iter2 = std::find_if(std::begin(import_thunks), 
         std::end(import_thunks), 
         [] (hadesmem::ImportThunk const& I)
@@ -91,7 +93,8 @@ BOOST_AUTO_TEST_CASE(import_dir_list)
       auto const imp_dir_raw = hadesmem::Read<IMAGE_IMPORT_DESCRIPTOR>(
         process, test_import_dir.GetBase());
 
-      test_import_dir.SetCharacteristics(test_import_dir.GetCharacteristics());
+      test_import_dir.SetOriginalFirstThunk(
+        test_import_dir.GetOriginalFirstThunk());
       test_import_dir.SetTimeDateStamp(test_import_dir.GetTimeDateStamp());
       test_import_dir.SetForwarderChain(test_import_dir.GetForwarderChain());
       test_import_dir.SetNameRaw(test_import_dir.GetNameRaw());
@@ -114,7 +117,7 @@ BOOST_AUTO_TEST_CASE(import_dir_list)
       BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
 
       hadesmem::ImportThunkList import_thunks(process, cur_pe_file, 
-        d.GetCharacteristics());
+        d.GetOriginalFirstThunk());
       BOOST_CHECK(std::begin(import_thunks) != std::end(import_thunks));
       for (auto const& t : import_thunks)
       {
