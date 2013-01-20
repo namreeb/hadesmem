@@ -111,7 +111,7 @@ ImportDirIterator& ImportDirIterator::operator++()
     impl_->import_dir_ = ImportDir(*impl_->process_, *impl_->pe_file_, 
       cur_base + 1);
 
-    if (!impl_->import_dir_->GetCharacteristics())
+    if (!impl_->import_dir_->GetOriginalFirstThunk())
     {
       impl_.reset();
       return *this;
