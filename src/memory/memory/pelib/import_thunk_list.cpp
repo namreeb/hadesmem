@@ -49,6 +49,10 @@ ImportThunkIterator::ImportThunkIterator(Process const& process,
     auto const thunk_ptr = reinterpret_cast<PIMAGE_THUNK_DATA>(RvaToVa(
       process, pe_file, first_thunk));
     impl_->import_thunk_ = ImportThunk(process, pe_file, thunk_ptr);
+    if (!impl_->import_thunk_->GetAddressOfData())
+    {
+      impl_.reset();
+    }
   }
   catch (std::exception const& /*e*/)
   {
