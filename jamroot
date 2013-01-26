@@ -77,11 +77,6 @@ project
     # Enable checks for signed overflow in debug builds
     <toolset>gcc,<variant>debug:<cxxflags>"-ftrapv"
     <toolset>clang,<variant>debug:<cxxflags>"-ftrapv"
-	# Enable LTCG in MSVC release builds (primarily for perf, but also 
-	# to enable better code analysis and allow the compiler to report more 
-	# warnings/errors).
-	<toolset>msvc,<variant>release:<cxxflags>"/GL"
-	<toolset>msvc,<variant>release:<linkflags>"/LTCG"
     
     # Enable C++11 Mode
     <toolset>gcc:<cxxflags>"-std=c++11"
