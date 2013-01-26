@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -24,7 +25,10 @@
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
@@ -66,13 +70,12 @@ void DumpRegions(hadesmem::Process const& process)
   }
 }
 
-void DumpExports(hadesmem::Process const& process, 
-  hadesmem::Module const& module)
+void DumpExports(hadesmem::Process const& process, PVOID module, 
+  hadesmem::PeFileType type)
 {
   std::wcout << "\n\tExports:\n";
 
-  hadesmem::PeFile pe_file(process, module.GetHandle(), 
-    hadesmem::PeFileType::Image);
+  hadesmem::PeFile pe_file(process, module, type);
   hadesmem::ExportList exports(process, pe_file);
   for (auto const& e : exports)
   {
@@ -80,11 +83,18 @@ void DumpExports(hadesmem::Process const& process,
     std::wcout << "\n";
     std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
     std::wcout << "\t\tVA: " << PtrToString(e.GetVa()) << "\n";
-    std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
-    std::wcout << "\t\tOrdinal: " << e.GetOrdinal() << "\n";
-    std::wcout << "\t\tByName: " << e.ByName() << "\n";
-    std::wcout << "\t\tByOrdinal: " << e.ByOrdinal() << "\n";
-    std::wcout << "\t\tIsForwarded: " << e.IsForwarded() << "\n";
+    if (e.ByName())
+    {
+      std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
+    }
+    else if (e.ByOrdinal())
+    {
+      std::wcout << "\t\tOrdinal: " << e.GetOrdinal() << "\n";
+    }
+    else
+    {
+      std::wcout << "\t\tWARNING! Entry not exported by name or ordinal.\n";
+    }
     if (e.IsForwarded())
     {
       std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";
@@ -111,13 +121,12 @@ void DumpExports(hadesmem::Process const& process,
   }
 }
 
-void DumpImports(hadesmem::Process const& process, 
-  hadesmem::Module const& module)
+void DumpImports(hadesmem::Process const& process, PVOID module, 
+  hadesmem::PeFileType type)
 {
   std::wcout << "\n\tImport Dirs:\n";
 
-  hadesmem::PeFile pe_file(process, module.GetHandle(), 
-    hadesmem::PeFileType::Image);
+  hadesmem::PeFile pe_file(process, module, type);
   hadesmem::ImportDirList import_dirs(process, pe_file);
   for (auto const& dir : import_dirs)
   {
@@ -136,23 +145,29 @@ void DumpImports(hadesmem::Process const& process,
 
     std::wcout << "\n\t\tImport Thunks:\n";
 
-    // Images without an INT are valid, but after an image like this is loaded 
-    // it is impossible to recover the name table.
-    if (!dir.GetOriginalFirstThunk())
+    // Certain information gets destroyed by the Windows PE loader in 
+    // some circumstances. Nothing we can do but ignore it or resort to 
+    // reading the original data from disk.
+    if (type == hadesmem::PeFileType::Image)
     {
-      std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
-      continue;
-    }
+      // Images without an INT are valid, but after an image like this is loaded 
+      // it is impossible to recover the name table.
+      if (!dir.GetOriginalFirstThunk())
+      {
+        std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
+        continue;
+      }
 
-    // Some modules (packed modules are the only ones I've found so far) have 
-    // import directories where the IAT RVA is the same as the INT RVA which 
-    // effectively means there is no INT once the module is loaded.
-    if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
-    {
-      std::wcout << "\n\t\t\tWARNING! IAT is same as INT for this module.\n";
-      continue;
+      // Some modules (packed modules are the only ones I've found so far) have 
+      // import directories where the IAT RVA is the same as the INT RVA which 
+      // effectively means there is no INT once the module is loaded.
+      if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
+      {
+        std::wcout << "\n\t\t\tWARNING! IAT is same as INT for this module.\n";
+        continue;
+      }
     }
-
+    
     hadesmem::ImportThunkList import_thunks(process, pe_file, 
       dir.GetOriginalFirstThunk());
     for (auto const& thunk : import_thunks)
@@ -161,7 +176,6 @@ void DumpImports(hadesmem::Process const& process,
       std::wcout << "\t\t\tAddressOfData: " << std::hex << 
         thunk.GetAddressOfData() << std::dec << "\n";
       std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
-      std::wcout << "\t\t\tByOrdinal: " << thunk.ByOrdinal() << "\n";
       if (thunk.ByOrdinal())
       {
         std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
@@ -193,9 +207,9 @@ void DumpModules(hadesmem::Process const& process)
     std::wcout << "\tName: " << module.GetName() << "\n";
     std::wcout << "\tPath: " << module.GetPath() << "\n";
 
-    DumpExports(process, module);
+    DumpExports(process, module.GetHandle(), hadesmem::PeFileType::Image);
 
-    DumpImports(process, module);
+    DumpImports(process, module.GetHandle(), hadesmem::PeFileType::Image);
   }
 }
 
@@ -226,6 +240,114 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   DumpModules(*process);
 
   DumpRegions(*process);
+}
+
+// TODO: Cleanup.
+void DumpFile(boost::filesystem::path const& path)
+{
+  std::ifstream file(path.c_str(), std::ios::binary | std::ios::ate);
+  if (!file)
+  {
+    std::wcout << "\nFailed to open file.\n";
+    return;
+  }
+
+  std::streampos const size = file.tellg();
+  if (!size || size < 0)
+  {
+    std::wcout << "\nEmpty or invalid file.\n";
+    return;
+  }
+
+  if (!file.seekg(0))
+  {
+    std::wcout << "\nWARNING! Seeking to beginning of file failed.\n";
+    return;
+  }
+
+  // Pick some arbitrary maximum size
+  // TODO: Fix this. Ideally we should only peek the first N bytes (however 
+  // big the PE headers are) and check if it's a valid target or not, then read 
+  // the rest of the file.
+  if (static_cast<long long>(size) > 0x40000000LL) // 1GB
+  {
+    std::wcout << "\nFile too big.\n";
+    return;
+  }
+
+  // TODO: Fix all the unsafe integer downcasting.
+  
+  std::vector<char> buf(static_cast<std::size_t>(size));
+
+  if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
+  {
+    std::wcout << "\nWARNING! Failed to read file data.\n";
+    return;
+  }
+
+  if (buf.size() != static_cast<std::size_t>(size))
+  {
+    std::wcout << "\nWARNING! Buffer size does not match file size.\n";
+    return;
+  }
+
+  hadesmem::Process const process(GetCurrentProcessId());
+
+  try
+  {
+    hadesmem::PeFile const pe_file(process, buf.data(), 
+      hadesmem::PeFileType::Data);
+    hadesmem::NtHeaders const nt_hdr(process, pe_file);
+#if defined(HADESMEM_ARCH_X86)
+    if (nt_hdr.GetMachine() != IMAGE_FILE_MACHINE_I386)
+#elif defined(HADESMEM_ARCH_X64)
+    if (nt_hdr.GetMachine() != IMAGE_FILE_MACHINE_AMD64)
+#else
+#error [HadesMem] Unsupported architecture.
+#endif
+    {
+      return;
+    }
+  }
+  catch (std::exception const& /*e*/)
+  {
+    return;
+  }
+
+  DumpExports(process, buf.data(), hadesmem::PeFileType::Data);
+
+  DumpImports(process, buf.data(), hadesmem::PeFileType::Data);
+}
+
+// Doing directory recursion 'manually' because recursive_directory_iterator 
+// throws on increment, even when you construct it as no-throw.
+void DumpDir(boost::filesystem::path const& path)
+{
+  std::wcout << "\nEntering dir: " << path << ".\n";
+
+  boost::system::error_code ec;
+  boost::filesystem::directory_iterator iter(path, ec);
+  boost::filesystem::directory_iterator end;
+
+  while (iter != end && !ec);
+  {
+    auto const& cur_path = *iter;
+
+    std::wcout << "\nCurrent path: " << cur_path << ".\n";
+    
+    if (boost::filesystem::is_directory(cur_path) && 
+      !boost::filesystem::is_symlink(cur_path))
+    {
+      DumpDir(cur_path);
+    }
+
+    if (boost::filesystem::is_regular_file(cur_path))
+    {
+      DumpFile(cur_path);
+    }
+
+    ++iter;
+  }
 }
 
 }
@@ -306,6 +428,13 @@ int main(int /*argc*/, char* /*argv*/[])
       {
         DumpProcessEntry(process_entry);
       }
+
+      std::wcout << "\nFiles:\n";
+
+      boost::filesystem::path const self_path = 
+        hadesmem::detail::GetSelfPath();
+      boost::filesystem::path const root_dir = self_path.root_path();
+      DumpDir(root_dir);
     }
 
     return 0;
