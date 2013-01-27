@@ -262,35 +262,28 @@ void DumpFile(boost::filesystem::path const& path)
     return;
   }
 
-  if (!file.seekg(0))
+  if (!file.seekg(0, std::ios::beg))
   {
     std::wcout << "\nWARNING! Seeking to beginning of file failed.\n";
     return;
   }
 
-  // Pick some arbitrary maximum size
-  // TODO: Fix this. Ideally we should only peek the first N bytes (however 
-  // big the PE headers are) and check if it's a valid target or not, then read 
-  // the rest of the file.
-  if (static_cast<long long>(size) > 0x40000000LL) // 1GB
+  // Peek for the MZ header before reading the whole file.
+  std::vector<char> mz_buf(2);
+  if (!file.read(mz_buf.data(), 2))
   {
-    std::wcout << "\nFile too big.\n";
+    std::wcout << "\nWARNING! Failed to read header signature.\n";
     return;
   }
 
+  BOOST_ASSERT(file.tellg() == 0);
+
   // TODO: Fix all the unsafe integer downcasting.
-  
   std::vector<char> buf(static_cast<std::size_t>(size));
 
   if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
   {
     std::wcout << "\nWARNING! Failed to read file data.\n";
-    return;
-  }
-
-  if (buf.size() != static_cast<std::size_t>(size))
-  {
-    std::wcout << "\nWARNING! Buffer size does not match file size.\n";
     return;
   }
 
