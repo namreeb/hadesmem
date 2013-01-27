@@ -123,6 +123,10 @@ DWORD TlsDir::GetCharacteristics() const
     offsetof(IMAGE_TLS_DIRECTORY, Characteristics));
 }
 
+// TODO: Decide whether to throw on a NULL AddressOfCallbacks, return an empty 
+// container, or simply ignore it and consider it a precondition violation.
+// Update dumper afterwards to reflect decision. (Currently it is manually 
+// checking AddressOfCallbacks.)
 std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
 {
   std::vector<PIMAGE_TLS_CALLBACK> callbacks;

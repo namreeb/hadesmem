@@ -289,11 +289,14 @@ void DumpTls(hadesmem::Process const& process, PVOID module,
     << tls_dir->GetAddressOfIndex() << std::dec << "\n";
   std::wcout << "\t\tAddressOfCallBacks: " << std::hex 
     << tls_dir->GetAddressOfCallBacks() << std::dec << "\n";
-  auto const callbacks = tls_dir->GetCallbacks();
-  for (auto const c : callbacks)
+  if (tls_dir->GetAddressOfCallBacks())
   {
-    std::wcout << "\t\tCallback: " << std::hex 
-      << reinterpret_cast<DWORD_PTR>(c) << std::dec << "\n";
+    auto const callbacks = tls_dir->GetCallbacks();
+    for (auto const c : callbacks)
+    {
+      std::wcout << "\t\tCallback: " << std::hex 
+        << reinterpret_cast<DWORD_PTR>(c) << std::dec << "\n";
+    }
   }
   std::wcout << "\t\tSizeOfZeroFill: " << std::hex 
     << tls_dir->GetSizeOfZeroFill() << std::dec << "\n";
