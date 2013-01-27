@@ -329,7 +329,7 @@ void DumpDir(boost::filesystem::path const& path)
   boost::filesystem::directory_iterator iter(path, ec);
   boost::filesystem::directory_iterator end;
 
-  while (iter != end && !ec);
+  while (iter != end && !ec)
   {
     auto const& cur_path = *iter;
 
