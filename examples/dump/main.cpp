@@ -281,13 +281,13 @@ void DumpTls(hadesmem::Process const& process, PVOID module,
 
   std::wcout << std::boolalpha;
   std::wcout << "\n";
-  std::wcout << "\t\tGetStartAddressOfRawData: " 
-    << tls_dir->GetStartAddressOfRawData() << "\n";
-  std::wcout << "\t\tGetEndAddressOfRawData: " << std::hex 
+  std::wcout << "\t\tStartAddressOfRawData: " << std::hex 
+    << tls_dir->GetStartAddressOfRawData() << std::dec << "\n";
+  std::wcout << "\t\tEndAddressOfRawData: " << std::hex 
     << tls_dir->GetEndAddressOfRawData() << std::dec << "\n";
-  std::wcout << "\t\tGetAddressOfIndex: " << std::hex 
+  std::wcout << "\t\tAddressOfIndex: " << std::hex 
     << tls_dir->GetAddressOfIndex() << std::dec << "\n";
-  std::wcout << "\t\tGetAddressOfCallBacks: " << std::hex 
+  std::wcout << "\t\tAddressOfCallBacks: " << std::hex 
     << tls_dir->GetAddressOfCallBacks() << std::dec << "\n";
   auto const callbacks = tls_dir->GetCallbacks();
   for (auto const c : callbacks)
@@ -295,9 +295,9 @@ void DumpTls(hadesmem::Process const& process, PVOID module,
     std::wcout << "\t\tCallback: " << std::hex 
       << reinterpret_cast<DWORD_PTR>(c) << std::dec << "\n";
   }
-  std::wcout << "\t\tGetSizeOfZeroFill: " << std::hex 
+  std::wcout << "\t\tSizeOfZeroFill: " << std::hex 
     << tls_dir->GetSizeOfZeroFill() << std::dec << "\n";
-  std::wcout << "\t\tGetCharacteristics: " << std::hex 
+  std::wcout << "\t\tCharacteristics: " << std::hex 
     << tls_dir->GetCharacteristics() << std::dec << "\n";
   std::wcout << std::noboolalpha;
 }
