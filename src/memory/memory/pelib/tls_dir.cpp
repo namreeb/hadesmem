@@ -127,11 +127,22 @@ std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
 {
   std::vector<PIMAGE_TLS_CALLBACK> callbacks;
 
-  NtHeaders nt_headers(*impl_->process_, *impl_->pe_file_);
-
+  // TODO: Refactor this into a new GetRuntimeBase/GetImageBase/etc API (names 
+  // just ideas, still not decided on what to call it).
+  ULONG_PTR image_base = 0;
+  if (impl_->pe_file_->GetType() == PeFileType::Image)
+  {
+    image_base = reinterpret_cast<ULONG_PTR>(impl_->pe_file_->GetBase()); 
+  }
+  else
+  {
+    NtHeaders nt_headers(*impl_->process_, *impl_->pe_file_);
+    image_base = nt_headers.GetImageBase();
+  }
+  
   auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(RvaToVa(
     *impl_->process_, *impl_->pe_file_, static_cast<DWORD>(
-    GetAddressOfCallBacks() - nt_headers.GetImageBase())));
+    GetAddressOfCallBacks() - image_base)));
   
   for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*impl_->process_, 
     callbacks_raw); 
@@ -139,7 +150,7 @@ std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
     callback = Read<PIMAGE_TLS_CALLBACK>(*impl_->process_, ++callbacks_raw))
   {
     DWORD_PTR const callback_offset = reinterpret_cast<DWORD_PTR>(callback) - 
-      nt_headers.GetImageBase();
+      image_base;
     callbacks.push_back(reinterpret_cast<PIMAGE_TLS_CALLBACK>(
       callback_offset));
   }
