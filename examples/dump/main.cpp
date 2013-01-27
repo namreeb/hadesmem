@@ -17,6 +17,7 @@
 #include <windows.h>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/process.hpp>
@@ -26,6 +27,8 @@
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/section.hpp>
+#include <hadesmem/pelib/tls_dir.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
@@ -33,6 +36,7 @@
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
+#include <hadesmem/pelib/section_list.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
 #include <hadesmem/pelib/import_thunk_list.hpp>
 
@@ -69,6 +73,233 @@ void DumpRegions(hadesmem::Process const& process)
     std::wcout << "\tType: " << std::hex << region.GetType() << std::dec 
       << "\n";
   }
+}
+
+void DumpHeaders(hadesmem::Process const& process, PVOID module, 
+  hadesmem::PeFileType type)
+{
+  std::wcout << "\n\tDOS Header:\n";
+
+  hadesmem::PeFile pe_file(process, module, type);
+
+  hadesmem::DosHeader dos_hdr(process, pe_file);
+  std::wcout << std::boolalpha;
+  std::wcout << "\n";
+  std::wcout << "\t\tMagic: " << std::hex << dos_hdr.GetMagic() << std::dec 
+    << "\n";
+  std::wcout << "\t\tBytesOnLastPage: " << std::hex 
+    << dos_hdr.GetBytesOnLastPage() << std::dec << "\n";
+  std::wcout << "\t\tPagesInFile: " << std::hex << dos_hdr.GetPagesInFile() 
+    << std::dec << "\n";
+  std::wcout << "\t\tRelocations: " << std::hex << dos_hdr.GetRelocations() 
+    << std::dec << "\n";
+  std::wcout << "\t\tSizeOfHeaderInParagraphs: " << std::hex 
+    << dos_hdr.GetSizeOfHeaderInParagraphs() << std::dec << "\n";
+  std::wcout << "\t\tMinExtraParagraphs: " << std::hex 
+    << dos_hdr.GetMinExtraParagraphs() << std::dec << "\n";
+  std::wcout << "\t\tMaxExtraParagraphs: " << std::hex 
+    << dos_hdr.GetMaxExtraParagraphs() << std::dec << "\n";
+  std::wcout << "\t\tInitialSS: " << std::hex << dos_hdr.GetInitialSS() 
+    << std::dec << "\n";
+  std::wcout << "\t\tInitialSP: " << std::hex << dos_hdr.GetInitialSP() 
+    << std::dec << "\n";
+  std::wcout << "\t\tChecksum: " << std::hex << dos_hdr.GetChecksum() 
+    << std::dec << "\n";
+  std::wcout << "\t\tInitialIP: " << std::hex << dos_hdr.GetInitialIP() 
+    << std::dec << "\n";
+  std::wcout << "\t\tInitialCS: " << std::hex << dos_hdr.GetInitialCS() 
+    << std::dec << "\n";
+  std::wcout << "\t\tRelocTableFileAddr: " << std::hex 
+    << dos_hdr.GetRelocTableFileAddr() << std::dec << "\n";
+  std::wcout << "\t\tOverlayNum: " << std::hex << dos_hdr.GetOverlayNum() 
+    << std::dec << "\n";
+  std::wcout << "\t\tReservedWords1:" << std::hex;
+  auto const reserved_words_1 = dos_hdr.GetReservedWords1();
+  for (auto const r : reserved_words_1)
+  {
+    std::wcout << L' ' << r;
+  }
+  std::wcout  << std::dec << "\n";
+  std::wcout << "\t\tOEMID: " << std::hex << dos_hdr.GetOEMID() << std::dec 
+    << "\n";
+  std::wcout << "\t\tOEMInfo: " << std::hex << dos_hdr.GetOEMInfo() 
+    << std::dec << "\n";
+  std::wcout << "\t\tReservedWords2:" << std::hex;
+  auto const reserved_words_2 = dos_hdr.GetReservedWords2();
+  for (auto const r : reserved_words_2)
+  {
+    std::wcout << L' ' << r;
+  }
+  std::wcout  << std::dec << "\n";
+  std::wcout << "\t\tNewHeaderOffset: " << std::hex 
+    << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
+  std::wcout << std::noboolalpha;
+
+  hadesmem::NtHeaders nt_hdrs(process, pe_file);
+  std::wcout << std::boolalpha;
+  std::wcout << "\n";
+  std::wcout << "\t\tSignature: " << std::hex << nt_hdrs.GetSignature() 
+    << std::dec << "\n";
+  std::wcout << "\t\tMachine: " << std::hex 
+    << nt_hdrs.GetMachine() << std::dec << "\n";
+  std::wcout << "\t\tNumberOfSections: " << std::hex 
+    << nt_hdrs.GetNumberOfSections() << std::dec << "\n";
+  std::wcout << "\t\tTimeDateStamp: " << std::hex 
+    << nt_hdrs.GetTimeDateStamp() << std::dec << "\n";
+  std::wcout << "\t\tPointerToSymbolTable: " << std::hex 
+    << nt_hdrs.GetPointerToSymbolTable() << std::dec << "\n";
+  std::wcout << "\t\tNumberOfSymbols: " << std::hex 
+    << nt_hdrs.GetNumberOfSymbols() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfOptionalHeader: " << std::hex 
+    << nt_hdrs.GetSizeOfOptionalHeader() << std::dec << "\n";
+  std::wcout << "\t\tCharacteristics: " << std::hex 
+    << nt_hdrs.GetCharacteristics() << std::dec << "\n";
+  std::wcout << "\t\tMagic: " << std::hex << nt_hdrs.GetMagic() << std::dec 
+    << "\n";
+  std::wcout << "\t\tMajorLinkerVersion: " << nt_hdrs.GetMajorLinkerVersion() 
+    << "\n";
+  std::wcout << "\t\tMinorLinkerVersion: " << nt_hdrs.GetMinorLinkerVersion() 
+    << "\n";
+  std::wcout << "\t\tSizeOfCode: " << std::hex << nt_hdrs.GetSizeOfCode() 
+    << std::dec << "\n";
+  std::wcout << "\t\tSizeOfInitializedData: " << std::hex 
+    << nt_hdrs.GetSizeOfInitializedData() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfUninitializedData: " << std::hex 
+    << nt_hdrs.GetSizeOfUninitializedData() << std::dec << "\n";
+  std::wcout << "\t\tAddressOfEntryPoint: " << std::hex 
+    << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
+  std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode() 
+    << std::dec << "\n";
+#if defined(HADESMEM_ARCH_X86) 
+  std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData() 
+    << std::dec << "\n";
+#endif
+  std::wcout << "\t\tImageBase: " << std::hex << nt_hdrs.GetImageBase() 
+    << std::dec << "\n";
+  std::wcout << "\t\tSectionAlignment: " << std::hex 
+    << nt_hdrs.GetSectionAlignment() << std::dec << "\n";
+  std::wcout << "\t\tFileAlignment: " << std::hex 
+    << nt_hdrs.GetFileAlignment() << std::dec << "\n";
+  std::wcout << "\t\tMajorOperatingSystemVersion: " 
+    << nt_hdrs.GetMajorOperatingSystemVersion() << "\n";
+  std::wcout << "\t\tMinorOperatingSystemVersion: " 
+    << nt_hdrs.GetMinorOperatingSystemVersion() << "\n";
+  std::wcout << "\t\tMajorImageVersion: " << nt_hdrs.GetMajorImageVersion() 
+    << "\n";
+  std::wcout << "\t\tMinorImageVersion: " << nt_hdrs.GetMinorImageVersion() 
+    << "\n";
+  std::wcout << "\t\tMajorSubsystemVersion: " 
+    << nt_hdrs.GetMajorSubsystemVersion() << "\n";
+  std::wcout << "\t\tMinorSubsystemVersion: " 
+    << nt_hdrs.GetMinorSubsystemVersion() << "\n";
+  std::wcout << "\t\tWin32VersionValue: " << nt_hdrs.GetWin32VersionValue() 
+    << "\n";
+  std::wcout << "\t\tSizeOfImage: " << std::hex << nt_hdrs.GetSizeOfImage() 
+    << std::dec << "\n";
+  std::wcout << "\t\tSizeOfHeaders: " << std::hex 
+    << nt_hdrs.GetSizeOfHeaders() << std::dec << "\n";
+  std::wcout << "\t\tCheckSum: " << std::hex << nt_hdrs.GetCheckSum() 
+    << std::dec << "\n";
+  std::wcout << "\t\tSubsystem: " << std::hex << nt_hdrs.GetSubsystem() 
+    << std::dec << "\n";
+  std::wcout << "\t\tDllCharacteristics: " << std::hex 
+    << nt_hdrs.GetDllCharacteristics() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfStackReserve: " << std::hex 
+    << nt_hdrs.GetSizeOfStackReserve() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfStackCommit: " << std::hex 
+    << nt_hdrs.GetSizeOfStackCommit() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfHeapReserve: " << std::hex 
+    << nt_hdrs.GetSizeOfHeapReserve() << std::dec << "\n";
+  std::wcout << "\t\tSizeOfHeapCommit: " << std::hex 
+    << nt_hdrs.GetSizeOfHeapCommit() << std::dec << "\n";
+  std::wcout << "\t\tLoaderFlags: " << std::hex << nt_hdrs.GetLoaderFlags() 
+    << std::dec << "\n";
+  std::wcout << "\t\tNumberOfRvaAndSizes: " 
+    << nt_hdrs.GetNumberOfRvaAndSizes() << "\n";
+  DWORD const num_dirs = nt_hdrs.GetNumberOfRvaAndSizes();
+  for (DWORD i = 0; i < num_dirs; ++i)
+  {
+    std::wcout << "\t\tDataDirectoryVirtualAddress: " << std::hex 
+      << nt_hdrs.GetDataDirectoryVirtualAddress(
+      static_cast<hadesmem::PeDataDir>(i)) << std::dec << "\n";
+    std::wcout << "\t\tDataDirectorySize: " << std::hex 
+      << nt_hdrs.GetDataDirectorySize(static_cast<hadesmem::PeDataDir>(i)) 
+      << std::dec << "\n";
+  }
+  std::wcout << std::noboolalpha;
+}
+
+void DumpSections(hadesmem::Process const& process, PVOID module, 
+  hadesmem::PeFileType type)
+{
+  std::wcout << "\n\tSections:\n";
+
+  hadesmem::PeFile pe_file(process, module, type);
+  hadesmem::SectionList sections(process, pe_file);
+  for (auto const& s : sections)
+  {
+    std::wcout << std::boolalpha;
+    std::wcout << "\n";
+    std::wcout << "\t\tName: " << s.GetName().c_str() << "\n";
+    std::wcout << "\t\tVirtualAddress: " << std::hex << s.GetVirtualAddress() 
+      << std::dec << "\n";
+    std::wcout << "\t\tVirtualSize: " << std::hex << s.GetVirtualSize() 
+      << std::dec << "\n";
+    std::wcout << "\t\tPointerToRawData: " << std::hex 
+      << s.GetPointerToRawData() << std::dec << "\n";
+    std::wcout << "\t\tSizeOfRawData: " << std::hex << s.GetSizeOfRawData() 
+      << std::dec << "\n";
+    std::wcout << "\t\tPointerToRelocations: " << std::hex 
+      << s.GetPointerToRelocations() << std::dec << "\n";
+    std::wcout << "\t\tPointerToLinenumbers: " << std::hex 
+      << s.GetPointerToLinenumbers() << std::dec << "\n";
+    std::wcout << "\t\tNumberOfRelocations: " << std::hex 
+      << s.GetNumberOfRelocations() << std::dec << "\n";
+    std::wcout << "\t\tNumberOfLinenumbers: " << std::hex 
+      << s.GetNumberOfLinenumbers() << std::dec << "\n";
+    std::wcout << "\t\tCharacteristics: " << std::hex 
+      << s.GetCharacteristics() << std::dec << "\n";
+    std::wcout << std::noboolalpha;
+  }
+}
+
+void DumpTls(hadesmem::Process const& process, PVOID module, 
+  hadesmem::PeFileType type)
+{
+  hadesmem::PeFile pe_file(process, module, type);
+  std::unique_ptr<hadesmem::TlsDir> tls_dir;
+  try
+  {
+    tls_dir.reset(new hadesmem::TlsDir(process, pe_file));
+  }
+  catch (std::exception const& /*e*/)
+  {
+    return;
+  }
+
+  std::wcout << "\n\tTLS:\n";
+
+  std::wcout << std::boolalpha;
+  std::wcout << "\n";
+  std::wcout << "\t\tGetStartAddressOfRawData: " 
+    << tls_dir->GetStartAddressOfRawData() << "\n";
+  std::wcout << "\t\tGetEndAddressOfRawData: " << std::hex 
+    << tls_dir->GetEndAddressOfRawData() << std::dec << "\n";
+  std::wcout << "\t\tGetAddressOfIndex: " << std::hex 
+    << tls_dir->GetAddressOfIndex() << std::dec << "\n";
+  std::wcout << "\t\tGetAddressOfCallBacks: " << std::hex 
+    << tls_dir->GetAddressOfCallBacks() << std::dec << "\n";
+  auto const callbacks = tls_dir->GetCallbacks();
+  for (auto const c : callbacks)
+  {
+    std::wcout << "\t\tCallback: " << std::hex 
+      << reinterpret_cast<DWORD_PTR>(c) << std::dec << "\n";
+  }
+  std::wcout << "\t\tGetSizeOfZeroFill: " << std::hex 
+    << tls_dir->GetSizeOfZeroFill() << std::dec << "\n";
+  std::wcout << "\t\tGetCharacteristics: " << std::hex 
+    << tls_dir->GetCharacteristics() << std::dec << "\n";
+  std::wcout << std::noboolalpha;
 }
 
 void DumpExports(hadesmem::Process const& process, PVOID module, 
@@ -151,17 +382,17 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
     // reading the original data from disk.
     if (type == hadesmem::PeFileType::Image)
     {
-      // Images without an INT are valid, but after an image like this is loaded 
-      // it is impossible to recover the name table.
+      // Images without an INT are valid, but after an image like this is 
+      // loaded it is impossible to recover the name table.
       if (!dir.GetOriginalFirstThunk())
       {
         std::wcout << "\n\t\t\tWARNING! No INT for this module.\n";
         continue;
       }
 
-      // Some modules (packed modules are the only ones I've found so far) have 
-      // import directories where the IAT RVA is the same as the INT RVA which 
-      // effectively means there is no INT once the module is loaded.
+      // Some modules (packed modules are the only ones I've found so far) 
+      // have import directories where the IAT RVA is the same as the INT RVA 
+      // which effectively means there is no INT once the module is loaded.
       if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
       {
         std::wcout << "\n\t\t\tWARNING! IAT is same as INT for this module.\n";
@@ -207,6 +438,12 @@ void DumpModules(hadesmem::Process const& process)
       << "\n";
     std::wcout << "\tName: " << module.GetName() << "\n";
     std::wcout << "\tPath: " << module.GetPath() << "\n";
+
+    DumpHeaders(process, module.GetHandle(), hadesmem::PeFileType::Image);
+
+    DumpSections(process, module.GetHandle(), hadesmem::PeFileType::Image);
+
+    DumpTls(process, module.GetHandle(), hadesmem::PeFileType::Image);
 
     DumpExports(process, module.GetHandle(), hadesmem::PeFileType::Image);
 
@@ -264,7 +501,7 @@ void DumpFile(boost::filesystem::path const& path)
 
   if (!file.seekg(0, std::ios::beg))
   {
-    std::wcout << "\nWARNING! Seeking to beginning of file failed.\n";
+    std::wcout << "\nWARNING! Seeking to beginning of file failed (1).\n";
     return;
   }
 
@@ -276,7 +513,18 @@ void DumpFile(boost::filesystem::path const& path)
     return;
   }
 
-  BOOST_ASSERT(file.tellg() == 0);
+  // Check for MZ signature
+  if (mz_buf[0] != 'M' && mz_buf[1] != 'Z')
+  {
+    std::wcout << "\nNot a PE file (Pass 1).\n";
+    return;
+  }
+
+  if (!file.seekg(0, std::ios::beg))
+  {
+    std::wcout << "\nWARNING! Seeking to beginning of file failed (2).\n";
+    return;
+  }
 
   // TODO: Fix all the unsafe integer downcasting.
   std::vector<char> buf(static_cast<std::size_t>(size));
@@ -302,13 +550,21 @@ void DumpFile(boost::filesystem::path const& path)
 #error [HadesMem] Unsupported architecture.
 #endif
     {
+      std::wcout << "\nArchitecture mismatch.\n";
       return;
     }
   }
   catch (std::exception const& /*e*/)
   {
+    std::wcout << "\nNot a PE file (Pass 2).\n";
     return;
   }
+
+  DumpHeaders(process, buf.data(), hadesmem::PeFileType::Data);
+
+  DumpSections(process, buf.data(), hadesmem::PeFileType::Data);
+
+  DumpTls(process, buf.data(), hadesmem::PeFileType::Data);
 
   DumpExports(process, buf.data(), hadesmem::PeFileType::Data);
 

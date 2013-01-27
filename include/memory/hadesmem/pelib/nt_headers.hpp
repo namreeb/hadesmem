@@ -18,7 +18,7 @@ class Process;
 
 class PeFile;
 
-enum class PeDataDir : unsigned int
+enum class PeDataDir : DWORD
 {
   Export, 
   Import, 
@@ -90,7 +90,7 @@ public:
 
   DWORD GetBaseOfCode() const;
 
-#if defined(_M_IX86) 
+#if defined(HADESMEM_ARCH_X86) 
   DWORD GetBaseOfData() const;
 #endif
 
@@ -172,7 +172,7 @@ public:
 
   void SetBaseOfCode(DWORD base_of_code) const;
 
-#if defined(_M_IX86) 
+#if defined(HADESMEM_ARCH_X86) 
   void SetBaseOfData(DWORD base_of_data) const;
 #endif
 
