@@ -39,13 +39,14 @@ struct ExportDir::Impl
     NtHeaders nt_headers(process, pe_file);
     DWORD const export_dir_rva = nt_headers.GetDataDirectoryVirtualAddress(
       PeDataDir::Export);
-    DWORD const export_dir_size = nt_headers.GetDataDirectorySize(
-      PeDataDir::Export);
-    if (!export_dir_rva || !export_dir_size)
+    // Windows will load images which don't specify a size for the export 
+    // directory.
+    if (!export_dir_rva)
     {
       HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("Export directory is invalid."));
     }
+
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, export_dir_rva));
   }
 

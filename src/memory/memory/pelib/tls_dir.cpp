@@ -35,11 +35,11 @@ struct TlsDir::Impl
     NtHeaders const nt_headers(process, pe_file);
 
     // TODO: Some sort of API to handle this common case.
-    DWORD const data_dir_size = nt_headers.GetDataDirectorySize(
-      PeDataDir::TLS);
     DWORD const data_dir_va = nt_headers.GetDataDirectoryVirtualAddress(
       PeDataDir::TLS);
-    if (!data_dir_size || !data_dir_va)
+    // Windows will load images which don't specify a size for the TLS 
+    // directory.
+    if (!data_dir_va)
     {
       HADESMEM_THROW_EXCEPTION(Error() << 
         ErrorString("PE file has no TLS directory."));
