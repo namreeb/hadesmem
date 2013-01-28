@@ -592,20 +592,6 @@ void DumpFile(boost::filesystem::path const& path)
     hadesmem::PeFile const pe_file(process, buf.data(), 
       hadesmem::PeFileType::Data);
     hadesmem::NtHeaders const nt_hdr(process, pe_file);
-    // TODO: Fix this check. The machine type is not required to be set (or 
-    // can be invalid? - check this) when no code is being executed 
-    // (e.g. data or resource only PEs).
-#if defined(HADESMEM_ARCH_X86)
-    if (nt_hdr.GetMachine() != IMAGE_FILE_MACHINE_I386)
-#elif defined(HADESMEM_ARCH_X64)
-    if (nt_hdr.GetMachine() != IMAGE_FILE_MACHINE_AMD64)
-#else
-#error [HadesMem] Unsupported architecture.
-#endif
-    {
-      std::wcout << "\nArchitecture mismatch.\n";
-      return;
-    }
   }
   catch (std::exception const& /*e*/)
   {
