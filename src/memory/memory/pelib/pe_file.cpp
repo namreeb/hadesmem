@@ -143,6 +143,18 @@ PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         return base + rva;
       }
     }
+    
+    // For some stupid reason, Windows will load specially crafted images 
+    // with no sections.
+    // TODO: Check whether FileAlignment and/or SectionAlignment should be 
+    // checked here. In the specially crafted image I'm testing this against 
+    // the value is '1' for both anyway, but I'd like to ensure it's not 
+    // possible for it to be higher, and if it is, whether it would affect 
+    // the RVA resolution here.
+    if (std::begin(sections) == std::end(sections))
+    {
+      return base + rva;
+    }
 
     return nullptr;
   }
