@@ -661,6 +661,7 @@ int main(int /*argc*/, char* /*argv*/[])
       ("help", "produce help message")
       ("pid", boost::program_options::value<DWORD>(), "target process id")
       ("file", boost::program_options::wvalue<std::wstring>(), "target file")
+      ("dir", boost::program_options::wvalue<std::wstring>(), "target dir")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -676,12 +677,6 @@ int main(int /*argc*/, char* /*argv*/[])
       return 1;
     }
 
-    DWORD pid = 0;
-    if (var_map.count("pid"))
-    {
-      pid = var_map["pid"].as<DWORD>();
-    }
-
     try
     {
       hadesmem::GetSeDebugPrivilege();
@@ -693,8 +688,10 @@ int main(int /*argc*/, char* /*argv*/[])
       std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
     }
 
-    if (pid)
+    if (var_map.count("pid"))
     {
+      DWORD pid = pid = var_map["pid"].as<DWORD>();
+
       hadesmem::ProcessList const processes;
       auto iter = std::find_if(std::begin(processes), std::end(processes), 
         [pid] (hadesmem::ProcessEntry const& process_entry)
@@ -711,30 +708,31 @@ int main(int /*argc*/, char* /*argv*/[])
           hadesmem::ErrorString("Failed to find requested process."));
       }
     }
+    else if (var_map.count("file"))
+    {
+      DumpFile(var_map["file"].as<std::wstring>());
+    }
+    else if (var_map.count("dir"))
+    {
+      DumpDir(var_map["dir"].as<std::wstring>());
+    }
     else
     {
-      if (var_map.count("file"))
+      std::wcout << "\nProcesses:\n";
+
+      hadesmem::ProcessList const processes;
+      for (auto const& process_entry : processes)
       {
-        DumpFile(var_map["file"].as<std::wstring>());
+        DumpProcessEntry(process_entry);
       }
-      else
-      {
-        std::wcout << "\nProcesses:\n";
 
-        hadesmem::ProcessList const processes;
-        for (auto const& process_entry : processes)
-        {
-          DumpProcessEntry(process_entry);
-        }
+      std::wcout << "\nFiles:\n";
 
-        std::wcout << "\nFiles:\n";
-
-        boost::filesystem::path const self_path = 
-          hadesmem::detail::GetSelfPath();
-        boost::filesystem::path const root_dir = self_path.root_path();
-        DumpDir(root_dir);
-      }
-    }
+      boost::filesystem::path const self_path = 
+        hadesmem::detail::GetSelfPath();
+      boost::filesystem::path const root_dir = self_path.root_path();
+      DumpDir(root_dir);
+  }
 
     return 0;
   }

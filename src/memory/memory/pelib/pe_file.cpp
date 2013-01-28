@@ -138,14 +138,17 @@ PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       if (virtual_beg <= rva && rva < virtual_end)
       {
         rva -= virtual_beg;
-        rva += section.GetPointerToRawData();
+        // If PointerToRawData is less than 0x200 it is rounded down to 0.
+        if (section.GetPointerToRawData() >= 0x200)
+        {
+          rva += section.GetPointerToRawData();
+        }
 
         return base + rva;
       }
     }
     
-    // For some stupid reason, Windows will load specially crafted images 
-    // with no sections.
+    // Windows will load specially crafted images with no sections.
     // TODO: Check whether FileAlignment and/or SectionAlignment should be 
     // checked here. In the specially crafted image I'm testing this against 
     // the value is '1' for both anyway, but I'd like to ensure it's not 
