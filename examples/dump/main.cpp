@@ -415,8 +415,10 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
     std::wcout << "\n";
     std::wcout << "\t\tOriginalFirstThunk: " << std::hex << 
       dir.GetOriginalFirstThunk() << std::dec << "\n";
-    std::wcout << "\t\tTimeDateStamp: " << dir.GetTimeDateStamp() << "\n";
-    std::wcout << "\t\tForwarderChain: " << dir.GetForwarderChain() << "\n";
+    std::wcout << "\t\tTimeDateStamp: " << std::hex 
+      << dir.GetTimeDateStamp() << std::dec << "\n";
+    std::wcout << "\t\tForwarderChain: " << std::hex 
+      << dir.GetForwarderChain() << std::dec << "\n";
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << 
       std::dec << "\n";
     std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";

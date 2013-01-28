@@ -110,8 +110,13 @@ ImportDirIterator& ImportDirIterator::operator++()
       impl_->import_dir_->GetBase());
     impl_->import_dir_ = ImportDir(*impl_->process_, *impl_->pe_file_, 
       cur_base + 1);
-
-    if (!impl_->import_dir_->GetOriginalFirstThunk())
+    
+    // If the Name is NULL then the other fields can be non-NULL but the 
+    // entire entry will still be skipped by the Windows loader.
+    bool const has_name = impl_->import_dir_->GetNameRaw() != 0;
+    bool const has_ilt_or_iat = impl_->import_dir_->GetOriginalFirstThunk() || 
+      impl_->import_dir_->GetFirstThunk();
+    if (!has_name || !has_ilt_or_iat)
     {
       impl_.reset();
       return *this;
