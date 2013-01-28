@@ -430,7 +430,7 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
     // reading the original data from disk.
     if (type == hadesmem::PeFileType::Image)
     {
-      // Images without an INT are valid, but after an image like this is 
+      // Images without an INT/ILT are valid, but after an image like this is 
       // loaded it is impossible to recover the name table.
       if (!dir.GetOriginalFirstThunk())
       {
@@ -439,8 +439,9 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
       }
 
       // Some modules (packed modules are the only ones I've found so far) 
-      // have import directories where the IAT RVA is the same as the INT RVA 
-      // which effectively means there is no INT once the module is loaded.
+      // have import directories where the IAT RVA is the same as the INT/ILT 
+      // RVA which effectively means there is no INT/ILT once the module is 
+      // loaded.
       if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
       {
         std::wcout << "\n\t\t\tWARNING! IAT is same as INT for this module.\n";
@@ -449,7 +450,8 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
     }
     
     hadesmem::ImportThunkList import_thunks(process, pe_file, 
-      dir.GetOriginalFirstThunk());
+      dir.GetOriginalFirstThunk() ? dir.GetOriginalFirstThunk() : 
+      dir.GetFirstThunk());
     for (auto const& thunk : import_thunks)
     {
       std::wcout << "\n";

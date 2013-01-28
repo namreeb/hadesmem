@@ -42,9 +42,9 @@ struct ImportDir::Impl
       NtHeaders nt_headers(process, pe_file);
       DWORD const import_dir_rva = nt_headers.GetDataDirectoryVirtualAddress(
         PeDataDir::Import);
-      DWORD const import_dir_size = nt_headers.GetDataDirectorySize(
-        PeDataDir::Import);
-      if (!import_dir_rva || !import_dir_size)
+      // For some stupid reason, Windows will load images which don't specify 
+      // a size for the Import directory.
+      if (!import_dir_rva)
       {
         HADESMEM_THROW_EXCEPTION(Error() << 
           ErrorString("Import directory is invalid."));
