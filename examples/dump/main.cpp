@@ -30,6 +30,7 @@
 #include <hadesmem/pelib/section.hpp>
 #include <hadesmem/pelib/tls_dir.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
+#include <hadesmem/pelib/export_dir.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/detail/self_path.hpp>
@@ -134,6 +135,8 @@ void DumpHeaders(hadesmem::Process const& process, PVOID module,
   std::wcout << "\t\tNewHeaderOffset: " << std::hex 
     << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
   std::wcout << std::noboolalpha;
+
+  std::wcout << "\n\tNT Headers:\n";
 
   hadesmem::NtHeaders nt_hdrs(process, pe_file);
   std::wcout << std::boolalpha;
@@ -308,9 +311,47 @@ void DumpTls(hadesmem::Process const& process, PVOID module,
 void DumpExports(hadesmem::Process const& process, PVOID module, 
   hadesmem::PeFileType type)
 {
+  hadesmem::PeFile pe_file(process, module, type);
+  std::unique_ptr<hadesmem::ExportDir> export_dir;
+  try
+  {
+    export_dir.reset(new hadesmem::ExportDir(process, pe_file));
+  }
+  catch (std::exception const& /*e*/)
+  {
+    return;
+  }
+
+  std::wcout << "\n\tExport Dir:\n";
+
+  std::wcout << std::boolalpha;
+  std::wcout << "\n";
+  std::wcout << "\t\tGetCharacteristics: " << std::hex 
+    << export_dir->GetCharacteristics() << std::dec << "\n";
+  std::wcout << "\t\tGetTimeDateStamp: " << std::hex 
+    << export_dir->GetTimeDateStamp() << std::dec << "\n";
+  std::wcout << "\t\tGetMajorVersion: " << std::hex 
+    << export_dir->GetMajorVersion() << std::dec << "\n";
+  std::wcout << "\t\tGetMinorVersion: " << std::hex 
+    << export_dir->GetMinorVersion() << std::dec << "\n";
+  std::wcout << "\t\tGetName: " << std::hex 
+    << export_dir->GetName().c_str() << std::dec << "\n";
+  std::wcout << "\t\tGetOrdinalBase: " << std::hex 
+    << export_dir->GetOrdinalBase() << std::dec << "\n";
+  std::wcout << "\t\tGetNumberOfFunctions: " << std::hex 
+    << export_dir->GetNumberOfFunctions() << std::dec << "\n";
+  std::wcout << "\t\tGetNumberOfNames: " << std::hex 
+    << export_dir->GetNumberOfNames() << std::dec << "\n";
+  std::wcout << "\t\tGetAddressOfFunctions: " << std::hex 
+    << export_dir->GetAddressOfFunctions() << std::dec << "\n";
+  std::wcout << "\t\tGetAddressOfNames: " << std::hex 
+    << export_dir->GetAddressOfNames() << std::dec << "\n";
+  std::wcout << "\t\tGetAddressOfNameOrdinals: " << std::hex 
+    << export_dir->GetAddressOfNameOrdinals() << std::dec << "\n";
+  std::wcout << std::noboolalpha;
+
   std::wcout << "\n\tExports:\n";
 
-  hadesmem::PeFile pe_file(process, module, type);
   hadesmem::ExportList exports(process, pe_file);
   for (auto const& e : exports)
   {
@@ -359,10 +400,14 @@ void DumpExports(hadesmem::Process const& process, PVOID module,
 void DumpImports(hadesmem::Process const& process, PVOID module, 
   hadesmem::PeFileType type)
 {
-  std::wcout << "\n\tImport Dirs:\n";
-
   hadesmem::PeFile pe_file(process, module, type);
   hadesmem::ImportDirList import_dirs(process, pe_file);
+
+  if (std::begin(import_dirs) != std::end(import_dirs))
+  {
+    std::wcout << "\n\tImport Dirs:\n";
+  }
+
   for (auto const& dir : import_dirs)
   {
     std::wcout << std::boolalpha;
@@ -545,6 +590,9 @@ void DumpFile(boost::filesystem::path const& path)
     hadesmem::PeFile const pe_file(process, buf.data(), 
       hadesmem::PeFileType::Data);
     hadesmem::NtHeaders const nt_hdr(process, pe_file);
+    // TODO: Fix this check. The machine type is not required to be set (or 
+    // can be invalid? - check this) when no code is being executed 
+    // (e.g. data or resource only PEs).
 #if defined(HADESMEM_ARCH_X86)
     if (nt_hdr.GetMachine() != IMAGE_FILE_MACHINE_I386)
 #elif defined(HADESMEM_ARCH_X64)
@@ -623,7 +671,8 @@ int main(int /*argc*/, char* /*argv*/[])
       "General options");
     opts_desc.add_options()
       ("help", "produce help message")
-      ("pid", boost::program_options::value<DWORD>(), "process id")
+      ("pid", boost::program_options::value<DWORD>(), "target process id")
+      ("file", boost::program_options::wvalue<std::wstring>(), "target file")
       ;
 
     std::vector<std::wstring> const args = boost::program_options::
@@ -676,20 +725,27 @@ int main(int /*argc*/, char* /*argv*/[])
     }
     else
     {
-      std::wcout << "\nProcesses:\n";
-
-      hadesmem::ProcessList const processes;
-      for (auto const& process_entry : processes)
+      if (var_map.count("file"))
       {
-        DumpProcessEntry(process_entry);
+        DumpFile(var_map["file"].as<std::wstring>());
       }
+      else
+      {
+        std::wcout << "\nProcesses:\n";
 
-      std::wcout << "\nFiles:\n";
+        hadesmem::ProcessList const processes;
+        for (auto const& process_entry : processes)
+        {
+          DumpProcessEntry(process_entry);
+        }
 
-      boost::filesystem::path const self_path = 
-        hadesmem::detail::GetSelfPath();
-      boost::filesystem::path const root_dir = self_path.root_path();
-      DumpDir(root_dir);
+        std::wcout << "\nFiles:\n";
+
+        boost::filesystem::path const self_path = 
+          hadesmem::detail::GetSelfPath();
+        boost::filesystem::path const root_dir = self_path.root_path();
+        DumpDir(root_dir);
+      }
     }
 
     return 0;
