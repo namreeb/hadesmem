@@ -692,7 +692,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     if (var_map.count("pid"))
     {
-      DWORD pid = pid = var_map["pid"].as<DWORD>();
+      DWORD pid = var_map["pid"].as<DWORD>();
 
       hadesmem::ProcessList const processes;
       auto iter = std::find_if(std::begin(processes), std::end(processes), 
