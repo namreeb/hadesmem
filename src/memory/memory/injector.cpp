@@ -106,6 +106,53 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
   }
 }
 
+void ForceLdrInitializeThunk(DWORD proc_id)
+{
+  Process const process(proc_id);
+
+  // This is used to generate a 'nullsub' function, which is called in 
+  // the context of the remote process in order to 'force' a call to 
+  // ntdll.dll!LdrInitializeThunk. This is necessary because module 
+  // enumeration will fail if LdrInitializeThunk has not been called, 
+  // and Injector::InjectDll (and the APIs it uses) depends on the 
+  // module enumeration APIs.
+#if defined(HADESMEM_ARCH_X64) 
+  std::array<BYTE, 1> return_instr = { { 0xC3 } };
+#elif defined(HADESMEM_ARCH_X86) 
+  std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+  Allocator const stub_remote(process, sizeof(return_instr));
+
+  Write(process, stub_remote.GetBase(), return_instr);
+
+  auto const stub_remote_pfn = 
+    reinterpret_cast<LPTHREAD_START_ROUTINE>(
+    reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
+
+  detail::SmartHandle const remote_thread(::CreateRemoteThread(
+    process.GetHandle(), nullptr, 0, stub_remote_pfn, nullptr, 0, nullptr));
+  if (!remote_thread.GetHandle())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Could not create remote thread.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  // TODO: Add a sensible timeout.
+  if (::WaitForSingleObject(remote_thread.GetHandle(), INFINITE) != 
+    WAIT_OBJECT_0)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Could not wait for remote thread.") << 
+      ErrorCodeWinLast(last_error));
+  }
+}
+
 }
 
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
@@ -142,6 +189,8 @@ HMODULE InjectDll(Process const& process, std::wstring const& path,
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module file."));
   }
+
+  ForceLdrInitializeThunk(process.GetId());
 
   std::wstring const path_string(path_real.native());
   std::size_t const path_buf_size = (path_string.size() + 1) * 
@@ -323,48 +372,6 @@ CreateAndInjectData CreateAndInject(
   try
   {
     Process const process(proc_info.dwProcessId);
-
-    // This is used to generate a 'nullsub' function, which is called in 
-    // the context of the remote process in order to 'force' a call to 
-    // ntdll.dll!LdrInitializeThunk. This is necessary because module 
-    // enumeration will fail if LdrInitializeThunk has not been called, 
-    // and Injector::InjectDll (and the APIs it uses) depend on the 
-    // module enumeration APIs.
-#if defined(HADESMEM_ARCH_X64) 
-    std::array<BYTE, 1> return_instr = { { 0xC3 } };
-#elif defined(HADESMEM_ARCH_X86) 
-    std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
-#else 
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-    Allocator const stub_remote(process, sizeof(return_instr));
-
-    Write(process, stub_remote.GetBase(), return_instr);
-
-    auto const stub_remote_pfn = 
-      reinterpret_cast<LPTHREAD_START_ROUTINE>(
-      reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
-
-    detail::SmartHandle const remote_thread(::CreateRemoteThread(
-      process.GetHandle(), nullptr, 0, stub_remote_pfn, nullptr, 0, nullptr));
-    if (!remote_thread.GetHandle())
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Could not create remote thread.") << 
-        ErrorCodeWinLast(last_error));
-    }
-
-    // TODO: Add a sensible timeout.
-    if (::WaitForSingleObject(remote_thread.GetHandle(), INFINITE) != 
-      WAIT_OBJECT_0)
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Could not wait for remote thread.") << 
-        ErrorCodeWinLast(last_error));
-    }
 
     HMODULE const remote_module = InjectDll(process, module, flags);
 
