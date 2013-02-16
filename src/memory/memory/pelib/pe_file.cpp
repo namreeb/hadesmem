@@ -139,6 +139,9 @@ PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       {
         rva -= virtual_beg;
         // If PointerToRawData is less than 0x200 it is rounded down to 0.
+        // TODO: Check if this is the correct way to be doing this. In the 
+        // Windows loader this is probably done as part of a more complex 
+        // mask, containing logic that's missing here.
         if (section.GetPointerToRawData() >= 0x200)
         {
           rva += section.GetPointerToRawData();
