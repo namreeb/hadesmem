@@ -77,43 +77,43 @@ public:
   
   LONG GetNewHeaderOffset() const;
   
-  void SetMagic(WORD magic) const;
+  void SetMagic(WORD magic);
   
-  void SetBytesOnLastPage(WORD bytes_on_last_page) const;
+  void SetBytesOnLastPage(WORD bytes_on_last_page);
   
-  void SetPagesInFile(WORD pages_in_file) const;
+  void SetPagesInFile(WORD pages_in_file);
   
-  void SetRelocations(WORD relocations) const;
+  void SetRelocations(WORD relocations);
   
-  void SetSizeOfHeaderInParagraphs(WORD size_of_header_in_paragraphs) const;
+  void SetSizeOfHeaderInParagraphs(WORD size_of_header_in_paragraphs);
   
-  void SetMinExtraParagraphs(WORD min_extra_paragraphs) const;
+  void SetMinExtraParagraphs(WORD min_extra_paragraphs);
   
-  void SetMaxExtraParagraphs(WORD max_extra_paragraphs) const;
+  void SetMaxExtraParagraphs(WORD max_extra_paragraphs);
   
-  void SetInitialSS(WORD initial_ss) const;
+  void SetInitialSS(WORD initial_ss);
   
-  void SetInitialSP(WORD initial_sp) const;
+  void SetInitialSP(WORD initial_sp);
   
-  void SetChecksum(WORD checksum) const;
+  void SetChecksum(WORD checksum);
   
-  void SetInitialIP(WORD initial_ip) const;
+  void SetInitialIP(WORD initial_ip);
   
-  void SetInitialCS(WORD initial_cs) const;
+  void SetInitialCS(WORD initial_cs);
   
-  void SetRelocTableFileAddr(WORD reloc_table_file_addr) const;
+  void SetRelocTableFileAddr(WORD reloc_table_file_addr);
   
-  void SetOverlayNum(WORD overlay_num) const;
+  void SetOverlayNum(WORD overlay_num);
   
-  void SetReservedWords1(std::array<WORD, 4> const& reserved_words_1) const;
+  void SetReservedWords1(std::array<WORD, 4> const& reserved_words_1);
   
-  void SetOEMID(WORD oem_id) const;
+  void SetOEMID(WORD oem_id);
   
-  void SetOEMInfo(WORD oem_info) const;
+  void SetOEMInfo(WORD oem_info);
   
-  void SetReservedWords2(std::array<WORD, 10> const& reserved_words_2) const;
+  void SetReservedWords2(std::array<WORD, 10> const& reserved_words_2);
 
-  void SetNewHeaderOffset(LONG offset) const;
+  void SetNewHeaderOffset(LONG offset);
   
 private:
   struct Impl;

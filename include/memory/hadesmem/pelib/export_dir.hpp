@@ -57,27 +57,27 @@ public:
 
   DWORD GetAddressOfNameOrdinals() const;
 
-  void SetCharacteristics(DWORD characteristics) const;
+  void SetCharacteristics(DWORD characteristics);
 
-  void SetTimeDateStamp(DWORD time_date_stamp) const;
+  void SetTimeDateStamp(DWORD time_date_stamp);
 
-  void SetMajorVersion(WORD major_version) const;
+  void SetMajorVersion(WORD major_version);
 
-  void SetMinorVersion(WORD minor_version) const;
+  void SetMinorVersion(WORD minor_version);
 
-  void SetName(std::string const& name) const;
+  void SetName(std::string const& name);
 
-  void SetOrdinalBase(DWORD ordinal_base) const;
+  void SetOrdinalBase(DWORD ordinal_base);
 
-  void SetNumberOfFunctions(DWORD number_of_functions) const;
+  void SetNumberOfFunctions(DWORD number_of_functions);
 
-  void SetNumberOfNames(DWORD number_of_names) const;
+  void SetNumberOfNames(DWORD number_of_names);
 
-  void SetAddressOfFunctions(DWORD address_of_functions) const;
+  void SetAddressOfFunctions(DWORD address_of_functions);
 
-  void SetAddressOfNames(DWORD address_of_names) const;
+  void SetAddressOfNames(DWORD address_of_names);
 
-  void SetAddressOfNameOrdinals(DWORD address_of_name_ordinals) const;
+  void SetAddressOfNameOrdinals(DWORD address_of_name_ordinals);
   
 private:
   struct Impl;

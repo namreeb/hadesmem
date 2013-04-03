@@ -48,17 +48,17 @@ public:
 
   DWORD GetFirstThunk() const;
 
-  void SetOriginalFirstThunk(DWORD original_first_thunk) const;
+  void SetOriginalFirstThunk(DWORD original_first_thunk);
 
-  void SetTimeDateStamp(DWORD time_date_stamp) const;
+  void SetTimeDateStamp(DWORD time_date_stamp);
 
-  void SetForwarderChain(DWORD forwarder_chain) const;
+  void SetForwarderChain(DWORD forwarder_chain);
 
-  void SetNameRaw(DWORD name) const;
+  void SetNameRaw(DWORD name);
 
-  void SetName(std::string const& name) const;
+  void SetName(std::string const& name);
 
-  void SetFirstThunk(DWORD first_thunk) const;
+  void SetFirstThunk(DWORD first_thunk);
   
 private:
   struct Impl;

@@ -50,15 +50,15 @@ public:
 
   std::string GetName() const;
 
-  void SetAddressOfData(DWORD_PTR address_of_data) const;
+  void SetAddressOfData(DWORD_PTR address_of_data);
 
-  void SetOrdinalRaw(DWORD_PTR ordinal_raw) const;
+  void SetOrdinalRaw(DWORD_PTR ordinal_raw);
 
   // Todo: SetOrdinal function
 
-  void SetFunction(DWORD_PTR function) const;
+  void SetFunction(DWORD_PTR function);
 
-  void SetHint(WORD hint) const;
+  void SetHint(WORD hint);
 
   // TODO: SetName function
 

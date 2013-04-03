@@ -179,61 +179,61 @@ DWORD Section::GetCharacteristics() const
     IMAGE_SECTION_HEADER, Characteristics));
 }
 
-void Section::SetName(std::string const& Name) const
+void Section::SetName(std::string const& Name)
 {
   WriteString(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     Name), Name);
 }
 
-void Section::SetVirtualAddress(DWORD VirtualAddress) const
+void Section::SetVirtualAddress(DWORD VirtualAddress)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     VirtualAddress), VirtualAddress);
 }
 
-void Section::SetVirtualSize(DWORD VirtualSize) const
+void Section::SetVirtualSize(DWORD VirtualSize)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     Misc.VirtualSize), VirtualSize);
 }
 
-void Section::SetSizeOfRawData(DWORD SizeOfRawData) const
+void Section::SetSizeOfRawData(DWORD SizeOfRawData)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     SizeOfRawData), SizeOfRawData);
 }
 
-void Section::SetPointerToRawData(DWORD PointerToRawData) const
+void Section::SetPointerToRawData(DWORD PointerToRawData)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     PointerToRawData), PointerToRawData);
 }
 
-void Section::SetPointerToRelocations(DWORD PointerToRelocations) const
+void Section::SetPointerToRelocations(DWORD PointerToRelocations)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     PointerToRelocations), PointerToRelocations);
 }
 
-void Section::SetPointerToLinenumbers(DWORD PointerToLinenumbers) const
+void Section::SetPointerToLinenumbers(DWORD PointerToLinenumbers)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     PointerToLinenumbers), PointerToLinenumbers);
 }
 
-void Section::SetNumberOfRelocations(WORD NumberOfRelocations) const
+void Section::SetNumberOfRelocations(WORD NumberOfRelocations)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     NumberOfRelocations), NumberOfRelocations);
 }
 
-void Section::SetNumberOfLinenumbers(WORD NumberOfLinenumbers) const
+void Section::SetNumberOfLinenumbers(WORD NumberOfLinenumbers)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     NumberOfLinenumbers), NumberOfLinenumbers);
 }
 
-void Section::SetCharacteristics(DWORD Characteristics) const
+void Section::SetCharacteristics(DWORD Characteristics)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_SECTION_HEADER, 
     Characteristics), Characteristics);

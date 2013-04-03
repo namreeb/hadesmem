@@ -49,19 +49,19 @@ public:
 
   DWORD GetCharacteristics() const;
 
-  void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data) const;
+  void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data);
 
-  void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data) const;
+  void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data);
 
-  void SetAddressOfIndex(DWORD_PTR address_of_index) const;
+  void SetAddressOfIndex(DWORD_PTR address_of_index);
 
-  void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks) const;
+  void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks);
 
   // TODO: SetCallbacks function
 
-  void SetSizeOfZeroFill(DWORD size_of_zero_fill) const;
+  void SetSizeOfZeroFill(DWORD size_of_zero_fill);
 
-  void SetCharacteristics(DWORD characteristics) const;
+  void SetCharacteristics(DWORD characteristics);
   
 private:
   struct Impl;

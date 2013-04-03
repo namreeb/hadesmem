@@ -163,31 +163,31 @@ DWORD ExportDir::GetAddressOfNameOrdinals() const
     IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals));
 }
 
-void ExportDir::SetCharacteristics(DWORD characteristics) const
+void ExportDir::SetCharacteristics(DWORD characteristics)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     Characteristics), characteristics);
 }
 
-void ExportDir::SetTimeDateStamp(DWORD time_date_stamp) const
+void ExportDir::SetTimeDateStamp(DWORD time_date_stamp)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     TimeDateStamp), time_date_stamp);
 }
 
-void ExportDir::SetMajorVersion(WORD major_version) const
+void ExportDir::SetMajorVersion(WORD major_version)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     MajorVersion), major_version);
 }
 
-void ExportDir::SetMinorVersion(WORD minor_version) const
+void ExportDir::SetMinorVersion(WORD minor_version)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     MinorVersion), minor_version);
 }
 
-void ExportDir::SetName(std::string const& name) const
+void ExportDir::SetName(std::string const& name)
 {
   DWORD const name_rva = Read<DWORD>(*impl_->process_, impl_->base_ + 
     FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, Name));
@@ -213,37 +213,37 @@ void ExportDir::SetName(std::string const& name) const
     name_rva), name);
 }
 
-void ExportDir::SetOrdinalBase(DWORD base) const
+void ExportDir::SetOrdinalBase(DWORD base)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     Base), base);
 }
 
-void ExportDir::SetNumberOfFunctions(DWORD number_of_functions) const
+void ExportDir::SetNumberOfFunctions(DWORD number_of_functions)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     NumberOfFunctions), number_of_functions);
 }
 
-void ExportDir::SetNumberOfNames(DWORD number_of_names) const
+void ExportDir::SetNumberOfNames(DWORD number_of_names)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     NumberOfNames), number_of_names);
 }
 
-void ExportDir::SetAddressOfFunctions(DWORD address_of_functions) const
+void ExportDir::SetAddressOfFunctions(DWORD address_of_functions)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     AddressOfFunctions), address_of_functions);
 }
 
-void ExportDir::SetAddressOfNames(DWORD address_of_names) const
+void ExportDir::SetAddressOfNames(DWORD address_of_names)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     AddressOfNames), address_of_names);
 }
 
-void ExportDir::SetAddressOfNameOrdinals(DWORD address_of_name_ordinals) const
+void ExportDir::SetAddressOfNameOrdinals(DWORD address_of_name_ordinals)
 {
   Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
     AddressOfNameOrdinals), address_of_name_ordinals);

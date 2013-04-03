@@ -86,7 +86,7 @@ DWORD_PTR ImportThunk::GetAddressOfData() const
     IMAGE_THUNK_DATA, u1.AddressOfData));
 }
 
-void ImportThunk::SetAddressOfData(DWORD_PTR address_of_data) const
+void ImportThunk::SetAddressOfData(DWORD_PTR address_of_data)
 {
   return Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
     u1.AddressOfData), address_of_data);
@@ -98,7 +98,7 @@ DWORD_PTR ImportThunk::GetOrdinalRaw() const
     IMAGE_THUNK_DATA, u1.Ordinal));
 }
 
-void ImportThunk::SetOrdinalRaw(DWORD_PTR ordinal_raw) const
+void ImportThunk::SetOrdinalRaw(DWORD_PTR ordinal_raw)
 {
   return Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
     u1.Ordinal), ordinal_raw);
@@ -120,7 +120,7 @@ DWORD_PTR ImportThunk::GetFunction() const
     IMAGE_THUNK_DATA, u1.Function));
 }
 
-void ImportThunk::SetFunction(DWORD_PTR function) const
+void ImportThunk::SetFunction(DWORD_PTR function)
 {
   return Write(*impl_->process_, impl_->base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
     u1.Function), function);
@@ -134,7 +134,7 @@ WORD ImportThunk::GetHint() const
     IMAGE_IMPORT_BY_NAME, Hint));
 }
 
-void ImportThunk::SetHint(WORD hint) const
+void ImportThunk::SetHint(WORD hint)
 {
   PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*impl_->process_, 
     *impl_->pe_file_, static_cast<DWORD>(GetAddressOfData())));

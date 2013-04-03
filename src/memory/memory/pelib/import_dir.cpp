@@ -130,31 +130,31 @@ DWORD ImportDir::GetFirstThunk() const
     IMAGE_IMPORT_DESCRIPTOR, FirstThunk));
 }
 
-void ImportDir::SetOriginalFirstThunk(DWORD original_first_thunk) const
+void ImportDir::SetOriginalFirstThunk(DWORD original_first_thunk)
 {
   return Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), original_first_thunk);
 }
 
-void ImportDir::SetTimeDateStamp(DWORD time_date_stamp) const
+void ImportDir::SetTimeDateStamp(DWORD time_date_stamp)
 {
   return Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), time_date_stamp);
 }
 
-void ImportDir::SetForwarderChain(DWORD forwarder_chain) const
+void ImportDir::SetForwarderChain(DWORD forwarder_chain)
 {
   return Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), forwarder_chain);
 }
 
-void ImportDir::SetNameRaw(DWORD name) const
+void ImportDir::SetNameRaw(DWORD name)
 {
   Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, Name), name);
 }
 
-void ImportDir::SetName(std::string const& name) const
+void ImportDir::SetName(std::string const& name)
 {
   DWORD name_rva = Read<DWORD>(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, Name));
@@ -184,7 +184,7 @@ void ImportDir::SetName(std::string const& name) const
   return WriteString(*impl_->process_, name_ptr, name);
 }
 
-void ImportDir::SetFirstThunk(DWORD first_thunk) const
+void ImportDir::SetFirstThunk(DWORD first_thunk)
 {
   return Write(*impl_->process_, impl_->base_ +  FIELD_OFFSET(
     IMAGE_IMPORT_DESCRIPTOR, FirstThunk), first_thunk);

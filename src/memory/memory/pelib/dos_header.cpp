@@ -202,118 +202,117 @@ LONG DosHeader::GetNewHeaderOffset() const
     e_lfanew));
 }
 
-void DosHeader::SetMagic(WORD magic) const
+void DosHeader::SetMagic(WORD magic)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_magic), 
     magic);
 }
 
-void DosHeader::SetBytesOnLastPage(WORD bytes_on_last_page) const
+void DosHeader::SetBytesOnLastPage(WORD bytes_on_last_page)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_cblp), 
     bytes_on_last_page);
 }
 
-void DosHeader::SetPagesInFile(WORD pages_in_file) const
+void DosHeader::SetPagesInFile(WORD pages_in_file)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_cp), 
     pages_in_file);
 }
 
-void DosHeader::SetRelocations(WORD relocations) const
+void DosHeader::SetRelocations(WORD relocations)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_crlc), 
     relocations);
 }
 
-void DosHeader::SetSizeOfHeaderInParagraphs(WORD size_of_header_in_paragraphs) 
-  const
+void DosHeader::SetSizeOfHeaderInParagraphs(WORD size_of_header_in_paragraphs)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_cparhdr), 
     size_of_header_in_paragraphs);
 }
 
-void DosHeader::SetMinExtraParagraphs(WORD min_extra_paragraphs) const
+void DosHeader::SetMinExtraParagraphs(WORD min_extra_paragraphs)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_minalloc), 
     min_extra_paragraphs);
 }
 
-void DosHeader::SetMaxExtraParagraphs(WORD max_extra_paragraphs) const
+void DosHeader::SetMaxExtraParagraphs(WORD max_extra_paragraphs)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, 
     e_maxalloc), max_extra_paragraphs);
 }
 
-void DosHeader::SetInitialSS(WORD initial_ss) const
+void DosHeader::SetInitialSS(WORD initial_ss)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_ss), 
     initial_ss);
 }
 
-void DosHeader::SetInitialSP(WORD initial_sp) const
+void DosHeader::SetInitialSP(WORD initial_sp)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_sp), 
     initial_sp);
 }
 
-void DosHeader::SetChecksum(WORD checksum) const
+void DosHeader::SetChecksum(WORD checksum)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_csum), 
     checksum);
 }
 
-void DosHeader::SetInitialIP(WORD initial_ip) const
+void DosHeader::SetInitialIP(WORD initial_ip)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_ip), 
     initial_ip);
 }
 
-void DosHeader::SetInitialCS(WORD initial_cs) const
+void DosHeader::SetInitialCS(WORD initial_cs)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_cs), 
     initial_cs);
 }
 
-void DosHeader::SetRelocTableFileAddr(WORD reloc_table_file_addr) const
+void DosHeader::SetRelocTableFileAddr(WORD reloc_table_file_addr)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_lfarlc), 
     reloc_table_file_addr);
 }
 
-void DosHeader::SetOverlayNum(WORD overlay_num) const
+void DosHeader::SetOverlayNum(WORD overlay_num)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_ovno), 
     overlay_num);
 }
 
 void DosHeader::SetReservedWords1(
-  std::array<WORD, 4> const& reserved_words_1) const
+  std::array<WORD, 4> const& reserved_words_1)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_res), 
     reserved_words_1);
 }
 
-void DosHeader::SetOEMID(WORD oem_id) const
+void DosHeader::SetOEMID(WORD oem_id)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_oemid), 
     oem_id);
 }
 
-void DosHeader::SetOEMInfo(WORD oem_info) const
+void DosHeader::SetOEMInfo(WORD oem_info)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_oeminfo), 
     oem_info);
 }
 
 void DosHeader::SetReservedWords2(
-  std::array<WORD, 10> const& reserved_words_2) const
+  std::array<WORD, 10> const& reserved_words_2)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_res2), 
     reserved_words_2);
 }
 
-void DosHeader::SetNewHeaderOffset(LONG offset) const
+void DosHeader::SetNewHeaderOffset(LONG offset)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_DOS_HEADER, e_lfanew), 
     offset);

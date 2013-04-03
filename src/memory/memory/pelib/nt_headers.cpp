@@ -355,132 +355,131 @@ DWORD NtHeaders::GetDataDirectorySize(PeDataDir data_dir) const
     IMAGE_DATA_DIRECTORY, Size));
 }
 
-void NtHeaders::SetSignature(DWORD signature) const
+void NtHeaders::SetSignature(DWORD signature)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, Signature), 
     signature);
 }
 
-void NtHeaders::SetMachine(WORD machine) const
+void NtHeaders::SetMachine(WORD machine)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     Machine), machine);
 }
 
-void NtHeaders::SetNumberOfSections(WORD number_of_sections) const
+void NtHeaders::SetNumberOfSections(WORD number_of_sections)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     NumberOfSections), number_of_sections);
 }
 
-void NtHeaders::SetTimeDateStamp(DWORD time_date_stamp) const
+void NtHeaders::SetTimeDateStamp(DWORD time_date_stamp)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     TimeDateStamp), time_date_stamp);
 }
 
-void NtHeaders::SetPointerToSymbolTable(DWORD pointer_to_symbol_table) const
+void NtHeaders::SetPointerToSymbolTable(DWORD pointer_to_symbol_table)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     PointerToSymbolTable), pointer_to_symbol_table);
 }
 
-void NtHeaders::SetNumberOfSymbols(DWORD number_of_symbols) const
+void NtHeaders::SetNumberOfSymbols(DWORD number_of_symbols)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     NumberOfSymbols), number_of_symbols);
 }
 
-void NtHeaders::SetSizeOfOptionalHeader(WORD size_of_optional_header) const
+void NtHeaders::SetSizeOfOptionalHeader(WORD size_of_optional_header)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     SizeOfOptionalHeader), size_of_optional_header);
 
 }
 
-void NtHeaders::SetCharacteristics(WORD characteristics) const
+void NtHeaders::SetCharacteristics(WORD characteristics)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, FileHeader.
     Characteristics), characteristics);
 }
 
-void NtHeaders::SetMagic(WORD magic) const
+void NtHeaders::SetMagic(WORD magic)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.Magic), magic);
 }
 
-void NtHeaders::SetMajorLinkerVersion(BYTE major_linker_version) const
+void NtHeaders::SetMajorLinkerVersion(BYTE major_linker_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MajorLinkerVersion), major_linker_version);
 }
 
-void NtHeaders::SetMinorLinkerVersion(BYTE minor_linker_version) const
+void NtHeaders::SetMinorLinkerVersion(BYTE minor_linker_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MinorLinkerVersion), minor_linker_version);
 }
 
-void NtHeaders::SetSizeOfCode(DWORD size_of_code) const
+void NtHeaders::SetSizeOfCode(DWORD size_of_code)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfCode), size_of_code);
 }
 
-void NtHeaders::SetSizeOfInitializedData(DWORD size_of_initialized_data) const
+void NtHeaders::SetSizeOfInitializedData(DWORD size_of_initialized_data)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfInitializedData), size_of_initialized_data);
 }
 
-void NtHeaders::SetSizeOfUninitializedData(DWORD size_of_uninitialized_data) 
-  const
+void NtHeaders::SetSizeOfUninitializedData(DWORD size_of_uninitialized_data)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfUninitializedData), size_of_uninitialized_data);
 }
 
-void NtHeaders::SetAddressOfEntryPoint(DWORD address_of_entry_point) const
+void NtHeaders::SetAddressOfEntryPoint(DWORD address_of_entry_point)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.AddressOfEntryPoint), address_of_entry_point);
 }
 
-void NtHeaders::SetBaseOfCode(DWORD base_of_code) const
+void NtHeaders::SetBaseOfCode(DWORD base_of_code)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.BaseOfCode), base_of_code);
 }
 
 #if defined(_M_IX86) 
-void NtHeaders::SetBaseOfData(DWORD base_of_data) const
+void NtHeaders::SetBaseOfData(DWORD base_of_data)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.BaseOfData), base_of_data);
 }
 #endif
 
-void NtHeaders::SetImageBase(ULONG_PTR image_base) const
+void NtHeaders::SetImageBase(ULONG_PTR image_base)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.ImageBase), image_base);
 }
 
-void NtHeaders::SetSectionAlignment(DWORD section_alignment) const
+void NtHeaders::SetSectionAlignment(DWORD section_alignment)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SectionAlignment), section_alignment);
 }
 
-void NtHeaders::SetFileAlignment(DWORD file_alignment) const
+void NtHeaders::SetFileAlignment(DWORD file_alignment)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.FileAlignment), file_alignment);
 }
 
 void NtHeaders::SetMajorOperatingSystemVersion(
-  WORD major_operating_system_version) const
+  WORD major_operating_system_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MajorOperatingSystemVersion), 
@@ -488,111 +487,111 @@ void NtHeaders::SetMajorOperatingSystemVersion(
 }
 
 void NtHeaders::SetMinorOperatingSystemVersion(
-  WORD minor_operating_system_version) const
+  WORD minor_operating_system_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MinorOperatingSystemVersion), 
     minor_operating_system_version);
 }
 
-void NtHeaders::SetMajorImageVersion(WORD major_image_version) const
+void NtHeaders::SetMajorImageVersion(WORD major_image_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MajorImageVersion), major_image_version);
 }
 
-void NtHeaders::SetMinorImageVersion(WORD minor_image_version) const
+void NtHeaders::SetMinorImageVersion(WORD minor_image_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MinorImageVersion), minor_image_version);
 }
 
-void NtHeaders::SetMajorSubsystemVersion(WORD major_subsystem_version) const
+void NtHeaders::SetMajorSubsystemVersion(WORD major_subsystem_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MajorSubsystemVersion), major_subsystem_version);
 }
 
-void NtHeaders::SetMinorSubsystemVersion(WORD minor_subsystem_version) const
+void NtHeaders::SetMinorSubsystemVersion(WORD minor_subsystem_version)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.MinorSubsystemVersion), minor_subsystem_version);
 }
 
-void NtHeaders::SetWin32VersionValue(DWORD win32_version_value) const
+void NtHeaders::SetWin32VersionValue(DWORD win32_version_value)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.Win32VersionValue), win32_version_value);
 }
 
-void NtHeaders::SetSizeOfImage(DWORD size_of_image) const
+void NtHeaders::SetSizeOfImage(DWORD size_of_image)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfImage), size_of_image);
 }
 
-void NtHeaders::SetSizeOfHeaders(DWORD size_of_headers) const
+void NtHeaders::SetSizeOfHeaders(DWORD size_of_headers)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfHeaders), size_of_headers);
 }
 
-void NtHeaders::SetCheckSum(DWORD checksum) const
+void NtHeaders::SetCheckSum(DWORD checksum)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.CheckSum), checksum);
 }
 
-void NtHeaders::SetSubsystem(WORD subsystem) const
+void NtHeaders::SetSubsystem(WORD subsystem)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.Subsystem), subsystem);
 }
 
-void NtHeaders::SetDllCharacteristics(WORD dll_characteristics) const
+void NtHeaders::SetDllCharacteristics(WORD dll_characteristics)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.DllCharacteristics), dll_characteristics);
 }
 
-void NtHeaders::SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve) const
+void NtHeaders::SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfStackReserve), size_of_stack_reserve);
 }
 
-void NtHeaders::SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit) const
+void NtHeaders::SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfStackCommit), size_of_stack_commit);
 }
 
-void NtHeaders::SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve) const
+void NtHeaders::SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfHeapReserve), size_of_heap_reserve);
 }
 
-void NtHeaders::SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit) const
+void NtHeaders::SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.SizeOfHeapCommit), size_of_heap_commit);
 }
 
-void NtHeaders::SetLoaderFlags(DWORD loader_flags) const
+void NtHeaders::SetLoaderFlags(DWORD loader_flags)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.LoaderFlags), loader_flags);
 }
 
-void NtHeaders::SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes) const
+void NtHeaders::SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_NT_HEADERS, 
     OptionalHeader.NumberOfRvaAndSizes), number_of_rva_and_sizes);
 }
 
 void NtHeaders::SetDataDirectoryVirtualAddress(PeDataDir data_dir, 
-  DWORD data_directory_virtual_address) const
+  DWORD data_directory_virtual_address)
 {
   if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
   {
@@ -606,7 +605,7 @@ void NtHeaders::SetDataDirectoryVirtualAddress(PeDataDir data_dir,
 }
 
 void NtHeaders::SetDataDirectorySize(PeDataDir data_dir, 
-  DWORD data_directory_size) const
+  DWORD data_directory_size)
 {
   if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
   {

@@ -162,37 +162,37 @@ std::vector<PIMAGE_TLS_CALLBACK> TlsDir::GetCallbacks() const
   return callbacks;
 }
 
-void TlsDir::SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data) const
+void TlsDir::SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     StartAddressOfRawData), start_address_of_raw_data);
 }
 
-void TlsDir::SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data) const
+void TlsDir::SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     EndAddressOfRawData), end_address_of_raw_data);
 }
 
-void TlsDir::SetAddressOfIndex(DWORD_PTR address_of_index) const
+void TlsDir::SetAddressOfIndex(DWORD_PTR address_of_index)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     AddressOfIndex), address_of_index);
 }
 
-void TlsDir::SetAddressOfCallBacks(DWORD_PTR address_of_callbacks) const
+void TlsDir::SetAddressOfCallBacks(DWORD_PTR address_of_callbacks)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     AddressOfCallBacks), address_of_callbacks);
 }
 
-void TlsDir::SetSizeOfZeroFill(DWORD size_of_zero_fill) const
+void TlsDir::SetSizeOfZeroFill(DWORD size_of_zero_fill)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     SizeOfZeroFill), size_of_zero_fill);
 }
 
-void TlsDir::SetCharacteristics(DWORD characteristics) const
+void TlsDir::SetCharacteristics(DWORD characteristics)
 {
   Write(*impl_->process_, impl_->base_ + offsetof(IMAGE_TLS_DIRECTORY, 
     Characteristics), characteristics);

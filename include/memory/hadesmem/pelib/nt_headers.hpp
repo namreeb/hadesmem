@@ -140,91 +140,91 @@ public:
 
   DWORD GetDataDirectorySize(PeDataDir data_dir) const;
 
-  void SetSignature(DWORD signature) const;
+  void SetSignature(DWORD signature);
 
-  void SetMachine(WORD machine) const;
+  void SetMachine(WORD machine);
 
-  void SetNumberOfSections(WORD number_of_sections) const;
+  void SetNumberOfSections(WORD number_of_sections);
 
-  void SetTimeDateStamp(DWORD time_date_stamp) const;
+  void SetTimeDateStamp(DWORD time_date_stamp);
 
-  void SetPointerToSymbolTable(DWORD pointer_to_symbol_table) const;
+  void SetPointerToSymbolTable(DWORD pointer_to_symbol_table);
 
-  void SetNumberOfSymbols(DWORD number_of_symbols) const;
+  void SetNumberOfSymbols(DWORD number_of_symbols);
 
-  void SetSizeOfOptionalHeader(WORD size_of_optional_header) const;
+  void SetSizeOfOptionalHeader(WORD size_of_optional_header);
 
-  void SetCharacteristics(WORD characteristics) const;
+  void SetCharacteristics(WORD characteristics);
 
-  void SetMagic(WORD magic) const;
+  void SetMagic(WORD magic);
 
-  void SetMajorLinkerVersion(BYTE major_linker_version) const;
+  void SetMajorLinkerVersion(BYTE major_linker_version);
 
-  void SetMinorLinkerVersion(BYTE minor_linker_version) const;
+  void SetMinorLinkerVersion(BYTE minor_linker_version);
 
-  void SetSizeOfCode(DWORD size_of_code) const;
+  void SetSizeOfCode(DWORD size_of_code);
 
-  void SetSizeOfInitializedData(DWORD size_of_initialized_data) const;
+  void SetSizeOfInitializedData(DWORD size_of_initialized_data);
 
-  void SetSizeOfUninitializedData(DWORD size_of_uninitialized_data) const;
+  void SetSizeOfUninitializedData(DWORD size_of_uninitialized_data);
 
-  void SetAddressOfEntryPoint(DWORD address_of_entry_point) const;
+  void SetAddressOfEntryPoint(DWORD address_of_entry_point);
 
-  void SetBaseOfCode(DWORD base_of_code) const;
+  void SetBaseOfCode(DWORD base_of_code);
 
 #if defined(HADESMEM_ARCH_X86) 
-  void SetBaseOfData(DWORD base_of_data) const;
+  void SetBaseOfData(DWORD base_of_data);
 #endif
 
-  void SetImageBase(ULONG_PTR image_base) const;
+  void SetImageBase(ULONG_PTR image_base);
 
-  void SetSectionAlignment(DWORD section_alignment) const;
+  void SetSectionAlignment(DWORD section_alignment);
 
-  void SetFileAlignment(DWORD file_alignment) const;
+  void SetFileAlignment(DWORD file_alignment);
 
   void SetMajorOperatingSystemVersion(
-    WORD major_operating_system_version) const;
+    WORD major_operating_system_version);
 
   void SetMinorOperatingSystemVersion(
-    WORD minor_operating_system_version) const;
+    WORD minor_operating_system_version);
 
-  void SetMajorImageVersion(WORD major_image_version) const;
+  void SetMajorImageVersion(WORD major_image_version);
 
-  void SetMinorImageVersion(WORD minor_image_version) const;
+  void SetMinorImageVersion(WORD minor_image_version);
 
-  void SetMajorSubsystemVersion(WORD major_subsystem_version) const;
+  void SetMajorSubsystemVersion(WORD major_subsystem_version);
 
-  void SetMinorSubsystemVersion(WORD minor_subsystem_version) const;
+  void SetMinorSubsystemVersion(WORD minor_subsystem_version);
 
-  void SetWin32VersionValue(DWORD win32_version_value) const;
+  void SetWin32VersionValue(DWORD win32_version_value);
 
-  void SetSizeOfImage(DWORD size_of_image) const;
+  void SetSizeOfImage(DWORD size_of_image);
 
-  void SetSizeOfHeaders(DWORD size_of_headers) const;
+  void SetSizeOfHeaders(DWORD size_of_headers);
 
-  void SetCheckSum(DWORD checksum) const;
+  void SetCheckSum(DWORD checksum);
 
-  void SetSubsystem(WORD subsystem) const;
+  void SetSubsystem(WORD subsystem);
 
-  void SetDllCharacteristics(WORD dll_characteristics) const;
+  void SetDllCharacteristics(WORD dll_characteristics);
 
-  void SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve) const;
+  void SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve);
 
-  void SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit) const;
+  void SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit);
 
-  void SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve) const;
+  void SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve);
 
-  void SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit) const;
+  void SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit);
 
-  void SetLoaderFlags(DWORD loader_flags) const;
+  void SetLoaderFlags(DWORD loader_flags);
 
-  void SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes) const;
+  void SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes);
 
   void SetDataDirectoryVirtualAddress(PeDataDir data_dir, 
-    DWORD data_directory_virtual_address) const;
+    DWORD data_directory_virtual_address);
 
   void SetDataDirectorySize(PeDataDir data_dir, 
-    DWORD data_directory_size) const;
+    DWORD data_directory_size);
   
 private:
   struct Impl;

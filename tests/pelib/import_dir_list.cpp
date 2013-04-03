@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(import_dir_list)
       BOOST_CHECK(std::begin(import_thunks) != std::end(import_thunks));
       for (auto const& t : import_thunks)
       {
-        hadesmem::ImportThunk const test_thunk(process, cur_pe_file, 
+        hadesmem::ImportThunk test_thunk(process, cur_pe_file, 
           reinterpret_cast<PIMAGE_THUNK_DATA>(t.GetBase()));
 
         auto const imp_thunk_raw = hadesmem::Read<IMAGE_THUNK_DATA>(process, 

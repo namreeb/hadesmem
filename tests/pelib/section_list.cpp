@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(section_list)
     // TODO: Better tests.
     hadesmem::SectionList sections(process, pe_file);
     WORD section_count = 0;
-    for (auto const& section : sections)
+    for (auto& section : sections)
     {
       section_count = static_cast<WORD>(section_count + 1);
 

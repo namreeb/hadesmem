@@ -57,25 +57,25 @@ public:
 
   DWORD GetCharacteristics() const;
 
-  void SetName(std::string const& Name) const;
+  void SetName(std::string const& Name);
 
-  void SetVirtualAddress(DWORD VirtualAddress) const;
+  void SetVirtualAddress(DWORD VirtualAddress);
 
-  void SetVirtualSize(DWORD VirtualSize) const;
+  void SetVirtualSize(DWORD VirtualSize);
 
-  void SetSizeOfRawData(DWORD SizeOfRawData) const;
+  void SetSizeOfRawData(DWORD SizeOfRawData);
 
-  void SetPointerToRawData(DWORD PointerToRawData) const;
+  void SetPointerToRawData(DWORD PointerToRawData);
 
-  void SetPointerToRelocations(DWORD PointerToRelocations) const;
+  void SetPointerToRelocations(DWORD PointerToRelocations);
 
-  void SetPointerToLinenumbers(DWORD PointerToLinenumbers) const;
+  void SetPointerToLinenumbers(DWORD PointerToLinenumbers);
 
-  void SetNumberOfRelocations(WORD NumberOfRelocations) const;
+  void SetNumberOfRelocations(WORD NumberOfRelocations);
 
-  void SetNumberOfLinenumbers(WORD NumberOfLinenumbers) const;
+  void SetNumberOfLinenumbers(WORD NumberOfLinenumbers);
 
-  void SetCharacteristics(DWORD Characteristics) const;
+  void SetCharacteristics(DWORD Characteristics);
   
 private:
   friend class SectionIterator;
