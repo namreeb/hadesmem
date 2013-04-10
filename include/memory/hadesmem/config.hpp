@@ -80,3 +80,7 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 #else
 #define HADESMEM_DLLEXPORT __declspec(dllexport)
 #endif
+
+// Approximate equivalent of MAX_PATH for Unicode APIs.
+// See: http://goo.gl/1VVA3
+#define HADESMEM_MAX_PATH_UNICODE (1 << 15)

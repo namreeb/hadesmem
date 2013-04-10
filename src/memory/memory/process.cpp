@@ -3,7 +3,7 @@
 
 #include "hadesmem/process.hpp"
 
-#include <array>
+#include <vector>
 #include <ostream>
 #include <utility>
 
@@ -12,6 +12,7 @@
 #include "hadesmem/detail/warning_disable_suffix.hpp"
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 #include "hadesmem/detail/smart_handle.hpp"
 
 namespace hadesmem
@@ -228,7 +229,7 @@ std::wostream& operator<<(std::wostream& lhs, Process const& rhs)
 
 std::wstring GetPath(Process const& process)
 {
-  std::array<wchar_t, MAX_PATH> path = { { 0 } };
+  std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
   DWORD path_len = static_cast<DWORD>(path.size());
   if (!::QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
     &path_len))

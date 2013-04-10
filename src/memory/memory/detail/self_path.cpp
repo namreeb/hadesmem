@@ -3,13 +3,14 @@
 
 #include "hadesmem/detail/self_path.hpp"
 
-#include <array>
+#include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include "hadesmem/error.hpp"
+#include "hadesmem/config.hpp"
 
 namespace hadesmem
 {
@@ -36,7 +37,7 @@ HMODULE GetHandleToSelf()
 
 std::wstring GetSelfPath()
 {
-  std::array<wchar_t, MAX_PATH> path = { { 0 } };
+  std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
   DWORD const path_out_len = ::GetModuleFileName(GetHandleToSelf(), 
     path.data(), static_cast<DWORD>(path.size()));
   if (!path_out_len || ::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
