@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -16,6 +15,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 
@@ -89,14 +89,14 @@ ImportDirIterator::~ImportDirIterator()
 ImportDirIterator::reference ImportDirIterator::operator*() const 
   HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->import_dir_;
 }
 
 ImportDirIterator::pointer ImportDirIterator::operator->() const 
   HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->import_dir_;
 }
 
@@ -104,7 +104,7 @@ ImportDirIterator& ImportDirIterator::operator++()
 {
   try
   {
-    BOOST_ASSERT(impl_.get());
+    HADESMEM_ASSERT(impl_.get());
 
     auto const cur_base = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
       impl_->import_dir_->GetBase());

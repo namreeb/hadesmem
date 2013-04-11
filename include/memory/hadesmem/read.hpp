@@ -11,14 +11,11 @@
 #include <exception>
 #include <type_traits>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/protect.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/read_impl.hpp>
 #include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/query_region.hpp>
@@ -82,7 +79,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
-  BOOST_ASSERT(chunk_len != 0);
+  HADESMEM_ASSERT(chunk_len != 0);
 
   detail::ProtectGuard protect_guard(process, address, 
     detail::ProtectGuardType::kRead);

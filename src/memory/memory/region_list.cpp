@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -17,6 +16,7 @@
 #include <hadesmem/region.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/query_region.hpp>
 
 namespace hadesmem
@@ -73,13 +73,13 @@ RegionIterator::~RegionIterator()
 
 RegionIterator::reference RegionIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->region_;
 }
 
 RegionIterator::pointer RegionIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->region_;
 }
 
@@ -87,7 +87,7 @@ RegionIterator& RegionIterator::operator++()
 {
   try
   {
-    BOOST_ASSERT(impl_.get());
+    HADESMEM_ASSERT(impl_.get());
     
     void const* const base = impl_->region_->GetBase();
     SIZE_T const size = impl_->region_->GetSize();

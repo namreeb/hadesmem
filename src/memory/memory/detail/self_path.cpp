@@ -5,12 +5,9 @@
 
 #include <vector>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/assert.hpp>
 
 namespace hadesmem
 {
@@ -55,7 +52,7 @@ std::wstring GetSelfDirPath()
 {
   std::wstring self_path(GetSelfPath());
   std::wstring::size_type const separator = self_path.rfind(L'\\');
-  BOOST_ASSERT(separator != std::wstring::npos);
+  HADESMEM_ASSERT(separator != std::wstring::npos);
   self_path.erase(separator);
   return self_path;
 }

@@ -3,13 +3,10 @@
 
 #include <hadesmem/detail/read_impl.hpp>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/query_region.hpp>
 #include <hadesmem/detail/protect_guard.hpp>
 
@@ -22,8 +19,8 @@ namespace detail
 void Read(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
-  BOOST_ASSERT(data != nullptr);
-  BOOST_ASSERT(len != 0);
+  HADESMEM_ASSERT(data != nullptr);
+  HADESMEM_ASSERT(len != 0);
 
   ProtectGuard protect_guard(process, address, ProtectGuardType::kRead);
 
@@ -35,8 +32,8 @@ void Read(Process const& process, LPVOID address, LPVOID data,
 void ReadUnchecked(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
-  BOOST_ASSERT(data != nullptr);
-  BOOST_ASSERT(len != 0);
+  HADESMEM_ASSERT(data != nullptr);
+  HADESMEM_ASSERT(len != 0);
   
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 

@@ -7,13 +7,13 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
@@ -25,7 +25,7 @@ namespace
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
-  BOOST_ASSERT(name != nullptr);
+  HADESMEM_ASSERT(name != nullptr);
 
   // Do not continue if Shim Engine is enabled for local process, 
   // otherwise it could interfere with the address resolution.
@@ -61,13 +61,13 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorCodeWinLast(last_error));
   }
 
-  BOOST_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
+  HADESMEM_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
     reinterpret_cast<DWORD_PTR>(local_module));
   
   auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
     reinterpret_cast<DWORD_PTR>(local_module);
 
-  BOOST_ASSERT(module.GetSize() > func_delta);
+  HADESMEM_ASSERT(module.GetSize() > func_delta);
 
   auto const remote_func = reinterpret_cast<FARPROC>(
     reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);

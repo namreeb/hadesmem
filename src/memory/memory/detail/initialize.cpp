@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
@@ -27,6 +26,7 @@
 #endif // #if !defined(HADESMEM_GCC)
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/assert.hpp>
 
 #ifndef PROCESS_CALLBACK_FILTER_ENABLED
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
@@ -128,7 +128,7 @@ std::locale ImbueAllDefault()
   std::locale const locale = gen("");
 
   // Ensure the locale uses a UTF-8 backend. 
-  BOOST_ASSERT(std::use_facet<boost::locale::info>(locale).utf8());
+  HADESMEM_ASSERT(std::use_facet<boost::locale::info>(locale).utf8());
 
   return ImbueAll(locale);
 }

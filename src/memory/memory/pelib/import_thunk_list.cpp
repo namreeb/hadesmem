@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -16,6 +15,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
 
@@ -95,14 +95,14 @@ ImportThunkIterator::~ImportThunkIterator()
 ImportThunkIterator::reference ImportThunkIterator::operator*() const 
   HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->import_thunk_;
 }
 
 ImportThunkIterator::pointer ImportThunkIterator::operator->() const 
   HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->import_thunk_;
 }
 
@@ -110,7 +110,7 @@ ImportThunkIterator& ImportThunkIterator::operator++()
 {
   try
   {
-    BOOST_ASSERT(impl_.get());
+    HADESMEM_ASSERT(impl_.get());
 
     auto const cur_base = reinterpret_cast<PIMAGE_THUNK_DATA>(
       impl_->import_thunk_->GetBase());

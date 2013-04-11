@@ -6,12 +6,9 @@
 #include <utility>
 #include <ostream>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 
 namespace hadesmem
 {
@@ -49,7 +46,7 @@ struct Allocator::Impl
     base_(Alloc(process, size)), 
     size_(size)
   {
-    BOOST_ASSERT(size != 0);
+    HADESMEM_ASSERT(size != 0);
   }
 
   ~Impl()
@@ -64,8 +61,8 @@ struct Allocator::Impl
       return;
     }
 
-    BOOST_ASSERT(base_ != nullptr);
-    BOOST_ASSERT(size_ != 0);
+    HADESMEM_ASSERT(base_ != nullptr);
+    HADESMEM_ASSERT(size_ != 0);
 
     ::hadesmem::Free(*process_, base_);
 
@@ -85,7 +82,7 @@ struct Allocator::Impl
       (void)e;
 
       // WARNING: Memory in remote process is leaked if 'Free' fails
-      BOOST_ASSERT(boost::diagnostic_information(e).c_str() && false);
+      HADESMEM_ASSERT(boost::diagnostic_information(e).c_str() && false);
 
       process_ = nullptr;
       base_ = nullptr;

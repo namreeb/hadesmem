@@ -7,7 +7,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -17,6 +16,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/section.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 
@@ -88,19 +88,19 @@ SectionIterator::~SectionIterator()
 
 SectionIterator::reference SectionIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->section_;
 }
 
 SectionIterator::pointer SectionIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->section_;
 }
 
 SectionIterator& SectionIterator::operator++()
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
 
   WORD const number = impl_->section_->GetNumber();
 

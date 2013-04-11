@@ -10,10 +10,6 @@
 #include <type_traits>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
-#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <asmjit/asmjit.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -23,6 +19,7 @@
 #include <hadesmem/write.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
@@ -261,7 +258,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     (void)call_convs;
-    BOOST_ASSERT(call_convs[i] == CallConv::kDefault || 
+    HADESMEM_ASSERT(call_convs[i] == CallConv::kDefault || 
       call_convs[i] == CallConv::kWinApi || 
       call_convs[i] == CallConv::kX64);
 
@@ -696,7 +693,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   std::vector<CallConv> const& call_convs, 
   std::vector<std::vector<CallArg>> const& args_full) 
 {
-  BOOST_ASSERT(addresses.size() == call_convs.size() && 
+  HADESMEM_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
 
   Allocator const return_values_remote(process, 

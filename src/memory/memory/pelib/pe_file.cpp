@@ -7,16 +7,13 @@
 #include <ostream>
 #include <utility>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <winnt.h>
 
 #include <hadesmem/read.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/section.hpp>
 #include <hadesmem/pelib/section_list.hpp>
 
@@ -31,7 +28,7 @@ struct PeFile::Impl
     base_(static_cast<PBYTE>(address)), 
     type_(type)
   {
-    BOOST_ASSERT(base_ != 0);
+    HADESMEM_ASSERT(base_ != 0);
   }
 
   Process const* process_;

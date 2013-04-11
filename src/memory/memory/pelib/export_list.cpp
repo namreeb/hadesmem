@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -17,6 +16,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/pelib/export.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
 
@@ -88,13 +88,13 @@ ExportIterator::~ExportIterator()
 
 ExportIterator::reference ExportIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->export_;
 }
 
 ExportIterator::pointer ExportIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->export_;
 }
 
@@ -102,7 +102,7 @@ ExportIterator& ExportIterator::operator++()
 {
   try
   {
-    BOOST_ASSERT(impl_.get());
+    HADESMEM_ASSERT(impl_.get());
     
     ExportDir const export_dir(*impl_->process_, *impl_->pe_file_);
     DWORD* ptr_functions = static_cast<DWORD*>(RvaToVa(*impl_->process_, 

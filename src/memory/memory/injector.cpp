@@ -9,7 +9,6 @@
 #include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -21,6 +20,7 @@
 #include <hadesmem/write.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
@@ -158,7 +158,7 @@ void ForceLdrInitializeThunk(DWORD proc_id)
 HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
 {
-  BOOST_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
+  HADESMEM_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
 
    boost::filesystem::path path_real(path);
 

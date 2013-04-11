@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -17,6 +16,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
@@ -43,7 +43,7 @@ ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
 ModuleIterator::ModuleIterator(Process const& process)
   : impl_(new Impl())
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   
   impl_->process_ = &process;
   
@@ -123,19 +123,19 @@ ModuleIterator::~ModuleIterator()
 
 ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return *impl_->module_;
 }
 
 ModuleIterator::pointer ModuleIterator::operator->() const HADESMEM_NOEXCEPT
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   return &*impl_->module_;
 }
 
 ModuleIterator& ModuleIterator::operator++()
 {
-  BOOST_ASSERT(impl_.get());
+  HADESMEM_ASSERT(impl_.get());
   
   MODULEENTRY32 entry;
   ::ZeroMemory(&entry, sizeof(entry));
