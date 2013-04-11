@@ -8,7 +8,6 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/scope_exit.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/error.hpp>
@@ -22,6 +21,34 @@ namespace hadesmem
 
 namespace
 {
+
+// TODO: Replace this with something more generic and robust.
+class Library
+{
+public:
+  explicit Library(HMODULE module)
+    : module_(module)
+  { }
+
+  ~Library()
+  {
+    if (module_)
+    {
+        BOOST_VERIFY(::FreeLibrary(module_));
+    }
+  }
+
+  HMODULE Get() const
+  {
+    return module_;
+  }
+
+private:
+  Library(Library const& other);
+  Library& operator=(Library const& other);
+
+  HMODULE module_;
+};
 
 FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
@@ -37,22 +64,17 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorString("Shims enabled for local process."));
   }
 
-  HMODULE const local_module = ::LoadLibraryEx(module.GetPath().c_str(), 
-    nullptr, DONT_RESOLVE_DLL_REFERENCES);
-  if (!local_module)
+  Library const local_module(::LoadLibraryEx(module.GetPath().c_str(), 
+    nullptr, DONT_RESOLVE_DLL_REFERENCES));
+  if (!local_module.Get())
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("LoadLibraryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
-
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    BOOST_VERIFY(::FreeLibrary(local_module));
-  };
   
-  FARPROC const local_func = ::GetProcAddress(local_module, name);
+  FARPROC const local_func = ::GetProcAddress(local_module.Get(), name);
   if (!local_func)
   {
     DWORD const last_error = ::GetLastError();
@@ -62,10 +84,10 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   }
 
   HADESMEM_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
-    reinterpret_cast<DWORD_PTR>(local_module));
+    reinterpret_cast<DWORD_PTR>(local_module.Get()));
   
   auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
-    reinterpret_cast<DWORD_PTR>(local_module);
+    reinterpret_cast<DWORD_PTR>(local_module.Get());
 
   HADESMEM_ASSERT(module.GetSize() > func_delta);
 
