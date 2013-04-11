@@ -8,3 +8,5 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #define HADESMEM_ASSERT(...) BOOST_ASSERT(__VA_ARGS__)
+
+#define HADESMEM_VERIFY(...) BOOST_VERIFY(__VA_ARGS__)

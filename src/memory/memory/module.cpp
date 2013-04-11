@@ -34,7 +34,7 @@ public:
   {
     if (module_)
     {
-        BOOST_VERIFY(::FreeLibrary(module_));
+        HADESMEM_VERIFY(::FreeLibrary(module_));
     }
   }
 
