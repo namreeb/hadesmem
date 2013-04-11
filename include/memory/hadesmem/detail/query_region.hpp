@@ -5,7 +5,7 @@
 
 #include <windows.h>
 
-#include "hadesmem/config.hpp"
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {

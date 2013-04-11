@@ -1,23 +1,23 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/pelib/import_dir_list.hpp"
+#include <hadesmem/pelib/import_dir_list.hpp>
 
 #include <utility>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
-#include "hadesmem/read.hpp"
-#include "hadesmem/error.hpp"
-#include "hadesmem/config.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/pelib/pe_file.hpp"
-#include "hadesmem/pelib/import_dir.hpp"
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/import_dir.hpp>
 
 namespace hadesmem
 {

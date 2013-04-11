@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/detail/self_path.hpp"
+#include <hadesmem/detail/self_path.hpp>
 
 #include <vector>
 
@@ -9,8 +9,8 @@
 #include <boost/assert.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/config.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {

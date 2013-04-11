@@ -1,24 +1,24 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/pelib/pe_file.hpp"
+#include <hadesmem/pelib/pe_file.hpp>
 
 #include <cstddef>
 #include <ostream>
 #include <utility>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include "hadesmem/read.hpp"
-#include "hadesmem/error.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/pelib/section.hpp"
-#include "hadesmem/pelib/section_list.hpp"
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/pelib/section.hpp>
+#include <hadesmem/pelib/section_list.hpp>
 
 namespace hadesmem
 {

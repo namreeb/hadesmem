@@ -1,17 +1,17 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/detail/write_impl.hpp"
+#include <hadesmem/detail/write_impl.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/protect.hpp"
-#include "hadesmem/detail/query_region.hpp"
-#include "hadesmem/detail/protect_guard.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/protect.hpp>
+#include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/detail/protect_guard.hpp>
 
 namespace hadesmem
 {

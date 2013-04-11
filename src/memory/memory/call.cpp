@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/call.hpp"
+#include <hadesmem/call.hpp>
 
 #include <cstring>
 #include <cstddef>
@@ -9,23 +9,23 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <asmjit/asmjit.h>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/read.hpp"
-#include "hadesmem/alloc.hpp"
-#include "hadesmem/error.hpp"
-#include "hadesmem/write.hpp"
-#include "hadesmem/module.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/detail/type_traits.hpp"
-#include "hadesmem/detail/smart_handle.hpp"
-#include "hadesmem/detail/static_assert.hpp"
+#include <hadesmem/read.hpp>
+#include <hadesmem/alloc.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/write.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/detail/type_traits.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 // TODO: Improve safety via EH.
 

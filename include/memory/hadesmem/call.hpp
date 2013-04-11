@@ -8,21 +8,21 @@
 #include <utility>
 #include <type_traits>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/config.hpp"
-#include "hadesmem/detail/func_args.hpp"
-#include "hadesmem/detail/func_arity.hpp"
-#include "hadesmem/detail/func_result.hpp"
-#include "hadesmem/detail/static_assert.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
+#include <hadesmem/detail/func_args.hpp>
+#include <hadesmem/detail/func_arity.hpp>
+#include <hadesmem/detail/func_result.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {

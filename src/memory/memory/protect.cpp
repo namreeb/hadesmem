@@ -1,12 +1,12 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/protect.hpp"
+#include <hadesmem/protect.hpp>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/detail/query_region.hpp"
-#include "hadesmem/detail/protect_region.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/detail/protect_region.hpp>
 
 namespace hadesmem
 {

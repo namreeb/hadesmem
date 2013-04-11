@@ -7,11 +7,11 @@
 
 #include <windows.h>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/exception/all.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/config.hpp"
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {

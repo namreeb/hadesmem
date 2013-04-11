@@ -1,13 +1,13 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/detail/smart_handle.hpp"
+#include <hadesmem/detail/smart_handle.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/error.hpp"
+#include <hadesmem/error.hpp>
 
 // TODO: PImpl this class?
 

@@ -11,7 +11,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
-#include "hadesmem/config.hpp"
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {

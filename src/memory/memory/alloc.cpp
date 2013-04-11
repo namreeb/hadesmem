@@ -1,17 +1,17 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/alloc.hpp"
+#include <hadesmem/alloc.hpp>
 
 #include <utility>
 #include <ostream>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/process.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {

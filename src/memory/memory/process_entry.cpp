@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/process_entry.hpp"
+#include <hadesmem/process_entry.hpp>
 
 #include <utility>
 

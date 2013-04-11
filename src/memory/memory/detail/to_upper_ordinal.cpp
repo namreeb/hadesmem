@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/detail/to_upper_ordinal.hpp"
+#include <hadesmem/detail/to_upper_ordinal.hpp>
 
 #include <limits>
 #include <vector>
@@ -9,7 +9,7 @@
 
 #include <windows.h>
 
-#include "hadesmem/error.hpp"
+#include <hadesmem/error.hpp>
 
 namespace hadesmem
 {

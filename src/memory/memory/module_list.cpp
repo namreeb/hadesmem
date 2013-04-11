@@ -1,23 +1,23 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/module_list.hpp"
+#include <hadesmem/module_list.hpp>
 
 #include <utility>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 #include <tlhelp32.h>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/config.hpp"
-#include "hadesmem/module.hpp"
-#include "hadesmem/process.hpp"
-#include "hadesmem/detail/smart_handle.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {

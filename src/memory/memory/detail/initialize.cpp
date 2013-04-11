@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "hadesmem/detail/initialize.hpp"
+#include <hadesmem/detail/initialize.hpp>
 
 #include <ctime>
 #include <random>

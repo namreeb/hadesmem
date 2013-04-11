@@ -6,7 +6,7 @@
 #include <memory>
 #include <iterator>
 
-#include "hadesmem/config.hpp"
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {

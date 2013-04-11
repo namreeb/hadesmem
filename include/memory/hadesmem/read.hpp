@@ -11,19 +11,19 @@
 #include <exception>
 #include <type_traits>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
-#include "hadesmem/error.hpp"
-#include "hadesmem/protect.hpp"
-#include "hadesmem/detail/read_impl.hpp"
-#include "hadesmem/detail/type_traits.hpp"
-#include "hadesmem/detail/query_region.hpp"
-#include "hadesmem/detail/protect_guard.hpp"
-#include "hadesmem/detail/static_assert.hpp"
+#include <hadesmem/error.hpp>
+#include <hadesmem/protect.hpp>
+#include <hadesmem/detail/read_impl.hpp>
+#include <hadesmem/detail/type_traits.hpp>
+#include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/detail/protect_guard.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 // NOTE: Reads which span across region boundaries are not explicitly handled 
 // or supported. They may work simply by chance (or if the user changes the 

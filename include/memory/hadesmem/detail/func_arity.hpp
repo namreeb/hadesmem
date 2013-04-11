@@ -5,12 +5,12 @@
 
 #include <cstddef>
 
-#include "hadesmem/detail/warning_disable_prefix.hpp"
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/preprocessor.hpp>
-#include "hadesmem/detail/warning_disable_suffix.hpp"
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include "hadesmem/config.hpp"
-#include "hadesmem/detail/static_assert.hpp"
+#include <hadesmem/config.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {
