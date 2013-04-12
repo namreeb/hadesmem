@@ -14,6 +14,16 @@ namespace hadesmem
 namespace detail
 {
 
+SmartHandle::SmartHandle() HADESMEM_NOEXCEPT
+  : handle_(nullptr), 
+  invalid_(nullptr)
+{ }
+
+SmartHandle::SmartHandle(HANDLE handle) HADESMEM_NOEXCEPT
+  : handle_(handle), 
+  invalid_(nullptr)
+{ }
+
 SmartHandle::SmartHandle(HANDLE handle, HANDLE invalid) HADESMEM_NOEXCEPT
   : handle_(handle), 
   invalid_(invalid)

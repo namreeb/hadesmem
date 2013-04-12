@@ -16,8 +16,11 @@ namespace detail
 class SmartHandle
 {
 public:
-  explicit SmartHandle(HANDLE handle = nullptr, HANDLE invalid = nullptr) 
-    HADESMEM_NOEXCEPT;
+  SmartHandle() HADESMEM_NOEXCEPT;
+  
+  explicit SmartHandle(HANDLE handle) HADESMEM_NOEXCEPT;
+
+  explicit SmartHandle(HANDLE handle, HANDLE invalid) HADESMEM_NOEXCEPT;
 
   SmartHandle& operator=(HANDLE handle) HADESMEM_NOEXCEPT;
 
