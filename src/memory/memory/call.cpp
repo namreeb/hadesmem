@@ -42,6 +42,9 @@
 // generated at compile-time with FASM and stored in a binary 'blob' (embedded 
 // in the source). This will remove the dependency on AsmJit.
 
+// TODO: Add support for cross-session injection (also cross-winsta and 
+// cross-desktop injection). See Injector TODO notes for more details.
+
 HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
