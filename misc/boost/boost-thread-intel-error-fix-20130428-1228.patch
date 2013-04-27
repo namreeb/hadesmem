@@ -1,0 +1,13 @@
+Index: boost/thread/win32/once.hpp
+===================================================================
+--- boost/thread/win32/once.hpp	(revision 84054)
++++ boost/thread/win32/once.hpp	(working copy)
+@@ -363,7 +363,7 @@
+         }
+     }
+ #else
+-#ifndef BOOST_MSVC
++#if !defined( BOOST_MSVC ) && !defined( BOOST_INTEL_WIN )
+     template<typename Function>
+     void call_once(once_flag& flag,Function f)
+     {

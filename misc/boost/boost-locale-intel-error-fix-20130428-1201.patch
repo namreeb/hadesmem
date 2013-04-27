@@ -1,0 +1,17 @@
+Index: libs/locale/src/win32/api.hpp
+===================================================================
+--- libs/locale/src/win32/api.hpp	(revision 84054)
++++ libs/locale/src/win32/api.hpp	(working copy)
+@@ -134,10 +134,10 @@
+         }
+         if(!inf_group) {
+             if(std::numeric_limits<char>::is_signed) {
+-                res.grouping+=std::numeric_limits<char>::min();
++                res.grouping+=(std::numeric_limits<char>::min)();
+             }
+             else {
+-                res.grouping+=std::numeric_limits<char>::max();
++                res.grouping+=(std::numeric_limits<char>::max)();
+             }
+         }
+         return res;
