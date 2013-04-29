@@ -15,6 +15,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/initialize.hpp>
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -31,6 +32,11 @@
 #endif // #if defined(HADESMEM_CLANG)
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::RegionList::iterator)
+  
+BOOST_AUTO_TEST_CASE(initialize)
+{
+  hadesmem::detail::InitializeAll();
+}
 
 BOOST_AUTO_TEST_CASE(region_list)
 {

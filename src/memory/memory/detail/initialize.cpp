@@ -26,11 +26,62 @@
 #endif // #if !defined(HADESMEM_GCC)
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
 #include <hadesmem/detail/assert.hpp>
 
 #ifndef PROCESS_CALLBACK_FILTER_ENABLED
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
 #endif // #ifndef PROCESS_CALLBACK_FILTER_ENABLED
+
+namespace
+{
+
+struct ProcessMitigationPolicy
+{
+  typedef enum _PROCESS_MITIGATION_POLICY
+  {  
+    ProcessDEPPolicy,  
+    ProcessASLRPolicy,  
+    ProcessReserved1MitigationPolicy,  
+    ProcessStrictHandleCheckPolicy,  
+    ProcessSystemCallDisablePolicy,  
+    ProcessMitigationOptionsMask,  
+    ProcessExtensionPointDisablePolicy,  
+    MaxProcessMitigationPolicy  
+  } PROCESS_MITIGATION_POLICY, *PPROCESS_MITIGATION_POLICY;  
+
+  typedef struct _PROCESS_MITIGATION_ASLR_POLICY
+  {
+    union
+    {
+      ULONG Flags;
+      struct
+      {
+        ULONG EnableBottomUpRandomization : 1;
+        ULONG EnableForceRelocateImages : 1;
+        ULONG EnableHighEntropy : 1;
+        ULONG DisallowStrippedImages : 1;
+        ULONG ReservedFlags : 28;
+      } Bits;
+    };
+  } PROCESS_MITIGATION_ASLR_POLICY, *PPROCESS_MITIGATION_ASLR_POLICY;
+
+  typedef struct _PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+  {
+    union
+    {
+      ULONG Flags;
+      struct
+      {
+        ULONG RaiseExceptionOnInvalidHandleReference : 1;
+        ULONG HandleExceptionsPermanentlyEnabled : 1;
+        ULONG ReservedFlags : 30;
+      } Bits;
+    };
+  } PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, *PPROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY;
+};
+
+}
 
 namespace hadesmem
 {
@@ -115,6 +166,90 @@ void EnableBottomUpRand()
   }
 }
 
+void EnableMitigationPolicies()
+{
+  HMODULE const kernel32_mod = ::GetModuleHandle(L"kernel32.dll");
+  if (!kernel32_mod)
+  {
+    DWORD const last_error = ::GetLastError();
+      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+        hadesmem::ErrorString("GetModuleHandle failed.") << 
+        hadesmem::ErrorCodeWinLast(last_error));
+  }
+  
+  // These APIs are not available by default until Windows 8, so they 
+  // must be called dynamically.
+  typedef BOOL (WINAPI * GetProcessMitigationPolicyPtr) (
+    HANDLE hProcess, 
+    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY MitigationPolicy, 
+    PVOID lpBuffer, SIZE_T dwLength);
+  auto const get_mitigation_policy = 
+    reinterpret_cast<GetProcessMitigationPolicyPtr>(::GetProcAddress(
+    kernel32_mod, "GetProcessMitigationPolicy"));
+  if (!get_mitigation_policy)
+  {
+    return;
+  }
+
+  typedef BOOL (WINAPI * SetProcessMitigationPolicyPtr) (
+    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY MitigationPolicy, 
+    PVOID lpBuffer, SIZE_T dwLength);
+  auto const set_mitigation_policy = 
+    reinterpret_cast<SetProcessMitigationPolicyPtr>(::GetProcAddress(
+    kernel32_mod, "SetProcessMitigationPolicy"));
+  if (!set_mitigation_policy)
+  {
+    return;
+  }
+
+  ProcessMitigationPolicy::PROCESS_MITIGATION_ASLR_POLICY aslr_policy = 
+    { { 0 } };
+  if (!get_mitigation_policy(::GetCurrentProcess(), 
+    ProcessMitigationPolicy::ProcessASLRPolicy, &aslr_policy, 
+    sizeof(aslr_policy)))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      hadesmem::ErrorString("GetProcessMitigationPolicy failed.") << 
+      hadesmem::ErrorCodeWinLast(last_error));
+  }
+
+  aslr_policy.Bits.EnableForceRelocateImages = 1;
+  aslr_policy.Bits.DisallowStrippedImages = 1;
+  if (!set_mitigation_policy(ProcessMitigationPolicy::ProcessASLRPolicy, 
+    &aslr_policy, sizeof(aslr_policy)))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      hadesmem::ErrorString("SetProcessMitigationPolicy failed.") << 
+      hadesmem::ErrorCodeWinLast(last_error));
+  }
+
+  ProcessMitigationPolicy::PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY 
+    strict_handle_check_policy = { { 0 } };
+  if (!get_mitigation_policy(::GetCurrentProcess(), 
+    ProcessMitigationPolicy::ProcessStrictHandleCheckPolicy, 
+    &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      hadesmem::ErrorString("GetProcessMitigationPolicy failed.") << 
+      hadesmem::ErrorCodeWinLast(last_error));
+  }
+
+  strict_handle_check_policy.Bits.RaiseExceptionOnInvalidHandleReference = 1;
+  strict_handle_check_policy.Bits.HandleExceptionsPermanentlyEnabled = 1;
+  if (!set_mitigation_policy(
+    ProcessMitigationPolicy::ProcessStrictHandleCheckPolicy, 
+    &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      hadesmem::ErrorString("SetProcessMitigationPolicy failed.") << 
+      hadesmem::ErrorCodeWinLast(last_error));
+  }
+}
+
 std::locale ImbueAllDefault()
 {
   // Use the Windows API backend to (hopefully) provide consistent behaviour 
@@ -157,6 +292,16 @@ std::locale ImbueAll(std::locale const& locale)
   std::ios_base::sync_with_stdio(false); 
 
   return old_loc;
+}
+
+void InitializeAll()
+{
+  hadesmem::detail::DisableUserModeCallbackExceptionFilter();
+  hadesmem::detail::EnableCrtDebugFlags();
+  hadesmem::detail::EnableTerminationOnHeapCorruption();
+  hadesmem::detail::EnableBottomUpRand();
+  hadesmem::detail::EnableMitigationPolicies();
+  hadesmem::detail::ImbueAllDefault();
 }
 
 }

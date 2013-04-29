@@ -46,7 +46,9 @@ struct Allocator::Impl
     base_(Alloc(process, size)), 
     size_(size)
   {
-    HADESMEM_ASSERT(size != 0);
+    HADESMEM_ASSERT(process_ != 0);
+    HADESMEM_ASSERT(base_ != 0);
+    HADESMEM_ASSERT(size_ != 0);
   }
 
   ~Impl()

@@ -14,6 +14,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/initialize.hpp>
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -29,10 +30,15 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
+BOOST_AUTO_TEST_CASE(initialize)
+{
+  hadesmem::detail::InitializeAll();
+}
+
 BOOST_AUTO_TEST_CASE(alloc)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
-  
+
   PVOID address = Alloc(process, 0x1000);
   *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);
   BOOST_CHECK_EQUAL(*static_cast<BYTE*>(address), static_cast<BYTE>(0xFF));

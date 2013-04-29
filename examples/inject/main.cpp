@@ -43,11 +43,7 @@ int main(int argc, char* /*argv*/[])
 {
   try
   {
-    hadesmem::detail::DisableUserModeCallbackExceptionFilter();
-    hadesmem::detail::EnableCrtDebugFlags();
-    hadesmem::detail::EnableTerminationOnHeapCorruption();
-    hadesmem::detail::EnableBottomUpRand();
-    hadesmem::detail::ImbueAllDefault();
+    hadesmem::detail::InitializeAll();
 
     std::cout << "HadesMem Injector\n";
 

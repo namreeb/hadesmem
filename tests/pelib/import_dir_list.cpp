@@ -19,6 +19,7 @@
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
+#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
 #include <hadesmem/pelib/import_thunk_list.hpp>
 
@@ -42,6 +43,11 @@
 extern "C" HADESMEM_DLLEXPORT void Dummy();
 extern "C" HADESMEM_DLLEXPORT void Dummy()
 { }
+
+BOOST_AUTO_TEST_CASE(initialize)
+{
+  hadesmem::detail::InitializeAll();
+}
 
 BOOST_AUTO_TEST_CASE(import_dir_list)
 {
