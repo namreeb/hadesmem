@@ -10,7 +10,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {
