@@ -33,7 +33,7 @@ public:
 
   Module& operator=(Module&& other) HADESMEM_NOEXCEPT;
 
-  ~Module();
+  ~Module() HADESMEM_NOEXCEPT;
   
   HMODULE GetHandle() const HADESMEM_NOEXCEPT;
   
@@ -46,10 +46,23 @@ public:
 private:
   friend class ModuleIterator;
 
-  explicit Module(Process const& process, MODULEENTRY32 const& entry);
+  typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;
 
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  explicit Module(Process const& process, MODULEENTRY32 const& entry);
+  
+  void Initialize(HMODULE handle);
+  
+  void Initialize(std::wstring const& path);
+  
+  void Initialize(MODULEENTRY32 const& entry);
+  
+  void InitializeIf(EntryCallback const& check_func);
+
+  Process const* process_;
+  HMODULE handle_;
+  DWORD size_;
+  std::wstring name_;
+  std::wstring path_;
 };
 
 bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT;

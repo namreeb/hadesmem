@@ -26,11 +26,11 @@ namespace
 class Library
 {
 public:
-  explicit Library(HMODULE module)
+  explicit HADESMEM_CONSTEXPR Library(HMODULE module) HADESMEM_NOEXCEPT
     : module_(module)
   { }
 
-  ~Library()
+  ~Library() HADESMEM_NOEXCEPT
   {
     if (module_)
     {
@@ -99,113 +99,163 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
 }
 
-struct Module::Impl
+Module::Module(Process const& process, HMODULE handle)
+  : process_(&process), 
+  handle_(nullptr), 
+  size_(0), 
+  name_(), 
+  path_()
 {
-  explicit Impl(Process const& process, HMODULE handle)
-    : process_(&process), 
-    handle_(nullptr), 
-    size_(0), 
-    name_(), 
-    path_()
-  {
-    Initialize(handle);
-  }
+  Initialize(handle);
+}
 
-  explicit Impl(Process const& process, std::wstring const& path)
-    : process_(&process), 
-    handle_(nullptr), 
-    size_(0), 
-    name_(), 
-    path_()
-  {
-    Initialize(path);
-  }
+Module::Module(Process const& process, std::wstring const& path)
+  : process_(&process), 
+  handle_(nullptr), 
+  size_(0), 
+  name_(), 
+  path_()
+{
+  Initialize(path);
+}
 
-  explicit Impl(Process const& process, MODULEENTRY32 const& entry)
-    : process_(&process), 
-    handle_(nullptr), 
-    size_(0), 
-    name_(), 
-    path_()
-  {
-    Initialize(entry);
-  }
+Module::Module(Process const& process, MODULEENTRY32 const& entry)
+  : process_(&process), 
+  handle_(nullptr), 
+  size_(0), 
+  name_(), 
+  path_()
+{
+  Initialize(entry);
+}
 
-  void Initialize(HMODULE handle)
+Module::Module(Module const& other)
+  : process_(other.process_), 
+  handle_(other.handle_), 
+  size_(other.size_), 
+  name_(other.name_), 
+  path_(other.path_)
+{ }
+
+Module& Module::operator=(Module const& other)
+{
+  process_ = other.process_;
+  handle_ = other.handle_;
+  size_ = other.size_;
+  name_ = other.name_;
+  path_ = other.path_;
+
+  return *this;
+}
+
+Module::Module(Module&& other) HADESMEM_NOEXCEPT
+  : process_(other.process_), 
+  handle_(other.handle_), 
+  size_(other.size_), 
+  name_(std::move(other.name_)), 
+  path_(std::move(other.path_))
+{ }
+
+Module& Module::operator=(Module&& other) HADESMEM_NOEXCEPT
+{
+  process_ = other.process_;
+  handle_ = other.handle_;
+  size_ = other.size_;
+  name_ = std::move(other.name_);
+  path_ = std::move(other.path_);
+
+  return *this;
+}
+
+Module::~Module() HADESMEM_NOEXCEPT
+{ }
+
+HMODULE Module::GetHandle() const HADESMEM_NOEXCEPT
+{
+  return handle_;
+}
+
+DWORD Module::GetSize() const HADESMEM_NOEXCEPT
+{
+  return size_;
+}
+
+std::wstring Module::GetName() const
+{
+  return name_;
+}
+
+std::wstring Module::GetPath() const
+{
+  return path_;
+}
+
+void Module::Initialize(HMODULE handle)
+{
+  auto handle_check = 
+    [&] (MODULEENTRY32 const& entry) -> bool
   {
-    auto handle_check = 
-      [&] (MODULEENTRY32 const& entry) -> bool
+    if (entry.hModule == handle || !handle)
     {
-      if (entry.hModule == handle || !handle)
+      return true;
+    }
+
+    return false;
+  };
+
+  InitializeIf(handle_check);
+}
+
+void Module::Initialize(std::wstring const& path)
+{
+  bool const is_path = (path.find(L'\\') != std::wstring::npos) || 
+    (path.find(L'/') != std::wstring::npos);
+
+  std::wstring const path_upper = detail::ToUpperOrdinal(path);
+
+  auto path_check = 
+    [&] (MODULEENTRY32 const& entry) -> bool
+  {
+    if (is_path)
+    {
+      if (boost::filesystem::equivalent(path, entry.szExePath))
       {
         return true;
       }
-
-      return false;
-    };
-
-    InitializeIf(handle_check);
-  }
-
-  void Initialize(std::wstring const& path)
-  {
-    bool const is_path = (path.find(L'\\') != std::wstring::npos) || 
-      (path.find(L'/') != std::wstring::npos);
-
-    std::wstring const path_upper = detail::ToUpperOrdinal(path);
-
-    auto path_check = 
-      [&] (MODULEENTRY32 const& entry) -> bool
+    }
+    else
     {
-      if (is_path)
+      if (path_upper == detail::ToUpperOrdinal(entry.szModule))
       {
-        if (boost::filesystem::equivalent(path, entry.szExePath))
-        {
-          return true;
-        }
+        return true;
       }
-      else
-      {
-        if (path_upper == detail::ToUpperOrdinal(entry.szModule))
-        {
-          return true;
-        }
-      }
+    }
 
-      return false;
-    };
+    return false;
+  };
 
-    InitializeIf(path_check);
-  }
+  InitializeIf(path_check);
+}
 
-  void Initialize(MODULEENTRY32 const& entry)
+void Module::Initialize(MODULEENTRY32 const& entry)
+{
+  handle_ = entry.hModule;
+  size_ = entry.modBaseSize;
+  name_ = entry.szModule;
+  path_ = entry.szExePath;
+}
+
+void Module::InitializeIf(EntryCallback const& check_func)
+{
+  detail::SmartHandle snap(::CreateToolhelp32Snapshot(
+    TH32CS_SNAPMODULE, process_->GetId()), INVALID_HANDLE_VALUE);
+  if (!snap.IsValid())
   {
-    handle_ = entry.hModule;
-    size_ = entry.modBaseSize;
-    name_ = entry.szModule;
-    path_ = entry.szExePath;
-  }
-
-  typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;
-  void InitializeIf(EntryCallback const& check_func)
-  {
-    detail::SmartHandle snap(::CreateToolhelp32Snapshot(
-      TH32CS_SNAPMODULE, process_->GetId()), INVALID_HANDLE_VALUE);
-    if (!snap.IsValid())
+    if (GetLastError() == ERROR_BAD_LENGTH)
     {
-      if (GetLastError() == ERROR_BAD_LENGTH)
-      {
-        snap = ::CreateToolhelp32Snapshot(
-          TH32CS_SNAPMODULE, process_->GetId());
-        if (!snap.IsValid())
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
-            ErrorString("CreateToolhelp32Snapshot failed.") << 
-            ErrorCodeWinLast(last_error));
-        }
-      }
-      else
+      snap = ::CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE, process_->GetId());
+      if (!snap.IsValid())
       {
         DWORD const last_error = ::GetLastError();
         HADESMEM_THROW_EXCEPTION(Error() << 
@@ -213,98 +263,42 @@ struct Module::Impl
           ErrorCodeWinLast(last_error));
       }
     }
-
-    MODULEENTRY32 entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
-
-    for (BOOL more_mods = ::Module32First(snap.GetHandle(), &entry); more_mods; 
-      more_mods = ::Module32Next(snap.GetHandle(), &entry)) 
-    {
-      if (check_func(entry))
-      {
-        Initialize(entry);      
-        return;
-      }
-    }
-
-    DWORD const last_error = ::GetLastError();
-    if (last_error == ERROR_NO_MORE_FILES)
-    {
-      HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Could not find module.") << 
-        ErrorCodeWinLast(last_error));
-    }
     else
     {
+      DWORD const last_error = ::GetLastError();
       HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Module enumeration failed.") << 
+        ErrorString("CreateToolhelp32Snapshot failed.") << 
         ErrorCodeWinLast(last_error));
     }
   }
 
-  Process const* process_;
-  HMODULE handle_;
-  DWORD size_;
-  std::wstring name_;
-  std::wstring path_;
-};
+  MODULEENTRY32 entry;
+  ::ZeroMemory(&entry, sizeof(entry));
+  entry.dwSize = sizeof(entry);
 
-Module::Module(Process const& process, HMODULE handle)
-  : impl_(new Impl(process, handle))
-{ }
+  for (BOOL more_mods = ::Module32First(snap.GetHandle(), &entry); more_mods; 
+    more_mods = ::Module32Next(snap.GetHandle(), &entry)) 
+  {
+    if (check_func(entry))
+    {
+      Initialize(entry);      
+      return;
+    }
+  }
 
-Module::Module(Process const& process, std::wstring const& path)
-  : impl_(new Impl(process, path))
-{ }
-
-Module::Module(Process const& process, MODULEENTRY32 const& entry)
-  : impl_(new Impl(process, entry))
-{ }
-
-Module::Module(Module const& other)
-  : impl_(new Impl(*other.impl_))
-{ }
-
-Module& Module::operator=(Module const& other)
-{
-  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
-
-  return *this;
-}
-
-Module::Module(Module&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
-{ }
-
-Module& Module::operator=(Module&& other) HADESMEM_NOEXCEPT
-{
-  impl_ = std::move(other.impl_);
-
-  return *this;
-}
-
-Module::~Module()
-{ }
-
-HMODULE Module::GetHandle() const HADESMEM_NOEXCEPT
-{
-  return impl_->handle_;
-}
-
-DWORD Module::GetSize() const HADESMEM_NOEXCEPT
-{
-  return impl_->size_;
-}
-
-std::wstring Module::GetName() const
-{
-  return impl_->name_;
-}
-
-std::wstring Module::GetPath() const
-{
-  return impl_->path_;
+  DWORD const last_error = ::GetLastError();
+  if (last_error == ERROR_NO_MORE_FILES)
+  {
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Could not find module.") << 
+      ErrorCodeWinLast(last_error));
+  }
+  else
+  {
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("Module enumeration failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
 }
 
 bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
