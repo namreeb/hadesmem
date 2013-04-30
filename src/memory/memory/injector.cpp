@@ -222,73 +222,72 @@ CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
     CallConv::kDefault);
 }
 
-struct CreateAndInjectData::Impl
-{
-  explicit Impl(Process const& process, HMODULE module, DWORD_PTR export_ret, 
-    DWORD export_last_error)
-    : process_(process), 
-    module_(module), 
-    export_ret_(export_ret), 
-    export_last_error_(export_last_error)
-  { }
-
-  Process process_;
-  HMODULE module_;
-  DWORD_PTR export_ret_;
-  DWORD export_last_error_;
-};
-
 CreateAndInjectData::CreateAndInjectData(Process const& process, 
   HMODULE module, DWORD_PTR export_ret, DWORD export_last_error) 
-  : impl_(new Impl(process, module, export_ret, export_last_error))
+  : process_(process), 
+  module_(module), 
+  export_ret_(export_ret), 
+  export_last_error_(export_last_error)
 { }
 
 CreateAndInjectData::CreateAndInjectData(CreateAndInjectData const& other)
-  : impl_(new Impl(*other.impl_))
+  : process_(other.process_), 
+  module_(other.module_), 
+  export_ret_(other.export_ret_), 
+  export_last_error_(other.export_last_error_)
 { }
 
 CreateAndInjectData& CreateAndInjectData::operator=(
   CreateAndInjectData const& other)
 {
-  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+  process_ = other.process_;
+  module_ = other.module_;
+  export_ret_ = other.export_ret_;
+  export_last_error_ = other.export_last_error_;
 
   return *this;
 }
 
 CreateAndInjectData::CreateAndInjectData(CreateAndInjectData&& other) 
   HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
+  : process_(std::move(other.process_)), 
+  module_(other.module_), 
+  export_ret_(other.export_ret_), 
+  export_last_error_(other.export_last_error_)
 { }
 
 CreateAndInjectData& CreateAndInjectData::operator=(
   CreateAndInjectData&& other) HADESMEM_NOEXCEPT
 {
-  impl_ = std::move(other.impl_);
+  process_ = std::move(other.process_);
+  module_ = other.module_;
+  export_ret_ = other.export_ret_;
+  export_last_error_ = other.export_last_error_;
 
   return *this;
 }
 
-CreateAndInjectData::~CreateAndInjectData()
+CreateAndInjectData::~CreateAndInjectData() HADESMEM_NOEXCEPT
 { }
 
 Process CreateAndInjectData::GetProcess() const
 {
-  return impl_->process_;
+  return process_;
 }
 
 HMODULE CreateAndInjectData::GetModule() const HADESMEM_NOEXCEPT
 {
-  return impl_->module_;
+  return module_;
 }
 
 DWORD_PTR CreateAndInjectData::GetExportRet() const HADESMEM_NOEXCEPT
 {
-  return impl_->export_ret_;
+  return export_ret_;
 }
 
 DWORD CreateAndInjectData::GetExportLastError() const HADESMEM_NOEXCEPT
 {
-  return impl_->export_last_error_;
+  return export_last_error_;
 }
 
 CreateAndInjectData CreateAndInject(

@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 #include <vector>
 #include <utility>
@@ -11,11 +10,10 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {
-
-class Process;
 
 template <typename T>
 class CallResult;
@@ -55,7 +53,7 @@ public:
   CreateAndInjectData& operator=(CreateAndInjectData&& other) 
     HADESMEM_NOEXCEPT;
 
-  ~CreateAndInjectData();
+  ~CreateAndInjectData() HADESMEM_NOEXCEPT;
 
   Process GetProcess() const;
 
@@ -66,8 +64,10 @@ public:
   DWORD GetExportLastError() const HADESMEM_NOEXCEPT;
 
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process process_;
+  HMODULE module_;
+  DWORD_PTR export_ret_;
+  DWORD export_last_error_;
 };
 
 CreateAndInjectData CreateAndInject(
