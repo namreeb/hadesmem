@@ -36,6 +36,10 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
+#define HADESMEM_NO_CONSTEXPR
+#endif // #if defined(HADESMEM_MSVC)
+
+#if defined(HADESMEM_MSVC)
 #define HADESMEM_NO_VARIADIC_TEMPLATES
 #endif // #if defined(HADESMEM_MSVC)
 
@@ -54,6 +58,12 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 #define HADESMEM_NOEXCEPT_IF(Pred) noexcept((Pred))
 #define HADESMEM_NOEXCEPT_EXPR(Expr) noexcept((Expr))
 #endif // #if defined(HADESMEM_NO_NOEXCEPT)
+
+#if defined(HADESMEM_NO_CONSTEXPR)
+#define HADESMEM_CONSTEXPR
+#else // #if defined(HADESMEM_NO_CONSTEXPR)
+#define HADESMEM_CONSTEXPR constexpr
+#endif // #if defined(HADESMEM_NO_CONSTEXPR)
 
 #if defined(_M_IX86)
 #define HADESMEM_ARCH_X86
