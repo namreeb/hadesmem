@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <memory>
+
 #if defined(__clang__)
 #define HADESMEM_CLANG
 #elif defined(__INTEL_COMPILER)
