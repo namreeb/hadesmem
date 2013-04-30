@@ -47,7 +47,7 @@ public:
     : handle_(other.handle_), 
     invalid_(other.invalid_)
   {
-    other.handle_ = nullptr;
+    other.handle_ = other.invalid_;
   }
 
   SmartHandle& operator=(SmartHandle&& other) HADESMEM_NOEXCEPT
