@@ -19,17 +19,17 @@ namespace detail
 class SmartHandle
 {
 public:
-  SmartHandle() HADESMEM_NOEXCEPT
+  HADESMEM_CONSTEXPR SmartHandle() HADESMEM_NOEXCEPT
     : handle_(nullptr), 
     invalid_(nullptr)
   { }
   
-  explicit SmartHandle(HANDLE handle) HADESMEM_NOEXCEPT
+  explicit HADESMEM_CONSTEXPR SmartHandle(HANDLE handle) HADESMEM_NOEXCEPT
     : handle_(handle), 
     invalid_(nullptr)
   { }
 
-  explicit SmartHandle(HANDLE handle, HANDLE invalid) HADESMEM_NOEXCEPT
+  explicit HADESMEM_CONSTEXPR SmartHandle(HANDLE handle, HANDLE invalid) HADESMEM_NOEXCEPT
     : handle_(handle), 
     invalid_(invalid)
   { }
