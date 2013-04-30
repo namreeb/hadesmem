@@ -4,7 +4,6 @@
 #pragma once
 
 #include <iosfwd>
-#include <memory>
 
 #include <windows.h>
 
