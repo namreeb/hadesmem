@@ -4,9 +4,17 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <iterator>
 
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/optional.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
 #include <hadesmem/config.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {
@@ -20,36 +28,84 @@ class Module;
 class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
 {
 public:
-  ModuleIterator() HADESMEM_NOEXCEPT;
+  ModuleIterator() HADESMEM_NOEXCEPT
+    : impl_()
+  { }
   
   explicit ModuleIterator(Process const& process);
 
-  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT;
+  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
+    : impl_(other.impl_)
+  { }
 
-  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT;
+  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT
+  {
+    impl_ = other.impl_;
 
-  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT;
+  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
+    : impl_(std::move(other.impl_))
+  { }
 
-  ~ModuleIterator();
+  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT
+  {
+    impl_ = std::move(other.impl_);
+
+    return *this;
+  }
+
+  ~ModuleIterator() HADESMEM_NOEXCEPT
+  { }
   
-  reference operator*() const HADESMEM_NOEXCEPT;
-  
-  pointer operator->() const HADESMEM_NOEXCEPT;
-  
+  reference operator*() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return *impl_->module_;
+  }
+
+  pointer operator->() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return &*impl_->module_;
+  }
+
   ModuleIterator& operator++();
   
-  ModuleIterator operator++(int);
+  ModuleIterator operator++(int)
+  {
+    ModuleIterator iter(*this);
+    ++*this;
+    return iter;
+  }
   
-  bool operator==(ModuleIterator const& other) const HADESMEM_NOEXCEPT;
+  bool operator==(ModuleIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return impl_ == other.impl_;
+  }
   
-  bool operator!=(ModuleIterator const& other) const HADESMEM_NOEXCEPT;
+  bool operator!=(ModuleIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return impl_ != other.impl_;
+  }
   
 private:
+  struct Impl
+  {
+    Impl() HADESMEM_NOEXCEPT
+      : process_(nullptr), 
+      snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
+      module_()
+    { }
+
+    Process const* process_;
+    detail::SmartHandle snap_;
+    boost::optional<Module> module_;
+  };
+
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  struct Impl;
   std::shared_ptr<Impl> impl_;
 };
 
@@ -90,13 +146,25 @@ public:
   ~ModuleList() HADESMEM_NOEXCEPT
   { }
   
-  iterator begin();
+  iterator begin()
+  {
+    return ModuleList::iterator(*process_);
+  }
   
-  const_iterator begin() const;
+  const_iterator begin() const
+  {
+    return ModuleList::iterator(*process_);
+  }
   
-  iterator end() HADESMEM_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT
+  {
+    return ModuleList::iterator();
+  }
   
-  const_iterator end() const HADESMEM_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return ModuleList::iterator();
+  }
   
 private:
   Process const* process_;

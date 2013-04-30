@@ -3,41 +3,14 @@
 
 #include <hadesmem/module_list.hpp>
 
-#include <utility>
-
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
 
 #include <hadesmem/error.hpp>
-#include <hadesmem/config.hpp>
-#include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {
-
-struct ModuleIterator::Impl
-{
-  Impl() HADESMEM_NOEXCEPT
-    : process_(nullptr), 
-    snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
-    module_()
-  { }
-  
-  Process const* process_;
-  detail::SmartHandle snap_;
-  boost::optional<Module> module_;
-};
-
-ModuleIterator::ModuleIterator() HADESMEM_NOEXCEPT
-  : impl_()
-{ }
 
 // TOOD: Clean this up.
 ModuleIterator::ModuleIterator(Process const& process)
@@ -94,45 +67,6 @@ ModuleIterator::ModuleIterator(Process const& process)
   impl_->module_ = Module(*impl_->process_, entry);
 }
 
-ModuleIterator::ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
-  : impl_(other.impl_)
-{ }
-
-ModuleIterator& ModuleIterator::operator=(ModuleIterator const& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = other.impl_;
-
-  return *this;
-}
-
-ModuleIterator::ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
-{ }
-
-ModuleIterator& ModuleIterator::operator=(ModuleIterator&& other) 
-  HADESMEM_NOEXCEPT
-{
-  impl_ = std::move(other.impl_);
-
-  return *this;
-}
-
-ModuleIterator::~ModuleIterator()
-{ }
-
-ModuleIterator::reference ModuleIterator::operator*() const HADESMEM_NOEXCEPT
-{
-  HADESMEM_ASSERT(impl_.get());
-  return *impl_->module_;
-}
-
-ModuleIterator::pointer ModuleIterator::operator->() const HADESMEM_NOEXCEPT
-{
-  HADESMEM_ASSERT(impl_.get());
-  return &*impl_->module_;
-}
-
 ModuleIterator& ModuleIterator::operator++()
 {
   HADESMEM_ASSERT(impl_.get());
@@ -157,45 +91,6 @@ ModuleIterator& ModuleIterator::operator++()
   impl_->module_ = Module(*impl_->process_, entry);
   
   return *this;
-}
-
-ModuleIterator ModuleIterator::operator++(int)
-{
-  ModuleIterator iter(*this);
-  ++*this;
-  return iter;
-}
-
-bool ModuleIterator::operator==(ModuleIterator const& other) const 
-  HADESMEM_NOEXCEPT
-{
-  return impl_ == other.impl_;
-}
-
-bool ModuleIterator::operator!=(ModuleIterator const& other) const 
-  HADESMEM_NOEXCEPT
-{
-  return !(*this == other);
-}
-
-ModuleList::iterator ModuleList::begin()
-{
-  return ModuleList::iterator(*process_);
-}
-
-ModuleList::const_iterator ModuleList::begin() const
-{
-  return ModuleList::iterator(*process_);
-}
-
-ModuleList::iterator ModuleList::end() HADESMEM_NOEXCEPT
-{
-  return ModuleList::iterator();
-}
-
-ModuleList::const_iterator ModuleList::end() const HADESMEM_NOEXCEPT
-{
-  return ModuleList::iterator();
 }
 
 }
