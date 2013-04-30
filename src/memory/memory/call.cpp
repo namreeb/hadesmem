@@ -36,17 +36,6 @@ namespace hadesmem
 namespace
 {
 
-struct CallResultRemote
-{
-  DWORD64 return_value_64;
-  float return_value_float;
-  double return_value_double;
-  DWORD last_error;
-};
-
-// CallResultRemote must be POD because of 'offsetof' usage.
-HADESMEM_STATIC_ASSERT(std::is_pod<CallResultRemote>::value);
-
 #if defined(HADESMEM_ARCH_X86)
 
 class ArgVisitor32 : public boost::static_visitor<>
@@ -147,21 +136,21 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_64)));
+      i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_64)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_float)));
+      i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_float)));
     assembler->fst(AsmJit::dword_ptr(AsmJit::ecx));
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_double)));
+      i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_double)));
     assembler->fst(AsmJit::qword_ptr(AsmJit::ecx));
 
     assembler->mov(AsmJit::eax, AsmJit::uimm(get_last_error));
@@ -169,8 +158,8 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, last_error)));
+      i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, last_error)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
 
     if (call_conv == CallConv::kDefault || call_conv == CallConv::kCdecl)
@@ -257,26 +246,26 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     assembler->call(AsmJit::rax);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_64));
+      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_64));
     assembler->mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_float));
+      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_float));
     assembler->movss(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, return_value_double));
+      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, return_value_double));
     assembler->movsd(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rax, get_last_error);
     assembler->call(AsmJit::rax);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(CallResultRemote) + 
-      offsetof(CallResultRemote, last_error));
+      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+      offsetof(detail::CallResultRemote, last_error));
     assembler->mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
   }
 
@@ -580,81 +569,72 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 
 #endif // #if defined(HADESMEM_ARCH_X64)
 
-struct CallResultRaw::Impl
+CallResultRaw::CallResultRaw(DWORD64 return_int_64, 
+  float return_float, double return_double, DWORD last_error) 
+  HADESMEM_NOEXCEPT
+  : results_()
 {
-  explicit Impl(DWORD64 return_int_64, float return_float, 
-    double return_double, DWORD last_error) HADESMEM_NOEXCEPT
-    : results_()
-  {
-    results_.return_value_64 = return_int_64;
-    results_.return_value_float = return_float;
-    results_.return_value_double = return_double;
-    results_.last_error = last_error;
-  }
-
-  CallResultRemote results_;
-};
-
-CallResultRaw::CallResultRaw(DWORD64 return_int_64, float return_float, 
-  double return_double, DWORD last_error)
-  : impl_(new Impl(return_int_64, return_float, return_double, last_error))
-{ }
+  results_.return_value_64 = return_int_64;
+  results_.return_value_float = return_float;
+  results_.return_value_double = return_double;
+  results_.last_error = last_error;
+}
 
 CallResultRaw::CallResultRaw(CallResultRaw const& other)
-  : impl_(new Impl(*other.impl_))
+  : results_(other.results_)
 { }
 
 CallResultRaw& CallResultRaw::operator=(CallResultRaw const& other)
 {
-  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+  results_ = other.results_;
 
   return *this;
 }
 
 CallResultRaw::CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
+  : results_(other.results_)
 { }
 
 CallResultRaw& CallResultRaw::operator=(CallResultRaw&& other) 
   HADESMEM_NOEXCEPT
 {
-  impl_ = std::move(other.impl_);
+  results_ = other.results_;
 
   return *this;
 }
 
-CallResultRaw::~CallResultRaw()
+CallResultRaw::~CallResultRaw() HADESMEM_NOEXCEPT
 { }
 
 DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
 {
-  return static_cast<DWORD_PTR>(impl_->results_.return_value_64 & 
+  return static_cast<DWORD_PTR>(results_.return_value_64 & 
     static_cast<DWORD_PTR>(-1));
 }
 
 DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
 {
-  return static_cast<DWORD32>(impl_->results_.return_value_64 & 0xFFFFFFFFUL);
+  return static_cast<DWORD32>(results_.return_value_64 & 0xFFFFFFFFUL);
 }
 
 DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
 {
-  return impl_->results_.return_value_64;
+  return results_.return_value_64;
 }
 
 float CallResultRaw::GetReturnValueFloat() const HADESMEM_NOEXCEPT
 {
-  return impl_->results_.return_value_float;
+  return results_.return_value_float;
 }
 
 double CallResultRaw::GetReturnValueDouble() const HADESMEM_NOEXCEPT
 {
-  return impl_->results_.return_value_double;
+  return results_.return_value_double;
 }
 
 DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
 {
-  return impl_->results_.last_error;
+  return results_.last_error;
 }
 
 CallResultRaw Call(Process const& process, 
@@ -680,7 +660,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
     addresses.size() == args_full.size());
 
   Allocator const return_values_remote(process, 
-    sizeof(CallResultRemote) * addresses.size());
+    sizeof(detail::CallResultRemote) * addresses.size());
 
   Allocator const code_remote(GenerateCallCode(process, addresses, 
     call_convs, args_full, return_values_remote.GetBase()));
@@ -709,8 +689,8 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
       ErrorCodeWinLast(LastError));
   }
 
-  std::vector<CallResultRemote> return_vals_remote = 
-    ReadVector<CallResultRemote>(process, 
+  std::vector<detail::CallResultRemote> return_vals_remote = 
+    ReadVector<detail::CallResultRemote>(process, 
     return_values_remote.GetBase(), addresses.size());
   
   std::vector<CallResultRaw> return_vals;
@@ -718,7 +698,7 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     std::back_inserter(return_vals), 
-    [] (CallResultRemote const& r)
+    [] (detail::CallResultRemote const& r)
     {
       return CallResultRaw(r.return_value_64, 
         r.return_value_float, 
@@ -729,68 +709,53 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
   return return_vals;
 }
 
-struct MultiCall::Impl
-{
-  Impl(Process const& process)
-    : process_(&process), 
-    addresses_(), 
-    call_convs_(), 
-    args_()
-  { }
-
-  void AddImpl(FnPtr address, CallConv call_conv, 
-    std::vector<CallArg> const& args)
-  {
-    addresses_.push_back(address);
-    call_convs_.push_back(call_conv);
-    args_.push_back(args);
-  }
-
-  Process const* process_;
-  std::vector<FnPtr> addresses_; 
-  std::vector<CallConv> call_convs_; 
-  std::vector<std::vector<CallArg>> args_;
-};
-
 MultiCall::MultiCall(Process const& process)
-  : impl_(new Impl(process))
+  : process_(&process), 
+  addresses_(), 
+  call_convs_(), 
+  args_()
 { }
 
 MultiCall::MultiCall(MultiCall const& other)
-  : impl_(new Impl(*other.impl_))
+  : process_(other.process_), 
+  addresses_(other.addresses_), 
+  call_convs_(other.call_convs_), 
+  args_(other.args_)
 { }
 
 MultiCall& MultiCall::operator=(MultiCall const& other)
 {
-  impl_ = std::unique_ptr<Impl>(new Impl(*other.impl_));
+  process_ = other.process_;
+  addresses_ = other.addresses_;
+  call_convs_ = other.call_convs_;
+  args_ = other.args_;
 
   return *this;
 }
 
 MultiCall::MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
-  : impl_(std::move(other.impl_))
+  : process_(other.process_), 
+  addresses_(std::move(other.addresses_)), 
+  call_convs_(std::move(other.call_convs_)), 
+  args_(std::move(other.args_))
 { }
 
 MultiCall& MultiCall::operator=(MultiCall&& other) HADESMEM_NOEXCEPT
 {
-  impl_ = std::move(other.impl_);
+  process_ = other.process_;
+  addresses_ = std::move(other.addresses_);
+  call_convs_ = std::move(other.call_convs_);
+  args_ = std::move(other.args_);
 
   return *this;
 }
 
-MultiCall::~MultiCall()
+MultiCall::~MultiCall() HADESMEM_NOEXCEPT
 { }
 
 std::vector<CallResultRaw> MultiCall::Call() const
 {
-  return CallMulti(*impl_->process_, impl_->addresses_, impl_->call_convs_, 
-    impl_->args_);
-}
-
-void MultiCall::AddImpl(FnPtr address, CallConv call_conv, 
-  std::vector<CallArg> const& args)
-{
-  impl_->AddImpl(address, call_conv, args);
+  return CallMulti(*process_, addresses_, call_convs_, args_);
 }
 
 }

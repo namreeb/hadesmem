@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <memory>
 #include <vector>
 #include <utility>
 #include <type_traits>
@@ -86,11 +85,22 @@ private:
   DWORD last_error_;
 };
 
+namespace detail
+{
+  struct CallResultRemote
+  {
+    DWORD64 return_value_64;
+    float return_value_float;
+    double return_value_double;
+    DWORD last_error;
+  };
+}
+
 class CallResultRaw
 {
 public:
   explicit CallResultRaw(DWORD64 return_int_64, float return_float, 
-    double return_double, DWORD last_error);
+    double return_double, DWORD last_error) HADESMEM_NOEXCEPT;
 
   CallResultRaw(CallResultRaw const& other);
 
@@ -100,7 +110,7 @@ public:
 
   CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_NOEXCEPT;
 
-  ~CallResultRaw();
+  ~CallResultRaw() HADESMEM_NOEXCEPT;
 
   DWORD GetLastError() const HADESMEM_NOEXCEPT;
   
@@ -194,8 +204,10 @@ private:
 
   double GetReturnValueDouble() const HADESMEM_NOEXCEPT;
 
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  // CallResultRemote must be POD because of 'offsetof' usage.
+  HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
+
+  detail::CallResultRemote results_;
 };
 
 namespace detail
@@ -415,7 +427,7 @@ public:
   
   MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT;
 
-  ~MultiCall();
+  ~MultiCall() HADESMEM_NOEXCEPT;
 
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
@@ -428,7 +440,9 @@ public:
     call_args.reserve(sizeof...(args));
     detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
 
-    AddImpl(address, call_conv, call_args);
+    addresses_.push_back(address);
+    call_convs_.push_back(call_conv);
+    args_.push_back(call_args);
   }
 
 #else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
@@ -441,7 +455,9 @@ public:
     HADESMEM_CHECK_FUNC_ARITY(n);\
     std::vector<CallArg> args;\
     BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
-    AddImpl(address, call_conv, args);\
+    addresses_.push_back(address);\
+    call_convs_.push_back(call_conv);\
+    args_.push_back(args);\
   }\
 
 #define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
@@ -470,9 +486,11 @@ public:
 private:
   void AddImpl(FnPtr address, CallConv call_conv, 
     std::vector<CallArg> const& args);
-
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  
+  Process const* process_;
+  std::vector<FnPtr> addresses_; 
+  std::vector<CallConv> call_convs_; 
+  std::vector<std::vector<CallArg>> args_;
 };
 
 }
