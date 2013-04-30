@@ -28,7 +28,7 @@ public:
   
   Allocator& operator=(Allocator&& other) HADESMEM_NOEXCEPT;
   
-  ~Allocator();
+  ~Allocator() HADESMEM_NOEXCEPT;
   
   void Free();
   
@@ -40,8 +40,11 @@ private:
   Allocator(Allocator const& other) HADESMEM_DELETED_FUNCTION;
   Allocator& operator=(Allocator const& other) HADESMEM_DELETED_FUNCTION;
 
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  void FreeUnchecked() HADESMEM_NOEXCEPT;
+  
+  Process const* process_;
+  PVOID base_;
+  SIZE_T size_;
 };
 
 bool operator==(Allocator const& lhs, Allocator const& rhs) HADESMEM_NOEXCEPT;
