@@ -27,9 +27,6 @@
 // memory page protections preemptively in preparation for the read), however 
 // this is not guaranteed to work, even in the aforementioned scenario.
 
-// TODO: Fix cross-region reads (and writes?). This has already come up in 
-// real world code with the import dumper.
-
 namespace hadesmem
 {
 

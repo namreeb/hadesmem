@@ -24,27 +24,6 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
-// TODO: Improve safety via EH.
-
-// TODO: Clean up ASM code and code generation.
-
-// TODO: Add support for more 'complex' argument and return types, including 
-// struct/class/union, long double, SIMD types, etc. A good reference for 
-// calling conventions is available at http://bit.ly/3CvgMV.
-
-// TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated 
-// code, 'private' functions, obfuscated code, etc).
-
-// TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
-// externally instead of being regenerated for every call.
-
-// TODO: Once the JIT-once rewrite is complete, transition to using code 
-// generated at compile-time with FASM and stored in a binary 'blob' (embedded 
-// in the source). This will remove the dependency on AsmJit.
-
-// TODO: Add support for cross-session injection (also cross-winsta and 
-// cross-desktop injection). See Injector TODO notes for more details.
-
 HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
 HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
@@ -230,6 +209,7 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   });
   std::size_t const max_num_args = max_args_list->size();
 
+  // TODO: Comment/document this properly.
   std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
     max_num_args * 0x8);
   stack_offs += (stack_offs % 16);
