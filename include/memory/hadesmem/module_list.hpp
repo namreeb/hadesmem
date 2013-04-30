@@ -60,17 +60,35 @@ public:
   typedef ModuleIterator iterator;
   typedef ModuleIterator const_iterator;
   
-  explicit ModuleList(Process const& process);
+  explicit HADESMEM_CONSTEXPR ModuleList(Process const& process) 
+    HADESMEM_NOEXCEPT
+    : process_(&process)
+  { }
 
-  ModuleList(ModuleList const& other);
+  HADESMEM_CONSTEXPR ModuleList(ModuleList const& other) HADESMEM_NOEXCEPT
+    : process_(other.process_)
+  { }
 
-  ModuleList& operator=(ModuleList const& other);
+  ModuleList& operator=(ModuleList const& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
 
-  ModuleList(ModuleList&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  ModuleList& operator=(ModuleList&& other) HADESMEM_NOEXCEPT;
+  HADESMEM_CONSTEXPR ModuleList(ModuleList&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_)
+  { }
 
-  ~ModuleList();
+  ModuleList& operator=(ModuleList&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+
+    return *this;
+  }
+
+  ~ModuleList() HADESMEM_NOEXCEPT
+  { }
   
   iterator begin();
   
@@ -81,8 +99,7 @@ public:
   const_iterator end() const HADESMEM_NOEXCEPT;
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process const* process_;
 };
 
 }
