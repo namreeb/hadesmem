@@ -10,6 +10,7 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {
@@ -27,7 +28,7 @@ public:
   
   Process& operator=(Process&& other) HADESMEM_NOEXCEPT;
   
-  ~Process();
+  ~Process() HADESMEM_NOEXCEPT;
   
   DWORD GetId() const HADESMEM_NOEXCEPT;
   
@@ -36,8 +37,12 @@ public:
   void Cleanup();
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  void CheckWoW64() const;
+
+  void CleanupUnchecked() HADESMEM_NOEXCEPT;
+
+  detail::SmartHandle handle_;
+  DWORD id_;
 };
 
 bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT;
