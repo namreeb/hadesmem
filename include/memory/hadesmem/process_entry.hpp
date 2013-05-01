@@ -5,6 +5,7 @@
 
 #include <string>
 #include <memory>
+#include <utility>
 
 #include <windows.h>
 #include <tlhelp32.h>
@@ -17,31 +18,84 @@ namespace hadesmem
 class ProcessEntry
 {
 public:
-  explicit ProcessEntry(PROCESSENTRY32 const& entry);
+  explicit ProcessEntry(PROCESSENTRY32 const& entry)
+    : id_(entry.th32ProcessID), 
+    threads_(entry.cntThreads), 
+    parent_(entry.th32ParentProcessID), 
+    priority_(entry.pcPriClassBase), 
+    name_(entry.szExeFile)
+  { }
 
-  ProcessEntry(ProcessEntry const& other);
+  ProcessEntry(ProcessEntry const& other)
+    : id_(other.id_), 
+    threads_(other.threads_), 
+    parent_(other.parent_), 
+    priority_(other.priority_), 
+    name_(other.name_)
+  { }
 
-  ProcessEntry& operator=(ProcessEntry const& other);
+  ProcessEntry& operator=(ProcessEntry const& other)
+  {
+    id_ = other.id_;
+    threads_ = other.threads_;
+    priority_ = other.priority_;
+    name_ = other.name_;
 
-  ProcessEntry(ProcessEntry&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_NOEXCEPT;
+  ProcessEntry(ProcessEntry&& other) HADESMEM_NOEXCEPT
+    : id_(other.id_), 
+    threads_(other.threads_), 
+    parent_(other.parent_), 
+    priority_(other.priority_), 
+    name_(std::move(other.name_))
+  { }
 
-  ~ProcessEntry();
+  ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_NOEXCEPT
+  {
+    id_ = other.id_;
+    threads_ = other.threads_;
+    priority_ = other.priority_;
+    name_ = std::move(other.name_);
 
-  DWORD GetId() const HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  DWORD GetThreads() const HADESMEM_NOEXCEPT;
+  ~ProcessEntry() HADESMEM_NOEXCEPT
+  { }
 
-  DWORD GetParentId() const HADESMEM_NOEXCEPT;
+  DWORD GetId() const HADESMEM_NOEXCEPT
+  {
+    return id_;
+  }
 
-  LONG GetPriority() const HADESMEM_NOEXCEPT;
+  DWORD GetThreads() const HADESMEM_NOEXCEPT
+  {
+    return threads_;
+  }
 
-  std::wstring GetName() const;
+  DWORD GetParentId() const HADESMEM_NOEXCEPT
+  {
+    return parent_;
+  }
+
+  LONG GetPriority() const HADESMEM_NOEXCEPT
+  {
+    return priority_;
+  }
+
+  std::wstring GetName() const
+  {
+    return name_;
+  }
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  DWORD id_;
+  DWORD threads_;
+  DWORD parent_;
+  LONG priority_;
+  std::wstring name_;
 };
 
 }
