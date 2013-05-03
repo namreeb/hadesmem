@@ -5,6 +5,10 @@
 
 #include <memory>
 
+#include <windows.h>
+
+#include <hadesmem/detail/static_assert.hpp>
+
 #if defined(__clang__)
 #define HADESMEM_CLANG
 #elif defined(__INTEL_COMPILER)
@@ -96,3 +100,16 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://goo.gl/1VVA3
 #define HADESMEM_MAX_PATH_UNICODE (1 << 15)
+
+// Every effort is made to NOT assume the below is true across the entire 
+// codebase, but for the Call module it is unavoidable. If adding support for 
+// another architecture, this may need adjusting. However, if anywhere other 
+// than here and Call needs adjusting, it is considered a bug and should be 
+// reported.
+HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
+HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
+HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
+HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));

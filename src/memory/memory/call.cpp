@@ -5,9 +5,7 @@
 
 #include <cstring>
 #include <cstddef>
-#include <utility>
 #include <algorithm>
-#include <type_traits>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <asmjit/asmjit.h>
@@ -15,20 +13,11 @@
 
 #include <hadesmem/read.hpp>
 #include <hadesmem/alloc.hpp>
-#include <hadesmem/error.hpp>
 #include <hadesmem/write.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
-#include <hadesmem/detail/static_assert.hpp>
-
-HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
-HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
 
 namespace hadesmem
 {
@@ -137,20 +126,20 @@ void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_64)));
+      offsetof(detail::CallResultRemote, return_i64)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_float)));
+      offsetof(detail::CallResultRemote, return_float)));
     assembler->fst(AsmJit::dword_ptr(AsmJit::ecx));
 
     assembler->mov(AsmJit::ecx, AsmJit::uimm(
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
       i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_double)));
+      offsetof(detail::CallResultRemote, return_double)));
     assembler->fst(AsmJit::qword_ptr(AsmJit::ecx));
 
     assembler->mov(AsmJit::eax, AsmJit::uimm(get_last_error));
@@ -247,17 +236,17 @@ void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_64));
+      offsetof(detail::CallResultRemote, return_i64));
     assembler->mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_float));
+      offsetof(detail::CallResultRemote, return_float));
     assembler->movss(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
       return_values_remote) + i * sizeof(detail::CallResultRemote) + 
-      offsetof(detail::CallResultRemote, return_value_double));
+      offsetof(detail::CallResultRemote, return_double));
     assembler->movsd(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rax, get_last_error);
@@ -392,6 +381,7 @@ void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 {
+  HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
   DWORD arg_conv;
@@ -405,6 +395,7 @@ void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
 {
+  HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
   DWORD64 arg_conv;
@@ -466,6 +457,7 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 {
+  HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
   HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
   DWORD arg_conv;
@@ -514,6 +506,7 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 {
+  HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
   HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
   DWORD64 arg_conv;
@@ -568,74 +561,6 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 }
 
 #endif // #if defined(HADESMEM_ARCH_X64)
-
-CallResultRaw::CallResultRaw(DWORD64 return_int_64, 
-  float return_float, double return_double, DWORD last_error) 
-  HADESMEM_NOEXCEPT
-  : results_()
-{
-  results_.return_value_64 = return_int_64;
-  results_.return_value_float = return_float;
-  results_.return_value_double = return_double;
-  results_.last_error = last_error;
-}
-
-CallResultRaw::CallResultRaw(CallResultRaw const& other)
-  : results_(other.results_)
-{ }
-
-CallResultRaw& CallResultRaw::operator=(CallResultRaw const& other)
-{
-  results_ = other.results_;
-
-  return *this;
-}
-
-CallResultRaw::CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT
-  : results_(other.results_)
-{ }
-
-CallResultRaw& CallResultRaw::operator=(CallResultRaw&& other) 
-  HADESMEM_NOEXCEPT
-{
-  results_ = other.results_;
-
-  return *this;
-}
-
-CallResultRaw::~CallResultRaw() HADESMEM_NOEXCEPT
-{ }
-
-DWORD_PTR CallResultRaw::GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
-{
-  return static_cast<DWORD_PTR>(results_.return_value_64 & 
-    static_cast<DWORD_PTR>(-1));
-}
-
-DWORD32 CallResultRaw::GetReturnValueInt32() const HADESMEM_NOEXCEPT
-{
-  return static_cast<DWORD32>(results_.return_value_64 & 0xFFFFFFFFUL);
-}
-
-DWORD64 CallResultRaw::GetReturnValueInt64() const HADESMEM_NOEXCEPT
-{
-  return results_.return_value_64;
-}
-
-float CallResultRaw::GetReturnValueFloat() const HADESMEM_NOEXCEPT
-{
-  return results_.return_value_float;
-}
-
-double CallResultRaw::GetReturnValueDouble() const HADESMEM_NOEXCEPT
-{
-  return results_.return_value_double;
-}
-
-DWORD CallResultRaw::GetLastError() const HADESMEM_NOEXCEPT
-{
-  return results_.last_error;
-}
 
 CallResultRaw Call(Process const& process, 
   FnPtr address, 
@@ -700,62 +625,10 @@ std::vector<CallResultRaw> CallMulti(Process const& process,
     std::back_inserter(return_vals), 
     [] (detail::CallResultRemote const& r)
     {
-      return CallResultRaw(r.return_value_64, 
-        r.return_value_float, 
-        r.return_value_double, 
-        r.last_error);
+      return static_cast<CallResultRaw>(r);
     });
 
   return return_vals;
-}
-
-MultiCall::MultiCall(Process const& process)
-  : process_(&process), 
-  addresses_(), 
-  call_convs_(), 
-  args_()
-{ }
-
-MultiCall::MultiCall(MultiCall const& other)
-  : process_(other.process_), 
-  addresses_(other.addresses_), 
-  call_convs_(other.call_convs_), 
-  args_(other.args_)
-{ }
-
-MultiCall& MultiCall::operator=(MultiCall const& other)
-{
-  process_ = other.process_;
-  addresses_ = other.addresses_;
-  call_convs_ = other.call_convs_;
-  args_ = other.args_;
-
-  return *this;
-}
-
-MultiCall::MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_), 
-  addresses_(std::move(other.addresses_)), 
-  call_convs_(std::move(other.call_convs_)), 
-  args_(std::move(other.args_))
-{ }
-
-MultiCall& MultiCall::operator=(MultiCall&& other) HADESMEM_NOEXCEPT
-{
-  process_ = other.process_;
-  addresses_ = std::move(other.addresses_);
-  call_convs_ = std::move(other.call_convs_);
-  args_ = std::move(other.args_);
-
-  return *this;
-}
-
-MultiCall::~MultiCall() HADESMEM_NOEXCEPT
-{ }
-
-std::vector<CallResultRaw> MultiCall::Call() const
-{
-  return CallMulti(*process_, addresses_, call_convs_, args_);
 }
 
 }

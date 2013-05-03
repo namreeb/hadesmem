@@ -89,31 +89,63 @@ namespace detail
 {
   struct CallResultRemote
   {
-    DWORD64 return_value_64;
-    float return_value_float;
-    double return_value_double;
+    DWORD64 return_i64;
+    float return_float;
+    double return_double;
     DWORD last_error;
   };
+
+  // CallResultRemote must be POD because of 'offsetof' usage.
+  HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
 }
 
 class CallResultRaw
 {
 public:
-  explicit CallResultRaw(DWORD64 return_int_64, float return_float, 
-    double return_double, DWORD last_error) HADESMEM_NOEXCEPT;
+  explicit CallResultRaw(DWORD64 return_i64, float return_float, 
+    double return_double, DWORD last_error) HADESMEM_NOEXCEPT
+    : result_()
+  {
+    result_.return_i64 = return_i64;
+    result_.return_float = return_float;
+    result_.return_double = return_double;
+    result_.last_error = last_error;
+  }
 
-  CallResultRaw(CallResultRaw const& other);
+  explicit CallResultRaw(detail::CallResultRemote const& result)
+    : result_(result)
+  { }
 
-  CallResultRaw& operator=(CallResultRaw const& other);
+  CallResultRaw(CallResultRaw const& other) HADESMEM_NOEXCEPT
+    : result_(other.result_)
+  { }
 
-  CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT;
+  CallResultRaw& operator=(CallResultRaw const& other) HADESMEM_NOEXCEPT
+  {
+    result_ = other.result_;
 
-  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  ~CallResultRaw() HADESMEM_NOEXCEPT;
+  CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT
+    : result_(other.result_)
+  { }
 
-  DWORD GetLastError() const HADESMEM_NOEXCEPT;
+  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_NOEXCEPT
+  {
+    result_ = other.result_;
+
+    return *this;
+  }
+
+  ~CallResultRaw() HADESMEM_NOEXCEPT
+  { }
   
+  DWORD GetLastError() const HADESMEM_NOEXCEPT
+  {
+    return result_.last_error;
+  }
+
   template <typename T>
   typename std::decay<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
   {
@@ -194,20 +226,33 @@ private:
     return GetReturnValueIntOrFloatImpl<T>();
   }
 
-  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT;
+  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
+  {
+    return static_cast<DWORD_PTR>(result_.return_i64 & 
+      static_cast<DWORD_PTR>(-1));
+  }
 
-  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT;
+  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT
+  {
+    return static_cast<DWORD32>(result_.return_i64 & 0xFFFFFFFFUL);
+  }
 
-  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT;
+  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT
+  {
+    return result_.return_i64;
+  }
 
-  float GetReturnValueFloat() const HADESMEM_NOEXCEPT;
+  float GetReturnValueFloat() const HADESMEM_NOEXCEPT
+  {
+    return result_.return_float;
+  }
 
-  double GetReturnValueDouble() const HADESMEM_NOEXCEPT;
+  double GetReturnValueDouble() const HADESMEM_NOEXCEPT
+  {
+    return result_.return_double;
+  }
 
-  // CallResultRemote must be POD because of 'offsetof' usage.
-  HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
-
-  detail::CallResultRemote results_;
+  detail::CallResultRemote result_;
 };
 
 namespace detail
@@ -417,17 +462,49 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
 class MultiCall
 {
 public:
-  explicit MultiCall(Process const& process);
+  explicit MultiCall(Process const& process)
+    : process_(&process), 
+    addresses_(), 
+    call_convs_(), 
+    args_()
+  { }
   
-  MultiCall(MultiCall const& other);
-  
-  MultiCall& operator=(MultiCall const& other);
-  
-  MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT;
-  
-  MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT;
+  MultiCall(MultiCall const& other)
+    : process_(other.process_), 
+    addresses_(other.addresses_), 
+    call_convs_(other.call_convs_), 
+    args_(other.args_)
+  { }
 
-  ~MultiCall() HADESMEM_NOEXCEPT;
+  MultiCall& operator=(MultiCall const& other)
+  {
+    process_ = other.process_;
+    addresses_ = other.addresses_;
+    call_convs_ = other.call_convs_;
+    args_ = other.args_;
+
+    return *this;
+  }
+  
+  MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    addresses_(std::move(other.addresses_)), 
+    call_convs_(std::move(other.call_convs_)), 
+    args_(std::move(other.args_))
+  { }
+  
+  MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    addresses_ = std::move(other.addresses_);
+    call_convs_ = std::move(other.call_convs_);
+    args_ = std::move(other.args_);
+
+    return *this;
+  }
+
+  ~MultiCall() HADESMEM_NOEXCEPT
+  { }
 
 #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
 
@@ -481,12 +558,12 @@ public:
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
-  std::vector<CallResultRaw> Call() const;
+  std::vector<CallResultRaw> Call() const
+  {
+    return CallMulti(*process_, addresses_, call_convs_, args_);
+  }
   
 private:
-  void AddImpl(FnPtr address, CallConv call_conv, 
-    std::vector<CallArg> const& args);
-  
   Process const* process_;
   std::vector<FnPtr> addresses_; 
   std::vector<CallConv> call_convs_; 
