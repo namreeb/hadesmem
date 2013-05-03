@@ -42,26 +42,70 @@ class CreateAndInjectData
 {
 public:
   explicit CreateAndInjectData(Process const& process, HMODULE module, 
-    DWORD_PTR export_ret, DWORD export_last_error);
+    DWORD_PTR export_ret, DWORD export_last_error)
+    : process_(process), 
+    module_(module), 
+    export_ret_(export_ret), 
+    export_last_error_(export_last_error)
+  { }
 
-  CreateAndInjectData(CreateAndInjectData const& other);
+  CreateAndInjectData(CreateAndInjectData const& other)
+    : process_(other.process_), 
+    module_(other.module_), 
+    export_ret_(other.export_ret_), 
+    export_last_error_(other.export_last_error_)
+  { }
 
-  CreateAndInjectData& operator=(CreateAndInjectData const& other);
+  CreateAndInjectData& operator=(CreateAndInjectData const& other)
+  {
+    process_ = other.process_;
+    module_ = other.module_;
+    export_ret_ = other.export_ret_;
+    export_last_error_ = other.export_last_error_;
 
-  CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
+
+  CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_NOEXCEPT
+    : process_(std::move(other.process_)), 
+    module_(other.module_), 
+    export_ret_(other.export_ret_), 
+    export_last_error_(other.export_last_error_)
+  { }
 
   CreateAndInjectData& operator=(CreateAndInjectData&& other) 
-    HADESMEM_NOEXCEPT;
+    HADESMEM_NOEXCEPT
+  {
+    process_ = std::move(other.process_);
+    module_ = other.module_;
+    export_ret_ = other.export_ret_;
+    export_last_error_ = other.export_last_error_;
 
-  ~CreateAndInjectData() HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  Process GetProcess() const;
+  ~CreateAndInjectData() HADESMEM_NOEXCEPT
+  { }
 
-  HMODULE GetModule() const HADESMEM_NOEXCEPT;
+  Process GetProcess() const
+  {
+    return process_;
+  }
 
-  DWORD_PTR GetExportRet() const HADESMEM_NOEXCEPT;
+  HMODULE GetModule() const HADESMEM_NOEXCEPT
+  {
+    return module_;
+  }
 
-  DWORD GetExportLastError() const HADESMEM_NOEXCEPT;
+  DWORD_PTR GetExportRet() const HADESMEM_NOEXCEPT
+  {
+    return export_ret_;
+  }
+
+  DWORD GetExportLastError() const HADESMEM_NOEXCEPT
+  {
+    return export_last_error_;
+  }
 
 private:
   Process process_;
