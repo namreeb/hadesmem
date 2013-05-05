@@ -50,15 +50,15 @@ public:
   { }
 
   Module& operator=(Module const& other)
-{
-  process_ = other.process_;
-  handle_ = other.handle_;
-  size_ = other.size_;
-  name_ = other.name_;
-  path_ = other.path_;
+  {
+    process_ = other.process_;
+    handle_ = other.handle_;
+    size_ = other.size_;
+    name_ = other.name_;
+    path_ = other.path_;
 
-  return *this;
-}
+    return *this;
+  }
 
   Module(Module&& other) HADESMEM_NOEXCEPT
     : process_(other.process_), 
@@ -108,14 +108,14 @@ private:
   typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;
 
   explicit Module(Process const& process, MODULEENTRY32 const& entry)
-  : process_(&process), 
-  handle_(nullptr), 
-  size_(0), 
-  name_(), 
-  path_()
-{
-  Initialize(entry);
-}
+    : process_(&process), 
+    handle_(nullptr), 
+    size_(0), 
+    name_(), 
+    path_()
+  {
+    Initialize(entry);
+  }
   
   void Initialize(HMODULE handle);
   
