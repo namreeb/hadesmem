@@ -5,18 +5,31 @@
 
 #include <windows.h>
 
+#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {
 
-class Process;
-
 namespace detail
 {
+  
+inline DWORD Protect(Process const& process, 
+  MEMORY_BASIC_INFORMATION const& mbi, DWORD protect)
+{
+  DWORD old_protect = 0;
+  if (!::VirtualProtectEx(process.GetHandle(), mbi.BaseAddress, 
+    mbi.RegionSize, protect, &old_protect))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("VirtualProtectEx failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
 
-DWORD Protect(Process const& process, MEMORY_BASIC_INFORMATION const& mbi, 
-  DWORD protect);
+  return old_protect;
+}
 
 }
 
