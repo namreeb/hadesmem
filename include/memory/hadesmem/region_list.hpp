@@ -4,52 +4,134 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <iterator>
 
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/optional.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
+#include <windows.h>
+
+#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/region.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/protect.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/query_region.hpp>
 
 namespace hadesmem
 {
-
-class Process;
-
-class Region;
 
 // RegionIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
 {
 public:
-  RegionIterator() HADESMEM_NOEXCEPT;
+  RegionIterator() HADESMEM_NOEXCEPT
+    : impl_()
+  { }
   
-  explicit RegionIterator(Process const& process);
+  explicit RegionIterator(Process const& process)
+    : impl_(new Impl(process))
+  { }
 
-  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT;
+  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT
+    : impl_(other.impl_)
+  { }
 
-  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT;
+  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT
+  {
+    impl_ = other.impl_;
 
-  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT;
+  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT
+    : impl_(std::move(other.impl_))
+  { }
 
-  ~RegionIterator();
+  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT
+  {
+    impl_ = std::move(other.impl_);
+
+    return *this;
+  }
+
+  ~RegionIterator() HADESMEM_NOEXCEPT
+  { }
   
-  reference operator*() const HADESMEM_NOEXCEPT;
+  reference operator*() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return *impl_->region_;
+  }
   
-  pointer operator->() const HADESMEM_NOEXCEPT;
+  pointer operator->() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return &*impl_->region_;
+  }
   
-  RegionIterator& operator++();
+  RegionIterator& operator++()
+  {
+    try
+    {
+      HADESMEM_ASSERT(impl_.get());
+    
+      void const* const base = impl_->region_->GetBase();
+      SIZE_T const size = impl_->region_->GetSize();
+      auto const next = static_cast<char const* const>(base) + size;
+      MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, next);
+      impl_->region_ = Region(*impl_->process_, mbi);
+    }
+    catch (std::exception const& /*e*/)
+    {
+      // TODO: Check whether this is the right thing to do. We should only 
+      // flag as the 'end' once we've actually reached the end of the list. If 
+      // the iteration fails we should throw an exception.
+      impl_.reset();
+    }
   
-  RegionIterator operator++(int);
+    return *this;
+  }
   
-  bool operator==(RegionIterator const& other) const HADESMEM_NOEXCEPT;
+  RegionIterator operator++(int)
+  {
+    RegionIterator iter(*this);
+    ++*this;
+    return iter;
+  }
+
   
-  bool operator!=(RegionIterator const& other) const HADESMEM_NOEXCEPT;
+  bool operator==(RegionIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return impl_ == other.impl_;
+  }
+  
+  bool operator!=(RegionIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return !(*this == other);
+  }
   
 private:
+  struct Impl
+  {
+    explicit Impl(Process const& process) HADESMEM_NOEXCEPT
+      : process_(&process), 
+      region_()
+    {
+      MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, nullptr);
+      region_ = Region(process, mbi);
+    }
+
+    Process const* process_;
+    boost::optional<Region> region_;
+  };
+
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  struct Impl;
   std::shared_ptr<Impl> impl_;
 };
 
