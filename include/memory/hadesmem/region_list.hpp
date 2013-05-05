@@ -60,29 +60,57 @@ public:
   typedef RegionIterator iterator;
   typedef RegionIterator const_iterator;
   
-  explicit RegionList(Process const& process);
+  explicit RegionList(Process const& process)
+    : process_(&process)
+  { }
 
-  RegionList(RegionList const& other);
+  RegionList(RegionList const& other) HADESMEM_NOEXCEPT
+    : process_(other.process_)
+  { }
 
-  RegionList& operator=(RegionList const& other);
+  RegionList& operator=(RegionList const& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
 
-  RegionList(RegionList&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT;
+  RegionList(RegionList&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_)
+  { }
 
-  ~RegionList();
+  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+
+    return *this;
+  }
+
+  ~RegionList() HADESMEM_NOEXCEPT
+  { }
   
-  iterator begin();
+  iterator begin()
+  {
+    return iterator(*process_);
+  }
   
-  const_iterator begin() const;
+  const_iterator begin() const
+  {
+    return const_iterator(*process_);
+  }
   
-  iterator end() HADESMEM_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT
+  {
+    return iterator();
+  }
   
-  const_iterator end() const HADESMEM_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return const_iterator();
+  }
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process const* process_;
 };
 
 }
