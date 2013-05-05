@@ -99,97 +99,6 @@ FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
 }
 
-Module::Module(Process const& process, HMODULE handle)
-  : process_(&process), 
-  handle_(nullptr), 
-  size_(0), 
-  name_(), 
-  path_()
-{
-  Initialize(handle);
-}
-
-Module::Module(Process const& process, std::wstring const& path)
-  : process_(&process), 
-  handle_(nullptr), 
-  size_(0), 
-  name_(), 
-  path_()
-{
-  Initialize(path);
-}
-
-Module::Module(Process const& process, MODULEENTRY32 const& entry)
-  : process_(&process), 
-  handle_(nullptr), 
-  size_(0), 
-  name_(), 
-  path_()
-{
-  Initialize(entry);
-}
-
-Module::Module(Module const& other)
-  : process_(other.process_), 
-  handle_(other.handle_), 
-  size_(other.size_), 
-  name_(other.name_), 
-  path_(other.path_)
-{ }
-
-Module& Module::operator=(Module const& other)
-{
-  process_ = other.process_;
-  handle_ = other.handle_;
-  size_ = other.size_;
-  name_ = other.name_;
-  path_ = other.path_;
-
-  return *this;
-}
-
-Module::Module(Module&& other) HADESMEM_NOEXCEPT
-  : process_(other.process_), 
-  handle_(other.handle_), 
-  size_(other.size_), 
-  name_(std::move(other.name_)), 
-  path_(std::move(other.path_))
-{ }
-
-Module& Module::operator=(Module&& other) HADESMEM_NOEXCEPT
-{
-  process_ = other.process_;
-  handle_ = other.handle_;
-  size_ = other.size_;
-  name_ = std::move(other.name_);
-  path_ = std::move(other.path_);
-
-  return *this;
-}
-
-Module::~Module() HADESMEM_NOEXCEPT
-{ }
-
-HMODULE Module::GetHandle() const HADESMEM_NOEXCEPT
-{
-  return handle_;
-}
-
-DWORD Module::GetSize() const HADESMEM_NOEXCEPT
-{
-  return size_;
-}
-
-std::wstring Module::GetName() const
-{
-  return name_;
-}
-
-std::wstring Module::GetPath() const
-{
-  return path_;
-}
-
 void Module::Initialize(HMODULE handle)
 {
   auto handle_check = 
@@ -235,14 +144,6 @@ void Module::Initialize(std::wstring const& path)
   };
 
   InitializeIf(path_check);
-}
-
-void Module::Initialize(MODULEENTRY32 const& entry)
-{
-  handle_ = entry.hModule;
-  size_ = entry.modBaseSize;
-  name_ = entry.szModule;
-  path_ = entry.szExePath;
 }
 
 void Module::InitializeIf(EntryCallback const& check_func)
@@ -301,45 +202,7 @@ void Module::InitializeIf(EntryCallback const& check_func)
   }
 }
 
-bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return lhs.GetHandle() == rhs.GetHandle();
-}
 
-bool operator!=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return !(lhs == rhs);
-}
-
-bool operator<(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return lhs.GetHandle() < rhs.GetHandle();
-}
-
-bool operator<=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return lhs.GetHandle() <= rhs.GetHandle();
-}
-
-bool operator>(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return lhs.GetHandle() > rhs.GetHandle();
-}
-
-bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
-{
-  return lhs.GetHandle() >= rhs.GetHandle();
-}
-
-std::ostream& operator<<(std::ostream& lhs, Module const& rhs)
-{
-  return (lhs << rhs.GetHandle());
-}
-
-std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
-{
-  return (lhs << rhs.GetHandle());
-}
 
 FARPROC FindProcedure(Module const& module, std::string const& name)
 {
