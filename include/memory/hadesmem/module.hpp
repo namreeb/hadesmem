@@ -4,8 +4,8 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 #include <utility>
-#include <iostream>
 #include <functional>
 
 #include <windows.h>
