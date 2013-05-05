@@ -112,7 +112,8 @@ public:
     result_.last_error = last_error;
   }
 
-  explicit CallResultRaw(detail::CallResultRemote const& result)
+  explicit CallResultRaw(detail::CallResultRemote const& result) 
+    HADESMEM_NOEXCEPT
     : result_(result)
   { }
 

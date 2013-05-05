@@ -124,7 +124,7 @@ public:
 
   const_iterator begin() const
   {
-    return iterator(0);
+    return const_iterator(0);
   }
 
   iterator end() HADESMEM_NOEXCEPT
@@ -134,7 +134,7 @@ public:
 
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return iterator();
+    return const_iterator();
   }
 };
 

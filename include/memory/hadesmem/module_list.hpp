@@ -148,22 +148,22 @@ public:
   
   iterator begin()
   {
-    return ModuleList::iterator(*process_);
+    return iterator(*process_);
   }
   
   const_iterator begin() const
   {
-    return ModuleList::iterator(*process_);
+    return const_iterator(*process_);
   }
   
   iterator end() HADESMEM_NOEXCEPT
   {
-    return ModuleList::iterator();
+    return iterator();
   }
   
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return ModuleList::iterator();
+    return const_iterator();
   }
   
 private:
