@@ -32,21 +32,6 @@ namespace hadesmem
 
 class Process;
 
-namespace detail
-{
-
-template <typename T>
-T ReadUnchecked(Process const& process, PVOID address)
-{
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  
-  T data;
-  ReadUnchecked(process, address, std::addressof(data), sizeof(data));
-  return data;
-}
-
-}
-
 template <typename T>
 T Read(Process const& process, PVOID address)
 {

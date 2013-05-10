@@ -11,6 +11,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/query_region.hpp>
 #include <hadesmem/detail/protect_guard.hpp>
 
@@ -19,6 +20,16 @@ namespace hadesmem
 
 namespace detail
 {
+
+template <typename T>
+T ReadUnchecked(Process const& process, PVOID address)
+{
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  
+  T data;
+  ReadUnchecked(process, address, std::addressof(data), sizeof(data));
+  return data;
+}
 
 inline void ReadUnchecked(Process const& process, LPVOID address, 
   LPVOID data, std::size_t len)
