@@ -14,6 +14,14 @@ namespace hadesmem
 namespace detail
 {
 
+inline SYSTEM_INFO GetSystemInfo()
+{
+  SYSTEM_INFO sys_info;
+  ::ZeroMemory(&sys_info, sizeof(sys_info));
+  ::GetSystemInfo(&sys_info);
+  return sys_info;
+}
+  
 inline bool IsWoW64Process(HANDLE handle)
 {
   BOOL is_wow64 = FALSE;

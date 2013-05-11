@@ -22,11 +22,6 @@
 #include <hadesmem/detail/protect_guard.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
-// NOTE: Reads which span across region boundaries are not explicitly handled 
-// or supported. They may work simply by chance (or if the user changes the 
-// memory page protections preemptively in preparation for the read), however 
-// this is not guaranteed to work, even in the aforementioned scenario.
-
 namespace hadesmem
 {
 
@@ -37,7 +32,7 @@ T Read(Process const& process, PVOID address)
 {
   HADESMEM_ASSERT(address != nullptr);
   
-  return detail::Read<T>(process, address);
+  return detail::ReadImpl<T>(process, address);
 }
 
 template <typename T, std::size_t N>
@@ -45,7 +40,7 @@ std::array<T, N> Read(Process const& process, PVOID address)
 {
   HADESMEM_ASSERT(address != nullptr);
 
-  return detail::Read<std::array<T, N>>(process, address);
+  return detail::ReadImpl<std::array<T, N>>(process, address);
 }
 
 // TODO: Clean up this function.
@@ -93,6 +88,8 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
     }
 
     address = region_next;
+
+    protect_guard.Restore();
   }
 }
 
@@ -107,7 +104,7 @@ std::vector<T> ReadVector(Process const& process, PVOID address,
   HADESMEM_ASSERT(count != 0);
   
   std::vector<T> data(count);
-  detail::Read(process, address, data.data(), sizeof(T) * count);
+  detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
   return data;
 }
 

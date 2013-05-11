@@ -15,6 +15,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/initialize.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -120,4 +121,21 @@ BOOST_AUTO_TEST_CASE(read_vector)
     process, &int_list, 10);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
     int_list_read.cbegin(), int_list_read.cend());
+}
+
+BOOST_AUTO_TEST_CASE(read_cross_region)
+{
+  SYSTEM_INFO const sys_info = hadesmem::detail::GetSystemInfo();
+  DWORD const page_size = sys_info.dwPageSize;
+  
+  LPVOID const address = VirtualAlloc(nullptr, page_size * 2, MEM_RESERVE | 
+    MEM_COMMIT, PAGE_NOACCESS);
+  BOOST_REQUIRE(address != 0);
+  
+  hadesmem::Process const process(::GetCurrentProcessId());
+  std::vector<char> buf = hadesmem::ReadVector<char>(process, address, 
+    page_size * 2);
+  std::vector<char> zero_buf(page_size * 2);
+  BOOST_CHECK_EQUAL_COLLECTIONS(buf.cbegin(), buf.cend(), 
+    zero_buf.cbegin(), zero_buf.cend());
 }
