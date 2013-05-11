@@ -27,12 +27,17 @@
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
 
+namespace
+{
+
 struct non_pod_type
 {
   virtual void foo() { }
   
   virtual ~non_pod_type() { }
 };
+
+}
 
 BOOST_AUTO_TEST_CASE(initialize)
 {
