@@ -21,19 +21,10 @@ namespace hadesmem
 namespace detail
 {
 
-template <typename T>
-T ReadUnchecked(Process const& process, PVOID address)
-{
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  
-  T data;
-  ReadUnchecked(process, address, std::addressof(data), sizeof(data));
-  return data;
-}
-
 inline void ReadUnchecked(Process const& process, LPVOID address, 
   LPVOID data, std::size_t len)
 {
+  HADESMEM_ASSERT(address != nullptr);
   HADESMEM_ASSERT(data != nullptr);
   HADESMEM_ASSERT(len != 0);
   
@@ -51,6 +42,7 @@ inline void ReadUnchecked(Process const& process, LPVOID address,
 inline void Read(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
+  HADESMEM_ASSERT(address != nullptr);
   HADESMEM_ASSERT(data != nullptr);
   HADESMEM_ASSERT(len != 0);
 
@@ -59,6 +51,19 @@ inline void Read(Process const& process, LPVOID address, LPVOID data,
   ReadUnchecked(process, address, data, len);
 
   protect_guard.Restore();
+}
+
+template <typename T>
+T Read(Process const& process, PVOID address)
+{
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
+  
+  HADESMEM_ASSERT(address != nullptr);
+
+  T data;
+  Read(process, address, std::addressof(data), sizeof(data));
+  return data;
 }
 
 }

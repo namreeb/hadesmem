@@ -11,6 +11,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/query_region.hpp>
 #include <hadesmem/detail/protect_guard.hpp>
 
@@ -21,15 +22,14 @@ class Process;
 
 namespace detail
 {
-  
-inline void Write(Process const& process, PVOID address, LPCVOID data, 
-  std::size_t len)
+
+inline void WriteUnchecked(Process const& process, PVOID address, 
+  LPCVOID data, std::size_t len)
 {
+  HADESMEM_ASSERT(address != nullptr);
   HADESMEM_ASSERT(data != nullptr);
   HADESMEM_ASSERT(len != 0);
 
-  ProtectGuard protect_guard(process, address, ProtectGuardType::kWrite);
-  
   SIZE_T bytes_written = 0;
   if (!::WriteProcessMemory(process.GetHandle(), address, data, 
     len, &bytes_written) || bytes_written != len)
@@ -39,6 +39,18 @@ inline void Write(Process const& process, PVOID address, LPCVOID data,
       ErrorString("Could not write process memory.") << 
       ErrorCodeWinLast(last_error));
   }
+}
+
+inline void Write(Process const& process, PVOID address, LPCVOID data, 
+  std::size_t len)
+{
+  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_ASSERT(data != nullptr);
+  HADESMEM_ASSERT(len != 0);
+
+  ProtectGuard protect_guard(process, address, ProtectGuardType::kWrite);
+  
+  WriteUnchecked(process, address, data, len);
 
   protect_guard.Restore();
 }

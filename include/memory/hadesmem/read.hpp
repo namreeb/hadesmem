@@ -35,23 +35,17 @@ class Process;
 template <typename T>
 T Read(Process const& process, PVOID address)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_ASSERT(address != nullptr);
   
-  T data;
-  detail::Read(process, address, std::addressof(data), sizeof(data));
-  return data;
+  return detail::Read<T>(process, address);
 }
 
 template <typename T, std::size_t N>
 std::array<T, N> Read(Process const& process, PVOID address)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_ASSERT(address != nullptr);
 
-  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
-
-  std::array<T, N> data;
-  detail::Read(process, address, data.data(), sizeof(T) * N);
-  return data;
+  return detail::Read<std::array<T, N>>(process, address);
 }
 
 // TODO: Clean up this function.
@@ -63,21 +57,21 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
   HADESMEM_ASSERT(chunk_len != 0);
 
-  detail::ProtectGuard protect_guard(process, address, 
-    detail::ProtectGuardType::kRead);
-
   std::basic_string<T> data;
 
   for (;;)
   {
+    detail::ProtectGuard protect_guard(process, address, 
+      detail::ProtectGuardType::kRead);
+
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-    PVOID const region_end = static_cast<PBYTE>(mbi.BaseAddress) + 
+    PVOID const region_next = static_cast<PBYTE>(mbi.BaseAddress) + 
       mbi.RegionSize;
 
     T* cur = static_cast<T*>(address);
-    while (cur + 1 < region_end)
+    while (cur + 1 < region_next)
     {
-      std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_end) - 
+      std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_next) - 
         reinterpret_cast<DWORD_PTR>(cur);
       std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
         len_to_end);
@@ -98,20 +92,22 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
       cur += buf_len;
     }
 
-    address = region_end;
+    address = region_next;
   }
 }
 
 template <typename T>
 std::vector<T> ReadVector(Process const& process, PVOID address, 
-  std::size_t size)
+  std::size_t count)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-
   HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
-  std::vector<T> data(size);
-  detail::Read(process, address, data.data(), sizeof(T) * size);
+  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_ASSERT(count != 0);
+  
+  std::vector<T> data(count);
+  detail::Read(process, address, data.data(), sizeof(T) * count);
   return data;
 }
 

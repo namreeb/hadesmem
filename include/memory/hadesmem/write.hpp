@@ -31,6 +31,8 @@ void Write(Process const& process, PVOID address, T const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
+  HADESMEM_ASSERT(address != nullptr);
+  
   detail::Write(process, address, std::addressof(data), sizeof(data));
 }
 
@@ -40,6 +42,10 @@ void Write(Process const& process, PVOID address, T const* ptr,
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
+  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_ASSERT(ptr != nullptr);
+  HADESMEM_ASSERT(count != 0);
+  
   std::size_t const raw_size = static_cast<std::size_t>(
     std::distance(ptr, ptr + count)) * sizeof(T);
   detail::Write(process, address, ptr, raw_size);
