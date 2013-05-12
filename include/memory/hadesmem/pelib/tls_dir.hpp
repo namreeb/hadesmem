@@ -3,85 +3,250 @@
 
 #pragma once
 
+#include <array>
 #include <iosfwd>
 #include <memory>
 #include <vector>
+#include <cstddef>
+#include <ostream>
+#include <utility>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/assert.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
+#include <winnt.h>
 
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
 
 namespace hadesmem
 {
 
-class Process;
-
-class PeFile;
-
 class TlsDir
 {
 public:
-  explicit TlsDir(Process const& process, PeFile const& pe_file);
+  explicit TlsDir(Process const& process, PeFile const& pe_file)
+    : process_(&process), 
+    pe_file_(&pe_file), 
+    base_(nullptr)
+  {
+    NtHeaders const nt_headers(process, pe_file);
 
-  TlsDir(TlsDir const& other);
+    // TODO: Some sort of API to handle this common case.
+    DWORD const data_dir_va = nt_headers.GetDataDirectoryVirtualAddress(
+      PeDataDir::TLS);
+    // Windows will load images which don't specify a size for the TLS 
+    // directory.
+    if (!data_dir_va)
+    {
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("PE file has no TLS directory."));
+    }
+
+    base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
+  }
+
+  TlsDir(TlsDir const& other)
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  TlsDir& operator=(TlsDir const& other);
+  TlsDir& operator=(TlsDir const& other)
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
 
-  TlsDir(TlsDir&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
+
+  TlsDir(TlsDir&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  TlsDir& operator=(TlsDir&& other) HADESMEM_NOEXCEPT;
+  TlsDir& operator=(TlsDir&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
+
+    return *this;
+  }
   
-  ~TlsDir();
+  ~TlsDir() HADESMEM_NOEXCEPT
+  { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT;
+  PVOID GetBase() const HADESMEM_NOEXCEPT
+  {
+    return base_;
+  }
 
-  DWORD_PTR GetStartAddressOfRawData() const;
+  DWORD_PTR GetStartAddressOfRawData() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      StartAddressOfRawData));
+  }
 
-  DWORD_PTR GetEndAddressOfRawData() const;
+  DWORD_PTR GetEndAddressOfRawData() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      EndAddressOfRawData));
+  }
 
-  DWORD_PTR GetAddressOfIndex() const;
+  DWORD_PTR GetAddressOfIndex() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      AddressOfIndex));
+  }
 
-  DWORD_PTR GetAddressOfCallBacks() const;
+  DWORD_PTR GetAddressOfCallBacks() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      AddressOfCallBacks));
+  }
+  
+  // TODO: Decide whether to throw on a NULL AddressOfCallbacks, return an 
+  // empty container, or simply ignore it and consider it a precondition 
+  // violation. Update dumper afterwards to reflect decision. (Currently it 
+  // is manually checking AddressOfCallbacks.)
+  std::vector<PIMAGE_TLS_CALLBACK> GetCallbacks() const
+  {
+    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
 
-  std::vector<PIMAGE_TLS_CALLBACK> GetCallbacks() const;
+    // TODO: Refactor this into a new GetRuntimeBase/GetImageBase/etc 
+    // API (names just ideas, still not decided on what to call it).
+    ULONG_PTR image_base = 0;
+    if (pe_file_->GetType() == PeFileType::Image)
+    {
+      image_base = reinterpret_cast<ULONG_PTR>(pe_file_->GetBase()); 
+    }
+    else
+    {
+      NtHeaders nt_headers(*process_, *pe_file_);
+      image_base = nt_headers.GetImageBase();
+    }
+  
+    auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(RvaToVa(
+      *process_, *pe_file_, static_cast<DWORD>(GetAddressOfCallBacks() - 
+      image_base)));
+  
+    for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*process_, callbacks_raw); 
+      callback; 
+      callback = Read<PIMAGE_TLS_CALLBACK>(*process_, ++callbacks_raw))
+    {
+      DWORD_PTR const callback_offset = reinterpret_cast<DWORD_PTR>(
+        callback) - image_base;
+      callbacks.push_back(reinterpret_cast<PIMAGE_TLS_CALLBACK>(
+        callback_offset));
+    }
+  
+    return callbacks;
+  }
 
-  DWORD GetSizeOfZeroFill() const;
+  DWORD GetSizeOfZeroFill() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      SizeOfZeroFill));
+  }
 
-  DWORD GetCharacteristics() const;
+  DWORD GetCharacteristics() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      Characteristics));
+  }
 
-  void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data);
+  void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      StartAddressOfRawData), start_address_of_raw_data);
+  }
 
-  void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data);
+  void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      EndAddressOfRawData), end_address_of_raw_data);
+  }
 
-  void SetAddressOfIndex(DWORD_PTR address_of_index);
+  void SetAddressOfIndex(DWORD_PTR address_of_index)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      AddressOfIndex), address_of_index);
+  }
 
-  void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks);
+  void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      AddressOfCallBacks), address_of_callbacks);
+  }
 
   // TODO: SetCallbacks function
 
-  void SetSizeOfZeroFill(DWORD size_of_zero_fill);
+  void SetSizeOfZeroFill(DWORD size_of_zero_fill)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      SizeOfZeroFill), size_of_zero_fill);
+  }
 
-  void SetCharacteristics(DWORD characteristics);
+  void SetCharacteristics(DWORD characteristics)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, 
+      Characteristics), characteristics);
+  }
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process const* process_;
+  PeFile const* pe_file_;
+  PBYTE base_;
 };
 
-bool operator==(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() == rhs.GetBase();
+}
 
-bool operator!=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
 
-bool operator<(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() < rhs.GetBase();
+}
 
-bool operator<=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() <= rhs.GetBase();
+}
 
-bool operator>(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() > rhs.GetBase();
+}
 
-bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() >= rhs.GetBase();
+}
 
-std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs);
+inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
-std::wostream& operator<<(std::wostream& lhs, TlsDir const& rhs);
+inline std::wostream& operator<<(std::wostream& lhs, TlsDir const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
 }
