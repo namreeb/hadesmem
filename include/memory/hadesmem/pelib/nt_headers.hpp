@@ -34,10 +34,6 @@
 namespace hadesmem
 {
 
-class Process;
-
-class PeFile;
-
 enum class PeDataDir : DWORD
 {
   Export, 
@@ -68,13 +64,13 @@ public:
     EnsureValid();
   }
 
-  NtHeaders(NtHeaders const& other)
+  NtHeaders(NtHeaders const& other) HADESMEM_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  NtHeaders& operator=(NtHeaders const& other)
+  NtHeaders& operator=(NtHeaders const& other) HADESMEM_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;

@@ -34,10 +34,6 @@
 namespace hadesmem
 {
 
-class Process;
-
-class PeFile;
-
 class ImportDir
 {
 public:
@@ -64,13 +60,13 @@ public:
     }
   }
 
-  ImportDir(ImportDir const& other)
+  ImportDir(ImportDir const& other) HADESMEM_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ImportDir& operator=(ImportDir const& other)
+  ImportDir& operator=(ImportDir const& other) HADESMEM_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
