@@ -201,7 +201,7 @@ void ExportDir::SetName(std::string const& name)
   std::string const current_name = ReadString<char>(*impl_->process_, 
     RvaToVa(*impl_->process_, *impl_->pe_file_, name_rva));
 
-  // FIXME: Support allocating space for a new name rather than just 
+  // TODO: Support allocating space for a new name rather than just 
   // overwriting the existing one.
   if (name.size() > current_name.size())
   {
