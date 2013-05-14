@@ -6,10 +6,29 @@
 #include <array>
 #include <iosfwd>
 #include <memory>
+#include <cstddef>
+#include <ostream>
+#include <utility>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/assert.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
+#include <winnt.h>
 
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wextended-offsetof"
+#endif
 
 namespace hadesmem
 {
@@ -40,211 +59,642 @@ enum class PeDataDir : DWORD
 class NtHeaders
 {
 public:
-  explicit NtHeaders(Process const& process, PeFile const& pe_file);
+  explicit NtHeaders(Process const& process, PeFile const& pe_file)
+    : process_(&process), 
+    pe_file_(&pe_file), 
+    base_(CalculateBase(*process_, *pe_file_))
+  {
+    EnsureValid();
+  }
 
-  NtHeaders(NtHeaders const& other);
+  NtHeaders(NtHeaders const& other)
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  NtHeaders& operator=(NtHeaders const& other);
+  NtHeaders& operator=(NtHeaders const& other)
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
 
-  NtHeaders(NtHeaders&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
+
+  NtHeaders(NtHeaders&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  NtHeaders& operator=(NtHeaders&& other) HADESMEM_NOEXCEPT;
+  NtHeaders& operator=(NtHeaders&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
+
+    return *this;
+  }
   
-  ~NtHeaders();
+  ~NtHeaders() HADESMEM_NOEXCEPT
+  { }
+  
+  PVOID GetBase() const HADESMEM_NOEXCEPT
+  {
+    return base_;
+  }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT;
+  bool IsValid() const
+  {
+    // TODO: Check whether the Magic check should be removed (i.e. whether 
+    // Windows will load images with a NULL or invalid value).
+    return IMAGE_NT_SIGNATURE == GetSignature() && 
+      IMAGE_NT_OPTIONAL_HDR_MAGIC == GetMagic();
+  }
 
-  bool IsValid() const;
+  void EnsureValid() const
+  {
+    if (!IsValid())
+    {
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("NT headers signature invalid."));
+    }
+  }
 
-  void EnsureValid() const;
+  DWORD GetSignature() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      Signature));
+  }
 
-  DWORD GetSignature() const;
+  WORD GetMachine() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.Machine));
+  }
 
-  WORD GetMachine() const;
+  WORD GetNumberOfSections() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.NumberOfSections));
+  }
 
-  WORD GetNumberOfSections() const;
+  DWORD GetTimeDateStamp() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.TimeDateStamp));
+  }
 
-  DWORD GetTimeDateStamp() const;
+  DWORD GetPointerToSymbolTable() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.PointerToSymbolTable));
+  }
 
-  DWORD GetPointerToSymbolTable() const;
+  DWORD GetNumberOfSymbols() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.NumberOfSymbols));
+  }
 
-  DWORD GetNumberOfSymbols() const;
+  WORD GetSizeOfOptionalHeader() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.SizeOfOptionalHeader));
+  }
 
-  WORD GetSizeOfOptionalHeader() const;
+  WORD GetCharacteristics() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.Characteristics));
+  }
 
-  WORD GetCharacteristics() const;
+  WORD GetMagic() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Magic));
+  }
 
-  WORD GetMagic() const;
+  BYTE GetMajorLinkerVersion() const
+  {
+    return Read<BYTE>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorLinkerVersion));
+  }
 
-  BYTE GetMajorLinkerVersion() const;
+  BYTE GetMinorLinkerVersion() const
+  {
+    return Read<BYTE>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorLinkerVersion));
+  }
 
-  BYTE GetMinorLinkerVersion() const;
+  DWORD GetSizeOfCode() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfCode));
+  }
 
-  DWORD GetSizeOfCode() const;
+  DWORD GetSizeOfInitializedData() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfInitializedData));
+  }
 
-  DWORD GetSizeOfInitializedData() const;
+  DWORD GetSizeOfUninitializedData() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfUninitializedData));
+  }
 
-  DWORD GetSizeOfUninitializedData() const;
+  DWORD GetAddressOfEntryPoint() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.AddressOfEntryPoint));
+  }
 
-  DWORD GetAddressOfEntryPoint() const;
+  DWORD GetBaseOfCode() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.BaseOfCode));
+  }
 
-  DWORD GetBaseOfCode() const;
-
-#if defined(HADESMEM_ARCH_X86) 
-  DWORD GetBaseOfData() const;
+#if defined(_M_IX86) 
+  DWORD GetBaseOfData() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.BaseOfData));
+  }
 #endif
 
-  ULONG_PTR GetImageBase() const;
+  ULONG_PTR GetImageBase() const
+  {
+    return Read<ULONG_PTR>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.ImageBase));
+  }
 
-  DWORD GetSectionAlignment() const;
+  DWORD GetSectionAlignment() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SectionAlignment));
+  }
 
-  DWORD GetFileAlignment() const;
+  DWORD GetFileAlignment() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.FileAlignment));
+  }
 
-  WORD GetMajorOperatingSystemVersion() const;
+  WORD GetMajorOperatingSystemVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorOperatingSystemVersion));
+  }
 
-  WORD GetMinorOperatingSystemVersion() const;
+  WORD GetMinorOperatingSystemVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorOperatingSystemVersion));
+  }
 
-  WORD GetMajorImageVersion() const;
+  WORD GetMajorImageVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorImageVersion));
+  }
 
-  WORD GetMinorImageVersion() const;
+  WORD GetMinorImageVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorImageVersion));
+  }
 
-  WORD GetMajorSubsystemVersion() const;
+  WORD GetMajorSubsystemVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorSubsystemVersion));
+  }
 
-  WORD GetMinorSubsystemVersion() const;
+  WORD GetMinorSubsystemVersion() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorSubsystemVersion));
+  }
 
-  DWORD GetWin32VersionValue() const;
+  DWORD GetWin32VersionValue() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Win32VersionValue));
+  }
 
-  DWORD GetSizeOfImage() const;
+  DWORD GetSizeOfImage() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfImage));
+  }
 
-  DWORD GetSizeOfHeaders() const;
+  DWORD GetSizeOfHeaders() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeaders));
+  }
 
-  DWORD GetCheckSum() const;
+  DWORD GetCheckSum() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.CheckSum));
+  }
 
-  WORD GetSubsystem() const;
+  WORD GetSubsystem() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Subsystem));
+  }
 
-  WORD GetDllCharacteristics() const;
+  WORD GetDllCharacteristics() const
+  {
+    return Read<WORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DllCharacteristics));
+  }
 
-  ULONG_PTR GetSizeOfStackReserve() const;
+  ULONG_PTR GetSizeOfStackReserve() const
+  {
+    return Read<ULONG_PTR>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfStackReserve));
+  }
 
-  ULONG_PTR GetSizeOfStackCommit() const;
+  ULONG_PTR GetSizeOfStackCommit() const
+  {
+    return Read<ULONG_PTR>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfStackCommit));
+  }
 
-  ULONG_PTR GetSizeOfHeapReserve() const;
+  ULONG_PTR GetSizeOfHeapReserve() const
+  {
+    return Read<ULONG_PTR>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeapReserve));
+  }
 
-  ULONG_PTR GetSizeOfHeapCommit() const;
+  ULONG_PTR GetSizeOfHeapCommit() const
+  {
+    return Read<ULONG_PTR>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeapCommit));
+  }
 
-  DWORD GetLoaderFlags() const;
+  DWORD GetLoaderFlags() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.LoaderFlags));
+  }
 
-  DWORD GetNumberOfRvaAndSizes() const;
+  DWORD GetNumberOfRvaAndSizes() const
+  {
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.NumberOfRvaAndSizes));
+  }
 
-  DWORD GetDataDirectoryVirtualAddress(PeDataDir data_dir) const;
+  DWORD GetDataDirectoryVirtualAddress(PeDataDir data_dir) const
+  {
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    {
+      return 0;
+    }
 
-  DWORD GetDataDirectorySize(PeDataDir data_dir) const;
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
+      sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
+      VirtualAddress));
+  }
 
-  void SetSignature(DWORD signature);
+  DWORD GetDataDirectorySize(PeDataDir data_dir) const
+  {
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    {
+      return 0;
+    }
 
-  void SetMachine(WORD machine);
+    return Read<DWORD>(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
+      sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size));
+  }
+  
+  void SetSignature(DWORD signature)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      Signature), signature);
+  }
 
-  void SetNumberOfSections(WORD number_of_sections);
+  void SetMachine(WORD machine)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.Machine), machine);
+  }
 
-  void SetTimeDateStamp(DWORD time_date_stamp);
+  void SetNumberOfSections(WORD number_of_sections)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.NumberOfSections), number_of_sections);
+  }
 
-  void SetPointerToSymbolTable(DWORD pointer_to_symbol_table);
+  void SetTimeDateStamp(DWORD time_date_stamp)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.TimeDateStamp), time_date_stamp);
+  }
 
-  void SetNumberOfSymbols(DWORD number_of_symbols);
+  void SetPointerToSymbolTable(DWORD pointer_to_symbol_table)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.PointerToSymbolTable), pointer_to_symbol_table);
+  }
 
-  void SetSizeOfOptionalHeader(WORD size_of_optional_header);
+  void SetNumberOfSymbols(DWORD number_of_symbols)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.NumberOfSymbols), number_of_symbols);
+  }
 
-  void SetCharacteristics(WORD characteristics);
+  void SetSizeOfOptionalHeader(WORD size_of_optional_header)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.SizeOfOptionalHeader), size_of_optional_header);
 
-  void SetMagic(WORD magic);
+  }
 
-  void SetMajorLinkerVersion(BYTE major_linker_version);
+  void SetCharacteristics(WORD characteristics)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      FileHeader.Characteristics), characteristics);
+  }
 
-  void SetMinorLinkerVersion(BYTE minor_linker_version);
+  void SetMagic(WORD magic)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Magic), magic);
+  }
 
-  void SetSizeOfCode(DWORD size_of_code);
+  void SetMajorLinkerVersion(BYTE major_linker_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorLinkerVersion), major_linker_version);
+  }
 
-  void SetSizeOfInitializedData(DWORD size_of_initialized_data);
+  void SetMinorLinkerVersion(BYTE minor_linker_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorLinkerVersion), minor_linker_version);
+  }
 
-  void SetSizeOfUninitializedData(DWORD size_of_uninitialized_data);
+  void SetSizeOfCode(DWORD size_of_code)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfCode), size_of_code);
+  }
 
-  void SetAddressOfEntryPoint(DWORD address_of_entry_point);
+  void SetSizeOfInitializedData(DWORD size_of_initialized_data)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfInitializedData), size_of_initialized_data);
+  }
 
-  void SetBaseOfCode(DWORD base_of_code);
+  void SetSizeOfUninitializedData(DWORD size_of_uninitialized_data)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfUninitializedData), size_of_uninitialized_data);
+  }
 
-#if defined(HADESMEM_ARCH_X86) 
-  void SetBaseOfData(DWORD base_of_data);
-#endif
+  void SetAddressOfEntryPoint(DWORD address_of_entry_point)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.AddressOfEntryPoint), address_of_entry_point);
+  }
 
-  void SetImageBase(ULONG_PTR image_base);
+  void SetBaseOfCode(DWORD base_of_code)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.BaseOfCode), base_of_code);
+  }
 
-  void SetSectionAlignment(DWORD section_alignment);
+  #if defined(_M_IX86) 
+  void SetBaseOfData(DWORD base_of_data)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.BaseOfData), base_of_data);
+  }
+  #endif
 
-  void SetFileAlignment(DWORD file_alignment);
+  void SetImageBase(ULONG_PTR image_base)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.ImageBase), image_base);
+  }
+
+  void SetSectionAlignment(DWORD section_alignment)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SectionAlignment), section_alignment);
+  }
+
+  void SetFileAlignment(DWORD file_alignment)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.FileAlignment), file_alignment);
+  }
 
   void SetMajorOperatingSystemVersion(
-    WORD major_operating_system_version);
+    WORD major_operating_system_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorOperatingSystemVersion), 
+      major_operating_system_version);
+  }
 
   void SetMinorOperatingSystemVersion(
-    WORD minor_operating_system_version);
+    WORD minor_operating_system_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorOperatingSystemVersion), 
+      minor_operating_system_version);
+  }
 
-  void SetMajorImageVersion(WORD major_image_version);
+  void SetMajorImageVersion(WORD major_image_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorImageVersion), major_image_version);
+  }
 
-  void SetMinorImageVersion(WORD minor_image_version);
+  void SetMinorImageVersion(WORD minor_image_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorImageVersion), minor_image_version);
+  }
 
-  void SetMajorSubsystemVersion(WORD major_subsystem_version);
+  void SetMajorSubsystemVersion(WORD major_subsystem_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MajorSubsystemVersion), major_subsystem_version);
+  }
 
-  void SetMinorSubsystemVersion(WORD minor_subsystem_version);
+  void SetMinorSubsystemVersion(WORD minor_subsystem_version)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.MinorSubsystemVersion), minor_subsystem_version);
+  }
 
-  void SetWin32VersionValue(DWORD win32_version_value);
+  void SetWin32VersionValue(DWORD win32_version_value)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Win32VersionValue), win32_version_value);
+  }
 
-  void SetSizeOfImage(DWORD size_of_image);
+  void SetSizeOfImage(DWORD size_of_image)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfImage), size_of_image);
+  }
 
-  void SetSizeOfHeaders(DWORD size_of_headers);
+  void SetSizeOfHeaders(DWORD size_of_headers)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeaders), size_of_headers);
+  }
 
-  void SetCheckSum(DWORD checksum);
+  void SetCheckSum(DWORD checksum)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.CheckSum), checksum);
+  }
 
-  void SetSubsystem(WORD subsystem);
+  void SetSubsystem(WORD subsystem)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.Subsystem), subsystem);
+  }
 
-  void SetDllCharacteristics(WORD dll_characteristics);
+  void SetDllCharacteristics(WORD dll_characteristics)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DllCharacteristics), dll_characteristics);
+  }
 
-  void SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve);
+  void SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfStackReserve), size_of_stack_reserve);
+  }
 
-  void SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit);
+  void SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfStackCommit), size_of_stack_commit);
+  }
 
-  void SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve);
+  void SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeapReserve), size_of_heap_reserve);
+  }
 
-  void SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit);
+  void SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.SizeOfHeapCommit), size_of_heap_commit);
+  }
 
-  void SetLoaderFlags(DWORD loader_flags);
+  void SetLoaderFlags(DWORD loader_flags)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.LoaderFlags), loader_flags);
+  }
 
-  void SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes);
+  void SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes)
+  {
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.NumberOfRvaAndSizes), number_of_rva_and_sizes);
+  }
 
   void SetDataDirectoryVirtualAddress(PeDataDir data_dir, 
-    DWORD data_directory_virtual_address);
+    DWORD data_directory_virtual_address)
+  {
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    {
+      return;
+    }
+
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
+      sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, 
+      VirtualAddress), data_directory_virtual_address);
+  }
 
   void SetDataDirectorySize(PeDataDir data_dir, 
-    DWORD data_directory_size);
-  
+    DWORD data_directory_size)
+  {
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    {
+      return;
+    }
+
+    Write(*process_, base_ + offsetof(IMAGE_NT_HEADERS, 
+      OptionalHeader.DataDirectory[0]) + static_cast<DWORD>(data_dir) * 
+      sizeof(IMAGE_DATA_DIRECTORY) + offsetof(IMAGE_DATA_DIRECTORY, Size), 
+      data_directory_size);
+  }
+
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  PBYTE CalculateBase(Process const& process, PeFile const& pe_file) const
+  {
+    DosHeader dos_header(process, pe_file);
+    return static_cast<PBYTE>(dos_header.GetBase()) + 
+      dos_header.GetNewHeaderOffset();
+  }
+
+  Process const* process_;
+  PeFile const* pe_file_;
+  PBYTE base_;
 };
 
-bool operator==(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator==(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() == rhs.GetBase();
+}
 
-bool operator!=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator!=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
 
-bool operator<(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() < rhs.GetBase();
+}
 
-bool operator<=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() <= rhs.GetBase();
+}
 
-bool operator>(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() > rhs.GetBase();
+}
 
-bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() >= rhs.GetBase();
+}
 
-std::ostream& operator<<(std::ostream& lhs, NtHeaders const& rhs);
+inline std::ostream& operator<<(std::ostream& lhs, NtHeaders const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
-std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs);
+inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
 }
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif
