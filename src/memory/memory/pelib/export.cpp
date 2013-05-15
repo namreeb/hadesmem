@@ -49,6 +49,12 @@ struct Export::Impl
     ExportDir const export_dir(process, pe_file);
 
     WORD offset = static_cast<WORD>(ordinal_ - export_dir.GetOrdinalBase());
+    
+    if (offset >= export_dir.GetNumberOfFunctions())
+    {
+        HADESMEM_THROW_EXCEPTION(Error() << 
+          ErrorString("Ordinal out of range."));
+    }
 
     WORD* ptr_ordinals = static_cast<WORD*>(RvaToVa(process, pe_file, 
       export_dir.GetAddressOfNameOrdinals()));
