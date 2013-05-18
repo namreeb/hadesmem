@@ -76,12 +76,10 @@ void DumpRegions(hadesmem::Process const& process)
   }
 }
 
-void DumpHeaders(hadesmem::Process const& process, PVOID module, 
-  hadesmem::PeFileType type)
+void DumpDosHeader(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
 {
   std::wcout << "\n\tDOS Header:\n";
-
-  hadesmem::PeFile pe_file(process, module, type);
 
   hadesmem::DosHeader dos_hdr(process, pe_file);
   std::wcout << std::boolalpha;
@@ -135,7 +133,11 @@ void DumpHeaders(hadesmem::Process const& process, PVOID module,
   std::wcout << "\t\tNewHeaderOffset: " << std::hex 
     << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
   std::wcout << std::noboolalpha;
+}
 
+void DumpNtHeaders(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
+{
   std::wcout << "\n\tNT Headers:\n";
 
   hadesmem::NtHeaders nt_hdrs(process, pe_file);
@@ -239,12 +241,19 @@ void DumpHeaders(hadesmem::Process const& process, PVOID module,
   std::wcout << std::noboolalpha;
 }
 
-void DumpSections(hadesmem::Process const& process, PVOID module, 
-  hadesmem::PeFileType type)
+void DumpHeaders(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
+{
+  DumpDosHeader(process, pe_file);
+  
+  DumpNtHeaders(process, pe_file);
+}
+
+void DumpSections(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
 {
   std::wcout << "\n\tSections:\n";
 
-  hadesmem::PeFile pe_file(process, module, type);
   hadesmem::SectionList sections(process, pe_file);
   for (auto const& s : sections)
   {
@@ -273,10 +282,9 @@ void DumpSections(hadesmem::Process const& process, PVOID module,
   }
 }
 
-void DumpTls(hadesmem::Process const& process, PVOID module, 
-  hadesmem::PeFileType type)
+void DumpTls(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
 {
-  hadesmem::PeFile pe_file(process, module, type);
   std::unique_ptr<hadesmem::TlsDir> tls_dir;
   try
   {
@@ -315,10 +323,9 @@ void DumpTls(hadesmem::Process const& process, PVOID module,
   std::wcout << std::noboolalpha;
 }
 
-void DumpExports(hadesmem::Process const& process, PVOID module, 
-  hadesmem::PeFileType type)
+void DumpExports(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
 {
-  hadesmem::PeFile pe_file(process, module, type);
   std::unique_ptr<hadesmem::ExportDir> export_dir;
   try
   {
@@ -404,10 +411,9 @@ void DumpExports(hadesmem::Process const& process, PVOID module,
   }
 }
 
-void DumpImports(hadesmem::Process const& process, PVOID module, 
-  hadesmem::PeFileType type)
+void DumpImports(hadesmem::Process const& process, 
+  hadesmem::PeFile const& pe_file)
 {
-  hadesmem::PeFile pe_file(process, module, type);
   hadesmem::ImportDirList import_dirs(process, pe_file);
 
   if (std::begin(import_dirs) != std::end(import_dirs))
@@ -437,7 +443,7 @@ void DumpImports(hadesmem::Process const& process, PVOID module,
     // Certain information gets destroyed by the Windows PE loader in 
     // some circumstances. Nothing we can do but ignore it or resort to 
     // reading the original data from disk.
-    if (type == hadesmem::PeFileType::Image)
+    if (pe_file.GetType() == hadesmem::PeFileType::Image)
     {
       // Images without an INT/ILT are valid, but after an image like this is 
       // loaded it is impossible to recover the name table.
@@ -498,15 +504,30 @@ void DumpModules(hadesmem::Process const& process)
     std::wcout << "\tName: " << module.GetName() << "\n";
     std::wcout << "\tPath: " << module.GetPath() << "\n";
 
-    DumpHeaders(process, module.GetHandle(), hadesmem::PeFileType::Image);
+    hadesmem::PeFile const pe_file(process, module.GetHandle(), 
+      hadesmem::PeFileType::Image);
 
-    DumpSections(process, module.GetHandle(), hadesmem::PeFileType::Image);
+    try
+    {
+      hadesmem::DosHeader const dos_header(process, pe_file);
+      hadesmem::NtHeaders const nt_headers(process, pe_file);
+    }
+    catch (std::exception const& /*e*/)
+    {
+      std::wcout << "\n";
+      std::wcout << "\tWARNING! Not a valid PE file or architecture.\n";
+      continue;
+    }
 
-    DumpTls(process, module.GetHandle(), hadesmem::PeFileType::Image);
+    DumpHeaders(process, pe_file);
 
-    DumpExports(process, module.GetHandle(), hadesmem::PeFileType::Image);
+    DumpSections(process, pe_file);
 
-    DumpImports(process, module.GetHandle(), hadesmem::PeFileType::Image);
+    DumpTls(process, pe_file);
+
+    DumpExports(process, pe_file);
+
+    DumpImports(process, pe_file);
   }
 }
 
@@ -595,28 +616,29 @@ void DumpFile(boost::filesystem::path const& path)
   }
 
   hadesmem::Process const process(GetCurrentProcessId());
-
+  
+  hadesmem::PeFile const pe_file(process, buf.data(), 
+    hadesmem::PeFileType::Data);
+  
   try
   {
-    hadesmem::PeFile const pe_file(process, buf.data(), 
-      hadesmem::PeFileType::Data);
     hadesmem::NtHeaders const nt_hdr(process, pe_file);
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nNot a PE file (Pass 2).\n";
+    std::wcout << "\nNot a PE file or wrong architecture (Pass 2).\n";
     return;
   }
 
-  DumpHeaders(process, buf.data(), hadesmem::PeFileType::Data);
+  DumpHeaders(process, pe_file);
 
-  DumpSections(process, buf.data(), hadesmem::PeFileType::Data);
+  DumpSections(process, pe_file);
 
-  DumpTls(process, buf.data(), hadesmem::PeFileType::Data);
+  DumpTls(process, pe_file);
 
-  DumpExports(process, buf.data(), hadesmem::PeFileType::Data);
+  DumpExports(process, pe_file);
 
-  DumpImports(process, buf.data(), hadesmem::PeFileType::Data);
+  DumpImports(process, pe_file);
 }
 
 // Doing directory recursion 'manually' because recursive_directory_iterator 
