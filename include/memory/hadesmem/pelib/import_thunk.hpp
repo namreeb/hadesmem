@@ -6,81 +6,211 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <cstddef>
+#include <ostream>
+#include <utility>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/assert.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
+#include <winnt.h>
 
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/import_dir.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
+
+// TODO: Fix the code so this hack can be removed.
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wextended-offsetof"
+#endif
 
 namespace hadesmem
 {
-
-class Process;
-
-class PeFile;
 
 class ImportThunk
 {
 public:
   explicit ImportThunk(Process const& process, PeFile const& pe_file, 
-    PIMAGE_THUNK_DATA thunk);
+    PIMAGE_THUNK_DATA thunk)
+    : process_(&process), 
+    pe_file_(&pe_file), 
+    base_(reinterpret_cast<PBYTE>(thunk))
+  { }
   
-  ImportThunk(ImportThunk const& other);
+  ImportThunk(ImportThunk const& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  ImportThunk& operator=(ImportThunk const& other);
+  ImportThunk& operator=(ImportThunk const& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
 
-  ImportThunk(ImportThunk&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
+
+  ImportThunk(ImportThunk&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    base_(other.base_)
+  { }
   
-  ImportThunk& operator=(ImportThunk&& other) HADESMEM_NOEXCEPT;
+  ImportThunk& operator=(ImportThunk&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    base_ = other.base_;
+
+    return *this;
+  }
   
-  ~ImportThunk();
+  ~ImportThunk() HADESMEM_NOEXCEPT
+  { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT;
-
-  DWORD_PTR GetAddressOfData() const;
+  PVOID GetBase() const HADESMEM_NOEXCEPT
+  {
+    return base_;
+  }
   
-  DWORD_PTR GetOrdinalRaw() const;
+  DWORD_PTR GetAddressOfData() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.AddressOfData));
+  }
 
-  bool ByOrdinal() const;
+  void SetAddressOfData(DWORD_PTR address_of_data)
+  {
+    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.AddressOfData), address_of_data);
+  }
 
-  WORD GetOrdinal() const;
+  DWORD_PTR GetOrdinalRaw() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.Ordinal));
+  }
 
-  DWORD_PTR GetFunction() const;
+  void SetOrdinalRaw(DWORD_PTR ordinal_raw)
+  {
+    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.Ordinal), ordinal_raw);
+  }
 
-  WORD GetHint() const;
+  bool ByOrdinal() const
+  {
+    return IMAGE_SNAP_BY_ORDINAL(GetOrdinalRaw());
+  }
 
-  std::string GetName() const;
-
-  void SetAddressOfData(DWORD_PTR address_of_data);
-
-  void SetOrdinalRaw(DWORD_PTR ordinal_raw);
+  WORD GetOrdinal() const
+  {
+    return IMAGE_ORDINAL(GetOrdinalRaw());
+  }
 
   // Todo: SetOrdinal function
 
-  void SetFunction(DWORD_PTR function);
+  DWORD_PTR GetFunction() const
+  {
+    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.Function));
+  }
 
-  void SetHint(WORD hint);
+  void SetFunction(DWORD_PTR function)
+  {
+    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+      u1.Function), function);
+  }
+
+  WORD GetHint() const
+  {
+    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
+      static_cast<DWORD>(GetAddressOfData())));
+    return Read<WORD>(*process_, name_import + FIELD_OFFSET(
+      IMAGE_IMPORT_BY_NAME, Hint));
+  }
+
+  void SetHint(WORD hint)
+  {
+    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
+      static_cast<DWORD>(GetAddressOfData())));
+    return Write(*process_, name_import + FIELD_OFFSET(
+      IMAGE_IMPORT_BY_NAME, Hint), hint);
+  }
+
+  std::string GetName() const
+  {
+    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
+      static_cast<DWORD>(GetAddressOfData())));
+    return ReadString<char>(*process_, name_import + FIELD_OFFSET(
+      IMAGE_IMPORT_BY_NAME, Name));
+  }
 
   // TODO: SetName function
 
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process const* process_;
+  PeFile const* pe_file_;
+  PBYTE base_;
 };
 
-bool operator==(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() == rhs.GetBase();
+}
 
-bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
 
-bool operator<(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() < rhs.GetBase();
+}
 
-bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() <= rhs.GetBase();
+}
 
-bool operator>(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() > rhs.GetBase();
+}
 
-bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs) HADESMEM_NOEXCEPT;
+inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs) 
+  HADESMEM_NOEXCEPT
+{
+  return lhs.GetBase() >= rhs.GetBase();
+}
 
-std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs);
+inline std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
-std::wostream& operator<<(std::wostream& lhs, ImportThunk const& rhs);
+inline std::wostream& operator<<(std::wostream& lhs, ImportThunk const& rhs)
+{
+  return (lhs << rhs.GetBase());
+}
 
 }
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif
