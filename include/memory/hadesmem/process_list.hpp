@@ -11,6 +11,10 @@
 #include <boost/optional.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <windows.h>
+#include <tlhelp32.h>
+
+#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/process_entry.hpp>
@@ -18,10 +22,6 @@
 
 namespace hadesmem
 {
-
-class Process;
-
-class ProcessEntry;
 
 // ProcessIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
@@ -32,8 +32,58 @@ public:
   ProcessIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
-
-  explicit ProcessIterator(int dummy);
+  
+  // TOOD: Clean this up.
+  ProcessIterator(int /*dummy*/)
+    : impl_(new Impl())
+  {
+    HADESMEM_ASSERT(impl_.get());
+  
+    impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
+      TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+    if (!impl_->snap_.IsValid())
+    {
+      if (::GetLastError() == ERROR_BAD_LENGTH)
+      {
+        impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
+          TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+        if (!impl_->snap_.IsValid())
+        {
+          DWORD const last_error = ::GetLastError();
+          HADESMEM_THROW_EXCEPTION(Error() << 
+            ErrorString("CreateToolhelp32Snapshot failed.") << 
+            ErrorCodeWinLast(last_error));
+        }
+      }
+      else
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_THROW_EXCEPTION(Error() << 
+          ErrorString("CreateToolhelp32Snapshot failed.") << 
+          ErrorCodeWinLast(last_error));
+      }
+    }
+  
+    PROCESSENTRY32 entry;
+    ::ZeroMemory(&entry, sizeof(entry));
+    entry.dwSize = sizeof(entry);
+    if (!::Process32First(impl_->snap_.GetHandle(), &entry))
+    {
+      DWORD const last_error = ::GetLastError();
+    
+      if (last_error == ERROR_NO_MORE_FILES)
+      {
+        impl_.reset();
+        return;
+      }
+    
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("Process32First failed.") << 
+        ErrorCodeWinLast(last_error));
+    }
+  
+    impl_->process_ = ProcessEntry(entry);
+  }
 
   ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT
     : impl_(other.impl_)
@@ -72,7 +122,33 @@ public:
     return &*impl_->process_;
   }
   
-  ProcessIterator& operator++();
+  ProcessIterator& operator++()
+  {
+    HADESMEM_ASSERT(impl_.get());
+  
+    PROCESSENTRY32 entry;
+    ::ZeroMemory(&entry, sizeof(entry));
+    entry.dwSize = sizeof(entry);
+    if (!::Process32Next(impl_->snap_.GetHandle(), &entry))
+    {
+      if (::GetLastError() == ERROR_NO_MORE_FILES)
+      {
+        impl_.reset();
+        return *this;
+      }
+      else
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_THROW_EXCEPTION(Error() << 
+          ErrorString("Module32Next failed.") << 
+          ErrorCodeWinLast(last_error));
+      }
+    }
+  
+    impl_->process_ = ProcessEntry(entry);
+  
+    return *this;
+  }
   
   ProcessIterator operator++(int)
   {

@@ -96,32 +96,32 @@ public:
   
   DWORD GetCharacteristics() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, Characteristics));
   }
 
   DWORD GetTimeDateStamp() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, TimeDateStamp));
   }
 
   WORD GetMajorVersion() const
   {
-    return Read<WORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<WORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, MajorVersion));
   }
 
   WORD GetMinorVersion() const
   {
-    return Read<WORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<WORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, MinorVersion));
   }
 
   std::string GetName() const
   {
     DWORD const name_rva = Read<DWORD>(*process_, base_ + 
-      FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, Name));
+      offsetof(IMAGE_EXPORT_DIRECTORY, Name));
 
     if (!name_rva)
     {
@@ -134,68 +134,68 @@ public:
 
   DWORD GetOrdinalBase() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, Base));
   }
 
   DWORD GetNumberOfFunctions() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, NumberOfFunctions));
   }
 
   DWORD GetNumberOfNames() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, NumberOfNames));
   }
 
   DWORD GetAddressOfFunctions() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, AddressOfFunctions));
   }
 
   DWORD GetAddressOfNames() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, AddressOfNames));
   }
 
   DWORD GetAddressOfNameOrdinals() const
   {
-    return Read<DWORD>(*process_, base_ + FIELD_OFFSET(
+    return Read<DWORD>(*process_, base_ + offsetof(
       IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals));
   }
 
   void SetCharacteristics(DWORD characteristics)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       Characteristics), characteristics);
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       TimeDateStamp), time_date_stamp);
   }
 
   void SetMajorVersion(WORD major_version)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       MajorVersion), major_version);
   }
 
   void SetMinorVersion(WORD minor_version)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       MinorVersion), minor_version);
   }
 
   void SetName(std::string const& name)
   {
     DWORD const name_rva = Read<DWORD>(*process_, base_ + 
-      FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, Name));
+      offsetof(IMAGE_EXPORT_DIRECTORY, Name));
 
     if (!name_rva)
     {
@@ -220,37 +220,37 @@ public:
 
   void SetOrdinalBase(DWORD base)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       Base), base);
   }
 
   void SetNumberOfFunctions(DWORD number_of_functions)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       NumberOfFunctions), number_of_functions);
   }
 
   void SetNumberOfNames(DWORD number_of_names)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       NumberOfNames), number_of_names);
   }
 
   void SetAddressOfFunctions(DWORD address_of_functions)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       AddressOfFunctions), address_of_functions);
   }
 
   void SetAddressOfNames(DWORD address_of_names)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       AddressOfNames), address_of_names);
   }
 
   void SetAddressOfNameOrdinals(DWORD address_of_name_ordinals)
   {
-    Write(*process_, base_ + FIELD_OFFSET(IMAGE_EXPORT_DIRECTORY, 
+    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, 
       AddressOfNameOrdinals), address_of_name_ordinals);
   }
 

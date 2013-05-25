@@ -85,25 +85,25 @@ public:
   
   DWORD_PTR GetAddressOfData() const
   {
-    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.AddressOfData));
   }
 
   void SetAddressOfData(DWORD_PTR address_of_data)
   {
-    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.AddressOfData), address_of_data);
   }
 
   DWORD_PTR GetOrdinalRaw() const
   {
-    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.Ordinal));
   }
 
   void SetOrdinalRaw(DWORD_PTR ordinal_raw)
   {
-    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.Ordinal), ordinal_raw);
   }
 
@@ -121,13 +121,13 @@ public:
 
   DWORD_PTR GetFunction() const
   {
-    return Read<DWORD_PTR>(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.Function));
   }
 
   void SetFunction(DWORD_PTR function)
   {
-    return Write(*process_, base_ + FIELD_OFFSET(IMAGE_THUNK_DATA, 
+    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
       u1.Function), function);
   }
 
@@ -135,7 +135,7 @@ public:
   {
     PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
       static_cast<DWORD>(GetAddressOfData())));
-    return Read<WORD>(*process_, name_import + FIELD_OFFSET(
+    return Read<WORD>(*process_, name_import + offsetof(
       IMAGE_IMPORT_BY_NAME, Hint));
   }
 
@@ -143,7 +143,7 @@ public:
   {
     PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
       static_cast<DWORD>(GetAddressOfData())));
-    return Write(*process_, name_import + FIELD_OFFSET(
+    return Write(*process_, name_import + offsetof(
       IMAGE_IMPORT_BY_NAME, Hint), hint);
   }
 
@@ -151,7 +151,7 @@ public:
   {
     PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
       static_cast<DWORD>(GetAddressOfData())));
-    return ReadString<char>(*process_, name_import + FIELD_OFFSET(
+    return ReadString<char>(*process_, name_import + offsetof(
       IMAGE_IMPORT_BY_NAME, Name));
   }
 

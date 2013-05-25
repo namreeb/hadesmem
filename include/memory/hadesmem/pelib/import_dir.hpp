@@ -100,25 +100,25 @@ public:
   
   DWORD GetOriginalFirstThunk() const
   {
-    return Read<DWORD>(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       OriginalFirstThunk));
   }
 
   DWORD GetTimeDateStamp() const
   {
-    return Read<DWORD>(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       TimeDateStamp));
   }
 
   DWORD GetForwarderChain() const
   {
-    return Read<DWORD>(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       ForwarderChain));
   }
 
   DWORD GetNameRaw() const
   {
-    return Read<DWORD>(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       Name));
   }
 
@@ -130,37 +130,37 @@ public:
 
   DWORD GetFirstThunk() const
   {
-    return Read<DWORD>(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       FirstThunk));
   }
 
   void SetOriginalFirstThunk(DWORD original_first_thunk)
   {
-    return Write(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       OriginalFirstThunk), original_first_thunk);
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
   {
-    return Write(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       TimeDateStamp), time_date_stamp);
   }
 
   void SetForwarderChain(DWORD forwarder_chain)
   {
-    return Write(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       ForwarderChain), forwarder_chain);
   }
 
   void SetNameRaw(DWORD name)
   {
-    Write(*process_, base_ +  FIELD_OFFSET(
+    Write(*process_, base_ +  offsetof(
       IMAGE_IMPORT_DESCRIPTOR, Name), name);
   }
 
   void SetName(std::string const& name)
   {
-    DWORD name_rva = Read<DWORD>(*process_, base_ +  FIELD_OFFSET(
+    DWORD name_rva = Read<DWORD>(*process_, base_ +  offsetof(
       IMAGE_IMPORT_DESCRIPTOR, Name));
     if (!name_rva)
     {
@@ -190,7 +190,7 @@ public:
 
   void SetFirstThunk(DWORD first_thunk)
   {
-    return Write(*process_, base_ +  FIELD_OFFSET(IMAGE_IMPORT_DESCRIPTOR, 
+    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
       FirstThunk), first_thunk);
   }
 

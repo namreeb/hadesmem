@@ -270,8 +270,6 @@ private:
   WORD ordinal_;
   bool by_name_;
   bool forwarded_;
-  bool forwarded_by_ordinal_;
-  WORD forwarder_ordinal_;
 };
 
 inline bool operator==(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
