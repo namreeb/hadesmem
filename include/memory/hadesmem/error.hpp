@@ -15,16 +15,20 @@
 
 namespace hadesmem
 {
+  
+// Header-only library unfortunately means no vtable/rtti anchor.
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wweak-vtables"
+#endif // #if defined(HADESMEM_CLANG)
 
 class Error : public virtual std::exception, 
   public virtual boost::exception
-{
-private:
-  // This function exists to 'anchor' the class, and stop the compiler from 
-  // copying vtable and RTTI info into every object file that includes 
-  // this header.
-  virtual void Anchor() const;
-};
+{ };
+
+#if defined(HADESMEM_CLANG)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_CLANG)
 
 typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
 typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR> 
