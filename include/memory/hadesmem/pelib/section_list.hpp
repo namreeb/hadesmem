@@ -73,7 +73,7 @@ public:
     return *this;
   }
 
-  ~SectionIterator()
+  ~SectionIterator() HADESMEM_NOEXCEPT
   { }
   
   reference operator*() const HADESMEM_NOEXCEPT

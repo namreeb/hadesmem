@@ -4,20 +4,25 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <iterator>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/optional.hpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
+#include <hadesmem/read.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/import_thunk.hpp>
 
 namespace hadesmem
 {
-
-class Process;
-
-class PeFile;
-
-class ImportThunk;
 
 // ImportThunkIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
@@ -25,39 +30,134 @@ class ImportThunkIterator : public std::iterator<std::input_iterator_tag,
   ImportThunk>
 {
 public:
-  ImportThunkIterator() HADESMEM_NOEXCEPT;
+  ImportThunkIterator() HADESMEM_NOEXCEPT
+    : impl_()
+  { }
   
   explicit ImportThunkIterator(Process const& process, PeFile const& pe_file, 
-    DWORD first_thunk);
+    DWORD first_thunk)
+    : impl_(new Impl(process, pe_file))
+  {
+    try
+    {
+      auto const thunk_ptr = reinterpret_cast<PIMAGE_THUNK_DATA>(RvaToVa(
+        process, pe_file, first_thunk));
+      impl_->import_thunk_ = ImportThunk(process, pe_file, thunk_ptr);
+      if (!impl_->import_thunk_->GetAddressOfData())
+      {
+        impl_.reset();
+      }
+    }
+    catch (std::exception const& /*e*/)
+    {
+      // TODO: Check whether this is the right thing to do. We should only 
+      // flag as the 'end' once we've actually reached the end of the list. If 
+      // the iteration fails we should throw an exception.
+      impl_.reset();
+    }
+  }
 
-  ImportThunkIterator(ImportThunkIterator const& other) HADESMEM_NOEXCEPT;
+  ImportThunkIterator(ImportThunkIterator const& other) HADESMEM_NOEXCEPT
+    : impl_(other.impl_)
+  { }
 
   ImportThunkIterator& operator=(ImportThunkIterator const& other) 
-    HADESMEM_NOEXCEPT;
+    HADESMEM_NOEXCEPT
+  {
+    impl_ = other.impl_;
 
-  ImportThunkIterator(ImportThunkIterator&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
+
+  ImportThunkIterator(ImportThunkIterator&& other) HADESMEM_NOEXCEPT
+    : impl_(std::move(other.impl_))
+  { }
 
   ImportThunkIterator& operator=(ImportThunkIterator&& other) 
-    HADESMEM_NOEXCEPT;
+    HADESMEM_NOEXCEPT
+  {
+    impl_ = std::move(other.impl_);
 
-  ~ImportThunkIterator();
+    return *this;
+  }
+
+  ~ImportThunkIterator()
+  { }
   
-  reference operator*() const HADESMEM_NOEXCEPT;
+  reference operator*() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return *impl_->import_thunk_;
+  }
   
-  pointer operator->() const HADESMEM_NOEXCEPT;
+  pointer operator->() const HADESMEM_NOEXCEPT
+  {
+    HADESMEM_ASSERT(impl_.get());
+    return &*impl_->import_thunk_;
+  }
   
-  ImportThunkIterator& operator++();
+  ImportThunkIterator& operator++()
+  {
+    try
+    {
+      HADESMEM_ASSERT(impl_.get());
+
+      auto const cur_base = reinterpret_cast<PIMAGE_THUNK_DATA>(
+        impl_->import_thunk_->GetBase());
+      impl_->import_thunk_ = ImportThunk(*impl_->process_, *impl_->pe_file_, 
+        cur_base + 1);
+
+      if (!impl_->import_thunk_->GetAddressOfData())
+      {
+        impl_.reset();
+        return *this;
+      }
+    }
+    catch (std::exception const& /*e*/)
+    {
+      // TODO: Check whether this is the right thing to do. We should only 
+      // flag as the 'end' once we've actually reached the end of the list. If 
+      // the iteration fails we should throw an exception.
+      impl_.reset();
+    }
   
-  ImportThunkIterator operator++(int);
+    return *this;
+  }
   
-  bool operator==(ImportThunkIterator const& other) const HADESMEM_NOEXCEPT;
+  ImportThunkIterator operator++(int)
+  {
+    ImportThunkIterator iter(*this);
+    ++*this;
+    return iter;
+  }
   
-  bool operator!=(ImportThunkIterator const& other) const HADESMEM_NOEXCEPT;
+  bool operator==(ImportThunkIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return impl_ == other.impl_;
+  }
+  
+  bool operator!=(ImportThunkIterator const& other) const HADESMEM_NOEXCEPT
+  {
+    return !(*this == other);
+  }
   
 private:
+  struct Impl
+  {
+    explicit Impl(Process const& process, PeFile const& pe_file) 
+      HADESMEM_NOEXCEPT
+      : process_(&process), 
+      pe_file_(&pe_file), 
+      import_thunk_()
+    { }
+
+    Process const* process_;
+    PeFile const* pe_file_;
+    boost::optional<ImportThunk> import_thunk_;
+  };
+
   // Using a shared_ptr to provide shallow copy semantics, as 
   // required by InputIterator.
-  struct Impl;
   std::shared_ptr<Impl> impl_;
 };
 
@@ -69,29 +169,69 @@ public:
   typedef ImportThunkIterator const_iterator;
   
   explicit ImportThunkList(Process const& process, PeFile const& pe_file, 
-    DWORD first_thunk);
+    DWORD first_thunk)
+    : process_(&process), 
+    pe_file_(&pe_file), 
+    first_thunk_(first_thunk)
+  { }
 
-  ImportThunkList(ImportThunkList const& other);
+  ImportThunkList(ImportThunkList const& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    first_thunk_(other.first_thunk_)
+  { }
 
-  ImportThunkList& operator=(ImportThunkList const& other);
+  ImportThunkList& operator=(ImportThunkList const& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    first_thunk_ = other.first_thunk_;
 
-  ImportThunkList(ImportThunkList&& other) HADESMEM_NOEXCEPT;
+    return *this;
+  }
 
-  ImportThunkList& operator=(ImportThunkList&& other) HADESMEM_NOEXCEPT;
+  ImportThunkList(ImportThunkList&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    pe_file_(other.pe_file_), 
+    first_thunk_(other.first_thunk_)
+  { }
 
-  ~ImportThunkList();
+  ImportThunkList& operator=(ImportThunkList&& other) HADESMEM_NOEXCEPT
+  {
+    process_ = other.process_;
+    pe_file_ = other.pe_file_;
+    first_thunk_ = other.first_thunk_;
+
+    return *this;
+  }
+
+  ~ImportThunkList() HADESMEM_NOEXCEPT
+  { }
   
-  iterator begin();
+  iterator begin()
+  {
+    return ImportThunkList::iterator(*process_, *pe_file_, first_thunk_);
+  }
   
-  const_iterator begin() const;
+  const_iterator begin() const
+  {
+    return ImportThunkList::iterator(*process_, *pe_file_, first_thunk_);
+  }
   
-  iterator end() HADESMEM_NOEXCEPT;
+  iterator end() HADESMEM_NOEXCEPT
+  {
+    return ImportThunkList::iterator();
+  }
   
-  const_iterator end() const HADESMEM_NOEXCEPT;
+  const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return ImportThunkList::iterator();
+  }
   
 private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Process const* process_;
+  PeFile const* pe_file_;
+  DWORD first_thunk_;
 };
 
 }
