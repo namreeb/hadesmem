@@ -89,7 +89,7 @@ struct ProcessMitigationPolicy
 
 // Disables the user-mode callback exception filter present in 64-bit versions 
 // of Windows. Microsoft Support article KB976038 (http://bit.ly/8yZMvw).
-void DisableUserModeCallbackExceptionFilter()
+inline void DisableUserModeCallbackExceptionFilter()
 {
   HMODULE const k32_mod = ::GetModuleHandle(L"kernel32");
   if (!k32_mod)
@@ -120,7 +120,7 @@ void DisableUserModeCallbackExceptionFilter()
 }
 
 // Enables CRT debug flags for memory leak detection in debug builds.
-void EnableCrtDebugFlags()
+inline void EnableCrtDebugFlags()
 {
   // Only enable in debug mode.
 #if defined(_DEBUG)
@@ -137,7 +137,7 @@ void EnableCrtDebugFlags()
 // Forces termination of the application if heap corruption is detected.
 // Recommended as per Microsoft article "Windows ISV Software Security 
 // Defenses" (http://bit.ly/i5yLdM).
-void EnableTerminationOnHeapCorruption()
+inline void EnableTerminationOnHeapCorruption()
 {
   if (!::HeapSetInformation(::GetProcessHeap(), 
     HeapEnableTerminationOnCorruption, nullptr, 0))
@@ -151,7 +151,7 @@ void EnableTerminationOnHeapCorruption()
 
 // Custom 'bottom up randomization' implementation similar to that of EMET.
 // Modified version of code by Didier Stevens (http://bit.ly/qUhc9K).
-void EnableBottomUpRand()
+inline void EnableBottomUpRand()
 {
   // This is a defense-in-depth measure, so the time should be sufficient 
   // entropy in all but the rarest cases.
@@ -174,7 +174,7 @@ void EnableBottomUpRand()
 
 // Enables extra process mitigation policies. Currently hardens ASLR and 
 // handle policies.
-void EnableMitigationPolicies()
+inline void EnableMitigationPolicies()
 {
   HMODULE const kernel32_mod = ::GetModuleHandle(L"kernel32.dll");
   if (!kernel32_mod)
@@ -260,7 +260,7 @@ void EnableMitigationPolicies()
 
 // Sets the global locale, and imbues all existing static streams with the 
 // new locale (including 3rd party libraries like Boost.Filesystem).
-std::locale ImbueAll(std::locale const& locale)
+inline std::locale ImbueAll(std::locale const& locale)
 {
   auto const old_loc = std::locale::global(locale);
 
@@ -288,7 +288,7 @@ std::locale ImbueAll(std::locale const& locale)
 
 // Generates a new UTF-8 based locale object, sets the global locale, and 
 // imbues all known static streams.
-std::locale ImbueAllDefault()
+inline std::locale ImbueAllDefault()
 {
   // Use the Windows API backend to (hopefully) provide consistent behaviour 
   // across different compilers and standard library implementations (as 
@@ -307,7 +307,7 @@ std::locale ImbueAllDefault()
 }
 
 // Perform all initialization tasks.
-void InitializeAll()
+inline void InitializeAll()
 {
   hadesmem::detail::DisableUserModeCallbackExceptionFilter();
   hadesmem::detail::EnableCrtDebugFlags();
