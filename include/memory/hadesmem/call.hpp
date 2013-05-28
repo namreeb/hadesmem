@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstring>
 #include <utility>
+#include <iterator>
 #include <algorithm>
 #include <type_traits>
 
@@ -897,11 +898,15 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 
 }
 
-inline std::vector<CallResultRaw> CallMulti(Process const& process, 
+template <typename OutputIterator>
+inline void CallMulti(Process const& process, 
   std::vector<FnPtr> const& addresses, 
   std::vector<CallConv> const& call_convs, 
-  std::vector<std::vector<CallArg>> const& args_full) 
+  std::vector<std::vector<CallArg>> const& args_full, 
+  OutputIterator results) 
 {
+  // TODO: Iterator checks for type and category.
+
   HADESMEM_ASSERT(addresses.size() == call_convs.size() && 
     addresses.size() == args_full.size());
 
@@ -942,14 +947,14 @@ inline std::vector<CallResultRaw> CallMulti(Process const& process,
   std::vector<CallResultRaw> return_vals;
   return_vals.reserve(addresses.size());
   
+  // TODO: Ensure that the documentation covers the exception guarantee for 
+  // what happens if we throw while writing to the output iterator.
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
-    std::back_inserter(return_vals), 
+    results, 
     [] (detail::CallResultRemote const& r)
     {
       return static_cast<CallResultRaw>(r);
     });
-
-  return return_vals;
 }
 
 inline CallResultRaw Call(Process const& process, 
@@ -963,7 +968,11 @@ inline CallResultRaw Call(Process const& process,
   call_convs.push_back(call_conv);
   std::vector<std::vector<CallArg>> args_full;
   args_full.push_back(args);
-  return CallMulti(process, addresses, call_convs, args_full)[0];
+  std::vector<CallResultRaw> results;
+  CallMulti(process, addresses, call_convs, args_full, 
+    std::back_inserter(results));
+  BOOST_ASSERT(results.size() == 1);
+  return results.front();
 }
 
 namespace detail
@@ -1170,9 +1179,12 @@ public:
 
 #endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
   
-  std::vector<CallResultRaw> Call() const
+  template <typename OutputIterator>
+  void Call(OutputIterator results) const
   {
-    return CallMulti(*process_, addresses_, call_convs_, args_);
+    // TODO: Iterator checks for type and category.
+
+    CallMulti(*process_, addresses_, call_convs_, args_, results);
   }
   
 private:

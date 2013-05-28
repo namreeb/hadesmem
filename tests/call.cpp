@@ -421,7 +421,8 @@ BOOST_AUTO_TEST_CASE(call)
     &MultiThreadSet), hadesmem::CallConv::kDefault, 0x1234UL);
   multi_call.Add<DWORD ()>(reinterpret_cast<hadesmem::FnPtr>(
     &MultiThreadGet), hadesmem::CallConv::kDefault);
-  std::vector<hadesmem::CallResultRaw> multi_call_ret = multi_call.Call();
+  std::vector<hadesmem::CallResultRaw> multi_call_ret;
+  multi_call.Call(std::back_inserter(multi_call_ret));
   BOOST_CHECK_EQUAL(multi_call_ret[0].GetLastError(), 
     0x1337UL);
   BOOST_CHECK_EQUAL(multi_call_ret[1].GetReturnValue<DWORD_PTR>(), 
