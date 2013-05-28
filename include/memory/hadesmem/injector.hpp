@@ -155,7 +155,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
 {
   HADESMEM_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
 
-   boost::filesystem::path path_real(path);
+  boost::filesystem::path path_real(path);
 
   bool const path_resolution = !!(flags & InjectFlags::kPathResolution);
 
