@@ -25,8 +25,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 template <typename T>
 T Read(Process const& process, PVOID address)
 {

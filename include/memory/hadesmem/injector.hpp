@@ -135,9 +135,6 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
 
 }
 
-template <typename T>
-class CallResult;
-
 struct InjectFlags
 {
   enum

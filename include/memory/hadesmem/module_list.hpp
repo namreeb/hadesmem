@@ -24,10 +24,6 @@
 namespace hadesmem
 {
 
-class Process;
-
-class Module;
-
 // ModuleIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>

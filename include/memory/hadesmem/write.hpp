@@ -19,8 +19,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 template <typename T>
 void Write(Process const& process, PVOID address, T const& data)
 {

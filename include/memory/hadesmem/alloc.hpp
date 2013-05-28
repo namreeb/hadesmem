@@ -16,8 +16,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 inline PVOID Alloc(Process const& process, SIZE_T size)
 {
   PVOID const address = ::VirtualAllocEx(process.GetHandle(), nullptr, 

@@ -13,8 +13,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 inline bool CanRead(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);

@@ -23,8 +23,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 class Region
 {
 public:

@@ -12,8 +12,6 @@
 namespace hadesmem
 {
 
-class Process;
-
 namespace detail
 {
 
