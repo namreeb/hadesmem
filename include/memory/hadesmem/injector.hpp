@@ -41,6 +41,8 @@ namespace detail
 inline FARPROC GetProcAddressInternal(Process const& process, 
   Module const& module, std::string const& export_name)
 {
+  HADESMEM_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
+
   PeFile const pe_file(process, module.GetHandle(), PeFileType::Image);
   
   ExportList const exports(process, pe_file);
@@ -56,7 +58,15 @@ inline FARPROC GetProcAddressInternal(Process const& process,
           e.GetForwarderFunction());
       }
 
-      return reinterpret_cast<FARPROC>(e.GetVa());
+      // TODO: This invokes undefined behavior. Fix this.
+      union Conv
+      {
+        FARPROC pfn;
+        void* va;
+      };
+      Conv conv;
+      conv.va = e.GetVa();
+      return conv.pfn;
     }
   }
 
