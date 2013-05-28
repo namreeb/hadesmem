@@ -309,7 +309,8 @@ void DumpTls(hadesmem::Process const& process,
     << tls_dir->GetAddressOfCallBacks() << std::dec << "\n";
   if (tls_dir->GetAddressOfCallBacks())
   {
-    auto const callbacks = tls_dir->GetCallbacks();
+    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
+    tls_dir->GetCallbacks(std::back_inserter(callbacks));
     for (auto const c : callbacks)
     {
       std::wcout << "\t\tCallback: " << std::hex 

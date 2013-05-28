@@ -19,8 +19,11 @@
 namespace hadesmem
 {
 
+// TODO: Write overloadsd which take iterators (and don't assume that a 
+// contiguous block of memory has been passed in).
+
 template <typename T>
-void Write(Process const& process, PVOID address, T const& data)
+inline void Write(Process const& process, PVOID address, T const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
@@ -30,7 +33,7 @@ void Write(Process const& process, PVOID address, T const& data)
 }
 
 template <typename T>
-void Write(Process const& process, PVOID address, T const* ptr, 
+inline void Write(Process const& process, PVOID address, T const* ptr, 
   std::size_t count)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
@@ -45,7 +48,7 @@ void Write(Process const& process, PVOID address, T const* ptr,
 }
 
 template <typename T>
-void Write(Process const& process, PVOID address, T const* beg, 
+inline void Write(Process const& process, PVOID address, T const* beg, 
   T const* end)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
@@ -61,7 +64,7 @@ void Write(Process const& process, PVOID address, T const* beg,
 
 // NOTE: This will not write a null terminator.
 template <typename T>
-void WriteString(Process const& process, PVOID address, T const* const beg, 
+inline void WriteString(Process const& process, PVOID address, T const* const beg, 
   T const* const end)
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
@@ -76,7 +79,7 @@ void WriteString(Process const& process, PVOID address, T const* const beg,
 }
 
 template <typename T>
-void WriteString(Process const& process, PVOID address, 
+inline void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
@@ -88,7 +91,8 @@ void WriteString(Process const& process, PVOID address,
 }
 
 template <typename T>
-void WriteString(Process const& process, PVOID address, T const* const str)
+inline void WriteString(Process const& process, PVOID address, 
+  T const* const str)
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
   
@@ -99,7 +103,7 @@ void WriteString(Process const& process, PVOID address, T const* const str)
 }
 
 template <typename T>
-void WriteVector(Process const& process, PVOID address, 
+inline void WriteVector(Process const& process, PVOID address, 
   std::vector<T> const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);

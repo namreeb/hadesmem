@@ -93,7 +93,8 @@ BOOST_AUTO_TEST_CASE(tls_dir)
     cur_tls_dir->SetAddressOfCallBacks(cur_tls_dir->GetAddressOfCallBacks());
     cur_tls_dir->SetSizeOfZeroFill(cur_tls_dir->GetSizeOfZeroFill());
     cur_tls_dir->SetCharacteristics(cur_tls_dir->GetCharacteristics());
-    cur_tls_dir->GetCallbacks();
+    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
+    cur_tls_dir->GetCallbacks(std::back_inserter(callbacks));
 
     auto const tls_dir_raw_new = hadesmem::Read<IMAGE_TLS_DIRECTORY>(process, 
       cur_tls_dir->GetBase());

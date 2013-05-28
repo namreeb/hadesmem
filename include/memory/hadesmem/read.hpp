@@ -26,7 +26,7 @@ namespace hadesmem
 {
 
 template <typename T>
-T Read(Process const& process, PVOID address)
+inline T Read(Process const& process, PVOID address)
 {
   HADESMEM_ASSERT(address != nullptr);
   
@@ -34,7 +34,7 @@ T Read(Process const& process, PVOID address)
 }
 
 template <typename T, std::size_t N>
-std::array<T, N> Read(Process const& process, PVOID address)
+inline std::array<T, N> Read(Process const& process, PVOID address)
 {
   HADESMEM_ASSERT(address != nullptr);
 
@@ -92,7 +92,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 }
 
 template <typename T>
-std::vector<T> ReadVector(Process const& process, PVOID address, 
+inline std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t count)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);

@@ -119,10 +119,11 @@ public:
   // empty container, or simply ignore it and consider it a precondition 
   // violation. Update dumper afterwards to reflect decision. (Currently it 
   // is manually checking AddressOfCallbacks.)
-  std::vector<PIMAGE_TLS_CALLBACK> GetCallbacks() const
+  template <typename OutputIterator>
+  void GetCallbacks(OutputIterator callbacks) const
   {
-    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
-
+    // TODO: Iterator checks for type and category.
+    
     // TODO: Refactor this into a new GetRuntimeBase/GetImageBase/etc 
     // API (names just ideas, still not decided on what to call it).
     ULONG_PTR image_base = 0;
@@ -146,11 +147,10 @@ public:
     {
       DWORD_PTR const callback_offset = reinterpret_cast<DWORD_PTR>(
         callback) - image_base;
-      callbacks.push_back(reinterpret_cast<PIMAGE_TLS_CALLBACK>(
-        callback_offset));
+      *callbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK>(
+        callback_offset);
+      ++callbacks;
     }
-  
-    return callbacks;
   }
 
   DWORD GetSizeOfZeroFill() const
