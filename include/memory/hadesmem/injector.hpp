@@ -34,7 +34,7 @@ namespace hadesmem
 namespace detail
 {
 
-void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
+inline void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
   bool force)
 {
   // Unless we're told otherwise, don't quote unless we actually
@@ -86,7 +86,7 @@ void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
   }
 }
 
-void ForceLdrInitializeThunk(DWORD proc_id)
+inline void ForceLdrInitializeThunk(DWORD proc_id)
 {
   Process const process(proc_id);
 
@@ -150,7 +150,7 @@ struct InjectFlags
   };
 };
 
-HMODULE InjectDll(Process const& process, std::wstring const& path, 
+inline HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
 {
   HADESMEM_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
@@ -231,7 +231,7 @@ void FreeDll(Process const& process, HMODULE module)
 }
 
 // TODO: Configurable timeout.
-CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
+inline CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
   std::string const& export_name)
 {
   Module const module_remote(process, module);
