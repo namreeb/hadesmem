@@ -75,8 +75,13 @@ BOOST_AUTO_TEST_CASE(injector)
   if (GetModuleHandle(L"d3d9.dll") == nullptr)
   {
     hadesmem::CreateAndInjectData const inject_data = 
-      hadesmem::CreateAndInject(hadesmem::detail::GetSelfPath(), L"", 
-      std::vector<std::wstring>(), L"d3d9.dll", "", 
+      hadesmem::CreateAndInject(
+      hadesmem::detail::GetSelfPath(), 
+      L"", 
+      std::vector<std::wstring>::iterator(), 
+      std::vector<std::wstring>::iterator(), 
+      L"d3d9.dll", 
+      "", 
       hadesmem::InjectFlags::kNone);
     BOOL const terminated = ::TerminateProcess(
       inject_data.GetProcess().GetHandle(), 0);

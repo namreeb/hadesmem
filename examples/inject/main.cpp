@@ -175,8 +175,14 @@ int main(int argc, char* /*argv*/[])
       std::string const export_name = var_map.count("export") ? 
         var_map["export"].as<std::string>() : "";
       hadesmem::CreateAndInjectData const inject_data = 
-        hadesmem::CreateAndInject(exe_path, L"", std::vector<std::wstring>(), 
-        module_path, export_name, flags);
+        hadesmem::CreateAndInject(
+        exe_path, 
+        L"", 
+        std::vector<std::wstring>::iterator(), 
+        std::vector<std::wstring>::iterator(), 
+        module_path, 
+        export_name, 
+        flags);
 
       std::wcout << "\nSuccessfully created target.\n";
       std::wcout << "Process ID: " << inject_data.GetProcess() << ".\n";

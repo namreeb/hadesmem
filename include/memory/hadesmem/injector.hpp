@@ -31,6 +31,7 @@
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {
@@ -355,19 +356,23 @@ private:
   DWORD export_last_error_;
 };
 
+template <typename ArgsIter>
 inline CreateAndInjectData CreateAndInject(
   std::wstring const& path, 
   std::wstring const& work_dir, 
-  std::vector<std::wstring> const& args, 
+  ArgsIter args_beg, 
+  ArgsIter args_end, 
   std::wstring const& module, 
   std::string const& export_name, 
   int flags)
 {
+  HADESMEM_STATIC_ASSERT(std::is_same<std::wstring, typename std::iterator_traits<ArgsIter>::value_type>::value);
+
   boost::filesystem::path const path_real(path);
   
   std::wstring command_line;
   detail::ArgvQuote(&command_line, path_real.native(), false);
-  std::for_each(std::begin(args), std::end(args), 
+  std::for_each(args_beg, args_end, 
     [&] (std::wstring const& arg) 
   {
     command_line += L' ';
