@@ -213,7 +213,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   return load_library_ret.GetReturnValue();
 }
 
-void FreeDll(Process const& process, HMODULE module)
+inline void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(process, L"kernel32.dll");
   auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
