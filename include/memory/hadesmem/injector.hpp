@@ -412,7 +412,7 @@ inline CreateAndInjectData CreateAndInject(
       export_ret = CallExport(process, remote_module, export_name);
     }
 
-    if (flags & InjectFlags::kKeepSuspended)
+    if (!(flags & InjectFlags::kKeepSuspended))
     {
       if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
       {

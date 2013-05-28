@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(injector)
   hadesmem::FreeDll(process, kernel32_mod_new_2);
 
   // Todo: Test kPathResolution flag.
-
+  // TODO: Test KKeepSuspended flag.
   // TODO: Test export calling in CreateAndInject.
   // TODO: Test work dir, args, etc in CreateAndInject.
   // TODO: Test kAddToSearchOrder flag.
