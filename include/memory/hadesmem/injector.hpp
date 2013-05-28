@@ -12,6 +12,7 @@
 #include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -24,8 +25,11 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/pelib/export.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
@@ -33,6 +37,31 @@ namespace hadesmem
   
 namespace detail
 {
+
+inline FARPROC GetProcAddressInternal(Process const& process, 
+  Module const& module, std::string const& export_name)
+{
+  PeFile const pe_file(process, module.GetHandle(), PeFileType::Image);
+  
+  ExportList const exports(process, pe_file);
+  for (auto const& e : exports)
+  {
+    if (e.ByName() && e.GetName() == export_name)
+    {
+      if (e.IsForwarded())
+      {
+        Module const forwarder_module(process, 
+          boost::locale::conv::utf_to_utf<wchar_t>(e.GetForwarderModule()));
+        return GetProcAddressInternal(process, forwarder_module, 
+          e.GetForwarderFunction());
+      }
+
+      return reinterpret_cast<FARPROC>(e.GetVa());
+    }
+  }
+
+  return nullptr;
+}
 
 inline void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
   bool force)
@@ -192,7 +221,8 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   WriteString(process, lib_file_remote.GetBase(), path_string);
 
   Module const kernel32_mod(process, L"kernel32.dll");
-  auto const load_library = FindProcedure(kernel32_mod, "LoadLibraryExW");
+  auto const load_library = detail::GetProcAddressInternal(process, 
+    kernel32_mod, "LoadLibraryExW");
 
   typedef HMODULE (LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
     DWORD dwFlags);
@@ -203,7 +233,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Call to LoadLibraryW in remote process failed.") << 
+      ErrorString("Call to LoadLibraryExW in remote process failed.") << 
       ErrorCodeWinLast(load_library_ret.GetLastError()));
   }
 
@@ -213,7 +243,8 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
 inline void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(process, L"kernel32.dll");
-  auto const free_library = FindProcedure(kernel32_mod, "FreeLibrary");
+  auto const free_library = detail::GetProcAddressInternal(process, 
+    kernel32_mod, "FreeLibrary");
 
   typedef BOOL (FreeLibraryFuncT)(HMODULE hModule);
   auto const free_library_ret = 
