@@ -12,12 +12,6 @@ use-project /asmjit
     src/asmjit
   ;
   
-# Use HadesMem library.
-use-project /memory
-  :
-    src/memory
-  ;
-
 # Use HadesMem tests.
 use-project /tests
   :
@@ -30,7 +24,7 @@ use-project /examples
     examples
   ;
 
-project
+project memory
   :
     requirements
     
@@ -60,7 +54,7 @@ project
     # Compile for x86/x64, with static linking to the multi-threaded runtime.
     <architecture>x86
     <threading>multi
-    <runtime-link>static
+    <runtime-link>shared
     
     # Disable warning relating to the length of decorated names caused by 
     # some Boost components. This warning can safely be ignored as it does 
@@ -92,9 +86,50 @@ project
     # Output to 'bin' directory.
     build-dir bin
   ;
+  
+lib advapi32
+  :
+  :
+    <name>advapi32
+  ;
+  
+lib shell32
+  :
+  :
+    <name>shell32
+  ;
 
-# Build HadesMem library.
-build-project src/memory
+lib shlwapi
+  :
+  :
+    <name>shlwapi
+  ;
+
+lib user32
+  :
+  :
+    <name>user32
+  ;
+  
+alias memory
+  :
+  :
+  :
+  :
+    <library>advapi32
+    <library>shell32
+    <library>shlwapi
+    <library>user32
+	
+    <library>/boost//headers
+    <library>/boost//locale/<link>static
+    <library>/boost//exception/<link>static
+    <library>/boost//filesystem/<link>static
+	
+    <library>src/asmjit
+
+    <include>"./include/memory"
+    <include>"./src/asmjit"
   ;
 
 # Build HadesMem tests.
@@ -108,8 +143,7 @@ build-project examples
 # Install to 'dist' directory.
 install dist
   :
-    # Install library and examples.
-    src/memory
+    # Install examples.
     examples
   :
     # Give each toolset, variant, and architecture combination its own 
@@ -146,5 +180,5 @@ install dist
 # Allow easy consumption by 3rd parties.
 alias hadesmem
   :
-    src/memory//memory
+    memory
   ;

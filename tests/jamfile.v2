@@ -2,7 +2,7 @@
 
 import testing
   ;
-
+  
 project
   :
     requirements
@@ -18,11 +18,12 @@ project
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
     
-    <library>/memory//memory
+	
     <library>/boost//thread/<link>static
     <library>/boost//date_time/<link>static
-    <library>/boost//filesystem/<link>static
     <library>/boost//unit_test_framework/<link>static
+
+    <library>/memory//memory
   ;
 
 run process.cpp

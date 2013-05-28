@@ -14,39 +14,29 @@ project
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -pedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
+    
+    <library>/memory//memory
   ;
 
 exe dump
   :
     [ glob dump/*.cpp ]
-    /memory//memory
-    /boost//locale/<link>static
-    /boost//filesystem/<link>static
     /boost//program_options/<link>static
   ;
   
 exe inject
   :
     [ glob inject/*.cpp ]
-    /memory//memory
-    /boost//locale/<link>static
-    /boost//filesystem/<link>static
     /boost//program_options/<link>static
   ;
 
 lib injecttestdep
   :
     [ glob injecttestdep/*.cpp ]
-    /memory//memory
-    /boost//locale/<link>static
-    /boost//filesystem/<link>static
   ;
 
 lib injecttest
   :
     [ glob injecttest/*.cpp ]
 	injecttestdep
-    /memory//memory
-    /boost//locale/<link>static
-    /boost//filesystem/<link>static
   ;
