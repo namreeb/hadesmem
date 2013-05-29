@@ -411,10 +411,14 @@ private:
 
 #if defined(HADESMEM_ARCH_X86)
 
+template <typename AddressesForwardIterator, 
+  typename ConvForwardIterator, 
+  typename ArgsForwardIterator>
 inline void GenerateCallCode32(AsmJit::X86Assembler* assembler, 
-  std::vector<FnPtr> const& addresses, 
-  std::vector<CallConv> const& call_convs, 
-  std::vector<std::vector<CallArg>> const& args_full, 
+  AddressesForwardIterator addresses_beg, 
+  AddressesForwardIterator addresses_end, 
+  ConvForwardIterator call_convs_beg, 
+  ArgsForwardIterator args_full_beg, 
   DWORD_PTR get_last_error, 
   DWORD_PTR set_last_error, 
   DWORD_PTR is_debugger_present, 
@@ -440,15 +444,19 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   assembler->push(AsmJit::imm(0x0));
   assembler->mov(AsmJit::eax, AsmJit::uimm(set_last_error));
   assembler->call(AsmJit::eax);
-
-  for (std::size_t i = 0; i < addresses.size(); ++i)
+  
+  for (std::size_t i = 0; addresses_beg != addresses_end; ++addresses_beg, 
+    ++call_convs_beg, ++args_full_beg, ++i)
   {
-    FnPtr address = addresses[i];
-    CallConv call_conv = call_convs[i];
-    std::vector<CallArg> const& args = args_full[i];
+    FnPtr address = *addresses_beg;
+    CallConv call_conv = *call_convs_beg;
+    auto const& args = *args_full_beg;
+    // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
     ArgVisitor32 arg_visitor(assembler, num_args, call_conv);
+    // TODO: Make this code more generic and remove the dependency on 
+    // rbegin() and rend().
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
@@ -503,10 +511,14 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
 #if defined(HADESMEM_ARCH_X64)
 
+template <typename AddressesForwardIterator, 
+  typename ConvForwardIterator, 
+  typename ArgsForwardIterator>
 inline void GenerateCallCode64(AsmJit::X86Assembler* assembler, 
-  std::vector<FnPtr> const& addresses, 
-  std::vector<CallConv> const& call_convs, 
-  std::vector<std::vector<CallArg>> const& args_full, 
+  AddressesForwardIterator addresses_beg, 
+  AddressesForwardIterator addresses_end, 
+  ConvForwardIterator call_convs_beg, 
+  ArgsForwardIterator args_full_beg, 
   DWORD_PTR get_last_error, 
   DWORD_PTR set_last_error, 
   DWORD_PTR is_debugger_present, 
@@ -514,13 +526,20 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   PVOID return_values_remote)
 {
   AsmJit::Label label_nodebug(assembler->newLabel());
-
-  auto const max_args_list = std::max_element(std::begin(args_full), 
-    std::end(args_full), 
+  
+  std::size_t const num_addresses = std::distance(addresses_beg, 
+    addresses_end);
+  
+  // TODO: Make this code more generic and remove the dependency on 
+  // std::vector<CallArg>.
+  auto const max_args_list = std::max_element(args_full_beg, 
+    args_full_beg + num_addresses, 
     [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
   {
     return args1.size() < args2.size();
   });
+  // TODO: Make this code more generic and remove the dependency on 
+  // size().
   std::size_t const max_num_args = max_args_list->size();
 
   // TODO: Comment/document this properly.
@@ -547,19 +566,23 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   assembler->mov(AsmJit::rcx, 0);
   assembler->mov(AsmJit::rax, set_last_error);
   assembler->call(AsmJit::rax);
-
-  for (std::size_t i = 0; i < addresses.size(); ++i)
+  
+  for (std::size_t i = 0; addresses_beg != addresses_end; ++addresses_beg, 
+    ++call_convs_beg, ++args_full_beg, ++i)
   {
-    FnPtr address = addresses[i];
-    std::vector<CallArg> const& args = args_full[i];
+    FnPtr address = *addresses_beg;
+    auto const& args = *args_full_beg;
+    // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
-    (void)call_convs;
-    HADESMEM_ASSERT(call_convs[i] == CallConv::kDefault || 
-      call_convs[i] == CallConv::kWinApi || 
-      call_convs[i] == CallConv::kX64);
+    CallConv call_conv = *call_convs_beg;
+    HADESMEM_ASSERT(call_conv == CallConv::kDefault || 
+      call_conv == CallConv::kWinApi || 
+      call_conv == CallConv::kX64);
 
     ArgVisitor64 arg_visitor(assembler, num_args);
+    // TODO: Make this code more generic and remove the dependency on 
+    // rbegin() and rend().
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
@@ -600,11 +623,15 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 }
 
 #endif // #if defined(HADESMEM_ARCH_X64)
-
+  
+template <typename AddressesForwardIterator, 
+  typename ConvForwardIterator, 
+  typename ArgsForwardIterator>
 inline Allocator GenerateCallCode(Process const& process, 
-  std::vector<FnPtr> const& addresses, 
-  std::vector<CallConv> const& call_convs, 
-  std::vector<std::vector<CallArg>> const& args_full, 
+  AddressesForwardIterator addresses_beg, 
+  AddressesForwardIterator addresses_end, 
+  ConvForwardIterator call_convs_beg, 
+  ArgsForwardIterator args_full_beg, 
   PVOID return_values_remote)
 {
   Module const kernel32(process, L"kernel32.dll");
@@ -620,12 +647,24 @@ inline Allocator GenerateCallCode(Process const& process,
   AsmJit::X86Assembler assembler;
   
 #if defined(HADESMEM_ARCH_X64)
-  GenerateCallCode64(&assembler, addresses, call_convs, args_full, 
-    get_last_error, set_last_error, is_debugger_present, debug_break, 
+  GenerateCallCode64(&assembler, 
+    addresses_beg, addresses_end, 
+    call_convs_beg, 
+    args_full_beg, 
+    get_last_error, 
+    set_last_error, 
+    is_debugger_present, 
+    debug_break, 
     return_values_remote);
 #elif defined(HADESMEM_ARCH_X86)
-  GenerateCallCode32(&assembler, addresses, call_convs, args_full, 
-    get_last_error, set_last_error, is_debugger_present, debug_break, 
+  GenerateCallCode32(&assembler, 
+    addresses_beg, addresses_end, 
+    call_convs_beg, 
+    args_full_beg, 
+    get_last_error, 
+    set_last_error, 
+    is_debugger_present, 
+    debug_break, 
     return_values_remote);
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -898,23 +937,32 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 
 }
 
-template <typename OutputIterator>
+template <typename AddressesForwardIterator, 
+  typename ConvForwardIterator, 
+  typename ArgsForwardIterator, 
+  typename ResultsOutputIterator>
 inline void CallMulti(Process const& process, 
-  std::vector<FnPtr> const& addresses, 
-  std::vector<CallConv> const& call_convs, 
-  std::vector<std::vector<CallArg>> const& args_full, 
-  OutputIterator results) 
+  AddressesForwardIterator addresses_beg, 
+  AddressesForwardIterator addresses_end, 
+  ConvForwardIterator call_convs_beg, 
+  ArgsForwardIterator args_full_beg, 
+  ResultsOutputIterator results)
 {
   // TODO: Iterator checks for type and category.
 
-  HADESMEM_ASSERT(addresses.size() == call_convs.size() && 
-    addresses.size() == args_full.size());
+  // TODO: Fix this cast, it should not be necessary.
+  // TODO: Perform overflow checking.
+  std::size_t const num_addresses = static_cast<std::size_t>(std::distance(
+    addresses_beg, addresses_end));
 
   Allocator const return_values_remote(process, 
-    sizeof(detail::CallResultRemote) * addresses.size());
+    sizeof(detail::CallResultRemote) * num_addresses);
 
-  Allocator const code_remote(detail::GenerateCallCode(process, addresses, 
-    call_convs, args_full, return_values_remote.GetBase()));
+  Allocator const code_remote(detail::GenerateCallCode(process, 
+    addresses_beg, addresses_end, 
+    call_convs_beg, 
+    args_full_beg, 
+    return_values_remote.GetBase()));
   LPTHREAD_START_ROUTINE code_remote_pfn = 
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
@@ -942,10 +990,10 @@ inline void CallMulti(Process const& process,
 
   std::vector<detail::CallResultRemote> return_vals_remote = 
     ReadVector<detail::CallResultRemote>(process, 
-    return_values_remote.GetBase(), addresses.size());
+    return_values_remote.GetBase(), num_addresses);
   
   std::vector<CallResultRaw> return_vals;
-  return_vals.reserve(addresses.size());
+  return_vals.reserve(num_addresses);
   
   // TODO: Ensure that the documentation covers the exception guarantee for 
   // what happens if we throw while writing to the output iterator.
@@ -957,19 +1005,24 @@ inline void CallMulti(Process const& process,
     });
 }
 
+template <typename ArgsForwardIterator>
 inline CallResultRaw Call(Process const& process, 
   FnPtr address, 
   CallConv call_conv, 
-  std::vector<CallArg> const& args)
+  ArgsForwardIterator args_beg, 
+  ArgsForwardIterator args_end)
 {
   std::vector<FnPtr> addresses;
   addresses.push_back(address);
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
   std::vector<std::vector<CallArg>> args_full;
-  args_full.push_back(args);
+  args_full.push_back(std::vector<CallArg>(args_beg, args_end));
   std::vector<CallResultRaw> results;
-  CallMulti(process, addresses, call_convs, args_full, 
+  CallMulti(process, 
+    std::begin(addresses), std::end(addresses), 
+    std::begin(call_convs), 
+    std::begin(args_full), 
     std::back_inserter(results));
   BOOST_ASSERT(results.size() == 1);
   return results.front();
@@ -983,14 +1036,13 @@ namespace detail
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
-template <typename FuncT, int N, typename T>
-void AddCallArg(std::vector<CallArg>* call_args, T&& arg)
+template <typename FuncT, int N, typename T, typename OutputIterator>
+void AddCallArg(OutputIterator call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
   typedef typename boost::mpl::at_c<FuncArgs, N>::type RealT;
   HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
-  RealT const real_arg(std::forward<T>(arg));
-  call_args->emplace_back(std::move(real_arg));
+  *call_args = static_cast<CallArg>(static_cast<RealT>(std::forward<T>(arg)));
 }
 
 #if defined(HADESMEM_MSVC)
@@ -1004,18 +1056,18 @@ void AddCallArg(std::vector<CallArg>* call_args, T&& arg)
 namespace detail
 {
 
-template <typename FuncT, int N>
-void BuildCallArgs(std::vector<CallArg>* /*call_args*/) HADESMEM_NOEXCEPT
+template <typename FuncT, int N, typename OutputIterator>
+void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_NOEXCEPT
 {
   return;
 }
 
-template <typename FuncT, int N, typename T, typename... Args>
-void BuildCallArgs(std::vector<CallArg>* call_args, T&& arg, 
-  Args&&... args)
+template <typename FuncT, int N, typename T, typename OutputIterator, 
+  typename... Args>
+void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
-  return BuildCallArgs<FuncT, N + 1>(call_args, std::forward<Args>(args)...);
+  return BuildCallArgs<FuncT, N + 1>(++call_args, std::forward<Args>(args)...);
 }
 
 }
@@ -1029,9 +1081,10 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
 
   std::vector<CallArg> call_args;
   call_args.reserve(sizeof...(args));
-  detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
+  detail::BuildCallArgs<FuncT, 0>(std::back_inserter(call_args), args...);
 
-  CallResultRaw const ret = Call(process, address, call_conv, call_args);
+  CallResultRaw const ret = Call(process, address, call_conv, 
+    std::begin(call_args), std::end(call_args));
   typedef typename detail::FuncResult<FuncT>::type ResultT;
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
@@ -1046,7 +1099,8 @@ HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
   HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
 
 #define HADESMEM_CALL_ADD_ARG(n) \
-  detail::AddCallArg<FuncT, n>(&args, std::forward<T##n>(t##n))
+  detail::AddCallArg<FuncT, n>(std::back_inserter(args), \
+    std::forward<T##n>(t##n))
 
 #define HADESMEM_CALL_ADD_ARG_WRAPPER(z, n, unused) \
   HADESMEM_CALL_ADD_ARG(n);
@@ -1060,7 +1114,8 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
   HADESMEM_CHECK_FUNC_ARITY(n);\
   std::vector<CallArg> args;\
   BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
-  CallResultRaw const ret = Call(process, address, call_conv, args);\
+  CallResultRaw const ret = Call(process, address, call_conv, \
+    std::begin(args), std::end(args));\
   typedef typename detail::FuncResult<FuncT>::type ResultT;\
   return detail::CallResultRawToCallResult<ResultT>(ret);\
 }\
@@ -1136,7 +1191,7 @@ public:
 
     std::vector<CallArg> call_args;
     call_args.reserve(sizeof...(args));
-    detail::BuildCallArgs<FuncT, 0>(&call_args, args...);
+    detail::BuildCallArgs<FuncT, 0>(std::back_inserter(call_args), args...);
 
     addresses_.push_back(address);
     call_convs_.push_back(call_conv);
@@ -1184,7 +1239,8 @@ public:
   {
     // TODO: Iterator checks for type and category.
 
-    CallMulti(*process_, addresses_, call_convs_, args_, results);
+    CallMulti(*process_, std::begin(addresses_), std::end(addresses_), 
+      std::begin(call_convs_), std::begin(args_), results);
   }
   
 private:

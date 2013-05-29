@@ -72,14 +72,15 @@ BOOST_AUTO_TEST_CASE(injector)
   // TODO: Enumerate module list and ensure the target module has actually 
   // been loaded (will require a debug flag to not resume the target).
   // Check for presence of d3d9.dll to avoid accidentally creating a fork bomb.
+  std::vector<std::wstring> args;
   if (GetModuleHandle(L"d3d9.dll") == nullptr)
   {
     hadesmem::CreateAndInjectData const inject_data = 
       hadesmem::CreateAndInject(
       hadesmem::detail::GetSelfPath(), 
       L"", 
-      std::vector<std::wstring>::iterator(), 
-      std::vector<std::wstring>::iterator(), 
+      std::begin(args), 
+      std::end(args), 
       L"d3d9.dll", 
       "", 
       hadesmem::InjectFlags::kNone);

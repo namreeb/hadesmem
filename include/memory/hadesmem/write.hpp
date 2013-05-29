@@ -19,7 +19,7 @@
 namespace hadesmem
 {
 
-// TODO: Write overloadsd which take iterators (and don't assume that a 
+// TODO: Write overloads which take iterators (and don't assume that a 
 // contiguous block of memory has been passed in).
 
 template <typename T>

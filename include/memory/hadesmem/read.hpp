@@ -24,6 +24,9 @@
 
 namespace hadesmem
 {
+  
+// TODO: Read overloads which take iterators (and don't assume that a 
+// contiguous block of memory has been passed in).
 
 template <typename T>
 inline T Read(Process const& process, PVOID address)
@@ -36,9 +39,36 @@ inline T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 inline std::array<T, N> Read(Process const& process, PVOID address)
 {
+  HADESMEM_STATIC_ASSERT(N != 0);
+
   HADESMEM_ASSERT(address != nullptr);
 
   return detail::ReadImpl<std::array<T, N>>(process, address);
+}
+
+template <typename T, std::size_t N, typename OutputIterator>
+inline void Read(Process const& process, PVOID address, OutputIterator out)
+{
+  HADESMEM_STATIC_ASSERT(N != 0);
+
+  HADESMEM_ASSERT(address != nullptr);
+
+  auto const data = detail::ReadImpl<std::array<T, N>>(process, address);
+  std::copy(&data[0], &data[0] + N, out);
+}
+
+template <typename T>
+inline std::vector<T> ReadVector(Process const& process, PVOID address, 
+  std::size_t count);
+
+template <typename T, typename OutputIterator>
+inline void Read(Process const& process, PVOID address, std::size_t n, OutputIterator out)
+{
+  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_ASSERT(n != 0);
+
+  auto const data = ReadVector<T>(process, address, n);
+  std::copy(std::begin(data), std::end(data), out);
 }
 
 // TODO: Clean up this function.
