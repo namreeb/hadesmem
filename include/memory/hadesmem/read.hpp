@@ -25,9 +25,6 @@
 namespace hadesmem
 {
   
-// TODO: Read overloads which take iterators (and don't assume that a 
-// contiguous block of memory has been passed in).
-
 template <typename T>
 inline T Read(Process const& process, PVOID address)
 {
@@ -49,6 +46,8 @@ inline std::array<T, N> Read(Process const& process, PVOID address)
 template <typename T, std::size_t N, typename OutputIterator>
 inline void Read(Process const& process, PVOID address, OutputIterator out)
 {
+  // TODO: Iterator checks for type and category.
+
   HADESMEM_STATIC_ASSERT(N != 0);
 
   HADESMEM_ASSERT(address != nullptr);
@@ -72,15 +71,15 @@ inline void Read(Process const& process, PVOID address, std::size_t n, OutputIte
 }
 
 // TODO: Clean up this function.
-template <typename T>
-std::basic_string<T> ReadString(Process const& process, PVOID address, 
-  std::size_t chunk_len = 128)
+template <typename T, typename OutputIterator>
+void ReadStringEx(Process const& process, PVOID address, 
+  OutputIterator data, std::size_t chunk_len)
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
   HADESMEM_ASSERT(chunk_len != 0);
-
-  std::basic_string<T> data;
+  
+  // TODO: Iterator checks for type and category.
 
   for (;;)
   {
@@ -104,12 +103,12 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
       detail::ReadUnchecked(process, cur, buf.data(), buf.size() * sizeof(T));
 
       auto const iter = std::find(std::begin(buf), std::end(buf), T());
-      std::copy(std::begin(buf), iter, std::back_inserter(data));
+      std::copy(std::begin(buf), iter, data);
 
       if (iter != std::end(buf))
       {
         protect_guard.Restore();
-        return data;
+        return;
       }
 
       cur += buf_len;
@@ -119,6 +118,30 @@ std::basic_string<T> ReadString(Process const& process, PVOID address,
 
     protect_guard.Restore();
   }
+}
+
+template <typename T, typename OutputIterator>
+void ReadString(Process const& process, PVOID address, 
+  OutputIterator data)
+{
+  std::size_t const chunk_len = 128;
+  return ReadStringEx<T>(process, address, data, chunk_len);
+}
+
+template <typename T>
+std::basic_string<T> ReadStringEx(Process const& process, PVOID address, 
+  std::size_t chunk_len)
+{
+  std::basic_string<T> data;
+  ReadStringEx<T>(process, address, std::back_inserter(data), chunk_len);
+  return data;
+}
+
+template <typename T>
+std::basic_string<T> ReadString(Process const& process, PVOID address)
+{
+  std::size_t const chunk_len = 128;
+  return ReadStringEx<T>(process, address, chunk_len);
 }
 
 template <typename T>
@@ -134,6 +157,22 @@ inline std::vector<T> ReadVector(Process const& process, PVOID address,
   std::vector<T> data(count);
   detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
   return data;
+}
+
+template <typename T, typename OutputIterator>
+inline void ReadVector(Process const& process, PVOID address, 
+  std::size_t count, OutputIterator out)
+{
+  // TODO: Iterator checks for type and category.
+
+  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
+  
+  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_ASSERT(count != 0);
+
+  std::vector<T> data = ReadVector<T>(process, address, count);
+  std::copy(std::begin(data), std::end(data), out);
 }
 
 }

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(read_string)
 
   std::string test_string_2 = "Narrow test string.";
   char* const test_string_real_2 = &test_string_2[0];
-  auto const new_test_string_2 = hadesmem::ReadString<char>(process, 
+  auto const new_test_string_2 = hadesmem::ReadStringEx<char>(process, 
     test_string_real_2, 1);
   BOOST_CHECK_EQUAL(new_test_string_2, test_string_2);
 }
@@ -120,6 +120,12 @@ BOOST_AUTO_TEST_CASE(read_vector)
   std::vector<int> int_list_read = hadesmem::ReadVector<int>(
     process, &int_list, 10);
   BOOST_CHECK_EQUAL_COLLECTIONS(int_list.cbegin(), int_list.cend(), 
+    int_list_read.cbegin(), int_list_read.cend());
+  
+  std::vector<int> int_list_read_2;
+  hadesmem::ReadVector<int>(process, &int_list, 10, 
+    std::back_inserter(int_list_read_2));
+  BOOST_CHECK_EQUAL_COLLECTIONS(int_list_read_2.cbegin(), int_list_read_2.cend(), 
     int_list_read.cbegin(), int_list_read.cend());
 }
 
