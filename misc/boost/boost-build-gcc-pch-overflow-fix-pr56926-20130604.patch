@@ -1,0 +1,14 @@
+Index: tools/build/v2/tools/pch.jam
+===================================================================
+--- tools/build/v2/tools/pch.jam	(revision 84616)
++++ tools/build/v2/tools/pch.jam	(working copy)
+@@ -75,8 +75,7 @@
+             local r = [ run-pch $(project) $(name)
+               : [ $(property-set).add-raw <define>BOOST_BUILD_PCH_ENABLED ]
+               : $(sources) ] ;
+-            return [ generators.add-usage-requirements $(r)
+-              : <define>BOOST_BUILD_PCH_ENABLED ] ;
++            return [ generators.add-usage-requirements $(r) ] ;
+         }
+     }
+ 
