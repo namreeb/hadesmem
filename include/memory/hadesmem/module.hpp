@@ -210,7 +210,7 @@ private:
 
     MODULEENTRY32 entry;
     ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
+    entry.dwSize = static_cast<DWORD>(sizeof(entry));
 
     for (BOOL more_mods = ::Module32First(snap.GetHandle(), &entry); more_mods; 
       more_mods = ::Module32Next(snap.GetHandle(), &entry)) 

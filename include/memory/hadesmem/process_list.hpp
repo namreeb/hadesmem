@@ -66,7 +66,7 @@ public:
   
     PROCESSENTRY32 entry;
     ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
+    entry.dwSize = static_cast<DWORD>(sizeof(entry));
     if (!::Process32First(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();
@@ -128,7 +128,7 @@ public:
   
     PROCESSENTRY32 entry;
     ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
+    entry.dwSize = static_cast<DWORD>(sizeof(entry));
     if (!::Process32Next(impl_->snap_.GetHandle(), &entry))
     {
       if (::GetLastError() == ERROR_NO_MORE_FILES)

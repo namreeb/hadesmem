@@ -204,7 +204,7 @@ inline void GetSeDebugPrivilege()
   privileges.Privileges[0].Luid = luid;
   privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
   if (!::AdjustTokenPrivileges(process_token.GetHandle(), FALSE, &privileges, 
-    sizeof(privileges), nullptr, nullptr) || 
+    static_cast<DWORD>(sizeof(privileges)), nullptr, nullptr) || 
     ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
   {
     DWORD const last_error = ::GetLastError();

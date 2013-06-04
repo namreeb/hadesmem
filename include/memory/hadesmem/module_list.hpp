@@ -70,7 +70,7 @@ public:
   
     MODULEENTRY32 entry;
     ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
+    entry.dwSize = static_cast<DWORD>(sizeof(entry));
     if (!::Module32First(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();
@@ -131,7 +131,7 @@ public:
   
     MODULEENTRY32 entry;
     ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = sizeof(entry);
+    entry.dwSize = static_cast<DWORD>(sizeof(entry));
     if (!::Module32Next(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();

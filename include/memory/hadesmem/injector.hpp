@@ -398,7 +398,7 @@ inline CreateAndInjectData CreateAndInject(
 
   STARTUPINFO start_info;
   ::ZeroMemory(&start_info, sizeof(start_info));
-  start_info.cb = sizeof(start_info);
+  start_info.cb = static_cast<DWORD>(sizeof(start_info));
   PROCESS_INFORMATION proc_info;
   ::ZeroMemory(&proc_info, sizeof(proc_info));
   if (!::CreateProcess(path_real.c_str(), proc_args.data(), nullptr, nullptr, 
