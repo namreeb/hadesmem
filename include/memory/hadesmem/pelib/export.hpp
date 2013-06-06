@@ -4,16 +4,13 @@
 #pragma once
 
 #include <iosfwd>
+#include <limits>
 #include <memory>
 #include <string>
 #include <cstddef>
 #include <ostream>
+#include <sstream>
 #include <utility>
-
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <boost/lexical_cast.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 #include <winnt.h>
@@ -26,6 +23,7 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
+#include <hadesmem/detail/str_to_num.hpp>
 
 // TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)
@@ -250,7 +248,7 @@ public:
     try
     {
       std::string const forwarder_function(GetForwarderFunction());
-      return boost::lexical_cast<WORD>(forwarder_function.substr(1));
+      return detail::StrToUnsigned<WORD>(forwarder_function.substr(1));
     }
     catch (std::exception const& /*e*/)
     {
