@@ -128,6 +128,7 @@ void ReadString(Process const& process, PVOID address,
   return ReadStringEx<T>(process, address, data, chunk_len);
 }
 
+// TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
 std::basic_string<T> ReadStringEx(Process const& process, PVOID address, 
   std::size_t chunk_len)
@@ -137,6 +138,7 @@ std::basic_string<T> ReadStringEx(Process const& process, PVOID address,
   return data;
 }
 
+// TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
 std::basic_string<T> ReadString(Process const& process, PVOID address)
 {
@@ -144,6 +146,7 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
   return ReadStringEx<T>(process, address, chunk_len);
 }
 
+// TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
 inline std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t count)

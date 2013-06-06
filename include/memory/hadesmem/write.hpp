@@ -78,6 +78,7 @@ inline void WriteString(Process const& process, PVOID address, T const* const be
   Write(process, address, beg, count);
 }
 
+// TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
 inline void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
@@ -102,6 +103,7 @@ inline void WriteString(Process const& process, PVOID address,
   WriteString(process, address, std::basic_string<T>(str));
 }
 
+// TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
 inline void WriteVector(Process const& process, PVOID address, 
   std::vector<T> const& data)
