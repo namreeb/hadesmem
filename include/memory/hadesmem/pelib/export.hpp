@@ -248,7 +248,7 @@ public:
     try
     {
       std::string const forwarder_function(GetForwarderFunction());
-      return detail::StrToUnsigned<WORD>(forwarder_function.substr(1));
+      return detail::StrToNum<WORD>(forwarder_function.substr(1));
     }
     catch (std::exception const& /*e*/)
     {

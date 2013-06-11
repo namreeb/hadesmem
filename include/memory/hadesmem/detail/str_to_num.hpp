@@ -12,6 +12,7 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {
@@ -19,25 +20,19 @@ namespace hadesmem
 namespace detail
 {
 
-// TODO: Better type checking/constraints. Improve genericity.
 template <typename T, typename CharT>
-T StrToUnsigned(std::basic_string<CharT> const& str)
+T StrToNum(std::basic_string<CharT> const& str)
 {
-  // TODO: Remove this workaround once Clang on Windows supports a newer 
-  // STL implementation.
-#if defined(HADESMEM_CLANG)
-  std::basic_ostringstream converter(str);
-  unsigned long long out = 0;
+  HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
+  std::basic_ostringstream<CharT> converter(str);
+  T out = 0;
   if (!converter || (!converter >> out))
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Conversion failed."));
   }
-#else // #if defined(HADESMEM_CLANG)
-  unsigned long long const out = std::stoull(str);
-#endif // #if defined(HADESMEM_CLANG)
   HADESMEM_ASSERT(out < (std::numeric_limits<T>::max)());
-  return static_cast<T>(out);
+  return out;
 }
 
 }
