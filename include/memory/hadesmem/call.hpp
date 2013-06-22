@@ -206,22 +206,19 @@ private:
   }
 
   template <typename T>
-  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
-    -> typename std::enable_if<std::is_same<float, T>::value, T>::type
+  T GetReturnValueIntOrFloatImpl(std::true_type, std::false_type, std::false_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
 
   template <typename T>
-  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
-    -> typename std::enable_if<std::is_same<double, T>::value, T>::type
+  T GetReturnValueIntOrFloatImpl(std::false_type, std::true_type, std::false_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
 
   template <typename T>
-  auto GetReturnValueIntOrFloatImpl() const HADESMEM_NOEXCEPT 
-    -> typename std::enable_if<std::is_integral<T>::value, T>::type
+  T GetReturnValueIntOrFloatImpl(std::false_type, std::false_type, std::true_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
@@ -240,7 +237,8 @@ private:
   {
     HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_floating_point<T>::value);
-    return GetReturnValueIntOrFloatImpl<T>();
+    return GetReturnValueIntOrFloatImpl<T>(std::is_same<T, float>(), 
+      std::is_same<T, double>(), std::is_integral<T>());
   }
 
   DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
