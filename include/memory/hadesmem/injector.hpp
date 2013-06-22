@@ -6,6 +6,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <cstring>
 #include <utility>
 #include <utility>
 #include <iterator>
@@ -59,15 +60,11 @@ inline FARPROC GetProcAddressInternal(Process const& process,
           e.GetForwarderFunction());
       }
 
-      // TODO: This invokes undefined behavior. Fix this.
-      union Conv
-      {
-        FARPROC pfn;
-        void* va;
-      };
-      Conv conv;
-      conv.va = e.GetVa();
-      return conv.pfn;
+      void* va = e.GetVa();
+      FARPROC pfn = nullptr;
+      std::memcpy(&pfn, &va, sizeof(void*));
+
+      return pfn;
     }
   }
 

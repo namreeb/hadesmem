@@ -948,10 +948,11 @@ inline void CallMulti(Process const& process,
 {
   // TODO: Iterator checks for type and category.
 
-  // TODO: Fix this cast, it should not be necessary.
-  // TODO: Perform overflow checking.
-  std::size_t const num_addresses = static_cast<std::size_t>(std::distance(
-    addresses_beg, addresses_end));
+  auto const num_addresses_signed = std::distance(addresses_beg, 
+    addresses_end);
+  HADESMEM_ASSERT(num_addresses_signed > 0);
+  auto const num_addresses = static_cast<typename std::make_unsigned<decltype(
+    num_addresses_signed)>::type>(num_addresses_signed);
 
   Allocator const return_values_remote(process, 
     sizeof(detail::CallResultRemote) * num_addresses);
