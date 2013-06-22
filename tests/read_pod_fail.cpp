@@ -49,4 +49,9 @@ BOOST_AUTO_TEST_CASE(read_pod_fail)
   hadesmem::Process const process(::GetCurrentProcessId());
   
   hadesmem::Read<non_pod_type>(process, nullptr);
+
+  // Need Boost.Test to think it needs to log something to suppress a warning 
+  // that would cause a compile failure and mask a test failure if the above 
+  // code actually did compile.
+  BOOST_CHECK_EQUAL(1, 1);
 }

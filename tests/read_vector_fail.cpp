@@ -43,4 +43,9 @@ BOOST_AUTO_TEST_CASE(read_vector_fail)
   hadesmem::Process const process(::GetCurrentProcessId());
   
   hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr, 1);
+
+  // Need Boost.Test to think it needs to log something to suppress a warning 
+  // that would cause a compile failure and mask a test failure if the above 
+  // code actually did compile.
+  BOOST_CHECK_EQUAL(1, 1);
 }
