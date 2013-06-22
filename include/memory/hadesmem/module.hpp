@@ -183,8 +183,8 @@ private:
 
   void InitializeIf(EntryCallback const& check_func)
   {
-    detail::SmartHandle snap(::CreateToolhelp32Snapshot(
-      TH32CS_SNAPMODULE, process_->GetId()), INVALID_HANDLE_VALUE);
+    detail::SmartSnapHandle snap(::CreateToolhelp32Snapshot(
+      TH32CS_SNAPMODULE, process_->GetId()));
     if (!snap.IsValid())
     {
       if (GetLastError() == ERROR_BAD_LENGTH)

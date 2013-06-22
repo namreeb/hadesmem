@@ -41,16 +41,16 @@ public:
   
     impl_->process_ = &process;
   
-    impl_->snap_ = detail::SmartHandle(
+    impl_->snap_ = detail::SmartSnapHandle(
       ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-      impl_->process_->GetId()), INVALID_HANDLE_VALUE);
+      impl_->process_->GetId()));
     if (!impl_->snap_.IsValid())
     {
       if (::GetLastError() == ERROR_BAD_LENGTH)
       {
-        impl_->snap_ = detail::SmartHandle(
+        impl_->snap_ = detail::SmartSnapHandle(
           ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-          impl_->process_->GetId()), INVALID_HANDLE_VALUE);
+          impl_->process_->GetId()));
         if (!impl_->snap_.IsValid())
         {
           DWORD const last_error = ::GetLastError();
@@ -173,12 +173,12 @@ private:
   {
     Impl() HADESMEM_NOEXCEPT
       : process_(nullptr), 
-      snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
+      snap_(INVALID_HANDLE_VALUE), 
       module_()
     { }
 
     Process const* process_;
-    detail::SmartHandle snap_;
+    detail::SmartSnapHandle snap_;
     boost::optional<Module> module_;
   };
 

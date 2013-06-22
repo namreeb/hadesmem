@@ -16,25 +16,21 @@ namespace detail
 {
 
 // TODO: Turn this into a template like the old EnsureCleanup class template?
-class SmartHandle
+template <typename Policy>
+class SmartHandleImpl
 {
 public:
-  HADESMEM_CONSTEXPR SmartHandle() HADESMEM_NOEXCEPT
-    : handle_(nullptr), 
-    invalid_(nullptr)
+  typedef typename Policy::HandleT HandleT;
+
+  HADESMEM_CONSTEXPR SmartHandleImpl() HADESMEM_NOEXCEPT
+    : handle_(nullptr)
   { }
   
-  explicit HADESMEM_CONSTEXPR SmartHandle(HANDLE handle) HADESMEM_NOEXCEPT
-    : handle_(handle), 
-    invalid_(nullptr)
+  explicit HADESMEM_CONSTEXPR SmartHandleImpl(HandleT handle) HADESMEM_NOEXCEPT
+    : handle_(handle)
   { }
 
-  explicit HADESMEM_CONSTEXPR SmartHandle(HANDLE handle, HANDLE invalid) HADESMEM_NOEXCEPT
-    : handle_(handle), 
-    invalid_(invalid)
-  { }
-
-  SmartHandle& operator=(HANDLE handle) HADESMEM_NOEXCEPT
+  SmartHandleImpl& operator=(HandleT handle) HADESMEM_NOEXCEPT
   {
     CleanupUnchecked();
 
@@ -43,38 +39,35 @@ public:
     return *this;
   }
 
-  SmartHandle(SmartHandle&& other) HADESMEM_NOEXCEPT
-    : handle_(other.handle_), 
-    invalid_(other.invalid_)
+  SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_NOEXCEPT
+    : handle_(other.handle_)
   {
-    other.handle_ = other.invalid_;
+    other.handle_ = GetInvalid();
   }
 
-  SmartHandle& operator=(SmartHandle&& other) HADESMEM_NOEXCEPT
+  SmartHandleImpl& operator=(SmartHandleImpl&& other) HADESMEM_NOEXCEPT
   {
     CleanupUnchecked();
 
     handle_ = other.handle_;
-    other.handle_ = other.invalid_;
-
-    invalid_ = other.invalid_;
+    other.handle_ = other.GetInvalid();
 
     return *this;
   }
 
-  ~SmartHandle() HADESMEM_NOEXCEPT
+  ~SmartHandleImpl() HADESMEM_NOEXCEPT
   {
     CleanupUnchecked();
   }
 
-  HANDLE GetHandle() const HADESMEM_NOEXCEPT
+  HandleT GetHandle() const HADESMEM_NOEXCEPT
   {
     return handle_;
   }
 
-  HANDLE GetInvalid() const HADESMEM_NOEXCEPT
+  HandleT GetInvalid() const HADESMEM_NOEXCEPT
   {
-    return invalid_;
+    return Policy::GetInvalid();
   }
 
   bool IsValid() const HADESMEM_NOEXCEPT
@@ -84,25 +77,26 @@ public:
 
   void Cleanup()
   {
-    if (handle_ == invalid_)
+    if (handle_ == GetInvalid())
     {
       return;
     }
 
-    if (!::CloseHandle(handle_))
+    if (!Policy::Cleanup(handle_))
     {
       DWORD const last_error = ::GetLastError();
       HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("CloseHandle failed.") << 
+        ErrorString("SmartHandle cleanup failed.") << 
         ErrorCodeWinLast(last_error));
     }
 
-    handle_ = invalid_;
+    handle_ = GetInvalid();
   }
 
 private:
-  SmartHandle(SmartHandle const& other) HADESMEM_DELETED_FUNCTION;
-  SmartHandle& operator=(SmartHandle const& other) HADESMEM_DELETED_FUNCTION;
+  SmartHandleImpl(SmartHandleImpl const& other) HADESMEM_DELETED_FUNCTION;
+  SmartHandleImpl& operator=(SmartHandleImpl const& other) 
+    HADESMEM_DELETED_FUNCTION;
 
   void CleanupUnchecked() HADESMEM_NOEXCEPT
   {
@@ -117,13 +111,47 @@ private:
       // WARNING: Handle is leaked if 'Cleanup' fails.
       HADESMEM_ASSERT(boost::diagnostic_information(e).c_str() && false);
 
-      handle_ = invalid_;
+      handle_ = GetInvalid();
     }
   }
 
-  HANDLE handle_;
-  HANDLE invalid_;
+  HandleT handle_;
+  Policy policy_;
 };
+
+struct HandlePolicy
+{
+  typedef HANDLE HandleT;
+
+  static HADESMEM_CONSTEXPR HandleT GetInvalid() HADESMEM_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::CloseHandle(handle) != 0;
+  }
+};
+
+typedef SmartHandleImpl<HandlePolicy> SmartHandle;
+
+struct SnapPolicy
+{
+  typedef HANDLE HandleT;
+
+  static HandleT GetInvalid() HADESMEM_NOEXCEPT
+  {
+    return INVALID_HANDLE_VALUE;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::CloseHandle(handle) != 0;
+  }
+};
+
+typedef SmartHandleImpl<SnapPolicy> SmartSnapHandle;
 
 }
 

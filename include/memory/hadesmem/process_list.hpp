@@ -39,14 +39,14 @@ public:
   {
     HADESMEM_ASSERT(impl_.get());
   
-    impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
-      TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+    impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
+      TH32CS_SNAPPROCESS, 0));
     if (!impl_->snap_.IsValid())
     {
       if (::GetLastError() == ERROR_BAD_LENGTH)
       {
-        impl_->snap_ = detail::SmartHandle(::CreateToolhelp32Snapshot(
-          TH32CS_SNAPPROCESS, 0), INVALID_HANDLE_VALUE);
+        impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
+          TH32CS_SNAPPROCESS, 0));
         if (!impl_->snap_.IsValid())
         {
           DWORD const last_error = ::GetLastError();
@@ -171,11 +171,11 @@ private:
   struct Impl
   {
     explicit Impl() HADESMEM_NOEXCEPT
-      : snap_(INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE), 
+      : snap_(INVALID_HANDLE_VALUE), 
       process_()
     { }
   
-    detail::SmartHandle snap_;
+    detail::SmartSnapHandle snap_;
     boost::optional<ProcessEntry> process_;
   };
 
