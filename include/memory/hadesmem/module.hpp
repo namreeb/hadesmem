@@ -4,13 +4,14 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 #include <ostream>
 #include <utility>
 #include <functional>
-#include <ostream>
-#include <utility>
+
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -20,7 +21,10 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/pelib/export.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
@@ -288,21 +292,41 @@ inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 namespace detail
 {
 
-inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
+inline FARPROC GetProcAddressInternal(Process const& process, 
+  HMODULE const& module, std::string const& export_name)
+{
+  HADESMEM_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
+
+  PeFile const pe_file(process, module, PeFileType::Image);
+  
+  ExportList const exports(process, pe_file);
+  for (auto const& e : exports)
+  {
+    if (e.ByName() && e.GetName() == export_name)
+    {
+      if (e.IsForwarded())
+      {
+        Module const forwarder_module(process, 
+          boost::locale::conv::utf_to_utf<wchar_t>(e.GetForwarderModule()));
+        return GetProcAddressInternal(process, forwarder_module.GetHandle(), 
+          e.GetForwarderFunction());
+      }
+
+      void* va = e.GetVa();
+      FARPROC pfn = nullptr;
+      std::memcpy(&pfn, &va, sizeof(void*));
+
+      return pfn;
+    }
+  }
+
+  return nullptr;
+}
+
+inline FARPROC FindProcedureInternal(Process const& process, 
+  Module const& module, LPCSTR name)
 {
   HADESMEM_ASSERT(name != nullptr);
-
-  // Do not continue if Shim Engine is enabled for local process, 
-  // otherwise it could interfere with the address resolution.
-  // TODO: Work around this with 'manual' export lookup or similar, as we 
-  // need this to work in cases where we can't control whether we're shimmed 
-  // or not.
-  HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
-  if (shim_eng_mod)
-  {
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Shims enabled for local process."));
-  }
 
   SmartModuleHandle const local_module(::LoadLibraryEx(
     module.GetPath().c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
@@ -314,12 +338,13 @@ inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorCodeWinLast(last_error));
   }
   
-  FARPROC const local_func = ::GetProcAddress(local_module.GetHandle(), name);
+  FARPROC const local_func = GetProcAddressInternal(process, 
+    local_module.GetHandle(), name);
   if (!local_func)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("GetProcAddress failed.") << 
+      ErrorString("GetProcAddressInternal failed.") << 
       ErrorCodeWinLast(last_error));
   }
 
@@ -339,14 +364,17 @@ inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 
 }
 
-inline FARPROC FindProcedure(Module const& module, std::string const& name)
+inline FARPROC FindProcedure(Process const& process, Module const& module, 
+  std::string const& name)
 {
-  return detail::FindProcedureInternal(module, name.c_str());
+  return detail::FindProcedureInternal(process, module, name.c_str());
 }
 
-inline FARPROC FindProcedure(Module const& module, WORD ordinal)
+inline FARPROC FindProcedure(Process const& process, Module const& module, 
+  WORD ordinal)
 {
-  return detail::FindProcedureInternal(module, MAKEINTRESOURCEA(ordinal));
+  return detail::FindProcedureInternal(process, module, 
+    MAKEINTRESOURCEA(ordinal));
 }
 
 }

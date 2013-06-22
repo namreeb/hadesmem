@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK_LE(this_mod, this_mod_other);
   BOOST_CHECK(!(this_mod > this_mod_other));
   BOOST_CHECK(!(this_mod < this_mod_other));
-  BOOST_CHECK_THROW(FindProcedure(this_mod, "non_existant_export"), 
+  BOOST_CHECK_THROW(FindProcedure(process, this_mod, "non_existant_export"), 
     hadesmem::Error);
   hadesmem::Module this_mod_copy(this_mod);
   BOOST_CHECK_EQUAL(this_mod, this_mod_copy);
@@ -69,8 +69,9 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK_EQUAL(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()), 
     L"NTDLL.DLL");
   BOOST_CHECK_GT(this_mod.GetPath().size(), this_mod.GetName().size());
-  BOOST_CHECK_EQUAL(FindProcedure(ntdll_mod, "NtQueryInformationProcess"), 
-    ::GetProcAddress(ntdll_mod.GetHandle(), "NtQueryInformationProcess"));
+  BOOST_CHECK_EQUAL(FindProcedure(process, ntdll_mod, 
+    "NtQueryInformationProcess"), GetProcAddress(ntdll_mod.GetHandle(), 
+    "NtQueryInformationProcess"));
   hadesmem::Module const ntdll_mod_other(process, L"ntdll.dll");
   BOOST_CHECK_EQUAL(ntdll_mod, ntdll_mod_other);
   hadesmem::Module const ntdll_mod_from_handle(process, 

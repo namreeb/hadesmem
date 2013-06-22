@@ -634,39 +634,32 @@ inline Allocator GenerateCallCode(Process const& process,
 {
   Module const kernel32(process, L"kernel32.dll");
   auto const get_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
-    kernel32, "GetLastError"));
+    process, kernel32, "GetLastError"));
   auto const set_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
-    kernel32, "SetLastError"));
+    process, kernel32, "SetLastError"));
   auto const is_debugger_present = reinterpret_cast<DWORD_PTR>(FindProcedure(
-    kernel32, "IsDebuggerPresent"));
+    process, kernel32, "IsDebuggerPresent"));
   auto const debug_break = reinterpret_cast<DWORD_PTR>(FindProcedure(
-    kernel32, "DebugBreak"));
+    process, kernel32, "DebugBreak"));
 
   AsmJit::X86Assembler assembler;
   
 #if defined(HADESMEM_ARCH_X64)
-  GenerateCallCode64(&assembler, 
-    addresses_beg, addresses_end, 
-    call_convs_beg, 
-    args_full_beg, 
-    get_last_error, 
-    set_last_error, 
-    is_debugger_present, 
-    debug_break, 
-    return_values_remote);
+  GenerateCallCode64(
 #elif defined(HADESMEM_ARCH_X86)
-  GenerateCallCode32(&assembler, 
-    addresses_beg, addresses_end, 
-    call_convs_beg, 
-    args_full_beg, 
-    get_last_error, 
-    set_last_error, 
-    is_debugger_present, 
-    debug_break, 
-    return_values_remote);
+  GenerateCallCode32(
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
+    &assembler, 
+    addresses_beg, addresses_end, 
+    call_convs_beg, 
+    args_full_beg, 
+    get_last_error, 
+    set_last_error, 
+    is_debugger_present, 
+    debug_break, 
+    return_values_remote);
   
   DWORD_PTR const stub_size = assembler.getCodeSize();
   

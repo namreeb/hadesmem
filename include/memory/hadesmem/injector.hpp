@@ -6,14 +6,12 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <cstring>
 #include <utility>
 #include <utility>
 #include <iterator>
 #include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -26,11 +24,8 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/pelib/export.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/self_path.hpp>
-#include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
@@ -39,37 +34,6 @@ namespace hadesmem
   
 namespace detail
 {
-
-inline FARPROC GetProcAddressInternal(Process const& process, 
-  Module const& module, std::string const& export_name)
-{
-  HADESMEM_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
-
-  PeFile const pe_file(process, module.GetHandle(), PeFileType::Image);
-  
-  ExportList const exports(process, pe_file);
-  for (auto const& e : exports)
-  {
-    if (e.ByName() && e.GetName() == export_name)
-    {
-      if (e.IsForwarded())
-      {
-        Module const forwarder_module(process, 
-          boost::locale::conv::utf_to_utf<wchar_t>(e.GetForwarderModule()));
-        return GetProcAddressInternal(process, forwarder_module, 
-          e.GetForwarderFunction());
-      }
-
-      void* va = e.GetVa();
-      FARPROC pfn = nullptr;
-      std::memcpy(&pfn, &va, sizeof(void*));
-
-      return pfn;
-    }
-  }
-
-  return nullptr;
-}
 
 inline void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
   bool force)
@@ -230,7 +194,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
 
   Module const kernel32_mod(process, L"kernel32.dll");
   auto const load_library = detail::GetProcAddressInternal(process, 
-    kernel32_mod, "LoadLibraryExW");
+    kernel32_mod.GetHandle(), "LoadLibraryExW");
 
   typedef HMODULE (LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
     DWORD dwFlags);
@@ -252,7 +216,7 @@ inline void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(process, L"kernel32.dll");
   auto const free_library = detail::GetProcAddressInternal(process, 
-    kernel32_mod, "FreeLibrary");
+    kernel32_mod.GetHandle(), "FreeLibrary");
 
   typedef BOOL (FreeLibraryFuncT)(HMODULE hModule);
   auto const free_library_ret = 
@@ -271,7 +235,7 @@ inline CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
   std::string const& export_name)
 {
   Module const module_remote(process, module);
-  auto const export_ptr = FindProcedure(module_remote, export_name);
+  auto const export_ptr = FindProcedure(process, module_remote, export_name);
 
   return Call<DWORD_PTR()>(process, reinterpret_cast<FnPtr>(export_ptr), 
     CallConv::kDefault);
