@@ -153,6 +153,23 @@ struct SnapPolicy
 
 typedef SmartHandleImpl<SnapPolicy> SmartSnapHandle;
 
+struct LibraryPolicy
+{
+  typedef HMODULE HandleT;
+
+  static HandleT GetInvalid() HADESMEM_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::FreeLibrary(handle) != 0;
+  }
+};
+
+typedef SmartHandleImpl<LibraryPolicy> SmartModuleHandle;
+
 }
 
 }

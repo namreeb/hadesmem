@@ -288,41 +288,15 @@ inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 namespace detail
 {
 
-// TODO: Replace this with something more generic and robust.
-class Library
-{
-public:
-  explicit HADESMEM_CONSTEXPR Library(HMODULE module) HADESMEM_NOEXCEPT
-    : module_(module)
-  { }
-
-  ~Library() HADESMEM_NOEXCEPT
-  {
-    if (module_)
-    {
-        HADESMEM_VERIFY(::FreeLibrary(module_));
-    }
-  }
-
-  HMODULE Get() const
-  {
-    return module_;
-  }
-
-private:
-  Library(Library const& other);
-  Library& operator=(Library const& other);
-
-  HMODULE module_;
-};
-
 inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
 {
   HADESMEM_ASSERT(name != nullptr);
 
   // Do not continue if Shim Engine is enabled for local process, 
   // otherwise it could interfere with the address resolution.
-  // TODO: Work around this with 'manual' export lookup or similar.
+  // TODO: Work around this with 'manual' export lookup or similar, as we 
+  // need this to work in cases where we can't control whether we're shimmed 
+  // or not.
   HMODULE const shim_eng_mod = ::GetModuleHandle(L"ShimEng.dll");
   if (shim_eng_mod)
   {
@@ -330,9 +304,9 @@ inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorString("Shims enabled for local process."));
   }
 
-  Library const local_module(::LoadLibraryEx(module.GetPath().c_str(), 
-    nullptr, DONT_RESOLVE_DLL_REFERENCES));
-  if (!local_module.Get())
+  SmartModuleHandle const local_module(::LoadLibraryEx(
+    module.GetPath().c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
+  if (!local_module.GetHandle())
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
@@ -340,7 +314,7 @@ inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
       ErrorCodeWinLast(last_error));
   }
   
-  FARPROC const local_func = ::GetProcAddress(local_module.Get(), name);
+  FARPROC const local_func = ::GetProcAddress(local_module.GetHandle(), name);
   if (!local_func)
   {
     DWORD const last_error = ::GetLastError();
@@ -350,10 +324,10 @@ inline FARPROC FindProcedureInternal(Module const& module, LPCSTR name)
   }
 
   HADESMEM_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
-    reinterpret_cast<DWORD_PTR>(local_module.Get()));
+    reinterpret_cast<DWORD_PTR>(local_module.GetHandle()));
   
   auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
-    reinterpret_cast<DWORD_PTR>(local_module.Get());
+    reinterpret_cast<DWORD_PTR>(local_module.GetHandle());
 
   HADESMEM_ASSERT(module.GetSize() > func_delta);
 
