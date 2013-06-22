@@ -59,6 +59,7 @@ BOOST_AUTO_TEST_CASE(this_process)
   process_str_1 >> process_id_1;
   BOOST_CHECK_EQUAL(process.GetId(), process_id_1);
   std::wstringstream process_str_2;
+  process_str_2.imbue(std::locale::classic());
   process_str_2 << process;
   DWORD process_id_2;
   process_str_2 >> process_id_2;

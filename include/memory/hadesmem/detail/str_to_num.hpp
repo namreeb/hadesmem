@@ -4,6 +4,7 @@
 #pragma once
 
 #include <limits>
+#include <locale>
 #include <string>
 #include <sstream>
 
@@ -25,6 +26,7 @@ T StrToNum(std::basic_string<CharT> const& str)
 {
   HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
   std::basic_ostringstream<CharT> converter(str);
+  converter.imbue(std::locale::classic());
   T out = 0;
   if (!converter || (!converter >> out))
   {
