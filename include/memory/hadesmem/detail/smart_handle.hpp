@@ -15,7 +15,6 @@ namespace hadesmem
 namespace detail
 {
 
-// TODO: Turn this into a template like the old EnsureCleanup class template?
 template <typename Policy>
 class SmartHandleImpl
 {

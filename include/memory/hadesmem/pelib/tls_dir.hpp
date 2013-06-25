@@ -124,19 +124,7 @@ public:
   {
     // TODO: Iterator checks for type and category.
     
-    // TODO: Refactor this into a new GetRuntimeBase/GetImageBase/etc 
-    // API (names just ideas, still not decided on what to call it).
-    ULONG_PTR image_base = 0;
-    if (pe_file_->GetType() == PeFileType::Image)
-    {
-      image_base = reinterpret_cast<ULONG_PTR>(pe_file_->GetBase()); 
-    }
-    else
-    {
-      NtHeaders nt_headers(*process_, *pe_file_);
-      image_base = nt_headers.GetImageBase();
-    }
-  
+    ULONG_PTR image_base = GetRuntimeBase(*process_, *pe_file_);
     auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(RvaToVa(
       *process_, *pe_file_, static_cast<DWORD>(GetAddressOfCallBacks() - 
       image_base)));

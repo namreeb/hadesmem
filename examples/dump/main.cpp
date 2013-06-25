@@ -221,14 +221,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
     << std::dec << "\n";
   std::wcout << "\t\tNumberOfRvaAndSizes: " 
     << nt_hdrs.GetNumberOfRvaAndSizes() << "\n";
-  DWORD num_dirs = nt_hdrs.GetNumberOfRvaAndSizes();
-  // TODO: There should be an API to handle this.
-  if (num_dirs > 0x10)
-  {
-    std::wcout << "\t\tWARNING! NumberOfRvaAndSizes too large. Defaulting to "
-      "16.\n";
-    num_dirs = 0x10;
-  }
+  DWORD num_dirs = GetNumberOfRvaAndSizesClamped(nt_hdrs);
+  std::wcout << "\t\tNumberOfRvaAndSizes (Clamped): " << num_dirs << "\n";
   for (DWORD i = 0; i < num_dirs; ++i)
   {
     std::wcout << "\t\tDataDirectoryVirtualAddress: " << std::hex 

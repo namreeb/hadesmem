@@ -20,7 +20,7 @@ namespace hadesmem
 {
 
 // TODO: Write overloads which take iterators (and don't assume that a 
-// contiguous block of memory has been passed in).
+// contiguous block of memory has been passed in?).
 
 template <typename T>
 inline void Write(Process const& process, PVOID address, T const& data)

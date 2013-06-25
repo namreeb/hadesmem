@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <ostream>
 #include <utility>
+#include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/assert.hpp>
@@ -695,6 +696,25 @@ inline std::ostream& operator<<(std::ostream& lhs, NtHeaders const& rhs)
 inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
 {
   return (lhs << rhs.GetBase());
+}
+
+// TODO: Add tests for this.
+inline DWORD GetNumberOfRvaAndSizesClamped(NtHeaders const& nt_headers)
+{
+  DWORD num_rvas_and_sizes = nt_headers.GetNumberOfRvaAndSizes();
+  return (std::min)(num_rvas_and_sizes, 0x10UL);
+}
+
+// TODO: Add tests for this.
+inline ULONG_PTR GetRuntimeBase(Process const& process, PeFile const& pe_file)
+{
+  switch (pe_file.GetType())
+  {
+  case PeFileType::Image:
+    return reinterpret_cast<ULONG_PTR>(pe_file.GetBase());
+  case PeFileType::Data:
+    return NtHeaders(process, pe_file).GetImageBase();
+  }
 }
 
 }
