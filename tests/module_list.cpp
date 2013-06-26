@@ -31,6 +31,7 @@
 #endif // #if defined(HADESMEM_CLANG)
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::ModuleList::iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::ModuleList::const_iterator)
 
 BOOST_AUTO_TEST_CASE(initialize)
 {
