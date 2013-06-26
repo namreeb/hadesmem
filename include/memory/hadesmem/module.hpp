@@ -116,6 +116,7 @@ public:
   }
   
 private:
+  template <typename ModuleT>
   friend class ModuleIterator;
 
   typedef std::function<bool (MODULEENTRY32 const&)> EntryCallback;

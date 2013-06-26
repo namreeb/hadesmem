@@ -715,6 +715,9 @@ inline ULONG_PTR GetRuntimeBase(Process const& process, PeFile const& pe_file)
   case PeFileType::Data:
     return NtHeaders(process, pe_file).GetImageBase();
   }
+
+  HADESMEM_ASSERT(false);
+  return 0;
 }
 
 }

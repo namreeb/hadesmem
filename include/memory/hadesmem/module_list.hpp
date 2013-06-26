@@ -26,14 +26,26 @@ namespace hadesmem
 
 // ModuleIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class ModuleIterator : public std::iterator<std::input_iterator_tag, Module>
+template <typename ModuleT>
+class ModuleIterator : public std::iterator<std::input_iterator_tag, ModuleT>
 {
 public:
+  typedef typename std::iterator<std::input_iterator_tag, 
+    ModuleT>::value_type value_type;
+  typedef typename std::iterator<std::input_iterator_tag, 
+    ModuleT>::difference_type difference_type;
+  typedef typename std::iterator<std::input_iterator_tag, 
+    ModuleT>::pointer pointer;
+  typedef typename std::iterator<std::input_iterator_tag, 
+    ModuleT>::reference reference;
+  typedef typename std::iterator<std::input_iterator_tag, 
+    ModuleT>::iterator_category iterator_category;
+
   ModuleIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
   
-// TOOD: Clean this up.
+  // TODO: Clean this up.
   explicit ModuleIterator(Process const& process)
     : impl_(new Impl())
   {
@@ -191,8 +203,8 @@ class ModuleList
 {
 public:
   typedef Module value_type;
-  typedef ModuleIterator iterator;
-  typedef ModuleIterator const_iterator;
+  typedef ModuleIterator<Module> iterator;
+  typedef ModuleIterator<Module const> const_iterator;
   
   explicit HADESMEM_CONSTEXPR ModuleList(Process const& process) 
     HADESMEM_NOEXCEPT
@@ -234,12 +246,22 @@ public:
     return const_iterator(*process_);
   }
   
+  const_iterator cbegin() const
+  {
+    return const_iterator(*process_);
+  }
+  
   iterator end() HADESMEM_NOEXCEPT
   {
     return iterator();
   }
   
   const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
   {
     return const_iterator();
   }
