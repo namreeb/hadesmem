@@ -25,15 +25,23 @@ namespace hadesmem
 
 // ProcessIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
+template <typename ProcessEntryT>
 class ProcessIterator : public std::iterator<std::input_iterator_tag, 
-  ProcessEntry>
+  ProcessEntryT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, ProcessEntryT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   ProcessIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
   
-  // TOOD: Clean this up.
+  // TODO: Clean this up.
   ProcessIterator(int /*dummy*/)
     : impl_(new Impl())
   {
@@ -187,8 +195,8 @@ private:
 class ProcessList
 {
 public:
-  typedef ProcessIterator iterator;
-  typedef ProcessIterator const_iterator;
+  typedef ProcessIterator<ProcessEntry> iterator;
+  typedef ProcessIterator<ProcessEntry const> const_iterator;
 
   HADESMEM_CONSTEXPR ProcessList() HADESMEM_NOEXCEPT
   { }
@@ -202,13 +210,23 @@ public:
   {
     return const_iterator(0);
   }
-
+  
+  const_iterator cbegin() const
+  {
+    return const_iterator(0);
+  }
+  
   iterator end() HADESMEM_NOEXCEPT
   {
     return iterator();
   }
 
   const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
   {
     return const_iterator();
   }

@@ -30,16 +30,12 @@ template <typename ModuleT>
 class ModuleIterator : public std::iterator<std::input_iterator_tag, ModuleT>
 {
 public:
-  typedef typename std::iterator<std::input_iterator_tag, 
-    ModuleT>::value_type value_type;
-  typedef typename std::iterator<std::input_iterator_tag, 
-    ModuleT>::difference_type difference_type;
-  typedef typename std::iterator<std::input_iterator_tag, 
-    ModuleT>::pointer pointer;
-  typedef typename std::iterator<std::input_iterator_tag, 
-    ModuleT>::reference reference;
-  typedef typename std::iterator<std::input_iterator_tag, 
-    ModuleT>::iterator_category iterator_category;
+  typedef std::iterator<std::input_iterator_tag, ModuleT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
 
   ModuleIterator() HADESMEM_NOEXCEPT
     : impl_()
