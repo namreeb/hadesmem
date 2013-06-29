@@ -1,0 +1,13 @@
+Index: boost/exception/info.hpp
+===================================================================
+--- boost/exception/info.hpp	(revision 84911)
++++ boost/exception/info.hpp	(working copy)
+@@ -25,7 +25,7 @@
+     template <class Tag,class T>
+     inline
+     std::string
+-    error_info_name( error_info<Tag,T> const & x )
++    error_info_name( error_info<Tag,T> const & /*x*/ )
+         {
+         return tag_type_name<Tag>();
+         }
