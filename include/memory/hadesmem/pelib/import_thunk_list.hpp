@@ -26,10 +26,18 @@ namespace hadesmem
 
 // ImportThunkIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
+template <typename ImportThunkT>
 class ImportThunkIterator : public std::iterator<std::input_iterator_tag, 
-  ImportThunk>
+  ImportThunkT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, ImportThunkT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   ImportThunkIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
@@ -165,8 +173,8 @@ class ImportThunkList
 {
 public:
   typedef ImportThunk value_type;
-  typedef ImportThunkIterator iterator;
-  typedef ImportThunkIterator const_iterator;
+  typedef ImportThunkIterator<ImportThunk> iterator;
+  typedef ImportThunkIterator<ImportThunk const> const_iterator;
   
   explicit ImportThunkList(Process const& process, PeFile const& pe_file, 
     DWORD first_thunk)
@@ -215,7 +223,14 @@ public:
   
   const_iterator begin() const
   {
-    return ImportThunkList::iterator(*process_, *pe_file_, first_thunk_);
+    return ImportThunkList::const_iterator(*process_, *pe_file_, 
+      first_thunk_);
+  }
+  
+  const_iterator cbegin() const
+  {
+    return ImportThunkList::const_iterator(*process_, *pe_file_, 
+      first_thunk_);
   }
   
   iterator end() HADESMEM_NOEXCEPT
@@ -225,7 +240,12 @@ public:
   
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return ImportThunkList::iterator();
+    return ImportThunkList::const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
+  {
+    return ImportThunkList::const_iterator();
   }
   
 private:
