@@ -27,9 +27,17 @@ namespace hadesmem
 
 // ExportIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class ExportIterator : public std::iterator<std::input_iterator_tag, Export>
+template <typename ExportT>
+class ExportIterator : public std::iterator<std::input_iterator_tag, ExportT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, ExportT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   ExportIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
@@ -168,8 +176,8 @@ class ExportList
 {
 public:
   typedef Export value_type;
-  typedef ExportIterator iterator;
-  typedef ExportIterator const_iterator;
+  typedef ExportIterator<Export> iterator;
+  typedef ExportIterator<Export const> const_iterator;
   
   explicit ExportList(Process const& process, PeFile const& pe_file)
     : process_(&process), 
@@ -212,7 +220,12 @@ public:
   
   const_iterator begin() const
   {
-    return ExportList::iterator(*process_, *pe_file_);
+    return ExportList::const_iterator(*process_, *pe_file_);
+  }
+  
+  const_iterator cbegin() const
+  {
+    return ExportList::const_iterator(*process_, *pe_file_);
   }
   
   iterator end() HADESMEM_NOEXCEPT
@@ -222,7 +235,12 @@ public:
   
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return ExportList::iterator();
+    return ExportList::const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
+  {
+    return ExportList::const_iterator();
   }
   
 private:
