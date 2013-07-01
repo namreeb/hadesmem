@@ -26,9 +26,17 @@ namespace hadesmem
 
 // RegionIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class RegionIterator : public std::iterator<std::input_iterator_tag, Region>
+template <typename RegionT>
+class RegionIterator : public std::iterator<std::input_iterator_tag, RegionT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, RegionT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   RegionIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
@@ -139,8 +147,8 @@ class RegionList
 {
 public:
   typedef Region value_type;
-  typedef RegionIterator iterator;
-  typedef RegionIterator const_iterator;
+  typedef RegionIterator<Region> iterator;
+  typedef RegionIterator<Region const> const_iterator;
   
   explicit RegionList(Process const& process)
     : process_(&process)
@@ -181,12 +189,22 @@ public:
     return const_iterator(*process_);
   }
   
+  const_iterator cbegin() const
+  {
+    return const_iterator(*process_);
+  }
+  
   iterator end() HADESMEM_NOEXCEPT
   {
     return iterator();
   }
   
   const_iterator end() const HADESMEM_NOEXCEPT
+  {
+    return const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
   {
     return const_iterator();
   }

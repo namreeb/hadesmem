@@ -96,6 +96,7 @@ public:
   }
   
 private:
+  template <typename RegionT>
   friend class RegionIterator;
 
   explicit Region(Process const& process, 
