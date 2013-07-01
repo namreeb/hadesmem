@@ -27,9 +27,17 @@ namespace hadesmem
 
 // SectionIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-class SectionIterator : public std::iterator<std::input_iterator_tag, Section>
+template <typename SectionT>  
+class SectionIterator : public std::iterator<std::input_iterator_tag, SectionT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, SectionT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   SectionIterator() HADESMEM_NOEXCEPT
     : impl_()
   { }
@@ -150,8 +158,8 @@ class SectionList
 {
 public:
   typedef Section value_type;
-  typedef SectionIterator iterator;
-  typedef SectionIterator const_iterator;
+  typedef SectionIterator<Section> iterator;
+  typedef SectionIterator<Section const> const_iterator;
   
   explicit SectionList(Process const& process, PeFile const& pe_file)
     : process_(&process), 
@@ -194,7 +202,12 @@ public:
   
   const_iterator begin() const
   {
-    return SectionList::iterator(*process_, *pe_file_);
+    return SectionList::const_iterator(*process_, *pe_file_);
+  }
+  
+  const_iterator cbegin() const
+  {
+    return SectionList::const_iterator(*process_, *pe_file_);
   }
   
   iterator end() HADESMEM_NOEXCEPT
@@ -204,7 +217,12 @@ public:
   
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return SectionList::iterator();
+    return SectionList::const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
+  {
+    return SectionList::const_iterator();
   }
   
 private:

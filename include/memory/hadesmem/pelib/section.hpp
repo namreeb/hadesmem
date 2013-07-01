@@ -235,6 +235,7 @@ public:
   }
 
 private:
+  template <typename SectionT>
   friend class SectionIterator;
 
   explicit Section(Process const& process, PeFile const& pe_file, WORD number, 
