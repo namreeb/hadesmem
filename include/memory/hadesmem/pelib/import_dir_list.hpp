@@ -26,10 +26,18 @@ namespace hadesmem
 
 // ImportDirIterator satisfies the requirements of an input iterator 
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
+template <typename ImportDirT>
 class ImportDirIterator : public std::iterator<std::input_iterator_tag, 
-  ImportDir>
+  ImportDirT>
 {
 public:
+  typedef std::iterator<std::input_iterator_tag, ImportDirT> BaseIteratorT;
+  typedef typename BaseIteratorT::value_type value_type;
+  typedef typename BaseIteratorT::difference_type difference_type;
+  typedef typename BaseIteratorT::pointer pointer;
+  typedef typename BaseIteratorT::reference reference;
+  typedef typename BaseIteratorT::iterator_category iterator_category;
+
   ImportDirIterator() HADESMEM_NOEXCEPT
   : impl_()
 { }
@@ -162,8 +170,8 @@ class ImportDirList
 {
 public:
   typedef ImportDir value_type;
-  typedef ImportDirIterator iterator;
-  typedef ImportDirIterator const_iterator;
+  typedef ImportDirIterator<ImportDir> iterator;
+  typedef ImportDirIterator<ImportDir const> const_iterator;
   
   explicit ImportDirList(Process const& process, PeFile const& pe_file)
     : process_(&process), 
@@ -206,7 +214,12 @@ public:
   
   const_iterator begin() const
   {
-    return ImportDirList::iterator(*process_, *pe_file_);
+    return ImportDirList::const_iterator(*process_, *pe_file_);
+  }
+  
+  const_iterator cbegin() const
+  {
+    return ImportDirList::const_iterator(*process_, *pe_file_);
   }
   
   iterator end() HADESMEM_NOEXCEPT
@@ -216,7 +229,12 @@ public:
   
   const_iterator end() const HADESMEM_NOEXCEPT
   {
-    return ImportDirList::iterator();
+    return ImportDirList::const_iterator();
+  }
+  
+  const_iterator cend() const HADESMEM_NOEXCEPT
+  {
+    return ImportDirList::const_iterator();
   }
   
 private:
