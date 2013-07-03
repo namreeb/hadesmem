@@ -178,7 +178,7 @@ public:
 private:
   struct Impl
   {
-    explicit Impl() HADESMEM_NOEXCEPT
+    Impl() HADESMEM_NOEXCEPT
       : snap_(INVALID_HANDLE_VALUE), 
       process_()
     { }
