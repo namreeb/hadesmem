@@ -573,10 +573,9 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
-    CallConv call_conv = *call_convs_beg;
-    HADESMEM_ASSERT(call_conv == CallConv::kDefault || 
-      call_conv == CallConv::kWinApi || 
-      call_conv == CallConv::kX64);
+    HADESMEM_ASSERT(*call_convs_beg == CallConv::kDefault || 
+      *call_convs_beg == CallConv::kWinApi || 
+      *call_convs_beg == CallConv::kX64);
 
     ArgVisitor64 arg_visitor(assembler, num_args);
     // TODO: Make this code more generic and remove the dependency on 

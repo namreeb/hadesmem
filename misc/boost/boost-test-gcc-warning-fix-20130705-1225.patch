@@ -1,0 +1,17 @@
+Index: boost/test/utils/basic_cstring/basic_cstring.hpp
+===================================================================
+--- boost/test/utils/basic_cstring/basic_cstring.hpp	(revision 84943)
++++ boost/test/utils/basic_cstring/basic_cstring.hpp	(working copy)
+@@ -288,9 +288,10 @@
+ inline basic_cstring<CharT>&
+ basic_cstring<CharT>::trim_left( iterator it )
+ {
+-    m_begin = it;
+-    if( m_end <= m_begin )
++    if( m_end <= it )
+         clear();
++    else
++      m_begin = it;
+ 
+     return *this;
+ }

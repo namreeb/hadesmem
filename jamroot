@@ -61,13 +61,17 @@ project memory
     # not affect program correctness.
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>intel:<cxxflags>"/Qwd2586"
-    # Required for atomics library.
+    
+	# Required for atomics library.
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i686"
-    # --export-all-symbols is required because of a bug in Clang's dllexport  
+    
+	# --export-all-symbols is required because of a bug in Clang's dllexport  
     # support. Remove once this has been fixed.
     <toolset>clang:<linkflags>"-Wl,--export-all-symbols"
-    # Required for Boost.
+    
+	# Required for Boost.
     <toolset>clang:<linkflags>"-Wl,--allow-multiple-definition"
+
     # Enable checks for signed overflow in debug builds
     <toolset>gcc,<variant>debug:<cxxflags>"-ftrapv"
     <toolset>clang,<variant>debug:<cxxflags>"-ftrapv"
@@ -76,6 +80,13 @@ project memory
     <toolset>gcc:<cxxflags>"-std=c++11"
     <toolset>clang:<cxxflags>"-std=c++11"
     <toolset>intel:<cxxflags>"/Qstd=c++11"
+
+	# Enable LTO/LTCG
+	<variant>release,<toolset>msvc:<cxxflags>"/GL"
+	<variant>release,<toolset>msvc:<linkflags>"/LTCG"
+	<variant>release,<toolset>intel:<cxxflags>"/GL"
+	<variant>release,<toolset>intel:<linkflags>"/LTCG"
+	<variant>release,<toolset>gcc:<cxxflags>"-flto"
     
     # Enable generation of debugging symbols, even under release mode.
     <debug-symbols>on
