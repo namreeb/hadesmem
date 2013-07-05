@@ -39,11 +39,11 @@ public:
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
   ImportDirIterator() HADESMEM_NOEXCEPT
-  : impl_()
-{ }
+    : impl_()
+  { }
   
   explicit ImportDirIterator(Process const& process, PeFile const& pe_file)
-    : impl_(new Impl(process, pe_file))
+    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {

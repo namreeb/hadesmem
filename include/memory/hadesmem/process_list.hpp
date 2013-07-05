@@ -43,7 +43,7 @@ public:
   
   // TODO: Clean this up.
   ProcessIterator(int /*dummy*/)
-    : impl_(new Impl())
+    : impl_(std::make_shared<Impl>())
   {
     HADESMEM_ASSERT(impl_.get());
   

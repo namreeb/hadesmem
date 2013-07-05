@@ -44,7 +44,7 @@ public:
   
   explicit ImportThunkIterator(Process const& process, PeFile const& pe_file, 
     DWORD first_thunk)
-    : impl_(new Impl(process, pe_file))
+    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {

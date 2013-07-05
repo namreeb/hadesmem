@@ -42,7 +42,7 @@ public:
   { }
   
   explicit RegionIterator(Process const& process)
-    : impl_(new Impl(process))
+    : impl_(std::make_shared<Impl>(process))
   { }
 
   RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT

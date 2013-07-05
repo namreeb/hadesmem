@@ -43,7 +43,7 @@ public:
   { }
   
   explicit SectionIterator(Process const& process, PeFile const& pe_file)
-    : impl_(new Impl(process, pe_file))
+    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     NtHeaders const nt_headers(process, pe_file);
     if (!nt_headers.GetNumberOfSections())

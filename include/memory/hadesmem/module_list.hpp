@@ -43,7 +43,7 @@ public:
   
   // TODO: Clean this up.
   explicit ModuleIterator(Process const& process)
-    : impl_(new Impl())
+    : impl_(std::make_shared<Impl>())
   {
     HADESMEM_ASSERT(impl_.get());
   

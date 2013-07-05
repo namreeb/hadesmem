@@ -36,6 +36,7 @@
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/pelib/export_list.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
 #include <hadesmem/pelib/section_list.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
@@ -282,7 +283,8 @@ void DumpTls(hadesmem::Process const& process,
   std::unique_ptr<hadesmem::TlsDir> tls_dir;
   try
   {
-    tls_dir.reset(new hadesmem::TlsDir(process, pe_file));
+    tls_dir = hadesmem::detail::make_unique<hadesmem::TlsDir>(
+      process, pe_file);
   }
   catch (std::exception const& /*e*/)
   {
@@ -324,7 +326,8 @@ void DumpExports(hadesmem::Process const& process,
   std::unique_ptr<hadesmem::ExportDir> export_dir;
   try
   {
-    export_dir.reset(new hadesmem::ExportDir(process, pe_file));
+    export_dir = hadesmem::detail::make_unique<hadesmem::ExportDir>(process, 
+      pe_file);
   }
   catch (std::exception const& /*e*/)
   {
@@ -538,7 +541,8 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   std::unique_ptr<hadesmem::Process> process;
   try
   {
-    process.reset(new hadesmem::Process(process_entry.GetId()));
+    process = hadesmem::detail::make_unique<hadesmem::Process>(
+      process_entry.GetId());
   }
   catch (std::exception const& /*e*/)
   {

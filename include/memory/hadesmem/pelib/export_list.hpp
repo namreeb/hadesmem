@@ -43,7 +43,7 @@ public:
   { }
   
   explicit ExportIterator(Process const& process, PeFile const& pe_file)
-    : impl_(new Impl(process, pe_file))
+    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
