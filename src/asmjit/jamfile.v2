@@ -21,13 +21,6 @@ lib asmjit
 
 	# Static link
     <define>ASMJIT_API=""
-	
-	# Enable LTO/LTCG
-	<variant>release,<toolset>msvc:<cxxflags>"/GL"
-	<variant>release,<toolset>msvc:<linkflags>"/LTCG"
-	<variant>release,<toolset>intel:<cxxflags>"/GL"
-	<variant>release,<toolset>intel:<linkflags>"/LTCG"
-	<variant>release,<toolset>gcc:<cxxflags>"-flto"
   : 
   : 
     <include>"$(ASMJIT_ROOT)/asmjit/src/"
