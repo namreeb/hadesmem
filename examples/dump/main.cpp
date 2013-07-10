@@ -562,9 +562,13 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 // TODO: Cleanup.
 void DumpFile(boost::filesystem::path const& path)
 {
-  std::string const path_utf8 = boost::locale::conv::utf_to_utf<char>(
-    path.native());
-  std::ifstream file(path_utf8.c_str(), std::ios::binary | std::ios::ate);
+#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  std::ifstream file(path.native(), std::ios::binary | std::ios::ate);
+#else // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  // TODO: Fix this for compilers other than MSVC and ICC.
+  std::ifstream file(path.string<std::string>(), 
+    std::ios::binary | std::ios::ate);
+#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   if (!file)
   {
     std::wcout << "\nFailed to open file.\n";

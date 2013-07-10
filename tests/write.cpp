@@ -179,15 +179,15 @@ BOOST_AUTO_TEST_CASE(write_cross_region)
   // Disable warning false positive.
   // warning C6387: 'address' could be '0':  this does not adhere to the 
   // specification for the function 'VirtualProtect'.
-#ifdef HADESMEM_MSVC
+#if defined(HADESMEM_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 6387)
-#endif
+#endif // #if defined(HADESMEM_MSVC)
   BOOST_CHECK(VirtualProtect(address, page_size, PAGE_READONLY, 
     &old_protect) != 0);
-#ifdef HADESMEM_MSVC
+#if defined(HADESMEM_MSVC)
 #pragma warning(pop)
-#endif
+#endif // #if defined(HADESMEM_MSVC)
   hadesmem::Process const process(::GetCurrentProcessId());
   std::vector<char> buf(page_size * 2, 'h');
   hadesmem::WriteVector(process, address, buf);

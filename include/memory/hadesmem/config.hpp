@@ -91,11 +91,11 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 // this is worked around by using a linker flag to export all symbols 
 // unconditionally.
 // TODO: Remove this hack once Clang has been fixed.
-#ifdef HADESMEM_CLANG
+#if defined(HADESMEM_CLANG)
 #define HADESMEM_DLLEXPORT  
-#else
+#else // #if defined(HADESMEM_CLANG)
 #define HADESMEM_DLLEXPORT __declspec(dllexport)
-#endif
+#endif // #if defined(HADESMEM_CLANG)
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://goo.gl/1VVA3

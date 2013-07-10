@@ -26,7 +26,7 @@
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push, 1)
-#pragma warning(disable: 66 177 367 504 693 869 1879)
+#pragma warning(disable: 66 177 367 504 693 809 869 1879)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_CLANG)
