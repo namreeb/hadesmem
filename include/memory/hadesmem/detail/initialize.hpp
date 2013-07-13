@@ -95,9 +95,9 @@ inline void DisableUserModeCallbackExceptionFilter()
   if (!k32_mod)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("GetModuleHandle failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("GetModuleHandle failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 
   typedef BOOL (NTAPI *GetProcessUserModeExceptionPolicyPtr)(LPDWORD lpFlags);
@@ -143,9 +143,9 @@ inline void EnableTerminationOnHeapCorruption()
     HeapEnableTerminationOnCorruption, nullptr, 0))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("HeapSetInformation failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("HeapSetInformation failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 }
 
@@ -165,9 +165,9 @@ inline void EnableBottomUpRand()
     if (!::VirtualAlloc(NULL, kAllocSize64K, MEM_RESERVE, PAGE_NOACCESS))
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-        hadesmem::ErrorString("VirtualAlloc failed.") << 
-        hadesmem::ErrorCodeWinLast(last_error));
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("VirtualAlloc failed.") << 
+        ErrorCodeWinLast(last_error));
     }
   }
 }
@@ -180,9 +180,9 @@ inline void EnableMitigationPolicies()
   if (!kernel32_mod)
   {
     DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-        hadesmem::ErrorString("GetModuleHandle failed.") << 
-        hadesmem::ErrorCodeWinLast(last_error));
+      HADESMEM_THROW_EXCEPTION(Error() << 
+        ErrorString("GetModuleHandle failed.") << 
+        ErrorCodeWinLast(last_error));
   }
   
   // These APIs are not available by default until Windows 8, so they 
@@ -217,9 +217,9 @@ inline void EnableMitigationPolicies()
     sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("GetProcessMitigationPolicy failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("GetProcessMitigationPolicy failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 
   aslr_policy.Bits.EnableForceRelocateImages = 1;
@@ -228,9 +228,9 @@ inline void EnableMitigationPolicies()
     &aslr_policy, sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("SetProcessMitigationPolicy failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("SetProcessMitigationPolicy failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 
   ProcessMitigationPolicy::PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY 
@@ -240,9 +240,9 @@ inline void EnableMitigationPolicies()
     &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("GetProcessMitigationPolicy failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("GetProcessMitigationPolicy failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 
   strict_handle_check_policy.Bits.RaiseExceptionOnInvalidHandleReference = 1;
@@ -252,9 +252,9 @@ inline void EnableMitigationPolicies()
     &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
-      hadesmem::ErrorString("SetProcessMitigationPolicy failed.") << 
-      hadesmem::ErrorCodeWinLast(last_error));
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("SetProcessMitigationPolicy failed.") << 
+      ErrorCodeWinLast(last_error));
   }
 }
 
@@ -309,12 +309,12 @@ inline std::locale ImbueAllDefault()
 // Perform all initialization tasks.
 inline void InitializeAll()
 {
-  hadesmem::detail::DisableUserModeCallbackExceptionFilter();
-  hadesmem::detail::EnableCrtDebugFlags();
-  hadesmem::detail::EnableTerminationOnHeapCorruption();
-  hadesmem::detail::EnableBottomUpRand();
-  hadesmem::detail::EnableMitigationPolicies();
-  hadesmem::detail::ImbueAllDefault();
+  DisableUserModeCallbackExceptionFilter();
+  EnableCrtDebugFlags();
+  EnableTerminationOnHeapCorruption();
+  EnableBottomUpRand();
+  EnableMitigationPolicies();
+  ImbueAllDefault();
 }
 
 }

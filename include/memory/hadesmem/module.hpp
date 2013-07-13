@@ -237,7 +237,7 @@ private:
     else
     {
       HADESMEM_THROW_EXCEPTION(Error() << 
-        ErrorString("Module enumeration failed.") << 
+        ErrorString("Module32First/Module32Next failed.") << 
         ErrorCodeWinLast(last_error));
     }
   }

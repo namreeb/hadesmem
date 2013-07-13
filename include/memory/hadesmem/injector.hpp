@@ -27,6 +27,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
@@ -113,25 +114,7 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
 
-  detail::SmartHandle const remote_thread(::CreateRemoteThread(
-    process.GetHandle(), nullptr, 0, stub_remote_pfn, nullptr, 0, nullptr));
-  if (!remote_thread.GetHandle())
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not create remote thread.") << 
-      ErrorCodeWinLast(last_error));
-  }
-
-  // TODO: Add a sensible and configurable timeout.
-  if (::WaitForSingleObject(remote_thread.GetHandle(), INFINITE) != 
-    WAIT_OBJECT_0)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not wait for remote thread.") << 
-      ErrorCodeWinLast(last_error));
-  }
+  CreateRemoteThreadAndWait(process, stub_remote_pfn);
 }
 
 }
@@ -205,7 +188,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Call to LoadLibraryExW in remote process failed.") << 
+      ErrorString("LoadLibraryExW failed.") << 
       ErrorCodeWinLast(load_library_ret.GetLastError()));
   }
 
@@ -225,7 +208,7 @@ inline void FreeDll(Process const& process, HMODULE module)
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Call to FreeLibrary in remote process failed.") << 
+      ErrorString("FreeLibrary failed.") << 
       ErrorCodeWinLast(free_library_ret.GetLastError()));
   }
 }
@@ -327,7 +310,8 @@ inline CreateAndInjectData CreateAndInject(
   std::string const& export_name, 
   int flags)
 {
-  HADESMEM_STATIC_ASSERT(std::is_same<std::wstring, typename std::iterator_traits<ArgsIter>::value_type>::value);
+  HADESMEM_STATIC_ASSERT(std::is_same<std::wstring, 
+    typename std::iterator_traits<ArgsIter>::value_type>::value);
 
   boost::filesystem::path const path_real(path);
   
@@ -394,7 +378,7 @@ inline CreateAndInjectData CreateAndInject(
       {
         DWORD const last_error = ::GetLastError();
         HADESMEM_THROW_EXCEPTION(Error() << 
-          ErrorString("Could not resume process.") << 
+          ErrorString("ResumeThread failed.") << 
           ErrorCodeWinLast(last_error) << 
           ErrorCodeWinRet(export_ret.GetReturnValue()) << 
           ErrorCodeWinOther(export_ret.GetLastError()));

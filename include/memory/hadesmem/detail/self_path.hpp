@@ -28,7 +28,7 @@ inline HMODULE GetHandleToSelf()
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Failed to query memory.") << 
+      ErrorString("VirtualQuery failed.") << 
       ErrorCodeWinLast(last_error));
   }
 

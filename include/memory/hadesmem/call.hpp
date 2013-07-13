@@ -36,6 +36,7 @@
 #include <hadesmem/detail/func_arity.hpp>
 #include <hadesmem/detail/func_result.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
@@ -958,26 +959,7 @@ inline void CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
 
-  detail::SmartHandle const thread_remote(::CreateRemoteThread(
-    process.GetHandle(), nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(
-    code_remote_pfn), nullptr, 0, nullptr));
-  if (!thread_remote.GetHandle())
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not create remote thread.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  // TODO: Allow customizable timeout.
-  if (::WaitForSingleObject(thread_remote.GetHandle(), INFINITE) != 
-    WAIT_OBJECT_0)
-  {
-    DWORD const LastError = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("Could not wait for remote thread.") << 
-      ErrorCodeWinLast(LastError));
-  }
+  detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
 
   std::vector<detail::CallResultRemote> return_vals_remote = 
     ReadVector<detail::CallResultRemote>(process, 
