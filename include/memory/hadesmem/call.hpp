@@ -104,16 +104,18 @@ private:
 
 namespace detail
 {
-  struct CallResultRemote
-  {
-    DWORD64 return_i64;
-    float return_float;
-    double return_double;
-    DWORD last_error;
-  };
 
-  // CallResultRemote must be POD because of 'offsetof' usage.
-  HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
+struct CallResultRemote
+{
+  DWORD64 return_i64;
+  float return_float;
+  double return_double;
+  DWORD last_error;
+};
+
+// CallResultRemote must be POD because of 'offsetof' usage.
+HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
+
 }
 
 class CallResultRaw
@@ -207,19 +209,22 @@ private:
   }
 
   template <typename T>
-  T GetReturnValueIntOrFloatImpl(std::true_type, std::false_type, std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueIntOrFloatImpl(std::true_type, std::false_type, 
+    std::false_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
 
   template <typename T>
-  T GetReturnValueIntOrFloatImpl(std::false_type, std::true_type, std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueIntOrFloatImpl(std::false_type, std::true_type, 
+    std::false_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
 
   template <typename T>
-  T GetReturnValueIntOrFloatImpl(std::false_type, std::false_type, std::true_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueIntOrFloatImpl(std::false_type, std::false_type, 
+std::true_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
@@ -959,6 +964,7 @@ inline void CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
 
+  // TODO: Configurable timeout.
   detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
 
   std::vector<detail::CallResultRemote> return_vals_remote = 

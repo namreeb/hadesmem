@@ -114,6 +114,7 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
 
+  // TODO: Configurable timeout.
   CreateRemoteThreadAndWait(process, stub_remote_pfn);
 }
 
@@ -159,7 +160,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   // because otherwise we would need to perform the check in the context 
   // of the remote process, which is not possible to do without 
   // introducing race conditions and other potential problems. So we just 
-  // let LoadLibraryW do the check for us.
+  // let LoadLibraryExW do the check for us.
   if (path_resolution && !boost::filesystem::exists(path_real))
   {
     HADESMEM_THROW_EXCEPTION(Error() << 
