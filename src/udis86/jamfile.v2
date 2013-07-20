@@ -1,0 +1,22 @@
+# src/udis86/jamfile.v2
+
+# Use udis86 library
+import os ;
+local UDIS86_ROOT = [ os.environ UDIS86_ROOT ] ;
+
+project 
+  : 
+    requirements 
+
+    <warnings>off
+  ;
+
+lib udis86
+  : 
+    [ glob $(UDIS86_ROOT)/libudis86/*.c ] 
+  : 
+    <link>static
+  : 
+  : 
+    <include>"$(UDIS86_ROOT)/"
+  ;

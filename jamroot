@@ -12,6 +12,12 @@ use-project /asmjit
     src/asmjit
   ;
   
+# Use udis86 library. 
+use-project /udis86
+  :
+    src/udis86
+  ;
+  
 # Use HadesMem tests.
 use-project /tests
   :
@@ -143,6 +149,8 @@ alias memory
     <library>/boost//filesystem/<link>static
 	
     <library>src/asmjit
+
+    <library>src/udis86
 
     <include>"./include/memory"
     <include>"./src/asmjit"

@@ -61,6 +61,9 @@ run call.cpp
 run injector.cpp
   ;
   
+run patcher.cpp
+  ;
+  
 run pelib/pe_file.cpp
   ;
   
