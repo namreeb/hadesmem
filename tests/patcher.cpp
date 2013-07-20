@@ -75,15 +75,14 @@ DWORD HookMe(int i1, int i2, int i3, int i4, int i5, int i6,
   return 0x1234;
 }
 
-DWORD HookMe_Hook(int i1, int i2, int i3, int i4, int i5, int i6, 
+DWORD HookMeHk(int i1, int i2, int i3, int i4, int i5, int i6, 
   int i7, int i8);
-DWORD HookMe_Hook(int i1, int i2, int i3, int i4, int i5, int i6, 
+DWORD HookMeHk(int i1, int i2, int i3, int i4, int i5, int i6, 
   int i7, int i8)
 {
   BOOST_CHECK(g_detour->GetTrampoline() != nullptr);
   auto const orig = reinterpret_cast<decltype(&HookMe)>(
-    reinterpret_cast<DWORD_PTR>(
-    g_detour->GetTrampoline()));
+    reinterpret_cast<DWORD_PTR>(g_detour->GetTrampoline()));
   BOOST_CHECK_EQUAL(orig(i1, i2, i3, i4, i5, i6, i7, i8), 
     static_cast<DWORD>(0x1234));
   return 0x1337;
@@ -204,7 +203,7 @@ BOOST_AUTO_TEST_CASE(patchdetour)
   hadesmem::Process const process(::GetCurrentProcessId());
 
   DWORD_PTR const target_ptr = reinterpret_cast<DWORD_PTR>(hook_me_wrapper);
-  DWORD_PTR const detour_ptr = reinterpret_cast<DWORD_PTR>(&HookMe_Hook);
+  DWORD_PTR const detour_ptr = reinterpret_cast<DWORD_PTR>(&HookMeHk);
   g_detour.reset(new hadesmem::PatchDetour(process, 
     reinterpret_cast<PVOID>(target_ptr), 
     reinterpret_cast<PVOID>(detour_ptr)));
