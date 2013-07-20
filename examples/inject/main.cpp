@@ -171,6 +171,7 @@ int main(int argc, char* /*argv*/[])
     }
     else
     {
+      std::vector<std::wstring> args;
       std::wstring const exe_path = var_map["run"].as<std::wstring>();
       std::string const export_name = var_map.count("export") ? 
         var_map["export"].as<std::string>() : "";
@@ -178,8 +179,8 @@ int main(int argc, char* /*argv*/[])
         hadesmem::CreateAndInject(
         exe_path, 
         L"", 
-        std::vector<std::wstring>::iterator(), 
-        std::vector<std::wstring>::iterator(), 
+        std::begin(args), 
+        std::end(args), 
         module_path, 
         export_name, 
         flags);
