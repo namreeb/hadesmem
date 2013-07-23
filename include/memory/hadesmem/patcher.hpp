@@ -36,6 +36,7 @@
 namespace hadesmem
 {
 
+template <typename Derived>
 class Patch
 {
 public:
@@ -62,9 +63,15 @@ public:
   virtual ~Patch()
   { }
 
-  virtual void Apply() = 0;
+  void Apply()
+  {
+    static_cast<Derived*>(this)->Apply();
+  }
     
-  virtual void Remove() = 0;
+  void Remove()
+  {
+    static_cast<Derived*>(this)->Remove();
+  }
 
   bool IsApplied() const
   {
@@ -81,7 +88,7 @@ private:
   Patch& operator=(Patch const&);
 };
 
-class PatchRaw : public Patch
+class PatchRaw : public Patch<PatchRaw>
 {
 public:
   PatchRaw(Process const& process, PVOID target, 
@@ -110,11 +117,8 @@ public:
     orig_ = std::move(other.orig_);
     return *this;
   }
-        
-  virtual ~PatchRaw()
-  { }
-
-  virtual void Apply()
+  
+  void Apply()
   {
     if (applied_)
     {
@@ -130,7 +134,7 @@ public:
     applied_ = true;
   }
 
-  virtual void Remove()
+  void Remove()
   {
     if (!applied_)
     {
@@ -150,7 +154,7 @@ private:
   std::vector<BYTE> orig_;
 };
 
-class PatchDetour : public Patch
+class PatchDetour : public Patch<PatchDetour>
 {
 public:
   PatchDetour(Process const& process, PVOID target, PVOID detour)
@@ -187,12 +191,12 @@ public:
     return *this;
   }
         
-  virtual ~PatchDetour()
+  ~PatchDetour()
   {
     Remove();
   }
 
-  virtual void Apply()
+  void Apply()
   {
     if (applied_)
     {

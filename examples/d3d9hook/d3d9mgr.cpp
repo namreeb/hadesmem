@@ -263,7 +263,8 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
             hadesmem::ErrorCodeWinLast(last_error));
         }
       
-        auto d3dx_create_line = reinterpret_cast<decltype(&D3DXCreateLine)>(GetProcAddress(d3dx_mod, "D3DXCreateLine"));
+        auto d3dx_create_line = reinterpret_cast<decltype(&D3DXCreateLine)>(
+          GetProcAddress(d3dx_mod, "D3DXCreateLine"));
         if (!d3dx_create_line)
         {
           DWORD const last_error = ::GetLastError();
@@ -283,7 +284,8 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
         std::wstring const face_name(L"Tahoma");
         DWORD const height = 10;
       
-        auto d3dx_create_font = reinterpret_cast<decltype(&D3DXCreateFontW)>(GetProcAddress(d3dx_mod, "D3DXCreateFontW"));
+        auto d3dx_create_font = reinterpret_cast<decltype(&D3DXCreateFontW)>(
+          GetProcAddress(d3dx_mod, "D3DXCreateFontW"));
         if (!d3dx_create_font)
         {
           DWORD const last_error = ::GetLastError();
@@ -398,7 +400,8 @@ void OnEndScene(IDirect3DDevice9* device)
 
   data.g_state_block->Capture();
 
-  auto const draw_line = [&] (D3DXVECTOR2 start, D3DXVECTOR2 end, float width, D3DCOLOR colour)
+  auto const draw_line = [&] (D3DXVECTOR2 start, D3DXVECTOR2 end, 
+    float width, D3DCOLOR colour)
   {
     data.g_line->SetWidth(width);
 
@@ -412,7 +415,8 @@ void OnEndScene(IDirect3DDevice9* device)
     data.g_line->End();
   };
 
-  auto const draw_box = [&] (D3DXVECTOR2 bottom_left, D3DXVECTOR2 top_right, float line_width, D3DCOLOR colour)
+  auto const draw_box = [&] (D3DXVECTOR2 bottom_left, D3DXVECTOR2 top_right, 
+    float line_width, D3DCOLOR colour)
   {
     float width = top_right[0] - bottom_left[0];
     float height = top_right[1] - bottom_left[1];
@@ -504,7 +508,8 @@ void OnPostReset(IDirect3DDevice9* device)
   
   if (data.g_state_block)
   {
-    OutputDebugStringA("Warning! OnPostReset called with invalid render data (state block).");
+    OutputDebugStringA("Warning! OnPostReset called with invalid render data"
+      " (state block).");
   }
   else
   {
@@ -517,7 +522,8 @@ void OnPostReset(IDirect3DDevice9* device)
   }
   else
   {
-    OutputDebugStringA("Warning! OnPostReset called with invalid render data (line).");
+    OutputDebugStringA("Warning! OnPostReset called with invalid render data "
+      "(line).");
   }
 
   if (data.g_font)
@@ -526,7 +532,8 @@ void OnPostReset(IDirect3DDevice9* device)
   }
   else
   {
-    OutputDebugStringA("Warning! OnPostReset called with invalid render data (font).");
+    OutputDebugStringA("Warning! OnPostReset called with invalid render data "
+      "(font).");
   }
 }
 
