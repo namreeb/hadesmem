@@ -1,5 +1,8 @@
 # examples/jamfile.v2
 
+import os ;
+local DXSDK_DIR = [ os.environ DXSDK_DIR ] ;
+
 project 
   :
     requirements
@@ -17,7 +20,21 @@ project
     
     <library>/memory//memory
   ;
-
+  
+lib d3dx9
+  :
+  :
+    <name>d3dx9
+    <address-model>32:<search>$(DXSDK_DIR)/lib/x86
+    <address-model>64:<search>$(DXSDK_DIR)/lib/x64
+  ;
+  
+lib gdi32
+  :
+  :
+    <name>gdi32
+  ;
+  
 exe dump
   :
     [ glob dump/*.cpp ]
@@ -39,4 +56,16 @@ lib injecttest
   :
     [ glob injecttest/*.cpp ]
 	injecttestdep
+  ;
+
+lib d3d9hook
+  :
+    [ glob d3d9hook/*.cpp ]
+	d3dx9
+	gdi32
+  :
+    # Disable warning caused by D3DX9 headers.
+    <toolset>intel:<cxxflags>"/Qwd1885"
+    <toolset>msvc:<include>"$(DXSDK_DIR)/include/"
+    <toolset>intel:<include>"$(DXSDK_DIR)/include/"
   ;

@@ -157,7 +157,9 @@ public:
     : Patch(process), 
     target_(target), 
     detour_(detour), 
-    trampoline_()
+    trampoline_(), 
+    orig_(), 
+    trampolines_()
   { }
     
   PatchDetour(PatchDetour&& other)
@@ -165,7 +167,8 @@ public:
     target_(other.target_), 
     detour_(other.detour_), 
     trampoline_(std::move(other.trampoline_)), 
-    orig_(std::move(other.orig_))
+    orig_(std::move(other.orig_)), 
+    trampolines_(std::move(other.trampolines_))
   {
     other.target_ = nullptr;
     other.detour_ = nullptr;
@@ -180,11 +183,14 @@ public:
     other.detour_ = nullptr;
     trampoline_ = std::move(other.trampoline_);
     orig_ = std::move(other.orig_);
+    trampolines_ = std::move(other.trampolines_);
     return *this;
   }
         
   virtual ~PatchDetour()
-  { }
+  {
+    Remove();
+  }
 
   virtual void Apply()
   {
@@ -193,11 +199,8 @@ public:
       return;
     }
 
-    // Calculate size of trampoline buffer to generate (for worst case 
-    // scenario)
-    // TODO: Fix this to use maximum instruction length instead? (15 on 
-    // both x86 and x64)
-    ULONG const tramp_size = GetJumpSize() * 3;
+    ULONG const kMaxInstructionLen = 15;
+    ULONG const tramp_size = kMaxInstructionLen * 3;
 
     trampoline_.reset(new Allocator(*process_, tramp_size));
     PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
@@ -246,7 +249,7 @@ public:
       // TODO: Support other operand sizes.
       ud_operand_t const* op = ud_insn_opr(&ud_obj, 0);
       std::size_t const sdword_size_bits = sizeof(std::int32_t) * CHAR_BIT;
-      if (ud_obj.mnemonic == UD_Ijmp && 
+      if ((ud_obj.mnemonic == UD_Ijmp || ud_obj.mnemonic == UD_Icall) && 
         op && 
         op->type == UD_OP_JIMM && 
         op->size == sdword_size_bits)
@@ -263,8 +266,17 @@ public:
         std::string const jump_str = "Jump target is " + jmp_ss.str() + ".\n";
         OutputDebugStringA(jump_str.c_str());
 #endif
-        WriteJump(tramp_cur, jump_target);
-        tramp_cur += GetJumpSize();
+        if (ud_obj.mnemonic == UD_Ijmp)
+        {
+          WriteJump(tramp_cur, jump_target);
+          tramp_cur += GetJumpSize();
+        }
+        else
+        {
+          HADESMEM_ASSERT(ud_obj.mnemonic == UD_Icall);
+          WriteCall(tramp_cur, jump_target);
+          tramp_cur += GetCallSize();
+        }
       }
       else
       {
@@ -302,6 +314,8 @@ public:
 
     trampoline_.reset();
 
+    trampolines_.clear();
+
     applied_ = false;
   }
 
@@ -311,18 +325,88 @@ public:
   }
 
 private:
+#if defined(_M_AMD64)
+  // Inspired by EasyHook.
+  std::unique_ptr<Allocator> AllocTrampolineNear(PVOID address)
+  {
+    SYSTEM_INFO sys_info;
+    ZeroMemory(&sys_info, sizeof(sys_info));
+    GetSystemInfo(&sys_info);
+    DWORD page_size = sys_info.dwPageSize;
+
+    LONG_PTR const search_beg = 
+      (std::max)(reinterpret_cast<LONG_PTR>(address) - 0x7FFFFF00LL, 
+      reinterpret_cast<LONG_PTR>(sys_info.lpMinimumApplicationAddress));
+    LONG_PTR const search_end = 
+      (std::min)(reinterpret_cast<LONG_PTR>(address) + 0x7FFFFF00LL, 
+      reinterpret_cast<LONG_PTR>(sys_info.lpMaximumApplicationAddress));
+
+    std::unique_ptr<Allocator> trampoline;
+
+    for (LONG_PTR base = reinterpret_cast<LONG_PTR>(address), index = 0;
+      base + index < search_end || base - index > search_beg;
+      index += page_size)
+    {
+      LONG_PTR const higher = base + index;
+      if (higher < search_end)
+      {
+        try
+        {
+          trampoline.reset(new Allocator(*process_, reinterpret_cast<PVOID>(higher), page_size));
+          break;
+        }
+        catch (std::exception const& /*e*/)
+        { }
+      }
+
+      LONG_PTR const lower = base - index;
+      if (lower > search_beg)
+      {
+        try
+        {
+          trampoline.reset(new Allocator(*process_, reinterpret_cast<PVOID>(lower), page_size));
+          break;
+        }
+        catch (std::exception const& /*e*/)
+        { }
+      }
+    }
+
+    if (!trampoline)
+    {
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("Failed to find trampoline memory block."));
+    }
+
+    return trampoline;
+  }
+#elif defined(_M_IX86) 
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
   void WriteJump(PVOID address, PVOID target)
   {
     AsmJit::X86Assembler jit;
 
 #if defined(_M_AMD64) 
-    // PUSH <Low Absolute>
-    // MOV [RSP+4], <High Absolute>
-    // RET
-    jit.push(static_cast<DWORD>(reinterpret_cast<DWORD_PTR>(target)));
-    jit.mov(AsmJit::dword_ptr(AsmJit::rsp, 4), static_cast<DWORD>(((
-      reinterpret_cast<DWORD_PTR>(target) >> 32) & 0xFFFFFFFF)));
-    jit.ret();
+    // TODO: Fall back to PUSH/RET trick (14 bytes) if finding a trampoline 
+    // fails.
+    std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
+
+    PVOID tramp_addr = trampoline->GetBase();
+
+    Write(*process_, tramp_addr, reinterpret_cast<DWORD_PTR>(target));
+
+    trampolines_.emplace_back(std::move(trampoline));
+
+    AsmJit::Label label(jit.newLabel());
+    jit.bind(label);
+    // JMP QWORD PTR <Trampoline, Relative>
+    LONG_PTR const disp = reinterpret_cast<LONG_PTR>(tramp_addr) - 
+      reinterpret_cast<LONG_PTR>(address) - 
+      sizeof(LONG);
+    jit.jmp(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
 #elif defined(_M_IX86) 
     // JMP <Target, Relative>
     jit.jmp(target);
@@ -343,11 +427,65 @@ private:
 
     WriteVector(*process_, address, jump_buf);
   }
+  
+  void WriteCall(PVOID address, PVOID target)
+  {
+    AsmJit::X86Assembler jit;
+
+#if defined(_M_AMD64) 
+    std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
+
+    PVOID tramp_addr = trampoline->GetBase();
+
+    Write(*process_, tramp_addr, reinterpret_cast<DWORD_PTR>(target));
+
+    trampolines_.emplace_back(std::move(trampoline));
+
+    AsmJit::Label label(jit.newLabel());
+    jit.bind(label);
+    // CALL QWORD PTR <Trampoline, Relative>
+    LONG_PTR const disp = reinterpret_cast<LONG_PTR>(tramp_addr) - 
+      reinterpret_cast<LONG_PTR>(address) - 
+      sizeof(LONG);
+    jit.call(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
+#elif defined(_M_IX86) 
+    // CALL <Target, Relative>
+    jit.call(target);
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+    DWORD_PTR const stub_size = jit.getCodeSize();
+    if (stub_size != GetCallSize())
+    {
+      BOOST_THROW_EXCEPTION(Error() << 
+        ErrorString("Unexpected stub size."));
+    }
+
+    std::vector<BYTE> jump_buf(stub_size);
+      
+    jit.relocCode(jump_buf.data(), reinterpret_cast<DWORD_PTR>(address));
+
+    WriteVector(*process_, address, jump_buf);
+  }
 
   unsigned int GetJumpSize() const
   {
 #if defined(_M_AMD64) 
-    unsigned int jump_size = 14;
+    unsigned int jump_size = 6;
+#elif defined(_M_IX86) 
+    unsigned int jump_size = 5;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+    return jump_size;
+  }
+
+  unsigned int GetCallSize() const
+  {
+#if defined(_M_AMD64) 
+    unsigned int jump_size = 6;
 #elif defined(_M_IX86) 
     unsigned int jump_size = 5;
 #else 
@@ -361,6 +499,7 @@ private:
   PVOID detour_;
   std::unique_ptr<Allocator> trampoline_;
   std::vector<BYTE> orig_;
+  std::vector<std::unique_ptr<Allocator>> trampolines_;
 };
 
 }
