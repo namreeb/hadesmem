@@ -98,7 +98,7 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 #endif // #if defined(HADESMEM_CLANG)
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
-// See: http://goo.gl/1VVA3
+// See: http://bit.ly/17CCZFX
 #define HADESMEM_MAX_PATH_UNICODE (1 << 15)
 
 // Every effort is made to NOT assume the below is true across the entire 

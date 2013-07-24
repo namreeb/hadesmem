@@ -309,13 +309,12 @@ inline std::locale ImbueAllDefault()
 // Perform all initialization tasks.
 inline void InitializeAll()
 {
+  // TODO: Investigate why this is failing under MinGW-w64 and fix.
+#if !defined(HADESMEM_CLANG) && !defined(HADESMEM_GCC)
   DisableUserModeCallbackExceptionFilter();
   EnableCrtDebugFlags();
   EnableTerminationOnHeapCorruption();
   EnableBottomUpRand();
-  // Enabling mitigation policies under MinGW-w64 causes a crash.
-  // TODO: Investigate why this is failing under MinGW-w64 and fix.
-#if !defined(HADESMEM_CLANG) && !defined(HADESMEM_GCC)
   EnableMitigationPolicies();
 #endif
   ImbueAllDefault();

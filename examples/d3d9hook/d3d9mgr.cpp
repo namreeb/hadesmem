@@ -9,6 +9,8 @@
 #include <algorithm>
 
 #include <windows.h>
+#include <winternl.h>
+#include <winnt.h>
 
 // Work around a Clang issue.
 // c:/mingw32-dw2/bin/../lib/clang/3.2/../../../i686-w64-mingw32/include
@@ -39,6 +41,14 @@ using std::max;
 // TODO: Add more error checking.
 
 // TODO: Thread safety for hooks.
+
+// TODO: Find the right headers so that this can be removed.
+#ifndef STATUS_SUCCESS
+#define STATUS_SUCCESS (static_cast<NTSTATUS>(0x00000000L))
+#endif
+#ifndef NT_SUCCESS
+#define NT_SUCCESS(Status) ((static_cast<NTSTATUS>(Status)) >= 0)
+#endif
 
 namespace
 {
@@ -72,6 +82,8 @@ std::unique_ptr<hadesmem::PatchDetour> g_end_scene_hk;
 std::unique_ptr<hadesmem::PatchDetour> g_reset_hk;
 std::unique_ptr<hadesmem::PatchDetour> g_release_hk;
 
+std::unique_ptr<hadesmem::PatchDetour> g_ldr_load_dll;
+
 // TODO: Fix the code so this hack isn't required.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic pop
@@ -104,12 +116,18 @@ void OnPostReset(IDirect3DDevice9* device);
 
 void OnRelease(IUnknown* device, ULONG ref_count);
 
+void ApplyDetours(hadesmem::Module const& d3d9_mod);
+
+NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics, 
+  PCUNICODE_STRING name,  PVOID* handle);
+
 // TODO: Thread safety
 IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
 {
-  OutputDebugStringA("Direct3DCreate9Hk called.");
+  OutputDebugStringA("Direct3DCreate9Hk called.\n");
 
   IDirect3D9* d3d9 = nullptr;
+  DWORD last_error = 0;
   
   try
   {
@@ -119,17 +137,27 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
       g_d3d9_create_hk->GetTrampoline()));
 
     d3d9 = d3d9_create(sdk_version);
-    if (d3d9 && !g_create_device_hk)
+    last_error = GetLastError();
+    if (d3d9)
     {
-      PBYTE* vmt = *reinterpret_cast<PBYTE**>(d3d9);
+      OutputDebugStringA("Direct3DCreate9 succeeded.\n");
 
-      PBYTE create_device = vmt[16];
-      PBYTE create_device_hk = reinterpret_cast<PBYTE>(
-        reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
+      if (!g_create_device_hk)
+      {
+        PBYTE* vmt = *reinterpret_cast<PBYTE**>(d3d9);
 
-      g_create_device_hk.reset(new hadesmem::PatchDetour(*g_process, 
-        create_device, create_device_hk));
-      g_create_device_hk->Apply();
+        PBYTE create_device = vmt[16];
+        PBYTE create_device_hk = reinterpret_cast<PBYTE>(
+          reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
+
+        g_create_device_hk.reset(new hadesmem::PatchDetour(*g_process, 
+          create_device, create_device_hk));
+        g_create_device_hk->Apply();
+      }
+    }
+    else
+    {
+      OutputDebugStringA("Direct3DCreate9 failed.\n");
     }
   }
   catch (std::exception const& e)
@@ -138,15 +166,17 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
     OutputDebugStringA(boost::diagnostic_information(e).c_str());
   }
 
+  SetLastError(last_error);
   return d3d9;
 }
 
 // TODO: Thread safety
 HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
 {
-  OutputDebugStringA("Direct3DCreate9ExHk called.");
+  OutputDebugStringA("Direct3DCreate9ExHk called.\n");
 
   HRESULT hr = ERROR_NOT_SUPPORTED;
+  DWORD last_error = 0;
   
   try
   {
@@ -156,17 +186,27 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
       g_d3d9_create_ex_hk->GetTrampoline()));
 
     hr = d3d9_create_ex(sdk_version, ppd3d9);
-    if (SUCCEEDED(hr) && ppd3d9 && *ppd3d9 && !g_create_device_hk)
+    last_error = GetLastError();
+    if (SUCCEEDED(hr) && ppd3d9 && *ppd3d9)
     {
-      PBYTE* vmt = *reinterpret_cast<PBYTE**>(*ppd3d9);
+      OutputDebugStringA("Direct3DCreate9Ex succeeded.\n");
 
-      PBYTE create_device = vmt[16];
-      PBYTE create_device_hk = reinterpret_cast<PBYTE>(
-        reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
+      if (!g_create_device_hk)
+      {
+        PBYTE* vmt = *reinterpret_cast<PBYTE**>(*ppd3d9);
 
-      g_create_device_hk.reset(new hadesmem::PatchDetour(*g_process, 
-        create_device, create_device_hk));
-      g_create_device_hk->Apply();
+        PBYTE create_device = vmt[16];
+        PBYTE create_device_hk = reinterpret_cast<PBYTE>(
+          reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
+
+        g_create_device_hk.reset(new hadesmem::PatchDetour(*g_process, 
+          create_device, create_device_hk));
+        g_create_device_hk->Apply();
+      }
+    }
+    else
+    {
+      OutputDebugStringA("Direct3DCreate9Ex failed.\n");
     }
   }
   catch (std::exception const& e)
@@ -175,6 +215,7 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
     OutputDebugStringA(boost::diagnostic_information(e).c_str());
   }
 
+  SetLastError(last_error);
   return hr;
 }
 
@@ -187,9 +228,10 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
   D3DPRESENT_PARAMETERS* presentation_params, 
   IDirect3DDevice9** ppdevice)
 {
-  OutputDebugStringA("CreateDeviceHk called.");
+  OutputDebugStringA("CreateDeviceHk called.\n");
 
   HRESULT hr = ERROR_NOT_SUPPORTED;
+  DWORD last_error_restored = 0;
   
   try
   {
@@ -200,9 +242,12 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
 
     hr = create_device(pd3d9, adapter, device_type, focus_wnd, 
       behaviour_flags, presentation_params, ppdevice);
+    last_error_restored = GetLastError();
     // TODO: Reduce nesting.
     if (SUCCEEDED(hr) && ppdevice && *ppdevice)
     {
+      OutputDebugStringA("CreateDevice succeeded.\n");
+
       PBYTE* vmt = *reinterpret_cast<PBYTE**>(*ppdevice);
 
       if (!g_release_hk)
@@ -332,6 +377,10 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
         throw;
       }
     }
+    else
+    {
+      OutputDebugStringA("CreateDevice failed.\n");
+    }
   }
   catch (std::exception const& e)
   {
@@ -339,6 +388,7 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     OutputDebugStringA(boost::diagnostic_information(e).c_str());
   }
 
+  SetLastError(last_error_restored);
   return hr;
 }
 
@@ -348,28 +398,58 @@ HRESULT WINAPI EndSceneHk(IDirect3DDevice9* device)
     reinterpret_cast<decltype(&EndSceneHk)>(
     reinterpret_cast<DWORD_PTR>(
     g_end_scene_hk->GetTrampoline()));
+  
+  try
+  {
+    OnEndScene(device);
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
 
-  OnEndScene(device);
-
-  HRESULT hr = end_scene(device);
-
-  return hr;
+  return end_scene(device);
 }
 
 HRESULT WINAPI ResetHk(IDirect3DDevice9* device, 
   D3DPRESENT_PARAMETERS* presentation_params)
 {
+  OutputDebugStringA("Reset called.\n");
+
   auto const reset = 
     reinterpret_cast<decltype(&ResetHk)>(
     reinterpret_cast<DWORD_PTR>(
     g_reset_hk->GetTrampoline()));
 
-  OnPreReset(device);
+  try
+  {
+    OnPreReset(device);
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
 
   HRESULT hr = reset(device, presentation_params);
+  DWORD const last_error = GetLastError();
+  
+  OutputDebugStringA(SUCCEEDED(hr) ? 
+    "Reset succeeded.\n" : 
+    "Reset failed.\n");
 
-  OnPostReset(device);
+  try
+  {
+    OnPostReset(device);
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
 
+  SetLastError(last_error);
   return hr;
 }
 
@@ -381,9 +461,19 @@ ULONG WINAPI ReleaseHk(IUnknown* unknown)
     g_release_hk->GetTrampoline()));
   
   ULONG ref_count = release(unknown);
+  DWORD const last_error = GetLastError();
+  
+  try
+  {
+    OnRelease(unknown, ref_count);
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
 
-  OnRelease(unknown, ref_count);
-
+  SetLastError(last_error);
   return ref_count;
 }
 
@@ -483,15 +573,30 @@ void OnPreReset(IDirect3DDevice9* device)
     data.g_state_block->Release();
     data.g_state_block = nullptr;
   }
+  else
+  {
+    OutputDebugStringA("Warning! OnPreReset called with invalid render data"
+      " (state block).\n");
+  }
 
   if (data.g_line)
   {
     data.g_line->OnLostDevice();
   }
+  else
+  {
+    OutputDebugStringA("Warning! OnPreReset called with invalid render data"
+      " (line).\n");
+  }
 
   if (data.g_font)
   {
     data.g_font->OnLostDevice();
+  }
+  else
+  {
+    OutputDebugStringA("Warning! OnPreReset called with invalid render data"
+      " (font).\n");
   }
 }
 
@@ -509,7 +614,7 @@ void OnPostReset(IDirect3DDevice9* device)
   if (data.g_state_block)
   {
     OutputDebugStringA("Warning! OnPostReset called with invalid render data"
-      " (state block).");
+      " (state block).\n");
   }
   else
   {
@@ -523,7 +628,7 @@ void OnPostReset(IDirect3DDevice9* device)
   else
   {
     OutputDebugStringA("Warning! OnPostReset called with invalid render data "
-      "(line).");
+      "(line).\n");
   }
 
   if (data.g_font)
@@ -533,7 +638,7 @@ void OnPostReset(IDirect3DDevice9* device)
   else
   {
     OutputDebugStringA("Warning! OnPostReset called with invalid render data "
-      "(font).");
+      "(font).\n");
   }
 }
 
@@ -576,39 +681,134 @@ void OnRelease(IUnknown* device, ULONG ref_count)
   g_devices.erase(iter);
 }
 
+void ApplyDetours(hadesmem::Module const& d3d9_mod)
+{
+  try
+  {
+    if (!g_d3d9_create_hk)
+    {
+      FARPROC const d3d9_create = hadesmem::FindProcedure(*g_process, d3d9_mod, 
+        "Direct3DCreate9");
+      PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+        d3d9_create));
+      PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+        &Direct3DCreate9Hk));
+      g_d3d9_create_hk.reset(new hadesmem::PatchDetour(*g_process, target, 
+        detour));
+      g_d3d9_create_hk->Apply();
+    }
+
+    if (!g_d3d9_create_ex_hk)
+    {
+      // TODO: Fail gracefully when this function is unavailable. (Investigate 
+      // when this can happen... Maybe it's unnecessary nowadays?)
+      FARPROC const d3d9_create_ex = hadesmem::FindProcedure(*g_process, 
+        d3d9_mod, "Direct3DCreate9Ex");
+      PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+        d3d9_create_ex));
+      PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
+        &Direct3DCreate9ExHk));
+      g_d3d9_create_ex_hk.reset(new hadesmem::PatchDetour(*g_process, target, 
+        detour));
+      g_d3d9_create_ex_hk->Apply();
+    }
+  }
+  catch (std::exception const& e)
+  {
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
+}
+
+NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics, 
+  PCUNICODE_STRING name,  PVOID* handle)
+{
+  OutputDebugStringA("LdrLoadDll called.\n");
+
+  if (name && name->Length && name->Buffer)
+  {
+    OutputDebugStringW((L"DllName: " + std::wstring(name->Buffer, name->Buffer + name->Length - 1) + L".\n").c_str());
+  }
+
+  NTSTATUS ret = STATUS_SUCCESS;
+  DWORD last_error = 0;
+  
+  try
+  {
+    auto const ldr_load_dll = 
+      reinterpret_cast<decltype(&LdrLoadDllHk)>(
+      reinterpret_cast<DWORD_PTR>(
+      g_ldr_load_dll->GetTrampoline()));
+
+    ret = ldr_load_dll(path, characteristics, name, handle);
+    last_error = GetLastError();
+    if (NT_SUCCESS(ret))
+    {
+      OutputDebugStringA("LdrLoadDll succeeded.\n");
+
+      if (name && name->Length && name->Buffer)
+      {
+        std::wstring const name_real(hadesmem::detail::ToUpperOrdinal(
+          std::wstring(name->Buffer, name->Buffer + name->Length)));
+        OutputDebugStringW((L"Loaded DLL: " + name_real + L".\n").c_str());
+        std::wstring const d3d9_dll_name(hadesmem::detail::ToUpperOrdinal(
+          L"d3d9.dll"));
+        std::wstring const d3d9_name(hadesmem::detail::ToUpperOrdinal(
+          L"d3d9"));
+        if (name_real == d3d9_dll_name || name_real == d3d9_name)
+        {
+          OutputDebugStringA("D3D9 loaded. Applying hooks.\n");
+
+          hadesmem::Module const d3d9_mod(*g_process, 
+            reinterpret_cast<HMODULE>(*handle));
+          ApplyDetours(d3d9_mod);
+        }
+      }
+    }
+    else
+    {
+      OutputDebugStringA("LdrLoadDll failed.\n");
+    }
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
+
+  SetLastError(last_error);
+  return ret;
+}
+
 }
 
 void InitializeD3D9Hooks()
 {
   g_process.reset(new hadesmem::Process(::GetCurrentProcessId()));
   
-  // TODO: Fix to not require this (load library hook?).
-  LoadLibraryW(L"d3d9.dll");
-  hadesmem::Module d3d9_mod(*g_process, L"d3d9.dll");
-
+  std::unique_ptr<hadesmem::Module> d3d9_mod;
+  try
   {
-    FARPROC const d3d9_create = hadesmem::FindProcedure(*g_process, d3d9_mod, 
-      "Direct3DCreate9");
+    d3d9_mod.reset(new hadesmem::Module(*g_process, L"d3d9.dll"));
+  }
+  catch (std::exception const& /*e*/)
+  {
+    OutputDebugStringA("Hooking LdrLoadDll.\n");
+
+    hadesmem::Module ntdll(*g_process, L"ntdll.dll");
+    FARPROC const ldr_load_dll = hadesmem::FindProcedure(*g_process, ntdll, 
+      "LdrLoadDll");
     PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      d3d9_create));
+      ldr_load_dll));
     PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      &Direct3DCreate9Hk));
-    g_d3d9_create_hk.reset(new hadesmem::PatchDetour(*g_process, target, 
+      &LdrLoadDllHk));
+    g_ldr_load_dll.reset(new hadesmem::PatchDetour(*g_process, target, 
       detour));
-    g_d3d9_create_hk->Apply();
+    g_ldr_load_dll->Apply();
+
+    return;
   }
 
-  {
-    // TODO: Fail gracefully when this function is unavailable. (Investigate 
-    // when this can happen... Maybe it's unnecessary nowadays?)
-    FARPROC const d3d9_create_ex = hadesmem::FindProcedure(*g_process, 
-      d3d9_mod, "Direct3DCreate9Ex");
-    PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      d3d9_create_ex));
-    PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      &Direct3DCreate9ExHk));
-    g_d3d9_create_ex_hk.reset(new hadesmem::PatchDetour(*g_process, target, 
-      detour));
-    g_d3d9_create_ex_hk->Apply();
-  }
+  OutputDebugStringA("Hooking D3D9 directly.\n");
+
+  ApplyDetours(*d3d9_mod);
 }
