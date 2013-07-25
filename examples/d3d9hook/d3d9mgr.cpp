@@ -38,7 +38,17 @@ using std::max;
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
+// TODO: Clean this all up.
+
+// TODO: Add more error checking (e.g. all the D3DX calls).
+
 // TODO: Thread safety for hooks.
+
+// TODO: Add CreateProcess/ShellExecute/etc hooks. (Or perhaps at a lower 
+// level?)
+
+// TODO: Support multiple D3D modules (both in parallel and reloading of a 
+// single module).
 
 // TODO: Find the right headers so that this can be removed.
 #ifndef STATUS_SUCCESS
@@ -163,7 +173,7 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error);
@@ -212,7 +222,7 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error);
@@ -363,6 +373,8 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
       }
       catch (std::exception const& /*e*/)
       {
+        ::OutputDebugStringA("Failed while initializing render data.\n");
+
         data.g_state_block->Release();
         data.g_state_block = nullptr;
   
@@ -383,7 +395,7 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::  ;
   }
 
   ::SetLastError(last_error_restored);
@@ -404,7 +416,7 @@ HRESULT WINAPI EndSceneHk(IDirect3DDevice9* device)
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   return end_scene(device);
@@ -427,7 +439,7 @@ HRESULT WINAPI ResetHk(IDirect3DDevice9* device,
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   HRESULT hr = reset(device, presentation_params);
@@ -444,7 +456,7 @@ HRESULT WINAPI ResetHk(IDirect3DDevice9* device,
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error);
@@ -468,7 +480,7 @@ ULONG WINAPI ReleaseHk(IUnknown* unknown)
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error);
@@ -521,14 +533,14 @@ void OnEndScene(IDirect3DDevice9* device)
   D3DVIEWPORT9 viewport;
   device->GetViewport(&viewport);
 
-  D3DXVECTOR2 const top_left(0,0);
-  D3DXVECTOR2 const bottom_right(static_cast<float>(viewport.Width), 
-    static_cast<float>(viewport.Height));
+  D3DXVECTOR2 const top_left(1,1);
+  D3DXVECTOR2 const bottom_right(static_cast<float>(viewport.Width) - 1, 
+    static_cast<float>(viewport.Height) - 1);
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-sign-overflow"
 #endif // #if defined(HADESMEM_CLANG)
-  draw_box(top_left, bottom_right, 2, D3DCOLOR_ARGB(255, 0, 255, 0));
+  draw_box(top_left, bottom_right, 5, D3DCOLOR_ARGB(255, 0, 255, 0));
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
@@ -715,7 +727,7 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
   }
   catch (std::exception const& e)
   {
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 }
 
@@ -767,7 +779,7 @@ NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics,
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::OutputDebugStringA(boost::diagnostic_information(e).c_str());
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error);
