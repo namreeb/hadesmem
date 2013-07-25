@@ -964,7 +964,12 @@ inline void CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
 
-  // TODO: Configurable timeout.
+  // TODO: Configurable timeout. This will complicate resource management 
+  // however, as we will need to extend the lifetime of the remote memory 
+  // in case it executes after we time out. Also, if it times out there 
+  // is no way to try again in the future... Should we just leak the memory 
+  // on timeout? Return a 'future' object? Some sort of combination? Requires 
+  // more investigation...
   detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
 
   std::vector<detail::CallResultRemote> return_vals_remote = 

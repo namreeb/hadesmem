@@ -113,8 +113,13 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
   auto const stub_remote_pfn = 
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
-
-  // TODO: Configurable timeout.
+  
+  // TODO: Configurable timeout. This will complicate resource management 
+  // however, as we will need to extend the lifetime of the remote memory 
+  // in case it executes after we time out. Also, if it times out there 
+  // is no way to try again in the future... Should we just leak the memory 
+  // on timeout? Return a 'future' object? Some sort of combination? Requires 
+  // more investigation...
   CreateRemoteThreadAndWait(process, stub_remote_pfn);
 }
 
@@ -214,7 +219,12 @@ inline void FreeDll(Process const& process, HMODULE module)
   }
 }
 
-// TODO: Configurable timeout.
+// TODO: Configurable timeout. This will complicate resource management 
+// however, as we will need to extend the lifetime of the remote memory 
+// in case it executes after we time out. Also, if it times out there 
+// is no way to try again in the future... Should we just leak the memory 
+// on timeout? Return a 'future' object? Some sort of combination? Requires 
+// more investigation...
 inline CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
   std::string const& export_name)
 {
@@ -369,7 +379,12 @@ inline CreateAndInjectData CreateAndInject(
     CallResult<DWORD_PTR> export_ret(0, 0);
     if (!export_name.empty())
     {
-      // TODO: Configurable timeout.
+      // TODO: Configurable timeout. This will complicate resource management 
+      // however, as we will need to extend the lifetime of the remote memory 
+      // in case it executes after we time out. Also, if it times out there 
+      // is no way to try again in the future... Should we just leak the memory 
+      // on timeout? Return a 'future' object? Some sort of combination? Requires 
+      // more investigation...
       export_ret = CallExport(process, remote_module, export_name);
     }
 
