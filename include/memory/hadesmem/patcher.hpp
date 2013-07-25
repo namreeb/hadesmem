@@ -396,6 +396,8 @@ private:
 #if defined(_M_AMD64) 
     // TODO: Fall back to PUSH/RET trick (14 bytes) if finding a trampoline 
     // fails.
+    // TODO: Use relative jumps where possible (detect delta at 
+    // runtime). Saves a byte.
     std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
 
     PVOID tramp_addr = trampoline->GetBase();
@@ -489,14 +491,14 @@ private:
   unsigned int GetCallSize() const
   {
 #if defined(_M_AMD64) 
-    unsigned int jump_size = 6;
+    unsigned int call_size = 6;
 #elif defined(_M_IX86) 
-    unsigned int jump_size = 5;
+    unsigned int call_size = 5;
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    return jump_size;
+    return call_size;
   }
 
   PVOID target_;
