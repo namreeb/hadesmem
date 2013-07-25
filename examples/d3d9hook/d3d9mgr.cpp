@@ -395,7 +395,7 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
   catch (std::exception const& e)
   {
     // TODO: Add proper logging.
-    ::  ;
+    ::OutputDebugStringA((boost::diagnostic_information(e) + "\n").c_str());
   }
 
   ::SetLastError(last_error_restored);
