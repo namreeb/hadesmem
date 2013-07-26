@@ -45,7 +45,7 @@ using std::max;
 // TODO: Thread safety for hooks.
 
 // TODO: Add CreateProcess/ShellExecute/etc hooks. (Or perhaps at a lower 
-// level?)
+// level? e.g. NtCreateUserProcess, NtCreateProcess, NtCreateProcessEx.)
 
 // TODO: Support multiple D3D modules (both in parallel and reloading of a 
 // single module).
@@ -75,11 +75,8 @@ std::unique_ptr<hadesmem::Process> g_process;
 struct RenderData
 {
   HWND g_wnd;
-
   IDirect3DStateBlock9* g_state_block;
-
   ID3DXLine* g_line;
-
   ID3DXFont* g_font;
 };
 

@@ -64,6 +64,9 @@ run injector.cpp
 run patcher.cpp
   ;
   
+run find_pattern.cpp
+  ;
+  
 run pelib/pe_file.cpp
   ;
   

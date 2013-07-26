@@ -27,7 +27,7 @@
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push, 1)
-#pragma warning(disable: 66 177 367 504 693 809 869 1879 1885)
+#pragma warning(disable: 9 10 66 82 177 367 504 693 809 869 1879 1885)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_CLANG)
@@ -35,6 +35,7 @@
 #pragma GCC diagnostic ignored "-Wgnu"
 #pragma GCC diagnostic ignored "-Wundef"
 #pragma GCC diagnostic ignored "-Wpadded"
+#pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wcast-align"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wextra-semi"
