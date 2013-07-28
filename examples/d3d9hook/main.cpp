@@ -31,6 +31,16 @@ extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/)
 
 extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID /*module*/)
 {
+  try
+  {
+    UninitializeD3D9Hooks();
+  }
+  catch (std::exception const& e)
+  {
+    // TODO: Add proper logging.
+    OutputDebugStringA(boost::diagnostic_information(e).c_str());
+  }
+
   return 0;
 }
 

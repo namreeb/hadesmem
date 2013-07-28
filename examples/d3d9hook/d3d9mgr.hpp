@@ -4,3 +4,5 @@
 #pragma once
 
 void InitializeD3D9Hooks();
+
+void UninitializeD3D9Hooks();

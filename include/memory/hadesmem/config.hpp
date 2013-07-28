@@ -87,6 +87,14 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 #define HADESMEM_CALL_MAX_ARGS 10
 #endif // #ifndef HADESMEM_CALL_MAX_ARGS
 
+#if !defined(HADESMEM_NO_TRACING)
+#define HADESMEM_TRACE_A(x) ::OutputDebugStringA(x)
+#define HADESMEM_TRACE_W(x) ::OutputDebugStringW(x)
+#else
+#define HADESMEM_TRACE_A(x) 
+#define HADESMEM_TRACE_W(x) 
+#endif
+
 // This is required because of a bug in Clang's dllexport support on Windows, 
 // this is worked around by using a linker flag to export all symbols 
 // unconditionally.

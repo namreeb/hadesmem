@@ -22,7 +22,7 @@ inline PVOID Alloc(Process const& process, SIZE_T size)
     size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
   if (!address)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
@@ -37,7 +37,7 @@ inline PVOID Alloc(Process const& process, PVOID base, SIZE_T size)
     size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
   if (!address)
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
@@ -50,7 +50,7 @@ inline void Free(Process const& process, LPVOID address)
 {
   if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
   {
-    DWORD const last_error = GetLastError();
+    DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualFreeEx failed.") << 
       ErrorCodeWinLast(last_error));
@@ -153,7 +153,9 @@ private:
       (void)e;
 
       // WARNING: Memory in remote process is leaked if 'Free' fails
-      HADESMEM_ASSERT(boost::diagnostic_information(e).c_str() && false);
+      // TODO: Add debug logging to other destructors.
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_TRACE_A("\n");
 
       process_ = nullptr;
       base_ = nullptr;
