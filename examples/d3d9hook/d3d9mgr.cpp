@@ -49,6 +49,9 @@ using std::max;
 // TODO: Hook process creation APIs at NT level (NtCreateUserProcess, 
 // NtCreateProcess, NtCreateProcessEx).
 
+// TODO: Investigate how ShellExecute[Ex], WinExec, etc create processes and 
+// how we should hook them.
+
 // TODO: Support 32-bit processes running 64-bit processes and vice-versa.
 
 // TODO: Support multiple D3D modules (both in parallel and reloading of a 
@@ -827,6 +830,9 @@ NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics,
     last_error = GetLastError();
     if (NT_SUCCESS(ret))
     {
+      // TODO: Should be checking anything else here like characteristics, path, 
+      // handle, etc?
+
       HADESMEM_TRACE_A("LdrLoadDll succeeded.\n");
 
       if (name && name->Length && name->Buffer)
