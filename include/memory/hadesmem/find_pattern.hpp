@@ -39,7 +39,8 @@
 #include <hadesmem/detail/static_assert.hpp>
 
 // TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
-// appropriate, remove and add apis, fix bugs, clean up code, etc.
+// appropriate, remove and add apis, fix bugs, clean up code, etc. Use new 
+// lanaguage features like noexcept, constexpr, etc.
 // TODO: Add stream overloads.
 // TODO: Rewrite to not use virtual functions.
 // TODO: Rewrite to remove cyclic dependencies.
@@ -134,24 +135,24 @@ public:
 
   Pattern& operator=(Pattern const& other);
   
-  Pattern(Pattern&& Other);
+  Pattern(Pattern&& other) HADESMEM_NOEXCEPT;
   
-  Pattern& operator=(Pattern&& Other);
+  Pattern& operator=(Pattern&& other) HADESMEM_NOEXCEPT;
   
-  ~Pattern();
+  ~Pattern() HADESMEM_NOEXCEPT;
   
   void Save();
   
   // TODO: More consistent naming.
   void Update(PBYTE address);
   
-  PBYTE GetAddress() const;
+  PBYTE GetAddress() const HADESMEM_NOEXCEPT;
   
-  int GetFlags() const;
+  int GetFlags() const HADESMEM_NOEXCEPT;
   
-  DWORD_PTR GetBase() const;
+  DWORD_PTR GetBase() const HADESMEM_NOEXCEPT;
 
-  Process const* GetProcess() const;
+  Process const* GetProcess() const HADESMEM_NOEXCEPT;
     
 private:
   FindPattern* finder_;
@@ -169,7 +170,7 @@ public:
   // TODO: Should this be pure virtual?
   virtual void Manipulate(Pattern& /*pattern*/) const;
 
-  virtual ~Manipulator();
+  virtual ~Manipulator() HADESMEM_NOEXCEPT;
 
   friend Pattern& operator<< (Pattern& pattern, 
     Manipulator const& manipulator);
@@ -184,7 +185,7 @@ public:
 class Add : public Manipulator
 {
 public:
-  explicit Add(DWORD_PTR offset);
+  explicit Add(DWORD_PTR offset) HADESMEM_NOEXCEPT;
   
   virtual void Manipulate(Pattern& pattern) const;
   
@@ -195,7 +196,7 @@ private:
 class Sub : public Manipulator
 {
 public:
-  explicit Sub(DWORD_PTR offset);
+  explicit Sub(DWORD_PTR offset) HADESMEM_NOEXCEPT;
   
   virtual void Manipulate(Pattern& pattern) const;
     
@@ -212,7 +213,7 @@ public:
 class Rel : public Manipulator
 {
 public:
-  Rel(DWORD_PTR size, DWORD_PTR offset);
+  Rel(DWORD_PTR size, DWORD_PTR offset) HADESMEM_NOEXCEPT;
   
   virtual void Manipulate(Pattern& pattern) const;
   
@@ -304,18 +305,21 @@ public:
     return *this;
   }
     
-  FindPattern(FindPattern&& other)
+  FindPattern(FindPattern&& other) HADESMEM_NOEXCEPT
     : process_(other.process_), 
     base_(other.base_), 
     code_regions_(std::move(other.code_regions_)), 
     data_regions_(std::move(other.data_regions_)), 
     addresses_(std::move(other.addresses_))
-  { }
+  {
+    other.process_ = nullptr;
+    other.base_ = 0;
+  }
     
-  FindPattern& operator=(FindPattern&& other)
+  FindPattern& operator=(FindPattern&& other) HADESMEM_NOEXCEPT
   {
     process_ = other.process_;
-    other.process_ = 0;
+    other.process_ = nullptr;
     base_ = other.base_;
     other.base_ = 0;
     code_regions_ = std::move(other.code_regions_);
@@ -324,7 +328,7 @@ public:
     return *this;
   }
     
-  ~FindPattern()
+  ~FindPattern() HADESMEM_NOEXCEPT
   { }
   
   PVOID Find(std::wstring const& data, int flags) const
@@ -667,7 +671,7 @@ inline Pattern& Pattern::operator=(Pattern const& other)
   return *this;
 }
     
-inline Pattern::Pattern(Pattern&& other)
+inline Pattern::Pattern(Pattern&& other) HADESMEM_NOEXCEPT
   : finder_(other.finder_), 
   name_(std::move(other.name_)), 
   address_(other.address_), 
@@ -678,7 +682,7 @@ inline Pattern::Pattern(Pattern&& other)
   other.flags_ = FindPatternFlags::kNone;
 }
     
-inline Pattern& Pattern::operator=(Pattern&& other)
+inline Pattern& Pattern::operator=(Pattern&& other) HADESMEM_NOEXCEPT
 {
   finder_ = other.finder_;
   other.finder_ = nullptr;
@@ -690,7 +694,7 @@ inline Pattern& Pattern::operator=(Pattern&& other)
   return *this;
 }
     
-inline Pattern::~Pattern()
+inline Pattern::~Pattern() HADESMEM_NOEXCEPT
 { }
   
 inline void Pattern::Save()
@@ -711,24 +715,25 @@ inline void Pattern::Update(PBYTE address)
   address_ = address;
 }
     
-inline PBYTE Pattern::GetAddress() const
+inline PBYTE Pattern::GetAddress() const HADESMEM_NOEXCEPT
 {
   return address_;
 }
 
-inline int Pattern::GetFlags() const
+inline int Pattern::GetFlags() const HADESMEM_NOEXCEPT
 {
   return flags_;
 }
     
-inline DWORD_PTR Pattern::GetBase() const
+inline DWORD_PTR Pattern::GetBase() const HADESMEM_NOEXCEPT
 {
   // TODO: This feels like a hack. Investigate and fix this. (And if 
   // appropriate, remove friendship requirement.)
   return finder_->base_;
 }
 
-inline Process const* Pattern::GetProcess() const
+// TODO: This feels like a hack. Investigate and fix this.
+inline Process const* Pattern::GetProcess() const HADESMEM_NOEXCEPT
 {
   return finder_->process_;
 }
@@ -740,7 +745,7 @@ namespace pattern_manipulators
 inline void Manipulator::Manipulate(Pattern& /*pattern*/) const
 { }
 
-inline Manipulator::~Manipulator()
+inline Manipulator::~Manipulator() HADESMEM_NOEXCEPT
 { }
 
 inline void Save::Manipulate(Pattern& pattern) const
@@ -748,7 +753,7 @@ inline void Save::Manipulate(Pattern& pattern) const
   pattern.Save();
 }
 
-inline Add::Add(DWORD_PTR offset)
+inline Add::Add(DWORD_PTR offset) HADESMEM_NOEXCEPT
   : offset_(offset)
 { }
 
@@ -761,7 +766,7 @@ inline void Add::Manipulate(Pattern& pattern) const
   }
 }
 
-inline Sub::Sub(DWORD_PTR offset)
+inline Sub::Sub(DWORD_PTR offset) HADESMEM_NOEXCEPT
   : offset_(offset)
 { }
 
@@ -795,7 +800,7 @@ inline void Lea::Manipulate(Pattern& pattern) const
   }
 }
 
-inline Rel::Rel(DWORD_PTR size, DWORD_PTR offset)
+inline Rel::Rel(DWORD_PTR size, DWORD_PTR offset) HADESMEM_NOEXCEPT
   : size_(size), 
   offset_(offset)
 { }

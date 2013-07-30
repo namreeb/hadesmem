@@ -59,6 +59,16 @@ using std::max;
 
 // TODO: Fail gracefully if any functions we hook don't exist.
 
+// TODO: Should the D3D hooks be destroyed automatically instead of by a 
+// cleanup function? What if d3d9hook.dll is unloaded before d3d9 and 
+// something calls one of the funcs we hook? Probably unlikely.. The 
+// hooks that are likely to be called (e.g. LdrLoadDll) are already 
+// automatically cleaned up. We do need to make sure we don't unload at a 
+// time that will cause the target to crash though... Investigate safety 
+// for unloads at arbitrary times (and perhaps reloads using a save and 
+// lookup of some sort, to make testing easier).
+
+
 // TODO: Find the right headers so that this can be removed.
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS (static_cast<NTSTATUS>(0x00000000L))

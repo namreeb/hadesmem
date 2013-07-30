@@ -27,95 +27,58 @@
 #include <hadesmem/write.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wweak-vtables"
-#endif
+// TODO: Fix exception safety.
 
 namespace hadesmem
 {
 
-template <typename Derived>
-class Patch
-{
-public:
-  explicit Patch(Process const& process)
-    : process_(&process), 
-    applied_(false)
-  { }
-    
-  Patch(Patch&& other)
-    : process_(other.process_), 
-    applied_(other.applied_)
-  {
-    other.applied_ = false;
-  }
-    
-  Patch& operator=(Patch&& other)
-  {
-    process_ = other.process_;
-    applied_ = other.applied_;
-    other.applied_ = false;
-    return *this;
-  }
-
-  virtual ~Patch()
-  { }
-
-  void Apply()
-  {
-    static_cast<Derived*>(this)->Apply();
-  }
-    
-  void Remove()
-  {
-    static_cast<Derived*>(this)->Remove();
-  }
-
-  bool IsApplied() const
-  {
-    return applied_;
-  }
-
-protected:
-  Process const* process_;
-
-  bool applied_;
-    
-private:
-  Patch(Patch const&);
-  Patch& operator=(Patch const&);
-};
-
-class PatchRaw : public Patch<PatchRaw>
+class PatchRaw
 {
 public:
   PatchRaw(Process const& process, PVOID target, 
     std::vector<BYTE> const& data)
-    : Patch(process), 
+    : process_(&process), 
+    applied_(false), 
     target_(target), 
     data_(data), 
     orig_()
   { }
     
-  PatchRaw(PatchRaw&& other)
-    : Patch(std::forward<Patch>(other)), 
+  PatchRaw(PatchRaw&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    applied_(other.applied_), 
     target_(other.target_), 
     data_(std::move(other.data_)), 
     orig_(std::move(other.orig_))
   {
+    other.process_ = nullptr;
+    other.applied_ = false;
     other.target_ = nullptr;
   }
     
-  PatchRaw& operator=(PatchRaw&& other)
+  PatchRaw& operator=(PatchRaw&& other) HADESMEM_NOEXCEPT
   {
-    Patch::operator=(std::forward<Patch>(other));
+    RemoveUnchecked();
+    
+    process_ = other.process_;
+    other.process_ = nullptr;
+    applied_ = other.applied_;
+    other.applied_ = false;
     target_ = other.target_;
     other.target_ = nullptr;
     data_ = std::move(other.data_);
     orig_ = std::move(other.orig_);
     return *this;
+  }
+
+  ~PatchRaw() HADESMEM_NOEXCEPT
+  {
+    RemoveUnchecked();
+  }
+  
+  bool IsApplied() const HADESMEM_NOEXCEPT
+  {
+    return applied_;
   }
   
   void Apply()
@@ -147,18 +110,50 @@ public:
 
     applied_ = false;
   }
+  
+  // TODO: Code smell... This feels like code duplication between derived classes.
+  void RemoveUnchecked() HADESMEM_NOEXCEPT
+  {
+    try
+    {
+      Remove();
+    }
+    catch (std::exception const& e)
+    {
+      (void)e;
+
+      // WARNING: Patch may not be removed if Remove fails.
+      // TODO: Add debug logging to other destructors.
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_TRACE_A("\n");
+      
+      // TODO: Code smell... Should this be handled by the base class somehow?
+      process_ = nullptr;
+      applied_ = false;
+
+      target_ = nullptr;
+      data_.clear();
+      orig_.clear();
+    }
+  }
 
 private:
+  PatchRaw(PatchRaw const& other) HADESMEM_DELETED_FUNCTION;
+  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DELETED_FUNCTION;
+  
+  Process const* process_;
+  bool applied_;
   PVOID target_;
   std::vector<BYTE> data_;
   std::vector<BYTE> orig_;
 };
 
-class PatchDetour : public Patch<PatchDetour>
+class PatchDetour
 {
 public:
   PatchDetour(Process const& process, PVOID target, PVOID detour)
-    : Patch(process), 
+    : process_(&process), 
+    applied_(false), 
     target_(target), 
     detour_(detour), 
     trampoline_(), 
@@ -166,21 +161,29 @@ public:
     trampolines_()
   { }
     
-  PatchDetour(PatchDetour&& other)
-    : Patch(std::forward<Patch>(other)), 
+  PatchDetour(PatchDetour&& other) HADESMEM_NOEXCEPT
+    : process_(other.process_), 
+    applied_(other.applied_), 
     target_(other.target_), 
     detour_(other.detour_), 
     trampoline_(std::move(other.trampoline_)), 
     orig_(std::move(other.orig_)), 
     trampolines_(std::move(other.trampolines_))
   {
+    other.process_ = nullptr;
+    other.applied_ = false;
     other.target_ = nullptr;
     other.detour_ = nullptr;
   }
-    
-  PatchDetour& operator=(PatchDetour&& other)
+   
+  PatchDetour& operator=(PatchDetour&& other) HADESMEM_NOEXCEPT
   {
-    Patch::operator=(std::forward<Patch>(other));
+    RemoveUnchecked();
+    
+    process_ = other.process_;
+    other.process_ = nullptr;
+    applied_ = other.applied_;
+    other.applied_ = false;
     target_ = other.target_;
     other.target_ = nullptr;
     detour_ = other.detour_;
@@ -190,12 +193,12 @@ public:
     trampolines_ = std::move(other.trampolines_);
     return *this;
   }
-        
-  ~PatchDetour()
-  {
-    Remove();
-  }
 
+  ~PatchDetour() HADESMEM_NOEXCEPT
+  {
+    RemoveUnchecked();
+  }
+  
   void Apply()
   {
     if (applied_)
@@ -307,7 +310,7 @@ public:
     applied_ = true;
   }
     
-  virtual void Remove()
+  void Remove()
   {
     if (!applied_)
     {
@@ -323,12 +326,43 @@ public:
     applied_ = false;
   }
 
-  PVOID GetTrampoline() const
+  PVOID GetTrampoline() const HADESMEM_NOEXCEPT
   {
     return trampoline_->GetBase();
   }
+  
+  // TODO: Code smell... This feels like code duplication between derived classes.
+  void RemoveUnchecked() HADESMEM_NOEXCEPT
+  {
+    try
+    {
+      Remove();
+    }
+    catch (std::exception const& e)
+    {
+      (void)e;
+
+      // WARNING: Patch may not be removed if Remove fails.
+      // TODO: Add debug logging to other destructors.
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_TRACE_A("\n");
+      
+      // TODO: Code smell... Should this be handled by the base class somehow?
+      process_ = nullptr;
+      applied_ = false;
+
+      target_ = nullptr;
+      detour_ = nullptr;
+      trampoline_.reset();
+      orig_.clear();
+      trampolines_.clear();
+    }
+  }
 
 private:
+  PatchDetour(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
+  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
+
 #if defined(_M_AMD64)
   // Inspired by EasyHook.
   std::unique_ptr<Allocator> AllocTrampolineNear(PVOID address)
@@ -475,7 +509,8 @@ private:
     WriteVector(*process_, address, jump_buf);
   }
 
-  unsigned int GetJumpSize() const
+  // TODO: Make constexpr.
+  unsigned int GetJumpSize() const HADESMEM_NOEXCEPT
   {
 #if defined(_M_AMD64) 
     unsigned int jump_size = 6;
@@ -488,7 +523,8 @@ private:
     return jump_size;
   }
 
-  unsigned int GetCallSize() const
+  // TODO: Make constexpr.
+  unsigned int GetCallSize() const HADESMEM_NOEXCEPT
   {
 #if defined(_M_AMD64) 
     unsigned int call_size = 6;
@@ -500,7 +536,9 @@ private:
 
     return call_size;
   }
-
+  
+  Process const* process_;
+  bool applied_;
   PVOID target_;
   PVOID detour_;
   std::unique_ptr<Allocator> trampoline_;
@@ -509,7 +547,3 @@ private:
 };
 
 }
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif
