@@ -63,6 +63,9 @@ lib d3d9hook
     [ glob d3d9hook/*.cpp ]
 	d3dx9
 	gdi32
+    /boost//atomic/<link>static
+    /boost//thread/<link>static
+    /boost//date_time/<link>static
   :
     # Disable warning caused by D3DX9 headers.
     <toolset>intel:<cxxflags>"/Qwd1885"

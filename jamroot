@@ -67,6 +67,11 @@ project memory
     # not affect program correctness.
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>intel:<cxxflags>"/Qwd2586"
+    # Disable behavior change 'warning', "an object of POD type constructed 
+    # with an initializer of the form () will be default-initialized". This 
+    # warning can be safely ignored as it's just a notification about a 
+    # deficiency in the compiler, it doesn't indicate a problem with the code.
+    <toolset>msvc:<cxxflags>"/wd4345"
     
 	# Required for atomics library.
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i686"
