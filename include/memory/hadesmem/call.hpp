@@ -85,6 +85,11 @@
 // TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
 // easily identified in a debugger.
 
+// TODO: Consolidate memory allocations where possible.
+
+// TODO: Injected code should restrict itself to the NT API only where 
+// possible.
+
 namespace hadesmem
 {
   
