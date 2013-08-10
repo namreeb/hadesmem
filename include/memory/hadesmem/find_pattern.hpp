@@ -41,9 +41,18 @@
 // TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
 // appropriate, remove and add apis, fix bugs, clean up code, etc. Use new 
 // lanaguage features like noexcept, constexpr, etc.
+
 // TODO: Add stream overloads.
+
 // TODO: Rewrite to not use virtual functions.
+
 // TODO: Rewrite to remove cyclic dependencies.
+
+// TODO: Pattern generator.
+
+// TODO: Multi-pass’ support (e.g. search for pattern, apply for manipulators, use as starting point for second search).
+
+// TODO: Arbitrary region support.
 
 // Clang generates a warning for all inline classes with virtual methods, due 
 // to the potential object file bloat it may cause.

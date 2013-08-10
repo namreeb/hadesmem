@@ -281,12 +281,18 @@ inline bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
 
 inline std::ostream& operator<<(std::ostream& lhs, Module const& rhs)
 {
-  return (lhs << rhs.GetHandle());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetHandle());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 {
-  return (lhs << rhs.GetHandle());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetHandle());
+  lhs.imbue(old);
+  return lhs;
 }
 
 // TODO: Split this into a different file.

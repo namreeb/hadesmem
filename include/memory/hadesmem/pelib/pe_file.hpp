@@ -18,6 +18,39 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
 
+// TODO: Extra sanity checking in all components. E.g. Check 
+// NumberOfRvaAndSizes in NtHeaders before attempting to retrieve a data dir.
+
+// TODO: Improve PeLib support for pathological cases like Corkami tests.
+
+// TODO: Full support for writing back to PE file, including automatically 
+// performing adjustments where required to fit in new data or remove 
+// unnecessary space.
+
+// TODO: Helper functions such as FindExport, FindImport, HasDataDir, 
+// GetArchitecture, IsDotNet, GetPDB, etc.
+
+// TODO: Don't crash on data which is malformed, but ignored by the PE loader 
+// (e.g. ISSetup.dll).
+
+// TODO: Move PeLib code into PeLib namespace.
+
+// TODO: Write/Set methods for PeLib should be non-const.
+
+// TODO: Cache base pointers etc rather than retrieving it manually in every 
+// getter/setter.
+
+// TODO: Rewrite PeLib to do more ‘caching’ and only read/write on demand. 
+// Also take into account rewriting to allow writes from scratch (see other 
+// item) as the getters/setters obviously can’t ever reference memory, 
+// because there might not be a memory region to reference!
+
+// TODO: Decouple PeFile from Process. It should use a generic interface 
+// instead.
+
+// TODO: Decouple PeLib from the architecture being compiled for. Required 
+// for cross-architecture support in hadesmem.
+
 namespace hadesmem
 {
 
@@ -119,12 +152,18 @@ inline bool operator>=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
 
 inline std::ostream& operator<<(std::ostream& lhs, PeFile const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
@@ -182,14 +221,10 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       if (virtual_beg <= rva && rva < virtual_end)
       {
         rva -= virtual_beg;
-        // If PointerToRawData is less than 0x200 it is rounded down to 0.
-        // TODO: Check if this is the correct way to be doing this. In the 
-        // Windows loader this is probably done as part of a more complex 
-        // mask, containing logic that's missing here.
-        if (section_header.PointerToRawData >= 0x200)
-        {
-          rva += section_header.PointerToRawData;
-        }
+        // If PointerToRawData is less than 0x200 it is rounded down to 0. 
+        // Safe to mask it off unconditionally because it must be a multiple 
+        // of FileAlignment.
+        rva += section_header.PointerToRawData & ~0x1FF;
 
         return base + rva;
       }

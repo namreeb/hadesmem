@@ -39,6 +39,52 @@
 #include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
+// TODO: Cross-session injection (also cross-winsta and cross-desktop 
+// injection). Easiest solution is to use a broker process via a service 
+// and CreateProcessAsUser. Potentially 'better' solution would be to use 
+// NtCreateThread/RtlCreateUserThread.
+
+// TODO: Support injection into CSRSS. CreateRemoteThread can't be used on 
+// CSRSS because when the thread is initialized it tries to notify CSRSS os 
+// the thread creation and gets confused. Potential workaround is to use 
+// NtCreateThread/RtlCreateUserThread.
+
+// TODO: Support using NtCreateThread/RtlCreateUserThread. Does not create an 
+// activation context, so it will need special work done to get cases like 
+// .NET working.
+
+// TODO: Support injection using only NT APIs (for smss.exe etc).
+
+// TODO: Support injection into unitialized processes, native processes, 
+// CSRSS, etc.
+
+// TODO: Improve safety via EH. Both x86 and x64.
+
+// TODO: Clean up ASM code and code generation.
+
+// TODO: Add support for more 'complex' argument and return types, including 
+// struct/class/union, long double, SIMD types, etc. A good reference for 
+// calling conventions is available at http://bit.ly/3CvgMV.
+
+// TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated 
+// code, 'private' functions, obfuscated code, etc).
+
+// TODO: Only JIT code for Call once, then cache. Rewrite to pull data 
+// externally instead of being regenerated for every call.
+
+// TODO: Once the JIT-once rewrite is complete, transition to using code 
+// generated at compile-time with FASM and stored in a binary 'blob' 
+// (embedded in the source). This will remove the dependency on AsmJit.
+
+// TODO: Clean up x64 assembly related to the stack. Important for EH.
+
+// TODO: Wow64 bypass.
+
+// TODO: Split this mess up into multiple headers where possible.
+
+// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
+// easily identified in a debugger.
+
 namespace hadesmem
 {
   

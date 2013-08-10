@@ -32,6 +32,8 @@
 #pragma GCC diagnostic ignored "-Wextended-offsetof"
 #endif
 
+// TODO: Support setting and writing back ImportThunk. (For IAT hooking.)
+
 namespace hadesmem
 {
 
@@ -201,12 +203,18 @@ inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs)
 
 inline std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, ImportThunk const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 }

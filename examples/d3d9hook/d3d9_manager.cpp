@@ -81,6 +81,9 @@ using std::max;
 
 // TODO: Make it safe to unload on the fly.
 
+// TODO: Investigate places where D3D9Hook should be bumping the DLL 
+// reference count (using GetModuleHandleEx).
+
 // TODO: Find the right headers so that this can be removed.
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS (static_cast<NTSTATUS>(0x00000000L))
@@ -174,10 +177,8 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
 
     HADESMEM_TRACE_A("Direct3DCreate9Hk called.\n");
   
-    auto const d3d9_create = 
-      reinterpret_cast<decltype(&Direct3DCreate9Hk)>(
-      reinterpret_cast<DWORD_PTR>(
-      g_d3d_mod.second->d3d9_create_hk->GetTrampoline()));
+    auto const d3d9_create = g_d3d_mod.second->d3d9_create_hk->
+      GetTrampoline<decltype(&Direct3DCreate9Hk)>();
 
     d3d9 = d3d9_create(sdk_version);
     last_error = ::GetLastError();
@@ -225,10 +226,8 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
 
     HADESMEM_TRACE_A("Direct3DCreate9ExHk called.\n");
 
-    auto const d3d9_create_ex = 
-      reinterpret_cast<decltype(&Direct3DCreate9ExHk)>(
-      reinterpret_cast<DWORD_PTR>(
-      g_d3d_mod.second->d3d9_create_ex_hk->GetTrampoline()));
+    auto const d3d9_create_ex = g_d3d_mod.second->d3d9_create_ex_hk->
+      GetTrampoline<decltype(&Direct3DCreate9ExHk)>();
 
     hr = d3d9_create_ex(sdk_version, ppd3d9);
     last_error = ::GetLastError();
@@ -281,10 +280,8 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     
     HADESMEM_TRACE_A("CreateDeviceHk called.\n");
 
-    auto const create_device = 
-      reinterpret_cast<decltype(&CreateDeviceHk)>(
-      reinterpret_cast<DWORD_PTR>(
-      g_d3d_mod.second->create_device_hk->GetTrampoline()));
+    auto const create_device = g_d3d_mod.second->create_device_hk->
+      GetTrampoline<decltype(&CreateDeviceHk)>();
 
     hr = create_device(pd3d9, adapter, device_type, focus_wnd, 
       behaviour_flags, presentation_params, ppdevice);
@@ -412,10 +409,8 @@ NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics,
   NTSTATUS ret = STATUS_SUCCESS;
   DWORD last_error = 0;
   
-  auto const ldr_load_dll = 
-    reinterpret_cast<decltype(&LdrLoadDllHk)>(
-    reinterpret_cast<DWORD_PTR>(
-    g_ldr_load_dll->GetTrampoline()));
+  auto const ldr_load_dll = g_ldr_load_dll->
+    GetTrampoline<decltype(&LdrLoadDllHk)>();
   
   if (*in_hook == true)
   {
@@ -496,10 +491,8 @@ BOOL WINAPI CreateProcessInternalWHk(
   
   try
   {
-    auto const create_process_internal_w = 
-      reinterpret_cast<decltype(&CreateProcessInternalWHk)>(
-      reinterpret_cast<DWORD_PTR>(
-      g_create_process_internal_w->GetTrampoline()));
+    auto const create_process_internal_w = g_create_process_internal_w->
+      GetTrampoline<decltype(&CreateProcessInternalWHk)>();
 
     DWORD const creation_flags_new = creation_flags | CREATE_SUSPENDED;
     ret = create_process_internal_w(

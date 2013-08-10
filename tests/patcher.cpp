@@ -81,8 +81,7 @@ DWORD HookMeHk(int i1, int i2, int i3, int i4, int i5, int i6,
   int i7, int i8)
 {
   BOOST_CHECK(g_detour->GetTrampoline() != nullptr);
-  auto const orig = reinterpret_cast<decltype(&HookMe)>(
-    reinterpret_cast<DWORD_PTR>(g_detour->GetTrampoline()));
+  auto const orig = g_detour->GetTrampoline<decltype(&HookMe)>();
   BOOST_CHECK_EQUAL(orig(i1, i2, i3, i4, i5, i6, i7, i8), 
     static_cast<DWORD>(0x1234));
   return 0x1337;
@@ -138,6 +137,8 @@ BOOST_AUTO_TEST_CASE(patchdetour)
 
   // TODO: Generate different kinds of code to test all instruction 
   // resolution code and ensure we're covering all the important cases.
+
+  // TODO: Test different calling conventions etc.
 
   AsmJit::X86Compiler c;
   c.newFunc(AsmJit::kX86FuncConvDefault, HookMeFuncBuilderT());

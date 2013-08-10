@@ -76,10 +76,10 @@ public:
       }
     }
   
-    MODULEENTRY32 entry;
+    MODULEENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));
     entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Module32First(impl_->snap_.GetHandle(), &entry))
+    if (!::Module32FirstW(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();
       if (last_error == ERROR_NO_MORE_FILES)
@@ -137,10 +137,10 @@ public:
   {
     HADESMEM_ASSERT(impl_.get());
   
-    MODULEENTRY32 entry;
+    MODULEENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));
     entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Module32Next(impl_->snap_.GetHandle(), &entry))
+    if (!::Module32NextW(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();
       if (last_error == ERROR_NO_MORE_FILES)

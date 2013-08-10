@@ -21,6 +21,8 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 
+// TODO: Distinguish between IAT and ILT in import enumeration.
+
 namespace hadesmem
 {
 

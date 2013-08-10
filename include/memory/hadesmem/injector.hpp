@@ -30,6 +30,38 @@
 #include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
+// TODO: .NET injection (without DLL dependency if possible).
+
+// TODO: Cross-session injection (also cross-winsta and cross-desktop 
+// injection). Easiest solution is to use a broker process via a service 
+// and CreateProcessAsUser. Potentially 'better' solution would be to use 
+// NtCreateThread/RtlCreateUserThread.
+
+// TODO: Support injection into CSRSS. CreateRemoteThread can't be used on 
+// CSRSS because when the thread is initialized it tries to notify CSRSS os 
+// the thread creation and gets confused. Potential workaround is to use 
+// NtCreateThread/RtlCreateUserThread.
+
+// TODO: Support using NtCreateThread/RtlCreateUserThread. Does not create an 
+// activation context, so it will need special work done to get cases like 
+// .NET working.
+
+// TODO: WoW64 process native DLL injection.
+
+// TODO: Support injection using only NT APIs (for smss.exe etc).
+
+// TODO: IAT injection (to allow execution of code before Dllmain of other 
+// modules are executed). Include support for .NET target processes.
+
+// TODO: Support injection into unitialized processes, native processes, 
+// CSRSS, etc.
+
+// TODO: Add a way to easily resume targets created with the kKeepSuspended 
+// flag.
+
+// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
+// easily identified in a debugger.
+
 namespace hadesmem
 {
   

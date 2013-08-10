@@ -72,10 +72,10 @@ public:
       }
     }
   
-    PROCESSENTRY32 entry;
+    PROCESSENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));
     entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Process32First(impl_->snap_.GetHandle(), &entry))
+    if (!::Process32FirstW(impl_->snap_.GetHandle(), &entry))
     {
       DWORD const last_error = ::GetLastError();
     
@@ -134,10 +134,10 @@ public:
   {
     HADESMEM_ASSERT(impl_.get());
   
-    PROCESSENTRY32 entry;
+    PROCESSENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));
     entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Process32Next(impl_->snap_.GetHandle(), &entry))
+    if (!::Process32NextW(impl_->snap_.GetHandle(), &entry))
     {
       if (::GetLastError() == ERROR_NO_MORE_FILES)
       {

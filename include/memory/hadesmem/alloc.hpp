@@ -206,12 +206,18 @@ inline bool operator>=(Allocator const& lhs, Allocator const& rhs)
 
 inline std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 }

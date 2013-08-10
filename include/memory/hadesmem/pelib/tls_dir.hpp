@@ -229,12 +229,18 @@ inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
 
 inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, TlsDir const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 }

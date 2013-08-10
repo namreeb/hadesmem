@@ -690,12 +690,18 @@ inline bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEX
 
 inline std::ostream& operator<<(std::ostream& lhs, NtHeaders const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
 {
-  return (lhs << rhs.GetBase());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
 }
 
 // TODO: Add tests for this.

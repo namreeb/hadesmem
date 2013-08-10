@@ -22,6 +22,9 @@
 #include <hadesmem/detail/protect_guard.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
+// TODO: Support custom string, vector, etc types. Also support custom 
+// allocators, traits, etc.
+
 namespace hadesmem
 {
   

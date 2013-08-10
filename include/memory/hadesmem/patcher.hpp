@@ -29,6 +29,32 @@
 
 // TODO: Fix exception safety.
 
+// TODO: EAT hooking.
+
+// TODO: IAT hooking.
+
+// TODO: VEH hooking. (INT 3, DR, invalid instr, etc.)
+
+// TODO: Make hooking a transactional operation.
+
+// TODO: Freeze target when hooking (except calling thread if applicable – 
+// e.g. in injected code).
+
+// TODO: VMT hooking.
+
+// TODO: Explicitly support (and test) hook chains.
+
+// TODO: Support 'safe' unloading by incrementing/decrementing a counter for 
+// each detour so it can be detect when your code is currently executing 
+// before unloading? What other options are there?
+
+// TODO: Support passing a hook context. (This is needed to support 
+// multi-module support properly in base hook. i.e. Two concurrent D3D 
+// instances.) Need to be sure not to dirty registers though.
+
+// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
+// easily identified in a debugger.
+
 namespace hadesmem
 {
 
@@ -148,6 +174,12 @@ private:
   std::vector<BYTE> orig_;
 };
 
+// TODO: Consolidate memory allocations where possible. Taking a page for 
+// every trampoline (including two trampolines per patch on x64 -- fix this 
+// too) is extremely wasteful.
+// TODO: Support calling convention differences for target function and 
+// detour function (calling convention only though, not args or return type). 
+// Templates can be used to detect information if appropriate.
 class PatchDetour
 {
 public:
@@ -199,6 +231,8 @@ public:
     RemoveUnchecked();
   }
   
+  // TODO: Detect when applying or removing patch and code is currently being 
+  // executed. (Redirect EIP to trampoline.)
   void Apply()
   {
     if (applied_)
@@ -227,7 +261,10 @@ public:
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
-
+    
+    // TODO: Detect cases where hooking may overflow past the end of a 
+    // function, and fail. (Provide policy or flag to allow overriding this 
+    // behaviour.) Examples may be instructions such as int 3, ret, jmp, etc.
     unsigned int instr_size = 0;
     do
     {
@@ -251,9 +288,12 @@ public:
       asm_str_full += '\n';
       OutputDebugStringA(asm_str_full.c_str());
 #endif
-
-      // TODO: Support more types of relative instructions
-      // TODO: Support other operand sizes.
+      
+      // TODO: Improved relative instruction rebuilding (including conditionals). 
+      // x64 has far more IP relative instructions than x86.
+      // TODO: Support more operand sizes for existing relative instruction support.
+      // TODO: Improve instruction rebuilding for cases such as jumps 
+      // backwards into the detour and fail safely (or whatever is appropriate).
       ud_operand_t const* op = ud_insn_opr(&ud_obj, 0);
       std::size_t const sdword_size_bits = sizeof(std::int32_t) * CHAR_BIT;
       if ((ud_obj.mnemonic == UD_Ijmp || ud_obj.mnemonic == UD_Icall) && 
@@ -329,6 +369,13 @@ public:
   PVOID GetTrampoline() const HADESMEM_NOEXCEPT
   {
     return trampoline_->GetBase();
+  }
+
+  template <typename FuncT>
+  FuncT GetTrampoline() const HADESMEM_NOEXCEPT
+  {
+    return reinterpret_cast<FuncT>(reinterpret_cast<DWORD_PTR>(
+      trampoline_->GetBase()));
   }
   
   // TODO: Code smell... This feels like code duplication between derived classes.
@@ -431,7 +478,11 @@ private:
     // TODO: Fall back to PUSH/RET trick (14 bytes) if finding a trampoline 
     // fails.
     // TODO: Use relative jumps where possible (detect delta at 
-    // runtime). Saves a byte.
+    // runtime). Saves a byte and a trampoline allocation.
+    // TODO: When we allocate a trampoline near an address, we should just 
+    // write our real trampoline there, rather than using a second layer 
+    // of indirection (which could easily result in virtual address space 
+    // exhaustion, given we take a full page for every trampoline).
     std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
 
     PVOID tramp_addr = trampoline->GetBase();
@@ -509,32 +560,26 @@ private:
     WriteVector(*process_, address, jump_buf);
   }
 
-  // TODO: Make constexpr.
   unsigned int GetJumpSize() const HADESMEM_NOEXCEPT
   {
 #if defined(_M_AMD64) 
-    unsigned int jump_size = 6;
+    return 6;
 #elif defined(_M_IX86) 
-    unsigned int jump_size = 5;
+    return 5;
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
-
-    return jump_size;
   }
 
-  // TODO: Make constexpr.
   unsigned int GetCallSize() const HADESMEM_NOEXCEPT
   {
 #if defined(_M_AMD64) 
-    unsigned int call_size = 6;
+    return 6;
 #elif defined(_M_IX86) 
-    unsigned int call_size = 5;
+    return 5;
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
-
-    return call_size;
   }
   
   Process const* process_;

@@ -17,6 +17,11 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
+// TODO: Support cross architecture process manipulation (opening an x86 
+// WoW64 process as native x64). Includes removing dependency of non-ntdll 
+// in injected code and DLL loader, and adding cross architecture support 
+// for pelib.
+
 namespace hadesmem
 {
 
@@ -147,19 +152,25 @@ inline bool operator>=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
 
 inline std::ostream& operator<<(std::ostream& lhs, Process const& rhs)
 {
-  return (lhs << rhs.GetId());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << rhs.GetId();
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, Process const& rhs)
 {
-  return (lhs << rhs.GetId());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << rhs.GetId();
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wstring GetPath(Process const& process)
 {
   std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
   DWORD path_len = static_cast<DWORD>(path.size());
-  if (!::QueryFullProcessImageName(process.GetHandle(), 0, path.data(), 
+  if (!::QueryFullProcessImageNameW(process.GetHandle(), 0, path.data(), 
     &path_len))
   {
       DWORD const last_error = ::GetLastError();

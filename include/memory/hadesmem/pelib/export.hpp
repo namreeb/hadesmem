@@ -36,6 +36,12 @@ namespace hadesmem
 
 // TODO: Constructor to create Export by name (optimize using binary search).
 
+// TODO: Support setting and writing back Export. (For EAT hooking.)
+
+// TODO: Improve export forwarding code to detect and handle 
+// forward-by-ordinal explicitly rather than forcing the user to detect it 
+// and do string manipulation and conversion.
+
 class Export
 {
 public:
@@ -302,12 +308,18 @@ inline bool operator>=(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
 
 inline std::ostream& operator<<(std::ostream& lhs, Export const& rhs)
 {
-  return (lhs << rhs.GetOrdinal());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << rhs.GetOrdinal();
+  lhs.imbue(old);
+  return lhs;
 }
 
 inline std::wostream& operator<<(std::wostream& lhs, Export const& rhs)
 {
-  return (lhs << rhs.GetOrdinal());
+  std::locale old = lhs.imbue(std::locale::classic());
+  lhs << rhs.GetOrdinal();
+  lhs.imbue(old);
+  return lhs;
 }
 
 }
