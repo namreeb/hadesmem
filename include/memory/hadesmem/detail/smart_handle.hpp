@@ -64,7 +64,7 @@ public:
     return handle_;
   }
 
-  HandleT GetInvalid() const HADESMEM_NOEXCEPT
+  HADESMEM_CONSTEXPR HandleT GetInvalid() const HADESMEM_NOEXCEPT
   {
     return Policy::GetInvalid();
   }
@@ -139,7 +139,7 @@ struct SnapPolicy
 {
   typedef HANDLE HandleT;
 
-  static HandleT GetInvalid() HADESMEM_NOEXCEPT
+  static HADESMEM_CONSTEXPR HandleT GetInvalid() HADESMEM_NOEXCEPT
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -156,7 +156,7 @@ struct LibraryPolicy
 {
   typedef HMODULE HandleT;
 
-  static HandleT GetInvalid() HADESMEM_NOEXCEPT
+  static HADESMEM_CONSTEXPR HandleT GetInvalid() HADESMEM_NOEXCEPT
   {
     return nullptr;
   }
