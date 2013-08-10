@@ -52,10 +52,8 @@ BOOST_AUTO_TEST_CASE(alloc)
   BOOST_CHECK_EQUAL(mbi.Type, static_cast<DWORD>(MEM_PRIVATE));
   BOOST_CHECK_NO_THROW(Free(process, address));
   
-  auto const invalid_address = reinterpret_cast<LPVOID>(
-    static_cast<DWORD_PTR>(-1));
   BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::Error);
-  BOOST_CHECK_THROW(Free(process, invalid_address), hadesmem::Error);
+  // TODO: Add a 'Free' failure check without causing app verifier stops.
 }
 
 BOOST_AUTO_TEST_CASE(allocator)

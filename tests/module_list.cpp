@@ -59,9 +59,6 @@ BOOST_AUTO_TEST_CASE(module_list)
   hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
   BOOST_CHECK_NE(++iter, std::end(module_list_1));
   BOOST_CHECK_EQUAL(*iter, ntdll_mod);
-  hadesmem::Module const kernel32_mod(process, L"kernel32.dll");
-  BOOST_CHECK_NE(++iter, std::end(module_list_1));
-  BOOST_CHECK_EQUAL(*iter, kernel32_mod);
 }
 
 BOOST_AUTO_TEST_CASE(module_list_algorithm)

@@ -38,7 +38,10 @@
 // TODO: Make hooking a transactional operation.
 
 // TODO: Freeze target when hooking (except calling thread if applicable – 
-// e.g. in injected code).
+// e.g. in injected code). Support doing this via both manual thread 
+// enumeration (will require new Thread, ThreadList, etc APIs) and also 
+// NtSuspendProcess. NtSuspendProcess method cannot be used on self? Or does 
+// it handle this case and exclude the current thread?
 
 // TODO: VMT hooking.
 

@@ -69,9 +69,10 @@ BOOST_AUTO_TEST_CASE(module)
   BOOST_CHECK_EQUAL(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()), 
     L"NTDLL.DLL");
   BOOST_CHECK_GT(this_mod.GetPath().size(), this_mod.GetName().size());
-  BOOST_CHECK_EQUAL(FindProcedure(process, ntdll_mod, 
-    "NtQueryInformationProcess"), GetProcAddress(ntdll_mod.GetHandle(), 
-    "NtQueryInformationProcess"));
+  // Use an API that's unlikely to be hooked.
+  BOOST_CHECK_EQUAL(
+    FindProcedure(process, ntdll_mod, "RtlRandom"), 
+    GetProcAddress(ntdll_mod.GetHandle(), "RtlRandom"));
   hadesmem::Module const ntdll_mod_other(process, L"ntdll.dll");
   BOOST_CHECK_EQUAL(ntdll_mod, ntdll_mod_other);
   hadesmem::Module const ntdll_mod_from_handle(process, 

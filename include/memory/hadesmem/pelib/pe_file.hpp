@@ -224,7 +224,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         // If PointerToRawData is less than 0x200 it is rounded down to 0. 
         // Safe to mask it off unconditionally because it must be a multiple 
         // of FileAlignment.
-        rva += section_header.PointerToRawData & ~0x1FF;
+        rva += section_header.PointerToRawData & ~0x1FFUL;
 
         return base + rva;
       }

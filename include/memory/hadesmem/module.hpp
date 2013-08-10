@@ -299,6 +299,8 @@ inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 namespace detail
 {
 
+// TODO: Support exports by ordinal, add a new overload and change 
+// FindProcedure to use it.
 inline FARPROC GetProcAddressInternal(Process const& process, 
   HMODULE const& module, std::string const& export_name)
 {
@@ -335,36 +337,15 @@ inline FARPROC FindProcedureInternal(Process const& process,
 {
   HADESMEM_ASSERT(name != nullptr);
 
-  SmartModuleHandle const local_module(::LoadLibraryEx(
-    module.GetPath().c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES));
-  if (!local_module.GetHandle())
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
-      ErrorString("LoadLibraryEx failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  FARPROC const local_func = GetProcAddressInternal(process, 
-    local_module.GetHandle(), name);
-  if (!local_func)
+  FARPROC const remote_func = GetProcAddressInternal(process, 
+    module.GetHandle(), name);
+  if (!remote_func)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("GetProcAddressInternal failed.") << 
       ErrorCodeWinLast(last_error));
   }
-
-  HADESMEM_ASSERT(reinterpret_cast<DWORD_PTR>(local_func) > 
-    reinterpret_cast<DWORD_PTR>(local_module.GetHandle()));
-  
-  auto const func_delta = reinterpret_cast<DWORD_PTR>(local_func) - 
-    reinterpret_cast<DWORD_PTR>(local_module.GetHandle());
-
-  HADESMEM_ASSERT(module.GetSize() > func_delta);
-
-  auto const remote_func = reinterpret_cast<FARPROC>(
-    reinterpret_cast<DWORD_PTR>(module.GetHandle()) + func_delta);
   
   return remote_func;
 }
