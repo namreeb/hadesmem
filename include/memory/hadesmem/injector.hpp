@@ -88,7 +88,7 @@ inline void ArgvQuote(std::wstring* command_line, std::wstring const& argument,
   {
     command_line->push_back(L'"');
 
-    for (auto it = std::begin(argument); ;++it)
+    for (auto it = std::begin(argument); ; ++it)
     {
       std::size_t num_backslashes = 0;
 
