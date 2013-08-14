@@ -55,8 +55,12 @@
 // multi-module support properly in base hook. i.e. Two concurrent D3D 
 // instances.) Need to be sure not to dirty registers though.
 
-// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
-// easily identified in a debugger.
+// TODO: Add a 'thumbprint' to all remote memory allocations so the blocks 
+// can be easily identified in a debugger. This should probably be done in 
+// the Allocator with a 'thumbprint' flag to make it optional and also 
+// keep the code in a common place.
+
+// TODO: Rewrite to not use AsmJit.
 
 namespace hadesmem
 {
@@ -244,26 +248,37 @@ public:
     }
 
     ULONG const kMaxInstructionLen = 15;
-    ULONG const tramp_size = kMaxInstructionLen * 3;
+    ULONG const kTrampSize = kMaxInstructionLen * 3;
 
-    trampoline_.reset(new Allocator(*process_, tramp_size));
+    trampoline_ = std::unique_ptr<Allocator>(new Allocator(*process_, kTrampSize));
     PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
     
     std::vector<BYTE> buffer(ReadVector<BYTE>(*process_, target_, 
-      tramp_size));
+      kTrampSize));
 
     ud_t ud_obj;
     ud_init(&ud_obj);
     ud_set_input_buffer(&ud_obj, buffer.data(), buffer.size());
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
     ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target_));
-#if defined(_M_AMD64) 
+#if defined(_M_AMD64)
     ud_set_mode(&ud_obj, 64);
-#elif defined(_M_IX86) 
+#elif defined(_M_IX86)
     ud_set_mode(&ud_obj, 32);
-#else 
+#else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+    bool detour_near = IsNear(target_, detour_);
+    if (detour_near)
+    {
+      HADESMEM_TRACE_A("PatchDetour::Apply: Detour near.");
+    }
+    else
+    {
+      HADESMEM_TRACE_A("PatchDetour::Apply: Detour far.");
+    }
+    DWORD_PTR const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
     
     // TODO: Detect cases where hooking may overflow past the end of a 
     // function, and fail. (Provide policy or flag to allow overriding this 
@@ -289,7 +304,7 @@ public:
         "Disassembly bytes printing failed.");
       asm_str_full += ']';
       asm_str_full += '\n';
-      OutputDebugStringA(asm_str_full.c_str());
+      HADESMEM_TRACE_A(asm_str_full.c_str());
 #endif
       
       // TODO: Improved relative instruction rebuilding (including conditionals). 
@@ -318,14 +333,12 @@ public:
 #endif
         if (ud_obj.mnemonic == UD_Ijmp)
         {
-          WriteJump(tramp_cur, jump_target);
-          tramp_cur += GetJumpSize();
+          tramp_cur += WriteJump(tramp_cur, jump_target);
         }
         else
         {
           HADESMEM_ASSERT(ud_obj.mnemonic == UD_Icall);
-          WriteCall(tramp_cur, jump_target);
-          tramp_cur += GetCallSize();
+          tramp_cur += WriteCall(tramp_cur, jump_target);
         }
       }
       else
@@ -336,19 +349,17 @@ public:
       }
 
       instr_size += len;
-    } while (instr_size < GetJumpSize());
+    } while (instr_size < jump_size);
 
-    WriteJump(tramp_cur, static_cast<PBYTE>(target_) + instr_size);
-    tramp_cur += GetJumpSize();
+    tramp_cur += WriteJump(tramp_cur, static_cast<PBYTE>(target_) + instr_size);
 
-    FlushInstructionCache(*process_, trampoline_->GetBase(), 
-      instr_size + GetJumpSize());
+    FlushInstructionCache(*process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    orig_ = ReadVector<BYTE>(*process_, target_, GetJumpSize());
+    orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
 
     WriteJump(target_, detour_);
 
-    FlushInstructionCache(*process_, target_, orig_.size());
+    FlushInstructionCache(*process_, target_, instr_size);
 
     applied_ = true;
   }
@@ -413,15 +424,16 @@ private:
   PatchDetour(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
   PatchDetour& operator=(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
 
-#if defined(_M_AMD64)
   // Inspired by EasyHook.
-  std::unique_ptr<Allocator> AllocTrampolineNear(PVOID address)
+  // TODO: Allow specifying a size rather than only supporting a single page.
+  std::unique_ptr<Allocator> AllocatePageNear(PVOID address)
   {
     SYSTEM_INFO sys_info;
     ZeroMemory(&sys_info, sizeof(sys_info));
     GetSystemInfo(&sys_info);
     DWORD page_size = sys_info.dwPageSize;
 
+#if defined(_M_AMD64) 
     LONG_PTR const search_beg = 
       (std::max)(reinterpret_cast<LONG_PTR>(address) - 0x7FFFFF00LL, 
       reinterpret_cast<LONG_PTR>(sys_info.lpMinimumApplicationAddress));
@@ -467,67 +479,125 @@ private:
     }
 
     return trampoline;
-  }
 #elif defined(_M_IX86) 
+    return new Allocator(address, page_size);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
+  }
 
-  void WriteJump(PVOID address, PVOID target)
+  bool IsNear(PVOID address, PVOID target)
+  {
+    std::ptrdiff_t const offset = static_cast<PBYTE>(address) - 
+      static_cast<PBYTE>(target);
+    bool const is_near = 
+      (offset > -(static_cast<LONG_PTR>(1) << 31)) && 
+      (offset < (static_cast<LONG_PTR>(1) << 31));
+#if defined(_M_IX86)
+    HADESMEM_ASSERT(is_near);
+#endif
+    return is_near;
+  }
+
+  // TODO: Remove code duplication from WriteCall.
+  DWORD_PTR WriteJump(PVOID address, PVOID target)
   {
     AsmJit::X86Assembler jit;
+    DWORD_PTR expected_stub_size = 0;
+    std::vector<BYTE> jump_buf;
+    bool asmjit_bug = false;
 
-#if defined(_M_AMD64) 
-    // TODO: Fall back to PUSH/RET trick (14 bytes) if finding a trampoline 
-    // fails.
-    // TODO: Use relative jumps where possible (detect delta at 
-    // runtime). Saves a byte and a trampoline allocation.
-    // TODO: When we allocate a trampoline near an address, we should just 
-    // write our real trampoline there, rather than using a second layer 
-    // of indirection (which could easily result in virtual address space 
-    // exhaustion, given we take a full page for every trampoline).
-    std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
+#if defined(_M_AMD64)
+    if (IsNear(address, target))
+    {
+      // JMP <Target, Relative>
+      jit.jmp(target);
 
-    PVOID tramp_addr = trampoline->GetBase();
+      // AsmJit generates the correct JMP instruction, but then adds a bunch 
+      // of zero padding for no particular reason... Investigate this.
+      // TODO: Fix this.
+      expected_stub_size = 0x13;
+      asmjit_bug = true;
+    }
+    else
+    {
+      // TODO: Fall back to PUSH/RET trick (14 bytes) if finding a trampoline 
+      // fails.
+      // TODO: Try and 'share' trampoline pages where possible. It's a waste 
+      // of VA space to use an entire page per trampoline when all we store 
+      // is a single pointer.
+      std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
+      PVOID tramp_addr = trampoline->GetBase();
 
-    Write(*process_, tramp_addr, reinterpret_cast<DWORD_PTR>(target));
+      Write(*process_, tramp_addr, target);
 
-    trampolines_.emplace_back(std::move(trampoline));
+      trampolines_.emplace_back(std::move(trampoline));
 
-    AsmJit::Label label(jit.newLabel());
-    jit.bind(label);
-    // JMP QWORD PTR <Trampoline, Relative>
-    LONG_PTR const disp = reinterpret_cast<LONG_PTR>(tramp_addr) - 
-      reinterpret_cast<LONG_PTR>(address) - 
-      sizeof(LONG);
-    jit.jmp(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
-#elif defined(_M_IX86) 
+      // JMP QWORD PTR <Trampoline, Relative>
+      AsmJit::Label label(jit.newLabel());
+      jit.bind(label);
+      LONG_PTR const disp = static_cast<PBYTE>(tramp_addr) - 
+        static_cast<PBYTE>(address) - sizeof(LONG);
+      jit.jmp(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
+
+      expected_stub_size = kJumpSize64;
+    }
+    
+#elif defined(_M_IX86)
     // JMP <Target, Relative>
     jit.jmp(target);
-#else 
+
+    expected_stub_size = kJumpSize32;
+#else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
-    if (stub_size != GetJumpSize())
+    // TODO: Add this to WriteCall.
+#ifndef NDEBUG
+    std::stringstream stub_sizes;
+    stub_sizes.imbue(std::locale::classic());
+    stub_sizes 
+      << "PatchDetour::Apply: Stub size = " 
+      << stub_size 
+      << ", Expected stub size = " 
+      << expected_stub_size 
+      << ".\n";
+    HADESMEM_TRACE_A(stub_sizes.str().c_str());
+#endif
+    // TODO: Should this be an assert?
+    if (stub_size != expected_stub_size)
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Unexpected stub size."));
     }
 
-    std::vector<BYTE> jump_buf(stub_size);
-      
+    jump_buf.resize(stub_size);
+
     jit.relocCode(jump_buf.data(), reinterpret_cast<DWORD_PTR>(address));
 
+    // Remove the padding added due to AsmJit bug.
+    // TODO: Fix this.
+    if (asmjit_bug == true)
+    {
+      jump_buf.erase(std::begin(jump_buf) + kJumpSize32, std::end(jump_buf));
+      HADESMEM_ASSERT(jump_buf.size() == kJumpSize32);
+    }
+
     WriteVector(*process_, address, jump_buf);
+
+    return jump_buf.size();
   }
   
-  void WriteCall(PVOID address, PVOID target)
+  DWORD_PTR WriteCall(PVOID address, PVOID target)
   {
     AsmJit::X86Assembler jit;
+    DWORD_PTR expected_stub_size = 0;
 
 #if defined(_M_AMD64) 
-    std::unique_ptr<Allocator> trampoline(AllocTrampolineNear(address));
+    // TODO: Optimize this to avoid a trampoline where possible. Similar to 
+    // WriteJump. Try to consolidate the funcs.
+    std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
 
     PVOID tramp_addr = trampoline->GetBase();
 
@@ -535,22 +605,26 @@ private:
 
     trampolines_.emplace_back(std::move(trampoline));
 
+    // CALL QWORD PTR <Trampoline, Relative>
     AsmJit::Label label(jit.newLabel());
     jit.bind(label);
-    // CALL QWORD PTR <Trampoline, Relative>
     LONG_PTR const disp = reinterpret_cast<LONG_PTR>(tramp_addr) - 
       reinterpret_cast<LONG_PTR>(address) - 
       sizeof(LONG);
     jit.call(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
+
+    expected_stub_size = kCallSize64;
 #elif defined(_M_IX86) 
     // CALL <Target, Relative>
     jit.call(target);
+
+    expected_stub_size = kCallSize32;
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
-    if (stub_size != GetCallSize())
+    if (stub_size != expected_stub_size)
     {
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Unexpected stub size."));
@@ -561,29 +635,21 @@ private:
     jit.relocCode(jump_buf.data(), reinterpret_cast<DWORD_PTR>(address));
 
     WriteVector(*process_, address, jump_buf);
-  }
 
-  unsigned int GetJumpSize() const HADESMEM_NOEXCEPT
-  {
-#if defined(_M_AMD64) 
-    return 6;
+    return stub_size;
+  }
+  
+  static DWORD_PTR const kJumpSize32 = 5;
+  static DWORD_PTR const kCallSize32 = 5;
+#if defined(_M_AMD64)
+  static DWORD_PTR const kJumpSize64 = 6;
+  static DWORD_PTR const kCallSize64 = 6;
 #elif defined(_M_IX86) 
-    return 5;
+  static DWORD_PTR const kJumpSize64 = kJumpSize32;
+  static DWORD_PTR const kCallSize64 = kCallSize32;
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
-  }
-
-  unsigned int GetCallSize() const HADESMEM_NOEXCEPT
-  {
-#if defined(_M_AMD64) 
-    return 6;
-#elif defined(_M_IX86) 
-    return 5;
-#else 
-#error "[HadesMem] Unsupported architecture."
-#endif
-  }
   
   Process const* process_;
   bool applied_;
