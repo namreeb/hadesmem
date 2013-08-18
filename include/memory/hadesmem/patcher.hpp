@@ -452,7 +452,8 @@ private:
       {
         try
         {
-          trampoline.reset(new Allocator(*process_, reinterpret_cast<PVOID>(higher), page_size));
+          trampoline.reset(new Allocator(*process_, 
+            reinterpret_cast<PVOID>(higher), page_size));
           break;
         }
         catch (std::exception const& /*e*/)
@@ -464,7 +465,8 @@ private:
       {
         try
         {
-          trampoline.reset(new Allocator(*process_, reinterpret_cast<PVOID>(lower), page_size));
+          trampoline.reset(new Allocator(*process_, 
+            reinterpret_cast<PVOID>(lower), page_size));
           break;
         }
         catch (std::exception const& /*e*/)
@@ -480,7 +482,8 @@ private:
 
     return trampoline;
 #elif defined(_M_IX86) 
-    return new Allocator(address, page_size);
+    return static_cast<std::unique_ptr<Allocator>>(
+      new Allocator(*process_, address, page_size));
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -488,15 +491,20 @@ private:
 
   bool IsNear(PVOID address, PVOID target)
   {
+#if defined(_M_AMD64) 
     std::ptrdiff_t const offset = static_cast<PBYTE>(address) - 
       static_cast<PBYTE>(target);
     bool const is_near = 
       (offset > -(static_cast<LONG_PTR>(1) << 31)) && 
       (offset < (static_cast<LONG_PTR>(1) << 31));
-#if defined(_M_IX86)
-    HADESMEM_ASSERT(is_near);
-#endif
     return is_near;
+#elif defined(_M_IX86)
+    (void)address;
+    (void)target;
+    return true;
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
   }
 
   // TODO: Remove code duplication from WriteCall.
