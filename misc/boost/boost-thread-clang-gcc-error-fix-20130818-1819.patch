@@ -1,0 +1,22 @@
+Index: libs/thread/src/win32/thread.cpp
+===================================================================
+--- libs/thread/src/win32/thread.cpp	(revision 85387)
++++ libs/thread/src/win32/thread.cpp	(working copy)
+@@ -235,7 +235,7 @@
+ 
+     bool thread::start_thread_noexcept()
+     {
+-        uintptr_t const new_thread=_beginthreadex(0,0,&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
++        void* const new_thread=(void*)_beginthreadex(0,0,&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
+         if(!new_thread)
+         {
+             return false;
+@@ -250,7 +250,7 @@
+     bool thread::start_thread_noexcept(const attributes& attr)
+     {
+       //uintptr_t const new_thread=_beginthreadex(attr.get_security(),attr.get_stack_size(),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
+-      uintptr_t const new_thread=_beginthreadex(0,static_cast<unsigned int>(attr.get_stack_size()),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
++      void* const new_thread=(void*)_beginthreadex(0,static_cast<unsigned int>(attr.get_stack_size()),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
+       if(!new_thread)
+       {
+         return false;
