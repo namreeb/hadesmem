@@ -55,8 +55,9 @@ int main(int argc, char* /*argv*/[])
       ("module", boost::program_options::wvalue<std::wstring>(), "module path")
       ("path-resolution", "perform path resolution")
       ("export", boost::program_options::value<std::string>(), "export name")
+      ("inject", "inject module")
       ("free", "unload module")
-      ("add-path", "add module dir to serach order")
+      ("add-path", "add module dir to search order")
       ("run", boost::program_options::wvalue<std::wstring>(), "process path")
       ;
 
@@ -88,8 +89,15 @@ int main(int argc, char* /*argv*/[])
       return 1;
     }
 
-    bool const inject = (var_map.count("free") == 0);
-    if (!inject && create_proc)
+    bool const inject = (var_map.count("inject") != 0);
+    bool const free = (var_map.count("free") != 0);
+
+    if (inject && free)
+    {
+      std::cerr << "\nError! Please specify inject or free, not both.\n";
+    }
+
+    if ((!inject || free) && create_proc)
     {
       std::cerr << "\nError! Modules can only be unloaded from running "
         "targets.\n";
@@ -161,7 +169,7 @@ int main(int argc, char* /*argv*/[])
         std::wcout << "LastError: " << export_ret.GetLastError() << ".\n";
       }
 
-      if (!inject)
+      if (free)
       {
         hadesmem::FreeDll(process, module);
 
