@@ -10,11 +10,11 @@
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved);
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID module);
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load();
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID module);
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free();
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/)
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load()
 {
   try
   {
@@ -28,7 +28,7 @@ extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load(LPCVOID /*module*/)
   return 0;
 }
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free(LPCVOID /*module*/)
+extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free()
 {
   try
   {
