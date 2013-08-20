@@ -20,8 +20,11 @@
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/injector.hpp>
+#include <hadesmem/process_list.hpp>
+#include <hadesmem/process_entry.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/initialize.hpp>
+#include <hadesmem/detail/to_upper_ordinal.hpp>
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
 // e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN?
@@ -52,6 +55,7 @@ int main(int argc, char* /*argv*/[])
     opts_desc.add_options()
       ("help", "produce help message")
       ("pid", boost::program_options::value<DWORD>(), "process id")
+      ("name", boost::program_options::wvalue<std::wstring>(), "process name")
       ("module", boost::program_options::wvalue<std::wstring>(), "module path")
       ("path-resolution", "perform path resolution")
       ("export", boost::program_options::value<std::string>(), "export name")
@@ -82,29 +86,53 @@ int main(int argc, char* /*argv*/[])
     
     bool const has_pid = (var_map.count("pid") != 0);
     bool const create_proc = (var_map.count("run") != 0);
-    if ((has_pid && create_proc) || (!has_pid && !create_proc))
+    bool const has_name = (var_map.count("name") != 0);
+    if ((has_pid && create_proc) || (has_pid && has_name) || 
+      (create_proc && has_name))
     {
-      std::cerr << "\nError! A process ID or an executable path must be "
-        "specified.\n";
+      std::cerr << "\nError! A process ID, process name, or executable path "
+        "must be specified, not a combination.\n";
       return 1;
+    }
+
+    if (!has_pid && !has_name && !create_proc)
+    {
+      std::cerr << "\nError! A process ID, process name, or executable path "
+        "must be specified.\n";
     }
 
     bool const inject = (var_map.count("inject") != 0);
     bool const free = (var_map.count("free") != 0);
+    bool const call_export = (var_map.count("export") != 0);
 
     if (inject && free)
     {
       std::cerr << "\nError! Please specify inject or free, not both.\n";
     }
 
-    if ((!inject || free) && create_proc)
+    if (free && create_proc)
     {
       std::cerr << "\nError! Modules can only be unloaded from running "
         "targets.\n";
       return 1;
     }
 
+    if (!inject && create_proc)
+    {
+      std::cerr << "\nError! Exports can only be called without injection on "
+        "running targets. Did you mean to use --inject?\n";
+      return 1;
+    }
+
+    if (!inject && !free && !call_export)
+    {
+      std::cerr << "\nError! Please choose action(s) to perform on the "
+        "process (inject, free, export).\n";
+      return 1;
+    }
+
     std::wstring const module_path = var_map["module"].as<std::wstring>();
+    std::wstring const proc_name = var_map["name"].as<std::wstring>();
     bool const path_resolution = var_map.count("path-resolution") != 0;
     bool const add_path = var_map.count("add-path") != 0;
 
@@ -118,7 +146,7 @@ int main(int argc, char* /*argv*/[])
       flags |= hadesmem::InjectFlags::kAddToSearchOrder;
     }
 
-    if (has_pid)
+    if (has_pid || has_name)
     {
       try
       {
@@ -131,15 +159,41 @@ int main(int argc, char* /*argv*/[])
         std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
       }
 
-      DWORD const pid = var_map["pid"].as<DWORD>();
+      std::unique_ptr<hadesmem::Process> process;
 
-      hadesmem::Process const process(pid);
+      if (has_pid)
+      {
+        DWORD const pid = var_map["pid"].as<DWORD>();
+        process.reset(new hadesmem::Process(pid));
+      }
+      else
+      {
+        std::wstring const proc_name_upper = hadesmem::detail::ToUpperOrdinal(
+          proc_name);
+        hadesmem::ProcessList proc_list;
+        auto iter = std::find_if(std::begin(proc_list), std::end(proc_list), 
+          [&] (hadesmem::ProcessEntry const& proc_entry)
+        {
+          return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) == 
+            proc_name_upper;
+        });
+        if (iter != std::end(proc_list))
+        {
+          process.reset(new hadesmem::Process(iter->GetId()));
+        }
+        else
+        {
+          std::wcerr << "\nError! Failed to find process \"" << proc_name 
+            << "\".\n";
+          return 1;
+        }
+      }
       
       HMODULE module = nullptr;
 
       if (inject)
       {
-        module = hadesmem::InjectDll(process, module_path, flags);
+        module = hadesmem::InjectDll(*process, module_path, flags);
 
         std::wcout << "\nSuccessfully injected module at base address " << 
           PtrToString(module) << ".\n";
@@ -154,14 +208,14 @@ int main(int argc, char* /*argv*/[])
         }
         path_real.make_preferred();
 
-        hadesmem::Module const remote_module(process, path_real.native());
+        hadesmem::Module const remote_module(*process, path_real.native());
         module = remote_module.GetHandle();
       }
 
-      if (var_map.count("export"))
+      if (call_export)
       {
         std::string const export_name = var_map["export"].as<std::string>();
-        auto const export_ret = hadesmem::CallExport(process, module, 
+        auto const export_ret = hadesmem::CallExport(*process, module, 
           export_name);
 
         std::wcout << "\nSuccessfully called module export.\n";
@@ -171,7 +225,7 @@ int main(int argc, char* /*argv*/[])
 
       if (free)
       {
-        hadesmem::FreeDll(process, module);
+        hadesmem::FreeDll(*process, module);
 
         std::wcout << "\nSuccessfully freed module at base address " << 
           PtrToString(module) << ".\n";
