@@ -94,7 +94,7 @@ void ReadStringEx(Process const& process, PVOID address,
       mbi.RegionSize;
 
     T* cur = static_cast<T*>(address);
-    while (cur + 1 < region_next)
+    while (cur + 1 <= region_next)
     {
       std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_next) - 
         reinterpret_cast<DWORD_PTR>(cur);

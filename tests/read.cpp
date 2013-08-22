@@ -12,6 +12,7 @@
 #include <boost/test/unit_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <hadesmem/alloc.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
@@ -93,23 +94,38 @@ BOOST_AUTO_TEST_CASE(read_string)
 {
   hadesmem::Process const process(::GetCurrentProcessId());
 
+  hadesmem::Allocator const str_alloc(process, 0x1000);
+  char* const str_mem = static_cast<char*>(str_alloc.GetBase());
+  wchar_t* const str_mem_wide = static_cast<wchar_t*>(str_alloc.GetBase());
+
   std::string test_string = "Narrow test string.";
-  char* const test_string_real = &test_string[0];
-  auto const new_test_string = hadesmem::ReadString<char>(process, 
-    test_string_real);
+  std::copy(std::begin(test_string), std::end(test_string), str_mem);
+  str_mem[test_string.size()] = '\0';
+  auto const new_test_string = hadesmem::ReadString<char>(process, str_mem);
   BOOST_CHECK_EQUAL(new_test_string, test_string);
 
-  std::wstring wide_test_string = L"Narrow test string.";
-  wchar_t* const wide_test_string_real = &wide_test_string[0];
+  std::wstring wide_test_string = L"Wide test string.";
+  std::copy(std::begin(wide_test_string), std::end(wide_test_string), 
+    str_mem_wide);
+  str_mem[wide_test_string.size()] = L'\0';
   auto const wide_new_test_string = hadesmem::ReadString<wchar_t>(process, 
-    wide_test_string_real);
+    str_mem_wide);
   BOOST_CHECK_EQUAL(wide_new_test_string, wide_test_string);
 
   std::string test_string_2 = "Narrow test string.";
-  char* const test_string_real_2 = &test_string_2[0];
-  auto const new_test_string_2 = hadesmem::ReadStringEx<char>(process, 
-    test_string_real_2, 1);
+  std::copy(std::begin(test_string_2), std::end(test_string_2), str_mem);
+  str_mem[test_string_2.size()] = '\0';
+  auto const new_test_string_2 = hadesmem::ReadStringEx<char>(
+    process, str_mem, 1);
   BOOST_CHECK_EQUAL(new_test_string_2, test_string_2);
+
+  std::wstring wide_test_string_2 = L"Wide test string.";
+  std::copy(std::begin(wide_test_string_2), std::end(wide_test_string_2), 
+    str_mem_wide);
+  str_mem[wide_test_string_2.size()] = L'\0';
+  auto const wide_new_test_string_2 = hadesmem::ReadStringEx<wchar_t>(
+    process, str_mem_wide, 1);
+  BOOST_CHECK_EQUAL(wide_new_test_string_2, wide_test_string_2);
 }
 
 BOOST_AUTO_TEST_CASE(read_vector)
