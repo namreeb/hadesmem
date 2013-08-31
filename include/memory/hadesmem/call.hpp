@@ -275,7 +275,7 @@ private:
 
   template <typename T>
   T GetReturnValueIntOrFloatImpl(std::false_type, std::false_type, 
-std::true_type) const HADESMEM_NOEXCEPT
+    std::true_type) const HADESMEM_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
