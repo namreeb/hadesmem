@@ -1,0 +1,26 @@
+Index: boost/atomic/detail/windows.hpp
+===================================================================
+--- boost/atomic/detail/windows.hpp	(revision 85521)
++++ boost/atomic/detail/windows.hpp	(working copy)
+@@ -46,7 +46,7 @@
+ 
+ // Define compiler barriers
+ #if defined(__INTEL_COMPILER)
+-#define BOOST_ATOMIC_COMPILER_BARRIER __memory_barrier();
++#define BOOST_ATOMIC_COMPILER_BARRIER() __memory_barrier();
+ #elif defined(_MSC_VER) && _MSC_VER >= 1310 && !defined(_WIN32_WCE)
+ extern "C" void _ReadWriteBarrier(void);
+ #pragma intrinsic(_ReadWriteBarrier)
+@@ -73,8 +73,10 @@
+ }
+ 
+ // Define compiler barriers
+-#if defined(_MSC_VER) && _MSC_VER >= 1310 && !defined(_WIN32_WCE)
+-extern "C" void _ReadWriteBarrier();
++#if defined(__INTEL_COMPILER)
++#define BOOST_ATOMIC_COMPILER_BARRIER() __memory_barrier();
++#elif defined(_MSC_VER) && _MSC_VER >= 1310 && !defined(_WIN32_WCE)
++extern "C" void _ReadWriteBarrier(void);
+ #pragma intrinsic(_ReadWriteBarrier)
+ #define BOOST_ATOMIC_COMPILER_BARRIER() _ReadWriteBarrier()
+ #endif

@@ -21,6 +21,7 @@
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
