@@ -187,6 +187,7 @@ inline bool IsWoW64(Process const& process)
   return detail::IsWoW64Process(process.GetHandle());
 }
 
+// TODO: Move this to a more appropriate header file.
 inline void GetSeDebugPrivilege()
 {
   HANDLE process_token_temp = 0;
