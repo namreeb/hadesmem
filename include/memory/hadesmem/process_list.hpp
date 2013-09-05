@@ -148,7 +148,7 @@ public:
       {
         DWORD const last_error = ::GetLastError();
         HADESMEM_THROW_EXCEPTION(Error() << 
-          ErrorString("Module32Next failed.") << 
+          ErrorString("Process32Next failed.") << 
           ErrorCodeWinLast(last_error));
       }
     }
