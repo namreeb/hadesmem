@@ -94,7 +94,7 @@ public:
         ErrorCodeWinLast(last_error));
     }
     
-    if (!IsTargetThread(entry.th32OwnerProcessID))
+    if (IsTargetThread(entry.th32OwnerProcessID))
     {
       impl_->thread_ = ThreadEntry(entry);
     }
