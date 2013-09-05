@@ -115,7 +115,6 @@ private:
   }
 
   HandleT handle_;
-  Policy policy_;
 };
 
 struct HandlePolicy
