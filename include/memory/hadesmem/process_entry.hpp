@@ -38,6 +38,7 @@ public:
   {
     id_ = other.id_;
     threads_ = other.threads_;
+    parent_ = other.parent_;
     priority_ = other.priority_;
     name_ = other.name_;
 
@@ -56,6 +57,7 @@ public:
   {
     id_ = other.id_;
     threads_ = other.threads_;
+    parent_ = other.parent_;
     priority_ = other.priority_;
     name_ = std::move(other.name_);
 
