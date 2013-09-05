@@ -38,7 +38,7 @@ inline bool IsWoW64Process(HANDLE handle)
 
 inline HANDLE OpenProcessAllAccess(DWORD id)
 {
-  HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, id);
+  HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
@@ -56,7 +56,7 @@ inline HANDLE DuplicateHandle(HANDLE handle)
 
   HANDLE new_handle = nullptr;
   if (!::DuplicateHandle(::GetCurrentProcess(), handle, 
-    ::GetCurrentProcess(), &new_handle, 0, TRUE, DUPLICATE_SAME_ACCESS))
+    ::GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_THROW_EXCEPTION(Error() << 
