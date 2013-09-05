@@ -23,8 +23,10 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/region_list.hpp>
+#include <hadesmem/thread_list.hpp>
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/process_list.hpp>
+#include <hadesmem/thread_entry.hpp>
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/section.hpp>
@@ -529,6 +531,28 @@ void DumpModules(hadesmem::Process const& process)
   }
 }
 
+void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
+{
+  std::wcout << "\n";
+  std::wcout << "Usage: " << thread_entry.GetUsage() << "\n";
+  std::wcout << "ID: " << thread_entry.GetId() << "\n";
+  std::wcout << "Owner ID: " << thread_entry.GetOwnerId() << "\n";
+  std::wcout << "Base Priority: " << thread_entry.GetBasePriority() << "\n";
+  std::wcout << "Delta Priority: " << thread_entry.GetDeltaPriority() << "\n";
+  std::wcout << "Flags: " << thread_entry.GetFlags() << "\n";
+}
+
+void DumpThreads(DWORD pid)
+{
+  std::wcout << "\nThreads:\n";
+
+  hadesmem::ThreadList threads(pid);
+  for (auto const& thread_entry : threads)
+  {
+    DumpThreadEntry(thread_entry);
+  }
+}
+
 void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 {
   std::wcout << "\n";
@@ -537,6 +561,8 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   std::wcout << "Parent: " << process_entry.GetParentId() << "\n";
   std::wcout << "Priority: " << process_entry.GetPriority() << "\n";
   std::wcout << "Name: " << process_entry.GetName() << "\n";
+
+  DumpThreads(process_entry.GetId());
 
   std::unique_ptr<hadesmem::Process> process;
   try
@@ -557,6 +583,17 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   DumpModules(*process);
 
   DumpRegions(*process);
+}
+
+void DumpProcesses()
+{
+  std::wcout << "\nProcesses:\n";
+
+  hadesmem::ProcessList const processes;
+  for (auto const& process_entry : processes)
+  {
+    DumpProcessEntry(process_entry);
+  }
 }
 
 // TODO: Cleanup.
@@ -748,13 +785,9 @@ int main(int /*argc*/, char* /*argv*/[])
     }
     else
     {
-      std::wcout << "\nProcesses:\n";
+      DumpThreads(static_cast<DWORD>(-1));
 
-      hadesmem::ProcessList const processes;
-      for (auto const& process_entry : processes)
-      {
-        DumpProcessEntry(process_entry);
-      }
+      DumpProcesses();
 
       std::wcout << "\nFiles:\n";
 
