@@ -166,6 +166,7 @@ inline std::wostream& operator<<(std::wostream& lhs, Process const& rhs)
   return lhs;
 }
 
+// TODO: Move this to a more appropriate header (process_helpers.hpp?).
 inline std::wstring GetPath(Process const& process)
 {
   std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
@@ -182,12 +183,13 @@ inline std::wstring GetPath(Process const& process)
   return path.data();
 }
 
+// TODO: Move this to a more appropriate header (process_helpers.hpp?).
 inline bool IsWoW64(Process const& process)
 {
   return detail::IsWoW64Process(process.GetHandle());
 }
 
-// TODO: Move this to a more appropriate header file.
+// TODO: Move this to a more appropriate header (get_debug_privilege.hpp?).
 inline void GetSeDebugPrivilege()
 {
   HANDLE process_token_temp = 0;

@@ -1,0 +1,200 @@
+// Copyright (C) 2010-2013 Joshua Boyce.
+// See the file COPYING for copying permission.
+
+#pragma once
+
+#include <vector>
+#include <sstream>
+#include <algorithm>
+
+#include <windows.h>
+#include <winnt.h>
+
+#include <hadesmem/error.hpp>
+#include <hadesmem/config.hpp>
+#include <hadesmem/thread.hpp>
+#include <hadesmem/thread_list.hpp>
+#include <hadesmem/thread_entry.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/winapi.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
+
+// TODO: Add tests for all thread helper APIs.
+
+namespace hadesmem
+{
+  
+inline DWORD SuspendThread(Thread const& thread)
+{
+#ifndef NDEBUG
+  std::stringstream suspend_ss;
+  suspend_ss.imbue(std::locale::classic());
+  suspend_ss << "Suspending thread with ID 0n" << thread.GetId() << ".\n";
+  HADESMEM_TRACE_A(suspend_ss.str().c_str());
+#endif
+
+  DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
+  if (suspend_count == static_cast<DWORD>(-1))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("SuspendThread failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return suspend_count;
+}
+
+inline DWORD ResumeThread(Thread const& thread)
+{
+#ifndef NDEBUG
+  std::stringstream suspend_ss;
+  suspend_ss.imbue(std::locale::classic());
+  suspend_ss << "Resuming thread with ID 0n" << thread.GetId() << ".\n";
+  HADESMEM_TRACE_A(suspend_ss.str().c_str());
+#endif
+
+  DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
+  if (suspend_count == static_cast<DWORD>(-1))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("ResumeThread failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return suspend_count;
+}
+
+inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
+{
+  if (::GetCurrentThreadId() == thread.GetId())
+  {
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("GetThreadContext called for current thread."));
+  }
+
+  CONTEXT context;
+  ZeroMemory(&context, sizeof(context));
+  context.ContextFlags = context_flags;
+  if (!::GetThreadContext(thread.GetHandle(), &context))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("GetThreadContext failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return context;
+}
+
+inline void SetThreadContext(Thread const& thread, CONTEXT const& context)
+{
+  if (!::SetThreadContext(thread.GetHandle(), &context))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("SetThreadContext failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+}
+
+class SuspendedThread
+{
+public:
+  explicit SuspendedThread(DWORD thread_id)
+    : thread_(thread_id)
+  {
+    SuspendThread(thread_);
+  }
+
+  SuspendedThread(SuspendedThread&& other) HADESMEM_NOEXCEPT
+    : thread_(std::move(other.thread_))
+  { }
+
+  SuspendedThread& operator=(SuspendedThread&& other) HADESMEM_NOEXCEPT
+  {
+    ResumeUnchecked();
+
+    thread_ = std::move(other.thread_);
+
+    return *this;
+  }
+
+  ~SuspendedThread()
+  {
+    ResumeUnchecked();
+  }
+
+  void Resume()
+  {
+    if (thread_.GetHandle())
+    {
+      ResumeThread(thread_);
+    }
+  }
+
+private:
+  // Disable copying.
+  SuspendedThread(SuspendedThread const& other);
+  SuspendedThread& operator=(SuspendedThread const& other);
+
+  void ResumeUnchecked()
+  {
+    try
+    {
+      Resume();
+    }
+    catch (std::exception const& e)
+    {
+      (void)e;
+
+      // WARNING: Thread is never resumed if ResumeThread fails...
+      // TODO: Add debug logging to other destructors.
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_TRACE_A("\n");
+    }
+  }
+
+  Thread thread_;
+};
+
+class SuspendedProcess
+{
+public:
+  explicit SuspendedProcess(DWORD pid)
+  {
+    ThreadList threads(pid);
+    for (auto const& thread_entry : threads)
+    {
+      DWORD const current_thread_id = ::GetCurrentThreadId();
+      if (thread_entry.GetId() != current_thread_id)
+      {
+        threads_.emplace_back(thread_entry.GetId());
+      }
+    }
+  }
+
+  SuspendedProcess(SuspendedProcess&& other) HADESMEM_NOEXCEPT
+    : threads_(std::move(other.threads_))
+  { }
+
+  SuspendedProcess& operator=(SuspendedProcess&& other) HADESMEM_NOEXCEPT
+  {
+    threads_ = std::move(other.threads_);
+
+    return *this;
+  }
+  
+  ~SuspendedProcess()
+  { }
+  
+private:
+  // Disable copying.
+  SuspendedProcess(SuspendedProcess const& other);
+  SuspendedProcess& operator=(SuspendedProcess const& other);
+  
+  std::vector<SuspendedThread> threads_;
+};
+
+}

@@ -50,6 +50,20 @@ inline HANDLE OpenProcessAllAccess(DWORD id)
   return handle;
 }
 
+inline HANDLE OpenThreadAllAccess(DWORD id)
+{
+  HANDLE const handle = ::OpenThread(THREAD_ALL_ACCESS, FALSE, id);
+  if (!handle)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_THROW_EXCEPTION(Error() << 
+      ErrorString("OpenThread failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return handle;
+}
+
 inline HANDLE DuplicateHandle(HANDLE handle)
 {
   HADESMEM_ASSERT(handle != nullptr);

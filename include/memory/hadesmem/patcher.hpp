@@ -26,6 +26,7 @@
 #include <hadesmem/flush.hpp>
 #include <hadesmem/write.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/thread_helpers.hpp>
 
 // TODO: Fix exception safety.
 
@@ -37,11 +38,12 @@
 
 // TODO: Make hooking a transactional operation.
 
-// TODO: Freeze target when hooking (except calling thread if applicable – 
-// e.g. in injected code). Support doing this via both manual thread 
-// enumeration (will require new Thread, ThreadList, etc APIs) and also 
-// NtSuspendProcess. NtSuspendProcess method cannot be used on self? Or does 
-// it handle this case and exclude the current thread?
+// TODO: When patching memory, check each thread context to ensure we're not 
+// overwriting code that's currently being executed in a way that could cause 
+// a crash. In the case of PatchDetour we should set the thread context to 
+// redirect it to our trampoline, and in the case of PatchRaw it's probably 
+// safer just to bail and make the caller try again. Need to document that 
+// the API may fail spuriously and that the caller should retry.
 
 // TODO: VMT hooking.
 
@@ -61,6 +63,10 @@
 // keep the code in a common place.
 
 // TODO: Rewrite to not use AsmJit.
+
+// TODO: Add proper tests for edge cases trying to be handled (thread 
+// suspension, thread redirection, instruction resolution, no free trampoline 
+// blocks near a target address, short and far jumps, etc etc.)
 
 namespace hadesmem
 {
@@ -121,6 +127,8 @@ public:
       return;
     }
 
+    SuspendedProcess suspended_process(process_->GetId());
+
     orig_ = ReadVector<BYTE>(*process_, target_, data_.size());
       
     WriteVector(*process_, target_, data_);
@@ -136,6 +144,8 @@ public:
     {
       return;
     }
+
+    SuspendedProcess suspended_process(process_->GetId());
 
     WriteVector(*process_, target_, orig_);
 
@@ -247,6 +257,8 @@ public:
       return;
     }
 
+    SuspendedProcess suspended_process(process_->GetId());
+
     ULONG const kMaxInstructionLen = 15;
     ULONG const kTrampSize = kMaxInstructionLen * 3;
 
@@ -329,7 +341,7 @@ public:
         jmp_ss.imbue(std::locale::classic());
         jmp_ss << std::hex << jump_target;
         std::string const jump_str = "Jump target is " + jmp_ss.str() + ".\n";
-        OutputDebugStringA(jump_str.c_str());
+        HADESMEM_TRACE_A(jump_str.c_str());
 #endif
         if (ud_obj.mnemonic == UD_Ijmp)
         {
@@ -370,6 +382,8 @@ public:
     {
       return;
     }
+
+    SuspendedProcess suspended_process(process_->GetId());
 
     WriteVector(*process_, target_, orig_);
 
