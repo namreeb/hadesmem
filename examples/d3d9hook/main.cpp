@@ -5,6 +5,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/trace.hpp>
 
 #include "d3d9_manager.hpp"
 

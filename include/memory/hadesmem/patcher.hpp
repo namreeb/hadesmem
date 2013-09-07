@@ -26,6 +26,7 @@
 #include <hadesmem/flush.hpp>
 #include <hadesmem/write.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/thread_helpers.hpp>
 
 // TODO: Fix exception safety.
@@ -167,8 +168,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
-      HADESMEM_TRACE_A("\n");
+      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -282,14 +282,7 @@ public:
 #endif
 
     bool detour_near = IsNear(target_, detour_);
-    if (detour_near)
-    {
-      HADESMEM_TRACE_A("PatchDetour::Apply: Detour near.");
-    }
-    else
-    {
-      HADESMEM_TRACE_A("PatchDetour::Apply: Detour far.");
-    }
+    HADESMEM_TRACE_A(detour_near ? "Detour near.\n" : "Detour far.\n");
     DWORD_PTR const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
     
     // TODO: Detect cases where hooking may overflow past the end of a 
@@ -305,18 +298,12 @@ public:
           ErrorString("Disassembly failed."));
       }
         
-#ifndef NDEBUG
+#if !defined(HADESMEM_NO_TRACE)
       char const* const asm_str = ud_insn_asm(&ud_obj);
-      std::string asm_str_full = "PatchDetour::Apply: ";
-      asm_str_full += (asm_str ? asm_str : "Disassembly printing failed.");
-      asm_str_full += ' ';
-      asm_str_full += '[';
       char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
-      asm_str_full += (asm_bytes_str ? asm_bytes_str : 
-        "Disassembly bytes printing failed.");
-      asm_str_full += ']';
-      asm_str_full += '\n';
-      HADESMEM_TRACE_A(asm_str_full.c_str());
+      HADESMEM_TRACE_FORMAT_A("%s. [%s].\n", 
+        (asm_str ? asm_str : "Invalid."), 
+        (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
       
       // TODO: Improved relative instruction rebuilding (including conditionals). 
@@ -336,13 +323,7 @@ public:
         unsigned int const insn_len = ud_insn_len(&ud_obj);
         PVOID jump_target = reinterpret_cast<PBYTE>(
           static_cast<DWORD_PTR>(insn_base)) + insn_target + insn_len;
-#ifndef NDEBUG
-        std::stringstream jmp_ss;
-        jmp_ss.imbue(std::locale::classic());
-        jmp_ss << std::hex << jump_target;
-        std::string const jump_str = "Jump target is " + jmp_ss.str() + ".\n";
-        HADESMEM_TRACE_A(jump_str.c_str());
-#endif
+        HADESMEM_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
         {
           tramp_cur += WriteJump(tramp_cur, jump_target);
@@ -419,8 +400,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
-      HADESMEM_TRACE_A("\n");
+      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -575,18 +555,10 @@ private:
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
-    // TODO: Add this to WriteCall.
-#ifndef NDEBUG
-    std::stringstream stub_sizes;
-    stub_sizes.imbue(std::locale::classic());
-    stub_sizes 
-      << "PatchDetour::Apply: Stub size = " 
-      << stub_size 
-      << ", Expected stub size = " 
-      << expected_stub_size 
-      << ".\n";
-    HADESMEM_TRACE_A(stub_sizes.str().c_str());
-#endif
+    HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
+      "Expected stub size = 0n%Iu.\n", 
+      stub_size, 
+      expected_stub_size);
     // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {
@@ -646,6 +618,11 @@ private:
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
+    HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
+      "Expected stub size = 0n%Iu.\n", 
+      stub_size, 
+      expected_stub_size);
+    // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {
       BOOST_THROW_EXCEPTION(Error() << 

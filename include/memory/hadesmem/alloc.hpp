@@ -11,6 +11,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
 
 namespace hadesmem
@@ -154,8 +155,7 @@ private:
 
       // WARNING: Memory in remote process is leaked if 'Free' fails
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
-      HADESMEM_TRACE_A("\n");
+      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
 
       process_ = nullptr;
       base_ = nullptr;

@@ -14,6 +14,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/thread.hpp>
 #include <hadesmem/thread_list.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/thread_entry.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/winapi.hpp>
@@ -26,12 +27,7 @@ namespace hadesmem
   
 inline DWORD SuspendThread(Thread const& thread)
 {
-#ifndef NDEBUG
-  std::stringstream suspend_ss;
-  suspend_ss.imbue(std::locale::classic());
-  suspend_ss << "Suspending thread with ID 0n" << thread.GetId() << ".\n";
-  HADESMEM_TRACE_A(suspend_ss.str().c_str());
-#endif
+  HADESMEM_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.\n", thread.GetId());
 
   DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))
@@ -47,12 +43,7 @@ inline DWORD SuspendThread(Thread const& thread)
 
 inline DWORD ResumeThread(Thread const& thread)
 {
-#ifndef NDEBUG
-  std::stringstream suspend_ss;
-  suspend_ss.imbue(std::locale::classic());
-  suspend_ss << "Resuming thread with ID 0n" << thread.GetId() << ".\n";
-  HADESMEM_TRACE_A(suspend_ss.str().c_str());
-#endif
+  HADESMEM_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.\n", thread.GetId());
 
   DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))
@@ -151,14 +142,21 @@ private:
 
       // WARNING: Thread is never resumed if ResumeThread fails...
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
-      HADESMEM_TRACE_A("\n");
+      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
     }
   }
 
   Thread thread_;
 };
 
+// TODO: Do multiple passes to ensure no threads are missed. Currently this 
+// code suffers from a race condition whereby new threads could be created 
+// after we take the snapshot, so they would be missed.
+// TODO: Fix this code for the case where a thread in the snapshot has 
+// terminated by the time we get around to trying to suspend it. Should 
+// errors just be swallowed? We could probably get away with that as long as 
+// we fix the above todo and just do several attempts until all threads 
+// have been successfully suspended (or back out if not).
 class SuspendedProcess
 {
 public:

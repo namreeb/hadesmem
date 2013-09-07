@@ -40,6 +40,7 @@ using std::max;
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/injector.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>

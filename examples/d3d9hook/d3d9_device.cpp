@@ -14,6 +14,7 @@
 #include <winnt.h>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/trace.hpp>
 
 #include "proxy_call.hpp"
 
