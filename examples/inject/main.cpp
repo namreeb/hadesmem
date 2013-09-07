@@ -170,7 +170,6 @@ int main(int argc, char* /*argv*/[])
     }
 
     auto const module_path = GetOptionValue<std::wstring>("module", var_map);
-    auto const proc_name = GetOptionValue<std::wstring>("name", var_map);
     bool const path_resolution = IsOptionSet("path-resolution", var_map);
     bool const add_path = IsOptionSet("add-path", var_map);
 
@@ -206,6 +205,7 @@ int main(int argc, char* /*argv*/[])
       }
       else
       {
+        auto const proc_name = GetOptionValue<std::wstring>("name", var_map);
         std::wstring const proc_name_upper = hadesmem::detail::ToUpperOrdinal(
           proc_name);
         hadesmem::ProcessList proc_list;
