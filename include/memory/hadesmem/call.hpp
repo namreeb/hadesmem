@@ -481,7 +481,7 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   DWORD_PTR debug_break, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode32 called.\n");
+  HADESMEM_TRACE_A("GenerateCallCode32 called.");
 
   AsmJit::Label label_nodebug(assembler->newLabel());
 
@@ -583,7 +583,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   DWORD_PTR debug_break, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode64 called.\n");
+  HADESMEM_TRACE_A("GenerateCallCode64 called.");
 
   AsmJit::Label label_nodebug(assembler->newLabel());
   
@@ -693,7 +693,7 @@ inline Allocator GenerateCallCode(Process const& process,
   ArgsForwardIterator args_full_beg, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode called.\n");
+  HADESMEM_TRACE_A("GenerateCallCode called.");
 
   Module const kernel32(process, L"kernel32.dll");
   auto const get_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
@@ -726,17 +726,17 @@ inline Allocator GenerateCallCode(Process const& process,
   
   DWORD_PTR const stub_size = assembler.getCodeSize();
   
-  HADESMEM_TRACE_A("Allocating memory for remote stub.\n");
+  HADESMEM_TRACE_A("Allocating memory for remote stub.");
 
   Allocator stub_mem_remote(process, stub_size);
   
-  HADESMEM_TRACE_A("Performing code relocation.\n");
+  HADESMEM_TRACE_A("Performing code relocation.");
 
   std::vector<BYTE> code_real(stub_size);
   assembler.relocCode(code_real.data(), reinterpret_cast<DWORD_PTR>(
     stub_mem_remote.GetBase()));
   
-  HADESMEM_TRACE_A("Writing remote code stub.\n");
+  HADESMEM_TRACE_A("Writing remote code stub.");
 
   WriteVector(process, stub_mem_remote.GetBase(), code_real);
 
@@ -1010,7 +1010,7 @@ inline void CallMulti(Process const& process,
 {
   // TODO: Iterator checks for type and category.
   
-  HADESMEM_TRACE_A("CallMulti called.\n");
+  HADESMEM_TRACE_A("CallMulti called.");
 
   auto const num_addresses_signed = std::distance(addresses_beg, 
     addresses_end);
@@ -1018,12 +1018,12 @@ inline void CallMulti(Process const& process,
   auto const num_addresses = static_cast<typename std::make_unsigned<decltype(
     num_addresses_signed)>::type>(num_addresses_signed);
   
-  HADESMEM_TRACE_A("Allocating memory for return values.\n");
+  HADESMEM_TRACE_A("Allocating memory for return values.");
 
   Allocator const return_values_remote(process, 
     sizeof(detail::CallResultRemote) * num_addresses);
   
-  HADESMEM_TRACE_A("Allocating memory for code stub.\n");
+  HADESMEM_TRACE_A("Allocating memory for code stub.");
 
   Allocator const code_remote(detail::GenerateCallCode(process, 
     addresses_beg, addresses_end, 
@@ -1034,7 +1034,7 @@ inline void CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
   
-  HADESMEM_TRACE_A("Creating remote thread and waiting.\n");
+  HADESMEM_TRACE_A("Creating remote thread and waiting.");
 
   // TODO: Configurable timeout. This will complicate resource management 
   // however, as we will need to extend the lifetime of the remote memory 
@@ -1044,7 +1044,7 @@ inline void CallMulti(Process const& process,
   // more investigation...
   detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
   
-  HADESMEM_TRACE_A("Reading return values.\n");
+  HADESMEM_TRACE_A("Reading return values.");
 
   std::vector<detail::CallResultRemote> return_vals_remote = 
     ReadVector<detail::CallResultRemote>(process, 
@@ -1109,7 +1109,7 @@ void AddCallArg(OutputIterator call_args, T&& arg)
 
 }
 
-#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 namespace detail
 {
@@ -1147,7 +1147,7 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
 
-#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 
@@ -1191,7 +1191,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
 
-#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 class MultiCall
 {
@@ -1240,7 +1240,7 @@ public:
   ~MultiCall() HADESMEM_NOEXCEPT
   { }
 
-#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)
@@ -1256,7 +1256,7 @@ public:
     args_.push_back(call_args);
   }
 
-#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 #define BOOST_PP_LOCAL_MACRO(n) \
   template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -1290,7 +1290,7 @@ public:
 
 #undef HADESMEM_CALL_ADD_ARG_WRAPPER
 
-#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
   
   template <typename OutputIterator>
   void Call(OutputIterator results) const

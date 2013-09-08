@@ -30,9 +30,9 @@
 #include <hadesmem/module.hpp>
 #include <hadesmem/detail/assert.hpp>
 
-#ifndef PROCESS_CALLBACK_FILTER_ENABLED
+#if !defined(PROCESS_CALLBACK_FILTER_ENABLED)
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
-#endif // #ifndef PROCESS_CALLBACK_FILTER_ENABLED
+#endif // #if !defined(PROCESS_CALLBACK_FILTER_ENABLED)
 
 #include <windows.h>
 

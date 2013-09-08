@@ -85,7 +85,7 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
 #if !defined(HADESMEM_CALL_MAX_ARGS)
 #define HADESMEM_CALL_MAX_ARGS 10
-#endif // #ifndef HADESMEM_CALL_MAX_ARGS
+#endif // #if !defined(HADESMEM_CALL_MAX_ARGS)
 
 // This is required because of a bug in Clang's dllexport support on Windows, 
 // this is worked around by using a linker flag to export all symbols 

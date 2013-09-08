@@ -168,7 +168,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -282,7 +282,7 @@ public:
 #endif
 
     bool detour_near = IsNear(target_, detour_);
-    HADESMEM_TRACE_A(detour_near ? "Detour near.\n" : "Detour far.\n");
+    HADESMEM_TRACE_A(detour_near ? "Detour near." : "Detour far.");
     DWORD_PTR const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
     
     // TODO: Detect cases where hooking may overflow past the end of a 
@@ -301,7 +301,7 @@ public:
 #if !defined(HADESMEM_NO_TRACE)
       char const* const asm_str = ud_insn_asm(&ud_obj);
       char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
-      HADESMEM_TRACE_FORMAT_A("%s. [%s].\n", 
+      HADESMEM_TRACE_FORMAT_A("%s. [%s].", 
         (asm_str ? asm_str : "Invalid."), 
         (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
@@ -400,7 +400,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -556,7 +556,7 @@ private:
 
     DWORD_PTR const stub_size = jit.getCodeSize();
     HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
-      "Expected stub size = 0n%Iu.\n", 
+      "Expected stub size = 0n%Iu.", 
       stub_size, 
       expected_stub_size);
     // TODO: Should this be an assert?
@@ -619,7 +619,7 @@ private:
 
     DWORD_PTR const stub_size = jit.getCodeSize();
     HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
-      "Expected stub size = 0n%Iu.\n", 
+      "Expected stub size = 0n%Iu.", 
       stub_size, 
       expected_stub_size);
     // TODO: Should this be an assert?

@@ -27,7 +27,7 @@ namespace hadesmem
   
 inline DWORD SuspendThread(Thread const& thread)
 {
-  HADESMEM_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.\n", thread.GetId());
+  HADESMEM_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.", thread.GetId());
 
   DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))
@@ -43,7 +43,7 @@ inline DWORD SuspendThread(Thread const& thread)
 
 inline DWORD ResumeThread(Thread const& thread)
 {
-  HADESMEM_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.\n", thread.GetId());
+  HADESMEM_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.", thread.GetId());
 
   DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))
@@ -142,7 +142,7 @@ private:
 
       // WARNING: Thread is never resumed if ResumeThread fails...
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
     }
   }
 

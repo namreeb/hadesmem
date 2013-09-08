@@ -17,7 +17,7 @@ namespace hadesmem
 namespace detail
 {
 
-#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args)
@@ -25,7 +25,7 @@ std::unique_ptr<T> make_unique(Args&&... args)
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 // Not using Boost.Preprocessor for the non-variadic implementation of this 
 // because it is a 'detail' API and so users (should) have no need to 
@@ -73,7 +73,7 @@ std::unique_ptr<T> make_unique(A1&& a1, A2&& a2, A3&& a3, A4&& a4, A5&& a5)
     std::forward<A5>(a5)));
 }
 
-#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 }
 

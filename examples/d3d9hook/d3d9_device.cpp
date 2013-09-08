@@ -58,7 +58,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
 {
   try
   {
-    HADESMEM_TRACE_A("Creating RenderData for device.\n");
+    HADESMEM_TRACE_A("Creating RenderData for device.");
 
     auto const proxy_call = MakeProxyCall(this);
 
@@ -160,8 +160,8 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
   }
   catch (std::exception const& /*e*/)
   {
-    HADESMEM_TRACE_A("Failed while initializing render data.\n");
-        
+    HADESMEM_TRACE_A("Failed while initializing render data.");
+    
     if (render_data_.state_block)
     {
       render_data_.state_block->Release();
@@ -239,7 +239,7 @@ ULONG __stdcall IDirect3DDevice9Proxy::Release()
 
     if (cleanup_this)
     {
-      HADESMEM_TRACE_A("Deleting IDirect3DDevice9Proxy.\n");
+      HADESMEM_TRACE_A("Deleting IDirect3DDevice9Proxy.");
 
       delete this;
     }
@@ -248,7 +248,7 @@ ULONG __stdcall IDirect3DDevice9Proxy::Release()
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
   
   return new_ref;
@@ -353,7 +353,7 @@ HRESULT __stdcall IDirect3DDevice9Proxy::Reset(D3DPRESENT_PARAMETERS* pPresentat
 {
   Validate();
 
-  HADESMEM_TRACE_A("Reset called.\n");
+  HADESMEM_TRACE_A("Reset called.");
 
   try
   {
@@ -361,15 +361,15 @@ HRESULT __stdcall IDirect3DDevice9Proxy::Reset(D3DPRESENT_PARAMETERS* pPresentat
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   HRESULT hr = device_->Reset(pPresentationParameters);
   DWORD const last_error = ::GetLastError();
 
   HADESMEM_TRACE_A(SUCCEEDED(hr) ? 
-    "Reset succeeded.\n" : 
-    "Reset failed.\n");
+    "Reset succeeded." : 
+    "Reset failed.");
 
   try
   {
@@ -377,7 +377,7 @@ HRESULT __stdcall IDirect3DDevice9Proxy::Reset(D3DPRESENT_PARAMETERS* pPresentat
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   ::SetLastError(last_error);
@@ -571,7 +571,7 @@ HRESULT __stdcall IDirect3DDevice9Proxy::EndScene()
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A((boost::diagnostic_information(e) + "\n").c_str());
+    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   auto const proxy_call = MakeProxyCall(this);
@@ -1331,14 +1331,14 @@ void IDirect3DDevice9Proxy::OnEndScene()
     if (FAILED(render_data_.state_block->Capture()))
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9::Capture failed "
-        "(state block).\n");
+        "(state block).");
       return;
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnEndScene called with invalid render data"
-      " (state block).\n");
+      " (state block).");
   }
 
   if (render_data_.default_state_block)
@@ -1346,14 +1346,14 @@ void IDirect3DDevice9Proxy::OnEndScene()
     if (FAILED(render_data_.default_state_block->Apply()))
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9::Apply failed (default "
-        "state block).\n");
+        "state block).");
       return;
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnEndScene called with invalid render data"
-      " (default state block).\n");
+      " (default state block).");
   }
 
   auto const draw_line = [&] (D3DXVECTOR2 start, D3DXVECTOR2 end, 
@@ -1361,27 +1361,27 @@ void IDirect3DDevice9Proxy::OnEndScene()
   {
     if (FAILED(render_data_.line->SetWidth(width)))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::SetWidth failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::SetWidth failed.");
       return false;
     }
 
     if (FAILED(render_data_.line->Begin()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::Begin failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::Begin failed.");
       return false;
     }
     
     D3DXVECTOR2 vec[2] = { start, end };
     if (FAILED(render_data_.line->Draw(vec, 2, colour)))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::Draw failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::Draw failed.");
       render_data_.line->End();
       return false;
     }
       
     if (FAILED(render_data_.line->End()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::End failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::End failed.");
       return false;
     }
 
@@ -1402,7 +1402,7 @@ void IDirect3DDevice9Proxy::OnEndScene()
       || !draw_line(bottom_right, top_right, line_width, colour) 
       || !draw_line(top_left, top_right, line_width, colour))
     {
-      HADESMEM_TRACE_A("Warning! DrawLine failed.\n");
+      HADESMEM_TRACE_A("Warning! DrawLine failed.");
       return false;
     }
 
@@ -1412,7 +1412,7 @@ void IDirect3DDevice9Proxy::OnEndScene()
   D3DVIEWPORT9 viewport;
   if (FAILED(device_->GetViewport(&viewport)))
   {
-    HADESMEM_TRACE_A("Warning! IDirect3DDevice9::GetViewport failed.\n");
+    HADESMEM_TRACE_A("Warning! IDirect3DDevice9::GetViewport failed.");
     return;
   }
 
@@ -1441,7 +1441,7 @@ void IDirect3DDevice9Proxy::OnEndScene()
   else
   {
     HADESMEM_TRACE_A("Warning! OnEndScene called with invalid render data "
-      "(line).\n");
+      "(line).");
     return;
   }
   
@@ -1466,13 +1466,13 @@ void IDirect3DDevice9Proxy::OnEndScene()
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
     {
-      HADESMEM_TRACE_A("Warning! ID3DXFont::DrawText failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXFont::DrawText failed.");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnEndScene called with invalid render data "
-      "(font).\n");
+      "(font).");
   }
 
   if (render_data_.state_block)
@@ -1480,19 +1480,19 @@ void IDirect3DDevice9Proxy::OnEndScene()
     if (FAILED(render_data_.state_block->Apply()))
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9::Apply failed (default "
-        "state block).\n");
+        "state block).");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnEndScene called with invalid render data"
-      " (default state block).\n");
+      " (default state block).");
   }
 }
 
 void IDirect3DDevice9Proxy::OnPreReset()
 {
-  OutputDebugStringA("OnPreReset called for device.\n");
+  OutputDebugStringA("OnPreReset called for device.");
   
   HADESMEM_ASSERT(call_count_ == 0);
 
@@ -1501,14 +1501,14 @@ void IDirect3DDevice9Proxy::OnPreReset()
     if (render_data_.state_block->Release())
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9 leaked in "
-        "OnPreReset.\n");
+        "OnPreReset.");
     }
     render_data_.state_block = nullptr;
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPreReset called with invalid render data"
-      " (state block).\n");
+      " (state block).");
   }
 
   if (render_data_.default_state_block)
@@ -1516,60 +1516,60 @@ void IDirect3DDevice9Proxy::OnPreReset()
     if (render_data_.default_state_block->Release())
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9 leaked in "
-        "OnPreReset (default).\n");
+        "OnPreReset (default).");
     }
     render_data_.default_state_block = nullptr;
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPreReset called with invalid render data"
-      " (default state block).\n");
+      " (default state block).");
   }
 
   if (render_data_.line)
   {
     if (FAILED(render_data_.line->OnLostDevice()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::OnLostDevice failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::OnLostDevice failed.");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPreReset called with invalid render data"
-      " (line).\n");
+      " (line).");
   }
 
   if (render_data_.font)
   {
     if (FAILED(render_data_.font->OnLostDevice()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXFont::OnLostDevice failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXFont::OnLostDevice failed.");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPreReset called with invalid render data"
-      " (font).\n");
+      " (font).");
   }
 }
 
 void IDirect3DDevice9Proxy::OnPostReset()
 {
-  OutputDebugStringA("OnPostReset called for device.\n");
+  OutputDebugStringA("OnPostReset called for device.");
   
   HADESMEM_ASSERT(render_data_.state_block == nullptr);
 
   if (render_data_.state_block)
   {
     HADESMEM_TRACE_A("Warning! OnPostReset called with invalid render "
-      "data (state block).\n");
+      "data (state block).");
   }
   else
   {
     if (FAILED(device_->CreateStateBlock(D3DSBT_ALL, &render_data_.state_block)))
     {
       HADESMEM_TRACE_A("Warning! IDirect3DDevice9::CreateStateBlock "
-        "failed.\n");
+        "failed.");
     }
   }
   
@@ -1578,7 +1578,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
   if (render_data_.default_state_block)
   {
     HADESMEM_TRACE_A("Warning! OnPostReset called with invalid render "
-      "data (state block).\n");
+      "data (state block).");
   }
   else
   {
@@ -1586,7 +1586,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
     if (!render_data_.default_state_block)
     {
       HADESMEM_TRACE_A("Warning! CreateDefaultStateBlock failed "
-        "(default).\n");
+        "(default).");
     }
   }
   
@@ -1596,13 +1596,13 @@ void IDirect3DDevice9Proxy::OnPostReset()
   {
     if (FAILED(render_data_.line->OnResetDevice()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine::OnResetDevice failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine::OnResetDevice failed.");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPostReset called with invalid render "
-      "data (line).\n");
+      "data (line).");
   }
   
   HADESMEM_ASSERT(render_data_.font != nullptr);
@@ -1611,20 +1611,20 @@ void IDirect3DDevice9Proxy::OnPostReset()
   {
     if (FAILED(render_data_.font->OnResetDevice()))
     {
-      HADESMEM_TRACE_A("Warning! ID3DXFont::OnResetDevice failed.\n");
+      HADESMEM_TRACE_A("Warning! ID3DXFont::OnResetDevice failed.");
     }
   }
   else
   {
     HADESMEM_TRACE_A("Warning! OnPostReset called with invalid render "
-      "data (font).\n");
+      "data (font).");
   }
 }
 
 // TODO: Add checks to ensure that 
 void IDirect3DDevice9Proxy::OnRelease()
 {
-  HADESMEM_TRACE_A("OnRelease actually cleaning up!\n");
+  HADESMEM_TRACE_A("OnRelease actually cleaning up!");
 
   HADESMEM_ASSERT(call_count_ == 0);
 
@@ -1634,16 +1634,16 @@ void IDirect3DDevice9Proxy::OnRelease()
   {
     if (render_data_.state_block->Release())
     {
-      HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9 leaked in Release.\n");
+      HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9 leaked in Release.");
     }
     render_data_.state_block = nullptr;
 
-    HADESMEM_TRACE_A("Cleaned up IDirect3DStateBlock9.\n");
+    HADESMEM_TRACE_A("Cleaned up IDirect3DStateBlock9.");
   }
   else
   {
     HADESMEM_TRACE_A("Warning! Release called with invalid render data "
-      "(state block).\n");
+      "(state block).");
   }
   
   HADESMEM_ASSERT(render_data_.default_state_block != nullptr);
@@ -1653,16 +1653,16 @@ void IDirect3DDevice9Proxy::OnRelease()
     if (render_data_.default_state_block->Release())
     {
       HADESMEM_TRACE_A("Warning! IDirect3DStateBlock9 leaked in Release "
-        "(default).\n");
+        "(default).");
     }
     render_data_.default_state_block = nullptr;
 
-    HADESMEM_TRACE_A("Cleaned up IDirect3DStateBlock9 (default).\n");
+    HADESMEM_TRACE_A("Cleaned up IDirect3DStateBlock9 (default).");
   }
   else
   {
     HADESMEM_TRACE_A("Warning! Release called with invalid render data "
-      "(default state block).\n");
+      "(default state block).");
   }
   
   HADESMEM_ASSERT(render_data_.line != nullptr);
@@ -1671,16 +1671,16 @@ void IDirect3DDevice9Proxy::OnRelease()
   {
     if (render_data_.line->Release())
     {
-      HADESMEM_TRACE_A("Warning! ID3DXLine leaked in Release (default).\n");
+      HADESMEM_TRACE_A("Warning! ID3DXLine leaked in Release (default).");
     }
     render_data_.line = nullptr;
 
-    HADESMEM_TRACE_A("Cleaned up ID3DXLine.\n");
+    HADESMEM_TRACE_A("Cleaned up ID3DXLine.");
   }
   else
   {
     HADESMEM_TRACE_A("Warning! Release called with invalid render data "
-      "(line).\n");
+      "(line).");
   }
   
   HADESMEM_ASSERT(render_data_.font != nullptr);
@@ -1689,15 +1689,15 @@ void IDirect3DDevice9Proxy::OnRelease()
   {
     if (render_data_.font->Release())
     {
-      HADESMEM_TRACE_A("Warning! ID3DXFont leaked in Release (default).\n");
+      HADESMEM_TRACE_A("Warning! ID3DXFont leaked in Release (default).");
     }
     render_data_.font = nullptr;
 
-    HADESMEM_TRACE_A("Cleaned up ID3DXFont.\n");
+    HADESMEM_TRACE_A("Cleaned up ID3DXFont.");
   }
   else
   {
     HADESMEM_TRACE_A("Warning! Release called with invalid render data "
-      "(line).\n");
+      "(line).");
   }
 }

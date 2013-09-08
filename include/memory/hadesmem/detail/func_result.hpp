@@ -19,7 +19,7 @@ namespace detail
 template <typename FuncT>
 struct FuncResult;
 
-#ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 template <typename R, typename... Args>
 struct FuncResult<R (Args...)>
@@ -27,7 +27,7 @@ struct FuncResult<R (Args...)>
   typedef R type;
 };
 
-#else // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
   
 HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
 
@@ -53,7 +53,7 @@ struct FuncResult<R (BOOST_PP_ENUM_PARAMS(n, T))> \
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
 
-#endif // #ifndef HADESMEM_NO_VARIADIC_TEMPLATES
+#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
 }
 
