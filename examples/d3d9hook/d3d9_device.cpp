@@ -15,6 +15,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 
 #include "proxy_call.hpp"
 
@@ -26,7 +27,7 @@
 
 // TODO: Support IDirect3DDevice9Ex.
 
-// TODO: Thread safety and (if appliciable) reentrancy safety checks.
+// TODO: Thread safety and (if applicable) reentrancy safety checks.
 
 // TODO: Ensure that unloading on the fly does not leak a proxy or any other 
 // resources.
@@ -80,8 +81,9 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
 
     if (!d3dx_mod_)
     {
-      d3dx_mod_.reset(new hadesmem::detail::SmartModuleHandle(
-        ::LoadLibraryW(L"d3dx9_43")));
+      d3dx_mod_ = 
+        hadesmem::detail::make_unique<hadesmem::detail::SmartModuleHandle>(
+        ::LoadLibraryW(L"d3dx9_43"));
     }
 
     if (!d3dx_mod_->GetHandle())

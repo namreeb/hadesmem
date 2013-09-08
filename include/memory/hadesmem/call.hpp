@@ -1075,7 +1075,7 @@ inline CallResultRaw Call(Process const& process,
   std::vector<CallConv> call_convs;
   call_convs.push_back(call_conv);
   std::vector<std::vector<CallArg>> args_full;
-  args_full.push_back(std::vector<CallArg>(args_beg, args_end));
+  args_full.emplace_back(args_beg, args_end);
   std::vector<CallResultRaw> results;
   CallMulti(process, 
     std::begin(addresses), std::end(addresses), 

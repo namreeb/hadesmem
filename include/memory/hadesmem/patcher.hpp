@@ -28,6 +28,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/thread_helpers.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 
 // TODO: Fix exception safety.
 
@@ -262,7 +263,8 @@ public:
     ULONG const kMaxInstructionLen = 15;
     ULONG const kTrampSize = kMaxInstructionLen * 3;
 
-    trampoline_ = std::unique_ptr<Allocator>(new Allocator(*process_, kTrampSize));
+    trampoline_ = hadesmem::detail::make_unique<Allocator>(
+      *process_, kTrampSize);
     PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
     
     std::vector<BYTE> buffer(ReadVector<BYTE>(*process_, target_, 
@@ -437,6 +439,20 @@ private:
 
     std::unique_ptr<Allocator> trampoline;
 
+    auto const allocate_tramp = 
+      [] (Process const& process, PVOID addr, SIZE_T size) -> std::unique_ptr<Allocator>
+      {
+        try
+        {
+          return hadesmem::detail::make_unique<Allocator>(
+            process, addr, size);
+        }
+        catch (std::exception const& /*e*/)
+        {
+          return std::unique_ptr<Allocator>();
+        }
+      };
+
     for (LONG_PTR base = reinterpret_cast<LONG_PTR>(address), index = 0;
       base + index < search_end || base - index > search_beg;
       index += page_size)
@@ -444,27 +460,19 @@ private:
       LONG_PTR const higher = base + index;
       if (higher < search_end)
       {
-        try
+        if (trampoline = allocate_tramp(*process_, reinterpret_cast<PVOID>(higher), page_size))
         {
-          trampoline.reset(new Allocator(*process_, 
-            reinterpret_cast<PVOID>(higher), page_size));
           break;
         }
-        catch (std::exception const& /*e*/)
-        { }
       }
 
       LONG_PTR const lower = base - index;
       if (lower > search_beg)
       {
-        try
+        if (trampoline = allocate_tramp(*process_, reinterpret_cast<PVOID>(lower), page_size))
         {
-          trampoline.reset(new Allocator(*process_, 
-            reinterpret_cast<PVOID>(lower), page_size));
           break;
         }
-        catch (std::exception const& /*e*/)
-        { }
       }
     }
 
@@ -476,8 +484,9 @@ private:
 
     return trampoline;
 #elif defined(_M_IX86) 
-    return static_cast<std::unique_ptr<Allocator>>(
-      new Allocator(*process_, address, page_size));
+    (void)address;
+    return hadesmem::detail::make_unique<Allocator>(
+      *process_, nullptr, page_size);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

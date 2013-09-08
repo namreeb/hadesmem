@@ -25,6 +25,7 @@
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/initialize.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
@@ -201,7 +202,7 @@ int main(int argc, char* /*argv*/[])
       if (has_pid)
       {
         DWORD const pid = GetOptionValue<DWORD>("pid", var_map);
-        process.reset(new hadesmem::Process(pid));
+        process = hadesmem::detail::make_unique<hadesmem::Process>(pid);
       }
       else
       {
@@ -242,7 +243,8 @@ int main(int argc, char* /*argv*/[])
           return 1;
         }
 
-        process.reset(new hadesmem::Process(found_procs.front().GetId()));
+        process = hadesmem::detail::make_unique<hadesmem::Process>(
+          found_procs.front().GetId());
       }
       
       HMODULE module = nullptr;

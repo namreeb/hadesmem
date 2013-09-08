@@ -22,6 +22,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/initialize.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -205,9 +206,10 @@ BOOST_AUTO_TEST_CASE(patchdetour)
 
   DWORD_PTR const target_ptr = reinterpret_cast<DWORD_PTR>(hook_me_wrapper);
   DWORD_PTR const detour_ptr = reinterpret_cast<DWORD_PTR>(&HookMeHk);
-  g_detour.reset(new hadesmem::PatchDetour(process, 
+  g_detour = hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+    process, 
     reinterpret_cast<PVOID>(target_ptr), 
-    reinterpret_cast<PVOID>(detour_ptr)));
+    reinterpret_cast<PVOID>(detour_ptr));
   
   BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1234));
   

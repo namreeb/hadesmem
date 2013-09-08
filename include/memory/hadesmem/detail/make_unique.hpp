@@ -30,7 +30,12 @@ std::unique_ptr<T> make_unique(Args&&... args)
 // Not using Boost.Preprocessor for the non-variadic implementation of this 
 // because it is a 'detail' API and so users (should) have no need to 
 // configure it.
-  
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif // #if defined(HADESMEM_MSVC)
+
 template<typename T>
 std::unique_ptr<T> make_unique()
 {
@@ -72,6 +77,10 @@ std::unique_ptr<T> make_unique(A1&& a1, A2&& a2, A3&& a3, A4&& a4, A5&& a5)
     std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4), 
     std::forward<A5>(a5)));
 }
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 #endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 

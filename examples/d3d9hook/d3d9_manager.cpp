@@ -42,6 +42,7 @@ using std::max;
 #include <hadesmem/injector.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
@@ -195,8 +196,9 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
         PBYTE create_device_hk = reinterpret_cast<PBYTE>(
           reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
 
-        g_d3d_mod.second->create_device_hk.reset(new hadesmem::PatchDetour(
-          *g_process, create_device, create_device_hk));
+        g_d3d_mod.second->create_device_hk = 
+          hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+          *g_process, create_device, create_device_hk);
         g_d3d_mod.second->create_device_hk->Apply();
       }
     }
@@ -244,8 +246,9 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
         PBYTE create_device_hk = reinterpret_cast<PBYTE>(
           reinterpret_cast<DWORD_PTR>(&CreateDeviceHk));
 
-        g_d3d_mod.second->create_device_hk.reset(new hadesmem::PatchDetour(
-          *g_process, create_device, create_device_hk));
+        g_d3d_mod.second->create_device_hk = 
+          hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+          *g_process, create_device, create_device_hk);
         g_d3d_mod.second->create_device_hk->Apply();
       }
     }
@@ -296,8 +299,7 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
       (void)proxy;
 
       // TODO: Add code to clean up the proxy eventually. This would have to 
-      // be done very carefully. The proxy can only safely be unloaded once 
-      // the associated d3d9.dll has been unloaded.
+      // be done very carefully.
     }
     else
     {
@@ -341,8 +343,10 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
 
     std::pair<std::unique_ptr<hadesmem::detail::SmartModuleHandle>, 
       std::unique_ptr<ModuleData>> d3d9_mod_tmp;
-    d3d9_mod_tmp.first.reset(new hadesmem::detail::SmartModuleHandle());
-    d3d9_mod_tmp.second.reset(new ModuleData());
+    d3d9_mod_tmp.first = 
+      hadesmem::detail::make_unique<hadesmem::detail::SmartModuleHandle>();
+    d3d9_mod_tmp.second = 
+      hadesmem::detail::make_unique<ModuleData>();
     HMODULE d3d9_handle_tmp = nullptr;
     if (!::GetModuleHandleEx(
       GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, 
@@ -363,9 +367,9 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
         d3d9_create));
       PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
         &Direct3DCreate9Hk));
-      d3d9_mod_tmp.second->d3d9_create_hk.reset(
-        new hadesmem::PatchDetour(
-        *g_process, target, detour));
+      d3d9_mod_tmp.second->d3d9_create_hk = 
+        hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+        *g_process, target, detour);
       d3d9_mod_tmp.second->d3d9_create_hk->Apply();
     }
     else
@@ -381,9 +385,9 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
         d3d9_create_ex));
       PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
         &Direct3DCreate9ExHk));
-      d3d9_mod_tmp.second->d3d9_create_ex_hk.reset(
-        new hadesmem::PatchDetour(
-        *g_process, target, detour));
+      d3d9_mod_tmp.second->d3d9_create_ex_hk = 
+        hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+        *g_process, target, detour);
       d3d9_mod_tmp.second->d3d9_create_ex_hk->Apply();
     }
     else
@@ -391,8 +395,7 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
       HADESMEM_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9Ex.");
     }
 
-    g_d3d_mod.first = std::move(d3d9_mod_tmp.first);
-    g_d3d_mod.second = std::move(d3d9_mod_tmp.second);
+    g_d3d_mod = std::move(d3d9_mod_tmp);
   }
 }
 
@@ -576,7 +579,8 @@ void InitializeD3D9Hooks()
   static boost::mutex mutex;
   boost::lock_guard<boost::mutex> lock(mutex);
   
-  g_process.reset(new hadesmem::Process(::GetCurrentProcessId()));
+  g_process = hadesmem::detail::make_unique<hadesmem::Process>(
+    ::GetCurrentProcessId());
   
   {
     HADESMEM_TRACE_A("Hooking CreateProcessInternalW.");
@@ -591,15 +595,17 @@ void InitializeD3D9Hooks()
       create_process_internal_w));
     PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
       &CreateProcessInternalWHk));
-    g_create_process_internal_w.reset(new hadesmem::PatchDetour(
-      *g_process, target, detour));
+    g_create_process_internal_w = 
+      hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+      *g_process, target, detour);
     g_create_process_internal_w->Apply();
   }
   
   std::unique_ptr<hadesmem::Module> d3d9_mod;
   try
   {
-    d3d9_mod.reset(new hadesmem::Module(*g_process, L"d3d9.dll"));
+    d3d9_mod = hadesmem::detail::make_unique<hadesmem::Module>(
+      *g_process, L"d3d9.dll");
   }
   catch (std::exception const& /*e*/)
   {
@@ -614,8 +620,8 @@ void InitializeD3D9Hooks()
       ldr_load_dll));
     PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
       &LdrLoadDllHk));
-    g_ldr_load_dll.reset(new hadesmem::PatchDetour(*g_process, target, 
-      detour));
+    g_ldr_load_dll = hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+      *g_process, target, detour);
     g_ldr_load_dll->Apply();
 
     return;
