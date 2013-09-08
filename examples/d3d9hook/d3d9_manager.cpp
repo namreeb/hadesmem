@@ -573,10 +573,15 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
         ::SetLastError(last_error);
         return ret;
       }
-      auto const name_beg = std::begin(path) + 
+      std::size_t const name_beg_tmp = 
         (backslash != std::wstring::npos ? backslash + 1 : 0);
-      std::wstring const module_name(name_beg, path.end());
-      std::wstring const module_name_upper(hadesmem::detail::ToUpperOrdinal(module_name));
+      HADESMEM_ASSERT(name_beg_tmp < static_cast<std::size_t>(
+        (std::numeric_limits<std::wstring::difference_type>::max)()));
+      auto const name_beg = static_cast<std::wstring::difference_type>(
+        name_beg_tmp);
+      std::wstring const module_name(std::begin(path) + name_beg, std::end(path));
+      std::wstring const module_name_upper(
+        hadesmem::detail::ToUpperOrdinal(module_name));
       if (module_name_upper == L"D3D9" || module_name_upper == L"D3D9.DLL")
       {
         HADESMEM_TRACE_A("D3D9 loaded. Applying hooks.");

@@ -73,15 +73,18 @@ project memory
     # deficiency in the compiler, it doesn't indicate a problem with the code.
     <toolset>msvc:<cxxflags>"/wd4345"
     
-	# Required for atomics library.
+    # Required for atomics library.
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i686"
     
-	# --export-all-symbols is required because of a bug in Clang's dllexport  
+    # --export-all-symbols is required because of a bug in Clang's dllexport  
     # support. Remove once this has been fixed.
     <toolset>clang:<linkflags>"-Wl,--export-all-symbols"
     
-	# Required for Boost.
+    # Required for Boost.
     <toolset>clang:<linkflags>"-Wl,--allow-multiple-definition"
+    
+    # Required for <intrin.h>.
+    <toolset>clang:<cxxflags>"-mmmx -m3dnow"
 
     # Enable checks for signed overflow in debug builds
     <toolset>gcc,<variant>debug:<cxxflags>"-ftrapv"
