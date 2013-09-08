@@ -6,6 +6,8 @@
 #include <array>
 #include <mutex>
 #include <memory>
+#include <string>
+#include <cstddef>
 #include <iostream>
 #include <algorithm>
 
@@ -16,6 +18,7 @@
 #include <windows.h>
 #include <winternl.h>
 #include <winnt.h>
+#include <intrin.h>
 
 // Work around a Clang issue.
 // c:/mingw32-dw2/bin/../lib/clang/3.2/../../../i686-w64-mingw32/include
@@ -37,6 +40,7 @@ using std::max;
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/module.hpp>
+#include <hadesmem/region.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/injector.hpp>
@@ -86,6 +90,10 @@ using std::max;
 // TODO: Investigate places where D3D9Hook should be bumping the DLL 
 // reference count (using GetModuleHandleEx).
 
+// TODO: Probe memory in API hooks safely.
+
+// TODO: Use RAII to ensure the last error code is restored.
+
 // TODO: Find the right headers so that this can be removed.
 #if !defined(STATUS_SUCCESS)
 #define STATUS_SUCCESS (static_cast<NTSTATUS>(0x00000000L))
@@ -93,6 +101,54 @@ using std::max;
 #if !defined(NT_SUCCESS)
 #define NT_SUCCESS(Status) ((static_cast<NTSTATUS>(Status)) >= 0)
 #endif
+
+// TODO: Clean this up, and move to its own header or find the right 
+// existing headers.
+// TODO: Stuff is currently named wrong to fix name collisions. Fix this 
+// properly.
+extern "C"
+{
+
+enum HADESMEM_SECTION_INHERIT
+{
+  ViewShare = 1, 
+  ViewUnmap = 2 
+};
+
+struct HADESMEM_TIB
+{
+  struct _EXCEPTION_REGISTRATION_RECORD* ExceptionList;
+  PVOID StackBase;
+  PVOID StackLimit;
+  PVOID SubSystemTib;
+  PVOID FiberData;
+  PVOID ArbitraryUserPointer;
+  struct HADESMEM_TIB *Self;
+};
+
+struct HADESMEM_TEB
+{
+  HADESMEM_TIB Tib;
+  // More stuff here that we currently don't care about.
+};
+
+#if defined(HADESMEM_ARCH_X64) 
+inline HADESMEM_TEB* HadesMemCurrentTeb()
+{
+  return reinterpret_cast<HADESMEM_TEB*>(
+    __readgsqword(offsetof(NT_TIB, Self)));
+}
+#elif defined(HADESMEM_ARCH_X86) 
+inline HADESMEM_TEB* HadesMemCurrentTeb()
+{
+  return reinterpret_cast<HADESMEM_TEB*>(
+    __readfsdword(offsetof(NT_TIB, Self)));
+}
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+}
 
 // TODO: Fix the code so this hack isn't required.
 #if defined(HADESMEM_CLANG)
@@ -124,7 +180,7 @@ PatchDetourPtr create_device_hk;
 std::pair<std::unique_ptr<hadesmem::detail::SmartModuleHandle>, 
   std::unique_ptr<ModuleData>> g_d3d_mod;
 
-PatchDetourPtr g_ldr_load_dll;
+PatchDetourPtr g_nt_map_view_of_section;
 
 PatchDetourPtr g_create_process_internal_w;
 
@@ -137,11 +193,11 @@ auto const to_string =
     return str.str();
   };
 
-IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version);
+extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version);
 
-HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9);
+extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9);
 
-HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9, 
+extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9, 
   UINT adapter, 
   D3DDEVTYPE device_type, 
   HWND focus_wnd, 
@@ -149,12 +205,21 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
   D3DPRESENT_PARAMETERS* presentation_params, 
   IDirect3DDevice9** ppdevice);
 
-void ApplyDetours(hadesmem::Module const& d3d9_mod);
+void ApplyDetours(HMODULE d3d9_mod);
 
-NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics, 
-  PCUNICODE_STRING name,  PVOID* handle);
+extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
+  HANDLE section, 
+  HANDLE process, 
+  PVOID* base, 
+  ULONG_PTR zero_bits, 
+  SIZE_T commit_size, 
+  PLARGE_INTEGER section_offset, 
+  PSIZE_T view_size, 
+  HADESMEM_SECTION_INHERIT inherit_disposition, 
+  ULONG alloc_type, 
+  ULONG alloc_protect);
 
-BOOL WINAPI CreateProcessInternalWHk(
+extern "C" BOOL WINAPI CreateProcessInternalWHk(
   HANDLE hUserToken,  
   LPCWSTR lpApplicationName,  
   LPWSTR lpCommandLine,  
@@ -168,7 +233,7 @@ BOOL WINAPI CreateProcessInternalWHk(
   LPPROCESS_INFORMATION lpProcessInformation,  
   PHANDLE hRestrictedUserToken);
 
-IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
+extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
 {
   IDirect3D9* d3d9 = nullptr;
   DWORD last_error = 0xDEADBEEF;
@@ -216,7 +281,7 @@ IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
   return d3d9;
 }
 
-HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
+extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
 {
 
   HRESULT hr = ERROR_NOT_SUPPORTED;
@@ -266,7 +331,7 @@ HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
   return hr;
 }
 
-HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9, 
+extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9, 
   UINT adapter, 
   D3DDEVTYPE device_type, 
   HWND focus_wnd, 
@@ -317,12 +382,12 @@ HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
 
 // TODO: Fix this to properly support module unloads and loads, 
 // then to support multiple modules simultaneously.
-void ApplyDetours(hadesmem::Module const& d3d9_mod)
+void ApplyDetours(HMODULE d3d9_mod)
 {
   static boost::mutex mutex;
   boost::lock_guard<boost::mutex> lock(mutex);
   
-  if (g_d3d_mod.first != nullptr && g_d3d_mod.first->GetHandle() != d3d9_mod.GetHandle())
+  if (g_d3d_mod.first != nullptr && g_d3d_mod.first->GetHandle() != d3d9_mod)
   {
     HADESMEM_TRACE_A("Attempt to apply detours to a new module when the "
       "initial module is still loaded.");
@@ -350,17 +415,19 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
     HMODULE d3d9_handle_tmp = nullptr;
     if (!::GetModuleHandleEx(
       GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, 
-      reinterpret_cast<LPCTSTR>(d3d9_mod.GetHandle()), 
+      reinterpret_cast<LPCTSTR>(d3d9_mod), 
       &d3d9_handle_tmp))
     {
-      HADESMEM_TRACE_A("Attempt to bump ref count of D3D9 module "
+      // TODO: Fix this. It currently doesn't work if we hook D3D9 as the 
+      // result of a call to NtMapViewOfSection because the module isn't yet 
+      // in the loader list... For now, just warn instead of failing.
+      HADESMEM_TRACE_A("Warning! Attempt to bump ref count of D3D9 module "
         "failed.");
-      return;
     }
-    *d3d9_mod_tmp.first = d3d9_handle_tmp;
+    *d3d9_mod_tmp.first = d3d9_mod;
     
-    FARPROC const d3d9_create = hadesmem::FindProcedure(*g_process, 
-      d3d9_mod, "Direct3DCreate9");
+    FARPROC const d3d9_create = hadesmem::detail::FindProcedureInternal(
+      *g_process, d3d9_mod, "Direct3DCreate9");
     if (d3d9_create)
     {
       PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
@@ -377,8 +444,8 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
       HADESMEM_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9.");
     }
     
-    FARPROC const d3d9_create_ex = hadesmem::FindProcedure(*g_process, 
-      d3d9_mod, "Direct3DCreate9Ex");
+    FARPROC const d3d9_create_ex = hadesmem::detail::FindProcedureInternal(
+      *g_process, d3d9_mod, "Direct3DCreate9Ex");
     if (d3d9_create_ex)
     {
       PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
@@ -399,68 +466,127 @@ void ApplyDetours(hadesmem::Module const& d3d9_mod)
   }
 }
 
-NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics, 
-  PCUNICODE_STRING name,  PVOID* handle)
+extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
+  HANDLE section, 
+  HANDLE process, 
+  PVOID* base, 
+  ULONG_PTR zero_bits, 
+  SIZE_T commit_size, 
+  PLARGE_INTEGER section_offset, 
+  PSIZE_T view_size, 
+  HADESMEM_SECTION_INHERIT inherit_disposition, 
+  ULONG alloc_type, 
+  ULONG alloc_protect)
 {
-  // Nothing must load a DLL until the the in_hook flag is set to true.
-
+  // Nothing must call NtMapViewOfSection until the the in_hook flag is set to 
+  // true.
+  // TODO: Replace the use of Boost with something custom so we can guarantee 
+  // that in the future Boost won't start mapping sections.
   static boost::thread_specific_ptr<bool> in_hook;
   if (in_hook.get() == nullptr)
   {
     in_hook.reset(new bool(false));
   }
-  
+
   NTSTATUS ret = STATUS_SUCCESS;
   DWORD last_error = 0;
-  
-  auto const ldr_load_dll = g_ldr_load_dll->
-    GetTrampoline<decltype(&LdrLoadDllHk)>();
+
+  auto const nt_map_view_of_section = g_nt_map_view_of_section->
+    GetTrampoline<decltype(&NtMapViewOfSectionHk)>();
+
+  ret = nt_map_view_of_section(
+    section, 
+    process, 
+    base, 
+    zero_bits, 
+    commit_size, 
+    section_offset, 
+    view_size, 
+    inherit_disposition, 
+    alloc_type, 
+    alloc_protect);
+  last_error = GetLastError();
   
   if (*in_hook == true)
   {
-    return ldr_load_dll(path, characteristics, name, handle);
+    ::SetLastError(last_error);
+    return ret;
   }
 
   *in_hook = true;
 
-  HADESMEM_TRACE_A("LdrLoadDll called.");
+  // TODO: Check whether GetProcessId could ever actually fail for the 
+  // current process and find a workaround if it can.
+  DWORD const pid = ::GetProcessId(process);
+  if (!pid || pid != ::GetCurrentProcessId())
+  {
+    if (!pid)
+    {
+      HADESMEM_TRACE_A("NtMapViewOfSection called for unknown process.");
+    }
+    else
+    {
+      HADESMEM_TRACE_A("NtMapViewOfSection called for different process.");
+    }
+    *in_hook = false;
+    ::SetLastError(last_error);
+    return ret;
+  }
+
+  //HADESMEM_TRACE_A("NtMapViewOfSection called for current process.");
 
   try
   {
-    ret = ldr_load_dll(path, characteristics, name, handle);
-    last_error = GetLastError();
     if (NT_SUCCESS(ret))
     {
-      HADESMEM_TRACE_A("LdrLoadDll succeeded.");
-      
-      if (name && name->Length && name->Buffer)
-      {
-        // TODO: Optimize this.
-        // TODO: Should be checking anything else here like characteristics, 
-        // path, handle, etc?
+      //HADESMEM_TRACE_A("NtMapViewOfSection succeeded.");
 
-        auto const null_char = std::find(name->Buffer, 
-          name->Buffer + name->Length, L'\0');
-        std::wstring const name_real(hadesmem::detail::ToUpperOrdinal(
-          std::wstring(name->Buffer, null_char)));
-        HADESMEM_TRACE_FORMAT_W(L"Loaded DLL \"%s\".", name_real.c_str());
-        std::wstring const d3d9_dll_name(hadesmem::detail::ToUpperOrdinal(
-          L"d3d9.dll"));
-        std::wstring const d3d9_name(hadesmem::detail::ToUpperOrdinal(
-          L"d3d9"));
-        if (name_real == d3d9_dll_name || name_real == d3d9_name)
-        {
-          HADESMEM_TRACE_A("D3D9 loaded. Applying hooks.");
-          
-          hadesmem::Module const d3d9_mod(*g_process, 
-            reinterpret_cast<HMODULE>(*handle));
-          ApplyDetours(d3d9_mod);
-        }
+      hadesmem::Region const region(*g_process, *base);
+      DWORD const region_type = region.GetType();
+      if (region_type != MEM_IMAGE)
+      {
+        //HADESMEM_TRACE_FORMAT_A("Not an image. Type given was %lx.", 
+        //  region_type);
+        *in_hook = false;
+        ::SetLastError(last_error);
+        return ret;
+      }
+
+      PVOID const arbitrary_user_pointer = 
+        HadesMemCurrentTeb()->Tib.ArbitraryUserPointer;
+      if (!arbitrary_user_pointer)
+      {
+        HADESMEM_TRACE_A("No arbitrary user pointer.");
+        *in_hook = false;
+        ::SetLastError(last_error);
+        return ret;
+      }
+
+      std::wstring const path(static_cast<PCWSTR>(arbitrary_user_pointer));
+      HADESMEM_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
+
+      auto const backslash = path.find_last_of(L'\\');
+      if (backslash + 1 == L'\\')
+      {
+        HADESMEM_TRACE_A("Invalid path.");
+        *in_hook = false;
+        ::SetLastError(last_error);
+        return ret;
+      }
+      auto const name_beg = std::begin(path) + 
+        (backslash != std::wstring::npos ? backslash + 1 : 0);
+      std::wstring const module_name(name_beg, path.end());
+      std::wstring const module_name_upper(hadesmem::detail::ToUpperOrdinal(module_name));
+      if (module_name_upper == L"D3D9" || module_name_upper == L"D3D9.DLL")
+      {
+        HADESMEM_TRACE_A("D3D9 loaded. Applying hooks.");
+
+        ApplyDetours(reinterpret_cast<HMODULE>(*base));
       }
     }
     else
     {
-      HADESMEM_TRACE_A("LdrLoadDll failed.");
+      HADESMEM_TRACE_A("NtMapViewOfSection failed.");
     }
   }
   catch (std::exception const& e)
@@ -474,7 +600,7 @@ NTSTATUS WINAPI LdrLoadDllHk(PCWSTR path, PULONG characteristics,
   return ret;
 }
 
-BOOL WINAPI CreateProcessInternalWHk(
+extern "C" BOOL WINAPI CreateProcessInternalWHk(
   HANDLE user_token,  
   LPCWSTR application_name,  
   LPWSTR command_line,  
@@ -601,35 +727,34 @@ void InitializeD3D9Hooks()
     g_create_process_internal_w->Apply();
   }
   
-  std::unique_ptr<hadesmem::Module> d3d9_mod;
   try
   {
-    d3d9_mod = hadesmem::detail::make_unique<hadesmem::Module>(
-      *g_process, L"d3d9.dll");
+    hadesmem::Module d3d9_mod(*g_process, L"d3d9.dll");
+
+    HADESMEM_TRACE_A("Hooking D3D9 directly.");
+
+    ApplyDetours(d3d9_mod.GetHandle());
   }
   catch (std::exception const& /*e*/)
   {
-    HADESMEM_TRACE_A("Hooking LdrLoadDll.");
+    HADESMEM_TRACE_A("Hooking NtMapViewOfSection.");
 
-    // TODO: Support multiple LdrLoadDll hooks.
+    // TODO: Support multiple NtMapViewOfSection hooks.
     // TODO: Fall back gracefully if this API doesn't exist.
     hadesmem::Module ntdll(*g_process, L"ntdll.dll");
-    FARPROC const ldr_load_dll = hadesmem::FindProcedure(*g_process, ntdll, 
-      "LdrLoadDll");
+    FARPROC const nt_map_view_of_section = hadesmem::FindProcedure(
+      *g_process, ntdll, "NtMapViewOfSection");
     PVOID target = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      ldr_load_dll));
+      nt_map_view_of_section));
     PVOID detour = reinterpret_cast<PVOID>(reinterpret_cast<DWORD_PTR>(
-      &LdrLoadDllHk));
-    g_ldr_load_dll = hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+      &NtMapViewOfSectionHk));
+    g_nt_map_view_of_section = 
+      hadesmem::detail::make_unique<hadesmem::PatchDetour>(
       *g_process, target, detour);
-    g_ldr_load_dll->Apply();
+    g_nt_map_view_of_section->Apply();
 
     return;
   }
-
-  HADESMEM_TRACE_A("Hooking D3D9 directly.");
-
-  ApplyDetours(*d3d9_mod);
 }
 
 void UninitializeD3D9Hooks()

@@ -332,13 +332,15 @@ inline FARPROC GetProcAddressInternal(Process const& process,
   return nullptr;
 }
 
-inline FARPROC FindProcedureInternal(Process const& process, 
-  Module const& module, LPCSTR name)
+inline FARPROC FindProcedureInternal(
+  Process const& process, 
+  HMODULE module, 
+  LPCSTR name)
 {
   HADESMEM_ASSERT(name != nullptr);
 
-  FARPROC const remote_func = GetProcAddressInternal(process, 
-    module.GetHandle(), name);
+  FARPROC const remote_func = GetProcAddressInternal(
+    process, module, name);
   if (!remote_func)
   {
     DWORD const last_error = ::GetLastError();
@@ -352,16 +354,25 @@ inline FARPROC FindProcedureInternal(Process const& process,
 
 }
 
-inline FARPROC FindProcedure(Process const& process, Module const& module, 
+inline FARPROC FindProcedure(
+  Process const& process, 
+  Module const& module, 
   std::string const& name)
 {
-  return detail::FindProcedureInternal(process, module, name.c_str());
+  return detail::FindProcedureInternal(
+    process, 
+    module.GetHandle(), 
+    name.c_str());
 }
 
-inline FARPROC FindProcedure(Process const& process, Module const& module, 
+inline FARPROC FindProcedure(
+  Process const& process, 
+  Module const& module, 
   WORD ordinal)
 {
-  return detail::FindProcedureInternal(process, module, 
+  return detail::FindProcedureInternal(
+    process, 
+    module.GetHandle(), 
     MAKEINTRESOURCEA(ordinal));
 }
 
