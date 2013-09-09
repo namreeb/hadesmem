@@ -95,9 +95,6 @@ using std::max;
 // TODO: Use RAII to ensure the last error code is restored.
 
 // TODO: Find the right headers so that this can be removed.
-#if !defined(STATUS_SUCCESS)
-#define STATUS_SUCCESS (static_cast<NTSTATUS>(0x00000000L))
-#endif
 #if !defined(NT_SUCCESS)
 #define NT_SUCCESS(Status) ((static_cast<NTSTATUS>(Status)) >= 0)
 #endif
@@ -235,7 +232,7 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
 
 extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
 {
-  IDirect3D9* d3d9 = nullptr;
+  IDirect3D9* d3d9 = reinterpret_cast<IDirect3D9*>(0xDEADBEEF);
   DWORD last_error = 0xDEADBEEF;
   try
   {
@@ -284,8 +281,8 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
 extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9)
 {
 
-  HRESULT hr = ERROR_NOT_SUPPORTED;
-  DWORD last_error = 0;
+  HRESULT hr = static_cast<HRESULT>(0xDEADBEEF);
+  DWORD last_error = 0xDEADBEEF;
   
   try
   {
@@ -339,8 +336,8 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
   D3DPRESENT_PARAMETERS* presentation_params, 
   IDirect3DDevice9** ppdevice)
 {
-  HRESULT hr = ERROR_NOT_SUPPORTED;
-  DWORD last_error_restored = 0;
+  HRESULT hr = static_cast<HRESULT>(0xDEADBEEF);
+  DWORD last_error = 0xDEADBEEF;
   
   try
   {
@@ -354,7 +351,7 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
 
     hr = create_device(pd3d9, adapter, device_type, focus_wnd, 
       behaviour_flags, presentation_params, ppdevice);
-    last_error_restored = ::GetLastError();
+    last_error = ::GetLastError();
     if (SUCCEEDED(hr) && ppdevice && *ppdevice)
     {
       HADESMEM_TRACE_A("CreateDevice succeeded.");
@@ -376,7 +373,7 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
-  ::SetLastError(last_error_restored);
+  ::SetLastError(last_error);
   return hr;
 }
 
@@ -478,6 +475,9 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
   ULONG alloc_type, 
   ULONG alloc_protect)
 {
+  NTSTATUS ret = static_cast<NTSTATUS>(0xDEADBEEF);
+  DWORD last_error = 0xDEADBEEF;
+
   // Nothing must call NtMapViewOfSection until the the in_hook flag is set to 
   // true.
   // TODO: Replace the use of Boost with something custom so we can guarantee 
@@ -487,9 +487,6 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
   {
     in_hook->reset(new bool(false));
   }
-
-  NTSTATUS ret = STATUS_SUCCESS;
-  DWORD last_error = 0;
 
   auto const nt_map_view_of_section = g_nt_map_view_of_section->
     GetTrampoline<decltype(&NtMapViewOfSectionHk)>();
@@ -619,13 +616,13 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
   LPPROCESS_INFORMATION process_info,  
   PHANDLE restricted_user_token)
 {
+  BOOL ret = static_cast<BOOL>(0xDEADBEEF);
+  DWORD last_error = 0xDEADBEEF;
+
   HADESMEM_TRACE_A("CreateProcessInternalW called.");
 
   // TODO: Log more details about params.
 
-  BOOL ret = TRUE;
-  DWORD last_error = 0;
-  
   try
   {
     auto const create_process_internal_w = g_create_process_internal_w->
