@@ -482,10 +482,10 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
   // true.
   // TODO: Replace the use of Boost with something custom so we can guarantee 
   // that in the future Boost won't start mapping sections.
-  static boost::thread_specific_ptr<bool> in_hook;
-  if (in_hook.get() == nullptr)
+  static boost::thread_specific_ptr<bool>* in_hook = new boost::thread_specific_ptr<bool>();
+  if (in_hook->get() == nullptr)
   {
-    in_hook.reset(new bool(false));
+    in_hook->reset(new bool(false));
   }
 
   NTSTATUS ret = STATUS_SUCCESS;
@@ -507,13 +507,13 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
     alloc_protect);
   last_error = GetLastError();
   
-  if (*in_hook == true)
+  if (**in_hook == true)
   {
     ::SetLastError(last_error);
     return ret;
   }
 
-  *in_hook = true;
+  **in_hook = true;
 
   // TODO: Check whether GetProcessId could ever actually fail for the 
   // current process and find a workaround if it can.
@@ -528,7 +528,7 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
     {
       HADESMEM_TRACE_A("NtMapViewOfSection called for different process.");
     }
-    *in_hook = false;
+    **in_hook = false;
     ::SetLastError(last_error);
     return ret;
   }
@@ -547,7 +547,7 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
       {
         //HADESMEM_TRACE_FORMAT_A("Not an image. Type given was %lx.", 
         //  region_type);
-        *in_hook = false;
+        **in_hook = false;
         ::SetLastError(last_error);
         return ret;
       }
@@ -557,7 +557,7 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
       if (!arbitrary_user_pointer)
       {
         HADESMEM_TRACE_A("No arbitrary user pointer.");
-        *in_hook = false;
+        **in_hook = false;
         ::SetLastError(last_error);
         return ret;
       }
@@ -569,7 +569,7 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
       if (backslash + 1 == L'\\')
       {
         HADESMEM_TRACE_A("Invalid path.");
-        *in_hook = false;
+        **in_hook = false;
         ::SetLastError(last_error);
         return ret;
       }
@@ -599,7 +599,7 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
     HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
-  *in_hook = false;
+  **in_hook = false;
 
   ::SetLastError(last_error);
   return ret;
@@ -620,6 +620,8 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
   PHANDLE restricted_user_token)
 {
   HADESMEM_TRACE_A("CreateProcessInternalW called.");
+
+  // TODO: Log more details about params.
 
   BOOL ret = TRUE;
   DWORD last_error = 0;
