@@ -67,6 +67,12 @@ run patcher.cpp
 run find_pattern.cpp
   ;
   
+run thread.cpp
+  ;
+  
+run thread_list.cpp
+  ;
+  
 run pelib/pe_file.cpp
   ;
   
