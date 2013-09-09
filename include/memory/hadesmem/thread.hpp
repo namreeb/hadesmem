@@ -132,7 +132,7 @@ inline bool operator>(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Thread const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }
