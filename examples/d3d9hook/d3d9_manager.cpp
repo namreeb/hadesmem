@@ -239,7 +239,7 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
     static boost::mutex mutex;
     boost::lock_guard<boost::mutex> lock(mutex);
 
-    HADESMEM_TRACE_A("Direct3DCreate9Hk called.");
+    HADESMEM_DETAIL_TRACE_A("Direct3DCreate9Hk called.");
   
     auto const d3d9_create = g_d3d_mod.second->d3d9_create_hk->
       GetTrampoline<decltype(&Direct3DCreate9Hk)>();
@@ -248,7 +248,7 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
     last_error = ::GetLastError();
     if (d3d9)
     {
-      HADESMEM_TRACE_A("Direct3DCreate9 succeeded.");
+      HADESMEM_DETAIL_TRACE_A("Direct3DCreate9 succeeded.");
 
       if (!g_d3d_mod.second->create_device_hk)
       {
@@ -266,12 +266,12 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
     }
     else
     {
-      HADESMEM_TRACE_A("Direct3DCreate9 failed.");
+      HADESMEM_DETAIL_TRACE_A("Direct3DCreate9 failed.");
     }
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   ::SetLastError(last_error);
@@ -289,7 +289,7 @@ extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** p
     static boost::mutex mutex;
     boost::lock_guard<boost::mutex> lock(mutex);
 
-    HADESMEM_TRACE_A("Direct3DCreate9ExHk called.");
+    HADESMEM_DETAIL_TRACE_A("Direct3DCreate9ExHk called.");
 
     auto const d3d9_create_ex = g_d3d_mod.second->d3d9_create_ex_hk->
       GetTrampoline<decltype(&Direct3DCreate9ExHk)>();
@@ -298,7 +298,7 @@ extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** p
     last_error = ::GetLastError();
     if (SUCCEEDED(hr) && ppd3d9 && *ppd3d9)
     {
-      HADESMEM_TRACE_A("Direct3DCreate9Ex succeeded.");
+      HADESMEM_DETAIL_TRACE_A("Direct3DCreate9Ex succeeded.");
 
       if (!g_d3d_mod.second->create_device_hk)
       {
@@ -316,12 +316,12 @@ extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** p
     }
     else
     {
-      HADESMEM_TRACE_A("Direct3DCreate9Ex failed.");
+      HADESMEM_DETAIL_TRACE_A("Direct3DCreate9Ex failed.");
     }
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   ::SetLastError(last_error);
@@ -344,7 +344,7 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     static boost::mutex mutex;
     boost::lock_guard<boost::mutex> lock(mutex);
     
-    HADESMEM_TRACE_A("CreateDeviceHk called.");
+    HADESMEM_DETAIL_TRACE_A("CreateDeviceHk called.");
 
     auto const create_device = g_d3d_mod.second->create_device_hk->
       GetTrampoline<decltype(&CreateDeviceHk)>();
@@ -354,7 +354,7 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     last_error = ::GetLastError();
     if (SUCCEEDED(hr) && ppdevice && *ppdevice)
     {
-      HADESMEM_TRACE_A("CreateDevice succeeded.");
+      HADESMEM_DETAIL_TRACE_A("CreateDevice succeeded.");
       
       IDirect3DDevice9Proxy* proxy = new IDirect3DDevice9Proxy(*ppdevice);
       *ppdevice = proxy;
@@ -365,12 +365,12 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
     }
     else
     {
-      HADESMEM_TRACE_A("CreateDevice failed.");
+      HADESMEM_DETAIL_TRACE_A("CreateDevice failed.");
     }
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   ::SetLastError(last_error);
@@ -386,20 +386,20 @@ void ApplyDetours(HMODULE d3d9_mod)
   
   if (g_d3d_mod.first != nullptr && g_d3d_mod.first->GetHandle() != d3d9_mod)
   {
-    HADESMEM_TRACE_A("Attempt to apply detours to a new module when the "
-      "initial module is still loaded.");
+    HADESMEM_DETAIL_TRACE_A("Attempt to apply detours to a new module when "
+      "the initial module is still loaded.");
     return;
   }
 
   if (g_d3d_mod.first != nullptr)
   {
-    HADESMEM_TRACE_A("Reload of same D3D9 module. Ignoring.");
+    HADESMEM_DETAIL_TRACE_A("Reload of same D3D9 module. Ignoring.");
     return;
   }
 
   if (g_d3d_mod.first == nullptr)
   {
-    HADESMEM_TRACE_A("New D3D9 module. Hooking.");
+    HADESMEM_DETAIL_TRACE_A("New D3D9 module. Hooking.");
 
     HADESMEM_DETAIL_ASSERT(!g_d3d_mod.second);
 
@@ -418,8 +418,8 @@ void ApplyDetours(HMODULE d3d9_mod)
       // TODO: Fix this. It currently doesn't work if we hook D3D9 as the 
       // result of a call to NtMapViewOfSection because the module isn't yet 
       // in the loader list... For now, just warn instead of failing.
-      HADESMEM_TRACE_A("Warning! Attempt to bump ref count of D3D9 module "
-        "failed.");
+      HADESMEM_DETAIL_TRACE_A("Warning! Attempt to bump ref count of D3D9 "
+        "module failed.");
     }
     *d3d9_mod_tmp.first = d3d9_mod;
     
@@ -438,7 +438,7 @@ void ApplyDetours(HMODULE d3d9_mod)
     }
     else
     {
-      HADESMEM_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9.");
+      HADESMEM_DETAIL_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9.");
     }
     
     FARPROC const d3d9_create_ex = hadesmem::detail::FindProcedureInternal(
@@ -456,7 +456,7 @@ void ApplyDetours(HMODULE d3d9_mod)
     }
     else
     {
-      HADESMEM_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9Ex.");
+      HADESMEM_DETAIL_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9Ex.");
     }
 
     g_d3d_mod = std::move(d3d9_mod_tmp);
@@ -519,30 +519,32 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
   {
     if (!pid)
     {
-      HADESMEM_TRACE_A("NtMapViewOfSection called for unknown process.");
+      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection called for unknown "
+        "process.");
     }
     else
     {
-      HADESMEM_TRACE_A("NtMapViewOfSection called for different process.");
+      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection called for different "
+        "process.");
     }
     **in_hook = false;
     ::SetLastError(last_error);
     return ret;
   }
 
-  //HADESMEM_TRACE_A("NtMapViewOfSection called for current process.");
+  //HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection called for current process.");
 
   try
   {
     if (NT_SUCCESS(ret))
     {
-      //HADESMEM_TRACE_A("NtMapViewOfSection succeeded.");
+      //HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection succeeded.");
 
       hadesmem::Region const region(*g_process, *base);
       DWORD const region_type = region.GetType();
       if (region_type != MEM_IMAGE)
       {
-        //HADESMEM_TRACE_FORMAT_A("Not an image. Type given was %lx.", 
+        //HADESMEM_DETAIL_TRACE_FORMAT_A("Not an image. Type given was %lx.", 
         //  region_type);
         **in_hook = false;
         ::SetLastError(last_error);
@@ -553,19 +555,19 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
         HadesMemCurrentTeb()->Tib.ArbitraryUserPointer;
       if (!arbitrary_user_pointer)
       {
-        HADESMEM_TRACE_A("No arbitrary user pointer.");
+        HADESMEM_DETAIL_TRACE_A("No arbitrary user pointer.");
         **in_hook = false;
         ::SetLastError(last_error);
         return ret;
       }
 
       std::wstring const path(static_cast<PCWSTR>(arbitrary_user_pointer));
-      HADESMEM_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
 
       auto const backslash = path.find_last_of(L'\\');
       if (backslash + 1 == L'\\')
       {
-        HADESMEM_TRACE_A("Invalid path.");
+        HADESMEM_DETAIL_TRACE_A("Invalid path.");
         **in_hook = false;
         ::SetLastError(last_error);
         return ret;
@@ -581,19 +583,19 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
         hadesmem::detail::ToUpperOrdinal(module_name));
       if (module_name_upper == L"D3D9" || module_name_upper == L"D3D9.DLL")
       {
-        HADESMEM_TRACE_A("D3D9 loaded. Applying hooks.");
+        HADESMEM_DETAIL_TRACE_A("D3D9 loaded. Applying hooks.");
 
         ApplyDetours(reinterpret_cast<HMODULE>(*base));
       }
     }
     else
     {
-      HADESMEM_TRACE_A("NtMapViewOfSection failed.");
+      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection failed.");
     }
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   **in_hook = false;
@@ -619,7 +621,7 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
   BOOL ret = static_cast<BOOL>(0xDEADBEEF);
   DWORD last_error = 0xDEADBEEF;
 
-  HADESMEM_TRACE_A("CreateProcessInternalW called.");
+  HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW called.");
 
   // TODO: Log more details about params.
 
@@ -645,37 +647,37 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
     last_error = GetLastError();
     if (NT_SUCCESS(ret))
     {
-      HADESMEM_TRACE_A("CreateProcessInternalW succeeded.");
+      HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW succeeded.");
 
       DWORD const pid = process_info->dwProcessId;
-      HADESMEM_TRACE_FORMAT_W(L"PID 0n%lu", pid);
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"PID 0n%lu", pid);
 
-      HADESMEM_TRACE_A("Opening process.");
+      HADESMEM_DETAIL_TRACE_A("Opening process.");
       hadesmem::Process const process(pid);
-      HADESMEM_TRACE_A("Getting path to self.");
+      HADESMEM_DETAIL_TRACE_A("Getting path to self.");
       std::wstring const self_path = hadesmem::detail::GetSelfPath();
-      HADESMEM_TRACE_FORMAT_W(L"Path: \"%s\".", self_path.c_str());
-      HADESMEM_TRACE_A("Injecting DLL.\n");
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path: \"%s\".", self_path.c_str());
+      HADESMEM_DETAIL_TRACE_A("Injecting DLL.\n");
       HMODULE const remote_mod = hadesmem::InjectDll(process, self_path, 
         hadesmem::InjectFlags::kAddToSearchOrder);
       // TODO: Configurable export name
-      HADESMEM_TRACE_A("Calling Load export.");
+      HADESMEM_DETAIL_TRACE_A("Calling Load export.");
       hadesmem::CallResult<DWORD_PTR> init_result = hadesmem::CallExport(
         process, remote_mod, "Load");
 
-      HADESMEM_TRACE_FORMAT_A(
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
         "Ret = 0x%Ix, LastError = 0x%lx", 
         init_result.GetReturnValue(), 
         init_result.GetLastError());
     }
     else
     {
-      HADESMEM_TRACE_A("CreateProcessInternalW failed.");
+      HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW failed.");
     }
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   try
@@ -693,7 +695,7 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
 
     ::TerminateProcess(process_info->hProcess, 0xDEADBEEF);
   }
@@ -713,7 +715,7 @@ void InitializeD3D9Hooks()
     ::GetCurrentProcessId());
   
   {
-    HADESMEM_TRACE_A("Hooking CreateProcessInternalW.");
+    HADESMEM_DETAIL_TRACE_A("Hooking CreateProcessInternalW.");
 
     // TODO: Support multiple CreateProcessInternalW hooks.
     // TODO: Fall back gracefully if this API doesn't exist.
@@ -735,13 +737,13 @@ void InitializeD3D9Hooks()
   {
     hadesmem::Module d3d9_mod(*g_process, L"d3d9.dll");
 
-    HADESMEM_TRACE_A("Hooking D3D9 directly.");
+    HADESMEM_DETAIL_TRACE_A("Hooking D3D9 directly.");
 
     ApplyDetours(d3d9_mod.GetHandle());
   }
   catch (std::exception const& /*e*/)
   {
-    HADESMEM_TRACE_A("Hooking NtMapViewOfSection.");
+    HADESMEM_DETAIL_TRACE_A("Hooking NtMapViewOfSection.");
 
     // TODO: Support multiple NtMapViewOfSection hooks.
     // TODO: Fall back gracefully if this API doesn't exist.
@@ -768,13 +770,13 @@ void UninitializeD3D9Hooks()
   
   if (g_d3d_mod.first)
   {
-    HADESMEM_TRACE_A("Cleaning up D3D mod handle.");
+    HADESMEM_DETAIL_TRACE_A("Cleaning up D3D mod handle.");
     g_d3d_mod.first = nullptr;
   }
   
   if (g_d3d_mod.second)
   {
-    HADESMEM_TRACE_A("Cleaning up D3D mod data.");
+    HADESMEM_DETAIL_TRACE_A("Cleaning up D3D mod data.");
     g_d3d_mod.second = nullptr;
   }
 }

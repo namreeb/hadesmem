@@ -23,7 +23,7 @@ extern "C" HADESMEM_DLLEXPORT DWORD_PTR Load()
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   return 0;
@@ -37,7 +37,7 @@ extern "C" HADESMEM_DLLEXPORT DWORD_PTR Free()
   }
   catch (std::exception const& e)
   {
-    HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
   }
 
   return 0;

@@ -169,7 +169,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -284,7 +284,7 @@ public:
 #endif
 
     bool detour_near = IsNear(target_, detour_);
-    HADESMEM_TRACE_A(detour_near ? "Detour near." : "Detour far.");
+    HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
     DWORD_PTR const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
     
     // TODO: Detect cases where hooking may overflow past the end of a 
@@ -303,7 +303,7 @@ public:
 #if !defined(HADESMEM_NO_TRACE)
       char const* const asm_str = ud_insn_asm(&ud_obj);
       char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
-      HADESMEM_TRACE_FORMAT_A("%s. [%s].", 
+      HADESMEM_DETAIL_TRACE_FORMAT_A("%s. [%s].", 
         (asm_str ? asm_str : "Invalid."), 
         (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
@@ -325,7 +325,7 @@ public:
         unsigned int const insn_len = ud_insn_len(&ud_obj);
         PVOID jump_target = reinterpret_cast<PBYTE>(
           static_cast<DWORD_PTR>(insn_base)) + insn_target + insn_len;
-        HADESMEM_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
         {
           tramp_cur += WriteJump(tramp_cur, jump_target);
@@ -402,7 +402,7 @@ public:
 
       // WARNING: Patch may not be removed if Remove fails.
       // TODO: Add debug logging to other destructors.
-      HADESMEM_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -564,7 +564,7 @@ private:
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
-    HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Stub size = 0n%Iu, "
       "Expected stub size = 0n%Iu.", 
       stub_size, 
       expected_stub_size);
@@ -627,7 +627,7 @@ private:
 #endif
 
     DWORD_PTR const stub_size = jit.getCodeSize();
-    HADESMEM_TRACE_FORMAT_A("Stub size = 0n%Iu, "
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Stub size = 0n%Iu, "
       "Expected stub size = 0n%Iu.", 
       stub_size, 
       expected_stub_size);

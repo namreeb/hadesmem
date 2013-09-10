@@ -481,7 +481,7 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   DWORD_PTR debug_break, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode32 called.");
+  HADESMEM_DETAIL_TRACE_A("GenerateCallCode32 called.");
 
   AsmJit::Label label_nodebug(assembler->newLabel());
 
@@ -583,7 +583,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   DWORD_PTR debug_break, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode64 called.");
+  HADESMEM_DETAIL_TRACE_A("GenerateCallCode64 called.");
 
   AsmJit::Label label_nodebug(assembler->newLabel());
   
@@ -693,7 +693,7 @@ inline Allocator GenerateCallCode(Process const& process,
   ArgsForwardIterator args_full_beg, 
   PVOID return_values_remote)
 {
-  HADESMEM_TRACE_A("GenerateCallCode called.");
+  HADESMEM_DETAIL_TRACE_A("GenerateCallCode called.");
 
   Module const kernel32(process, L"kernel32.dll");
   auto const get_last_error = reinterpret_cast<DWORD_PTR>(FindProcedure(
@@ -726,17 +726,17 @@ inline Allocator GenerateCallCode(Process const& process,
   
   DWORD_PTR const stub_size = assembler.getCodeSize();
   
-  HADESMEM_TRACE_A("Allocating memory for remote stub.");
+  HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
   Allocator stub_mem_remote(process, stub_size);
   
-  HADESMEM_TRACE_A("Performing code relocation.");
+  HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
 
   std::vector<BYTE> code_real(stub_size);
   assembler.relocCode(code_real.data(), reinterpret_cast<DWORD_PTR>(
     stub_mem_remote.GetBase()));
   
-  HADESMEM_TRACE_A("Writing remote code stub.");
+  HADESMEM_DETAIL_TRACE_A("Writing remote code stub.");
 
   WriteVector(process, stub_mem_remote.GetBase(), code_real);
 
@@ -1010,7 +1010,7 @@ inline void CallMulti(Process const& process,
 {
   // TODO: Iterator checks for type and category.
   
-  HADESMEM_TRACE_A("CallMulti called.");
+  HADESMEM_DETAIL_TRACE_A("CallMulti called.");
 
   auto const num_addresses_signed = std::distance(addresses_beg, 
     addresses_end);
@@ -1018,12 +1018,12 @@ inline void CallMulti(Process const& process,
   auto const num_addresses = static_cast<typename std::make_unsigned<decltype(
     num_addresses_signed)>::type>(num_addresses_signed);
   
-  HADESMEM_TRACE_A("Allocating memory for return values.");
+  HADESMEM_DETAIL_TRACE_A("Allocating memory for return values.");
 
   Allocator const return_values_remote(process, 
     sizeof(detail::CallResultRemote) * num_addresses);
   
-  HADESMEM_TRACE_A("Allocating memory for code stub.");
+  HADESMEM_DETAIL_TRACE_A("Allocating memory for code stub.");
 
   Allocator const code_remote(detail::GenerateCallCode(process, 
     addresses_beg, addresses_end, 
@@ -1034,7 +1034,7 @@ inline void CallMulti(Process const& process,
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
   
-  HADESMEM_TRACE_A("Creating remote thread and waiting.");
+  HADESMEM_DETAIL_TRACE_A("Creating remote thread and waiting.");
 
   // TODO: Configurable timeout. This will complicate resource management 
   // however, as we will need to extend the lifetime of the remote memory 
@@ -1044,7 +1044,7 @@ inline void CallMulti(Process const& process,
   // more investigation...
   detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
   
-  HADESMEM_TRACE_A("Reading return values.");
+  HADESMEM_DETAIL_TRACE_A("Reading return values.");
 
   std::vector<detail::CallResultRemote> return_vals_remote = 
     ReadVector<detail::CallResultRemote>(process, 

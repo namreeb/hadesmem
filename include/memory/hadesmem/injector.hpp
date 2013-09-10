@@ -144,11 +144,11 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
 #error "[HadesMem] Unsupported architecture."
 #endif
   
-  HADESMEM_TRACE_A("Allocating memory for remote stub.");
+  HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
   Allocator const stub_remote(process, sizeof(return_instr));
   
-  HADESMEM_TRACE_A("Writing remote stub.");
+  HADESMEM_DETAIL_TRACE_A("Writing remote stub.");
 
   Write(process, stub_remote.GetBase(), return_instr);
 
@@ -156,7 +156,7 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
     reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
   
-  HADESMEM_TRACE_A("Starting remote thread.");
+  HADESMEM_DETAIL_TRACE_A("Starting remote thread.");
 
   // TODO: Configurable timeout. This will complicate resource management 
   // however, as we will need to extend the lifetime of the remote memory 
@@ -166,7 +166,7 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
   // more investigation...
   CreateRemoteThreadAndWait(process, stub_remote_pfn);
   
-  HADESMEM_TRACE_A("Remote thread complete.");
+  HADESMEM_DETAIL_TRACE_A("Remote thread complete.");
 }
 
 }
@@ -218,32 +218,32 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
       ErrorString("Could not find module file."));
   }
   
-  HADESMEM_TRACE_A("Calling ForceLdrInitializeThunk.\n");
+  HADESMEM_DETAIL_TRACE_A("Calling ForceLdrInitializeThunk.\n");
 
   detail::ForceLdrInitializeThunk(process.GetId());
 
   std::wstring const path_string(path_real.native());
 
-  HADESMEM_TRACE_FORMAT_W(L"Module path is \"%s\".", path_string.c_str());
+  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module path is \"%s\".", path_string.c_str());
 
   std::size_t const path_buf_size = (path_string.size() + 1) * 
     sizeof(wchar_t);
   
-  HADESMEM_TRACE_A("Allocating memory for module path.");
+  HADESMEM_DETAIL_TRACE_A("Allocating memory for module path.");
 
   Allocator const lib_file_remote(process, path_buf_size);
   
-  HADESMEM_TRACE_A("Writing memory for module path.");
+  HADESMEM_DETAIL_TRACE_A("Writing memory for module path.");
 
   WriteString(process, lib_file_remote.GetBase(), path_string);
   
-  HADESMEM_TRACE_A("Finding LoadLibraryExW.");
+  HADESMEM_DETAIL_TRACE_A("Finding LoadLibraryExW.");
 
   Module const kernel32_mod(process, L"kernel32.dll");
   auto const load_library = detail::GetProcAddressInternal(process, 
     kernel32_mod.GetHandle(), "LoadLibraryExW");
   
-  HADESMEM_TRACE_A("Calling LoadLibraryExW.");
+  HADESMEM_DETAIL_TRACE_A("Calling LoadLibraryExW.");
 
   typedef HMODULE (LoadLibraryExFuncT)(LPCWSTR lpFileName, HANDLE hFile, 
     DWORD dwFlags);
