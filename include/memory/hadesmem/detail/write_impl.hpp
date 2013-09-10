@@ -82,7 +82,7 @@ inline void WriteImpl(Process const& process, PVOID address, LPCVOID data,
 template <typename T>
 void WriteImpl(Process const& process, PVOID address, T const& data)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 

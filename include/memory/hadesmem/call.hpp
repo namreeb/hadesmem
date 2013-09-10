@@ -95,7 +95,7 @@ namespace hadesmem
 {
   
 typedef void (*FnPtr)();
-HADESMEM_STATIC_ASSERT(sizeof(FnPtr) == sizeof(void*));
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FnPtr) == sizeof(void*));
 
 enum class CallConv
 {
@@ -112,7 +112,7 @@ template <typename T>
 class CallResult
 {
 public:
-  HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
     std::is_pointer<T>::value || 
     std::is_same<float, typename std::remove_cv<T>::type>::value || 
     std::is_same<double, typename std::remove_cv<T>::type>::value);
@@ -166,7 +166,7 @@ struct CallResultRemote
 };
 
 // CallResultRemote must be POD because of 'offsetof' usage.
-HADESMEM_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
+HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
 
 }
 
@@ -221,7 +221,7 @@ public:
   template <typename T>
   typename std::decay<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::decay<T>::type>::value || 
       std::is_same<double, typename std::decay<T>::type>::value);
@@ -234,29 +234,29 @@ private:
   template <typename T>
   T GetReturnValueIntImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
   T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(sizeof(T) <= sizeof(DWORD32));
-    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) <= sizeof(DWORD32));
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt32());
   }
 
   template <typename T>
   T GetReturnValuePtrImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
   T GetReturnValuePtrImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt32());
   }
 
@@ -285,7 +285,7 @@ private:
   template <typename T>
   T GetReturnValueImpl(std::true_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_pointer<T>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
       (sizeof(void*) == sizeof(DWORD64))>());
   }
@@ -293,7 +293,7 @@ private:
   template <typename T>
   T GetReturnValueImpl(std::false_type) const HADESMEM_NOEXCEPT
   {
-    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_floating_point<T>::value);
     return GetReturnValueIntOrFloatImpl<T>(std::is_same<T, float>(), 
       std::is_same<T, double>(), std::is_integral<T>());
@@ -354,7 +354,7 @@ public:
   explicit CallArg(T t) HADESMEM_NOEXCEPT
     : arg_()
   {
-    HADESMEM_STATIC_ASSERT(std::is_integral<T>::value || 
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
       std::is_same<double, typename std::remove_cv<T>::type>::value);
@@ -814,8 +814,8 @@ void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 {
-  HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
-  HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
   DWORD arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
@@ -828,8 +828,8 @@ void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
 {
-  HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
-  HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
@@ -890,8 +890,8 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 {
-  HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
-  HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
   DWORD arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
@@ -939,8 +939,8 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
 
 void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
 {
-  HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
-  HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
   DWORD64 arg_conv;
   std::memcpy(&arg_conv, &arg, sizeof(arg));
@@ -1099,7 +1099,7 @@ void AddCallArg(OutputIterator call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
   typedef typename boost::mpl::at_c<FuncArgs, N>::type RealT;
-  HADESMEM_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   *call_args = static_cast<CallArg>(static_cast<RealT>(std::forward<T>(arg)));
 }
 
@@ -1125,7 +1125,9 @@ template <typename FuncT, int N, typename T, typename OutputIterator,
 void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
-  return BuildCallArgs<FuncT, N + 1>(++call_args, std::forward<Args>(args)...);
+  return BuildCallArgs<FuncT, N + 1>(
+    ++call_args, 
+    std::forward<Args>(args)...);
 }
 
 }
@@ -1135,7 +1137,8 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
   Process const& process, FnPtr address, CallConv call_conv, 
   Args&&... args)
 {
-  HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 
+    sizeof...(args));
 
   std::vector<CallArg> call_args;
   call_args.reserve(sizeof...(args));
@@ -1149,12 +1152,14 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
 
 #else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
 
-HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_REPEAT);
+HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
+  BOOST_PP_LIMIT_REPEAT);
 
-HADESMEM_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < BOOST_PP_LIMIT_ITERATION);
+HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
+  BOOST_PP_LIMIT_ITERATION);
 
 #define HADESMEM_CHECK_FUNC_ARITY(n) \
-  HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
 
 #define HADESMEM_CALL_ADD_ARG(n) \
   detail::AddCallArg<FuncT, n>(std::back_inserter(args), \
@@ -1245,7 +1250,8 @@ public:
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)
   {
-    HADESMEM_STATIC_ASSERT(detail::FuncArity<FuncT>::value == sizeof...(args));
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value == 
+      sizeof...(args));
 
     std::vector<CallArg> call_args;
     call_args.reserve(sizeof...(args));

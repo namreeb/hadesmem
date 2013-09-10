@@ -304,7 +304,7 @@ namespace detail
 inline FARPROC GetProcAddressInternal(Process const& process, 
   HMODULE const& module, std::string const& export_name)
 {
-  HADESMEM_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
 
   PeFile const pe_file(process, module, PeFileType::Image);
   

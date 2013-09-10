@@ -39,7 +39,7 @@ inline T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 inline std::array<T, N> Read(Process const& process, PVOID address)
 {
-  HADESMEM_STATIC_ASSERT(N != 0);
+  HADESMEM_DETAIL_STATIC_ASSERT(N != 0);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
@@ -51,7 +51,7 @@ inline void Read(Process const& process, PVOID address, OutputIterator out)
 {
   // TODO: Iterator checks for type and category.
 
-  HADESMEM_STATIC_ASSERT(N != 0);
+  HADESMEM_DETAIL_STATIC_ASSERT(N != 0);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
@@ -78,7 +78,7 @@ template <typename T, typename OutputIterator>
 void ReadStringEx(Process const& process, PVOID address, 
   OutputIterator data, std::size_t chunk_len)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
 
   HADESMEM_DETAIL_ASSERT(chunk_len != 0);
   
@@ -154,8 +154,8 @@ template <typename T>
 inline std::vector<T> ReadVector(Process const& process, PVOID address, 
   std::size_t count)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(count != 0);
@@ -171,8 +171,8 @@ inline void ReadVector(Process const& process, PVOID address,
 {
   // TODO: Iterator checks for type and category.
 
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(count != 0);

@@ -106,15 +106,15 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 // another architecture, this may need adjusting. However, if anywhere other 
 // than here and Call needs adjusting, it is probably a bug and should be 
 // reported.
-HADESMEM_STATIC_ASSERT(sizeof(DWORD) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(DWORD32) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(DWORD64) == 8);
-HADESMEM_STATIC_ASSERT(sizeof(float) == 4);
-HADESMEM_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
-HADESMEM_STATIC_ASSERT(sizeof(double) == 8);
-HADESMEM_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(DWORD) == 4);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(DWORD32) == 4);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(DWORD64) == 8);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
 // While every effort is made to not rely on the below, it is unavoidable 
 // when manually implementing functions such as GetProcAddress, which is 
 // required by the Injector.
-HADESMEM_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));

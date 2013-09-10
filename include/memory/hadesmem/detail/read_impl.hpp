@@ -82,8 +82,8 @@ inline void ReadImpl(Process const& process, LPVOID address, LPVOID data,
 template <typename T>
 T ReadImpl(Process const& process, PVOID address)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 

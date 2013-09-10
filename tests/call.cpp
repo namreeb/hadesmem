@@ -40,19 +40,19 @@ struct DummyType { };
 DummyType dummy_glob;
 
 typedef int (IntRetFuncT)();
-HADESMEM_STATIC_ASSERT(std::is_same<
+HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
   decltype(hadesmem::Call<IntRetFuncT>(std::declval<hadesmem::Process>(), 
   nullptr, hadesmem::CallConv::kDefault).GetReturnValue()), 
   int>::value);
 
 typedef double (DoubleRetFuncT)();
-HADESMEM_STATIC_ASSERT(std::is_same<
+HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
   decltype(hadesmem::Call<DoubleRetFuncT>(std::declval<hadesmem::Process>(), 
   nullptr, hadesmem::CallConv::kDefault).GetReturnValue()), 
   double>::value);
 
 typedef DummyType* (PtrRetFuncT)();
-HADESMEM_STATIC_ASSERT(std::is_same<
+HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
   decltype(hadesmem::Call<PtrRetFuncT>(std::declval<hadesmem::Process>(), 
   nullptr, hadesmem::CallConv::kDefault).GetReturnValue()), 
   DummyType*>::value);

@@ -28,7 +28,7 @@ namespace hadesmem
 template <typename T>
 inline void Write(Process const& process, PVOID address, T const& data)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   
@@ -39,7 +39,7 @@ template <typename T>
 inline void Write(Process const& process, PVOID address, T const* ptr, 
   std::size_t count)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(ptr != nullptr);
@@ -54,7 +54,7 @@ template <typename T>
 inline void Write(Process const& process, PVOID address, T const* beg, 
   T const* end)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(beg != nullptr);
@@ -70,7 +70,7 @@ template <typename T>
 inline void WriteString(Process const& process, PVOID address, T const* const beg, 
   T const* const end)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(beg != nullptr);
@@ -86,7 +86,7 @@ template <typename T>
 inline void WriteString(Process const& process, PVOID address, 
   std::basic_string<T> const& data)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
@@ -98,7 +98,7 @@ template <typename T>
 inline void WriteString(Process const& process, PVOID address, 
   T const* const str)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(str != nullptr);
@@ -111,7 +111,7 @@ template <typename T>
 inline void WriteVector(Process const& process, PVOID address, 
   std::vector<T> const& data)
 {
-  HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(!data.empty());
