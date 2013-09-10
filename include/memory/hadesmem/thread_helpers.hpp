@@ -34,7 +34,7 @@ inline DWORD SuspendThread(Thread const& thread)
   if (suspend_count == static_cast<DWORD>(-1))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("SuspendThread failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -51,7 +51,7 @@ inline DWORD ResumeThread(Thread const& thread)
   if (suspend_count == static_cast<DWORD>(-1))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("ResumeThread failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -63,7 +63,7 @@ inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
 {
   if (::GetCurrentThreadId() == thread.GetId())
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetThreadContext called for current thread."));
   }
 
@@ -73,7 +73,7 @@ inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
   if (!::GetThreadContext(thread.GetHandle(), &context))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetThreadContext failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -86,7 +86,7 @@ inline void SetThreadContext(Thread const& thread, CONTEXT const& context)
   if (!::SetThreadContext(thread.GetHandle(), &context))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("SetThreadContext failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -101,11 +101,11 @@ public:
     SuspendThread(thread_);
   }
 
-  SuspendedThread(SuspendedThread&& other) HADESMEM_NOEXCEPT
+  SuspendedThread(SuspendedThread&& other) HADESMEM_DETAIL_NOEXCEPT
     : thread_(std::move(other.thread_))
   { }
 
-  SuspendedThread& operator=(SuspendedThread&& other) HADESMEM_NOEXCEPT
+  SuspendedThread& operator=(SuspendedThread&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     ResumeUnchecked();
 
@@ -175,11 +175,11 @@ public:
     }
   }
 
-  SuspendedProcess(SuspendedProcess&& other) HADESMEM_NOEXCEPT
+  SuspendedProcess(SuspendedProcess&& other) HADESMEM_DETAIL_NOEXCEPT
     : threads_(std::move(other.threads_))
   { }
 
-  SuspendedProcess& operator=(SuspendedProcess&& other) HADESMEM_NOEXCEPT
+  SuspendedProcess& operator=(SuspendedProcess&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     threads_ = std::move(other.threads_);
 

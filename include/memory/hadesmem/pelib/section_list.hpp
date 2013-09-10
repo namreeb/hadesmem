@@ -38,7 +38,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  SectionIterator() HADESMEM_NOEXCEPT
+  SectionIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -59,38 +59,38 @@ public:
     impl_->section_ = Section(process, pe_file, 0, base);
   }
 
-  SectionIterator(SectionIterator const& other) HADESMEM_NOEXCEPT
+  SectionIterator(SectionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
-  SectionIterator& operator=(SectionIterator const& other) HADESMEM_NOEXCEPT
+  SectionIterator& operator=(SectionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  SectionIterator(SectionIterator&& other) HADESMEM_NOEXCEPT
+  SectionIterator(SectionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  SectionIterator& operator=(SectionIterator&& other) HADESMEM_NOEXCEPT
+  SectionIterator& operator=(SectionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
     return *this;
   }
 
-  ~SectionIterator() HADESMEM_NOEXCEPT
+  ~SectionIterator() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->section_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->section_;
@@ -124,12 +124,12 @@ public:
     return iter;
   }
   
-  bool operator==(SectionIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(SectionIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(SectionIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(SectionIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -138,7 +138,7 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process, PeFile const& pe_file) 
-      HADESMEM_NOEXCEPT
+      HADESMEM_DETAIL_NOEXCEPT
       : process_(&process), 
       pe_file_(&pe_file), 
       section_()
@@ -166,12 +166,12 @@ public:
     pe_file_(&pe_file)
   { }
 
-  SectionList(SectionList const& other) HADESMEM_NOEXCEPT
+  SectionList(SectionList const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  SectionList& operator=(SectionList const& other) HADESMEM_NOEXCEPT
+  SectionList& operator=(SectionList const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -179,12 +179,12 @@ public:
     return *this;
   }
 
-  SectionList(SectionList&& other) HADESMEM_NOEXCEPT
+  SectionList(SectionList&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  SectionList& operator=(SectionList&& other) HADESMEM_NOEXCEPT
+  SectionList& operator=(SectionList&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -210,17 +210,17 @@ public:
     return SectionList::const_iterator(*process_, *pe_file_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return SectionList::iterator();
   }
   
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return SectionList::const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return SectionList::const_iterator();
   }

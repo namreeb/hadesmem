@@ -39,13 +39,13 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ThreadIterator() HADESMEM_NOEXCEPT
+  ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_(), 
     pid_(0)
   { }
 
   // TODO: Clean this up.
-  ThreadIterator(DWORD pid) HADESMEM_NOEXCEPT
+  ThreadIterator(DWORD pid) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::make_shared<Impl>()), 
     pid_(pid)
   {
@@ -62,7 +62,7 @@ public:
         if (!impl_->snap_.IsValid())
         {
           DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("CreateToolhelp32Snapshot failed.") << 
             ErrorCodeWinLast(last_error));
         }
@@ -70,7 +70,7 @@ public:
       else
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -89,7 +89,7 @@ public:
         return;
       }
     
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Thread32First failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -104,12 +104,12 @@ public:
     }
   }
 
-  ThreadIterator(ThreadIterator const& other) HADESMEM_NOEXCEPT
+  ThreadIterator(ThreadIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_), 
     pid_(other.pid_)
   { }
 
-  ThreadIterator& operator=(ThreadIterator const& other) HADESMEM_NOEXCEPT
+  ThreadIterator& operator=(ThreadIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
     pid_ = other.pid_;
@@ -117,12 +117,12 @@ public:
     return *this;
   }
 
-  ThreadIterator(ThreadIterator&& other) HADESMEM_NOEXCEPT
+  ThreadIterator(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_)), 
     pid_(other.pid_)
   { }
 
-  ThreadIterator& operator=(ThreadIterator&& other) HADESMEM_NOEXCEPT
+  ThreadIterator& operator=(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
     pid_ = other.pid_;
@@ -130,16 +130,16 @@ public:
     return *this;
   }
 
-  ~ThreadIterator() HADESMEM_NOEXCEPT
+  ~ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->thread_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->thread_;
@@ -161,12 +161,12 @@ public:
     return iter;
   }
   
-  bool operator==(ThreadIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(ThreadIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(ThreadIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(ThreadIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -189,7 +189,7 @@ private:
         else
         {
           DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("Thread32Next failed.") << 
             ErrorCodeWinLast(last_error));
         }
@@ -210,7 +210,7 @@ private:
   
   struct Impl
   {
-    Impl() HADESMEM_NOEXCEPT
+    Impl() HADESMEM_DETAIL_NOEXCEPT
       : snap_(INVALID_HANDLE_VALUE), 
       thread_()
     { }
@@ -231,11 +231,11 @@ public:
   typedef ThreadIterator<ThreadEntry> iterator;
   typedef ThreadIterator<ThreadEntry const> const_iterator;
 
-  HADESMEM_CONSTEXPR ThreadList() HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ThreadList() HADESMEM_DETAIL_NOEXCEPT
     : pid_(static_cast<DWORD>(-1))
   { }
 
-  HADESMEM_CONSTEXPR ThreadList(DWORD pid) HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ThreadList(DWORD pid) HADESMEM_DETAIL_NOEXCEPT
     : pid_(pid)
   { }
 
@@ -254,17 +254,17 @@ public:
     return const_iterator(pid_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return iterator();
   }
 
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }

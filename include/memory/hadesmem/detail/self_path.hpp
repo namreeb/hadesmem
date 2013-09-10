@@ -27,7 +27,7 @@ inline HMODULE GetHandleToSelf()
   if (!::VirtualQuery(this_func_ptr, &mem_info, sizeof(mem_info)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualQuery failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -37,13 +37,13 @@ inline HMODULE GetHandleToSelf()
 
 inline std::wstring GetSelfPath()
 {
-  std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
+  std::vector<wchar_t> path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
   DWORD const path_out_len = ::GetModuleFileName(GetHandleToSelf(), 
     path.data(), static_cast<DWORD>(path.size()));
   if (!path_out_len || ::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetModuleFileName failed.") << 
       ErrorCodeWinLast(last_error));
   }

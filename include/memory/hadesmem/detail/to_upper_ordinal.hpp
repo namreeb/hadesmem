@@ -29,7 +29,7 @@ inline std::wstring ToUpperOrdinal(std::wstring const& str)
   if (num_converted != str_buf.size())
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("CharUpperBuff failed.") << 
       ErrorCodeWinRet(num_converted) << 
       ErrorCodeWinLast(last_error));

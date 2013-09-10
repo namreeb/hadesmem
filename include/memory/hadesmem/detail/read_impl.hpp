@@ -33,7 +33,7 @@ inline void ReadUnchecked(Process const& process, LPVOID address,
     &bytes_read) || bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("ReadProcessMemory failed.") << 
       ErrorCodeWinLast(last_error));
   }

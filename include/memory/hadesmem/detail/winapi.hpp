@@ -28,7 +28,7 @@ inline bool IsWoW64Process(HANDLE handle)
   if (!::IsWow64Process(handle, &is_wow64))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("IsWoW64Process failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -42,7 +42,7 @@ inline HANDLE OpenProcessAllAccess(DWORD id)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -56,7 +56,7 @@ inline HANDLE OpenThreadAllAccess(DWORD id)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("OpenThread failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -73,7 +73,7 @@ inline HANDLE DuplicateHandle(HANDLE handle)
     ::GetCurrentProcess(), &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("DuplicateHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }

@@ -23,7 +23,7 @@ inline DWORD Protect(Process const& process,
     mbi.RegionSize, protect, &old_protect))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualProtectEx failed.") << 
       ErrorCodeWinLast(last_error));
   }

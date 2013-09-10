@@ -73,7 +73,7 @@ public:
     return *this;
   }
 
-  Module(Module&& other) HADESMEM_NOEXCEPT
+  Module(Module&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     handle_(other.handle_), 
     size_(other.size_), 
@@ -81,7 +81,7 @@ public:
     path_(std::move(other.path_))
   { }
 
-  Module& operator=(Module&& other) HADESMEM_NOEXCEPT
+  Module& operator=(Module&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     handle_ = other.handle_;
@@ -92,15 +92,15 @@ public:
     return *this;
   }
 
-  ~Module() HADESMEM_NOEXCEPT
+  ~Module() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  HMODULE GetHandle() const HADESMEM_NOEXCEPT
+  HMODULE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
     return handle_;
   }
   
-  DWORD GetSize() const HADESMEM_NOEXCEPT
+  DWORD GetSize() const HADESMEM_DETAIL_NOEXCEPT
   {
     return size_;
   }
@@ -199,7 +199,7 @@ private:
         if (!snap.IsValid())
         {
           DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("CreateToolhelp32Snapshot failed.") << 
             ErrorCodeWinLast(last_error));
         }
@@ -207,7 +207,7 @@ private:
       else
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -230,13 +230,13 @@ private:
     DWORD const last_error = ::GetLastError();
     if (last_error == ERROR_NO_MORE_FILES)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Could not find module.") << 
         ErrorCodeWinLast(last_error));
     }
     else
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Module32First/Module32Next failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -249,32 +249,32 @@ private:
   std::wstring path_;
 };
 
-inline bool operator==(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() == rhs.GetHandle();
 }
 
-inline bool operator!=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() < rhs.GetHandle();
 }
 
-inline bool operator<=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() <= rhs.GetHandle();
 }
 
-inline bool operator>(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() > rhs.GetHandle();
 }
 
-inline bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() >= rhs.GetHandle();
 }
@@ -344,7 +344,7 @@ inline FARPROC FindProcedureInternal(
   if (!remote_func)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetProcAddressInternal failed.") << 
       ErrorCodeWinLast(last_error));
   }

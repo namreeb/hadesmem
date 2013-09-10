@@ -47,7 +47,7 @@ public:
     NtHeaders const nt_headers(process, pe_file);
     if (number >= nt_headers.GetNumberOfSections())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Invalid section number."));
     }
     
@@ -59,14 +59,14 @@ public:
     base_ = reinterpret_cast<PBYTE>(section_header);
   }
 
-  Section(Section const& other) HADESMEM_NOEXCEPT
+  Section(Section const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     number_(other.number_), 
     base_(other.base_)
   { }
   
-  Section& operator=(Section const& other) HADESMEM_NOEXCEPT
+  Section& operator=(Section const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -76,14 +76,14 @@ public:
     return *this;
   }
 
-  Section(Section&& other) HADESMEM_NOEXCEPT
+  Section(Section&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     number_(other.number_), 
     base_(other.base_)
   { }
   
-  Section& operator=(Section&& other) HADESMEM_NOEXCEPT
+  Section& operator=(Section&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -93,15 +93,15 @@ public:
     return *this;
   }
   
-  ~Section() HADESMEM_NOEXCEPT
+  ~Section() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
-  WORD GetNumber() const HADESMEM_NOEXCEPT
+  WORD GetNumber() const HADESMEM_DETAIL_NOEXCEPT
   {
     return number_;
   }
@@ -253,37 +253,37 @@ private:
 };
 
 inline bool operator==(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Section const& lhs, Section const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

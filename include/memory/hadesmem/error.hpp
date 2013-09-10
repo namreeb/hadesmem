@@ -41,4 +41,4 @@ typedef boost::error_info<struct TagErrorCodeOther, HRESULT> ErrorCodeWinHr;
 
 }
 
-#define HADESMEM_THROW_EXCEPTION(x) BOOST_THROW_EXCEPTION(x)
+#define HADESMEM_DETAIL_THROW_EXCEPTION(x) BOOST_THROW_EXCEPTION(x)

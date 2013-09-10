@@ -45,7 +45,7 @@ public:
     return *this;
   }
 
-  ProcessEntry(ProcessEntry&& other) HADESMEM_NOEXCEPT
+  ProcessEntry(ProcessEntry&& other) HADESMEM_DETAIL_NOEXCEPT
     : id_(other.id_), 
     threads_(other.threads_), 
     parent_(other.parent_), 
@@ -53,7 +53,7 @@ public:
     name_(std::move(other.name_))
   { }
 
-  ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_NOEXCEPT
+  ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     id_ = other.id_;
     threads_ = other.threads_;
@@ -64,25 +64,25 @@ public:
     return *this;
   }
 
-  ~ProcessEntry() HADESMEM_NOEXCEPT
+  ~ProcessEntry() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  DWORD GetId() const HADESMEM_NOEXCEPT
+  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return id_;
   }
 
-  DWORD GetThreads() const HADESMEM_NOEXCEPT
+  DWORD GetThreads() const HADESMEM_DETAIL_NOEXCEPT
   {
     return threads_;
   }
 
-  DWORD GetParentId() const HADESMEM_NOEXCEPT
+  DWORD GetParentId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return parent_;
   }
 
-  LONG GetPriority() const HADESMEM_NOEXCEPT
+  LONG GetPriority() const HADESMEM_DETAIL_NOEXCEPT
   {
     return priority_;
   }

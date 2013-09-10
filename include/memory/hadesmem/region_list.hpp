@@ -37,7 +37,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  RegionIterator() HADESMEM_NOEXCEPT
+  RegionIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -45,38 +45,38 @@ public:
     : impl_(std::make_shared<Impl>(process))
   { }
 
-  RegionIterator(RegionIterator const& other) HADESMEM_NOEXCEPT
+  RegionIterator(RegionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
-  RegionIterator& operator=(RegionIterator const& other) HADESMEM_NOEXCEPT
+  RegionIterator& operator=(RegionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  RegionIterator(RegionIterator&& other) HADESMEM_NOEXCEPT
+  RegionIterator(RegionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  RegionIterator& operator=(RegionIterator&& other) HADESMEM_NOEXCEPT
+  RegionIterator& operator=(RegionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
     return *this;
   }
 
-  ~RegionIterator() HADESMEM_NOEXCEPT
+  ~RegionIterator() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->region_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->region_;
@@ -113,12 +113,12 @@ public:
   }
 
   
-  bool operator==(RegionIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(RegionIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(RegionIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(RegionIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -126,7 +126,7 @@ public:
 private:
   struct Impl
   {
-    explicit Impl(Process const& process) HADESMEM_NOEXCEPT
+    explicit Impl(Process const& process) HADESMEM_DETAIL_NOEXCEPT
       : process_(&process), 
       region_()
     {
@@ -154,29 +154,29 @@ public:
     : process_(&process)
   { }
 
-  RegionList(RegionList const& other) HADESMEM_NOEXCEPT
+  RegionList(RegionList const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_)
   { }
 
-  RegionList& operator=(RegionList const& other) HADESMEM_NOEXCEPT
+  RegionList& operator=(RegionList const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
 
     return *this;
   }
 
-  RegionList(RegionList&& other) HADESMEM_NOEXCEPT
+  RegionList(RegionList&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_)
   { }
 
-  RegionList& operator=(RegionList&& other) HADESMEM_NOEXCEPT
+  RegionList& operator=(RegionList&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
 
     return *this;
   }
 
-  ~RegionList() HADESMEM_NOEXCEPT
+  ~RegionList() HADESMEM_DETAIL_NOEXCEPT
   { }
   
   iterator begin()
@@ -194,17 +194,17 @@ public:
     return const_iterator(*process_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return iterator();
   }
   
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }

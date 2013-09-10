@@ -9,6 +9,12 @@
 
 #include <hadesmem/detail/static_assert.hpp>
 
+// Allow the user to override the compiler detection.
+#if !defined(HADESMEM_CLANG) && \
+!defined(HADESMEM_INTEL) && \
+!defined(HADESMEM_GCC) && \
+!defined(HADESMEM_MSVC)
+
 #if defined(__clang__)
 #define HADESMEM_CLANG
 #elif defined(__INTEL_COMPILER)
@@ -21,67 +27,70 @@
 #error "[HadesMem] Unsupported compiler."
 #endif
 
+#endif // #if !defined(HADESMEM_CLANG) && 
+// !defined(HADESMEM_INTEL) && 
+// !defined(HADESMEM_GCC) && 
+// !defined(HADESMEM_MSVC)
+
 #define HADESMEM_VERSION_MAJOR 2
 #define HADESMEM_VERSION_MINOR 0
 #define HADESMEM_VERSION_PATCH 0
 
-#define HADESMEM_VERSION_STRING_GEN_EXP(x, y, z) "v" #x "." #y "." #z
+#define HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z) "v" #x "." #y "." #z
 
-#define HADESMEM_VERSION_STRING_GEN(x, y, z) \
-HADESMEM_VERSION_STRING_GEN_EXP(x, y, z)
+#define HADESMEM_DETAIL_VERSION_STRING_GEN(x, y, z) \
+  HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z)
 
-#define HADESMEM_VERSION_STRING HADESMEM_VERSION_STRING_GEN(\
-HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
+#define HADESMEM_VERSION_STRING HADESMEM_DETAIL_VERSION_STRING_GEN(\
+  HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
 #if defined(HADESMEM_MSVC)
-#define HADESMEM_NO_DELETED_FUNCTIONS
+#define HADESMEM_DETAIL_NO_DELETED_FUNCTIONS
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
-#define HADESMEM_NO_NOEXCEPT
+#define HADESMEM_DETAIL_NO_NOEXCEPT
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
-#define HADESMEM_NO_CONSTEXPR
+#define HADESMEM_DETAIL_NO_CONSTEXPR
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
-#define HADESMEM_NO_VARIADIC_TEMPLATES
+#define HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES
 #endif // #if defined(HADESMEM_MSVC)
 
-#if defined(HADESMEM_NO_DELETED_FUNCTIONS)
-#define HADESMEM_DELETED_FUNCTION 
-#else // #if defined(HADESMEM_NO_DELETED_FUNCTIONS)
-#define HADESMEM_DELETED_FUNCTION = delete
-#endif // #if defined(HADESMEM_NO_DELETED_FUNCTIONS)
+#if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
+#define HADESMEM_DETAIL_DELETED_FUNCTION 
+#else // #if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
+#define HADESMEM_DETAIL_DELETED_FUNCTION = delete
+#endif // #if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
 
-#if defined(HADESMEM_NO_NOEXCEPT)
-#define HADESMEM_NOEXCEPT 
-#define HADESMEM_NOEXCEPT_IF(Pred) 
-#define HADESMEM_NOEXCEPT_EXPR(Expr) false
-#else // #if defined(HADESMEM_NO_NOEXCEPT)
-#define HADESMEM_NOEXCEPT noexcept
-#define HADESMEM_NOEXCEPT_IF(Pred) noexcept((Pred))
-#define HADESMEM_NOEXCEPT_EXPR(Expr) noexcept((Expr))
-#endif // #if defined(HADESMEM_NO_NOEXCEPT)
+#if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
+#define HADESMEM_DETAIL_NOEXCEPT 
+#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred) 
+#define HADESMEM_DETAIL_NOEXCEPT_EXPR(Expr) false
+#else // #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
+#define HADESMEM_DETAIL_NOEXCEPT noexcept
+#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred) noexcept((Pred))
+#define HADESMEM_DETAIL_NOEXCEPT_EXPR(Expr) noexcept((Expr))
+#endif // #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
 
-#if defined(HADESMEM_NO_CONSTEXPR)
-#define HADESMEM_CONSTEXPR
-#else // #if defined(HADESMEM_NO_CONSTEXPR)
-#define HADESMEM_CONSTEXPR constexpr
-#endif // #if defined(HADESMEM_NO_CONSTEXPR)
+#if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
+#define HADESMEM_DETAIL_CONSTEXPR
+#else // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
+#define HADESMEM_DETAIL_CONSTEXPR constexpr
+#endif // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
 
 #if defined(_M_IX86)
-#define HADESMEM_ARCH_X86
-#endif // #if defined(_M_IX86)
-
-#if defined(_M_AMD64)
-#define HADESMEM_ARCH_X64
-#endif // #if defined(_M_AMD64)
-
-#if !defined(HADESMEM_ARCH_X86) && !defined(HADESMEM_ARCH_X64)
+#define HADESMEM_DETAIL_ARCH_X86
+#elif defined(_M_AMD64)
+#define HADESMEM_DETAIL_ARCH_X64
+#else // #if defined(_M_IX86)
+// #elif defined(_M_AMD64)
 #error "[HadesMem] Unsupported architecture."
-#endif // #if !defined(HADESMEM_ARCH_X86) && !defined(HADESMEM_ARCH_X64)
+#endif // #if defined(_M_IX86)
+// #elif defined(_M_AMD64)
 
 #if !defined(HADESMEM_CALL_MAX_ARGS)
 #define HADESMEM_CALL_MAX_ARGS 10
@@ -92,14 +101,15 @@ HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 // unconditionally.
 // TODO: Remove this hack once Clang has been fixed.
 #if defined(HADESMEM_CLANG)
-#define HADESMEM_DLLEXPORT  
+#define HADESMEM_DETAIL_DLLEXPORT  
 #else // #if defined(HADESMEM_CLANG)
-#define HADESMEM_DLLEXPORT __declspec(dllexport)
+#define HADESMEM_DETAIL_DLLEXPORT __declspec(dllexport)
 #endif // #if defined(HADESMEM_CLANG)
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://bit.ly/17CCZFX
-#define HADESMEM_MAX_PATH_UNICODE (1 << 15)
+// TODO: Does this belong somehwere else?
+#define HADESMEM_DETAIL_MAX_PATH_UNICODE (1 << 15)
 
 // Every effort is made to NOT assume the below is true across the entire 
 // codebase, but for the Call module it is unavoidable. If adding support for 

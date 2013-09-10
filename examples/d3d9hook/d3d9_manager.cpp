@@ -129,13 +129,13 @@ struct HADESMEM_TEB
   // More stuff here that we currently don't care about.
 };
 
-#if defined(HADESMEM_ARCH_X64) 
+#if defined(HADESMEM_DETAIL_ARCH_X64) 
 inline HADESMEM_TEB* HadesMemCurrentTeb()
 {
   return reinterpret_cast<HADESMEM_TEB*>(
     __readgsqword(offsetof(NT_TIB, Self)));
 }
-#elif defined(HADESMEM_ARCH_X86) 
+#elif defined(HADESMEM_DETAIL_ARCH_X86) 
 inline HADESMEM_TEB* HadesMemCurrentTeb()
 {
   return reinterpret_cast<HADESMEM_TEB*>(
@@ -687,7 +687,7 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
       if (::ResumeThread(process_info->hThread) == static_cast<DWORD>(-1))
       {
         DWORD const last_error_inner = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
           hadesmem::ErrorString("ResumeThread failed.") << 
           hadesmem::ErrorCodeWinLast(last_error_inner));
       }

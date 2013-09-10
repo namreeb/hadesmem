@@ -24,7 +24,7 @@ inline PVOID Alloc(Process const& process, SIZE_T size)
   if (!address)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -39,7 +39,7 @@ inline PVOID Alloc(Process const& process, PVOID base, SIZE_T size)
   if (!address)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualAllocEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -52,7 +52,7 @@ inline void Free(Process const& process, LPVOID address)
   if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualFreeEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -81,7 +81,7 @@ public:
     HADESMEM_DETAIL_ASSERT(size_ != 0);
   }
   
-  Allocator(Allocator&& other) HADESMEM_NOEXCEPT
+  Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     base_(other.base_), 
     size_(other.size_)
@@ -91,7 +91,7 @@ public:
     other.size_ = 0;
   }
   
-  Allocator& operator=(Allocator&& other) HADESMEM_NOEXCEPT
+  Allocator& operator=(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     FreeUnchecked();
 
@@ -107,7 +107,7 @@ public:
     return *this;
   }
   
-  ~Allocator() HADESMEM_NOEXCEPT
+  ~Allocator() HADESMEM_DETAIL_NOEXCEPT
   {
     FreeUnchecked();
   }
@@ -129,21 +129,21 @@ public:
     size_ = 0;
   }
   
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
-  SIZE_T GetSize() const HADESMEM_NOEXCEPT
+  SIZE_T GetSize() const HADESMEM_DETAIL_NOEXCEPT
   {
     return size_;
   }
 
 private:
-  Allocator(Allocator const& other) HADESMEM_DELETED_FUNCTION;
-  Allocator& operator=(Allocator const& other) HADESMEM_DELETED_FUNCTION;
+  Allocator(Allocator const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  Allocator& operator=(Allocator const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
 
-  void FreeUnchecked() HADESMEM_NOEXCEPT
+  void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -169,37 +169,37 @@ private:
 };
 
 inline bool operator==(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Allocator const& lhs, Allocator const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

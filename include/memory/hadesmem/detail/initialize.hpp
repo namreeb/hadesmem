@@ -95,7 +95,7 @@ inline void DisableUserModeCallbackExceptionFilter()
   if (!k32_mod)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetModuleHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -143,7 +143,7 @@ inline void EnableTerminationOnHeapCorruption()
     HeapEnableTerminationOnCorruption, nullptr, 0))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("HeapSetInformation failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -165,7 +165,7 @@ inline void EnableBottomUpRand()
     if (!::VirtualAlloc(NULL, kAllocSize64K, MEM_RESERVE, PAGE_NOACCESS))
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("VirtualAlloc failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -180,7 +180,7 @@ inline void EnableMitigationPolicies()
   if (!kernel32_mod)
   {
     DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("GetModuleHandle failed.") << 
         ErrorCodeWinLast(last_error));
   }
@@ -217,7 +217,7 @@ inline void EnableMitigationPolicies()
     sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetProcessMitigationPolicy failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -228,7 +228,7 @@ inline void EnableMitigationPolicies()
     &aslr_policy, sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("SetProcessMitigationPolicy failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -240,7 +240,7 @@ inline void EnableMitigationPolicies()
     &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetProcessMitigationPolicy failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -252,7 +252,7 @@ inline void EnableMitigationPolicies()
     &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("SetProcessMitigationPolicy failed.") << 
       ErrorCodeWinLast(last_error));
   }

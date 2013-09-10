@@ -136,9 +136,9 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
   // enumeration will fail if LdrInitializeThunk has not been called, 
   // and Injector::InjectDll (and the APIs it uses) depends on the 
   // module enumeration APIs.
-#if defined(HADESMEM_ARCH_X64) 
+#if defined(HADESMEM_DETAIL_ARCH_X64) 
   std::array<BYTE, 1> return_instr = { { 0xC3 } };
-#elif defined(HADESMEM_ARCH_X86) 
+#elif defined(HADESMEM_DETAIL_ARCH_X86) 
   std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
 #else 
 #error "[HadesMem] Unsupported architecture."
@@ -202,7 +202,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
   if (add_path && path_real.is_relative())
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("Cannot modify search order unless an absolute path "
       "or path resolution is used."));
   }
@@ -214,7 +214,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
   // let LoadLibraryExW do the check for us.
   if (path_resolution && !boost::filesystem::exists(path_real))
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("Could not find module file."));
   }
   
@@ -253,7 +253,7 @@ inline HMODULE InjectDll(Process const& process, std::wstring const& path,
     nullptr, add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("LoadLibraryExW failed.") << 
       ErrorCodeWinLast(load_library_ret.GetLastError()));
   }
@@ -273,7 +273,7 @@ inline void FreeDll(Process const& process, HMODULE module)
     CallConv::kWinApi, module);
   if (!free_library_ret.GetReturnValue())
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("FreeLibrary failed.") << 
       ErrorCodeWinLast(free_library_ret.GetLastError()));
   }
@@ -323,7 +323,7 @@ public:
     return *this;
   }
 
-  CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_NOEXCEPT
+  CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(std::move(other.process_)), 
     module_(other.module_), 
     export_ret_(other.export_ret_), 
@@ -331,7 +331,7 @@ public:
   { }
 
   CreateAndInjectData& operator=(CreateAndInjectData&& other) 
-    HADESMEM_NOEXCEPT
+    HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = std::move(other.process_);
     module_ = other.module_;
@@ -341,7 +341,7 @@ public:
     return *this;
   }
 
-  ~CreateAndInjectData() HADESMEM_NOEXCEPT
+  ~CreateAndInjectData() HADESMEM_DETAIL_NOEXCEPT
   { }
 
   Process GetProcess() const
@@ -349,17 +349,17 @@ public:
     return process_;
   }
 
-  HMODULE GetModule() const HADESMEM_NOEXCEPT
+  HMODULE GetModule() const HADESMEM_DETAIL_NOEXCEPT
   {
     return module_;
   }
 
-  DWORD_PTR GetExportRet() const HADESMEM_NOEXCEPT
+  DWORD_PTR GetExportRet() const HADESMEM_DETAIL_NOEXCEPT
   {
     return export_ret_;
   }
 
-  DWORD GetExportLastError() const HADESMEM_NOEXCEPT
+  DWORD GetExportLastError() const HADESMEM_DETAIL_NOEXCEPT
   {
     return export_last_error_;
   }
@@ -422,7 +422,7 @@ inline CreateAndInjectData CreateAndInject(
     work_dir_real.c_str(), &start_info, &proc_info))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("CreateProcess failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -453,7 +453,7 @@ inline CreateAndInjectData CreateAndInject(
       if (::ResumeThread(thread_handle.GetHandle()) == static_cast<DWORD>(-1))
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("ResumeThread failed.") << 
           ErrorCodeWinLast(last_error) << 
           ErrorCodeWinRet(export_ret.GetReturnValue()) << 

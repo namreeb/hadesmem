@@ -71,13 +71,13 @@ public:
     HADESMEM_DETAIL_ASSERT(base_ != 0);
   }
 
-  PeFile(PeFile const& other) HADESMEM_NOEXCEPT
+  PeFile(PeFile const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     base_(other.base_), 
     type_(other.type_)
   { }
   
-  PeFile& operator=(PeFile const& other) HADESMEM_NOEXCEPT
+  PeFile& operator=(PeFile const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     base_ = other.base_;
@@ -86,13 +86,13 @@ public:
     return *this;
   }
 
-  PeFile(PeFile&& other) HADESMEM_NOEXCEPT
+  PeFile(PeFile&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     base_(other.base_), 
     type_(other.type_)
   { }
   
-  PeFile& operator=(PeFile&& other) HADESMEM_NOEXCEPT
+  PeFile& operator=(PeFile&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     base_ = other.base_;
@@ -101,15 +101,15 @@ public:
     return *this;
   }
   
-  ~PeFile() HADESMEM_NOEXCEPT
+  ~PeFile() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
-  PeFileType GetType() const HADESMEM_NOEXCEPT
+  PeFileType GetType() const HADESMEM_DETAIL_NOEXCEPT
   {
     return type_;
   }
@@ -120,32 +120,32 @@ private:
     PeFileType type_;
 };
 
-inline bool operator==(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(PeFile const& lhs, PeFile const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
@@ -241,7 +241,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
   }
   else
   {
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("Unhandled file type."));
   }
 }

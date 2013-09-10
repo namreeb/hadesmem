@@ -54,7 +54,7 @@ public:
       // directory.
       if (!import_dir_rva)
       {
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Import directory is invalid."));
       }
 
@@ -62,13 +62,13 @@ public:
     }
   }
 
-  ImportDir(ImportDir const& other) HADESMEM_NOEXCEPT
+  ImportDir(ImportDir const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ImportDir& operator=(ImportDir const& other) HADESMEM_NOEXCEPT
+  ImportDir& operator=(ImportDir const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -77,13 +77,13 @@ public:
     return *this;
   }
 
-  ImportDir(ImportDir&& other) HADESMEM_NOEXCEPT
+  ImportDir(ImportDir&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ImportDir& operator=(ImportDir&& other) HADESMEM_NOEXCEPT
+  ImportDir& operator=(ImportDir&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -92,10 +92,10 @@ public:
     return *this;
   }
   
-  ~ImportDir() HADESMEM_NOEXCEPT
+  ~ImportDir() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -166,14 +166,14 @@ public:
       IMAGE_IMPORT_DESCRIPTOR, Name));
     if (!name_rva)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Name RVA is null."));
     }
 
     PVOID name_ptr = RvaToVa(*process_, *pe_file_, name_rva);
     if (!name_ptr)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Name VA is null."));
     }
 
@@ -183,7 +183,7 @@ public:
     // overwriting the existing one.
     if (name.size() > cur_name.size())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("New name longer than existing name."));
     }
 
@@ -202,32 +202,32 @@ private:
   PBYTE base_;
 };
 
-inline bool operator==(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

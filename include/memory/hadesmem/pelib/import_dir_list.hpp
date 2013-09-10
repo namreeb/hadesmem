@@ -40,7 +40,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ImportDirIterator() HADESMEM_NOEXCEPT
+  ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -60,23 +60,23 @@ public:
     }
   }
 
-  ImportDirIterator(ImportDirIterator const& other) HADESMEM_NOEXCEPT
+  ImportDirIterator(ImportDirIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
   ImportDirIterator& operator=(ImportDirIterator const& other) 
-    HADESMEM_NOEXCEPT
+    HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  ImportDirIterator(ImportDirIterator&& other) HADESMEM_NOEXCEPT
+  ImportDirIterator(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  ImportDirIterator& operator=(ImportDirIterator&& other) HADESMEM_NOEXCEPT
+  ImportDirIterator& operator=(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
@@ -86,13 +86,13 @@ public:
   ~ImportDirIterator()
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->import_dir_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->import_dir_;
@@ -138,12 +138,12 @@ public:
     return iter;
   }
   
-  bool operator==(ImportDirIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(ImportDirIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(ImportDirIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(ImportDirIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -152,7 +152,7 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process, PeFile const& pe_file) 
-      HADESMEM_NOEXCEPT
+      HADESMEM_DETAIL_NOEXCEPT
       : process_(&process), 
       pe_file_(&pe_file), 
       import_dir_()
@@ -180,12 +180,12 @@ public:
     pe_file_(&pe_file)
   { }
 
-  ImportDirList(ImportDirList const& other) HADESMEM_NOEXCEPT
+  ImportDirList(ImportDirList const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  ImportDirList& operator=(ImportDirList const& other) HADESMEM_NOEXCEPT
+  ImportDirList& operator=(ImportDirList const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -193,12 +193,12 @@ public:
     return *this;
   }
 
-  ImportDirList(ImportDirList&& other) HADESMEM_NOEXCEPT
+  ImportDirList(ImportDirList&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  ImportDirList& operator=(ImportDirList&& other) HADESMEM_NOEXCEPT
+  ImportDirList& operator=(ImportDirList&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -206,7 +206,7 @@ public:
     return *this;
   }
 
-  ~ImportDirList() HADESMEM_NOEXCEPT
+  ~ImportDirList() HADESMEM_DETAIL_NOEXCEPT
   { }
   
   iterator begin()
@@ -224,17 +224,17 @@ public:
     return ImportDirList::const_iterator(*process_, *pe_file_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return ImportDirList::iterator();
   }
   
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return ImportDirList::const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return ImportDirList::const_iterator();
   }

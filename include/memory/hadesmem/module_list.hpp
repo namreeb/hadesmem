@@ -37,7 +37,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ModuleIterator() HADESMEM_NOEXCEPT
+  ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -62,7 +62,7 @@ public:
         if (!impl_->snap_.IsValid())
         {
           DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("CreateToolhelp32Snapshot failed.") << 
             ErrorCodeWinLast(last_error));
         }
@@ -70,7 +70,7 @@ public:
       else
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -88,7 +88,7 @@ public:
         return;
       }
     
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Module32First failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -96,38 +96,38 @@ public:
     impl_->module_ = Module(*impl_->process_, entry);
   }
 
-  ModuleIterator(ModuleIterator const& other) HADESMEM_NOEXCEPT
+  ModuleIterator(ModuleIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
-  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_NOEXCEPT
+  ModuleIterator& operator=(ModuleIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  ModuleIterator(ModuleIterator&& other) HADESMEM_NOEXCEPT
+  ModuleIterator(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_NOEXCEPT
+  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
     return *this;
   }
 
-  ~ModuleIterator() HADESMEM_NOEXCEPT
+  ~ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->module_;
   }
 
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->module_;
@@ -149,7 +149,7 @@ public:
         return *this;
       }
     
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Module32Next failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -166,12 +166,12 @@ public:
     return iter;
   }
   
-  bool operator==(ModuleIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(ModuleIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(ModuleIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(ModuleIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ != other.impl_;
   }
@@ -179,7 +179,7 @@ public:
 private:
   struct Impl
   {
-    Impl() HADESMEM_NOEXCEPT
+    Impl() HADESMEM_DETAIL_NOEXCEPT
       : process_(nullptr), 
       snap_(INVALID_HANDLE_VALUE), 
       module_()
@@ -202,34 +202,34 @@ public:
   typedef ModuleIterator<Module> iterator;
   typedef ModuleIterator<Module const> const_iterator;
   
-  explicit HADESMEM_CONSTEXPR ModuleList(Process const& process) 
-    HADESMEM_NOEXCEPT
+  explicit HADESMEM_DETAIL_CONSTEXPR ModuleList(Process const& process) 
+    HADESMEM_DETAIL_NOEXCEPT
     : process_(&process)
   { }
 
-  HADESMEM_CONSTEXPR ModuleList(ModuleList const& other) HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ModuleList(ModuleList const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_)
   { }
 
-  ModuleList& operator=(ModuleList const& other) HADESMEM_NOEXCEPT
+  ModuleList& operator=(ModuleList const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
 
     return *this;
   }
 
-  HADESMEM_CONSTEXPR ModuleList(ModuleList&& other) HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ModuleList(ModuleList&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_)
   { }
 
-  ModuleList& operator=(ModuleList&& other) HADESMEM_NOEXCEPT
+  ModuleList& operator=(ModuleList&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
 
     return *this;
   }
 
-  ~ModuleList() HADESMEM_NOEXCEPT
+  ~ModuleList() HADESMEM_DETAIL_NOEXCEPT
   { }
   
   iterator begin()
@@ -247,17 +247,17 @@ public:
     return const_iterator(*process_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return iterator();
   }
   
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }

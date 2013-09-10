@@ -21,15 +21,15 @@ class SmartHandleImpl
 public:
   typedef typename Policy::HandleT HandleT;
 
-  HADESMEM_CONSTEXPR SmartHandleImpl() HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
     : handle_(nullptr)
   { }
   
-  explicit HADESMEM_CONSTEXPR SmartHandleImpl(HandleT handle) HADESMEM_NOEXCEPT
+  explicit HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT
     : handle_(handle)
   { }
 
-  SmartHandleImpl& operator=(HandleT handle) HADESMEM_NOEXCEPT
+  SmartHandleImpl& operator=(HandleT handle) HADESMEM_DETAIL_NOEXCEPT
   {
     CleanupUnchecked();
 
@@ -38,13 +38,13 @@ public:
     return *this;
   }
 
-  SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_NOEXCEPT
+  SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
     : handle_(other.handle_)
   {
     other.handle_ = GetInvalid();
   }
 
-  SmartHandleImpl& operator=(SmartHandleImpl&& other) HADESMEM_NOEXCEPT
+  SmartHandleImpl& operator=(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     CleanupUnchecked();
 
@@ -54,22 +54,22 @@ public:
     return *this;
   }
 
-  ~SmartHandleImpl() HADESMEM_NOEXCEPT
+  ~SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
   {
     CleanupUnchecked();
   }
 
-  HandleT GetHandle() const HADESMEM_NOEXCEPT
+  HandleT GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
     return handle_;
   }
 
-  HandleT GetInvalid() const HADESMEM_NOEXCEPT
+  HandleT GetInvalid() const HADESMEM_DETAIL_NOEXCEPT
   {
     return Policy::GetInvalid();
   }
 
-  bool IsValid() const HADESMEM_NOEXCEPT
+  bool IsValid() const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetHandle() != GetInvalid();
   }
@@ -84,7 +84,7 @@ public:
     if (!Policy::Cleanup(handle_))
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("SmartHandle cleanup failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -93,11 +93,11 @@ public:
   }
 
 private:
-  SmartHandleImpl(SmartHandleImpl const& other) HADESMEM_DELETED_FUNCTION;
+  SmartHandleImpl(SmartHandleImpl const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
   SmartHandleImpl& operator=(SmartHandleImpl const& other) 
-    HADESMEM_DELETED_FUNCTION;
+    HADESMEM_DETAIL_DELETED_FUNCTION;
 
-  void CleanupUnchecked() HADESMEM_NOEXCEPT
+  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -121,7 +121,7 @@ struct HandlePolicy
 {
   typedef HANDLE HandleT;
 
-  static HADESMEM_CONSTEXPR HandleT GetInvalid() HADESMEM_NOEXCEPT
+  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
   {
     return nullptr;
   }
@@ -138,7 +138,7 @@ struct SnapPolicy
 {
   typedef HANDLE HandleT;
 
-  static HandleT GetInvalid() HADESMEM_NOEXCEPT
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -155,7 +155,7 @@ struct LibraryPolicy
 {
   typedef HMODULE HandleT;
 
-  static HADESMEM_CONSTEXPR HandleT GetInvalid() HADESMEM_NOEXCEPT
+  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
   {
     return nullptr;
   }

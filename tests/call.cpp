@@ -177,9 +177,9 @@ public:
 
 #endif // #if !defined(HADESMEM_CLANG)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
 
-#elif defined(HADESMEM_ARCH_X86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
 
 DWORD_PTR __fastcall TestIntegerFast(unsigned int a, unsigned int b, 
   unsigned int c, unsigned int d, unsigned int e, unsigned int f)
@@ -295,9 +295,9 @@ BOOST_AUTO_TEST_CASE(call)
   // Clang does not yet implement MSVC-style __thiscall
 #if !defined(HADESMEM_CLANG)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
   hadesmem::CallConv const thiscall_call_conv = hadesmem::CallConv::kDefault;
-#elif defined(HADESMEM_ARCH_X86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
   hadesmem::CallConv const thiscall_call_conv = hadesmem::CallConv::kThisCall;
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -333,9 +333,9 @@ BOOST_AUTO_TEST_CASE(call)
 
 #endif // #if !defined(HADESMEM_CLANG)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
   
-#elif defined(HADESMEM_ARCH_X86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
 
   auto const call_int_fast_ret = hadesmem::Call<TestIntegerT>(
     process, reinterpret_cast<hadesmem::FnPtr>(&TestIntegerFast), 

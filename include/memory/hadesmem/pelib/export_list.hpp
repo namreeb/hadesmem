@@ -38,7 +38,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ExportIterator() HADESMEM_NOEXCEPT
+  ExportIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -60,22 +60,22 @@ public:
     }
   }
 
-  ExportIterator(ExportIterator const& other) HADESMEM_NOEXCEPT
+  ExportIterator(ExportIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
-  ExportIterator& operator=(ExportIterator const& other) HADESMEM_NOEXCEPT
+  ExportIterator& operator=(ExportIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  ExportIterator(ExportIterator&& other) HADESMEM_NOEXCEPT
+  ExportIterator(ExportIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  ExportIterator& operator=(ExportIterator&& other) HADESMEM_NOEXCEPT
+  ExportIterator& operator=(ExportIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
@@ -85,13 +85,13 @@ public:
   ~ExportIterator()
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->export_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->export_;
@@ -115,7 +115,7 @@ public:
 
       if (offset >= export_dir.GetNumberOfFunctions())
       {
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Invalid export number."));
       }
 
@@ -142,12 +142,12 @@ public:
     return iter;
   }
   
-  bool operator==(ExportIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(ExportIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(ExportIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(ExportIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -156,7 +156,7 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process, PeFile const& pe_file) 
-      HADESMEM_NOEXCEPT
+      HADESMEM_DETAIL_NOEXCEPT
       : process_(&process), 
       pe_file_(&pe_file), 
       export_()
@@ -184,12 +184,12 @@ public:
     pe_file_(&pe_file)
   { }
 
-  ExportList(ExportList const& other) HADESMEM_NOEXCEPT
+  ExportList(ExportList const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  ExportList& operator=(ExportList const& other) HADESMEM_NOEXCEPT
+  ExportList& operator=(ExportList const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -197,12 +197,12 @@ public:
     return *this;
   }
 
-  ExportList(ExportList&& other) HADESMEM_NOEXCEPT
+  ExportList(ExportList&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_)
   { }
 
-  ExportList& operator=(ExportList&& other) HADESMEM_NOEXCEPT
+  ExportList& operator=(ExportList&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -210,7 +210,7 @@ public:
     return *this;
   }
 
-  ~ExportList() HADESMEM_NOEXCEPT
+  ~ExportList() HADESMEM_DETAIL_NOEXCEPT
   { }
   
   iterator begin()
@@ -228,17 +228,17 @@ public:
     return ExportList::const_iterator(*process_, *pe_file_);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return ExportList::iterator();
   }
   
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return ExportList::const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return ExportList::const_iterator();
   }

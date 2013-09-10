@@ -46,7 +46,7 @@ public:
     // directory.
     if (!data_dir_va)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("PE file has no TLS directory."));
     }
 
@@ -68,13 +68,13 @@ public:
     return *this;
   }
 
-  TlsDir(TlsDir&& other) HADESMEM_NOEXCEPT
+  TlsDir(TlsDir&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  TlsDir& operator=(TlsDir&& other) HADESMEM_NOEXCEPT
+  TlsDir& operator=(TlsDir&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -83,10 +83,10 @@ public:
     return *this;
   }
   
-  ~TlsDir() HADESMEM_NOEXCEPT
+  ~TlsDir() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -197,32 +197,32 @@ private:
   PBYTE base_;
 };
 
-inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -49,20 +49,20 @@ public:
     // directory.
     if (!export_dir_rva)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Export directory is invalid."));
     }
 
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, export_dir_rva));
   }
 
-  ExportDir(ExportDir const& other) HADESMEM_NOEXCEPT
+  ExportDir(ExportDir const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ExportDir& operator=(ExportDir const& other) HADESMEM_NOEXCEPT
+  ExportDir& operator=(ExportDir const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -71,13 +71,13 @@ public:
     return *this;
   }
 
-  ExportDir(ExportDir&& other) HADESMEM_NOEXCEPT
+  ExportDir(ExportDir&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ExportDir& operator=(ExportDir&& other) HADESMEM_NOEXCEPT
+  ExportDir& operator=(ExportDir&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -86,10 +86,10 @@ public:
     return *this;
   }
   
-  ~ExportDir() HADESMEM_NOEXCEPT
+  ~ExportDir() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -199,7 +199,7 @@ public:
 
     if (!name_rva)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Export dir has no name. Cannot overwrite."));
     }
 
@@ -210,7 +210,7 @@ public:
     // overwriting the existing one.
     if (name.size() > current_name.size())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Cannot overwrite name with longer string."));
     }
 
@@ -260,32 +260,32 @@ private:
   PBYTE base_;
 };
 
-inline bool operator==(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(ExportDir const& lhs, ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

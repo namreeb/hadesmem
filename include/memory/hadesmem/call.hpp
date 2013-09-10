@@ -117,17 +117,17 @@ public:
     std::is_same<float, typename std::remove_cv<T>::type>::value || 
     std::is_same<double, typename std::remove_cv<T>::type>::value);
 
-  explicit CallResult(T const& result, DWORD last_error) HADESMEM_NOEXCEPT
+  explicit CallResult(T const& result, DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
     : result_(result), 
     last_error_(last_error)
   { }
 
-  T GetReturnValue() const HADESMEM_NOEXCEPT
+  T GetReturnValue() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_;
   }
 
-  DWORD GetLastError() const HADESMEM_NOEXCEPT
+  DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
   {
     return last_error_;
   }
@@ -141,11 +141,11 @@ template <>
 class CallResult<void>
 {
 public:
-  explicit CallResult(DWORD last_error) HADESMEM_NOEXCEPT
+  explicit CallResult(DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
     : last_error_(last_error)
   { }
 
-  DWORD GetLastError() const HADESMEM_NOEXCEPT
+  DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
   {
     return last_error_;
   }
@@ -174,7 +174,7 @@ class CallResultRaw
 {
 public:
   explicit CallResultRaw(DWORD64 return_i64, float return_float, 
-    double return_double, DWORD last_error) HADESMEM_NOEXCEPT
+    double return_double, DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
     : result_()
   {
     result_.return_i64 = return_i64;
@@ -184,42 +184,42 @@ public:
   }
 
   explicit CallResultRaw(detail::CallResultRemote const& result) 
-    HADESMEM_NOEXCEPT
+    HADESMEM_DETAIL_NOEXCEPT
     : result_(result)
   { }
 
-  CallResultRaw(CallResultRaw const& other) HADESMEM_NOEXCEPT
+  CallResultRaw(CallResultRaw const& other) HADESMEM_DETAIL_NOEXCEPT
     : result_(other.result_)
   { }
 
-  CallResultRaw& operator=(CallResultRaw const& other) HADESMEM_NOEXCEPT
+  CallResultRaw& operator=(CallResultRaw const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     result_ = other.result_;
 
     return *this;
   }
 
-  CallResultRaw(CallResultRaw&& other) HADESMEM_NOEXCEPT
+  CallResultRaw(CallResultRaw&& other) HADESMEM_DETAIL_NOEXCEPT
     : result_(other.result_)
   { }
 
-  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_NOEXCEPT
+  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     result_ = other.result_;
 
     return *this;
   }
 
-  ~CallResultRaw() HADESMEM_NOEXCEPT
+  ~CallResultRaw() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  DWORD GetLastError() const HADESMEM_NOEXCEPT
+  DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_.last_error;
   }
 
   template <typename T>
-  typename std::decay<T>::type GetReturnValue() const HADESMEM_NOEXCEPT
+  typename std::decay<T>::type GetReturnValue() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
@@ -232,14 +232,14 @@ public:
   
 private:
   template <typename T>
-  T GetReturnValueIntImpl(std::true_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueIntImpl(std::true_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
-  T GetReturnValueIntImpl(std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueIntImpl(std::false_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) <= sizeof(DWORD32));
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
@@ -247,14 +247,14 @@ private:
   }
 
   template <typename T>
-  T GetReturnValuePtrImpl(std::true_type) const HADESMEM_NOEXCEPT
+  T GetReturnValuePtrImpl(std::true_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt64());
   }
 
   template <typename T>
-  T GetReturnValuePtrImpl(std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValuePtrImpl(std::false_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt32());
@@ -262,28 +262,28 @@ private:
 
   template <typename T>
   T GetReturnValueIntOrFloatImpl(std::true_type, std::false_type, 
-    std::false_type) const HADESMEM_NOEXCEPT
+    std::false_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetReturnValueFloat();
   }
 
   template <typename T>
   T GetReturnValueIntOrFloatImpl(std::false_type, std::true_type, 
-    std::false_type) const HADESMEM_NOEXCEPT
+    std::false_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetReturnValueDouble();
   }
 
   template <typename T>
   T GetReturnValueIntOrFloatImpl(std::false_type, std::false_type, 
-    std::true_type) const HADESMEM_NOEXCEPT
+    std::true_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetReturnValueIntImpl<T>(std::integral_constant<bool, 
       (sizeof(T) == sizeof(DWORD64))>());
   }
 
   template <typename T>
-  T GetReturnValueImpl(std::true_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueImpl(std::true_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return GetReturnValuePtrImpl<T>(std::integral_constant<bool, 
@@ -291,7 +291,7 @@ private:
   }
 
   template <typename T>
-  T GetReturnValueImpl(std::false_type) const HADESMEM_NOEXCEPT
+  T GetReturnValueImpl(std::false_type) const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_floating_point<T>::value);
@@ -299,28 +299,28 @@ private:
       std::is_same<T, double>(), std::is_integral<T>());
   }
 
-  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_NOEXCEPT
+  DWORD_PTR GetReturnValueIntPtr() const HADESMEM_DETAIL_NOEXCEPT
   {
     return static_cast<DWORD_PTR>(result_.return_i64 & 
       static_cast<DWORD_PTR>(-1));
   }
 
-  DWORD32 GetReturnValueInt32() const HADESMEM_NOEXCEPT
+  DWORD32 GetReturnValueInt32() const HADESMEM_DETAIL_NOEXCEPT
   {
     return static_cast<DWORD32>(result_.return_i64 & 0xFFFFFFFFUL);
   }
 
-  DWORD64 GetReturnValueInt64() const HADESMEM_NOEXCEPT
+  DWORD64 GetReturnValueInt64() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_.return_i64;
   }
 
-  float GetReturnValueFloat() const HADESMEM_NOEXCEPT
+  float GetReturnValueFloat() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_.return_float;
   }
 
-  double GetReturnValueDouble() const HADESMEM_NOEXCEPT
+  double GetReturnValueDouble() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_.return_double;
   }
@@ -333,14 +333,14 @@ namespace detail
 
 template <typename T>
 CallResult<T> CallResultRawToCallResult(CallResultRaw const& result) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
 }
 
 template <>
 inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return CallResult<void>(result.GetLastError());
 }
@@ -351,7 +351,7 @@ class CallArg
 {
 public:
   template <typename T>
-  explicit CallArg(T t) HADESMEM_NOEXCEPT
+  explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT
     : arg_()
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
@@ -369,7 +369,7 @@ public:
   
 private:
   template <typename T>
-  void Initialize(T t) HADESMEM_NOEXCEPT
+  void Initialize(T t) HADESMEM_DETAIL_NOEXCEPT
   {
     typedef typename std::conditional<sizeof(T) == sizeof(DWORD64), DWORD64, 
       DWORD32>::type D;
@@ -377,7 +377,7 @@ private:
   }
 
   template <typename T>
-  void Initialize(T const* t) HADESMEM_NOEXCEPT
+  void Initialize(T const* t) HADESMEM_DETAIL_NOEXCEPT
   {
     typedef typename std::conditional<sizeof(T const*) == sizeof(DWORD64), 
       DWORD64, DWORD32>::type D;
@@ -385,27 +385,27 @@ private:
   }
 
   template <typename T>
-  void Initialize(T* t) HADESMEM_NOEXCEPT
+  void Initialize(T* t) HADESMEM_DETAIL_NOEXCEPT
   {
     Initialize(static_cast<T const*>(t));
   }
 
-  void Initialize(DWORD32 t) HADESMEM_NOEXCEPT
+  void Initialize(DWORD32 t) HADESMEM_DETAIL_NOEXCEPT
   {
     arg_ = t;
   }
 
-  void Initialize(DWORD64 t) HADESMEM_NOEXCEPT
+  void Initialize(DWORD64 t) HADESMEM_DETAIL_NOEXCEPT
   {
     arg_ = t;
   }
   
-  void Initialize(float t) HADESMEM_NOEXCEPT
+  void Initialize(float t) HADESMEM_DETAIL_NOEXCEPT
   {
     arg_ = t;
   }
   
-  void Initialize(double t) HADESMEM_NOEXCEPT
+  void Initialize(double t) HADESMEM_DETAIL_NOEXCEPT
   {
     arg_ = t;
   }
@@ -417,21 +417,21 @@ private:
 namespace detail
 {
   
-#if defined(HADESMEM_ARCH_X86)
+#if defined(HADESMEM_DETAIL_ARCH_X86)
 
 class ArgVisitor32 : public boost::static_visitor<>
 {
 public:
   ArgVisitor32(AsmJit::X86Assembler* assembler, std::size_t num_args, 
-    CallConv call_conv) HADESMEM_NOEXCEPT;
+    CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(DWORD32 arg) HADESMEM_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(DWORD64 arg) HADESMEM_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(float arg) HADESMEM_NOEXCEPT;
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(double arg) HADESMEM_NOEXCEPT;
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT;
 
 private:
   AsmJit::X86Assembler* assembler_;
@@ -439,23 +439,23 @@ private:
   CallConv call_conv_;
 };
 
-#endif // #if defined(HADESMEM_ARCH_X86)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
 
 class ArgVisitor64 : public boost::static_visitor<>
 {
 public:
   ArgVisitor64(AsmJit::X86Assembler* assembler, std::size_t num_args) 
-    HADESMEM_NOEXCEPT;
+    HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(DWORD32 arg) HADESMEM_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(DWORD64 arg) HADESMEM_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(float arg) HADESMEM_NOEXCEPT;
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT;
 
-  void operator()(double arg) HADESMEM_NOEXCEPT;
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT;
 
 private:
   AsmJit::X86Assembler* assembler_;
@@ -463,9 +463,9 @@ private:
   std::size_t cur_arg_;
 };
 
-#endif // #if defined(HADESMEM_ARCH_X64)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
 
-#if defined(HADESMEM_ARCH_X86)
+#if defined(HADESMEM_DETAIL_ARCH_X86)
 
 template <typename AddressesForwardIterator, 
   typename ConvForwardIterator, 
@@ -565,9 +565,9 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   assembler->ret(0x4);
 }
 
-#endif // #if defined(HADESMEM_ARCH_X86)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename AddressesForwardIterator, 
   typename ConvForwardIterator, 
@@ -681,7 +681,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   assembler->ret();
 }
 
-#endif // #if defined(HADESMEM_ARCH_X64)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
   
 template <typename AddressesForwardIterator, 
   typename ConvForwardIterator, 
@@ -707,9 +707,9 @@ inline Allocator GenerateCallCode(Process const& process,
 
   AsmJit::X86Assembler assembler;
   
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
   GenerateCallCode64(
-#elif defined(HADESMEM_ARCH_X86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
   GenerateCallCode32(
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -743,16 +743,16 @@ inline Allocator GenerateCallCode(Process const& process,
   return stub_mem_remote;
 }
 
-#if defined(HADESMEM_ARCH_X86)
+#if defined(HADESMEM_DETAIL_ARCH_X86)
 
 ArgVisitor32::ArgVisitor32(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args, CallConv call_conv) HADESMEM_NOEXCEPT
+  std::size_t num_args, CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT
   : assembler_(assembler), 
   cur_arg_(num_args), 
   call_conv_(call_conv)
 { }
 
-void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
+void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
 {
   switch (cur_arg_)
   {
@@ -799,7 +799,7 @@ void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
+void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
 {
   assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
     (arg >> 32) & 0xFFFFFFFFUL)));
@@ -812,7 +812,7 @@ void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
+void ArgVisitor32::operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
@@ -826,7 +826,7 @@ void ArgVisitor32::operator()(float arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
+void ArgVisitor32::operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
@@ -845,23 +845,23 @@ void ArgVisitor32::operator()(double arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-#endif // #if defined(HADESMEM_ARCH_X86)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
-#if defined(HADESMEM_ARCH_X64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
 
 ArgVisitor64::ArgVisitor64(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args) HADESMEM_NOEXCEPT
+  std::size_t num_args) HADESMEM_DETAIL_NOEXCEPT
   : assembler_(assembler), 
   num_args_(num_args), 
   cur_arg_(num_args)
 { }
 
-void ArgVisitor64::operator()(DWORD32 arg) HADESMEM_NOEXCEPT
+void ArgVisitor64::operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
 {
   return (*this)(static_cast<DWORD64>(arg));
 }
 
-void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
+void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
 {
   switch (cur_arg_)
   {
@@ -888,7 +888,7 @@ void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
+void ArgVisitor64::operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
@@ -937,7 +937,7 @@ void ArgVisitor64::operator()(float arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
+void ArgVisitor64::operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
@@ -993,7 +993,7 @@ void ArgVisitor64::operator()(double arg) HADESMEM_NOEXCEPT
   --cur_arg_;
 }
 
-#endif // #if defined(HADESMEM_ARCH_X64)
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 }
 
@@ -1109,13 +1109,13 @@ void AddCallArg(OutputIterator call_args, T&& arg)
 
 }
 
-#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
 namespace detail
 {
 
 template <typename FuncT, int N, typename OutputIterator>
-void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_NOEXCEPT
+void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return;
 }
@@ -1150,7 +1150,7 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
 
-#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#else // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
 HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
   BOOST_PP_LIMIT_REPEAT);
@@ -1196,7 +1196,7 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
 
-#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#endif // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
 class MultiCall
 {
@@ -1225,14 +1225,14 @@ public:
     return *this;
   }
   
-  MultiCall(MultiCall&& other) HADESMEM_NOEXCEPT
+  MultiCall(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     addresses_(std::move(other.addresses_)), 
     call_convs_(std::move(other.call_convs_)), 
     args_(std::move(other.args_))
   { }
   
-  MultiCall& operator=(MultiCall&& other) HADESMEM_NOEXCEPT
+  MultiCall& operator=(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     addresses_ = std::move(other.addresses_);
@@ -1242,10 +1242,10 @@ public:
     return *this;
   }
 
-  ~MultiCall() HADESMEM_NOEXCEPT
+  ~MultiCall() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-#if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)
@@ -1262,7 +1262,7 @@ public:
     args_.push_back(call_args);
   }
 
-#else // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#else // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
 #define BOOST_PP_LOCAL_MACRO(n) \
   template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -1296,7 +1296,7 @@ public:
 
 #undef HADESMEM_CALL_ADD_ARG_WRAPPER
 
-#endif // #if !defined(HADESMEM_NO_VARIADIC_TEMPLATES)
+#endif // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
   
   template <typename OutputIterator>
   void Call(OutputIterator results) const

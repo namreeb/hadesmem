@@ -23,7 +23,7 @@ inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
     sizeof(mbi))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("VirtualQueryEx failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -31,7 +31,7 @@ inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
   return mbi;
 }
 
-inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
+inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
     ((mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
@@ -42,7 +42,7 @@ inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
     (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
 }
 
-inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
+inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
     ((mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
@@ -51,7 +51,7 @@ inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
     (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
 }
 
-inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
+inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
     ((mbi.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || 
@@ -60,7 +60,7 @@ inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
     (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY);
 }
 
-inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_NOEXCEPT
+inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.Protect & PAGE_GUARD) == PAGE_GUARD;
 }

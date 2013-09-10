@@ -48,14 +48,14 @@ public:
     return *this;
   }
   
-  Process(Process&& other) HADESMEM_NOEXCEPT
+  Process(Process&& other) HADESMEM_DETAIL_NOEXCEPT
     : handle_(std::move(other.handle_)), 
     id_(other.id_)
   {
     other.id_ = 0;
   }
   
-  Process& operator=(Process&& other) HADESMEM_NOEXCEPT
+  Process& operator=(Process&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     handle_ = std::move(other.handle_);
     id_ = other.id_;
@@ -65,17 +65,17 @@ public:
     return *this;
   }
   
-  ~Process() HADESMEM_NOEXCEPT
+  ~Process() HADESMEM_DETAIL_NOEXCEPT
   {
     CleanupUnchecked();
   }
   
-  DWORD GetId() const HADESMEM_NOEXCEPT
+  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return id_;
   }
   
-  HANDLE GetHandle() const HADESMEM_NOEXCEPT
+  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
     return handle_.GetHandle();
   }
@@ -92,13 +92,13 @@ private:
     if (detail::IsWoW64Process(::GetCurrentProcess()) != 
       detail::IsWoW64Process(handle_.GetHandle()))
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Cross-architecture process manipulation is currently "
         "unsupported."));
     }
   }
 
-  void CleanupUnchecked() HADESMEM_NOEXCEPT
+  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -120,32 +120,32 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Process const& lhs, Process const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(Process const& lhs, Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }
@@ -169,13 +169,13 @@ inline std::wostream& operator<<(std::wostream& lhs, Process const& rhs)
 // TODO: Move this to a more appropriate header (process_helpers.hpp?).
 inline std::wstring GetPath(Process const& process)
 {
-  std::vector<wchar_t> path(HADESMEM_MAX_PATH_UNICODE);
+  std::vector<wchar_t> path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
   DWORD path_len = static_cast<DWORD>(path.size());
   if (!::QueryFullProcessImageNameW(process.GetHandle(), 0, path.data(), 
     &path_len))
   {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("QueryFullProcessImageName failed.") << 
         ErrorCodeWinLast(last_error));
   }
@@ -197,7 +197,7 @@ inline void GetSeDebugPrivilege()
     TOKEN_QUERY, &process_token_temp)) 
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("OpenProcessToken failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -207,7 +207,7 @@ inline void GetSeDebugPrivilege()
   if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("LookupPrivilegeValue failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -222,7 +222,7 @@ inline void GetSeDebugPrivilege()
     ::GetLastError() == ERROR_NOT_ALL_ASSIGNED) 
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("AdjustTokenPrivileges failed.") << 
       ErrorCodeWinLast(last_error));
   }

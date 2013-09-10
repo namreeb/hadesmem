@@ -7,9 +7,9 @@
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved);
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR InjectTestDep_Foo();
+extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo();
 
-extern "C" HADESMEM_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
+extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
 {
   return 0;
 }

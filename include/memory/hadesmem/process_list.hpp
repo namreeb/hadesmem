@@ -37,7 +37,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ProcessIterator() HADESMEM_NOEXCEPT
+  ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -58,7 +58,7 @@ public:
         if (!impl_->snap_.IsValid())
         {
           DWORD const last_error = ::GetLastError();
-          HADESMEM_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("CreateToolhelp32Snapshot failed.") << 
             ErrorCodeWinLast(last_error));
         }
@@ -66,7 +66,7 @@ public:
       else
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("CreateToolhelp32Snapshot failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -85,7 +85,7 @@ public:
         return;
       }
     
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Process32First failed.") << 
         ErrorCodeWinLast(last_error));
     }
@@ -93,38 +93,38 @@ public:
     impl_->process_ = ProcessEntry(entry);
   }
 
-  ProcessIterator(ProcessIterator const& other) HADESMEM_NOEXCEPT
+  ProcessIterator(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(other.impl_)
   { }
 
-  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_NOEXCEPT
+  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
     return *this;
   }
 
-  ProcessIterator(ProcessIterator&& other) HADESMEM_NOEXCEPT
+  ProcessIterator(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::move(other.impl_))
   { }
 
-  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_NOEXCEPT
+  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
     return *this;
   }
 
-  ~ProcessIterator() HADESMEM_NOEXCEPT
+  ~ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  reference operator*() const HADESMEM_NOEXCEPT
+  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->process_;
   }
   
-  pointer operator->() const HADESMEM_NOEXCEPT
+  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->process_;
@@ -147,7 +147,7 @@ public:
       else
       {
         DWORD const last_error = ::GetLastError();
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Process32Next failed.") << 
           ErrorCodeWinLast(last_error));
       }
@@ -165,12 +165,12 @@ public:
     return iter;
   }
   
-  bool operator==(ProcessIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator==(ProcessIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
   
-  bool operator!=(ProcessIterator const& other) const HADESMEM_NOEXCEPT
+  bool operator!=(ProcessIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }
@@ -178,7 +178,7 @@ public:
 private:
   struct Impl
   {
-    Impl() HADESMEM_NOEXCEPT
+    Impl() HADESMEM_DETAIL_NOEXCEPT
       : snap_(INVALID_HANDLE_VALUE), 
       process_()
     { }
@@ -198,7 +198,7 @@ public:
   typedef ProcessIterator<ProcessEntry> iterator;
   typedef ProcessIterator<ProcessEntry const> const_iterator;
 
-  HADESMEM_CONSTEXPR ProcessList() HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ProcessList() HADESMEM_DETAIL_NOEXCEPT
   { }
 
   iterator begin()
@@ -216,17 +216,17 @@ public:
     return const_iterator(0);
   }
   
-  iterator end() HADESMEM_NOEXCEPT
+  iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
     return iterator();
   }
 
-  const_iterator end() const HADESMEM_NOEXCEPT
+  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }
   
-  const_iterator cend() const HADESMEM_NOEXCEPT
+  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
     return const_iterator();
   }

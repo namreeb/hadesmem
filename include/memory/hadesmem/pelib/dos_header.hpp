@@ -31,7 +31,7 @@ class DosHeader
 {
 public:
   explicit DosHeader(Process const& process, PeFile const& pe_file) 
-    HADESMEM_NOEXCEPT
+    HADESMEM_DETAIL_NOEXCEPT
     : process_(&process), 
     pe_file_(&pe_file), 
     base_(static_cast<PBYTE>(pe_file.GetBase()))
@@ -39,13 +39,13 @@ public:
     EnsureValid();
   }
 
-  DosHeader(DosHeader const& other) HADESMEM_NOEXCEPT
+  DosHeader(DosHeader const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  DosHeader& operator=(DosHeader const& other) HADESMEM_NOEXCEPT
+  DosHeader& operator=(DosHeader const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -54,13 +54,13 @@ public:
     return *this;
   }
 
-  DosHeader(DosHeader&& other) HADESMEM_NOEXCEPT
+  DosHeader(DosHeader&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  DosHeader& operator=(DosHeader&& other) HADESMEM_NOEXCEPT
+  DosHeader& operator=(DosHeader&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -69,10 +69,10 @@ public:
     return *this;
   }
   
-  ~DosHeader() HADESMEM_NOEXCEPT
+  ~DosHeader() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -86,7 +86,7 @@ public:
   {
     if (!IsValid())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("DOS header magic invalid."));
     }
   }
@@ -303,37 +303,37 @@ private:
 };
 
 inline bool operator==(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(DosHeader const& lhs, DosHeader const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

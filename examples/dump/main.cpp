@@ -178,7 +178,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
   std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode() 
     << std::dec << "\n";
-#if defined(HADESMEM_ARCH_X86) 
+#if defined(HADESMEM_DETAIL_ARCH_X86) 
   std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData() 
     << std::dec << "\n";
 #endif
@@ -771,7 +771,7 @@ int main(int /*argc*/, char* /*argv*/[])
       }
       else
       {
-        HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
           hadesmem::ErrorString("Failed to find requested process."));
       }
     }

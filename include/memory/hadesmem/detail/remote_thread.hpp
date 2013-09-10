@@ -23,7 +23,7 @@ inline detail::SmartHandle CreateRemoteThreadAndWait(Process const& process,
   if (!remote_thread.GetHandle())
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("CreateRemoteThread failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -34,12 +34,12 @@ inline detail::SmartHandle CreateRemoteThreadAndWait(Process const& process,
   {
     if (wait_res == WAIT_TIMEOUT)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("WaitForSingleObject timeout."));
     }
 
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("WaitForSingleObject failed.") << 
       ErrorCodeWinLast(last_error));
   }

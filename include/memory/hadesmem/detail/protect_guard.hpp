@@ -40,7 +40,7 @@ public:
   {
     if (IsGuard(mbi_))
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Attempt to write to guard page."));
     }
 
@@ -53,7 +53,7 @@ public:
     }
   }
 
-  ProtectGuard(ProtectGuard&& other) HADESMEM_NOEXCEPT
+  ProtectGuard(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     type_(other.type_), 
     can_read_or_write_(other.can_read_or_write_), 
@@ -63,7 +63,7 @@ public:
     other.old_protect_ = 0;
   }
 
-  ProtectGuard& operator=(ProtectGuard&& other) HADESMEM_NOEXCEPT
+  ProtectGuard& operator=(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     type_ = other.type_;
@@ -76,7 +76,7 @@ public:
     return *this;
   }
 
-  ~ProtectGuard() HADESMEM_NOEXCEPT
+  ~ProtectGuard() HADESMEM_DETAIL_NOEXCEPT
   {
     RestoreUnchecked();
   }
@@ -96,7 +96,7 @@ public:
     old_protect_ = 0;
   }
 
-  void RestoreUnchecked() HADESMEM_NOEXCEPT
+  void RestoreUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -112,8 +112,8 @@ public:
   }
 
 private:
-  ProtectGuard(ProtectGuard const& other) HADESMEM_DELETED_FUNCTION;
-  ProtectGuard& operator=(ProtectGuard const& other) HADESMEM_DELETED_FUNCTION;
+  ProtectGuard(ProtectGuard const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  ProtectGuard& operator=(ProtectGuard const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
   
   Process const* process_;
   ProtectGuardType type_;

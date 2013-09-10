@@ -64,7 +64,7 @@ public:
     
     if (offset >= export_dir.GetNumberOfFunctions())
     {
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Ordinal out of range."));
     }
 
@@ -116,7 +116,7 @@ public:
       }
       else
       {
-        HADESMEM_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Invalid forwarder string format."));
       }
     }
@@ -156,7 +156,7 @@ public:
     return *this;
   }
 
-  Export(Export&& other) HADESMEM_NOEXCEPT
+  Export(Export&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     rva_(other.rva_), 
@@ -169,7 +169,7 @@ public:
     forwarded_(other.forwarded_)
   { }
   
-  Export& operator=(Export&& other) HADESMEM_NOEXCEPT
+  Export& operator=(Export&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -185,15 +185,15 @@ public:
     return *this;
   }
   
-  ~Export() HADESMEM_NOEXCEPT
+  ~Export() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  DWORD GetRva() const HADESMEM_NOEXCEPT
+  DWORD GetRva() const HADESMEM_DETAIL_NOEXCEPT
   {
     return rva_;
   }
 
-  PVOID GetVa() const HADESMEM_NOEXCEPT
+  PVOID GetVa() const HADESMEM_DETAIL_NOEXCEPT
   {
     return va_;
   }
@@ -203,22 +203,22 @@ public:
     return name_;
   }
 
-  WORD GetOrdinal() const HADESMEM_NOEXCEPT
+  WORD GetOrdinal() const HADESMEM_DETAIL_NOEXCEPT
   {
     return ordinal_;
   }
 
-  bool ByName() const HADESMEM_NOEXCEPT
+  bool ByName() const HADESMEM_DETAIL_NOEXCEPT
   {
     return by_name_;
   }
 
-  bool ByOrdinal() const HADESMEM_NOEXCEPT
+  bool ByOrdinal() const HADESMEM_DETAIL_NOEXCEPT
   {
     return !by_name_;
   }
 
-  bool IsForwarded() const HADESMEM_NOEXCEPT
+  bool IsForwarded() const HADESMEM_DETAIL_NOEXCEPT
   {
     return forwarded_;
   }
@@ -247,7 +247,7 @@ public:
   {
     if (!IsForwardedByOrdinal())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Function is not exported by ordinal."));
     }
 
@@ -258,7 +258,7 @@ public:
     }
     catch (std::exception const& /*e*/)
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Invalid forwarder ordinal detected."));
     }
   }
@@ -276,32 +276,32 @@ private:
   bool forwarded_;
 };
 
-inline bool operator==(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetOrdinal() == rhs.GetOrdinal();
 }
 
-inline bool operator!=(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetOrdinal() < rhs.GetOrdinal();
 }
 
-inline bool operator<=(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetOrdinal() <= rhs.GetOrdinal();
 }
 
-inline bool operator>(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetOrdinal() > rhs.GetOrdinal();
 }
 
-inline bool operator>=(Export const& lhs, Export const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetOrdinal() >= rhs.GetOrdinal();
 }

@@ -33,7 +33,7 @@ inline void WriteUnchecked(Process const& process, PVOID address,
     len, &bytes_written) || bytes_written != len)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("WriteProcessMemory failed.") << 
       ErrorCodeWinLast(last_error));
   }

@@ -67,7 +67,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
       D3DSBT_ALL, &render_data_.state_block);
     if (FAILED(create_state_block_hr))
     {
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("GetProcAddress failed.") << 
         hadesmem::ErrorCodeWinHr(create_state_block_hr));
     }
@@ -75,7 +75,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
     render_data_.default_state_block = CreateDefaultStateBlock();
     if (!render_data_.default_state_block)
     {
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("CreateDefaultStateBlock failed."));
     }
 
@@ -89,7 +89,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
     if (!d3dx_mod_->GetHandle())
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("LoadLibraryW failed.") << 
         hadesmem::ErrorCodeWinLast(last_error));
     }
@@ -101,7 +101,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
     if (!d3dx_create_line)
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("GetProcAddress failed.\n") << 
         hadesmem::ErrorCodeWinLast(last_error));
     }
@@ -124,7 +124,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
     if (!d3dx_create_font)
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("GetProcAddress failed.") << 
         hadesmem::ErrorCodeWinLast(last_error));
     }

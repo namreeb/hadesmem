@@ -15,7 +15,7 @@ namespace hadesmem
 class ThreadEntry
 {
 public:
-  explicit ThreadEntry(THREADENTRY32 const& entry) HADESMEM_NOEXCEPT
+  explicit ThreadEntry(THREADENTRY32 const& entry) HADESMEM_DETAIL_NOEXCEPT
     : usage_(entry.cntUsage), 
     thread_id_(entry.th32ThreadID), 
     owner_process_id_(entry.th32OwnerProcessID), 
@@ -24,7 +24,7 @@ public:
     flags_(entry.dwFlags)
   { }
 
-  ThreadEntry(ThreadEntry const& other) HADESMEM_NOEXCEPT
+  ThreadEntry(ThreadEntry const& other) HADESMEM_DETAIL_NOEXCEPT
     : usage_(other.usage_), 
     thread_id_(other.thread_id_), 
     owner_process_id_(other.owner_process_id_), 
@@ -33,7 +33,7 @@ public:
     flags_(other.flags_)
   { }
 
-  ThreadEntry& operator=(ThreadEntry const& other) HADESMEM_NOEXCEPT
+  ThreadEntry& operator=(ThreadEntry const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     usage_ = other.usage_;
     thread_id_ = other.thread_id_;
@@ -45,7 +45,7 @@ public:
     return *this;
   }
 
-  ThreadEntry(ThreadEntry&& other) HADESMEM_NOEXCEPT
+  ThreadEntry(ThreadEntry&& other) HADESMEM_DETAIL_NOEXCEPT
     : usage_(other.usage_), 
     thread_id_(other.thread_id_), 
     owner_process_id_(other.owner_process_id_), 
@@ -54,7 +54,7 @@ public:
     flags_(other.flags_)
   { }
 
-  ThreadEntry& operator=(ThreadEntry&& other) HADESMEM_NOEXCEPT
+  ThreadEntry& operator=(ThreadEntry&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     usage_ = other.usage_;
     thread_id_ = other.thread_id_;
@@ -66,35 +66,35 @@ public:
     return *this;
   }
 
-  ~ThreadEntry() HADESMEM_NOEXCEPT
+  ~ThreadEntry() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  DWORD GetUsage() const HADESMEM_NOEXCEPT
+  DWORD GetUsage() const HADESMEM_DETAIL_NOEXCEPT
   {
     return usage_;
   }
 
-  DWORD GetId() const HADESMEM_NOEXCEPT
+  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return thread_id_;
   }
 
-  DWORD GetOwnerId() const HADESMEM_NOEXCEPT
+  DWORD GetOwnerId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return owner_process_id_;
   }
 
-  LONG GetBasePriority() const HADESMEM_NOEXCEPT
+  LONG GetBasePriority() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_priority_;
   }
 
-  LONG GetDeltaPriority() const HADESMEM_NOEXCEPT
+  LONG GetDeltaPriority() const HADESMEM_DETAIL_NOEXCEPT
   {
     return delta_priority_;
   }
 
-  DWORD GetFlags() const HADESMEM_NOEXCEPT
+  DWORD GetFlags() const HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }

@@ -36,8 +36,8 @@
 #endif // #if defined(HADESMEM_CLANG)
 
 // Export something to ensure tests pass...
-extern "C" HADESMEM_DLLEXPORT void Dummy();
-extern "C" HADESMEM_DLLEXPORT void Dummy()
+extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy();
+extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy()
 { }
 
 BOOST_AUTO_TEST_CASE(initialize)

@@ -85,7 +85,7 @@ public:
     orig_()
   { }
     
-  PatchRaw(PatchRaw&& other) HADESMEM_NOEXCEPT
+  PatchRaw(PatchRaw&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     applied_(other.applied_), 
     target_(other.target_), 
@@ -97,7 +97,7 @@ public:
     other.target_ = nullptr;
   }
     
-  PatchRaw& operator=(PatchRaw&& other) HADESMEM_NOEXCEPT
+  PatchRaw& operator=(PatchRaw&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     RemoveUnchecked();
     
@@ -112,12 +112,12 @@ public:
     return *this;
   }
 
-  ~PatchRaw() HADESMEM_NOEXCEPT
+  ~PatchRaw() HADESMEM_DETAIL_NOEXCEPT
   {
     RemoveUnchecked();
   }
   
-  bool IsApplied() const HADESMEM_NOEXCEPT
+  bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT
   {
     return applied_;
   }
@@ -157,7 +157,7 @@ public:
   }
   
   // TODO: Code smell... This feels like code duplication between derived classes.
-  void RemoveUnchecked() HADESMEM_NOEXCEPT
+  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -182,8 +182,8 @@ public:
   }
 
 private:
-  PatchRaw(PatchRaw const& other) HADESMEM_DELETED_FUNCTION;
-  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DELETED_FUNCTION;
+  PatchRaw(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
   
   Process const* process_;
   bool applied_;
@@ -211,7 +211,7 @@ public:
     trampolines_()
   { }
     
-  PatchDetour(PatchDetour&& other) HADESMEM_NOEXCEPT
+  PatchDetour(PatchDetour&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     applied_(other.applied_), 
     target_(other.target_), 
@@ -226,7 +226,7 @@ public:
     other.detour_ = nullptr;
   }
    
-  PatchDetour& operator=(PatchDetour&& other) HADESMEM_NOEXCEPT
+  PatchDetour& operator=(PatchDetour&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     RemoveUnchecked();
     
@@ -244,7 +244,7 @@ public:
     return *this;
   }
 
-  ~PatchDetour() HADESMEM_NOEXCEPT
+  ~PatchDetour() HADESMEM_DETAIL_NOEXCEPT
   {
     RemoveUnchecked();
   }
@@ -377,20 +377,20 @@ public:
     applied_ = false;
   }
 
-  PVOID GetTrampoline() const HADESMEM_NOEXCEPT
+  PVOID GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
   {
     return trampoline_->GetBase();
   }
 
   template <typename FuncT>
-  FuncT GetTrampoline() const HADESMEM_NOEXCEPT
+  FuncT GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
   {
     return reinterpret_cast<FuncT>(reinterpret_cast<DWORD_PTR>(
       trampoline_->GetBase()));
   }
   
   // TODO: Code smell... This feels like code duplication between derived classes.
-  void RemoveUnchecked() HADESMEM_NOEXCEPT
+  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -417,8 +417,8 @@ public:
   }
 
 private:
-  PatchDetour(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
-  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DELETED_FUNCTION;
+  PatchDetour(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
 
   // Inspired by EasyHook.
   // TODO: Allow specifying a size rather than only supporting a single page.

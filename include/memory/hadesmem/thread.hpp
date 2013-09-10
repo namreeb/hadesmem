@@ -46,14 +46,14 @@ public:
     return *this;
   }
   
-  Thread(Thread&& other) HADESMEM_NOEXCEPT
+  Thread(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
     : handle_(std::move(other.handle_)), 
     id_(other.id_)
   {
     other.id_ = 0;
   }
   
-  Thread& operator=(Thread&& other) HADESMEM_NOEXCEPT
+  Thread& operator=(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     handle_ = std::move(other.handle_);
     id_ = other.id_;
@@ -63,17 +63,17 @@ public:
     return *this;
   }
   
-  ~Thread() HADESMEM_NOEXCEPT
+  ~Thread() HADESMEM_DETAIL_NOEXCEPT
   {
     CleanupUnchecked();
   }
   
-  DWORD GetId() const HADESMEM_NOEXCEPT
+  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return id_;
   }
   
-  HANDLE GetHandle() const HADESMEM_NOEXCEPT
+  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
     return handle_.GetHandle();
   }
@@ -85,7 +85,7 @@ public:
 }
   
 private:
-  void CleanupUnchecked() HADESMEM_NOEXCEPT
+  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
     {
@@ -107,32 +107,32 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Thread const& lhs, Thread const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }

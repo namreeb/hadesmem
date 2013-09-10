@@ -47,13 +47,13 @@ public:
     base_(reinterpret_cast<PBYTE>(thunk))
   { }
   
-  ImportThunk(ImportThunk const& other) HADESMEM_NOEXCEPT
+  ImportThunk(ImportThunk const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ImportThunk& operator=(ImportThunk const& other) HADESMEM_NOEXCEPT
+  ImportThunk& operator=(ImportThunk const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -62,13 +62,13 @@ public:
     return *this;
   }
 
-  ImportThunk(ImportThunk&& other) HADESMEM_NOEXCEPT
+  ImportThunk(ImportThunk&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  ImportThunk& operator=(ImportThunk&& other) HADESMEM_NOEXCEPT
+  ImportThunk& operator=(ImportThunk&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -77,10 +77,10 @@ public:
     return *this;
   }
   
-  ~ImportThunk() HADESMEM_NOEXCEPT
+  ~ImportThunk() HADESMEM_DETAIL_NOEXCEPT
   { }
 
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -166,37 +166,37 @@ private:
 };
 
 inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_NOEXCEPT
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

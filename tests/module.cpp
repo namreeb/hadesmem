@@ -78,11 +78,11 @@ BOOST_AUTO_TEST_CASE(module)
   hadesmem::Module const ntdll_mod_from_handle(process, 
     ::GetModuleHandle(L"ntdll.dll"));
   BOOST_CHECK_EQUAL(ntdll_mod, ntdll_mod_from_handle);
-  std::vector<wchar_t> system_path(HADESMEM_MAX_PATH_UNICODE);
+  std::vector<wchar_t> system_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
   UINT const sys_path_len = GetSystemDirectory(system_path.data(), 
     static_cast<UINT>(system_path.size()));
   BOOST_CHECK_NE(sys_path_len, 0U);
-  BOOST_CHECK_LT(sys_path_len, static_cast<UINT>(HADESMEM_MAX_PATH_UNICODE));
+  BOOST_CHECK_LT(sys_path_len, static_cast<UINT>(HADESMEM_DETAIL_MAX_PATH_UNICODE));
   std::wstring const ntdll_path = static_cast<std::wstring>(
     system_path.data()) + L"\\nTdLl.DlL";
   hadesmem::Module const ntdll_mod_from_path(process, ntdll_path);

@@ -65,13 +65,13 @@ public:
     EnsureValid();
   }
 
-  NtHeaders(NtHeaders const& other) HADESMEM_NOEXCEPT
+  NtHeaders(NtHeaders const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  NtHeaders& operator=(NtHeaders const& other) HADESMEM_NOEXCEPT
+  NtHeaders& operator=(NtHeaders const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -80,13 +80,13 @@ public:
     return *this;
   }
 
-  NtHeaders(NtHeaders&& other) HADESMEM_NOEXCEPT
+  NtHeaders(NtHeaders&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  NtHeaders& operator=(NtHeaders&& other) HADESMEM_NOEXCEPT
+  NtHeaders& operator=(NtHeaders&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -95,10 +95,10 @@ public:
     return *this;
   }
   
-  ~NtHeaders() HADESMEM_NOEXCEPT
+  ~NtHeaders() HADESMEM_DETAIL_NOEXCEPT
   { }
   
-  PVOID GetBase() const HADESMEM_NOEXCEPT
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -109,9 +109,9 @@ public:
     // Windows will load images with a NULL or invalid value).
     return IMAGE_NT_SIGNATURE == GetSignature() && 
       IMAGE_NT_OPTIONAL_HDR_MAGIC == GetMagic() && 
-#if defined(HADESMEM_ARCH_X86)
+#if defined(HADESMEM_DETAIL_ARCH_X86)
       IMAGE_FILE_MACHINE_I386 == GetMachine();
-#elif defined(HADESMEM_ARCH_X64)
+#elif defined(HADESMEM_DETAIL_ARCH_X64)
       IMAGE_FILE_MACHINE_AMD64 == GetMachine();
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -122,7 +122,7 @@ public:
   {
     if (!IsValid())
     {
-      HADESMEM_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("NT headers signature invalid."));
     }
   }
@@ -658,32 +658,32 @@ private:
   PBYTE base_;
 };
 
-inline bool operator==(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator==(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator!=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator<=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_NOEXCEPT
+inline bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
