@@ -31,7 +31,7 @@ namespace hadesmem
 template <typename T>
 inline T Read(Process const& process, PVOID address)
 {
-  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
   
   return detail::ReadImpl<T>(process, address);
 }
@@ -41,7 +41,7 @@ inline std::array<T, N> Read(Process const& process, PVOID address)
 {
   HADESMEM_STATIC_ASSERT(N != 0);
 
-  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
 
   return detail::ReadImpl<std::array<T, N>>(process, address);
 }
@@ -53,7 +53,7 @@ inline void Read(Process const& process, PVOID address, OutputIterator out)
 
   HADESMEM_STATIC_ASSERT(N != 0);
 
-  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
 
   auto const data = detail::ReadImpl<std::array<T, N>>(process, address);
   std::copy(&data[0], &data[0] + N, out);
@@ -66,8 +66,8 @@ inline std::vector<T> ReadVector(Process const& process, PVOID address,
 template <typename T, typename OutputIterator>
 inline void Read(Process const& process, PVOID address, std::size_t n, OutputIterator out)
 {
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(n != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(n != 0);
 
   auto const data = ReadVector<T>(process, address, n);
   std::copy(std::begin(data), std::end(data), out);
@@ -80,7 +80,7 @@ void ReadStringEx(Process const& process, PVOID address,
 {
   HADESMEM_STATIC_ASSERT(detail::IsCharType<T>::value);
 
-  HADESMEM_ASSERT(chunk_len != 0);
+  HADESMEM_DETAIL_ASSERT(chunk_len != 0);
   
   // TODO: Iterator checks for type and category.
 
@@ -157,8 +157,8 @@ inline std::vector<T> ReadVector(Process const& process, PVOID address,
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(count != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count != 0);
   
   std::vector<T> data(count);
   detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
@@ -174,8 +174,8 @@ inline void ReadVector(Process const& process, PVOID address,
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(count != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count != 0);
 
   std::vector<T> data = ReadVector<T>(process, address, count);
   std::copy(std::begin(data), std::end(data), out);

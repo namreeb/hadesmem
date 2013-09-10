@@ -68,7 +68,7 @@ public:
     base_(static_cast<PBYTE>(address)), 
     type_(type)
   {
-    HADESMEM_ASSERT(base_ != 0);
+    HADESMEM_DETAIL_ASSERT(base_ != 0);
   }
 
   PeFile(PeFile const& other) HADESMEM_NOEXCEPT

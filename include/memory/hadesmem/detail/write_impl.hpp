@@ -24,9 +24,9 @@ namespace detail
 inline void WriteUnchecked(Process const& process, PVOID address, 
   LPCVOID data, std::size_t len)
 {
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(data != nullptr);
-  HADESMEM_ASSERT(len != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
 
   SIZE_T bytes_written = 0;
   if (!::WriteProcessMemory(process.GetHandle(), address, data, 
@@ -42,9 +42,9 @@ inline void WriteUnchecked(Process const& process, PVOID address,
 inline void WriteImpl(Process const& process, PVOID address, LPCVOID data, 
   std::size_t len)
 {
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(data != nullptr);
-  HADESMEM_ASSERT(len != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
   
   for (;;)
   {
@@ -84,7 +84,7 @@ void WriteImpl(Process const& process, PVOID address, T const& data)
 {
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   
-  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
 
   WriteImpl(process, address, std::addressof(data), sizeof(data));
 }

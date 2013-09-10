@@ -66,9 +66,9 @@ public:
     base_(Alloc(process, size)), 
     size_(size)
   {
-    HADESMEM_ASSERT(process_ != 0);
-    HADESMEM_ASSERT(base_ != 0);
-    HADESMEM_ASSERT(size_ != 0);
+    HADESMEM_DETAIL_ASSERT(process_ != 0);
+    HADESMEM_DETAIL_ASSERT(base_ != 0);
+    HADESMEM_DETAIL_ASSERT(size_ != 0);
   }
   
   explicit Allocator(Process const& process, PVOID base, SIZE_T size)
@@ -76,9 +76,9 @@ public:
     base_(Alloc(process, base, size)), 
     size_(size)
   {
-    HADESMEM_ASSERT(process_ != 0);
-    HADESMEM_ASSERT(base_ != 0);
-    HADESMEM_ASSERT(size_ != 0);
+    HADESMEM_DETAIL_ASSERT(process_ != 0);
+    HADESMEM_DETAIL_ASSERT(base_ != 0);
+    HADESMEM_DETAIL_ASSERT(size_ != 0);
   }
   
   Allocator(Allocator&& other) HADESMEM_NOEXCEPT
@@ -119,8 +119,8 @@ public:
       return;
     }
 
-    HADESMEM_ASSERT(base_ != nullptr);
-    HADESMEM_ASSERT(size_ != 0);
+    HADESMEM_DETAIL_ASSERT(base_ != nullptr);
+    HADESMEM_DETAIL_ASSERT(size_ != 0);
 
     ::hadesmem::Free(*process_, base_);
 

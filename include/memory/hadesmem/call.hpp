@@ -635,7 +635,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
-    HADESMEM_ASSERT(*call_convs_beg == CallConv::kDefault || 
+    HADESMEM_DETAIL_ASSERT(*call_convs_beg == CallConv::kDefault || 
       *call_convs_beg == CallConv::kWinApi || 
       *call_convs_beg == CallConv::kX64);
 
@@ -1014,7 +1014,7 @@ inline void CallMulti(Process const& process,
 
   auto const num_addresses_signed = std::distance(addresses_beg, 
     addresses_end);
-  HADESMEM_ASSERT(num_addresses_signed > 0);
+  HADESMEM_DETAIL_ASSERT(num_addresses_signed > 0);
   auto const num_addresses = static_cast<typename std::make_unsigned<decltype(
     num_addresses_signed)>::type>(num_addresses_signed);
   

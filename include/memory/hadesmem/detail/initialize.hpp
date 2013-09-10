@@ -301,7 +301,7 @@ inline std::locale ImbueAllDefault()
   std::locale const locale = gen("");
 
   // Ensure the locale uses a UTF-8 backend. 
-  HADESMEM_ASSERT(std::use_facet<boost::locale::info>(locale).utf8());
+  HADESMEM_DETAIL_ASSERT(std::use_facet<boost::locale::info>(locale).utf8());
 
   return ImbueAll(locale);
 }

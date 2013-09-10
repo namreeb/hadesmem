@@ -194,9 +194,9 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
 
 IDirect3DDevice9Proxy::~IDirect3DDevice9Proxy()
 {
-  HADESMEM_ASSERT(magic_ == 0xDEADBEEF);
-  HADESMEM_ASSERT(ref_count_ == 0);
-  HADESMEM_ASSERT(call_count_ == 0);
+  HADESMEM_DETAIL_ASSERT(magic_ == 0xDEADBEEF);
+  HADESMEM_DETAIL_ASSERT(ref_count_ == 0);
+  HADESMEM_DETAIL_ASSERT(call_count_ == 0);
   magic_ = 0xCAFEBABE;
 }
 
@@ -212,7 +212,7 @@ HRESULT __stdcall IDirect3DDevice9Proxy::QueryInterface(REFIID riid, void** ppvo
 ULONG __stdcall IDirect3DDevice9Proxy::AddRef()
 {
   Validate();
-  HADESMEM_ASSERT(ref_count_ != 0);
+  HADESMEM_DETAIL_ASSERT(ref_count_ != 0);
   ++ref_count_;
   auto const proxy_call = MakeProxyCall(this);
   return device_->AddRef();
@@ -1125,9 +1125,9 @@ void IDirect3DDevice9Proxy::PostCall()
 
 void IDirect3DDevice9Proxy::Validate() const
 {
-  HADESMEM_ASSERT(magic_ == 0xDEADBEEF);
+  HADESMEM_DETAIL_ASSERT(magic_ == 0xDEADBEEF);
 
-  HADESMEM_ASSERT(device_ != nullptr);
+  HADESMEM_DETAIL_ASSERT(device_ != nullptr);
 }
 
 IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
@@ -1496,7 +1496,7 @@ void IDirect3DDevice9Proxy::OnPreReset()
 {
   OutputDebugStringA("OnPreReset called for device.");
   
-  HADESMEM_ASSERT(call_count_ == 0);
+  HADESMEM_DETAIL_ASSERT(call_count_ == 0);
 
   if (render_data_.state_block)
   {
@@ -1559,7 +1559,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
 {
   OutputDebugStringA("OnPostReset called for device.");
   
-  HADESMEM_ASSERT(render_data_.state_block == nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.state_block == nullptr);
 
   if (render_data_.state_block)
   {
@@ -1575,7 +1575,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
     }
   }
   
-  HADESMEM_ASSERT(render_data_.default_state_block == nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.default_state_block == nullptr);
 
   if (render_data_.default_state_block)
   {
@@ -1592,7 +1592,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
     }
   }
   
-  HADESMEM_ASSERT(render_data_.line != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.line != nullptr);
 
   if (render_data_.line)
   {
@@ -1607,7 +1607,7 @@ void IDirect3DDevice9Proxy::OnPostReset()
       "data (line).");
   }
   
-  HADESMEM_ASSERT(render_data_.font != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.font != nullptr);
 
   if (render_data_.font)
   {
@@ -1628,9 +1628,9 @@ void IDirect3DDevice9Proxy::OnRelease()
 {
   HADESMEM_TRACE_A("OnRelease actually cleaning up!");
 
-  HADESMEM_ASSERT(call_count_ == 0);
+  HADESMEM_DETAIL_ASSERT(call_count_ == 0);
 
-  HADESMEM_ASSERT(render_data_.state_block != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.state_block != nullptr);
 
   if (render_data_.state_block)
   {
@@ -1648,7 +1648,7 @@ void IDirect3DDevice9Proxy::OnRelease()
       "(state block).");
   }
   
-  HADESMEM_ASSERT(render_data_.default_state_block != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.default_state_block != nullptr);
 
   if (render_data_.default_state_block)
   {
@@ -1667,7 +1667,7 @@ void IDirect3DDevice9Proxy::OnRelease()
       "(default state block).");
   }
   
-  HADESMEM_ASSERT(render_data_.line != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.line != nullptr);
 
   if (render_data_.line)
   {
@@ -1685,7 +1685,7 @@ void IDirect3DDevice9Proxy::OnRelease()
       "(line).");
   }
   
-  HADESMEM_ASSERT(render_data_.font != nullptr);
+  HADESMEM_DETAIL_ASSERT(render_data_.font != nullptr);
 
   if (render_data_.font)
   {

@@ -66,7 +66,7 @@ inline HANDLE OpenThreadAllAccess(DWORD id)
 
 inline HANDLE DuplicateHandle(HANDLE handle)
 {
-  HADESMEM_ASSERT(handle != nullptr);
+  HADESMEM_DETAIL_ASSERT(handle != nullptr);
 
   HANDLE new_handle = nullptr;
   if (!::DuplicateHandle(::GetCurrentProcess(), handle, 

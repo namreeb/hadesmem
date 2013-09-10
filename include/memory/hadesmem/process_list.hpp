@@ -45,7 +45,7 @@ public:
   ProcessIterator(int /*dummy*/)
     : impl_(std::make_shared<Impl>())
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
   
     impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
       TH32CS_SNAPPROCESS, 0));
@@ -120,19 +120,19 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->process_;
   }
   
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->process_;
   }
   
   ProcessIterator& operator++()
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
   
     PROCESSENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));

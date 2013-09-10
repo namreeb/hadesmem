@@ -24,9 +24,9 @@ namespace detail
 inline void ReadUnchecked(Process const& process, LPVOID address, 
   LPVOID data, std::size_t len)
 {
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(data != nullptr);
-  HADESMEM_ASSERT(len != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
   
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(process.GetHandle(), address, data, len, 
@@ -42,9 +42,9 @@ inline void ReadUnchecked(Process const& process, LPVOID address,
 inline void ReadImpl(Process const& process, LPVOID address, LPVOID data, 
   std::size_t len)
 {
-  HADESMEM_ASSERT(address != nullptr);
-  HADESMEM_ASSERT(data != nullptr);
-  HADESMEM_ASSERT(len != 0);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
 
   for (;;)
   {
@@ -85,7 +85,7 @@ T ReadImpl(Process const& process, PVOID address)
   HADESMEM_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);
   
-  HADESMEM_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
 
   T data;
   ReadImpl(process, address, std::addressof(data), sizeof(data));

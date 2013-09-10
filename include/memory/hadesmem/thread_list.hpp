@@ -49,7 +49,7 @@ public:
     : impl_(std::make_shared<Impl>()), 
     pid_(pid)
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     
     impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
       TH32CS_SNAPTHREAD, 0));
@@ -135,19 +135,19 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->thread_;
   }
   
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->thread_;
   }
   
   ThreadIterator& operator++()
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     
     Advance();
     

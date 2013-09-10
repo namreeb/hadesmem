@@ -337,7 +337,7 @@ inline FARPROC FindProcedureInternal(
   HMODULE module, 
   LPCSTR name)
 {
-  HADESMEM_ASSERT(name != nullptr);
+  HADESMEM_DETAIL_ASSERT(name != nullptr);
 
   FARPROC const remote_func = GetProcAddressInternal(
     process, module, name);

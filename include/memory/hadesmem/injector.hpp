@@ -186,7 +186,7 @@ struct InjectFlags
 inline HMODULE InjectDll(Process const& process, std::wstring const& path, 
   int flags)
 {
-  HADESMEM_ASSERT((flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)) == 0);
+  HADESMEM_DETAIL_ASSERT(!(flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)));
 
   boost::filesystem::path path_real(path);
 

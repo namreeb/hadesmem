@@ -108,7 +108,7 @@ private:
       (void)e;
 
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      HADESMEM_ASSERT(boost::diagnostic_information(e).c_str() && false);
+      HADESMEM_DETAIL_ASSERT(false);
 
       handle_ = GetInvalid();
     }

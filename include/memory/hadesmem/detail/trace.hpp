@@ -24,12 +24,12 @@ do\
 HADESMEM_TRACE_MULTI_LINE_MACRO_BEGIN \
 std::vector<char> trace_buffer;\
 int const num_char = _snprintf(trace_buffer.data(), 0, format, __VA_ARGS__);\
-HADESMEM_ASSERT(num_char > 0);\
+HADESMEM_DETAIL_ASSERT(num_char > 0);\
 if (num_char > 0)\
 {\
   trace_buffer.resize(static_cast<std::size_t>(num_char + 1));\
   int const num_char_actual = _snprintf(trace_buffer.data(), static_cast<std::size_t>(num_char), format, __VA_ARGS__);\
-  HADESMEM_ASSERT(num_char_actual > 0);\
+  HADESMEM_DETAIL_ASSERT(num_char_actual > 0);\
   (void)num_char_actual;\
   HADESMEM_TRACE_RAW_A(__FUNCTION__);\
   HADESMEM_TRACE_RAW_A(": ");\
@@ -46,12 +46,12 @@ HADESMEM_TRACE_MULTI_LINE_MACRO_END
 HADESMEM_TRACE_MULTI_LINE_MACRO_BEGIN \
 std::vector<wchar_t> trace_buffer;\
 int const num_char = _snwprintf(trace_buffer.data(), 0, format, __VA_ARGS__);\
-HADESMEM_ASSERT(num_char > 0);\
+HADESMEM_DETAIL_ASSERT(num_char > 0);\
 if (num_char > 0)\
 {\
   trace_buffer.resize(static_cast<std::size_t>(num_char + 1));\
   int const num_char_actual = _snwprintf(trace_buffer.data(), static_cast<std::size_t>(num_char), format, __VA_ARGS__);\
-  HADESMEM_ASSERT(num_char_actual > 0);\
+  HADESMEM_DETAIL_ASSERT(num_char_actual > 0);\
   (void)num_char_actual;\
   HADESMEM_TRACE_RAW_A(__FUNCTION__);\
   HADESMEM_TRACE_RAW_A(": ");\

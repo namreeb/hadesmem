@@ -55,7 +55,7 @@ inline std::wstring GetSelfDirPath()
 {
   std::wstring self_path(GetSelfPath());
   std::wstring::size_type const separator = self_path.rfind(L'\\');
-  HADESMEM_ASSERT(separator != std::wstring::npos);
+  HADESMEM_DETAIL_ASSERT(separator != std::wstring::npos);
   self_path.erase(separator);
   return self_path;
 }

@@ -72,13 +72,13 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->region_;
   }
   
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->region_;
   }
   
@@ -86,7 +86,7 @@ public:
   {
     try
     {
-      HADESMEM_ASSERT(impl_.get());
+      HADESMEM_DETAIL_ASSERT(impl_.get());
     
       void const* const base = impl_->region_->GetBase();
       SIZE_T const size = impl_->region_->GetSize();

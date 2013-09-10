@@ -45,7 +45,7 @@ public:
   explicit ModuleIterator(Process const& process)
     : impl_(std::make_shared<Impl>())
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
   
     impl_->process_ = &process;
   
@@ -123,19 +123,19 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->module_;
   }
 
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->module_;
   }
 
   ModuleIterator& operator++()
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
   
     MODULEENTRY32W entry;
     ::ZeroMemory(&entry, sizeof(entry));

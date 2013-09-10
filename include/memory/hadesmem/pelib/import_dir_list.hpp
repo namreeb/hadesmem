@@ -88,13 +88,13 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->import_dir_;
   }
   
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->import_dir_;
   }
   
@@ -102,7 +102,7 @@ public:
   {
     try
     {
-      HADESMEM_ASSERT(impl_.get());
+      HADESMEM_DETAIL_ASSERT(impl_.get());
 
       auto const cur_base = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
         impl_->import_dir_->GetBase());

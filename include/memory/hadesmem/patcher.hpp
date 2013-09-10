@@ -332,7 +332,7 @@ public:
         }
         else
         {
-          HADESMEM_ASSERT(ud_obj.mnemonic == UD_Icall);
+          HADESMEM_DETAIL_ASSERT(ud_obj.mnemonic == UD_Icall);
           tramp_cur += WriteCall(tramp_cur, jump_target);
         }
       }
@@ -584,7 +584,7 @@ private:
     if (asmjit_bug == true)
     {
       jump_buf.erase(std::begin(jump_buf) + kJumpSize32, std::end(jump_buf));
-      HADESMEM_ASSERT(jump_buf.size() == kJumpSize32);
+      HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
     }
 
     WriteVector(*process_, address, jump_buf);

@@ -87,13 +87,13 @@ public:
   
   reference operator*() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->export_;
   }
   
   pointer operator->() const HADESMEM_NOEXCEPT
   {
-    HADESMEM_ASSERT(impl_.get());
+    HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->export_;
   }
   
@@ -101,7 +101,7 @@ public:
   {
     try
     {
-      HADESMEM_ASSERT(impl_.get());
+      HADESMEM_DETAIL_ASSERT(impl_.get());
     
       ExportDir const export_dir(*impl_->process_, *impl_->pe_file_);
       DWORD* ptr_functions = static_cast<DWORD*>(RvaToVa(*impl_->process_, 

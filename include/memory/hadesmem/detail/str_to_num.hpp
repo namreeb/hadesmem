@@ -33,7 +33,7 @@ T StrToNum(std::basic_string<CharT> const& str)
     HADESMEM_THROW_EXCEPTION(Error() << 
       ErrorString("Conversion failed."));
   }
-  HADESMEM_ASSERT(out < (std::numeric_limits<T>::max)());
+  HADESMEM_DETAIL_ASSERT(out < (std::numeric_limits<T>::max)());
   return out;
 }
 

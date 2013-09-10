@@ -610,7 +610,7 @@ private:
   PVOID Find(std::vector<std::pair<BYTE, bool>> const& data, 
     bool scan_data_secs) const
   {
-    HADESMEM_ASSERT(!data.empty());
+    HADESMEM_DETAIL_ASSERT(!data.empty());
     
     std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions = 
       scan_data_secs ? data_regions_ : code_regions_;
@@ -618,10 +618,10 @@ private:
     {
       PBYTE const s_beg = i->first;
       PBYTE const s_end = i->second;
-      HADESMEM_ASSERT(s_end > s_beg);
+      HADESMEM_DETAIL_ASSERT(s_end > s_beg);
       
       std::ptrdiff_t const mem_size = s_end - s_beg;
-      HADESMEM_ASSERT(s_beg <= s_end);
+      HADESMEM_DETAIL_ASSERT(s_beg <= s_end);
       std::vector<BYTE> const buffer(ReadVector<BYTE>(*process_, s_beg, 
         static_cast<std::size_t>(mem_size)));
       
