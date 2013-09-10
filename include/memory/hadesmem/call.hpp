@@ -54,9 +54,9 @@
 // activation context, so it will need special work done to get cases like 
 // .NET working.
 
-// TODO: Support injection using only NT APIs (for smss.exe etc).
+// TODO: Support injected code using only NT APIs (for smss.exe etc).
 
-// TODO: Support injection into unitialized processes, native processes, 
+// TODO: Support injection into uninitialized processes, native processes, 
 // CSRSS, etc.
 
 // TODO: Improve safety via EH. Both x86 and x64.
@@ -87,9 +87,6 @@
 // easily identified in a debugger.
 
 // TODO: Consolidate memory allocations where possible.
-
-// TODO: Injected code should restrict itself to the NT API only where 
-// possible.
 
 namespace hadesmem
 {
