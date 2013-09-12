@@ -38,6 +38,67 @@ inline std::wstring CombinePath(std::wstring const& base, std::wstring const& ap
   return buffer.data();
 }
 
+inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
+{
+  HANDLE file = ::CreateFile(
+    path.c_str(), 
+    GENERIC_READ, 
+    FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 
+    nullptr, 
+    OPEN_EXISTING, 
+    FILE_FLAG_BACKUP_SEMANTICS, 
+    nullptr);
+  if (file == INVALID_HANDLE_VALUE)
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("CreateFile failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return SmartFileHandle(file);
+}
+
+inline BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE file)
+{
+  BY_HANDLE_FILE_INFORMATION file_info;
+  ZeroMemory(&file_info, sizeof(file_info));
+  if (!::GetFileInformationByHandle(file, &file_info))
+  {
+    DWORD const last_error = ::GetLastError();
+    BOOST_THROW_EXCEPTION(Error() << 
+      ErrorString("GetFileInformationByHandle failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return file_info;
+}
+
+inline bool ArePathsEquivalent(std::wstring const& left, std::wstring const& right)
+{
+  SmartFileHandle const left_file(OpenFileForMetadata(left));
+  SmartFileHandle const right_file(OpenFileForMetadata(right));
+  BY_HANDLE_FILE_INFORMATION left_file_info = 
+    GetFileInformationByHandle(left_file.GetHandle());
+  BY_HANDLE_FILE_INFORMATION right_file_info = 
+    GetFileInformationByHandle(right_file.GetHandle());
+  return 
+    left_file_info.dwVolumeSerialNumber == 
+    right_file_info.dwVolumeSerialNumber
+    && left_file_info.nFileIndexHigh == 
+    right_file_info.nFileIndexHigh
+    && left_file_info.nFileIndexLow == 
+    right_file_info.nFileIndexLow
+    && left_file_info.nFileSizeHigh == 
+    right_file_info.nFileSizeHigh
+    && left_file_info.nFileSizeLow == 
+    right_file_info.nFileSizeLow
+    && left_file_info.ftLastWriteTime.dwLowDateTime == 
+    right_file_info.ftLastWriteTime.dwLowDateTime
+    && left_file_info.ftLastWriteTime.dwHighDateTime == 
+    right_file_info.ftLastWriteTime.dwHighDateTime;
+}
+
 }
 
 }

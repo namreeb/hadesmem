@@ -144,13 +144,13 @@ public:
 
 #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
-  Pattern(Pattern const& other) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern(Pattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  Pattern& operator=(Pattern const& other) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern& operator=(Pattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  Pattern(Pattern&& other) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern(Pattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  Pattern& operator=(Pattern&& other) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern& operator=(Pattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
   ~Pattern() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 

@@ -168,6 +168,23 @@ struct LibraryPolicy
 
 typedef SmartHandleImpl<LibraryPolicy> SmartModuleHandle;
 
+struct FilePolicy
+{
+  typedef HANDLE HandleT;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return INVALID_HANDLE_VALUE;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::CloseHandle(handle) != 0;
+  }
+};
+
+typedef SmartHandleImpl<FilePolicy> SmartFileHandle;
+
 }
 
 }

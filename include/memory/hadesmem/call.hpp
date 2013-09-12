@@ -32,6 +32,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/detail/func_args.hpp>
 #include <hadesmem/detail/func_arity.hpp>
 #include <hadesmem/detail/func_result.hpp>
@@ -184,31 +185,6 @@ public:
     : result_(result)
   { }
 
-  CallResultRaw(CallResultRaw const& other) HADESMEM_DETAIL_NOEXCEPT
-    : result_(other.result_)
-  { }
-
-  CallResultRaw& operator=(CallResultRaw const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    result_ = other.result_;
-
-    return *this;
-  }
-
-  CallResultRaw(CallResultRaw&& other) HADESMEM_DETAIL_NOEXCEPT
-    : result_(other.result_)
-  { }
-
-  CallResultRaw& operator=(CallResultRaw&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    result_ = other.result_;
-
-    return *this;
-  }
-
-  ~CallResultRaw() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
   {
     return result_.last_error;
@@ -1154,15 +1130,15 @@ HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS <
 HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
   BOOST_PP_LIMIT_ITERATION);
 
-#define HADESMEM_CHECK_FUNC_ARITY(n) \
+#define HADESMEM_DETAIL_CHECK_FUNC_ARITY(n) \
   HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
 
-#define HADESMEM_CALL_ADD_ARG(n) \
+#define HADESMEM_DETAIL_CALL_ADD_ARG(n) \
   detail::AddCallArg<FuncT, n>(std::back_inserter(args), \
     std::forward<T##n>(t##n))
 
-#define HADESMEM_CALL_ADD_ARG_WRAPPER(z, n, unused) \
-  HADESMEM_CALL_ADD_ARG(n);
+#define HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER(z, n, unused) \
+  HADESMEM_DETAIL_CALL_ADD_ARG(n);
 
 #define BOOST_PP_LOCAL_MACRO(n) \
 template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
@@ -1170,9 +1146,9 @@ CallResult<typename detail::FuncResult<FuncT>::type>\
   Call(Process const& process, FnPtr address, CallConv call_conv \
   BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
 {\
-  HADESMEM_CHECK_FUNC_ARITY(n);\
+  HADESMEM_DETAIL_CHECK_FUNC_ARITY(n);\
   std::vector<CallArg> args;\
-  BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
+  BOOST_PP_REPEAT(n, HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER, ~)\
   CallResultRaw const ret = Call(process, address, call_conv, \
     std::begin(args), std::end(args));\
   typedef typename detail::FuncResult<FuncT>::type ResultT;\
@@ -1203,7 +1179,21 @@ public:
     call_convs_(), 
     args_()
   { }
-  
+
+#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
+  MultiCall(MultiCall const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  MultiCall& operator=(MultiCall const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  MultiCall(MultiCall&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  MultiCall& operator=(MultiCall&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  ~MultiCall() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
   MultiCall(MultiCall const& other)
     : process_(other.process_), 
     addresses_(other.addresses_), 
@@ -1241,6 +1231,8 @@ public:
   ~MultiCall() HADESMEM_DETAIL_NOEXCEPT
   { }
 
+#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
 #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
   template <typename FuncT, typename... Args>
@@ -1265,9 +1257,9 @@ public:
   void Add(FnPtr address, CallConv call_conv \
     BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
   {\
-    HADESMEM_CHECK_FUNC_ARITY(n);\
+    HADESMEM_DETAIL_CHECK_FUNC_ARITY(n);\
     std::vector<CallArg> args;\
-    BOOST_PP_REPEAT(n, HADESMEM_CALL_ADD_ARG_WRAPPER, ~)\
+    BOOST_PP_REPEAT(n, HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER, ~)\
     addresses_.push_back(address);\
     call_convs_.push_back(call_conv);\
     args_.push_back(args);\
@@ -1286,11 +1278,11 @@ public:
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
 
-#undef HADESMEM_CHECK_FUNC_ARITY
+#undef HADESMEM_DETAIL_CHECK_FUNC_ARITY
 
-#undef HADESMEM_CALL_ADD_ARG
+#undef HADESMEM_DETAIL_CALL_ADD_ARG
 
-#undef HADESMEM_CALL_ADD_ARG_WRAPPER
+#undef HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
   

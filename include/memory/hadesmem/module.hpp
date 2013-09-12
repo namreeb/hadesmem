@@ -9,12 +9,6 @@
 #include <utility>
 #include <functional>
 
-
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/locale.hpp>
-#include <boost/filesystem.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
 
@@ -24,6 +18,7 @@
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
@@ -53,7 +48,21 @@ public:
   {
     Initialize(path);
   }
-  
+
+#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
+  Module(Module const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  Module& operator=(Module const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  Module(Module&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  Module& operator=(Module&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  ~Module() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
   Module(Module const& other)
     : process_(other.process_), 
     handle_(other.handle_), 
@@ -94,6 +103,8 @@ public:
 
   ~Module() HADESMEM_DETAIL_NOEXCEPT
   { }
+
+#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   HMODULE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -149,8 +160,7 @@ private:
   
   void Initialize(std::wstring const& path)
   {
-    bool const is_path = (path.find(L'\\') != std::wstring::npos) || 
-      (path.find(L'/') != std::wstring::npos);
+    bool const is_path = (path.find_first_of(L"\\/") != std::wstring::npos);
 
     std::wstring const path_upper = detail::ToUpperOrdinal(path);
 
@@ -159,7 +169,7 @@ private:
     {
       if (is_path)
       {
-        if (boost::filesystem::equivalent(path, entry.szExePath))
+        if (detail::ArePathsEquivalent(path, entry.szExePath))
         {
           return true;
         }
@@ -293,87 +303,6 @@ inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
   lhs << static_cast<void*>(rhs.GetHandle());
   lhs.imbue(old);
   return lhs;
-}
-
-// TODO: Split this into a different file.
-namespace detail
-{
-
-// TODO: Support exports by ordinal, add a new overload and change 
-// FindProcedure to use it.
-inline FARPROC GetProcAddressInternal(Process const& process, 
-  HMODULE const& module, std::string const& export_name)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
-
-  PeFile const pe_file(process, module, PeFileType::Image);
-  
-  ExportList const exports(process, pe_file);
-  for (auto const& e : exports)
-  {
-    if (e.ByName() && e.GetName() == export_name)
-    {
-      if (e.IsForwarded())
-      {
-        Module const forwarder_module(process, 
-          boost::locale::conv::utf_to_utf<wchar_t>(e.GetForwarderModule()));
-        return GetProcAddressInternal(process, forwarder_module.GetHandle(), 
-          e.GetForwarderFunction());
-      }
-
-      void* va = e.GetVa();
-      FARPROC pfn = nullptr;
-      std::memcpy(&pfn, &va, sizeof(void*));
-
-      return pfn;
-    }
-  }
-
-  return nullptr;
-}
-
-inline FARPROC FindProcedureInternal(
-  Process const& process, 
-  HMODULE module, 
-  LPCSTR name)
-{
-  HADESMEM_DETAIL_ASSERT(name != nullptr);
-
-  FARPROC const remote_func = GetProcAddressInternal(
-    process, module, name);
-  if (!remote_func)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("GetProcAddressInternal failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return remote_func;
-}
-
-}
-
-inline FARPROC FindProcedure(
-  Process const& process, 
-  Module const& module, 
-  std::string const& name)
-{
-  return detail::FindProcedureInternal(
-    process, 
-    module.GetHandle(), 
-    name.c_str());
-}
-
-inline FARPROC FindProcedure(
-  Process const& process, 
-  Module const& module, 
-  WORD ordinal)
-{
-  return detail::FindProcedureInternal(
-    process, 
-    module.GetHandle(), 
-    MAKEINTRESOURCEA(ordinal));
 }
 
 }

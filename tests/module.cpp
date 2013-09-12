@@ -13,6 +13,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 

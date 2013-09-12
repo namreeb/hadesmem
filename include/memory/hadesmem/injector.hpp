@@ -22,11 +22,13 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/argv_quote.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
-#include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/force_initialize.hpp>
 
 // TODO: .NET injection (without DLL dependency if possible).
 
@@ -67,106 +69,6 @@
 
 namespace hadesmem
 {
-  
-namespace detail
-{
-
-inline void ArgvQuote(std::wstring* command_line, std::wstring const& argument, 
-  bool force)
-{
-  // Unless we're told otherwise, don't quote unless we actually
-  // need to do so (and hopefully avoid problems if programs won't
-  // parse quotes properly).
-  if (!force && !argument.empty() && argument.find_first_of(L" \t\n\v\"") 
-    == argument.npos)
-  {
-    command_line->append(argument);
-  }
-  else 
-  {
-    command_line->push_back(L'"');
-
-    for (auto it = std::begin(argument); ; ++it)
-    {
-      std::size_t num_backslashes = 0;
-
-      while (it != std::end(argument) && *it == L'\\') 
-      {
-        ++it;
-        ++num_backslashes;
-      }
-
-      if (it == std::end(argument))
-      {
-        // Escape all backslashes, but let the terminating
-        // double quotation mark we add below be interpreted
-        // as a metacharacter.
-        command_line->append(num_backslashes * 2, L'\\');
-        break;
-      }
-      else if (*it == L'"')
-      {
-        // Escape all backslashes and the following
-        // double quotation mark.
-        command_line->append(num_backslashes * 2 + 1, L'\\');
-        command_line->push_back(*it);
-      }
-      else
-      {
-        // Backslashes aren't special here.
-        command_line->append(num_backslashes, L'\\');
-        command_line->push_back(*it);
-      }
-    }
-
-    command_line->push_back(L'"');
-  }
-}
-
-inline void ForceLdrInitializeThunk(DWORD proc_id)
-{
-  Process const process(proc_id);
-
-  // This is used to generate a 'nullsub' function, which is called in 
-  // the context of the remote process in order to 'force' a call to 
-  // ntdll.dll!LdrInitializeThunk. This is necessary because module 
-  // enumeration will fail if LdrInitializeThunk has not been called, 
-  // and Injector::InjectDll (and the APIs it uses) depends on the 
-  // module enumeration APIs.
-#if defined(HADESMEM_DETAIL_ARCH_X64) 
-  std::array<BYTE, 1> return_instr = { { 0xC3 } };
-#elif defined(HADESMEM_DETAIL_ARCH_X86) 
-  std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
-#else 
-#error "[HadesMem] Unsupported architecture."
-#endif
-  
-  HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
-
-  Allocator const stub_remote(process, sizeof(return_instr));
-  
-  HADESMEM_DETAIL_TRACE_A("Writing remote stub.");
-
-  Write(process, stub_remote.GetBase(), return_instr);
-
-  auto const stub_remote_pfn = 
-    reinterpret_cast<LPTHREAD_START_ROUTINE>(
-    reinterpret_cast<DWORD_PTR>(stub_remote.GetBase()));
-  
-  HADESMEM_DETAIL_TRACE_A("Starting remote thread.");
-
-  // TODO: Configurable timeout. This will complicate resource management 
-  // however, as we will need to extend the lifetime of the remote memory 
-  // in case it executes after we time out. Also, if it times out there 
-  // is no way to try again in the future... Should we just leak the memory 
-  // on timeout? Return a 'future' object? Some sort of combination? Requires 
-  // more investigation...
-  CreateRemoteThreadAndWait(process, stub_remote_pfn);
-  
-  HADESMEM_DETAIL_TRACE_A("Remote thread complete.");
-}
-
-}
 
 struct InjectFlags
 {
@@ -266,8 +168,11 @@ inline void FreeDll(Process const& process, HMODULE module)
 
   typedef BOOL (FreeLibraryFuncT)(HMODULE hModule);
   auto const free_library_ret = 
-    Call<FreeLibraryFuncT>(process, reinterpret_cast<FnPtr>(free_library), 
-    CallConv::kWinApi, module);
+    Call<FreeLibraryFuncT>(
+    process, 
+    reinterpret_cast<FnPtr>(free_library), 
+    CallConv::kWinApi, 
+    module);
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
@@ -303,6 +208,24 @@ public:
     export_last_error_(export_last_error)
   { }
 
+#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
+  CreateAndInjectData(CreateAndInjectData const&) 
+    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  CreateAndInjectData& operator=(CreateAndInjectData const&) 
+    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  CreateAndInjectData(CreateAndInjectData&&) 
+    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  CreateAndInjectData& operator=(CreateAndInjectData&&) 
+    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+  ~CreateAndInjectData() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+
+#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+
   CreateAndInjectData(CreateAndInjectData const& other)
     : process_(other.process_), 
     module_(other.module_), 
@@ -312,10 +235,8 @@ public:
 
   CreateAndInjectData& operator=(CreateAndInjectData const& other)
   {
-    process_ = other.process_;
-    module_ = other.module_;
-    export_ret_ = other.export_ret_;
-    export_last_error_ = other.export_last_error_;
+    CreateAndInjectData tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }
@@ -338,8 +259,7 @@ public:
     return *this;
   }
 
-  ~CreateAndInjectData() HADESMEM_DETAIL_NOEXCEPT
-  { }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   Process GetProcess() const
   {

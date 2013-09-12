@@ -49,6 +49,7 @@ using std::max;
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/find_procedure.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
 #include "d3d9_device.hpp"
