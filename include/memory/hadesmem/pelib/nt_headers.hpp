@@ -11,10 +11,6 @@
 #include <utility>
 #include <algorithm>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <winnt.h>
 
@@ -23,6 +19,7 @@
 #include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 

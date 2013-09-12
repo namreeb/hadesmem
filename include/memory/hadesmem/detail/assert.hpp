@@ -3,10 +3,6 @@
 
 #pragma once
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
+#include <cassert>
 
-#define HADESMEM_DETAIL_ASSERT(...) BOOST_ASSERT(__VA_ARGS__)
-
-#define HADESMEM_VERIFY(...) BOOST_VERIFY(__VA_ARGS__)
+#define HADESMEM_DETAIL_ASSERT(...) assert(__VA_ARGS__)

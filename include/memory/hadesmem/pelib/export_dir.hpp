@@ -10,10 +10,6 @@
 #include <ostream>
 #include <utility>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <winnt.h>
 

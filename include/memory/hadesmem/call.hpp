@@ -12,7 +12,6 @@
 #include <type_traits>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/assert.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>

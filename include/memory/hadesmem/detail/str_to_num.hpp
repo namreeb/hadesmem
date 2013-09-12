@@ -8,11 +8,8 @@
 #include <string>
 #include <sstream>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
@@ -33,7 +30,6 @@ T StrToNum(std::basic_string<CharT> const& str)
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("Conversion failed."));
   }
-  HADESMEM_DETAIL_ASSERT(out < (std::numeric_limits<T>::max)());
   return out;
 }
 
