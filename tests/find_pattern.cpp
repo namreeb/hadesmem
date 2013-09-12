@@ -162,12 +162,18 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     L"{ Nop Other, 90 }\n";
   find_pattern.LoadFileMemory(pattern_file_data);
   // Ensure all patterns match previous scans
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"First Call"), call_pattern.GetAddress());
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"First Call"), find_pattern[L"First Call"]);
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Zeros New"), zeros_rel);
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Zeros New"), find_pattern[L"Zeros New"]);
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Other"), nop_rel);
-  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Other"), find_pattern[L"Nop Other"]);
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"First Call"), 
+    call_pattern.GetAddress());
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"First Call"), 
+    find_pattern[L"First Call"]);
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Zeros New"), 
+    zeros_rel);
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Zeros New"), 
+    find_pattern[L"Zeros New"]);
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Other"), 
+    nop_rel);
+  BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Other"), 
+    find_pattern[L"Nop Other"]);
  
   // Test pattern file, using various types of invalid input.
   std::wstring const pattern_file_data_invalid1 = 

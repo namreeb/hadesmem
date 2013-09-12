@@ -128,6 +128,7 @@ struct FindPatternFlags
     kThrowOnUnmatch = 1 << 0, 
     kRelativeAddress = 1 << 1, 
     kScanData = 1 << 2, 
+    kInvalidFlagMaxValue = 1 << 3
   };
 };
 
@@ -168,6 +169,7 @@ public:
     name_ = other.name_;
     address_ = other.address_;
     flags_ = other.flags_;
+
     return *this;
   }
 
@@ -321,7 +323,7 @@ public:
   {
     if (!module)
     {
-      ModuleList modules(process);
+      ModuleList const modules(process);
       auto const exe_mod = std::begin(modules);
       HADESMEM_DETAIL_ASSERT(exe_mod != std::end(modules));
       module = exe_mod->GetHandle();
@@ -334,12 +336,12 @@ public:
     DosHeader const dos_header(process, pe_file);
     NtHeaders const nt_headers(process, pe_file);
     
-    SectionList sections(process, pe_file);
+    SectionList const sections(process, pe_file);
     for (auto const& s : sections)
     {
-      bool is_code_section = 
+      bool const is_code_section = 
         ((s.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == IMAGE_SCN_CNT_CODE);
-      bool is_data_section = 
+      bool const is_data_section = 
         ((s.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA) == 
         IMAGE_SCN_CNT_INITIALIZED_DATA);
       if (is_code_section || is_data_section)
@@ -401,6 +403,7 @@ public:
     code_regions_ = other.code_regions_;
     data_regions_ = other.data_regions_;
     addresses_ = other.addresses_;
+
     return *this;
   }
 
@@ -419,11 +422,16 @@ public:
   {
     process_ = other.process_;
     other.process_ = nullptr;
+
     base_ = other.base_;
     other.base_ = 0;
+
     code_regions_ = std::move(other.code_regions_);
+
     data_regions_ = std::move(other.data_regions_);
+
     addresses_ = std::move(other.addresses_);
+
     return *this;
   }
 
@@ -434,6 +442,9 @@ public:
   
   PVOID Find(std::wstring const& data, int flags) const
   {
+    HADESMEM_DETAIL_ASSERT(!(flags & 
+      ~(FindPatternFlags::kInvalidFlagMaxValue - 1)));
+
     typedef std::wstring::const_iterator DataIter;
     typedef boost::spirit::qi::standard::space_type SkipWsT;
     
@@ -443,11 +454,11 @@ public:
       static_cast<unsigned int>(-1)]);
     
     boost::spirit::qi::rule<DataIter, std::vector<unsigned int>(), SkipWsT> 
-      data_list_rule = +(data_rule);
+      const data_list_rule = +(data_rule);
     
     std::vector<unsigned int> data_parsed;
     auto data_beg = std::begin(data);
-    auto data_end = std::end(data);
+    auto const data_end = std::end(data);
     bool const converted = boost::spirit::qi::phrase_parse(
       data_beg, data_end, 
       data_list_rule, 
@@ -464,23 +475,19 @@ public:
       std::back_inserter(data_real), 
       [] (unsigned int current) -> std::pair<BYTE, bool>
       {
-        bool const is_wildcard = (current == static_cast<unsigned int>(-1));
-        
-        BYTE current_byte = 0;
-        if (!is_wildcard)
+        try
         {
-          try
-          {
-            current_byte = boost::numeric_cast<BYTE>(current);
-          }
-          catch (std::exception const& /*e*/)
-          {
-            BOOST_THROW_EXCEPTION(Error() << 
-              ErrorString("Data conversion failed (numeric)."));
-          }
+          bool const is_wildcard = (current == static_cast<unsigned int>(-1));
+          BYTE const current_byte = is_wildcard 
+            ? static_cast<BYTE>(0) 
+            : boost::numeric_cast<BYTE>(current);
+          return std::make_pair(current_byte, !is_wildcard);
         }
-        
-        return std::make_pair(current_byte, !is_wildcard);
+        catch (std::exception const& /*e*/)
+        {
+          BOOST_THROW_EXCEPTION(Error() << 
+            ErrorString("Data conversion failed (numeric)."));
+        }
       });
     
     bool const scan_data_secs = ((flags & FindPatternFlags::kScanData) == 
@@ -568,14 +575,14 @@ public:
       (L"RelativeAddress", FindPatternFlags::kRelativeAddress)
       (L"ScanData", FindPatternFlags::kScanData);
     
-    boost::spirit::qi::rule<DataIter, std::vector<int>(), SkipWsT> flags_rule = 
-      '(' >> *(flags_parser % ',') >> ')';
-    boost::spirit::qi::rule<DataIter, std::wstring()> name_rule = 
-      boost::spirit::qi::lexeme[*(~boost::spirit::qi::char_(','))] >> ',';    
-    boost::spirit::qi::rule<DataIter, std::wstring()> data_rule = 
-      boost::spirit::qi::lexeme[*(~boost::spirit::qi::char_('}'))];    
-    boost::spirit::qi::rule<DataIter, detail::PatternInfo(), SkipWsT> pattern_rule = 
-      '{' >> name_rule >> data_rule >> '}';
+    boost::spirit::qi::rule<DataIter, std::vector<int>(), SkipWsT> 
+      const flags_rule = '(' >> *(flags_parser % ',') >> ')';
+    boost::spirit::qi::rule<DataIter, std::wstring()> const name_rule = 
+      boost::spirit::qi::lexeme[*(~boost::spirit::qi::char_(','))] >> ',';
+    boost::spirit::qi::rule<DataIter, std::wstring()> const data_rule = 
+      boost::spirit::qi::lexeme[*(~boost::spirit::qi::char_('}'))];
+    boost::spirit::qi::rule<DataIter, detail::PatternInfo(), SkipWsT> 
+      const pattern_rule = '{' >> name_rule >> data_rule >> '}';
     
     typedef boost::spirit::qi::symbols<wchar_t, int> ManipParser;
     ManipParser manip_parser;
@@ -585,26 +592,25 @@ public:
       (L"Rel", detail::ManipInfo::Manipulator::kRel)
       (L"Lea", detail::ManipInfo::Manipulator::kLea);
     
-    boost::spirit::qi::rule<DataIter, int(), SkipWsT> manip_name_rule = 
+    boost::spirit::qi::rule<DataIter, int(), SkipWsT> const manip_name_rule = 
       manip_parser >> ',';
     // TODO: Use a DWORD_PTR here.
     boost::spirit::qi::rule<DataIter, std::vector<unsigned long>(), SkipWsT> 
-      operand_rule = (boost::spirit::ulong_ % ',');
+      const operand_rule = (boost::spirit::ulong_ % ',');
     boost::spirit::qi::rule<DataIter, detail::ManipInfo(), SkipWsT> 
-      manip_rule = ('[' >> manip_name_rule >> operand_rule >> ']');
+      const manip_rule = ('[' >> manip_name_rule >> operand_rule >> ']');
     boost::spirit::qi::rule<DataIter, detail::PatternInfoFull(), SkipWsT> 
-      pattern_full_rule = (pattern_rule >> *manip_rule);
+      const pattern_full_rule = (pattern_rule >> *manip_rule);
     
     std::vector<int> flags_list;
     std::vector<detail::PatternInfoFull> pattern_list;
     
     auto data_beg = std::begin(data);
-    auto data_end = std::end(data);
-    bool const parsed = boost::spirit::qi::phrase_parse(data_beg, data_end, 
-      (
-        L"HadesMem Patterns" >> flags_rule >> 
-        *pattern_full_rule
-      ), 
+    auto const data_end = std::end(data);
+    bool const parsed = boost::spirit::qi::phrase_parse(
+      data_beg, 
+      data_end, 
+      (L"HadesMem Patterns" >> flags_rule >> *pattern_full_rule), 
       boost::spirit::qi::space, 
       flags_list, 
       pattern_list);
@@ -660,8 +666,7 @@ public:
               ErrorString("Invalid manipulator operands for 'Rel'."));
           }
           
-          pattern << pattern_manipulators::Rel(m.operands[0], 
-            m.operands[1]);
+          pattern << pattern_manipulators::Rel(m.operands[0], m.operands[1]);
           
           break;
           
@@ -707,10 +712,10 @@ private:
     
     std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions = 
       scan_data_secs ? data_regions_ : code_regions_;
-    for (auto i = std::begin(scan_regions); i != std::end(scan_regions); ++i)
+    for (auto const& region : scan_regions)
     {
-      PBYTE const s_beg = i->first;
-      PBYTE const s_end = i->second;
+      PBYTE const s_beg = region.first;
+      PBYTE const s_end = region.second;
       HADESMEM_DETAIL_ASSERT(s_end > s_beg);
       
       std::ptrdiff_t const mem_size = s_end - s_beg;
@@ -718,14 +723,17 @@ private:
       std::vector<BYTE> const buffer(ReadVector<BYTE>(*process_, s_beg, 
         static_cast<std::size_t>(mem_size)));
       
-      auto const iter = std::search(std::begin(buffer), std::end(buffer), 
-        std::begin(data), std::end(data), 
+      auto const iter = std::search(
+        std::begin(buffer), 
+        std::end(buffer), 
+        std::begin(data), 
+        std::end(data), 
         [] (BYTE h_cur, std::pair<BYTE, bool> const& n_cur)
         {
           return (!n_cur.second) || (h_cur == n_cur.first);
         });
       
-      if (iter != buffer.cend())
+      if (iter != std::end(buffer))
       {
         return (s_beg + std::distance(std::begin(buffer), iter));
       }
@@ -792,7 +800,7 @@ inline void Save::Manipulate(Pattern& pattern) const
 
 inline void Add::Manipulate(Pattern& pattern) const
 {
-  PBYTE address = pattern.GetAddress();
+  PBYTE const address = pattern.GetAddress();
   if (!address)
   {
     return;
@@ -803,7 +811,7 @@ inline void Add::Manipulate(Pattern& pattern) const
 
 inline void Sub::Manipulate(Pattern& pattern) const
 {
-  PBYTE address = pattern.GetAddress();
+  PBYTE const address = pattern.GetAddress();
   if (!address)
   {
     return;
@@ -826,7 +834,7 @@ inline void Lea::Manipulate(Pattern& pattern) const
       (pattern.GetFlags() & FindPatternFlags::kRelativeAddress) == 
       FindPatternFlags::kRelativeAddress;
     DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
-    address = Read<PBYTE>(*pattern.GetProcess(), pattern.GetAddress() + base);
+    address = Read<PBYTE>(*pattern.GetProcess(), address + base);
   }
   catch (std::exception const& /*e*/)
   {
@@ -846,11 +854,11 @@ inline void Rel::Manipulate(Pattern& pattern) const
 
   try
   {
-    bool is_relative_address = 
+    bool const is_relative_address = 
       (pattern.GetFlags() & FindPatternFlags::kRelativeAddress) == 
       FindPatternFlags::kRelativeAddress;
-    DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
-    address = Read<PBYTE>(*pattern.GetProcess(), pattern.GetAddress() + base) + 
+    DWORD_PTR const base = is_relative_address ? pattern.GetBase() : 0;
+    address = Read<PBYTE>(*pattern.GetProcess(), address + base) + 
       reinterpret_cast<DWORD_PTR>(address + base) + size_ - offset_;
   }
   catch (std::exception const& /*e*/)
