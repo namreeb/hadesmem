@@ -90,9 +90,11 @@ BOOST_AUTO_TEST_CASE(this_thread)
     {
       hadesmem::SuspendedProcess suspend_process(::GetCurrentProcessId());
     }
+    other.detach();
   }
   catch (std::exception const& /*e*/)
   {
+    (void)::TerminateThread(other.native_handle(), 0xDEADBEEF);
     other.detach();
     throw;
   }
