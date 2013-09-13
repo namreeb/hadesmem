@@ -106,6 +106,7 @@ BOOST_AUTO_TEST_CASE(this_thread)
       hadesmem::SuspendedProcess const suspend_process(
         ::GetCurrentProcessId());
     }
+
     BOOST_CHECK_NE(::SetEvent(quit_event.GetHandle()), 0);
     other.join();
   }
