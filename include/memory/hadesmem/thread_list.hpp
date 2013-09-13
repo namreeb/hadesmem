@@ -21,8 +21,6 @@
 #include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
-// TODO: Add tests for ThreadList and ThreadIterator.
-
 namespace hadesmem
 {
 
@@ -45,7 +43,6 @@ public:
     pid_(0)
   { }
 
-  // TODO: Clean this up.
   ThreadIterator(DWORD pid) HADESMEM_DETAIL_NOEXCEPT
     : impl_(std::make_shared<Impl>()), 
     pid_(pid)

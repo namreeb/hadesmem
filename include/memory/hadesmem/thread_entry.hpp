@@ -11,7 +11,6 @@
 namespace hadesmem
 {
 
-// TODO: Add tests for ThreadEntry.
 class ThreadEntry
 {
 public:

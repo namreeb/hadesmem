@@ -20,8 +20,6 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
-// TODO: Add tests for all thread helper APIs.
-
 namespace hadesmem
 {
   

@@ -16,9 +16,6 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
-// TODO: Remove all the code duplication in First/Next wrappers. Looks like a 
-// candidate for templates.
-
 namespace hadesmem
 {
 

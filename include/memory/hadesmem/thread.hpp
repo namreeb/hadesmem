@@ -18,8 +18,6 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
-// TODO: Add tests for Thread.
-
 // TODO: Support interacting with WoW64 threads from x64 procs (via 
 // Wow64SuspendThread, Wow64GetThreadContext, etc.).
 
