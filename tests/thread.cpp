@@ -85,10 +85,11 @@ BOOST_AUTO_TEST_CASE(this_thread)
     BOOST_CHECK_THROW(hadesmem::GetThreadContext(thread, CONTEXT_FULL), 
       hadesmem::Error);
     {
-      hadesmem::SuspendedThread suspend_thread(other_thread.GetId());
+      hadesmem::SuspendedThread const suspend_thread(other_thread.GetId());
     }
     {
-      hadesmem::SuspendedProcess suspend_process(::GetCurrentProcessId());
+      hadesmem::SuspendedProcess const suspend_process(
+        ::GetCurrentProcessId());
     }
     other.detach();
   }
