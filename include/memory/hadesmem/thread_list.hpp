@@ -7,10 +7,6 @@
 #include <utility>
 #include <iterator>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
 
@@ -18,6 +14,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/thread_entry.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
@@ -53,7 +50,7 @@ public:
       TH32CS_SNAPTHREAD, 
       0);
 
-    boost::optional<THREADENTRY32> entry = 
+    hadesmem::detail::Optional<THREADENTRY32> entry = 
       detail::Thread32First(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -140,7 +137,7 @@ private:
   {
     for (;;) 
     {
-      boost::optional<THREADENTRY32> entry = 
+      hadesmem::detail::Optional<THREADENTRY32> entry = 
         detail::Thread32Next(impl_->snap_.GetHandle());
       if (!entry)
       {
@@ -169,7 +166,7 @@ private:
     { }
   
     detail::SmartSnapHandle snap_;
-    boost::optional<ThreadEntry> thread_;
+    hadesmem::detail::Optional<ThreadEntry> thread_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as 

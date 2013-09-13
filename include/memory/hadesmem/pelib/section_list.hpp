@@ -8,10 +8,6 @@
 #include <utility>
 #include <iterator>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <winnt.h>
 
@@ -20,6 +16,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/section.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 
 namespace hadesmem
@@ -143,7 +140,7 @@ private:
 
     Process const* process_;
     PeFile const* pe_file_;
-    boost::optional<Section> section_;
+    hadesmem::detail::Optional<Section> section_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as 

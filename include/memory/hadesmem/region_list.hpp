@@ -7,10 +7,6 @@
 #include <utility>
 #include <iterator>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 
 #include <hadesmem/error.hpp>
@@ -19,6 +15,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/query_region.hpp>
 
 namespace hadesmem
@@ -135,7 +132,7 @@ private:
     }
 
     Process const* process_;
-    boost::optional<Region> region_;
+    hadesmem::detail::Optional<Region> region_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as 

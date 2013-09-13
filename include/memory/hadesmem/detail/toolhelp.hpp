@@ -5,14 +5,11 @@
 
 #include <type_traits>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
@@ -45,7 +42,7 @@ inline detail::SmartSnapHandle CreateToolhelp32Snapshot(
 
 
 template <typename Entry, typename Func>
-boost::optional<Entry> Toolhelp32Enum(
+hadesmem::detail::Optional<Entry> Toolhelp32Enum(
   Func func, 
   HANDLE snap, 
   std::string const& error)
@@ -60,7 +57,7 @@ boost::optional<Entry> Toolhelp32Enum(
     DWORD const last_error = ::GetLastError();
     if (last_error == ERROR_NO_MORE_FILES)
     {
-      return boost::optional<Entry>();
+      return hadesmem::detail::Optional<Entry>();
     }
 
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
@@ -68,10 +65,10 @@ boost::optional<Entry> Toolhelp32Enum(
       ErrorCodeWinLast(last_error));
   }
 
-  return boost::optional<Entry>(entry);
+  return hadesmem::detail::Optional<Entry>(entry);
 }
 
-inline boost::optional<MODULEENTRY32> Module32First(HANDLE snap)
+inline hadesmem::detail::Optional<MODULEENTRY32> Module32First(HANDLE snap)
 {
   return Toolhelp32Enum<MODULEENTRY32, decltype(&::Module32First)>(
     &::Module32First, 
@@ -79,7 +76,7 @@ inline boost::optional<MODULEENTRY32> Module32First(HANDLE snap)
     "Module32First failed.");
 }
 
-inline boost::optional<MODULEENTRY32> Module32Next(HANDLE snap)
+inline hadesmem::detail::Optional<MODULEENTRY32> Module32Next(HANDLE snap)
 {
   return Toolhelp32Enum<MODULEENTRY32, decltype(&::Module32Next)>(
     &::Module32Next, 
@@ -87,7 +84,7 @@ inline boost::optional<MODULEENTRY32> Module32Next(HANDLE snap)
     "Module32Next failed.");
 }
 
-inline boost::optional<PROCESSENTRY32> Process32First(HANDLE snap)
+inline hadesmem::detail::Optional<PROCESSENTRY32> Process32First(HANDLE snap)
 {
   return Toolhelp32Enum<PROCESSENTRY32, decltype(&::Process32First)>(
     &::Process32First, 
@@ -95,7 +92,7 @@ inline boost::optional<PROCESSENTRY32> Process32First(HANDLE snap)
     "Process32First failed.");
 }
 
-inline boost::optional<PROCESSENTRY32> Process32Next(HANDLE snap)
+inline hadesmem::detail::Optional<PROCESSENTRY32> Process32Next(HANDLE snap)
 {
   return Toolhelp32Enum<PROCESSENTRY32, decltype(&::Process32Next)>(
     &::Process32Next, 
@@ -103,7 +100,7 @@ inline boost::optional<PROCESSENTRY32> Process32Next(HANDLE snap)
     "Process32Next failed.");
 }
 
-inline boost::optional<THREADENTRY32> Thread32First(HANDLE snap)
+inline hadesmem::detail::Optional<THREADENTRY32> Thread32First(HANDLE snap)
 {
   return Toolhelp32Enum<THREADENTRY32, decltype(&::Thread32First)>(
     &::Thread32First, 
@@ -111,7 +108,7 @@ inline boost::optional<THREADENTRY32> Thread32First(HANDLE snap)
     "Thread32First failed.");
 }
 
-inline boost::optional<THREADENTRY32> Thread32Next(HANDLE snap)
+inline hadesmem::detail::Optional<THREADENTRY32> Thread32Next(HANDLE snap)
 {
   return Toolhelp32Enum<THREADENTRY32, decltype(&::Thread32Next)>(
     &::Thread32Next, 

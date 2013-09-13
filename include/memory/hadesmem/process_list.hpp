@@ -7,10 +7,6 @@
 #include <utility>
 #include <iterator>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 #include <tlhelp32.h>
 
@@ -18,6 +14,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/process_entry.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
@@ -50,7 +47,7 @@ public:
     impl_->snap_ = detail::CreateToolhelp32Snapshot(
       TH32CS_SNAPPROCESS, 0);
 
-    boost::optional<PROCESSENTRY32W> entry = 
+    hadesmem::detail::Optional<PROCESSENTRY32W> entry = 
       detail::Process32First(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -99,7 +96,7 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
-    boost::optional<PROCESSENTRY32> entry = 
+    hadesmem::detail::Optional<PROCESSENTRY32> entry = 
       detail::Process32Next(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -138,7 +135,7 @@ private:
     { }
   
     detail::SmartSnapHandle snap_;
-    boost::optional<ProcessEntry> process_;
+    hadesmem::detail::Optional<ProcessEntry> process_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as 

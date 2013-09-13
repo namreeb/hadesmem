@@ -7,10 +7,6 @@
 #include <utility>
 #include <iterator>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/optional.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 
 #include <hadesmem/read.hpp>
@@ -19,6 +15,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/detail/optional.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 
 // TODO: Distinguish between IAT and ILT in import enumeration.
@@ -157,7 +154,7 @@ private:
 
     Process const* process_;
     PeFile const* pe_file_;
-    boost::optional<ImportDir> import_dir_;
+    hadesmem::detail::Optional<ImportDir> import_dir_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as 
