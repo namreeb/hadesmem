@@ -81,9 +81,6 @@ public:
     return *this;
   }
 
-  ~SectionIterator() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -166,35 +163,6 @@ public:
     pe_file_(&pe_file)
   { }
 
-  SectionList(SectionList const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  SectionList& operator=(SectionList const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  SectionList(SectionList&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  SectionList& operator=(SectionList&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  ~SectionList()
-  { }
-  
   iterator begin()
   {
     return SectionList::iterator(*process_, *pe_file_);

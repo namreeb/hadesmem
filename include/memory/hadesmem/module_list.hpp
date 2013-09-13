@@ -19,6 +19,7 @@
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
@@ -41,7 +42,6 @@ public:
     : impl_()
   { }
   
-  // TODO: Clean this up.
   explicit ModuleIterator(Process const& process)
     : impl_(std::make_shared<Impl>())
   {
@@ -49,51 +49,19 @@ public:
   
     impl_->process_ = &process;
   
-    impl_->snap_ = detail::SmartSnapHandle(
-      ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-      impl_->process_->GetId()));
-    if (!impl_->snap_.IsValid())
-    {
-      if (::GetLastError() == ERROR_BAD_LENGTH)
-      {
-        impl_->snap_ = detail::SmartSnapHandle(
-          ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
-          impl_->process_->GetId()));
-        if (!impl_->snap_.IsValid())
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("CreateToolhelp32Snapshot failed.") << 
-            ErrorCodeWinLast(last_error));
-        }
-      }
-      else
-      {
-        DWORD const last_error = ::GetLastError();
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-          ErrorString("CreateToolhelp32Snapshot failed.") << 
-          ErrorCodeWinLast(last_error));
-      }
-    }
-  
-    MODULEENTRY32W entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Module32FirstW(impl_->snap_.GetHandle(), &entry))
-    {
-      DWORD const last_error = ::GetLastError();
-      if (last_error == ERROR_NO_MORE_FILES)
-      {
-        impl_.reset();
-        return;
-      }
+    impl_->snap_ = detail::CreateToolhelp32Snapshot(
+      TH32CS_SNAPMODULE, 
+      impl_->process_->GetId());
     
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Module32First failed.") << 
-        ErrorCodeWinLast(last_error));
+    boost::optional<MODULEENTRY32> entry = 
+      detail::Module32First(impl_->snap_.GetHandle());
+    if (!entry)
+    {
+      impl_.reset();
+      return;
     }
   
-    impl_->module_ = Module(*impl_->process_, entry);
+    impl_->module_ = Module(*impl_->process_, *entry);
   }
 
   ModuleIterator(ModuleIterator const& other) HADESMEM_DETAIL_NOEXCEPT
@@ -118,9 +86,6 @@ public:
     return *this;
   }
 
-  ~ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -136,25 +101,16 @@ public:
   ModuleIterator& operator++()
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
-  
-    MODULEENTRY32W entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Module32NextW(impl_->snap_.GetHandle(), &entry))
-    {
-      DWORD const last_error = ::GetLastError();
-      if (last_error == ERROR_NO_MORE_FILES)
-      {
-        impl_.reset();
-        return *this;
-      }
     
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Module32Next failed.") << 
-        ErrorCodeWinLast(last_error));
+    boost::optional<MODULEENTRY32> entry = 
+      detail::Module32Next(impl_->snap_.GetHandle());
+    if (!entry)
+    {
+      impl_.reset();
+      return *this;
     }
   
-    impl_->module_ = Module(*impl_->process_, entry);
+    impl_->module_ = Module(*impl_->process_, *entry);
   
     return *this;
   }

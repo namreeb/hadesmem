@@ -176,9 +176,6 @@ public:
 
     return *this;
   }
-  
-  ~Export() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
   DWORD GetRva() const HADESMEM_DETAIL_NOEXCEPT
   {

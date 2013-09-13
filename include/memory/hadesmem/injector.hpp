@@ -229,8 +229,6 @@ public:
   CreateAndInjectData& operator=(CreateAndInjectData&&) 
     HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  ~CreateAndInjectData() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
-
 #else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   CreateAndInjectData(CreateAndInjectData const& other)

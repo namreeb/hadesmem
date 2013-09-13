@@ -58,39 +58,6 @@ public:
     }
   }
 
-  ImportDir(ImportDir const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  ImportDir& operator=(ImportDir const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  ImportDir(ImportDir&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  ImportDir& operator=(ImportDir&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~ImportDir() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;

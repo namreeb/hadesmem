@@ -23,7 +23,7 @@ public:
   typedef typename Policy::HandleT HandleT;
 
   HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
-    : handle_(nullptr)
+    : handle_(GetInvalid())
   { }
   
   explicit HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT
@@ -91,6 +91,15 @@ public:
     }
 
     handle_ = GetInvalid();
+  }
+
+  // WARNING: This detaches the handle from the smart handle. The caller 
+  // is responsible for managing the lifetime of the handle after this point.
+  HandleT Detach()
+  {
+    HandleT handle = handle_;
+    handle_ = GetInvalid();
+    return handle;
   }
 
 private:

@@ -18,6 +18,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/thread_entry.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
 // TODO: Add tests for ThreadList and ThreadIterator.
@@ -50,53 +51,22 @@ public:
     pid_(pid)
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
-    
-    impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
-      TH32CS_SNAPTHREAD, 0));
-    if (!impl_->snap_.IsValid())
+
+    impl_->snap_ = detail::CreateToolhelp32Snapshot(
+      TH32CS_SNAPTHREAD, 
+      0);
+
+    boost::optional<THREADENTRY32> entry = 
+      detail::Thread32First(impl_->snap_.GetHandle());
+    if (!entry)
     {
-      if (::GetLastError() == ERROR_BAD_LENGTH)
-      {
-        impl_->snap_ = detail::SmartSnapHandle(::CreateToolhelp32Snapshot(
-          TH32CS_SNAPTHREAD, 0));
-        if (!impl_->snap_.IsValid())
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("CreateToolhelp32Snapshot failed.") << 
-            ErrorCodeWinLast(last_error));
-        }
-      }
-      else
-      {
-        DWORD const last_error = ::GetLastError();
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-          ErrorString("CreateToolhelp32Snapshot failed.") << 
-          ErrorCodeWinLast(last_error));
-      }
+      impl_.reset();
+      return;
     }
     
-    THREADENTRY32 entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = static_cast<DWORD>(sizeof(entry));
-    if (!::Thread32First(impl_->snap_.GetHandle(), &entry))
+    if (IsTargetThread(entry->th32OwnerProcessID))
     {
-      DWORD const last_error = ::GetLastError();
-    
-      if (last_error == ERROR_NO_MORE_FILES)
-      {
-        impl_.reset();
-        return;
-      }
-    
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Thread32First failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
-    
-    if (IsTargetThread(entry.th32OwnerProcessID))
-    {
-      impl_->thread_ = ThreadEntry(entry);
+      impl_->thread_ = ThreadEntry(*entry);
     }
     else
     {
@@ -130,9 +100,6 @@ public:
     return *this;
   }
 
-  ~ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -174,30 +141,19 @@ public:
 private:
   void Advance()
   {
-    THREADENTRY32 entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = static_cast<DWORD>(sizeof(entry));
     for (;;) 
     {
-      if (!::Thread32Next(impl_->snap_.GetHandle(), &entry))
+      boost::optional<THREADENTRY32> entry = 
+        detail::Thread32Next(impl_->snap_.GetHandle());
+      if (!entry)
       {
-        if (::GetLastError() == ERROR_NO_MORE_FILES)
-        {
-          impl_.reset();
-          break;
-        }
-        else
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("Thread32Next failed.") << 
-            ErrorCodeWinLast(last_error));
-        }
+        impl_.reset();
+        break;
       }
 
-      if (IsTargetThread(entry.th32OwnerProcessID))
+      if (IsTargetThread(entry->th32OwnerProcessID))
       {
-        impl_->thread_ = ThreadEntry(entry);
+        impl_->thread_ = ThreadEntry(*entry);
         break;
       }
     }

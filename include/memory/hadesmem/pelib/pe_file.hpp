@@ -64,45 +64,16 @@ class PeFile
 {
 public:
   explicit PeFile(Process const& process, PVOID address, PeFileType type)
-    : process_(&process), 
-    base_(static_cast<PBYTE>(address)), 
+    : base_(static_cast<PBYTE>(address)), 
     type_(type)
   {
     HADESMEM_DETAIL_ASSERT(base_ != 0);
+
+    // Process is not actually used but we take it anyway for interface 
+    // symetry and in case we want to change the implementation to use it 
+    // later without breaking the interface.
+    (void)process;
   }
-
-  PeFile(PeFile const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    base_(other.base_), 
-    type_(other.type_)
-  { }
-  
-  PeFile& operator=(PeFile const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    base_ = other.base_;
-    type_ = other.type_;
-
-    return *this;
-  }
-
-  PeFile(PeFile&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    base_(other.base_), 
-    type_(other.type_)
-  { }
-  
-  PeFile& operator=(PeFile&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    base_ = other.base_;
-    type_ = other.type_;
-
-    return *this;
-  }
-  
-  ~PeFile() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -115,7 +86,6 @@ public:
   }
 
 private:
-    Process const* process_;
     PBYTE base_;
     PeFileType type_;
 };

@@ -49,39 +49,6 @@ public:
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
   }
 
-  TlsDir(TlsDir const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  TlsDir& operator=(TlsDir const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  TlsDir(TlsDir&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  TlsDir& operator=(TlsDir&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~TlsDir() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;

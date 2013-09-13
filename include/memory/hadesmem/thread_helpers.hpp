@@ -114,7 +114,7 @@ public:
     return *this;
   }
 
-  ~SuspendedThread()
+  ~SuspendedThread() HADESMEM_DETAIL_NOEXCEPT
   {
     ResumeUnchecked();
   }
@@ -184,9 +184,6 @@ public:
 
     return *this;
   }
-  
-  ~SuspendedProcess()
-  { }
   
 private:
   // Disable copying.

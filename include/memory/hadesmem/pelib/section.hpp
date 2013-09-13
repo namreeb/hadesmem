@@ -55,43 +55,6 @@ public:
     base_ = reinterpret_cast<PBYTE>(section_header);
   }
 
-  Section(Section const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    number_(other.number_), 
-    base_(other.base_)
-  { }
-  
-  Section& operator=(Section const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    number_ = other.number_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  Section(Section&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    number_(other.number_), 
-    base_(other.base_)
-  { }
-  
-  Section& operator=(Section&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    number_ = other.number_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~Section() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;

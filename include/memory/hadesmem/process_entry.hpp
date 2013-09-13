@@ -61,9 +61,6 @@ public:
     return *this;
   }
 
-  ~ProcessEntry() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
   {
     return id_;

@@ -46,7 +46,7 @@
 // NtCreateThread/RtlCreateUserThread.
 
 // TODO: Support injection into CSRSS. CreateRemoteThread can't be used on 
-// CSRSS because when the thread is initialized it tries to notify CSRSS os 
+// CSRSS because when the thread is initialized it tries to notify CSRSS of 
 // the thread creation and gets confused. Potential workaround is to use 
 // NtCreateThread/RtlCreateUserThread.
 
@@ -1190,8 +1190,6 @@ public:
 
   MultiCall& operator=(MultiCall&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  ~MultiCall() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
-
 #else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   MultiCall(MultiCall const& other)
@@ -1225,9 +1223,6 @@ public:
 
     return *this;
   }
-
-  ~MultiCall() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 

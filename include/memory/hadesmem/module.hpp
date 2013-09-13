@@ -59,8 +59,6 @@ public:
 
   Module& operator=(Module&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  ~Module() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
-
 #else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   Module(Module const& other)
@@ -97,9 +95,6 @@ public:
 
     return *this;
   }
-
-  ~Module() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 

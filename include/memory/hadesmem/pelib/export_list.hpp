@@ -82,9 +82,6 @@ public:
     return *this;
   }
 
-  ~ExportIterator()
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -184,35 +181,6 @@ public:
     pe_file_(&pe_file)
   { }
 
-  ExportList(ExportList const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  ExportList& operator=(ExportList const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  ExportList(ExportList&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  ExportList& operator=(ExportList&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  ~ExportList() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   iterator begin()
   {
     return ExportList::iterator(*process_, *pe_file_);

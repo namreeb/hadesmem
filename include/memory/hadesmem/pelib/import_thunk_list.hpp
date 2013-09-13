@@ -89,9 +89,6 @@ public:
     return *this;
   }
 
-  ~ImportThunkIterator()
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -183,39 +180,6 @@ public:
     first_thunk_(first_thunk)
   { }
 
-  ImportThunkList(ImportThunkList const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    first_thunk_(other.first_thunk_)
-  { }
-
-  ImportThunkList& operator=(ImportThunkList const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    first_thunk_ = other.first_thunk_;
-
-    return *this;
-  }
-
-  ImportThunkList(ImportThunkList&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    first_thunk_(other.first_thunk_)
-  { }
-
-  ImportThunkList& operator=(ImportThunkList&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    first_thunk_ = other.first_thunk_;
-
-    return *this;
-  }
-
-  ~ImportThunkList() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   iterator begin()
   {
     return ImportThunkList::iterator(*process_, *pe_file_, first_thunk_);

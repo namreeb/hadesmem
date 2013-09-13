@@ -43,39 +43,6 @@ public:
     base_(reinterpret_cast<PBYTE>(thunk))
   { }
   
-  ImportThunk(ImportThunk const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  ImportThunk& operator=(ImportThunk const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  ImportThunk(ImportThunk&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  ImportThunk& operator=(ImportThunk&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~ImportThunk() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;

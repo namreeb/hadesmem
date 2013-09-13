@@ -68,9 +68,6 @@ public:
     return *this;
   }
 
-  ~RegionIterator() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());

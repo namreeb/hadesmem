@@ -24,51 +24,6 @@ public:
     flags_(entry.dwFlags)
   { }
 
-  ThreadEntry(ThreadEntry const& other) HADESMEM_DETAIL_NOEXCEPT
-    : usage_(other.usage_), 
-    thread_id_(other.thread_id_), 
-    owner_process_id_(other.owner_process_id_), 
-    base_priority_(other.base_priority_), 
-    delta_priority_(other.delta_priority_), 
-    flags_(other.flags_)
-  { }
-
-  ThreadEntry& operator=(ThreadEntry const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    usage_ = other.usage_;
-    thread_id_ = other.thread_id_;
-    owner_process_id_ = other.owner_process_id_;
-    base_priority_ = other.base_priority_;
-    delta_priority_ = other.delta_priority_;
-    flags_ = other.flags_;
-
-    return *this;
-  }
-
-  ThreadEntry(ThreadEntry&& other) HADESMEM_DETAIL_NOEXCEPT
-    : usage_(other.usage_), 
-    thread_id_(other.thread_id_), 
-    owner_process_id_(other.owner_process_id_), 
-    base_priority_(other.base_priority_), 
-    delta_priority_(other.delta_priority_), 
-    flags_(other.flags_)
-  { }
-
-  ThreadEntry& operator=(ThreadEntry&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    usage_ = other.usage_;
-    thread_id_ = other.thread_id_;
-    owner_process_id_ = other.owner_process_id_;
-    base_priority_ = other.base_priority_;
-    delta_priority_ = other.delta_priority_;
-    flags_ = other.flags_;
-
-    return *this;
-  }
-
-  ~ThreadEntry() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
   DWORD GetUsage() const HADESMEM_DETAIL_NOEXCEPT
   {
     return usage_;

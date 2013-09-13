@@ -29,45 +29,11 @@ public:
   explicit DosHeader(Process const& process, PeFile const& pe_file) 
     HADESMEM_DETAIL_NOEXCEPT
     : process_(&process), 
-    pe_file_(&pe_file), 
     base_(static_cast<PBYTE>(pe_file.GetBase()))
   {
     EnsureValid();
   }
-
-  DosHeader(DosHeader const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  DosHeader& operator=(DosHeader const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  DosHeader(DosHeader&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  DosHeader& operator=(DosHeader&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~DosHeader() HADESMEM_DETAIL_NOEXCEPT
-  { }
-
+    
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
@@ -294,7 +260,6 @@ public:
   
 private:
   Process const* process_;
-  PeFile const* pe_file_;
   PBYTE base_;
 };
 

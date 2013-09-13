@@ -94,7 +94,15 @@ BOOST_AUTO_TEST_CASE(this_thread)
   }
   catch (std::exception const& /*e*/)
   {
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+// warning C6258: Using TerminateThread does not allow proper thread clean up.
+#pragma warning(disable: 6258)
+    // TODO: Use an event or something else that's 'safe' instead of just 
+    // trashing the thread.
     (void)::TerminateThread(other.native_handle(), 0xDEADBEEF);
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
     other.detach();
     throw;
   }

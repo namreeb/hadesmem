@@ -152,8 +152,6 @@ public:
 
   Pattern& operator=(Pattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  ~Pattern() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
-
 #else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   Pattern(Pattern const& other)
@@ -197,9 +195,6 @@ public:
 
     return *this;
   }
-
-  ~Pattern() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
@@ -382,8 +377,6 @@ public:
 
   FindPattern& operator=(FindPattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  ~FindPattern() HADESMEM_DETAIL_DEFAULTED_FUNCTION;
-
 #else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
   FindPattern(FindPattern const& other)
@@ -429,9 +422,6 @@ public:
 
     return *this;
   }
-
-  ~FindPattern() HADESMEM_DETAIL_NOEXCEPT
-  { }
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
   

@@ -62,39 +62,6 @@ public:
     EnsureValid();
   }
 
-  NtHeaders(NtHeaders const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  NtHeaders& operator=(NtHeaders const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-
-  NtHeaders(NtHeaders&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_), 
-    base_(other.base_)
-  { }
-  
-  NtHeaders& operator=(NtHeaders&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    base_ = other.base_;
-
-    return *this;
-  }
-  
-  ~NtHeaders() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;

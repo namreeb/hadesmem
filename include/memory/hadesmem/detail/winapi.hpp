@@ -7,6 +7,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {
@@ -36,7 +37,7 @@ inline bool IsWoW64Process(HANDLE handle)
   return is_wow64 != FALSE;
 }
 
-inline HANDLE OpenProcessAllAccess(DWORD id)
+inline detail::SmartHandle OpenProcessAllAccess(DWORD id)
 {
   HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
   if (!handle)
@@ -47,10 +48,10 @@ inline HANDLE OpenProcessAllAccess(DWORD id)
       ErrorCodeWinLast(last_error));
   }
 
-  return handle;
+  return detail::SmartHandle(handle);
 }
 
-inline HANDLE OpenThreadAllAccess(DWORD id)
+inline detail::SmartHandle OpenThreadAllAccess(DWORD id)
 {
   HANDLE const handle = ::OpenThread(THREAD_ALL_ACCESS, FALSE, id);
   if (!handle)
@@ -61,10 +62,10 @@ inline HANDLE OpenThreadAllAccess(DWORD id)
       ErrorCodeWinLast(last_error));
   }
 
-  return handle;
+  return detail::SmartHandle(handle);
 }
 
-inline HANDLE DuplicateHandle(HANDLE handle)
+inline detail::SmartHandle DuplicateHandle(HANDLE handle)
 {
   HADESMEM_DETAIL_ASSERT(handle != nullptr);
 
@@ -78,7 +79,7 @@ inline HANDLE DuplicateHandle(HANDLE handle)
       ErrorCodeWinLast(last_error));
   }
 
-  return new_handle;
+  return detail::SmartHandle(new_handle);
 }
 
 }

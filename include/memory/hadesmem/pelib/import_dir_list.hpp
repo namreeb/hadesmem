@@ -83,9 +83,6 @@ public:
     return *this;
   }
 
-  ~ImportDirIterator()
-  { }
-  
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
@@ -180,35 +177,6 @@ public:
     pe_file_(&pe_file)
   { }
 
-  ImportDirList(ImportDirList const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  ImportDirList& operator=(ImportDirList const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  ImportDirList(ImportDirList&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_), 
-    pe_file_(other.pe_file_)
-  { }
-
-  ImportDirList& operator=(ImportDirList&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-
-    return *this;
-  }
-
-  ~ImportDirList() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   iterator begin()
   {
     return ImportDirList::iterator(*process_, *pe_file_);
