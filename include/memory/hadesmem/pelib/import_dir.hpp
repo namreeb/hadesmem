@@ -230,7 +230,7 @@ inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs) HADESMEM_DETA
 
 inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;
@@ -238,7 +238,7 @@ inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, ImportDir const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;

@@ -165,10 +165,8 @@ public:
 
   Pattern& operator=(Pattern const& other)
   {
-    finder_ = other.finder_;
-    name_ = other.name_;
-    address_ = other.address_;
-    flags_ = other.flags_;
+    Pattern tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }
@@ -398,11 +396,8 @@ public:
 
   FindPattern& operator=(FindPattern const& other)
   {
-    process_ = other.process_;
-    base_ = other.base_;
-    code_regions_ = other.code_regions_;
-    data_regions_ = other.data_regions_;
-    addresses_ = other.addresses_;
+    FindPattern tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }

@@ -49,13 +49,13 @@ public:
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
   }
 
-  TlsDir(TlsDir const& other)
+  TlsDir(TlsDir const& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     pe_file_(other.pe_file_), 
     base_(other.base_)
   { }
   
-  TlsDir& operator=(TlsDir const& other)
+  TlsDir& operator=(TlsDir const& other) HADESMEM_DETAIL_NOEXCEPT
   {
     process_ = other.process_;
     pe_file_ = other.pe_file_;
@@ -225,7 +225,7 @@ inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOE
 
 inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;
@@ -233,7 +233,7 @@ inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, TlsDir const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;

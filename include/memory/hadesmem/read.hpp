@@ -60,11 +60,17 @@ inline void Read(Process const& process, PVOID address, OutputIterator out)
 }
 
 template <typename T>
-inline std::vector<T> ReadVector(Process const& process, PVOID address, 
+inline std::vector<T> ReadVector(
+  Process const& process, 
+  PVOID address, 
   std::size_t count);
 
 template <typename T, typename OutputIterator>
-inline void Read(Process const& process, PVOID address, std::size_t n, OutputIterator out)
+inline void Read(
+  Process const& process, 
+  PVOID address, 
+  std::size_t n, 
+  OutputIterator out)
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(n != 0);
@@ -75,8 +81,11 @@ inline void Read(Process const& process, PVOID address, std::size_t n, OutputIte
 
 // TODO: Clean up this function.
 template <typename T, typename OutputIterator>
-void ReadStringEx(Process const& process, PVOID address, 
-  OutputIterator data, std::size_t chunk_len)
+void ReadStringEx(
+  Process const& process, 
+  PVOID address, 
+  OutputIterator data, 
+  std::size_t chunk_len)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
 
@@ -96,7 +105,8 @@ void ReadStringEx(Process const& process, PVOID address,
     T* cur = static_cast<T*>(address);
     while (cur + 1 <= region_next)
     {
-      std::size_t const len_to_end = reinterpret_cast<DWORD_PTR>(region_next) - 
+      std::size_t const len_to_end = 
+        reinterpret_cast<DWORD_PTR>(region_next) - 
         reinterpret_cast<DWORD_PTR>(cur);
       std::size_t const buf_len_bytes = (std::min)(chunk_len * sizeof(T), 
         len_to_end);
@@ -124,7 +134,9 @@ void ReadStringEx(Process const& process, PVOID address,
 }
 
 template <typename T, typename OutputIterator>
-void ReadString(Process const& process, PVOID address, 
+void ReadString(
+  Process const& process, 
+  PVOID address, 
   OutputIterator data)
 {
   std::size_t const chunk_len = 128;
@@ -133,7 +145,9 @@ void ReadString(Process const& process, PVOID address,
 
 // TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
-std::basic_string<T> ReadStringEx(Process const& process, PVOID address, 
+std::basic_string<T> ReadStringEx(
+  Process const& process, 
+  PVOID address, 
   std::size_t chunk_len)
 {
   std::basic_string<T> data;
@@ -151,7 +165,9 @@ std::basic_string<T> ReadString(Process const& process, PVOID address)
 
 // TODO: Support containers with custom traits, allocators, etc.
 template <typename T>
-inline std::vector<T> ReadVector(Process const& process, PVOID address, 
+inline std::vector<T> ReadVector(
+  Process const& process, 
+  PVOID address, 
   std::size_t count)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
@@ -166,8 +182,11 @@ inline std::vector<T> ReadVector(Process const& process, PVOID address,
 }
 
 template <typename T, typename OutputIterator>
-inline void ReadVector(Process const& process, PVOID address, 
-  std::size_t count, OutputIterator out)
+inline void ReadVector(
+  Process const& process, 
+  PVOID address, 
+  std::size_t count, 
+  OutputIterator out)
 {
   // TODO: Iterator checks for type and category.
 

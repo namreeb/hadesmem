@@ -49,7 +49,8 @@ public:
     : impl_(other.impl_)
   { }
 
-  RegionIterator& operator=(RegionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
+  RegionIterator& operator=(RegionIterator const& other) 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = other.impl_;
 
@@ -91,7 +92,9 @@ public:
       void const* const base = impl_->region_->GetBase();
       SIZE_T const size = impl_->region_->GetSize();
       auto const next = static_cast<char const* const>(base) + size;
-      MEMORY_BASIC_INFORMATION const mbi = detail::Query(*impl_->process_, next);
+      MEMORY_BASIC_INFORMATION const mbi = detail::Query(
+        *impl_->process_, 
+        next);
       impl_->region_ = Region(*impl_->process_, mbi);
     }
     catch (std::exception const& /*e*/)
@@ -154,31 +157,6 @@ public:
     : process_(&process)
   { }
 
-  RegionList(RegionList const& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_)
-  { }
-
-  RegionList& operator=(RegionList const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-
-    return *this;
-  }
-
-  RegionList(RegionList&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_)
-  { }
-
-  RegionList& operator=(RegionList&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    process_ = other.process_;
-
-    return *this;
-  }
-
-  ~RegionList() HADESMEM_DETAIL_NOEXCEPT
-  { }
-  
   iterator begin()
   {
     return iterator(*process_);

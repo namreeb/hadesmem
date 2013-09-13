@@ -140,11 +140,10 @@ private:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Thread is never resumed if ResumeThread fails...
-      // TODO: Add debug logging to other destructors.
+      (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_ASSERT(false);
     }
   }
 

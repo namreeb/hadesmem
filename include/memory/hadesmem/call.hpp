@@ -1203,10 +1203,8 @@ public:
 
   MultiCall& operator=(MultiCall const& other)
   {
-    process_ = other.process_;
-    addresses_ = other.addresses_;
-    call_convs_ = other.call_convs_;
-    args_ = other.args_;
+    MultiCall tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }

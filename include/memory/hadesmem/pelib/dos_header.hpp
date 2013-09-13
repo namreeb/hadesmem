@@ -336,7 +336,7 @@ inline bool operator>=(DosHeader const& lhs, DosHeader const& rhs)
 
 inline std::ostream& operator<<(std::ostream& lhs, DosHeader const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;
@@ -344,7 +344,7 @@ inline std::ostream& operator<<(std::ostream& lhs, DosHeader const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, DosHeader const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;

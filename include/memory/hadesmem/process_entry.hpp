@@ -36,11 +36,8 @@ public:
 
   ProcessEntry& operator=(ProcessEntry const& other)
   {
-    id_ = other.id_;
-    threads_ = other.threads_;
-    parent_ = other.parent_;
-    priority_ = other.priority_;
-    name_ = other.name_;
+    ProcessEntry tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }

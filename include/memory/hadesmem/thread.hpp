@@ -13,6 +13,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
@@ -40,8 +41,8 @@ public:
   
   Thread& operator=(Thread const& other)
   {
-    handle_ = detail::DuplicateHandle(other.handle_.GetHandle());
-    id_ = other.id_;
+    Thread tmp(other);
+    *this = std::move(tmp);
   
     return *this;
   }
@@ -93,9 +94,9 @@ private:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Handle is leaked if 'Cleanup' fails.
+      (void)e;
+      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
       id_ = 0;
@@ -107,39 +108,45 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Thread const& lhs, Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Thread const& lhs, Thread const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }
 
 inline std::ostream& operator<<(std::ostream& lhs, Thread const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetId();
   lhs.imbue(old);
   return lhs;
@@ -147,7 +154,7 @@ inline std::ostream& operator<<(std::ostream& lhs, Thread const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, Thread const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetId();
   lhs.imbue(old);
   return lhs;

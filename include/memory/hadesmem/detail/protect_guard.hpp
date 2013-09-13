@@ -12,6 +12,8 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/query_region.hpp>
 #include <hadesmem/detail/protect_region.hpp>
 
@@ -104,10 +106,10 @@ public:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Protection is not restored if 'Restore' fails.
-      assert(boost::diagnostic_information(e).c_str() && false);
+      (void)e;
+      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_ASSERT(false);
     }
   }
 

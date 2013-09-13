@@ -73,11 +73,8 @@ public:
 
   Module& operator=(Module const& other)
   {
-    process_ = other.process_;
-    handle_ = other.handle_;
-    size_ = other.size_;
-    name_ = other.name_;
-    path_ = other.path_;
+    Module tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }
@@ -291,7 +288,7 @@ inline bool operator>=(Module const& lhs, Module const& rhs) HADESMEM_DETAIL_NOE
 
 inline std::ostream& operator<<(std::ostream& lhs, Module const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetHandle());
   lhs.imbue(old);
   return lhs;
@@ -299,7 +296,7 @@ inline std::ostream& operator<<(std::ostream& lhs, Module const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, Module const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetHandle());
   lhs.imbue(old);
   return lhs;

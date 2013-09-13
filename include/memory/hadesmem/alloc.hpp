@@ -151,11 +151,10 @@ private:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Memory in remote process is leaked if 'Free' fails
-      // TODO: Add debug logging to other destructors.
+      (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_ASSERT(false);
 
       process_ = nullptr;
       base_ = nullptr;
@@ -206,7 +205,7 @@ inline bool operator>=(Allocator const& lhs, Allocator const& rhs)
 
 inline std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;
@@ -214,7 +213,7 @@ inline std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;

@@ -82,7 +82,9 @@ struct InjectFlags
   };
 };
 
-inline HMODULE InjectDll(Process const& process, std::wstring const& path, 
+inline HMODULE InjectDll(
+  Process const& process, 
+  std::wstring const& path, 
   int flags)
 {
   HADESMEM_DETAIL_ASSERT(!(flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)));
@@ -187,7 +189,9 @@ inline void FreeDll(Process const& process, HMODULE module)
 // is no way to try again in the future... Should we just leak the memory 
 // on timeout? Return a 'future' object? Some sort of combination? Requires 
 // more investigation...
-inline CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module, 
+inline CallResult<DWORD_PTR> CallExport(
+  Process const& process, 
+  HMODULE module, 
   std::string const& export_name)
 {
   Module const module_remote(process, module);
@@ -200,8 +204,11 @@ inline CallResult<DWORD_PTR> CallExport(Process const& process, HMODULE module,
 class CreateAndInjectData
 {
 public:
-  explicit CreateAndInjectData(Process const& process, HMODULE module, 
-    DWORD_PTR export_ret, DWORD export_last_error)
+  explicit CreateAndInjectData(
+    Process const& process, 
+    HMODULE module, 
+    DWORD_PTR export_ret, 
+    DWORD export_last_error)
     : process_(process), 
     module_(module), 
     export_ret_(export_ret), 
@@ -394,7 +401,9 @@ inline CreateAndInjectData CreateAndInject(
   {
     // Terminate process if injection failed, otherwise the 'zombie' process 
     // would be leaked.
-    ::TerminateProcess(proc_handle.GetHandle(), 0);
+    BOOL const terminated = ::TerminateProcess(proc_handle.GetHandle(), 0);
+    (void)terminated;
+    HADESMEM_DETAIL_ASSERT(terminated != FALSE);
 
     throw;
   }

@@ -142,16 +142,8 @@ public:
   
   Export& operator=(Export const& other)
   {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    rva_ = other.rva_;
-    va_ = other.va_;
-    name_ = other.name_;
-    forwarder_ = other.forwarder_;
-    forwarder_split_ = other.forwarder_split_;
-    ordinal_ = other.ordinal_;
-    by_name_ = other.by_name_;
-    forwarded_ = other.forwarded_;
+    Export tmp(other);
+    *this = std::move(tmp);
 
     return *this;
   }
@@ -308,7 +300,7 @@ inline bool operator>=(Export const& lhs, Export const& rhs) HADESMEM_DETAIL_NOE
 
 inline std::ostream& operator<<(std::ostream& lhs, Export const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetOrdinal();
   lhs.imbue(old);
   return lhs;
@@ -316,7 +308,7 @@ inline std::ostream& operator<<(std::ostream& lhs, Export const& rhs)
 
 inline std::wostream& operator<<(std::wostream& lhs, Export const& rhs)
 {
-  std::locale old = lhs.imbue(std::locale::classic());
+  std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetOrdinal();
   lhs.imbue(old);
   return lhs;

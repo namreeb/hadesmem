@@ -7,6 +7,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
 
 namespace hadesmem
@@ -105,9 +106,9 @@ private:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Handle is leaked if 'Cleanup' fails.
+      (void)e;
+      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
       handle_ = GetInvalid();

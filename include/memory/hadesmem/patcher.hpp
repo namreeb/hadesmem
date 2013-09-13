@@ -27,6 +27,7 @@
 #include <hadesmem/write.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 
@@ -76,7 +77,9 @@ namespace hadesmem
 class PatchRaw
 {
 public:
-  PatchRaw(Process const& process, PVOID target, 
+  PatchRaw(
+    Process const& process, 
+    PVOID target, 
     std::vector<BYTE> const& data)
     : process_(&process), 
     applied_(false), 
@@ -103,12 +106,17 @@ public:
     
     process_ = other.process_;
     other.process_ = nullptr;
+
     applied_ = other.applied_;
     other.applied_ = false;
+
     target_ = other.target_;
     other.target_ = nullptr;
+
     data_ = std::move(other.data_);
+
     orig_ = std::move(other.orig_);
+
     return *this;
   }
 
@@ -165,11 +173,10 @@ public:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Patch may not be removed if Remove fails.
-      // TODO: Add debug logging to other destructors.
+      (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_ASSERT(false);
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
@@ -398,11 +405,10 @@ public:
     }
     catch (std::exception const& e)
     {
-      (void)e;
-
       // WARNING: Patch may not be removed if Remove fails.
-      // TODO: Add debug logging to other destructors.
+      (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_ASSERT(false);
       
       // TODO: Code smell... Should this be handled by the base class somehow?
       process_ = nullptr;
