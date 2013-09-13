@@ -73,7 +73,7 @@ public:
   Optional& operator=(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     Destroy();
-    Construct(std::move(other->Get()));
+    Construct(std::move(other.Get()));
     other.valid_ = false;
 
     return *this;

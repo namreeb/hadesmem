@@ -40,7 +40,7 @@ inline std::wstring CombinePath(std::wstring const& base, std::wstring const& ap
 
 inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
 {
-  HANDLE file = ::CreateFile(
+  HANDLE const file = ::CreateFile(
     path.c_str(), 
     GENERIC_READ, 
     FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 

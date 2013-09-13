@@ -18,6 +18,7 @@
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
@@ -190,58 +191,23 @@ private:
 
   void InitializeIf(EntryCallback const& check_func)
   {
-    detail::SmartSnapHandle snap(::CreateToolhelp32Snapshot(
+    detail::SmartSnapHandle snap(detail::CreateToolhelp32Snapshot(
       TH32CS_SNAPMODULE, process_->GetId()));
-    if (!snap.IsValid())
-    {
-      if (GetLastError() == ERROR_BAD_LENGTH)
-      {
-        snap = ::CreateToolhelp32Snapshot(
-          TH32CS_SNAPMODULE, process_->GetId());
-        if (!snap.IsValid())
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("CreateToolhelp32Snapshot failed.") << 
-            ErrorCodeWinLast(last_error));
-        }
-      }
-      else
-      {
-        DWORD const last_error = ::GetLastError();
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-          ErrorString("CreateToolhelp32Snapshot failed.") << 
-          ErrorCodeWinLast(last_error));
-      }
-    }
 
-    MODULEENTRY32 entry;
-    ::ZeroMemory(&entry, sizeof(entry));
-    entry.dwSize = static_cast<DWORD>(sizeof(entry));
-
-    for (BOOL more_mods = ::Module32First(snap.GetHandle(), &entry); more_mods; 
-      more_mods = ::Module32Next(snap.GetHandle(), &entry)) 
+    hadesmem::detail::Optional<MODULEENTRY32> entry;
+    for (entry = detail::Module32First(snap.GetHandle()); 
+      entry; 
+      entry = detail::Module32Next(snap.GetHandle()))
     {
-      if (check_func(entry))
+      if (check_func(*entry))
       {
-        Initialize(entry);      
+        Initialize(*entry);
         return;
       }
     }
 
-    DWORD const last_error = ::GetLastError();
-    if (last_error == ERROR_NO_MORE_FILES)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Could not find module.") << 
-        ErrorCodeWinLast(last_error));
-    }
-    else
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Module32First/Module32Next failed.") << 
-        ErrorCodeWinLast(last_error));
-    }
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("Could not find module."));
   }
 
   Process const* process_;
