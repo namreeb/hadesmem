@@ -87,7 +87,7 @@ public:
     return *this;
   }
 
-  Optional& operator=(T&& t)
+  Optional& operator=(T&& t) HADESMEM_DETAIL_NOEXCEPT
   {
     Destroy();
     Construct(std::move(t));
@@ -95,7 +95,7 @@ public:
     return *this;
   }
 
-  ~Optional()
+  ~Optional() HADESMEM_DETAIL_NOEXCEPT
   {
     Destroy();
   }
@@ -103,59 +103,60 @@ public:
   // TODO: Emplacement support. (Including default construction of T.)
 
 #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-  operator Boolean() const
+  operator Boolean() const HADESMEM_DETAIL_NOEXCEPT
   {
     return valid_ ? &Optional::NotComparable : nullptr;
   }
 #else // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-  HADESMEM_DETAIL_EXPLICIT_CONVERSION_OPERATOR operator bool() const
+  HADESMEM_DETAIL_EXPLICIT_CONVERSION_OPERATOR operator bool() const 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return valid_;
   }
 #endif // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
 
-  T& Get()
+  T& Get() HADESMEM_DETAIL_NOEXCEPT
   {
     return *GetPtr();
   }
 
-  T const& Get() const
+  T const& Get() const HADESMEM_DETAIL_NOEXCEPT
   {
     return *GetPtr();
   }
 
-  T& operator*()
+  T& operator*() HADESMEM_DETAIL_NOEXCEPT
   {
     return Get();
   }
 
-  T const& operator*() const
+  T const& operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     return Get();
   }
 
-  T* GetPtr()
+  T* GetPtr() HADESMEM_DETAIL_NOEXCEPT
   {
     return static_cast<T*>(static_cast<void*>(&t_));
   }
 
-  T* GetPtr() const
+  T* GetPtr() const HADESMEM_DETAIL_NOEXCEPT
   {
     return static_cast<T const*>(static_cast<void const*>(&t_));
   }
 
-  T* operator->()
+  T* operator->() HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }
 
-  T const* operator->() const
+  T const* operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }
 
 private:
-  void NotComparable() const
+  void NotComparable() const HADESMEM_DETAIL_NOEXCEPT
   { }
 
   template <typename U>
