@@ -66,7 +66,19 @@ BOOST_AUTO_TEST_CASE(this_thread)
   thread_str_2 >> thread_id_2;
   BOOST_CHECK_EQUAL(thread.GetId(), thread_id_2);
 
-  boost::thread other([]() { Sleep(INFINITE); });
+  hadesmem::detail::SmartHandle quit_event(::CreateEvent(
+    nullptr, 
+    TRUE, 
+    FALSE, 
+    nullptr));
+  boost::thread other(
+    [&]()
+    {
+      BOOST_CHECK_EQUAL(::WaitForSingleObject(
+        quit_event.GetHandle(), 
+        INFINITE), 
+        WAIT_OBJECT_0);
+    });
   try
   {
     DWORD const other_id = ::GetThreadId(other.native_handle());
@@ -75,36 +87,32 @@ BOOST_AUTO_TEST_CASE(this_thread)
     BOOST_CHECK_EQUAL(hadesmem::SuspendThread(other_thread), 1UL);
     BOOST_CHECK_EQUAL(hadesmem::ResumeThread(other_thread), 2UL);
     BOOST_CHECK_EQUAL(hadesmem::ResumeThread(other_thread), 1UL);
-    hadesmem::SuspendThread(other_thread);
-    CONTEXT const full_context = hadesmem::GetThreadContext(
-      other_thread, CONTEXT_FULL);
-    CONTEXT const all_context = hadesmem::GetThreadContext(
-      other_thread, CONTEXT_ALL);
-    hadesmem::SetThreadContext(other_thread, full_context);
-    hadesmem::SetThreadContext(other_thread, all_context);
-    BOOST_CHECK_THROW(hadesmem::GetThreadContext(thread, CONTEXT_FULL), 
-      hadesmem::Error);
+
     {
-      hadesmem::SuspendedThread const suspend_thread(other_thread.GetId());
+      hadesmem::SuspendedThread const suspend_thread(
+        other_thread.GetId());
+
+      CONTEXT const full_context = hadesmem::GetThreadContext(
+        other_thread, CONTEXT_FULL);
+      CONTEXT const all_context = hadesmem::GetThreadContext(
+        other_thread, CONTEXT_ALL);
+      hadesmem::SetThreadContext(other_thread, full_context);
+      hadesmem::SetThreadContext(other_thread, all_context);
+      BOOST_CHECK_THROW(hadesmem::GetThreadContext(thread, CONTEXT_FULL), 
+        hadesmem::Error);
     }
+
     {
       hadesmem::SuspendedProcess const suspend_process(
         ::GetCurrentProcessId());
     }
-    other.detach();
+    BOOST_CHECK_NE(::SetEvent(quit_event.GetHandle()), 0);
+    other.join();
   }
   catch (std::exception const& /*e*/)
   {
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-// warning C6258: Using TerminateThread does not allow proper thread clean up.
-#pragma warning(disable: 6258)
-    // TODO: Use an event or something else that's 'safe' instead of just 
-    // trashing the thread.
-    (void)::TerminateThread(other.native_handle(), 0xDEADBEEF);
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
-    other.detach();
+    BOOST_CHECK_NE(::SetEvent(quit_event.GetHandle()), 0);
+    other.join();
     throw;
   }
 }
