@@ -163,8 +163,12 @@ public:
 
     applied_ = false;
   }
-  
-  // TODO: Code smell... This feels like code duplication between derived classes.
+
+private:
+  PatchRaw(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+
+  // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
@@ -177,8 +181,8 @@ public:
       (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       HADESMEM_DETAIL_ASSERT(false);
-      
-      // TODO: Code smell... Should this be handled by the base class somehow?
+
+      // TODO: Code smell... Reduce code duplication somehow?
       process_ = nullptr;
       applied_ = false;
 
@@ -187,10 +191,6 @@ public:
       orig_.clear();
     }
   }
-
-private:
-  PatchRaw(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
   
   Process const* process_;
   bool applied_;
@@ -395,8 +395,12 @@ public:
     return reinterpret_cast<FuncT>(reinterpret_cast<DWORD_PTR>(
       trampoline_->GetBase()));
   }
-  
-  // TODO: Code smell... This feels like code duplication between derived classes.
+
+private:
+  PatchDetour(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+
+  // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
@@ -409,8 +413,8 @@ public:
       (void)e;
       HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
       HADESMEM_DETAIL_ASSERT(false);
-      
-      // TODO: Code smell... Should this be handled by the base class somehow?
+
+      // TODO: Code smell... Reduce code duplication somehow?
       process_ = nullptr;
       applied_ = false;
 
@@ -421,10 +425,6 @@ public:
       trampolines_.clear();
     }
   }
-
-private:
-  PatchDetour(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
 
   // Inspired by EasyHook.
   // TODO: Allow specifying a size rather than only supporting a single page.
