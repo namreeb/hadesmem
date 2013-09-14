@@ -8,22 +8,19 @@
 #include <locale>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <utility>
 #include <iterator>
 #include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/variant.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi_uint.hpp>
 #include <boost/numeric/conversion/cast.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include <Windows.h>
+#include <windows.h>
 
 #include <hadesmem/read.hpp>
 #include <hadesmem/error.hpp>
@@ -37,6 +34,7 @@
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/section_list.hpp>
+#include <hadesmem/detail/pattern_info.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
 // TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
@@ -64,58 +62,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif // #if defined(HADESMEM_CLANG)
-
-namespace hadesmem
-{
-
-namespace detail
-{
-
-struct PatternInfo
-{
-  std::wstring name;
-  std::wstring data;
-};
-
-struct ManipInfo
-{
-  struct Manipulator
-  {
-    enum 
-    {
-      kAdd, 
-      kSub, 
-      kRel, 
-      kLea
-    };
-  };
-  
-  int type;
-  // TODO: Use a DWORD_PTR here.
-  std::vector<unsigned long> operands;
-};
-
-struct PatternInfoFull
-{
-  PatternInfo pattern;
-  std::vector<ManipInfo> manipulators;
-};
-
-}
-
-}
-
-BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::PatternInfo, 
-  (std::wstring, name)
-  (std::wstring, data))
-
-BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::ManipInfo, 
-  (int, type)
-  (std::vector<unsigned long>, operands))
-
-BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::PatternInfoFull, 
-  (hadesmem::detail::PatternInfo, pattern)
-  (std::vector<hadesmem::detail::ManipInfo>, manipulators))
 
 namespace hadesmem
 {
@@ -527,6 +473,7 @@ public:
       BOOST_THROW_EXCEPTION(Error() << 
         ErrorString("Could not find target pattern."));
     }
+
     return iter->second;
   }
       
