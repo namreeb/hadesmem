@@ -16,7 +16,6 @@
 #include <boost/variant.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi_uint.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -34,6 +33,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/section.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/section_list.hpp>
@@ -250,7 +250,7 @@ inline Pattern& operator<<(Pattern& pattern, Manipulator const& manipulator)
 class Save : public Manipulator
 {
 public:
-  virtual void Manipulate(Pattern& pattern) const HADESMEM_DETAIL_FINAL;
+  virtual void Manipulate(Pattern& pattern) const final;
 };
 
 class Add : public Manipulator
@@ -260,7 +260,7 @@ public:
     : offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const HADESMEM_DETAIL_FINAL;
+  virtual void Manipulate(Pattern& pattern) const final;
   
 private:
   DWORD_PTR offset_;
@@ -273,7 +273,7 @@ public:
     : offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const HADESMEM_DETAIL_FINAL;
+  virtual void Manipulate(Pattern& pattern) const final;
     
 private:
   DWORD_PTR offset_;
@@ -282,7 +282,7 @@ private:
 class Lea : public Manipulator
 {
 public:
-  virtual void Manipulate(Pattern& pattern) const HADESMEM_DETAIL_FINAL;
+  virtual void Manipulate(Pattern& pattern) const final;
 };
 
 class Rel : public Manipulator
@@ -293,7 +293,7 @@ public:
     offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const HADESMEM_DETAIL_FINAL;
+  virtual void Manipulate(Pattern& pattern) const final;
   
 private:
   DWORD_PTR size_;
@@ -532,7 +532,14 @@ public:
       
   void LoadFile(std::wstring const& path)
   {
-    boost::filesystem::wifstream pattern_file(path);
+#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+    std::wifstream pattern_file(path, 
+      std::ios::binary | std::ios::ate);
+#else // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+    // TODO: Fix this for compilers other than MSVC and ICC.
+    std::wifstream pattern_file(hadesmem::detail::WideCharToMultiByte(path), 
+      std::ios::binary | std::ios::ate);
+#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
     if (!pattern_file)
     {
       BOOST_THROW_EXCEPTION(Error() << 

@@ -12,6 +12,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
@@ -40,14 +41,8 @@ inline FARPROC GetProcAddressInternal(
       if (e.IsForwarded())
       {
         std::string const forwarder_module_name(e.GetForwarderModule());
-        // TODO: Do the string conversion properly. Windows seems to use 
-        // RtlAnsiStringToUnicodeString according to some very quick 
-        // debugging. Need to investigate further and implement the correct 
-        // behavior.
-        std::wstring const forwarder_module_name_wide(
-          std::begin(forwarder_module_name), 
-          std::end(forwarder_module_name));
-        Module const forwarder_module(process, forwarder_module_name_wide);
+        Module const forwarder_module(process, 
+          MultiByteToWideChar(forwarder_module_name));
         return GetProcAddressInternal(
           process, 
           forwarder_module.GetHandle(), 
