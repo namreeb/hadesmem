@@ -424,7 +424,7 @@ void ApplyDetours(HMODULE d3d9_mod)
     }
     *d3d9_mod_tmp.first = d3d9_mod;
     
-    FARPROC const d3d9_create = hadesmem::detail::FindProcedureInternal(
+    FARPROC const d3d9_create = hadesmem::detail::GetProcAddressInternal(
       *g_process, d3d9_mod, "Direct3DCreate9");
     if (d3d9_create)
     {
@@ -442,7 +442,7 @@ void ApplyDetours(HMODULE d3d9_mod)
       HADESMEM_DETAIL_TRACE_A("Failed to find d3d9.dll!Direct3DCreate9.");
     }
     
-    FARPROC const d3d9_create_ex = hadesmem::detail::FindProcedureInternal(
+    FARPROC const d3d9_create_ex = hadesmem::detail::GetProcAddressInternal(
       *g_process, d3d9_mod, "Direct3DCreate9Ex");
     if (d3d9_create_ex)
     {

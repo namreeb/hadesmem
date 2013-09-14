@@ -136,9 +136,9 @@ inline HMODULE InjectDll(
   HADESMEM_DETAIL_TRACE_A("Finding LoadLibraryExW.");
 
   Module const kernel32_mod(process, L"kernel32.dll");
-  auto const load_library = detail::GetProcAddressInternal(
+  auto const load_library = FindProcedure(
     process, 
-    kernel32_mod.GetHandle(), 
+    kernel32_mod, 
     "LoadLibraryExW");
   
   HADESMEM_DETAIL_TRACE_A("Calling LoadLibraryExW.");
@@ -165,8 +165,10 @@ inline HMODULE InjectDll(
 inline void FreeDll(Process const& process, HMODULE module)
 {
   Module const kernel32_mod(process, L"kernel32.dll");
-  auto const free_library = detail::GetProcAddressInternal(process, 
-    kernel32_mod.GetHandle(), "FreeLibrary");
+  auto const free_library = FindProcedure(
+    process, 
+    kernel32_mod, 
+    "FreeLibrary");
 
   typedef BOOL (FreeLibraryFuncT)(HMODULE hModule);
   auto const free_library_ret = 

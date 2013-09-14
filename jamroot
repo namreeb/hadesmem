@@ -72,6 +72,10 @@ project memory
     # warning can be safely ignored as it's just a notification about a 
     # deficiency in the compiler, it doesn't indicate a problem with the code.
     <toolset>msvc:<cxxflags>"/wd4345"
+    # Disable "dynamic exception specifications are deprecated". Causes 
+    # unsuppressable false positives in Boost code, and no hadesmem code uses 
+    # dynamic exception specifications.
+    <toolset>intel:<cxxflags>"/Qwd3346"
     
     # Required for atomics library.
     <toolset>gcc,<address-model>32:<cxxflags>"-march=i686"

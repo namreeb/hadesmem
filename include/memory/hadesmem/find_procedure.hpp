@@ -19,10 +19,17 @@ inline FARPROC FindProcedure(
   Module const& module, 
   std::string const& name)
 {
-  return detail::FindProcedureInternal(
-    process, 
-    module.GetHandle(), 
-    name.c_str());
+  FARPROC const remote_func = detail::GetProcAddressInternal(
+    process, module.GetHandle(), name);
+  if (!remote_func)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("GetProcAddressInternal failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return remote_func;
 }
 
 inline FARPROC FindProcedure(
@@ -30,10 +37,17 @@ inline FARPROC FindProcedure(
   Module const& module, 
   WORD ordinal)
 {
-  return detail::FindProcedureInternal(
-    process, 
-    module.GetHandle(), 
-    MAKEINTRESOURCEA(ordinal));
+  FARPROC const remote_func = detail::GetProcAddressInternal(
+    process, module.GetHandle(), ordinal);
+  if (!remote_func)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("GetProcAddressInternal failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return remote_func;
 }
 
 }
