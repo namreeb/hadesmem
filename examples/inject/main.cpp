@@ -104,7 +104,7 @@ int main(int argc, char* /*argv*/[])
   {
     hadesmem::detail::InitializeAll();
 
-    std::cout << "HadesMem Injector\n";
+    std::cout << "HadesMem Injector [" << HADESMEM_VERSION_STRING << "]\n";
 
     boost::program_options::options_description const opts_desc = 
       GetOptionsDesc();

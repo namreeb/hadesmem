@@ -720,7 +720,7 @@ int main(int /*argc*/, char* /*argv*/[])
   {
     hadesmem::detail::InitializeAll();
 
-    std::cout << "HadesMem Dumper\n";
+    std::cout << "HadesMem Dumper [" << HADESMEM_VERSION_STRING << "]\n";
 
     boost::program_options::options_description opts_desc(
       "General options");
