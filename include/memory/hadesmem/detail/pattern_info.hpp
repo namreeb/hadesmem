@@ -37,8 +37,7 @@ struct ManipInfo
   };
   
   int type;
-  // TODO: Use a DWORD_PTR here.
-  std::vector<unsigned long> operands;
+  std::vector<DWORD_PTR> operands;
 };
 
 struct PatternInfoFull
@@ -57,7 +56,7 @@ BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::PatternInfo,
 
 BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::ManipInfo, 
   (int, type)
-  (std::vector<unsigned long>, operands))
+  (std::vector<DWORD_PTR>, operands))
 
 BOOST_FUSION_ADAPT_STRUCT(hadesmem::detail::PatternInfoFull, 
   (hadesmem::detail::PatternInfo, pattern)

@@ -38,8 +38,8 @@
 #include <hadesmem/detail/static_assert.hpp>
 
 // TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
-// appropriate, remove and add apis, fix bugs, clean up code, etc. Use new 
-// lanaguage features like noexcept, constexpr, etc.
+// appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new 
+// language features like noexcept, constexpr, etc.
 
 // TODO: Add stream overloads.
 
@@ -49,7 +49,8 @@
 
 // TODO: Pattern generator.
 
-// TODO: Multi-pass support (e.g. search for pattern, apply for manipulators, use as starting point for second search).
+// TODO: Multi-pass support (e.g. search for pattern, apply for manipulators, 
+// use as starting point for second search).
 
 // TODO: Arbitrary region support.
 
@@ -484,7 +485,8 @@ public:
       std::ios::binary | std::ios::ate);
 #else // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
     // TODO: Fix this for compilers other than MSVC and ICC.
-    std::wifstream pattern_file(hadesmem::detail::WideCharToMultiByte(path), 
+    std::wifstream pattern_file(
+      hadesmem::detail::WideCharToMultiByte(path), 
       std::ios::binary | std::ios::ate);
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
     if (!pattern_file)
@@ -533,9 +535,12 @@ public:
     
     boost::spirit::qi::rule<DataIter, int(), SkipWsT> const manip_name_rule = 
       manip_parser >> ',';
-    // TODO: Use a DWORD_PTR here.
-    boost::spirit::qi::rule<DataIter, std::vector<unsigned long>(), SkipWsT> 
+    boost::spirit::qi::rule<DataIter, std::vector<DWORD_PTR>(), SkipWsT> 
+#if defined(HADESMEM_DETAIL_ARCH_X86)
       const operand_rule = (boost::spirit::ulong_ % ',');
+#elif defined(HADESMEM_DETAIL_ARCH_X64)
+      const operand_rule = (boost::spirit::ulong_long % ',');
+#endif
     boost::spirit::qi::rule<DataIter, detail::ManipInfo(), SkipWsT> 
       const manip_rule = ('[' >> manip_name_rule >> operand_rule >> ']');
     boost::spirit::qi::rule<DataIter, detail::PatternInfoFull(), SkipWsT> 
