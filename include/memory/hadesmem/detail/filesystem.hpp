@@ -67,7 +67,7 @@ inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
 inline BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE file)
 {
   BY_HANDLE_FILE_INFORMATION file_info;
-  ZeroMemory(&file_info, sizeof(file_info));
+  ::ZeroMemory(&file_info, sizeof(file_info));
   if (!::GetFileInformationByHandle(file, &file_info))
   {
     DWORD const last_error = ::GetLastError();
