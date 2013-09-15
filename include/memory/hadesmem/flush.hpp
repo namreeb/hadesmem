@@ -17,7 +17,7 @@ inline void FlushInstructionCache(Process const& process, LPCVOID address,
   if (!::FlushInstructionCache(process.GetHandle(), address, size))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("FlushInstructionCache failed.") << 
       ErrorCodeWinLast(last_error));
   }

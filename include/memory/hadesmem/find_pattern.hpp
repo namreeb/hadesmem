@@ -290,7 +290,7 @@ public:
           pe_file, s.GetVirtualAddress()));
         if (section_beg == nullptr)
         {
-          BOOST_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("Could not get section base address."));
         }
           
@@ -309,7 +309,7 @@ public:
     
     if (code_regions_.empty() && data_regions_.empty())
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("No valid sections to scan found."));
     }
   }
@@ -398,7 +398,7 @@ public:
       data_parsed);
     if (!converted || data_beg != data_end)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Data parsing failed."));
     }
     
@@ -417,7 +417,7 @@ public:
         }
         catch (std::exception const& /*e*/)
         {
-          BOOST_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("Data conversion failed (numeric)."));
         }
       });
@@ -430,7 +430,7 @@ public:
     if (!address && ((flags & FindPatternFlags::kThrowOnUnmatch) == 
       FindPatternFlags::kThrowOnUnmatch))
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Could not match pattern."));
     }
     
@@ -471,7 +471,7 @@ public:
     auto const iter = addresses_.find(name);
     if (iter == std::end(addresses_))
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Could not find target pattern."));
     }
 
@@ -491,7 +491,7 @@ public:
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
     if (!pattern_file)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Could not open pattern file."));
     }
     
@@ -560,7 +560,7 @@ public:
       pattern_list);
     if (!parsed || data_beg != data_end)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Parsing failed."));
     }
     
@@ -584,7 +584,7 @@ public:
         case detail::ManipInfo::Manipulator::kAdd:
           if (m.operands.size() != 1)
           {
-            BOOST_THROW_EXCEPTION(Error() << 
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
               ErrorString("Invalid manipulator operands for 'Add'."));
           }
           
@@ -595,7 +595,7 @@ public:
         case detail::ManipInfo::Manipulator::kSub:
           if (m.operands.size() != 1)
           {
-            BOOST_THROW_EXCEPTION(Error() << 
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
               ErrorString("Invalid manipulator operands for 'Sub'."));
           }
           
@@ -606,7 +606,7 @@ public:
         case detail::ManipInfo::Manipulator::kRel:
           if (m.operands.size() != 2)
           {
-            BOOST_THROW_EXCEPTION(Error() << 
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
               ErrorString("Invalid manipulator operands for 'Rel'."));
           }
           
@@ -617,7 +617,7 @@ public:
         case detail::ManipInfo::Manipulator::kLea:
           if (m.operands.size() != 0)
           {
-            BOOST_THROW_EXCEPTION(Error() << 
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
               ErrorString("Invalid manipulator operands for 'Lea'."));
           }
           
@@ -626,7 +626,7 @@ public:
           break;
           
         default:
-          BOOST_THROW_EXCEPTION(Error() << 
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
             ErrorString("Unknown manipulator."));
         }
       }

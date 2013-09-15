@@ -303,7 +303,7 @@ public:
       unsigned int const len = ud_disassemble(&ud_obj);
       if (len == 0)
       {
-        BOOST_THROW_EXCEPTION(Error() << 
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
           ErrorString("Disassembly failed."));
       }
         
@@ -484,7 +484,7 @@ private:
 
     if (!trampoline)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Failed to find trampoline memory block."));
     }
 
@@ -577,7 +577,7 @@ private:
     // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Unexpected stub size."));
     }
 
@@ -640,7 +640,7 @@ private:
     // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Unexpected stub size."));
     }
 

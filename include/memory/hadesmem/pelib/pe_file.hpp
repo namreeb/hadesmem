@@ -151,7 +151,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     IMAGE_DOS_HEADER dos_header = Read<IMAGE_DOS_HEADER>(process, base);
     if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Invalid DOS header."));
     }
 
@@ -160,7 +160,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       ptr_nt_headers);
     if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
     {
-      BOOST_THROW_EXCEPTION(Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Invalid NT headers."));
     }
 

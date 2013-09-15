@@ -109,7 +109,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
     HRESULT const line_hr = d3dx_create_line(device_, &render_data_.line);
     if (FAILED(line_hr))
     {
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("Failed to create line.") << 
         hadesmem::ErrorCodeWinHr(line_hr));
     }
@@ -144,7 +144,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
       &render_data_.font);
     if (FAILED(font_hr))
     {
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("Failed to create font.") << 
         hadesmem::ErrorCodeWinHr(font_hr));
     }
@@ -153,7 +153,7 @@ IDirect3DDevice9Proxy::IDirect3DDevice9Proxy(IDirect3DDevice9* ppdevice)
       0, 255);
     if (FAILED(preload_characters_hr))
     {
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("Failed to preload characters.") << 
         hadesmem::ErrorCodeWinHr(preload_characters_hr));
     }
@@ -1138,7 +1138,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(begin_state_block_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::BeginStateBlock failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(begin_state_block_hr));
@@ -1262,7 +1262,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
     if (FAILED(set_render_state_hr))
     {
       DWORD const last_error = ::GetLastError();
-      BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
         hadesmem::ErrorString("IDirect3DDevice9::SetPixelShader failed.") << 
         hadesmem::ErrorCodeWinLast(last_error) << 
         hadesmem::ErrorCodeWinHr(set_render_state_hr));
@@ -1273,7 +1273,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(set_pixel_shader_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::SetPixelShader failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(set_pixel_shader_hr));
@@ -1283,7 +1283,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(set_vertex_shader_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::SetVertexShader failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(set_vertex_shader_hr));
@@ -1293,7 +1293,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(set_texture_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::SetTexture failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(set_texture_hr));
@@ -1304,7 +1304,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(set_vertex_declaration_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::SetVertexDeclaration failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(set_vertex_declaration_hr));
@@ -1315,7 +1315,7 @@ IDirect3DStateBlock9* IDirect3DDevice9Proxy::CreateDefaultStateBlock()
   if (FAILED(end_state_block_hr))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(hadesmem::Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("IDirect3DDevice9::EndStateBlock failed.") << 
       hadesmem::ErrorCodeWinLast(last_error) << 
       hadesmem::ErrorCodeWinHr(end_state_block_hr));

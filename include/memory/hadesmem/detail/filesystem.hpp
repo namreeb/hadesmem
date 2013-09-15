@@ -35,7 +35,7 @@ inline std::wstring CombinePath(std::wstring const& base, std::wstring const& ap
   if (!::PathCombineW(buffer.data(), base.c_str(), append.c_str()))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("PathCombineW failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -56,7 +56,7 @@ inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
   if (file == INVALID_HANDLE_VALUE)
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("CreateFile failed.") << 
       ErrorCodeWinLast(last_error));
   }
@@ -71,7 +71,7 @@ inline BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE file)
   if (!::GetFileInformationByHandle(file, &file_info))
   {
     DWORD const last_error = ::GetLastError();
-    BOOST_THROW_EXCEPTION(Error() << 
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
       ErrorString("GetFileInformationByHandle failed.") << 
       ErrorCodeWinLast(last_error));
   }
