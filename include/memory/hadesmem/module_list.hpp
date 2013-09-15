@@ -7,9 +7,9 @@
 #include <memory>
 #include <utility>
 
-#include <tlhelp32.h>
 #include <windows.h>
-
+#include <tlhelp32.h>
+ 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/optional.hpp>

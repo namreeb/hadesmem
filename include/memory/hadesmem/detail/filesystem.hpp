@@ -3,10 +3,15 @@
 
 #pragma once
 
-#include <shlwapi.h>
+#include <string>
+#include <vector>
+
 #include <windows.h>
+#include <shlwapi.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {

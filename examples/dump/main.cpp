@@ -1,48 +1,50 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include <algorithm>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/debug_privilege.hpp>
+#include <hadesmem/detail/initialize.hpp>
+#include <hadesmem/detail/make_unique.hpp>
+#include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
-#include <hadesmem/region.hpp>
-#include <hadesmem/process.hpp>
 #include <hadesmem/module_list.hpp>
-#include <hadesmem/region_list.hpp>
-#include <hadesmem/thread_list.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/export.hpp>
-#include <hadesmem/process_list.hpp>
-#include <hadesmem/thread_entry.hpp>
-#include <hadesmem/process_entry.hpp>
+#include <hadesmem/pelib/export_dir.hpp>
+#include <hadesmem/pelib/export_list.hpp>
+#include <hadesmem/pelib/import_dir.hpp>
+#include <hadesmem/pelib/import_dir_list.hpp>
+#include <hadesmem/pelib/import_thunk.hpp>
+#include <hadesmem/pelib/import_thunk_list.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/section.hpp>
-#include <hadesmem/pelib/tls_dir.hpp>
-#include <hadesmem/pelib/dos_header.hpp>
-#include <hadesmem/pelib/export_dir.hpp>
-#include <hadesmem/pelib/import_dir.hpp>
-#include <hadesmem/pelib/nt_headers.hpp>
-#include <hadesmem/detail/self_path.hpp>
-#include <hadesmem/detail/initialize.hpp>
-#include <hadesmem/pelib/export_list.hpp>
-#include <hadesmem/detail/make_unique.hpp>
-#include <hadesmem/pelib/import_thunk.hpp>
 #include <hadesmem/pelib/section_list.hpp>
-#include <hadesmem/pelib/import_dir_list.hpp>
-#include <hadesmem/pelib/import_thunk_list.hpp>
+#include <hadesmem/pelib/tls_dir.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/process_entry.hpp>
+#include <hadesmem/process_helpers.hpp>
+#include <hadesmem/process_list.hpp>
+#include <hadesmem/region.hpp>
+#include <hadesmem/region_list.hpp>
+#include <hadesmem/thread_list.hpp>
+#include <hadesmem/thread_entry.hpp>
 
 namespace
 {

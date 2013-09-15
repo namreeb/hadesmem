@@ -1,12 +1,12 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include <algorithm>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/filesystem.hpp>
@@ -16,17 +16,18 @@
 #include <windows.h>
 
 #include <hadesmem/call.hpp>
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/injector.hpp>
-#include <hadesmem/process_list.hpp>
-#include <hadesmem/process_entry.hpp>
-#include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/injector.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/process_entry.hpp>
+#include <hadesmem/process_list.hpp>
 
 // TODO: Add support for for passing args, work dir, etc to CreateAndInject.
 // e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN? Or just enforce that 

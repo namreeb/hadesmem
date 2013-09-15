@@ -82,6 +82,23 @@ inline detail::SmartHandle DuplicateHandle(HANDLE handle)
   return detail::SmartHandle(new_handle);
 }
 
+inline std::wstring QueryFullProcessImageName(HANDLE handle)
+{
+  HADESMEM_DETAIL_ASSERT(handle != nullptr);
+
+  std::vector<wchar_t> path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  DWORD path_len = static_cast<DWORD>(path.size());
+  if (!::QueryFullProcessImageNameW(handle, 0, path.data(), &path_len))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("QueryFullProcessImageName failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return path.data();
+}
+
 }
 
 }
