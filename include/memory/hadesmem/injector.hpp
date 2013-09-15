@@ -3,32 +3,31 @@
 
 #pragma once
 
-#include <array>
-#include <string>
-#include <vector>
-#include <utility>
-#include <utility>
-#include <iterator>
 #include <algorithm>
+#include <array>
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <windows.h>
 
-#include <hadesmem/call.hpp>
 #include <hadesmem/alloc.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/write.hpp>
+#include <hadesmem/call.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/argv_quote.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/filesystem.hpp>
+#include <hadesmem/detail/force_initialize.hpp>
+#include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/trace.hpp>
-#include <hadesmem/detail/assert.hpp>
-#include <hadesmem/find_procedure.hpp>
-#include <hadesmem/detail/self_path.hpp>
-#include <hadesmem/detail/argv_quote.hpp>
-#include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
-#include <hadesmem/detail/static_assert.hpp>
-#include <hadesmem/detail/force_initialize.hpp>
+#include <hadesmem/write.hpp>
 
 // TODO: .NET injection (without DLL dependency if possible).
 

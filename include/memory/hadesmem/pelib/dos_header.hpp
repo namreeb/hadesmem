@@ -4,21 +4,21 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <iosfwd>
 #include <memory>
-#include <cstddef>
 #include <ostream>
 #include <utility>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include <hadesmem/read.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
+#include <hadesmem/write.hpp>
 
 namespace hadesmem
 {

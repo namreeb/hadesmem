@@ -8,10 +8,10 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/error.hpp>
 
 namespace hadesmem
 {

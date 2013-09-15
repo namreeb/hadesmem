@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <vector>
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
-#include <utility>
 #include <iterator>
-#include <algorithm>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/mpl/at.hpp>
-#include <boost/variant.hpp>
 #include <boost/preprocessor.hpp>
+#include <boost/variant.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
@@ -23,22 +23,22 @@
 #include <asmjit/asmjit.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include <hadesmem/read.hpp>
 #include <hadesmem/alloc.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/detail/func_args.hpp>
 #include <hadesmem/detail/func_arity.hpp>
 #include <hadesmem/detail/func_result.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/remote_thread.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/find_procedure.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
+#include <hadesmem/write.hpp>
 
 // TODO: Cross-session injection (also cross-winsta and cross-desktop 
 // injection). Easiest solution is to use a broker process via a service 

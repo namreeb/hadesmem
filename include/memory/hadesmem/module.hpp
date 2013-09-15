@@ -3,26 +3,26 @@
 
 #pragma once
 
-#include <string>
 #include <cstring>
-#include <ostream>
-#include <utility>
 #include <functional>
+#include <ostream>
+#include <string>
+#include <utility>
 
-#include <windows.h>
 #include <tlhelp32.h>
+#include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/pelib/export.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/pelib/export.hpp>
+#include <hadesmem/pelib/export_list.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {

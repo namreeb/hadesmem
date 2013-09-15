@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <vector>
 #include <cstdio>
+#include <vector>
 
 #include <windows.h>
 

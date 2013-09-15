@@ -4,17 +4,16 @@
 #pragma once
 
 #include <ctime>
+#include <iostream>
 #include <locale>
 #include <random>
-#include <iostream>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/locale.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <windows.h>
 // Required for ::_CrtSetDbgFlag.
 // Does not compile under GCC.
 #if !defined(HADESMEM_GCC)
@@ -22,19 +21,18 @@
 #if !defined(HADESMEM_CLANG)
 #define _CRTDBG_MAP_ALLOC
 #endif // #if !defined(HADESMEM_CLANG)
-#include <stdlib.h>
 #include <crtdbg.h>
+#include <stdlib.h>
 #endif // #if !defined(HADESMEM_GCC)
+#include <windows.h>
 
+#include <hadesmem/detail/assert.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
-#include <hadesmem/detail/assert.hpp>
 
 #if !defined(PROCESS_CALLBACK_FILTER_ENABLED)
 #define PROCESS_CALLBACK_FILTER_ENABLED 0x1UL
 #endif // #if !defined(PROCESS_CALLBACK_FILTER_ENABLED)
-
-#include <windows.h>
 
 namespace hadesmem
 {

@@ -5,10 +5,10 @@
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/error.hpp>
 
 namespace hadesmem
 {

@@ -7,8 +7,8 @@
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 namespace hadesmem

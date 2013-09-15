@@ -3,18 +3,17 @@
 
 #pragma once
 
-#include <iosfwd>
 #include <memory>
 #include <ostream>
 #include <utility>
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
-#include <hadesmem/detail/query_region.hpp>
 
 namespace hadesmem
 {

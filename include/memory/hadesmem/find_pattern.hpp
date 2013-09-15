@@ -3,39 +3,39 @@
 
 #pragma once
 
+#include <algorithm>
+#include <fstream>
+#include <iterator>
 #include <map>
 #include <limits>
 #include <locale>
 #include <string>
-#include <vector>
-#include <fstream>
 #include <utility>
-#include <iterator>
-#include <algorithm>
+#include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/qi_uint.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_uint.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
 
-#include <hadesmem/read.hpp>
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/module_list.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/pelib/section.hpp>
-#include <hadesmem/detail/str_conv.hpp>
-#include <hadesmem/pelib/dos_header.hpp>
-#include <hadesmem/pelib/nt_headers.hpp>
-#include <hadesmem/pelib/section_list.hpp>
 #include <hadesmem/detail/pattern_info.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/str_conv.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/module_list.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/section.hpp>
+#include <hadesmem/pelib/section_list.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
 
 // TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
 // appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new 

@@ -3,20 +3,20 @@
 
 #pragma once
 
+#include <cstddef>
 #include <iosfwd>
 #include <memory>
-#include <cstddef>
 #include <ostream>
 #include <utility>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include <hadesmem/read.hpp>
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
 
 // TODO: Extra sanity checking in all components. E.g. Check 
 // NumberOfRvaAndSizes in NtHeaders before attempting to retrieve a data dir.
@@ -86,8 +86,8 @@ public:
   }
 
 private:
-    PBYTE base_;
-    PeFileType type_;
+  PBYTE base_;
+  PeFileType type_;
 };
 
 inline bool operator==(PeFile const& lhs, PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT

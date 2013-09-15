@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <string>
 #include <cstddef>
 #include <iterator>
+#include <string>
 
 namespace hadesmem
 {

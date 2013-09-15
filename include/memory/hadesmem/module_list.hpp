@@ -3,21 +3,21 @@
 
 #pragma once
 
+#include <iterator>
 #include <memory>
 #include <utility>
-#include <iterator>
 
-#include <windows.h>
 #include <tlhelp32.h>
+#include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/optional.hpp>
-#include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/toolhelp.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {

@@ -5,9 +5,9 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
 
 namespace hadesmem
 {

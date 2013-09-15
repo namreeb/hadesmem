@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 #include <utility>
 
-#include <windows.h>
 #include <tlhelp32.h>
+#include <windows.h>
 
 #include <hadesmem/config.hpp>
 

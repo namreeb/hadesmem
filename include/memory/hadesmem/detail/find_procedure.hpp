@@ -3,19 +3,19 @@
 
 #pragma once
 
-#include <string>
 #include <algorithm>
+#include <string>
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/pelib/export.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/str_conv.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/pelib/export.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {

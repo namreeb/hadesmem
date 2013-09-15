@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <locale>
-#include <memory>
-#include <vector>
 #include <climits>
 #include <cstdint>
+#include <locale>
+#include <memory>
 #include <sstream>
+#include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <asmjit/asmjit.h>
@@ -20,16 +20,16 @@
 
 #include <windows.h>
 
-#include <hadesmem/read.hpp>
 #include <hadesmem/alloc.hpp>
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/make_unique.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
-#include <hadesmem/write.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/trace.hpp>
-#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/read.hpp>
 #include <hadesmem/thread_helpers.hpp>
-#include <hadesmem/detail/make_unique.hpp>
+#include <hadesmem/write.hpp>
 
 // TODO: Fix exception safety.
 

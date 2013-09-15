@@ -3,25 +3,25 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <iosfwd>
 #include <memory>
-#include <cstddef>
 #include <ostream>
 #include <utility>
-#include <algorithm>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include <hadesmem/read.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
+#include <hadesmem/write.hpp>
 
 // TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)

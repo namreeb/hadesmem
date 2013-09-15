@@ -5,8 +5,8 @@
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
 namespace hadesmem

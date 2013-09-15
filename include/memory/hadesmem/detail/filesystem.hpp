@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <windows.h>
 #include <shlwapi.h>
+#include <windows.h>
 
 #include <hadesmem/config.hpp>
 

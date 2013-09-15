@@ -7,9 +7,9 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/find_procedure.hpp>
 
 namespace hadesmem
 {

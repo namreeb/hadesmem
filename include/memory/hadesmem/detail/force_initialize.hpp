@@ -7,11 +7,11 @@
 
 #include <windows.h>
 
-#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/remote_thread.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/write.hpp>
 
 namespace hadesmem
 {

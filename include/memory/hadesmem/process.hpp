@@ -3,20 +3,20 @@
 
 #pragma once
 
-#include <string>
 #include <memory>
-#include <vector>
 #include <ostream>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/winapi.hpp>
+#include <hadesmem/error.hpp>
 
 // TODO: Support cross architecture process manipulation (opening an x86 
 // WoW64 process as native x64). Includes removing dependency of non-ntdll 

@@ -3,27 +3,27 @@
 
 #pragma once
 
+#include <cstddef>
 #include <iosfwd>
 #include <limits>
 #include <memory>
-#include <string>
-#include <cstddef>
 #include <ostream>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include <hadesmem/read.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/write.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/detail/str_to_num.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
-#include <hadesmem/detail/str_to_num.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/read.hpp>
+#include <hadesmem/write.hpp>
 
 // TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)

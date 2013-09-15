@@ -4,23 +4,23 @@
 #pragma once
 
 #include <array>
-#include <memory>
-#include <string>
-#include <vector>
 #include <cstddef>
 #include <exception>
+#include <memory>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 #include <windows.h>
 
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/protect_guard.hpp>
+#include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/detail/read_impl.hpp>
+#include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/protect.hpp>
-#include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/read_impl.hpp>
-#include <hadesmem/detail/type_traits.hpp>
-#include <hadesmem/detail/query_region.hpp>
-#include <hadesmem/detail/protect_guard.hpp>
-#include <hadesmem/detail/static_assert.hpp>
 
 // TODO: Support custom string, vector, etc types. Also support custom 
 // allocators, traits, etc.
