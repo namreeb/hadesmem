@@ -46,19 +46,16 @@
 // and CreateProcessAsUser. Potentially 'better' solution would be to use 
 // NtCreateThread/RtlCreateUserThread.
 
-// TODO: Support injection into CSRSS. CreateRemoteThread can't be used on 
-// CSRSS because when the thread is initialized it tries to notify CSRSS of 
-// the thread creation and gets confused. Potential workaround is to use 
-// NtCreateThread/RtlCreateUserThread.
-
 // TODO: Support using NtCreateThread/RtlCreateUserThread. Does not create an 
 // activation context, so it will need special work done to get cases like 
 // .NET working.
 
-// TODO: Support injected code using only NT APIs (for smss.exe etc).
+// TODO: Support injected code using only NT APIs (for native processes such 
+// as smss.exe etc).
 
-// TODO: Support injection into uninitialized processes, native processes, 
-// CSRSS, etc.
+// TODO: Support injecting into uninitialized processes without forcing a 
+// LdrInitializeThunk call, as this may cause execution of code which we 
+// want to hook (among other things)!
 
 // TODO: Improve safety via EH. Both x86 and x64.
 
