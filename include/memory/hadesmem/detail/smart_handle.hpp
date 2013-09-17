@@ -131,7 +131,8 @@ struct HandlePolicy
 {
   typedef HANDLE HandleT;
 
-  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return nullptr;
   }
@@ -165,7 +166,8 @@ struct LibraryPolicy
 {
   typedef HMODULE HandleT;
 
-  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return nullptr;
   }

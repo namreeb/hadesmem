@@ -153,7 +153,7 @@ private:
     }
   }
 
-  bool IsTargetThread(DWORD owner_id)
+  bool IsTargetThread(DWORD owner_id) HADESMEM_DETAIL_NOEXCEPT
   {
     return pid_ == static_cast<DWORD>(-1) || pid_ == owner_id;
   }

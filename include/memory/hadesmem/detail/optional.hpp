@@ -180,9 +180,12 @@ private:
     }
   }
 
-  typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type t_;
+  typename std::aligned_storage<sizeof(T), 
+    std::alignment_of<T>::value>::type t_;
   bool valid_;
 };
+
+// TODO: Add conditional noexcept to operator overloads.
 
 template <typename T>
 inline bool operator==(Optional<T> const& lhs, Optional<T> const& rhs)

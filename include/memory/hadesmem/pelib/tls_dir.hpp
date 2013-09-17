@@ -158,32 +158,38 @@ private:
   PBYTE base_;
 };
 
-inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) 
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
