@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <ctime>
 #include <iostream>
 #include <locale>
@@ -124,7 +125,7 @@ inline void EnableCrtDebugFlags()
 #if defined(_DEBUG)
   // Does not compile under GCC.
 #if !defined(HADESMEM_GCC)
-  int dbg_flags = ::_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+  std::int32_t dbg_flags = ::_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
   dbg_flags |= _CRTDBG_ALLOC_MEM_DF;
   dbg_flags |= _CRTDBG_LEAK_CHECK_DF;
   ::_CrtSetDbgFlag(dbg_flags);
@@ -153,14 +154,15 @@ inline void EnableBottomUpRand()
 {
   // This is a defense-in-depth measure, so the time should be sufficient 
   // entropy in all but the rarest cases.
-  std::mt19937 rand(static_cast<unsigned int>(std::time(nullptr)));
-  std::uniform_int_distribution<unsigned int> uint_dist(0, 256);
-  unsigned int const num_allocs = uint_dist(rand);
-  for (unsigned int i = 0; i != num_allocs; ++i)
+  std::random_device rseed;
+  std::mt19937 rand(rseed());
+  std::uniform_int_distribution<std::uint32_t> uint_dist(0, 256);
+  std::uint32_t const num_allocs = uint_dist(rand);
+  for (std::uint32_t i = 0; i != num_allocs; ++i)
   {
     // Reserve memory only, as committing it would be a waste.
     DWORD const kAllocSize64K = 64 * 1024;
-    if (!::VirtualAlloc(NULL, kAllocSize64K, MEM_RESERVE, PAGE_NOACCESS))
+    if (!::VirtualAlloc(nullptr, kAllocSize64K, MEM_RESERVE, PAGE_NOACCESS))
     {
       DWORD const last_error = ::GetLastError();
       HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 

@@ -175,7 +175,7 @@ int main(int argc, char* /*argv*/[])
     bool const path_resolution = IsOptionSet("path-resolution", var_map);
     bool const add_path = IsOptionSet("add-path", var_map);
 
-    int flags = hadesmem::InjectFlags::kNone;
+    std::uint32_t flags = hadesmem::InjectFlags::kNone;
     if (path_resolution)
     {
       flags |= hadesmem::InjectFlags::kPathResolution;

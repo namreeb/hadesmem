@@ -36,7 +36,7 @@ struct ManipInfo
     };
   };
   
-  int type;
+  std::int32_t type;
   std::vector<DWORD_PTR> operands;
 };
 

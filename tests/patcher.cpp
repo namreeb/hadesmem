@@ -56,10 +56,12 @@ std::unique_ptr<hadesmem::PatchDetour> g_detour;
 namespace
 {
 
-DWORD HookMe(int i1, int i2, int i3, int i4, int i5, int i6, 
-  int i7, int i8);
-DWORD HookMe(int i1, int i2, int i3, int i4, int i5, int i6, 
-  int i7, int i8)
+std::uint32_t HookMe(std::int32_t i1, std::int32_t i2, std::int32_t i3, 
+  std::int32_t i4, std::int32_t i5, std::int32_t i6, std::int32_t i7, 
+  std::int32_t i8);
+std::uint32_t HookMe(std::int32_t i1, std::int32_t i2, std::int32_t i3, 
+  std::int32_t i4, std::int32_t i5, std::int32_t i6, std::int32_t i7, 
+  std::int32_t i8)
 {
   std::string const foo("Foo");
   BOOST_CHECK_EQUAL(foo, "Foo");
@@ -76,15 +78,16 @@ DWORD HookMe(int i1, int i2, int i3, int i4, int i5, int i6,
   return 0x1234;
 }
 
-DWORD HookMeHk(int i1, int i2, int i3, int i4, int i5, int i6, 
-  int i7, int i8);
-DWORD HookMeHk(int i1, int i2, int i3, int i4, int i5, int i6, 
-  int i7, int i8)
+std::uint32_t HookMeHk(std::int32_t i1, std::int32_t i2, std::int32_t i3, 
+  std::int32_t i4, std::int32_t i5, std::int32_t i6, std::int32_t i7, 
+  std::int32_t i8);
+std::uint32_t HookMeHk(std::int32_t i1, std::int32_t i2, std::int32_t i3, 
+  std::int32_t i4, std::int32_t i5, std::int32_t i6, std::int32_t i7, 
+  std::int32_t i8)
 {
   BOOST_CHECK(g_detour->GetTrampoline() != nullptr);
   auto const orig = g_detour->GetTrampoline<decltype(&HookMe)>();
-  BOOST_CHECK_EQUAL(orig(i1, i2, i3, i4, i5, i6, i7, i8), 
-    static_cast<DWORD>(0x1234));
+  BOOST_CHECK_EQUAL(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1234UL);
   return 0x1337;
 }
 
@@ -133,8 +136,9 @@ BOOST_AUTO_TEST_CASE(patchraw)
 
 BOOST_AUTO_TEST_CASE(patchdetour)
 {
-  typedef AsmJit::FuncBuilder8<DWORD, int, int, int, int, int, int, int, int> 
-    HookMeFuncBuilderT;
+  typedef AsmJit::FuncBuilder8<std::uint32_t, std::int32_t, std::int32_t, 
+    std::int32_t, std::int32_t, std::int32_t, std::int32_t, std::int32_t, 
+    std::int32_t> HookMeFuncBuilderT;
 
   // TODO: Generate different kinds of code to test all instruction 
   // resolution code and ensure we're covering all the important cases.
@@ -196,11 +200,12 @@ BOOST_AUTO_TEST_CASE(patchdetour)
   auto const hook_me_wrapper = reinterpret_cast<decltype(&HookMe)>(
     reinterpret_cast<DWORD_PTR>(hook_me_wrapper_raw));
 
-  auto const hook_me_packaged = [&]()
-  {
-    return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
-  };
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1234));
+  auto const hook_me_packaged = 
+    [&]()
+    {
+      return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
+    };
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1234UL);
   
   hadesmem::Process const process(::GetCurrentProcessId());
 
@@ -211,21 +216,21 @@ BOOST_AUTO_TEST_CASE(patchdetour)
     reinterpret_cast<PVOID>(target_ptr), 
     reinterpret_cast<PVOID>(detour_ptr));
   
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1234));
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1234UL);
   
   g_detour->Apply();
   
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1337));
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1337UL);
   
   g_detour->Remove();
   
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1234));
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1234UL);
   
   g_detour->Apply();
   
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1337));
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1337UL);
   
   g_detour->Remove();
   
-  BOOST_CHECK_EQUAL(hook_me_packaged(), static_cast<DWORD>(0x1234));
+  BOOST_CHECK_EQUAL(hook_me_packaged(), 0x1234UL);
 }

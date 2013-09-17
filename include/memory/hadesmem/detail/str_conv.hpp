@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,7 +19,7 @@ namespace detail
 
 inline std::string WideCharToMultiByte(std::wstring const& in)
 {
-  int const buf_len = ::WideCharToMultiByte(
+  std::int32_t const buf_len = ::WideCharToMultiByte(
     CP_OEMCP, 
     WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, 
     in.c_str(), 
@@ -58,7 +59,7 @@ inline std::string WideCharToMultiByte(std::wstring const& in)
 
 inline std::wstring MultiByteToWideChar(std::string const& in)
 {
-  int const buf_len = ::MultiByteToWideChar(
+  std::int32_t const buf_len = ::MultiByteToWideChar(
     CP_OEMCP, 
     MB_ERR_INVALID_CHARS, 
     in.c_str(), 

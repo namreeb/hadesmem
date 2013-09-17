@@ -4,6 +4,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <iterator>
 #include <map>
@@ -84,10 +85,10 @@ class FindPattern;
 class Pattern
 {
 public:
-  Pattern(FindPattern& finder, std::wstring const& data, int flags);
+  Pattern(FindPattern& finder, std::wstring const& data, std::uint32_t flags);
   
   Pattern(FindPattern& finder, std::wstring const& data, 
-    std::wstring const& name, int flags);
+    std::wstring const& name, std::uint32_t flags);
 
 #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
@@ -158,7 +159,7 @@ public:
     return address_;
   }
 
-  int GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -171,7 +172,7 @@ private:
   FindPattern* finder_;
   std::wstring name_;
   PBYTE address_;
-  int flags_;
+  std::uint32_t flags_;
 };
 
 namespace pattern_manipulators
@@ -372,23 +373,23 @@ public:
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
   
-  PVOID Find(std::wstring const& data, int flags) const
+  PVOID Find(std::wstring const& data, std::uint32_t flags) const
   {
     HADESMEM_DETAIL_ASSERT(!(flags & 
-      ~(FindPatternFlags::kInvalidFlagMaxValue - 1)));
+      ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
 
     typedef std::wstring::const_iterator DataIter;
     typedef boost::spirit::qi::standard::space_type SkipWsT;
     
-    boost::spirit::qi::rule<DataIter, unsigned int(), SkipWsT> data_rule;
+    boost::spirit::qi::rule<DataIter, std::uint32_t(), SkipWsT> data_rule;
     data_rule %= (boost::spirit::qi::hex | 
       boost::spirit::qi::lit(L"??")[boost::spirit::qi::_val = 
       static_cast<unsigned int>(-1)]);
     
-    boost::spirit::qi::rule<DataIter, std::vector<unsigned int>(), SkipWsT> 
+    boost::spirit::qi::rule<DataIter, std::vector<std::uint32_t>(), SkipWsT> 
       const data_list_rule = +(data_rule);
     
-    std::vector<unsigned int> data_parsed;
+    std::vector<std::uint32_t> data_parsed;
     auto data_beg = std::begin(data);
     auto const data_end = std::end(data);
     bool const converted = boost::spirit::qi::phrase_parse(
@@ -405,11 +406,11 @@ public:
     std::vector<std::pair<BYTE, bool>> data_real;
     std::transform(std::begin(data_parsed), std::end(data_parsed), 
       std::back_inserter(data_real), 
-      [] (unsigned int current) -> std::pair<BYTE, bool>
+      [] (std::uint32_t current) -> std::pair<BYTE, bool>
       {
         try
         {
-          bool const is_wildcard = (current == static_cast<unsigned int>(-1));
+          bool const is_wildcard = (current == static_cast<std::uint32_t>(-1));
           BYTE const current_byte = is_wildcard 
             ? static_cast<BYTE>(0) 
             : boost::numeric_cast<BYTE>(current);
@@ -443,7 +444,7 @@ public:
     return address;
   }
   
-  PVOID Find(std::wstring const& data, std::wstring const& name, int flags)
+  PVOID Find(std::wstring const& data, std::wstring const& name, std::uint32_t flags)
   {
     PVOID const address = Find(data, flags);
     
@@ -564,9 +565,9 @@ public:
         ErrorString("Parsing failed."));
     }
     
-    int flags = FindPatternFlags::kNone;
+    std::uint32_t flags = FindPatternFlags::kNone;
     std::for_each(std::begin(flags_list), std::end(flags_list), 
-      [&] (int flag)
+      [&] (std::uint32_t flag)
       {
         flags |= flag;
       });
@@ -694,7 +695,7 @@ private:
 };
 
 inline Pattern::Pattern(FindPattern& finder, std::wstring const& data, 
-  int flags)
+  std::uint32_t flags)
   : finder_(&finder), 
   name_(), 
   address_(static_cast<PBYTE>(finder.Find(data, flags))), 
@@ -702,7 +703,7 @@ inline Pattern::Pattern(FindPattern& finder, std::wstring const& data,
 { }
 
 inline Pattern::Pattern(FindPattern& finder, std::wstring const& data, 
-  std::wstring const& name, int flags)
+  std::wstring const& name, std::uint32_t flags)
   : finder_(&finder), 
   name_(name), 
   address_(static_cast<PBYTE>(finder.Find(data, flags))), 

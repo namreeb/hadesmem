@@ -49,10 +49,10 @@ BOOST_AUTO_TEST_CASE(read_pod)
   
   struct TestPODType
   {
-    int a;
+    std::int32_t a;
     char* b;
     wchar_t c;
-    long long d;
+    std::int64_t d;
   };
   
   TestPODType test_pod_type = { 1, 0, L'a', 1234567812345678 };

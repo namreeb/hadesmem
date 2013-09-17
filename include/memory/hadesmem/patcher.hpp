@@ -77,7 +77,7 @@ namespace hadesmem
 class PatchRaw
 {
 public:
-  PatchRaw(
+  explicit PatchRaw(
     Process const& process, 
     PVOID target, 
     std::vector<BYTE> const& data)
@@ -208,7 +208,7 @@ private:
 class PatchDetour
 {
 public:
-  PatchDetour(Process const& process, PVOID target, PVOID detour)
+  explicit PatchDetour(Process const& process, PVOID target, PVOID detour)
     : process_(&process), 
     applied_(false), 
     target_(target), 
@@ -267,8 +267,8 @@ public:
 
     SuspendedProcess suspended_process(process_->GetId());
 
-    ULONG const kMaxInstructionLen = 15;
-    ULONG const kTrampSize = kMaxInstructionLen * 3;
+    std::uint32_t const kMaxInstructionLen = 15;
+    std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
 
     trampoline_ = hadesmem::detail::make_unique<Allocator>(
       *process_, kTrampSize);
@@ -297,10 +297,10 @@ public:
     // TODO: Detect cases where hooking may overflow past the end of a 
     // function, and fail. (Provide policy or flag to allow overriding this 
     // behaviour.) Examples may be instructions such as int 3, ret, jmp, etc.
-    unsigned int instr_size = 0;
+    std::uint32_t instr_size = 0;
     do
     {
-      unsigned int const len = ud_disassemble(&ud_obj);
+      std::uint32_t const len = ud_disassemble(&ud_obj);
       if (len == 0)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
@@ -329,7 +329,7 @@ public:
       {
         std::uint64_t const insn_base = ud_insn_off(&ud_obj);
         std::int32_t const insn_target = op->lval.sdword;
-        unsigned int const insn_len = ud_insn_len(&ud_obj);
+        std::uint32_t const insn_len = ud_insn_len(&ud_obj);
         PVOID jump_target = reinterpret_cast<PBYTE>(
           static_cast<DWORD_PTR>(insn_base)) + insn_target + insn_len;
         HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
@@ -353,9 +353,14 @@ public:
       instr_size += len;
     } while (instr_size < jump_size);
 
-    tramp_cur += WriteJump(tramp_cur, static_cast<PBYTE>(target_) + instr_size);
+    tramp_cur += WriteJump(
+      tramp_cur, 
+      static_cast<PBYTE>(target_) + instr_size);
 
-    FlushInstructionCache(*process_, trampoline_->GetBase(), trampoline_->GetSize());
+    FlushInstructionCache(
+      *process_, 
+      trampoline_->GetBase(), 
+      trampoline_->GetSize());
 
     orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
 
@@ -398,7 +403,8 @@ public:
 
 private:
   PatchDetour(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  PatchDetour& operator=(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchDetour& operator=(PatchDetour const& other) 
+    HADESMEM_DETAIL_DELETED_FUNCTION;
 
   // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
@@ -446,7 +452,8 @@ private:
     std::unique_ptr<Allocator> trampoline;
 
     auto const allocate_tramp = 
-      [] (Process const& process, PVOID addr, SIZE_T size) -> std::unique_ptr<Allocator>
+      [] (Process const& process, PVOID addr, SIZE_T size) -> 
+      std::unique_ptr<Allocator>
       {
         try
         {
@@ -466,7 +473,10 @@ private:
       LONG_PTR const higher = base + index;
       if (higher < search_end)
       {
-        if (trampoline = allocate_tramp(*process_, reinterpret_cast<PVOID>(higher), page_size))
+        if (trampoline = allocate_tramp(
+          *process_, 
+          reinterpret_cast<PVOID>(higher), 
+          page_size))
         {
           break;
         }
@@ -475,7 +485,10 @@ private:
       LONG_PTR const lower = base - index;
       if (lower > search_beg)
       {
-        if (trampoline = allocate_tramp(*process_, reinterpret_cast<PVOID>(lower), page_size))
+        if (trampoline = allocate_tramp(
+          *process_, 
+          reinterpret_cast<PVOID>(lower), 
+          page_size))
         {
           break;
         }
@@ -492,7 +505,9 @@ private:
 #elif defined(_M_IX86) 
     (void)address;
     return hadesmem::detail::make_unique<Allocator>(
-      *process_, nullptr, page_size);
+      *process_, 
+      nullptr, 
+      page_size);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

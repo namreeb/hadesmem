@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstdio>
 #include <vector>
 
@@ -44,14 +45,14 @@ do\
 #define HADESMEM_DETAIL_TRACE_FORMAT_IMPL(detail_char_type, \
   detail_format_func, detail_format, ...) \
 HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN \
-int const detail_num_char = detail_format_func(nullptr, 0, detail_format, \
+std::int32_t const detail_num_char = detail_format_func(nullptr, 0, detail_format, \
   __VA_ARGS__);\
 HADESMEM_DETAIL_ASSERT(detail_num_char > 0);\
 if (detail_num_char > 0)\
 {\
   std::vector<detail_char_type> detail_trace_buffer(\
     static_cast<std::size_t>(detail_num_char + 1));\
-  int const detail_num_char_actual = detail_format_func(\
+  std::int32_t const detail_num_char_actual = detail_format_func(\
     detail_trace_buffer.data(), \
     static_cast<std::size_t>(detail_num_char), \
     detail_format, \

@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <iterator>
 #include <string>
 #include <utility>
@@ -84,9 +85,10 @@ struct InjectFlags
 inline HMODULE InjectDll(
   Process const& process, 
   std::wstring const& path, 
-  int flags)
+  std::uint32_t flags)
 {
-  HADESMEM_DETAIL_ASSERT(!(flags & ~(InjectFlags::kInvalidFlagMaxValue - 1)));
+  HADESMEM_DETAIL_ASSERT(!(flags & 
+    ~(InjectFlags::kInvalidFlagMaxValue - 1UL)));
 
   std::wstring path_real(path);
 
@@ -302,7 +304,7 @@ inline CreateAndInjectData CreateAndInject(
   ArgsIter args_end, 
   std::wstring const& module, 
   std::string const& export_name, 
-  int flags)
+  std::uint32_t flags)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::wstring, 
     typename std::iterator_traits<ArgsIter>::value_type>::value);

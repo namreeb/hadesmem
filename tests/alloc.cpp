@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(alloc)
   ::ZeroMemory(&mbi, sizeof(mbi));
   BOOST_REQUIRE(::VirtualQuery(address, &mbi, sizeof(mbi)));
   BOOST_CHECK_EQUAL(mbi.BaseAddress, address);
-  BOOST_CHECK_EQUAL(mbi.RegionSize, static_cast<SIZE_T>(0x1000));
+  BOOST_CHECK_EQUAL(mbi.RegionSize, 0x1000UL);
   BOOST_CHECK_EQUAL(mbi.State, static_cast<DWORD>(MEM_COMMIT));
   BOOST_CHECK_EQUAL(mbi.Protect, static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
   BOOST_CHECK_EQUAL(mbi.Type, static_cast<DWORD>(MEM_PRIVATE));
@@ -62,15 +62,15 @@ BOOST_AUTO_TEST_CASE(allocator)
   
   hadesmem::Allocator allocator_1(process, 0x1000);
   BOOST_CHECK(allocator_1.GetBase());
-  BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
+  BOOST_CHECK_EQUAL(allocator_1.GetSize(), 0x1000UL);
   
   hadesmem::Allocator allocator_2(std::move(allocator_1));
   BOOST_CHECK(allocator_2.GetBase());
-  BOOST_CHECK_EQUAL(allocator_2.GetSize(), static_cast<SIZE_T>(0x1000));
+  BOOST_CHECK_EQUAL(allocator_2.GetSize(), 0x1000UL);
   
   allocator_1 = std::move(allocator_2);
   BOOST_CHECK(allocator_1.GetBase());
-  BOOST_CHECK_EQUAL(allocator_1.GetSize(), static_cast<SIZE_T>(0x1000));
+  BOOST_CHECK_EQUAL(allocator_1.GetSize(), 0x1000UL);
   
   BOOST_CHECK_NO_THROW(allocator_1.Free());
 

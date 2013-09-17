@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(write_pod)
   
   struct TestPODType
   {
-    int a;
+    std::int32_t a;
     char* b;
     wchar_t c;
-    long long d;
+    std::int64_t d;
   };
   
   TestPODType test_pod_type = { 1, 0, L'a', 1234567812345678 };
@@ -81,18 +81,18 @@ BOOST_AUTO_TEST_CASE(write_pod)
   BOOST_CHECK_EQUAL(std::memcmp(&test_pod_type_5, &test_pod_type_2, 
     sizeof(test_pod_type_5)), 0);
 
-  int int_arr_1[] = { 1, 2, 3, 4, 5 };
-  int new_inner_1[] = { 9, 8 };
+  std::int32_t int_arr_1[] = { 1, 2, 3, 4, 5 };
+  std::int32_t new_inner_1[] = { 9, 8 };
   hadesmem::Write(process, int_arr_1, new_inner_1, sizeof(new_inner_1) / sizeof(int));
-  int expected_arr_1[] = { 9, 8, 3, 4, 5 };
+  std::int32_t expected_arr_1[] = { 9, 8, 3, 4, 5 };
   BOOST_CHECK_EQUAL(std::memcmp(&int_arr_1[0], &expected_arr_1[0], 
     sizeof(int_arr_1)), 0);
 
-  int int_arr_2[] = { 1, 2, 3, 4, 5 };
-  int new_inner_2[] = { 9, 8 };
+  std::int32_t int_arr_2[] = { 1, 2, 3, 4, 5 };
+  std::int32_t new_inner_2[] = { 9, 8 };
   hadesmem::Write(process, int_arr_2, new_inner_2, new_inner_2 + 
     (sizeof(new_inner_2) / sizeof(int)));
-  int expected_arr_2[] = { 9, 8, 3, 4, 5 };
+  std::int32_t expected_arr_2[] = { 9, 8, 3, 4, 5 };
   BOOST_CHECK_EQUAL(std::memcmp(&int_arr_2[0], &expected_arr_2[0], 
     sizeof(int_arr_2)), 0);
 

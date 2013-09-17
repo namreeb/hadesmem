@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <type_traits>
@@ -1066,7 +1067,7 @@ namespace detail
 #pragma warning(disable: 4100)
 #endif // #if defined(HADESMEM_MSVC)
 
-template <typename FuncT, int N, typename T, typename OutputIterator>
+template <typename FuncT, std::int32_t N, typename T, typename OutputIterator>
 void AddCallArg(OutputIterator call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
@@ -1086,13 +1087,13 @@ void AddCallArg(OutputIterator call_args, T&& arg)
 namespace detail
 {
 
-template <typename FuncT, int N, typename OutputIterator>
+template <typename FuncT, std::int32_t N, typename OutputIterator>
 void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return;
 }
 
-template <typename FuncT, int N, typename T, typename OutputIterator, 
+template <typename FuncT, std::int32_t N, typename T, typename OutputIterator, 
   typename... Args>
 void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 {

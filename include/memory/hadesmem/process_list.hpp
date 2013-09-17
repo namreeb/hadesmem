@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -39,7 +40,7 @@ public:
     : impl_()
   { }
   
-  ProcessIterator(int /*dummy*/)
+  ProcessIterator(std::int32_t /*dummy*/)
     : impl_(std::make_shared<Impl>())
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
