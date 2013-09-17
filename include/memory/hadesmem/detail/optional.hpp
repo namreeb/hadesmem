@@ -8,10 +8,10 @@
 
 #include <hadesmem/config.hpp>
 
-// TODO: operator== and operator<.
-
 // TODO: Implement same interface as std::optional<T> to make switching later 
 // easier.
+
+// TODO: Add tests.
 
 namespace hadesmem
 {
@@ -183,6 +183,24 @@ private:
   typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type t_;
   bool valid_;
 };
+
+template <typename T>
+inline bool operator==(Optional<T> const& lhs, Optional<T> const& rhs)
+{
+  return (!lhs && !rhs) || ((rhs && lhs) && *rhs == *lhs);
+}
+
+template <typename T>
+inline bool operator!=(Optional<T> const& lhs, Optional<T> const& rhs)
+{
+  return !(lhs == rhs);
+}
+
+template <typename T>
+inline bool operator<(Optional<T> const& lhs, Optional<T> const& rhs)
+{
+  return (!lhs && !rhs) || ((rhs && lhs) && *rhs < *lhs);
+}
 
 }
 

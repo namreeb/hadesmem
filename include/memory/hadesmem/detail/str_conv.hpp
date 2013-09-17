@@ -10,6 +10,7 @@
 #include <windows.h>
 
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/assert.hpp>
 
 namespace hadesmem
 {
@@ -35,8 +36,8 @@ inline std::string WideCharToMultiByte(std::wstring const& in)
       ErrorString("WideCharToMultiByte failed.") << 
       ErrorCodeWinLast(last_error));
   }
+  HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
-  // TODO: Bounds checking before static_cast.
   std::vector<char> buf(static_cast<std::size_t>(buf_len));
   if (!::WideCharToMultiByte(
     CP_OEMCP, 
@@ -73,8 +74,8 @@ inline std::wstring MultiByteToWideChar(std::string const& in)
       ErrorString("MultiByteToWideChar failed.") << 
       ErrorCodeWinLast(last_error));
   }
+  HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
-  // TODO: Bounds checking before static_cast.
   std::vector<wchar_t> buf(static_cast<std::size_t>(buf_len));
   if (!::MultiByteToWideChar(
     CP_OEMCP, 

@@ -35,7 +35,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -114,7 +114,7 @@ public:
   
   ModuleIterator operator++(int)
   {
-    ModuleIterator iter(*this);
+    ModuleIterator const iter(*this);
     ++*this;
     return iter;
   }

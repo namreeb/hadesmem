@@ -38,10 +38,6 @@ namespace hadesmem
 
 // TODO: Support setting and writing back Export. (For EAT hooking.)
 
-// TODO: Improve export forwarding code to detect and handle 
-// forward-by-ordinal explicitly rather than forcing the user to detect it 
-// and do string manipulation and conversion.
-
 class Export
 {
 public:

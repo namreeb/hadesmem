@@ -102,14 +102,16 @@ inline FARPROC GetProcAddressFromExport(
     }
   }
 
-  // TODO: Investigate whether there is a way to do this that isn't 
-  // illegal. Or at least, a way that's potentially friendlier to the 
-  // compiler. Perhaps a union? What do compilers prefer?
-  void* va = e.GetVa();
-  FARPROC pfn = nullptr;
-  std::memcpy(&pfn, &va, sizeof(void*));
-
-  return pfn;
+  // NOTE: This is technically illegal, but we don't really have a choice.
+  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
+  union Conv
+  {
+    void* va;
+    FARPROC pfn;
+  };
+  Conv conv;
+  conv.va = e.GetVa();
+  return conv.pfn;
 }
 
 }

@@ -37,7 +37,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -50,9 +50,6 @@ public:
     }
     catch (std::exception const& /*e*/)
     {
-      // TODO: Check whether this is the right thing to do. We should only 
-      // flag as the 'end' once we've actually reached the end of the list. If 
-      // the iteration fails we should throw an exception.
       impl_.reset();
     }
   }
@@ -116,9 +113,6 @@ public:
     }
     catch (std::exception const& /*e*/)
     {
-      // TODO: Check whether this is the right thing to do. We should only 
-      // flag as the 'end' once we've actually reached the end of the list. If 
-      // the iteration fails we should throw an exception.
       impl_.reset();
     }
   
@@ -127,7 +121,7 @@ public:
   
   ImportDirIterator operator++(int)
   {
-    ImportDirIterator iter(*this);
+    ImportDirIterator const iter(*this);
     ++*this;
     return iter;
   }

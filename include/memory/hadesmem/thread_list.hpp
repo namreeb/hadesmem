@@ -35,7 +35,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_(), 
     pid_(0)
   { }
@@ -117,7 +117,7 @@ public:
   
   ThreadIterator operator++(int)
   {
-    ThreadIterator iter(*this);
+    ThreadIterator const iter(*this);
     ++*this;
     return iter;
   }

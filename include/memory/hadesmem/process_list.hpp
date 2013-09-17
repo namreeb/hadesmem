@@ -36,7 +36,7 @@ public:
   typedef typename BaseIteratorT::reference reference;
   typedef typename BaseIteratorT::iterator_category iterator_category;
 
-  ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
     : impl_()
   { }
   
@@ -112,7 +112,7 @@ public:
   
   ProcessIterator operator++(int)
   {
-    ProcessIterator iter(*this);
+    ProcessIterator const iter(*this);
     ++*this;
     return iter;
   }

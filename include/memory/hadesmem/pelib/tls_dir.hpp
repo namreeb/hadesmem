@@ -78,14 +78,12 @@ public:
       AddressOfCallBacks));
   }
   
-  // TODO: Decide whether to throw on a NULL AddressOfCallbacks, return an 
-  // empty container, or simply ignore it and consider it a precondition 
-  // violation. Update dumper afterwards to reflect decision. (Currently it 
-  // is manually checking AddressOfCallbacks.)
   template <typename OutputIterator>
   void GetCallbacks(OutputIterator callbacks) const
   {
-    // TODO: Iterator checks for type and category.
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+      typename std::iterator_traits<OutputIterator>::iterator_category>::
+      value);
     
     ULONG_PTR image_base = GetRuntimeBase(*process_, *pe_file_);
     auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(RvaToVa(
