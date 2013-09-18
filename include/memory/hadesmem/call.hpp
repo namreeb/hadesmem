@@ -15,7 +15,6 @@
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/preprocessor.hpp>
-#include <boost/variant.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
@@ -320,21 +319,45 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 class CallArg
 {
 public:
+  // TODO: Investigate whether taking the arg by value here (and elsewhere in 
+  // the class is the right thing to do. What if the copy constructor can 
+  // throw but the implicit conversion operator is noexcept... We can't even 
+  // guarantee that the conversion is noexcept though... Perhaps this should 
+  // be using conditional noexcept.
   template <typename T>
   explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT
-    : arg_()
+    : arg_(), 
+    type_(VariantType::kNone)
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value || 
       std::is_pointer<T>::value || 
       std::is_same<float, typename std::remove_cv<T>::type>::value || 
       std::is_same<double, typename std::remove_cv<T>::type>::value);
-    
+
     Initialize(t);
   }
-  
-  boost::variant<DWORD32, DWORD64, float, double> GetVariant() const
+
+  template <typename F>
+  void Apply(F f) const
   {
-    return arg_;
+    switch (type_)
+    {
+    case VariantType::kNone:
+      HADESMEM_DETAIL_ASSERT(false);
+      break;
+    case VariantType::kInt32:
+      f(arg_.i32);
+      break;
+    case VariantType::kInt64:
+      f(arg_.i64);
+      break;
+    case VariantType::kFloat32:
+      f(arg_.f32);
+      break;
+    case VariantType::kFloat64:
+      f(arg_.f64);
+      break;
+    }
   }
   
 private:
@@ -362,26 +385,46 @@ private:
 
   void Initialize(DWORD32 t) HADESMEM_DETAIL_NOEXCEPT
   {
-    arg_ = t;
+    arg_.i32 = t;
+    type_ = VariantType::kInt32;
   }
 
   void Initialize(DWORD64 t) HADESMEM_DETAIL_NOEXCEPT
   {
-    arg_ = t;
+    arg_.i64 = t;
+    type_ = VariantType::kInt64;
   }
-  
+
   void Initialize(float t) HADESMEM_DETAIL_NOEXCEPT
   {
-    arg_ = t;
+    arg_.f32 = t;
+    type_ = VariantType::kFloat32;
   }
-  
+
   void Initialize(double t) HADESMEM_DETAIL_NOEXCEPT
   {
-    arg_ = t;
+    arg_.f64 = t;
+    type_ = VariantType::kFloat64;
   }
-  
-  typedef boost::variant<DWORD32, DWORD64, float, double> Arg;
-  Arg arg_;
+
+  enum class VariantType
+  {
+    kNone, 
+    kInt32, 
+    kInt64, 
+    kFloat32, 
+    kFloat64
+  };
+
+  union Variant
+  {
+    DWORD32 i32;
+    DWORD64 i64;
+    float f32;
+    double f64;
+  };
+  Variant arg_;
+  VariantType type_;
 };
 
 namespace detail
@@ -389,7 +432,8 @@ namespace detail
   
 #if defined(HADESMEM_DETAIL_ARCH_X86)
 
-class ArgVisitor32 : public boost::static_visitor<>
+// TODO: Rename this class?
+class ArgVisitor32
 {
 public:
   ArgVisitor32(AsmJit::X86Assembler* assembler, std::size_t num_args, 
@@ -413,7 +457,8 @@ private:
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
-class ArgVisitor64 : public boost::static_visitor<>
+// TODO: Rename this class?
+class ArgVisitor64
 {
 public:
   ArgVisitor64(AsmJit::X86Assembler* assembler, std::size_t num_args) 
@@ -488,8 +533,7 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
-      auto variant = arg.GetVariant();
-      boost::apply_visitor(arg_visitor, variant);
+      arg.Apply(std::ref(arg_visitor));
     });
 
     assembler->mov(AsmJit::eax, reinterpret_cast<sysint_t>(address));
@@ -615,8 +659,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
-      auto variant = arg.GetVariant();
-      boost::apply_visitor(arg_visitor, variant);
+      arg.Apply(std::ref(arg_visitor));
     });
 
     assembler->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
