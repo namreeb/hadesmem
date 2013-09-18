@@ -696,7 +696,10 @@ void DumpDir(std::wstring const& path)
   std::wstring path_real(path);
   if (path_real.back() == L'\\')
   {
-    path_real.pop_back();
+    // libstdc++ 4.6 does not have pop_back for basic_string.
+    // TODO: Fix this once targetting a Clang build with a newer standard 
+    // library implementation
+    path_real.erase(path_real.size() - 1);
   }
 
   WIN32_FIND_DATA find_data;
