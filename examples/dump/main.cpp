@@ -697,7 +697,7 @@ void DumpDir(std::wstring const& path)
   if (path_real.back() == L'\\')
   {
     // libstdc++ 4.6 does not have pop_back for basic_string.
-    // TODO: Fix this once targetting a Clang build with a newer standard 
+    // TODO: Fix this once targeting a Clang build with a newer standard 
     // library implementation
     path_real.erase(path_real.size() - 1);
   }
