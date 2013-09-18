@@ -7,7 +7,7 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE process
+#define BOOST_TEST_MODULE thread
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/thread.hpp>
 #include <boost/test/unit_test.hpp>

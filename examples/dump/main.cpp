@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -9,7 +10,6 @@
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
@@ -21,6 +21,7 @@
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
@@ -688,30 +689,67 @@ void DumpFile(std::wstring const& path)
 // throws on increment, even when you construct it as no-throw.
 void DumpDir(std::wstring const& path)
 {
-  std::wcout << "\nEntering dir: " << path << ".\n";
+  std::wcout << "\nEntering dir: \"" << path << "\".\n";
 
-  boost::system::error_code ec;
-  boost::filesystem::directory_iterator iter(path, ec);
-  boost::filesystem::directory_iterator end;
+  // TODO: Directory enumeration API (custom iterator?).
 
-  while (iter != end && !ec)
+  std::wstring path_real(path);
+  if (path_real.back() == L'\\')
   {
-    auto const& cur_path = *iter;
+    path_real.pop_back();
+  }
 
-    std::wstring const cur_path_str = cur_path.path().native();
-
-    std::wcout << "\nCurrent path: " << cur_path << ".\n";
-    
-    if (hadesmem::detail::IsDirectory(cur_path_str) && 
-      !hadesmem::detail::IsSymlink(cur_path_str))
+  WIN32_FIND_DATA find_data;
+  ZeroMemory(&find_data, sizeof(find_data));
+  hadesmem::detail::SmartFindHandle const handle(
+    ::FindFirstFile((path_real + L"\\*").c_str(), &find_data));
+  if (!handle.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    if (last_error == ERROR_FILE_NOT_FOUND)
     {
-      DumpDir(cur_path_str);
+      std::wcout << "\nDirectory is empty.\n";
+      return;
+    }
+    if (last_error == ERROR_ACCESS_DENIED)
+    {
+      std::wcout << "\nAccess denied to directory.\n";
+      return;
+    }
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
+      hadesmem::ErrorString("FindFirstFile failed.") << 
+      hadesmem::ErrorCodeWinLast(last_error));
+  }
+
+  do 
+  {
+    std::wstring const cur_file = find_data.cFileName;
+    if (cur_file == L"." || cur_file == L"..")
+    {
+      continue;
     }
 
-    DumpFile(cur_path_str);
+    std::wstring const cur_path = path_real + L"\\" + cur_file;
 
-    ++iter;
+    std::wcout << "\nCurrent path: \"" << cur_path << "\".\n";
+
+    if (hadesmem::detail::IsDirectory(cur_path) && 
+      !hadesmem::detail::IsSymlink(cur_path))
+    {
+      DumpDir(cur_path);
+    }
+
+    DumpFile(cur_path);
+  } while (::FindNextFile(handle.GetHandle(), &find_data));
+
+  DWORD const last_error = ::GetLastError();
+  if (last_error == ERROR_NO_MORE_FILES)
+  {
+    return;
   }
+  HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
+    hadesmem::ErrorString("FindNextFile failed.") << 
+    hadesmem::ErrorCodeWinLast(last_error));
 }
 
 }
