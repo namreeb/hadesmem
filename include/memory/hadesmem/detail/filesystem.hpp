@@ -130,7 +130,7 @@ inline std::wstring GetRootPath(std::wstring const& path)
   return drive_path.data();
 }
 
-DWORD GetFileAttributes(std::wstring const& path)
+inline DWORD GetFileAttributes(std::wstring const& path)
 {
   DWORD const attributes = ::GetFileAttributes(path.c_str());
   if (attributes == INVALID_FILE_ATTRIBUTES)
