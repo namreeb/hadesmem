@@ -10,7 +10,6 @@
 #include <random>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -259,7 +258,7 @@ inline void EnableMitigationPolicies()
 }
 
 // Sets the global locale, and imbues all existing static streams with the 
-// new locale (including 3rd party libraries like Boost.Filesystem).
+// new locale.
 inline std::locale ImbueAll(std::locale const& locale)
 {
   auto const old_loc = std::locale::global(locale);
@@ -273,8 +272,6 @@ inline std::locale ImbueAll(std::locale const& locale)
   std::wcout.imbue(locale);
   std::wcerr.imbue(locale);
   std::wclog.imbue(locale);
-
-  boost::filesystem::path::imbue(locale);
 
   // According to comments in the Boost.Locale examples, this is needed 
   // to prevent the C standard library performing string conversions 

@@ -104,6 +104,32 @@ inline bool ArePathsEquivalent(std::wstring const& left, std::wstring const& rig
     right_file_info.ftLastWriteTime.dwHighDateTime;
 }
 
+inline std::wstring GetRootPath(std::wstring const& path)
+{
+  int const drive_num = ::PathGetDriveNumber(path.c_str());
+  if (drive_num == -1)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("PathGetDriveNumber failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  std::vector<wchar_t> drive_path(4);
+  PathBuildRoot(drive_path.data(), drive_num);
+  if (drive_path[0] == L'\0' || 
+    drive_path[1] == L'\0' || 
+    drive_path[2] == L'\0')
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("PathBuildRoot failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return drive_path.data();
+}
+
 }
 
 }

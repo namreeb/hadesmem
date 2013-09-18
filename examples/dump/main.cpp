@@ -21,6 +21,7 @@
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
@@ -599,13 +600,13 @@ void DumpProcesses()
 }
 
 // TODO: Cleanup.
-void DumpFile(boost::filesystem::path const& path)
+void DumpFile(std::wstring const& path)
 {
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  std::ifstream file(path.native(), std::ios::binary | std::ios::ate);
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
 #else // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   // TODO: Fix this for compilers other than MSVC and ICC.
-  std::ifstream file(path.string<std::string>(), 
+  std::ifstream file(hadesmem::detail::WideCharToMultiByte(path), 
     std::ios::binary | std::ios::ate);
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   if (!file)
@@ -685,7 +686,7 @@ void DumpFile(boost::filesystem::path const& path)
 
 // Doing directory recursion 'manually' because recursive_directory_iterator 
 // throws on increment, even when you construct it as no-throw.
-void DumpDir(boost::filesystem::path const& path)
+void DumpDir(std::wstring const& path)
 {
   std::wcout << "\nEntering dir: " << path << ".\n";
 
@@ -702,12 +703,12 @@ void DumpDir(boost::filesystem::path const& path)
     if (boost::filesystem::is_directory(cur_path) && 
       !boost::filesystem::is_symlink(cur_path))
     {
-      DumpDir(cur_path);
+      DumpDir(cur_path.path().native());
     }
 
     if (boost::filesystem::is_regular_file(cur_path))
     {
-      DumpFile(cur_path);
+      DumpFile(cur_path.path().native());
     }
 
     ++iter;
@@ -793,10 +794,11 @@ int main(int /*argc*/, char* /*argv*/[])
 
       std::wcout << "\nFiles:\n";
 
-      boost::filesystem::path const self_path = 
+      std::wstring const self_path = 
         hadesmem::detail::GetSelfPath();
-      boost::filesystem::path const root_dir = self_path.root_path();
-      DumpDir(root_dir);
+      std::wstring const root_path = 
+        hadesmem::detail::GetRootPath(self_path);
+      DumpDir(root_path);
   }
 
     return 0;

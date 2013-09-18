@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -18,6 +17,7 @@
 #include <hadesmem/call.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
@@ -259,15 +259,15 @@ int main(int argc, char* /*argv*/[])
       }
       else
       {
-        boost::filesystem::path path_real(module_path);
-        if (path_resolution && path_real.is_relative())
+        std::wstring path_real(module_path);
+        if (path_resolution && hadesmem::detail::IsPathRelative(path_real))
         {
-          path_real = boost::filesystem::absolute(path_real, 
-            hadesmem::detail::GetSelfDirPath());
+          path_real = hadesmem::detail::CombinePath(
+            hadesmem::detail::GetSelfDirPath(), 
+            path_real);
         }
-        path_real.make_preferred();
 
-        hadesmem::Module const remote_module(*process, path_real.native());
+        hadesmem::Module const remote_module(*process, path_real);
         module = remote_module.GetHandle();
       }
 

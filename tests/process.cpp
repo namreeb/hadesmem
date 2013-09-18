@@ -9,12 +9,12 @@
 
 #define BOOST_TEST_MODULE process
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process_helpers.hpp>
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(this_process)
   BOOST_CHECK_EQUAL(process.GetId(), process_id_2);
   std::wstring const path(hadesmem::GetPath(process));
   BOOST_CHECK(!path.empty());
-  BOOST_CHECK(boost::filesystem::exists(path));
+  BOOST_CHECK(hadesmem::detail::DoesFileExist(path));
   BOOL is_wow64_real = FALSE;
   BOOST_CHECK(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
   BOOST_CHECK_EQUAL(hadesmem::IsWoW64(process), is_wow64_real != FALSE);
