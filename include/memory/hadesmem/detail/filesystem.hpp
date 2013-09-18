@@ -130,6 +130,36 @@ inline std::wstring GetRootPath(std::wstring const& path)
   return drive_path.data();
 }
 
+DWORD GetFileAttributes(std::wstring const& path)
+{
+  DWORD const attributes = ::GetFileAttributes(path.c_str());
+  if (attributes == INVALID_FILE_ATTRIBUTES)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+      ErrorString("GetFileAttributes failed.") << 
+      ErrorCodeWinLast(last_error));
+  }
+
+  return attributes;
+}
+
+inline bool IsDirectory(std::wstring const& path)
+{
+  DWORD const attributes = ::hadesmem::detail::GetFileAttributes(
+    path.c_str());
+  return (attributes & FILE_ATTRIBUTE_DIRECTORY) == 
+    FILE_ATTRIBUTE_DIRECTORY;
+}
+
+inline bool IsSymlink(std::wstring const& path)
+{
+  DWORD const attributes = ::hadesmem::detail::GetFileAttributes(
+    path.c_str());
+  return (attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 
+    FILE_ATTRIBUTE_REPARSE_POINT;
+}
+
 }
 
 }

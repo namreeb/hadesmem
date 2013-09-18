@@ -698,18 +698,17 @@ void DumpDir(std::wstring const& path)
   {
     auto const& cur_path = *iter;
 
+    std::wstring const cur_path_str = cur_path.path().native();
+
     std::wcout << "\nCurrent path: " << cur_path << ".\n";
     
-    if (boost::filesystem::is_directory(cur_path) && 
-      !boost::filesystem::is_symlink(cur_path))
+    if (hadesmem::detail::IsDirectory(cur_path_str) && 
+      !hadesmem::detail::IsSymlink(cur_path_str))
     {
-      DumpDir(cur_path.path().native());
+      DumpDir(cur_path_str);
     }
 
-    if (boost::filesystem::is_regular_file(cur_path))
-    {
-      DumpFile(cur_path.path().native());
-    }
+    DumpFile(cur_path_str);
 
     ++iter;
   }
