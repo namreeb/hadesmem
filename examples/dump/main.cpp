@@ -719,6 +719,11 @@ void DumpDir(std::wstring const& path)
       std::wcout << "\nAccess denied to directory.\n";
       return;
     }
+    if (last_error == ERROR_SHARING_VIOLATION)
+    {
+      std::wcout << "\nSharing violation.\n";
+      return;
+    }
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("FindFirstFile failed.") << 
       hadesmem::ErrorCodeWinLast(last_error));
