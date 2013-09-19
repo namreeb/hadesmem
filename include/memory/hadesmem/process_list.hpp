@@ -48,7 +48,7 @@ public:
     impl_->snap_ = detail::CreateToolhelp32Snapshot(
       TH32CS_SNAPPROCESS, 0);
 
-    hadesmem::detail::Optional<PROCESSENTRY32W> entry = 
+    hadesmem::detail::Optional<PROCESSENTRY32W> const entry = 
       detail::Process32First(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -97,7 +97,7 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
-    hadesmem::detail::Optional<PROCESSENTRY32> entry = 
+    hadesmem::detail::Optional<PROCESSENTRY32> const entry = 
       detail::Process32Next(impl_->snap_.GetHandle());
     if (!entry)
     {

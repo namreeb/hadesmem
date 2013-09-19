@@ -82,10 +82,10 @@ public:
   }
   
   void Cleanup()
-{
-  handle_.Cleanup();
-  id_ = 0;
-}
+  {
+    handle_.Cleanup();
+    id_ = 0;
+  }
   
 private:
   void CheckWoW64() const

@@ -719,11 +719,6 @@ void DumpDir(std::wstring const& path)
       std::wcout << "\nAccess denied to directory.\n";
       return;
     }
-    if (last_error == ERROR_SHARING_VIOLATION)
-    {
-      std::wcout << "\nSharing violation.\n";
-      return;
-    }
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << 
       hadesmem::ErrorString("FindFirstFile failed.") << 
       hadesmem::ErrorCodeWinLast(last_error));
@@ -741,13 +736,28 @@ void DumpDir(std::wstring const& path)
 
     std::wcout << "\nCurrent path: \"" << cur_path << "\".\n";
 
-    if (hadesmem::detail::IsDirectory(cur_path) && 
-      !hadesmem::detail::IsSymlink(cur_path))
+    try
     {
-      DumpDir(cur_path);
-    }
+      if (hadesmem::detail::IsDirectory(cur_path) && 
+        !hadesmem::detail::IsSymlink(cur_path))
+      {
+        DumpDir(cur_path);
+      }
 
-    DumpFile(cur_path);
+      DumpFile(cur_path);
+    }
+    catch (hadesmem::Error const& e)
+    {
+      auto const last_error_ptr = 
+        boost::get_error_info<hadesmem::ErrorCodeWinLast>(e);
+      if (last_error_ptr && *last_error_ptr == ERROR_SHARING_VIOLATION)
+      {
+        std::wcout << "\nSharing violation.\n";
+        continue;
+      }
+
+      throw;
+    }
   } while (::FindNextFile(handle.GetHandle(), &find_data));
 
   DWORD const last_error = ::GetLastError();

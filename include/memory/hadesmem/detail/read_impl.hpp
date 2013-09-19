@@ -21,8 +21,11 @@ namespace hadesmem
 namespace detail
 {
 
-inline void ReadUnchecked(Process const& process, LPVOID address, 
-  LPVOID data, std::size_t len)
+inline void ReadUnchecked(
+  Process const& process, 
+  LPVOID address, 
+  LPVOID data, 
+  std::size_t len)
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(data != nullptr);
@@ -39,7 +42,10 @@ inline void ReadUnchecked(Process const& process, LPVOID address,
   }
 }
 
-inline void ReadImpl(Process const& process, LPVOID address, LPVOID data, 
+inline void ReadImpl(
+  Process const& process, 
+  LPVOID address, 
+  LPVOID data, 
   std::size_t len)
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
@@ -80,7 +86,9 @@ inline void ReadImpl(Process const& process, LPVOID address, LPVOID data,
 }
 
 template <typename T>
-T ReadImpl(Process const& process, PVOID address)
+T ReadImpl(
+  Process const& process, 
+  PVOID address)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);

@@ -50,7 +50,7 @@ public:
       TH32CS_SNAPMODULE, 
       impl_->process_->GetId());
     
-    hadesmem::detail::Optional<MODULEENTRY32> entry = 
+    hadesmem::detail::Optional<MODULEENTRY32> const entry = 
       detail::Module32First(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -99,7 +99,7 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     
-    hadesmem::detail::Optional<MODULEENTRY32> entry = 
+    hadesmem::detail::Optional<MODULEENTRY32> const entry = 
       detail::Module32Next(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -155,7 +155,7 @@ public:
   typedef ModuleIterator<Module> iterator;
   typedef ModuleIterator<Module const> const_iterator;
   
-  explicit HADESMEM_DETAIL_CONSTEXPR ModuleList(Process const& process) 
+  HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process const& process) 
     HADESMEM_DETAIL_NOEXCEPT
     : process_(&process)
   { }

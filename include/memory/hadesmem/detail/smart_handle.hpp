@@ -26,7 +26,8 @@ public:
     : handle_(GetInvalid())
   { }
   
-  explicit HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT
+  explicit HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl(HandleT handle) 
+    HADESMEM_DETAIL_NOEXCEPT
     : handle_(handle)
   { }
 
@@ -97,7 +98,7 @@ public:
   // is responsible for managing the lifetime of the handle after this point.
   HandleT Detach()
   {
-    HandleT handle = handle_;
+    HandleT const handle = handle_;
     handle_ = GetInvalid();
     return handle;
   }

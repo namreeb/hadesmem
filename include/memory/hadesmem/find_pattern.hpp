@@ -694,7 +694,8 @@ private:
   std::map<std::wstring, PVOID> addresses_;
 };
 
-inline Pattern::Pattern(FindPattern& finder, std::wstring const& data, 
+inline Pattern::Pattern(FindPattern& finder, 
+  std::wstring const& data, 
   std::uint32_t flags)
   : finder_(&finder), 
   name_(), 
@@ -702,8 +703,10 @@ inline Pattern::Pattern(FindPattern& finder, std::wstring const& data,
   flags_(flags)
 { }
 
-inline Pattern::Pattern(FindPattern& finder, std::wstring const& data, 
-  std::wstring const& name, std::uint32_t flags)
+inline Pattern::Pattern(FindPattern& finder, 
+  std::wstring const& data, 
+  std::wstring const& name, 
+  std::uint32_t flags)
   : finder_(&finder), 
   name_(name), 
   address_(static_cast<PBYTE>(finder.Find(data, flags))), 
@@ -775,7 +778,7 @@ inline void Lea::Manipulate(Pattern& pattern) const
 
   try
   {
-    bool is_relative_address = 
+    bool const is_relative_address = 
       (pattern.GetFlags() & FindPatternFlags::kRelativeAddress) == 
       FindPatternFlags::kRelativeAddress;
     DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;

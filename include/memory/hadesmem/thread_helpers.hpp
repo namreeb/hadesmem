@@ -161,7 +161,8 @@ class SuspendedProcess
 public:
   explicit SuspendedProcess(DWORD pid)
   {
-    ThreadList threads(pid);
+    // TODO: Add a transform_if algorithm?
+    ThreadList const threads(pid);
     for (auto const& thread_entry : threads)
     {
       DWORD const current_thread_id = ::GetCurrentThreadId();

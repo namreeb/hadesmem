@@ -137,7 +137,7 @@ public:
       return;
     }
 
-    SuspendedProcess suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process(process_->GetId());
 
     orig_ = ReadVector<BYTE>(*process_, target_, data_.size());
       
@@ -155,7 +155,7 @@ public:
       return;
     }
 
-    SuspendedProcess suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process(process_->GetId());
 
     WriteVector(*process_, target_, orig_);
 
@@ -239,15 +239,22 @@ public:
     
     process_ = other.process_;
     other.process_ = nullptr;
+
     applied_ = other.applied_;
     other.applied_ = false;
+
     target_ = other.target_;
     other.target_ = nullptr;
+
     detour_ = other.detour_;
     other.detour_ = nullptr;
+
     trampoline_ = std::move(other.trampoline_);
+
     orig_ = std::move(other.orig_);
+
     trampolines_ = std::move(other.trampolines_);
+
     return *this;
   }
 
@@ -265,7 +272,7 @@ public:
       return;
     }
 
-    SuspendedProcess suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process(process_->GetId());
 
     std::uint32_t const kMaxInstructionLen = 15;
     std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
@@ -274,7 +281,7 @@ public:
       *process_, kTrampSize);
     PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
     
-    std::vector<BYTE> buffer(ReadVector<BYTE>(*process_, target_, 
+    std::vector<BYTE> const buffer(ReadVector<BYTE>(*process_, target_, 
       kTrampSize));
 
     ud_t ud_obj;
@@ -320,7 +327,7 @@ public:
       // TODO: Support more operand sizes for existing relative instruction support.
       // TODO: Improve instruction rebuilding for cases such as jumps 
       // backwards into the detour and fail safely (or whatever is appropriate).
-      ud_operand_t const* op = ud_insn_opr(&ud_obj, 0);
+      ud_operand_t const* const op = ud_insn_opr(&ud_obj, 0);
       std::size_t const sdword_size_bits = sizeof(std::int32_t) * CHAR_BIT;
       if ((ud_obj.mnemonic == UD_Ijmp || ud_obj.mnemonic == UD_Icall) && 
         op && 
@@ -330,7 +337,7 @@ public:
         std::uint64_t const insn_base = ud_insn_off(&ud_obj);
         std::int32_t const insn_target = op->lval.sdword;
         std::uint32_t const insn_len = ud_insn_len(&ud_obj);
-        PVOID jump_target = reinterpret_cast<PBYTE>(
+        PVOID const jump_target = reinterpret_cast<PBYTE>(
           static_cast<DWORD_PTR>(insn_base)) + insn_target + insn_len;
         HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
@@ -345,7 +352,7 @@ public:
       }
       else
       {
-        uint8_t const* raw = ud_insn_ptr(&ud_obj);
+        uint8_t const* const raw = ud_insn_ptr(&ud_obj);
         Write(*process_, tramp_cur, raw, raw + len);
         tramp_cur += len;
       }
@@ -378,7 +385,7 @@ public:
       return;
     }
 
-    SuspendedProcess suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process(process_->GetId());
 
     WriteVector(*process_, target_, orig_);
 
@@ -439,7 +446,7 @@ private:
     SYSTEM_INFO sys_info;
     ZeroMemory(&sys_info, sizeof(sys_info));
     GetSystemInfo(&sys_info);
-    DWORD page_size = sys_info.dwPageSize;
+    DWORD const page_size = sys_info.dwPageSize;
 
 #if defined(_M_AMD64) 
     LONG_PTR const search_beg = 

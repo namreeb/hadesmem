@@ -137,16 +137,16 @@ private:
   
   void Initialize(HMODULE handle)
   {
-    auto handle_check = 
+    auto const handle_check = 
       [&] (MODULEENTRY32 const& entry) -> bool
-    {
-      if (entry.hModule == handle || !handle)
       {
-        return true;
-      }
+        if (entry.hModule == handle || !handle)
+        {
+          return true;
+        }
 
-      return false;
-    };
+        return false;
+      };
 
     InitializeIf(handle_check);
   }
@@ -157,26 +157,26 @@ private:
 
     std::wstring const path_upper = detail::ToUpperOrdinal(path);
 
-    auto path_check = 
+    auto const path_check = 
       [&] (MODULEENTRY32 const& entry) -> bool
-    {
-      if (is_path)
       {
-        if (detail::ArePathsEquivalent(path, entry.szExePath))
+        if (is_path)
         {
-          return true;
+          if (detail::ArePathsEquivalent(path, entry.szExePath))
+          {
+            return true;
+          }
         }
-      }
-      else
-      {
-        if (path_upper == detail::ToUpperOrdinal(entry.szModule))
+        else
         {
-          return true;
+          if (path_upper == detail::ToUpperOrdinal(entry.szModule))
+          {
+            return true;
+          }
         }
-      }
 
-      return false;
-    };
+        return false;
+      };
 
     InitializeIf(path_check);
   }
@@ -191,7 +191,7 @@ private:
 
   void InitializeIf(EntryCallback const& check_func)
   {
-    detail::SmartSnapHandle snap(detail::CreateToolhelp32Snapshot(
+    detail::SmartSnapHandle const snap(detail::CreateToolhelp32Snapshot(
       TH32CS_SNAPMODULE, process_->GetId()));
 
     hadesmem::detail::Optional<MODULEENTRY32> entry;

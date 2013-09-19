@@ -30,9 +30,9 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
   // and Injector::InjectDll (and the APIs it uses) depends on the 
   // module enumeration APIs.
 #if defined(HADESMEM_DETAIL_ARCH_X64) 
-  std::array<BYTE, 1> return_instr = { { 0xC3 } };
+  std::array<BYTE, 1> const return_instr = { { 0xC3 } };
 #elif defined(HADESMEM_DETAIL_ARCH_X86) 
-  std::array<BYTE, 3> return_instr = { { 0xC2, 0x04, 0x00 } };
+  std::array<BYTE, 3> const return_instr = { { 0xC2, 0x04, 0x00 } };
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

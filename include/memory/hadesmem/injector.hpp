@@ -90,14 +90,18 @@ inline HMODULE InjectDll(
   HADESMEM_DETAIL_ASSERT(!(flags & 
     ~(InjectFlags::kInvalidFlagMaxValue - 1UL)));
 
-  std::wstring path_real(path);
-
   bool const path_resolution = !!(flags & InjectFlags::kPathResolution);
 
-  if (path_resolution && detail::IsPathRelative(path_real))
-  {
-    path_real = detail::CombinePath(detail::GetSelfDirPath(), path_real);
-  }
+  std::wstring const path_real = 
+    [&]() -> std::wstring
+    {
+      if (path_resolution && detail::IsPathRelative(path))
+      {
+        return detail::CombinePath(detail::GetSelfDirPath(), path);
+      }
+
+      return path;
+    }();
 
   bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
   if (add_path && detail::IsPathRelative(path_real))
@@ -309,31 +313,40 @@ inline CreateAndInjectData CreateAndInject(
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::wstring, 
     typename std::iterator_traits<ArgsIter>::value_type>::value);
 
-  std::wstring command_line;
-  detail::ArgvQuote(&command_line, path, false);
-  std::for_each(args_beg, args_end, 
-    [&] (std::wstring const& arg) 
-  {
-    command_line += L' ';
-    detail::ArgvQuote(&command_line, arg, false);
-  });
+  std::wstring const command_line = 
+    [&] ()
+    {
+      std::wstring command_line_temp;
+      detail::ArgvQuote(&command_line_temp, path, false);
+      std::for_each(args_beg, args_end, 
+        [&] (std::wstring const& arg) 
+      {
+        command_line_temp += L' ';
+        detail::ArgvQuote(&command_line_temp, arg, false);
+      });
+      return command_line_temp;
+    }();
+
   std::vector<wchar_t> proc_args(
     std::begin(command_line), 
     std::end(command_line));
   proc_args.push_back(L'\0');
 
-  std::wstring work_dir_real(work_dir);
-  if (work_dir_real.empty() && 
-    !path.empty() && 
-    !detail::IsPathRelative(path))
-  {
-    std::size_t const separator = path.find_last_of(L"\\/");
-    if (separator != std::wstring::npos && 
-      separator != path.size() - 1)
+  std::wstring const work_dir_real = 
+    [&]() -> std::wstring
     {
-      work_dir_real = path.substr(0, separator + 1);
-    }
-  }
+      if (work_dir.empty() && !path.empty() && !detail::IsPathRelative(path))
+      {
+        std::size_t const separator = path.find_last_of(L"\\/");
+        if (separator != std::wstring::npos && 
+          separator != path.size() - 1)
+        {
+          return path.substr(0, separator + 1);
+        }
+      }
+
+      return work_dir;
+    }();
 
   STARTUPINFO start_info;
   ::ZeroMemory(&start_info, sizeof(start_info));
@@ -367,17 +380,22 @@ inline CreateAndInjectData CreateAndInject(
 
     HMODULE const remote_module = InjectDll(process, module, flags);
 
-    CallResult<DWORD_PTR> export_ret(0, 0);
-    if (!export_name.empty())
-    {
-      // TODO: Configurable timeout. This will complicate resource management 
-      // however, as we will need to extend the lifetime of the remote memory 
-      // in case it executes after we time out. Also, if it times out there 
-      // is no way to try again in the future... Should we just leak the memory 
-      // on timeout? Return a 'future' object? Some sort of combination? Requires 
-      // more investigation...
-      export_ret = CallExport(process, remote_module, export_name);
-    }
+    CallResult<DWORD_PTR> const export_ret = 
+      [&] ()
+      {
+        if (!export_name.empty())
+        {
+          // TODO: Configurable timeout. This will complicate resource management 
+          // however, as we will need to extend the lifetime of the remote memory 
+          // in case it executes after we time out. Also, if it times out there 
+          // is no way to try again in the future... Should we just leak the memory 
+          // on timeout? Return a 'future' object? Some sort of combination? Requires 
+          // more investigation...
+          return CallExport(process, remote_module, export_name);
+        }
+
+        return CallResult<DWORD_PTR>(0, 0);
+      }();
 
     if (!(flags & InjectFlags::kKeepSuspended))
     {

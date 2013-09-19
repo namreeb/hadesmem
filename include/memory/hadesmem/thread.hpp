@@ -78,10 +78,10 @@ public:
   }
   
   void Cleanup()
-{
-  handle_.Cleanup();
-  id_ = 0;
-}
+  {
+    handle_.Cleanup();
+    id_ = 0;
+  }
   
 private:
   void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT

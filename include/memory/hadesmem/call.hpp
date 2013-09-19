@@ -111,17 +111,21 @@ public:
     std::is_same<float, typename std::remove_cv<T>::type>::value || 
     std::is_same<double, typename std::remove_cv<T>::type>::value);
 
-  explicit CallResult(T const& result, DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR explicit CallResult(
+    T result, 
+    DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
     : result_(result), 
     last_error_(last_error)
   { }
 
-  T GetReturnValue() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR T GetReturnValue() const 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return result_;
   }
 
-  DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR DWORD GetLastError() const 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return last_error_;
   }
@@ -135,11 +139,13 @@ template <>
 class CallResult<void>
 {
 public:
-  explicit CallResult(DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR explicit CallResult(DWORD last_error) 
+    HADESMEM_DETAIL_NOEXCEPT
     : last_error_(last_error)
   { }
 
-  DWORD GetLastError() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR DWORD GetLastError() const 
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return last_error_;
   }
@@ -159,7 +165,8 @@ struct CallResultRemote
   DWORD last_error;
 };
 
-// CallResultRemote must be POD because of 'offsetof' usage.
+// CallResultRemote must be POD because 'offsetof' requires a standard layout 
+// type and 'malloc'/'memcpy'/etc requires a trivial type.
 HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
 
 }
@@ -167,8 +174,11 @@ HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<detail::CallResultRemote>::value);
 class CallResultRaw
 {
 public:
-  explicit CallResultRaw(DWORD64 return_i64, float return_float, 
-    double return_double, DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
+  explicit CallResultRaw(
+    DWORD64 return_i64, 
+    float return_float, 
+    double return_double, 
+    DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
     : result_()
   {
     result_.return_i64 = return_i64;
@@ -319,11 +329,7 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 class CallArg
 {
 public:
-  // TODO: Investigate whether taking the arg by value here (and elsewhere in 
-  // the class is the right thing to do. What if the copy constructor can 
-  // throw but the implicit conversion operator is noexcept... We can't even 
-  // guarantee that the conversion is noexcept though... Perhaps this should 
-  // be using conditional noexcept.
+  // TODO: Make this constexpr.
   template <typename T>
   explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT
     : arg_(), 
@@ -521,8 +527,8 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
   for (std::size_t i = 0; addresses_beg != addresses_end; ++addresses_beg, 
     ++call_convs_beg, ++args_full_beg, ++i)
   {
-    FnPtr address = *addresses_beg;
-    CallConv call_conv = *call_convs_beg;
+    FnPtr const address = *addresses_beg;
+    CallConv const call_conv = *call_convs_beg;
     auto const& args = *args_full_beg;
     // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
@@ -539,37 +545,33 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::eax, reinterpret_cast<sysint_t>(address));
     assembler->call(AsmJit::eax);
 
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
+    DWORD_PTR const current_return_value_remote = 
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(detail::CallResultRemote) + 
+      i * sizeof(detail::CallResultRemote);
+
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_i64)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx, 4), AsmJit::edx);
 
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
-      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(detail::CallResultRemote) + 
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_float)));
     assembler->fst(AsmJit::dword_ptr(AsmJit::ecx));
 
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
-      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(detail::CallResultRemote) + 
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_double)));
     assembler->fst(AsmJit::qword_ptr(AsmJit::ecx));
 
     assembler->mov(AsmJit::eax, AsmJit::uimm(get_last_error));
     assembler->call(AsmJit::eax);
-
-    assembler->mov(AsmJit::ecx, AsmJit::uimm(
-      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(detail::CallResultRemote) + 
+    
+    assembler->mov(AsmJit::ecx, AsmJit::uimm(current_return_value_remote + 
       offsetof(detail::CallResultRemote, last_error)));
     assembler->mov(AsmJit::dword_ptr(AsmJit::ecx), AsmJit::eax);
 
     if (call_conv == CallConv::kDefault || call_conv == CallConv::kCdecl)
     {
-      assembler->add(AsmJit::esp, AsmJit::uimm(num_args * sizeof(PVOID)));
+      assembler->add(AsmJit::esp, AsmJit::uimm(num_args * sizeof(void*)));
     }
   }
 
@@ -609,20 +611,26 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   auto const max_args_list = std::max_element(args_full_beg, 
     args_full_beg + num_addresses, 
     [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
-  {
-    return args1.size() < args2.size();
-  });
+    {
+      return args1.size() < args2.size();
+    });
   // TODO: Make this code more generic and remove the dependency on 
   // size().
   std::size_t const max_num_args = max_args_list->size();
 
   // TODO: Comment/document this properly.
-  std::size_t stack_offs = (std::max)(static_cast<std::size_t>(0x20), 
-    max_num_args * 0x8);
-  stack_offs += (stack_offs % 16);
-  // TODO: Fix argument handling code to not require the extra scratch space.
-  stack_offs += 16;
-  stack_offs += 8;
+  std::size_t const stack_offset = 
+    [&]()
+    {
+      std::size_t const ghost_size = 0x20UL;
+      std::size_t stack_offs_tmp = (std::max)(ghost_size, max_num_args * 0x8);
+      stack_offs_tmp += (stack_offs_tmp % 16);
+      // TODO: Fix argument handling code to not require the extra scratch 
+      // space.
+      stack_offs_tmp += 16;
+      stack_offs_tmp += 8;
+      return stack_offs_tmp;
+    }();
 
   assembler->sub(AsmJit::rsp, stack_offs);
 
@@ -644,7 +652,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   for (std::size_t i = 0; addresses_beg != addresses_end; ++addresses_beg, 
     ++call_convs_beg, ++args_full_beg, ++i)
   {
-    FnPtr address = *addresses_beg;
+    FnPtr const address = *addresses_beg;
     auto const& args = *args_full_beg;
     // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
@@ -665,26 +673,26 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::rax, reinterpret_cast<DWORD_PTR>(address));
     assembler->call(AsmJit::rax);
 
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+    DWORD_PTR const current_return_value_remote = 
+      reinterpret_cast<DWORD_PTR>(return_values_remote) + 
+      i * sizeof(detail::CallResultRemote)
+    
+    assembler->mov(AsmJit::rcx, current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_i64));
     assembler->mov(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::rax);
 
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+    assembler->mov(AsmJit::rcx, current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_float));
     assembler->movss(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+    assembler->mov(AsmJit::rcx, current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_double));
     assembler->movsd(AsmJit::qword_ptr(AsmJit::rcx), AsmJit::xmm0);
 
     assembler->mov(AsmJit::rax, get_last_error);
     assembler->call(AsmJit::rax);
 
-    assembler->mov(AsmJit::rcx, reinterpret_cast<DWORD_PTR>(
-      return_values_remote) + i * sizeof(detail::CallResultRemote) + 
+    assembler->mov(AsmJit::rcx, current_return_value_remote + 
       offsetof(detail::CallResultRemote, last_error));
     assembler->mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
   }
@@ -741,6 +749,7 @@ inline Allocator GenerateCallCode(Process const& process,
   
   HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
+  // Not const because we want implicit move on return.
   Allocator stub_mem_remote(process, stub_size);
   
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
@@ -1059,15 +1068,12 @@ inline void CallMulti(Process const& process,
   
   HADESMEM_DETAIL_TRACE_A("Reading return values.");
 
-  std::vector<detail::CallResultRemote> return_vals_remote = 
+  std::vector<detail::CallResultRemote> const return_vals_remote = 
     ReadVector<detail::CallResultRemote>(process, 
     return_values_remote.GetBase(), num_addresses);
   
   std::vector<CallResultRaw> return_vals;
   return_vals.reserve(num_addresses);
-  
-  // TODO: Ensure that the documentation covers the exception guarantee for 
-  // what happens if we throw while writing to the output iterator.
   std::transform(std::begin(return_vals_remote), std::end(return_vals_remote), 
     results, 
     [] (detail::CallResultRemote const& r)
@@ -1323,7 +1329,9 @@ public:
   template <typename OutputIterator>
   void Call(OutputIterator results) const
   {
-    // TODO: Iterator checks for type and category.
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+      typename std::iterator_traits<OutputIterator>::iterator_category>::
+      value);
 
     CallMulti(*process_, std::begin(addresses_), std::end(addresses_), 
       std::begin(call_convs_), std::begin(args_), results);

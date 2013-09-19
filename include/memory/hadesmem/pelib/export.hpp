@@ -56,7 +56,8 @@ public:
   {
     ExportDir const export_dir(process, pe_file);
 
-    WORD offset = static_cast<WORD>(ordinal_ - export_dir.GetOrdinalBase());
+    WORD const offset = static_cast<WORD>(ordinal_ - 
+      export_dir.GetOrdinalBase());
     
     if (offset >= export_dir.GetNumberOfFunctions())
     {
@@ -64,18 +65,20 @@ public:
           ErrorString("Ordinal out of range."));
     }
 
-    WORD* ptr_ordinals = static_cast<WORD*>(RvaToVa(process, pe_file, 
-      export_dir.GetAddressOfNameOrdinals()));
+    WORD* const ptr_ordinals = static_cast<WORD*>(
+      RvaToVa(process, pe_file, export_dir.GetAddressOfNameOrdinals()));
 
-    DWORD* ptr_names = static_cast<DWORD*>(RvaToVa(process, pe_file, 
-      export_dir.GetAddressOfNames()));
+    DWORD* const ptr_names = static_cast<DWORD*>(
+      RvaToVa(process, pe_file, export_dir.GetAddressOfNames()));
 
     if (DWORD const num_names = export_dir.GetNumberOfNames())
     {
-      std::vector<WORD> name_ordinals = ReadVector<WORD>(process, 
-        ptr_ordinals, num_names);
-      auto name_ord_iter = std::find(std::begin(name_ordinals), 
-        std::end(name_ordinals), offset);
+      std::vector<WORD> const name_ordinals = 
+        ReadVector<WORD>(process, ptr_ordinals, num_names);
+      auto const name_ord_iter = std::find(
+        std::begin(name_ordinals), 
+        std::end(name_ordinals), 
+        offset);
       if (name_ord_iter != std::end(name_ordinals))
       {
         by_name_ = true;
@@ -85,8 +88,8 @@ public:
       }
     }
 
-    DWORD* ptr_functions = static_cast<DWORD*>(RvaToVa(process, pe_file, 
-      export_dir.GetAddressOfFunctions()));
+    DWORD* const ptr_functions = static_cast<DWORD*>(
+      RvaToVa(process, pe_file, export_dir.GetAddressOfFunctions()));
     DWORD const func_rva = Read<DWORD>(process, ptr_functions + offset);
 
     NtHeaders const nt_headers(process, pe_file);
@@ -104,7 +107,7 @@ public:
       forwarder_ = ReadString<char>(process, RvaToVa(process, pe_file, 
         func_rva));
 
-      std::string::size_type split_pos = forwarder_.rfind('.');
+      std::string::size_type const split_pos = forwarder_.rfind('.');
       if (split_pos != std::string::npos)
       {
         forwarder_split_ = std::make_pair(forwarder_.substr(0, split_pos), 

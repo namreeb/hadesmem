@@ -50,7 +50,7 @@ public:
       TH32CS_SNAPTHREAD, 
       0);
 
-    hadesmem::detail::Optional<THREADENTRY32> entry = 
+    hadesmem::detail::Optional<THREADENTRY32> const entry = 
       detail::Thread32First(impl_->snap_.GetHandle());
     if (!entry)
     {
@@ -137,7 +137,7 @@ private:
   {
     for (;;) 
     {
-      hadesmem::detail::Optional<THREADENTRY32> entry = 
+      hadesmem::detail::Optional<THREADENTRY32> const entry = 
         detail::Thread32Next(impl_->snap_.GetHandle());
       if (!entry)
       {

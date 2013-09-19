@@ -82,11 +82,13 @@ struct ProcessMitigationPolicy
         ULONG ReservedFlags : 30;
       } Bits;
     };
-  } PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, *PPROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY;
+  } PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, 
+    *PPROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY;
 };
 
-// Disables the user-mode callback exception filter present in 64-bit versions 
-// of Windows. Microsoft Support article KB976038 (http://bit.ly/8yZMvw).
+// Disables the user-mode callback exception filter present in 64-bit 
+// versions of Windows. Microsoft Support article KB976038 
+// (http://bit.ly/8yZMvw).
 inline void DisableUserModeCallbackExceptionFilter()
 {
   HMODULE const k32_mod = ::GetModuleHandle(L"kernel32");
@@ -98,8 +100,8 @@ inline void DisableUserModeCallbackExceptionFilter()
       ErrorCodeWinLast(last_error));
   }
 
-  typedef BOOL (NTAPI *GetProcessUserModeExceptionPolicyPtr)(LPDWORD lpFlags);
-  typedef BOOL (NTAPI *SetProcessUserModeExceptionPolicyPtr)(DWORD dwFlags);
+  typedef BOOL (NTAPI *GetProcessUserModeExceptionPolicyPtr)(LPDWORD flags);
+  typedef BOOL (NTAPI *SetProcessUserModeExceptionPolicyPtr)(DWORD flags);
 
   // These APIs are not available by default until Windows 7 SP1, so they 
   // must be called dynamically.
@@ -124,9 +126,10 @@ inline void EnableCrtDebugFlags()
 #if defined(_DEBUG)
   // Does not compile under GCC.
 #if !defined(HADESMEM_GCC)
-  std::int32_t dbg_flags = ::_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-  dbg_flags |= _CRTDBG_ALLOC_MEM_DF;
-  dbg_flags |= _CRTDBG_LEAK_CHECK_DF;
+  std::int32_t dbg_flags = 
+    ::_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) 
+    | _CRTDBG_ALLOC_MEM_DF 
+    | _CRTDBG_LEAK_CHECK_DF;
   ::_CrtSetDbgFlag(dbg_flags);
 #endif // #if !defined(HADESMEM_GCC)
 #endif // #if defined(_DEBUG)
@@ -187,9 +190,10 @@ inline void EnableMitigationPolicies()
   // These APIs are not available by default until Windows 8, so they 
   // must be called dynamically.
   typedef BOOL (WINAPI * GetProcessMitigationPolicyPtr) (
-    HANDLE hProcess, 
-    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY MitigationPolicy, 
-    PVOID lpBuffer, SIZE_T dwLength);
+    HANDLE process, 
+    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY mitigation_policy, 
+    PVOID buffer, 
+    SIZE_T length);
   auto const get_mitigation_policy = 
     reinterpret_cast<GetProcessMitigationPolicyPtr>(::GetProcAddress(
     kernel32_mod, "GetProcessMitigationPolicy"));
@@ -199,8 +203,9 @@ inline void EnableMitigationPolicies()
   }
 
   typedef BOOL (WINAPI * SetProcessMitigationPolicyPtr) (
-    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY MitigationPolicy, 
-    PVOID lpBuffer, SIZE_T dwLength);
+    ProcessMitigationPolicy::PROCESS_MITIGATION_POLICY mitigation_policy, 
+    PVOID buffer, 
+    SIZE_T length);
   auto const set_mitigation_policy = 
     reinterpret_cast<SetProcessMitigationPolicyPtr>(::GetProcAddress(
     kernel32_mod, "SetProcessMitigationPolicy"));
@@ -211,8 +216,10 @@ inline void EnableMitigationPolicies()
 
   ProcessMitigationPolicy::PROCESS_MITIGATION_ASLR_POLICY aslr_policy = 
     { { 0 } };
-  if (!get_mitigation_policy(::GetCurrentProcess(), 
-    ProcessMitigationPolicy::ProcessASLRPolicy, &aslr_policy, 
+  if (!get_mitigation_policy(
+    ::GetCurrentProcess(), 
+    ProcessMitigationPolicy::ProcessASLRPolicy, 
+    &aslr_policy, 
     sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
@@ -223,8 +230,10 @@ inline void EnableMitigationPolicies()
 
   aslr_policy.Bits.EnableForceRelocateImages = 1;
   aslr_policy.Bits.DisallowStrippedImages = 1;
-  if (!set_mitigation_policy(ProcessMitigationPolicy::ProcessASLRPolicy, 
-    &aslr_policy, sizeof(aslr_policy)))
+  if (!set_mitigation_policy(
+    ProcessMitigationPolicy::ProcessASLRPolicy, 
+    &aslr_policy, 
+    sizeof(aslr_policy)))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
@@ -234,9 +243,11 @@ inline void EnableMitigationPolicies()
 
   ProcessMitigationPolicy::PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY 
     strict_handle_check_policy = { { 0 } };
-  if (!get_mitigation_policy(::GetCurrentProcess(), 
+  if (!get_mitigation_policy(
+    ::GetCurrentProcess(), 
     ProcessMitigationPolicy::ProcessStrictHandleCheckPolicy, 
-    &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
+    &strict_handle_check_policy, 
+    sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
@@ -248,7 +259,8 @@ inline void EnableMitigationPolicies()
   strict_handle_check_policy.Bits.HandleExceptionsPermanentlyEnabled = 1;
   if (!set_mitigation_policy(
     ProcessMitigationPolicy::ProcessStrictHandleCheckPolicy, 
-    &strict_handle_check_policy, sizeof(strict_handle_check_policy)))
+    &strict_handle_check_policy, 
+    sizeof(strict_handle_check_policy)))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 

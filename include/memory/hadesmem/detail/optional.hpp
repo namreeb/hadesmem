@@ -28,7 +28,7 @@ private:
   typedef void (Optional::* Boolean)() const;
 
 public:
-  Optional() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT
     : t_(), 
     valid_(false)
   { }
@@ -40,6 +40,7 @@ public:
     Construct(t);
   }
 
+  // TODO: Conditional noexcept.
   explicit Optional(T&& t)
     : t_(), 
     valid_(false)
@@ -140,7 +141,7 @@ public:
     return static_cast<T*>(static_cast<void*>(&t_));
   }
 
-  T* GetPtr() const HADESMEM_DETAIL_NOEXCEPT
+  T const* GetPtr() const HADESMEM_DETAIL_NOEXCEPT
   {
     return static_cast<T const*>(static_cast<void const*>(&t_));
   }

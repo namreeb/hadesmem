@@ -15,8 +15,10 @@ namespace hadesmem
 namespace detail
 {
 
-inline detail::SmartHandle CreateRemoteThreadAndWait(Process const& process, 
-  LPTHREAD_START_ROUTINE func, DWORD timeout = INFINITE)
+inline detail::SmartHandle CreateRemoteThreadAndWait(
+  Process const& process, 
+  LPTHREAD_START_ROUTINE func, 
+  DWORD timeout = INFINITE)
 {
   detail::SmartHandle remote_thread(::CreateRemoteThread(process.GetHandle(), 
     nullptr, 0, func, nullptr, 0, nullptr));
