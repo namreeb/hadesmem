@@ -13,6 +13,8 @@
 
 // TODO: Add tests.
 
+// TODO: Add constexpr support. (http://bit.ly/U7lSYy)
+
 namespace hadesmem
 {
 
