@@ -632,7 +632,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
       return stack_offs_tmp;
     }();
 
-  assembler->sub(AsmJit::rsp, stack_offs);
+  assembler->sub(AsmJit::rsp, stack_offset);
 
   assembler->mov(AsmJit::rax, is_debugger_present);
   assembler->call(AsmJit::rax);
@@ -675,7 +675,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
 
     DWORD_PTR const current_return_value_remote = 
       reinterpret_cast<DWORD_PTR>(return_values_remote) + 
-      i * sizeof(detail::CallResultRemote)
+      i * sizeof(detail::CallResultRemote);
     
     assembler->mov(AsmJit::rcx, current_return_value_remote + 
       offsetof(detail::CallResultRemote, return_i64));
@@ -697,7 +697,7 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
     assembler->mov(AsmJit::dword_ptr(AsmJit::rcx), AsmJit::eax);
   }
 
-  assembler->add(AsmJit::rsp, stack_offs);
+  assembler->add(AsmJit::rsp, stack_offset);
 
   assembler->ret();
 }

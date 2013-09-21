@@ -182,15 +182,6 @@ PatchDetourPtr g_nt_map_view_of_section;
 
 PatchDetourPtr g_create_process_internal_w;
 
-// TODO: Fix this hack.
-auto const to_string = 
-  [] (unsigned long) -> std::string
-  {
-    std::stringstream str;
-    str.imbue(std::locale::classic());
-    return str.str();
-  };
-
 extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version);
 
 extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** ppd3d9);
