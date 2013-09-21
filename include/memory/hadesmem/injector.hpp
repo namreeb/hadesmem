@@ -310,7 +310,7 @@ inline CreateAndInjectData CreateAndInject(
   std::string const& export_name, 
   std::uint32_t flags)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::wstring, 
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::wstring, 
     typename std::iterator_traits<ArgsIter>::value_type>::value);
 
   std::wstring const command_line = 

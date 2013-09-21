@@ -50,7 +50,7 @@ inline std::array<T, N> Read(Process const& process, PVOID address)
 template <typename T, std::size_t N, typename OutputIterator>
 inline void Read(Process const& process, PVOID address, OutputIterator out)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
     typename std::iterator_traits<OutputIterator>::iterator_category>::value);
 
   HADESMEM_DETAIL_STATIC_ASSERT(N != 0);
@@ -89,7 +89,7 @@ void ReadStringEx(
   std::size_t chunk_len)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
     typename std::iterator_traits<OutputIterator>::iterator_category>::value);
 
   HADESMEM_DETAIL_ASSERT(chunk_len != 0);
@@ -189,7 +189,7 @@ inline void ReadVector(
   std::size_t count, 
   OutputIterator out)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
     typename std::iterator_traits<OutputIterator>::iterator_category>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsDefaultConstructible<T>::value);

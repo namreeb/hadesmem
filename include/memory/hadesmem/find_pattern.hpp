@@ -44,8 +44,6 @@
 
 // TODO: Add stream overloads.
 
-// TODO: Rewrite to not use virtual functions.
-
 // TODO: Rewrite to remove cyclic dependencies.
 
 // TODO: Pattern generator.
@@ -180,60 +178,69 @@ namespace pattern_manipulators
 
 // TODO: Would templates make more sense here?
 
-class Manipulator
+class ManipulatorBase
 {
 public:
-  virtual void Manipulate(Pattern& pattern) const = 0;
-
-  virtual ~Manipulator() HADESMEM_DETAIL_NOEXCEPT
+  virtual ~ManipulatorBase() HADESMEM_DETAIL_NOEXCEPT
   { }
 };
 
-inline Pattern& operator<<(Pattern& pattern, Manipulator const& manipulator)
+template <typename D>
+class Manipulator : public ManipulatorBase
+{
+public:
+  void Manipulate(Pattern& pattern) const
+  {
+    return static_cast<D const*>(this)->Manipulate(pattern);
+  }
+};
+
+template <typename D>
+inline Pattern& operator<<(Pattern& pattern, Manipulator<D> const& manipulator)
 {
   manipulator.Manipulate(pattern);
   return pattern;
 }
 
-class Save : public Manipulator
+class Save : public Manipulator<Save>
 {
 public:
-  virtual void Manipulate(Pattern& pattern) const final;
+  void Manipulate(Pattern& pattern) const;
 };
 
-class Add : public Manipulator
+class Add : public Manipulator<Add>
 {
 public:
   explicit Add(DWORD_PTR offset) HADESMEM_DETAIL_NOEXCEPT
     : offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const final;
+  void Manipulate(Pattern& pattern) const;
   
 private:
   DWORD_PTR offset_;
 };
 
-class Sub : public Manipulator
+class Sub : public Manipulator<Sub>
 {
 public:
   explicit Sub(DWORD_PTR offset) HADESMEM_DETAIL_NOEXCEPT
     : offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const final;
+  void Manipulate(Pattern& pattern) const;
     
 private:
   DWORD_PTR offset_;
 };
 
-class Lea : public Manipulator
+class Lea : public Manipulator<Lea>
 {
 public:
-  virtual void Manipulate(Pattern& pattern) const final;
+  void Manipulate(Pattern& pattern) const;
 };
 
-class Rel : public Manipulator
+class Rel : public Manipulator<Rel>
 {
 public:
   explicit Rel(DWORD_PTR size, DWORD_PTR offset) HADESMEM_DETAIL_NOEXCEPT
@@ -241,7 +248,7 @@ public:
     offset_(offset)
   { }
   
-  virtual void Manipulate(Pattern& pattern) const final;
+  void Manipulate(Pattern& pattern) const;
   
 private:
   DWORD_PTR size_;
@@ -281,31 +288,27 @@ public:
     for (auto const& s : sections)
     {
       bool const is_code_section = 
-        ((s.GetCharacteristics() & IMAGE_SCN_CNT_CODE) == IMAGE_SCN_CNT_CODE);
+        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_CODE);
       bool const is_data_section = 
-        ((s.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA) == 
-        IMAGE_SCN_CNT_INITIALIZED_DATA);
-      if (is_code_section || is_data_section)
+        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA);
+      if (!is_code_section && !is_data_section)
       {
-        PBYTE const section_beg = static_cast<PBYTE>(RvaToVa(process, 
-          pe_file, s.GetVirtualAddress()));
-        if (section_beg == nullptr)
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("Could not get section base address."));
-        }
-          
-        PBYTE const section_end = section_beg + s.GetSizeOfRawData();
-        
-        if (is_code_section)
-        {
-          code_regions_.emplace_back(section_beg, section_end);
-        }
-        else
-        {
-          data_regions_.emplace_back(section_beg, section_end);
-        }
+        continue;
       }
+
+      PBYTE const section_beg = static_cast<PBYTE>(RvaToVa(process, 
+        pe_file, s.GetVirtualAddress()));
+      if (section_beg == nullptr)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+          ErrorString("Could not get section base address."));
+      }
+          
+      PBYTE const section_end = section_beg + s.GetSizeOfRawData();
+
+      std::vector<std::pair<PBYTE, PBYTE>>& region = 
+        is_code_section ? code_regions_ : data_regions_;
+      region.emplace_back(section_beg, section_end);
     }
     
     if (code_regions_.empty() && data_regions_.empty())
@@ -393,7 +396,8 @@ public:
     auto data_beg = std::begin(data);
     auto const data_end = std::end(data);
     bool const converted = boost::spirit::qi::phrase_parse(
-      data_beg, data_end, 
+      data_beg, 
+      data_end, 
       data_list_rule, 
       boost::spirit::qi::space, 
       data_parsed);
@@ -423,20 +427,17 @@ public:
         }
       });
     
-    bool const scan_data_secs = ((flags & FindPatternFlags::kScanData) == 
-      FindPatternFlags::kScanData);
+    bool const scan_data_secs = !!(flags & FindPatternFlags::kScanData);
     
     PVOID address = Find(data_real, scan_data_secs);
     
-    if (!address && ((flags & FindPatternFlags::kThrowOnUnmatch) == 
-      FindPatternFlags::kThrowOnUnmatch))
+    if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
         ErrorString("Could not match pattern."));
     }
     
-    if (address && ((flags & FindPatternFlags::kRelativeAddress) == 
-      FindPatternFlags::kRelativeAddress))
+    if (address && !!(flags & FindPatternFlags::kRelativeAddress))
     {
       address = static_cast<PBYTE>(address) - base_;
     }
@@ -779,8 +780,7 @@ inline void Lea::Manipulate(Pattern& pattern) const
   try
   {
     bool const is_relative_address = 
-      (pattern.GetFlags() & FindPatternFlags::kRelativeAddress) == 
-      FindPatternFlags::kRelativeAddress;
+      !!(pattern.GetFlags() & FindPatternFlags::kRelativeAddress);
     DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
     address = Read<PBYTE>(*pattern.GetProcess(), address + base);
   }
@@ -803,8 +803,7 @@ inline void Rel::Manipulate(Pattern& pattern) const
   try
   {
     bool const is_relative_address = 
-      (pattern.GetFlags() & FindPatternFlags::kRelativeAddress) == 
-      FindPatternFlags::kRelativeAddress;
+      !!(pattern.GetFlags() & FindPatternFlags::kRelativeAddress);
     DWORD_PTR const base = is_relative_address ? pattern.GetBase() : 0;
     address = Read<PBYTE>(*pattern.GetProcess(), address + base) + 
       reinterpret_cast<DWORD_PTR>(address + base) + size_ - offset_;

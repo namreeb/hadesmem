@@ -128,7 +128,6 @@
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://bit.ly/17CCZFX
-// TODO: Does this belong somehwere else?
 #define HADESMEM_DETAIL_MAX_PATH_UNICODE (1 << 15)
 
 // Every effort is made to NOT assume the below is true across the entire 

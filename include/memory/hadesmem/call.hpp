@@ -438,21 +438,110 @@ namespace detail
   
 #if defined(HADESMEM_DETAIL_ARCH_X86)
 
-// TODO: Rename this class?
 class ArgVisitor32
 {
 public:
-  ArgVisitor32(AsmJit::X86Assembler* assembler, std::size_t num_args, 
-    CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT;
+  ArgVisitor32(AsmJit::X86Assembler* assembler, 
+    std::size_t num_args, 
+    CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT
+    : assembler_(assembler), 
+    cur_arg_(num_args), 
+    call_conv_(call_conv)
+  { }
 
-  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    switch (cur_arg_)
+    {
+    case 1:
+      switch (call_conv_)
+      {
+      case CallConv::kThisCall:
+      case CallConv::kFastCall:
+        assembler_->mov(AsmJit::ecx, AsmJit::uimm(arg));
+        break;
+      case CallConv::kDefault:
+      case CallConv::kWinApi:
+      case CallConv::kCdecl:
+      case CallConv::kStdCall:
+      case CallConv::kX64:
+        assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
+        assembler_->push(AsmJit::eax);
+        break;
+      }
+      break;
+    case 2:
+      switch (call_conv_)
+      {
+      case CallConv::kFastCall:
+        assembler_->mov(AsmJit::edx, AsmJit::uimm(arg));
+        break;
+      case CallConv::kDefault:
+      case CallConv::kWinApi:
+      case CallConv::kCdecl:
+      case CallConv::kStdCall:
+      case CallConv::kThisCall:
+      case CallConv::kX64:
+        assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
+        assembler_->push(AsmJit::eax);
+        break;
+      }
+      break;
+    default:
+      assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
+      assembler_->push(AsmJit::eax);
+      break;
+    }
 
-  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT;
+    --cur_arg_;
+  }
 
-  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
+      (arg >> 32) & 0xFFFFFFFFUL)));
+    assembler_->push(AsmJit::eax);
 
-  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT;
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
+      arg & 0xFFFFFFFFUL)));
+    assembler_->push(AsmJit::eax);
 
+    --cur_arg_;
+  }
+
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+
+    DWORD arg_conv;
+    std::memcpy(&arg_conv, &arg, sizeof(arg));
+
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(arg_conv));
+    assembler_->push(AsmJit::eax);
+
+    --cur_arg_;
+  }
+
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+
+    DWORD64 arg_conv;
+    std::memcpy(&arg_conv, &arg, sizeof(arg));
+
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
+      (arg_conv >> 32) & 0xFFFFFFFFUL)));
+    assembler_->push(AsmJit::eax);
+
+    assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
+      arg_conv & 0xFFFFFFFFUL)));
+    assembler_->push(AsmJit::eax);
+
+    --cur_arg_;
+  }
+  
 private:
   AsmJit::X86Assembler* assembler_;
   std::size_t cur_arg_;
@@ -463,20 +552,153 @@ private:
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
-// TODO: Rename this class?
 class ArgVisitor64
 {
 public:
-  ArgVisitor64(AsmJit::X86Assembler* assembler, std::size_t num_args) 
-    HADESMEM_DETAIL_NOEXCEPT;
+  ArgVisitor64(AsmJit::X86Assembler* assembler, 
+    std::size_t num_args) HADESMEM_DETAIL_NOEXCEPT
+    : assembler_(assembler), 
+    num_args_(num_args), 
+    cur_arg_(num_args)
+  { }
 
-  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT;
+  void operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    return (*this)(static_cast<DWORD64>(arg));
+  }
 
-  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT;
+  void operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    switch (cur_arg_)
+    {
+    case 1:
+      assembler_->mov(AsmJit::rcx, arg);
+      break;
+    case 2:
+      assembler_->mov(AsmJit::rdx, arg);
+      break;
+    case 3:
+      assembler_->mov(AsmJit::r8, arg);
+      break;
+    case 4:
+      assembler_->mov(AsmJit::r9, arg);
+      break;
+    default:
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+        static_cast<DWORD>(arg & 0xFFFFFFFFUL));
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
+        static_cast<DWORD>((arg >> 32) & 0xFFFFFFFFUL));
+      break;
+    }
 
-  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT;
+    --cur_arg_;
+  }
 
-  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT;
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+
+    DWORD arg_conv;
+    std::memcpy(&arg_conv, &arg, sizeof(arg));
+
+    std::size_t const scratch_offs = num_args_ * 8;
+
+    switch (cur_arg_)
+    {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
+      break;
+    default:
+      break;
+    }
+
+    switch (cur_arg_)
+    {
+    case 1:
+      assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 2:
+      assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 3:
+      assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 4:
+      assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    default:
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+        arg_conv);
+      break;
+    }
+
+    --cur_arg_;
+  }
+
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+
+    DWORD64 arg_conv;
+    std::memcpy(&arg_conv, &arg, sizeof(arg));
+
+    DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL);
+    DWORD const arg_high = static_cast<DWORD>(
+      (arg_conv >> 32) & 0xFFFFFFFFUL);
+
+    std::size_t const scratch_offs = num_args_ * 8;
+
+    switch (cur_arg_)
+    {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
+        arg_high);
+      break;
+    default:
+      break;
+    }
+
+    switch (cur_arg_)
+    {
+    case 1:
+      assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 2:
+      assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 3:
+      assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    case 4:
+      assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
+        scratch_offs));
+      break;
+    default:
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
+        arg_low);
+      assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
+        arg_high);
+      break;
+    }
+
+    --cur_arg_;
+  }
 
 private:
   AsmJit::X86Assembler* assembler_;
@@ -530,12 +752,9 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
     FnPtr const address = *addresses_beg;
     CallConv const call_conv = *call_convs_beg;
     auto const& args = *args_full_beg;
-    // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
     ArgVisitor32 arg_visitor(assembler, num_args, call_conv);
-    // TODO: Make this code more generic and remove the dependency on 
-    // rbegin() and rend().
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
@@ -585,6 +804,15 @@ inline void GenerateCallCode32(AsmJit::X86Assembler* assembler,
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
+struct ContainerSizeComparer
+{
+  template <typename C1, typename C2>
+  bool operator()(C1 const& lhs, C2 const& rhs)
+  {
+    return lhs.size() < rhs.size();
+  }
+};
+
 template <typename AddressesForwardIterator, 
   typename ConvForwardIterator, 
   typename ArgsForwardIterator>
@@ -605,30 +833,20 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   
   std::size_t const num_addresses = std::distance(addresses_beg, 
     addresses_end);
-  
-  // TODO: Make this code more generic and remove the dependency on 
-  // std::vector<CallArg>.
   auto const max_args_list = std::max_element(args_full_beg, 
-    args_full_beg + num_addresses, 
-    [] (std::vector<CallArg> const& args1, std::vector<CallArg> const& args2)
-    {
-      return args1.size() < args2.size();
-    });
-  // TODO: Make this code more generic and remove the dependency on 
-  // size().
+    args_full_beg + num_addresses, ContainerSizeComparer());
   std::size_t const max_num_args = max_args_list->size();
 
-  // TODO: Comment/document this properly.
   std::size_t const stack_offset = 
     [&]()
     {
+      // Minimum 0x20 bytes of ghost space for spilling args.
       std::size_t const ghost_size = 0x20UL;
       std::size_t stack_offs_tmp = (std::max)(ghost_size, max_num_args * 0x8);
-      stack_offs_tmp += (stack_offs_tmp % 16);
-      // TODO: Fix argument handling code to not require the extra scratch 
-      // space.
+      // Add scratch space for use when converting args etc.
       stack_offs_tmp += 16;
-      stack_offs_tmp += 8;
+      // Align the stack for the return address.
+      stack_offs_tmp += (stack_offs_tmp % 16) ? 0 : 8;
       return stack_offs_tmp;
     }();
 
@@ -654,7 +872,6 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
   {
     FnPtr const address = *addresses_beg;
     auto const& args = *args_full_beg;
-    // TODO: Make this code more generic and remove the dependency on size().
     std::size_t const num_args = args.size();
 
     HADESMEM_DETAIL_ASSERT(*call_convs_beg == CallConv::kDefault || 
@@ -662,8 +879,6 @@ inline void GenerateCallCode64(AsmJit::X86Assembler* assembler,
       *call_convs_beg == CallConv::kX64);
 
     ArgVisitor64 arg_visitor(assembler, num_args);
-    // TODO: Make this code more generic and remove the dependency on 
-    // rbegin() and rend().
     std::for_each(args.rbegin(), args.rend(), 
       [&] (CallArg const& arg)
     {
@@ -749,7 +964,6 @@ inline Allocator GenerateCallCode(Process const& process,
   
   HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
-  // Not const because we want implicit move on return.
   Allocator stub_mem_remote(process, stub_size);
   
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
@@ -765,260 +979,12 @@ inline Allocator GenerateCallCode(Process const& process,
   return stub_mem_remote;
 }
 
-#if defined(HADESMEM_DETAIL_ARCH_X86)
-
-ArgVisitor32::ArgVisitor32(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args, CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT
-  : assembler_(assembler), 
-  cur_arg_(num_args), 
-  call_conv_(call_conv)
-{ }
-
-void ArgVisitor32::operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  switch (cur_arg_)
-  {
-  case 1:
-    switch (call_conv_)
-    {
-    case CallConv::kThisCall:
-    case CallConv::kFastCall:
-      assembler_->mov(AsmJit::ecx, AsmJit::uimm(arg));
-      break;
-    case CallConv::kDefault:
-    case CallConv::kWinApi:
-    case CallConv::kCdecl:
-    case CallConv::kStdCall:
-    case CallConv::kX64:
-      assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
-      assembler_->push(AsmJit::eax);
-      break;
-    }
-    break;
-  case 2:
-    switch (call_conv_)
-    {
-    case CallConv::kFastCall:
-      assembler_->mov(AsmJit::edx, AsmJit::uimm(arg));
-      break;
-    case CallConv::kDefault:
-    case CallConv::kWinApi:
-    case CallConv::kCdecl:
-    case CallConv::kStdCall:
-    case CallConv::kThisCall:
-    case CallConv::kX64:
-      assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
-      assembler_->push(AsmJit::eax);
-      break;
-    }
-    break;
-  default:
-    assembler_->mov(AsmJit::eax, AsmJit::uimm(arg));
-    assembler_->push(AsmJit::eax);
-    break;
-  }
-
-  --cur_arg_;
 }
 
-void ArgVisitor32::operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    (arg >> 32) & 0xFFFFFFFFUL)));
-  assembler_->push(AsmJit::eax);
-
-  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(arg & 
-    0xFFFFFFFFUL)));
-  assembler_->push(AsmJit::eax);
-
-  --cur_arg_;
-}
-
-void ArgVisitor32::operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
-
-  DWORD arg_conv;
-  std::memcpy(&arg_conv, &arg, sizeof(arg));
-
-  assembler_->mov(AsmJit::eax, AsmJit::uimm(arg_conv));
-  assembler_->push(AsmJit::eax);
-
-  --cur_arg_;
-}
-
-void ArgVisitor32::operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
-
-  DWORD64 arg_conv;
-  std::memcpy(&arg_conv, &arg, sizeof(arg));
-
-  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    (arg_conv >> 32) & 0xFFFFFFFFUL)));
-  assembler_->push(AsmJit::eax);
-
-  assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
-    arg_conv & 0xFFFFFFFFUL)));
-  assembler_->push(AsmJit::eax);
-
-  --cur_arg_;
-}
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-
-ArgVisitor64::ArgVisitor64(AsmJit::X86Assembler* assembler, 
-  std::size_t num_args) HADESMEM_DETAIL_NOEXCEPT
-  : assembler_(assembler), 
-  num_args_(num_args), 
-  cur_arg_(num_args)
-{ }
-
-void ArgVisitor64::operator()(DWORD32 arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  return (*this)(static_cast<DWORD64>(arg));
-}
-
-void ArgVisitor64::operator()(DWORD64 arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  switch (cur_arg_)
-  {
-  case 1:
-    assembler_->mov(AsmJit::rcx, arg);
-    break;
-  case 2:
-    assembler_->mov(AsmJit::rdx, arg);
-    break;
-  case 3:
-    assembler_->mov(AsmJit::r8, arg);
-    break;
-  case 4:
-    assembler_->mov(AsmJit::r9, arg);
-    break;
-  default:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
-      static_cast<DWORD>(arg & 0xFFFFFFFFUL));
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
-      static_cast<DWORD>((arg >> 32) & 0xFFFFFFFFUL));
-    break;
-  }
-
-  --cur_arg_;
-}
-
-void ArgVisitor64::operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
-
-  DWORD arg_conv;
-  std::memcpy(&arg_conv, &arg, sizeof(arg));
-
-  std::size_t const scratch_offs = num_args_ * 8;
-
-  switch (cur_arg_)
-  {
-  case 1:
-  case 2:
-  case 3:
-  case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_conv);
-    break;
-  default:
-    break;
-  }
-
-  switch (cur_arg_)
-  {
-  case 1:
-    assembler_->movss(AsmJit::xmm0, AsmJit::dword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 2:
-    assembler_->movss(AsmJit::xmm1, AsmJit::dword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 3:
-    assembler_->movss(AsmJit::xmm2, AsmJit::dword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 4:
-    assembler_->movss(AsmJit::xmm3, AsmJit::dword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  default:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
-      arg_conv);
-    break;
-  }
-
-  --cur_arg_;
-}
-
-void ArgVisitor64::operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
-
-  DWORD64 arg_conv;
-  std::memcpy(&arg_conv, &arg, sizeof(arg));
-
-  DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL);
-  DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFFUL);
-
-  std::size_t const scratch_offs = num_args_ * 8;
-
-  switch (cur_arg_)
-  {
-  case 1:
-  case 2:
-  case 3:
-  case 4:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs), arg_low);
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, scratch_offs + 4), 
-      arg_high);
-    break;
-  default:
-    break;
-  }
-
-  switch (cur_arg_)
-  {
-  case 1:
-    assembler_->movsd(AsmJit::xmm0, AsmJit::qword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 2:
-    assembler_->movsd(AsmJit::xmm1, AsmJit::qword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 3:
-    assembler_->movsd(AsmJit::xmm2, AsmJit::qword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  case 4:
-    assembler_->movsd(AsmJit::xmm3, AsmJit::qword_ptr(AsmJit::rsp, 
-      scratch_offs));
-    break;
-  default:
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8), 
-      arg_low);
-    assembler_->mov(AsmJit::dword_ptr(AsmJit::rsp, (cur_arg_ - 1) * 8 + 4), 
-      arg_high);
-    break;
-  }
-
-  --cur_arg_;
-}
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
-
-}
-
+// TODO: Remove dependency on ArgsForwardIterator being an iterator with 
+// value_type of std::vector<CallArg> (or rather, any container supporting 
+// size() and rbegin()/rend(), but there's no good reason to use anything but 
+// vector even if it's technically supported).
 template <typename AddressesForwardIterator, 
   typename ConvForwardIterator, 
   typename ArgsForwardIterator, 
@@ -1030,7 +996,18 @@ inline void CallMulti(Process const& process,
   ArgsForwardIterator args_full_beg, 
   ResultsOutputIterator results)
 {
-  // TODO: Iterator checks for type and category.
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::forward_iterator_tag, 
+    typename std::iterator_traits<AddressesForwardIterator>::
+    iterator_category>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::forward_iterator_tag, 
+    typename std::iterator_traits<ConvForwardIterator>::
+    iterator_category>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::forward_iterator_tag, 
+    typename std::iterator_traits<ArgsForwardIterator>::
+    iterator_category>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
+    typename std::iterator_traits<ResultsOutputIterator>::
+    iterator_category>::value);
   
   HADESMEM_DETAIL_TRACE_A("CallMulti called.");
 
@@ -1151,6 +1128,7 @@ void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 
 }
 
+// TODO: Support decltype(&SomeFunc) and decltype(SomeFunc) as args to FuncT.
 template <typename FuncT, typename... Args>
 CallResult<typename detail::FuncResult<FuncT>::type> Call(
   Process const& process, FnPtr address, CallConv call_conv, 
@@ -1329,7 +1307,7 @@ public:
   template <typename OutputIterator>
   void Call(OutputIterator results) const
   {
-    HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
       typename std::iterator_traits<OutputIterator>::iterator_category>::
       value);
 

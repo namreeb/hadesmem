@@ -148,16 +148,14 @@ inline bool IsDirectory(std::wstring const& path)
 {
   DWORD const attributes = ::hadesmem::detail::GetFileAttributes(
     path.c_str());
-  return (attributes & FILE_ATTRIBUTE_DIRECTORY) == 
-    FILE_ATTRIBUTE_DIRECTORY;
+  return !!(attributes & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 inline bool IsSymlink(std::wstring const& path)
 {
   DWORD const attributes = ::hadesmem::detail::GetFileAttributes(
     path.c_str());
-  return (attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 
-    FILE_ATTRIBUTE_REPARSE_POINT;
+  return !!(attributes & FILE_ATTRIBUTE_REPARSE_POINT);
 }
 
 }

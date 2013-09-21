@@ -34,35 +34,35 @@ inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
-    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
-    (mbi.Protect & PAGE_READONLY) == PAGE_READONLY || 
-    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
-    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+    (!!(mbi.Protect & PAGE_EXECUTE_READ) || 
+    !!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
+    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) || 
+    !!(mbi.Protect & PAGE_READONLY) || 
+    !!(mbi.Protect & PAGE_READWRITE) || 
+    !!(mbi.Protect & PAGE_WRITECOPY));
 }
 
 inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || 
-    (mbi.Protect & PAGE_READWRITE) == PAGE_READWRITE || 
-    (mbi.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY);
+    (!!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
+    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) || 
+    !!(mbi.Protect & PAGE_READWRITE) || 
+    !!(mbi.Protect & PAGE_WRITECOPY));
 }
 
 inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
   return (mbi.State != MEM_RESERVE) && 
-    ((mbi.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || 
-    (mbi.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ || 
-    (mbi.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE || 
-    (mbi.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY);
+    (!!(mbi.Protect & PAGE_EXECUTE) || 
+    !!(mbi.Protect & PAGE_EXECUTE_READ) || 
+    !!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
+    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY));
 }
 
 inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
 {
-  return (mbi.Protect & PAGE_GUARD) == PAGE_GUARD;
+  return !!(mbi.Protect & PAGE_GUARD);
 }
 
 }

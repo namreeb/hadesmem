@@ -81,7 +81,7 @@ public:
   template <typename OutputIterator>
   void GetCallbacks(OutputIterator callbacks) const
   {
-    HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<std::output_iterator_tag, 
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::output_iterator_tag, 
       typename std::iterator_traits<OutputIterator>::iterator_category>::
       value);
     

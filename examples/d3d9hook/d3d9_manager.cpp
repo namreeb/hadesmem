@@ -674,7 +674,7 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
 
   try
   {
-    if (ret && (creation_flags & CREATE_SUSPENDED) == 0)
+    if (ret && !(creation_flags & CREATE_SUSPENDED))
     {
       if (::ResumeThread(process_info->hThread) == static_cast<DWORD>(-1))
       {
