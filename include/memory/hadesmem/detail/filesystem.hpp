@@ -116,7 +116,7 @@ inline std::wstring GetRootPath(std::wstring const& path)
   }
 
   std::vector<wchar_t> drive_path(4);
-  PathBuildRoot(drive_path.data(), drive_num);
+  ::PathBuildRoot(drive_path.data(), drive_num);
   if (drive_path[0] == L'\0' || 
     drive_path[1] == L'\0' || 
     drive_path[2] == L'\0')

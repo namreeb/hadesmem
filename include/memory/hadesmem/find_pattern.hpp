@@ -196,7 +196,8 @@ public:
 };
 
 template <typename D>
-inline Pattern& operator<<(Pattern& pattern, Manipulator<D> const& manipulator)
+inline Pattern& operator<<(Pattern& pattern, 
+  Manipulator<D> const& manipulator)
 {
   manipulator.Manipulate(pattern);
   return pattern;
@@ -322,7 +323,8 @@ public:
 
   FindPattern(FindPattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
-  FindPattern& operator=(FindPattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  FindPattern& operator=(FindPattern const&) 
+    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
   FindPattern(FindPattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
 
