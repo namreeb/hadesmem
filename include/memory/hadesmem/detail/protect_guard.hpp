@@ -104,11 +104,11 @@ public:
     {
       Restore();
     }
-    catch (std::exception const& e)
+    catch (...)
     {
       // WARNING: Protection is not restored if 'Restore' fails.
-      (void)e;
-      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
     }
   }

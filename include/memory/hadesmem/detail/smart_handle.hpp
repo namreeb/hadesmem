@@ -104,7 +104,8 @@ public:
   }
 
 private:
-  SmartHandleImpl(SmartHandleImpl const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  SmartHandleImpl(SmartHandleImpl const& other) 
+    HADESMEM_DETAIL_DELETED_FUNCTION;
   SmartHandleImpl& operator=(SmartHandleImpl const& other) 
     HADESMEM_DETAIL_DELETED_FUNCTION;
 
@@ -114,11 +115,11 @@ private:
     {
       Cleanup();
     }
-    catch (std::exception const& e)
+    catch (...)
     {
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      (void)e;
-      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
       handle_ = GetInvalid();

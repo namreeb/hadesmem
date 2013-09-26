@@ -261,9 +261,10 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9Hk(UINT sdk_version)
       HADESMEM_DETAIL_TRACE_A("Direct3DCreate9 failed.");
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   ::SetLastError(last_error);
@@ -311,9 +312,10 @@ extern "C" HRESULT WINAPI Direct3DCreate9ExHk(UINT sdk_version, IDirect3D9Ex** p
       HADESMEM_DETAIL_TRACE_A("Direct3DCreate9Ex failed.");
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   ::SetLastError(last_error);
@@ -360,9 +362,10 @@ extern "C" HRESULT WINAPI CreateDeviceHk(IDirect3D9* pd3d9,
       HADESMEM_DETAIL_TRACE_A("CreateDevice failed.");
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   ::SetLastError(last_error);
@@ -585,9 +588,10 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionHk(
       HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection failed.");
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   **in_hook = false;
@@ -667,9 +671,10 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
       HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW failed.");
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   try
@@ -685,9 +690,10 @@ extern "C" BOOL WINAPI CreateProcessInternalWHk(
       }
     }
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
 
     ::TerminateProcess(process_info->hProcess, 0xDEADBEEF);
   }

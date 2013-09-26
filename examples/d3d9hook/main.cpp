@@ -21,9 +21,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load()
   {
     InitializeD3D9Hooks();
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   return 0;
@@ -35,9 +36,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free()
   {
     UninitializeD3D9Hooks();
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   return 0;

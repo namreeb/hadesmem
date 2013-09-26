@@ -136,11 +136,11 @@ private:
     {
       Resume();
     }
-    catch (std::exception const& e)
+    catch (...)
     {
       // WARNING: Thread is never resumed if ResumeThread fails...
-      (void)e;
-      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
     }
   }

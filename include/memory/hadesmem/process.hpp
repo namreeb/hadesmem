@@ -105,11 +105,11 @@ private:
     {
       Cleanup();
     }
-    catch (std::exception const& e)
+    catch (...)
     {
       // WARNING: Handle is leaked if 'Cleanup' fails.
-      (void)e;
-      HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
       id_ = 0;

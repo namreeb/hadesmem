@@ -248,9 +248,10 @@ ULONG __stdcall IDirect3DDevice9Proxy::Release()
 
     return ret;
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
   
   return new_ref;
@@ -361,9 +362,10 @@ HRESULT __stdcall IDirect3DDevice9Proxy::Reset(D3DPRESENT_PARAMETERS* pPresentat
   {
     OnPreReset();
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   HRESULT hr = device_->Reset(pPresentationParameters);
@@ -377,9 +379,10 @@ HRESULT __stdcall IDirect3DDevice9Proxy::Reset(D3DPRESENT_PARAMETERS* pPresentat
   {
     OnPostReset();
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   ::SetLastError(last_error);
@@ -571,9 +574,10 @@ HRESULT __stdcall IDirect3DDevice9Proxy::EndScene()
   {
     OnEndScene();
   }
-  catch (std::exception const& e)
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(boost::diagnostic_information(e).c_str());
+    HADESMEM_DETAIL_TRACE_A(boost::current_exception_diagnostic_information()
+      .c_str());
   }
 
   auto const proxy_call = MakeProxyCall(this);

@@ -858,10 +858,10 @@ int main(int /*argc*/, char* /*argv*/[])
 
     return 0;
   }
-  catch (std::exception const& e)
+  catch (...)
   {
     std::cerr << "\nError!\n";
-    std::cerr << boost::diagnostic_information(e) << '\n';
+    std::cerr << boost::current_exception_diagnostic_information() << '\n';
 
     return 1;
   }
