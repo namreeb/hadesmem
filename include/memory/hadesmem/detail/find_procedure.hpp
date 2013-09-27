@@ -11,6 +11,7 @@
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/pelib/export.hpp>
@@ -102,16 +103,7 @@ inline FARPROC GetProcAddressFromExport(
     }
   }
 
-  // NOTE: This is technically illegal, but we don't really have a choice.
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
-  union Conv
-  {
-    void* va;
-    FARPROC pfn;
-  };
-  Conv conv;
-  conv.va = e.GetVa();
-  return conv.pfn;
+  return UnionCast<FARPROC>(e.GetVa());
 }
 
 }

@@ -33,6 +33,7 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
@@ -514,8 +515,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
-    DWORD arg_conv;
-    std::memcpy(&arg_conv, &arg, sizeof(arg));
+    auto const arg_conv = UnionCast<DWORD>(arg);
 
     assembler_->mov(AsmJit::eax, AsmJit::uimm(arg_conv));
     assembler_->push(AsmJit::eax);
@@ -528,8 +528,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
-    DWORD64 arg_conv;
-    std::memcpy(&arg_conv, &arg, sizeof(arg));
+    auto const arg_conv = UnionCast<DWORD64>(arg);
 
     assembler_->mov(AsmJit::eax, AsmJit::uimm(static_cast<DWORD>(
       (arg_conv >> 32) & 0xFFFFFFFFUL)));
@@ -599,8 +598,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 
-    DWORD arg_conv;
-    std::memcpy(&arg_conv, &arg, sizeof(arg));
+    auto const arg_conv = UnionCast<DWORD>(arg);
 
     std::size_t const scratch_offs = num_args_ * 8;
 
@@ -648,8 +646,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
-    DWORD64 arg_conv;
-    std::memcpy(&arg_conv, &arg, sizeof(arg));
+    auto const arg_conv = UnionCast<DWORD64>(arg);
 
     DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL);
     DWORD const arg_high = static_cast<DWORD>(
