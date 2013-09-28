@@ -10,12 +10,12 @@
 #include <map>
 #include <limits>
 #include <locale>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/numeric/conversion/cast.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_uint.hpp>
@@ -383,51 +383,51 @@ public:
     HADESMEM_DETAIL_ASSERT(!(flags & 
       ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
 
-    typedef std::wstring::const_iterator DataIter;
-    typedef boost::spirit::qi::standard::space_type SkipWsT;
-    
-    boost::spirit::qi::rule<DataIter, std::uint32_t(), SkipWsT> data_rule;
-    data_rule %= (boost::spirit::qi::hex | 
-      boost::spirit::qi::lit(L"??")[boost::spirit::qi::_val = 
-      static_cast<unsigned int>(-1)]);
-    
-    boost::spirit::qi::rule<DataIter, std::vector<std::uint32_t>(), SkipWsT> 
-      const data_list_rule = +(data_rule);
-    
-    std::vector<std::uint32_t> data_parsed;
-    auto data_beg = std::begin(data);
-    auto const data_end = std::end(data);
-    bool const converted = boost::spirit::qi::phrase_parse(
-      data_beg, 
-      data_end, 
-      data_list_rule, 
-      boost::spirit::qi::space, 
-      data_parsed);
-    if (!converted || data_beg != data_end)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Data parsing failed."));
-    }
-    
+    HADESMEM_DETAIL_ASSERT(!data.empty());
+
+    std::wstring const data_trimmed = data.substr(0, 
+      data.find_last_not_of(L" \n\r\t") + 1);
+
+    HADESMEM_DETAIL_ASSERT(!data_trimmed.empty());
+
+    std::wistringstream data_str(data_trimmed);
+    data_str.imbue(std::locale::classic());
     std::vector<std::pair<BYTE, bool>> data_real;
-    std::transform(std::begin(data_parsed), std::end(data_parsed), 
-      std::back_inserter(data_real), 
-      [] (std::uint32_t current) -> std::pair<BYTE, bool>
+    for (;;)
+    {
+      std::wstring data_cur_str;
+      if (!(data_str >> data_cur_str))
       {
-        try
-        {
-          bool const is_wildcard = (current == static_cast<std::uint32_t>(-1));
-          BYTE const current_byte = is_wildcard 
-            ? static_cast<BYTE>(0) 
-            : boost::numeric_cast<BYTE>(current);
-          return std::make_pair(current_byte, !is_wildcard);
-        }
-        catch (std::exception const& /*e*/)
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+          ErrorString("Data parsing failed."));
+      }
+
+      bool const is_wildcard = (data_cur_str == L"??");
+      std::uint32_t current = 0U;
+      if (!is_wildcard)
+      {
+        std::wistringstream conv(data_cur_str);
+        conv.imbue(std::locale::classic());
+        if (!(conv >> std::hex >> current))
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-            ErrorString("Data conversion failed (numeric)."));
+            ErrorString("Data conversion failed."));
         }
-      });
+
+        if (current > 0xFFU)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
+            ErrorString("Invalid data."));
+        }
+      }
+
+      data_real.emplace_back(static_cast<BYTE>(current), !is_wildcard);
+
+      if (data_str.eof())
+      {
+        break;
+      }
+    }
     
     bool const scan_data_secs = !!(flags & FindPatternFlags::kScanData);
     

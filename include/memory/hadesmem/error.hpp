@@ -38,6 +38,8 @@ typedef boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>
   ErrorCodeWinOther;
 typedef boost::error_info<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
 typedef boost::error_info<struct TagErrorCodeOther, HRESULT> ErrorCodeWinHr;
+typedef boost::error_info<struct TagErrorString, std::string> 
+  ErrorStringOther;
 
 }
 
