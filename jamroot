@@ -106,6 +106,10 @@ project memory
     <variant>release,<toolset>intel:<linkflags>"/LTCG"
     <variant>release,<toolset>gcc:<cxxflags>"-flto"
     
+    # Improve standards conformance under MSVC
+    <toolset>msvc:<cxxflags>"/Zc:rvalueCast"
+    <toolset>msvc:<cxxflags>"/volatile:iso"
+        
     # Enable generation of debugging symbols, even under release mode.
     <debug-symbols>on
     
