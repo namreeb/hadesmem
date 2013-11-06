@@ -14,7 +14,6 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/mpl/at.hpp>
-#include <boost/preprocessor.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <windows.h>
@@ -1102,8 +1101,6 @@ void AddCallArg(OutputIterator call_args, T&& arg)
 
 }
 
-#if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
-
 namespace detail
 {
 
@@ -1143,54 +1140,6 @@ CallResult<typename detail::FuncResult<FuncT>::type> Call(
   typedef typename detail::FuncResult<FuncT>::type ResultT;
   return detail::CallResultRawToCallResult<ResultT>(ret);
 }
-
-#else // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
-
-HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
-  BOOST_PP_LIMIT_REPEAT);
-
-HADESMEM_DETAIL_STATIC_ASSERT(HADESMEM_CALL_MAX_ARGS < 
-  BOOST_PP_LIMIT_ITERATION);
-
-#define HADESMEM_DETAIL_CHECK_FUNC_ARITY(n) \
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value == n)
-
-#define HADESMEM_DETAIL_CALL_ADD_ARG(n) \
-  detail::AddCallArg<FuncT, n>(std::back_inserter(args), \
-    std::forward<T##n>(t##n))
-
-#define HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER(z, n, unused) \
-  HADESMEM_DETAIL_CALL_ADD_ARG(n);
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-CallResult<typename detail::FuncResult<FuncT>::type>\
-  Call(Process const& process, FnPtr address, CallConv call_conv \
-  BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
-{\
-  HADESMEM_DETAIL_CHECK_FUNC_ARITY(n);\
-  std::vector<CallArg> args;\
-  BOOST_PP_REPEAT(n, HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER, ~)\
-  CallResultRaw const ret = Call(process, address, call_conv, \
-    std::begin(args), std::end(args));\
-  typedef typename detail::FuncResult<FuncT>::type ResultT;\
-  return detail::CallResultRawToCallResult<ResultT>(ret);\
-}\
-
-#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif // #if defined(HADESMEM_MSVC)
-
-#include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
-
-#endif // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
 
 class MultiCall
 {
@@ -1248,8 +1197,6 @@ public:
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
-#if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
-
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)
   {
@@ -1265,42 +1212,6 @@ public:
     args_.push_back(call_args);
   }
 
-#else // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
-
-#define BOOST_PP_LOCAL_MACRO(n) \
-  template <typename FuncT BOOST_PP_ENUM_TRAILING_PARAMS(n, typename T)>\
-  void Add(FnPtr address, CallConv call_conv \
-    BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(n, T, && t))\
-  {\
-    HADESMEM_DETAIL_CHECK_FUNC_ARITY(n);\
-    std::vector<CallArg> args;\
-    BOOST_PP_REPEAT(n, HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER, ~)\
-    addresses_.push_back(address);\
-    call_convs_.push_back(call_conv);\
-    args_.push_back(args);\
-  }\
-
-#define BOOST_PP_LOCAL_LIMITS (0, HADESMEM_CALL_MAX_ARGS)
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif // #if defined(HADESMEM_MSVC)
-
-#include BOOST_PP_LOCAL_ITERATE()
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
-
-#undef HADESMEM_DETAIL_CHECK_FUNC_ARITY
-
-#undef HADESMEM_DETAIL_CALL_ADD_ARG
-
-#undef HADESMEM_DETAIL_CALL_ADD_ARG_WRAPPER
-
-#endif // #if !defined(HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES)
-  
   template <typename OutputIterator>
   void Call(OutputIterator results) const
   {

@@ -44,10 +44,8 @@
 #define HADESMEM_VERSION_STRING HADESMEM_DETAIL_VERSION_STRING_GEN(\
   HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
-#if defined(HADESMEM_MSVC)
-#define HADESMEM_DETAIL_NO_DELETED_FUNCTIONS
-#endif // #if defined(HADESMEM_MSVC)
-
+// TODO: Split this up into defaulted functions for move functions and 
+// non-move functions (Dev12 RTM does not support move function generation).
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS
 #endif // #if defined(HADESMEM_MSVC)
@@ -58,14 +56,6 @@
 
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_CONSTEXPR
-#endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_MSVC)
-#define HADESMEM_DETAIL_NO_VARIADIC_TEMPLATES
-#endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_MSVC)
-#define HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
