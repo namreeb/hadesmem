@@ -32,7 +32,9 @@ struct IsTriviallyCopyable
   // libstdc++.
   static bool const value = std::is_trivial<T>::value;
 #else
-  static bool const value = std::is_trivially_copyable<T>::value;
+  // TODO: Update to use std::is_trivially_copyable when MSVC is fixed. Dev12 
+  // seems to be broken for arrays.
+  static bool const value = std::is_trivial<T>::value;
 #endif
 };
 
