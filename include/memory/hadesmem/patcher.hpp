@@ -165,8 +165,8 @@ public:
   }
 
 private:
-  PatchRaw(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  PatchRaw& operator=(PatchRaw const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchRaw(PatchRaw const& other) = delete;
+  PatchRaw& operator=(PatchRaw const& other) = delete;
 
   // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
@@ -409,9 +409,9 @@ public:
   }
 
 private:
-  PatchDetour(PatchDetour const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  PatchDetour(PatchDetour const& other) = delete;
   PatchDetour& operator=(PatchDetour const& other) 
-    HADESMEM_DETAIL_DELETED_FUNCTION;
+    = delete;
 
   // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT

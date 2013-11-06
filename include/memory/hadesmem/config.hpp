@@ -24,6 +24,9 @@
 #elif defined(_MSC_VER)
 #define HADESMEM_MSVC
 #else
+// I don't like having to do this, but given that some small parts of the 
+// code base rely on 'questionable' interpretations of the standard it's 
+// safer to verify before continuing.
 #error "[HadesMem] Unsupported compiler."
 #endif
 
@@ -44,10 +47,8 @@
 #define HADESMEM_VERSION_STRING HADESMEM_DETAIL_VERSION_STRING_GEN(\
   HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
-// TODO: Split this up into defaulted functions for move functions and 
-// non-move functions (Dev12 RTM does not support move function generation).
 #if defined(HADESMEM_MSVC)
-#define HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS
+#define HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_MSVC)
@@ -57,18 +58,6 @@
 #if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_CONSTEXPR
 #endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
-#define HADESMEM_DETAIL_DELETED_FUNCTION 
-#else // #if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
-#define HADESMEM_DETAIL_DELETED_FUNCTION = delete
-#endif // #if defined(HADESMEM_DETAIL_NO_DELETED_FUNCTIONS)
-
-#if defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
-#define HADESMEM_DETAIL_DEFAULTED_FUNCTION 
-#else // #if defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
-#define HADESMEM_DETAIL_DEFAULTED_FUNCTION = default
-#endif // #if defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
 #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
 #define HADESMEM_DETAIL_NOEXCEPT 
@@ -85,12 +74,6 @@
 #else // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
 #define HADESMEM_DETAIL_CONSTEXPR constexpr
 #endif // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
-
-#if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-#define HADESMEM_DETAIL_EXPLICIT_CONVERSION_OPERATOR 
-#else // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-#define HADESMEM_DETAIL_EXPLICIT_CONVERSION_OPERATOR explicit
-#endif // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
 
 #if defined(_M_IX86)
 #define HADESMEM_DETAIL_ARCH_X86

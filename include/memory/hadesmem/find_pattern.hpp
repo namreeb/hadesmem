@@ -88,32 +88,17 @@ public:
   Pattern(FindPattern& finder, std::wstring const& data, 
     std::wstring const& name, std::uint32_t flags);
 
-#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+  Pattern(Pattern const&) = default;
 
-  Pattern(Pattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern& operator=(Pattern const&) = default;
 
-  Pattern& operator=(Pattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  Pattern(Pattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern(Pattern&&) = default;
 
-  Pattern& operator=(Pattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Pattern& operator=(Pattern&&) = default;
 
-#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
-
-  Pattern(Pattern const& other)
-    : finder_(other.finder_), 
-    name_(other.name_), 
-    address_(other.address_), 
-    flags_(other.flags_)
-  { }
-
-  Pattern& operator=(Pattern const& other)
-  {
-    Pattern tmp(other);
-    *this = std::move(tmp);
-
-    return *this;
-  }
+#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   Pattern(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
     : finder_(other.finder_), 
@@ -142,7 +127,7 @@ public:
     return *this;
   }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   void Save();
 
@@ -319,34 +304,17 @@ public:
     }
   }
 
-#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+  FindPattern(FindPattern const&) = default;
 
-  FindPattern(FindPattern const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  FindPattern& operator=(FindPattern const&) = default;
 
-  FindPattern& operator=(FindPattern const&) 
-    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  FindPattern(FindPattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  FindPattern(FindPattern&&) = default;
 
-  FindPattern& operator=(FindPattern&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  FindPattern& operator=(FindPattern&&) = default;
 
-#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
-
-  FindPattern(FindPattern const& other)
-    : process_(other.process_), 
-    base_(other.base_), 
-    code_regions_(other.code_regions_), 
-    data_regions_(other.data_regions_), 
-    addresses_(other.addresses_)
-  { }
-
-  FindPattern& operator=(FindPattern const& other)
-  {
-    FindPattern tmp(other);
-    *this = std::move(tmp);
-
-    return *this;
-  }
+#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   FindPattern(FindPattern&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
@@ -376,7 +344,7 @@ public:
     return *this;
   }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
   
   PVOID Find(std::wstring const& data, std::uint32_t flags) const
   {

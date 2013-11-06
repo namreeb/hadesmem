@@ -140,8 +140,8 @@ public:
   }
 
 private:
-  Allocator(Allocator const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  Allocator& operator=(Allocator const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  Allocator(Allocator const& other) = delete;
+  Allocator& operator=(Allocator const& other) = delete;
 
   void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {

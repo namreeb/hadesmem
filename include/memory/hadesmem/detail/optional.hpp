@@ -111,8 +111,7 @@ public:
     return valid_ ? &Optional::NotComparable : nullptr;
   }
 #else // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-  HADESMEM_DETAIL_EXPLICIT_CONVERSION_OPERATOR operator bool() const 
-    HADESMEM_DETAIL_NOEXCEPT
+  explicit operator bool() const HADESMEM_DETAIL_NOEXCEPT
   {
     return valid_;
   }

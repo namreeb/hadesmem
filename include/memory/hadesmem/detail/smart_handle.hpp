@@ -104,10 +104,8 @@ public:
   }
 
 private:
-  SmartHandleImpl(SmartHandleImpl const& other) 
-    HADESMEM_DETAIL_DELETED_FUNCTION;
-  SmartHandleImpl& operator=(SmartHandleImpl const& other) 
-    HADESMEM_DETAIL_DELETED_FUNCTION;
+  SmartHandleImpl(SmartHandleImpl const& other) = delete;
+  SmartHandleImpl& operator=(SmartHandleImpl const& other) = delete;
 
   void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {

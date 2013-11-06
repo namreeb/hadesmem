@@ -1151,33 +1151,18 @@ public:
     args_()
   { }
 
-#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+  MultiCall(MultiCall const&) = default;
 
-  MultiCall(MultiCall const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  MultiCall& operator=(MultiCall const&) = default;
 
-  MultiCall& operator=(MultiCall const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  MultiCall(MultiCall&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  MultiCall(MultiCall&&) = default;
 
-  MultiCall& operator=(MultiCall&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  MultiCall& operator=(MultiCall&&) = default;
 
-#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  MultiCall(MultiCall const& other)
-    : process_(other.process_), 
-    addresses_(other.addresses_), 
-    call_convs_(other.call_convs_), 
-    args_(other.args_)
-  { }
-
-  MultiCall& operator=(MultiCall const& other)
-  {
-    MultiCall tmp(other);
-    *this = std::move(tmp);
-
-    return *this;
-  }
-  
   MultiCall(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
     addresses_(std::move(other.addresses_)), 
@@ -1195,7 +1180,7 @@ public:
     return *this;
   }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   template <typename FuncT, typename... Args>
   void Add(FnPtr address, CallConv call_conv, Args&&... args)

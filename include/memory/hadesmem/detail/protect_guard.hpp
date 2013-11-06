@@ -114,8 +114,8 @@ public:
   }
 
 private:
-  ProtectGuard(ProtectGuard const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
-  ProtectGuard& operator=(ProtectGuard const& other) HADESMEM_DETAIL_DELETED_FUNCTION;
+  ProtectGuard(ProtectGuard const& other) = delete;
+  ProtectGuard& operator=(ProtectGuard const& other) = delete;
   
   Process const* process_;
   ProtectGuardType type_;

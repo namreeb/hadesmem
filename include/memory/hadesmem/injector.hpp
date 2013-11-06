@@ -222,36 +222,17 @@ public:
     export_last_error_(export_last_error)
   { }
 
-#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+  CreateAndInjectData(CreateAndInjectData const&) = default;
 
-  CreateAndInjectData(CreateAndInjectData const&) 
-    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  CreateAndInjectData& operator=(CreateAndInjectData const&) = default;
 
-  CreateAndInjectData& operator=(CreateAndInjectData const&) 
-    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  CreateAndInjectData(CreateAndInjectData&&) 
-    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  CreateAndInjectData(CreateAndInjectData&&) = default;
 
-  CreateAndInjectData& operator=(CreateAndInjectData&&) 
-    HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  CreateAndInjectData& operator=(CreateAndInjectData&&) = default;
 
-#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
-
-  CreateAndInjectData(CreateAndInjectData const& other)
-    : process_(other.process_), 
-    module_(other.module_), 
-    export_ret_(other.export_ret_), 
-    export_last_error_(other.export_last_error_)
-  { }
-
-  CreateAndInjectData& operator=(CreateAndInjectData const& other)
-  {
-    CreateAndInjectData tmp(other);
-    *this = std::move(tmp);
-
-    return *this;
-  }
+#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   CreateAndInjectData(CreateAndInjectData&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(std::move(other.process_)), 
@@ -271,7 +252,7 @@ public:
     return *this;
   }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   Process GetProcess() const
   {

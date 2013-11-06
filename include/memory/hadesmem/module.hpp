@@ -50,33 +50,18 @@ public:
     Initialize(path);
   }
 
-#if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
 
-  Module(Module const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Module(Module const&) = default;
 
-  Module& operator=(Module const&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Module& operator=(Module const&) = default;
 
-  Module(Module&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  Module& operator=(Module&&) HADESMEM_DETAIL_DEFAULTED_FUNCTION;
+  Module(Module&&) = default;
 
-#else // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+  Module& operator=(Module&&) = default;
 
-  Module(Module const& other)
-    : process_(other.process_), 
-    handle_(other.handle_), 
-    size_(other.size_), 
-    name_(other.name_), 
-    path_(other.path_)
-  { }
-
-  Module& operator=(Module const& other)
-  {
-    Module tmp(other);
-    *this = std::move(tmp);
-
-    return *this;
-  }
+#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   Module(Module&& other) HADESMEM_DETAIL_NOEXCEPT
     : process_(other.process_), 
@@ -97,7 +82,7 @@ public:
     return *this;
   }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_DEFAULTED_FUNCTIONS)
+#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   HMODULE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
   {
