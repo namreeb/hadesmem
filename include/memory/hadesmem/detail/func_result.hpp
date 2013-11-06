@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include <hadesmem/config.hpp>
-#include <hadesmem/detail/static_assert.hpp>
-
 namespace hadesmem
 {
 

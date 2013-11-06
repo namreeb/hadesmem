@@ -12,10 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/mpl/at.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
@@ -1085,7 +1081,7 @@ template <typename FuncT, std::int32_t N, typename T, typename OutputIterator>
 void AddCallArg(OutputIterator call_args, T&& arg)
 {
   typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
-  typedef typename boost::mpl::at_c<FuncArgs, N>::type RealT;
+  typedef typename std::tuple_element<N, FuncArgs>::type RealT;
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   *call_args = static_cast<CallArg>(static_cast<RealT>(std::forward<T>(arg)));
 }
