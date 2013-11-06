@@ -85,10 +85,6 @@
 #endif // #if defined(_M_IX86)
 // #elif defined(_M_AMD64)
 
-#if !defined(HADESMEM_CALL_MAX_ARGS)
-#define HADESMEM_CALL_MAX_ARGS 10
-#endif // #if !defined(HADESMEM_CALL_MAX_ARGS)
-
 // This is required because of a bug in Clang's dllexport support on Windows, 
 // this is worked around by using a linker flag to export all symbols 
 // unconditionally.
