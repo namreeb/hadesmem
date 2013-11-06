@@ -1081,11 +1081,6 @@ inline CallResultRaw Call(Process const& process,
 namespace detail
 {
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif // #if defined(HADESMEM_MSVC)
-
 template <typename FuncT, std::int32_t N, typename T, typename OutputIterator>
 void AddCallArg(OutputIterator call_args, T&& arg)
 {
@@ -1094,10 +1089,6 @@ void AddCallArg(OutputIterator call_args, T&& arg)
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_convertible<T, RealT>::value);
   *call_args = static_cast<CallArg>(static_cast<RealT>(std::forward<T>(arg)));
 }
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
 
 }
 
