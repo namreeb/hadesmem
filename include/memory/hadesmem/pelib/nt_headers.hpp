@@ -671,7 +671,7 @@ inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
 // TODO: Add tests for this.
 inline DWORD GetNumberOfRvaAndSizesClamped(NtHeaders const& nt_headers)
 {
-  DWORD num_rvas_and_sizes = nt_headers.GetNumberOfRvaAndSizes();
+  DWORD const num_rvas_and_sizes = nt_headers.GetNumberOfRvaAndSizes();
   return (std::min)(num_rvas_and_sizes, 0x10UL);
 }
 
