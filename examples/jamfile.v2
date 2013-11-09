@@ -12,7 +12,7 @@ project
     <warnings-as-errors>on
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
-    <toolset>gcc:<cxxflags>"-ansi -Wpedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++ -Wold-style-cast"
+    <toolset>gcc:<cxxflags>"-ansi -Wpedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++ -Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual -Wsuggest-attribute=pure -Wsuggest-attribute=const -Winvalid-pch -Wno-multichar"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
     
     <library>/memory//memory
