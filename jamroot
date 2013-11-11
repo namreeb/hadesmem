@@ -17,6 +17,12 @@ use-project /udis86
   :
     src/udis86
   ;
+ 
+# Use PugiXML library. 
+use-project /pugixml
+  :
+    src/pugixml
+  ;
   
 # Use HadesMem tests.
 use-project /tests
@@ -165,8 +171,9 @@ alias memory
 
     <library>src/udis86
 
+    <library>src/pugixml
+
     <include>"./include/memory"
-    <include>"./src/asmjit"
   ;
 
 # Build HadesMem tests.
