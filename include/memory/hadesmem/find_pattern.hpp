@@ -51,6 +51,9 @@
 
 // TODO: Arbitrary region support.
 
+// TODO: Standalone app/example for FindPattern. For dumping results, 
+// experimenting with patterns, automatically generating new patterns, etc.
+
 namespace hadesmem
 {
     namespace detail
@@ -483,29 +486,86 @@ namespace hadesmem
         void LoadFile(std::wstring const& path)
         {
             pugi::xml_document doc;
-            // TODO: More detailed error reporting.
-            if (!doc.load_file(path.c_str()))
+            auto const load_result = doc.load_file(path.c_str());
+            if (!load_result)
             {
                 HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("Loading XML file failed."));
+                    ErrorString("Loading XML file failed.") <<
+                    ErrorCodeOther(load_result.status) << 
+                    ErrorStringOther(load_result.description()));
             }
+
             LoadImpl(doc);
         }
 
         void LoadFileMemory(std::wstring const& data)
         {
             pugi::xml_document doc;
-            // TODO: More detailed error reporting.
-            if (!doc.load(data.c_str()))
+            auto const load_result = doc.load(data.c_str());
+            if (!load_result)
             {
                 HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("Loading XML file failed."));
+                    ErrorString("Loading XML file failed.") <<
+                    ErrorCodeOther(load_result.status) <<
+                    ErrorStringOther(load_result.description()));
             }
 
             LoadImpl(doc);
         }
 
-        void LoadImpl(pugi::xml_document& doc)
+        friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
+        {
+            return lhs.process_ == rhs.process_ &&
+                lhs.base_ == rhs.base_ &&
+                lhs.addresses_ == rhs.addresses_;
+        }
+
+        friend bool operator!=(FindPattern const& lhs, FindPattern const& rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+    private:
+        PVOID Find(std::vector<std::pair<BYTE, bool>> const& data,
+            bool scan_data_secs) const
+        {
+            HADESMEM_DETAIL_ASSERT(!data.empty());
+
+            std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
+                scan_data_secs ? data_regions_ : code_regions_;
+            for (auto const& region : scan_regions)
+            {
+                PBYTE const s_beg = region.first;
+                PBYTE const s_end = region.second;
+                HADESMEM_DETAIL_ASSERT(s_end > s_beg);
+
+                std::ptrdiff_t const mem_size = s_end - s_beg;
+                HADESMEM_DETAIL_ASSERT(s_beg <= s_end);
+                std::vector<BYTE> const buffer(ReadVector<BYTE>(
+                    *process_, 
+                    s_beg,
+                    static_cast<std::size_t>(mem_size)));
+
+                auto const iter = std::search(
+                    std::begin(buffer),
+                    std::end(buffer),
+                    std::begin(data),
+                    std::end(data),
+                    [](BYTE h_cur, std::pair<BYTE, bool> const& n_cur)
+                {
+                    return (!n_cur.second) || (h_cur == n_cur.first);
+                });
+
+                if (iter != std::end(buffer))
+                {
+                    return (s_beg + std::distance(std::begin(buffer), iter));
+                }
+            }
+
+            return nullptr;
+        }
+
+        void LoadImpl(pugi::xml_document const& doc)
         {
             auto const hadesmem_root = doc.child(L"HadesMem");
             if (!hadesmem_root)
@@ -597,8 +657,8 @@ namespace hadesmem
                         "attribute for 'Pattern' node."));
                 }
 
-                detail::PatternInfo pattern_info{ 
-                    pattern_name, 
+                detail::PatternInfo pattern_info{
+                    pattern_name,
                     pattern_data };
 
                 std::vector<detail::ManipInfo> pattern_manips;
@@ -614,7 +674,7 @@ namespace hadesmem
                             ErrorString("Failed to find 'Name' attribute "
                             "for 'Manipulator' node."));
                     }
-                    std::wstring const manipulator_name = 
+                    std::wstring const manipulator_name =
                         manipulator_name_attr.value();
                     if (manipulator_name.empty())
                     {
@@ -647,7 +707,7 @@ namespace hadesmem
                             "for 'Manipulator' node."));
                     }
 
-                    auto const hex_str_to_uintptr = 
+                    auto const hex_str_to_uintptr =
                         [](std::wstring const& s) -> std::uintptr_t
                     {
                         std::wstringstream str;
@@ -665,27 +725,27 @@ namespace hadesmem
                     auto const manipulator_operand1 = manipulator.attribute(
                         L"Operand1");
                     bool const has_operand1 = !!manipulator_operand1;
-                    std::uintptr_t const operand1 = has_operand1 
-                        ? hex_str_to_uintptr(manipulator_operand1.value()) 
+                    std::uintptr_t const operand1 = has_operand1
+                        ? hex_str_to_uintptr(manipulator_operand1.value())
                         : 0U;
 
                     auto const manipulator_operand2 = manipulator.attribute(
                         L"Operand2");
                     bool const has_operand2 = !!manipulator_operand2;
-                    std::uintptr_t const operand2 = has_operand2 
-                        ? hex_str_to_uintptr(manipulator_operand2.value()) 
+                    std::uintptr_t const operand2 = has_operand2
+                        ? hex_str_to_uintptr(manipulator_operand2.value())
                         : 0U;
 
-                    pattern_manips.emplace_back(detail::ManipInfo{ 
-                        type, 
-                        has_operand1, 
-                        operand1, 
-                        has_operand2, 
+                    pattern_manips.emplace_back(detail::ManipInfo{
+                        type,
+                        has_operand1,
+                        operand1,
+                        has_operand2,
                         operand2 });
                 }
 
-                pattern_infos.emplace_back(detail::PatternInfoFull{ 
-                    pattern_info, 
+                pattern_infos.emplace_back(detail::PatternInfoFull{
+                    pattern_info,
                     pattern_manips });
             }
 
@@ -756,58 +816,6 @@ namespace hadesmem
 
                 pattern.Save();
             }
-        }
-
-        friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
-        {
-            return lhs.process_ == rhs.process_ &&
-                lhs.base_ == rhs.base_ &&
-                lhs.addresses_ == rhs.addresses_;
-        }
-
-        friend bool operator!=(FindPattern const& lhs, FindPattern const& rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-    private:
-        PVOID Find(std::vector<std::pair<BYTE, bool>> const& data,
-            bool scan_data_secs) const
-        {
-            HADESMEM_DETAIL_ASSERT(!data.empty());
-
-            std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
-                scan_data_secs ? data_regions_ : code_regions_;
-            for (auto const& region : scan_regions)
-            {
-                PBYTE const s_beg = region.first;
-                PBYTE const s_end = region.second;
-                HADESMEM_DETAIL_ASSERT(s_end > s_beg);
-
-                std::ptrdiff_t const mem_size = s_end - s_beg;
-                HADESMEM_DETAIL_ASSERT(s_beg <= s_end);
-                std::vector<BYTE> const buffer(ReadVector<BYTE>(
-                    *process_, 
-                    s_beg,
-                    static_cast<std::size_t>(mem_size)));
-
-                auto const iter = std::search(
-                    std::begin(buffer),
-                    std::end(buffer),
-                    std::begin(data),
-                    std::end(data),
-                    [](BYTE h_cur, std::pair<BYTE, bool> const& n_cur)
-                {
-                    return (!n_cur.second) || (h_cur == n_cur.first);
-                });
-
-                if (iter != std::end(buffer))
-                {
-                    return (s_beg + std::distance(std::begin(buffer), iter));
-                }
-            }
-
-            return nullptr;
         }
 
         Process const* process_;
