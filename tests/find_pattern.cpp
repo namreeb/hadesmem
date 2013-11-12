@@ -158,8 +158,8 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <FindPattern>
-    <Flag Name="RelativeAddress"></Flag>
-    <Flag Name="ThrowOnUnmatch"></Flag>
+    <Flag Name="RelativeAddress"/>
+    <Flag Name="ThrowOnUnmatch"/>
     <Pattern Name="First Call" Data="E8">
       <Manipulator Name="Add" Operand1="1"></Manipulator>
       <Manipulator Name="Rel" Operand1="5" Operand2="1"></Manipulator>
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
       <Manipulator Name="Add" Operand1="1"></Manipulator>
       <Manipulator Name="Sub" Operand1="1"></Manipulator>
     </Pattern>
-    <Pattern Name="Nop Other" Data="90"></Pattern>
+    <Pattern Name="Nop Other" Data="90"/>
   </FindPattern>
 </HadesMem>
 )";
@@ -188,59 +188,49 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
         find_pattern[L"Nop Other"]);
 
     // Test pattern file, using various types of invalid input.
+    // TODO: Fix the test to ensure we get the error we're expecting, rather 
+    // than just any error.
     std::wstring const pattern_file_data_invalid1 =
         LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <FindPattern>
-    <Flag>InvalidFlag</Flag>
+    <Flag Name="InvalidFlag"></Flag>
   </FindPattern>
 </HadesMem>
 )";
     BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
         pattern_file_data_invalid1), 
         hadesmem::Error);
+
     std::wstring const pattern_file_data_invalid2 =
         LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <FindPattern>
-    <Flag>RelativeAddress</Flag>
-    <Flag>ThrowOnUnmatch</Flag>
-    <Manipulator Name="Add" Operand1="1"></Manipulator>
+    <Flag Name="RelativeAddress"></Flag>
+    <Flag Name="ThrowOnUnmatch"></Flag>
+    <Pattern Name="Foo" Data="ZZ"></Pattern>
   </FindPattern>
 </HadesMem>
 )";
     BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
         pattern_file_data_invalid2), 
         hadesmem::Error);
+
     std::wstring const pattern_file_data_invalid3 =
         LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <FindPattern>
-    <Flag>RelativeAddress</Flag>
-    <Flag>ThrowOnUnmatch</Flag>
-    <Pattern Name="Foo" Data="ZZ"></Pattern>
-  </FindPattern>
-</HadesMem>
-)";
-    BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
-        pattern_file_data_invalid3), 
-        hadesmem::Error);
-    std::wstring const pattern_file_data_invalid4 =
-        LR"(
-<?xml version="1.0" encoding="utf-8"?>
-<HadesMem>
-  <FindPattern>
-    <Flag>RelativeAddress</Flag>
-    <Flag>ThrowOnUnmatch</Flag>
+    <Flag Name="RelativeAddress"></Flag>
+    <Flag Name="ThrowOnUnmatch"></Flag>
     <Pattern></Pattern>
   </FindPattern>
 </HadesMem>
 )";
     BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
-        pattern_file_data_invalid4),
+        pattern_file_data_invalid3),
         hadesmem::Error);
 
     // Todo: LoadFile test
@@ -270,7 +260,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     // Check ScanData flag
     // Note: Pattern is for narrow string 'FindPattern' (without quotes)
     auto const find_pattern_str = find_pattern.Find(L"46 69 6E 64 50 61 74 "
-        L"65 72 6E", hadesmem::FindPatternFlags::kScanData);
+        L"74 65 72 6E", hadesmem::FindPatternFlags::kScanData);
     BOOST_CHECK(find_pattern_str != nullptr);
 
     // Check conversion failures throw
