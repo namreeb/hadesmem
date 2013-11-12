@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <fstream>
 #include <iterator>
 #include <limits>
 #include <locale>
@@ -25,7 +24,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/static_assert.hpp>
-#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
