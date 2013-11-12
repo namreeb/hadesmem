@@ -52,6 +52,12 @@
 // TODO: Standalone app/example for FindPattern. For dumping results, 
 // experimenting with patterns, automatically generating new patterns, etc.
 
+// TODO: Allow flags to be overriden for individual patterns. This is 
+// desirable for flags like kScanData.
+
+// TODO: Allow module names and custom regions to be specified in pattern 
+// file.
+
 namespace hadesmem
 {
     namespace detail
@@ -109,13 +115,13 @@ namespace hadesmem
     {
     public:
         Pattern(
-            FindPattern& finder, 
-            std::wstring const& data, 
+            FindPattern& finder,
+            std::wstring const& data,
             std::uint32_t flags);
 
-        Pattern(FindPattern& finder, 
+        Pattern(FindPattern& finder,
             std::wstring const& data,
-            std::wstring const& name, 
+            std::wstring const& name,
             std::uint32_t flags);
 
         Pattern(Pattern const&) = default;
@@ -250,7 +256,7 @@ namespace hadesmem
         class Rel : public Manipulator<Rel>
         {
         public:
-            explicit Rel(DWORD_PTR size, DWORD_PTR offset) 
+            explicit Rel(DWORD_PTR size, DWORD_PTR offset)
                 HADESMEM_DETAIL_NOEXCEPT
                 : size_(size),
                 offset_(offset)
@@ -287,7 +293,7 @@ namespace hadesmem
 
             PBYTE const base = reinterpret_cast<PBYTE>(module);
             base_ = reinterpret_cast<DWORD_PTR>(base);
-            PeFile const pe_file(process, reinterpret_cast<PVOID>(base), 
+            PeFile const pe_file(process, reinterpret_cast<PVOID>(base),
                 hadesmem::PeFileType::Image);
             DosHeader const dos_header(process, pe_file);
             NtHeaders const nt_headers(process, pe_file);
@@ -298,7 +304,7 @@ namespace hadesmem
                 bool const is_code_section =
                     !!(s.GetCharacteristics() & IMAGE_SCN_CNT_CODE);
                 bool const is_data_section =
-                    !!(s.GetCharacteristics() & 
+                    !!(s.GetCharacteristics() &
                     IMAGE_SCN_CNT_INITIALIZED_DATA);
                 if (!is_code_section && !is_data_section)
                 {
@@ -306,8 +312,8 @@ namespace hadesmem
                 }
 
                 PBYTE const section_beg = static_cast<PBYTE>(RvaToVa(
-                    process, 
-                    pe_file, 
+                    process,
+                    pe_file,
                     s.GetVirtualAddress()));
                 if (section_beg == nullptr)
                 {
@@ -415,7 +421,7 @@ namespace hadesmem
                 }
 
                 data_real.emplace_back(
-                    static_cast<BYTE>(current), 
+                    static_cast<BYTE>(current),
                     !is_wildcard);
 
                 if (data_str.eof())
@@ -424,7 +430,7 @@ namespace hadesmem
                 }
             }
 
-            bool const scan_data_secs = !!(flags & 
+            bool const scan_data_secs = !!(flags &
                 FindPatternFlags::kScanData);
 
             PVOID address = Find(data_real, scan_data_secs);
@@ -444,8 +450,8 @@ namespace hadesmem
         }
 
         PVOID Find(
-            std::wstring const& data, 
-            std::wstring const& name, 
+            std::wstring const& data,
+            std::wstring const& name,
             std::uint32_t flags)
         {
             PVOID const address = Find(data, flags);
@@ -489,7 +495,7 @@ namespace hadesmem
             {
                 HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
                     ErrorString("Loading XML file failed.") <<
-                    ErrorCodeOther(load_result.status) << 
+                    ErrorCodeOther(load_result.status) <<
                     ErrorStringOther(load_result.description()));
             }
 
@@ -540,7 +546,7 @@ namespace hadesmem
                 std::ptrdiff_t const mem_size = s_end - s_beg;
                 HADESMEM_DETAIL_ASSERT(s_beg <= s_end);
                 std::vector<BYTE> const buffer(ReadVector<BYTE>(
-                    *process_, 
+                    *process_,
                     s_beg,
                     static_cast<std::size_t>(mem_size)));
 
@@ -790,7 +796,9 @@ namespace hadesmem
                                 "for 'Rel'."));
                         }
 
-                        pattern << pattern_manipulators::Rel(m.operand1, m.operand2);
+                        pattern << pattern_manipulators::Rel(
+                            m.operand1, 
+                            m.operand2);
 
                         break;
 
@@ -908,7 +916,7 @@ namespace hadesmem
             try
             {
                 bool const is_relative_address =
-                    !!(pattern.GetFlags() & 
+                    !!(pattern.GetFlags() &
                     FindPatternFlags::kRelativeAddress);
                 DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
                 address = Read<PBYTE>(*pattern.GetProcess(), address + base);
@@ -931,14 +939,14 @@ namespace hadesmem
 
             try
             {
-                bool const is_relative_address = 
-                    !!(pattern.GetFlags() & 
+                bool const is_relative_address =
+                    !!(pattern.GetFlags() &
                     FindPatternFlags::kRelativeAddress);
-                DWORD_PTR const base = 
+                DWORD_PTR const base =
                     is_relative_address ? pattern.GetBase() : 0;
-                address = 
-                    Read<PBYTE>(*pattern.GetProcess(), address + base) + 
-                    reinterpret_cast<DWORD_PTR>(address + base) + 
+                address =
+                    Read<PBYTE>(*pattern.GetProcess(), address + base) +
+                    reinterpret_cast<DWORD_PTR>(address + base) +
                     size_ - offset_;
             }
             catch (std::exception const& /*e*/)
