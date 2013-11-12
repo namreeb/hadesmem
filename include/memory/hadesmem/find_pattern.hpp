@@ -58,12 +58,21 @@
 // TODO: Allow module names and custom regions to be specified in pattern 
 // file.
 
+// TODO: Fix order of args etc (general API cleanup) due to adding start 
+// address support.
+
+// TODO: Currently custom start address support only works if the start 
+// pattern and new pattern both have matching kRelativeAddress flag (either 
+// both on or both off). For now we're simply assuming that the flags on the 
+// new pattern are correct, which may yeild the wrong results in some 
+// scenarios...
+
 namespace hadesmem
 {
 
     struct FindPatternFlags
     {
-        enum
+        enum : std::uint32_t
         {
             kNone = 0,
             kThrowOnUnmatch = 1 << 0,
@@ -83,10 +92,22 @@ namespace hadesmem
             std::wstring const& data,
             std::uint32_t flags);
 
+        Pattern(
+            FindPattern& finder,
+            std::wstring const& data,
+            std::uint32_t flags,
+            std::wstring const& start);
+
         Pattern(FindPattern& finder,
             std::wstring const& data,
             std::wstring const& name,
             std::uint32_t flags);
+
+        Pattern(FindPattern& finder,
+            std::wstring const& data,
+            std::wstring const& name,
+            std::uint32_t flags,
+            std::wstring const& start);
 
         Pattern(Pattern const&) = default;
 
@@ -285,7 +306,13 @@ namespace hadesmem
                         ErrorString("Could not get section base address."));
                 }
 
-                PBYTE const section_end = section_beg + s.GetSizeOfRawData();
+                DWORD const section_size = s.GetSizeOfRawData();
+                if (!section_size)
+                {
+                    continue;
+                }
+
+                PBYTE const section_end = section_beg + section_size;
 
                 std::vector<std::pair<PBYTE, PBYTE>>& region =
                     is_code_section ? code_regions_ : data_regions_;
@@ -341,7 +368,10 @@ namespace hadesmem
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        PVOID Find(std::wstring const& data, std::uint32_t flags) const
+        PVOID Find(
+            std::wstring const& data,
+            std::uint32_t flags,
+            std::wstring const& start) const
         {
             HADESMEM_DETAIL_ASSERT(!(flags &
                 ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
@@ -397,7 +427,14 @@ namespace hadesmem
             bool const scan_data_secs = !!(flags &
                 FindPatternFlags::kScanData);
 
-            PVOID address = Find(data_real, scan_data_secs);
+            bool const is_relative = !!(flags &
+                FindPatternFlags::kRelativeAddress);
+
+            PVOID address = Find(
+                data_real,
+                scan_data_secs,
+                start,
+                is_relative);
 
             if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
             {
@@ -405,9 +442,30 @@ namespace hadesmem
                     ErrorString("Could not match pattern."));
             }
 
-            if (address && !!(flags & FindPatternFlags::kRelativeAddress))
+            if (address && is_relative)
             {
                 address = static_cast<PBYTE>(address)-base_;
+            }
+
+            return address;
+        }
+
+        PVOID Find(std::wstring const& data, std::uint32_t flags) const
+        {
+            return Find(data, flags, L"");
+        }
+
+        PVOID Find(
+            std::wstring const& data,
+            std::wstring const& name,
+            std::uint32_t flags,
+            std::wstring const& start)
+        {
+            PVOID const address = Find(data, flags, start);
+
+            if (!name.empty())
+            {
+                addresses_[name] = address;
             }
 
             return address;
@@ -418,14 +476,7 @@ namespace hadesmem
             std::wstring const& name,
             std::uint32_t flags)
         {
-            PVOID const address = Find(data, flags);
-
-            if (!name.empty())
-            {
-                addresses_[name] = address;
-            }
-
-            return address;
+            return Find(data, name, flags, L"");
         }
 
         std::map<std::wstring, PVOID> GetAddresses() const
@@ -498,6 +549,7 @@ namespace hadesmem
         {
             std::wstring name;
             std::wstring data;
+            std::wstring start;
             std::uint32_t flags;
         };
 
@@ -505,7 +557,7 @@ namespace hadesmem
         {
             struct Manipulator
             {
-                enum
+                enum : std::uint32_t
                 {
                     kAdd,
                     kSub,
@@ -514,7 +566,7 @@ namespace hadesmem
                 };
             };
 
-            std::int32_t type;
+            std::uint32_t type;
             bool has_operand1;
             std::uintptr_t operand1;
             bool has_operand2;
@@ -533,21 +585,52 @@ namespace hadesmem
             std::vector<PatternInfoFull> patterns;
         };
 
-        PVOID Find(std::vector<std::pair<BYTE, bool>> const& data,
-            bool scan_data_secs) const
+        PVOID Find(
+            std::vector<std::pair<BYTE, bool>> const& data,
+            bool scan_data_secs,
+            std::wstring const& start,
+            bool is_relative) const
         {
             HADESMEM_DETAIL_ASSERT(!data.empty());
+
+            PVOID start_addr = (*this)[start];
+            if (start_addr && is_relative)
+            {
+                start_addr = static_cast<PBYTE>(start_addr)+base_;
+            }
 
             std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
                 scan_data_secs ? data_regions_ : code_regions_;
             for (auto const& region : scan_regions)
             {
-                PBYTE const s_beg = region.first;
+                PBYTE s_beg = region.first;
                 PBYTE const s_end = region.second;
-                HADESMEM_DETAIL_ASSERT(s_end > s_beg);
+
+                // Support custom scan start address.
+                if (start_addr)
+                {
+                    // Use specified starting address (plus one, so we don't 
+                    // just find the same thing again) if we're in the target 
+                    // region.
+                    if (start_addr >= s_beg && start_addr < s_end)
+                    {
+                        s_beg = static_cast<PBYTE>(start_addr)+1;
+                        if (s_beg == s_end)
+                        {
+                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                                ErrorString("Invalid start address."));
+                        }
+                    }
+                    // Skip if we're not in the target region.
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                HADESMEM_DETAIL_ASSERT(s_beg < s_end);
 
                 std::ptrdiff_t const mem_size = s_end - s_beg;
-                HADESMEM_DETAIL_ASSERT(s_beg <= s_end);
                 std::vector<BYTE> const buffer(ReadVector<BYTE>(
                     *process_,
                     s_beg,
@@ -580,7 +663,7 @@ namespace hadesmem
             {
                 auto const& pat_info = p.pattern;
                 std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
-                Pattern pattern(*this, pat_info.data, pat_info.name, flags);
+                Pattern pattern(*this, pat_info.data, pat_info.name, flags, pat_info.start);
 
                 auto const& manip_list = p.manipulators;
                 for (auto const& m : manip_list)
@@ -664,7 +747,7 @@ namespace hadesmem
                     ErrorString("Failed to find 'Patterns' node."));
             }
 
-            auto const read_flags = 
+            auto const read_flags =
                 [](pugi::xml_node const& node) -> std::uint32_t
             {
                 std::uint32_t flags = FindPatternFlags::kNone;
@@ -747,11 +830,25 @@ namespace hadesmem
                         "attribute for 'Pattern' node."));
                 }
 
+                std::wstring pattern_start;
+                auto const pattern_start_attr = pattern.attribute(L"Start");
+                if (pattern_start_attr)
+                {
+                    pattern_start = pattern_start_attr.value();
+                    if (pattern_start.empty())
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Failed to find value for 'Start' "
+                            "attribute for 'Pattern' node."));
+                    }
+                }
+
                 std::uint32_t const pattern_flags = read_flags(pattern);
 
                 PatternInfo pattern_info{
                     pattern_name,
                     pattern_data,
+                    pattern_start,
                     pattern_flags };
 
                 std::vector<ManipInfo> pattern_manips;
@@ -776,7 +873,7 @@ namespace hadesmem
                             "attribute for 'Manipulator' node."));
                     }
 
-                    std::int32_t type = 0;
+                    std::uint32_t type = 0;
                     if (manipulator_name == L"Add")
                     {
                         type = ManipInfo::Manipulator::kAdd;
@@ -854,6 +951,16 @@ namespace hadesmem
 
     inline Pattern::Pattern(FindPattern& finder,
         std::wstring const& data,
+        std::uint32_t flags,
+        std::wstring const& start)
+        : finder_(&finder),
+        name_(),
+        address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
+        flags_(flags)
+    { }
+
+    inline Pattern::Pattern(FindPattern& finder,
+        std::wstring const& data,
         std::uint32_t flags)
         : finder_(&finder),
         name_(),
@@ -868,6 +975,17 @@ namespace hadesmem
         : finder_(&finder),
         name_(name),
         address_(static_cast<PBYTE>(finder.Find(data, flags))),
+        flags_(flags)
+    { }
+
+    inline Pattern::Pattern(FindPattern& finder,
+        std::wstring const& data,
+        std::wstring const& name,
+        std::uint32_t flags,
+        std::wstring const& start)
+        : finder_(&finder),
+        name_(name),
+        address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
         flags_(flags)
     { }
 

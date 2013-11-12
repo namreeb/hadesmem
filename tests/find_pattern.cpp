@@ -169,6 +169,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
       <Manipulator Name="Sub" Operand1="1"/>
     </Pattern>
     <Pattern Name="Nop Other" Data="90"/>
+    <Pattern Name="Nop Second" Data="90" Start="Nop Other"/>
     <Pattern Name="FindPattern String" Data="46 69 6E 64 50 61 74 74 65 72 6E">
       <Flag Name="ScanData"/>
     </Pattern>
@@ -189,6 +190,9 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
         nop_rel);
     BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Other"),
         find_pattern[L"Nop Other"]);
+    BOOST_CHECK_EQUAL(find_pattern.Lookup(L"Nop Second"),
+        find_pattern[L"Nop Second"]);
+    BOOST_CHECK_GT(find_pattern[L"Nop Second"], find_pattern[L"Nop Other"]);
     BOOST_CHECK_EQUAL(find_pattern.Lookup(L"FindPattern String"),
         find_pattern[L"FindPattern String"]);
 
@@ -269,6 +273,21 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
         hadesmem::FindPatternFlags::kRelativeAddress);
     BOOST_CHECK(find_pattern_str != nullptr);
     BOOST_CHECK_EQUAL(find_pattern_str, find_pattern[L"FindPattern String"]);
+
+    // Check start address support
+    auto const nop_second = find_pattern.Find(L"90", 
+        hadesmem::FindPatternFlags::kRelativeAddress | 
+        hadesmem::FindPatternFlags::kThrowOnUnmatch, 
+        L"Nop Other");
+    BOOST_CHECK(nop_second != nullptr);
+    BOOST_CHECK_EQUAL(nop_second, find_pattern[L"Nop Second"]);
+    BOOST_CHECK_THROW(find_pattern.Find(L"90",
+        hadesmem::FindPatternFlags::kRelativeAddress |
+        hadesmem::FindPatternFlags::kThrowOnUnmatch | 
+        hadesmem::FindPatternFlags::kScanData,
+        L"Nop Other"), hadesmem::Error);
+    BOOST_CHECK(nop_second != nullptr);
+    BOOST_CHECK_EQUAL(nop_second, find_pattern[L"Nop Second"]);
 
     // Check conversion failures throw
     BOOST_CHECK_THROW(find_pattern.Find(L"ZZ",
