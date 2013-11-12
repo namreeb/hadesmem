@@ -60,42 +60,6 @@
 
 namespace hadesmem
 {
-    namespace detail
-    {
-
-        struct PatternInfo
-        {
-            std::wstring name;
-            std::wstring data;
-        };
-
-        struct ManipInfo
-        {
-            struct Manipulator
-            {
-                enum
-                {
-                    kAdd,
-                    kSub,
-                    kRel,
-                    kLea
-                };
-            };
-
-            std::int32_t type;
-            bool has_operand1;
-            std::uintptr_t operand1;
-            bool has_operand2;
-            std::uintptr_t operand2;
-        };
-
-        struct PatternInfoFull
-        {
-            PatternInfo pattern;
-            std::vector<ManipInfo> manipulators;
-        };
-
-    }
 
     struct FindPatternFlags
     {
@@ -530,6 +494,45 @@ namespace hadesmem
         }
 
     private:
+        struct PatternInfo
+        {
+            std::wstring name;
+            std::wstring data;
+            std::uint32_t flags;
+        };
+
+        struct ManipInfo
+        {
+            struct Manipulator
+            {
+                enum
+                {
+                    kAdd,
+                    kSub,
+                    kRel,
+                    kLea
+                };
+            };
+
+            std::int32_t type;
+            bool has_operand1;
+            std::uintptr_t operand1;
+            bool has_operand2;
+            std::uintptr_t operand2;
+        };
+
+        struct PatternInfoFull
+        {
+            PatternInfo pattern;
+            std::vector<ManipInfo> manipulators;
+        };
+
+        struct FindPatternInfo
+        {
+            std::uint32_t flags;
+            std::vector<PatternInfoFull> patterns;
+        };
+
         PVOID Find(std::vector<std::pair<BYTE, bool>> const& data,
             bool scan_data_secs) const
         {
@@ -571,6 +574,81 @@ namespace hadesmem
 
         void LoadImpl(pugi::xml_document const& doc)
         {
+            auto const patterns_info_full = ReadPatternsFromXml(doc);
+            auto const& pattern_infos = patterns_info_full.patterns;
+            for (auto const& p : pattern_infos)
+            {
+                auto const& pat_info = p.pattern;
+                std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
+                Pattern pattern(*this, pat_info.data, pat_info.name, flags);
+
+                auto const& manip_list = p.manipulators;
+                for (auto const& m : manip_list)
+                {
+                    switch (m.type)
+                    {
+                    case ManipInfo::Manipulator::kAdd:
+                        if (!m.has_operand1 || m.has_operand2)
+                        {
+                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                                ErrorString("Invalid manipulator operands "
+                                "for 'Add'."));
+                        }
+
+                        pattern << pattern_manipulators::Add(m.operand1);
+
+                        break;
+
+                    case ManipInfo::Manipulator::kSub:
+                        if (!m.has_operand1 || m.has_operand2)
+                        {
+                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                                ErrorString("Invalid manipulator operands "
+                                "for 'Sub'."));
+                        }
+
+                        pattern << pattern_manipulators::Sub(m.operand1);
+
+                        break;
+
+                    case ManipInfo::Manipulator::kRel:
+                        if (!m.has_operand1 || !m.has_operand2)
+                        {
+                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                                ErrorString("Invalid manipulator operands "
+                                "for 'Rel'."));
+                        }
+
+                        pattern << pattern_manipulators::Rel(
+                            m.operand1,
+                            m.operand2);
+
+                        break;
+
+                    case ManipInfo::Manipulator::kLea:
+                        if (m.has_operand1 || m.has_operand2)
+                        {
+                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                                ErrorString("Invalid manipulator operands "
+                                "for 'Lea'."));
+                        }
+
+                        pattern << pattern_manipulators::Lea();
+
+                        break;
+
+                    default:
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Unknown manipulator."));
+                    }
+                }
+
+                pattern.Save();
+            }
+        }
+
+        FindPatternInfo ReadPatternsFromXml(pugi::xml_document const& doc)
+        {
             auto const hadesmem_root = doc.child(L"HadesMem");
             if (!hadesmem_root)
             {
@@ -586,48 +664,56 @@ namespace hadesmem
                     ErrorString("Failed to find 'Patterns' node."));
             }
 
-            std::uint32_t flags = FindPatternFlags::kNone;
-            for (auto const& flag : find_pattern_node.children(L"Flag"))
+            auto const read_flags = 
+                [](pugi::xml_node const& node) -> std::uint32_t
             {
-                auto const flag_name_attr = flag.attribute(L"Name");
-                if (!flag_name_attr)
+                std::uint32_t flags = FindPatternFlags::kNone;
+                for (auto const& flag : node.children(L"Flag"))
                 {
-                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                        ErrorString("Failed to find 'Name' attribute for "
-                        "'Flag' node."));
-                }
-                std::wstring const flag_name = flag_name_attr.value();
-                if (flag_name.empty())
-                {
-                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                        ErrorString("Failed to find value for 'Name' "
-                        "attribute for 'Flag' node."));
+                    auto const flag_name_attr = flag.attribute(L"Name");
+                    if (!flag_name_attr)
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Failed to find 'Name' attribute for "
+                            "'Flag' node."));
+                    }
+                    std::wstring const flag_name = flag_name_attr.value();
+                    if (flag_name.empty())
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Failed to find value for 'Name' "
+                            "attribute for 'Flag' node."));
+                    }
+
+                    if (flag_name == L"None")
+                    {
+                        flags |= FindPatternFlags::kNone;
+                    }
+                    else if (flag_name == L"ThrowOnUnmatch")
+                    {
+                        flags |= FindPatternFlags::kThrowOnUnmatch;
+                    }
+                    else if (flag_name == L"RelativeAddress")
+                    {
+                        flags |= FindPatternFlags::kRelativeAddress;
+                    }
+                    else if (flag_name == L"ScanData")
+                    {
+                        flags |= FindPatternFlags::kScanData;
+                    }
+                    else
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Unknown 'Flag' value."));
+                    }
                 }
 
-                if (flag_name == L"None")
-                {
-                    flags |= FindPatternFlags::kNone;
-                }
-                else if (flag_name == L"ThrowOnUnmatch")
-                {
-                    flags |= FindPatternFlags::kThrowOnUnmatch;
-                }
-                else if (flag_name == L"RelativeAddress")
-                {
-                    flags |= FindPatternFlags::kRelativeAddress;
-                }
-                else if (flag_name == L"ScanData")
-                {
-                    flags |= FindPatternFlags::kScanData;
-                }
-                else
-                {
-                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                        ErrorString("Unknown 'Flag' value."));
-                }
-            }
+                return flags;
+            };
 
-            std::vector<detail::PatternInfoFull> pattern_infos;
+            std::uint32_t const flags = read_flags(find_pattern_node);
+
+            std::vector<PatternInfoFull> pattern_infos;
 
             for (auto const& pattern : find_pattern_node.children(L"Pattern"))
             {
@@ -661,11 +747,14 @@ namespace hadesmem
                         "attribute for 'Pattern' node."));
                 }
 
-                detail::PatternInfo pattern_info{
-                    pattern_name,
-                    pattern_data };
+                std::uint32_t const pattern_flags = read_flags(pattern);
 
-                std::vector<detail::ManipInfo> pattern_manips;
+                PatternInfo pattern_info{
+                    pattern_name,
+                    pattern_data,
+                    pattern_flags };
+
+                std::vector<ManipInfo> pattern_manips;
 
                 for (auto const& manipulator : pattern.children(
                     L"Manipulator"))
@@ -690,19 +779,19 @@ namespace hadesmem
                     std::int32_t type = 0;
                     if (manipulator_name == L"Add")
                     {
-                        type = detail::ManipInfo::Manipulator::kAdd;
+                        type = ManipInfo::Manipulator::kAdd;
                     }
                     else if (manipulator_name == L"Sub")
                     {
-                        type = detail::ManipInfo::Manipulator::kSub;
+                        type = ManipInfo::Manipulator::kSub;
                     }
                     else if (manipulator_name == L"Rel")
                     {
-                        type = detail::ManipInfo::Manipulator::kRel;
+                        type = ManipInfo::Manipulator::kRel;
                     }
                     else if (manipulator_name == L"Lea")
                     {
-                        type = detail::ManipInfo::Manipulator::kLea;
+                        type = ManipInfo::Manipulator::kLea;
                     }
                     else
                     {
@@ -740,7 +829,7 @@ namespace hadesmem
                         ? hex_str_to_uintptr(manipulator_operand2.value())
                         : 0U;
 
-                    pattern_manips.emplace_back(detail::ManipInfo{
+                    pattern_manips.emplace_back(ManipInfo{
                         type,
                         has_operand1,
                         operand1,
@@ -748,80 +837,12 @@ namespace hadesmem
                         operand2 });
                 }
 
-                pattern_infos.emplace_back(detail::PatternInfoFull{
+                pattern_infos.emplace_back(PatternInfoFull{
                     pattern_info,
                     pattern_manips });
             }
 
-
-            for (auto const& p : pattern_infos)
-            {
-                auto const& pat_info = p.pattern;
-                Pattern pattern(*this, pat_info.data, pat_info.name, flags);
-
-                auto const& manip_list = p.manipulators;
-                for (auto const& m : manip_list)
-                {
-                    switch (m.type)
-                    {
-                    case detail::ManipInfo::Manipulator::kAdd:
-                        if (!m.has_operand1 || m.has_operand2)
-                        {
-                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                                ErrorString("Invalid manipulator operands "
-                                "for 'Add'."));
-                        }
-
-                        pattern << pattern_manipulators::Add(m.operand1);
-
-                        break;
-
-                    case detail::ManipInfo::Manipulator::kSub:
-                        if (!m.has_operand1 || m.has_operand2)
-                        {
-                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                                ErrorString("Invalid manipulator operands "
-                                "for 'Sub'."));
-                        }
-
-                        pattern << pattern_manipulators::Sub(m.operand1);
-
-                        break;
-
-                    case detail::ManipInfo::Manipulator::kRel:
-                        if (!m.has_operand1 || !m.has_operand2)
-                        {
-                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                                ErrorString("Invalid manipulator operands "
-                                "for 'Rel'."));
-                        }
-
-                        pattern << pattern_manipulators::Rel(
-                            m.operand1, 
-                            m.operand2);
-
-                        break;
-
-                    case detail::ManipInfo::Manipulator::kLea:
-                        if (m.has_operand1 || m.has_operand2)
-                        {
-                            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                                ErrorString("Invalid manipulator operands "
-                                "for 'Lea'."));
-                        }
-
-                        pattern << pattern_manipulators::Lea();
-
-                        break;
-
-                    default:
-                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                            ErrorString("Unknown manipulator."));
-                    }
-                }
-
-                pattern.Save();
-            }
+            return{ flags, pattern_infos };
         }
 
         Process const* process_;
