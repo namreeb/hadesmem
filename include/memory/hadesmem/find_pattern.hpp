@@ -25,6 +25,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
@@ -44,28 +45,16 @@
 
 // TODO: Pattern generator.
 
-// TODO: Multi-pass support (e.g. search for pattern, apply for manipulators, 
-// use as starting point for second search).
-
 // TODO: Arbitrary region support.
 
 // TODO: Standalone app/example for FindPattern. For dumping results, 
 // experimenting with patterns, automatically generating new patterns, etc.
-
-// TODO: Allow flags to be overriden for individual patterns. This is 
-// desirable for flags like kScanData.
 
 // TODO: Allow module names and custom regions to be specified in pattern 
 // file.
 
 // TODO: Fix order of args etc (general API cleanup) due to adding start 
 // address support.
-
-// TODO: Currently custom start address support only works if the start 
-// pattern and new pattern both have matching kRelativeAddress flag (either 
-// both on or both off). For now we're simply assuming that the flags on the 
-// new pattern are correct, which may yeild the wrong results in some 
-// scenarios...
 
 namespace hadesmem
 {
@@ -178,6 +167,22 @@ namespace hadesmem
         PBYTE address_;
         std::uint32_t flags_;
     };
+
+    struct PatternData
+    {
+        void* address;
+        std::uint32_t flags;
+    };
+
+    inline bool operator==(PatternData const& lhs, PatternData const& rhs)
+    {
+        return lhs.address == rhs.address && lhs.flags == rhs.flags;
+    }
+
+    inline bool operator!=(PatternData const& lhs, PatternData const& rhs)
+    {
+        return !(lhs == rhs);
+    }
 
     namespace pattern_manipulators
     {
@@ -427,14 +432,10 @@ namespace hadesmem
             bool const scan_data_secs = !!(flags &
                 FindPatternFlags::kScanData);
 
-            bool const is_relative = !!(flags &
-                FindPatternFlags::kRelativeAddress);
-
             PVOID address = Find(
                 data_real,
                 scan_data_secs,
-                start,
-                is_relative);
+                start);
 
             if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
             {
@@ -442,6 +443,8 @@ namespace hadesmem
                     ErrorString("Could not match pattern."));
             }
 
+            bool const is_relative = !!(flags &
+                FindPatternFlags::kRelativeAddress);
             if (address && is_relative)
             {
                 address = static_cast<PBYTE>(address)-base_;
@@ -465,7 +468,7 @@ namespace hadesmem
 
             if (!name.empty())
             {
-                addresses_[name] = address;
+                addresses_[name] = PatternData{ address, flags };
             }
 
             return address;
@@ -479,7 +482,7 @@ namespace hadesmem
             return Find(data, name, flags, L"");
         }
 
-        std::map<std::wstring, PVOID> GetAddresses() const
+        std::map<std::wstring, PatternData> GetAddresses() const
         {
             return addresses_;
         }
@@ -487,10 +490,22 @@ namespace hadesmem
         PVOID operator[](std::wstring const& name) const
         {
             auto const iter = addresses_.find(name);
-            return (iter != addresses_.end()) ? iter->second : nullptr;
+            return (iter != addresses_.end()) ? iter->second.address : nullptr;
         }
 
         PVOID Lookup(std::wstring const& name) const
+        {
+            auto const iter = addresses_.find(name);
+            if (iter == std::end(addresses_))
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Could not find target pattern."));
+            }
+
+            return iter->second.address;
+        }
+
+        PatternData LookupEx(std::wstring const& name) const
         {
             auto const iter = addresses_.find(name);
             if (iter == std::end(addresses_))
@@ -588,15 +603,23 @@ namespace hadesmem
         PVOID Find(
             std::vector<std::pair<BYTE, bool>> const& data,
             bool scan_data_secs,
-            std::wstring const& start,
-            bool is_relative) const
+            std::wstring const& start) const
         {
             HADESMEM_DETAIL_ASSERT(!data.empty());
 
-            PVOID start_addr = (*this)[start];
-            if (start_addr && is_relative)
+            PVOID start_addr = nullptr;
+            try
             {
-                start_addr = static_cast<PBYTE>(start_addr)+base_;
+                PatternData const start_pattern = LookupEx(start);
+                bool const start_pattern_relative = !!(start_pattern.flags &
+                    FindPatternFlags::kRelativeAddress);
+                start_addr = start_pattern_relative
+                    ? static_cast<PBYTE>(start_pattern.address) + base_
+                    : start_pattern.address;
+            }
+            catch (std::exception const& /*e*/)
+            {
+                start_addr = nullptr;
             }
 
             std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
@@ -946,7 +969,7 @@ namespace hadesmem
         DWORD_PTR base_;
         std::vector<std::pair<PBYTE, PBYTE>> code_regions_;
         std::vector<std::pair<PBYTE, PBYTE>> data_regions_;
-        std::map<std::wstring, PVOID> addresses_;
+        std::map<std::wstring, PatternData> addresses_;
     };
 
     inline Pattern::Pattern(FindPattern& finder,
@@ -998,7 +1021,7 @@ namespace hadesmem
 
         // TODO: This feels like a hack. Investigate and fix this. (And if 
         // appropriate, remove friendship requirement.)
-        finder_->addresses_[name_] = address_;
+        finder_->addresses_[name_] = { address_, flags_ };
     }
 
     inline DWORD_PTR Pattern::GetBase() const HADESMEM_DETAIL_NOEXCEPT
