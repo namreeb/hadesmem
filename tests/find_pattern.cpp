@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     hadesmem::Process const process(::GetCurrentProcessId());
 
     HMODULE const self = GetModuleHandle(nullptr);
-    BOOST_REQUIRE(self != nullptr);
+    BOOST_REQUIRE_NE(self, static_cast<void*>(nullptr));
 
     hadesmem::FindPattern find_pattern(process, self);
 
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     auto const nop = find_pattern.Find(L"90",
         hadesmem::FindPatternFlags::kNone);
     // Ensure pattern was found
-    BOOST_CHECK(nop != nullptr);
+    BOOST_CHECK_NE(nop, static_cast<void*>(nullptr));
     // Ensure pattern address is valid
     BOOST_CHECK_GT(nop, self);
     // Scan again for same pattern, this time specifying a name
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     hadesmem::Pattern nop_pattern(find_pattern, L"90", L"NopPlus1",
         hadesmem::FindPatternFlags::kNone);
     // Apply 'Add' manipulator to pattern and save back to parent
-    nop_pattern << hadesmem::pattern_manipulators::Add(1) <<
-        hadesmem::pattern_manipulators::Save();
+    Add(nop_pattern, 1);
+    Save(find_pattern, nop_pattern);
     // Ensure manipulator was correctly applied
     BOOST_CHECK_EQUAL(nop_pattern.GetAddress(), static_cast<PBYTE>(nop)+1);
     // Ensure pattern result was saved back to parent
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     auto const zeros = find_pattern.Find(L"00 ?? 00",
         hadesmem::FindPatternFlags::kNone);
     // Ensure pattern was found
-    BOOST_CHECK(zeros != nullptr);
+    BOOST_CHECK_NE(zeros, static_cast<void*>(nullptr));
     // Ensure pattern address is valid
     BOOST_CHECK_GT(zeros, GetModuleHandle(nullptr));
     // Scan again for same pattern, this time specifying a name
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     // Ensure named map is the expected size
     BOOST_CHECK_EQUAL(find_pattern.GetAddresses().size(), 3UL);
     // Ensure this pattern (00 ?? 00) does not match the earlier pattern (90) 
-    BOOST_CHECK(nop != zeros);
+    BOOST_CHECK_NE(nop, zeros);
     // Scan again for same pattern, this time specifying the relative address 
     // flag
     auto const zeros_rel = find_pattern.Find(L"00 ?? 00",
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     hadesmem::Pattern zeros_pattern(find_pattern, L"00 ?? 00",
         L"ZerosMinus1", hadesmem::FindPatternFlags::kNone);
     // Apply 'Sub' manipulator to pattern and save back to parent
-    zeros_pattern << hadesmem::pattern_manipulators::Sub(1) <<
-        hadesmem::pattern_manipulators::Save();
+    Sub(zeros_pattern, 1);
+    Save(find_pattern, zeros_pattern);
     // Ensure manipulator was correctly applied
     BOOST_CHECK_EQUAL(static_cast<PVOID>(zeros_pattern.GetAddress()),
         static_cast<PVOID>(static_cast<PBYTE>(zeros)-1));
@@ -138,15 +138,16 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     hadesmem::Pattern call_pattern(find_pattern, L"E8",
         hadesmem::FindPatternFlags::kRelativeAddress);
     // Ensure pattern was found
-    BOOST_CHECK(call_pattern.GetAddress() != nullptr);
+    BOOST_CHECK_NE(call_pattern.GetAddress(), static_cast<void*>(nullptr));
     // The instruction is a 'Call' instruction, so add one byte to move 
     // past the instruction, then perform a relative dereference using the 
     // instruction size and operand offset (5 and 1 respectively in this 
     // case, for a 32-bit relative call).
-    call_pattern << hadesmem::pattern_manipulators::Add(1) <<
-        hadesmem::pattern_manipulators::Rel(5, 1);
+    Add(call_pattern, 1);
+    Rel(call_pattern, 5, 1);
+    Save(find_pattern, call_pattern);
     // Ensure pattern was found
-    BOOST_CHECK(call_pattern.GetAddress() != nullptr);
+    BOOST_CHECK_NE(call_pattern.GetAddress(), static_cast<void*>(nullptr));
 
     // Todo: pattern_manipulators::Lea test
 
@@ -219,7 +220,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
   <FindPattern>
     <Flag Name="RelativeAddress"/>
     <Flag Name="ThrowOnUnmatch"/>
-    <Pattern Name="Foo" Data="ZZ"/>
+    <Pattern Name="Foo2" Data="ZZ"/>
   </FindPattern>
 </HadesMem>
 )";
@@ -240,6 +241,21 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
 )";
     BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
         pattern_file_data_invalid3),
+        hadesmem::Error);
+
+    std::wstring const pattern_file_data_invalid4 =
+        LR"(
+<?xml version="1.0" encoding="utf-8"?>
+<HadesMem>
+  <FindPattern>
+    <Flag Name="RelativeAddress"/>
+    <Flag Name="ThrowOnUnmatch"/>
+    <Pattern Name="Foo4" Data="90" Start="DoesNotExist"/>
+  </FindPattern>
+</HadesMem>
+)";
+    BOOST_CHECK_THROW(find_pattern.LoadFileMemory(
+        pattern_file_data_invalid4),
         hadesmem::Error);
 
     // Todo: LoadFile test
@@ -271,7 +287,7 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
     auto const find_pattern_str = find_pattern.Find(L"46 69 6E 64 50 61 74 "
         L"74 65 72 6E", hadesmem::FindPatternFlags::kScanData |
         hadesmem::FindPatternFlags::kRelativeAddress);
-    BOOST_CHECK(find_pattern_str != nullptr);
+    BOOST_CHECK_NE(find_pattern_str, static_cast<void*>(nullptr));
     BOOST_CHECK_EQUAL(find_pattern_str, find_pattern[L"FindPattern String"]);
 
     // Check start address support
@@ -279,14 +295,14 @@ BOOST_AUTO_TEST_CASE(find_pattern_)
         hadesmem::FindPatternFlags::kRelativeAddress | 
         hadesmem::FindPatternFlags::kThrowOnUnmatch, 
         L"Nop Other");
-    BOOST_CHECK(nop_second != nullptr);
+    BOOST_CHECK_NE(nop_second, static_cast<void*>(nullptr));
     BOOST_CHECK_EQUAL(nop_second, find_pattern[L"Nop Second"]);
     BOOST_CHECK_THROW(find_pattern.Find(L"90",
         hadesmem::FindPatternFlags::kRelativeAddress |
         hadesmem::FindPatternFlags::kThrowOnUnmatch | 
         hadesmem::FindPatternFlags::kScanData,
         L"Nop Other"), hadesmem::Error);
-    BOOST_CHECK(nop_second != nullptr);
+    BOOST_CHECK_NE(nop_second, static_cast<void*>(nullptr));
     BOOST_CHECK_EQUAL(nop_second, find_pattern[L"Nop Second"]);
 
     // Check conversion failures throw

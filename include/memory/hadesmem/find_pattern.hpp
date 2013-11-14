@@ -39,8 +39,6 @@
 // appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new 
 // language features like noexcept, constexpr, etc.
 
-// TODO: Add stream overloads.
-
 // TODO: Rewrite to remove cyclic dependencies.
 
 // TODO: Pattern generator.
@@ -55,6 +53,14 @@
 
 // TODO: Fix order of args etc (general API cleanup) due to adding start 
 // address support.
+
+// TODO: Either support all the attributes, manipulators, etc in both the XML 
+// file and in source code, or don't support any (which would simplify things 
+// vastly). Probably best to only support very simple patterns in source code 
+// and require XML for anything complex?
+
+// TODO: Check for duplicate names etc? Or support it to allow patterns 
+// overwiting themself when using the Start attribute (any other scenarios?).
 
 namespace hadesmem
 {
@@ -76,21 +82,25 @@ namespace hadesmem
     class Pattern
     {
     public:
-        Pattern(
-            FindPattern& finder,
+        Pattern(FindPattern& finder,
             std::wstring const& data,
-            std::uint32_t flags);
+            std::uint32_t flags)
+            : Pattern(finder, data, flags, L"")
+        { }
 
-        Pattern(
-            FindPattern& finder,
+        Pattern(FindPattern& finder,
             std::wstring const& data,
             std::uint32_t flags,
-            std::wstring const& start);
+            std::wstring const& start)
+            : Pattern(finder, data, L"", flags, start)
+        { }
 
         Pattern(FindPattern& finder,
             std::wstring const& data,
             std::wstring const& name,
-            std::uint32_t flags);
+            std::uint32_t flags)
+            : Pattern(finder, data, name, flags, L"")
+        { }
 
         Pattern(FindPattern& finder,
             std::wstring const& data,
@@ -111,20 +121,25 @@ namespace hadesmem
 #else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Pattern(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
-            : finder_(other.finder_),
+            : process_(other.process_),
+            base_(other.base_),
             name_(std::move(other.name_)),
             address_(other.address_),
             flags_(other.flags_)
         {
-            other.finder_ = nullptr;
+            other.process_ = nullptr;
+            other.base_ = 0;
             other.address_ = nullptr;
             other.flags_ = FindPatternFlags::kNone;
         }
 
         Pattern& operator=(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
         {
-            finder_ = other.finder_;
-            other.finder_ = nullptr;
+            process_ = other.process_;
+            other.process_ = nullptr;
+
+            base_ = other.base_;
+            other.base_ = 0;
 
             name_ = std::move(other.name_);
 
@@ -139,17 +154,29 @@ namespace hadesmem
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        void Save();
-
-        // TODO: More consistent naming.
-        void Update(PBYTE address)
+        Process const* GetProcess() const HADESMEM_DETAIL_NOEXCEPT
         {
-            address_ = address;
+            return process_;
         }
 
-        PBYTE GetAddress() const HADESMEM_DETAIL_NOEXCEPT
+        DWORD_PTR GetBase() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return base_;
+        }
+
+        std::wstring GetName() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return name_;
+        }
+
+        PVOID GetAddress() const HADESMEM_DETAIL_NOEXCEPT
         {
             return address_;
+        }
+
+        void SetAddress(PVOID address)
+        {
+            address_ = static_cast<PBYTE>(address);
         }
 
         std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
@@ -157,12 +184,9 @@ namespace hadesmem
             return flags_;
         }
 
-        DWORD_PTR GetBase() const HADESMEM_DETAIL_NOEXCEPT;
-
-        Process const* GetProcess() const HADESMEM_DETAIL_NOEXCEPT;
-
     private:
-        FindPattern* finder_;
+        Process const* process_;
+        DWORD_PTR base_;
         std::wstring name_;
         PBYTE address_;
         std::uint32_t flags_;
@@ -184,81 +208,78 @@ namespace hadesmem
         return !(lhs == rhs);
     }
 
-    namespace pattern_manipulators
+    inline void Add(Pattern& pattern, DWORD_PTR offset)
     {
-
-        template <typename D>
-        class Manipulator
+        PBYTE const address = static_cast<PBYTE>(pattern.GetAddress());
+        if (!address)
         {
-        public:
-            void Manipulate(Pattern& pattern) const
-            {
-                return static_cast<D const*>(this)->Manipulate(pattern);
-            }
-        };
-
-        template <typename D>
-        inline Pattern& operator<<(Pattern& pattern,
-            Manipulator<D> const& manipulator)
-        {
-            manipulator.Manipulate(pattern);
-            return pattern;
+            return;
         }
 
-        class Save : public Manipulator<Save>
+        pattern.SetAddress(address + offset);
+    }
+
+    inline void Sub(Pattern& pattern, DWORD_PTR offset)
+    {
+        PBYTE const address = static_cast<PBYTE>(pattern.GetAddress());
+        if (!address)
         {
-        public:
-            void Manipulate(Pattern& pattern) const;
-        };
+            return;
+        }
 
-        class Add : public Manipulator<Add>
+        pattern.SetAddress(address - offset);
+    }
+
+    inline void Lea(Pattern& pattern)
+    {
+        PBYTE address = static_cast<PBYTE>(pattern.GetAddress());
+        if (!address)
         {
-        public:
-            explicit Add(DWORD_PTR offset) HADESMEM_DETAIL_NOEXCEPT
-                : offset_(offset)
-            { }
+            return;
+        }
 
-            void Manipulate(Pattern& pattern) const;
-
-        private:
-            DWORD_PTR offset_;
-        };
-
-        class Sub : public Manipulator<Sub>
+        try
         {
-        public:
-            explicit Sub(DWORD_PTR offset) HADESMEM_DETAIL_NOEXCEPT
-                : offset_(offset)
-            { }
-
-            void Manipulate(Pattern& pattern) const;
-
-        private:
-            DWORD_PTR offset_;
-        };
-
-        class Lea : public Manipulator<Lea>
+            bool const is_relative_address =
+                !!(pattern.GetFlags() &
+                FindPatternFlags::kRelativeAddress);
+            DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
+            address = Read<PBYTE>(*pattern.GetProcess(), address + base);
+        }
+        catch (std::exception const& /*e*/)
         {
-        public:
-            void Manipulate(Pattern& pattern) const;
-        };
+            address = nullptr;
+        }
 
-        class Rel : public Manipulator<Rel>
+        pattern.SetAddress(address);
+    }
+
+    inline void Rel(Pattern& pattern, DWORD_PTR size, DWORD_PTR offset)
+    {
+        PBYTE address = static_cast<PBYTE>(pattern.GetAddress());
+        if (!address)
         {
-        public:
-            explicit Rel(DWORD_PTR size, DWORD_PTR offset)
-                HADESMEM_DETAIL_NOEXCEPT
-                : size_(size),
-                offset_(offset)
-            { }
+            return;
+        }
 
-            void Manipulate(Pattern& pattern) const;
+        try
+        {
+            bool const is_relative_address =
+                !!(pattern.GetFlags() &
+                FindPatternFlags::kRelativeAddress);
+            DWORD_PTR const base =
+                is_relative_address ? pattern.GetBase() : 0;
+            address =
+                Read<PBYTE>(*pattern.GetProcess(), address + base) +
+                reinterpret_cast<DWORD_PTR>(address + base) +
+                size - offset;
+        }
+        catch (std::exception const& /*e*/)
+        {
+            address = nullptr;
+        }
 
-        private:
-            DWORD_PTR size_;
-            DWORD_PTR offset_;
-        };
-
+        pattern.SetAddress(address);
     }
 
     class FindPattern
@@ -373,89 +394,17 @@ namespace hadesmem
 
 #endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        PVOID Find(
-            std::wstring const& data,
-            std::uint32_t flags,
-            std::wstring const& start) const
-        {
-            HADESMEM_DETAIL_ASSERT(!(flags &
-                ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
-
-            HADESMEM_DETAIL_ASSERT(!data.empty());
-
-            std::wstring const data_trimmed = data.substr(0,
-                data.find_last_not_of(L" \n\r\t") + 1);
-
-            HADESMEM_DETAIL_ASSERT(!data_trimmed.empty());
-
-            std::wistringstream data_str(data_trimmed);
-            data_str.imbue(std::locale::classic());
-            std::vector<std::pair<BYTE, bool>> data_real;
-            for (;;)
-            {
-                std::wstring data_cur_str;
-                if (!(data_str >> data_cur_str))
-                {
-                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                        ErrorString("Data parsing failed."));
-                }
-
-                bool const is_wildcard = (data_cur_str == L"??");
-                std::uint32_t current = 0U;
-                if (!is_wildcard)
-                {
-                    std::wistringstream conv(data_cur_str);
-                    conv.imbue(std::locale::classic());
-                    if (!(conv >> std::hex >> current))
-                    {
-                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                            ErrorString("Data conversion failed."));
-                    }
-
-                    if (current > 0xFFU)
-                    {
-                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                            ErrorString("Invalid data."));
-                    }
-                }
-
-                data_real.emplace_back(
-                    static_cast<BYTE>(current),
-                    !is_wildcard);
-
-                if (data_str.eof())
-                {
-                    break;
-                }
-            }
-
-            bool const scan_data_secs = !!(flags &
-                FindPatternFlags::kScanData);
-
-            PVOID address = Find(
-                data_real,
-                scan_data_secs,
-                start);
-
-            if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
-            {
-                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("Could not match pattern."));
-            }
-
-            bool const is_relative = !!(flags &
-                FindPatternFlags::kRelativeAddress);
-            if (address && is_relative)
-            {
-                address = static_cast<PBYTE>(address)-base_;
-            }
-
-            return address;
-        }
-
         PVOID Find(std::wstring const& data, std::uint32_t flags) const
         {
             return Find(data, flags, L"");
+        }
+
+        PVOID Find(
+            std::wstring const& data,
+            std::wstring const& name,
+            std::uint32_t flags)
+        {
+            return Find(data, name, flags, L"");
         }
 
         PVOID Find(
@@ -476,10 +425,33 @@ namespace hadesmem
 
         PVOID Find(
             std::wstring const& data,
-            std::wstring const& name,
-            std::uint32_t flags)
+            std::uint32_t flags,
+            std::wstring const& start) const
         {
-            return Find(data, name, flags, L"");
+            HADESMEM_DETAIL_ASSERT(!(flags &
+                ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
+
+            auto const data_real = ConvertData(data);
+
+            PVOID address = Find(
+                data_real,
+                flags,
+                start);
+
+            if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Could not match pattern."));
+            }
+
+            bool const is_relative = !!(flags &
+                FindPatternFlags::kRelativeAddress);
+            if (address && is_relative)
+            {
+                address = static_cast<PBYTE>(address)-base_;
+            }
+
+            return address;
         }
 
         std::map<std::wstring, PatternData> GetAddresses() const
@@ -505,16 +477,9 @@ namespace hadesmem
             return iter->second.address;
         }
 
-        PatternData LookupEx(std::wstring const& name) const
+        void Update(std::wstring const& name, PVOID address, std::uint32_t flags)
         {
-            auto const iter = addresses_.find(name);
-            if (iter == std::end(addresses_))
-            {
-                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("Could not find target pattern."));
-            }
-
-            return iter->second;
+            addresses_[name] = PatternData{ address, flags };
         }
 
         void LoadFile(std::wstring const& path)
@@ -600,15 +565,81 @@ namespace hadesmem
             std::vector<PatternInfoFull> patterns;
         };
 
+        std::vector<std::pair<BYTE, bool>> ConvertData(
+            std::wstring const& data) const
+        {
+            HADESMEM_DETAIL_ASSERT(!data.empty());
+
+            std::wstring const data_trimmed = data.substr(0,
+                data.find_last_not_of(L" \n\r\t") + 1);
+
+            HADESMEM_DETAIL_ASSERT(!data_trimmed.empty());
+
+            std::wistringstream data_str(data_trimmed);
+            data_str.imbue(std::locale::classic());
+            std::vector<std::pair<BYTE, bool>> data_real;
+            for (;;)
+            {
+                std::wstring data_cur_str;
+                if (!(data_str >> data_cur_str))
+                {
+                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                        ErrorString("Data parsing failed."));
+                }
+
+                bool const is_wildcard = (data_cur_str == L"??");
+                std::uint32_t current = 0U;
+                if (!is_wildcard)
+                {
+                    std::wistringstream conv(data_cur_str);
+                    conv.imbue(std::locale::classic());
+                    if (!(conv >> std::hex >> current))
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Data conversion failed."));
+                    }
+
+                    if (current > 0xFFU)
+                    {
+                        HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                            ErrorString("Invalid data."));
+                    }
+                }
+
+                data_real.emplace_back(
+                    static_cast<BYTE>(current),
+                    !is_wildcard);
+
+                if (data_str.eof())
+                {
+                    break;
+                }
+            }
+
+            return data_real;
+        }
+
+        PatternData LookupEx(std::wstring const& name) const
+        {
+            auto const iter = addresses_.find(name);
+            if (iter == std::end(addresses_))
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Could not find target pattern."));
+            }
+
+            return iter->second;
+        }
+
         PVOID Find(
             std::vector<std::pair<BYTE, bool>> const& data,
-            bool scan_data_secs,
+            std::uint32_t flags,
             std::wstring const& start) const
         {
             HADESMEM_DETAIL_ASSERT(!data.empty());
 
             PVOID start_addr = nullptr;
-            try
+            if (!start.empty())
             {
                 PatternData const start_pattern = LookupEx(start);
                 bool const start_pattern_relative = !!(start_pattern.flags &
@@ -617,11 +648,9 @@ namespace hadesmem
                     ? static_cast<PBYTE>(start_pattern.address) + base_
                     : start_pattern.address;
             }
-            catch (std::exception const& /*e*/)
-            {
-                start_addr = nullptr;
-            }
 
+            bool const scan_data_secs = !!(flags &
+                FindPatternFlags::kScanData);
             std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
                 scan_data_secs ? data_regions_ : code_regions_;
             for (auto const& region : scan_regions)
@@ -686,7 +715,8 @@ namespace hadesmem
             {
                 auto const& pat_info = p.pattern;
                 std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
-                Pattern pattern(*this, pat_info.data, pat_info.name, flags, pat_info.start);
+                std::wstring const name = pat_info.name;
+                Pattern pattern(*this, pat_info.data, name, flags, pat_info.start);
 
                 auto const& manip_list = p.manipulators;
                 for (auto const& m : manip_list)
@@ -701,7 +731,7 @@ namespace hadesmem
                                 "for 'Add'."));
                         }
 
-                        pattern << pattern_manipulators::Add(m.operand1);
+                        Add(pattern, m.operand1);
 
                         break;
 
@@ -713,7 +743,7 @@ namespace hadesmem
                                 "for 'Sub'."));
                         }
 
-                        pattern << pattern_manipulators::Sub(m.operand1);
+                        Sub(pattern, m.operand1);
 
                         break;
 
@@ -725,9 +755,7 @@ namespace hadesmem
                                 "for 'Rel'."));
                         }
 
-                        pattern << pattern_manipulators::Rel(
-                            m.operand1,
-                            m.operand2);
+                        Rel(pattern, m.operand1, m.operand2);
 
                         break;
 
@@ -739,7 +767,7 @@ namespace hadesmem
                                 "for 'Lea'."));
                         }
 
-                        pattern << pattern_manipulators::Lea();
+                        Lea(pattern);
 
                         break;
 
@@ -749,7 +777,10 @@ namespace hadesmem
                     }
                 }
 
-                pattern.Save();
+                if (!name.empty())
+                {
+                    addresses_[name] = { pattern.GetAddress(), pattern.GetFlags() };
+                }
             }
         }
 
@@ -972,153 +1003,30 @@ namespace hadesmem
         std::map<std::wstring, PatternData> addresses_;
     };
 
-    inline Pattern::Pattern(FindPattern& finder,
-        std::wstring const& data,
-        std::uint32_t flags,
-        std::wstring const& start)
-        : finder_(&finder),
-        name_(),
-        address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
-        flags_(flags)
-    { }
-
-    inline Pattern::Pattern(FindPattern& finder,
-        std::wstring const& data,
-        std::uint32_t flags)
-        : finder_(&finder),
-        name_(),
-        address_(static_cast<PBYTE>(finder.Find(data, flags))),
-        flags_(flags)
-    { }
-
-    inline Pattern::Pattern(FindPattern& finder,
-        std::wstring const& data,
-        std::wstring const& name,
-        std::uint32_t flags)
-        : finder_(&finder),
-        name_(name),
-        address_(static_cast<PBYTE>(finder.Find(data, flags))),
-        flags_(flags)
-    { }
-
-    inline Pattern::Pattern(FindPattern& finder,
-        std::wstring const& data,
-        std::wstring const& name,
-        std::uint32_t flags,
-        std::wstring const& start)
-        : finder_(&finder),
-        name_(name),
-        address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
-        flags_(flags)
-    { }
-
-    inline void Pattern::Save()
+    inline void Save(FindPattern& find_pattern, Pattern const& pattern)
     {
-        if (name_.empty())
+        std::wstring const name{ pattern.GetName() };
+        if (name.empty())
         {
             return;
         }
 
-        // TODO: This feels like a hack. Investigate and fix this. (And if 
-        // appropriate, remove friendship requirement.)
-        finder_->addresses_[name_] = { address_, flags_ };
+        find_pattern.Update(
+            pattern.GetName(),
+            pattern.GetAddress(),
+            pattern.GetFlags());
     }
 
-    inline DWORD_PTR Pattern::GetBase() const HADESMEM_DETAIL_NOEXCEPT
-    {
-        // TODO: This feels like a hack. Investigate and fix this. (And if 
-        // appropriate, remove friendship requirement.)
-        return finder_->base_;
-    }
-
-    // TODO: This feels like a hack. Investigate and fix this.
-    inline Process const* Pattern::GetProcess() const HADESMEM_DETAIL_NOEXCEPT
-    {
-        return finder_->process_;
-    }
-
-    namespace pattern_manipulators
-    {
-
-        inline void Save::Manipulate(Pattern& pattern) const
-        {
-            pattern.Save();
-        }
-
-        inline void Add::Manipulate(Pattern& pattern) const
-        {
-            PBYTE const address = pattern.GetAddress();
-            if (!address)
-            {
-                return;
-            }
-
-            pattern.Update(address + offset_);
-        }
-
-        inline void Sub::Manipulate(Pattern& pattern) const
-        {
-            PBYTE const address = pattern.GetAddress();
-            if (!address)
-            {
-                return;
-            }
-
-            pattern.Update(address - offset_);
-        }
-
-        inline void Lea::Manipulate(Pattern& pattern) const
-        {
-            PBYTE address = pattern.GetAddress();
-            if (!address)
-            {
-                return;
-            }
-
-            try
-            {
-                bool const is_relative_address =
-                    !!(pattern.GetFlags() &
-                    FindPatternFlags::kRelativeAddress);
-                DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
-                address = Read<PBYTE>(*pattern.GetProcess(), address + base);
-            }
-            catch (std::exception const& /*e*/)
-            {
-                address = nullptr;
-            }
-
-            pattern.Update(address);
-        }
-
-        inline void Rel::Manipulate(Pattern& pattern) const
-        {
-            PBYTE address = pattern.GetAddress();
-            if (!address)
-            {
-                return;
-            }
-
-            try
-            {
-                bool const is_relative_address =
-                    !!(pattern.GetFlags() &
-                    FindPatternFlags::kRelativeAddress);
-                DWORD_PTR const base =
-                    is_relative_address ? pattern.GetBase() : 0;
-                address =
-                    Read<PBYTE>(*pattern.GetProcess(), address + base) +
-                    reinterpret_cast<DWORD_PTR>(address + base) +
-                    size_ - offset_;
-            }
-            catch (std::exception const& /*e*/)
-            {
-                address = nullptr;
-            }
-
-            pattern.Update(address);
-        }
-
-    }
+    inline Pattern::Pattern(FindPattern& finder,
+        std::wstring const& data,
+        std::wstring const& name,
+        std::uint32_t flags,
+        std::wstring const& start)
+        : process_(finder.process_),
+        base_(finder.base_),
+        name_(name),
+        address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
+        flags_(flags)
+    { }
 
 }
