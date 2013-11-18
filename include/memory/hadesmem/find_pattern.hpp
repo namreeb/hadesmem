@@ -62,6 +62,9 @@
 // TODO: Check for duplicate names etc? Or support it to allow patterns 
 // overwiting themself when using the Start attribute (any other scenarios?).
 
+// TODO: Clean up XML related code and remove redundant code, add/remove 
+// checking where appropriate, etc.
+
 namespace hadesmem
 {
 
