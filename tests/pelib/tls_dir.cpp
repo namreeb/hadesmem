@@ -19,7 +19,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -35,11 +34,6 @@
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
-
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
-}
 
 BOOST_AUTO_TEST_CASE(tls_dir)
 {

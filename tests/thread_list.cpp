@@ -15,7 +15,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/thread.hpp>
 #include <hadesmem/process_entry.hpp>
-#include <hadesmem/detail/initialize.hpp>
 
 // Boost.Test causes the following warning under GCC:
 // error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
@@ -34,11 +33,6 @@
 BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::ThreadList::iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(hadesmem::ThreadList::const_iterator)
   
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
-}
-
 BOOST_AUTO_TEST_CASE(thread_list)
 {
   BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ThreadList::

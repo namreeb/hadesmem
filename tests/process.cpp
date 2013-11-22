@@ -15,7 +15,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process_helpers.hpp>
 
@@ -32,11 +31,6 @@
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif // #if defined(HADESMEM_CLANG)
-
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
-}
 
 BOOST_AUTO_TEST_CASE(this_process)
 {

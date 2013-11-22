@@ -14,7 +14,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/find_procedure.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -33,11 +32,6 @@
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(std::wstring)
   
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
-}
-
 BOOST_AUTO_TEST_CASE(module)
 {
   hadesmem::Process const process(::GetCurrentProcessId());

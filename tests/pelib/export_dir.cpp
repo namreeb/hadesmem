@@ -18,7 +18,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -39,11 +38,6 @@
 extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy();
 extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy()
 { }
-
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
-}
 
 BOOST_AUTO_TEST_CASE(export_dir)
 {

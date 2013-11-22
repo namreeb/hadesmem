@@ -13,7 +13,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -231,11 +230,6 @@ std::int32_t __fastcall TestInteger64Fast(std::uint64_t a)
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-}
-
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
 }
 
 BOOST_AUTO_TEST_CASE(call)

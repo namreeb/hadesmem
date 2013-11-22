@@ -18,7 +18,6 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
@@ -776,8 +775,6 @@ int main(int /*argc*/, char* /*argv*/[])
 {
   try
   {
-    hadesmem::detail::InitializeAll();
-
     std::cout << "HadesMem Dumper [" << HADESMEM_VERSION_STRING << "]\n";
 
     boost::program_options::options_description opts_desc(

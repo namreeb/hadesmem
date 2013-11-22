@@ -21,7 +21,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 
 // Boost.Test causes the following warning under GCC:
@@ -91,11 +90,6 @@ std::uint32_t HookMeHk(std::int32_t i1, std::int32_t i2, std::int32_t i3,
   return 0x1337;
 }
 
-}
-
-BOOST_AUTO_TEST_CASE(initialize)
-{
-  hadesmem::detail::InitializeAll();
 }
 
 // TODO: Patcher constructor tests

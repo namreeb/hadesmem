@@ -18,7 +18,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/initialize.hpp>
 #include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
@@ -103,8 +102,6 @@ int main(int argc, char* /*argv*/[])
 {
   try
   {
-    hadesmem::detail::InitializeAll();
-
     std::cout << "HadesMem Injector [" << HADESMEM_VERSION_STRING << "]\n";
 
     boost::program_options::options_description const opts_desc = 
