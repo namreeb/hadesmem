@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -21,9 +22,6 @@
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/func_args.hpp>
-#include <hadesmem/detail/func_arity.hpp>
-#include <hadesmem/detail/func_result.hpp>
 #include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
@@ -1076,6 +1074,33 @@ inline CallResultRaw Call(Process const& process,
 
 namespace detail
 {
+
+template <typename FuncT>
+struct FuncResult;
+
+template <typename R, typename... Args>
+struct FuncResult<R(Args...)>
+{
+  typedef R type;
+};
+
+template <typename FuncT>
+struct FuncArity;
+
+template <typename R, typename... Args>
+struct FuncArity<R(Args...)>
+{
+  static std::size_t const value = sizeof...(Args);
+};
+
+template <typename FuncT>
+struct FuncArgs;
+
+template <typename R, typename... Args>
+struct FuncArgs<R(Args...)>
+{
+  typedef std::tuple<Args...> type;
+};
 
 template <typename FuncT, std::int32_t N, typename T, typename OutputIterator>
 void AddCallArg(OutputIterator call_args, T&& arg)
