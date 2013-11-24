@@ -15,85 +15,85 @@
 namespace hadesmem
 {
 
-namespace detail
-{
+    namespace detail
+    {
 
-inline std::string WideCharToMultiByte(std::wstring const& in)
-{
-  std::int32_t const buf_len = ::WideCharToMultiByte(
-    CP_OEMCP, 
-    WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, 
-    in.c_str(), 
-    -1, 
-    nullptr, 
-    0, 
-    nullptr, 
-    nullptr);
-  if (!buf_len)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("WideCharToMultiByte failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  HADESMEM_DETAIL_ASSERT(buf_len > 0);
+        inline std::string WideCharToMultiByte(std::wstring const& in)
+        {
+            std::int32_t const buf_len = ::WideCharToMultiByte(
+                CP_OEMCP,
+                WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
+                in.c_str(),
+                -1,
+                nullptr,
+                0,
+                nullptr,
+                nullptr);
+            if (!buf_len)
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("WideCharToMultiByte failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
+            HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
-  std::vector<char> buf(static_cast<std::size_t>(buf_len));
-  if (!::WideCharToMultiByte(
-    CP_OEMCP, 
-    WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, 
-    in.c_str(), 
-    -1, 
-    buf.data(), 
-    buf_len, 
-    nullptr, 
-    nullptr))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("WideCharToMultiByte failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+            std::vector<char> buf(static_cast<std::size_t>(buf_len));
+            if (!::WideCharToMultiByte(
+                CP_OEMCP,
+                WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
+                in.c_str(),
+                -1,
+                buf.data(),
+                buf_len,
+                nullptr,
+                nullptr))
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("WideCharToMultiByte failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
 
-  return buf.data();
-}
+            return buf.data();
+        }
 
-inline std::wstring MultiByteToWideChar(std::string const& in)
-{
-  std::int32_t const buf_len = ::MultiByteToWideChar(
-    CP_OEMCP, 
-    MB_ERR_INVALID_CHARS, 
-    in.c_str(), 
-    -1, 
-    nullptr, 
-    0);
-  if (!buf_len)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("MultiByteToWideChar failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  HADESMEM_DETAIL_ASSERT(buf_len > 0);
+        inline std::wstring MultiByteToWideChar(std::string const& in)
+        {
+            std::int32_t const buf_len = ::MultiByteToWideChar(
+                CP_OEMCP,
+                MB_ERR_INVALID_CHARS,
+                in.c_str(),
+                -1,
+                nullptr,
+                0);
+            if (!buf_len)
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("MultiByteToWideChar failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
+            HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
-  std::vector<wchar_t> buf(static_cast<std::size_t>(buf_len));
-  if (!::MultiByteToWideChar(
-    CP_OEMCP, 
-    MB_ERR_INVALID_CHARS, 
-    in.c_str(), 
-    -1, 
-    buf.data(), 
-    buf_len))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("MultiByteToWideChar failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+            std::vector<wchar_t> buf(static_cast<std::size_t>(buf_len));
+            if (!::MultiByteToWideChar(
+                CP_OEMCP,
+                MB_ERR_INVALID_CHARS,
+                in.c_str(),
+                -1,
+                buf.data(),
+                buf_len))
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("MultiByteToWideChar failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
 
-  return buf.data();
-}
+            return buf.data();
+        }
 
-}
+    }
 
 }

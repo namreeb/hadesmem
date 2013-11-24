@@ -30,192 +30,219 @@
 namespace hadesmem
 {
 
-// TODO: Handle forwarded imports.
+    // TODO: Handle forwarded imports.
 
-class ImportDir
-{
-public:
-  explicit ImportDir(Process const& process, PeFile const& pe_file, 
-    PIMAGE_IMPORT_DESCRIPTOR imp_desc)
-    : process_(&process), 
-    pe_file_(&pe_file), 
-    base_(reinterpret_cast<PBYTE>(imp_desc))
-  {
-    if (!base_)
+    class ImportDir
     {
-      NtHeaders nt_headers(process, pe_file);
-      DWORD const import_dir_rva = nt_headers.GetDataDirectoryVirtualAddress(
-        PeDataDir::Import);
-      // Windows will load images which don't specify a size for the import 
-      // directory.
-      if (!import_dir_rva)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-          ErrorString("Import directory is invalid."));
-      }
+    public:
+        explicit ImportDir(
+            Process const& process, 
+            PeFile const& pe_file,
+            PIMAGE_IMPORT_DESCRIPTOR imp_desc)
+            : process_(&process),
+            pe_file_(&pe_file),
+            base_(reinterpret_cast<PBYTE>(imp_desc))
+        {
+            if (!base_)
+            {
+                NtHeaders nt_headers(process, pe_file);
+                DWORD const import_dir_rva = 
+                    nt_headers.GetDataDirectoryVirtualAddress(
+                    PeDataDir::Import);
+                // Windows will load images which don't specify a size for the import 
+                // directory.
+                if (!import_dir_rva)
+                {
+                    HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                        ErrorString("Import directory is invalid."));
+                }
 
-      base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, import_dir_rva));
-    }
-  }
+                base_ = static_cast<PBYTE>(RvaToVa(
+                    process, 
+                    pe_file, 
+                    import_dir_rva));
+            }
+        }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return base_;
-  }
-  
-  DWORD GetOriginalFirstThunk() const
-  {
-    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      OriginalFirstThunk));
-  }
+        PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return base_;
+        }
 
-  DWORD GetTimeDateStamp() const
-  {
-    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      TimeDateStamp));
-  }
+        DWORD GetOriginalFirstThunk() const
+        {
+            return Read<DWORD>(
+                *process_, 
+                base_ + offsetof(
+                IMAGE_IMPORT_DESCRIPTOR, 
+                OriginalFirstThunk));
+        }
 
-  DWORD GetForwarderChain() const
-  {
-    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      ForwarderChain));
-  }
+        DWORD GetTimeDateStamp() const
+        {
+            return Read<DWORD>(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp));
+        }
 
-  DWORD GetNameRaw() const
-  {
-    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      Name));
-  }
+        DWORD GetForwarderChain() const
+        {
+            return Read<DWORD>(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, ForwarderChain));
+        }
 
-  std::string GetName() const
-  {
-    return ReadString<char>(*process_, RvaToVa(*process_, *pe_file_, 
-      GetNameRaw()));
-  }
+        DWORD GetNameRaw() const
+        {
+            return Read<DWORD>(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name));
+        }
 
-  DWORD GetFirstThunk() const
-  {
-    return Read<DWORD>(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      FirstThunk));
-  }
+        std::string GetName() const
+        {
+            return ReadString<char>(
+                *process_, 
+                RvaToVa(*process_, *pe_file_, GetNameRaw()));
+        }
 
-  void SetOriginalFirstThunk(DWORD original_first_thunk)
-  {
-    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      OriginalFirstThunk), original_first_thunk);
-  }
+        DWORD GetFirstThunk() const
+        {
+            return Read<DWORD>(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, FirstThunk));
+        }
 
-  void SetTimeDateStamp(DWORD time_date_stamp)
-  {
-    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      TimeDateStamp), time_date_stamp);
-  }
+        void SetOriginalFirstThunk(DWORD original_first_thunk)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(
+                IMAGE_IMPORT_DESCRIPTOR, 
+                OriginalFirstThunk), 
+                original_first_thunk);
+        }
 
-  void SetForwarderChain(DWORD forwarder_chain)
-  {
-    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      ForwarderChain), forwarder_chain);
-  }
+        void SetTimeDateStamp(DWORD time_date_stamp)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 
+                time_date_stamp);
+        }
 
-  void SetNameRaw(DWORD name)
-  {
-    Write(*process_, base_ +  offsetof(
-      IMAGE_IMPORT_DESCRIPTOR, Name), name);
-  }
+        void SetForwarderChain(DWORD forwarder_chain)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR,ForwarderChain), 
+                forwarder_chain);
+        }
 
-  void SetName(std::string const& name)
-  {
-    DWORD name_rva = Read<DWORD>(*process_, base_ +  offsetof(
-      IMAGE_IMPORT_DESCRIPTOR, Name));
-    if (!name_rva)
+        void SetNameRaw(DWORD name)
+        {
+            Write(*process_, base_ + offsetof(
+                IMAGE_IMPORT_DESCRIPTOR, Name), name);
+        }
+
+        void SetName(std::string const& name)
+        {
+            DWORD name_rva = Read<DWORD>(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name));
+            if (!name_rva)
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Name RVA is null."));
+            }
+
+            PVOID name_ptr = RvaToVa(*process_, *pe_file_, name_rva);
+            if (!name_ptr)
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Name VA is null."));
+            }
+
+            std::string const cur_name = ReadString<char>(
+                *process_, 
+                name_ptr);
+
+            // TODO: Support allocating space for a new name rather than just 
+            // overwriting the existing one.
+            if (name.size() > cur_name.size())
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("New name longer than existing name."));
+            }
+
+            return WriteString(*process_, name_ptr, name);
+        }
+
+        void SetFirstThunk(DWORD first_thunk)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR,FirstThunk), 
+                first_thunk);
+        }
+
+    private:
+        Process const* process_;
+        PeFile const* pe_file_;
+        PBYTE base_;
+    };
+
+    inline bool operator==(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Name RVA is null."));
+        return lhs.GetBase() == rhs.GetBase();
     }
 
-    PVOID name_ptr = RvaToVa(*process_, *pe_file_, name_rva);
-    if (!name_ptr)
+    inline bool operator!=(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("Name VA is null."));
+        return !(lhs == rhs);
     }
 
-    std::string const cur_name = ReadString<char>(*process_, name_ptr);
-
-    // TODO: Support allocating space for a new name rather than just 
-    // overwriting the existing one.
-    if (name.size() > cur_name.size())
+    inline bool operator<(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-        ErrorString("New name longer than existing name."));
+        return lhs.GetBase() < rhs.GetBase();
     }
 
-    return WriteString(*process_, name_ptr, name);
-  }
+    inline bool operator<=(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() <= rhs.GetBase();
+    }
 
-  void SetFirstThunk(DWORD first_thunk)
-  {
-    return Write(*process_, base_ +  offsetof(IMAGE_IMPORT_DESCRIPTOR, 
-      FirstThunk), first_thunk);
-  }
+    inline bool operator>(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() > rhs.GetBase();
+    }
 
-private:
-  Process const* process_;
-  PeFile const* pe_file_;
-  PBYTE base_;
-};
+    inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() >= rhs.GetBase();
+    }
 
-inline bool operator==(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() == rhs.GetBase();
-}
+    inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
+    {
+        std::locale const old = lhs.imbue(std::locale::classic());
+        lhs << static_cast<void*>(rhs.GetBase());
+        lhs.imbue(old);
+        return lhs;
+    }
 
-inline bool operator!=(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return !(lhs == rhs);
-}
-
-inline bool operator<(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() < rhs.GetBase();
-}
-
-inline bool operator<=(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() <= rhs.GetBase();
-}
-
-inline bool operator>(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() > rhs.GetBase();
-}
-
-inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() >= rhs.GetBase();
-}
-
-inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
-{
-  std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
-  lhs.imbue(old);
-  return lhs;
-}
-
-inline std::wostream& operator<<(std::wostream& lhs, ImportDir const& rhs)
-{
-  std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
-  lhs.imbue(old);
-  return lhs;
-}
+    inline std::wostream& operator<<(std::wostream& lhs, ImportDir const& rhs)
+    {
+        std::locale const old = lhs.imbue(std::locale::classic());
+        lhs << static_cast<void*>(rhs.GetBase());
+        lhs.imbue(old);
+        return lhs;
+    }
 
 }
 

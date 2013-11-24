@@ -12,25 +12,31 @@
 namespace hadesmem
 {
 
-namespace detail
-{
-  
-inline DWORD Protect(Process const& process, 
-  MEMORY_BASIC_INFORMATION const& mbi, DWORD protect)
-{
-  DWORD old_protect = 0;
-  if (!::VirtualProtectEx(process.GetHandle(), mbi.BaseAddress, 
-    mbi.RegionSize, protect, &old_protect))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("VirtualProtectEx failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+    namespace detail
+    {
 
-  return old_protect;
-}
+        inline DWORD Protect(
+            Process const& process,
+            MEMORY_BASIC_INFORMATION const& mbi, 
+            DWORD protect)
+        {
+            DWORD old_protect = 0;
+            if (!::VirtualProtectEx(
+                process.GetHandle(), 
+                mbi.BaseAddress,
+                mbi.RegionSize, 
+                protect, 
+                &old_protect))
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("VirtualProtectEx failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
 
-}
+            return old_protect;
+        }
+
+    }
 
 }

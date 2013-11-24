@@ -15,31 +15,31 @@
 
 namespace hadesmem
 {
-  
-// Header-only library unfortunately means no vtable/rtti anchor.
+
+    // Header-only library unfortunately means no vtable/rtti anchor.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif // #if defined(HADESMEM_CLANG)
 
-class Error : public virtual std::exception, 
-  public virtual boost::exception
-{ };
+    class Error : public virtual std::exception,
+        public virtual boost::exception
+    { };
 
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
 
-typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
-typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR> 
-  ErrorCodeWinRet;
-typedef boost::error_info<struct TagErrorCodeWinLast, DWORD> ErrorCodeWinLast;
-typedef boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR> 
-  ErrorCodeWinOther;
-typedef boost::error_info<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
-typedef boost::error_info<struct TagErrorCodeOther, HRESULT> ErrorCodeWinHr;
-typedef boost::error_info<struct TagErrorString, std::string> 
-  ErrorStringOther;
+    typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
+    typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR>
+        ErrorCodeWinRet;
+    typedef boost::error_info<struct TagErrorCodeWinLast, DWORD> ErrorCodeWinLast;
+    typedef boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>
+        ErrorCodeWinOther;
+    typedef boost::error_info<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
+    typedef boost::error_info<struct TagErrorCodeOther, HRESULT> ErrorCodeWinHr;
+    typedef boost::error_info<struct TagErrorString, std::string>
+        ErrorStringOther;
 
 }
 

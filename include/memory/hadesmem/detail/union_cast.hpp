@@ -10,34 +10,34 @@
 namespace hadesmem
 {
 
-namespace detail
-{
+    namespace detail
+    {
 
-template <typename T, typename U>
-T UnionCast(U const& u)
-{
-  // Technically this could be relaxed, but this is true for all our use 
-  // cases so it's good enough.
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<T>::value);
-  HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<U>::value);
+        template <typename T, typename U>
+        T UnionCast(U const& u)
+        {
+            // Technically this could be relaxed, but this is true for all 
+            // our use cases so it's good enough.
+            HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<T>::value);
+            HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<U>::value);
 
-  // Technically this could be relaxed, but this is true for all our use 
-  // cases so it's good enough.
-  HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) == sizeof(U));
+            // Technically this could be relaxed, but this is true for all our 
+            // use cases so it's good enough.
+            HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) == sizeof(U));
 
-  union Conv
-  {
-    T t;
-    U u;
-  };
-  Conv conv;
-  conv.u = u;
-  // Technically this is (AFAICT) undefined behaviour, however all the major 
-  // compilers (and probably the minor ones too) support this as the de-facto 
-  // method for type-punning.
-  return conv.t;
-}
+            union Conv
+            {
+                T t;
+                U u;
+            };
+            Conv conv;
+            conv.u = u;
+            // Technically this is (AFAICT) undefined behaviour, however all 
+            // the major compilers (and probably the minor ones too) support 
+            // this as the de-facto method for type-punning.
+            return conv.t;
+        }
 
-}
+    }
 
 }

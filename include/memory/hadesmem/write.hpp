@@ -19,105 +19,123 @@
 namespace hadesmem
 {
 
-// TODO: Write overloads which take iterators (and don't assume that a 
-// contiguous block of memory has been passed in?).
-  
-// TODO: Support custom string, vector, etc types. Also support custom 
-// allocators, traits, etc.
+    // TODO: Write overloads which take iterators (and don't assume that a 
+    // contiguous block of memory has been passed in?).
 
-template <typename T>
-inline void Write(Process const& process, PVOID address, T const& data)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  
-  detail::WriteImpl(process, address, data);
-}
+    // TODO: Support custom string, vector, etc types. Also support custom 
+    // allocators, traits, etc.
 
-template <typename T>
-inline void Write(Process const& process, PVOID address, T const* ptr, 
-  std::size_t count)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+    template <typename T>
+    inline void Write(Process const& process, PVOID address, T const& data)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(ptr != nullptr);
-  HADESMEM_DETAIL_ASSERT(count != 0);
-  
-  std::size_t const raw_size = static_cast<std::size_t>(
-    std::distance(ptr, ptr + count)) * sizeof(T);
-  detail::WriteImpl(process, address, ptr, raw_size);
-}
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
 
-template <typename T>
-inline void Write(Process const& process, PVOID address, T const* beg, 
-  T const* end)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(beg != nullptr);
-  HADESMEM_DETAIL_ASSERT(end != nullptr);
-  
-  std::size_t const count = static_cast<std::size_t>(
-    std::distance(beg, end));
-  Write(process, address, beg, count);
-}
+        detail::WriteImpl(process, address, data);
+    }
 
-// NOTE: This will not write a null terminator.
-template <typename T>
-inline void WriteString(Process const& process, PVOID address, T const* const beg, 
-  T const* const end)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(beg != nullptr);
-  HADESMEM_DETAIL_ASSERT(end != nullptr);
-  
-  std::size_t const count = static_cast<std::size_t>(
-    std::distance(beg, end));
-  Write(process, address, beg, count);
-}
+    template <typename T>
+    inline void Write(
+        Process const& process, 
+        PVOID address, 
+        T const* ptr,
+        std::size_t count)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-// TODO: Support containers with custom traits, allocators, etc.
-template <typename T>
-inline void WriteString(Process const& process, PVOID address, 
-  std::basic_string<T> const& data)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(ptr != nullptr);
+        HADESMEM_DETAIL_ASSERT(count != 0);
 
-  return WriteString(process, address, data.c_str(), data.c_str() + 
-    data.size() + 1);
-}
+        std::size_t const raw_size = static_cast<std::size_t>(
+            std::distance(ptr, ptr + count)) * sizeof(T);
+        detail::WriteImpl(process, address, ptr, raw_size);
+    }
 
-template <typename T>
-inline void WriteString(Process const& process, PVOID address, 
-  T const* const str)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(str != nullptr);
+    template <typename T>
+    inline void Write(
+        Process const& process, 
+        PVOID address, 
+        T const* beg,
+        T const* end)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 
-  WriteString(process, address, std::basic_string<T>(str));
-}
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(beg != nullptr);
+        HADESMEM_DETAIL_ASSERT(end != nullptr);
 
-// TODO: Support containers with custom traits, allocators, etc.
-template <typename T>
-inline void WriteVector(Process const& process, PVOID address, 
-  std::vector<T> const& data)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
-  
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(!data.empty());
+        std::size_t const count = static_cast<std::size_t>(
+            std::distance(beg, end));
+        Write(process, address, beg, count);
+    }
 
-  std::size_t const raw_size = data.size() * sizeof(T);
-  detail::WriteImpl(process, address, data.data(), raw_size);
-}
+    // NOTE: This will not write a null terminator.
+    template <typename T>
+    inline void WriteString(
+        Process const& process, 
+        PVOID address, 
+        T const* const beg,
+        T const* const end)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
+
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(beg != nullptr);
+        HADESMEM_DETAIL_ASSERT(end != nullptr);
+
+        std::size_t const count = static_cast<std::size_t>(
+            std::distance(beg, end));
+        Write(process, address, beg, count);
+    }
+
+    // TODO: Support containers with custom traits, allocators, etc.
+    template <typename T>
+    inline void WriteString(
+        Process const& process, 
+        PVOID address,
+        std::basic_string<T> const& data)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
+
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+        return WriteString(
+            process, 
+            address, 
+            data.c_str(), 
+            data.c_str() + data.size() + 1);
+    }
+
+    template <typename T>
+    inline void WriteString(
+        Process const& process, 
+        PVOID address,
+        T const* const str)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
+
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(str != nullptr);
+
+        WriteString(process, address, std::basic_string<T>(str));
+    }
+
+    // TODO: Support containers with custom traits, allocators, etc.
+    template <typename T>
+    inline void WriteVector(
+        Process const& process, 
+        PVOID address,
+        std::vector<T> const& data)
+    {
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+
+        HADESMEM_DETAIL_ASSERT(address != nullptr);
+        HADESMEM_DETAIL_ASSERT(!data.empty());
+
+        std::size_t const raw_size = data.size() * sizeof(T);
+        detail::WriteImpl(process, address, data.data(), raw_size);
+    }
 
 }

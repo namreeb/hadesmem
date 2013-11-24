@@ -12,59 +12,68 @@
 namespace hadesmem
 {
 
-namespace detail
-{
+    namespace detail
+    {
 
-inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
-{
-  MEMORY_BASIC_INFORMATION mbi;
-  ::ZeroMemory(&mbi, sizeof(mbi));
-  if (::VirtualQueryEx(process.GetHandle(), address, &mbi, sizeof(mbi)) != 
-    sizeof(mbi))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("VirtualQueryEx failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-  
-  return mbi;
-}
+        inline MEMORY_BASIC_INFORMATION Query(
+            Process const& process, 
+            LPCVOID address)
+        {
+            MEMORY_BASIC_INFORMATION mbi;
+            ::ZeroMemory(&mbi, sizeof(mbi));
+            if (::VirtualQueryEx(
+                process.GetHandle(), 
+                address, 
+                &mbi, 
+                sizeof(mbi)) != sizeof(mbi))
+            {
+                DWORD const last_error = ::GetLastError();
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("VirtualQueryEx failed.") <<
+                    ErrorCodeWinLast(last_error));
+            }
 
-inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
-{
-  return (mbi.State != MEM_RESERVE) && 
-    (!!(mbi.Protect & PAGE_EXECUTE_READ) || 
-    !!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
-    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) || 
-    !!(mbi.Protect & PAGE_READONLY) || 
-    !!(mbi.Protect & PAGE_READWRITE) || 
-    !!(mbi.Protect & PAGE_WRITECOPY));
-}
+            return mbi;
+        }
 
-inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
-{
-  return (mbi.State != MEM_RESERVE) && 
-    (!!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
-    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) || 
-    !!(mbi.Protect & PAGE_READWRITE) || 
-    !!(mbi.Protect & PAGE_WRITECOPY));
-}
+        inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return (mbi.State != MEM_RESERVE) &&
+            (!!(mbi.Protect & PAGE_EXECUTE_READ) ||
+            !!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+            !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) ||
+            !!(mbi.Protect & PAGE_READONLY) ||
+            !!(mbi.Protect & PAGE_READWRITE) ||
+            !!(mbi.Protect & PAGE_WRITECOPY));
+        }
 
-inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
-{
-  return (mbi.State != MEM_RESERVE) && 
-    (!!(mbi.Protect & PAGE_EXECUTE) || 
-    !!(mbi.Protect & PAGE_EXECUTE_READ) || 
-    !!(mbi.Protect & PAGE_EXECUTE_READWRITE) || 
-    !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY));
-}
+        inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return (mbi.State != MEM_RESERVE) &&
+            (!!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+            !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) ||
+            !!(mbi.Protect & PAGE_READWRITE) ||
+            !!(mbi.Protect & PAGE_WRITECOPY));
+        }
 
-inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
-{
-  return !!(mbi.Protect & PAGE_GUARD);
-}
+        inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return (mbi.State != MEM_RESERVE) &&
+            (!!(mbi.Protect & PAGE_EXECUTE) ||
+            !!(mbi.Protect & PAGE_EXECUTE_READ) ||
+            !!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+            !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY));
+        }
 
-}
+        inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return !!(mbi.Protect & PAGE_GUARD);
+        }
+
+    }
 
 }

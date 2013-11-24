@@ -33,152 +33,177 @@
 namespace hadesmem
 {
 
-class ImportThunk
-{
-public:
-  explicit ImportThunk(Process const& process, PeFile const& pe_file, 
-    PIMAGE_THUNK_DATA thunk)
-    : process_(&process), 
-    pe_file_(&pe_file), 
-    base_(reinterpret_cast<PBYTE>(thunk))
-  { }
-  
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return base_;
-  }
-  
-  DWORD_PTR GetAddressOfData() const
-  {
-    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.AddressOfData));
-  }
+    class ImportThunk
+    {
+    public:
+        explicit ImportThunk(
+            Process const& process,
+            PeFile const& pe_file,
+            PIMAGE_THUNK_DATA thunk)
+            : process_(&process),
+            pe_file_(&pe_file),
+            base_(reinterpret_cast<PBYTE>(thunk))
+        { }
 
-  void SetAddressOfData(DWORD_PTR address_of_data)
-  {
-    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.AddressOfData), address_of_data);
-  }
+        PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return base_;
+        }
 
-  DWORD_PTR GetOrdinalRaw() const
-  {
-    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.Ordinal));
-  }
+        DWORD_PTR GetAddressOfData() const
+        {
+            return Read<DWORD_PTR>(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.AddressOfData));
+        }
 
-  void SetOrdinalRaw(DWORD_PTR ordinal_raw)
-  {
-    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.Ordinal), ordinal_raw);
-  }
+        void SetAddressOfData(DWORD_PTR address_of_data)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.AddressOfData), 
+                address_of_data);
+        }
 
-  bool ByOrdinal() const
-  {
-    return IMAGE_SNAP_BY_ORDINAL(GetOrdinalRaw());
-  }
+        DWORD_PTR GetOrdinalRaw() const
+        {
+            return Read<DWORD_PTR>(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.Ordinal));
+        }
 
-  WORD GetOrdinal() const
-  {
-    return IMAGE_ORDINAL(GetOrdinalRaw());
-  }
+        void SetOrdinalRaw(DWORD_PTR ordinal_raw)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.Ordinal), 
+                ordinal_raw);
+        }
 
-  // Todo: SetOrdinal function
+        bool ByOrdinal() const
+        {
+            return IMAGE_SNAP_BY_ORDINAL(GetOrdinalRaw());
+        }
 
-  DWORD_PTR GetFunction() const
-  {
-    return Read<DWORD_PTR>(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.Function));
-  }
+        WORD GetOrdinal() const
+        {
+            return IMAGE_ORDINAL(GetOrdinalRaw());
+        }
 
-  void SetFunction(DWORD_PTR function)
-  {
-    return Write(*process_, base_ + offsetof(IMAGE_THUNK_DATA, 
-      u1.Function), function);
-  }
+        // Todo: SetOrdinal function
 
-  WORD GetHint() const
-  {
-    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
-      static_cast<DWORD>(GetAddressOfData())));
-    return Read<WORD>(*process_, name_import + offsetof(
-      IMAGE_IMPORT_BY_NAME, Hint));
-  }
+        DWORD_PTR GetFunction() const
+        {
+            return Read<DWORD_PTR>(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.Function));
+        }
 
-  void SetHint(WORD hint)
-  {
-    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
-      static_cast<DWORD>(GetAddressOfData())));
-    return Write(*process_, name_import + offsetof(
-      IMAGE_IMPORT_BY_NAME, Hint), hint);
-  }
+        void SetFunction(DWORD_PTR function)
+        {
+            return Write(
+                *process_, 
+                base_ + offsetof(IMAGE_THUNK_DATA, u1.Function), 
+                function);
+        }
 
-  std::string GetName() const
-  {
-    PBYTE const name_import = static_cast<PBYTE>(RvaToVa(*process_, *pe_file_, 
-      static_cast<DWORD>(GetAddressOfData())));
-    return ReadString<char>(*process_, name_import + offsetof(
-      IMAGE_IMPORT_BY_NAME, Name));
-  }
+        WORD GetHint() const
+        {
+            PBYTE const name_import = static_cast<PBYTE>(RvaToVa(
+                *process_, 
+                *pe_file_,
+                static_cast<DWORD>(GetAddressOfData())));
+            return Read<WORD>(
+                *process_, 
+                name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint));
+        }
 
-  // TODO: SetName function
+        void SetHint(WORD hint)
+        {
+            PBYTE const name_import = static_cast<PBYTE>(RvaToVa(
+                *process_, 
+                *pe_file_,
+                static_cast<DWORD>(GetAddressOfData())));
+            return Write(
+                *process_, 
+                name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint), 
+                hint);
+        }
 
-private:
-  Process const* process_;
-  PeFile const* pe_file_;
-  PBYTE base_;
-};
+        std::string GetName() const
+        {
+            PBYTE const name_import = static_cast<PBYTE>(RvaToVa(
+                *process_, 
+                *pe_file_,
+                static_cast<DWORD>(GetAddressOfData())));
+            return ReadString<char>(
+                *process_, 
+                name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
+        }
 
-inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() == rhs.GetBase();
-}
+        // TODO: SetName function
 
-inline bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return !(lhs == rhs);
-}
+    private:
+        Process const* process_;
+        PeFile const* pe_file_;
+        PBYTE base_;
+    };
 
-inline bool operator<(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() < rhs.GetBase();
-}
+    inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() == rhs.GetBase();
+    }
 
-inline bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() <= rhs.GetBase();
-}
+    inline bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return !(lhs == rhs);
+    }
 
-inline bool operator>(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() > rhs.GetBase();
-}
+    inline bool operator<(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() < rhs.GetBase();
+    }
 
-inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs) 
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  return lhs.GetBase() >= rhs.GetBase();
-}
+    inline bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() <= rhs.GetBase();
+    }
 
-inline std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs)
-{
-  std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
-  lhs.imbue(old);
-  return lhs;
-}
+    inline bool operator>(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() > rhs.GetBase();
+    }
 
-inline std::wostream& operator<<(std::wostream& lhs, ImportThunk const& rhs)
-{
-  std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
-  lhs.imbue(old);
-  return lhs;
-}
+    inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs)
+        HADESMEM_DETAIL_NOEXCEPT
+    {
+        return lhs.GetBase() >= rhs.GetBase();
+    }
+
+    inline std::ostream& operator<<(
+        std::ostream& lhs, 
+        ImportThunk const& rhs)
+    {
+        std::locale const old = lhs.imbue(std::locale::classic());
+        lhs << static_cast<void*>(rhs.GetBase());
+        lhs.imbue(old);
+        return lhs;
+    }
+
+    inline std::wostream& operator<<(
+        std::wostream& lhs, 
+        ImportThunk const& rhs)
+    {
+        std::locale const old = lhs.imbue(std::locale::classic());
+        lhs << static_cast<void*>(rhs.GetBase());
+        lhs.imbue(old);
+        return lhs;
+    }
 
 }
 

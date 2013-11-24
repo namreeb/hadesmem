@@ -11,16 +11,18 @@
 namespace hadesmem
 {
 
-inline void FlushInstructionCache(Process const& process, LPCVOID address, 
-  SIZE_T size)
-{
-  if (!::FlushInstructionCache(process.GetHandle(), address, size))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("FlushInstructionCache failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
-}
+    inline void FlushInstructionCache(
+        Process const& process, 
+        LPCVOID address,
+        SIZE_T size)
+    {
+        if (!::FlushInstructionCache(process.GetHandle(), address, size))
+        {
+            DWORD const last_error = ::GetLastError();
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                ErrorString("FlushInstructionCache failed.") <<
+                ErrorCodeWinLast(last_error));
+        }
+    }
 
 }

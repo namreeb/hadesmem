@@ -19,33 +19,33 @@ bool g_alloced_console = false;
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load()
 {
-  InjectTestDep_Foo();
+    InjectTestDep_Foo();
 
-  if (!AllocConsole())
-  {
-    return GetLastError();
-  }
+    if (!AllocConsole())
+    {
+        return GetLastError();
+    }
 
-  g_alloced_console = true;
+    g_alloced_console = true;
 
-  return 0;
+    return 0;
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free()
 {
-  if (g_alloced_console)
-  {
-    if (!FreeConsole())
+    if (g_alloced_console)
     {
-      return GetLastError();
+        if (!FreeConsole())
+        {
+            return GetLastError();
+        }
     }
-  }
-  
-  return 0;
+
+    return 0;
 }
 
-BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, 
-  LPVOID /*reserved*/)
+BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/,
+    LPVOID /*reserved*/)
 {
-  return TRUE;
+    return TRUE;
 }

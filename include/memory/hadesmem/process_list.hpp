@@ -22,166 +22,173 @@
 namespace hadesmem
 {
 
-// ProcessIterator satisfies the requirements of an input iterator 
-// (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-template <typename ProcessEntryT>
-class ProcessIterator : public std::iterator<std::input_iterator_tag, 
-  ProcessEntryT>
-{
-public:
-  typedef std::iterator<std::input_iterator_tag, ProcessEntryT> BaseIteratorT;
-  typedef typename BaseIteratorT::value_type value_type;
-  typedef typename BaseIteratorT::difference_type difference_type;
-  typedef typename BaseIteratorT::pointer pointer;
-  typedef typename BaseIteratorT::reference reference;
-  typedef typename BaseIteratorT::iterator_category iterator_category;
-
-  HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
-    : impl_()
-  { }
-  
-  ProcessIterator(std::int32_t /*dummy*/)
-    : impl_(std::make_shared<Impl>())
-  {
-    HADESMEM_DETAIL_ASSERT(impl_.get());
-  
-    impl_->snap_ = detail::CreateToolhelp32Snapshot(
-      TH32CS_SNAPPROCESS, 0);
-
-    hadesmem::detail::Optional<PROCESSENTRY32W> const entry = 
-      detail::Process32First(impl_->snap_.GetHandle());
-    if (!entry)
+    // ProcessIterator satisfies the requirements of an input iterator 
+    // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
+    template <typename ProcessEntryT>
+    class ProcessIterator : public std::iterator<
+        std::input_iterator_tag,
+        ProcessEntryT>
     {
-      impl_.reset();
-      return;
-    }
+    public:
+        typedef std::iterator<std::input_iterator_tag, ProcessEntryT> 
+            BaseIteratorT;
+        typedef typename BaseIteratorT::value_type value_type;
+        typedef typename BaseIteratorT::difference_type difference_type;
+        typedef typename BaseIteratorT::pointer pointer;
+        typedef typename BaseIteratorT::reference reference;
+        typedef typename BaseIteratorT::iterator_category iterator_category;
 
-    impl_->process_ = ProcessEntry(*entry);
-  }
+        HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
+            : impl_()
+        { }
 
-  ProcessIterator(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(other.impl_)
-  { }
+        ProcessIterator(std::int32_t /*dummy*/)
+            : impl_(std::make_shared<Impl>())
+        {
+            HADESMEM_DETAIL_ASSERT(impl_.get());
 
-  ProcessIterator& operator=(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = other.impl_;
+            impl_->snap_ = detail::CreateToolhelp32Snapshot(
+                TH32CS_SNAPPROCESS, 
+                0);
 
-    return *this;
-  }
+            hadesmem::detail::Optional<PROCESSENTRY32W> const entry =
+                detail::Process32First(impl_->snap_.GetHandle());
+            if (!entry)
+            {
+                impl_.reset();
+                return;
+            }
 
-  ProcessIterator(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
-  { }
+            impl_->process_ = ProcessEntry(*entry);
+        }
 
-  ProcessIterator& operator=(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
+        ProcessIterator(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
+            : impl_(other.impl_)
+        { }
 
-    return *this;
-  }
+        ProcessIterator& operator=(ProcessIterator const& other) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            impl_ = other.impl_;
 
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    HADESMEM_DETAIL_ASSERT(impl_.get());
-    return *impl_->process_;
-  }
-  
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    HADESMEM_DETAIL_ASSERT(impl_.get());
-    return &*impl_->process_;
-  }
-  
-  ProcessIterator& operator++()
-  {
-    HADESMEM_DETAIL_ASSERT(impl_.get());
+            return *this;
+        }
 
-    hadesmem::detail::Optional<PROCESSENTRY32> const entry = 
-      detail::Process32Next(impl_->snap_.GetHandle());
-    if (!entry)
+        ProcessIterator(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
+            : impl_(std::move(other.impl_))
+        { }
+
+        ProcessIterator& operator=(ProcessIterator&& other) 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            impl_ = std::move(other.impl_);
+
+            return *this;
+        }
+
+        reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            HADESMEM_DETAIL_ASSERT(impl_.get());
+            return *impl_->process_;
+        }
+
+        pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            HADESMEM_DETAIL_ASSERT(impl_.get());
+            return &*impl_->process_;
+        }
+
+        ProcessIterator& operator++()
+        {
+            HADESMEM_DETAIL_ASSERT(impl_.get());
+
+            hadesmem::detail::Optional<PROCESSENTRY32> const entry =
+                detail::Process32Next(impl_->snap_.GetHandle());
+            if (!entry)
+            {
+                impl_.reset();
+                return *this;
+            }
+
+            impl_->process_ = ProcessEntry(*entry);
+
+            return *this;
+        }
+
+        ProcessIterator operator++(int)
+        {
+            ProcessIterator const iter(*this);
+            ++*this;
+            return iter;
+        }
+
+        bool operator==(ProcessIterator const& other) const 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return impl_ == other.impl_;
+        }
+
+        bool operator!=(ProcessIterator const& other) const 
+            HADESMEM_DETAIL_NOEXCEPT
+        {
+            return !(*this == other);
+        }
+
+    private:
+        struct Impl
+        {
+            Impl() HADESMEM_DETAIL_NOEXCEPT
+            : snap_(INVALID_HANDLE_VALUE),
+            process_()
+            { }
+
+            detail::SmartSnapHandle snap_;
+            hadesmem::detail::Optional<ProcessEntry> process_;
+        };
+
+        // Using a shared_ptr to provide shallow copy semantics, as 
+        // required by InputIterator.
+        std::shared_ptr<Impl> impl_;
+    };
+
+    class ProcessList
     {
-      impl_.reset();
-      return *this;
-    }
-  
-    impl_->process_ = ProcessEntry(*entry);
-  
-    return *this;
-  }
-  
-  ProcessIterator operator++(int)
-  {
-    ProcessIterator const iter(*this);
-    ++*this;
-    return iter;
-  }
-  
-  bool operator==(ProcessIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return impl_ == other.impl_;
-  }
-  
-  bool operator!=(ProcessIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return !(*this == other);
-  }
-  
-private:
-  struct Impl
-  {
-    Impl() HADESMEM_DETAIL_NOEXCEPT
-      : snap_(INVALID_HANDLE_VALUE), 
-      process_()
-    { }
-  
-    detail::SmartSnapHandle snap_;
-    hadesmem::detail::Optional<ProcessEntry> process_;
-  };
+    public:
+        typedef ProcessIterator<ProcessEntry> iterator;
+        typedef ProcessIterator<ProcessEntry const> const_iterator;
 
-  // Using a shared_ptr to provide shallow copy semantics, as 
-  // required by InputIterator.
-  std::shared_ptr<Impl> impl_;
-};
+        HADESMEM_DETAIL_CONSTEXPR ProcessList() HADESMEM_DETAIL_NOEXCEPT
+        {}
 
-class ProcessList
-{
-public:
-  typedef ProcessIterator<ProcessEntry> iterator;
-  typedef ProcessIterator<ProcessEntry const> const_iterator;
+        iterator begin()
+        {
+            return iterator(0);
+        }
 
-  HADESMEM_DETAIL_CONSTEXPR ProcessList() HADESMEM_DETAIL_NOEXCEPT
-  { }
+        const_iterator begin() const
+        {
+            return const_iterator(0);
+        }
 
-  iterator begin()
-  {
-    return iterator(0);
-  }
+        const_iterator cbegin() const
+        {
+            return const_iterator(0);
+        }
 
-  const_iterator begin() const
-  {
-    return const_iterator(0);
-  }
-  
-  const_iterator cbegin() const
-  {
-    return const_iterator(0);
-  }
-  
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
-  {
-    return iterator();
-  }
+        iterator end() HADESMEM_DETAIL_NOEXCEPT
+        {
+            return iterator();
+        }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return const_iterator();
-  }
-  
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return const_iterator();
-  }
-};
+        const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return const_iterator();
+        }
+
+        const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return const_iterator();
+        }
+    };
 
 }

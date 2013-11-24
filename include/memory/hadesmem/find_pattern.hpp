@@ -85,27 +85,31 @@ namespace hadesmem
     class Pattern
     {
     public:
-        Pattern(FindPattern& finder,
+        Pattern(
+            FindPattern& finder,
             std::wstring const& data,
             std::uint32_t flags)
             : Pattern(finder, data, flags, L"")
         { }
 
-        Pattern(FindPattern& finder,
+        Pattern(
+            FindPattern& finder,
             std::wstring const& data,
             std::uint32_t flags,
             std::wstring const& start)
             : Pattern(finder, data, L"", flags, start)
         { }
 
-        Pattern(FindPattern& finder,
+        Pattern(
+            FindPattern& finder,
             std::wstring const& data,
             std::wstring const& name,
             std::uint32_t flags)
             : Pattern(finder, data, name, flags, L"")
         { }
 
-        Pattern(FindPattern& finder,
+        Pattern(
+            FindPattern& finder,
             std::wstring const& data,
             std::wstring const& name,
             std::uint32_t flags,
@@ -307,7 +311,9 @@ namespace hadesmem
 
             PBYTE const base = reinterpret_cast<PBYTE>(module);
             base_ = reinterpret_cast<DWORD_PTR>(base);
-            PeFile const pe_file(process, reinterpret_cast<PVOID>(base),
+            PeFile const pe_file(
+                process, 
+                reinterpret_cast<PVOID>(base),
                 hadesmem::PeFileType::Image);
             DosHeader const dos_header(process, pe_file);
             NtHeaders const nt_headers(process, pe_file);
@@ -465,7 +471,9 @@ namespace hadesmem
         PVOID operator[](std::wstring const& name) const
         {
             auto const iter = addresses_.find(name);
-            return (iter != addresses_.end()) ? iter->second.address : nullptr;
+            return (iter != addresses_.end()) 
+                ? iter->second.address 
+                : nullptr;
         }
 
         PVOID Lookup(std::wstring const& name) const
@@ -480,7 +488,10 @@ namespace hadesmem
             return iter->second.address;
         }
 
-        void Update(std::wstring const& name, PVOID address, std::uint32_t flags)
+        void Update(
+            std::wstring const& name, 
+            PVOID address, 
+            std::uint32_t flags)
         {
             addresses_[name] = PatternData{ address, flags };
         }
@@ -910,8 +921,8 @@ namespace hadesmem
 
                 std::vector<ManipInfo> pattern_manips;
 
-                for (auto const& manipulator : pattern.children(
-                    L"Manipulator"))
+                for (auto const& manipulator : 
+                    pattern.children(L"Manipulator"))
                 {
                     auto const manipulator_name_attr = manipulator.attribute(
                         L"Name");
@@ -1020,7 +1031,8 @@ namespace hadesmem
             pattern.GetFlags());
     }
 
-    inline Pattern::Pattern(FindPattern& finder,
+    inline Pattern::Pattern(
+        FindPattern& finder,
         std::wstring const& data,
         std::wstring const& name,
         std::uint32_t flags,

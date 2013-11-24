@@ -13,41 +13,45 @@
 
 namespace hadesmem
 {
-  
-inline FARPROC FindProcedure(
-  Process const& process, 
-  Module const& module, 
-  std::string const& name)
-{
-  FARPROC const remote_func = detail::GetProcAddressInternal(
-    process, module.GetHandle(), name);
-  if (!remote_func)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("GetProcAddressInternal failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
 
-  return remote_func;
-}
+    inline FARPROC FindProcedure(
+        Process const& process,
+        Module const& module,
+        std::string const& name)
+    {
+        FARPROC const remote_func = detail::GetProcAddressInternal(
+            process, 
+            module.GetHandle(), 
+            name);
+        if (!remote_func)
+        {
+            DWORD const last_error = ::GetLastError();
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                ErrorString("GetProcAddressInternal failed.") <<
+                ErrorCodeWinLast(last_error));
+        }
 
-inline FARPROC FindProcedure(
-  Process const& process, 
-  Module const& module, 
-  WORD ordinal)
-{
-  FARPROC const remote_func = detail::GetProcAddressInternal(
-    process, module.GetHandle(), ordinal);
-  if (!remote_func)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << 
-      ErrorString("GetProcAddressInternal failed.") << 
-      ErrorCodeWinLast(last_error));
-  }
+        return remote_func;
+    }
 
-  return remote_func;
-}
+    inline FARPROC FindProcedure(
+        Process const& process,
+        Module const& module,
+        WORD ordinal)
+    {
+        FARPROC const remote_func = detail::GetProcAddressInternal(
+            process, 
+            module.GetHandle(), 
+            ordinal);
+        if (!remote_func)
+        {
+            DWORD const last_error = ::GetLastError();
+            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                ErrorString("GetProcAddressInternal failed.") <<
+                ErrorCodeWinLast(last_error));
+        }
+
+        return remote_func;
+    }
 
 }

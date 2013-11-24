@@ -16,14 +16,14 @@
 namespace hadesmem
 {
 
-inline std::wstring GetPath(Process const& process)
-{
-  return detail::QueryFullProcessImageName(process.GetHandle());
-}
+    inline std::wstring GetPath(Process const& process)
+    {
+        return detail::QueryFullProcessImageName(process.GetHandle());
+    }
 
-inline bool IsWoW64(Process const& process)
-{
-  return detail::IsWoW64Process(process.GetHandle());
-}
+    inline bool IsWoW64(Process const& process)
+    {
+        return detail::IsWoW64Process(process.GetHandle());
+    }
 
 }
