@@ -17,10 +17,6 @@ project
     <toolset>msvc:<cxxflags>"/analyze /sdl"
     <toolset>gcc:<cxxflags>"-ansi -Wpedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++ -Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual -Wsuggest-attribute=pure -Wsuggest-attribute=const -Winvalid-pch -Wno-multichar"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
-	
-    <library>/boost//thread/<link>static
-    <library>/boost//date_time/<link>static
-    <library>/boost//unit_test_framework/<link>static
 
     <library>/memory//memory
   ;
@@ -68,9 +64,19 @@ run find_pattern.cpp
   ;
   
 run thread.cpp
+  :
+  :
+  :
+    <library>/boost//date_time/<link>static
+    <library>/boost//thread/<link>static
   ;
   
 run thread_list.cpp
+  :
+  :
+  :
+    <library>/boost//date_time/<link>static
+    <library>/boost//thread/<link>static
   ;
   
 run pelib/pe_file.cpp
@@ -89,6 +95,11 @@ run pelib/section_list.cpp
   ;
 
 run pelib/tls_dir.cpp
+  :
+  :
+  :
+    <library>/boost//date_time/<link>static
+    <library>/boost//thread/<link>static
   ;
   
 run pelib/export_dir.cpp

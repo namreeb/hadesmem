@@ -6,97 +6,88 @@
 #include <sstream>
 #include <utility>
 
-#define BOOST_TEST_MODULE alloc
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/test/unit_test.hpp>
+#include <boost/detail/lightweight_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-// Boost.Test causes the following warning under GCC:
-// error: base class 'struct boost::unit_test::ut_detail::nil_t' has a 
-// non-virtual destructor [-Werror=effc++]
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic ignored "-Weffc++"
-#endif // #if defined(HADESMEM_GCC)
-
-// Boost.Test causes the following warning under Clang:
-// error: declaration requires a global constructor 
-// [-Werror,-Wglobal-constructors]
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
-#endif // #if defined(HADESMEM_CLANG)
-
-BOOST_AUTO_TEST_CASE(alloc)
+void TestAlloc()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+    hadesmem::Process const process(::GetCurrentProcessId());
 
-  PVOID address = Alloc(process, 0x1000);
-  *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);
-  BOOST_CHECK_EQUAL(*static_cast<BYTE*>(address), static_cast<BYTE>(0xFF));
-  MEMORY_BASIC_INFORMATION mbi;
-  ::ZeroMemory(&mbi, sizeof(mbi));
-  BOOST_REQUIRE(::VirtualQuery(address, &mbi, sizeof(mbi)));
-  BOOST_CHECK_EQUAL(mbi.BaseAddress, address);
-  BOOST_CHECK_EQUAL(mbi.RegionSize, 0x1000UL);
-  BOOST_CHECK_EQUAL(mbi.State, static_cast<DWORD>(MEM_COMMIT));
-  BOOST_CHECK_EQUAL(mbi.Protect, static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
-  BOOST_CHECK_EQUAL(mbi.Type, static_cast<DWORD>(MEM_PRIVATE));
-  BOOST_CHECK_NO_THROW(Free(process, address));
-  
-  BOOST_CHECK_THROW(Alloc(process, 0), hadesmem::Error);
-  // TODO: Add a 'Free' failure check without causing app verifier stops.
+    PVOID address = Alloc(process, 0x1000);
+    *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);
+    BOOST_TEST_EQ(*static_cast<BYTE*>(address), static_cast<BYTE>(0xFF));
+    MEMORY_BASIC_INFORMATION mbi;
+    ::ZeroMemory(&mbi, sizeof(mbi));
+    BOOST_TEST(::VirtualQuery(address, &mbi, sizeof(mbi)));
+    BOOST_TEST_EQ(mbi.BaseAddress, address);
+    BOOST_TEST_EQ(mbi.RegionSize, 0x1000UL);
+    BOOST_TEST_EQ(mbi.State, static_cast<DWORD>(MEM_COMMIT));
+    BOOST_TEST_EQ(mbi.Protect, static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
+    BOOST_TEST_EQ(mbi.Type, static_cast<DWORD>(MEM_PRIVATE));
+    Free(process, address);
+
+    BOOST_TEST_THROWS(Alloc(process, 0), hadesmem::Error);
+    // TODO: Add a 'Free' failure check without causing app verifier stops.
 }
 
-BOOST_AUTO_TEST_CASE(allocator)
+void TestAllocator()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
-  
-  hadesmem::Allocator allocator_1(process, 0x1000);
-  BOOST_CHECK(allocator_1.GetBase());
-  BOOST_CHECK_EQUAL(allocator_1.GetSize(), 0x1000UL);
-  
-  hadesmem::Allocator allocator_2(std::move(allocator_1));
-  BOOST_CHECK(allocator_2.GetBase());
-  BOOST_CHECK_EQUAL(allocator_2.GetSize(), 0x1000UL);
-  
-  allocator_1 = std::move(allocator_2);
-  BOOST_CHECK(allocator_1.GetBase());
-  BOOST_CHECK_EQUAL(allocator_1.GetSize(), 0x1000UL);
-  
-  BOOST_CHECK_NO_THROW(allocator_1.Free());
+    hadesmem::Process const process(::GetCurrentProcessId());
 
-  hadesmem::Allocator allocator_3(process, 0x1000);
-  hadesmem::Allocator allocator_4(process, 0x1000);
-  BOOST_CHECK_EQUAL(allocator_3, allocator_3);
-  BOOST_CHECK_NE(allocator_3, allocator_4);
-  BOOST_CHECK_NE(allocator_4, allocator_3);
-  if (allocator_3 > allocator_4)
-  {
-    BOOST_CHECK_GT(allocator_3, allocator_4);
-    BOOST_CHECK_GE(allocator_3, allocator_4);
-    BOOST_CHECK(!(allocator_3 < allocator_4));
-    BOOST_CHECK(!(allocator_3 <= allocator_4));
-  }
-  else
-  {
-    BOOST_CHECK_GT(allocator_4, allocator_3);
-    BOOST_CHECK_GE(allocator_4, allocator_3);
-    BOOST_CHECK(!(allocator_4 < allocator_3));
-    BOOST_CHECK(!(allocator_4 <= allocator_3));
-  }
+    hadesmem::Allocator allocator_1(process, 0x1000);
+    BOOST_TEST(allocator_1.GetBase());
+    BOOST_TEST_EQ(allocator_1.GetSize(), 0x1000UL);
 
-  std::stringstream test_str_1;
-  test_str_1.imbue(std::locale::classic());
-  test_str_1 << allocator_3;
-  std::stringstream test_str_2;
-  test_str_2.imbue(std::locale::classic());
-  test_str_2 << allocator_3.GetBase();
-  BOOST_CHECK_EQUAL(test_str_1.str(), test_str_2.str());
-  std::stringstream test_str_3;
-  test_str_3.imbue(std::locale::classic());
-  test_str_3 << allocator_4.GetBase();
-  BOOST_CHECK_NE(test_str_1.str(), test_str_3.str());
+    hadesmem::Allocator allocator_2(std::move(allocator_1));
+    BOOST_TEST(allocator_2.GetBase());
+    BOOST_TEST_EQ(allocator_2.GetSize(), 0x1000UL);
+
+    allocator_1 = std::move(allocator_2);
+    BOOST_TEST(allocator_1.GetBase());
+    BOOST_TEST_EQ(allocator_1.GetSize(), 0x1000UL);
+    allocator_1.Free();
+
+    hadesmem::Allocator allocator_3(process, 0x1000);
+    hadesmem::Allocator allocator_4(process, 0x1000);
+    BOOST_TEST_EQ(allocator_3, allocator_3);
+    BOOST_TEST_NE(allocator_3, allocator_4);
+    BOOST_TEST_NE(allocator_4, allocator_3);
+    if (allocator_3 > allocator_4)
+    {
+        BOOST_TEST(allocator_3 > allocator_4);
+        BOOST_TEST(allocator_3 >= allocator_4);
+        BOOST_TEST(!(allocator_3 < allocator_4));
+        BOOST_TEST(!(allocator_3 <= allocator_4));
+    }
+    else
+    {
+        BOOST_TEST(allocator_4 > allocator_3);
+        BOOST_TEST(allocator_4 >= allocator_3);
+        BOOST_TEST(!(allocator_4 < allocator_3));
+        BOOST_TEST(!(allocator_4 <= allocator_3));
+    }
+
+    std::stringstream test_str_1;
+    test_str_1.imbue(std::locale::classic());
+    test_str_1 << allocator_3;
+    std::stringstream test_str_2;
+    test_str_2.imbue(std::locale::classic());
+    test_str_2 << allocator_3.GetBase();
+    BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
+    std::stringstream test_str_3;
+    test_str_3.imbue(std::locale::classic());
+    test_str_3 << allocator_4.GetBase();
+    BOOST_TEST_NE(test_str_1.str(), test_str_3.str());
+}
+
+int main()
+{
+    TestAlloc();
+    TestAllocator();
+    return boost::report_errors();
 }
