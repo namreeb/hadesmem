@@ -364,17 +364,9 @@ void TestCall()
     FuncConv func_conv;
     func_conv.pmfn = &ThiscallDummy::TestIntegerThis;
     auto const test_integer_this = func_conv.pfn;
-    ThiscallDummy thiscall_dummy;
-    // TODO: Improve Call so this typedef is not necessary and we can simply 
-    // use decltype.
-    using TestIntegerThisT = DWORD_PTR(*)(
-        ThiscallDummy* instance,
-        std::uint32_t a,
-        std::uint32_t b,
-        std::uint32_t c,
-        std::uint32_t d,
-        std::uint32_t e);
-    auto const call_int_this_ret = hadesmem::Call<TestIntegerThisT>(
+    ThiscallDummy const thiscall_dummy;
+    auto const call_int_this_ret = 
+        hadesmem::Call<decltype(&ThiscallDummy::TestIntegerThis)>(
         process,
         test_integer_this,
         thiscall_call_conv,

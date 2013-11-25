@@ -1256,6 +1256,18 @@ namespace hadesmem
         template <typename FuncT>
         struct FuncResult;
 
+        template <typename C, typename R, typename... Args>
+        struct FuncResult<R(C::*)(Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename C, typename R, typename... Args>
+        struct FuncResult<R(C::*)(Args...)const>
+        {
+            using type = R;
+        };
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
         template <typename R, typename... Args>
@@ -1315,6 +1327,18 @@ namespace hadesmem
         template <typename FuncT>
         struct FuncArity;
 
+        template <typename C, typename R, typename... Args>
+        struct FuncArity<R(C::*)(Args...)>
+        {
+            static std::size_t const value = sizeof...(Args) + 1;
+        };
+
+        template <typename C, typename R, typename... Args>
+        struct FuncArity<R(C::*)(Args...)const>
+        {
+            static std::size_t const value = sizeof...(Args)+1;
+        };
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
         template <typename R, typename... Args>
@@ -1373,6 +1397,18 @@ namespace hadesmem
 
         template <typename FuncT>
         struct FuncArgs;
+
+        template <typename C, typename R, typename... Args>
+        struct FuncArgs<R(C::*)(Args...)>
+        {
+            using type = std::tuple<C*, Args...>;
+        };
+
+        template <typename C, typename R, typename... Args>
+        struct FuncArgs<R(C::*)(Args...)const>
+        {
+            using type = std::tuple<C const*, Args...>;
+        };
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
