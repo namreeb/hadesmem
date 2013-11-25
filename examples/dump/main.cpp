@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
