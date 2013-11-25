@@ -30,12 +30,12 @@ namespace hadesmem
         ModuleT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, ModuleT> BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<std::input_iterator_tag, ModuleT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -157,9 +157,9 @@ namespace hadesmem
     class ModuleList
     {
     public:
-        typedef Module value_type;
-        typedef ModuleIterator<Module> iterator;
-        typedef ModuleIterator<Module const> const_iterator;
+        using value_type = Module;
+        using iterator = ModuleIterator<Module>;
+        using const_iterator = ModuleIterator<Module const>;
 
         HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process const& process)
             HADESMEM_DETAIL_NOEXCEPT

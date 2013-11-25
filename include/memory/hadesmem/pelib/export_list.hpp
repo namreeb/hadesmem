@@ -30,12 +30,12 @@ namespace hadesmem
         ExportT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, ExportT> BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<std::input_iterator_tag, ExportT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR ExportIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -180,9 +180,9 @@ namespace hadesmem
     class ExportList
     {
     public:
-        typedef Export value_type;
-        typedef ExportIterator<Export> iterator;
-        typedef ExportIterator<Export const> const_iterator;
+        using value_type = Export;
+        using iterator = ExportIterator<Export>;
+        using const_iterator = ExportIterator<Export const>;
 
         explicit ExportList(Process const& process, PeFile const& pe_file)
             : process_(&process),

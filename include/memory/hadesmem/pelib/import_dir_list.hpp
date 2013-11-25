@@ -31,13 +31,14 @@ namespace hadesmem
         ImportDirT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, ImportDirT> 
-            BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<
+            std::input_iterator_tag, 
+            ImportDirT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -172,9 +173,9 @@ namespace hadesmem
     class ImportDirList
     {
     public:
-        typedef ImportDir value_type;
-        typedef ImportDirIterator<ImportDir> iterator;
-        typedef ImportDirIterator<ImportDir const> const_iterator;
+        using value_type = ImportDir;
+        using iterator = ImportDirIterator<ImportDir>;
+        using const_iterator = ImportDirIterator<ImportDir const>;
 
         explicit ImportDirList(Process const& process, PeFile const& pe_file)
             : process_(&process),

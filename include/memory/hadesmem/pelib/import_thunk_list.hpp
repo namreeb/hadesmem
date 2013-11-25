@@ -29,13 +29,14 @@ namespace hadesmem
         ImportThunkT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, ImportThunkT> 
-            BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<
+            std::input_iterator_tag,
+            ImportThunkT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR ImportThunkIterator() 
             HADESMEM_DETAIL_NOEXCEPT
@@ -177,9 +178,9 @@ namespace hadesmem
     class ImportThunkList
     {
     public:
-        typedef ImportThunk value_type;
-        typedef ImportThunkIterator<ImportThunk> iterator;
-        typedef ImportThunkIterator<ImportThunk const> const_iterator;
+        using value_type = ImportThunk;
+        using iterator = ImportThunkIterator<ImportThunk>;
+        using const_iterator = ImportThunkIterator<ImportThunk const>;
 
         explicit ImportThunkList(
             Process const& process, 

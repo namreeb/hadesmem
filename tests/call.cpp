@@ -22,19 +22,19 @@
 struct DummyType { };
 DummyType dummy_glob;
 
-typedef std::int32_t(IntRetFuncT)();
+using IntRetFuncT = std::int32_t(*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
     std::is_same<decltype(hadesmem::Call<IntRetFuncT>(
     std::declval<hadesmem::Process>(), nullptr,
     hadesmem::CallConv::kDefault).GetReturnValue()), std::int32_t>::value);
 
-typedef double (DoubleRetFuncT)();
+using DoubleRetFuncT = double(*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
     std::is_same<decltype(hadesmem::Call<DoubleRetFuncT>(
     std::declval<hadesmem::Process>(), nullptr,
     hadesmem::CallConv::kDefault).GetReturnValue()), double>::value);
 
-typedef DummyType* (PtrRetFuncT)();
+using PtrRetFuncT = DummyType*(*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
     std::is_same<decltype(hadesmem::Call<PtrRetFuncT>(
     std::declval<hadesmem::Process>(), nullptr,
@@ -250,14 +250,7 @@ void TestCall()
 {
     hadesmem::Process const process(::GetCurrentProcessId());
 
-    typedef DWORD_PTR(TestIntegerT)(
-        std::uint32_t a,
-        std::uint32_t b,
-        std::uint32_t c,
-        std::uint32_t d,
-        std::uint32_t e,
-        std::uint32_t f);
-    auto const call_int_ret = hadesmem::Call<TestIntegerT>(
+    auto const call_int_ret = hadesmem::Call<decltype(&TestInteger)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestInteger),
         hadesmem::CallConv::kDefault,
@@ -269,14 +262,19 @@ void TestCall()
         0xFFFFFFFFU);
     BOOST_TEST_EQ(call_int_ret.GetReturnValue(), 0x12345678UL);
 
-    typedef float (TestFloatT)(
-        float a,
-        float b,
-        float c,
-        float d,
-        float e,
-        float f);
-    auto const call_float_ret = hadesmem::Call<TestFloatT>(
+    auto const call_int_ret_2 = hadesmem::Call<decltype(TestInteger)>(
+        process,
+        reinterpret_cast<hadesmem::FnPtr>(TestInteger),
+        hadesmem::CallConv::kDefault,
+        0xAAAAAAAAU,
+        0xBBBBBBBBU,
+        0xCCCCCCCCU,
+        0xDDDDDDDDU,
+        0xEEEEEEEEU,
+        0xFFFFFFFFU);
+    BOOST_TEST_EQ(call_int_ret_2.GetReturnValue(), 0x12345678UL);
+
+    auto const call_float_ret = hadesmem::Call<decltype(&TestFloat)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestFloat),
         hadesmem::CallConv::kDefault,
@@ -288,14 +286,7 @@ void TestCall()
         6.66666f);
     BOOST_TEST_EQ(call_float_ret.GetReturnValue(), 1.23456f);
 
-    typedef double (TestDoubleT)(
-        double a,
-        double b,
-        double c,
-        double d,
-        double e,
-        double f);
-    auto const call_double_ret = hadesmem::Call<TestDoubleT>(
+    auto const call_double_ret = hadesmem::Call<decltype(&TestDouble)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestDouble),
         hadesmem::CallConv::kDefault,
@@ -315,18 +306,7 @@ void TestCall()
         }
     };
     std::uint32_t const lvalue_int = 0xDEAFBEEF;
-    typedef DWORD_PTR(TestFuncT)(
-        double a,
-        void const* b,
-        char c,
-        float d,
-        std::int32_t e,
-        std::uint32_t f,
-        float g,
-        double h,
-        DummyType const* i,
-        std::uint64_t j);
-    auto const call_ret = hadesmem::Call<TestFuncT>(
+    auto const call_ret = hadesmem::Call<decltype(&TestMixed)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestMixed),
         hadesmem::CallConv::kDefault,
@@ -342,13 +322,13 @@ void TestCall()
     BOOST_TEST_EQ(call_ret.GetReturnValue(), 1234UL);
     BOOST_TEST_EQ(call_ret.GetLastError(), 5678UL);
 
-    hadesmem::Call<std::int32_t(std::uint64_t a)>(
+    hadesmem::Call<std::int32_t(*)(std::uint64_t a)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestInteger64),
         hadesmem::CallConv::kDefault,
         0xAAAAAAAABBBBBBBBULL);
 
-    auto const call_ptr_ret = hadesmem::Call<char const* ()>(
+    auto const call_ptr_ret = hadesmem::Call<char const*(*)()>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestPtrRet),
         hadesmem::CallConv::kDefault);
@@ -385,7 +365,9 @@ void TestCall()
     func_conv.pmfn = &ThiscallDummy::TestIntegerThis;
     auto const test_integer_this = func_conv.pfn;
     ThiscallDummy thiscall_dummy;
-    typedef DWORD_PTR(TestIntegerThisT)(
+    // TODO: Improve Call so this typedef is not necessary and we can simply 
+    // use decltype.
+    using TestIntegerThisT = DWORD_PTR(*)(
         ThiscallDummy* instance,
         std::uint32_t a,
         std::uint32_t b,
@@ -411,7 +393,7 @@ void TestCall()
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
-    auto const call_int_fast_ret = hadesmem::Call<TestIntegerT>(
+    auto const call_int_fast_ret = hadesmem::Call<decltype(&TestInteger)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestIntegerFast),
         hadesmem::CallConv::kFastCall,
@@ -424,7 +406,7 @@ void TestCall()
     BOOST_TEST_EQ(call_int_fast_ret.GetReturnValue(), 0x12345678UL);
     BOOST_TEST_EQ(call_int_fast_ret.GetLastError(), 0x87654321UL);
 
-    auto const call_int_std_ret = hadesmem::Call<TestIntegerT>(
+    auto const call_int_std_ret = hadesmem::Call<decltype(&TestInteger)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestIntegerStd),
         hadesmem::CallConv::kStdCall,
@@ -442,7 +424,7 @@ void TestCall()
     // with a 64-bit integer as the first parameter).
 #if !defined(HADESMEM_CLANG)
 
-    hadesmem::Call<std::int32_t(DWORD64 a)>(
+    hadesmem::Call<std::int32_t(*)(DWORD64)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestInteger64Fast),
         hadesmem::CallConv::kFastCall,
@@ -454,25 +436,25 @@ void TestCall()
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    auto const call_ret_64 = hadesmem::Call<std::uint64_t()>(
+    auto const call_ret_64 = hadesmem::Call<std::uint64_t(*)()>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestCall64Ret),
         hadesmem::CallConv::kDefault);
     BOOST_TEST_EQ(call_ret_64.GetReturnValue(), 0x123456787654321ULL);
 
-    auto const call_ret_float = hadesmem::Call<float()>(
+    auto const call_ret_float = hadesmem::Call<float(*)()>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestCallFloatRet),
         hadesmem::CallConv::kDefault);
     BOOST_TEST_EQ(call_ret_float.GetReturnValue(), 1.234f);
 
-    auto const call_ret_double = hadesmem::Call<double()>(
+    auto const call_ret_double = hadesmem::Call<double(*)()>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestCallDoubleRet),
         hadesmem::CallConv::kDefault);
     BOOST_TEST_EQ(call_ret_double.GetReturnValue(), 9.876);
 
-    auto const call_ret_void = hadesmem::Call<void()>(
+    auto const call_ret_void = hadesmem::Call<void(*)()>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestCallVoidRet),
         hadesmem::CallConv::kDefault);
@@ -497,7 +479,7 @@ void TestCall()
 #pragma warning(pop)
 #endif // #if defined(HADESMEM_MSVC)
 
-    auto const call_win = hadesmem::Call<FARPROC(HMODULE, LPCSTR)>(
+    auto const call_win = hadesmem::Call<FARPROC(*)(HMODULE, LPCSTR)>(
         process,
         get_proc_address,
         hadesmem::CallConv::kWinApi,
@@ -506,18 +488,18 @@ void TestCall()
     BOOST_TEST_EQ(call_win.GetReturnValue(), get_proc_address_tmp);
 
     hadesmem::MultiCall multi_call(process);
-    multi_call.Add<void(DWORD last_error)>(
+    multi_call.Add<void(*)(DWORD)>(
         reinterpret_cast<hadesmem::FnPtr>(&MultiThreadSet),
         hadesmem::CallConv::kDefault,
         0x1337UL);
-    multi_call.Add<DWORD()>(
+    multi_call.Add<DWORD(*)()>(
         reinterpret_cast<hadesmem::FnPtr>(&MultiThreadGet),
         hadesmem::CallConv::kDefault);
-    multi_call.Add<void(DWORD last_error)>(
+    multi_call.Add<void(*)(DWORD)>(
         reinterpret_cast<hadesmem::FnPtr>(&MultiThreadSet),
         hadesmem::CallConv::kDefault,
         0x1234UL);
-    multi_call.Add<DWORD()>(
+    multi_call.Add<DWORD(*)()>(
         reinterpret_cast<hadesmem::FnPtr>(&MultiThreadGet),
         hadesmem::CallConv::kDefault);
     std::vector<hadesmem::CallResultRaw> multi_call_ret;

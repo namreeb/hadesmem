@@ -96,8 +96,9 @@ namespace hadesmem
         template <typename OutputIterator>
         void GetCallbacks(OutputIterator callbacks) const
         {
-            typedef typename std::iterator_traits<OutputIterator>
-                ::iterator_category OutputIteratorCategory;
+            using OutputIteratorCategory = 
+                typename std::iterator_traits<OutputIterator>
+                ::iterator_category;
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_base_of<std::output_iterator_tag,
                 OutputIteratorCategory>::value);

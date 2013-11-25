@@ -30,16 +30,20 @@ namespace hadesmem
 #pragma GCC diagnostic pop
 #endif // #if defined(HADESMEM_CLANG)
 
-    typedef boost::error_info<struct TagErrorString, std::string> ErrorString;
-    typedef boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR>
-        ErrorCodeWinRet;
-    typedef boost::error_info<struct TagErrorCodeWinLast, DWORD> ErrorCodeWinLast;
-    typedef boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>
-        ErrorCodeWinOther;
-    typedef boost::error_info<struct TagErrorCodeOther, DWORD_PTR> ErrorCodeOther;
-    typedef boost::error_info<struct TagErrorCodeOther, HRESULT> ErrorCodeWinHr;
-    typedef boost::error_info<struct TagErrorString, std::string>
-        ErrorStringOther;
+    using ErrorString = 
+        boost::error_info<struct TagErrorString, std::string>;
+    using ErrorCodeWinRet = 
+        boost::error_info<struct TagErrorCodeWinRet, DWORD_PTR>;
+    using ErrorCodeWinLast = 
+        boost::error_info<struct TagErrorCodeWinLast, DWORD>;
+    using ErrorCodeWinOther = 
+        boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>;
+    using ErrorCodeOther = 
+        boost::error_info<struct TagErrorCodeOther, DWORD_PTR>;
+    using ErrorCodeWinHr = 
+        boost::error_info<struct TagErrorCodeOther, HRESULT>;
+    using ErrorStringOther = 
+        boost::error_info<struct TagErrorString, std::string>;
 
 }
 

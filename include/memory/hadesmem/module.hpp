@@ -108,7 +108,7 @@ namespace hadesmem
         template <typename ModuleT>
         friend class ModuleIterator;
 
-        typedef std::function<bool(MODULEENTRY32 const&)> EntryCallback;
+        using EntryCallback = std::function<bool(MODULEENTRY32 const&)>;
 
         explicit Module(Process const& process, MODULEENTRY32 const& entry)
             : process_(&process),

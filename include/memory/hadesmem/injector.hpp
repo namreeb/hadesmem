@@ -151,11 +151,7 @@ namespace hadesmem
 
         HADESMEM_DETAIL_TRACE_A("Calling LoadLibraryExW.");
 
-        typedef HMODULE(LoadLibraryExFuncT)(
-            LPCWSTR lpFileName, 
-            HANDLE hFile,
-            DWORD dwFlags);
-        auto const load_library_ret = Call<LoadLibraryExFuncT>(
+        auto const load_library_ret = Call<decltype(LoadLibraryExW)>(
             process,
             reinterpret_cast<FnPtr>(load_library),
             CallConv::kWinApi,
@@ -180,9 +176,7 @@ namespace hadesmem
             kernel32_mod,
             "FreeLibrary");
 
-        typedef BOOL(FreeLibraryFuncT)(HMODULE hModule);
-        auto const free_library_ret =
-            Call<FreeLibraryFuncT>(
+        auto const free_library_ret = Call<decltype(&FreeLibrary)>(
             process,
             reinterpret_cast<FnPtr>(free_library),
             CallConv::kWinApi,
@@ -212,7 +206,7 @@ namespace hadesmem
             module_remote, 
             export_name);
 
-        return Call<DWORD_PTR()>(
+        return Call<DWORD_PTR(*)()>(
             process, 
             reinterpret_cast<FnPtr>(export_ptr),
             CallConv::kDefault);
@@ -302,8 +296,8 @@ namespace hadesmem
         std::string const& export_name,
         std::uint32_t flags)
     {
-        typedef typename std::iterator_traits<ArgsIter>::value_type 
-            ArgsIterValueType;
+        using ArgsIterValueType = 
+            typename std::iterator_traits<ArgsIter>::value_type;
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_base_of<std::wstring,
             ArgsIterValueType>::value);

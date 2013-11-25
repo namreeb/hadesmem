@@ -29,6 +29,7 @@
 #include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
+#include <hadesmem/flush.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
@@ -82,7 +83,7 @@
 namespace hadesmem
 {
 
-    typedef void(*FnPtr)();
+    using FnPtr = void(*)();
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FnPtr) == sizeof(void*));
 
     enum class CallConv
@@ -204,7 +205,7 @@ namespace hadesmem
                 std::is_same<float, typename std::decay<T>::type>::value ||
                 std::is_same<double, typename std::decay<T>::type>::value);
 
-            typedef typename std::decay<T>::type U;
+            using U = typename std::decay<T>::type;
             return GetReturnValueImpl<U>(std::is_pointer<U>());
         }
 
@@ -348,7 +349,7 @@ namespace hadesmem
             : arg_(),
             type_(VariantType::kNone)
         {
-            typedef typename std::remove_cv<T>::type U;
+            using U = typename std::remove_cv<T>::type;
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_integral<T>::value ||
                 std::is_pointer<T>::value ||
@@ -385,20 +386,20 @@ namespace hadesmem
         template <typename T>
         void Initialize(T t) HADESMEM_DETAIL_NOEXCEPT
         {
-            typedef typename std::conditional<
+            using D = typename std::conditional<
                 sizeof(T) == sizeof(DWORD64), 
                 DWORD64,
-                DWORD32>::type D;
+                DWORD32>::type;
             Initialize(static_cast<D>(t));
         }
 
         template <typename T>
         void Initialize(T const* t) HADESMEM_DETAIL_NOEXCEPT
         {
-            typedef typename std::conditional<
+            using D = typename std::conditional<
                 sizeof(T const*) == sizeof(DWORD64),
                 DWORD64, 
-                DWORD32>::type D;
+                DWORD32>::type;
             Initialize(reinterpret_cast<D>(t));
         }
 
@@ -1089,6 +1090,11 @@ namespace hadesmem
 
                 WriteVector(process, stub_mem_remote.GetBase(), code_real);
 
+                FlushInstructionCache(
+                    process, 
+                    stub_mem_remote.GetBase(), 
+                    stub_size);
+
                 return stub_mem_remote;
             }
 
@@ -1109,26 +1115,30 @@ namespace hadesmem
         ArgsForwardIterator args_full_beg,
         ResultsOutputIterator results)
     {
-        typedef typename std::iterator_traits<AddressesForwardIterator>
-            ::iterator_category AddressesForwardIteratorCategory;
+        using AddressesForwardIteratorCategory = 
+            typename std::iterator_traits<AddressesForwardIterator>
+            ::iterator_category;
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_base_of<
             std::forward_iterator_tag,
             AddressesForwardIteratorCategory>::value);
-        typedef typename std::iterator_traits<ConvForwardIterator>
-            ::iterator_category ConvForwardIteratorCategory;
+        using ConvForwardIteratorCategory = 
+            typename std::iterator_traits<ConvForwardIterator>
+            ::iterator_category;
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_base_of<
             std::forward_iterator_tag,
             ConvForwardIteratorCategory>::value);
-        typedef typename std::iterator_traits<ArgsForwardIterator>
-            ::iterator_category ArgsForwardIteratorCategory;
+        using ArgsForwardIteratorCategory = 
+            typename std::iterator_traits<ArgsForwardIterator>
+            ::iterator_category;
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_base_of<
             std::forward_iterator_tag,
             ArgsForwardIteratorCategory>::value);
-        typedef typename std::iterator_traits<ResultsOutputIterator>
-            ::iterator_category ResultsOutputIteratorCategory;
+        using ResultsOutputIteratorCategory = 
+            typename std::iterator_traits<ResultsOutputIterator>
+            ::iterator_category;
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_base_of<
             std::output_iterator_tag,
@@ -1140,8 +1150,8 @@ namespace hadesmem
             addresses_beg,
             addresses_end);
         HADESMEM_DETAIL_ASSERT(num_addresses_signed > 0);
-        typedef typename std::make_unsigned<decltype(num_addresses_signed)>
-            ::type NumAddressesUnsigned;
+        using NumAddressesUnsigned = 
+            typename std::make_unsigned<decltype(num_addresses_signed)>::type;
         auto const num_addresses = static_cast<NumAddressesUnsigned>(
             num_addresses_signed);
 
@@ -1219,17 +1229,99 @@ namespace hadesmem
     namespace detail
     {
 
+        // TODO: Add support for __vectorcall.
+        
+        // TODO: Test all combinations of calling convention, pointer vs 
+        // non-ptr, etc. in Call test.
+        
+        // TODO: Add __clrcall support.
+        
+        // TODO: Add proper checking for when different calling conventions 
+        // are available.
+        // __cdecl - Always.
+        // __clrcall - _M_CEE defined.
+        // __fastcall - _M_IX86 defined and _M_CEE not defined.
+        // __stdcall - _M_IX86 defined.
+        // __thiscall - _M_IX86 defined. Member functions only.
+        // __vectorcall - VC 2013 or newer. _M_CEE must not be defined. 
+        // Available for _M_X64. Available for _M_IX86 when _M_IX86_FP is at 
+        // least 2.
+
+        // TODO: Add support to traits for varargs functions (call conv is 
+        // ignored on varargs).
+
+        // TODO: Move this back to its own header now that it has exploded in 
+        // size and complexity (and will do so further).
+
         template <typename FuncT>
         struct FuncResult;
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+
+        template <typename R, typename... Args>
+        struct FuncResult<R(*)(Args...)>
+        {
+            using type = R;
+        };
 
         template <typename R, typename... Args>
         struct FuncResult<R(Args...)>
         {
-            typedef R type;
+            using type = R;
         };
+
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+
+        template <typename R, typename... Args>
+        struct FuncResult<R(__cdecl*)(Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncResult<R __cdecl (Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncResult<R(__stdcall*)(Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncResult<R __stdcall (Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncResult<R(__fastcall*)(Args...)>
+        {
+            using type = R;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncResult<R __fastcall (Args...)>
+        {
+            using type = R;
+        };
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
 
         template <typename FuncT>
         struct FuncArity;
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+
+        template <typename R, typename... Args>
+        struct FuncArity<R(*)(Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
 
         template <typename R, typename... Args>
         struct FuncArity<R(Args...)>
@@ -1237,14 +1329,106 @@ namespace hadesmem
             static std::size_t const value = sizeof...(Args);
         };
 
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+
+        template <typename R, typename... Args>
+        struct FuncArity<R(__cdecl*)(Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArity<R __cdecl (Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArity<R(__stdcall*)(Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArity<R __stdcall (Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArity<R(__fastcall*)(Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArity<R __fastcall (Args...)>
+        {
+            static std::size_t const value = sizeof...(Args);
+        };
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+
         template <typename FuncT>
         struct FuncArgs;
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R(*)(Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
 
         template <typename R, typename... Args>
         struct FuncArgs<R(Args...)>
         {
-            typedef std::tuple<Args...> type;
+            using type = std::tuple<Args...>;
         };
+
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R(__cdecl*)(Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R __cdecl (Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R(__stdcall*)(Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R __stdcall (Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R(__fastcall*)(Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+        template <typename R, typename... Args>
+        struct FuncArgs<R __fastcall (Args...)>
+        {
+            using type = std::tuple<Args...>;
+        };
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
 
         template <typename FuncT, 
             std::int32_t N, 
@@ -1252,18 +1436,13 @@ namespace hadesmem
             typename OutputIterator>
         inline void AddCallArg(OutputIterator call_args, T&& arg)
         {
-            typedef typename detail::FuncArgs<FuncT>::type FuncArgs;
-            typedef typename std::tuple_element<N, FuncArgs>::type RealT;
+            using FuncArgs = typename FuncArgs<FuncT>::type;
+            using RealT = typename std::tuple_element<N, FuncArgs>::type;
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_convertible<T, RealT>::value);
             *call_args = static_cast<CallArg>(static_cast<RealT>(
                 std::forward<T>(arg)));
         }
-
-    }
-
-    namespace detail
-    {
 
         template <typename FuncT, std::int32_t N, typename OutputIterator>
         void BuildCallArgs(OutputIterator /*call_args*/) 
@@ -1290,8 +1469,8 @@ namespace hadesmem
 
     }
 
-    // TODO: Support decltype(&SomeFunc) and decltype(SomeFunc) as args to 
-    // FuncT.
+    // TODO: Support calling conventions on FuncT (e.g. __fastcall, 
+    // __thiscall).
     template <typename FuncT, typename... Args>
     CallResult<typename detail::FuncResult<FuncT>::type> Call(
         Process const& process, 
@@ -1314,7 +1493,7 @@ namespace hadesmem
             call_conv,
             std::begin(call_args), 
             std::end(call_args));
-        typedef typename detail::FuncResult<FuncT>::type ResultT;
+        using ResultT = typename detail::FuncResult<FuncT>::type;
         return detail::CallResultRawToCallResult<ResultT>(ret);
     }
 
@@ -1379,8 +1558,9 @@ namespace hadesmem
         template <typename OutputIterator>
         void Call(OutputIterator results) const
         {
-            typedef typename std::iterator_traits<OutputIterator>
-                ::iterator_category OutputIteratorCategory;
+            using OutputIteratorCategory = 
+                typename std::iterator_traits<OutputIterator>
+                ::iterator_category;
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_base_of<std::output_iterator_tag,
                 OutputIteratorCategory>::

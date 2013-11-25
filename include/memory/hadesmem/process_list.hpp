@@ -30,13 +30,14 @@ namespace hadesmem
         ProcessEntryT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, ProcessEntryT> 
-            BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<
+            std::input_iterator_tag, 
+            ProcessEntryT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -154,8 +155,9 @@ namespace hadesmem
     class ProcessList
     {
     public:
-        typedef ProcessIterator<ProcessEntry> iterator;
-        typedef ProcessIterator<ProcessEntry const> const_iterator;
+        using value_type = ProcessEntry;
+        using iterator = ProcessIterator<ProcessEntry>;
+        using const_iterator = ProcessIterator<ProcessEntry const>;
 
         HADESMEM_DETAIL_CONSTEXPR ProcessList() HADESMEM_DETAIL_NOEXCEPT
         {}

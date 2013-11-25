@@ -27,7 +27,7 @@ namespace hadesmem
         class Optional
         {
         private:
-            typedef void (Optional::* Boolean)() const;
+            using Boolean = void(Optional::*)() const;
 
         public:
             HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT

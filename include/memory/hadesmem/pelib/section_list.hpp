@@ -30,13 +30,14 @@ namespace hadesmem
         SectionT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, SectionT> 
-            BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<
+            std::input_iterator_tag,
+            SectionT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR SectionIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -164,9 +165,9 @@ namespace hadesmem
     class SectionList
     {
     public:
-        typedef Section value_type;
-        typedef SectionIterator<Section> iterator;
-        typedef SectionIterator<Section const> const_iterator;
+        using value_type = Section;
+        using iterator = SectionIterator<Section>;
+        using const_iterator = SectionIterator<Section const>;
 
         explicit SectionList(Process const& process, PeFile const& pe_file)
             : process_(&process),

@@ -29,12 +29,12 @@ namespace hadesmem
         RegionT>
     {
     public:
-        typedef std::iterator<std::input_iterator_tag, RegionT> BaseIteratorT;
-        typedef typename BaseIteratorT::value_type value_type;
-        typedef typename BaseIteratorT::difference_type difference_type;
-        typedef typename BaseIteratorT::pointer pointer;
-        typedef typename BaseIteratorT::reference reference;
-        typedef typename BaseIteratorT::iterator_category iterator_category;
+        using BaseIteratorT = std::iterator<std::input_iterator_tag, RegionT>;
+        using value_type = typename BaseIteratorT::value_type;
+        using difference_type = typename BaseIteratorT::difference_type;
+        using pointer = typename BaseIteratorT::pointer;
+        using reference = typename BaseIteratorT::reference;
+        using iterator_category = typename BaseIteratorT::iterator_category;
 
         HADESMEM_DETAIL_CONSTEXPR RegionIterator() HADESMEM_DETAIL_NOEXCEPT
             : impl_()
@@ -146,9 +146,9 @@ namespace hadesmem
     class RegionList
     {
     public:
-        typedef Region value_type;
-        typedef RegionIterator<Region> iterator;
-        typedef RegionIterator<Region const> const_iterator;
+        using value_type = Region;
+        using iterator = RegionIterator<Region>;
+        using const_iterator = RegionIterator<Region const>;
 
         explicit RegionList(Process const& process)
             : process_(&process)

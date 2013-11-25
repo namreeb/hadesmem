@@ -20,7 +20,7 @@ namespace hadesmem
         class SmartHandleImpl
         {
         public:
-            typedef typename Policy::HandleT HandleT;
+            using HandleT = typename Policy::HandleT;
 
             HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl() 
                 HADESMEM_DETAIL_NOEXCEPT
@@ -134,7 +134,7 @@ namespace hadesmem
 
         struct HandlePolicy
         {
-            typedef HANDLE HandleT;
+            using HandleT = HANDLE;
 
             static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid()
                 HADESMEM_DETAIL_NOEXCEPT
@@ -148,11 +148,11 @@ namespace hadesmem
             }
         };
 
-        typedef SmartHandleImpl<HandlePolicy> SmartHandle;
+        using SmartHandle = SmartHandleImpl<HandlePolicy>;
 
         struct SnapPolicy
         {
-            typedef HANDLE HandleT;
+            using HandleT = HANDLE;
 
             static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
             {
@@ -165,7 +165,7 @@ namespace hadesmem
             }
         };
 
-        typedef SmartHandleImpl<SnapPolicy> SmartSnapHandle;
+        using SmartSnapHandle = SmartHandleImpl<SnapPolicy>;
 
         struct LibraryPolicy
         {
@@ -183,11 +183,11 @@ namespace hadesmem
             }
         };
 
-        typedef SmartHandleImpl<LibraryPolicy> SmartModuleHandle;
+        using SmartModuleHandle = SmartHandleImpl<LibraryPolicy>;
 
         struct FilePolicy
         {
-            typedef HANDLE HandleT;
+            using HandleT = HANDLE;
 
             static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
             {
@@ -200,11 +200,11 @@ namespace hadesmem
             }
         };
 
-        typedef SmartHandleImpl<FilePolicy> SmartFileHandle;
+        using SmartFileHandle = SmartHandleImpl<FilePolicy>;
 
         struct FindPolicy
         {
-            typedef HANDLE HandleT;
+            using HandleT = HANDLE;
 
             static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
             {
@@ -217,7 +217,7 @@ namespace hadesmem
             }
         };
 
-        typedef SmartHandleImpl<FindPolicy> SmartFindHandle;
+        using SmartFindHandle = SmartHandleImpl<FindPolicy>;
 
     }
 

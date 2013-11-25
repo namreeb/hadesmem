@@ -117,7 +117,7 @@ void TestPatchRaw()
 
 void TestPatchDetour()
 {
-    typedef AsmJit::FuncBuilder8<
+    using HookMeFuncBuilderT = AsmJit::FuncBuilder8<
         std::uint32_t,
         std::int32_t,
         std::int32_t,
@@ -126,7 +126,7 @@ void TestPatchDetour()
         std::int32_t,
         std::int32_t,
         std::int32_t,
-        std::int32_t> HookMeFuncBuilderT;
+        std::int32_t>;
 
     // TODO: Generate different kinds of code to test all instruction 
     // resolution code and ensure we're covering all the important cases.
