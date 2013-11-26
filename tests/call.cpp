@@ -117,6 +117,12 @@ DWORD_PTR TestMixed(
     return 1234;
 }
 
+std::uint32_t TestRvalueOnly(std::uint32_t&& a)
+{
+    BOOST_TEST_EQ(a, 42U);
+    return a;
+}
+
 std::uint32_t TestInteger64(DWORD64 a)
 {
     BOOST_TEST_EQ(a, 0xAAAAAAAABBBBBBBBULL);
@@ -306,6 +312,7 @@ void TestCall()
         }
     };
     std::uint32_t const lvalue_int = 0xDEAFBEEF;
+    float const lvalue_float = 1234.56f;
     auto const call_ret = hadesmem::Call<decltype(&TestMixed)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestMixed),
@@ -316,11 +323,29 @@ void TestCall()
         9081.736455f,
         ImplicitConvTest(),
         lvalue_int,
-        1234.56f, 9876.54,
+        lvalue_float, 
+        9876.54,
         &dummy_glob,
         0xAAAAAAAABBBBBBBBULL);
     BOOST_TEST_EQ(call_ret.GetReturnValue(), 1234UL);
     BOOST_TEST_EQ(call_ret.GetLastError(), 5678UL);
+
+    // TODO: Add a new compile-fail test to ensure that this (and other 
+    // similar scenarios -- one test for each) doesn't compile.
+#if 0
+    std::uint32_t const lvalue_int_2 = 42U;
+    hadesmem::Call<decltype(&TestRvalueOnly)>(
+        process,
+        reinterpret_cast<hadesmem::FnPtr>(&TestMixed),
+        hadesmem::CallConv::kDefault,
+        lvalue_int_2);
+#endif
+
+    hadesmem::Call<decltype(&TestRvalueOnly)>(
+        process,
+        reinterpret_cast<hadesmem::FnPtr>(&TestMixed),
+        hadesmem::CallConv::kDefault,
+        42U);
 
     hadesmem::Call<std::int32_t(*)(std::uint64_t a)>(
         process,

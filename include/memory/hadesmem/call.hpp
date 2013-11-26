@@ -1505,8 +1505,9 @@ namespace hadesmem
 
     }
 
-    // TODO: Support calling conventions on FuncT (e.g. __fastcall, 
-    // __thiscall).
+    // TODO: Make FnPtr a class template which handles all the various 
+    // pointer types that we're interested in, rather than forcing 
+    // a reinterpret_cast (or worse).
     template <typename FuncT, typename... Args>
     CallResult<typename detail::FuncResult<FuncT>::type> Call(
         Process const& process, 
@@ -1521,7 +1522,7 @@ namespace hadesmem
         call_args.reserve(sizeof...(args));
         detail::BuildCallArgs<FuncT, 0>(
             std::back_inserter(call_args), 
-            args...);
+            std::forward<Args>(args)...);
 
         CallResultRaw const ret = Call(
             process, 
