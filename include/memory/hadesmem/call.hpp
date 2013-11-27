@@ -1474,6 +1474,10 @@ namespace hadesmem
         {
             using FuncArgs = typename FuncArgs<FuncT>::type;
             using RealT = typename std::tuple_element<N, FuncArgs>::type;
+            // TODO: We need to detect when RealT is a reference and then 
+            // pass by pointer rather than by value (depending on the ABI).
+            // For now, just fail if we detect a reference type...
+            HADESMEM_DETAIL_STATIC_ASSERT(!std::is_reference<RealT>::value);
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_convertible<T, RealT>::value);
             *call_args = static_cast<CallArg>(static_cast<RealT>(
@@ -1508,6 +1512,10 @@ namespace hadesmem
     // TODO: Make FnPtr a class template which handles all the various 
     // pointer types that we're interested in, rather than forcing 
     // a reinterpret_cast (or worse).
+    // TODO: Also provide an overload that can deduce FuncT from the 
+    // function pointer type of the function pointer which is passed in, 
+    // which would be useful for type safety and ensuring function prototypes 
+    // match.
     template <typename FuncT, typename... Args>
     CallResult<typename detail::FuncResult<FuncT>::type> Call(
         Process const& process, 

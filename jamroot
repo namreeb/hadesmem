@@ -163,7 +163,6 @@ alias memory
     <library>user32
 	
     <library>/boost//headers
-    <library>/boost//exception/<link>static
 	
     <library>src/asmjit
 
