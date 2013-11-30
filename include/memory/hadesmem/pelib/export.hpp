@@ -161,7 +161,7 @@ namespace hadesmem
 
         Export& operator=(Export const&) = default;
 
-        Export(Export&& other) HADESMEM_DETAIL_NOEXCEPT
+        Export(Export&& other)
             : process_(other.process_),
             pe_file_(other.pe_file_),
             rva_(other.rva_),
@@ -175,7 +175,7 @@ namespace hadesmem
             forwarded_(other.forwarded_)
         { }
 
-        Export& operator=(Export&& other) HADESMEM_DETAIL_NOEXCEPT
+        Export& operator=(Export&& other)
         {
             process_ = other.process_;
             pe_file_ = other.pe_file_;

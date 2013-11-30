@@ -66,6 +66,10 @@ namespace hadesmem
             HADESMEM_DETAIL_ASSERT(size_ != 0);
         }
 
+        Allocator(Allocator const& other) = delete;
+
+        Allocator& operator=(Allocator const& other) = delete;
+
         Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
             base_(other.base_),
@@ -92,7 +96,7 @@ namespace hadesmem
             return *this;
         }
 
-        ~Allocator() HADESMEM_DETAIL_NOEXCEPT
+        ~Allocator()
         {
             FreeUnchecked();
         }
@@ -125,9 +129,6 @@ namespace hadesmem
         }
 
     private:
-        Allocator(Allocator const& other) = delete;
-        Allocator& operator=(Allocator const& other) = delete;
-
         void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
         {
             try

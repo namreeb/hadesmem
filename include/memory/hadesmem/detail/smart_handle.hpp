@@ -32,7 +32,11 @@ namespace hadesmem
                 : handle_(handle)
             { }
 
-            SmartHandleImpl& operator=(HandleT handle) 
+            SmartHandleImpl(SmartHandleImpl const& other) = delete;
+
+            SmartHandleImpl& operator=(SmartHandleImpl const& other) = delete;
+
+            SmartHandleImpl& operator=(HandleT handle)
                 HADESMEM_DETAIL_NOEXCEPT
             {
                 CleanupUnchecked();
@@ -45,8 +49,8 @@ namespace hadesmem
             SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
                 : handle_(other.handle_)
             {
-                    other.handle_ = GetInvalid();
-                }
+                other.handle_ = GetInvalid();
+            }
 
             SmartHandleImpl& operator=(SmartHandleImpl&& other) 
                 HADESMEM_DETAIL_NOEXCEPT
@@ -59,7 +63,7 @@ namespace hadesmem
                 return *this;
             }
 
-            ~SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
+            ~SmartHandleImpl()
             {
                 CleanupUnchecked();
             }
@@ -108,9 +112,6 @@ namespace hadesmem
             }
 
         private:
-            SmartHandleImpl(SmartHandleImpl const& other) = delete;
-            SmartHandleImpl& operator=(SmartHandleImpl const& other) = delete;
-
             void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
             {
                 try

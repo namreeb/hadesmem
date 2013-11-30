@@ -65,7 +65,8 @@ namespace hadesmem
                 return *this;
             }
 
-            Optional(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
+            // TODO: Conditional noexcept.
+            Optional(Optional&& other)
                 : t_(),
                 valid_(false)
             {
@@ -73,7 +74,8 @@ namespace hadesmem
                 other.valid_ = false;
             }
 
-            Optional& operator=(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
+            // TODO: Conditional noexcept.
+            Optional& operator=(Optional&& other)
             {
                 Destroy();
                 Construct(std::move(other.Get()));

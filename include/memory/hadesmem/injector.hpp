@@ -232,8 +232,7 @@ namespace hadesmem
 
         CreateAndInjectData& operator=(CreateAndInjectData const&) = default;
 
-        CreateAndInjectData(CreateAndInjectData&& other) 
-            HADESMEM_DETAIL_NOEXCEPT
+        CreateAndInjectData(CreateAndInjectData&& other)
             : process_(std::move(other.process_)),
             module_(other.module_),
             export_ret_(other.export_ret_),
@@ -241,7 +240,6 @@ namespace hadesmem
         { }
 
         CreateAndInjectData& operator=(CreateAndInjectData&& other)
-            HADESMEM_DETAIL_NOEXCEPT
         {
             process_ = std::move(other.process_);
             module_ = other.module_;

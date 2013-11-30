@@ -99,7 +99,11 @@ namespace hadesmem
             orig_()
         { }
 
-        PatchRaw(PatchRaw&& other) HADESMEM_DETAIL_NOEXCEPT
+        PatchRaw(PatchRaw const& other) = delete;
+
+        PatchRaw& operator=(PatchRaw const& other) = delete;
+
+        PatchRaw(PatchRaw&& other)
             : process_(other.process_),
             applied_(other.applied_),
             target_(other.target_),
@@ -111,7 +115,7 @@ namespace hadesmem
             other.target_ = nullptr;
         }
 
-        PatchRaw& operator=(PatchRaw&& other) HADESMEM_DETAIL_NOEXCEPT
+        PatchRaw& operator=(PatchRaw&& other)
         {
             RemoveUnchecked();
 
@@ -131,7 +135,7 @@ namespace hadesmem
             return *this;
         }
 
-        ~PatchRaw() HADESMEM_DETAIL_NOEXCEPT
+        ~PatchRaw()
         {
             RemoveUnchecked();
         }
@@ -176,9 +180,6 @@ namespace hadesmem
         }
 
     private:
-        PatchRaw(PatchRaw const& other) = delete;
-        PatchRaw& operator=(PatchRaw const& other) = delete;
-
         // TODO: Code smell... This feels like code duplication.
         void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
         {
@@ -234,7 +235,11 @@ namespace hadesmem
             trampolines_()
         { }
 
-        PatchDetour(PatchDetour&& other) HADESMEM_DETAIL_NOEXCEPT
+        PatchDetour(PatchDetour const& other) = delete;
+
+        PatchDetour& operator=(PatchDetour const& other) = delete;
+
+        PatchDetour(PatchDetour&& other)
             : process_(other.process_),
             applied_(other.applied_),
             target_(other.target_),
@@ -249,7 +254,7 @@ namespace hadesmem
             other.detour_ = nullptr;
         }
 
-        PatchDetour& operator=(PatchDetour&& other) HADESMEM_DETAIL_NOEXCEPT
+        PatchDetour& operator=(PatchDetour&& other)
         {
             RemoveUnchecked();
 
@@ -274,7 +279,7 @@ namespace hadesmem
             return *this;
         }
 
-        ~PatchDetour() HADESMEM_DETAIL_NOEXCEPT
+        ~PatchDetour()
         {
             RemoveUnchecked();
         }
@@ -438,13 +443,10 @@ namespace hadesmem
         FuncT GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
         {
             return reinterpret_cast<FuncT>(reinterpret_cast<DWORD_PTR>(
-            trampoline_->GetBase()));
+                trampoline_->GetBase()));
         }
 
     private:
-        PatchDetour(PatchDetour const& other) = delete;
-        PatchDetour& operator=(PatchDetour const& other) = delete;
-
         // TODO: Code smell... This feels like code duplication.
         void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
         {

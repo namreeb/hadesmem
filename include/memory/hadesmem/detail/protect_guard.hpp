@@ -68,6 +68,10 @@ namespace hadesmem
                 }
             }
 
+            ProtectGuard(ProtectGuard const& other) = delete;
+
+            ProtectGuard& operator=(ProtectGuard const& other) = delete;
+
             ProtectGuard(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
                 : process_(other.process_),
                 type_(other.type_),
@@ -92,7 +96,7 @@ namespace hadesmem
                 return *this;
             }
 
-            ~ProtectGuard() HADESMEM_DETAIL_NOEXCEPT
+            ~ProtectGuard()
             {
                 RestoreUnchecked();
             }
@@ -129,9 +133,6 @@ namespace hadesmem
             }
 
         private:
-            ProtectGuard(ProtectGuard const& other) = delete;
-            ProtectGuard& operator=(ProtectGuard const& other) = delete;
-
             Process const* process_;
             ProtectGuardType type_;
             bool can_read_or_write_;

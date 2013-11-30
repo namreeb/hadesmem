@@ -64,7 +64,7 @@ namespace hadesmem
 
         Module& operator=(Module const&) = default;
 
-        Module(Module&& other) HADESMEM_DETAIL_NOEXCEPT
+        Module(Module&& other)
             : process_(other.process_),
             handle_(other.handle_),
             size_(other.size_),
@@ -72,7 +72,7 @@ namespace hadesmem
             path_(std::move(other.path_))
         { }
 
-        Module& operator=(Module&& other) HADESMEM_DETAIL_NOEXCEPT
+        Module& operator=(Module&& other)
         {
             process_ = other.process_;
             handle_ = other.handle_;

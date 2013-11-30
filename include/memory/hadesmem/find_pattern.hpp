@@ -123,7 +123,7 @@ namespace hadesmem
 
         Pattern& operator=(Pattern const&) = default;
 
-        Pattern(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
+        Pattern(Pattern&& other)
             : process_(other.process_),
             base_(other.base_),
             name_(std::move(other.name_)),
@@ -136,7 +136,7 @@ namespace hadesmem
             other.flags_ = FindPatternFlags::kNone;
         }
 
-        Pattern& operator=(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
+        Pattern& operator=(Pattern&& other)
         {
             process_ = other.process_;
             other.process_ = nullptr;
@@ -363,7 +363,7 @@ namespace hadesmem
 
         FindPattern& operator=(FindPattern const&) = default;
 
-        FindPattern(FindPattern&& other) HADESMEM_DETAIL_NOEXCEPT
+        FindPattern(FindPattern&& other)
             : process_(other.process_),
             base_(other.base_),
             code_regions_(std::move(other.code_regions_)),
@@ -374,7 +374,7 @@ namespace hadesmem
             other.base_ = 0;
         }
 
-        FindPattern& operator=(FindPattern&& other) HADESMEM_DETAIL_NOEXCEPT
+        FindPattern& operator=(FindPattern&& other)
         {
             process_ = other.process_;
             other.process_ = nullptr;

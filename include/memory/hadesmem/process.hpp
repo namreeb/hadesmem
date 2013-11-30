@@ -66,7 +66,7 @@ namespace hadesmem
             return *this;
         }
 
-        ~Process() HADESMEM_DETAIL_NOEXCEPT
+        ~Process()
         {
             CleanupUnchecked();
         }

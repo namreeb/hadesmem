@@ -101,6 +101,10 @@ namespace hadesmem
             SuspendThread(thread_);
         }
 
+        SuspendedThread(SuspendedThread const& other) = delete;
+
+        SuspendedThread& operator=(SuspendedThread const& other) = delete;
+
         SuspendedThread(SuspendedThread&& other) HADESMEM_DETAIL_NOEXCEPT
             : thread_(std::move(other.thread_))
         { }
@@ -129,10 +133,6 @@ namespace hadesmem
         }
 
     private:
-        // Disable copying.
-        SuspendedThread(SuspendedThread const& other);
-        SuspendedThread& operator=(SuspendedThread const& other);
-
         void ResumeUnchecked()
         {
             try
@@ -177,6 +177,10 @@ namespace hadesmem
             }
         }
 
+        SuspendedProcess(SuspendedProcess const& other) = delete;
+
+        SuspendedProcess& operator=(SuspendedProcess const& other) = delete;
+
         SuspendedProcess(SuspendedProcess&& other) HADESMEM_DETAIL_NOEXCEPT
             : threads_(std::move(other.threads_))
         { }
@@ -190,10 +194,6 @@ namespace hadesmem
         }
 
     private:
-        // Disable copying.
-        SuspendedProcess(SuspendedProcess const& other);
-        SuspendedProcess& operator=(SuspendedProcess const& other);
-
         std::vector<SuspendedThread> threads_;
     };
 

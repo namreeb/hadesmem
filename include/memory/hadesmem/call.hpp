@@ -1560,14 +1560,14 @@ namespace hadesmem
 
         MultiCall& operator=(MultiCall const&) = default;
 
-        MultiCall(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
+        MultiCall(MultiCall&& other)
             : process_(other.process_),
             addresses_(std::move(other.addresses_)),
             call_convs_(std::move(other.call_convs_)),
             args_(std::move(other.args_))
         { }
 
-        MultiCall& operator=(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
+        MultiCall& operator=(MultiCall&& other)
         {
             process_ = other.process_;
             addresses_ = std::move(other.addresses_);

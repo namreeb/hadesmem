@@ -26,23 +26,13 @@ namespace hadesmem
             name_(entry.szExeFile)
         { }
 
-        ProcessEntry(ProcessEntry const& other)
-            : id_(other.id_),
-            threads_(other.threads_),
-            parent_(other.parent_),
-            priority_(other.priority_),
-            name_(other.name_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ProcessEntry& operator=(ProcessEntry const& other)
-        {
-            ProcessEntry tmp(other);
-            *this = std::move(tmp);
+        ProcessEntry(ProcessEntry const&) = default;
 
-            return *this;
-        }
+        ProcessEntry& operator=(ProcessEntry const&) = default;
 
-        ProcessEntry(ProcessEntry&& other) HADESMEM_DETAIL_NOEXCEPT
+        ProcessEntry(ProcessEntry&& other)
             : id_(other.id_),
             threads_(other.threads_),
             parent_(other.parent_),
@@ -50,7 +40,7 @@ namespace hadesmem
             name_(std::move(other.name_))
         { }
 
-        ProcessEntry& operator=(ProcessEntry&& other) HADESMEM_DETAIL_NOEXCEPT
+        ProcessEntry& operator=(ProcessEntry&& other)
         {
             id_ = other.id_;
             threads_ = other.threads_;
@@ -60,6 +50,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
         {

@@ -162,29 +162,6 @@ namespace hadesmem
             : process_(&process)
         { }
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        ModuleList(ModuleList const&) = default;
-
-        ModuleList& operator=(ModuleList const&) = default;
-
-        HADESMEM_DETAIL_CONSTEXPR ModuleList(ModuleList&& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-            : process_(other.process_)
-        { }
-
-        ModuleList& operator=(ModuleList&& other) HADESMEM_DETAIL_NOEXCEPT
-        {
-            process_ = other.process_;
-
-            return *this;
-        }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        ~ModuleList() HADESMEM_DETAIL_NOEXCEPT
-        {}
-
         iterator begin()
         {
             return iterator(*process_);
