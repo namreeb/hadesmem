@@ -26,9 +26,6 @@ namespace hadesmem
         template <typename T>
         class Optional
         {
-        private:
-            using Boolean = void(Optional::*)() const;
-
         public:
             HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT
                 : t_(),
@@ -107,17 +104,10 @@ namespace hadesmem
 
             // TODO: Emplacement support. (Including default construction of T.)
 
-#if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
-            operator Boolean() const HADESMEM_DETAIL_NOEXCEPT
-            {
-                return valid_ ? &Optional::NotComparable : nullptr;
-            }
-#else // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
             explicit operator bool() const HADESMEM_DETAIL_NOEXCEPT
             {
                 return valid_;
             }
-#endif // #if defined(HADESMEM_DETAIL_NO_EXPLICIT_CONVERSION_OPERATOR)
 
             T& Get() HADESMEM_DETAIL_NOEXCEPT
             {
@@ -160,9 +150,6 @@ namespace hadesmem
             }
 
         private:
-            void NotComparable() const HADESMEM_DETAIL_NOEXCEPT
-            {}
-
             template <typename U>
             void Construct(U&& u)
             {
