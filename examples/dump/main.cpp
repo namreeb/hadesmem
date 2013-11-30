@@ -17,7 +17,6 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
@@ -289,8 +288,7 @@ namespace
         std::unique_ptr<hadesmem::TlsDir> tls_dir;
         try
         {
-            tls_dir = hadesmem::detail::make_unique<hadesmem::TlsDir>(
-                process, pe_file);
+            tls_dir = std::make_unique<hadesmem::TlsDir>(process, pe_file);
         }
         catch (std::exception const& /*e*/)
         {
@@ -333,7 +331,7 @@ namespace
         std::unique_ptr<hadesmem::ExportDir> export_dir;
         try
         {
-            export_dir = hadesmem::detail::make_unique<hadesmem::ExportDir>(
+            export_dir = std::make_unique<hadesmem::ExportDir>(
                 process,
                 pe_file);
         }
@@ -594,7 +592,7 @@ namespace
         std::unique_ptr<hadesmem::Process> process;
         try
         {
-            process = hadesmem::detail::make_unique<hadesmem::Process>(
+            process = std::make_unique<hadesmem::Process>(
                 process_entry.GetId());
         }
         catch (std::exception const& /*e*/)

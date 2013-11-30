@@ -22,7 +22,6 @@
 
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
@@ -294,7 +293,7 @@ namespace hadesmem
             std::uint32_t const kMaxInstructionLen = 15;
             std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
 
-            trampoline_ = hadesmem::detail::make_unique<Allocator>(
+            trampoline_ = std::make_unique<Allocator>(
                 *process_, 
                 kTrampSize);
             PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
@@ -502,7 +501,7 @@ namespace hadesmem
             {
                 try
                 {
-                    return hadesmem::detail::make_unique<Allocator>(
+                    return std::make_unique<Allocator>(
                         process, 
                         size, 
                         addr);
@@ -553,9 +552,7 @@ namespace hadesmem
             return trampoline;
 #elif defined(_M_IX86) 
             (void)address;
-            return hadesmem::detail::make_unique<Allocator>(
-                *process_,
-                page_size);
+            return std::make_unique<Allocator>(*process_, page_size);
 #else 
 #error "[HadesMem] Unsupported architecture."
 #endif

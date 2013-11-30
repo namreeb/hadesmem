@@ -18,7 +18,6 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
@@ -213,8 +212,7 @@ int main(int argc, char* /*argv*/[])
             if (has_pid)
             {
                 DWORD const pid = GetOptionValue<DWORD>("pid", var_map);
-                process = hadesmem::detail::make_unique<hadesmem::Process>(
-                    pid);
+                process = std::make_unique<hadesmem::Process>(pid);
             }
             else
             {
@@ -265,7 +263,7 @@ int main(int argc, char* /*argv*/[])
                 // enumeration after opening a handle on the result of the 
                 // first enumeration, and confirm that the result is 
                 // consistent (otherwise retry).
-                process = hadesmem::detail::make_unique<hadesmem::Process>(
+                process = std::make_unique<hadesmem::Process>(
                     found_procs.front().GetId());
             }
 

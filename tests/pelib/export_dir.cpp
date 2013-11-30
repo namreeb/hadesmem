@@ -11,7 +11,6 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
@@ -58,9 +57,9 @@ void TestExportDir()
         std::unique_ptr<hadesmem::ExportDir> cur_export_dir;
         try
         {
-            cur_export_dir =
-                hadesmem::detail::make_unique<hadesmem::ExportDir>(
-                process, cur_pe_file);
+            cur_export_dir = std::make_unique<hadesmem::ExportDir>(
+                process, 
+                cur_pe_file);
         }
         catch (std::exception const& /*e*/)
         {

@@ -12,7 +12,6 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
@@ -58,7 +57,7 @@ void TestTlsDir()
         std::unique_ptr<hadesmem::TlsDir> cur_tls_dir;
         try
         {
-            cur_tls_dir = hadesmem::detail::make_unique<hadesmem::TlsDir>(
+            cur_tls_dir = std::make_unique<hadesmem::TlsDir>(
                 process,
                 cur_pe_file);
         }

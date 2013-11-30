@@ -17,7 +17,6 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/make_unique.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
@@ -200,7 +199,7 @@ void TestPatchDetour()
 
     DWORD_PTR const target_ptr = reinterpret_cast<DWORD_PTR>(hook_me_wrapper);
     DWORD_PTR const detour_ptr = reinterpret_cast<DWORD_PTR>(&HookMeHk);
-    g_detour = hadesmem::detail::make_unique<hadesmem::PatchDetour>(
+    g_detour = std::make_unique<hadesmem::PatchDetour>(
         process,
         reinterpret_cast<PVOID>(target_ptr),
         reinterpret_cast<PVOID>(detour_ptr));
