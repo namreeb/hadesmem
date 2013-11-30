@@ -36,11 +36,18 @@ namespace hadesmem
                 Process const& process, 
                 PVOID address,
                 ProtectGuardType type)
+                : ProtectGuard(process, Query(process, address), type)
+            { }
+
+            explicit ProtectGuard(
+                Process const& process,
+                MEMORY_BASIC_INFORMATION const& mbi,
+                ProtectGuardType type)
                 : process_(&process),
                 type_(type),
                 can_read_or_write_(false),
                 old_protect_(0),
-                mbi_(Query(process, address))
+                mbi_(mbi)
             {
                 if (IsGuard(mbi_))
                 {
@@ -48,15 +55,15 @@ namespace hadesmem
                         ErrorString("Attempt to write to guard page."));
                 }
 
-                can_read_or_write_ = (type_ == ProtectGuardType::kRead) 
-                    ? CanRead(mbi_) 
+                can_read_or_write_ = (type_ == ProtectGuardType::kRead)
+                    ? CanRead(mbi_)
                     : CanWrite(mbi_);
 
                 if (!can_read_or_write_)
                 {
                     old_protect_ = Protect(
-                        process, 
-                        mbi_, 
+                        process,
+                        mbi_,
                         PAGE_EXECUTE_READWRITE);
                 }
             }

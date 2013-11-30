@@ -58,18 +58,16 @@ namespace hadesmem
 
             for (;;)
             {
-                ProtectGuard protect_guard(
-                    process, 
-                    address, 
-                    ProtectGuardType::kRead);
-
-                // TODO: Don't query the same region inforamtion twice, 
-                // ProtectGuard already requires region information.
                 MEMORY_BASIC_INFORMATION const mbi = detail::Query(
                     process, 
                     address);
                 PVOID const region_next = static_cast<PBYTE>(mbi.BaseAddress) +
                     mbi.RegionSize;
+
+                ProtectGuard protect_guard(
+                    process,
+                    mbi,
+                    ProtectGuardType::kRead);
 
                 LPVOID const address_end = static_cast<LPBYTE>(address)+len;
                 if (address_end <= region_next)
