@@ -58,18 +58,11 @@ namespace hadesmem
             Initialize(path);
         }
 
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Module(Module const&) = default;
 
         Module& operator=(Module const&) = default;
-
-#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        Module(Module&&) = default;
-
-        Module& operator=(Module&&) = default;
-
-#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Module(Module&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
@@ -90,7 +83,7 @@ namespace hadesmem
             return *this;
         }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         HMODULE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
         {

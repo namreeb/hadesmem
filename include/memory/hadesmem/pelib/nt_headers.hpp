@@ -32,7 +32,7 @@
 namespace hadesmem
 {
 
-    enum class PeDataDir : DWORD
+    enum class PeDataDir : std::uint32_t
     {
         Export,
         Import,

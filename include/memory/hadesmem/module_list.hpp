@@ -63,29 +63,25 @@ namespace hadesmem
             impl_->module_ = Module(*impl_->process_, *entry);
         }
 
-        ModuleIterator(ModuleIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ModuleIterator& operator=(ModuleIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
+        ModuleIterator(ModuleIterator const&) = default;
 
-            return *this;
-        }
+        ModuleIterator& operator=(ModuleIterator const&) = default;
 
         ModuleIterator(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_))
         { }
 
-        ModuleIterator& operator=(ModuleIterator&& other) 
+        ModuleIterator& operator=(ModuleIterator&& other)
             HADESMEM_DETAIL_NOEXCEPT
         {
             impl_ = std::move(other.impl_);
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {
@@ -166,18 +162,11 @@ namespace hadesmem
             : process_(&process)
         { }
 
-        HADESMEM_DETAIL_CONSTEXPR ModuleList(ModuleList const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-            : process_(other.process_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ModuleList& operator=(ModuleList const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            process_ = other.process_;
+        ModuleList(ModuleList const&) = default;
 
-            return *this;
-        }
+        ModuleList& operator=(ModuleList const&) = default;
 
         HADESMEM_DETAIL_CONSTEXPR ModuleList(ModuleList&& other) 
             HADESMEM_DETAIL_NOEXCEPT
@@ -190,6 +179,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         ~ModuleList() HADESMEM_DETAIL_NOEXCEPT
         {}

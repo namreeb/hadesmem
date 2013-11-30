@@ -117,17 +117,11 @@ namespace hadesmem
             std::uint32_t flags,
             std::wstring const& start);
 
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+
         Pattern(Pattern const&) = default;
 
         Pattern& operator=(Pattern const&) = default;
-
-#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        Pattern(Pattern&&) = default;
-
-        Pattern& operator=(Pattern&&) = default;
-
-#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Pattern(Pattern&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
@@ -161,7 +155,7 @@ namespace hadesmem
             return *this;
         }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Process const* GetProcess() const HADESMEM_DETAIL_NOEXCEPT
         {
@@ -363,17 +357,11 @@ namespace hadesmem
             }
         }
 
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+
         FindPattern(FindPattern const&) = default;
 
         FindPattern& operator=(FindPattern const&) = default;
-
-#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        FindPattern(FindPattern&&) = default;
-
-        FindPattern& operator=(FindPattern&&) = default;
-
-#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         FindPattern(FindPattern&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
@@ -403,7 +391,7 @@ namespace hadesmem
             return *this;
         }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         PVOID Find(std::wstring const& data, std::uint32_t flags) const
         {
@@ -551,18 +539,15 @@ namespace hadesmem
 
         struct ManipInfo
         {
-            struct Manipulator
+            enum class Manipulator
             {
-                enum : std::uint32_t
-                {
-                    kAdd,
-                    kSub,
-                    kRel,
-                    kLea
-                };
+                kAdd,
+                kSub,
+                kRel,
+                kLea
             };
 
-            std::uint32_t type;
+            Manipulator type;
             bool has_operand1;
             std::uintptr_t operand1;
             bool has_operand2;
@@ -943,7 +928,8 @@ namespace hadesmem
                             "attribute for 'Manipulator' node."));
                     }
 
-                    std::uint32_t type = 0;
+                    ManipInfo::Manipulator type = 
+                        ManipInfo::Manipulator::kAdd;
                     if (manipulator_name == L"Add")
                     {
                         type = ManipInfo::Manipulator::kAdd;

@@ -504,8 +504,8 @@ namespace hadesmem
                 {
                     return hadesmem::detail::make_unique<Allocator>(
                         process, 
-                        addr, 
-                        size);
+                        size, 
+                        addr);
                 }
                 catch (std::exception const& /*e*/)
                 {
@@ -555,7 +555,6 @@ namespace hadesmem
             (void)address;
             return hadesmem::detail::make_unique<Allocator>(
                 *process_,
-                nullptr,
                 page_size);
 #else 
 #error "[HadesMem] Unsupported architecture."

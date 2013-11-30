@@ -44,17 +44,11 @@ namespace hadesmem
             : impl_(std::make_shared<Impl>(process))
         { }
 
-        RegionIterator(RegionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        RegionIterator& operator=(RegionIterator const& other)
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
+        RegionIterator(RegionIterator const&) = default;
 
-            return *this;
-        }
+        RegionIterator& operator=(RegionIterator const&) = default;
 
         RegionIterator(RegionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_))
@@ -67,6 +61,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {

@@ -63,17 +63,11 @@ namespace hadesmem
             impl_->process_ = ProcessEntry(*entry);
         }
 
-        ProcessIterator(ProcessIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ProcessIterator& operator=(ProcessIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
+        ProcessIterator(ProcessIterator const&) = default;
 
-            return *this;
-        }
+        ProcessIterator& operator=(ProcessIterator const&) = default;
 
         ProcessIterator(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_))
@@ -86,6 +80,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {

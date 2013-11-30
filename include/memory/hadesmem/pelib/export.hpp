@@ -155,27 +155,11 @@ namespace hadesmem
             }
         }
 
-        Export(Export const& other)
-            : process_(other.process_),
-            pe_file_(other.pe_file_),
-            rva_(other.rva_),
-            va_(other.va_),
-            name_(other.name_),
-            forwarder_(other.forwarder_),
-            forwarder_split_(other.forwarder_split_),
-            procedure_number_(other.procedure_number_),
-            ordinal_number_(other.ordinal_number_),
-            by_name_(other.by_name_),
-            forwarded_(other.forwarded_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        Export& operator=(Export const& other)
-        {
-            Export tmp(other);
-            *this = std::move(tmp);
+        Export(Export const&) = default;
 
-            return *this;
-        }
+        Export& operator=(Export const&) = default;
 
         Export(Export&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
@@ -207,6 +191,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         DWORD GetRva() const HADESMEM_DETAIL_NOEXCEPT
         {

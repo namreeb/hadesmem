@@ -71,27 +71,18 @@ namespace hadesmem
             }
         }
 
-        ThreadIterator(ThreadIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_),
-            pid_(other.pid_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ThreadIterator& operator=(ThreadIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
-            pid_ = other.pid_;
+        ThreadIterator(ThreadIterator const&) = default;
 
-            return *this;
-        }
+        ThreadIterator& operator=(ThreadIterator const&) = default;
 
         ThreadIterator(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_)),
             pid_(other.pid_)
         { }
 
-        ThreadIterator& operator=(ThreadIterator&& other) 
+        ThreadIterator& operator=(ThreadIterator&& other)
             HADESMEM_DETAIL_NOEXCEPT
         {
             impl_ = std::move(other.impl_);
@@ -99,6 +90,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {

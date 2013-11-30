@@ -182,8 +182,7 @@ namespace hadesmem
                 }
             }
 
-            typename std::aligned_storage<sizeof(T),
-                std::alignment_of<T>::value>::type t_;
+            std::aligned_storage_t<sizeof(T), std::alignment_of<T>::value> t_;
             bool valid_;
         };
 

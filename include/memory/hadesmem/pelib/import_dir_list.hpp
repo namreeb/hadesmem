@@ -59,18 +59,11 @@ namespace hadesmem
             }
         }
 
-        ImportDirIterator(ImportDirIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        ImportDirIterator& operator=(ImportDirIterator const& other)
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
+        ImportDirIterator(ImportDirIterator const&) = default;
 
-            return *this;
-        }
+        ImportDirIterator& operator=(ImportDirIterator const&) = default;
 
         ImportDirIterator(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_))
@@ -83,6 +76,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {

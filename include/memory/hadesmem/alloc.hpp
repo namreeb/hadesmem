@@ -17,26 +17,10 @@
 namespace hadesmem
 {
 
-    inline PVOID Alloc(Process const& process, SIZE_T size)
-    {
-        PVOID const address = ::VirtualAllocEx(
-            process.GetHandle(),
-            nullptr,
-            size,
-            MEM_COMMIT | MEM_RESERVE,
-            PAGE_EXECUTE_READWRITE);
-        if (!address)
-        {
-            DWORD const last_error = ::GetLastError();
-            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("VirtualAllocEx failed.") <<
-                ErrorCodeWinLast(last_error));
-        }
-
-        return address;
-    }
-
-    inline PVOID Alloc(Process const& process, PVOID base, SIZE_T size)
+    inline PVOID Alloc(
+        Process const& process, 
+        SIZE_T size, 
+        PVOID base = nullptr)
     {
         PVOID const address = ::VirtualAllocEx(
             process.GetHandle(),
@@ -69,19 +53,12 @@ namespace hadesmem
     class Allocator
     {
     public:
-        explicit Allocator(Process const& process, SIZE_T size)
+        explicit Allocator(
+            Process const& process, 
+            SIZE_T size, 
+            PVOID base = nullptr)
             : process_(&process),
-            base_(Alloc(process, size)),
-            size_(size)
-        {
-            HADESMEM_DETAIL_ASSERT(process_ != 0);
-            HADESMEM_DETAIL_ASSERT(base_ != 0);
-            HADESMEM_DETAIL_ASSERT(size_ != 0);
-        }
-
-        explicit Allocator(Process const& process, PVOID base, SIZE_T size)
-            : process_(&process),
-            base_(Alloc(process, base, size)),
+            base_(Alloc(process, size, base)),
             size_(size)
         {
             HADESMEM_DETAIL_ASSERT(process_ != 0);

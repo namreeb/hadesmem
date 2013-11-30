@@ -104,8 +104,8 @@ namespace hadesmem
         HADESMEM_DETAIL_STATIC_ASSERT(
             std::is_integral<T>::value ||
             std::is_pointer<T>::value ||
-            std::is_same<float, typename std::remove_cv<T>::type>::value ||
-            std::is_same<double, typename std::remove_cv<T>::type>::value);
+            std::is_same<float, std::remove_cv_t<T>>::value ||
+            std::is_same<double, std::remove_cv_t<T>>::value);
 
         HADESMEM_DETAIL_CONSTEXPR explicit CallResult(
             T result,
@@ -196,16 +196,15 @@ namespace hadesmem
         }
 
         template <typename T>
-        typename std::decay<T>::type GetReturnValue() const
-            HADESMEM_DETAIL_NOEXCEPT
+        std::decay_t<T> GetReturnValue() const HADESMEM_DETAIL_NOEXCEPT
         {
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_integral<T>::value ||
                 std::is_pointer<T>::value ||
-                std::is_same<float, typename std::decay<T>::type>::value ||
-                std::is_same<double, typename std::decay<T>::type>::value);
+                std::is_same<float, std::decay_t<T>>::value ||
+                std::is_same<double, std::decay_t<T>>::value);
 
-            using U = typename std::decay<T>::type;
+            using U = std::decay_t<T>;
             return GetReturnValueImpl<U>(std::is_pointer<U>());
         }
 
@@ -349,7 +348,7 @@ namespace hadesmem
             : arg_(),
             type_(VariantType::kNone)
         {
-            using U = typename std::remove_cv<T>::type;
+            using U = std::remove_cv_t<T>;
             HADESMEM_DETAIL_STATIC_ASSERT(
                 std::is_integral<T>::value ||
                 std::is_pointer<T>::value ||
@@ -1151,7 +1150,7 @@ namespace hadesmem
             addresses_end);
         HADESMEM_DETAIL_ASSERT(num_addresses_signed > 0);
         using NumAddressesUnsigned = 
-            typename std::make_unsigned<decltype(num_addresses_signed)>::type;
+            std::make_unsigned_t<decltype(num_addresses_signed)>;
         auto const num_addresses = static_cast<NumAddressesUnsigned>(
             num_addresses_signed);
 
@@ -1323,6 +1322,9 @@ namespace hadesmem
 #endif
 
         template <typename FuncT>
+        using FuncResultT = typename FuncResult<FuncT>::type;
+
+        template <typename FuncT>
         struct FuncArity;
 
         template <typename C, typename R, typename... Args>
@@ -1464,14 +1466,16 @@ namespace hadesmem
 #error "[HadesMem] Unsupported architecture."
 #endif
 
+        template <typename FuncT>
+        using FuncArgsT = typename FuncArgs<FuncT>::type;
+
         template <typename FuncT, 
             std::int32_t N, 
             typename T, 
             typename OutputIterator>
         inline void AddCallArg(OutputIterator call_args, T&& arg)
         {
-            using FuncArgs = typename FuncArgs<FuncT>::type;
-            using RealT = typename std::tuple_element<N, FuncArgs>::type;
+            using RealT = typename std::tuple_element<N, FuncArgsT<FuncT>>::type;
             // TODO: We need to detect when RealT is a reference and then 
             // pass by pointer rather than by value (depending on the ABI).
             // For now, just fail if we detect a reference type...
@@ -1515,7 +1519,7 @@ namespace hadesmem
     // which would be useful for type safety and ensuring function prototypes 
     // match.
     template <typename FuncT, typename... Args>
-    CallResult<typename detail::FuncResult<FuncT>::type> Call(
+    CallResult<detail::FuncResultT<FuncT>> Call(
         Process const& process, 
         FnPtr address, 
         CallConv call_conv,
@@ -1536,7 +1540,7 @@ namespace hadesmem
             call_conv,
             std::begin(call_args), 
             std::end(call_args));
-        using ResultT = typename detail::FuncResult<FuncT>::type;
+        using ResultT = detail::FuncResultT<FuncT>;
         return detail::CallResultRawToCallResult<ResultT>(ret);
     }
 
@@ -1550,17 +1554,11 @@ namespace hadesmem
             args_()
         { }
 
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+
         MultiCall(MultiCall const&) = default;
 
         MultiCall& operator=(MultiCall const&) = default;
-
-#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        MultiCall(MultiCall&&) = default;
-
-        MultiCall& operator=(MultiCall&&) = default;
-
-#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         MultiCall(MultiCall&& other) HADESMEM_DETAIL_NOEXCEPT
             : process_(other.process_),
@@ -1579,7 +1577,7 @@ namespace hadesmem
             return *this;
         }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         template <typename FuncT, typename... Args>
         void Add(FnPtr address, CallConv call_conv, Args&&... args)

@@ -62,17 +62,11 @@ namespace hadesmem
             impl_->section_ = Section(process, pe_file, 0, base);
         }
 
-        SectionIterator(SectionIterator const& other) HADESMEM_DETAIL_NOEXCEPT
-            : impl_(other.impl_)
-        { }
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-        SectionIterator& operator=(SectionIterator const& other) 
-            HADESMEM_DETAIL_NOEXCEPT
-        {
-            impl_ = other.impl_;
+        SectionIterator(SectionIterator const&) = default;
 
-            return *this;
-        }
+        SectionIterator& operator=(SectionIterator const&) = default;
 
         SectionIterator(SectionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
             : impl_(std::move(other.impl_))
@@ -85,6 +79,8 @@ namespace hadesmem
 
             return *this;
         }
+
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         reference operator*() const HADESMEM_DETAIL_NOEXCEPT
         {

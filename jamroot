@@ -98,7 +98,7 @@ project memory
     <toolset>clang,<variant>debug:<cxxflags>"-ftrapv"
     
     # Enable C++11 Mode
-    <toolset>gcc:<cxxflags>"-std=c++11"
+    <toolset>gcc:<cxxflags>"-std=c++1y"
     <toolset>clang:<cxxflags>"-std=c++11"
     <toolset>intel:<cxxflags>"/Qstd=c++11"
     

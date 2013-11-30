@@ -72,7 +72,7 @@ namespace hadesmem
 
     struct InjectFlags
     {
-        enum
+        enum : std::uint32_t
         {
             kNone = 0,
             kPathResolution = 1 << 0,
@@ -226,17 +226,11 @@ namespace hadesmem
             export_last_error_(export_last_error)
         { }
 
+#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+
         CreateAndInjectData(CreateAndInjectData const&) = default;
 
         CreateAndInjectData& operator=(CreateAndInjectData const&) = default;
-
-#if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-        CreateAndInjectData(CreateAndInjectData&&) = default;
-
-        CreateAndInjectData& operator=(CreateAndInjectData&&) = default;
-
-#else // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         CreateAndInjectData(CreateAndInjectData&& other) 
             HADESMEM_DETAIL_NOEXCEPT
@@ -257,7 +251,7 @@ namespace hadesmem
             return *this;
         }
 
-#endif // #if !defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
+#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         Process GetProcess() const
         {
