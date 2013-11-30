@@ -85,15 +85,7 @@
 #endif // #if defined(_M_IX86)
 // #elif defined(_M_AMD64)
 
-// This is required because of a bug in Clang's dllexport support on Windows, 
-// this is worked around by using a linker flag to export all symbols 
-// unconditionally.
-// TODO: Remove this hack once Clang has been fixed.
-#if defined(HADESMEM_CLANG)
-#define HADESMEM_DETAIL_DLLEXPORT  
-#else // #if defined(HADESMEM_CLANG)
 #define HADESMEM_DETAIL_DLLEXPORT __declspec(dllexport)
-#endif // #if defined(HADESMEM_CLANG)
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://bit.ly/17CCZFX

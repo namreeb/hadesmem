@@ -163,9 +163,6 @@ DWORD MultiThreadGet()
     return GetLastError();
 }
 
-// Clang does not yet implement MSVC-style __thiscall
-#if !defined(HADESMEM_CLANG)
-
 class ThiscallDummy
 {
 public:
@@ -187,8 +184,6 @@ public:
         return 0x12345678;
     }
 };
-
-#endif // #if !defined(HADESMEM_CLANG)
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
@@ -234,19 +229,12 @@ DWORD_PTR __stdcall TestIntegerStd(
     return 0x12345678;
 }
 
-// Clang does not yet implement MSVC-style __fastcall (it seems to do so 
-// for the 'regular' case, but will do things differently when faced 
-// with a 64-bit integer as the first parameter).
-#if !defined(HADESMEM_CLANG)
-
 std::int32_t __fastcall TestInteger64Fast(std::uint64_t a)
 {
     BOOST_TEST_EQ(a, 0xAAAAAAAABBBBBBBBULL);
 
     return 0;
 }
-
-#endif // #if !defined(HADESMEM_CLANG)
 
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -364,9 +352,6 @@ void TestCall()
     BOOST_TEST_EQ(call_ptr_ret.GetReturnValue(),
         static_cast<char const* const>(nullptr));
 
-    // Clang does not yet implement MSVC-style __thiscall
-#if !defined(HADESMEM_CLANG)
-
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     hadesmem::CallConv const thiscall_call_conv =
         hadesmem::CallConv::kDefault;
@@ -408,8 +393,6 @@ void TestCall()
     BOOST_TEST_EQ(call_int_this_ret.GetReturnValue(), 0x12345678UL);
     BOOST_TEST_EQ(call_int_this_ret.GetLastError(), 0x87654321UL);
 
-#endif // #if !defined(HADESMEM_CLANG)
-
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -440,18 +423,11 @@ void TestCall()
     BOOST_TEST_EQ(call_int_std_ret.GetReturnValue(), 0x12345678UL);
     BOOST_TEST_EQ(call_int_std_ret.GetLastError(), 0x87654321UL);
 
-    // Clang does not yet implement MSVC-style __fastcall (it seems to do so 
-    // for the 'regular' case, but will do things differently when faced 
-    // with a 64-bit integer as the first parameter).
-#if !defined(HADESMEM_CLANG)
-
     hadesmem::Call<std::int32_t(*)(DWORD64)>(
         process,
         reinterpret_cast<hadesmem::FnPtr>(&TestInteger64Fast),
         hadesmem::CallConv::kFastCall,
         0xAAAAAAAABBBBBBBBULL);
-
-#endif // #if !defined(HADESMEM_CLANG)
 
 #else
 #error "[HadesMem] Unsupported architecture."
