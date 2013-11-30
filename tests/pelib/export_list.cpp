@@ -60,7 +60,7 @@ void TestExportList()
             hadesmem::Export const test_export(
                 process, 
                 cur_pe_file, 
-                e.GetOrdinal());
+                e.GetProcedureNumber());
 
             // TODO: Ensure Export::ByName works
             if (test_export.ByName())
@@ -70,7 +70,7 @@ void TestExportList()
             else
             {
                 BOOST_TEST(test_export.ByOrdinal());
-                BOOST_TEST(test_export.GetOrdinal() >=
+                BOOST_TEST(test_export.GetProcedureNumber() >=
                     cur_export_dir.GetOrdinalBase());
             }
 
@@ -92,7 +92,7 @@ void TestExportList()
             test_str_1 << e;
             std::stringstream test_str_2;
             test_str_2.imbue(std::locale::classic());
-            test_str_2 << e.GetOrdinal();
+            test_str_2 << e.GetProcedureNumber();
             BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
 
             // TODO: Ensure that output differs across exports.

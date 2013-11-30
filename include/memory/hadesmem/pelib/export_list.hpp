@@ -103,32 +103,39 @@ namespace hadesmem
                 ExportDir const export_dir(
                     *impl_->process_, 
                     *impl_->pe_file_);
+
                 DWORD* ptr_functions = static_cast<DWORD*>(RvaToVa(
                     *impl_->process_,
-                    *impl_->pe_file_, 
+                    *impl_->pe_file_,
                     export_dir.GetAddressOfFunctions()));
 
-                WORD offset = static_cast<WORD>(
-                    impl_->export_->GetOrdinal() -
-                    export_dir.GetOrdinalBase() + 1);
-                for (; !Read<DWORD>(*impl_->process_, ptr_functions + offset) 
-                    && offset < export_dir.GetNumberOfFunctions(); 
-                    ++offset)
+                DWORD const ordinal_base = export_dir.GetOrdinalBase();
+                
+                WORD const procedure_number = impl_->export_->
+                    GetProcedureNumber();
+
+                WORD ordinal_number = static_cast<WORD>(
+                    (procedure_number - ordinal_base) + 1);
+
+                for (; Read<DWORD>(*impl_->process_, 
+                    ptr_functions + ordinal_number) == 0UL
+                    && ordinal_number < export_dir.GetNumberOfFunctions();
+                    ++ordinal_number)
                     ;
 
-                if (offset >= export_dir.GetNumberOfFunctions())
+                if (ordinal_number >= export_dir.GetNumberOfFunctions())
                 {
                     HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
                         ErrorString("Invalid export number."));
                 }
 
-                WORD const new_ordinal = static_cast<WORD>(
-                    offset + export_dir.GetOrdinalBase());
+                WORD const new_procedure_number = static_cast<WORD>(
+                    ordinal_number + ordinal_base);
 
                 impl_->export_ = Export(
                     *impl_->process_, 
                     *impl_->pe_file_, 
-                    new_ordinal);
+                    new_procedure_number);
             }
             catch (std::exception const& /*e*/)
             {
@@ -160,11 +167,12 @@ namespace hadesmem
     private:
         struct Impl
         {
-            explicit Impl(Process const& process, PeFile const& pe_file)
-            HADESMEM_DETAIL_NOEXCEPT
-            : process_(&process),
-            pe_file_(&pe_file),
-            export_()
+            explicit Impl(
+                Process const& process, 
+                PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
+                : process_(&process),
+                pe_file_(&pe_file),
+                export_()
             { }
 
             Process const* process_;

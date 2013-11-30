@@ -23,6 +23,10 @@
 
 // TODO: Improve PeLib support for pathological cases like Corkami tests.
 
+// TODO: Remove assumptions made about the format where possible. The spec is 
+// often wrong (or simply ignored), so we need to be permissive (but also 
+// defensive) if we want to be useful when dealing with hostile files.
+
 // TODO: Full support for writing back to PE file, including automatically 
 // performing adjustments where required to fit in new data or remove 
 // unnecessary space.
@@ -46,14 +50,40 @@
 // because there might not be a memory region to reference!
 
 // TODO: Decouple PeFile from Process. It should use a generic interface 
-// instead.
+// instead.	Another potential alternative would be policy classes. Needs 
+// investigation.
 
 // TODO: Decouple PeLib from the architecture being compiled for. Required 
 // for cross-architecture support in hadesmem.
 
+// TODO: Support more of the PE file format.
+// Overlay data.
+// Resource directory.
+// Exception directory.
+// Relocation directory.
+// Security directory.
+// Debug directory.
+// Load config directory.
+// Delay import directory.
+// Bound import directory.
+// IAT(as opposed to Import) directory.
+// CLR runtime directory support.
+// etc.
+
+// TODO: Improve support for loading 'Data' files to handle pathalogical 
+// cases such as structures overlapping with implicitly zeroed virtual memory 
+// that only exists in-memory. This will probably require 'manually mapping' 
+// the data file. But what about files that overwrite data or overlap in 
+// memory but not on disk? That would potentially cause information loss... 
+// Keep two copies? How do we know which one to use depending on the scenario 
+// in that case? Needs more thought and investigation... Another concern 
+// would be write-back for these pathalogical files... That needs more 
+// thought also.
+
 namespace hadesmem
 {
 
+    // TODO: Investigate whether there is a better way to implement this.
     enum class PeFileType
     {
         Image,

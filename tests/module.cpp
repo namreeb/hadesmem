@@ -15,6 +15,8 @@
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Test global var exports for FindProcedure.
+
 void TestModule()
 {
     hadesmem::Process const process(::GetCurrentProcessId());

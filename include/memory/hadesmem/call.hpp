@@ -1234,8 +1234,6 @@ namespace hadesmem
         // TODO: Test all combinations of calling convention, pointer vs 
         // non-ptr, etc. in Call test.
         
-        // TODO: Add __clrcall support.
-        
         // TODO: Add proper checking for when different calling conventions 
         // are available.
         // __cdecl - Always.

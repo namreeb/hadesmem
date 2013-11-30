@@ -258,6 +258,13 @@ int main(int argc, char* /*argv*/[])
                     return 1;
                 }
 
+                // WARNING: There is a potential race condition here where 
+                // the process we're interested in quits and the PID is 
+                // reused for a different process. 
+                // TODO: To solve the race, we should perform a second 
+                // enumeration after opening a handle on the result of the 
+                // first enumeration, and confirm that the result is 
+                // consistent (otherwise retry).
                 process = hadesmem::detail::make_unique<hadesmem::Process>(
                     found_procs.front().GetId());
             }

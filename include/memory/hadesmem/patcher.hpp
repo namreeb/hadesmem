@@ -39,6 +39,8 @@
 
 // TODO: VEH hooking. (INT 3, DR, invalid instr, etc.)
 
+// TODO: VMT hooking.
+
 // TODO: Make hooking a transactional operation.
 
 // TODO: When patching memory, check each thread context to ensure we're not 
@@ -47,8 +49,6 @@
 // redirect it to our trampoline, and in the case of PatchRaw it's probably 
 // safer just to bail and make the caller try again. Need to document that 
 // the API may fail spuriously and that the caller should retry.
-
-// TODO: VMT hooking.
 
 // TODO: Explicitly support (and test) hook chains.
 
@@ -70,6 +70,18 @@
 // TODO: Add proper tests for edge cases trying to be handled (thread 
 // suspension, thread redirection, instruction resolution, no free trampoline 
 // blocks near a target address, short and far jumps, etc etc.)
+
+// TODO: Use a second trampoline in patcher when jumping to detour to pass a 
+// hook context (containing original trampoline, original module, etc).
+
+// TODO: Most detours should be declared as extern "C".
+
+// TODO: Improve type safety.
+
+// TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where 
+// appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new 
+// language features like noexcept, constexpr, etc. Consider other designs 
+// entirely.
 
 namespace hadesmem
 {
@@ -202,7 +214,8 @@ namespace hadesmem
 
     // TODO: Consolidate memory allocations where possible. Taking a page for 
     // every trampoline (including two trampolines per patch on x64 -- fix 
-    // this too) is extremely wasteful. 
+    // this too) is extremely wasteful. Perhaps allocate a block the size of 
+    // the allocation granularity then use a custom heap?
     // TODO: Support calling convention differences for target function and 
     // detour function (calling convention only though, not args or return 
     // type). Templates can be used to detect information if appropriate.

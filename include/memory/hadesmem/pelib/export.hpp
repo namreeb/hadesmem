@@ -25,6 +25,18 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Constructor to create Export by name (optimize using binary 
+// search).
+
+// TODO: Support setting and writing back Export. (For EAT hooking.)
+
+// TODO: Test that export code works against ordinal-only modules. From 
+// Corkami: 
+// ordinals-only exports can make the structure even smaller (no 
+// NumberOfFunctions/NumberOfNames/AddressOfNames/AddressOfNameOrdinals). 
+// Fake entries can be also present in exports as long as Base + Ordinal 
+// matches the wanted export. 
+
 // TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
@@ -34,18 +46,13 @@
 namespace hadesmem
 {
 
-    // TODO: Constructor to create Export by name (optimize using binary 
-    // search).
-
-    // TODO: Support setting and writing back Export. (For EAT hooking.)
-
     class Export
     {
     public:
         explicit Export(
             Process const& process,
             PeFile const& pe_file,
-            WORD ordinal)
+            WORD procedure_number)
             : process_(&process),
             pe_file_(&pe_file),
             rva_(0),
@@ -53,16 +60,18 @@ namespace hadesmem
             name_(),
             forwarder_(),
             forwarder_split_(),
-            ordinal_(ordinal),
+            procedure_number_(procedure_number),
+            ordinal_number_(0),
             by_name_(false),
             forwarded_(false)
         {
             ExportDir const export_dir(process, pe_file);
 
-            WORD const offset = static_cast<WORD>(ordinal_ -
+            // TODO: Check for underflow here.
+            ordinal_number_ = static_cast<WORD>(procedure_number_ -
                 export_dir.GetOrdinalBase());
 
-            if (offset >= export_dir.GetNumberOfFunctions())
+            if (ordinal_number_ >= export_dir.GetNumberOfFunctions())
             {
                 HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
                     ErrorString("Ordinal out of range."));
@@ -84,7 +93,7 @@ namespace hadesmem
                 auto const name_ord_iter = std::find(
                     std::begin(name_ordinals),
                     std::end(name_ordinals),
-                    offset);
+                    ordinal_number_);
                 if (name_ord_iter != std::end(name_ordinals))
                 {
                     by_name_ = true;
@@ -107,7 +116,7 @@ namespace hadesmem
                 export_dir.GetAddressOfFunctions()));
             DWORD const func_rva = Read<DWORD>(
                 process, 
-                ptr_functions + offset);
+                ptr_functions + ordinal_number_);
 
             NtHeaders const nt_headers(process, pe_file);
 
@@ -154,7 +163,8 @@ namespace hadesmem
             name_(other.name_),
             forwarder_(other.forwarder_),
             forwarder_split_(other.forwarder_split_),
-            ordinal_(other.ordinal_),
+            procedure_number_(other.procedure_number_),
+            ordinal_number_(other.ordinal_number_),
             by_name_(other.by_name_),
             forwarded_(other.forwarded_)
         { }
@@ -175,7 +185,8 @@ namespace hadesmem
             name_(std::move(other.name_)),
             forwarder_(std::move(other.forwarder_)),
             forwarder_split_(std::move(other.forwarder_split_)),
-            ordinal_(other.ordinal_),
+            procedure_number_(other.procedure_number_),
+            ordinal_number_(other.ordinal_number_),
             by_name_(other.by_name_),
             forwarded_(other.forwarded_)
         { }
@@ -189,7 +200,8 @@ namespace hadesmem
             name_ = std::move(other.name_);
             forwarder_ = std::move(other.forwarder_);
             forwarder_split_ = std::move(other.forwarder_split_);
-            ordinal_ = other.ordinal_;
+            procedure_number_ = other.procedure_number_;
+            ordinal_number_ = other.ordinal_number_;
             by_name_ = other.by_name_;
             forwarded_ = other.forwarded_;
 
@@ -211,9 +223,14 @@ namespace hadesmem
             return name_;
         }
 
-        WORD GetOrdinal() const HADESMEM_DETAIL_NOEXCEPT
+        WORD GetProcedureNumber() const HADESMEM_DETAIL_NOEXCEPT
         {
-            return ordinal_;
+            return procedure_number_;
+        }
+
+        WORD GetOrdinalNumber() const HADESMEM_DETAIL_NOEXCEPT
+        {
+            return ordinal_number_;
         }
 
         bool ByName() const HADESMEM_DETAIL_NOEXCEPT
@@ -279,7 +296,8 @@ namespace hadesmem
         std::string name_;
         std::string forwarder_;
         std::pair<std::string, std::string> forwarder_split_;
-        WORD ordinal_;
+        WORD procedure_number_;
+        WORD ordinal_number_;
         bool by_name_;
         bool forwarded_;
     };
@@ -287,7 +305,7 @@ namespace hadesmem
     inline bool operator==(Export const& lhs, Export const& rhs)
         HADESMEM_DETAIL_NOEXCEPT
     {
-        return lhs.GetOrdinal() == rhs.GetOrdinal();
+        return lhs.GetProcedureNumber() == rhs.GetProcedureNumber();
     }
 
     inline bool operator!=(Export const& lhs, Export const& rhs)
@@ -299,31 +317,31 @@ namespace hadesmem
     inline bool operator<(Export const& lhs, Export const& rhs)
         HADESMEM_DETAIL_NOEXCEPT
     {
-        return lhs.GetOrdinal() < rhs.GetOrdinal();
+        return lhs.GetProcedureNumber() < rhs.GetProcedureNumber();
     }
 
     inline bool operator<=(Export const& lhs, Export const& rhs)
         HADESMEM_DETAIL_NOEXCEPT
     {
-        return lhs.GetOrdinal() <= rhs.GetOrdinal();
+        return lhs.GetProcedureNumber() <= rhs.GetProcedureNumber();
     }
 
     inline bool operator>(Export const& lhs, Export const& rhs)
         HADESMEM_DETAIL_NOEXCEPT
     {
-        return lhs.GetOrdinal() > rhs.GetOrdinal();
+        return lhs.GetProcedureNumber() > rhs.GetProcedureNumber();
     }
 
     inline bool operator>=(Export const& lhs, Export const& rhs)
         HADESMEM_DETAIL_NOEXCEPT
     {
-        return lhs.GetOrdinal() >= rhs.GetOrdinal();
+        return lhs.GetProcedureNumber() >= rhs.GetProcedureNumber();
     }
 
     inline std::ostream& operator<<(std::ostream& lhs, Export const& rhs)
     {
         std::locale const old = lhs.imbue(std::locale::classic());
-        lhs << rhs.GetOrdinal();
+        lhs << rhs.GetProcedureNumber();
         lhs.imbue(old);
         return lhs;
     }
@@ -331,7 +349,7 @@ namespace hadesmem
     inline std::wostream& operator<<(std::wostream& lhs, Export const& rhs)
     {
         std::locale const old = lhs.imbue(std::locale::classic());
-        lhs << rhs.GetOrdinal();
+        lhs << rhs.GetProcedureNumber();
         lhs.imbue(old);
         return lhs;
     }

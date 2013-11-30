@@ -65,6 +65,8 @@
 // TODO: Clean up XML related code and remove redundant code, add/remove 
 // checking where appropriate, etc.
 
+// TODO: Add support for RVA as start address, not just name.
+
 namespace hadesmem
 {
 

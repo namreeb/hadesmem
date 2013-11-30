@@ -63,6 +63,8 @@ namespace hadesmem
                     address, 
                     ProtectGuardType::kRead);
 
+                // TODO: Don't query the same region inforamtion twice, 
+                // ProtectGuard already requires region information.
                 MEMORY_BASIC_INFORMATION const mbi = detail::Query(
                     process, 
                     address);

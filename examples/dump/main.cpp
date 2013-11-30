@@ -386,7 +386,10 @@ namespace
             }
             else if (e.ByOrdinal())
             {
-                std::wcout << "\t\tOrdinal: " << e.GetOrdinal() << "\n";
+                std::wcout << "\t\tProcedureNumber: " 
+                    << e.GetProcedureNumber() << "\n";
+                std::wcout << "\t\tOrdinalNumber: " 
+                    << e.GetOrdinalNumber() << "\n";
             }
             else
             {
@@ -780,6 +783,13 @@ namespace
                     && *last_error_ptr == ERROR_SHARING_VIOLATION)
                 {
                     std::wcout << "\nSharing violation.\n";
+                    continue;
+                }
+                
+                if (last_error_ptr
+                    && *last_error_ptr == ERROR_ACCESS_DENIED)
+                {
+                    std::wcout << "\nAccess denied.\n";
                     continue;
                 }
 

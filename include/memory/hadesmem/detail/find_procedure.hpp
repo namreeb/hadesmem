@@ -72,7 +72,7 @@ namespace hadesmem
             auto const pred =
                 [&](Export const& e)
             {
-                return e.ByOrdinal() && e.GetOrdinal() == ordinal;
+                return e.ByOrdinal() && e.GetProcedureNumber() == ordinal;
             };
             return GetProcAddressInternalFromPred(process, module, pred);
         }
