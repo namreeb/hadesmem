@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/concept_check.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/thread.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
@@ -17,10 +16,16 @@
 
 void TestThreadList()
 {
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ThreadList::
-        iterator>));
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ThreadList::
-        const_iterator>));
+    using ThreadListIterCat =
+        std::iterator_traits<hadesmem::ThreadList::iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        ThreadListIterCat>::value);
+    using ThreadListConstIterCat =
+        std::iterator_traits<hadesmem::ThreadList::const_iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        ThreadListConstIterCat>::value);
 
     boost::thread second_thread([]() { ::Sleep(INFINITE); });
     second_thread.detach();

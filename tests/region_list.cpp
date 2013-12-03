@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/concept_check.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -17,10 +16,16 @@
 
 void TestRegionList()
 {
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::RegionList::
-        iterator>));
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::RegionList::
-        const_iterator>));
+    using RegionListIterCat =
+        std::iterator_traits<hadesmem::RegionList::iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        RegionListIterCat>::value);
+    using RegionListConstIterCat =
+        std::iterator_traits<hadesmem::RegionList::const_iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        RegionListConstIterCat>::value);
 
     hadesmem::Process const process(::GetCurrentProcessId());
 

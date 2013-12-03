@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/concept_check.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -16,9 +15,16 @@
 
 void TestModuleList()
 {
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ModuleList::iterator>));
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ModuleList::
-        const_iterator>));
+    using ModuleListIterCat =
+        std::iterator_traits<hadesmem::ModuleList::iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag, 
+        ModuleListIterCat>::value);
+    using ModuleListConstIterCat =
+        std::iterator_traits<hadesmem::ModuleList::const_iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        ModuleListConstIterCat>::value);
 
     hadesmem::Process const process(::GetCurrentProcessId());
 

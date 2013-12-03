@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/concept_check.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -15,10 +14,16 @@
 
 void TestProcessList()
 {
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessList::
-        iterator>));
-    BOOST_CONCEPT_ASSERT((boost::InputIterator<hadesmem::ProcessList::
-        const_iterator>));
+    using ProcessListIterCat =
+        std::iterator_traits<hadesmem::ProcessList::iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        ProcessListIterCat>::value);
+    using ProcessListConstIterCat =
+        std::iterator_traits<hadesmem::ProcessList::const_iterator>::
+        iterator_category;
+    HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
+        ProcessListConstIterCat>::value);
 
     hadesmem::ProcessList const process_list_1;
     hadesmem::ProcessList process_list_2(process_list_1);
