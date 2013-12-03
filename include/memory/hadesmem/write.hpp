@@ -21,9 +21,8 @@ namespace hadesmem
 
     // TODO: Write overloads which take iterators (and don't assume that a 
     // contiguous block of memory has been passed in?).
-
-    // TODO: Support custom string, vector, etc types. Also support custom 
-    // allocators, traits, etc.
+    
+    // TODO: Fix API consistency (taking ranges vs a start and a size).
 
     template <typename T>
     inline void Write(Process const& process, PVOID address, T const& data)
@@ -90,12 +89,14 @@ namespace hadesmem
         Write(process, address, beg, count);
     }
 
-    // TODO: Support containers with custom traits, allocators, etc.
-    template <typename T>
+    template <
+        typename T, 
+        typename Traits = std::char_traits<T>, 
+        typename Alloc = std::allocator<T>>
     inline void WriteString(
         Process const& process, 
         PVOID address,
-        std::basic_string<T> const& data)
+        std::basic_string<T, Traits, Alloc> const& data)
     {
         HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
 
@@ -122,12 +123,11 @@ namespace hadesmem
         WriteString(process, address, std::basic_string<T>(str));
     }
 
-    // TODO: Support containers with custom traits, allocators, etc.
-    template <typename T>
+    template <typename T, typename Alloc = std::allocator<T>>
     inline void WriteVector(
         Process const& process, 
         PVOID address,
-        std::vector<T> const& data)
+        std::vector<T, Alloc> const& data)
     {
         HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
 

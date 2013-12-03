@@ -23,9 +23,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/protect.hpp>
 
-// TODO: Support custom string, vector, etc types. Also support custom 
-// allocators, traits, etc.
-
 namespace hadesmem
 {
 
@@ -68,8 +65,8 @@ namespace hadesmem
         std::copy(&data[0], &data[0] + N, out);
     }
 
-    template <typename T>
-    inline std::vector<T> ReadVector(
+    template <typename T, typename Alloc = std::allocator<T>>
+    inline std::vector<T, Alloc> ReadVector(
         Process const& process,
         PVOID address,
         std::size_t count);
@@ -166,29 +163,34 @@ namespace hadesmem
         return ReadStringEx<T>(process, address, data, chunk_len);
     }
 
-    // TODO: Support containers with custom traits, allocators, etc.
-    template <typename T>
-    std::basic_string<T> ReadStringEx(
+    template <
+        typename T,
+        typename Traits = std::char_traits<T>,
+        typename Alloc = std::allocator<T>>
+    std::basic_string<T, Traits, Alloc> ReadStringEx(
         Process const& process,
         PVOID address,
         std::size_t chunk_len)
     {
-        std::basic_string<T> data;
+        std::basic_string<T, Traits, Alloc> data;
         ReadStringEx<T>(process, address, std::back_inserter(data), chunk_len);
         return data;
     }
 
-    // TODO: Support containers with custom traits, allocators, etc.
-    template <typename T>
-    std::basic_string<T> ReadString(Process const& process, PVOID address)
+    template <
+        typename T,
+        typename Traits = std::char_traits<T>,
+        typename Alloc = std::allocator<T>>
+    std::basic_string<T, Traits, Alloc> ReadString(
+        Process const& process, 
+        PVOID address)
     {
         std::size_t const chunk_len = 128;
         return ReadStringEx<T>(process, address, chunk_len);
     }
 
-    // TODO: Support containers with custom traits, allocators, etc.
-    template <typename T>
-    inline std::vector<T> ReadVector(
+    template <typename T, typename Alloc>
+    inline std::vector<T, Alloc> ReadVector(
         Process const& process,
         PVOID address,
         std::size_t count)
@@ -201,7 +203,7 @@ namespace hadesmem
         HADESMEM_DETAIL_ASSERT(address != nullptr);
         HADESMEM_DETAIL_ASSERT(count != 0);
 
-        std::vector<T> data(count);
+        std::vector<T, Alloc> data(count);
         detail::ReadImpl(
             process, 
             address, 

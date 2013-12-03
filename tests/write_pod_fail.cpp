@@ -7,7 +7,7 @@
 
 struct non_pod_type
 {
-    virtual void foo() { }
+    virtual ~non_pod_type() {}
 };
 
 void TestWritePodFail()

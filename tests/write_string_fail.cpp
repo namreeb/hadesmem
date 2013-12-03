@@ -17,5 +17,5 @@ void TestWriteStringFail()
 
 int main()
 {
-    TestWritePodFail();
+    TestWriteStringFail();
 }
