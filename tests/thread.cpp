@@ -9,12 +9,47 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/thread.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/thread_helpers.hpp>
+
+// TODO: Clean up this mess and write a proper scope exit wrapper for 
+// use in the library.
+template <typename Func>
+class ScopeExit
+{
+public:
+    explicit ScopeExit(Func func)
+    : func_(func)
+    { }
+
+    ScopeExit(ScopeExit const&) = delete;
+
+    ScopeExit& operator=(ScopeExit const&) = delete;
+
+    ~ScopeExit()
+    {
+        func_();
+    }
+
+private:
+    Func func_;
+};
+
+
+DWORD WINAPI WaitFunc(LPVOID param)
+{
+    auto const quit_event_ =
+        static_cast<hadesmem::detail::SmartHandle*>(param);
+    BOOST_TEST_EQ(::WaitForSingleObject(
+        quit_event_->GetHandle(),
+        INFINITE),
+        WAIT_OBJECT_0);
+    return 0UL;
+}
 
 void TestThisThread()
 {
@@ -50,17 +85,28 @@ void TestThisThread()
         TRUE,
         FALSE,
         nullptr));
-    boost::thread other(
-        [&]()
+    DWORD other_id = 0;
+    hadesmem::detail::SmartHandle wait_thread(::CreateThread(
+        nullptr, 
+        0, 
+        &WaitFunc, 
+        &quit_event, 
+        0, 
+        &other_id));
+    auto const cleanup_thread_func = 
+        [&] ()
     {
+
+        BOOST_TEST_NE(::SetEvent(quit_event.GetHandle()), 0);
         BOOST_TEST_EQ(::WaitForSingleObject(
-            quit_event.GetHandle(),
+            wait_thread.GetHandle(),
             INFINITE),
             WAIT_OBJECT_0);
-    });
-    try
+    };
     {
-        DWORD const other_id = ::GetThreadId(other.native_handle());
+        ScopeExit<decltype(cleanup_thread_func)> cleanup_thread(
+            cleanup_thread_func);
+
         hadesmem::Thread const other_thread(other_id);
         BOOST_TEST_EQ(hadesmem::SuspendThread(other_thread), 0UL);
         BOOST_TEST_EQ(hadesmem::SuspendThread(other_thread), 1UL);
@@ -72,15 +118,15 @@ void TestThisThread()
                 other_thread.GetId());
 
             CONTEXT const full_context = hadesmem::GetThreadContext(
-                other_thread, 
+                other_thread,
                 CONTEXT_FULL);
             CONTEXT const all_context = hadesmem::GetThreadContext(
-                other_thread, 
+                other_thread,
                 CONTEXT_ALL);
             hadesmem::SetThreadContext(other_thread, full_context);
             hadesmem::SetThreadContext(other_thread, all_context);
             BOOST_TEST_THROWS(hadesmem::GetThreadContext(
-                thread, 
+                thread,
                 CONTEXT_FULL), hadesmem::Error);
         }
 
@@ -88,15 +134,6 @@ void TestThisThread()
             hadesmem::SuspendedProcess const suspend_process(
                 ::GetCurrentProcessId());
         }
-
-        BOOST_TEST_NE(::SetEvent(quit_event.GetHandle()), 0);
-        other.join();
-    }
-    catch (std::exception const& /*e*/)
-    {
-        BOOST_TEST_NE(::SetEvent(quit_event.GetHandle()), 0);
-        other.join();
-        throw;
     }
 }
 

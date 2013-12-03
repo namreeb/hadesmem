@@ -64,19 +64,9 @@ run find_pattern.cpp
   ;
   
 run thread.cpp
-  :
-  :
-  :
-    <library>/boost//date_time/<link>static
-    <library>/boost//thread/<link>static
   ;
   
 run thread_list.cpp
-  :
-  :
-  :
-    <library>/boost//date_time/<link>static
-    <library>/boost//thread/<link>static
   ;
   
 run pelib/pe_file.cpp
@@ -95,11 +85,6 @@ run pelib/section_list.cpp
   ;
 
 run pelib/tls_dir.cpp
-  :
-  :
-  :
-    <library>/boost//date_time/<link>static
-    <library>/boost//thread/<link>static
   ;
   
 run pelib/export_dir.cpp

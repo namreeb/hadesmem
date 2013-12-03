@@ -8,7 +8,6 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/thread/tss.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
@@ -21,9 +20,15 @@
 
 void TestTlsDir()
 {
-    // Use threads and TSS to ensure that at least one module has a TLS dir
-    boost::thread_specific_ptr<int> tss_dummy;
-    tss_dummy.reset(new int(1234));
+    // Use TLS to ensure that at least one module has a TLS dir
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+    static thread_local int tls_dummy = 0;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+    static __declspec(thread) int tls_dummy = 0;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+    (void)tls_dummy;
 
     hadesmem::Process const process(::GetCurrentProcessId());
 

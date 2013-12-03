@@ -7,12 +7,18 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/thread.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/thread.hpp>
+
+DWORD WINAPI SleepWrapper(LPVOID /*param*/)
+{
+    ::Sleep(INFINITE);
+    return 0UL;
+}
 
 void TestThreadList()
 {
@@ -27,10 +33,22 @@ void TestThreadList()
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<std::input_iterator_tag,
         ThreadListConstIterCat>::value);
 
-    boost::thread second_thread([]() { ::Sleep(INFINITE); });
-    second_thread.detach();
-    boost::thread third_thread([]() { ::Sleep(INFINITE); });
-    third_thread.detach();
+    {
+        hadesmem::detail::SmartHandle wait_thread_1(::CreateThread(
+            nullptr,
+            0,
+            &SleepWrapper,
+            nullptr,
+            0,
+            nullptr));
+        hadesmem::detail::SmartHandle wait_thread_2(::CreateThread(
+            nullptr,
+            0,
+            &SleepWrapper,
+            nullptr,
+            0,
+            nullptr));
+    }
 
     hadesmem::ThreadList const thread_list_1(::GetCurrentProcessId());
     hadesmem::ThreadList thread_list_2(thread_list_1);
