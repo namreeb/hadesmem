@@ -27,13 +27,6 @@
 #include <hadesmem/process_entry.hpp>
 #include <hadesmem/process_list.hpp>
 
-// TODO: Add support for for passing args, work dir, etc to CreateAndInject.
-// e.g. exe-arg0, exe-arg1, exe-arg2, ..., exe-argN? Or just enforce that 
-// the full command line be the last arg passed in?
-
-// TODO: Abstract away the usage of Boost.ProgramOptions from the main 
-// program logic. 
-
 namespace
 {
 
@@ -68,6 +61,11 @@ namespace
             ("free", "free module")
             ("run", boost::program_options::wvalue<std::wstring>(),
             "target process path (new instance)")
+            ("arg", boost::program_options::wvalue<
+            std::vector<std::wstring>>(),
+            "target process args (use once for each arg)")
+            ("work-dir", boost::program_options::wvalue<std::wstring>(),
+            "target process working directory")
             ;
 
         return opts_desc;
@@ -99,6 +97,54 @@ namespace
         return var_map[name].as<T>();
     }
 
+    DWORD FindProc(std::wstring const& proc_name, bool name_forced)
+    {
+        std::wstring const proc_name_upper =
+            hadesmem::detail::ToUpperOrdinal(proc_name);
+        hadesmem::ProcessList proc_list;
+        if (name_forced)
+        {
+            auto const proc_iter = std::find_if(
+                std::begin(proc_list),
+                std::end(proc_list),
+                [&](hadesmem::ProcessEntry const& proc_entry)
+            {
+                return hadesmem::detail::ToUpperOrdinal(
+                    proc_entry.GetName()) == proc_name_upper;
+            });
+            if (proc_iter == std::end(proc_list))
+            {
+                throw std::runtime_error("Failed to find process.");
+            }
+
+            return proc_iter->GetId();
+        }
+        else
+        {
+            std::vector<hadesmem::ProcessEntry> found_procs;
+            std::copy_if(std::begin(proc_list), std::end(proc_list),
+                std::back_inserter(found_procs),
+                [&](hadesmem::ProcessEntry const& proc_entry)
+            {
+                return hadesmem::detail::ToUpperOrdinal(
+                    proc_entry.GetName()) == proc_name_upper;
+            });
+
+            if (found_procs.empty())
+            {
+                throw std::runtime_error("Failed to find process.");
+            }
+
+            if (found_procs.size() > 1)
+            {
+                throw std::runtime_error("Process name search found multiple "
+                    "matches. Please specify a PID or use --name-forced.");
+            }
+
+            return found_procs.front().GetId();
+        }
+    }
+
 }
 
 int main(int argc, char* /*argv*/[])
@@ -121,8 +167,7 @@ int main(int argc, char* /*argv*/[])
 
         if (!IsOptionSet("module", var_map))
         {
-            std::cerr << "\nError! Module path must be specified.\n";
-            return 1;
+            throw std::runtime_error("Module path must be specified");
         }
 
         bool const has_pid = IsOptionSet("pid", var_map);
@@ -131,15 +176,14 @@ int main(int argc, char* /*argv*/[])
         if ((has_pid && create_proc) || (has_pid && has_name) ||
             (create_proc && has_name))
         {
-            std::cerr << "\nError! A process ID, process name, or "
-                "executable path must be specified, not a combination.\n";
-            return 1;
+            throw std::runtime_error("A process ID, process name, or "
+                "executable path must be specified, not a combination.");
         }
 
         if (!has_pid && !has_name && !create_proc)
         {
-            std::cerr << "\nError! A process ID, process name, or "
-                "executable path must be specified.\n";
+            throw std::runtime_error("A process ID, process name, or "
+                "executable path must be specified.");
         }
 
         bool const inject = IsOptionSet("inject", var_map);
@@ -148,30 +192,27 @@ int main(int argc, char* /*argv*/[])
 
         if (inject && free)
         {
-            std::cerr << "\nError! Please specify inject or free, not "
-                "both.\n";
+            throw std::runtime_error("Please specify inject or free, not "
+                "both.");
         }
 
         if (free && create_proc)
         {
-            std::cerr << "\nError! Modules can only be unloaded from running "
-                "targets.\n";
-            return 1;
+            throw std::runtime_error("Modules can only be unloaded from "
+                "running targets.");
         }
 
         if (!inject && create_proc)
         {
-            std::cerr << "\nError! Exports can only be called without "
+            throw std::runtime_error("Exports can only be called without "
                 "injection on running targets. Did you mean to use "
-                "--inject?\n";
-            return 1;
+                "--inject?");
         }
 
         if (!inject && !free && !call_export)
         {
-            std::cerr << "\nError! Please choose action(s) to perform on the "
-                "process (inject, free, export).\n";
-            return 1;
+            throw std::runtime_error("Please choose action(s) to perform on "
+                "the process (inject, free, export).");
         }
 
         auto const module_path = GetOptionValue<std::wstring>(
@@ -219,52 +260,27 @@ int main(int argc, char* /*argv*/[])
                 auto const proc_name = GetOptionValue<std::wstring>(
                     "name", 
                     var_map);
-                std::wstring const proc_name_upper = 
-                    hadesmem::detail::ToUpperOrdinal(proc_name);
-                hadesmem::ProcessList proc_list;
-                std::vector<hadesmem::ProcessEntry> found_procs;
-                std::copy_if(std::begin(proc_list), std::end(proc_list),
-                    std::back_inserter(found_procs),
-                    [&](hadesmem::ProcessEntry const& proc_entry)
-                {
-                    return hadesmem::detail::ToUpperOrdinal(
-                        proc_entry.GetName()) == proc_name_upper;
-                });
-
-                if (found_procs.empty())
-                {
-                    std::wcerr << "\nError! Failed to find process \"" 
-                        << proc_name << "\".\n";
-                    return 1;
-                }
-
-                // TODO: Don't enumerate all procs (above) if we are only 
-                // interested in the first match.
                 bool const name_forced = IsOptionSet("name-forced", var_map);
-                if (found_procs.size() > 1 && !name_forced)
+                
+                // Guard against potential PID reuse race condition. Unlikely 
+                // to ever happen in practice, but better safe than sorry.
+                DWORD proc_pid = 0;
+                DWORD proc_pid_2 = 0;
+                DWORD retries = 3;
+                do
                 {
-                    std::cerr << "\nError! Process name search found "
-                        "multiple matches.";
-                    for (auto const& proc_entry : found_procs)
-                    {
-                        std::stringstream conv;
-                        conv.imbue(std::locale::classic());
-                        conv << proc_entry.GetId();
-                        std::cerr << "\nPID = " << conv.str() << ".";
-                    }
-                    std::cerr << "\n";
-                    return 1;
-                }
+                    proc_pid = FindProc(proc_name, name_forced);
+                    process = std::make_unique<hadesmem::Process>(proc_pid);
 
-                // WARNING: There is a potential race condition here where 
-                // the process we're interested in quits and the PID is 
-                // reused for a different process. 
-                // TODO: To solve the race, we should perform a second 
-                // enumeration after opening a handle on the result of the 
-                // first enumeration, and confirm that the result is 
-                // consistent (otherwise retry).
-                process = std::make_unique<hadesmem::Process>(
-                    found_procs.front().GetId());
+                    proc_pid_2 = FindProc(proc_name, name_forced);
+                    hadesmem::Process process_2(proc_pid_2);
+                } while (proc_pid != proc_pid_2 && retries--);
+
+                if (proc_pid != proc_pid_2)
+                {
+                    throw std::runtime_error("Could not get handle to target "
+                        "process (PID reuse race).");
+                }
             }
 
             HMODULE module = nullptr;
@@ -315,19 +331,24 @@ int main(int argc, char* /*argv*/[])
         }
         else
         {
-            std::vector<std::wstring> create_args;
             auto const exe_path = GetOptionValue<std::wstring>(
                 "run", 
                 var_map);
+            auto const exe_args = IsOptionSet("arg", var_map)
+                ? GetOptionValue<std::vector<std::wstring>>("arg", var_map)
+                : std::vector<std::wstring>();
             auto const export_name = IsOptionSet("export", var_map) 
                 ? GetOptionValue<std::string>("export", var_map) 
                 : "";
+            auto const work_dir = IsOptionSet("work-dir", var_map)
+                ? GetOptionValue<std::wstring>("work-dir", var_map)
+                : L"";
             hadesmem::CreateAndInjectData const inject_data =
                 hadesmem::CreateAndInject(
                 exe_path,
-                L"",
-                std::begin(create_args),
-                std::end(create_args),
+                work_dir,
+                std::begin(exe_args),
+                std::end(exe_args),
                 module_path,
                 export_name,
                 flags);

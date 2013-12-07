@@ -179,7 +179,7 @@ void TestWriteString()
     };
     Foo foo = { "FooBar" };
     char const* const test_replacement_beg = "Bar";
-    hadesmem::WriteString(
+    hadesmem::Write(
         process,
         &foo.str,
         test_replacement_beg,

@@ -21,7 +21,7 @@
 // TODO: Support cross architecture process manipulation (opening an x86 
 // WoW64 process as native x64). Includes removing dependency of non-ntdll 
 // in injected code and DLL loader, and adding cross architecture support 
-// for pelib.
+// for pelib, thread, etc.
 
 namespace hadesmem
 {

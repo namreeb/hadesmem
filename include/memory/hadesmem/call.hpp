@@ -26,6 +26,7 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -35,25 +36,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: Cross-session injection (also cross-winsta and cross-desktop 
-// injection). Easiest solution is to use a broker process via a service 
-// and CreateProcessAsUser. Potentially 'better' solution would be to use 
-// NtCreateThread/RtlCreateUserThread.
-
-// TODO: Support using NtCreateThread/RtlCreateUserThread. Does not create an 
-// activation context, so it will need special work done to get cases like 
-// .NET working.
-
-// TODO: Support injected code using only NT APIs (for native processes such 
-// as smss.exe etc).
-
-// TODO: Support injecting into uninitialized processes without forcing a 
-// LdrInitializeThunk call, as this may cause execution of code which we 
-// want to hook (among other things)!
-
-// TODO: Improve safety via EH. Both x86 and x64.
-
-// TODO: Clean up ASM code and code generation.
+// TODO: Improve safety via EH. Both x86 and x64 (though they will require 
+// different techniques).
 
 // TODO: Add support for more 'complex' argument and return types, including 
 // struct/class/union, long double, SIMD types, etc. A good reference for 
@@ -69,10 +53,6 @@
 // generated at compile-time with FASM and stored in a binary 'blob' 
 // (embedded in the source). This will remove the dependency on AsmJit.
 
-// TODO: Clean up x64 assembly related to the stack. Important for EH.
-
-// TODO: Wow64 bypass.
-
 // TODO: Split this mess up into multiple headers where possible.
 
 // TODO: Add a 'thumbprint' to all memory allocations so the blocks can be 
@@ -80,11 +60,14 @@
 
 // TODO: Consolidate memory allocations where possible.
 
+// TODO: Add support for __vectorcall calling convention.
+
+// TODO: Add support for varargs functions.
+
 namespace hadesmem
 {
 
-    using FnPtr = void(*)();
-    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FnPtr) == sizeof(void*));
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void(*)()) == sizeof(void*));
 
     enum class CallConv
     {
@@ -342,7 +325,6 @@ namespace hadesmem
     class CallArg
     {
     public:
-        // TODO: Make this constexpr.
         template <typename T>
         explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT
             : arg_(),
@@ -804,7 +786,7 @@ namespace hadesmem
                     ++args_full_beg, 
                     ++i)
                 {
-                    FnPtr const address = *addresses_beg;
+                    void* const address = *addresses_beg;
                     CallConv const call_conv = *call_convs_beg;
                     auto const& args = *args_full_beg;
                     std::size_t const num_args = args.size();
@@ -953,7 +935,7 @@ namespace hadesmem
                     ++args_full_beg, 
                     ++i)
                 {
-                    FnPtr const address = *addresses_beg;
+                    void* const address = *addresses_beg;
                     auto const& args = *args_full_beg;
                     std::size_t const num_args = args.size();
 
@@ -1164,7 +1146,8 @@ namespace hadesmem
 
         Allocator const code_remote(detail::GenerateCallCode(
             process,
-            addresses_beg, addresses_end,
+            addresses_beg, 
+            addresses_end,
             call_convs_beg,
             args_full_beg,
             return_values_remote.GetBase()));
@@ -1203,12 +1186,12 @@ namespace hadesmem
     template <typename ArgsForwardIterator>
     inline CallResultRaw Call(
         Process const& process,
-        FnPtr address,
+        void* address,
         CallConv call_conv,
         ArgsForwardIterator args_beg,
         ArgsForwardIterator args_end)
     {
-        std::vector<FnPtr> addresses;
+        std::vector<void*> addresses;
         addresses.push_back(address);
         std::vector<CallConv> call_convs;
         call_convs.push_back(call_conv);
@@ -1228,251 +1211,12 @@ namespace hadesmem
     namespace detail
     {
 
-        // TODO: Add support for __vectorcall.
-        
-        // TODO: Test all combinations of calling convention, pointer vs 
-        // non-ptr, etc. in Call test.
-        
-        // TODO: Add proper checking for when different calling conventions 
-        // are available.
-        // __cdecl - Always.
-        // __clrcall - _M_CEE defined.
-        // __fastcall - _M_IX86 defined and _M_CEE not defined.
-        // __stdcall - _M_IX86 defined.
-        // __thiscall - _M_IX86 defined. Member functions only.
-        // __vectorcall - VC 2013 or newer. _M_CEE must not be defined. 
-        // Available for _M_X64. Available for _M_IX86 when _M_IX86_FP is at 
-        // least 2.
-
-        // TODO: Add support to traits for varargs functions (call conv is 
-        // ignored on varargs).
-
-        // TODO: Move this back to its own header now that it has exploded in 
-        // size and complexity (and will do so further).
-
-        template <typename FuncT>
-        struct FuncResult;
-
-        template <typename C, typename R, typename... Args>
-        struct FuncResult<R(C::*)(Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename C, typename R, typename... Args>
-        struct FuncResult<R(C::*)(Args...)const>
-        {
-            using type = R;
-        };
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-
-        template <typename R, typename... Args>
-        struct FuncResult<R(*)(Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R(Args...)>
-        {
-            using type = R;
-        };
-
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-
-        template <typename R, typename... Args>
-        struct FuncResult<R(__cdecl*)(Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R __cdecl (Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R(__stdcall*)(Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R __stdcall (Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R(__fastcall*)(Args...)>
-        {
-            using type = R;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncResult<R __fastcall (Args...)>
-        {
-            using type = R;
-        };
-
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-        template <typename FuncT>
-        using FuncResultT = typename FuncResult<FuncT>::type;
-
-        template <typename FuncT>
-        struct FuncArity;
-
-        template <typename C, typename R, typename... Args>
-        struct FuncArity<R(C::*)(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args) + 1;
-        };
-
-        template <typename C, typename R, typename... Args>
-        struct FuncArity<R(C::*)(Args...)const>
-        {
-            static std::size_t const value = sizeof...(Args)+1;
-        };
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-
-        template <typename R, typename... Args>
-        struct FuncArity<R(*)(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-
-        template <typename R, typename... Args>
-        struct FuncArity<R(__cdecl*)(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R __cdecl (Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R(__stdcall*)(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R __stdcall (Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R(__fastcall*)(Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArity<R __fastcall (Args...)>
-        {
-            static std::size_t const value = sizeof...(Args);
-        };
-
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-        template <typename FuncT>
-        struct FuncArgs;
-
-        template <typename C, typename R, typename... Args>
-        struct FuncArgs<R(C::*)(Args...)>
-        {
-            using type = std::tuple<C*, Args...>;
-        };
-
-        template <typename C, typename R, typename... Args>
-        struct FuncArgs<R(C::*)(Args...)const>
-        {
-            using type = std::tuple<C const*, Args...>;
-        };
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R(*)(Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R(Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R(__cdecl*)(Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R __cdecl (Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R(__stdcall*)(Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R __stdcall (Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R(__fastcall*)(Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-        template <typename R, typename... Args>
-        struct FuncArgs<R __fastcall (Args...)>
-        {
-            using type = std::tuple<Args...>;
-        };
-
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-        template <typename FuncT>
-        using FuncArgsT = typename FuncArgs<FuncT>::type;
-
-        template <typename FuncT, 
+        template <
+            typename FuncT, 
             std::int32_t N, 
             typename T, 
-            typename OutputIterator>
+            typename OutputIterator, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
         inline void AddCallArg(OutputIterator call_args, T&& arg)
         {
             using RealT = typename std::tuple_element<N, FuncArgsT<FuncT>>::type;
@@ -1486,8 +1230,12 @@ namespace hadesmem
                 std::forward<T>(arg)));
         }
 
-        template <typename FuncT, std::int32_t N, typename OutputIterator>
-        void BuildCallArgs(OutputIterator /*call_args*/) 
+        template <
+            typename FuncT, 
+            std::int32_t N, 
+            typename OutputIterator, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+        inline void BuildCallArgs(OutputIterator /*call_args*/)
             HADESMEM_DETAIL_NOEXCEPT
         {
             return;
@@ -1497,7 +1245,8 @@ namespace hadesmem
             std::int32_t N, 
             typename T, 
             typename OutputIterator,
-            typename... Args>
+            typename... Args, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
         inline void BuildCallArgs(
             OutputIterator call_args, 
             T&& arg, 
@@ -1511,17 +1260,13 @@ namespace hadesmem
 
     }
 
-    // TODO: Make FnPtr a class template which handles all the various 
-    // pointer types that we're interested in, rather than forcing 
-    // a reinterpret_cast (or worse).
-    // TODO: Also provide an overload that can deduce FuncT from the 
-    // function pointer type of the function pointer which is passed in, 
-    // which would be useful for type safety and ensuring function prototypes 
-    // match.
-    template <typename FuncT, typename... Args>
-    CallResult<detail::FuncResultT<FuncT>> Call(
+    template <
+        typename FuncT, 
+        typename... Args, 
+        int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+    inline CallResult<detail::FuncResultT<FuncT>> Call(
         Process const& process, 
-        FnPtr address, 
+        void* address, 
         CallConv call_conv,
         Args&&... args)
     {
@@ -1542,6 +1287,65 @@ namespace hadesmem
             std::end(call_args));
         using ResultT = detail::FuncResultT<FuncT>;
         return detail::CallResultRawToCallResult<ResultT>(ret);
+    }
+
+    namespace detail
+    {
+
+        template <
+            typename FuncT, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+        inline void* FuncToPointerImpl(FuncT func, std::true_type)
+        {
+            using FuncPtrT = std::add_pointer_t<FuncT>;
+            auto const func_ptr = static_cast<FuncPtrT>(func);
+            return detail::UnionCastUnchecked<void*>(func_ptr);
+        }
+
+        template <
+            typename FuncT, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+        inline void* FuncToPointerImpl(FuncT func, std::false_type)
+        {
+            auto const func_ptr = static_cast<FuncT>(func);
+            return detail::UnionCastUnchecked<void*>(func_ptr);
+        }
+
+        template <
+            typename FuncT, 
+            int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+        inline void* FuncToPointer(FuncT func)
+        {
+            return FuncToPointerImpl(func, std::is_function<FuncT>());
+        }
+
+    }
+
+    template <
+        typename FuncT, 
+        typename... Args, 
+        int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+    inline CallResult<detail::FuncResultT<FuncT>> Call(
+        Process const& process,
+        FuncT address,
+        CallConv call_conv,
+        Args&&... args)
+    {
+        // Note: Using detail::FuncArity instead of std::is_function because 
+        // libstdc++ does not provide support for custom calling conventions 
+        // in its traits.
+        // TODO: Write a custom is_function to avoid having to use the hack 
+        // described above.
+        HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value ||
+            std::is_member_function_pointer<FuncT>::value ||
+            (std::is_pointer<FuncT>::value &&
+            std::is_function<std::remove_pointer_t<FuncT>>::value));
+        
+        return Call<FuncT>(
+            process, 
+            detail::FuncToPointer(address),
+            call_conv, 
+            std::forward<Args>(args)...);
     }
 
     class MultiCall
@@ -1580,7 +1384,7 @@ namespace hadesmem
 #endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
         template <typename FuncT, typename... Args>
-        void Add(FnPtr address, CallConv call_conv, Args&&... args)
+        inline void Add(void* address, CallConv call_conv, Args&&... args)
         {
             HADESMEM_DETAIL_STATIC_ASSERT(detail::FuncArity<FuncT>::value ==
                 sizeof...(args));
@@ -1589,11 +1393,25 @@ namespace hadesmem
             call_args.reserve(sizeof...(args));
             detail::BuildCallArgs<FuncT, 0>(
                 std::back_inserter(call_args), 
-                args...);
+                std::forward<Args>(args)...);
 
             addresses_.push_back(address);
             call_convs_.push_back(call_conv);
             args_.push_back(call_args);
+        }
+
+        template <typename FuncT, typename... Args>
+        inline void Add(FuncT address, CallConv call_conv, Args&&... args)
+        {
+            HADESMEM_DETAIL_STATIC_ASSERT(std::is_function<FuncT>::value ||
+                std::is_member_function_pointer<FuncT>::value ||
+                (std::is_pointer<FuncT>::value &&
+                std::is_function<std::remove_pointer_t<FuncT>>::value));
+
+            return Add<FuncT>(
+                detail::FuncToPointer(address),
+                call_conv,
+                std::forward<Args>(args)...);
         }
 
         template <typename OutputIterator>
@@ -1618,7 +1436,7 @@ namespace hadesmem
 
     private:
         Process const* process_;
-        std::vector<FnPtr> addresses_;
+        std::vector<void*> addresses_;
         std::vector<CallConv> call_convs_;
         std::vector<std::vector<CallArg>> args_;
     };

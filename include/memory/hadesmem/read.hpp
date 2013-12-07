@@ -198,7 +198,7 @@ namespace hadesmem
         HADESMEM_DETAIL_STATIC_ASSERT(
             detail::IsTriviallyCopyable<T>::value);
         HADESMEM_DETAIL_STATIC_ASSERT(
-            detail::IsDefaultConstructible<T>::value);
+            std::is_default_constructible<T>::value);
 
         HADESMEM_DETAIL_ASSERT(address != nullptr);
         HADESMEM_DETAIL_ASSERT(count != 0);
@@ -226,7 +226,7 @@ namespace hadesmem
             >::value);
         HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
         HADESMEM_DETAIL_STATIC_ASSERT(
-            detail::IsDefaultConstructible<T>::value);
+            std::is_default_constructible<T>::value);
 
         HADESMEM_DETAIL_ASSERT(address != nullptr);
         HADESMEM_DETAIL_ASSERT(count != 0);

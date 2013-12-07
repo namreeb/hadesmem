@@ -32,29 +32,10 @@
 
 // TODO: .NET injection (without DLL dependency if possible).
 
-// TODO: Cross-session injection (also cross-winsta and cross-desktop 
-// injection). Easiest solution is to use a broker process via a service 
-// and CreateProcessAsUser. Potentially 'better' solution would be to use 
-// NtCreateThread/RtlCreateUserThread.
-
-// TODO: Support injection into CSRSS. CreateRemoteThread can't be used on 
-// CSRSS because when the thread is initialized it tries to notify CSRSS os 
-// the thread creation and gets confused. Potential workaround is to use 
-// NtCreateThread/RtlCreateUserThread.
-
-// TODO: Support using NtCreateThread/RtlCreateUserThread. Does not create an 
-// activation context, so it will need special work done to get cases like 
-// .NET working.
-
 // TODO: WoW64 process native DLL injection.
-
-// TODO: Support injection using only NT APIs (for smss.exe etc).
 
 // TODO: IAT injection (to allow execution of code before Dllmain of other 
 // modules are executed). Include support for .NET target processes.
-
-// TODO: Support injection into unitialized processes, native processes, 
-// CSRSS, etc.
 
 // TODO: Add a way to easily resume targets created with the kKeepSuspended 
 // flag.
@@ -63,9 +44,6 @@
 // easily identified in a debugger.
 
 // TODO: Consolidate memory allocations where possible.
-
-// TODO: Injected code should restrict itself to the NT API only where 
-// possible.
 
 namespace hadesmem
 {
@@ -151,9 +129,9 @@ namespace hadesmem
 
         HADESMEM_DETAIL_TRACE_A("Calling LoadLibraryExW.");
 
-        auto const load_library_ret = Call<decltype(LoadLibraryExW)>(
+        auto const load_library_ret = Call(
             process,
-            reinterpret_cast<FnPtr>(load_library),
+            reinterpret_cast<decltype(&LoadLibraryExW)>(load_library),
             CallConv::kWinApi,
             static_cast<LPCWSTR>(lib_file_remote.GetBase()),
             nullptr,
@@ -176,9 +154,9 @@ namespace hadesmem
             kernel32_mod,
             "FreeLibrary");
 
-        auto const free_library_ret = Call<decltype(&FreeLibrary)>(
+        auto const free_library_ret = Call(
             process,
-            reinterpret_cast<FnPtr>(free_library),
+            reinterpret_cast<decltype(&FreeLibrary)>(free_library),
             CallConv::kWinApi,
             module);
         if (!free_library_ret.GetReturnValue())
@@ -206,9 +184,9 @@ namespace hadesmem
             module_remote, 
             export_name);
 
-        return Call<DWORD_PTR(*)()>(
+        return Call(
             process, 
-            reinterpret_cast<FnPtr>(export_ptr),
+            reinterpret_cast<DWORD_PTR(*)()>(export_ptr),
             CallConv::kDefault);
     }
 

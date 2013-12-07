@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <locale>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -17,6 +19,20 @@ namespace hadesmem
 
     namespace detail
     {
+
+        // String must be hex.
+        inline void* HexStrToPtr(std::wstring const& str)
+        {
+            std::wstringstream ss(str);
+            ss.imbue(std::locale::classic());
+            DWORD_PTR ptr = 0;
+            if (!(ss >> std::hex >> ptr))
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("String to pointer conversion failed."));
+            }
+            return reinterpret_cast<void*>(ptr);
+        }
 
         inline std::string WideCharToMultiByte(std::wstring const& in)
         {

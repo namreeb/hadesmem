@@ -11,10 +11,6 @@
 // TODO: Implement same interface as std::optional<T> to make switching later 
 // easier.
 
-// TODO: Add tests.
-
-// TODO: Add constexpr support. (http://bit.ly/U7lSYy)
-
 namespace hadesmem
 {
 
@@ -23,6 +19,7 @@ namespace hadesmem
 
         // WARNING: T must have no-throw move, no-throw move assignment and 
         // no-throw destruction.
+        // TODO: static_assert the preconditions above.
         template <typename T>
         class Optional
         {
@@ -39,7 +36,6 @@ namespace hadesmem
                 Construct(t);
             }
 
-            // TODO: Conditional noexcept.
             explicit Optional(T&& t)
                 : t_(),
                 valid_(false)
@@ -62,8 +58,7 @@ namespace hadesmem
                 return *this;
             }
 
-            // TODO: Conditional noexcept.
-            Optional(Optional&& other)
+            Optional(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
                 : t_(),
                 valid_(false)
             {
@@ -71,8 +66,7 @@ namespace hadesmem
                 other.valid_ = false;
             }
 
-            // TODO: Conditional noexcept.
-            Optional& operator=(Optional&& other)
+            Optional& operator=(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
             {
                 Destroy();
                 Construct(std::move(other.Get()));
@@ -101,8 +95,6 @@ namespace hadesmem
             {
                 Destroy();
             }
-
-            // TODO: Emplacement support. (Including default construction of T.)
 
             explicit operator bool() const HADESMEM_DETAIL_NOEXCEPT
             {
@@ -174,8 +166,6 @@ namespace hadesmem
             std::aligned_storage_t<sizeof(T), std::alignment_of<T>::value> t_;
             bool valid_;
         };
-
-        // TODO: Add conditional noexcept to operator overloads.
 
         template <typename T>
         inline bool operator==(Optional<T> const& lhs, Optional<T> const& rhs)

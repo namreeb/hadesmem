@@ -622,13 +622,13 @@ namespace
         }
     }
 
-    // TODO: Cleanup.
     void DumpFile(std::wstring const& path)
     {
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
         std::ifstream file(path, std::ios::binary | std::ios::ate);
 #else // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-        // TODO: Fix this for compilers other than MSVC and ICC.
+        // libstdc++ doesn't support wide character overloads for ifstream's 
+        // construtor. :(
         std::ifstream file(
             hadesmem::detail::WideCharToMultiByte(path),
             std::ios::binary | std::ios::ate);
@@ -640,7 +640,7 @@ namespace
         }
 
         std::streampos const size = file.tellg();
-        if (!size || size < 0)
+        if (size <= 0)
         {
             std::wcout << "\nEmpty or invalid file.\n";
             return;
@@ -675,7 +675,6 @@ namespace
             return;
         }
 
-        // TODO: Fix all the unsafe integer downcasting.
         std::vector<char> buf(static_cast<std::size_t>(size));
 
         if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
@@ -711,22 +710,14 @@ namespace
         DumpImports(process, pe_file);
     }
 
-    // Doing directory recursion 'manually' because 
-    // recursive_directory_iterator throws on increment, even when you 
-    // construct it as no-throw.
     void DumpDir(std::wstring const& path)
     {
         std::wcout << "\nEntering dir: \"" << path << "\".\n";
 
-        // TODO: Directory enumeration API (custom iterator?).
-
         std::wstring path_real(path);
         if (path_real.back() == L'\\')
         {
-            // libstdc++ 4.6 does not have pop_back for basic_string.
-            // TODO: Fix this once targeting a Clang build with a newer 
-            // standard library implementation
-            path_real.erase(path_real.size() - 1);
+            path_real.pop_back();
         }
 
         WIN32_FIND_DATA find_data;

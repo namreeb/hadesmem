@@ -31,7 +31,7 @@ namespace hadesmem
         template <typename Pred>
         inline FARPROC GetProcAddressInternalFromPred(
             Process const& process,
-            HMODULE const& module,
+            HMODULE module,
             Pred pred)
         {
             HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));

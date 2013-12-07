@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <vector>
-#include <sstream>
 #include <algorithm>
+#include <vector>
+#include <set>
+#include <sstream>
 
 #include <windows.h>
 #include <winnt.h>
@@ -152,28 +153,62 @@ namespace hadesmem
         Thread thread_;
     };
 
-    // TODO: Do multiple passes to ensure no threads are missed. Currently 
-    // this code suffers from a race condition whereby new threads could be 
-    // created after we take the snapshot, so they would be missed.
-    // TODO: Fix this code for the case where a thread in the snapshot has 
-    // terminated by the time we get around to trying to suspend it. Should 
-    // errors just be swallowed? We could probably get away with that as long 
-    // as we fix the above todo and just do several attempts until all 
-    // threads have been successfully suspended (or back out if not).
     class SuspendedProcess
     {
     public:
-        explicit SuspendedProcess(DWORD pid)
+        explicit SuspendedProcess(DWORD pid, DWORD retries = 5)
         {
-            // TODO: Add a transform_if algorithm?
-            ThreadList const threads(pid);
-            for (auto const& thread_entry : threads)
+            // Multiple retries may be needed to plug a race condition 
+            // whereby after a thread snapshot is taken but before suspension 
+            // takes place, an existing thread launches a new thread which 
+            // would then be missed.
+            std::set<DWORD> tids;
+            bool need_retry = false;
+            do
             {
-                DWORD const current_thread_id = ::GetCurrentThreadId();
-                if (thread_entry.GetId() != current_thread_id)
+                need_retry = false;
+
+                ThreadList const threads(pid);
+                for (auto const& thread_entry : threads)
                 {
-                    threads_.emplace_back(thread_entry.GetId());
+                    DWORD const current_thread_id = ::GetCurrentThreadId();
+                    if (thread_entry.GetId() != current_thread_id)
+                    {
+                        // TODO: Fix the potential TID reuse race condition 
+                        // (after the snapshot a thread could theoretically 
+                        // terminate, then have its TID resued in a different 
+                        // process). Or it could theoretically also be reused 
+                        // as a PID which would cause a different set of 
+                        // errors. Investigate.
+                        auto const inserted = tids.insert(thread_entry.GetId());
+                        if (inserted.second)
+                        {
+                            need_retry = true;
+                            try
+                            {
+                                threads_.emplace_back(thread_entry.GetId());
+                            }
+                            // TODO: Only swallow the errors which are caused 
+                            // by a thread terminating, rather than all 
+                            // errors. This is ERROR_INVALID_PARAMETER for 
+                            // OpenThread, ERROR_ACCESS_DENIED for 
+                            // SuspendThread (which we should then 
+                            // double-check with WaitForSingleObject to 
+                            // confirm that the thread is signaled).
+                            catch (std::exception const& /*e*/)
+                            {
+                                tids.erase(inserted.first);
+                            }
+                        }
+                    }
                 }
+            } while (need_retry && retries--);
+
+            if (need_retry)
+            {
+                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
+                    ErrorString("Failed to suspend all threads in process "
+                    "(too many retries)."));
             }
         }
 

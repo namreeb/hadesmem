@@ -18,9 +18,6 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/error.hpp>
 
-// TODO: Support interacting with WoW64 threads from x64 procs (via 
-// Wow64SuspendThread, Wow64GetThreadContext, etc.).
-
 namespace hadesmem
 {
 

@@ -19,11 +19,6 @@
 namespace hadesmem
 {
 
-    // TODO: Write overloads which take iterators (and don't assume that a 
-    // contiguous block of memory has been passed in?).
-    
-    // TODO: Fix API consistency (taking ranges vs a start and a size).
-
     template <typename T>
     inline void Write(Process const& process, PVOID address, T const& data)
     {
@@ -36,8 +31,8 @@ namespace hadesmem
 
     template <typename T>
     inline void Write(
-        Process const& process, 
-        PVOID address, 
+        Process const& process,
+        PVOID address,
         T const* ptr,
         std::size_t count)
     {
@@ -70,25 +65,6 @@ namespace hadesmem
         Write(process, address, beg, count);
     }
 
-    // NOTE: This will not write a null terminator.
-    template <typename T>
-    inline void WriteString(
-        Process const& process, 
-        PVOID address, 
-        T const* const beg,
-        T const* const end)
-    {
-        HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
-
-        HADESMEM_DETAIL_ASSERT(address != nullptr);
-        HADESMEM_DETAIL_ASSERT(beg != nullptr);
-        HADESMEM_DETAIL_ASSERT(end != nullptr);
-
-        std::size_t const count = static_cast<std::size_t>(
-            std::distance(beg, end));
-        Write(process, address, beg, count);
-    }
-
     template <
         typename T, 
         typename Traits = std::char_traits<T>, 
@@ -102,11 +78,11 @@ namespace hadesmem
 
         HADESMEM_DETAIL_ASSERT(address != nullptr);
 
-        return WriteString(
+        return Write(
             process, 
             address, 
             data.c_str(), 
-            data.c_str() + data.size() + 1);
+            data.size() + 1);
     }
 
     template <typename T>

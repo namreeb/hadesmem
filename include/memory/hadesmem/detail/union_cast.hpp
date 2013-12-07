@@ -13,8 +13,12 @@ namespace hadesmem
     namespace detail
     {
 
-        template <typename T, typename U>
-        T UnionCast(U const& u)
+        template <
+            typename T, 
+            typename U, 
+            int DummyCallConvT = FuncCallConv<T>::value, 
+            int DummyCallConvU = FuncCallConv<U>::value>
+        inline T UnionCast(U const& u)
         {
             // Technically this could be relaxed, but this is true for all 
             // our use cases so it's good enough.
@@ -35,6 +39,25 @@ namespace hadesmem
             // Technically this is (AFAICT) undefined behaviour, however all 
             // the major compilers (and probably the minor ones too) support 
             // this as the de-facto method for type-punning.
+            return conv.t;
+        }
+
+        // WARNING: Here be dragons. Use with extreme caution. Undefined 
+        // behaviour galore.
+        template <
+            typename T,
+            typename U,
+            int DummyCallConvT = FuncCallConv<T>::value,
+            int DummyCallConvU = FuncCallConv<U>::value>
+        inline T UnionCastUnchecked(U const& u)
+        {
+            union Conv
+            {
+                T t;
+                U u;
+            };
+            Conv conv;
+            conv.u = u;
             return conv.t;
         }
 

@@ -13,7 +13,7 @@
 
 namespace hadesmem
 {
-
+    
     inline FARPROC FindProcedure(
         Process const& process,
         Module const& module,
@@ -25,10 +25,8 @@ namespace hadesmem
             name);
         if (!remote_func)
         {
-            DWORD const last_error = ::GetLastError();
             HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("GetProcAddressInternal failed.") <<
-                ErrorCodeWinLast(last_error));
+                ErrorString("GetProcAddressInternal failed."));
         }
 
         return remote_func;
@@ -45,10 +43,8 @@ namespace hadesmem
             ordinal);
         if (!remote_func)
         {
-            DWORD const last_error = ::GetLastError();
             HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("GetProcAddressInternal failed.") <<
-                ErrorCodeWinLast(last_error));
+                ErrorString("GetProcAddressInternal failed."));
         }
 
         return remote_func;
