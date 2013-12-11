@@ -46,3 +46,8 @@ lib injecttest
     [ glob injecttest/*.cpp ]
     injecttestdep
   ;
+  
+lib cerberus
+  :
+    [ glob cerberus/*.cpp ]
+  ;
