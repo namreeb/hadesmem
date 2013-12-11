@@ -101,11 +101,21 @@ public:
 
   bool HasName() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return buffer_->ImageName.Buffer != nullptr && buffer_->ImageName.Length;
+    // Check whether buffer is valid or it's the first process in the list
+    // (which is always System Idle Process).
+    return (buffer_->ImageName.Buffer != nullptr &&
+            buffer_->ImageName.Length) ||
+           prev_ == nullptr;
   }
 
   std::wstring GetName() const
   {
+    // First process is always System Idle Process.
+    if (!prev_)
+    {
+      return {L"System Idle Process"};
+    }
+
     auto const str_end =
       std::find(buffer_->ImageName.Buffer,
                 buffer_->ImageName.Buffer + buffer_->ImageName.Length,

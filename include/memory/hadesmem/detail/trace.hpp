@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <sstream>
 #include <vector>
 
 #include <windows.h>
@@ -44,13 +45,10 @@ do                                                                        \
 
 #define HADESMEM_DETAIL_TRACE_RAW(x) hadesmem::detail::OutputDebugString(x)
 
-// TODO: Fix this so that the function name etc is printed in the same string
-// as the actual message. Otherwise it causes interlaced output in WinDbg,
-// and also screws up DbgView output (puts all parts on a new line).
 #define HADESMEM_DETAIL_TRACE_FORMAT_IMPL(                                     \
   detail_char_type, detail_format_func, detail_format, ...)                    \
-  \
-HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN std::int32_t const                \
+                                                                               \
+  HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN std::int32_t const              \
     detail_num_char =                                                          \
       detail_format_func(nullptr, 0, detail_format, __VA_ARGS__);              \
   HADESMEM_DETAIL_ASSERT(detail_num_char > 0);                                 \
@@ -65,13 +63,11 @@ HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN std::int32_t const                \
                          __VA_ARGS__);                                         \
     HADESMEM_DETAIL_ASSERT(detail_num_char_actual > 0);                        \
     (void) detail_num_char_actual;                                             \
-    HADESMEM_DETAIL_TRACE_RAW(__FUNCTION__);                                   \
-    HADESMEM_DETAIL_TRACE_RAW(": ");                                           \
-    HADESMEM_DETAIL_TRACE_RAW(detail_trace_buffer.data());                     \
-    HADESMEM_DETAIL_TRACE_RAW("\n");                                           \
+    std::wstringstream formatter;                                              \
+    formatter << __FUNCTION__ << ": " << detail_trace_buffer.data() << "\n";   \
+    HADESMEM_DETAIL_TRACE_RAW(formatter.str().c_str());                        \
   }                                                                            \
-  \
-HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END
+  HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END
 
 #define HADESMEM_DETAIL_TRACE_FORMAT_A(format, ...)                            \
   HADESMEM_DETAIL_TRACE_FORMAT_IMPL(char, _snprintf, format, __VA_ARGS__)
