@@ -79,10 +79,10 @@ public:
     return buffer_ != nullptr;
   }
 
-  // TODO: Handle case where we unlink all processes. This should be detected
-  // and reported to the caller so they can zero out the entire buffer, update
-  // the return length, or fail, etc. (Whatever should happen, needs more
-  // investigation).
+  // TODO: Handle case where we unlink all processes. (May require zeroing the
+  // entire struct, updating return length, failing, etc. Needs more
+  // investigation to find the correct behaviour for this scenario, assuming
+  // that it's even a valid one.)
   void Unlink() HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(buffer_);
@@ -93,12 +93,6 @@ public:
     {
       if (buffer_->NextEntryOffset)
       {
-        // TODO: Investigate whether this is sufficient. For cases where callers
-        // actually use the extra information beyond the end of the base
-        // SYSTEM_PROCESS_INFORMATION struct, do they know exactly how many
-        // objects are in the array, or is it a linked list, or could we
-        // potentially be causing callers to read bogus data by simply
-        // pretending that the entry is longer than it actually is?
         prev_->NextEntryOffset += buffer_->NextEntryOffset;
       }
       else
@@ -112,7 +106,9 @@ public:
     {
       // Unlinking the first process is unsupported.
       // TODO: Fix this. Will also require reporting a new return length to
-      // the API (if appliciable) due to the buffer effectively changing size.
+      // the API (if appliciable) due to the buffer effectively changing size
+      // (take pointer in the constructor and handle it internally rather than
+      // bubbling it up and forcing it upon the caller).
       HADESMEM_DETAIL_ASSERT(false);
     }
   }
@@ -207,6 +203,12 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
   last_error.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
+  if (!NT_SUCCESS(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
+    return ret;
+  }
+
   // TODO: Handle SystemProcessIdInformation (88).
   if (system_information_class != winternl::SystemProcessInformation &&
       system_information_class != winternl::SystemExtendedProcessInformation &&
@@ -214,12 +216,6 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
       system_information_class != winternl::SystemFullProcessInformation)
   {
     HADESMEM_DETAIL_TRACE_A("Unhandled information class.");
-    return ret;
-  }
-
-  if (!NT_SUCCESS(ret))
-  {
-    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
     return ret;
   }
 
