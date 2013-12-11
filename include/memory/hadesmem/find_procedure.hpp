@@ -13,41 +13,33 @@
 
 namespace hadesmem
 {
-    
-    inline FARPROC FindProcedure(
-        Process const& process,
-        Module const& module,
-        std::string const& name)
-    {
-        FARPROC const remote_func = detail::GetProcAddressInternal(
-            process, 
-            module.GetHandle(), 
-            name);
-        if (!remote_func)
-        {
-            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("GetProcAddressInternal failed."));
-        }
 
-        return remote_func;
-    }
+inline FARPROC FindProcedure(Process const& process,
+                             Module const& module,
+                             std::string const& name)
+{
+  FARPROC const remote_func =
+    detail::GetProcAddressInternal(process, module.GetHandle(), name);
+  if (!remote_func)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error() << ErrorString("GetProcAddressInternal failed."));
+  }
 
-    inline FARPROC FindProcedure(
-        Process const& process,
-        Module const& module,
-        WORD ordinal)
-    {
-        FARPROC const remote_func = detail::GetProcAddressInternal(
-            process, 
-            module.GetHandle(), 
-            ordinal);
-        if (!remote_func)
-        {
-            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("GetProcAddressInternal failed."));
-        }
+  return remote_func;
+}
 
-        return remote_func;
-    }
+inline FARPROC
+  FindProcedure(Process const& process, Module const& module, WORD ordinal)
+{
+  FARPROC const remote_func =
+    detail::GetProcAddressInternal(process, module.GetHandle(), ordinal);
+  if (!remote_func)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error() << ErrorString("GetProcAddressInternal failed."));
+  }
 
+  return remote_func;
+}
 }

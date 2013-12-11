@@ -6,16 +6,17 @@
 #include <hadesmem/process.hpp>
 
 struct non_string_type
-{ };
+{
+};
 
 void TestWriteStringFail()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::WriteString(process, nullptr, non_string_type());
+  hadesmem::WriteString(process, nullptr, non_string_type());
 }
 
 int main()
 {
-    TestWriteStringFail();
+  TestWriteStringFail();
 }

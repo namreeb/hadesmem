@@ -13,65 +13,55 @@
 
 void TestQuery()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    HMODULE const this_mod = GetModuleHandle(nullptr);
-    BOOST_TEST(CanRead(process, this_mod));
-    BOOST_TEST(!CanWrite(process, this_mod));
-    BOOST_TEST(!CanExecute(process, this_mod));
-    BOOST_TEST(!IsGuard(process, this_mod));
+  HMODULE const this_mod = GetModuleHandle(nullptr);
+  BOOST_TEST(CanRead(process, this_mod));
+  BOOST_TEST(!CanWrite(process, this_mod));
+  BOOST_TEST(!CanExecute(process, this_mod));
+  BOOST_TEST(!IsGuard(process, this_mod));
 }
 
 void TestProtect()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    PVOID address = VirtualAlloc(
-        nullptr, 
-        0x1000, 
-        MEM_COMMIT | MEM_RESERVE,
-        PAGE_EXECUTE_READWRITE);
-    BOOST_TEST(address);
-    BOOST_TEST(CanRead(process, address));
-    BOOST_TEST(CanWrite(process, address));
-    BOOST_TEST(CanExecute(process, address));
-    BOOST_TEST(!IsGuard(process, address));
-    BOOST_TEST_EQ(Protect(process, address, PAGE_NOACCESS),
-        static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
-    BOOST_TEST(!CanRead(process, address));
-    BOOST_TEST(!CanWrite(process, address));
-    BOOST_TEST(!CanExecute(process, address));
-    BOOST_TEST(!IsGuard(process, address));
-    BOOST_TEST_EQ(Protect(process, address, PAGE_EXECUTE),
-        static_cast<DWORD>(PAGE_NOACCESS));
-    BOOST_TEST(CanExecute(process, address));
+  PVOID address = VirtualAlloc(
+    nullptr, 0x1000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+  BOOST_TEST(address);
+  BOOST_TEST(CanRead(process, address));
+  BOOST_TEST(CanWrite(process, address));
+  BOOST_TEST(CanExecute(process, address));
+  BOOST_TEST(!IsGuard(process, address));
+  BOOST_TEST_EQ(Protect(process, address, PAGE_NOACCESS),
+                static_cast<DWORD>(PAGE_EXECUTE_READWRITE));
+  BOOST_TEST(!CanRead(process, address));
+  BOOST_TEST(!CanWrite(process, address));
+  BOOST_TEST(!CanExecute(process, address));
+  BOOST_TEST(!IsGuard(process, address));
+  BOOST_TEST_EQ(Protect(process, address, PAGE_EXECUTE),
+                static_cast<DWORD>(PAGE_NOACCESS));
+  BOOST_TEST(CanExecute(process, address));
 }
 
 void QueryAndProtectInvalid()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    LPVOID const invalid_address = reinterpret_cast<LPVOID>(
-        static_cast<DWORD_PTR>(-1));
-    BOOST_TEST_THROWS(CanRead(process, invalid_address),
-        hadesmem::Error);
-    BOOST_TEST_THROWS(CanWrite(process, invalid_address),
-        hadesmem::Error);
-    BOOST_TEST_THROWS(CanExecute(process, invalid_address),
-        hadesmem::Error);
-    BOOST_TEST_THROWS(IsGuard(process, invalid_address),
-        hadesmem::Error);
-    BOOST_TEST_THROWS(Protect(
-        process, 
-        invalid_address, 
-        PAGE_EXECUTE_READWRITE),
-        hadesmem::Error);
+  LPVOID const invalid_address =
+    reinterpret_cast<LPVOID>(static_cast<DWORD_PTR>(-1));
+  BOOST_TEST_THROWS(CanRead(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(CanWrite(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(CanExecute(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(IsGuard(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE),
+                    hadesmem::Error);
 }
 
 int main()
 {
-    TestQuery();
-    TestProtect();
-    QueryAndProtectInvalid();
-    return boost::report_errors();
+  TestQuery();
+  TestProtect();
+  QueryAndProtectInvalid();
+  return boost::report_errors();
 }

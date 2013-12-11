@@ -5,9 +5,9 @@
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(push, 1)
-#pragma warning(disable: 4702 4996)
-#pragma warning(disable: 6011 6239 6246 6295 6326 6334 6385 6386 6387)
-#pragma warning(disable: 28159 28197 28285)
+#pragma warning(disable : 4702 4996)
+#pragma warning(disable : 6011 6239 6246 6295 6326 6334 6385 6386 6387)
+#pragma warning(disable : 28159 28197 28285)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_GCC)
@@ -30,8 +30,8 @@
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push, 1)
-#pragma warning(disable: 9 10 66 82 177 367 411 504 693 780 809 869 1879 1885)
-#pragma warning(disable: 3280 3346)
+#pragma warning(disable : 9 10 66 82 177 367 411 504 693 780 809 869 1879 1885)
+#pragma warning(disable : 3280 3346)
 #endif // #if defined(HADESMEM_MSVC)
 
 #if defined(HADESMEM_CLANG)

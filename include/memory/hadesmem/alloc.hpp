@@ -17,194 +17,183 @@
 namespace hadesmem
 {
 
-    inline PVOID Alloc(
-        Process const& process, 
-        SIZE_T size, 
-        PVOID base = nullptr)
-    {
-        PVOID const address = ::VirtualAllocEx(
-            process.GetHandle(),
-            base,
-            size,
-            MEM_COMMIT | MEM_RESERVE,
-            PAGE_EXECUTE_READWRITE);
-        if (!address)
-        {
-            DWORD const last_error = ::GetLastError();
-            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("VirtualAllocEx failed.") <<
-                ErrorCodeWinLast(last_error));
-        }
+inline PVOID Alloc(Process const& process, SIZE_T size, PVOID base = nullptr)
+{
+  PVOID const address = ::VirtualAllocEx(process.GetHandle(),
+                                         base,
+                                         size,
+                                         MEM_COMMIT | MEM_RESERVE,
+                                         PAGE_EXECUTE_READWRITE);
+  if (!address)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("VirtualAllocEx failed.")
+                                    << ErrorCodeWinLast(last_error));
+  }
 
-        return address;
+  return address;
+}
+
+inline void Free(Process const& process, LPVOID address)
+{
+  if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("VirtualFreeEx failed.")
+                                    << ErrorCodeWinLast(last_error));
+  }
+}
+
+class Allocator
+{
+public:
+  explicit Allocator(Process const& process, SIZE_T size, PVOID base = nullptr)
+    : process_(&process), base_(Alloc(process, size, base)), size_(size)
+  {
+    HADESMEM_DETAIL_ASSERT(process_ != 0);
+    HADESMEM_DETAIL_ASSERT(base_ != 0);
+    HADESMEM_DETAIL_ASSERT(size_ != 0);
+  }
+
+  Allocator(Allocator const& other) = delete;
+
+  Allocator& operator=(Allocator const& other) = delete;
+
+  Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
+    : process_(other.process_),
+      base_(other.base_),
+      size_(other.size_)
+  {
+    other.process_ = nullptr;
+    other.base_ = nullptr;
+    other.size_ = 0;
+  }
+
+  Allocator& operator=(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
+  {
+    FreeUnchecked();
+
+    process_ = other.process_;
+    other.process_ = nullptr;
+
+    base_ = other.base_;
+    other.base_ = nullptr;
+
+    size_ = other.size_;
+    other.size_ = 0;
+
+    return *this;
+  }
+
+  ~Allocator()
+  {
+    FreeUnchecked();
+  }
+
+  void Free()
+  {
+    if (!process_)
+    {
+      return;
     }
 
-    inline void Free(Process const& process, LPVOID address)
+    HADESMEM_DETAIL_ASSERT(base_ != nullptr);
+    HADESMEM_DETAIL_ASSERT(size_ != 0);
+
+    ::hadesmem::Free(*process_, base_);
+
+    process_ = nullptr;
+    base_ = nullptr;
+    size_ = 0;
+  }
+
+  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return base_;
+  }
+
+  SIZE_T GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return size_;
+  }
+
+private:
+  void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  {
+    try
     {
-        if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
-        {
-            DWORD const last_error = ::GetLastError();
-            HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                ErrorString("VirtualFreeEx failed.") <<
-                ErrorCodeWinLast(last_error));
-        }
+      Free();
     }
-
-    class Allocator
+    catch (...)
     {
-    public:
-        explicit Allocator(
-            Process const& process, 
-            SIZE_T size, 
-            PVOID base = nullptr)
-            : process_(&process),
-            base_(Alloc(process, size, base)),
-            size_(size)
-        {
-            HADESMEM_DETAIL_ASSERT(process_ != 0);
-            HADESMEM_DETAIL_ASSERT(base_ != 0);
-            HADESMEM_DETAIL_ASSERT(size_ != 0);
-        }
+      // WARNING: Memory in remote process is leaked if 'Free'
+      // fails.
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
 
-        Allocator(Allocator const& other) = delete;
-
-        Allocator& operator=(Allocator const& other) = delete;
-
-        Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
-            : process_(other.process_),
-            base_(other.base_),
-            size_(other.size_)
-        {
-            other.process_ = nullptr;
-            other.base_ = nullptr;
-            other.size_ = 0;
-        }
-
-        Allocator& operator=(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
-        {
-            FreeUnchecked();
-
-            process_ = other.process_;
-            other.process_ = nullptr;
-
-            base_ = other.base_;
-            other.base_ = nullptr;
-
-            size_ = other.size_;
-            other.size_ = 0;
-
-            return *this;
-        }
-
-        ~Allocator()
-        {
-            FreeUnchecked();
-        }
-
-        void Free()
-        {
-            if (!process_)
-            {
-                return;
-            }
-
-            HADESMEM_DETAIL_ASSERT(base_ != nullptr);
-            HADESMEM_DETAIL_ASSERT(size_ != 0);
-
-            ::hadesmem::Free(*process_, base_);
-
-            process_ = nullptr;
-            base_ = nullptr;
-            size_ = 0;
-        }
-
-        PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
-        {
-            return base_;
-        }
-
-        SIZE_T GetSize() const HADESMEM_DETAIL_NOEXCEPT
-        {
-            return size_;
-        }
-
-    private:
-        void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
-        {
-            try
-            {
-                Free();
-            }
-            catch (...)
-            {
-                // WARNING: Memory in remote process is leaked if 'Free' 
-                // fails.
-                HADESMEM_DETAIL_TRACE_A(
-                    boost::current_exception_diagnostic_information()
-                    .c_str());
-                HADESMEM_DETAIL_ASSERT(false);
-
-                process_ = nullptr;
-                base_ = nullptr;
-                size_ = 0;
-            }
-        }
-
-        Process const* process_;
-        PVOID base_;
-        SIZE_T size_;
-    };
-
-    inline bool operator==(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return lhs.GetBase() == rhs.GetBase();
+      process_ = nullptr;
+      base_ = nullptr;
+      size_ = 0;
     }
+  }
 
-    inline bool operator!=(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return !(lhs == rhs);
-    }
+  Process const* process_;
+  PVOID base_;
+  SIZE_T size_;
+};
 
-    inline bool operator<(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return lhs.GetBase() < rhs.GetBase();
-    }
+inline bool operator==(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetBase() == rhs.GetBase();
+}
 
-    inline bool operator<=(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return lhs.GetBase() <= rhs.GetBase();
-    }
+inline bool operator!=(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
 
-    inline bool operator>(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return lhs.GetBase() > rhs.GetBase();
-    }
+inline bool operator<(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetBase() < rhs.GetBase();
+}
 
-    inline bool operator>=(Allocator const& lhs, Allocator const& rhs)
-        HADESMEM_DETAIL_NOEXCEPT
-    {
-        return lhs.GetBase() >= rhs.GetBase();
-    }
+inline bool operator<=(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetBase() <= rhs.GetBase();
+}
 
-    inline std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
-    {
-        std::locale const old = lhs.imbue(std::locale::classic());
-        lhs << static_cast<void*>(rhs.GetBase());
-        lhs.imbue(old);
-        return lhs;
-    }
+inline bool operator>(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetBase() > rhs.GetBase();
+}
 
-    inline std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs)
-    {
-        std::locale const old = lhs.imbue(std::locale::classic());
-        lhs << static_cast<void*>(rhs.GetBase());
-        lhs.imbue(old);
-        return lhs;
-    }
+inline bool operator>=(Allocator const& lhs, Allocator const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetBase() >= rhs.GetBase();
+}
 
+inline std::ostream& operator<<(std::ostream& lhs, Allocator const& rhs)
+{
+  std::locale const old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
+}
+
+inline std::wostream& operator<<(std::wostream& lhs, Allocator const& rhs)
+{
+  std::locale const old = lhs.imbue(std::locale::classic());
+  lhs << static_cast<void*>(rhs.GetBase());
+  lhs.imbue(old);
+  return lhs;
+}
 }

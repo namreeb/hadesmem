@@ -7,19 +7,23 @@
 
 struct non_pod_type
 {
-    virtual void foo() { }
+  virtual void foo()
+  {
+  }
 
-    virtual ~non_pod_type() { }
+  virtual ~non_pod_type()
+  {
+  }
 };
 
 void TestReadPodFail()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::Read<non_pod_type>(process, nullptr);
+  hadesmem::Read<non_pod_type>(process, nullptr);
 }
 
 int main()
 {
-    TestReadPodFail();
+  TestReadPodFail();
 }

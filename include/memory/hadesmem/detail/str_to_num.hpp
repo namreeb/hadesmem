@@ -15,24 +15,22 @@
 namespace hadesmem
 {
 
-    namespace detail
-    {
+namespace detail
+{
 
-        template <typename T, typename CharT>
-        T StrToNum(std::basic_string<CharT> const& str)
-        {
-            HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
-            std::basic_ostringstream<CharT> converter(str);
-            converter.imbue(std::locale::classic());
-            T out = 0;
-            if (!converter || (!converter >> out))
-            {
-                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("Conversion failed."));
-            }
-            return out;
-        }
-
-    }
-
+template <typename T, typename CharT>
+T StrToNum(std::basic_string<CharT> const& str)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
+  std::basic_ostringstream<CharT> converter(str);
+  converter.imbue(std::locale::classic());
+  T out = 0;
+  if (!converter || (!converter >> out))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("Conversion failed."));
+  }
+  return out;
+}
+}
 }

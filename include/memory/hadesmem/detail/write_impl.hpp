@@ -18,95 +18,80 @@
 namespace hadesmem
 {
 
-    namespace detail
+namespace detail
+{
+
+inline void WriteUnchecked(Process const& process,
+                           PVOID address,
+                           LPCVOID data,
+                           std::size_t len)
+{
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
+
+  SIZE_T bytes_written = 0;
+  if (!::WriteProcessMemory(
+         process.GetHandle(), address, data, len, &bytes_written) ||
+      bytes_written != len)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("WriteProcessMemory failed.")
+                                    << ErrorCodeWinLast(last_error));
+  }
+}
+
+inline void WriteImpl(Process const& process,
+                      PVOID address,
+                      LPCVOID data,
+                      std::size_t len)
+{
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(data != nullptr);
+  HADESMEM_DETAIL_ASSERT(len != 0);
+
+  for (;;)
+  {
+    ProtectGuard protect_guard(process, address, ProtectGuardType::kWrite);
+
+    MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+    PVOID const region_next =
+      static_cast<PBYTE>(mbi.BaseAddress) + mbi.RegionSize;
+
+    LPVOID const address_end = static_cast<LPBYTE>(address) + len;
+    if (address_end <= region_next)
     {
+      WriteUnchecked(process, address, data, len);
 
-        inline void WriteUnchecked(
-            Process const& process, 
-            PVOID address,
-            LPCVOID data, 
-            std::size_t len)
-        {
-            HADESMEM_DETAIL_ASSERT(address != nullptr);
-            HADESMEM_DETAIL_ASSERT(data != nullptr);
-            HADESMEM_DETAIL_ASSERT(len != 0);
+      protect_guard.Restore();
 
-            SIZE_T bytes_written = 0;
-            if (!::WriteProcessMemory(
-                process.GetHandle(), 
-                address, 
-                data,
-                len, 
-                &bytes_written) || bytes_written != len)
-            {
-                DWORD const last_error = ::GetLastError();
-                HADESMEM_DETAIL_THROW_EXCEPTION(Error() <<
-                    ErrorString("WriteProcessMemory failed.") <<
-                    ErrorCodeWinLast(last_error));
-            }
-        }
-
-        inline void WriteImpl(
-            Process const& process, 
-            PVOID address, 
-            LPCVOID data,
-            std::size_t len)
-        {
-            HADESMEM_DETAIL_ASSERT(address != nullptr);
-            HADESMEM_DETAIL_ASSERT(data != nullptr);
-            HADESMEM_DETAIL_ASSERT(len != 0);
-
-            for (;;)
-            {
-                ProtectGuard protect_guard(
-                    process, 
-                    address, 
-                    ProtectGuardType::kWrite);
-
-                MEMORY_BASIC_INFORMATION const mbi = detail::Query(
-                    process, 
-                    address);
-                PVOID const region_next = 
-                    static_cast<PBYTE>(mbi.BaseAddress) +
-                    mbi.RegionSize;
-
-                LPVOID const address_end = static_cast<LPBYTE>(address)+len;
-                if (address_end <= region_next)
-                {
-                    WriteUnchecked(process, address, data, len);
-
-                    protect_guard.Restore();
-
-                    return;
-                }
-                else
-                {
-                    std::size_t const len_new = 
-                        reinterpret_cast<DWORD_PTR>(region_next)-
-                        reinterpret_cast<DWORD_PTR>(address);
-
-                    WriteUnchecked(process, address, data, len_new);
-
-                    protect_guard.Restore();
-
-                    address = static_cast<LPBYTE>(address)+len_new;
-                    data = static_cast<LPCBYTE>(data)+len_new;
-                    len -= len_new;
-                }
-            }
-        }
-
-        template <typename T>
-        void WriteImpl(Process const& process, PVOID address, T const& data)
-        {
-            HADESMEM_DETAIL_STATIC_ASSERT(detail
-                ::IsTriviallyCopyable<T>::value);
-
-            HADESMEM_DETAIL_ASSERT(address != nullptr);
-
-            WriteImpl(process, address, std::addressof(data), sizeof(data));
-        }
-
+      return;
     }
+    else
+    {
+      std::size_t const len_new = reinterpret_cast<DWORD_PTR>(region_next) -
+                                  reinterpret_cast<DWORD_PTR>(address);
 
+      WriteUnchecked(process, address, data, len_new);
+
+      protect_guard.Restore();
+
+      address = static_cast<LPBYTE>(address) + len_new;
+      data = static_cast<LPCBYTE>(data) + len_new;
+      len -= len_new;
+    }
+  }
+}
+
+template <typename T>
+void WriteImpl(Process const& process, PVOID address, T const& data)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+  WriteImpl(process, address, std::addressof(data), sizeof(data));
+}
+}
 }

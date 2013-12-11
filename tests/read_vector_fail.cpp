@@ -7,18 +7,19 @@
 
 struct NotDefaultConstructible
 {
-    NotDefaultConstructible(int)
-    { }
+  NotDefaultConstructible(int)
+  {
+  }
 };
 
 void TestReadVectorFail()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr, 1);
+  hadesmem::ReadVector<NotDefaultConstructible>(process, nullptr, 1);
 }
 
 int main()
 {
-    TestReadVectorFail();
+  TestReadVectorFail();
 }

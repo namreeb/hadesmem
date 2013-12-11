@@ -11,11 +11,11 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo();
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
 {
-    return 0;
+  return 0;
 }
 
-BOOL WINAPI DllMain(HINSTANCE /*instance*/, DWORD /*reason*/,
-    LPVOID /*reserved*/)
+BOOL WINAPI
+  DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, LPVOID /*reserved*/)
 {
-    return TRUE;
+  return TRUE;
 }

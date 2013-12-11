@@ -7,12 +7,12 @@
 
 void TestReadStringFail()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::ReadString<int>(process, nullptr);
+  hadesmem::ReadString<int>(process, nullptr);
 }
 
 int main()
 {
-    TestReadStringFail();
+  TestReadStringFail();
 }

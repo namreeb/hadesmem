@@ -10,10 +10,8 @@
 #include <hadesmem/detail/static_assert.hpp>
 
 // Allow the user to override the compiler detection.
-#if !defined(HADESMEM_CLANG) && \
-    !defined(HADESMEM_INTEL) && \
-    !defined(HADESMEM_GCC) && \
-    !defined(HADESMEM_MSVC)
+#if !defined(HADESMEM_CLANG) && !defined(HADESMEM_INTEL) &&                    \
+  !defined(HADESMEM_GCC) && !defined(HADESMEM_MSVC)
 
 #if defined(__clang__)
 #define HADESMEM_CLANG
@@ -24,15 +22,15 @@
 #elif defined(_MSC_VER)
 #define HADESMEM_MSVC
 #else
-// I don't like having to do this, but given that some small parts of the 
-// code base rely on 'questionable' interpretations of the standard it's 
+// I don't like having to do this, but given that some small parts of the
+// code base rely on 'questionable' interpretations of the standard it's
 // safer to verify before continuing.
 #error "[HadesMem] Unsupported compiler."
 #endif
 
-#endif // #if !defined(HADESMEM_CLANG) && 
-// !defined(HADESMEM_INTEL) && 
-// !defined(HADESMEM_GCC) && 
+#endif // #if !defined(HADESMEM_CLANG) &&
+// !defined(HADESMEM_INTEL) &&
+// !defined(HADESMEM_GCC) &&
 // !defined(HADESMEM_MSVC)
 
 #define HADESMEM_VERSION_MAJOR 2
@@ -41,10 +39,11 @@
 
 #define HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z) "v" #x "." #y "." #z
 
-#define HADESMEM_DETAIL_VERSION_STRING_GEN(x, y, z) \
-    HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z)
+#define HADESMEM_DETAIL_VERSION_STRING_GEN(x, y, z)                            \
+  HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z)
 
-#define HADESMEM_VERSION_STRING HADESMEM_DETAIL_VERSION_STRING_GEN(\
+#define HADESMEM_VERSION_STRING                                                \
+  HADESMEM_DETAIL_VERSION_STRING_GEN(                                          \
     HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
 #if defined(HADESMEM_MSVC)
@@ -61,7 +60,7 @@
 
 #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
 #define HADESMEM_DETAIL_NOEXCEPT throw()
-#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred) 
+#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred)
 #define HADESMEM_DETAIL_NOEXCEPT_EXPR(Expr) false
 #else // #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
 #define HADESMEM_DETAIL_NOEXCEPT noexcept
@@ -91,10 +90,10 @@
 // See: http://bit.ly/17CCZFX
 #define HADESMEM_DETAIL_MAX_PATH_UNICODE (1 << 15)
 
-// Every effort is made to NOT assume the below is true across the entire 
-// codebase, but for the Call module it is unavoidable. If adding support for 
-// another architecture, this may need adjusting. However, if anywhere other 
-// than here and Call needs adjusting, it is probably a bug and should be 
+// Every effort is made to NOT assume the below is true across the entire
+// codebase, but for the Call module it is unavoidable. If adding support for
+// another architecture, this may need adjusting. However, if anywhere other
+// than here and Call needs adjusting, it is probably a bug and should be
 // reported.
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(DWORD) == 4);
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(DWORD32) == 4);
@@ -104,7 +103,7 @@ HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
 
-// While every effort is made to not rely on the below, it is unavoidable 
-// when manually implementing functions such as GetProcAddress, which is 
+// While every effort is made to not rely on the below, it is unavoidable
+// when manually implementing functions such as GetProcAddress, which is
 // required by the Injector.
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));

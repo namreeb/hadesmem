@@ -21,95 +21,83 @@
 
 void TestSection()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::PeFile pe_file_1(
-        process, 
-        ::GetModuleHandle(nullptr),
-        hadesmem::PeFileType::Image);
+  hadesmem::PeFile pe_file_1(
+    process, ::GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
 
-    hadesmem::NtHeaders nt_headers_1(process, pe_file_1);
+  hadesmem::NtHeaders nt_headers_1(process, pe_file_1);
 
-    BOOST_TEST(nt_headers_1.GetNumberOfSections() >= 1);
+  BOOST_TEST(nt_headers_1.GetNumberOfSections() >= 1);
 
-    hadesmem::Section section_1(process, pe_file_1, 0);
+  hadesmem::Section section_1(process, pe_file_1, 0);
 
-    hadesmem::Section section_2(section_1);
-    BOOST_TEST_EQ(section_1, section_2);
-    section_1 = section_2;
-    BOOST_TEST_EQ(section_1, section_2);
-    hadesmem::Section section_3(std::move(section_2));
-    BOOST_TEST_EQ(section_3, section_1);
-    section_2 = std::move(section_3);
-    BOOST_TEST_EQ(section_1, section_2);
+  hadesmem::Section section_2(section_1);
+  BOOST_TEST_EQ(section_1, section_2);
+  section_1 = section_2;
+  BOOST_TEST_EQ(section_1, section_2);
+  hadesmem::Section section_3(std::move(section_2));
+  BOOST_TEST_EQ(section_3, section_1);
+  section_2 = std::move(section_3);
+  BOOST_TEST_EQ(section_1, section_2);
 
-    hadesmem::ModuleList modules(process);
-    for (auto const& mod : modules)
+  hadesmem::ModuleList modules(process);
+  for (auto const& mod : modules)
+  {
+    // TODO: Also test FileType_Data
+    hadesmem::PeFile const cur_pe_file(
+      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+
+    // Assume every module has at least one section.
+    // TODO: Better tests.
+    hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
+    BOOST_TEST(cur_nt_headers.GetNumberOfSections() >= 1);
+    hadesmem::Section cur_section(process, cur_pe_file, 0);
+
+    auto const section_header_raw =
+      hadesmem::Read<IMAGE_SECTION_HEADER>(process, cur_section.GetBase());
+
+    cur_section.SetName(cur_section.GetName());
+    cur_section.SetVirtualAddress(cur_section.GetVirtualAddress());
+    cur_section.SetVirtualSize(cur_section.GetVirtualSize());
+    cur_section.SetSizeOfRawData(cur_section.GetSizeOfRawData());
+    cur_section.SetPointerToRawData(cur_section.GetPointerToRawData());
+    cur_section.SetPointerToRelocations(cur_section.GetPointerToRelocations());
+    cur_section.SetPointerToLinenumbers(cur_section.GetPointerToLinenumbers());
+    cur_section.SetNumberOfRelocations(cur_section.GetNumberOfRelocations());
+    cur_section.SetNumberOfLinenumbers(cur_section.GetNumberOfLinenumbers());
+    cur_section.SetCharacteristics(cur_section.GetCharacteristics());
+
+    auto const section_header_raw_new =
+      hadesmem::Read<IMAGE_SECTION_HEADER>(process, cur_section.GetBase());
+
+    BOOST_TEST_EQ(std::memcmp(&section_header_raw,
+                              &section_header_raw_new,
+                              sizeof(section_header_raw)),
+                  0);
+
+    std::stringstream test_str_1;
+    test_str_1.imbue(std::locale::classic());
+    test_str_1 << cur_section;
+    std::stringstream test_str_2;
+    test_str_2.imbue(std::locale::classic());
+    test_str_2 << cur_section.GetBase();
+    BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
+    if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
     {
-        // TODO: Also test FileType_Data
-        hadesmem::PeFile const cur_pe_file(
-            process, 
-            mod.GetHandle(),
-            hadesmem::PeFileType::Image);
-
-        // Assume every module has at least one section.
-        // TODO: Better tests.
-        hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
-        BOOST_TEST(cur_nt_headers.GetNumberOfSections() >= 1);
-        hadesmem::Section cur_section(process, cur_pe_file, 0);
-
-        auto const section_header_raw = hadesmem::Read<IMAGE_SECTION_HEADER>(
-            process, cur_section.GetBase());
-
-        cur_section.SetName(cur_section.GetName());
-        cur_section.SetVirtualAddress(cur_section.GetVirtualAddress());
-        cur_section.SetVirtualSize(cur_section.GetVirtualSize());
-        cur_section.SetSizeOfRawData(cur_section.GetSizeOfRawData());
-        cur_section.SetPointerToRawData(cur_section.GetPointerToRawData());
-        cur_section.SetPointerToRelocations(
-            cur_section.GetPointerToRelocations());
-        cur_section.SetPointerToLinenumbers(
-            cur_section.GetPointerToLinenumbers());
-        cur_section.SetNumberOfRelocations(
-            cur_section.GetNumberOfRelocations());
-        cur_section.SetNumberOfLinenumbers(
-            cur_section.GetNumberOfLinenumbers());
-        cur_section.SetCharacteristics(cur_section.GetCharacteristics());
-
-        auto const section_header_raw_new = 
-            hadesmem::Read<IMAGE_SECTION_HEADER>(
-            process, 
-            cur_section.GetBase());
-
-        BOOST_TEST_EQ(std::memcmp(
-            &section_header_raw, 
-            &section_header_raw_new,
-            sizeof(section_header_raw)), 0);
-
-        std::stringstream test_str_1;
-        test_str_1.imbue(std::locale::classic());
-        test_str_1 << cur_section;
-        std::stringstream test_str_2;
-        test_str_2.imbue(std::locale::classic());
-        test_str_2 << cur_section.GetBase();
-        BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
-        if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
-        {
-            hadesmem::PeFile const pe_file_ntdll(
-                process, 
-                GetModuleHandle(L"ntdll"),
-                hadesmem::PeFileType::Image);
-            hadesmem::Section const section_ntdll(process, pe_file_ntdll, 0);
-            std::stringstream test_str_3;
-            test_str_3.imbue(std::locale::classic());
-            test_str_3 << section_ntdll.GetBase();
-            BOOST_TEST_NE(test_str_1.str(), test_str_3.str());
-        }
+      hadesmem::PeFile const pe_file_ntdll(
+        process, GetModuleHandle(L"ntdll"), hadesmem::PeFileType::Image);
+      hadesmem::Section const section_ntdll(process, pe_file_ntdll, 0);
+      std::stringstream test_str_3;
+      test_str_3.imbue(std::locale::classic());
+      test_str_3 << section_ntdll.GetBase();
+      BOOST_TEST_NE(test_str_1.str(), test_str_3.str());
     }
+  }
 }
 
 int main()
 {
-    TestSection();
-    return boost::report_errors();
+  TestSection();
+  return boost::report_errors();
 }

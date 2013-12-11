@@ -7,17 +7,19 @@
 
 struct non_pod_type
 {
-    virtual ~non_pod_type() {}
+  virtual ~non_pod_type()
+  {
+  }
 };
 
 void TestWritePodFail()
 {
-    hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process(::GetCurrentProcessId());
 
-    hadesmem::Write(process, nullptr, non_pod_type());
+  hadesmem::Write(process, nullptr, non_pod_type());
 }
 
 int main()
 {
-    TestWritePodFail();
+  TestWritePodFail();
 }
