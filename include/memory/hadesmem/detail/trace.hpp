@@ -42,6 +42,9 @@ do\
 
 #define HADESMEM_DETAIL_TRACE_RAW(x) hadesmem::detail::OutputDebugString(x)
 
+// TODO: Fix this so that the function name etc is printed in the same string 
+// as the actual message. Otherwise it causes interlaced output in WinDbg, 
+// and also screws up DbgView output (puts all parts on a new line).
 #define HADESMEM_DETAIL_TRACE_FORMAT_IMPL(\
     detail_char_type, \
     detail_format_func, \

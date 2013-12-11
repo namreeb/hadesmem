@@ -108,6 +108,9 @@ project memory
     <variant>release,<toolset>intel:<cxxflags>"/GL"
     <variant>release,<toolset>intel:<linkflags>"/LTCG"
     <variant>release,<toolset>gcc:<cxxflags>"-flto"
+
+    # Enable more MSVC optimizations
+    <variant>release,<toolset>msvc:<cxxflags>"/Gw /Gy"
     
     # Improve standards conformance under MSVC
     <toolset>msvc:<cxxflags>"/Zc:rvalueCast"

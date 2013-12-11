@@ -1252,10 +1252,10 @@ namespace hadesmem
             T&& arg, 
             Args&&... args)
         {
-                AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
-                return BuildCallArgs<FuncT, N + 1>(
-                    ++call_args,
-                    std::forward<Args>(args)...);
+            AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
+            return BuildCallArgs<FuncT, N + 1>(
+                ++call_args,
+                std::forward<Args>(args)...);
         }
 
     }

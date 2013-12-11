@@ -222,9 +222,10 @@ namespace hadesmem
     class PatchDetour
     {
     public:
+        // TODO: Template for function type(s).
         explicit PatchDetour(
-            Process const& process
-            , PVOID target, 
+            Process const& process, 
+            PVOID target, 
             PVOID detour)
             : process_(&process),
             applied_(false),
