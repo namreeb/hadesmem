@@ -1,6 +1,9 @@
 // Copyright (C) 2010-2013 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include <string>
+#include <iterator>
+
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
@@ -91,9 +94,7 @@ public:
     }
     else
     {
-      // Unlinking the first process is currently unsupported.
-      // TODO: Fix this? It's always the System Idle Process so I'm not
-      // sure if this is really useful...
+      // Unlinking the first process is unsupported.
       HADESMEM_DETAIL_ASSERT(false);
     }
   }
@@ -103,16 +104,29 @@ public:
     return buffer_->ImageName.Buffer != nullptr && buffer_->ImageName.Length;
   }
 
+  // TODO: Remove dependency on std::wstring, we shouldn't need to allocate
+  // and copy here. This should be a noexcept function returning a range over
+  // the existing string buffer.
   std::wstring GetName() const
   {
-    // TODO: I think SystemFullProcessInformation may return the
-    // full path rather than just the image name. Need to reverse
-    // engineer it further and handle this case if appliciable.
     auto const str_end =
       std::find(buffer_->ImageName.Buffer,
                 buffer_->ImageName.Buffer + buffer_->ImageName.Length,
                 L'\0');
-    return {buffer_->ImageName.Buffer, str_end};
+    // SystemFullProcessInformation returns the full path rather than just the
+    // image name.
+    if (info_class_ == winternl::SystemFullProcessInformation)
+    {
+      auto const name_beg =
+        std::find(std::reverse_iterator<wchar_t*>(str_end),
+                  std::reverse_iterator<wchar_t*>(buffer_->ImageName.Buffer),
+                  L'\\');
+      return {name_beg.base(), str_end};
+    }
+    else
+    {
+      return {buffer_->ImageName.Buffer, str_end};
+    }
   }
 
 private:
