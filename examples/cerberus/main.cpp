@@ -104,9 +104,6 @@ public:
     return buffer_->ImageName.Buffer != nullptr && buffer_->ImageName.Length;
   }
 
-  // TODO: Remove dependency on std::wstring, we shouldn't need to allocate
-  // and copy here. This should be a noexcept function returning a range over
-  // the existing string buffer.
   std::wstring GetName() const
   {
     auto const str_end =
