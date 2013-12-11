@@ -93,6 +93,12 @@ public:
     {
       if (buffer_->NextEntryOffset)
       {
+        // TODO: Investigate whether this is sufficient. For cases where callers
+        // actually use the extra information beyond the end of the base
+        // SYSTEM_PROCESS_INFORMATION struct, do they know exactly how many
+        // objects are in the array, or is it a linked list, or could we
+        // potentially be causing callers to read bogus data by simply
+        // pretending that the entry is longer than it actually is?
         prev_->NextEntryOffset += buffer_->NextEntryOffset;
       }
       else
