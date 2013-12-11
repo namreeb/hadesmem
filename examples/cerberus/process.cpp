@@ -11,6 +11,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/winternl.hpp>
+#include <hadesmem/detail/last_error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/patcher.hpp>
@@ -78,6 +79,10 @@ public:
     return buffer_ != nullptr;
   }
 
+  // TODO: Handle case where we unlink all processes. This should be detected
+  // and reported to the caller so they can zero out the entire buffer, update
+  // the return length, or fail, etc. (Whatever should happen, needs more
+  // investigation).
   void Unlink() HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(buffer_);
@@ -173,13 +178,13 @@ private:
   bool unlinked_;
 };
 
-// TODO: Preserve LastError value.
 extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
   winternl::SYSTEM_INFORMATION_CLASS system_information_class,
   PVOID system_information,
   ULONG system_information_length,
   PULONG return_length) HADESMEM_DETAIL_NOEXCEPT
 {
+  hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%u] [%p].",
                                  system_information_class,
                                  system_information,
@@ -188,10 +193,12 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
   auto& detour = GetNtQuerySystemInformationDetour();
   auto const nt_query_system_information =
     detour->GetTrampoline<decltype(&NtQuerySystemInformationHk)>();
+  last_error.Revert();
   auto const ret = nt_query_system_information(system_information_class,
                                                system_information,
                                                system_information_length,
                                                return_length);
+  last_error.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   // TODO: Handle SystemProcessIdInformation (88).
