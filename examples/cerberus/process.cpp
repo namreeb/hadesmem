@@ -77,7 +77,7 @@ public:
     }
   }
 
-  bool Valid() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsValid() const HADESMEM_DETAIL_NOEXCEPT
   {
     return buffer_ != nullptr;
   }
@@ -218,7 +218,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
     HADESMEM_DETAIL_TRACE_A("Enumerating processes.");
     for (SystemProcessInformationEnum process_info{system_information_class,
                                                    system_information};
-         process_info.Valid();
+         process_info.IsValid();
          process_info.Advance())
     {
       if (process_info.HasName())

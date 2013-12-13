@@ -107,7 +107,7 @@ public:
     }
   }
 
-  bool Valid() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsValid() const HADESMEM_DETAIL_NOEXCEPT
   {
     return buffer_ != nullptr;
   }
@@ -182,7 +182,7 @@ void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
   HADESMEM_DETAIL_TRACE_A("Enumerating files.");
   for (DirectoryFileInformationEnum<kInfoClass, BufferT> directory_info{
          file_information, length, status};
-       directory_info.Valid();
+       directory_info.IsValid();
        directory_info.Advance())
   {
     if (directory_info.HasName())
