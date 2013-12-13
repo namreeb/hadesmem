@@ -30,6 +30,9 @@ std::unique_ptr<hadesmem::PatchDetour>& GetNtQuerySystemInformationDetour()
   return detour;
 }
 
+// TODO: Rewrite this to use templates (similar to DirectoryFileInformationEnum)
+// instead of casting everywhere? Requires more boilerplate, but ends up easier
+// to write and maintain.
 class SystemProcessInformationEnum
 {
 public:
@@ -79,10 +82,6 @@ public:
     return buffer_ != nullptr;
   }
 
-  // TODO: Handle case where we unlink all processes. (May require zeroing the
-  // entire struct, updating return length, failing, etc. Needs more
-  // investigation to find the correct behaviour for this scenario, assuming
-  // that it's even a valid one.)
   void Unlink() HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(buffer_);
@@ -105,10 +104,6 @@ public:
     else
     {
       // Unlinking the first process is unsupported.
-      // TODO: Fix this. Will also require reporting a new return length to
-      // the API (if appliciable) due to the buffer effectively changing size
-      // (take pointer in the constructor and handle it internally rather than
-      // bubbling it up and forcing it upon the caller).
       HADESMEM_DETAIL_ASSERT(false);
     }
   }
@@ -119,13 +114,12 @@ public:
     // (which is always System Idle Process).
     return (buffer_->ImageName.Buffer != nullptr &&
             buffer_->ImageName.Length) ||
-           prev_ == nullptr;
+           buffer_->UniqueProcessId == 0;
   }
 
   std::wstring GetName() const
   {
-    // First process is always System Idle Process.
-    if (!prev_)
+    if (buffer_->UniqueProcessId == 0)
     {
       return {L"System Idle Process"};
     }
@@ -180,7 +174,7 @@ private:
   bool unlinked_;
 };
 
-extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
+extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
   winternl::SYSTEM_INFORMATION_CLASS system_information_class,
   PVOID system_information,
   ULONG system_information_length,
@@ -194,7 +188,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
                                  return_length);
   auto& detour = GetNtQuerySystemInformationDetour();
   auto const nt_query_system_information =
-    detour->GetTrampoline<decltype(&NtQuerySystemInformationHk)>();
+    detour->GetTrampoline<decltype(&NtQuerySystemInformationDetour)>();
   last_error.Revert();
   auto const ret = nt_query_system_information(system_information_class,
                                                system_information,
@@ -203,12 +197,6 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
   last_error.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
-  if (!NT_SUCCESS(ret))
-  {
-    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
-    return ret;
-  }
-
   // TODO: Handle SystemProcessIdInformation (88).
   if (system_information_class != winternl::SystemProcessInformation &&
       system_information_class != winternl::SystemExtendedProcessInformation &&
@@ -216,6 +204,12 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
       system_information_class != winternl::SystemFullProcessInformation)
   {
     HADESMEM_DETAIL_TRACE_A("Unhandled information class.");
+    return ret;
+  }
+
+  if (!NT_SUCCESS(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
     return ret;
   }
 
@@ -254,19 +248,19 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationHk(
 }
 }
 
-void HookNtQuerySystemInformation()
+void DetourNtQuerySystemInformation()
 {
   hadesmem::Module const ntdll(GetThisProcess(), L"ntdll.dll");
   auto const nt_query_system_information = hadesmem::FindProcedure(
     GetThisProcess(), ntdll, "NtQuerySystemInformation");
   auto const nt_query_system_information_ptr =
     hadesmem::detail::UnionCast<void*>(nt_query_system_information);
-  auto const nt_query_system_information_hk =
-    hadesmem::detail::UnionCast<void*>(&NtQuerySystemInformationHk);
+  auto const nt_query_system_information_detour =
+    hadesmem::detail::UnionCast<void*>(&NtQuerySystemInformationDetour);
   auto& detour = GetNtQuerySystemInformationDetour();
   detour.reset(new hadesmem::PatchDetour(GetThisProcess(),
                                          nt_query_system_information_ptr,
-                                         nt_query_system_information_hk));
+                                         nt_query_system_information_detour));
   detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("NtQuerySystemInformationHk detoured.");
+  HADESMEM_DETAIL_TRACE_A("NtQuerySystemInformation detoured.");
 }

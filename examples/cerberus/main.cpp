@@ -6,8 +6,11 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 
+#include "file.hpp"
 #include "process.hpp"
 
+// WARNING! Most of this is untested, it's for expository and testing 
+// purposes only.
 // TODO: Write a test app to exercise all the hooked APIs and information
 // classes.
 
@@ -21,7 +24,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    HookNtQuerySystemInformation();
+    //DetourNtQuerySystemInformation();
+    DetourNtQueryDirectoryFile();
   }
   catch (...)
   {

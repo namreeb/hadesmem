@@ -3,4 +3,4 @@
 
 #pragma once
 
-void DetourNtQuerySystemInformation();
+void DetourNtQueryDirectoryFile();
