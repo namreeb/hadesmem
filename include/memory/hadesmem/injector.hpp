@@ -32,13 +32,8 @@
 
 // TODO: .NET injection (without DLL dependency if possible).
 
-// TODO: WoW64 process native DLL injection.
-
 // TODO: IAT injection (to allow execution of code before Dllmain of other
 // modules are executed). Include support for .NET target processes.
-
-// TODO: Add a way to easily resume targets created with the kKeepSuspended
-// flag.
 
 // TODO: Add a 'thumbprint' to all memory allocations so the blocks can be
 // easily identified in a debugger.
@@ -180,25 +175,28 @@ public:
   explicit CreateAndInjectData(Process const& process,
                                HMODULE module,
                                DWORD_PTR export_ret,
-                               DWORD export_last_error)
+                               DWORD export_last_error,
+                               detail::SmartHandle&& thread_handle)
     : process_(process),
       module_(module),
       export_ret_(export_ret),
-      export_last_error_(export_last_error)
+      export_last_error_(export_last_error),
+      thread_handle_(std::move(thread_handle))
   {
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  CreateAndInjectData(CreateAndInjectData const&) = default;
+  CreateAndInjectData(CreateAndInjectData const&) = delete;
 
-  CreateAndInjectData& operator=(CreateAndInjectData const&) = default;
+  CreateAndInjectData& operator=(CreateAndInjectData const&) = delete;
 
   CreateAndInjectData(CreateAndInjectData&& other)
     : process_(std::move(other.process_)),
       module_(other.module_),
       export_ret_(other.export_ret_),
-      export_last_error_(other.export_last_error_)
+      export_last_error_(other.export_last_error_),
+      thread_handle_(std::move(other.thread_handle_))
   {
   }
 
@@ -208,6 +206,7 @@ public:
     module_ = other.module_;
     export_ret_ = other.export_ret_;
     export_last_error_ = other.export_last_error_;
+    thread_handle_ = std::move(other.thread_handle_);
 
     return *this;
   }
@@ -234,11 +233,28 @@ public:
     return export_last_error_;
   }
 
+  HANDLE GetThreadHandle() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return thread_handle_.GetHandle();
+  }
+
+  void ResumeThread() const
+  {
+    if (::ResumeThread(thread_handle_.GetHandle()) == static_cast<DWORD>(-1))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("ResumeThread failed.")
+                                      << ErrorCodeWinLast(last_error));
+    }
+  }
+
 private:
   Process process_;
   HMODULE module_;
   DWORD_PTR export_ret_;
   DWORD export_last_error_;
+  detail::SmartHandle thread_handle_;
 };
 
 template <typename ArgsIter>
@@ -310,7 +326,7 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
   }
 
   detail::SmartHandle const proc_handle(proc_info.hProcess);
-  detail::SmartHandle const thread_handle(proc_info.hThread);
+  detail::SmartHandle thread_handle(proc_info.hThread);
 
   try
   {
@@ -351,7 +367,8 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     return CreateAndInjectData(process,
                                remote_module,
                                export_ret.GetReturnValue(),
-                               export_ret.GetLastError());
+                               export_ret.GetLastError(),
+                               std::move(thread_handle));
   }
   catch (std::exception const& /*e*/)
   {

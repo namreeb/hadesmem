@@ -15,9 +15,17 @@
 
 void TestInjector()
 {
+  // Don't cause a fork bomb when we later re-launch ourselves to test injection
+  // as part of process creation.
+  // TODO: Find a less stupid way of testing this. Relying on some random
+  // module not being present when there's no actual guarantee of this (what if
+  // some overlay software is injected globally etc) is ridiculous.
+  HMODULE const d3d9_mod = ::GetModuleHandleW(L"d3d9.dll");
+  BOOST_TEST_EQ(d3d9_mod, static_cast<HMODULE>(nullptr));
+
   hadesmem::Process const process(::GetCurrentProcessId());
 
-  HMODULE const kernel32_mod = GetModuleHandle(L"kernel32.dll");
+  HMODULE const kernel32_mod = ::GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST_NE(kernel32_mod, static_cast<HMODULE>(nullptr));
 
   // 'Inject' Kernel32 with path resolution disabled and ensure that the
@@ -43,34 +51,51 @@ void TestInjector()
   hadesmem::FreeDll(process, kernel32_mod_new_2);
 
   // Todo: Test kPathResolution flag.
-  // TODO: Test kKeepSuspended flag.
   // TODO: Test export calling in CreateAndInject.
   // TODO: Test work dir, args, etc in CreateAndInject.
   // TODO: Test kAddToSearchOrder flag.
-  // TODO: Check more of the CreateAndInjectData functions.
   // TODO: Enumerate module list and ensure the target module has actually
-  // been loaded (will require a debug flag to not resume the target).
-  // Check for presence of d3d9.dll to avoid accidentally creating a fork
-  // bomb.
-  std::vector<std::wstring> args;
-  if (GetModuleHandle(L"d3d9.dll") == nullptr)
+  // been loaded.
+
   {
-    hadesmem::CreateAndInjectData const inject_data =
+    std::vector<std::wstring> args;
+    hadesmem::CreateAndInjectData const inject_data{
       hadesmem::CreateAndInject(hadesmem::detail::GetSelfPath(),
                                 L"",
                                 std::begin(args),
                                 std::end(args),
                                 L"d3d9.dll",
                                 "",
-                                hadesmem::InjectFlags::kNone);
+                                hadesmem::InjectFlags::kNone)};
+    BOOST_TEST(inject_data.GetProcess() != process);
+    BOOST_TEST_NE(inject_data.GetModule(), static_cast<HMODULE>(nullptr));
+    BOOST_TEST_EQ(inject_data.GetExportRet(), 0UL);
+    BOOST_TEST_EQ(inject_data.GetExportLastError(), 0UL);
+    BOOST_TEST_NE(inject_data.GetThreadHandle(), static_cast<HANDLE>(nullptr));
     BOOL const terminated =
       ::TerminateProcess(inject_data.GetProcess().GetHandle(), 0);
-    DWORD const last_error = ::GetLastError();
     BOOST_TEST_NE(terminated, 0);
-    if (!terminated)
-    {
-      BOOST_TEST_NE(last_error, 0UL);
-    }
+  }
+
+  {
+    std::vector<std::wstring> args;
+    hadesmem::CreateAndInjectData const inject_data{
+      hadesmem::CreateAndInject(hadesmem::detail::GetSelfPath(),
+                                L"",
+                                std::begin(args),
+                                std::end(args),
+                                L"d3d9.dll",
+                                "",
+                                hadesmem::InjectFlags::kKeepSuspended)};
+    BOOST_TEST(inject_data.GetProcess() != process);
+    BOOST_TEST_NE(inject_data.GetModule(), static_cast<HMODULE>(nullptr));
+    BOOST_TEST_EQ(inject_data.GetExportRet(), 0UL);
+    BOOST_TEST_EQ(inject_data.GetExportLastError(), 0UL);
+    BOOST_TEST_NE(inject_data.GetThreadHandle(), static_cast<HANDLE>(nullptr));
+    inject_data.ResumeThread();
+    BOOL const terminated =
+      ::TerminateProcess(inject_data.GetProcess().GetHandle(), 0);
+    BOOST_TEST_NE(terminated, 0);
   }
 }
 
