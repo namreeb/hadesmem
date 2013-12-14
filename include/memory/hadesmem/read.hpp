@@ -36,8 +36,6 @@ template <typename T> inline T Read(Process const& process, PVOID address)
 template <typename T, std::size_t N>
 inline std::array<T, N> Read(Process const& process, PVOID address)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(N != 0);
-
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
   return detail::ReadImpl<std::array<T, N>>(process, address);
@@ -49,8 +47,6 @@ inline void Read(Process const& process, PVOID address, OutputIterator out)
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<
     std::output_iterator_tag,
     typename std::iterator_traits<OutputIterator>::iterator_category>::value);
-
-  HADESMEM_DETAIL_STATIC_ASSERT(N != 0);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
@@ -67,7 +63,6 @@ inline void
   Read(Process const& process, PVOID address, std::size_t n, OutputIterator out)
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(n != 0);
 
   auto const data = ReadVector<T>(process, address, n);
   std::copy(std::begin(data), std::end(data), out);
@@ -161,9 +156,13 @@ inline std::vector<T, Alloc>
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(count != 0);
 
-  std::vector<T, Alloc> data(count);
+  // Need to allocate space for at least one element otherwise
+  // std::vector<T>::data will return nullptr, which will in turn cause an
+  // assertion failure in ReadImpl. We can't just remove the assertion in
+  // ReadImpl either because ReadProcessMemory will fail if passed nullptr as
+  // the output buffer, even if the size is zero.
+  std::vector<T, Alloc> data((std::max)(static_cast<std::size_t>(1U), count));
   detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
   return data;
 }
@@ -181,9 +180,8 @@ inline void ReadVector(Process const& process,
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
-  HADESMEM_DETAIL_ASSERT(count != 0);
 
-  std::vector<T> data = ReadVector<T>(process, address, count);
+  auto const data = ReadVector<T>(process, address, count);
   std::copy(std::begin(data), std::end(data), out);
 }
 }

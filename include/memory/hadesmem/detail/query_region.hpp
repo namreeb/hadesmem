@@ -34,31 +34,26 @@ inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  return (mbi.State != MEM_RESERVE) &&
-         (!!(mbi.Protect & PAGE_EXECUTE_READ) ||
-          !!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
-          !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) ||
-          !!(mbi.Protect & PAGE_READONLY) || !!(mbi.Protect & PAGE_READWRITE) ||
-          !!(mbi.Protect & PAGE_WRITECOPY));
+  DWORD const read_prot = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY |
+                          PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE |
+                          PAGE_EXECUTE_WRITECOPY;
+  return (mbi.State == MEM_COMMIT) && !!(mbi.Protect & read_prot);
 }
 
 inline bool CanWrite(MEMORY_BASIC_INFORMATION const& mbi)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  return (mbi.State != MEM_RESERVE) &&
-         (!!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
-          !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY) ||
-          !!(mbi.Protect & PAGE_READWRITE) || !!(mbi.Protect & PAGE_WRITECOPY));
+  DWORD const write_prot = PAGE_READWRITE | PAGE_WRITECOPY |
+                           PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+  return (mbi.State == MEM_COMMIT) && !!(mbi.Protect & write_prot);
 }
 
 inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  return (mbi.State != MEM_RESERVE) &&
-         (!!(mbi.Protect & PAGE_EXECUTE) ||
-          !!(mbi.Protect & PAGE_EXECUTE_READ) ||
-          !!(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
-          !!(mbi.Protect & PAGE_EXECUTE_WRITECOPY));
+  DWORD const exec_prot = PAGE_EXECUTE | PAGE_EXECUTE_READ |
+                          PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+  return (mbi.State == MEM_COMMIT) && !!(mbi.Protect & exec_prot);
 }
 
 inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi)

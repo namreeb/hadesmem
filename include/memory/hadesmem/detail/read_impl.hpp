@@ -28,7 +28,6 @@ inline void ReadUnchecked(Process const& process,
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(data != nullptr);
-  HADESMEM_DETAIL_ASSERT(len != 0);
 
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(
@@ -47,7 +46,6 @@ inline void
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
   HADESMEM_DETAIL_ASSERT(data != nullptr);
-  HADESMEM_DETAIL_ASSERT(len != 0);
 
   for (;;)
   {

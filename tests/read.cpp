@@ -18,6 +18,10 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Test reads against all page protection combination (especially
+// PAGE_NOCACHE and PAGE_WRITECOMBINE to confirm that they work and don't need
+// to be skipped like guard pages).
+
 void TestReadPod()
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -46,6 +50,9 @@ void TestReadPod()
   BOOST_TEST_EQ(
     std::memcmp(&test_pod_type, &new_test_array_2[0], sizeof(test_pod_type)),
     0);
+
+  auto const empty_array = hadesmem::Read<char, 0>(process, &test_pod_type);
+  (void)empty_array;
 
   PVOID const noaccess_page = VirtualAlloc(
     nullptr, sizeof(void*), MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS);
@@ -117,6 +124,9 @@ void TestReadVector()
   hadesmem::ReadVector<int>(
     process, &int_list[0], 10, std::back_inserter(int_list_read_2));
   BOOST_TEST(int_list_read_2 == int_list_read);
+
+  auto const empty_list =
+    hadesmem::ReadVector<unsigned char>(process, &int_list[0], 0);
 }
 
 void TestReadCrossRegion()
