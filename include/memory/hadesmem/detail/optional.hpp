@@ -40,7 +40,10 @@ public:
 
   Optional(Optional const& other) : t_(), valid_(false)
   {
-    Construct(other.Get());
+    if (other.valid)
+    {
+      Construct(other.Get());
+    }
   }
 
   Optional& operator=(Optional const& other)
@@ -53,14 +56,23 @@ public:
 
   Optional(Optional&& other) HADESMEM_DETAIL_NOEXCEPT : t_(), valid_(false)
   {
-    Construct(std::move(other.Get()));
+    if (other.valid_)
+    {
+      Construct(std::move(other.Get()));
+    }
+
     other.valid_ = false;
   }
 
   Optional& operator=(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     Destroy();
-    Construct(std::move(other.Get()));
+
+    if (other.valid_)
+    {
+      Construct(std::move(other.Get()));
+    }
+
     other.valid_ = false;
 
     return *this;

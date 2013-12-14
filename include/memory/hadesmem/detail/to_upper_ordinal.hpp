@@ -20,6 +20,11 @@ namespace detail
 
 inline std::wstring ToUpperOrdinal(std::wstring const& str)
 {
+  if (str.empty())
+  {
+    return str;
+  }
+
   std::vector<wchar_t> str_buf(std::begin(str), std::end(str));
   str_buf.push_back(0);
 

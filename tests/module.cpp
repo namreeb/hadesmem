@@ -42,6 +42,8 @@ void TestModule()
   this_mod_copy = std::move(this_mod_moved);
   BOOST_TEST_EQ(this_mod_copy, this_mod);
 
+  BOOST_TEST_THROWS(hadesmem::Module(process, L""), hadesmem::Error);
+
   hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
   BOOST_TEST_NE(ntdll_mod, this_mod);
   BOOST_TEST_EQ(ntdll_mod.GetHandle(), ::GetModuleHandle(L"ntdll.dll"));
