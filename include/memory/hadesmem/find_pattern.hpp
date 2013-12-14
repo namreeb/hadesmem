@@ -24,6 +24,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
@@ -82,116 +83,6 @@ struct FindPatternFlags
   };
 };
 
-class FindPattern;
-
-class Pattern
-{
-public:
-  Pattern(FindPattern& finder, std::wstring const& data, std::uint32_t flags)
-    : Pattern(finder, data, flags, L"")
-  {
-  }
-
-  Pattern(FindPattern& finder,
-          std::wstring const& data,
-          std::uint32_t flags,
-          std::wstring const& start)
-    : Pattern(finder, data, L"", flags, start)
-  {
-  }
-
-  Pattern(FindPattern& finder,
-          std::wstring const& data,
-          std::wstring const& name,
-          std::uint32_t flags)
-    : Pattern(finder, data, name, flags, L"")
-  {
-  }
-
-  Pattern(FindPattern& finder,
-          std::wstring const& data,
-          std::wstring const& name,
-          std::uint32_t flags,
-          std::wstring const& start);
-
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  Pattern(Pattern const&) = default;
-
-  Pattern& operator=(Pattern const&) = default;
-
-  Pattern(Pattern&& other)
-    : process_(other.process_),
-      base_(other.base_),
-      name_(std::move(other.name_)),
-      address_(other.address_),
-      flags_(other.flags_)
-  {
-    other.process_ = nullptr;
-    other.base_ = 0;
-    other.address_ = nullptr;
-    other.flags_ = FindPatternFlags::kNone;
-  }
-
-  Pattern& operator=(Pattern&& other)
-  {
-    process_ = other.process_;
-    other.process_ = nullptr;
-
-    base_ = other.base_;
-    other.base_ = 0;
-
-    name_ = std::move(other.name_);
-
-    address_ = other.address_;
-    other.address_ = nullptr;
-
-    flags_ = other.flags_;
-    other.flags_ = FindPatternFlags::kNone;
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  Process const* GetProcess() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return process_;
-  }
-
-  DWORD_PTR GetBase() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return base_;
-  }
-
-  std::wstring GetName() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return name_;
-  }
-
-  PVOID GetAddress() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return address_;
-  }
-
-  void SetAddress(PVOID address)
-  {
-    address_ = static_cast<PBYTE>(address);
-  }
-
-  std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return flags_;
-  }
-
-private:
-  Process const* process_;
-  DWORD_PTR base_;
-  std::wstring name_;
-  PBYTE address_;
-  std::uint32_t flags_;
-};
-
 struct PatternData
 {
   void* address;
@@ -208,140 +99,12 @@ inline bool operator!=(PatternData const& lhs, PatternData const& rhs)
   return !(lhs == rhs);
 }
 
-inline void Add(Pattern& pattern, DWORD_PTR offset)
-{
-  PBYTE const address = static_cast<PBYTE>(pattern.GetAddress());
-  if (!address)
-  {
-    return;
-  }
-
-  pattern.SetAddress(address + offset);
-}
-
-inline void Sub(Pattern& pattern, DWORD_PTR offset)
-{
-  PBYTE const address = static_cast<PBYTE>(pattern.GetAddress());
-  if (!address)
-  {
-    return;
-  }
-
-  pattern.SetAddress(address - offset);
-}
-
-inline void Lea(Pattern& pattern)
-{
-  PBYTE address = static_cast<PBYTE>(pattern.GetAddress());
-  if (!address)
-  {
-    return;
-  }
-
-  try
-  {
-    bool const is_relative_address =
-      !!(pattern.GetFlags() & FindPatternFlags::kRelativeAddress);
-    DWORD_PTR base = is_relative_address ? pattern.GetBase() : 0;
-    address = Read<PBYTE>(*pattern.GetProcess(), address + base);
-  }
-  catch (std::exception const& /*e*/)
-  {
-    address = nullptr;
-  }
-
-  pattern.SetAddress(address);
-}
-
-inline void Rel(Pattern& pattern, DWORD_PTR size, DWORD_PTR offset)
-{
-  PBYTE address = static_cast<PBYTE>(pattern.GetAddress());
-  if (!address)
-  {
-    return;
-  }
-
-  try
-  {
-    bool const is_relative_address =
-      !!(pattern.GetFlags() & FindPatternFlags::kRelativeAddress);
-    DWORD_PTR const base = is_relative_address ? pattern.GetBase() : 0;
-    address = Read<PBYTE>(*pattern.GetProcess(), address + base) +
-              reinterpret_cast<DWORD_PTR>(address + base) + size - offset;
-  }
-  catch (std::exception const& /*e*/)
-  {
-    address = nullptr;
-  }
-
-  pattern.SetAddress(address);
-}
-
 class FindPattern
 {
 public:
-  friend class Pattern;
-
-  explicit FindPattern(Process const& process, HMODULE module)
-    : process_(&process),
-      base_(0),
-      code_regions_(),
-      data_regions_(),
-      addresses_()
+  explicit FindPattern(Process const& process)
+    : process_(&process), find_pattern_datas_()
   {
-    if (!module)
-    {
-      ModuleList const modules(process);
-      auto const exe_mod = std::begin(modules);
-      HADESMEM_DETAIL_ASSERT(exe_mod != std::end(modules));
-      module = exe_mod->GetHandle();
-    }
-
-    PBYTE const base = reinterpret_cast<PBYTE>(module);
-    base_ = reinterpret_cast<DWORD_PTR>(base);
-    PeFile const pe_file(
-      process, reinterpret_cast<PVOID>(base), hadesmem::PeFileType::Image);
-    DosHeader const dos_header(process, pe_file);
-    NtHeaders const nt_headers(process, pe_file);
-
-    SectionList const sections(process, pe_file);
-    for (auto const& s : sections)
-    {
-      bool const is_code_section =
-        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_CODE);
-      bool const is_data_section =
-        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA);
-      if (!is_code_section && !is_data_section)
-      {
-        continue;
-      }
-
-      PBYTE const section_beg =
-        static_cast<PBYTE>(RvaToVa(process, pe_file, s.GetVirtualAddress()));
-      if (section_beg == nullptr)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Could not get section base address."));
-      }
-
-      DWORD const section_size = s.GetSizeOfRawData();
-      if (!section_size)
-      {
-        continue;
-      }
-
-      PBYTE const section_end = section_beg + section_size;
-
-      std::vector<std::pair<PBYTE, PBYTE>>& region =
-        is_code_section ? code_regions_ : data_regions_;
-      region.emplace_back(section_beg, section_end);
-    }
-
-    if (code_regions_.empty() && data_regions_.empty())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("No valid sections to scan found."));
-    }
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
@@ -352,13 +115,9 @@ public:
 
   FindPattern(FindPattern&& other)
     : process_(other.process_),
-      base_(other.base_),
-      code_regions_(std::move(other.code_regions_)),
-      data_regions_(std::move(other.data_regions_)),
-      addresses_(std::move(other.addresses_))
+      find_pattern_datas_(std::move(other.find_pattern_datas_))
   {
     other.process_ = nullptr;
-    other.base_ = 0;
   }
 
   FindPattern& operator=(FindPattern&& other)
@@ -366,102 +125,34 @@ public:
     process_ = other.process_;
     other.process_ = nullptr;
 
-    base_ = other.base_;
-    other.base_ = 0;
-
-    code_regions_ = std::move(other.code_regions_);
-
-    data_regions_ = std::move(other.data_regions_);
-
-    addresses_ = std::move(other.addresses_);
+    find_pattern_datas_ = std::move(other.find_pattern_datas_);
 
     return *this;
   }
 
 #endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  PVOID Find(std::wstring const& data, std::uint32_t flags) const
+  // TODO: Add a way to enumerate all patterns.
+
+  PVOID Lookup(std::wstring const& module, std::wstring const& name) const
   {
-    return Find(data, flags, L"");
+    return LookupEx(module, name).address;
   }
 
-  PVOID Find(std::wstring const& data,
-             std::wstring const& name,
-             std::uint32_t flags)
+  // TODO: Add a way to enumerate all modules/bases.
+
+  friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
   {
-    return Find(data, name, flags, L"");
+    return lhs.process_ == rhs.process_ &&
+           lhs.find_pattern_datas_ == rhs.find_pattern_datas_;
   }
 
-  PVOID Find(std::wstring const& data,
-             std::wstring const& name,
-             std::uint32_t flags,
-             std::wstring const& start)
+  friend bool operator!=(FindPattern const& lhs, FindPattern const& rhs)
   {
-    PVOID const address = Find(data, flags, start);
-
-    if (!name.empty())
-    {
-      addresses_[name] = PatternData{address, flags};
-    }
-
-    return address;
+    return !(lhs == rhs);
   }
 
-  PVOID Find(std::wstring const& data,
-             std::uint32_t flags,
-             std::wstring const& start) const
-  {
-    HADESMEM_DETAIL_ASSERT(
-      !(flags & ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
-
-    auto const data_real = ConvertData(data);
-
-    PVOID address = Find(data_real, flags, start);
-
-    if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Could not match pattern."));
-    }
-
-    bool const is_relative = !!(flags & FindPatternFlags::kRelativeAddress);
-    if (address && is_relative)
-    {
-      address = static_cast<PBYTE>(address) - base_;
-    }
-
-    return address;
-  }
-
-  std::map<std::wstring, PatternData> GetAddresses() const
-  {
-    return addresses_;
-  }
-
-  PVOID operator[](std::wstring const& name) const
-  {
-    auto const iter = addresses_.find(name);
-    return (iter != addresses_.end()) ? iter->second.address : nullptr;
-  }
-
-  PVOID Lookup(std::wstring const& name) const
-  {
-    auto const iter = addresses_.find(name);
-    if (iter == std::end(addresses_))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Could not find target pattern."));
-    }
-
-    return iter->second.address;
-  }
-
-  void Update(std::wstring const& name, PVOID address, std::uint32_t flags)
-  {
-    addresses_[name] = PatternData{address, flags};
-  }
-
-  void LoadFile(std::wstring const& path)
+  inline void LoadPatternFile(std::wstring const& path)
   {
     pugi::xml_document doc;
     auto const load_result = doc.load_file(path.c_str());
@@ -473,10 +164,10 @@ public:
                 << ErrorStringOther(load_result.description()));
     }
 
-    LoadImpl(doc);
+    LoadPatternFileImpl(doc);
   }
 
-  void LoadFileMemory(std::wstring const& data)
+  inline void LoadPatternFileMemory(std::wstring const& data)
   {
     pugi::xml_document doc;
     auto const load_result = doc.load(data.c_str());
@@ -488,58 +179,62 @@ public:
                 << ErrorStringOther(load_result.description()));
     }
 
-    LoadImpl(doc);
+    LoadPatternFileImpl(doc);
   }
 
-  friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
+  std::size_t ModuleCount() const
   {
-    return lhs.process_ == rhs.process_ && lhs.base_ == rhs.base_ &&
-           lhs.addresses_ == rhs.addresses_;
+    return find_pattern_datas_.size();
   }
 
-  friend bool operator!=(FindPattern const& lhs, FindPattern const& rhs)
+  std::size_t PatternCount(std::wstring const& module) const
   {
-    return !(lhs == rhs);
+    auto const mod_info = GetModuleInfo(module);
+    auto const iter =
+      find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
+    if (iter == std::end(find_pattern_datas_))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Invalid module name."));
+    }
+
+    return iter->second.size();
+  }
+
+  // TODO: Make these overloads less confusnig...
+  PVOID Find(std::wstring const& module,
+             std::wstring const& data,
+             std::uint32_t flags,
+             std::wstring const& start) const
+  {
+    auto const mod_info = GetModuleInfo(module);
+    return Find(mod_info, data, flags, start);
+  }
+
+  PVOID Find(std::wstring const& module,
+             std::wstring const& name,
+             std::wstring const& data,
+             std::uint32_t flags,
+             std::wstring const& start)
+  {
+    PVOID address = Find(module, data, flags, start);
+
+    if (!name.empty())
+    {
+      auto const mod_info = GetModuleInfo(module);
+      auto const pattern_data_map_iter =
+        find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
+      PatternDataMap& pattern_data_map =
+        (pattern_data_map_iter != std::end(find_pattern_datas_))
+          ? pattern_data_map_iter->second
+          : find_pattern_datas_[detail::ToUpperOrdinal(mod_info.name)];
+      pattern_data_map[name] = {address, flags};
+    }
+
+    return address;
   }
 
 private:
-  struct PatternInfo
-  {
-    std::wstring name;
-    std::wstring data;
-    std::wstring start;
-    std::uint32_t flags;
-  };
-
-  struct ManipInfo
-  {
-    enum class Manipulator
-    {
-      kAdd,
-      kSub,
-      kRel,
-      kLea
-    };
-
-    Manipulator type;
-    bool has_operand1;
-    std::uintptr_t operand1;
-    bool has_operand2;
-    std::uintptr_t operand2;
-  };
-
-  struct PatternInfoFull
-  {
-    PatternInfo pattern;
-    std::vector<ManipInfo> manipulators;
-  };
-
-  struct FindPatternInfo
-  {
-    std::uint32_t flags;
-    std::vector<PatternInfoFull> patterns;
-  };
-
   std::vector<std::pair<BYTE, bool>> ConvertData(std::wstring const& data) const
   {
     HADESMEM_DETAIL_ASSERT(!data.empty());
@@ -591,10 +286,22 @@ private:
     return data_real;
   }
 
-  PatternData LookupEx(std::wstring const& name) const
+  PatternData LookupEx(std::wstring const& module,
+                       std::wstring const& name) const
   {
-    auto const iter = addresses_.find(name);
-    if (iter == std::end(addresses_))
+    auto const mod_info = GetModuleInfo(module);
+    auto const addresses_iter =
+      find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
+    if (addresses_iter == std::end(find_pattern_datas_))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Could not find target module."));
+    }
+
+    auto const& addresses = addresses_iter->second;
+
+    auto const iter = addresses.find(name);
+    if (iter == std::end(addresses))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Could not find target pattern."));
@@ -603,7 +310,109 @@ private:
     return iter->second;
   }
 
-  PVOID Find(std::vector<std::pair<BYTE, bool>> const& data,
+  struct ModuleInfo
+  {
+    DWORD_PTR base;
+    std::wstring name;
+    std::vector<std::pair<PBYTE, PBYTE>> code_regions;
+    std::vector<std::pair<PBYTE, PBYTE>> data_regions;
+  };
+
+  PVOID Find(ModuleInfo const& mod_info,
+             std::wstring const& data,
+             std::uint32_t flags,
+             std::wstring const& start) const
+  {
+    HADESMEM_DETAIL_ASSERT(
+      !(flags & ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
+
+    auto const data_real = ConvertData(data);
+
+    PVOID address = Find(mod_info, data_real, flags, start);
+
+    if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Could not match pattern."));
+    }
+
+    bool const is_relative = !!(flags & FindPatternFlags::kRelativeAddress);
+    if (address && is_relative)
+    {
+      address = static_cast<PBYTE>(address) - mod_info.base;
+    }
+
+    return address;
+  }
+
+  ModuleInfo GetModuleInfo(std::wstring const& module) const
+  {
+    ModuleInfo mod_info;
+
+    if (module.empty())
+    {
+      Module const module_ex(*process_, nullptr);
+      mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
+      mod_info.name = module_ex.GetName();
+    }
+    // TODO: Fix Module construtor for an empty string... Apparently it's not
+    // throwing...
+    else
+    {
+      Module const module_ex(*process_, module);
+      mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
+      mod_info.name = detail::ToUpperOrdinal(module_ex.GetName());
+    }
+
+    PBYTE const base = reinterpret_cast<PBYTE>(mod_info.base);
+    PeFile const pe_file(*process_, base, hadesmem::PeFileType::Image);
+    DosHeader const dos_header(*process_, pe_file);
+    NtHeaders const nt_headers(*process_, pe_file);
+
+    SectionList const sections(*process_, pe_file);
+    for (auto const& s : sections)
+    {
+      bool const is_code_section =
+        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_CODE);
+      bool const is_data_section =
+        !!(s.GetCharacteristics() & IMAGE_SCN_CNT_INITIALIZED_DATA);
+      if (!is_code_section && !is_data_section)
+      {
+        continue;
+      }
+
+      PBYTE const section_beg =
+        static_cast<PBYTE>(RvaToVa(*process_, pe_file, s.GetVirtualAddress()));
+      if (section_beg == nullptr)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("Could not get section base address."));
+      }
+
+      DWORD const section_size = s.GetSizeOfRawData();
+      if (!section_size)
+      {
+        continue;
+      }
+
+      PBYTE const section_end = section_beg + section_size;
+
+      std::vector<std::pair<PBYTE, PBYTE>>& region =
+        is_code_section ? mod_info.code_regions : mod_info.data_regions;
+      region.emplace_back(section_beg, section_end);
+    }
+
+    if (mod_info.code_regions.empty() && mod_info.data_regions.empty())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("No valid sections to scan found."));
+    }
+
+    return mod_info;
+  }
+
+  PVOID Find(ModuleInfo const& mod_info,
+             std::vector<std::pair<BYTE, bool>> const& data,
              std::uint32_t flags,
              std::wstring const& start) const
   {
@@ -612,17 +421,17 @@ private:
     PVOID start_addr = nullptr;
     if (!start.empty())
     {
-      PatternData const start_pattern = LookupEx(start);
+      PatternData const start_pattern = LookupEx(mod_info.name, start);
       bool const start_pattern_relative =
         !!(start_pattern.flags & FindPatternFlags::kRelativeAddress);
       start_addr = start_pattern_relative
-                     ? static_cast<PBYTE>(start_pattern.address) + base_
+                     ? static_cast<PBYTE>(start_pattern.address) + mod_info.base
                      : start_pattern.address;
     }
 
     bool const scan_data_secs = !!(flags & FindPatternFlags::kScanData);
     std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
-      scan_data_secs ? data_regions_ : code_regions_;
+      scan_data_secs ? mod_info.data_regions : mod_info.code_regions;
     for (auto const& region : scan_regions)
     {
       PBYTE s_beg = region.first;
@@ -673,84 +482,182 @@ private:
     return nullptr;
   }
 
-  void LoadImpl(pugi::xml_document const& doc)
+  struct PatternInfo
   {
-    auto const patterns_info_full = ReadPatternsFromXml(doc);
-    auto const& pattern_infos = patterns_info_full.patterns;
-    for (auto const& p : pattern_infos)
+    std::wstring name;
+    std::wstring data;
+    std::wstring start;
+    std::uint32_t flags;
+  };
+
+  struct ManipInfo
+  {
+    enum class Manipulator
     {
-      auto const& pat_info = p.pattern;
-      std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
-      std::wstring const name = pat_info.name;
-      Pattern pattern(*this, pat_info.data, name, flags, pat_info.start);
+      kAdd,
+      kSub,
+      kRel,
+      kLea
+    };
 
-      auto const& manip_list = p.manipulators;
-      for (auto const& m : manip_list)
-      {
-        switch (m.type)
-        {
-        case ManipInfo::Manipulator::kAdd:
-          if (!m.has_operand1 || m.has_operand2)
-          {
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Invalid manipulator operands "
-                                     "for 'Add'."));
-          }
+    Manipulator type;
+    bool has_operand1;
+    std::uintptr_t operand1;
+    bool has_operand2;
+    std::uintptr_t operand2;
+  };
 
-          Add(pattern, m.operand1);
+  struct PatternInfoFull
+  {
+    PatternInfo pattern;
+    std::vector<ManipInfo> manipulators;
+  };
 
-          break;
+  struct FindPatternInfo
+  {
+    std::uint32_t flags;
+    std::vector<PatternInfoFull> patterns;
+  };
 
-        case ManipInfo::Manipulator::kSub:
-          if (!m.has_operand1 || m.has_operand2)
-          {
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Invalid manipulator operands "
-                                     "for 'Sub'."));
-          }
+  inline void* Add(DWORD_PTR /*base*/,
+                   void* address,
+                   std::uint32_t /*flags*/,
+                   DWORD_PTR offset) const
+  {
+    return address ? static_cast<unsigned char*>(address) + offset : nullptr;
+  }
 
-          Sub(pattern, m.operand1);
+  inline void* Sub(DWORD_PTR /*base*/,
+                   void* address,
+                   std::uint32_t /*flags*/,
+                   DWORD_PTR offset) const
+  {
+    return address ? static_cast<unsigned char*>(address) - offset : nullptr;
+  }
 
-          break;
+  inline void* Lea(DWORD_PTR base, void* address, std::uint32_t flags) const
+  {
+    if (!address)
+    {
+      return nullptr;
+    }
 
-        case ManipInfo::Manipulator::kRel:
-          if (!m.has_operand1 || !m.has_operand2)
-          {
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Invalid manipulator operands "
-                                     "for 'Rel'."));
-          }
-
-          Rel(pattern, m.operand1, m.operand2);
-
-          break;
-
-        case ManipInfo::Manipulator::kLea:
-          if (m.has_operand1 || m.has_operand2)
-          {
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Invalid manipulator operands "
-                                     "for 'Lea'."));
-          }
-
-          Lea(pattern);
-
-          break;
-
-        default:
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Unknown manipulator."));
-        }
-      }
-
-      if (!name.empty())
-      {
-        addresses_[name] = {pattern.GetAddress(), pattern.GetFlags()};
-      }
+    try
+    {
+      bool const is_relative_address =
+        !!(flags & FindPatternFlags::kRelativeAddress);
+      DWORD_PTR real_base = is_relative_address ? base : 0;
+      return Read<void*>(*process_,
+                         static_cast<unsigned char*>(address) + real_base);
+    }
+    catch (std::exception const& /*e*/)
+    {
+      return nullptr;
     }
   }
 
-  FindPatternInfo ReadPatternsFromXml(pugi::xml_document const& doc)
+  inline void* Rel(DWORD_PTR base,
+                   void* address,
+                   std::uint32_t flags,
+                   DWORD_PTR size,
+                   DWORD_PTR offset) const
+  {
+    if (!address)
+    {
+      return nullptr;
+    }
+
+    try
+    {
+      bool const is_relative_address =
+        !!(flags & FindPatternFlags::kRelativeAddress);
+      DWORD_PTR const real_base = is_relative_address ? base : 0;
+      return Read<PBYTE>(*process_,
+                         static_cast<unsigned char*>(address) + real_base) +
+             reinterpret_cast<DWORD_PTR>(static_cast<unsigned char*>(address) +
+                                         real_base) +
+             size - offset;
+    }
+    catch (std::exception const& /*e*/)
+    {
+      return nullptr;
+    }
+  }
+
+  inline std::wstring GetAttributeValue(pugi::xml_node const& node,
+                                        std::wstring const& name) const
+  {
+    auto const attr = node.attribute(name.c_str());
+    if (!attr)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Failed to find attribute for node."));
+    }
+
+    std::wstring const value = attr.value();
+    if (value.empty())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Failed to find value for attribute."));
+    }
+
+    return value;
+  }
+
+  inline std::wstring GetOptionalAttributeValue(pugi::xml_node const& node,
+                                                std::wstring const& name) const
+  {
+    auto const attr = node.attribute(name.c_str());
+    if (!attr)
+    {
+      return {};
+    }
+
+    std::wstring const value = attr.value();
+    if (value.empty())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Failed to find value for attribute."));
+    }
+
+    return value;
+  }
+
+  inline std::uint32_t ReadFlags(pugi::xml_node const& node) const
+  {
+    std::uint32_t flags = FindPatternFlags::kNone;
+    for (auto const& flag : node.children(L"Flag"))
+    {
+      auto const flag_name = GetAttributeValue(flag, L"Name");
+
+      if (flag_name == L"None")
+      {
+        flags |= FindPatternFlags::kNone;
+      }
+      else if (flag_name == L"ThrowOnUnmatch")
+      {
+        flags |= FindPatternFlags::kThrowOnUnmatch;
+      }
+      else if (flag_name == L"RelativeAddress")
+      {
+        flags |= FindPatternFlags::kRelativeAddress;
+      }
+      else if (flag_name == L"ScanData")
+      {
+        flags |= FindPatternFlags::kScanData;
+      }
+      else
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("Unknown 'Flag' value."));
+      }
+    }
+
+    return flags;
+  }
+
+  inline std::map<std::wstring, FindPatternInfo>
+    ReadPatternsFromXml(pugi::xml_document const& doc) const
   {
     auto const hadesmem_root = doc.child(L"HadesMem");
     if (!hadesmem_root)
@@ -759,220 +666,190 @@ private:
         Error() << ErrorString("Failed to find 'HadesMem' root node."));
     }
 
-    auto const find_pattern_node = hadesmem_root.child(L"FindPattern");
-    if (!find_pattern_node)
+    std::map<std::wstring, FindPatternInfo> pattern_infos_full;
+    for (auto const& find_pattern_node : hadesmem_root.children(L"FindPattern"))
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find 'Patterns' node."));
-    }
+      auto const module_name =
+        GetOptionalAttributeValue(find_pattern_node, L"Module");
 
-    auto const read_flags = [](pugi::xml_node const & node)->std::uint32_t
-    {
-      std::uint32_t flags = FindPatternFlags::kNone;
-      for (auto const& flag : node.children(L"Flag"))
+      std::uint32_t const flags = ReadFlags(find_pattern_node);
+
+      std::vector<PatternInfoFull> pattern_infos;
+
+      for (auto const& pattern : find_pattern_node.children(L"Pattern"))
       {
-        auto const flag_name_attr = flag.attribute(L"Name");
-        if (!flag_name_attr)
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Failed to find 'Name' attribute for "
-                                   "'Flag' node."));
-        }
-        std::wstring const flag_name = flag_name_attr.value();
-        if (flag_name.empty())
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Failed to find value for 'Name' "
-                                   "attribute for 'Flag' node."));
-        }
+        auto const pattern_name = GetAttributeValue(pattern, L"Name");
 
-        if (flag_name == L"None")
-        {
-          flags |= FindPatternFlags::kNone;
-        }
-        else if (flag_name == L"ThrowOnUnmatch")
-        {
-          flags |= FindPatternFlags::kThrowOnUnmatch;
-        }
-        else if (flag_name == L"RelativeAddress")
-        {
-          flags |= FindPatternFlags::kRelativeAddress;
-        }
-        else if (flag_name == L"ScanData")
-        {
-          flags |= FindPatternFlags::kScanData;
-        }
-        else
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Unknown 'Flag' value."));
-        }
-      }
+        auto const pattern_data = GetAttributeValue(pattern, L"Data");
 
-      return flags;
-    };
+        auto const pattern_start = GetOptionalAttributeValue(pattern, L"Start");
 
-    std::uint32_t const flags = read_flags(find_pattern_node);
+        std::uint32_t const pattern_flags = ReadFlags(pattern);
 
-    std::vector<PatternInfoFull> pattern_infos;
+        PatternInfo pattern_info{pattern_name,  pattern_data,
+                                 pattern_start, pattern_flags};
 
-    for (auto const& pattern : find_pattern_node.children(L"Pattern"))
-    {
-      auto const pattern_name_attr = pattern.attribute(L"Name");
-      if (!pattern_name_attr)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Failed to find 'Name' attribute for "
-                                 "'Pattern' node."));
-      }
-      std::wstring const pattern_name = pattern_name_attr.value();
-      if (pattern_name.empty())
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Failed to find value for 'Name' "
-                                 "attribute for 'Pattern' node."));
-      }
+        std::vector<ManipInfo> pattern_manips;
 
-      auto const pattern_data_attr = pattern.attribute(L"Data");
-      if (!pattern_data_attr)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Failed to find 'Data' attribute "
-                                 "for 'Pattern' node."));
-      }
-      std::wstring const pattern_data = pattern_data_attr.value();
-      if (pattern_data.empty())
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Failed to find value for 'Data' "
-                                 "attribute for 'Pattern' node."));
-      }
-
-      std::wstring pattern_start;
-      auto const pattern_start_attr = pattern.attribute(L"Start");
-      if (pattern_start_attr)
-      {
-        pattern_start = pattern_start_attr.value();
-        if (pattern_start.empty())
+        for (auto const& manipulator : pattern.children(L"Manipulator"))
         {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Failed to find value for 'Start' "
-                                   "attribute for 'Pattern' node."));
-        }
-      }
+          auto const manipulator_name = GetAttributeValue(manipulator, L"Name");
 
-      std::uint32_t const pattern_flags = read_flags(pattern);
-
-      PatternInfo pattern_info{pattern_name,  pattern_data,
-                               pattern_start, pattern_flags};
-
-      std::vector<ManipInfo> pattern_manips;
-
-      for (auto const& manipulator : pattern.children(L"Manipulator"))
-      {
-        auto const manipulator_name_attr = manipulator.attribute(L"Name");
-        if (!manipulator_name_attr)
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Failed to find 'Name' attribute "
-                                   "for 'Manipulator' node."));
-        }
-        std::wstring const manipulator_name = manipulator_name_attr.value();
-        if (manipulator_name.empty())
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Failed to find value for 'Name' "
-                                   "attribute for 'Manipulator' node."));
-        }
-
-        ManipInfo::Manipulator type = ManipInfo::Manipulator::kAdd;
-        if (manipulator_name == L"Add")
-        {
-          type = ManipInfo::Manipulator::kAdd;
-        }
-        else if (manipulator_name == L"Sub")
-        {
-          type = ManipInfo::Manipulator::kSub;
-        }
-        else if (manipulator_name == L"Rel")
-        {
-          type = ManipInfo::Manipulator::kRel;
-        }
-        else if (manipulator_name == L"Lea")
-        {
-          type = ManipInfo::Manipulator::kLea;
-        }
-        else
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Unknown value for 'Name' attribute "
-                                   "for 'Manipulator' node."));
-        }
-
-        auto const hex_str_to_uintptr = [](std::wstring const & s)
-          ->std::uintptr_t
-        {
-          std::wstringstream str;
-          str.imbue(std::locale::classic());
-          std::uintptr_t result = 0;
-          if (!(str << s) || !(str >> std::hex >> result))
+          ManipInfo::Manipulator type = ManipInfo::Manipulator::kAdd;
+          if (manipulator_name == L"Add")
+          {
+            type = ManipInfo::Manipulator::kAdd;
+          }
+          else if (manipulator_name == L"Sub")
+          {
+            type = ManipInfo::Manipulator::kSub;
+          }
+          else if (manipulator_name == L"Rel")
+          {
+            type = ManipInfo::Manipulator::kRel;
+          }
+          else if (manipulator_name == L"Lea")
+          {
+            type = ManipInfo::Manipulator::kLea;
+          }
+          else
           {
             HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Failed to convert hex string to "
-                                     "integer."));
+              Error() << ErrorString("Unknown value for 'Name' attribute for "
+                                     "'Manipulator' node."));
           }
-          return result;
-        };
 
-        auto const manipulator_operand1 = manipulator.attribute(L"Operand1");
-        bool const has_operand1 = !!manipulator_operand1;
-        std::uintptr_t const operand1 =
-          has_operand1 ? hex_str_to_uintptr(manipulator_operand1.value()) : 0U;
+          auto const hex_str_to_uintptr = [](std::wstring const & s)
+            ->std::uintptr_t
+          {
+            std::wstringstream str;
+            str.imbue(std::locale::classic());
+            std::uintptr_t result = 0;
+            if (!(str << s) || !(str >> std::hex >> result))
+            {
+              HADESMEM_DETAIL_THROW_EXCEPTION(
+                Error() << ErrorString(
+                             "Failed to convert hex string to integer."));
+            }
+            return result;
+          };
 
-        auto const manipulator_operand2 = manipulator.attribute(L"Operand2");
-        bool const has_operand2 = !!manipulator_operand2;
-        std::uintptr_t const operand2 =
-          has_operand2 ? hex_str_to_uintptr(manipulator_operand2.value()) : 0U;
+          auto const manipulator_operand1 = manipulator.attribute(L"Operand1");
+          bool const has_operand1 = !!manipulator_operand1;
+          std::uintptr_t const operand1 =
+            has_operand1 ? hex_str_to_uintptr(manipulator_operand1.value())
+                         : 0U;
 
-        pattern_manips.emplace_back(
-          ManipInfo{type, has_operand1, operand1, has_operand2, operand2});
+          auto const manipulator_operand2 = manipulator.attribute(L"Operand2");
+          bool const has_operand2 = !!manipulator_operand2;
+          std::uintptr_t const operand2 =
+            has_operand2 ? hex_str_to_uintptr(manipulator_operand2.value())
+                         : 0U;
+
+          pattern_manips.emplace_back(
+            ManipInfo{type, has_operand1, operand1, has_operand2, operand2});
+        }
+
+        pattern_infos.emplace_back(
+          PatternInfoFull{pattern_info, pattern_manips});
       }
 
-      pattern_infos.emplace_back(PatternInfoFull{pattern_info, pattern_manips});
+      // TODO: Check for duplicates.
+      pattern_infos_full[module_name] = {flags, pattern_infos};
     }
 
-    return {flags, pattern_infos};
+    return pattern_infos_full;
   }
+
+  inline void LoadPatternFileImpl(pugi::xml_document const& doc)
+  {
+    auto const patterns_info_full_list = ReadPatternsFromXml(doc);
+    for (auto const& patterns_info_full_pair : patterns_info_full_list)
+    {
+      ModuleInfo const mod_info = GetModuleInfo(patterns_info_full_pair.first);
+      auto const& patterns_info_full = patterns_info_full_pair.second;
+      auto const& pattern_infos = patterns_info_full.patterns;
+      for (auto const& p : pattern_infos)
+      {
+        auto const& pat_info = p.pattern;
+        std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
+        std::wstring const name = pat_info.name;
+        DWORD_PTR const base = mod_info.base;
+        void* address = Find(mod_info, pat_info.data, flags, pat_info.start);
+
+        auto const& manip_list = p.manipulators;
+        for (auto const& m : manip_list)
+        {
+          switch (m.type)
+          {
+          case ManipInfo::Manipulator::kAdd:
+            if (!m.has_operand1 || m.has_operand2)
+            {
+              HADESMEM_DETAIL_THROW_EXCEPTION(
+                Error() << ErrorString(
+                             "Invalid manipulator operands for 'Add'."));
+            }
+
+            address = Add(base, address, flags, m.operand1);
+
+            break;
+
+          case ManipInfo::Manipulator::kSub:
+            if (!m.has_operand1 || m.has_operand2)
+            {
+              HADESMEM_DETAIL_THROW_EXCEPTION(
+                Error() << ErrorString(
+                             "Invalid manipulator operands for 'Sub'."));
+            }
+
+            address = Sub(base, address, flags, m.operand1);
+
+            break;
+
+          case ManipInfo::Manipulator::kRel:
+            if (!m.has_operand1 || !m.has_operand2)
+            {
+              HADESMEM_DETAIL_THROW_EXCEPTION(
+                Error() << ErrorString(
+                             "Invalid manipulator operands for 'Rel'."));
+            }
+
+            address = Rel(base, address, flags, m.operand1, m.operand2);
+
+            break;
+
+          case ManipInfo::Manipulator::kLea:
+            if (m.has_operand1 || m.has_operand2)
+            {
+              HADESMEM_DETAIL_THROW_EXCEPTION(
+                Error() << ErrorString(
+                             "Invalid manipulator operands for 'Lea'."));
+            }
+
+            address = Lea(base, address, flags);
+
+            break;
+
+          default:
+            HADESMEM_DETAIL_THROW_EXCEPTION(
+              Error() << ErrorString("Unknown manipulator."));
+          }
+        }
+
+        auto const pattern_data_map_iter =
+          find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
+        PatternDataMap& pattern_data_map =
+          (pattern_data_map_iter != std::end(find_pattern_datas_))
+            ? pattern_data_map_iter->second
+            : find_pattern_datas_[detail::ToUpperOrdinal(mod_info.name)];
+        pattern_data_map[name] = {address, flags};
+      }
+    }
+  }
+
+  using PatternDataMap = std::map<std::wstring, PatternData>;
 
   Process const* process_;
-  DWORD_PTR base_;
-  std::vector<std::pair<PBYTE, PBYTE>> code_regions_;
-  std::vector<std::pair<PBYTE, PBYTE>> data_regions_;
-  std::map<std::wstring, PatternData> addresses_;
+  std::map<std::wstring, PatternDataMap> find_pattern_datas_;
 };
-
-inline void Save(FindPattern& find_pattern, Pattern const& pattern)
-{
-  std::wstring const name{pattern.GetName()};
-  if (name.empty())
-  {
-    return;
-  }
-
-  find_pattern.Update(
-    pattern.GetName(), pattern.GetAddress(), pattern.GetFlags());
-}
-
-inline Pattern::Pattern(FindPattern& finder,
-                        std::wstring const& data,
-                        std::wstring const& name,
-                        std::uint32_t flags,
-                        std::wstring const& start)
-  : process_(finder.process_),
-    base_(finder.base_),
-    name_(name),
-    address_(static_cast<PBYTE>(finder.Find(data, flags, start))),
-    flags_(flags)
-{
-}
 }
