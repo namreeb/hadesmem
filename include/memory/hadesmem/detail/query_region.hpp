@@ -56,10 +56,28 @@ inline bool CanExecute(MEMORY_BASIC_INFORMATION const& mbi)
   return (mbi.State == MEM_COMMIT) && !!(mbi.Protect & exec_prot);
 }
 
+inline bool IsBadProtect(MEMORY_BASIC_INFORMATION const& mbi)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return !!(mbi.Protect & (PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE));
+}
+
 inline bool IsGuard(MEMORY_BASIC_INFORMATION const& mbi)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return !!(mbi.Protect & PAGE_GUARD);
+}
+
+inline bool IsNoCache(MEMORY_BASIC_INFORMATION const& mbi)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return !!(mbi.Protect & PAGE_NOCACHE);
+}
+
+inline bool IsWriteCombine(MEMORY_BASIC_INFORMATION const& mbi)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return !!(mbi.Protect & PAGE_WRITECOMBINE);
 }
 }
 }

@@ -20,6 +20,9 @@ void TestQuery()
   BOOST_TEST(!CanWrite(process, this_mod));
   BOOST_TEST(!CanExecute(process, this_mod));
   BOOST_TEST(!IsGuard(process, this_mod));
+  BOOST_TEST(!IsNoCache(process, this_mod));
+  BOOST_TEST(!IsWriteCombine(process, this_mod));
+  BOOST_TEST(!IsBadProtect(process, this_mod));
 }
 
 void TestProtect()
@@ -39,6 +42,9 @@ void TestProtect()
   BOOST_TEST(!CanWrite(process, address));
   BOOST_TEST(!CanExecute(process, address));
   BOOST_TEST(!IsGuard(process, address));
+  BOOST_TEST(!IsNoCache(process, address));
+  BOOST_TEST(!IsWriteCombine(process, address));
+  BOOST_TEST(!IsBadProtect(process, address));
   BOOST_TEST_EQ(Protect(process, address, PAGE_EXECUTE),
                 static_cast<DWORD>(PAGE_NOACCESS));
   BOOST_TEST(CanExecute(process, address));
@@ -54,6 +60,9 @@ void QueryAndProtectInvalid()
   BOOST_TEST_THROWS(CanWrite(process, invalid_address), hadesmem::Error);
   BOOST_TEST_THROWS(CanExecute(process, invalid_address), hadesmem::Error);
   BOOST_TEST_THROWS(IsGuard(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(IsNoCache(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(IsWriteCombine(process, invalid_address), hadesmem::Error);
+  BOOST_TEST_THROWS(IsBadProtect(process, invalid_address), hadesmem::Error);
   BOOST_TEST_THROWS(Protect(process, invalid_address, PAGE_EXECUTE_READWRITE),
                     hadesmem::Error);
 }

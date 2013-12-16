@@ -48,10 +48,13 @@ public:
       old_protect_(0),
       mbi_(mbi)
   {
-    if (IsGuard(mbi_))
+    // TODO: Add a 'forced' mode to allow bypassing this for the rare cases
+    // where it may be necessary.
+    if (IsBadProtect(mbi_))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Attempt to write to guard page."));
+        Error() << ErrorString(
+                     "Attempt to access page with a 'bad' protection mask."));
     }
 
     can_read_or_write_ =

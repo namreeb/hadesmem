@@ -37,6 +37,24 @@ inline bool IsGuard(Process const& process, LPCVOID address)
   return detail::IsGuard(mbi);
 }
 
+inline bool IsNoCache(Process const& process, LPCVOID address)
+{
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+  return detail::IsWriteCombine(mbi);
+}
+
+inline bool IsWriteCombine(Process const& process, LPCVOID address)
+{
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+  return detail::IsWriteCombine(mbi);
+}
+
+inline bool IsBadProtect(Process const& process, LPCVOID address)
+{
+  MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
+  return detail::IsBadProtect(mbi);
+}
+
 inline DWORD Protect(Process const& process, LPVOID address, DWORD protect)
 {
   MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
