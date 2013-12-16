@@ -83,28 +83,23 @@ struct FindPatternFlags
   };
 };
 
-struct PatternData
-{
-  void* address;
-  std::uint32_t flags;
-};
-
-inline bool operator==(PatternData const& lhs, PatternData const& rhs)
-{
-  return lhs.address == rhs.address && lhs.flags == rhs.flags;
-}
-
-inline bool operator!=(PatternData const& lhs, PatternData const& rhs)
-{
-  return !(lhs == rhs);
-}
-
 class FindPattern
 {
 public:
-  explicit FindPattern(Process const& process)
+  // TODO: Use an enum instead of a boolean.
+  explicit FindPattern(Process const& process,
+                       std::wstring const& pattern_file,
+                       bool in_memory_file)
     : process_(&process), find_pattern_datas_()
   {
+    if (in_memory_file)
+    {
+      LoadPatternFileMemory(pattern_file);
+    }
+    else
+    {
+      LoadPatternFile(pattern_file);
+    }
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
@@ -152,6 +147,26 @@ public:
     return !(lhs == rhs);
   }
 
+  // TODO: Remove this once enumeration is supported.
+  std::size_t ModuleCount() const
+  {
+    return find_pattern_datas_.size();
+  }
+
+  // TODO: Remove this once enumeration is supported.
+  std::size_t PatternCount(std::wstring const& module) const
+  {
+    auto const iter = find_pattern_datas_.find(detail::ToUpperOrdinal(module));
+    if (iter == std::end(find_pattern_datas_))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Invalid module name."));
+    }
+
+    return iter->second.size();
+  }
+
+private:
   inline void LoadPatternFile(std::wstring const& path)
   {
     pugi::xml_document doc;
@@ -182,59 +197,22 @@ public:
     LoadPatternFileImpl(doc);
   }
 
-  std::size_t ModuleCount() const
+  struct PatternData
   {
-    return find_pattern_datas_.size();
-  }
+    void* address;
+    std::uint32_t flags;
 
-  std::size_t PatternCount(std::wstring const& module) const
-  {
-    auto const mod_info = GetModuleInfo(module);
-    auto const iter =
-      find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
-    if (iter == std::end(find_pattern_datas_))
+    bool operator==(PatternData const& rhs) const
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid module name."));
+      return address == rhs.address && flags == rhs.flags;
     }
 
-    return iter->second.size();
-  }
-
-  // TODO: Make these overloads less confusnig...
-  PVOID Find(std::wstring const& module,
-             std::wstring const& data,
-             std::uint32_t flags,
-             std::wstring const& start) const
-  {
-    auto const mod_info = GetModuleInfo(module);
-    return Find(mod_info, data, flags, start);
-  }
-
-  PVOID Find(std::wstring const& module,
-             std::wstring const& name,
-             std::wstring const& data,
-             std::uint32_t flags,
-             std::wstring const& start)
-  {
-    PVOID address = Find(module, data, flags, start);
-
-    if (!name.empty())
+    bool operator!=(PatternData const& rhs) const
     {
-      auto const mod_info = GetModuleInfo(module);
-      auto const pattern_data_map_iter =
-        find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
-      PatternDataMap& pattern_data_map =
-        (pattern_data_map_iter != std::end(find_pattern_datas_))
-          ? pattern_data_map_iter->second
-          : find_pattern_datas_[detail::ToUpperOrdinal(mod_info.name)];
-      pattern_data_map[name] = {address, flags};
+      return !(*this == rhs);
     }
+  };
 
-    return address;
-  }
-
-private:
   std::vector<std::pair<BYTE, bool>> ConvertData(std::wstring const& data) const
   {
     HADESMEM_DETAIL_ASSERT(!data.empty());
@@ -289,9 +267,8 @@ private:
   PatternData LookupEx(std::wstring const& module,
                        std::wstring const& name) const
   {
-    auto const mod_info = GetModuleInfo(module);
     auto const addresses_iter =
-      find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
+      find_pattern_datas_.find(detail::ToUpperOrdinal(module));
     if (addresses_iter == std::end(find_pattern_datas_))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -313,12 +290,12 @@ private:
   struct ModuleInfo
   {
     DWORD_PTR base;
-    std::wstring name;
     std::vector<std::pair<PBYTE, PBYTE>> code_regions;
     std::vector<std::pair<PBYTE, PBYTE>> data_regions;
   };
 
   PVOID Find(ModuleInfo const& mod_info,
+             std::wstring const& module,
              std::wstring const& data,
              std::uint32_t flags,
              std::wstring const& start) const
@@ -328,7 +305,7 @@ private:
 
     auto const data_real = ConvertData(data);
 
-    PVOID address = Find(mod_info, data_real, flags, start);
+    PVOID address = Find(mod_info, module, data_real, flags, start);
 
     if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
     {
@@ -353,15 +330,11 @@ private:
     {
       Module const module_ex(*process_, nullptr);
       mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
-      mod_info.name = module_ex.GetName();
     }
-    // TODO: Fix Module construtor for an empty string... Apparently it's not
-    // throwing...
     else
     {
       Module const module_ex(*process_, module);
       mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
-      mod_info.name = detail::ToUpperOrdinal(module_ex.GetName());
     }
 
     PBYTE const base = reinterpret_cast<PBYTE>(mod_info.base);
@@ -412,6 +385,7 @@ private:
   }
 
   PVOID Find(ModuleInfo const& mod_info,
+             std::wstring const& module,
              std::vector<std::pair<BYTE, bool>> const& data,
              std::uint32_t flags,
              std::wstring const& start) const
@@ -421,7 +395,7 @@ private:
     PVOID start_addr = nullptr;
     if (!start.empty())
     {
-      PatternData const start_pattern = LookupEx(mod_info.name, start);
+      PatternData const start_pattern = LookupEx(module, start);
       bool const start_pattern_relative =
         !!(start_pattern.flags & FindPatternFlags::kRelativeAddress);
       start_addr = start_pattern_relative
@@ -669,8 +643,8 @@ private:
     std::map<std::wstring, FindPatternInfo> pattern_infos_full;
     for (auto const& find_pattern_node : hadesmem_root.children(L"FindPattern"))
     {
-      auto const module_name =
-        GetOptionalAttributeValue(find_pattern_node, L"Module");
+      auto const module_name = detail::ToUpperOrdinal(
+        GetOptionalAttributeValue(find_pattern_node, L"Module"));
 
       std::uint32_t const flags = ReadFlags(find_pattern_node);
 
@@ -754,7 +728,8 @@ private:
           PatternInfoFull{pattern_info, pattern_manips});
       }
 
-      // TODO: Check for duplicates.
+      HADESMEM_DETAIL_ASSERT(pattern_infos_full.find(module_name) ==
+                             std::end(pattern_infos_full));
       pattern_infos_full[module_name] = {flags, pattern_infos};
     }
 
@@ -766,6 +741,10 @@ private:
     auto const patterns_info_full_list = ReadPatternsFromXml(doc);
     for (auto const& patterns_info_full_pair : patterns_info_full_list)
     {
+      HADESMEM_DETAIL_ASSERT(
+        find_pattern_datas_.find(patterns_info_full_pair.first) ==
+        std::end(find_pattern_datas_));
+
       ModuleInfo const mod_info = GetModuleInfo(patterns_info_full_pair.first);
       auto const& patterns_info_full = patterns_info_full_pair.second;
       auto const& pattern_infos = patterns_info_full.patterns;
@@ -775,7 +754,11 @@ private:
         std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
         std::wstring const name = pat_info.name;
         DWORD_PTR const base = mod_info.base;
-        void* address = Find(mod_info, pat_info.data, flags, pat_info.start);
+        void* address = Find(mod_info,
+                             patterns_info_full_pair.first,
+                             pat_info.data,
+                             flags,
+                             pat_info.start);
 
         auto const& manip_list = p.manipulators;
         for (auto const& m : manip_list)
@@ -836,13 +819,8 @@ private:
           }
         }
 
-        auto const pattern_data_map_iter =
-          find_pattern_datas_.find(detail::ToUpperOrdinal(mod_info.name));
-        PatternDataMap& pattern_data_map =
-          (pattern_data_map_iter != std::end(find_pattern_datas_))
-            ? pattern_data_map_iter->second
-            : find_pattern_datas_[detail::ToUpperOrdinal(mod_info.name)];
-        pattern_data_map[name] = {address, flags};
+        find_pattern_datas_[patterns_info_full_pair.first][name] = {address,
+                                                                    flags};
       }
     }
   }
