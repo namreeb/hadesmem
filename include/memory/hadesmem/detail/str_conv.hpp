@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -13,6 +14,7 @@
 
 #include <hadesmem/error.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {
@@ -21,17 +23,32 @@ namespace detail
 {
 
 // String must be hex.
-inline void* HexStrToPtr(std::wstring const& str)
+inline std::uintptr_t HexStrToPtr(std::wstring const& str)
 {
   std::wstringstream ss(str);
   ss.imbue(std::locale::classic());
-  DWORD_PTR ptr = 0;
+  std::uintptr_t ptr = 0;
   if (!(ss >> std::hex >> ptr))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       Error() << ErrorString("String to pointer conversion failed."));
   }
-  return reinterpret_cast<void*>(ptr);
+  return ptr;
+}
+
+template <typename T, typename CharT>
+T StrToNum(std::basic_string<CharT> const& str)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
+  std::basic_ostringstream<CharT> converter(str);
+  converter.imbue(std::locale::classic());
+  T out = 0;
+  if (!converter || (!converter >> out))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("Conversion failed."));
+  }
+  return out;
 }
 
 inline std::string WideCharToMultiByte(std::wstring const& in)

@@ -16,7 +16,7 @@
 #include <winnt.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/str_to_num.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>

@@ -41,12 +41,17 @@ void TestFindPattern()
       <Flag Name="ScanData"/>
     </Pattern>
   </FindPattern>
+  <FindPattern Module="ntdll.dll">
+    <Flag Name="ThrowOnUnmatch"/>
+    <Pattern Name="Int3 Then Nop" Data="CC 90"/>
+    <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e 64 6f 6d"/>
+  </FindPattern>
 </HadesMem>
 )";
   // TODO: Actually validate that the results are correct.
   hadesmem::FindPattern find_pattern(process, pattern_file_data, true);
   find_pattern = hadesmem::FindPattern(process, pattern_file_data, true);
-  BOOST_TEST_EQ(find_pattern.ModuleCount(), 1UL);
+  BOOST_TEST_EQ(find_pattern.ModuleCount(), 2UL);
   BOOST_TEST_EQ(find_pattern.PatternCount(L""), 5UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"First Call"),
                 static_cast<void*>(nullptr));
@@ -64,6 +69,25 @@ void TestFindPattern()
              find_pattern.Lookup(L"", L"Nop Other"));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"FindPattern String"),
                 static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(find_pattern.PatternCount(L"ntdll.dll"), 2UL);
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
+                static_cast<void*>(nullptr));
+  auto const int3_then_nop =
+    find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop");
+  BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop), '\xCC');
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop) + 1), '\x90');
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
+                static_cast<void*>(nullptr));
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
+                find_pattern.Lookup(L"", L"FindPattern String"));
+  HMODULE const ntdll_mod = ::GetModuleHandleW(L"ntdll");
+  BOOST_TEST_NE(ntdll_mod, static_cast<HMODULE>(nullptr));
+  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String") >
+             ntdll_mod);
+  std::string const rtlrandom = "RtlRandom";
+  auto const found_rtlrandom =
+    static_cast<char*>(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"));
+  std::equal(std::begin(rtlrandom), std::end(rtlrandom), found_rtlrandom);
 
   // TODO: Fix the test to ensure we get the error we're expecting, rather
   // than just any error.

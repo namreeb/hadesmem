@@ -36,42 +36,27 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
-// TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where
-// appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new
-// language features like noexcept, constexpr, etc.
-
-// TODO: Rewrite to remove cyclic dependencies.
-
 // TODO: Pattern generator.
-
-// TODO: Arbitrary region support.
 
 // TODO: Standalone app/example for FindPattern. For dumping results,
 // experimenting with patterns, automatically generating new patterns, etc.
 
-// TODO: Allow module names and custom regions to be specified in pattern
-// file.
+// TODO: Allow custom regions to be specified (similar to module name).
 
-// TODO: Fix order of args etc (general API cleanup) due to adding start
-// address support.
-
-// TODO: Either support all the attributes, manipulators, etc in both the XML
-// file and in source code, or don't support any (which would simplify things
-// vastly). Probably best to only support very simple patterns in source code
-// and require XML for anything complex?
-
-// TODO: Check for duplicate names etc? Or support it to allow patterns
-// overwiting themself when using the Start attribute (any other scenarios?).
+// TODO: Support basic pattern scans in the form of a free function taking
+// the arguments directly. For anything more complex require that XML be used.
 
 // TODO: Clean up XML related code and remove redundant code, add/remove
 // checking where appropriate, etc.
 
 // TODO: Add support for RVA as start address, not just name.
 
+// TODO: Make order of arguments more consistent (even in private funcs).
+
 namespace hadesmem
 {
 
-struct FindPatternFlags
+struct PatternFlags
 {
   enum : std::uint32_t
   {
@@ -135,6 +120,9 @@ public:
   }
 
   // TODO: Add a way to enumerate all modules/bases.
+
+  // TODO: Add operator[] overloads to read pattern addresses.
+  // e.g. find_pattern[L"ntdll.dll"][L"RtlRandom"]
 
   friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
   {
@@ -289,7 +277,7 @@ private:
 
   struct ModuleInfo
   {
-    DWORD_PTR base;
+    std::uintptr_t base;
     std::vector<std::pair<PBYTE, PBYTE>> code_regions;
     std::vector<std::pair<PBYTE, PBYTE>> data_regions;
   };
@@ -301,19 +289,19 @@ private:
              std::wstring const& start) const
   {
     HADESMEM_DETAIL_ASSERT(
-      !(flags & ~(FindPatternFlags::kInvalidFlagMaxValue - 1UL)));
+      !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
 
     auto const data_real = ConvertData(data);
 
     PVOID address = Find(mod_info, module, data_real, flags, start);
 
-    if (!address && !!(flags & FindPatternFlags::kThrowOnUnmatch))
+    if (!address && !!(flags & PatternFlags::kThrowOnUnmatch))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Could not match pattern."));
     }
 
-    bool const is_relative = !!(flags & FindPatternFlags::kRelativeAddress);
+    bool const is_relative = !!(flags & PatternFlags::kRelativeAddress);
     if (address && is_relative)
     {
       address = static_cast<PBYTE>(address) - mod_info.base;
@@ -329,12 +317,12 @@ private:
     if (module.empty())
     {
       Module const module_ex(*process_, nullptr);
-      mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
+      mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
     }
     else
     {
       Module const module_ex(*process_, module);
-      mod_info.base = reinterpret_cast<DWORD_PTR>(module_ex.GetHandle());
+      mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
     }
 
     PBYTE const base = reinterpret_cast<PBYTE>(mod_info.base);
@@ -397,13 +385,13 @@ private:
     {
       PatternData const start_pattern = LookupEx(module, start);
       bool const start_pattern_relative =
-        !!(start_pattern.flags & FindPatternFlags::kRelativeAddress);
+        !!(start_pattern.flags & PatternFlags::kRelativeAddress);
       start_addr = start_pattern_relative
                      ? static_cast<PBYTE>(start_pattern.address) + mod_info.base
                      : start_pattern.address;
     }
 
-    bool const scan_data_secs = !!(flags & FindPatternFlags::kScanData);
+    bool const scan_data_secs = !!(flags & PatternFlags::kScanData);
     std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
       scan_data_secs ? mod_info.data_regions : mod_info.code_regions;
     for (auto const& region : scan_regions)
@@ -493,23 +481,24 @@ private:
     std::vector<PatternInfoFull> patterns;
   };
 
-  inline void* Add(DWORD_PTR /*base*/,
+  inline void* Add(std::uintptr_t /*base*/,
                    void* address,
                    std::uint32_t /*flags*/,
-                   DWORD_PTR offset) const
+                   std::uintptr_t offset) const
   {
     return address ? static_cast<unsigned char*>(address) + offset : nullptr;
   }
 
-  inline void* Sub(DWORD_PTR /*base*/,
+  inline void* Sub(std::uintptr_t /*base*/,
                    void* address,
                    std::uint32_t /*flags*/,
-                   DWORD_PTR offset) const
+                   std::uintptr_t offset) const
   {
     return address ? static_cast<unsigned char*>(address) - offset : nullptr;
   }
 
-  inline void* Lea(DWORD_PTR base, void* address, std::uint32_t flags) const
+  inline void*
+    Lea(std::uintptr_t base, void* address, std::uint32_t flags) const
   {
     if (!address)
     {
@@ -519,10 +508,13 @@ private:
     try
     {
       bool const is_relative_address =
-        !!(flags & FindPatternFlags::kRelativeAddress);
-      DWORD_PTR real_base = is_relative_address ? base : 0;
-      return Read<void*>(*process_,
-                         static_cast<unsigned char*>(address) + real_base);
+        !!(flags & PatternFlags::kRelativeAddress);
+      std::uintptr_t real_base = is_relative_address ? base : 0;
+      void* const real_address =
+        static_cast<unsigned char*>(address) + real_base;
+      unsigned char* const result =
+        Read<unsigned char*>(*process_, real_address);
+      return is_relative_address ? result - base : result;
     }
     catch (std::exception const& /*e*/)
     {
@@ -530,11 +522,11 @@ private:
     }
   }
 
-  inline void* Rel(DWORD_PTR base,
+  inline void* Rel(std::uintptr_t base,
                    void* address,
                    std::uint32_t flags,
-                   DWORD_PTR size,
-                   DWORD_PTR offset) const
+                   std::uintptr_t size,
+                   std::uintptr_t offset) const
   {
     if (!address)
     {
@@ -544,13 +536,14 @@ private:
     try
     {
       bool const is_relative_address =
-        !!(flags & FindPatternFlags::kRelativeAddress);
-      DWORD_PTR const real_base = is_relative_address ? base : 0;
-      return Read<PBYTE>(*process_,
-                         static_cast<unsigned char*>(address) + real_base) +
-             reinterpret_cast<DWORD_PTR>(static_cast<unsigned char*>(address) +
-                                         real_base) +
-             size - offset;
+        !!(flags & PatternFlags::kRelativeAddress);
+      std::uintptr_t const real_base = is_relative_address ? base : 0;
+      void* const real_address =
+        static_cast<unsigned char*>(address) + real_base;
+      unsigned char* const result =
+        Read<unsigned char*>(*process_, real_address) +
+        reinterpret_cast<std::uintptr_t>(real_address) + size - offset;
+      return is_relative_address ? result - base : result;
     }
     catch (std::exception const& /*e*/)
     {
@@ -599,26 +592,26 @@ private:
 
   inline std::uint32_t ReadFlags(pugi::xml_node const& node) const
   {
-    std::uint32_t flags = FindPatternFlags::kNone;
+    std::uint32_t flags = PatternFlags::kNone;
     for (auto const& flag : node.children(L"Flag"))
     {
       auto const flag_name = GetAttributeValue(flag, L"Name");
 
       if (flag_name == L"None")
       {
-        flags |= FindPatternFlags::kNone;
+        flags |= PatternFlags::kNone;
       }
       else if (flag_name == L"ThrowOnUnmatch")
       {
-        flags |= FindPatternFlags::kThrowOnUnmatch;
+        flags |= PatternFlags::kThrowOnUnmatch;
       }
       else if (flag_name == L"RelativeAddress")
       {
-        flags |= FindPatternFlags::kRelativeAddress;
+        flags |= PatternFlags::kRelativeAddress;
       }
       else if (flag_name == L"ScanData")
       {
-        flags |= FindPatternFlags::kScanData;
+        flags |= PatternFlags::kScanData;
       }
       else
       {
@@ -693,31 +686,16 @@ private:
                                      "'Manipulator' node."));
           }
 
-          auto const hex_str_to_uintptr = [](std::wstring const & s)
-            ->std::uintptr_t
-          {
-            std::wstringstream str;
-            str.imbue(std::locale::classic());
-            std::uintptr_t result = 0;
-            if (!(str << s) || !(str >> std::hex >> result))
-            {
-              HADESMEM_DETAIL_THROW_EXCEPTION(
-                Error() << ErrorString(
-                             "Failed to convert hex string to integer."));
-            }
-            return result;
-          };
-
           auto const manipulator_operand1 = manipulator.attribute(L"Operand1");
           bool const has_operand1 = !!manipulator_operand1;
           std::uintptr_t const operand1 =
-            has_operand1 ? hex_str_to_uintptr(manipulator_operand1.value())
+            has_operand1 ? detail::HexStrToPtr(manipulator_operand1.value())
                          : 0U;
 
           auto const manipulator_operand2 = manipulator.attribute(L"Operand2");
           bool const has_operand2 = !!manipulator_operand2;
           std::uintptr_t const operand2 =
-            has_operand2 ? hex_str_to_uintptr(manipulator_operand2.value())
+            has_operand2 ? detail::HexStrToPtr(manipulator_operand2.value())
                          : 0U;
 
           pattern_manips.emplace_back(
@@ -736,6 +714,68 @@ private:
     return pattern_infos_full;
   }
 
+  inline void* ApplyManipulators(void* address,
+                                 std::uint32_t flags,
+                                 std::uintptr_t base,
+                                 std::vector<ManipInfo> const& manip_list) const
+  {
+    for (auto const& m : manip_list)
+    {
+      switch (m.type)
+      {
+      case ManipInfo::Manipulator::kAdd:
+        if (!m.has_operand1 || m.has_operand2)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Invalid manipulator operands for 'Add'."));
+        }
+
+        address = Add(base, address, flags, m.operand1);
+
+        break;
+
+      case ManipInfo::Manipulator::kSub:
+        if (!m.has_operand1 || m.has_operand2)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Invalid manipulator operands for 'Sub'."));
+        }
+
+        address = Sub(base, address, flags, m.operand1);
+
+        break;
+
+      case ManipInfo::Manipulator::kRel:
+        if (!m.has_operand1 || !m.has_operand2)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Invalid manipulator operands for 'Rel'."));
+        }
+
+        address = Rel(base, address, flags, m.operand1, m.operand2);
+
+        break;
+
+      case ManipInfo::Manipulator::kLea:
+        if (m.has_operand1 || m.has_operand2)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Invalid manipulator operands for 'Lea'."));
+        }
+
+        address = Lea(base, address, flags);
+
+        break;
+
+      default:
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                        << ErrorString("Unknown manipulator."));
+      }
+    }
+
+    return address;
+  }
+
   inline void LoadPatternFileImpl(pugi::xml_document const& doc)
   {
     auto const patterns_info_full_list = ReadPatternsFromXml(doc);
@@ -750,77 +790,17 @@ private:
       auto const& pattern_infos = patterns_info_full.patterns;
       for (auto const& p : pattern_infos)
       {
-        auto const& pat_info = p.pattern;
-        std::uint32_t const flags = patterns_info_full.flags | pat_info.flags;
-        std::wstring const name = pat_info.name;
-        DWORD_PTR const base = mod_info.base;
+        std::uint32_t const flags = patterns_info_full.flags | p.pattern.flags;
         void* address = Find(mod_info,
                              patterns_info_full_pair.first,
-                             pat_info.data,
+                             p.pattern.data,
                              flags,
-                             pat_info.start);
+                             p.pattern.start);
+        address =
+          ApplyManipulators(address, flags, mod_info.base, p.manipulators);
 
-        auto const& manip_list = p.manipulators;
-        for (auto const& m : manip_list)
-        {
-          switch (m.type)
-          {
-          case ManipInfo::Manipulator::kAdd:
-            if (!m.has_operand1 || m.has_operand2)
-            {
-              HADESMEM_DETAIL_THROW_EXCEPTION(
-                Error() << ErrorString(
-                             "Invalid manipulator operands for 'Add'."));
-            }
-
-            address = Add(base, address, flags, m.operand1);
-
-            break;
-
-          case ManipInfo::Manipulator::kSub:
-            if (!m.has_operand1 || m.has_operand2)
-            {
-              HADESMEM_DETAIL_THROW_EXCEPTION(
-                Error() << ErrorString(
-                             "Invalid manipulator operands for 'Sub'."));
-            }
-
-            address = Sub(base, address, flags, m.operand1);
-
-            break;
-
-          case ManipInfo::Manipulator::kRel:
-            if (!m.has_operand1 || !m.has_operand2)
-            {
-              HADESMEM_DETAIL_THROW_EXCEPTION(
-                Error() << ErrorString(
-                             "Invalid manipulator operands for 'Rel'."));
-            }
-
-            address = Rel(base, address, flags, m.operand1, m.operand2);
-
-            break;
-
-          case ManipInfo::Manipulator::kLea:
-            if (m.has_operand1 || m.has_operand2)
-            {
-              HADESMEM_DETAIL_THROW_EXCEPTION(
-                Error() << ErrorString(
-                             "Invalid manipulator operands for 'Lea'."));
-            }
-
-            address = Lea(base, address, flags);
-
-            break;
-
-          default:
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Unknown manipulator."));
-          }
-        }
-
-        find_pattern_datas_[patterns_info_full_pair.first][name] = {address,
-                                                                    flags};
+        find_pattern_datas_[patterns_info_full_pair.first][p.pattern.name] = {
+          address, flags};
       }
     }
   }
