@@ -43,15 +43,10 @@
 
 // TODO: Allow custom regions to be specified (similar to module name).
 
-// TODO: Support basic pattern scans in the form of a free function taking
-// the arguments directly. For anything more complex require that XML be used.
-
-// TODO: Clean up XML related code and remove redundant code, add/remove
-// checking where appropriate, etc.
-
-// TODO: Add support for RVA as start address, not just name.
-
-// TODO: Make order of arguments more consistent (even in private funcs).
+// TODO: Support basic pattern scans in the form of a free function (or maybe a
+// different but more basic class?) taking the arguments directly. For anything
+// more complex require that XML be used. Either way, don't duplicate code.
+// FindPattern should be implemented in terms of the simpler implementation.
 
 namespace hadesmem
 {
@@ -68,14 +63,57 @@ struct PatternFlags
   };
 };
 
+class Pattern
+{
+public:
+  Pattern() HADESMEM_DETAIL_NOEXCEPT
+  {
+  }
+
+  explicit Pattern(void* address, std::uint32_t flags) HADESMEM_DETAIL_NOEXCEPT
+    : address_{address},
+      flags_{flags}
+  {
+  }
+
+  void* GetAddress() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return address_;
+  }
+
+  std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return flags_;
+  }
+
+private:
+  void* address_{nullptr};
+  std::uint32_t flags_{PatternFlags::kNone};
+};
+
+inline bool operator==(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetAddress() == rhs.GetAddress() &&
+         lhs.GetFlags() == rhs.GetFlags();
+}
+
+inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return !(lhs == rhs);
+}
+
 class FindPattern
 {
 public:
-  // TODO: Use an enum instead of a boolean.
+  using PatternMap = std::map<std::wstring, Pattern>;
+  using ModuleMap = std::map<std::wstring, PatternMap>;
+
   explicit FindPattern(Process const& process,
                        std::wstring const& pattern_file,
                        bool in_memory_file)
-    : process_(&process), find_pattern_datas_()
+    : process_{&process}, find_pattern_datas_{}
   {
     if (in_memory_file)
     {
@@ -94,8 +132,8 @@ public:
   FindPattern& operator=(FindPattern const&) = default;
 
   FindPattern(FindPattern&& other)
-    : process_(other.process_),
-      find_pattern_datas_(std::move(other.find_pattern_datas_))
+    : process_{other.process_},
+      find_pattern_datas_{std::move(other.find_pattern_datas_)}
   {
     other.process_ = nullptr;
   }
@@ -112,17 +150,32 @@ public:
 
 #endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  // TODO: Add a way to enumerate all patterns.
+  // TODO: Don't return references to internals. Instead use a wrapper type that
+  // can provide safe and abstracted access to the underlying data. This
+  // includes providing APIs for enumeration, and also a const-safe operator[]
+  // for retrieving pattern data.
 
-  PVOID Lookup(std::wstring const& module, std::wstring const& name) const
+  ModuleMap const& GetModuleMap() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return LookupEx(module, name).address;
+    return find_pattern_datas_;
   }
 
-  // TODO: Add a way to enumerate all modules/bases.
+  PatternMap const& GetPatternMap(std::wstring const& module) const
+  {
+    auto const iter = find_pattern_datas_.find(detail::ToUpperOrdinal(module));
+    if (iter == std::end(find_pattern_datas_))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Invalid module name."));
+    }
 
-  // TODO: Add operator[] overloads to read pattern addresses.
-  // e.g. find_pattern[L"ntdll.dll"][L"RtlRandom"]
+    return iter->second;
+  }
+
+  void* Lookup(std::wstring const& module, std::wstring const& name) const
+  {
+    return LookupEx(module, name).GetAddress();
+  }
 
   friend bool operator==(FindPattern const& lhs, FindPattern const& rhs)
   {
@@ -133,25 +186,6 @@ public:
   friend bool operator!=(FindPattern const& lhs, FindPattern const& rhs)
   {
     return !(lhs == rhs);
-  }
-
-  // TODO: Remove this once enumeration is supported.
-  std::size_t ModuleCount() const
-  {
-    return find_pattern_datas_.size();
-  }
-
-  // TODO: Remove this once enumeration is supported.
-  std::size_t PatternCount(std::wstring const& module) const
-  {
-    auto const iter = find_pattern_datas_.find(detail::ToUpperOrdinal(module));
-    if (iter == std::end(find_pattern_datas_))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid module name."));
-    }
-
-    return iter->second.size();
   }
 
 private:
@@ -185,35 +219,42 @@ private:
     LoadPatternFileImpl(doc);
   }
 
-  struct PatternData
+  class PatternDataByte
   {
-    void* address;
-    std::uint32_t flags;
-
-    bool operator==(PatternData const& rhs) const
+  public:
+    explicit PatternDataByte(std::uint8_t data, bool wildcard)
+      : data_(data), wildcard_(wildcard)
     {
-      return address == rhs.address && flags == rhs.flags;
     }
 
-    bool operator!=(PatternData const& rhs) const
+    std::uint8_t GetData() const HADESMEM_DETAIL_NOEXCEPT
     {
-      return !(*this == rhs);
+      return data_;
     }
+
+    bool IsWildcard() const HADESMEM_DETAIL_NOEXCEPT
+    {
+      return wildcard_;
+    }
+
+  private:
+    std::uint8_t data_;
+    bool wildcard_;
   };
 
-  std::vector<std::pair<BYTE, bool>> ConvertData(std::wstring const& data) const
+  std::vector<PatternDataByte> ConvertData(std::wstring const& data) const
   {
     HADESMEM_DETAIL_ASSERT(!data.empty());
 
-    std::wstring const data_trimmed =
-      data.substr(0, data.find_last_not_of(L" \n\r\t") + 1);
+    std::wstring const data_trimmed{
+      data.substr(0, data.find_last_not_of(L" \n\r\t") + 1)};
 
     HADESMEM_DETAIL_ASSERT(!data_trimmed.empty());
 
-    std::wistringstream data_str(data_trimmed);
+    std::wistringstream data_str{data_trimmed};
     data_str.imbue(std::locale::classic());
-    std::vector<std::pair<BYTE, bool>> data_real;
-    for (;;)
+    std::vector<PatternDataByte> data_real;
+    do
     {
       std::wstring data_cur_str;
       if (!(data_str >> data_cur_str))
@@ -234,39 +275,24 @@ private:
             Error() << ErrorString("Data conversion failed."));
         }
 
-        if (current > 0xFFU)
+        if (current > static_cast<std::uint8_t>(-1))
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(Error()
                                           << ErrorString("Invalid data."));
         }
       }
 
-      data_real.emplace_back(static_cast<BYTE>(current), !is_wildcard);
-
-      if (data_str.eof())
-      {
-        break;
-      }
-    }
+      data_real.emplace_back(static_cast<std::uint8_t>(current), is_wildcard);
+    } while (!data_str.eof());
 
     return data_real;
   }
 
-  PatternData LookupEx(std::wstring const& module,
-                       std::wstring const& name) const
+  Pattern LookupEx(std::wstring const& module, std::wstring const& name) const
   {
-    auto const addresses_iter =
-      find_pattern_datas_.find(detail::ToUpperOrdinal(module));
-    if (addresses_iter == std::end(find_pattern_datas_))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Could not find target module."));
-    }
-
-    auto const& addresses = addresses_iter->second;
-
-    auto const iter = addresses.find(name);
-    if (iter == std::end(addresses))
+    auto const& pattern_map = GetPatternMap(module);
+    auto const iter = pattern_map.find(name);
+    if (iter == std::end(pattern_map))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Could not find target pattern."));
@@ -278,11 +304,12 @@ private:
   struct ModuleInfo
   {
     std::uintptr_t base;
-    std::vector<std::pair<PBYTE, PBYTE>> code_regions;
-    std::vector<std::pair<PBYTE, PBYTE>> data_regions;
+    using ScanRegion = std::pair<std::uint8_t*, std::uint8_t*>;
+    std::vector<ScanRegion> code_regions;
+    std::vector<ScanRegion> data_regions;
   };
 
-  PVOID Find(ModuleInfo const& mod_info,
+  void* Find(ModuleInfo const& mod_info,
              std::wstring const& module,
              std::wstring const& data,
              std::uint32_t flags,
@@ -293,7 +320,7 @@ private:
 
     auto const data_real = ConvertData(data);
 
-    PVOID address = Find(mod_info, module, data_real, flags, start);
+    void* address = Find(mod_info, module, std::begin(data_real), std::end(data_real), flags, start);
 
     if (!address && !!(flags & PatternFlags::kThrowOnUnmatch))
     {
@@ -304,7 +331,7 @@ private:
     bool const is_relative = !!(flags & PatternFlags::kRelativeAddress);
     if (address && is_relative)
     {
-      address = static_cast<PBYTE>(address) - mod_info.base;
+      address = static_cast<std::uint8_t*>(address) - mod_info.base;
     }
 
     return address;
@@ -316,21 +343,20 @@ private:
 
     if (module.empty())
     {
-      Module const module_ex(*process_, nullptr);
+      Module const module_ex{*process_, nullptr};
       mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
     }
     else
     {
-      Module const module_ex(*process_, module);
+      Module const module_ex{*process_, module};
       mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
     }
 
-    PBYTE const base = reinterpret_cast<PBYTE>(mod_info.base);
-    PeFile const pe_file(*process_, base, hadesmem::PeFileType::Image);
-    DosHeader const dos_header(*process_, pe_file);
-    NtHeaders const nt_headers(*process_, pe_file);
-
-    SectionList const sections(*process_, pe_file);
+    auto const base = reinterpret_cast<std::uint8_t*>(mod_info.base);
+    PeFile const pe_file{*process_, base, hadesmem::PeFileType::Image};
+    DosHeader const dos_header{*process_, pe_file};
+    NtHeaders const nt_headers{*process_, pe_file};
+    SectionList const sections{*process_, pe_file};
     for (auto const& s : sections)
     {
       bool const is_code_section =
@@ -342,8 +368,8 @@ private:
         continue;
       }
 
-      PBYTE const section_beg =
-        static_cast<PBYTE>(RvaToVa(*process_, pe_file, s.GetVirtualAddress()));
+      auto const section_beg = static_cast<std::uint8_t*>(
+        RvaToVa(*process_, pe_file, s.GetVirtualAddress()));
       if (section_beg == nullptr)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -356,9 +382,9 @@ private:
         continue;
       }
 
-      PBYTE const section_end = section_beg + section_size;
+      auto const section_end = section_beg + section_size;
 
-      std::vector<std::pair<PBYTE, PBYTE>>& region =
+      auto& region =
         is_code_section ? mod_info.code_regions : mod_info.data_regions;
       region.emplace_back(section_beg, section_end);
     }
@@ -372,72 +398,101 @@ private:
     return mod_info;
   }
 
-  PVOID Find(ModuleInfo const& mod_info,
+  template <typename NeedleIterator>
+  void* Find(std::uint8_t* s_beg,
+             std::uint8_t* s_end,
+             NeedleIterator n_beg,
+             NeedleIterator n_end) const
+  {
+    HADESMEM_DETAIL_ASSERT(s_beg < s_end);
+
+    std::ptrdiff_t const mem_size = s_end - s_beg;
+    std::vector<std::uint8_t> const haystack{ReadVector<std::uint8_t>(
+      *process_, s_beg, static_cast<std::size_t>(mem_size))};
+
+    auto const h_beg = std::begin(haystack);
+    auto const h_end = std::end(haystack);
+    auto const iter =
+      std::search(h_beg,
+                  h_end,
+                  n_beg,
+                  n_end,
+                  [](std::uint8_t h_cur, PatternDataByte const& n_cur)
+    { return (n_cur.IsWildcard()) || (h_cur == n_cur.GetData()); });
+
+    if (iter != h_end)
+    {
+      return s_beg + std::distance(h_beg, iter);
+    }
+
+    return nullptr;
+  }
+
+  template <typename NeedleIterator>
+  void* Find(ModuleInfo::ScanRegion const& region,
+             void* start_addr,
+             NeedleIterator n_beg,
+             NeedleIterator n_end) const
+  {
+    std::uint8_t* s_beg = region.first;
+    std::uint8_t* const s_end = region.second;
+
+    // Support custom scan start address.
+    if (start_addr)
+    {
+      // Use specified starting address (plus one, so we don't
+      // just find the same thing again) if we're in the target
+      // region.
+      if (start_addr >= s_beg && start_addr < s_end)
+      {
+        s_beg = static_cast<std::uint8_t*>(start_addr) + 1;
+        if (s_beg == s_end)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Invalid start address."));
+        }
+      }
+      // Skip if we're not in the target region.
+      else
+      {
+        return nullptr;
+      }
+    }
+
+    return Find(s_beg, s_end, n_beg, n_end);
+  }
+
+  template <typename NeedleIterator>
+  void* Find(ModuleInfo const& mod_info,
              std::wstring const& module,
-             std::vector<std::pair<BYTE, bool>> const& data,
+             NeedleIterator n_beg,
+             NeedleIterator n_end,
              std::uint32_t flags,
              std::wstring const& start) const
   {
-    HADESMEM_DETAIL_ASSERT(!data.empty());
+    HADESMEM_DETAIL_ASSERT(n_beg != n_end);
 
-    PVOID start_addr = nullptr;
+    void* start_addr = nullptr;
     if (!start.empty())
     {
-      PatternData const start_pattern = LookupEx(module, start);
+      Pattern const start_pattern = LookupEx(module, start);
       bool const start_pattern_relative =
-        !!(start_pattern.flags & PatternFlags::kRelativeAddress);
+        !!(start_pattern.GetFlags() & PatternFlags::kRelativeAddress);
       start_addr = start_pattern_relative
-                     ? static_cast<PBYTE>(start_pattern.address) + mod_info.base
-                     : start_pattern.address;
+                     ? static_cast<std::uint8_t*>(start_pattern.GetAddress()) +
+                         mod_info.base
+                     : start_pattern.GetAddress();
     }
 
     bool const scan_data_secs = !!(flags & PatternFlags::kScanData);
-    std::vector<std::pair<PBYTE, PBYTE>> const& scan_regions =
+    auto const& scan_regions =
       scan_data_secs ? mod_info.data_regions : mod_info.code_regions;
     for (auto const& region : scan_regions)
     {
-      PBYTE s_beg = region.first;
-      PBYTE const s_end = region.second;
-
-      // Support custom scan start address.
-      if (start_addr)
+      void* const address = Find(region, start_addr, n_beg, n_end);
+      if (address)
       {
-        // Use specified starting address (plus one, so we don't
-        // just find the same thing again) if we're in the target
-        // region.
-        if (start_addr >= s_beg && start_addr < s_end)
-        {
-          s_beg = static_cast<PBYTE>(start_addr) + 1;
-          if (s_beg == s_end)
-          {
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Invalid start address."));
-          }
-        }
-        // Skip if we're not in the target region.
-        else
-        {
-          continue;
-        }
-      }
-
-      HADESMEM_DETAIL_ASSERT(s_beg < s_end);
-
-      std::ptrdiff_t const mem_size = s_end - s_beg;
-      std::vector<BYTE> const buffer(
-        ReadVector<BYTE>(*process_, s_beg, static_cast<std::size_t>(mem_size)));
-
-      auto const iter =
-        std::search(std::begin(buffer),
-                    std::end(buffer),
-                    std::begin(data),
-                    std::end(data),
-                    [](BYTE h_cur, std::pair<BYTE, bool> const& n_cur)
-      { return (!n_cur.second) || (h_cur == n_cur.first); });
-
-      if (iter != std::end(buffer))
-      {
-        return (s_beg + std::distance(std::begin(buffer), iter));
+        return address;
       }
     }
 
@@ -486,7 +541,7 @@ private:
                    std::uint32_t /*flags*/,
                    std::uintptr_t offset) const
   {
-    return address ? static_cast<unsigned char*>(address) + offset : nullptr;
+    return static_cast<std::uint8_t*>(address) + offset;
   }
 
   inline void* Sub(std::uintptr_t /*base*/,
@@ -494,26 +549,19 @@ private:
                    std::uint32_t /*flags*/,
                    std::uintptr_t offset) const
   {
-    return address ? static_cast<unsigned char*>(address) - offset : nullptr;
+    return static_cast<std::uint8_t*>(address) - offset;
   }
 
   inline void*
     Lea(std::uintptr_t base, void* address, std::uint32_t flags) const
   {
-    if (!address)
-    {
-      return nullptr;
-    }
-
     try
     {
       bool const is_relative_address =
         !!(flags & PatternFlags::kRelativeAddress);
       std::uintptr_t real_base = is_relative_address ? base : 0;
-      void* const real_address =
-        static_cast<unsigned char*>(address) + real_base;
-      unsigned char* const result =
-        Read<unsigned char*>(*process_, real_address);
+      auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
+      std::uint8_t* const result = Read<std::uint8_t*>(*process_, real_address);
       return is_relative_address ? result - base : result;
     }
     catch (std::exception const& /*e*/)
@@ -528,21 +576,15 @@ private:
                    std::uintptr_t size,
                    std::uintptr_t offset) const
   {
-    if (!address)
-    {
-      return nullptr;
-    }
-
     try
     {
       bool const is_relative_address =
         !!(flags & PatternFlags::kRelativeAddress);
       std::uintptr_t const real_base = is_relative_address ? base : 0;
-      void* const real_address =
-        static_cast<unsigned char*>(address) + real_base;
-      unsigned char* const result =
-        Read<unsigned char*>(*process_, real_address) +
-        reinterpret_cast<std::uintptr_t>(real_address) + size - offset;
+      auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
+      auto const result = Read<std::uint8_t*>(*process_, real_address) +
+                          reinterpret_cast<std::uintptr_t>(real_address) +
+                          size - offset;
       return is_relative_address ? result - base : result;
     }
     catch (std::exception const& /*e*/)
@@ -770,6 +812,8 @@ private:
       default:
         HADESMEM_DETAIL_THROW_EXCEPTION(Error()
                                         << ErrorString("Unknown manipulator."));
+
+        break;
       }
     }
 
@@ -785,7 +829,7 @@ private:
         find_pattern_datas_.find(patterns_info_full_pair.first) ==
         std::end(find_pattern_datas_));
 
-      ModuleInfo const mod_info = GetModuleInfo(patterns_info_full_pair.first);
+      auto const mod_info = GetModuleInfo(patterns_info_full_pair.first);
       auto const& patterns_info_full = patterns_info_full_pair.second;
       auto const& pattern_infos = patterns_info_full.patterns;
       for (auto const& p : pattern_infos)
@@ -796,18 +840,19 @@ private:
                              p.pattern.data,
                              flags,
                              p.pattern.start);
-        address =
-          ApplyManipulators(address, flags, mod_info.base, p.manipulators);
+        if (address)
+        {
+          address =
+            ApplyManipulators(address, flags, mod_info.base, p.manipulators);
+        }
 
-        find_pattern_datas_[patterns_info_full_pair.first][p.pattern.name] = {
-          address, flags};
+        find_pattern_datas_[patterns_info_full_pair.first][p.pattern.name] =
+          Pattern{address, flags};
       }
     }
   }
 
-  using PatternDataMap = std::map<std::wstring, PatternData>;
-
   Process const* process_;
-  std::map<std::wstring, PatternDataMap> find_pattern_datas_;
+  ModuleMap find_pattern_datas_;
 };
 }

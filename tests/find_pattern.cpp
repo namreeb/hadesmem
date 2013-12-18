@@ -37,22 +37,22 @@ void TestFindPattern()
     </Pattern>
     <Pattern Name="Nop Other" Data="90"/>
     <Pattern Name="Nop Second" Data="90" Start="Nop Other"/>
-    <Pattern Name="FindPattern String" Data="46 69 6E 64 50 61 74 74 65 72 6E">
+    <Pattern Name="FindPattern String" Data="46 ?? 6E 64 50 61 74 74 65 72 6E">
       <Flag Name="ScanData"/>
     </Pattern>
   </FindPattern>
   <FindPattern Module="ntdll.dll">
     <Flag Name="ThrowOnUnmatch"/>
     <Pattern Name="Int3 Then Nop" Data="CC 90"/>
-    <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e 64 6f 6d"/>
+    <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e ?? 6f 6d"/>
   </FindPattern>
 </HadesMem>
 )";
   // TODO: Actually validate that the results are correct.
   hadesmem::FindPattern find_pattern(process, pattern_file_data, true);
   find_pattern = hadesmem::FindPattern(process, pattern_file_data, true);
-  BOOST_TEST_EQ(find_pattern.ModuleCount(), 2UL);
-  BOOST_TEST_EQ(find_pattern.PatternCount(L""), 5UL);
+  BOOST_TEST_EQ(find_pattern.GetModuleMap().size(), 2UL);
+  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"").size(), 5UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"First Call"),
                 static_cast<void*>(nullptr));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Zeros New"),
@@ -69,7 +69,7 @@ void TestFindPattern()
              find_pattern.Lookup(L"", L"Nop Other"));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"FindPattern String"),
                 static_cast<void*>(nullptr));
-  BOOST_TEST_EQ(find_pattern.PatternCount(L"ntdll.dll"), 2UL);
+  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 2UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
                 static_cast<void*>(nullptr));
   auto const int3_then_nop =
