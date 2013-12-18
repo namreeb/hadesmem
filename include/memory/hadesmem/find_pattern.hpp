@@ -66,22 +66,22 @@ struct PatternFlags
 class Pattern
 {
 public:
-  Pattern() HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR Pattern() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
-  explicit Pattern(void* address, std::uint32_t flags) HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR explicit Pattern(void* address, std::uint32_t flags) HADESMEM_DETAIL_NOEXCEPT
     : address_{address},
       flags_{flags}
   {
   }
 
-  void* GetAddress() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR void* GetAddress() const HADESMEM_DETAIL_NOEXCEPT
   {
     return address_;
   }
 
-  std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -222,17 +222,17 @@ private:
   class PatternDataByte
   {
   public:
-    explicit PatternDataByte(std::uint8_t data, bool wildcard)
+    HADESMEM_DETAIL_CONSTEXPR explicit PatternDataByte(std::uint8_t data, bool wildcard)
       : data_(data), wildcard_(wildcard)
     {
     }
 
-    std::uint8_t GetData() const HADESMEM_DETAIL_NOEXCEPT
+    HADESMEM_DETAIL_CONSTEXPR std::uint8_t GetData() const HADESMEM_DETAIL_NOEXCEPT
     {
       return data_;
     }
 
-    bool IsWildcard() const HADESMEM_DETAIL_NOEXCEPT
+    HADESMEM_DETAIL_CONSTEXPR bool IsWildcard() const HADESMEM_DETAIL_NOEXCEPT
     {
       return wildcard_;
     }
