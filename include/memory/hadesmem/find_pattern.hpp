@@ -70,9 +70,9 @@ public:
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR explicit Pattern(void* address, std::uint32_t flags) HADESMEM_DETAIL_NOEXCEPT
-    : address_{address},
-      flags_{flags}
+  HADESMEM_DETAIL_CONSTEXPR explicit Pattern(void* address, std::uint32_t flags)
+    HADESMEM_DETAIL_NOEXCEPT : address_{address},
+                               flags_{flags}
   {
   }
 
@@ -81,7 +81,8 @@ public:
     return address_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -222,12 +223,15 @@ private:
   class PatternDataByte
   {
   public:
-    HADESMEM_DETAIL_CONSTEXPR explicit PatternDataByte(std::uint8_t data, bool wildcard)
-      : data_(data), wildcard_(wildcard)
+    HADESMEM_DETAIL_CONSTEXPR explicit PatternDataByte(std::uint8_t data,
+                                                       bool wildcard)
+      HADESMEM_DETAIL_NOEXCEPT : data_(data),
+                                 wildcard_(wildcard)
     {
     }
 
-    HADESMEM_DETAIL_CONSTEXPR std::uint8_t GetData() const HADESMEM_DETAIL_NOEXCEPT
+    HADESMEM_DETAIL_CONSTEXPR std::uint8_t GetData() const
+      HADESMEM_DETAIL_NOEXCEPT
     {
       return data_;
     }
@@ -320,7 +324,12 @@ private:
 
     auto const data_real = ConvertData(data);
 
-    void* address = Find(mod_info, module, std::begin(data_real), std::end(data_real), flags, start);
+    void* address = Find(mod_info,
+                         module,
+                         std::begin(data_real),
+                         std::end(data_real),
+                         flags,
+                         start);
 
     if (!address && !!(flags & PatternFlags::kThrowOnUnmatch))
     {
