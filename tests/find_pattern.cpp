@@ -88,6 +88,12 @@ void TestFindPattern()
   auto const found_rtlrandom =
     static_cast<char*>(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"));
   std::equal(std::begin(rtlrandom), std::end(rtlrandom), found_rtlrandom);
+  BOOST_TEST_THROWS(
+    find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
+    hadesmem::Error);
+  BOOST_TEST_THROWS(
+    find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
+    hadesmem::Error);
 
   // TODO: Fix the test to ensure we get the error we're expecting, rather
   // than just any error.

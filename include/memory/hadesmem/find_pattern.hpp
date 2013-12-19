@@ -105,12 +105,163 @@ inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
   return !(lhs == rhs);
 }
 
+class PatternMap
+{
+public:
+  using key_type = std::map<std::wstring, Pattern>::key_type;
+  using mapped_type = std::map<std::wstring, Pattern>::mapped_type;
+  using value_type = std::map<std::wstring, Pattern>::value_type;
+  using iterator = std::map<std::wstring, Pattern>::iterator;
+  using const_iterator = std::map<std::wstring, Pattern>::const_iterator;
+  using size_type = std::map<std::wstring, Pattern>::size_type;
+
+  friend class FindPattern;
+
+  PatternMap() : map_()
+  {
+  }
+
+  const_iterator find(std::wstring const& name) const
+  {
+    return map_.find(name);
+  }
+
+  Pattern const& at(std::wstring const& name) const
+  {
+    return map_.at(name);
+  }
+
+  size_type size() const
+  {
+    return map_.size();
+  }
+
+  const_iterator begin() const
+  {
+    return map_.cbegin();
+  }
+
+  const_iterator cbegin() const
+  {
+    return map_.cbegin();
+  }
+
+  const_iterator end() const
+  {
+    return map_.end();
+  }
+
+  const_iterator cend() const
+  {
+    return map_.cend();
+  }
+
+  friend inline bool operator==(PatternMap const& lhs, PatternMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
+  {
+    return lhs.map_ == rhs.map_;
+  }
+
+  friend inline bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
+  {
+    return !(lhs == rhs);
+  }
+
+private:
+  Pattern& operator[](std::wstring const& name)
+  {
+    return map_[name];
+  }
+
+  Pattern& operator[](std::wstring&& name)
+  {
+    return map_[std::move(name)];
+  }
+
+  std::map<std::wstring, Pattern> map_;
+};
+
+class ModuleMap
+{
+public:
+  using key_type = std::map<std::wstring, PatternMap>::key_type;
+  using mapped_type = std::map<std::wstring, PatternMap>::mapped_type;
+  using value_type = std::map<std::wstring, PatternMap>::value_type;
+  using iterator = std::map<std::wstring, PatternMap>::iterator;
+  using const_iterator = std::map<std::wstring, PatternMap>::const_iterator;
+  using size_type = std::map<std::wstring, PatternMap>::size_type;
+
+  friend class FindPattern;
+
+  ModuleMap() : map_()
+  {
+  }
+
+  const_iterator find(std::wstring const& name) const
+  {
+    return map_.find(name);
+  }
+
+  PatternMap const& at(std::wstring const& name) const
+  {
+    return map_.at(name);
+  }
+
+  size_type size() const
+  {
+    return map_.size();
+  }
+
+  const_iterator begin() const
+  {
+    return map_.cbegin();
+  }
+
+  const_iterator cbegin() const
+  {
+    return map_.cbegin();
+  }
+
+  const_iterator end() const
+  {
+    return map_.end();
+  }
+
+  const_iterator cend() const
+  {
+    return map_.cend();
+  }
+
+  friend inline bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
+  {
+    return lhs.map_ == rhs.map_;
+  }
+
+  friend inline bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
+  {
+    return !(lhs == rhs);
+  }
+
+private:
+  PatternMap& operator[](std::wstring const& name)
+  {
+    return map_[name];
+  }
+
+  PatternMap& operator[](std::wstring&& name)
+  {
+    return map_[std::move(name)];
+  }
+
+  std::map<std::wstring, PatternMap> map_;
+};
+
 class FindPattern
 {
 public:
-  using PatternMap = std::map<std::wstring, Pattern>;
-  using ModuleMap = std::map<std::wstring, PatternMap>;
-
   explicit FindPattern(Process const& process,
                        std::wstring const& pattern_file,
                        bool in_memory_file)
@@ -151,11 +302,6 @@ public:
 
 #endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  // TODO: Don't return references to internals. Instead use a wrapper type that
-  // can provide safe and abstracted access to the underlying data. This
-  // includes providing APIs for enumeration, and also a const-safe operator[]
-  // for retrieving pattern data.
-
   ModuleMap const& GetModuleMap() const HADESMEM_DETAIL_NOEXCEPT
   {
     return find_pattern_datas_;
@@ -163,14 +309,15 @@ public:
 
   PatternMap const& GetPatternMap(std::wstring const& module) const
   {
-    auto const iter = find_pattern_datas_.find(detail::ToUpperOrdinal(module));
-    if (iter == std::end(find_pattern_datas_))
+    try
+    {
+      return find_pattern_datas_.at(detail::ToUpperOrdinal(module));
+    }
+    catch (std::out_of_range const&)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
                                       << ErrorString("Invalid module name."));
     }
-
-    return iter->second;
   }
 
   void* Lookup(std::wstring const& module, std::wstring const& name) const
@@ -295,14 +442,15 @@ private:
   Pattern LookupEx(std::wstring const& module, std::wstring const& name) const
   {
     auto const& pattern_map = GetPatternMap(module);
-    auto const iter = pattern_map.find(name);
-    if (iter == std::end(pattern_map))
+    try
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Could not find target pattern."));
+      return pattern_map.at(name);
     }
-
-    return iter->second;
+    catch (std::out_of_range const&)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Invalid pattern name."));
+    }
   }
 
   struct ModuleInfo
