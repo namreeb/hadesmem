@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/import_dir_list.hpp>
+#include <hadesmem/pelib/import_dir_list.hpp>
 
 #include <sstream>
 #include <utility>

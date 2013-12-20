@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/module.hpp>
+#include <hadesmem/module.hpp>
 
 #include <utility>
 

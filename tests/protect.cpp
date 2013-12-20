@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/protect.hpp>
+#include <hadesmem/protect.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/detail/lightweight_test.hpp>

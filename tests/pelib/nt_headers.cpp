@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/nt_headers.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
 
 #include <sstream>
 #include <utility>

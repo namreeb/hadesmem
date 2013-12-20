@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/process_list.hpp>
+#include <hadesmem/process_list.hpp>
 
 #include <utility>
 

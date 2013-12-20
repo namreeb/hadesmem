@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/write.hpp>
+#include <hadesmem/write.hpp>
 
 #include <hadesmem/process.hpp>
 

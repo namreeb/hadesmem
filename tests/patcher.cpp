@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/patcher.hpp>
+#include <hadesmem/patcher.hpp>
 
 #include <memory>
 #include <sstream>

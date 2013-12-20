@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/process.hpp>
+#include <hadesmem/process.hpp>
 
 #include <locale>
 #include <sstream>

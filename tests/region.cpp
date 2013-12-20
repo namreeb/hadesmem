@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/region.hpp>
+#include <hadesmem/region.hpp>
 
 #include <locale>
 #include <sstream>

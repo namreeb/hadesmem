@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/thread_list.hpp>
+#include <hadesmem/thread_list.hpp>
 
 #include <utility>
 

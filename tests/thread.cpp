@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/thread.hpp>
+#include <hadesmem/thread.hpp>
 
 #include <locale>
 #include <sstream>

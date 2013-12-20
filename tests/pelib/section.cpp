@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/section.hpp>
+#include <hadesmem/pelib/section.hpp>
 
 #include <sstream>
 #include <utility>

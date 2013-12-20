@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/call.hpp>
+#include <hadesmem/call.hpp>
 
 #include <cstdint>
 

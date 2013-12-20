@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/alloc.hpp>
+#include <hadesmem/alloc.hpp>
 
 #include <sstream>
 #include <utility>

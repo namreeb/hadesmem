@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/dos_header.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
 
 #include <sstream>
 #include <utility>
