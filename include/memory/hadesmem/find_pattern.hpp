@@ -306,8 +306,6 @@ void* Find(Process const& process,
 // the APIs taking a start address take a relative offset? Would simplify
 // things... What about simply supporting both? Add another param for
 // start_flags? That does not sound ideal...
-// TODO: Should this return a Pattern object instead of a void*? Makes it easier
-// for callers to track the flags.
 inline void* Find(Process const& process,
                   std::wstring const& module,
                   std::wstring const& data,
@@ -363,6 +361,30 @@ inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
+}
+
+inline bool operator<(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetAddress() < rhs.GetAddress();
+}
+
+inline bool operator<=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetAddress() <= rhs.GetAddress();
+}
+
+inline bool operator>(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetAddress() > rhs.GetAddress();
+}
+
+inline bool operator>=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  return lhs.GetAddress() >= rhs.GetAddress();
 }
 
 class PatternMap
