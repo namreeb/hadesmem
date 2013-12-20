@@ -41,12 +41,10 @@
 // TODO: Standalone app/example for FindPattern. For dumping results,
 // experimenting with patterns, automatically generating new patterns, etc.
 
-// TODO: Allow custom regions to be specified (similar to module name).
+// TODO: Allow RVA to be specified as start address in XML (similar to start
+// pattern name).
 
-// TODO: Support basic pattern scans in the form of a free function (or maybe a
-// different but more basic class?) taking the arguments directly. For anything
-// more complex require that XML be used. Either way, don't duplicate code.
-// FindPattern should be implemented in terms of the simpler implementation.
+// TODO: Allow custom regions to be specified (similar to module name).
 
 namespace hadesmem
 {
@@ -242,7 +240,7 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
 template <typename NeedleIterator>
 void* Find(Process const& process,
            ModuleRegionInfo::ScanRegion const& region,
-           void* start_addr,
+           void* start,
            NeedleIterator n_beg,
            NeedleIterator n_end)
 {
@@ -250,14 +248,14 @@ void* Find(Process const& process,
   std::uint8_t* const s_end = region.second;
 
   // Support custom scan start address.
-  if (start_addr)
+  if (start)
   {
     // Use specified starting address (plus one, so we don't
     // just find the same thing again) if we're in the target
     // region.
-    if (start_addr >= s_beg && start_addr < s_end)
+    if (start >= s_beg && start < s_end)
     {
-      s_beg = static_cast<std::uint8_t*>(start_addr) + 1;
+      s_beg = static_cast<std::uint8_t*>(start) + 1;
       if (s_beg == s_end)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -307,25 +305,18 @@ void* Find(Process const& process,
 }
 }
 
-// TODO: Should 'start' be relative rather than absolute? Otherwise it doesn't
-// make sense to specify module by name, as the caller must already have a
-// pointer to the module base?? How does this affect the other APIs? Should all
-// the APIs taking a start address take a relative offset? Would simplify
-// things... What about simply supporting both? Add another param for
-// start_flags? That does not sound ideal...
 inline void* Find(Process const& process,
                   std::wstring const& module,
                   std::wstring const& data,
                   std::uint32_t flags,
-                  void* start)
+                  std::uintptr_t start)
 {
+  auto const mod_info = detail::GetModuleInfo(process, module);
   auto const needle = detail::ConvertData(data);
-  return detail::Find(process,
-                      detail::GetModuleInfo(process, module),
-                      std::begin(needle),
-                      std::end(needle),
-                      flags,
-                      start);
+  void* const start_abs =
+    start ? reinterpret_cast<std::uint8_t*>(mod_info.base) + start : nullptr;
+  return detail::Find(
+    process, mod_info, std::begin(needle), std::end(needle), flags, start_abs);
 }
 
 class Pattern

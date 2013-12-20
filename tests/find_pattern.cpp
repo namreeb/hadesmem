@@ -23,43 +23,51 @@ void TestFindPattern()
     reinterpret_cast<std::uintptr_t>(::GetModuleHandleW(nullptr));
 
   void* nop =
-    hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, nullptr);
+    hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, 0U);
   BOOST_TEST_NE(nop, static_cast<void*>(nullptr));
   BOOST_TEST(nop > reinterpret_cast<void*>(process_base));
+
   void* nop_second =
-    hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, nop);
+    hadesmem::Find(process,
+                   L"",
+                   L"90",
+                   hadesmem::PatternFlags::kNone,
+                   reinterpret_cast<std::uintptr_t>(nop) - process_base);
   BOOST_TEST_NE(nop_second, static_cast<void*>(nullptr));
   BOOST_TEST_NE(nop_second, nop);
   BOOST_TEST(nop_second > nop);
   BOOST_TEST(nop_second > reinterpret_cast<void*>(process_base));
+
   void* find_pattern_string =
     hadesmem::Find(process,
                    L"",
                    L"46 ?? 6E 64 50 61 74 74 65 72 6E",
                    hadesmem::PatternFlags::kScanData,
-                   nullptr);
+                   0U);
   BOOST_TEST_NE(find_pattern_string, static_cast<void*>(nullptr));
   BOOST_TEST_NE(find_pattern_string, nop);
   BOOST_TEST(find_pattern_string > reinterpret_cast<void*>(process_base));
+
   BOOST_TEST_EQ(hadesmem::Find(process,
                                L"",
                                L"11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF",
                                hadesmem::PatternFlags::kNone,
-                               nullptr),
+                               0U),
                 static_cast<void*>(nullptr));
   BOOST_TEST_THROWS(
     hadesmem::Find(process,
                    L"",
                    L"11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF",
                    hadesmem::PatternFlags::kThrowOnUnmatch,
-                   nullptr),
+                   0U),
     hadesmem::Error);
+
   void* rtl_random_string =
     hadesmem::Find(process,
                    L"ntdll.dll",
                    L"52 74 6c 52 61 6e ?? 6f 6d",
                    hadesmem::PatternFlags::kRelativeAddress,
-                   nullptr);
+                   0U);
   BOOST_TEST_NE(rtl_random_string, static_cast<void*>(nullptr));
   BOOST_TEST_NE(rtl_random_string, find_pattern_string);
   HMODULE const ntdll_mod = ::GetModuleHandleW(L"ntdll");
@@ -73,7 +81,6 @@ void TestFindPattern()
                         static_cast<char const*>(rtl_random_string_absolute)));
 
   // Todo: Lea test
-  // TODO: Test multiple modules properly.
   std::wstring const pattern_file_data = LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
