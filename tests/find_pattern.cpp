@@ -19,6 +19,30 @@ void TestFindPattern()
 {
   hadesmem::Process const process(::GetCurrentProcessId());
 
+  std::uintptr_t const process_base =
+    reinterpret_cast<std::uintptr_t>(::GetModuleHandleW(nullptr));
+
+  void* nop =
+    hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, nullptr);
+  BOOST_TEST_NE(nop, static_cast<void*>(nullptr));
+  BOOST_TEST(nop > reinterpret_cast<void*>(process_base));
+  void* nop_second =
+    hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, nop);
+  BOOST_TEST_NE(nop_second, static_cast<void*>(nullptr));
+  BOOST_TEST_NE(nop_second, nop);
+  BOOST_TEST(nop_second > nop);
+  BOOST_TEST(nop_second > reinterpret_cast<void*>(process_base));
+  void* find_pattern_string =
+    hadesmem::Find(process,
+                   L"",
+                   L"46 ?? 6E 64 50 61 74 74 65 72 6E",
+                   hadesmem::PatternFlags::kScanData,
+                   nullptr);
+  BOOST_TEST_NE(find_pattern_string, static_cast<void*>(nullptr));
+  BOOST_TEST_NE(find_pattern_string, nop);
+  BOOST_TEST(find_pattern_string > reinterpret_cast<void*>(process_base));
+  // TODO: Improve free-function tests. Test module name, start address, etc.
+
   // Todo: Lea test
   // TODO: Test multiple modules properly.
   std::wstring const pattern_file_data = LR"(
@@ -61,14 +85,24 @@ void TestFindPattern()
                 find_pattern.Lookup(L"", L"First Call"));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Nop Other"),
                 static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(
+    find_pattern.Lookup(L"", L"Nop Other"),
+    static_cast<void*>(static_cast<std::uint8_t*>(nop) - process_base));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Nop Other"),
                 find_pattern.Lookup(L"", L"First Call"));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Nop Other"),
                 find_pattern.Lookup(L"", L"Zeros New"));
   BOOST_TEST(find_pattern.Lookup(L"", L"Nop Second") >
              find_pattern.Lookup(L"", L"Nop Other"));
+  BOOST_TEST_EQ(
+    find_pattern.Lookup(L"", L"Nop Second"),
+    static_cast<void*>(static_cast<std::uint8_t*>(nop_second) - process_base));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"FindPattern String"),
                 static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(
+    find_pattern.Lookup(L"", L"FindPattern String"),
+    static_cast<void*>(static_cast<std::uint8_t*>(find_pattern_string) -
+                       process_base));
   BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 2UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
                 static_cast<void*>(nullptr));
@@ -88,12 +122,10 @@ void TestFindPattern()
   auto const found_rtlrandom =
     static_cast<char*>(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"));
   std::equal(std::begin(rtlrandom), std::end(rtlrandom), found_rtlrandom);
-  BOOST_TEST_THROWS(
-    find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
-    hadesmem::Error);
-  BOOST_TEST_THROWS(
-    find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
-    hadesmem::Error);
+  BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
+                    hadesmem::Error);
+  BOOST_TEST_THROWS(find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
+                    hadesmem::Error);
 
   // TODO: Fix the test to ensure we get the error we're expecting, rather
   // than just any error.
