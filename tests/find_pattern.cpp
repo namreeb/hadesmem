@@ -41,7 +41,36 @@ void TestFindPattern()
   BOOST_TEST_NE(find_pattern_string, static_cast<void*>(nullptr));
   BOOST_TEST_NE(find_pattern_string, nop);
   BOOST_TEST(find_pattern_string > reinterpret_cast<void*>(process_base));
-  // TODO: Improve free-function tests. Test module name, start address, etc.
+  BOOST_TEST_EQ(hadesmem::Find(process,
+                               L"",
+                               L"11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF",
+                               hadesmem::PatternFlags::kNone,
+                               nullptr),
+                static_cast<void*>(nullptr));
+  BOOST_TEST_THROWS(
+    hadesmem::Find(process,
+                   L"",
+                   L"11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF",
+                   hadesmem::PatternFlags::kThrowOnUnmatch,
+                   nullptr),
+    hadesmem::Error);
+  void* rtl_random_string =
+    hadesmem::Find(process,
+                   L"ntdll.dll",
+                   L"52 74 6c 52 61 6e ?? 6f 6d",
+                   hadesmem::PatternFlags::kRelativeAddress,
+                   nullptr);
+  BOOST_TEST_NE(rtl_random_string, static_cast<void*>(nullptr));
+  BOOST_TEST_NE(rtl_random_string, find_pattern_string);
+  HMODULE const ntdll_mod = ::GetModuleHandleW(L"ntdll");
+  std::uintptr_t const ntdll_base = reinterpret_cast<std::uintptr_t>(ntdll_mod);
+  BOOST_TEST_NE(ntdll_mod, static_cast<HMODULE>(nullptr));
+  std::string const rtlrandom = "RtlRandom";
+  void* const rtl_random_string_absolute =
+    static_cast<std::uint8_t*>(rtl_random_string) + ntdll_base;
+  BOOST_TEST(std::equal(std::begin(rtlrandom),
+                        std::end(rtlrandom),
+                        static_cast<char const*>(rtl_random_string_absolute)));
 
   // Todo: Lea test
   // TODO: Test multiple modules properly.
@@ -112,16 +141,12 @@ void TestFindPattern()
   BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop) + 1), '\x90');
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
                 static_cast<void*>(nullptr));
-  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
-                find_pattern.Lookup(L"", L"FindPattern String"));
-  HMODULE const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  BOOST_TEST_NE(ntdll_mod, static_cast<HMODULE>(nullptr));
   BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String") >
              ntdll_mod);
-  std::string const rtlrandom = "RtlRandom";
-  auto const found_rtlrandom =
-    static_cast<char*>(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"));
-  std::equal(std::begin(rtlrandom), std::end(rtlrandom), found_rtlrandom);
+  BOOST_TEST_EQ(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
+                rtl_random_string_absolute);
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
+                find_pattern.Lookup(L"", L"FindPattern String"));
   BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
                     hadesmem::Error);
   BOOST_TEST_THROWS(find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),

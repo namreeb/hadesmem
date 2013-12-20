@@ -169,7 +169,7 @@ void* FindRaw(Process const& process,
   return nullptr;
 }
 
-struct ModuleInfo
+struct ModuleRegionInfo
 {
   std::uintptr_t base;
   using ScanRegion = std::pair<std::uint8_t*, std::uint8_t*>;
@@ -177,10 +177,10 @@ struct ModuleInfo
   std::vector<ScanRegion> data_regions;
 };
 
-inline ModuleInfo GetModuleInfo(Process const& process,
-                                std::wstring const& module)
+inline ModuleRegionInfo GetModuleInfo(Process const& process,
+                                      std::wstring const& module)
 {
-  ModuleInfo mod_info;
+  ModuleRegionInfo mod_info;
 
   if (module.empty())
   {
@@ -225,9 +225,9 @@ inline ModuleInfo GetModuleInfo(Process const& process,
 
     auto const section_end = section_beg + section_size;
 
-    auto& region =
+    auto& regions =
       is_code_section ? mod_info.code_regions : mod_info.data_regions;
-    region.emplace_back(section_beg, section_end);
+    regions.emplace_back(section_beg, section_end);
   }
 
   if (mod_info.code_regions.empty() && mod_info.data_regions.empty())
@@ -241,7 +241,7 @@ inline ModuleInfo GetModuleInfo(Process const& process,
 
 template <typename NeedleIterator>
 void* Find(Process const& process,
-           ModuleInfo::ScanRegion const& region,
+           ModuleRegionInfo::ScanRegion const& region,
            void* start_addr,
            NeedleIterator n_beg,
            NeedleIterator n_end)
@@ -276,7 +276,7 @@ void* Find(Process const& process,
 
 template <typename NeedleIterator>
 void* Find(Process const& process,
-           ModuleInfo const& mod_info,
+           ModuleRegionInfo const& mod_info,
            NeedleIterator n_beg,
            NeedleIterator n_end,
            std::uint32_t flags,
@@ -289,11 +289,18 @@ void* Find(Process const& process,
     scan_data_secs ? mod_info.data_regions : mod_info.code_regions;
   for (auto const& region : scan_regions)
   {
-    void* const address = Find(process, region, start, n_beg, n_end);
-    if (address)
+    if (void* const address = Find(process, region, start, n_beg, n_end))
     {
-      return address;
+      return !!(flags & PatternFlags::kRelativeAddress)
+               ? static_cast<std::uint8_t*>(address) - mod_info.base
+               : address;
     }
+  }
+
+  if (!!(flags & PatternFlags::kThrowOnUnmatch))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("Could not match pattern."));
   }
 
   return nullptr;
@@ -663,7 +670,7 @@ private:
     }
   }
 
-  void* Find(detail::ModuleInfo const& mod_info,
+  void* Find(detail::ModuleRegionInfo const& mod_info,
              std::wstring const& module,
              std::wstring const& data,
              std::uint32_t flags,
@@ -671,8 +678,6 @@ private:
   {
     HADESMEM_DETAIL_ASSERT(
       !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
-
-    auto const data_real = detail::ConvertData(data);
 
     void* start_addr = nullptr;
     if (!start.empty())
@@ -686,24 +691,13 @@ private:
                      : start_pattern.GetAddress();
     }
 
+    auto const data_real = detail::ConvertData(data);
     void* address = detail::Find(*process_,
                                  mod_info,
                                  std::begin(data_real),
                                  std::end(data_real),
                                  flags,
                                  start_addr);
-
-    if (!address && !!(flags & PatternFlags::kThrowOnUnmatch))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Could not match pattern."));
-    }
-
-    bool const is_relative = !!(flags & PatternFlags::kRelativeAddress);
-    if (address && is_relative)
-    {
-      address = static_cast<std::uint8_t*>(address) - mod_info.base;
-    }
 
     return address;
   }
