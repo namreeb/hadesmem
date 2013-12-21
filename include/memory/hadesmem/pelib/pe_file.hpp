@@ -213,6 +213,16 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
                                       << ErrorString("Invalid NT headers."));
     }
 
+    // Apparently on XP it's possible to load a PE with a SizeOfImage of only
+    // 0x2e. Simply treat anything outside of that as invalid for now, though I
+    // don't think that's entirely correct.
+    // TODO: Check whether this is correct (both for the case outlined above,
+    // and all other cases).
+    if (rva > nt_headers.OptionalHeader.SizeOfImage)
+    {
+      return nullptr;
+    }
+
     IMAGE_SECTION_HEADER* ptr_section_header =
       reinterpret_cast<PIMAGE_SECTION_HEADER>(
         ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
