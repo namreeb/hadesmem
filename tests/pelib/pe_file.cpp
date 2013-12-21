@@ -21,7 +21,7 @@ void TestPeFile()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   hadesmem::PeFile pe_file_2(pe_file_1);
   BOOST_TEST_EQ(pe_file_1, pe_file_2);
@@ -33,14 +33,14 @@ void TestPeFile()
   BOOST_TEST_EQ(pe_file_1, pe_file_2);
 
   hadesmem::PeFile pe_file_this(
-    process, ::GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
   BOOST_TEST_EQ(pe_file_this.GetBase(), ::GetModuleHandle(nullptr));
   BOOST_TEST(pe_file_this.GetType() == hadesmem::PeFileType::Image);
   BOOST_TEST_EQ(hadesmem::RvaToVa(process, pe_file_this, 0),
                 static_cast<void*>(nullptr));
 
   hadesmem::PeFile pe_file_ntdll(
-    process, ::GetModuleHandle(L"ntdll"), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(L"ntdll"), hadesmem::PeFileType::Image, 0);
   BOOST_TEST_EQ(pe_file_ntdll.GetBase(), ::GetModuleHandle(L"ntdll"));
   BOOST_TEST(pe_file_ntdll.GetType() == hadesmem::PeFileType::Image);
   BOOST_TEST_EQ(hadesmem::RvaToVa(process, pe_file_ntdll, 0),

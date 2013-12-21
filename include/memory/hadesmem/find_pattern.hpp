@@ -192,7 +192,7 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
   }
 
   auto const base = reinterpret_cast<std::uint8_t*>(mod_info.base);
-  PeFile const pe_file{process, base, hadesmem::PeFileType::Image};
+  PeFile const pe_file{process, base, hadesmem::PeFileType::Image, 0};
   DosHeader const dos_header{process, pe_file};
   NtHeaders const nt_headers{process, pe_file};
   SectionList const sections{process, pe_file};

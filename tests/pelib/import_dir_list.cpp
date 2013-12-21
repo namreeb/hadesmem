@@ -35,7 +35,7 @@ void TestImportDirList()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   bool processed_one_import_dir = false;
 
@@ -44,7 +44,7 @@ void TestImportDirList()
   {
     // TODO: Also test PeFileType::Data
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     hadesmem::ImportDirList import_dirs(process, cur_pe_file);
     if (mod.GetHandle() == GetModuleHandle(nullptr))

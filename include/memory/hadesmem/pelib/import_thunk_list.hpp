@@ -49,10 +49,17 @@ public:
     {
       auto const thunk_ptr = reinterpret_cast<PIMAGE_THUNK_DATA>(
         RvaToVa(process, pe_file, first_thunk));
+      if (!thunk_ptr)
+      {
+        impl_.reset();
+        return;
+      }
+
       impl_->import_thunk_ = ImportThunk(process, pe_file, thunk_ptr);
       if (!impl_->import_thunk_->GetAddressOfData())
       {
         impl_.reset();
+        return;
       }
     }
     catch (std::exception const& /*e*/)
@@ -67,9 +74,8 @@ public:
 
   ImportThunkIterator& operator=(ImportThunkIterator const&) = default;
 
-  ImportThunkIterator(ImportThunkIterator&& other)
-HADESMEM_DETAIL_NOEXCEPT:
-  impl_(std::move(other.impl_))
+  ImportThunkIterator(ImportThunkIterator&& other) HADESMEM_DETAIL_NOEXCEPT
+    : impl_(std::move(other.impl_))
   {
   }
 

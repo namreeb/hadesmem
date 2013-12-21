@@ -56,6 +56,11 @@ public:
       }
 
       base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, import_dir_rva));
+      if (!base_)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("Import directory is invalid."));
+      }
     }
   }
 

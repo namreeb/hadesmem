@@ -32,7 +32,7 @@ void TestExportList()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   bool processed_one_export_list = false;
 
@@ -41,7 +41,7 @@ void TestExportList()
   {
     // TODO: Also test PeFileType::Data
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     hadesmem::ExportList cur_export_list(process, cur_pe_file);
     if (std::begin(cur_export_list) == std::end(cur_export_list))

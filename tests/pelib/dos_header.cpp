@@ -24,7 +24,7 @@ void TestDosHeader()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   hadesmem::DosHeader dos_header_1(process, pe_file_1);
 
@@ -42,7 +42,7 @@ void TestDosHeader()
   {
     // TODO: Also test FileType_Data
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     hadesmem::DosHeader cur_dos_header(process, cur_pe_file);
 
@@ -89,10 +89,10 @@ void TestDosHeader()
     test_str_2.imbue(std::locale::classic());
     test_str_2 << cur_dos_header.GetBase();
     BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
-    if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
+    if (mod.GetHandle() != ::GetModuleHandleW(L"ntdll"))
     {
       hadesmem::PeFile const pe_file_ntdll(
-        process, GetModuleHandle(L"ntdll"), hadesmem::PeFileType::Image);
+        process, ::GetModuleHandleW(L"ntdll"), hadesmem::PeFileType::Image, 0);
       hadesmem::DosHeader const dos_header_ntdll(process, pe_file_ntdll);
       std::stringstream test_str_3;
       test_str_3.imbue(std::locale::classic());

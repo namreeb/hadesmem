@@ -30,7 +30,7 @@ void TestExportDir()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   hadesmem::ExportDir export_dir_1(process, pe_file_1);
 
@@ -50,7 +50,7 @@ void TestExportDir()
   {
     // TODO: Also test PeFileType::Data
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     std::unique_ptr<hadesmem::ExportDir> cur_export_dir;
     try

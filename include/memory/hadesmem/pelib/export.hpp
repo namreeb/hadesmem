@@ -78,9 +78,19 @@ public:
 
     WORD* const ptr_ordinals = static_cast<WORD*>(
       RvaToVa(process, pe_file, export_dir.GetAddressOfNameOrdinals()));
+    if (!ptr_ordinals)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("AddressOfNameOrdinals invalid."));
+    }
 
     DWORD* const ptr_names = static_cast<DWORD*>(
       RvaToVa(process, pe_file, export_dir.GetAddressOfNames()));
+    if (!ptr_names)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("AddressOfNames invalid."));
+    }
 
     if (DWORD const num_names = export_dir.GetNumberOfNames())
     {
@@ -100,6 +110,11 @@ public:
 
     DWORD* const ptr_functions = static_cast<DWORD*>(
       RvaToVa(process, pe_file, export_dir.GetAddressOfFunctions()));
+    if (!ptr_functions)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("AddressOfFunctions invalid."));
+    }
     DWORD const func_rva =
       Read<DWORD>(process, ptr_functions + ordinal_number_);
 

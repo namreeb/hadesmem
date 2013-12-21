@@ -34,7 +34,7 @@ inline FARPROC GetProcAddressInternalFromPred(Process const& process,
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
 
-  PeFile const pe_file(process, module, PeFileType::Image);
+  PeFile const pe_file(process, module, PeFileType::Image, 0);
 
   ExportList const exports(process, pe_file);
   auto const iter = std::find_if(std::begin(exports), std::end(exports), pred);

@@ -26,7 +26,7 @@ void TestSectionList()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, ::GetModuleHandle(nullptr), hadesmem::PeFileType::Image);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
 
   hadesmem::NtHeaders nt_headers_1(process, pe_file_1);
 
@@ -48,7 +48,7 @@ void TestSectionList()
   {
     // TODO: Also test PeFileType::Data
     hadesmem::PeFile const pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image);
+      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     hadesmem::NtHeaders const nt_headers(process, pe_file);
     WORD const num_sections = nt_headers.GetNumberOfSections();
@@ -92,8 +92,10 @@ void TestSectionList()
       BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
       if (mod.GetHandle() != GetModuleHandle(L"ntdll"))
       {
-        hadesmem::PeFile const pe_file_ntdll(
-          process, ::GetModuleHandle(L"ntdll"), hadesmem::PeFileType::Image);
+        hadesmem::PeFile const pe_file_ntdll(process,
+                                             ::GetModuleHandleW(L"ntdll"),
+                                             hadesmem::PeFileType::Image,
+                                             0);
         hadesmem::Section const section_ntdll(process, pe_file_ntdll, 0);
         std::stringstream test_str_3;
         test_str_3.imbue(std::locale::classic());

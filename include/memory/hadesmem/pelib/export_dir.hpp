@@ -48,6 +48,11 @@ public:
     }
 
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, export_dir_rva));
+    if (!base_)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Export directory is invalid."));
+    }
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -77,6 +82,12 @@ public:
   {
     return Read<WORD>(*process_,
                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, MinorVersion));
+  }
+
+  DWORD GetNameRaw() const
+  {
+    return Read<DWORD>(*process_,
+                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Name));
   }
 
   std::string GetName() const

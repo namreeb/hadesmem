@@ -307,7 +307,14 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
   if (tls_dir->GetAddressOfCallBacks())
   {
     std::vector<PIMAGE_TLS_CALLBACK> callbacks;
-    tls_dir->GetCallbacks(std::back_inserter(callbacks));
+    try
+    {
+      tls_dir->GetCallbacks(std::back_inserter(callbacks));
+    }
+    catch (std::exception const& /*e*/)
+    {
+      std::wcout << "\t\tWARNING! TLS callbacks are inavlid.\n";
+    }
     for (auto const c : callbacks)
     {
       std::wcout << "\t\tCallback: " << std::hex
@@ -338,27 +345,36 @@ void DumpExports(hadesmem::Process const& process,
 
   std::wcout << std::boolalpha;
   std::wcout << "\n";
-  std::wcout << "\t\tGetCharacteristics: " << std::hex
+  std::wcout << "\t\tCharacteristics: " << std::hex
              << export_dir->GetCharacteristics() << std::dec << "\n";
-  std::wcout << "\t\tGetTimeDateStamp: " << std::hex
+  std::wcout << "\t\tTimeDateStamp: " << std::hex
              << export_dir->GetTimeDateStamp() << std::dec << "\n";
-  std::wcout << "\t\tGetMajorVersion: " << std::hex
+  std::wcout << "\t\tMajorVersion: " << std::hex
              << export_dir->GetMajorVersion() << std::dec << "\n";
-  std::wcout << "\t\tGetMinorVersion: " << std::hex
+  std::wcout << "\t\tMinorVersion: " << std::hex
              << export_dir->GetMinorVersion() << std::dec << "\n";
-  std::wcout << "\t\tGetName: " << std::hex << export_dir->GetName().c_str()
+  std::wcout << "\t\tName (Raw): " << std::hex << export_dir->GetNameRaw()
              << std::dec << "\n";
-  std::wcout << "\t\tGetOrdinalBase: " << std::hex
-             << export_dir->GetOrdinalBase() << std::dec << "\n";
-  std::wcout << "\t\tGetNumberOfFunctions: " << std::hex
+  // Name is not guaranteed to be valid.
+  try
+  {
+    std::wcout << "\t\tName: " << export_dir->GetName().c_str() << "\n";
+  }
+  catch (std::exception const& /*e*/)
+  {
+    std::wcout << "\t\tWARNING! Name is invalid.\n";
+  }
+  std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
+             << std::dec << "\n";
+  std::wcout << "\t\tNumberOfFunctions: " << std::hex
              << export_dir->GetNumberOfFunctions() << std::dec << "\n";
-  std::wcout << "\t\tGetNumberOfNames: " << std::hex
+  std::wcout << "\t\tNumberOfNames: " << std::hex
              << export_dir->GetNumberOfNames() << std::dec << "\n";
-  std::wcout << "\t\tGetAddressOfFunctions: " << std::hex
+  std::wcout << "\t\tAddressOfFunctions: " << std::hex
              << export_dir->GetAddressOfFunctions() << std::dec << "\n";
-  std::wcout << "\t\tGetAddressOfNames: " << std::hex
+  std::wcout << "\t\tAddressOfNames: " << std::hex
              << export_dir->GetAddressOfNames() << std::dec << "\n";
-  std::wcout << "\t\tGetAddressOfNameOrdinals: " << std::hex
+  std::wcout << "\t\tAddressOfNameOrdinals: " << std::hex
              << export_dir->GetAddressOfNameOrdinals() << std::dec << "\n";
   std::wcout << std::noboolalpha;
 
@@ -403,7 +419,7 @@ void DumpExports(hadesmem::Process const& process,
         }
         catch (std::exception const& /*e*/)
         {
-          std::wcout << "\t\tForwarderOrdinal Invalid.\n";
+          std::wcout << "\t\tWARNING! ForwarderOrdinal invalid.\n";
         }
       }
     }
@@ -434,7 +450,14 @@ void DumpImports(hadesmem::Process const& process,
                << std::dec << "\n";
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec
                << "\n";
-    std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
+    try
+    {
+      std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
+    }
+    catch (std::exception const& /*e*/)
+    {
+      std::wcout << "\t\tWARNING! Failed to read name.\n";
+    }
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
 
@@ -472,20 +495,31 @@ void DumpImports(hadesmem::Process const& process,
                                             dir.GetOriginalFirstThunk()
                                               ? dir.GetOriginalFirstThunk()
                                               : dir.GetFirstThunk());
+    if (std::begin(import_thunks) == std::end(import_thunks))
+    {
+      std::wcout << "\n\t\tWARNING! Import thunk list is empty or invalid.\n";
+    }
     for (auto const& thunk : import_thunks)
     {
       std::wcout << "\n";
       std::wcout << "\t\t\tAddressOfData: " << std::hex
                  << thunk.GetAddressOfData() << std::dec << "\n";
       std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
-      if (thunk.ByOrdinal())
+      try
       {
-        std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+        if (thunk.ByOrdinal())
+        {
+          std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+        }
+        else
+        {
+          std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
+          std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
+        }
       }
-      else
+      catch (std::exception const& /*e*/)
       {
-        std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
-        std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
+        std::wcout << "\t\tWARNING! Invalid ordinal or name.\n";
       }
       std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
                  << std::dec << "\n";
@@ -510,7 +544,7 @@ void DumpModules(hadesmem::Process const& process)
     std::wcout << "\tPath: " << module.GetPath() << "\n";
 
     hadesmem::PeFile const pe_file(
-      process, module.GetHandle(), hadesmem::PeFileType::Image);
+      process, module.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     try
     {
@@ -664,8 +698,10 @@ void DumpFile(std::wstring const& path)
 
   hadesmem::Process const process(GetCurrentProcessId());
 
-  hadesmem::PeFile const pe_file(
-    process, buf.data(), hadesmem::PeFileType::Data);
+  hadesmem::PeFile const pe_file(process,
+                                 buf.data(),
+                                 hadesmem::PeFileType::Data,
+                                 static_cast<DWORD>(buf.size()));
 
   try
   {

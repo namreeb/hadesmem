@@ -93,10 +93,18 @@ enum class PeFileType
 class PeFile
 {
 public:
-  explicit PeFile(Process const& process, PVOID address, PeFileType type)
-    : base_(static_cast<PBYTE>(address)), type_(type)
+  explicit PeFile(Process const& process,
+                  PVOID address,
+                  PeFileType type,
+                  DWORD size)
+    : base_(static_cast<PBYTE>(address)), type_(type), size_(size)
   {
     HADESMEM_DETAIL_ASSERT(base_ != 0);
+    if (type == PeFileType::Data && !size)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Invalid file size."));
+    }
 
     // Process is not actually used but we take it anyway for
     // interface symetry and in case we want to change the
@@ -114,9 +122,15 @@ public:
     return type_;
   }
 
+  DWORD GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return size_;
+  }
+
 private:
   PBYTE base_;
   PeFileType type_;
+  DWORD size_;
 };
 
 inline bool operator==(PeFile const& lhs, PeFile const& rhs)
@@ -219,23 +233,64 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       return base + rva;
     }
 
+    bool in_header = true;
     for (WORD i = 0; i < num_sections; ++i)
     {
       DWORD const virtual_beg = section_header.VirtualAddress;
-      DWORD const virtual_end = virtual_beg + section_header.Misc.VirtualSize;
+      DWORD const virtual_size = section_header.Misc.VirtualSize;
+      DWORD const raw_size = section_header.SizeOfRawData;
+      // If VirtualSize is zero then SizeOfRawData is used.
+      DWORD const virtual_end =
+        virtual_beg + (virtual_size ? virtual_size : raw_size);
       if (virtual_beg <= rva && rva < virtual_end)
       {
         rva -= virtual_beg;
+
+        // If the RVA is outside the raw data (which would put it in the
+        // zero-fill of the virtual data) just return nullptr because it's
+        // invalid.
+        // TODO: Fix this for "legitimate" cases (a struct overlapping the
+        // virtual area to get 'free' zero fill, etc.).
+        if (rva > raw_size)
+        {
+          return nullptr;
+        }
+
         // If PointerToRawData is less than 0x200 it is rounded
         // down to 0. Safe to mask it off unconditionally because
         // it must be a multiple of FileAlignment.
         rva += section_header.PointerToRawData & ~(0x1FFUL);
 
+        // If the RVA now lies outside the actual file just return nullptr
+        // because it's invalid.
+        // TODO: Verify this is correct in all cases...
+        if (rva >= pe_file.GetSize())
+        {
+          return nullptr;
+        }
+
         return base + rva;
+      }
+
+      // This should be the 'normal' case. However sometimes the RVA is at a
+      // lower address than any of the sections, so we want to detect this so we
+      // can just treat the RVA as an offset from the module base (similar to
+      // when the image is loaded).
+      // TODO: Check whether this is correct for all cases. Should we perhaps
+      // instead check whether any sections have a PointerToRawData that is zero
+      // (or rounded down to zero)?
+      if (virtual_beg <= rva)
+      {
+        in_header = false;
       }
 
       section_header =
         Read<IMAGE_SECTION_HEADER>(process, ++ptr_section_header);
+    }
+
+    if (in_header && rva < pe_file.GetSize())
+    {
+      return base + rva;
     }
 
     return nullptr;

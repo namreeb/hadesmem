@@ -103,6 +103,11 @@ public:
   {
     PBYTE const name_import = static_cast<PBYTE>(
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
+    if (!name_import)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+        << ErrorString("Invalid import name and hint."));
+    }
     return Read<WORD>(*process_,
                       name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint));
   }
@@ -119,6 +124,11 @@ public:
   {
     PBYTE const name_import = static_cast<PBYTE>(
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
+    if (!name_import)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+        << ErrorString("Invalid import name and hint."));
+    }
     return ReadString<char>(*process_,
                             name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
   }

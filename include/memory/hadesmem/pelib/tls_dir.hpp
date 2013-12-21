@@ -45,6 +45,11 @@ public:
     }
 
     base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
+    if (!base_)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("TLS directory is invalid."));
+    }
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -89,6 +94,11 @@ public:
       RvaToVa(*process_,
               *pe_file_,
               static_cast<DWORD>(GetAddressOfCallBacks() - image_base)));
+    if (!callbacks_raw)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("TLS callbacks are invalid."));
+    }
 
     for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*process_, callbacks_raw);
          callback;
