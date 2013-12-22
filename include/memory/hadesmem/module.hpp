@@ -24,14 +24,8 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: Remove the constructor that takes a name/path because it is
-// functionality that belongs in (and already exists in) ModuleList. Perhaps
-// provide a factory instead?
-
 // TODO: When finding a module by name, allow disambiguation by checking the
-// headers (like the Windows loader does). Given that the name/path
-// functinoality will be 'removed' this will probably need to be implemented
-// as a free func designed to be used with ModuleList. Needs more thought...
+// headers (like the Windows loader does).
 
 namespace hadesmem
 {

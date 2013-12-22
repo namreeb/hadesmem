@@ -18,7 +18,7 @@ namespace hadesmem
 class ProcessEntry
 {
 public:
-  explicit ProcessEntry(PROCESSENTRY32 const& entry)
+  explicit ProcessEntry(PROCESSENTRY32W const& entry)
     : id_(entry.th32ProcessID),
       threads_(entry.cntThreads),
       parent_(entry.th32ParentProcessID),

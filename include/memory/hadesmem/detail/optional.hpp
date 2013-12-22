@@ -8,18 +8,12 @@
 
 #include <hadesmem/config.hpp>
 
-// TODO: Implement same interface as std::optional<T> to make switching later
-// easier.
-
 namespace hadesmem
 {
 
 namespace detail
 {
 
-// WARNING: T must have no-throw move, no-throw move assignment and
-// no-throw destruction.
-// TODO: static_assert the preconditions above.
 template <typename T> class Optional
 {
 public:
@@ -54,7 +48,7 @@ public:
     return *this;
   }
 
-  Optional(Optional&& other) HADESMEM_DETAIL_NOEXCEPT : t_(), valid_(false)
+  Optional(Optional&& other) : t_(), valid_(false)
   {
     if (other.valid_)
     {
@@ -64,7 +58,7 @@ public:
     other.valid_ = false;
   }
 
-  Optional& operator=(Optional&& other) HADESMEM_DETAIL_NOEXCEPT
+  Optional& operator=(Optional&& other)
   {
     Destroy();
 
@@ -86,7 +80,7 @@ public:
     return *this;
   }
 
-  Optional& operator=(T&& t) HADESMEM_DETAIL_NOEXCEPT
+  Optional& operator=(T&& t)
   {
     Destroy();
     Construct(std::move(t));
@@ -94,7 +88,7 @@ public:
     return *this;
   }
 
-  ~Optional() HADESMEM_DETAIL_NOEXCEPT
+  ~Optional()
   {
     Destroy();
   }

@@ -130,6 +130,16 @@ public:
     }
   }
 
+  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return thread_.GetId();
+  }
+
+  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return thread_.GetHandle();
+  }
+
 private:
   void ResumeUnchecked()
   {
@@ -170,30 +180,37 @@ public:
         DWORD const current_thread_id = ::GetCurrentThreadId();
         if (thread_entry.GetId() != current_thread_id)
         {
-          // TODO: Fix the potential TID reuse race condition
-          // (after the snapshot a thread could theoretically
-          // terminate, then have its TID resued in a different
-          // process). Or it could theoretically also be reused
-          // as a PID which would cause a different set of
-          // errors. Investigate.
           auto const inserted = tids.insert(thread_entry.GetId());
           if (inserted.second)
           {
             need_retry = true;
+
+            // TODO: Fix the case where an exception could be thrown due to a
+            // thread already being in the process of terminating. This would
+            // cause ERROR_INVALID_PARAMETER for OpenThread or
+            // ERROR_ACCESS_DENIED for SuspendThread (which we should then
+            // double-check with WaitForSingleObject to confirm that the thread
+            // is signaled). In these cases we should simply ignore the error
+            // and continue (because the thread is as good as suspended anyway).
+            // All other errors should cause a retry (but add trace logging of
+            // the exception details for debugging purposes).
             try
             {
+              // Close potential race condition whereby after the snapshot is
+              // taken the thread could terminate and have its TID reused in
+              // a different process.
+              Thread const thread(thread_entry.GetId());
+              VerifyPid(thread, pid);
+
+              // Should be safe (with the exception outlined above) to suspend
+              // the thread now, because we have a handle to the thread open,
+              // and we've verified it exists in the correct process.
               threads_.emplace_back(thread_entry.GetId());
             }
-            // TODO: Only swallow the errors which are caused
-            // by a thread terminating, rather than all
-            // errors. This is ERROR_INVALID_PARAMETER for
-            // OpenThread, ERROR_ACCESS_DENIED for
-            // SuspendThread (which we should then
-            // double-check with WaitForSingleObject to
-            // confirm that the thread is signaled).
             catch (std::exception const& /*e*/)
             {
               tids.erase(inserted.first);
+              continue;
             }
           }
         }
@@ -225,6 +242,23 @@ public:
   }
 
 private:
+  void VerifyPid(Thread const& thread, DWORD pid) const
+  {
+    DWORD const tid_pid = ::GetProcessIdOfThread(thread.GetHandle());
+    if (!tid_pid)
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("GetProcessIdOfThread failed.")
+                << ErrorCodeWinLast(last_error));
+    }
+
+    if (tid_pid != pid)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("PID verification failed."));
+    }
+  }
   std::vector<SuspendedThread> threads_;
 };
 }
