@@ -436,13 +436,13 @@ public:
     return map_.cend();
   }
 
-  friend inline bool operator==(PatternMap const& lhs, PatternMap const& rhs)
+  friend bool operator==(PatternMap const& lhs, PatternMap const& rhs)
     HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend inline bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
+  friend bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
     HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
@@ -513,13 +513,13 @@ public:
     return map_.cend();
   }
 
-  friend inline bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
+  friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
     HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend inline bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
+  friend bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
     HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
@@ -617,7 +617,7 @@ public:
   }
 
 private:
-  inline void LoadPatternFile(std::wstring const& path)
+  void LoadPatternFile(std::wstring const& path)
   {
     pugi::xml_document doc;
     auto const load_result = doc.load_file(path.c_str());
@@ -632,7 +632,7 @@ private:
     LoadPatternFileImpl(doc);
   }
 
-  inline void LoadPatternFileMemory(std::wstring const& data)
+  void LoadPatternFileMemory(std::wstring const& data)
   {
     pugi::xml_document doc;
     auto const load_result = doc.load(data.c_str());
@@ -699,24 +699,23 @@ private:
     std::vector<PatternInfoFull> patterns;
   };
 
-  inline void* Add(std::uintptr_t /*base*/,
-                   void* address,
-                   std::uint32_t /*flags*/,
-                   std::uintptr_t offset) const
+  void* Add(std::uintptr_t /*base*/,
+            void* address,
+            std::uint32_t /*flags*/,
+            std::uintptr_t offset) const
   {
     return static_cast<std::uint8_t*>(address) + offset;
   }
 
-  inline void* Sub(std::uintptr_t /*base*/,
-                   void* address,
-                   std::uint32_t /*flags*/,
-                   std::uintptr_t offset) const
+  void* Sub(std::uintptr_t /*base*/,
+            void* address,
+            std::uint32_t /*flags*/,
+            std::uintptr_t offset) const
   {
     return static_cast<std::uint8_t*>(address) - offset;
   }
 
-  inline void*
-    Lea(std::uintptr_t base, void* address, std::uint32_t flags) const
+  void* Lea(std::uintptr_t base, void* address, std::uint32_t flags) const
   {
     try
     {
@@ -733,11 +732,11 @@ private:
     }
   }
 
-  inline void* Rel(std::uintptr_t base,
-                   void* address,
-                   std::uint32_t flags,
-                   std::uintptr_t size,
-                   std::uintptr_t offset) const
+  void* Rel(std::uintptr_t base,
+            void* address,
+            std::uint32_t flags,
+            std::uintptr_t size,
+            std::uintptr_t offset) const
   {
     try
     {
@@ -756,8 +755,8 @@ private:
     }
   }
 
-  inline std::wstring GetAttributeValue(pugi::xml_node const& node,
-                                        std::wstring const& name) const
+  std::wstring GetAttributeValue(pugi::xml_node const& node,
+                                 std::wstring const& name) const
   {
     auto const attr = node.attribute(name.c_str());
     if (!attr)
@@ -776,8 +775,8 @@ private:
     return value;
   }
 
-  inline std::wstring GetOptionalAttributeValue(pugi::xml_node const& node,
-                                                std::wstring const& name) const
+  std::wstring GetOptionalAttributeValue(pugi::xml_node const& node,
+                                         std::wstring const& name) const
   {
     auto const attr = node.attribute(name.c_str());
     if (!attr)
@@ -795,7 +794,7 @@ private:
     return value;
   }
 
-  inline std::uint32_t ReadFlags(pugi::xml_node const& node) const
+  std::uint32_t ReadFlags(pugi::xml_node const& node) const
   {
     std::uint32_t flags = PatternFlags::kNone;
     for (auto const& flag : node.children(L"Flag"))
@@ -828,7 +827,7 @@ private:
     return flags;
   }
 
-  inline std::map<std::wstring, FindPatternInfo>
+  std::map<std::wstring, FindPatternInfo>
     ReadPatternsFromXml(pugi::xml_document const& doc) const
   {
     auto const hadesmem_root = doc.child(L"HadesMem");
@@ -922,10 +921,10 @@ private:
     return pattern_infos_full;
   }
 
-  inline void* ApplyManipulators(void* address,
-                                 std::uint32_t flags,
-                                 std::uintptr_t base,
-                                 std::vector<ManipInfo> const& manip_list) const
+  void* ApplyManipulators(void* address,
+                          std::uint32_t flags,
+                          std::uintptr_t base,
+                          std::vector<ManipInfo> const& manip_list) const
   {
     for (auto const& m : manip_list)
     {
@@ -986,9 +985,9 @@ private:
     return address;
   }
 
-  inline std::uintptr_t GetStartRva(std::wstring const& module,
-                                    std::uintptr_t base,
-                                    std::wstring const& start) const
+  std::uintptr_t GetStartRva(std::wstring const& module,
+                             std::uintptr_t base,
+                             std::wstring const& start) const
   {
     std::uintptr_t start_rva = 0U;
     if (!start.empty())
@@ -1004,7 +1003,7 @@ private:
     return start_rva;
   }
 
-  inline void LoadPatternFileImpl(pugi::xml_document const& doc)
+  void LoadPatternFileImpl(pugi::xml_document const& doc)
   {
     auto const patterns_info_full_list = ReadPatternsFromXml(doc);
     for (auto const& patterns_info_full_pair : patterns_info_full_list)
