@@ -41,9 +41,6 @@
 // TODO: Standalone app/example for FindPattern. For dumping results,
 // experimenting with patterns, automatically generating new patterns, etc.
 
-// TODO: Allow RVA to be specified as start address in XML (similar to start
-// pattern name).
-
 // TODO: Allow custom regions to be specified (similar to module name).
 
 namespace hadesmem
@@ -311,6 +308,9 @@ inline void* Find(Process const& process,
                   std::uint32_t flags,
                   std::uintptr_t start)
 {
+  HADESMEM_DETAIL_ASSERT(
+    !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
+
   auto const mod_info = detail::GetModuleInfo(process, module);
   auto const needle = detail::ConvertData(data);
   void* const start_abs =
@@ -661,43 +661,12 @@ private:
     }
   }
 
-  void* Find(detail::ModuleRegionInfo const& mod_info,
-             std::wstring const& module,
-             std::wstring const& data,
-             std::uint32_t flags,
-             std::wstring const& start) const
-  {
-    HADESMEM_DETAIL_ASSERT(
-      !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
-
-    void* start_addr = nullptr;
-    if (!start.empty())
-    {
-      Pattern const start_pattern = LookupEx(module, start);
-      bool const start_pattern_relative =
-        !!(start_pattern.GetFlags() & PatternFlags::kRelativeAddress);
-      start_addr = start_pattern_relative
-                     ? static_cast<std::uint8_t*>(start_pattern.GetAddress()) +
-                         mod_info.base
-                     : start_pattern.GetAddress();
-    }
-
-    auto const data_real = detail::ConvertData(data);
-    void* address = detail::Find(*process_,
-                                 mod_info,
-                                 std::begin(data_real),
-                                 std::end(data_real),
-                                 flags,
-                                 start_addr);
-
-    return address;
-  }
-
   struct PatternInfo
   {
     std::wstring name;
     std::wstring data;
     std::wstring start;
+    std::wstring start_rva;
     std::uint32_t flags;
   };
 
@@ -887,10 +856,13 @@ private:
 
         auto const pattern_start = GetOptionalAttributeValue(pattern, L"Start");
 
+        auto const pattern_start_rva =
+          GetOptionalAttributeValue(pattern, L"StartRVA");
+
         std::uint32_t const pattern_flags = ReadFlags(pattern);
 
-        PatternInfo pattern_info{pattern_name,  pattern_data,
-                                 pattern_start, pattern_flags};
+        PatternInfo pattern_info{pattern_name,      pattern_data, pattern_start,
+                                 pattern_start_rva, pattern_flags};
 
         std::vector<ManipInfo> pattern_manips;
 
@@ -1014,6 +986,24 @@ private:
     return address;
   }
 
+  inline std::uintptr_t GetStartRva(std::wstring const& module,
+                                    std::uintptr_t base,
+                                    std::wstring const& start) const
+  {
+    std::uintptr_t start_rva = 0U;
+    if (!start.empty())
+    {
+      Pattern const start_pattern = LookupEx(module, start);
+      start_rva = reinterpret_cast<std::uintptr_t>(start_pattern.GetAddress());
+      if (!(start_pattern.GetFlags() & PatternFlags::kRelativeAddress))
+      {
+        start_rva -= base;
+      }
+    }
+
+    return start_rva;
+  }
+
   inline void LoadPatternFileImpl(pugi::xml_document const& doc)
   {
     auto const patterns_info_full_list = ReadPatternsFromXml(doc);
@@ -1025,16 +1015,28 @@ private:
 
       auto const mod_info =
         detail::GetModuleInfo(*process_, patterns_info_full_pair.first);
+      auto const& module = patterns_info_full_pair.first;
       auto const& patterns_info_full = patterns_info_full_pair.second;
       auto const& pattern_infos = patterns_info_full.patterns;
       for (auto const& p : pattern_infos)
       {
         std::uint32_t const flags = patterns_info_full.flags | p.pattern.flags;
-        void* address = Find(mod_info,
-                             patterns_info_full_pair.first,
-                             p.pattern.data,
-                             flags,
-                             p.pattern.start);
+        void* address = nullptr;
+        if (!p.pattern.start_rva.empty())
+        {
+          std::uintptr_t const start_rva =
+            detail::HexStrToPtr(p.pattern.start_rva);
+          address = ::hadesmem::Find(
+            *process_, module, p.pattern.data, flags, start_rva);
+        }
+        else
+        {
+          std::uintptr_t const start_rva =
+            GetStartRva(module, mod_info.base, p.pattern.start);
+          address = ::hadesmem::Find(
+            *process_, module, p.pattern.data, flags, start_rva);
+        }
+
         if (address)
         {
           address =

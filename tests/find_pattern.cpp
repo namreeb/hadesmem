@@ -106,6 +106,7 @@ void TestFindPattern()
     <Flag Name="ThrowOnUnmatch"/>
     <Pattern Name="Int3 Then Nop" Data="CC 90"/>
     <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e ?? 6f 6d"/>
+    <Pattern Name="Int3 Then Nop 0x1000" Data="CC 90" StartRVA="0x1000"/>
   </FindPattern>
 </HadesMem>
 )";
@@ -114,6 +115,7 @@ void TestFindPattern()
   find_pattern = hadesmem::FindPattern(process, pattern_file_data, true);
   BOOST_TEST_EQ(find_pattern.GetModuleMap().size(), 2UL);
   BOOST_TEST_EQ(find_pattern.GetPatternMap(L"").size(), 5UL);
+  
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"First Call"),
                 static_cast<void*>(nullptr));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Zeros New"),
@@ -140,7 +142,7 @@ void TestFindPattern()
     find_pattern.Lookup(L"", L"FindPattern String"),
     static_cast<void*>(static_cast<std::uint8_t*>(find_pattern_string) -
                        process_base));
-  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 2UL);
+  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 3UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
                 static_cast<void*>(nullptr));
   auto const int3_then_nop =
@@ -158,7 +160,13 @@ void TestFindPattern()
   BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
                     hadesmem::Error);
   BOOST_TEST_THROWS(find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
-                    hadesmem::Error);
+    hadesmem::Error);
+  auto const int3_then_nop_0x1000 =
+    find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop 0x1000");
+  BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop_0x1000), '\xCC');
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop_0x1000)+1), '\x90');
+  auto const int3_then_nop_0x1000_rel = reinterpret_cast<std::uintptr_t>(int3_then_nop_0x1000)-ntdll_base;
+  BOOST_TEST(int3_then_nop_0x1000_rel >= 0x1000U);
 
   // TODO: Fix the test to ensure we get the error we're expecting, rather
   // than just any error.
