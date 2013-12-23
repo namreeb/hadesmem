@@ -30,13 +30,6 @@
 
 // TODO: Support setting and writing back Export. (For EAT hooking.)
 
-// TODO: Test that export code works against ordinal-only modules. From
-// Corkami:
-// ordinals-only exports can make the structure even smaller (no
-// NumberOfFunctions/NumberOfNames/AddressOfNames/AddressOfNameOrdinals).
-// Fake entries can be also present in exports as long as Base + Ordinal
-// matches the wanted export.
-
 // TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
@@ -66,34 +59,33 @@ public:
   {
     ExportDir const export_dir(process, pe_file);
 
-    // TODO: Check for underflow here.
-    ordinal_number_ =
-      static_cast<WORD>(procedure_number_ - export_dir.GetOrdinalBase());
-
+    DWORD const ordinal_base = export_dir.GetOrdinalBase();
+    HADESMEM_DETAIL_ASSERT(procedure_number_ >= ordinal_base);
+    ordinal_number_ = static_cast<WORD>(procedure_number_ - ordinal_base);
     if (ordinal_number_ >= export_dir.GetNumberOfFunctions())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
                                       << ErrorString("Ordinal out of range."));
     }
 
-    WORD* const ptr_ordinals = static_cast<WORD*>(
-      RvaToVa(process, pe_file, export_dir.GetAddressOfNameOrdinals()));
-    if (!ptr_ordinals)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("AddressOfNameOrdinals invalid."));
-    }
-
-    DWORD* const ptr_names = static_cast<DWORD*>(
-      RvaToVa(process, pe_file, export_dir.GetAddressOfNames()));
-    if (!ptr_names)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("AddressOfNames invalid."));
-    }
-
     if (DWORD const num_names = export_dir.GetNumberOfNames())
     {
+      WORD* const ptr_ordinals = static_cast<WORD*>(
+        RvaToVa(process, pe_file, export_dir.GetAddressOfNameOrdinals()));
+      if (!ptr_ordinals)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("AddressOfNameOrdinals invalid."));
+      }
+
+      DWORD* const ptr_names = static_cast<DWORD*>(
+        RvaToVa(process, pe_file, export_dir.GetAddressOfNames()));
+      if (!ptr_names)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("AddressOfNames invalid."));
+      }
+
       std::vector<WORD> const name_ordinals =
         ReadVector<WORD>(process, ptr_ordinals, num_names);
       auto const name_ord_iter = std::find(

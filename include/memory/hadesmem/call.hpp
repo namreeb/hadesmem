@@ -55,9 +55,6 @@
 
 // TODO: Split this mess up into multiple headers where possible.
 
-// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be
-// easily identified in a debugger.
-
 // TODO: Consolidate memory allocations where possible.
 
 // TODO: Add support for __vectorcall calling convention.

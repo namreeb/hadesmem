@@ -59,11 +59,6 @@
 // multi-module support properly in base hook. i.e. Two concurrent D3D
 // instances.) Need to be sure not to dirty registers though.
 
-// TODO: Add a 'thumbprint' to all remote memory allocations so the blocks
-// can be easily identified in a debugger. This should probably be done in
-// the Allocator with a 'thumbprint' flag to make it optional and also
-// keep the code in a common place.
-
 // TODO: Rewrite to not use AsmJit.
 
 // TODO: Add proper tests for edge cases trying to be handled (thread

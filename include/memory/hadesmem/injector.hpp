@@ -35,9 +35,6 @@
 // TODO: IAT injection (to allow execution of code before Dllmain of other
 // modules are executed). Include support for .NET target processes.
 
-// TODO: Add a 'thumbprint' to all memory allocations so the blocks can be
-// easily identified in a debugger.
-
 // TODO: Consolidate memory allocations where possible.
 
 namespace hadesmem

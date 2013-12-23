@@ -23,19 +23,12 @@ template <typename T, typename U = std::remove_cv_t<T>> struct IsCharType
 
 template <typename T> struct IsTriviallyCopyable
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   // TODO: Update to use std::is_trivially_copyable trait when
   // available in libstdc++.
-  static bool const value = std::is_trivial<T>::value;
-#else
   // TODO: Update to use std::is_trivially_copyable when MSVC is
   // fixed. Dev12 seems to be broken for arrays.
   static bool const value = std::is_trivial<T>::value;
-#endif
 };
-
-// TODO: Test all combinations of calling convention, pointer vs
-// non-ptr, etc. in Call test.
 
 // TODO: Add support to traits for varargs functions (call conv is
 // ignored on varargs). Remember though that you can have args before
