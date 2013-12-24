@@ -213,6 +213,14 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
                                       << ErrorString("Invalid NT headers."));
     }
 
+    // SizeOfHeaders can be arbitrarily large (including the size of the 
+    // entire file). In this case we simply treat all RVAs as an offset from 
+    // zero, rather than finding its 'true' location in a section.
+    if (rva < nt_headers.OptionalHeader.SizeOfHeaders)
+    {
+      return base + rva;
+    }
+
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
     // 0x2e. Simply treat anything outside of that as invalid for now, though I
     // don't think that's entirely correct.
