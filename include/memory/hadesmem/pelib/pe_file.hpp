@@ -222,7 +222,19 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     WORD num_sections = nt_headers.FileHeader.NumberOfSections;
     if (!num_sections)
     {
-      return base + rva;
+      // In cases where the PE file has no sections it can apparently also have
+      // all sorts of messed up RVAs for data dirs etc... Make sure that none of
+      // them lie outside the file, because otherwise simply returning a direct
+      // offset from the base wouldn't work anyway...
+      // TODO: Validate this.
+      if (rva > pe_file.GetSize())
+      {
+        return nullptr;
+      }
+      else
+      {
+        return base + rva;
+      }
     }
 
     // SizeOfHeaders can be arbitrarily large (including the size of the
@@ -241,11 +253,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     // overwritten by section space, as if the sections were folded back on the
     // header.
     // TODO: Fix this for the case outlined above (and others if applicable).
-    // This will probably require doing a faux load of the PE (at least up to
-    // the point where sections are loaded), however that could cause problems
-    // with other esoteric PE files which work when on-disk, but then destroy
-    // some of their data when loaded (for example, data that is separate on
-    // disk may overlap in memory). Investigate the best solution...
     if (rva > nt_headers.OptionalHeader.SizeOfImage)
     {
       return nullptr;
