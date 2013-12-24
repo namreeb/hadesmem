@@ -225,19 +225,27 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       return base + rva;
     }
 
-    // SizeOfHeaders can be arbitrarily large (including the size of the 
-    // entire file). In this case we simply treat all RVAs as an offset from 
+    // SizeOfHeaders can be arbitrarily large (including the size of the
+    // entire file). In this case we simply treat all RVAs as an offset from
     // zero, rather than finding its 'true' location in a section.
+    // TODO: Check whether this is correct for all cases.
     if (rva < nt_headers.OptionalHeader.SizeOfHeaders)
     {
       return base + rva;
     }
 
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
-    // 0x2e. Simply treat anything outside of that as invalid for now, though I
-    // don't think that's entirely correct.
-    // TODO: Check whether this is correct (both for the case outlined above,
-    // and all other cases).
+    // 0x2e. Simply treat anything outside of that as invalid for now, though
+    // this is not correct for all cases. For an example see "foldedhdr.exe"
+    // from the Corkami PE corpus. It is a PE where the NT headers are partially
+    // overwritten by section space, as if the sections were folded back on the
+    // header.
+    // TODO: Fix this for the case outlined above (and others if applicable).
+    // This will probably require doing a faux load of the PE (at least up to
+    // the point where sections are loaded), however that could cause problems
+    // with other esoteric PE files which work when on-disk, but then destroy
+    // some of their data when loaded (for example, data that is separate on
+    // disk may overlap in memory). Investigate the best solution...
     if (rva > nt_headers.OptionalHeader.SizeOfImage)
     {
       return nullptr;
