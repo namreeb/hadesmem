@@ -74,6 +74,8 @@ void TestSectionList()
       section.SetNumberOfRelocations(section.GetNumberOfRelocations());
       section.SetNumberOfLinenumbers(section.GetNumberOfLinenumbers());
       section.SetCharacteristics(section.GetCharacteristics());
+      section.UpdateWrite();
+      section.UpdateRead();
 
       auto const section_header_raw_new =
         hadesmem::Read<IMAGE_SECTION_HEADER>(process, section.GetBase());

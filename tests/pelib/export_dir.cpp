@@ -85,6 +85,8 @@ void TestExportDir()
     // Should the export dir name be the same as the module name under
     // normal circumstances?
     BOOST_TEST(!cur_export_dir->GetName().empty());
+    cur_export_dir->UpdateWrite();
+    cur_export_dir->UpdateRead();
 
     auto const export_dir_raw_new = hadesmem::Read<IMAGE_EXPORT_DIRECTORY>(
       process, cur_export_dir->GetBase());

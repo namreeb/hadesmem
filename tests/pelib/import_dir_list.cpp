@@ -86,6 +86,8 @@ void TestImportDirList()
       test_import_dir.SetName(test_import_dir.GetName());
       test_import_dir.SetFirstThunk(test_import_dir.GetFirstThunk());
       BOOST_TEST(!test_import_dir.GetName().empty());
+      test_import_dir.UpdateWrite();
+      test_import_dir.UpdateRead();
 
       auto const imp_dir_raw_new = hadesmem::Read<IMAGE_IMPORT_DESCRIPTOR>(
         process, test_import_dir.GetBase());

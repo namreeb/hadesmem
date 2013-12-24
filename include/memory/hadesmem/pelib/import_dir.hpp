@@ -40,7 +40,8 @@ public:
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc)
     : process_(&process),
       pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(imp_desc))
+      base_(reinterpret_cast<PBYTE>(imp_desc)),
+      data_()
   {
     if (!base_)
     {
@@ -62,6 +63,8 @@ public:
           Error() << ErrorString("Import directory is invalid."));
       }
     }
+
+    UpdateRead();
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -69,28 +72,34 @@ public:
     return base_;
   }
 
+  void UpdateRead()
+  {
+    data_ = Read<IMAGE_IMPORT_DESCRIPTOR>(*process_, base_);
+  }
+
+  void UpdateWrite()
+  {
+    Write(*process_, base_, data_);
+  }
+
   DWORD GetOriginalFirstThunk() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk));
+    return data_.OriginalFirstThunk;
   }
 
   DWORD GetTimeDateStamp() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp));
+    return data_.TimeDateStamp;
   }
 
   DWORD GetForwarderChain() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, ForwarderChain));
+    return data_.ForwarderChain;
   }
 
   DWORD GetNameRaw() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name));
+    return data_.Name;
   }
 
   std::string GetName() const
@@ -101,34 +110,27 @@ public:
 
   DWORD GetFirstThunk() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, FirstThunk));
+    return data_.FirstThunk;
   }
 
   void SetOriginalFirstThunk(DWORD original_first_thunk)
   {
-    return Write(*process_,
-                 base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk),
-                 original_first_thunk);
+    data_.OriginalFirstThunk = original_first_thunk;
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
   {
-    return Write(*process_,
-                 base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp),
-                 time_date_stamp);
+    data_.TimeDateStamp = time_date_stamp;
   }
 
   void SetForwarderChain(DWORD forwarder_chain)
   {
-    return Write(*process_,
-                 base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, ForwarderChain),
-                 forwarder_chain);
+    data_.ForwarderChain = forwarder_chain;
   }
 
   void SetNameRaw(DWORD name)
   {
-    Write(*process_, base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name), name);
+    data_.Name = name;
   }
 
   void SetName(std::string const& name)
@@ -163,15 +165,14 @@ public:
 
   void SetFirstThunk(DWORD first_thunk)
   {
-    return Write(*process_,
-                 base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, FirstThunk),
-                 first_thunk);
+    data_.FirstThunk = first_thunk;
   }
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
+  IMAGE_IMPORT_DESCRIPTOR data_;
 };
 
 inline bool operator==(ImportDir const& lhs, ImportDir const& rhs)

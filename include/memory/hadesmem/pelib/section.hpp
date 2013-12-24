@@ -35,7 +35,11 @@ class Section
 {
 public:
   explicit Section(Process const& process, PeFile const& pe_file, WORD number)
-    : process_(&process), pe_file_(&pe_file), number_(number), base_(nullptr)
+    : process_(&process),
+      pe_file_(&pe_file),
+      number_(number),
+      base_(nullptr),
+      data_()
   {
     NtHeaders const nt_headers(process, pe_file);
     if (number >= nt_headers.GetNumberOfSections())
@@ -52,11 +56,23 @@ public:
       number;
 
     base_ = reinterpret_cast<PBYTE>(section_header);
+
+    UpdateRead();
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
+  }
+
+  void UpdateRead()
+  {
+    data_ = Read<IMAGE_SECTION_HEADER>(*process_, base_);
+  }
+
+  void UpdateWrite()
+  {
+    Write(*process_, base_, data_);
   }
 
   WORD GetNumber() const HADESMEM_DETAIL_NOEXCEPT
@@ -66,13 +82,10 @@ public:
 
   std::string GetName() const
   {
-    std::array<char, 8> const name_raw =
-      Read<char, 8>(*process_, base_ + offsetof(IMAGE_SECTION_HEADER, Name));
-
     std::string name;
-    for (std::size_t i = 0; i < 8 && name_raw[i]; ++i)
+    for (std::size_t i = 0; i < 8 && data_.Name[i]; ++i)
     {
-      name += name_raw[i];
+      name += data_.Name[i];
     }
 
     return name;
@@ -80,124 +93,109 @@ public:
 
   DWORD GetVirtualAddress() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_SECTION_HEADER, VirtualAddress));
+    return data_.VirtualAddress;
   }
 
   DWORD GetVirtualSize() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, Misc.VirtualSize));
+    return data_.Misc.VirtualSize;
   }
 
   DWORD GetSizeOfRawData() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_SECTION_HEADER, SizeOfRawData));
+    return data_.SizeOfRawData;
   }
 
   DWORD GetPointerToRawData() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, PointerToRawData));
+    return data_.PointerToRawData;
   }
 
   DWORD GetPointerToRelocations() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, PointerToRelocations));
+    return data_.PointerToRelocations;
   }
 
   DWORD GetPointerToLinenumbers() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, PointerToLinenumbers));
+    return data_.PointerToLinenumbers;
   }
 
   WORD GetNumberOfRelocations() const
   {
-    return Read<WORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, NumberOfRelocations));
+    return data_.NumberOfRelocations;
   }
 
   WORD GetNumberOfLinenumbers() const
   {
-    return Read<WORD>(
-      *process_, base_ + offsetof(IMAGE_SECTION_HEADER, NumberOfLinenumbers));
+    return data_.NumberOfLinenumbers;
   }
 
   DWORD GetCharacteristics() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_SECTION_HEADER, Characteristics));
+    return data_.Characteristics;
   }
 
   void SetName(std::string const& name)
   {
-    WriteString(*process_, base_ + offsetof(IMAGE_SECTION_HEADER, Name), name);
+    if (name.size() > 8)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("New section name too large."));
+    }
+
+    std::copy(std::begin(name),
+              std::end(name),
+              reinterpret_cast<char*>(&data_.Name[0]));
+    if (name.size() != 8)
+    {
+      data_.Name[name.size()] = '\0';
+    }
   }
 
   void SetVirtualAddress(DWORD virtual_address)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, VirtualAddress),
-          virtual_address);
+    data_.VirtualAddress = virtual_address;
   }
 
   void SetVirtualSize(DWORD virtual_size)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, Misc.VirtualSize),
-          virtual_size);
+    data_.Misc.VirtualSize = virtual_size;
   }
 
   void SetSizeOfRawData(DWORD size_of_raw_data)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, SizeOfRawData),
-          size_of_raw_data);
+    data_.SizeOfRawData = size_of_raw_data;
   }
 
   void SetPointerToRawData(DWORD pointer_to_raw_data)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, PointerToRawData),
-          pointer_to_raw_data);
+    data_.PointerToRawData = pointer_to_raw_data;
   }
 
   void SetPointerToRelocations(DWORD pointer_to_relocations)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, PointerToRelocations),
-          pointer_to_relocations);
+    data_.PointerToRelocations = pointer_to_relocations;
   }
 
   void SetPointerToLinenumbers(DWORD pointer_to_linenumbers)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, PointerToLinenumbers),
-          pointer_to_linenumbers);
+    data_.PointerToLinenumbers = pointer_to_linenumbers;
   }
 
   void SetNumberOfRelocations(WORD number_of_relocations)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, NumberOfRelocations),
-          number_of_relocations);
+    data_.NumberOfRelocations = number_of_relocations;
   }
 
   void SetNumberOfLinenumbers(WORD number_of_linenumbers)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, NumberOfLinenumbers),
-          number_of_linenumbers);
+    data_.NumberOfLinenumbers = number_of_linenumbers;
   }
 
   void SetCharacteristics(DWORD characteristics)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_SECTION_HEADER, Characteristics),
-          characteristics);
+    data_.Characteristics = characteristics;
   }
 
 private:
@@ -210,14 +208,17 @@ private:
     : process_(&process),
       pe_file_(&pe_file),
       number_(number),
-      base_(static_cast<PBYTE>(base))
+      base_(static_cast<PBYTE>(base)),
+      data_()
   {
+    UpdateRead();
   }
 
   Process const* process_;
   PeFile const* pe_file_;
   WORD number_;
   PBYTE base_;
+  IMAGE_SECTION_HEADER data_;
 };
 
 inline bool operator==(Section const& lhs, Section const& rhs)

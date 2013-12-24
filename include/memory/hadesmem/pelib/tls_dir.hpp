@@ -29,7 +29,7 @@ class TlsDir
 {
 public:
   explicit TlsDir(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file), base_(nullptr)
+    : process_(&process), pe_file_(&pe_file), base_(nullptr), data_()
   {
     NtHeaders const nt_headers(process, pe_file);
 
@@ -50,6 +50,8 @@ public:
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("TLS directory is invalid."));
     }
+
+    UpdateRead();
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -57,28 +59,34 @@ public:
     return base_;
   }
 
+  void UpdateRead()
+  {
+    data_ = Read<IMAGE_TLS_DIRECTORY>(*process_, base_);
+  }
+
+  void UpdateWrite()
+  {
+    Write(*process_, base_, data_);
+  }
+
   DWORD_PTR GetStartAddressOfRawData() const
   {
-    return Read<DWORD_PTR>(
-      *process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, StartAddressOfRawData));
+    return data_.StartAddressOfRawData;
   }
 
   DWORD_PTR GetEndAddressOfRawData() const
   {
-    return Read<DWORD_PTR>(
-      *process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, EndAddressOfRawData));
+    return data_.EndAddressOfRawData;
   }
 
   DWORD_PTR GetAddressOfIndex() const
   {
-    return Read<DWORD_PTR>(
-      *process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, AddressOfIndex));
+    return data_.AddressOfIndex;
   }
 
   DWORD_PTR GetAddressOfCallBacks() const
   {
-    return Read<DWORD_PTR>(
-      *process_, base_ + offsetof(IMAGE_TLS_DIRECTORY, AddressOfCallBacks));
+    return data_.AddressOfCallBacks;
   }
 
   template <typename OutputIterator>
@@ -113,64 +121,51 @@ public:
 
   DWORD GetSizeOfZeroFill() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_TLS_DIRECTORY, SizeOfZeroFill));
+    return data_.SizeOfZeroFill;
   }
 
   DWORD GetCharacteristics() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_TLS_DIRECTORY, Characteristics));
+    return data_.Characteristics;
   }
 
   void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, StartAddressOfRawData),
-          start_address_of_raw_data);
+    data_.StartAddressOfRawData = start_address_of_raw_data;
   }
 
   void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, EndAddressOfRawData),
-          end_address_of_raw_data);
+    data_.EndAddressOfRawData = end_address_of_raw_data;
   }
 
   void SetAddressOfIndex(DWORD_PTR address_of_index)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, AddressOfIndex),
-          address_of_index);
+    data_.AddressOfIndex = address_of_index;
   }
 
   void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, AddressOfCallBacks),
-          address_of_callbacks);
+    data_.AddressOfCallBacks = address_of_callbacks;
   }
 
   // TODO: SetCallbacks function
 
   void SetSizeOfZeroFill(DWORD size_of_zero_fill)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, SizeOfZeroFill),
-          size_of_zero_fill);
+    data_.SizeOfZeroFill = size_of_zero_fill;
   }
 
   void SetCharacteristics(DWORD characteristics)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_TLS_DIRECTORY, Characteristics),
-          characteristics);
+    data_.Characteristics = characteristics;
   }
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
+  IMAGE_TLS_DIRECTORY data_;
 };
 
 inline bool operator==(TlsDir const& lhs, TlsDir const& rhs)

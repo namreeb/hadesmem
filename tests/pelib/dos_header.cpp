@@ -74,6 +74,8 @@ void TestDosHeader()
     cur_dos_header.SetOEMInfo(cur_dos_header.GetOEMInfo());
     cur_dos_header.SetReservedWords2(cur_dos_header.GetReservedWords2());
     cur_dos_header.SetNewHeaderOffset(cur_dos_header.GetNewHeaderOffset());
+    cur_dos_header.UpdateWrite();
+    cur_dos_header.UpdateRead();
 
     auto const dos_header_raw_new =
       hadesmem::Read<IMAGE_DOS_HEADER>(process, cur_pe_file.GetBase());

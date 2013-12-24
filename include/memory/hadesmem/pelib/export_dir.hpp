@@ -34,7 +34,7 @@ class ExportDir
 {
 public:
   explicit ExportDir(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file), base_(nullptr)
+    : process_(&process), pe_file_(&pe_file), base_(nullptr), data_()
   {
     NtHeaders nt_headers(process, pe_file);
     DWORD const export_dir_rva =
@@ -53,6 +53,8 @@ public:
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Export directory is invalid."));
     }
+
+    UpdateRead();
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -60,119 +62,106 @@ public:
     return base_;
   }
 
+  void UpdateRead()
+  {
+    data_ = Read<IMAGE_EXPORT_DIRECTORY>(*process_, base_);
+  }
+
+  void UpdateWrite()
+  {
+    Write(*process_, base_, data_);
+  }
+
   DWORD GetCharacteristics() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Characteristics));
+    return data_.Characteristics;
   }
 
   DWORD GetTimeDateStamp() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, TimeDateStamp));
+    return data_.TimeDateStamp;
   }
 
   WORD GetMajorVersion() const
   {
-    return Read<WORD>(*process_,
-                      base_ + offsetof(IMAGE_EXPORT_DIRECTORY, MajorVersion));
+    return data_.MajorVersion;
   }
 
   WORD GetMinorVersion() const
   {
-    return Read<WORD>(*process_,
-                      base_ + offsetof(IMAGE_EXPORT_DIRECTORY, MinorVersion));
+    return data_.MinorVersion;
   }
 
   DWORD GetNameRaw() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Name));
+    return data_.Name;
   }
 
   std::string GetName() const
   {
-    DWORD const name_rva =
-      Read<DWORD>(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Name));
+    DWORD const name_rva = GetNameRaw();
 
     if (!name_rva)
     {
-      return std::string();
+      return {};
     }
 
-    PVOID name_va = RvaToVa(*process_, *pe_file_, name_rva);
-    return ReadString<char>(*process_, name_va);
+    return ReadString<char>(*process_, RvaToVa(*process_, *pe_file_, name_rva));
   }
 
   DWORD GetOrdinalBase() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Base));
+    return data_.Base;
   }
 
   DWORD GetNumberOfFunctions() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, NumberOfFunctions));
+    return data_.NumberOfFunctions;
   }
 
   DWORD GetNumberOfNames() const
   {
-    return Read<DWORD>(*process_,
-                       base_ + offsetof(IMAGE_EXPORT_DIRECTORY, NumberOfNames));
+    return data_.NumberOfNames;
   }
 
   DWORD GetAddressOfFunctions() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfFunctions));
+    return data_.AddressOfFunctions;
   }
 
   DWORD GetAddressOfNames() const
   {
-    return Read<DWORD>(
-      *process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfNames));
+    return data_.AddressOfNames;
   }
 
   DWORD GetAddressOfNameOrdinals() const
   {
-    return Read<DWORD>(
-      *process_,
-      base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals));
+    return data_.AddressOfNameOrdinals;
   }
 
   void SetCharacteristics(DWORD characteristics)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Characteristics),
-          characteristics);
+    data_.Characteristics = characteristics;
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, TimeDateStamp),
-          time_date_stamp);
+    data_.TimeDateStamp = time_date_stamp;
   }
 
   void SetMajorVersion(WORD major_version)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, MajorVersion),
-          major_version);
+    data_.MajorVersion = major_version;
   }
 
   void SetMinorVersion(WORD minor_version)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, MinorVersion),
-          minor_version);
+    data_.MinorVersion = minor_version;
   }
 
   void SetName(std::string const& name)
   {
-    DWORD const name_rva =
-      Read<DWORD>(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Name));
+    DWORD const name_rva = GetNameRaw();
 
     if (!name_rva)
     {
@@ -196,48 +185,39 @@ public:
 
   void SetOrdinalBase(DWORD base)
   {
-    Write(*process_, base_ + offsetof(IMAGE_EXPORT_DIRECTORY, Base), base);
+    data_.Base = base;
   }
 
   void SetNumberOfFunctions(DWORD number_of_functions)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, NumberOfFunctions),
-          number_of_functions);
+    data_.NumberOfFunctions = number_of_functions;
   }
 
   void SetNumberOfNames(DWORD number_of_names)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, NumberOfNames),
-          number_of_names);
+    data_.NumberOfNames = number_of_names;
   }
 
   void SetAddressOfFunctions(DWORD address_of_functions)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfFunctions),
-          address_of_functions);
+    data_.AddressOfFunctions = address_of_functions;
   }
 
   void SetAddressOfNames(DWORD address_of_names)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfNames),
-          address_of_names);
+    data_.AddressOfNames = address_of_names;
   }
 
   void SetAddressOfNameOrdinals(DWORD address_of_name_ordinals)
   {
-    Write(*process_,
-          base_ + offsetof(IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals),
-          address_of_name_ordinals);
+    data_.AddressOfNameOrdinals = address_of_name_ordinals;
   }
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
+  IMAGE_EXPORT_DIRECTORY data_;
 };
 
 inline bool operator==(ExportDir const& lhs, ExportDir const& rhs)

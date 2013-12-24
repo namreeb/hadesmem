@@ -74,7 +74,7 @@ void TestNtHeaders()
     cur_nt_headers.SetAddressOfEntryPoint(
       cur_nt_headers.GetAddressOfEntryPoint());
     cur_nt_headers.SetBaseOfCode(cur_nt_headers.GetBaseOfCode());
-#if defined(_M_IX86)
+#if defined(HADESMEM_DETAIL_ARCH_X86)
     cur_nt_headers.SetBaseOfData(cur_nt_headers.GetBaseOfData());
 #endif
     cur_nt_headers.SetImageBase(cur_nt_headers.GetImageBase());
@@ -113,6 +113,8 @@ void TestNtHeaders()
       cur_nt_headers.SetDataDirectorySize(
         data_dir, cur_nt_headers.GetDataDirectorySize(data_dir));
     }
+    cur_nt_headers.UpdateWrite();
+    cur_nt_headers.UpdateRead();
 
     auto const nt_headers_raw_new =
       hadesmem::Read<IMAGE_NT_HEADERS>(process, cur_nt_headers.GetBase());

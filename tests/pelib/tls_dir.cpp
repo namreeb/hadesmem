@@ -80,6 +80,8 @@ void TestTlsDir()
     cur_tls_dir->SetCharacteristics(cur_tls_dir->GetCharacteristics());
     std::vector<PIMAGE_TLS_CALLBACK> callbacks;
     cur_tls_dir->GetCallbacks(std::back_inserter(callbacks));
+    cur_tls_dir->UpdateWrite();
+    cur_tls_dir->UpdateRead();
 
     auto const tls_dir_raw_new =
       hadesmem::Read<IMAGE_TLS_DIRECTORY>(process, cur_tls_dir->GetBase());

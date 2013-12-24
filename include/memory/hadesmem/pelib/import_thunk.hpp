@@ -41,8 +41,10 @@ public:
                        PIMAGE_THUNK_DATA thunk)
     : process_(&process),
       pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(thunk))
+      base_(reinterpret_cast<PBYTE>(thunk)),
+      data_()
   {
+    UpdateRead();
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -50,29 +52,24 @@ public:
     return base_;
   }
 
-  DWORD_PTR GetAddressOfData() const
+  void UpdateRead()
   {
-    return Read<DWORD_PTR>(
-      *process_, base_ + offsetof(IMAGE_THUNK_DATA, u1.AddressOfData));
+    data_ = Read<IMAGE_THUNK_DATA>(*process_, base_);
   }
 
-  void SetAddressOfData(DWORD_PTR address_of_data)
+  void UpdateWrite()
   {
-    return Write(*process_,
-                 base_ + offsetof(IMAGE_THUNK_DATA, u1.AddressOfData),
-                 address_of_data);
+    Write(*process_, base_, data_);
+  }
+
+  DWORD_PTR GetAddressOfData() const
+  {
+    return data_.u1.AddressOfData;
   }
 
   DWORD_PTR GetOrdinalRaw() const
   {
-    return Read<DWORD_PTR>(*process_,
-                           base_ + offsetof(IMAGE_THUNK_DATA, u1.Ordinal));
-  }
-
-  void SetOrdinalRaw(DWORD_PTR ordinal_raw)
-  {
-    return Write(
-      *process_, base_ + offsetof(IMAGE_THUNK_DATA, u1.Ordinal), ordinal_raw);
+    return data_.u1.Ordinal;
   }
 
   bool ByOrdinal() const
@@ -85,18 +82,9 @@ public:
     return IMAGE_ORDINAL(GetOrdinalRaw());
   }
 
-  // Todo: SetOrdinal function
-
   DWORD_PTR GetFunction() const
   {
-    return Read<DWORD_PTR>(*process_,
-                           base_ + offsetof(IMAGE_THUNK_DATA, u1.Function));
-  }
-
-  void SetFunction(DWORD_PTR function)
-  {
-    return Write(
-      *process_, base_ + offsetof(IMAGE_THUNK_DATA, u1.Function), function);
+    return data_.u1.Function;
   }
 
   WORD GetHint() const
@@ -105,11 +93,41 @@ public:
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
     if (!name_import)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-        << ErrorString("Invalid import name and hint."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Invalid import name and hint."));
     }
     return Read<WORD>(*process_,
                       name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint));
+  }
+
+  std::string GetName() const
+  {
+    PBYTE const name_import = static_cast<PBYTE>(
+      RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
+    if (!name_import)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Invalid import name and hint."));
+    }
+    return ReadString<char>(*process_,
+                            name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
+  }
+
+  void SetAddressOfData(DWORD_PTR address_of_data)
+  {
+    data_.u1.AddressOfData = address_of_data;
+  }
+
+  void SetOrdinalRaw(DWORD_PTR ordinal_raw)
+  {
+    data_.u1.Ordinal = ordinal_raw;
+  }
+
+  // Todo: SetOrdinal function
+
+  void SetFunction(DWORD_PTR function)
+  {
+    data_.u1.Function = function;
   }
 
   void SetHint(WORD hint)
@@ -120,25 +138,13 @@ public:
       *process_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint), hint);
   }
 
-  std::string GetName() const
-  {
-    PBYTE const name_import = static_cast<PBYTE>(
-      RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
-    if (!name_import)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-        << ErrorString("Invalid import name and hint."));
-    }
-    return ReadString<char>(*process_,
-                            name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
-  }
-
   // TODO: SetName function
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
+  IMAGE_THUNK_DATA data_;
 };
 
 inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs)
