@@ -250,9 +250,13 @@ void DumpHeaders(hadesmem::Process const& process,
 void DumpSections(hadesmem::Process const& process,
                   hadesmem::PeFile const& pe_file)
 {
-  std::wcout << "\n\tSections:\n";
-
   hadesmem::SectionList sections(process, pe_file);
+  
+  if (std::begin(sections) != std::end(sections))
+  {
+    std::wcout << "\n\tSections:\n";
+  }
+
   for (auto const& s : sections)
   {
     std::wcout << std::boolalpha;
