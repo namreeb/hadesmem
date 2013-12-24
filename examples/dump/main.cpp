@@ -251,7 +251,7 @@ void DumpSections(hadesmem::Process const& process,
                   hadesmem::PeFile const& pe_file)
 {
   hadesmem::SectionList sections(process, pe_file);
-  
+
   if (std::begin(sections) != std::end(sections))
   {
     std::wcout << "\n\tSections:\n";
@@ -465,8 +465,6 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
 
-    std::wcout << "\n\t\tImport Thunks:\n";
-
     // Certain information gets destroyed by the Windows PE loader in
     // some circumstances. Nothing we can do but ignore it or resort
     // to reading the original data from disk.
@@ -494,6 +492,11 @@ void DumpImports(hadesmem::Process const& process,
       }
     }
 
+    // Prefer the ILT over the IAT.
+    // TODO: Dump both? Keep in mind they are parsed in parallel and because of
+    // this the IAT does not have to be null terminated. Perhaps parse the ILT
+    // first, then use the count from there to limit the IAT parsing. The 
+    // dllmaxvals file from the Corkami PE corpus can be used to test this.
     hadesmem::ImportThunkList import_thunks(process,
                                             pe_file,
                                             dir.GetOriginalFirstThunk()
@@ -502,6 +505,10 @@ void DumpImports(hadesmem::Process const& process,
     if (std::begin(import_thunks) == std::end(import_thunks))
     {
       std::wcout << "\n\t\tWARNING! Import thunk list is empty or invalid.\n";
+    }
+    else
+    {
+      std::wcout << "\n\t\tImport Thunks:\n";
     }
     for (auto const& thunk : import_thunks)
     {
