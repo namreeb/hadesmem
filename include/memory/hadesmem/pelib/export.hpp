@@ -61,7 +61,7 @@ public:
 
     auto const ordinal_base = static_cast<WORD>(export_dir.GetOrdinalBase());
     HADESMEM_DETAIL_ASSERT(procedure_number_ >= ordinal_base);
-    ordinal_number_ = procedure_number_ - ordinal_base;
+    ordinal_number_ = static_cast<WORD>(procedure_number_ - ordinal_base);
     if (ordinal_number_ >= export_dir.GetNumberOfFunctions())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
