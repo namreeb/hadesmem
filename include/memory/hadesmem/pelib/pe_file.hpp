@@ -213,6 +213,18 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
                                       << ErrorString("Invalid NT headers."));
     }
 
+    // Windows will load specially crafted images with no sections.
+    // TODO: Check whether FileAlignment and/or SectionAlignment
+    // should be checked here. In the specially crafted image I'm
+    // testing this against the value is '1' for both anyway, but I'd
+    // like to ensure it's not possible for it to be higher, and if
+    // it is, whether it would affect the RVA resolution here.
+    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
+    if (!num_sections)
+    {
+      return base + rva;
+    }
+
     // SizeOfHeaders can be arbitrarily large (including the size of the 
     // entire file). In this case we simply treat all RVAs as an offset from 
     // zero, rather than finding its 'true' location in a section.
@@ -237,19 +249,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         nt_headers.FileHeader.SizeOfOptionalHeader);
     IMAGE_SECTION_HEADER section_header =
       Read<IMAGE_SECTION_HEADER>(process, ptr_section_header);
-
-    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
-
-    // Windows will load specially crafted images with no sections.
-    // TODO: Check whether FileAlignment and/or SectionAlignment
-    // should be checked here. In the specially crafted image I'm
-    // testing this against the value is '1' for both anyway, but I'd
-    // like to ensure it's not possible for it to be higher, and if
-    // it is, whether it would affect the RVA resolution here.
-    if (!num_sections)
-    {
-      return base + rva;
-    }
 
     bool in_header = true;
     for (WORD i = 0; i < num_sections; ++i)
