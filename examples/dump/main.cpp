@@ -498,8 +498,7 @@ void DumpImports(hadesmem::Process const& process,
       // no INT/ILT once the module is loaded.
       if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
       {
-        std::wcout << "\n\t\tWARNING! IAT is same as INT for "
-                      "this module.\n";
+        std::wcout << "\n\t\tWARNING! IAT is same as INT for this module.\n";
         continue;
       }
     }
@@ -592,8 +591,7 @@ void DumpModules(hadesmem::Process const& process)
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\n";
-      std::wcout << "\tWARNING! Not a valid PE file or "
-                    "architecture.\n";
+      std::wcout << "\tWARNING! Not a valid PE file or architecture.\n";
       continue;
     }
 
@@ -649,8 +647,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nCould not open process for further "
-                  "inspection.\n\n";
+    std::wcout << "\nCould not open process for further inspection.\n\n";
     return;
   }
 
@@ -699,8 +696,7 @@ void DumpFile(std::wstring const& path)
 
   if (!file.seekg(0, std::ios::beg))
   {
-    std::wcout << "\nWARNING! Seeking to beginning of file "
-                  "failed (1).\n";
+    std::wcout << "\nWARNING! Seeking to beginning of file failed (1).\n";
     return;
   }
 
@@ -721,8 +717,7 @@ void DumpFile(std::wstring const& path)
 
   if (!file.seekg(0, std::ios::beg))
   {
-    std::wcout << "\nWARNING! Seeking to beginning of file "
-                  "failed (2).\n";
+    std::wcout << "\nWARNING! Seeking to beginning of file failed (2).\n";
     return;
   }
 
@@ -747,8 +742,7 @@ void DumpFile(std::wstring const& path)
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nNot a PE file or wrong architecture (Pass "
-                  "2).\n";
+    std::wcout << "\nNot a PE file or wrong architecture (Pass 2).\n";
     return;
   }
 
@@ -904,8 +898,8 @@ int main(int /*argc*/, char * /*argv*/ [])
       else
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error() << hadesmem::ErrorString("Failed to find requested "
-                                                     "process."));
+          hadesmem::Error() << hadesmem::ErrorString(
+                                 "Failed to find requested process."));
       }
     }
     else if (var_map.count("file"))
