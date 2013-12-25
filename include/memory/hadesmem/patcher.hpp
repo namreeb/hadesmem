@@ -42,13 +42,6 @@
 
 // TODO: Make hooking a transactional operation.
 
-// TODO: When patching memory, check each thread context to ensure we're not
-// overwriting code that's currently being executed in a way that could cause
-// a crash. In the case of PatchDetour we should set the thread context to
-// redirect it to our trampoline, and in the case of PatchRaw it's probably
-// safer just to bail and make the caller try again. Need to document that
-// the API may fail spuriously and that the caller should retry.
-
 // TODO: Explicitly support (and test) hook chains.
 
 // TODO: Support 'safe' unloading by incrementing/decrementing a counter for
@@ -79,6 +72,37 @@
 
 namespace hadesmem
 {
+
+namespace detail
+{
+
+inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
+{
+  ThreadList threads(pid);
+  for (auto const& thread_entry : threads)
+  {
+    if (thread_entry.GetId() == ::GetCurrentThreadId())
+    {
+      continue;
+    }
+
+    Thread const thread(thread_entry.GetId());
+    auto const context = GetThreadContext(thread, CONTEXT_CONTROL);
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+    auto const ip = reinterpret_cast<void const*>(context.Rip);
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+    auto const ip = reinterpret_cast<void const*>(context.Eip);
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+    if (target <= ip && ip < static_cast<std::uint8_t*>(target) + len)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Thread is currently executing patch target."));
+    }
+  }
+}
+}
 
 class PatchRaw
 {
@@ -145,6 +169,8 @@ public:
 
     SuspendedProcess const suspended_process(process_->GetId());
 
+    detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
+
     orig_ = ReadVector<BYTE>(*process_, target_, data_.size());
 
     WriteVector(*process_, target_, data_);
@@ -162,6 +188,8 @@ public:
     }
 
     SuspendedProcess const suspended_process(process_->GetId());
+
+    detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
 
     WriteVector(*process_, target_, orig_);
 
@@ -380,6 +408,8 @@ public:
 
     orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
 
+    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+
     WriteJump(target_, detour_);
 
     FlushInstructionCache(*process_, target_, instr_size);
@@ -395,6 +425,8 @@ public:
     }
 
     SuspendedProcess const suspended_process(process_->GetId());
+
+    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
     WriteVector(*process_, target_, orig_);
 
