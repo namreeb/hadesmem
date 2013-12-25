@@ -37,9 +37,9 @@ inline bool IsWoW64Process(HANDLE handle)
   return is_wow64 != FALSE;
 }
 
-inline detail::SmartHandle OpenProcessAllAccess(DWORD id)
+inline detail::SmartHandle OpenProcess(DWORD id, DWORD access)
 {
-  HANDLE const handle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+  HANDLE const handle = ::OpenProcess(access, FALSE, id);
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
@@ -51,9 +51,14 @@ inline detail::SmartHandle OpenProcessAllAccess(DWORD id)
   return detail::SmartHandle(handle);
 }
 
-inline detail::SmartHandle OpenThreadAllAccess(DWORD id)
+inline detail::SmartHandle OpenProcessAllAccess(DWORD id)
 {
-  HANDLE const handle = ::OpenThread(THREAD_ALL_ACCESS, FALSE, id);
+  return OpenProcess(id, PROCESS_ALL_ACCESS);
+}
+
+inline detail::SmartHandle OpenThread(DWORD id, DWORD access)
+{
+  HANDLE const handle = ::OpenThread(access, FALSE, id);
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
@@ -62,6 +67,11 @@ inline detail::SmartHandle OpenThreadAllAccess(DWORD id)
   }
 
   return detail::SmartHandle(handle);
+}
+
+inline detail::SmartHandle OpenThreadAllAccess(DWORD id)
+{
+  return OpenThread(id, THREAD_ALL_ACCESS);
 }
 
 inline detail::SmartHandle DuplicateHandle(HANDLE handle)

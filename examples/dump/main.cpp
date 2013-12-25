@@ -86,7 +86,6 @@ void DumpDosHeader(hadesmem::Process const& process,
   std::wcout << "\n\tDOS Header:\n";
 
   hadesmem::DosHeader dos_hdr(process, pe_file);
-  std::wcout << std::boolalpha;
   std::wcout << "\n";
   std::wcout << "\t\tMagic: " << std::hex << dos_hdr.GetMagic() << std::dec
              << "\n";
@@ -136,7 +135,6 @@ void DumpDosHeader(hadesmem::Process const& process,
   std::wcout << std::dec << "\n";
   std::wcout << "\t\tNewHeaderOffset: " << std::hex
              << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
-  std::wcout << std::noboolalpha;
 }
 
 void DumpNtHeaders(hadesmem::Process const& process,
@@ -145,7 +143,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
   std::wcout << "\n\tNT Headers:\n";
 
   hadesmem::NtHeaders nt_hdrs(process, pe_file);
-  std::wcout << std::boolalpha;
   std::wcout << "\n";
   std::wcout << "\t\tSignature: " << std::hex << nt_hdrs.GetSignature()
              << std::dec << "\n";
@@ -236,7 +233,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
                << nt_hdrs.GetDataDirectorySize(
                     static_cast<hadesmem::PeDataDir>(i)) << std::dec << "\n";
   }
-  std::wcout << std::noboolalpha;
 }
 
 void DumpHeaders(hadesmem::Process const& process,
@@ -259,7 +255,6 @@ void DumpSections(hadesmem::Process const& process,
 
   for (auto const& s : sections)
   {
-    std::wcout << std::boolalpha;
     std::wcout << "\n";
     std::wcout << "\t\tName: " << s.GetName().c_str() << "\n";
     std::wcout << "\t\tVirtualAddress: " << std::hex << s.GetVirtualAddress()
@@ -280,7 +275,6 @@ void DumpSections(hadesmem::Process const& process,
                << s.GetNumberOfLinenumbers() << std::dec << "\n";
     std::wcout << "\t\tCharacteristics: " << std::hex << s.GetCharacteristics()
                << std::dec << "\n";
-    std::wcout << std::noboolalpha;
   }
 }
 
@@ -298,7 +292,6 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
 
   std::wcout << "\n\tTLS:\n";
 
-  std::wcout << std::boolalpha;
   std::wcout << "\n";
   std::wcout << "\t\tStartAddressOfRawData: " << std::hex
              << tls_dir->GetStartAddressOfRawData() << std::dec << "\n";
@@ -329,7 +322,6 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
              << tls_dir->GetSizeOfZeroFill() << std::dec << "\n";
   std::wcout << "\t\tCharacteristics: " << std::hex
              << tls_dir->GetCharacteristics() << std::dec << "\n";
-  std::wcout << std::noboolalpha;
 }
 
 void DumpExports(hadesmem::Process const& process,
@@ -347,7 +339,6 @@ void DumpExports(hadesmem::Process const& process,
 
   std::wcout << "\n\tExport Dir:\n";
 
-  std::wcout << std::boolalpha;
   std::wcout << "\n";
   std::wcout << "\t\tCharacteristics: " << std::hex
              << export_dir->GetCharacteristics() << std::dec << "\n";
@@ -380,14 +371,12 @@ void DumpExports(hadesmem::Process const& process,
              << export_dir->GetAddressOfNames() << std::dec << "\n";
   std::wcout << "\t\tAddressOfNameOrdinals: " << std::hex
              << export_dir->GetAddressOfNameOrdinals() << std::dec << "\n";
-  std::wcout << std::noboolalpha;
 
   std::wcout << "\n\tExports:\n";
 
   hadesmem::ExportList exports(process, pe_file);
   for (auto const& e : exports)
   {
-    std::wcout << std::boolalpha;
     std::wcout << "\n";
     std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
     std::wcout << "\t\tVA: " << PtrToString(e.GetVa()) << "\n";
@@ -427,8 +416,33 @@ void DumpExports(hadesmem::Process const& process,
         }
       }
     }
-    std::wcout << std::noboolalpha;
   }
+}
+
+void DumpImportThunk(hadesmem::ImportThunk const& thunk)
+{
+  std::wcout << "\n";
+  std::wcout << "\t\t\tAddressOfData: " << std::hex << thunk.GetAddressOfData()
+             << std::dec << "\n";
+  std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
+  try
+  {
+    if (thunk.ByOrdinal())
+    {
+      std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+    }
+    else
+    {
+      std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
+      std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
+    }
+  }
+  catch (std::exception const& /*e*/)
+  {
+    std::wcout << "\t\t\tWARNING! Invalid ordinal or name.\n";
+  }
+  std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
+             << std::dec << "\n";
 }
 
 void DumpImports(hadesmem::Process const& process,
@@ -443,8 +457,6 @@ void DumpImports(hadesmem::Process const& process,
 
   for (auto const& dir : import_dirs)
   {
-    std::wcout << std::boolalpha;
-
     std::wcout << "\n";
     std::wcout << "\t\tOriginalFirstThunk: " << std::hex
                << dir.GetOriginalFirstThunk() << std::dec << "\n";
@@ -475,7 +487,7 @@ void DumpImports(hadesmem::Process const& process,
       // table.
       if (!dir.GetOriginalFirstThunk())
       {
-        std::wcout << "\n\t\t\tWARNING! No INT for this "
+        std::wcout << "\n\t\tWARNING! No INT for this "
                       "module.\n";
         continue;
       }
@@ -486,57 +498,72 @@ void DumpImports(hadesmem::Process const& process,
       // no INT/ILT once the module is loaded.
       if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
       {
-        std::wcout << "\n\t\t\tWARNING! IAT is same as INT for "
+        std::wcout << "\n\t\tWARNING! IAT is same as INT for "
                       "this module.\n";
         continue;
       }
     }
 
-    // Prefer the ILT over the IAT.
-    // TODO: Dump both? Keep in mind they are parsed in parallel and because of
-    // this the IAT does not have to be null terminated. Perhaps parse the ILT
-    // first, then use the count from there to limit the IAT parsing. The 
-    // dllmaxvals file from the Corkami PE corpus can be used to test this.
-    hadesmem::ImportThunkList import_thunks(process,
-                                            pe_file,
-                                            dir.GetOriginalFirstThunk()
-                                              ? dir.GetOriginalFirstThunk()
-                                              : dir.GetFirstThunk());
-    if (std::begin(import_thunks) == std::end(import_thunks))
+    hadesmem::ImportThunkList ilt_thunks(process,
+                                         pe_file,
+                                         dir.GetOriginalFirstThunk()
+                                           ? dir.GetOriginalFirstThunk()
+                                           : dir.GetFirstThunk());
+    if (std::begin(ilt_thunks) == std::end(ilt_thunks))
     {
-      std::wcout << "\n\t\tWARNING! Import thunk list is empty or invalid.\n";
+      if (dir.GetOriginalFirstThunk())
+      {
+        std::wcout << "\n\t\tWARNING! ILT is empty or invalid.\n";
+      }
+      else
+      {
+        std::wcout << "\n\t\tWARNING! IAT is empty or invalid.\n";
+      }
     }
     else
     {
-      std::wcout << "\n\t\tImport Thunks:\n";
-    }
-    for (auto const& thunk : import_thunks)
-    {
-      std::wcout << "\n";
-      std::wcout << "\t\t\tAddressOfData: " << std::hex
-                 << thunk.GetAddressOfData() << std::dec << "\n";
-      std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
-      try
+      if (dir.GetOriginalFirstThunk())
       {
-        if (thunk.ByOrdinal())
-        {
-          std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
-        }
-        else
-        {
-          std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
-          std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
-        }
+        std::wcout << "\n\t\tImport Thunks (ILT):\n";
       }
-      catch (std::exception const& /*e*/)
+      else
       {
-        std::wcout << "\t\tWARNING! Invalid ordinal or name.\n";
+        std::wcout << "\n\t\tImport Thunks (IAT):\n";
       }
-      std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
-                 << std::dec << "\n";
     }
 
-    std::wcout << std::noboolalpha;
+    std::size_t count = 0U;
+    for (auto const& thunk : ilt_thunks)
+    {
+      ++count;
+      DumpImportThunk(thunk);
+    }
+
+    // Windows will load PE files that have an invalid RVA for the ILT (lies
+    // outside of the virtual space), and will fall back to the IAT in this
+    // case.
+    bool const ilt_valid =
+      !!hadesmem::RvaToVa(process, pe_file, dir.GetOriginalFirstThunk());
+    if (dir.GetFirstThunk() && (dir.GetOriginalFirstThunk() || !ilt_valid))
+    {
+      hadesmem::ImportThunkList iat_thunks(
+        process, pe_file, dir.GetFirstThunk());
+      if (std::begin(iat_thunks) != std::end(iat_thunks))
+      {
+        std::wcout << "\n\t\tImport Thunks (IAT):\n";
+      }
+      for (auto const& thunk : iat_thunks)
+      {
+        if (ilt_valid && !count--)
+        {
+          std::wcout << "\n\t\t\tWARNING! IAT size does not match ILT size. "
+                        "Stopping IAT enumeration early.\n";
+          break;
+        }
+
+        DumpImportThunk(thunk);
+      }
+    }
   }
 }
 

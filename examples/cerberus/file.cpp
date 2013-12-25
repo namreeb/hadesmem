@@ -179,6 +179,8 @@ template <winternl::FILE_INFORMATION_CLASS kInfoClass,
           typename BufferT = InfoClassToBufferT<kInfoClass>>
 void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
 {
+  HADESMEM_DETAIL_ASSERT(length >= sizeof(BufferT));
+
   HADESMEM_DETAIL_TRACE_A("Enumerating files.");
   for (DirectoryFileInformationEnum<kInfoClass, BufferT> directory_info{
          file_information, length, status};
@@ -321,8 +323,6 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
                                       return_single_entry,
                                       file_name,
                                       FALSE);
-        // TODO: Should we be checking only for STATUS_NO_MORE_FILES here? 
-        // What to do about other failures though?
         if (!NT_SUCCESS(ret))
         {
           break;

@@ -30,9 +30,6 @@ std::unique_ptr<hadesmem::PatchDetour>& GetNtQuerySystemInformationDetour()
   return detour;
 }
 
-// TODO: Rewrite this to use templates (similar to DirectoryFileInformationEnum)
-// instead of casting everywhere? Requires more boilerplate, but ends up easier
-// to write and maintain.
 class SystemProcessInformationEnum
 {
 public:
