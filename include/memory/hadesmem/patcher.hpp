@@ -213,7 +213,6 @@ private:
         boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
-      // TODO: Code smell... Reduce code duplication somehow?
       process_ = nullptr;
       applied_ = false;
 
@@ -301,8 +300,6 @@ public:
     RemoveUnchecked();
   }
 
-  // TODO: Detect when applying or removing patch and code is currently
-  // being executed. (Redirect EIP to trampoline.)
   void Apply()
   {
     if (applied_)
@@ -408,6 +405,8 @@ public:
 
     orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
 
+    // TODO: Instead of simply bailing in the case that this fails, we should
+    // instead redirect the IP to the equivalent spot in our trampoline.
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
     WriteJump(target_, detour_);
@@ -426,7 +425,12 @@ public:
 
     SuspendedProcess const suspended_process(process_->GetId());
 
+    // WARNING! There is no safe place to redirect the IP if we're executing
+    // either the target or the trampoline, because we're about to overwrite the
+    // target with its original code, and we're about to free the trampoline...
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+    detail::VerifyPatchThreads(
+      process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
     WriteVector(*process_, target_, orig_);
 
@@ -463,7 +467,6 @@ private:
         boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
-      // TODO: Code smell... Reduce code duplication somehow?
       process_ = nullptr;
       applied_ = false;
 
@@ -581,7 +584,6 @@ private:
 
       // AsmJit generates the correct JMP instruction, but then
       // adds a bunch of zero padding for no particular reason...
-      // Investigate this.
       // TODO: Fix this.
       expected_stub_size = 0x13;
       asmjit_bug = true;
