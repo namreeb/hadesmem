@@ -40,8 +40,9 @@
 // different techniques).
 
 // TODO: Add support for more 'complex' argument and return types, including
-// struct/class/union, long double, SIMD types, etc. A good reference for
-// calling conventions is available at http://bit.ly/3CvgMV.
+// struct/class/union, long double, SIMD types, cv qualifiers, ref qualifiers,
+// etc. A good reference for calling conventions is available at
+// http://bit.ly/3CvgMV.
 
 // TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated
 // code, 'private' functions, obfuscated code, etc).
@@ -50,8 +51,8 @@
 // externally instead of being regenerated for every call.
 
 // TODO: Once the JIT-once rewrite is complete, transition to using code
-// generated at compile-time with FASM and stored in a binary 'blob'
-// (embedded in the source). This will remove the dependency on AsmJit.
+// generated at compile-time with FASM and stored in a binary 'blob' (embedded
+// in the source). This will remove the dependency on AsmJit.
 
 // TODO: Split this mess up into multiple headers where possible.
 

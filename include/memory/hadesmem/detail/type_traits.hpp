@@ -49,6 +49,23 @@ struct FuncResult<R (C::*)(Args...) const>
   using type = R;
 };
 
+#define HADESMEM_DETAIL_MAKE_FUNC_RESULT(call_conv)                            \
+  \
+template<typename R,                                                           \
+         typename... Args> struct FuncResult<R(call_conv*)(Args...)>           \
+  \
+{                                                                         \
+    using type = R;                                                            \
+  \
+};                                                                             \
+  \
+template<typename R, typename... Args> struct FuncResult<R call_conv(Args...)> \
+  \
+{                                                                         \
+    using type = R;                                                            \
+  \
+};
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename R, typename... Args> struct FuncResult<R (*)(Args...)>
@@ -63,55 +80,17 @@ template <typename R, typename... Args> struct FuncResult<R(Args...)>
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
-template <typename R, typename... Args> struct FuncResult<R(__cdecl*)(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args> struct FuncResult<R __cdecl(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args>
-struct FuncResult<R(__stdcall*)(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args> struct FuncResult<R __stdcall(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args>
-struct FuncResult<R(__fastcall*)(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args> struct FuncResult<R __fastcall(Args...)>
-{
-  using type = R;
-};
+HADESMEM_DETAIL_MAKE_FUNC_RESULT(__cdecl)
+HADESMEM_DETAIL_MAKE_FUNC_RESULT(__stdcall)
+HADESMEM_DETAIL_MAKE_FUNC_RESULT(__fastcall)
 
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if defined(HADESMEM_X64) || (defined(HADESMEM_X86) && _M_IX86_FP >= 2)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
 
-template <typename R, typename... Args>
-struct FuncResult<R(__vectorcall*)(Args...)>
-{
-  using type = R;
-};
-
-template <typename R, typename... Args>
-struct FuncResult<R __vectorcall(Args...)>
-{
-  using type = R;
-};
+HADESMEM_DETAIL_MAKE_FUNC_RESULT(__vectorcall)
 
 #endif
 
@@ -131,6 +110,23 @@ struct FuncArity<R (C::*)(Args...) const>
   static std::size_t const value = sizeof...(Args) + 1;
 };
 
+#define HADESMEM_DETAIL_MAKE_FUNC_ARITY(call_conv)                             \
+  \
+template<typename R,                                                           \
+         typename... Args> struct FuncArity<R(call_conv*)(Args...)>            \
+  \
+{                                                                         \
+    static std::size_t const value = sizeof...(Args);                          \
+  \
+};                                                                             \
+  \
+template<typename R, typename... Args> struct FuncArity<R call_conv(Args...)>  \
+  \
+{                                                                         \
+    static std::size_t const value = sizeof...(Args);                          \
+  \
+};
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename R, typename... Args> struct FuncArity<R (*)(Args...)>
@@ -145,54 +141,17 @@ template <typename R, typename... Args> struct FuncArity<R(Args...)>
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
-template <typename R, typename... Args> struct FuncArity<R(__cdecl*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args> struct FuncArity<R __cdecl(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args> struct FuncArity<R(__stdcall*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args> struct FuncArity<R __stdcall(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args>
-struct FuncArity<R(__fastcall*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args> struct FuncArity<R __fastcall(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
+HADESMEM_DETAIL_MAKE_FUNC_ARITY(__cdecl)
+HADESMEM_DETAIL_MAKE_FUNC_ARITY(__stdcall)
+HADESMEM_DETAIL_MAKE_FUNC_ARITY(__fastcall)
 
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if defined(HADESMEM_X64) || (defined(HADESMEM_X86) && _M_IX86_FP >= 2)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
 
-template <typename R, typename... Args>
-struct FuncArity<R(__vectorcall*)(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
-
-template <typename R, typename... Args>
-struct FuncArity<R __vectorcall(Args...)>
-{
-  static std::size_t const value = sizeof...(Args);
-};
+HADESMEM_DETAIL_MAKE_FUNC_ARITY(__vectorcall)
 
 #endif
 
@@ -210,6 +169,22 @@ struct FuncArgs<R (C::*)(Args...) const>
   using type = std::tuple<C const*, Args...>;
 };
 
+#define HADESMEM_DETAIL_MAKE_FUNC_ARGS(call_conv)                              \
+  \
+template<typename R, typename... Args> struct FuncArgs<R(call_conv*)(Args...)> \
+  \
+{                                                                         \
+    using type = std::tuple<Args...>;                                          \
+  \
+};                                                                             \
+  \
+template<typename R, typename... Args> struct FuncArgs<R call_conv(Args...)>   \
+  \
+{                                                                         \
+    using type = std::tuple<Args...>;                                          \
+  \
+};
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename R, typename... Args> struct FuncArgs<R (*)(Args...)>
@@ -224,52 +199,17 @@ template <typename R, typename... Args> struct FuncArgs<R(Args...)>
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
-template <typename R, typename... Args> struct FuncArgs<R(__cdecl*)(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R __cdecl(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R(__stdcall*)(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R __stdcall(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R(__fastcall*)(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R __fastcall(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
+HADESMEM_DETAIL_MAKE_FUNC_ARGS(__cdecl)
+HADESMEM_DETAIL_MAKE_FUNC_ARGS(__stdcall)
+HADESMEM_DETAIL_MAKE_FUNC_ARGS(__fastcall)
 
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if defined(HADESMEM_X64) || (defined(HADESMEM_X86) && _M_IX86_FP >= 2)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
 
-template <typename R, typename... Args>
-struct FuncArgs<R(__vectorcall*)(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
-
-template <typename R, typename... Args> struct FuncArgs<R __vectorcall(Args...)>
-{
-  using type = std::tuple<Args...>;
-};
+HADESMEM_DETAIL_MAKE_FUNC_ARGS(__vectorcall)
 
 #endif
 
@@ -320,6 +260,24 @@ struct FuncCallConv<R (C::*)(Args...) const>
   static int const value = DetailCallConv::kThisCall;
 };
 
+#define HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(call_conv, call_conv_value)        \
+  \
+template<typename R,                                                           \
+         typename... Args> struct FuncCallConv<R(call_conv*)(Args...)>         \
+  \
+{                                                                         \
+    static int const value = call_conv_value;                                  \
+  \
+};                                                                             \
+  \
+template<typename R,                                                           \
+         typename... Args> struct FuncCallConv<R call_conv(Args...)>           \
+  \
+{                                                                         \
+    static int const value = call_conv_value;                                  \
+  \
+};
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename R, typename... Args> struct FuncCallConv<R (*)(Args...)>
@@ -334,58 +292,17 @@ template <typename R, typename... Args> struct FuncCallConv<R(Args...)>
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
-template <typename R, typename... Args>
-struct FuncCallConv<R(__cdecl*)(Args...)>
-{
-  static int const value = DetailCallConv::kCdecl;
-};
-
-template <typename R, typename... Args> struct FuncCallConv<R __cdecl(Args...)>
-{
-  static int const value = DetailCallConv::kCdecl;
-};
-
-template <typename R, typename... Args>
-struct FuncCallConv<R(__stdcall*)(Args...)>
-{
-  static int const value = DetailCallConv::kStdCall;
-};
-
-template <typename R, typename... Args>
-struct FuncCallConv<R __stdcall(Args...)>
-{
-  static int const value = DetailCallConv::kStdCall;
-};
-
-template <typename R, typename... Args>
-struct FuncCallConv<R(__fastcall*)(Args...)>
-{
-  static int const value = DetailCallConv::kFastCall;
-};
-
-template <typename R, typename... Args>
-struct FuncCallConv<R __fastcall(Args...)>
-{
-  static int const value = DetailCallConv::kFastCall;
-};
+HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__cdecl, DetailCallConv::kCdecl)
+HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__stdcall, DetailCallConv::kStdCall)
+HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__fastcall, DetailCallConv::kFastCall)
 
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if defined(HADESMEM_X64) || (defined(HADESMEM_X86) && _M_IX86_FP >= 2)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
 
-template <typename R, typename... Args>
-struct FuncCallConv<R(__vectorcall*)(Args...)>
-{
-  static int const value = DetailCallConv::kVectorCall;
-};
-
-template <typename R, typename... Args>
-struct FuncCallConv<R __vectorcall(Args...)>
-{
-  static int const value = DetailCallConv::kVectorCall;
-};
+HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__vectorcall, DetailCallConv::kVectorCall)
 
 #endif
 }

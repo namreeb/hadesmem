@@ -21,33 +21,16 @@
 // TODO: Extra sanity checking in all components. E.g. Check
 // NumberOfRvaAndSizes in NtHeaders before attempting to retrieve a data dir.
 
-// TODO: Improve PeLib support for pathological cases like Corkami tests.
-
-// TODO: Remove assumptions made about the format where possible. The spec is
-// often wrong (or simply ignored), so we need to be permissive (but also
-// defensive) if we want to be useful when dealing with hostile files.
-
-// TODO: Full support for writing back to PE file, including automatically
-// performing adjustments where required to fit in new data or remove
-// unnecessary space.
-
 // TODO: Helper functions such as FindExport, FindImport, HasDataDir,
 // GetArchitecture, IsDotNet, GetPDB, etc.
 
-// TODO: Don't crash on data which is malformed, but ignored by the PE loader
-// (e.g. ISSetup.dll).
-
 // TODO: Move PeLib code into PeLib namespace.
 
-// TODO: Write/Set methods for PeLib should be non-const.
-
-// TODO: Cache base pointers etc rather than retrieving it manually in every
-// getter/setter.
-
-// TODO: Rewrite PeLib to do more ‘caching’ and only read/write on demand.
-// Also take into account rewriting to allow writes from scratch (see other
-// item) as the getters/setters obviously can’t ever reference memory,
-// because there might not be a memory region to reference!
+// TODO: Rewrite PeLib to allow writes from scratch (building new PE file
+// sections, data, etc. or even an entire mew PE file). This includes full
+// support for writing back to existing PE files also, including automatically
+// performing adjustments where required to fit in new data or remove
+// unnecessary space.
 
 // TODO: Decouple PeFile from Process. It should use a generic interface
 // instead.	Another potential alternative would be policy classes. Needs
@@ -70,15 +53,9 @@
 // CLR runtime directory support.
 // etc.
 
-// TODO: Improve support for loading 'Data' files to handle pathalogical
-// cases such as structures overlapping with implicitly zeroed virtual memory
-// that only exists in-memory. This will probably require 'manually mapping'
-// the data file. But what about files that overwrite data or overlap in
-// memory but not on disk? That would potentially cause information loss...
-// Keep two copies? How do we know which one to use depending on the scenario
-// in that case? Needs more thought and investigation... Another concern
-// would be write-back for these pathalogical files... That needs more
-// thought also.
+// TODO: Improve PeLib support for pathological cases like Corkami tests. We
+// should not only ensure we don't crash, but we should also ensure we're
+// actually getting the right data out!
 
 namespace hadesmem
 {
@@ -214,11 +191,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     }
 
     // Windows will load specially crafted images with no sections.
-    // TODO: Check whether FileAlignment and/or SectionAlignment
-    // should be checked here. In the specially crafted image I'm
-    // testing this against the value is '1' for both anyway, but I'd
-    // like to ensure it's not possible for it to be higher, and if
-    // it is, whether it would affect the RVA resolution here.
     WORD num_sections = nt_headers.FileHeader.NumberOfSections;
     if (!num_sections)
     {
@@ -226,7 +198,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       // all sorts of messed up RVAs for data dirs etc... Make sure that none of
       // them lie outside the file, because otherwise simply returning a direct
       // offset from the base wouldn't work anyway...
-      // TODO: Validate this.
       if (rva > pe_file.GetSize())
       {
         return nullptr;
@@ -237,22 +208,17 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       }
     }
 
-    // SizeOfHeaders can be arbitrarily large (including the size of the
-    // entire file). In this case we simply treat all RVAs as an offset from
-    // zero, rather than finding its 'true' location in a section.
-    // TODO: Check whether this is correct for all cases.
+    // SizeOfHeaders can be arbitrarily large, including the size of the
+    // entire file. RVAs inside the headers are treated as an offset from
+    // zero, rather than finding the 'true' location in a section.
     if (rva < nt_headers.OptionalHeader.SizeOfHeaders)
     {
       return base + rva;
     }
 
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
-    // 0x2e. Simply treat anything outside of that as invalid for now, though
-    // this is not correct for all cases. For an example see "foldedhdr.exe"
-    // from the Corkami PE corpus. It is a PE where the NT headers are partially
-    // overwritten by section space, as if the sections were folded back on the
-    // header.
-    // TODO: Fix this for the case outlined above (and others if applicable).
+    // 0x2e. Treat anything outside of that as invalid. For an example see
+    // foldedhdr.exe from the Corkami PE corpus.
     if (rva > nt_headers.OptionalHeader.SizeOfImage)
     {
       return nullptr;
@@ -280,9 +246,11 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
 
         // If the RVA is outside the raw data (which would put it in the
         // zero-fill of the virtual data) just return nullptr because it's
-        // invalid.
-        // TODO: Fix this for "legitimate" cases (a struct overlapping the
-        // virtual area to get 'free' zero fill, etc.).
+        // invalid. Technically files like this will work when loaded by the
+        // PE loader due to the sections being mapped differention in memory
+        // to on disk, but if you want to inspect the file in that manner you
+        // should just use LoadLibrary with the appropriate flags for your
+        // scenario and then use PeFileType::Image.
         if (rva > raw_size)
         {
           return nullptr;
@@ -291,11 +259,12 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         // If PointerToRawData is less than 0x200 it is rounded
         // down to 0. Safe to mask it off unconditionally because
         // it must be a multiple of FileAlignment.
-        rva += section_header.PointerToRawData & ~(0x1FFUL);
+        rva +=
+          section_header.PointerToRawData &
+          ~((std::max)(0x200UL, nt_headers.OptionalHeader.FileAlignment) - 1);
 
         // If the RVA now lies outside the actual file just return nullptr
         // because it's invalid.
-        // TODO: Verify this is correct in all cases...
         if (rva >= pe_file.GetSize())
         {
           return nullptr;
@@ -308,9 +277,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       // lower address than any of the sections, so we want to detect this so we
       // can just treat the RVA as an offset from the module base (similar to
       // when the image is loaded).
-      // TODO: Check whether this is correct for all cases. Should we perhaps
-      // instead check whether any sections have a PointerToRawData that is zero
-      // (or rounded down to zero)?
       if (virtual_beg <= rva)
       {
         in_header = false;
