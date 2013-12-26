@@ -19,16 +19,16 @@ namespace hadesmem
 namespace detail
 {
 
-inline void ForceLdrInitializeThunk(DWORD proc_id)
-{
-  Process const process(proc_id);
-
 // This is used to generate a 'nullsub' function, which is called
 // in the context of the remote process in order to 'force' a
 // call to ntdll.dll!LdrInitializeThunk. This is necessary
 // because module enumeration will fail if LdrInitializeThunk has
 // not been called, and Injector::InjectDll (and the APIs it
 // uses) depends on the module enumeration APIs.
+inline void ForceLdrInitializeThunk(DWORD proc_id)
+{
+  Process const process(proc_id);
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   std::array<BYTE, 1> const return_instr = {{0xC3}};
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
