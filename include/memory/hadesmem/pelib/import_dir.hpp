@@ -32,6 +32,8 @@ namespace hadesmem
 
 // TODO: Handle forwarded imports.
 
+// TODO: Handle bound imports (both new way and old way).
+
 class ImportDir
 {
 public:

@@ -51,11 +51,17 @@
 // Bound import directory.
 // IAT(as opposed to Import) directory.
 // CLR runtime directory support.
+// DOS stub.
+// Rich header.
+// Checksum.
 // etc.
 
 // TODO: Improve PeLib support for pathological cases like Corkami tests. We
 // should not only ensure we don't crash, but we should also ensure we're
 // actually getting the right data out!
+
+// TODO: Where possible, document the SHA1 of example files which prompted the
+// addition of corner cases.
 
 namespace hadesmem
 {

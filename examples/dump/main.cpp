@@ -45,8 +45,51 @@
 #include <hadesmem/thread_list.hpp>
 #include <hadesmem/thread_entry.hpp>
 
+// TODO: Add functionality to make this tool more useful for reversing, such as
+// basic heuristics to detect suspicious files, packer/container detection,
+// diassembling the EP, compiler detection, dumping more of the file format
+// (requires PeLib work), .NET/VB6/etc detection, hashing, etc.
+
+// TODO: Detect and handle tricks like TLS AOI, virtual terminator, etc.
+
+// TODO: Relax some current warnings which are firing for legitimate cases (like
+// bound imports causing warnings due to there no longer being a valid ordinal
+// or name RVA).
+
+// TODO: Add new warnings for strange cases which require more investigation.
+// This includes both new cases, and also existing cases which are currently
+// being ignored (including those ignored inside PeLib itself, like a lot of the
+// corner cases in RvaToVa). Examples include a virtual or null EP, invalid
+// number of data dirs, unknown DOS stub, strange RVAs which lie outside of the
+// image or inside the headers, non-standard alignments, etc.
+
+// TODO: Split this tool up into multiple source files.
+
 namespace
 {
+
+// Record all modules (on disk) which cause a warning when dumped, to make it
+// easier to isolate files which require further investigation.
+// TODO: Clean this up and add support for in-memory modules.
+// TODO: Make this optional. Users may not want to pay for the extra memory cost
+// in extremely large parsing runs.
+bool g_warned;
+std::vector<std::wstring> g_all_warned;
+
+// TODO: Add an option for dumping the list to a file. Useful for when doing
+// extremely large parsing runs, and the list may not fit in the current console
+// buffer.
+void DumpWarned()
+{
+  if (!g_all_warned.empty())
+  {
+    std::wcout << "\nWarned:\n";
+    for (auto const f : g_all_warned)
+    {
+      std::wcout << f << "\n";
+    }
+  }
+}
 
 std::wstring PtrToString(void const* const ptr)
 {
@@ -311,6 +354,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\t\tWARNING! TLS callbacks are inavlid.\n";
+      g_warned = true;
     }
     for (auto const c : callbacks)
     {
@@ -358,6 +402,7 @@ void DumpExports(hadesmem::Process const& process,
   catch (std::exception const& /*e*/)
   {
     std::wcout << "\t\tWARNING! Name is invalid.\n";
+    g_warned = true;
   }
   std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
              << std::dec << "\n";
@@ -391,8 +436,8 @@ void DumpExports(hadesmem::Process const& process,
     }
     else
     {
-      std::wcout << "\t\tWARNING! Entry not exported by name or "
-                    "ordinal.\n";
+      std::wcout << "\t\tWARNING! Entry not exported by name or ordinal.\n";
+      g_warned = true;
     }
     if (e.IsForwarded())
     {
@@ -413,6 +458,7 @@ void DumpExports(hadesmem::Process const& process,
         catch (std::exception const& /*e*/)
         {
           std::wcout << "\t\tWARNING! ForwarderOrdinal invalid.\n";
+          g_warned = true;
         }
       }
     }
@@ -440,6 +486,7 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk)
   catch (std::exception const& /*e*/)
   {
     std::wcout << "\t\t\tWARNING! Invalid ordinal or name.\n";
+    g_warned = true;
   }
   std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
              << std::dec << "\n";
@@ -455,9 +502,22 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << "\n\tImport Dirs:\n";
   }
 
+  std::uint32_t num_import_dirs = 0U;
   for (auto const& dir : import_dirs)
   {
     std::wcout << "\n";
+
+    // TODO: Come up with a better solution to this.
+    if (num_import_dirs++ == 1000)
+    {
+      std::wcout << "\t\tWARNING! Processed 1000 import dirs. Stopping early "
+                    "to avoid resource exhaustion attacks. Check PE file for "
+                    "TLS AOI trick, virtual terminator trick, or other similar "
+                    "attacks.\n";
+      g_warned = true;
+      break;
+    }
+
     std::wcout << "\t\tOriginalFirstThunk: " << std::hex
                << dir.GetOriginalFirstThunk() << std::dec << "\n";
     std::wcout << "\t\tTimeDateStamp: " << std::hex << dir.GetTimeDateStamp()
@@ -473,6 +533,7 @@ void DumpImports(hadesmem::Process const& process,
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\t\tWARNING! Failed to read name.\n";
+      g_warned = true;
     }
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
@@ -487,8 +548,8 @@ void DumpImports(hadesmem::Process const& process,
       // table.
       if (!dir.GetOriginalFirstThunk())
       {
-        std::wcout << "\n\t\tWARNING! No INT for this "
-                      "module.\n";
+        std::wcout << "\n\t\tWARNING! No INT for this module.\n";
+        g_warned = true;
         continue;
       }
 
@@ -499,6 +560,7 @@ void DumpImports(hadesmem::Process const& process,
       if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
       {
         std::wcout << "\n\t\tWARNING! IAT is same as INT for this module.\n";
+        g_warned = true;
         continue;
       }
     }
@@ -513,10 +575,12 @@ void DumpImports(hadesmem::Process const& process,
       if (dir.GetOriginalFirstThunk())
       {
         std::wcout << "\n\t\tWARNING! ILT is empty or invalid.\n";
+        g_warned = true;
       }
       else
       {
         std::wcout << "\n\t\tWARNING! IAT is empty or invalid.\n";
+        g_warned = true;
       }
     }
     else
@@ -534,7 +598,17 @@ void DumpImports(hadesmem::Process const& process,
     std::size_t count = 0U;
     for (auto const& thunk : ilt_thunks)
     {
-      ++count;
+      // TODO: Come up with a better solution to this.
+      if (count++ == 1000)
+      {
+        std::wcout << "\n\t\t\tWARNING! Processed 1000 import thunks. Stopping "
+                      "early to avoid resource exhaustion attacks. Check PE "
+                      "file for TLS AOI trick, virtual terminator trick, or "
+                      "other similar attacks.\n";
+        g_warned = true;
+        break;
+      }
+
       DumpImportThunk(thunk);
     }
 
@@ -557,6 +631,7 @@ void DumpImports(hadesmem::Process const& process,
         {
           std::wcout << "\n\t\t\tWARNING! IAT size does not match ILT size. "
                         "Stopping IAT enumeration early.\n";
+          g_warned = true;
           break;
         }
 
@@ -592,6 +667,7 @@ void DumpModules(hadesmem::Process const& process)
     {
       std::wcout << "\n";
       std::wcout << "\tWARNING! Not a valid PE file or architecture.\n";
+      g_warned = true;
       continue;
     }
 
@@ -673,6 +749,8 @@ void DumpProcesses()
 
 void DumpFile(std::wstring const& path)
 {
+  g_warned = false;
+
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   std::ifstream file(path, std::ios::binary | std::ios::ate);
 #else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
@@ -755,6 +833,11 @@ void DumpFile(std::wstring const& path)
   DumpExports(process, pe_file);
 
   DumpImports(process, pe_file);
+
+  if (g_warned)
+  {
+    g_all_warned.push_back(path);
+  }
 }
 
 void DumpDir(std::wstring const& path)
@@ -922,6 +1005,8 @@ int main(int /*argc*/, char * /*argv*/ [])
       std::wstring const root_path = hadesmem::detail::GetRootPath(self_path);
       DumpDir(root_path);
     }
+
+    DumpWarned();
 
     return 0;
   }
