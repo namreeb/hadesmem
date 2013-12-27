@@ -71,22 +71,18 @@ namespace
 // Record all modules (on disk) which cause a warning when dumped, to make it
 // easier to isolate files which require further investigation.
 // TODO: Clean this up and add support for in-memory modules.
-// TODO: Make this optional. Users may not want to pay for the extra memory cost
-// in extremely large parsing runs.
-bool g_warned;
+bool g_warned = false;
+bool g_warned_enabled = false;
 std::vector<std::wstring> g_all_warned;
 
-// TODO: Add an option for dumping the list to a file. Useful for when doing
-// extremely large parsing runs, and the list may not fit in the current console
-// buffer.
-void DumpWarned()
+void DumpWarned(std::wostream& out)
 {
   if (!g_all_warned.empty())
   {
-    std::wcout << "\nWarned:\n";
+    std::wcout << "\nDumping warned list.\n";
     for (auto const f : g_all_warned)
     {
-      std::wcout << f << "\n";
+      out << f << "\n";
     }
   }
 }
@@ -935,7 +931,11 @@ int main(int /*argc*/, char * /*argv*/ [])
     opts_desc.add_options()("help", "produce help message")(
       "pid", boost::program_options::value<DWORD>(), "target process id")(
       "file", boost::program_options::wvalue<std::wstring>(), "target file")(
-      "dir", boost::program_options::wvalue<std::wstring>(), "target dir");
+      "dir", boost::program_options::wvalue<std::wstring>(), "target dir")(
+      "warned", "dump list of files which cause warnings")(
+      "warned-file",
+      boost::program_options::wvalue<std::wstring>(),
+      "dump warned list to file instead of stdout");
 
     std::vector<std::wstring> const args =
       boost::program_options::split_winmain(::GetCommandLine());
@@ -952,6 +952,8 @@ int main(int /*argc*/, char * /*argv*/ [])
       std::cout << '\n' << opts_desc << '\n';
       return 1;
     }
+
+    g_warned_enabled = !!var_map.count("warned");
 
     try
     {
@@ -1006,7 +1008,31 @@ int main(int /*argc*/, char * /*argv*/ [])
       DumpDir(root_path);
     }
 
-    DumpWarned();
+    if (g_warned_enabled)
+    {
+      if (var_map.count("warned-file"))
+      {
+        std::wstring const warned_file_path =
+          var_map["warned-file"].as<std::wstring>();
+#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+        std::wofstream warned_file(warned_file_path);
+#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+        // libstdc++ doesn't support wide character overloads for ifstream's
+        // construtor. :(
+        std::wofstream warned_file(
+          hadesmem::detail::WideCharToMultiByte(warned_file_path));
+#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+        if (!warned_file)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString("Failed to open warned file for output."));
+        }
+        DumpWarned(warned_file);
+      }
+      else
+      {
+        DumpWarned(std::wcout);
+      }
+    }
 
     return 0;
   }
