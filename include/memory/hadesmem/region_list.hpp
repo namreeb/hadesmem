@@ -39,8 +39,17 @@ public:
   }
 
   explicit RegionIterator(Process const& process)
-    : impl_(std::make_shared<Impl>(process))
+    : impl_()
   {
+    // VirtualQuery can fail with ERROR_ACCESS_DENIED for 'zombie' processes.
+    try
+    {
+      impl_ = std::make_shared<Impl>(process);
+    }
+    catch (std::exception const&)
+    {
+      return;
+    }
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)

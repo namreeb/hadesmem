@@ -46,8 +46,17 @@ public:
 
     impl_->process_ = &process;
 
-    impl_->snap_ = detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
-                                                    impl_->process_->GetId());
+    // CreateToolhelp32Snapshot can fail with ERROR_PARTIAL_COPY for 'zombie' processes.
+    try
+    {
+      impl_->snap_ = detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
+        impl_->process_->GetId());
+    }
+    catch (std::exception const&)
+    {
+      impl_.reset();
+      return;
+    }
 
     hadesmem::detail::Optional<MODULEENTRY32> const entry =
       detail::Module32First(impl_->snap_.GetHandle());

@@ -10,6 +10,7 @@
 #define HADESMEM_DETAIL_STATUS_NO_SUCH_FILE (static_cast<NTSTATUS>(0xC000000FL))
 #define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
   (static_cast<NTSTATUS>(0x80000006L))
+#define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH (static_cast<NTSTATUS>(0xC0000004L))
 
 namespace hadesmem
 {

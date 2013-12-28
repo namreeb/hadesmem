@@ -6,6 +6,8 @@
 #include <exception>
 
 #include <windows.h>
+#include <winnt.h>
+#include <winternl.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <boost/exception/all.hpp>
@@ -37,6 +39,7 @@ using ErrorCodeWinOther =
   boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>;
 using ErrorCodeOther = boost::error_info<struct TagErrorCodeOther, DWORD_PTR>;
 using ErrorCodeWinHr = boost::error_info<struct TagErrorCodeOther, HRESULT>;
+using ErrorCodeWinStatus = boost::error_info<struct TagErrorCodeOther, NTSTATUS>;
 using ErrorStringOther = boost::error_info<struct TagErrorString, std::string>;
 }
 

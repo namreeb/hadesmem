@@ -723,7 +723,17 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
     return;
   }
 
-  std::wcout << "Path: " << hadesmem::GetPath(*process) << "\n";
+  // Using the Win32 API to get a processes path can fail for 'zombie' processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
+  // TODO: Remove this once GetPath is fixed.
+  try
+  {
+    std::wcout << "\nPath (Win32): " << hadesmem::GetPath(*process) << "\n";
+  }
+  catch (std::exception const& /*e*/)
+  {
+    std::wcout << "\nWARNING! Could not get Win32 path to process.\n";
+  }
+  std::wcout << "Path (NT): " << hadesmem::GetPathNative(*process) << "\n";
   std::wcout << "WoW64: " << (hadesmem::IsWoW64(*process) ? "Yes" : "No")
              << "\n";
 
