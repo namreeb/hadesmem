@@ -68,7 +68,7 @@ namespace
 // easier to isolate files which require further investigation.
 // TODO: Clean this up.
 // TODO: Support logging the warned file list 'on the fly' rather than at the
-// end if the warnign list is being output to disk. This will make it more
+// end if the warning list is being output to disk. This will make it more
 // useful when doing extremely large runs.
 bool g_warned = false;
 bool g_warned_enabled = false;
