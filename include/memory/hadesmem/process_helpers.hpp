@@ -50,7 +50,7 @@ inline std::wstring GetPathNative(Process const& process)
       nt_query_system_information_proc);
 
   std::vector<wchar_t> buffer(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  detail::winternl::SYSTEM_PROCESS_ID_INFORMATION process_id_info = {};
+  detail::winternl::SYSTEM_PROCESS_ID_INFORMATION process_id_info;
   process_id_info.ProcessId = reinterpret_cast<void*>(process.GetId());
   process_id_info.ImageName.Buffer = buffer.data();
   process_id_info.ImageName.Length = 0;

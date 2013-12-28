@@ -95,6 +95,13 @@ std::wstring PtrToString(void const* const ptr)
   return str.str();
 }
 
+std::wstring MakeExtendedPath(std::wstring const& path)
+{
+  return {path.size() >= 4 && path.substr(0, 4) == L"\\\\?\\"
+            ? path
+            : L"\\\\?\\" + path};
+}
+
 void DumpRegions(hadesmem::Process const& process)
 {
   std::wcout << "\nRegions:\n";
@@ -887,15 +894,8 @@ void DumpDir(std::wstring const& path)
       continue;
     }
 
-    auto const make_extended_path = [](std::wstring const & path)
-    {
-      return std::wstring{path.size() >= 4 && path.substr(0, 4) == L"\\\\?\\"
-                ? path
-                : L"\\\\?\\" + path};
-    };
-
     std::wstring const cur_path =
-      make_extended_path(path_real + L"\\" + cur_file);
+      MakeExtendedPath(path_real + L"\\" + cur_file);
 
     std::wcout << "\nCurrent path: \"" << cur_path << "\".\n";
 
