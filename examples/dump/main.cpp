@@ -723,7 +723,8 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
     return;
   }
 
-  // Using the Win32 API to get a processes path can fail for 'zombie' processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
+  // Using the Win32 API to get a processes path can fail for 'zombie'
+  // processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
   // TODO: Remove this once GetPath is fixed.
   try
   {
@@ -1034,7 +1035,9 @@ int main(int /*argc*/, char * /*argv*/ [])
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
         if (!warned_file)
         {
-          HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString("Failed to open warned file for output."));
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            hadesmem::Error() << hadesmem::ErrorString(
+                                   "Failed to open warned file for output."));
         }
         DumpWarned(warned_file);
       }
