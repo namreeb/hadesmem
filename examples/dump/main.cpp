@@ -58,8 +58,9 @@
 // being ignored (including those ignored inside PeLib itself, like a lot of the
 // corner cases in RvaToVa). Examples include a virtual or null EP, invalid
 // number of data dirs, unknown DOS stub, strange RVAs which lie outside of the
-// image or inside the headers, non-standard alignments, etc. Add some extra
-// consistentcy checking to help detect strange PE files.
+// image or inside the headers, non-standard alignments, no sections, more than
+// 96 sections, etc. Add some extra consistentcy checking to help detect strange
+// PE files.
 
 // TODO: Split this tool up into multiple source files (more).
 

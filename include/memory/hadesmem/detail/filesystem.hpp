@@ -61,12 +61,15 @@ inline bool DoesFileExist(std::wstring const& path)
 
 inline bool IsPathRelative(std::wstring const& path)
 {
+  // TODO: Fix this for paths longer than MAX_PATH. (What other APIs are there?)
   return ::PathIsRelative(path.c_str()) != FALSE;
 }
 
 inline std::wstring CombinePath(std::wstring const& base,
                                 std::wstring const& append)
 {
+  // TODO: Fix this for paths longer than MAX_PATH. (Use PathCchCombineEx for
+  // Win 8+?)
   std::vector<wchar_t> buffer(MAX_PATH);
   if (!::PathCombineW(buffer.data(), base.c_str(), append.c_str()))
   {

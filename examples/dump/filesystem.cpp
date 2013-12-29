@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <hadesmem/detail/filesystem.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
@@ -20,11 +21,35 @@
 namespace
 {
 
+// Modified code from http://bit.ly/1int3Iv.
+// TODO: Use PathCchCanonicalizeEx on Windows 8+?
 std::wstring MakeExtendedPath(std::wstring const& path)
 {
-  return path.size() >= 4 && path.substr(0, 4) == L"\\\\?\\"
-           ? path
-           : L"\\\\?\\" + path;
+  if (path.compare(0, 2, L"\\\\"))
+  {
+    // TODO: Fix this for paths longer than MAX_PATH. IsPathRelative and
+    // CombinePath both use APIs which are limited to MAX_PATH.
+    if (hadesmem::detail::IsPathRelative(path))
+    {
+      return MakeExtendedPath(hadesmem::detail::CombinePath(
+        hadesmem::detail::GetSelfDirPath(), path));
+    }
+    else
+    {
+      return L"\\\\?\\" + path;
+    }
+  }
+  else
+  {
+    if (path.compare(0, 3, L"\\\\?"))
+    {
+      return L"\\\\?\\UNC\\" + path.substr(2);
+    }
+    else
+    {
+      return path;
+    }
+  }
 }
 }
 
