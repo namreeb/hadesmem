@@ -4,6 +4,7 @@
 #pragma once
 
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,27 +24,33 @@ namespace detail
 
 // TODO: Add throwing variants of OpenFile*.
 
-inline std::wfstream OpenFileWide(std::wstring const& path,
-                              std::ios_base::openmode mode)
+// libstdc++ doesn't support move operations on file-streams, so we have to
+// return a unique_ptr instead. :(
+inline std::unique_ptr<std::wfstream> OpenFileWide(std::wstring const& path,
+                                                   std::ios_base::openmode mode)
 {
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  return std::wfstream{path, mode};
+  return std::unique_ptr<std::wfstream>{new std::wfstream{path, mode}};
 #else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   // libstdc++ doesn't support wide character overloads for ifstream's
   // construtor. :(
-  return std::wfstream{hadesmem::detail::WideCharToMultiByte(path), mode};
+  return std::unique_ptr<std::wfstream>{
+    new std::wfstream{hadesmem::detail::WideCharToMultiByte(path), mode}};
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 
-inline std::fstream OpenFileNarrow(std::wstring const& path,
-  std::ios_base::openmode mode)
+// libstdc++ doesn't support move operations on file-streams, so we have to
+// return a unique_ptr instead. :(
+inline std::unique_ptr<std::fstream>
+  OpenFileNarrow(std::wstring const& path, std::ios_base::openmode mode)
 {
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  return std::fstream{ path, mode };
+  return std::unique_ptr<std::fstream>{new std::fstream{path, mode}};
 #else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   // libstdc++ doesn't support wide character overloads for ifstream's
   // construtor. :(
-  return std::fstream{ hadesmem::detail::WideCharToMultiByte(path), mode };
+  return std::unique_ptr<std::fstream>{
+    new std::fstream{hadesmem::detail::WideCharToMultiByte(path), mode}};
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 

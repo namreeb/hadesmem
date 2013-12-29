@@ -81,8 +81,10 @@ void HandleWarnings(std::wstring const& path)
   {
     if (g_warned_dynamic)
     {
-      std::wfstream warned_file(
-        hadesmem::detail::OpenFileWide(g_warned_file_path, std::ios::out));
+      std::unique_ptr<std::wfstream> warned_file_ptr(
+        hadesmem::detail::OpenFileWide(g_warned_file_path,
+                                       std::ios::out | std::ios::app));
+      std::wfstream& warned_file = *warned_file_ptr;
       if (!warned_file)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -378,8 +380,9 @@ int main(int /*argc*/, char * /*argv*/ [])
       {
         std::wstring const warned_file_path =
           var_map["warned-file"].as<std::wstring>();
-        std::wfstream warned_file(
+        std::unique_ptr<std::wfstream> warned_file_ptr(
           hadesmem::detail::OpenFileWide(warned_file_path, std::ios::out));
+        std::wfstream& warned_file = *warned_file_ptr;
         if (!warned_file)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(

@@ -32,8 +32,9 @@ void DumpFile(std::wstring const& path)
 {
   WarnForCurrentFile();
 
-  std::fstream file(hadesmem::detail::OpenFileNarrow(
+  std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFileNarrow(
     path, std::ios::in | std::ios::binary | std::ios::ate));
+  std::fstream& file = *file_ptr;
   if (!file)
   {
     std::wcout << "\nFailed to open file.\n";
