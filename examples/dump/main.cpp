@@ -77,6 +77,9 @@
 // TODO: Add helper functions such as "HasExportDir" etc. to avoid the
 // unnecessary memory allocations and exception handling.
 
+// TODO: Dump string representation of data where possible, such as bitmasks
+// (Charateristics etc.), data dir names, etc.
+
 namespace
 {
 

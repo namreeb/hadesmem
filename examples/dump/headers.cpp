@@ -129,6 +129,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // called, but for EXEs it causes execution to start at the 'MZ'. See
   // "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF" for more
   // inforamtion.
+  // TODO: For valid EPs inside the file, dump the section that it is in, and
+  // also disassemble the first N instructions (for some reasonable value of N).
   std::wcout << "\t\tAddressOfEntryPoint: " << std::hex
              << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
   std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode()
