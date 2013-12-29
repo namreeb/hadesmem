@@ -36,6 +36,18 @@ inline std::uintptr_t HexStrToPtr(std::wstring const& str)
   return ptr;
 }
 
+inline std::wstring PtrToHexString(void const* const ptr)
+{
+  std::wostringstream ss;
+  ss.imbue(std::locale::classic());
+  if (!(ss << std::hex << reinterpret_cast<std::uintptr_t>(ptr)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error() << ErrorString("Pointer to string conversion failed."));
+  }
+  return ss.str();
+}
+
 template <typename T, typename CharT>
 T StrToNum(std::basic_string<CharT> const& str)
 {

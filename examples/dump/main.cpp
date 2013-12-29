@@ -19,8 +19,8 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
-#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
@@ -36,6 +36,7 @@
 #include <hadesmem/thread_entry.hpp>
 
 #include "exports.hpp"
+#include "filesystem.hpp"
 #include "headers.hpp"
 #include "imports.hpp"
 #include "sections.hpp"
@@ -57,7 +58,8 @@
 // being ignored (including those ignored inside PeLib itself, like a lot of the
 // corner cases in RvaToVa). Examples include a virtual or null EP, invalid
 // number of data dirs, unknown DOS stub, strange RVAs which lie outside of the
-// image or inside the headers, non-standard alignments, etc.
+// image or inside the headers, non-standard alignments, etc. Add some extra
+// consistentcy checking to help detect strange PE files.
 
 // TODO: Split this tool up into multiple source files (more).
 
@@ -67,12 +69,34 @@ namespace
 // Record all modules (on disk) which cause a warning when dumped, to make it
 // easier to isolate files which require further investigation.
 // TODO: Clean this up.
-// TODO: Support logging the warned file list 'on the fly' rather than at the
-// end if the warning list is being output to disk. This will make it more
-// useful when doing extremely large runs.
 bool g_warned = false;
 bool g_warned_enabled = false;
+bool g_warned_dynamic = false;
 std::vector<std::wstring> g_all_warned;
+std::wstring g_warned_file_path;
+
+void HandleWarnings(std::wstring const& path)
+{
+  if (g_warned_enabled && g_warned)
+  {
+    if (g_warned_dynamic)
+    {
+      std::wfstream warned_file(
+        hadesmem::detail::OpenFileWide(g_warned_file_path, std::ios::out));
+      if (!warned_file)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error() << hadesmem::ErrorString(
+                                 "Failed to open warned file for output."));
+      }
+      warned_file << path << '\n';
+    }
+    else
+    {
+      g_all_warned.push_back(path);
+    }
+  }
+}
 
 void DumpWarned(std::wostream& out)
 {
@@ -86,13 +110,6 @@ void DumpWarned(std::wostream& out)
   }
 }
 
-std::wstring MakeExtendedPath(std::wstring const& path)
-{
-  return path.size() >= 4 && path.substr(0, 4) == L"\\\\?\\"
-           ? path
-           : L"\\\\?\\" + path;
-}
-
 void DumpRegions(hadesmem::Process const& process)
 {
   std::wcout << "\nRegions:\n";
@@ -101,9 +118,10 @@ void DumpRegions(hadesmem::Process const& process)
   for (auto const& region : regions)
   {
     std::wcout << "\n";
-    std::wcout << "\tBase: " << PtrToString(region.GetBase()) << "\n";
-    std::wcout << "\tAllocation Base: " << PtrToString(region.GetAllocBase())
-               << "\n";
+    std::wcout << "\tBase: "
+               << hadesmem::detail::PtrToHexString(region.GetBase()) << "\n";
+    std::wcout << "\tAllocation Base: " << hadesmem::detail::PtrToHexString(
+                                             region.GetAllocBase()) << "\n";
     std::wcout << "\tAllocation Protect: " << std::hex
                << region.GetAllocProtect() << std::dec << "\n";
     std::wcout << "\tSize: " << std::hex << region.GetSize() << std::dec
@@ -117,26 +135,6 @@ void DumpRegions(hadesmem::Process const& process)
   }
 }
 
-void DumpPeFile(hadesmem::Process const& process,
-                hadesmem::PeFile const& pe_file,
-                std::wstring const& path)
-{
-  DumpHeaders(process, pe_file);
-
-  DumpSections(process, pe_file);
-
-  DumpTls(process, pe_file);
-
-  DumpExports(process, pe_file);
-
-  DumpImports(process, pe_file);
-
-  if (g_warned)
-  {
-    g_all_warned.push_back(path);
-  }
-}
-
 void DumpModules(hadesmem::Process const& process)
 {
   std::wcout << "\nModules:\n";
@@ -145,7 +143,8 @@ void DumpModules(hadesmem::Process const& process)
   for (auto const& module : modules)
   {
     std::wcout << "\n";
-    std::wcout << "\tHandle: " << PtrToString(module.GetHandle()) << "\n";
+    std::wcout << "\tHandle: "
+               << hadesmem::detail::PtrToHexString(module.GetHandle()) << "\n";
     std::wcout << "\tSize: " << std::hex << module.GetSize() << std::dec
                << "\n";
     std::wcout << "\tName: " << module.GetName() << "\n";
@@ -245,190 +244,28 @@ void DumpProcesses()
     DumpProcessEntry(process_entry);
   }
 }
-
-void DumpFile(std::wstring const& path)
-{
-  g_warned = false;
-
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  std::ifstream file(path, std::ios::binary | std::ios::ate);
-#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  // libstdc++ doesn't support wide character overloads for ifstream's
-  // construtor. :(
-  std::ifstream file(hadesmem::detail::WideCharToMultiByte(path),
-                     std::ios::binary | std::ios::ate);
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  if (!file)
-  {
-    std::wcout << "\nFailed to open file.\n";
-    return;
-  }
-
-  std::streampos const size = file.tellg();
-  if (size <= 0)
-  {
-    std::wcout << "\nEmpty or invalid file.\n";
-    return;
-  }
-
-  if (!file.seekg(0, std::ios::beg))
-  {
-    std::wcout << "\nWARNING! Seeking to beginning of file failed (1).\n";
-    return;
-  }
-
-  // Peek for the MZ header before reading the whole file.
-  std::vector<char> mz_buf(2);
-  if (!file.read(mz_buf.data(), 2))
-  {
-    std::wcout << "\nWARNING! Failed to read header signature.\n";
-    return;
-  }
-
-  // Check for MZ signature
-  if (mz_buf[0] != 'M' && mz_buf[1] != 'Z')
-  {
-    std::wcout << "\nNot a PE file (Pass 1).\n";
-    return;
-  }
-
-  if (!file.seekg(0, std::ios::beg))
-  {
-    std::wcout << "\nWARNING! Seeking to beginning of file failed (2).\n";
-    return;
-  }
-
-  std::vector<char> buf(static_cast<std::size_t>(size));
-
-  if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
-  {
-    std::wcout << "\nWARNING! Failed to read file data.\n";
-    return;
-  }
-
-  hadesmem::Process const process(GetCurrentProcessId());
-
-  hadesmem::PeFile const pe_file(process,
-                                 buf.data(),
-                                 hadesmem::PeFileType::Data,
-                                 static_cast<DWORD>(buf.size()));
-
-  try
-  {
-    hadesmem::NtHeaders const nt_hdr(process, pe_file);
-  }
-  catch (std::exception const& /*e*/)
-  {
-    std::wcout << "\nNot a PE file or wrong architecture (Pass 2).\n";
-    return;
-  }
-
-  DumpPeFile(process, pe_file, path);
 }
 
-void DumpDir(std::wstring const& path)
+void DumpPeFile(hadesmem::Process const& process,
+                hadesmem::PeFile const& pe_file,
+                std::wstring const& path)
 {
-  std::wcout << "\nEntering dir: \"" << path << "\".\n";
+  DumpHeaders(process, pe_file);
 
-  std::wstring path_real(path);
-  if (path_real.back() == L'\\')
-  {
-    path_real.pop_back();
-  }
+  DumpSections(process, pe_file);
 
-  WIN32_FIND_DATA find_data;
-  ZeroMemory(&find_data, sizeof(find_data));
-  hadesmem::detail::SmartFindHandle const handle(
-    ::FindFirstFile((path_real + L"\\*").c_str(), &find_data));
-  if (!handle.IsValid())
-  {
-    DWORD const last_error = ::GetLastError();
-    if (last_error == ERROR_FILE_NOT_FOUND)
-    {
-      std::wcout << "\nDirectory is empty.\n";
-      return;
-    }
-    if (last_error == ERROR_ACCESS_DENIED)
-    {
-      std::wcout << "\nAccess denied to directory.\n";
-      return;
-    }
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error() << hadesmem::ErrorString("FindFirstFile failed.")
-                        << hadesmem::ErrorCodeWinLast(last_error));
-  }
+  DumpTls(process, pe_file);
 
-  do
-  {
-    std::wstring const cur_file = find_data.cFileName;
-    if (cur_file == L"." || cur_file == L"..")
-    {
-      continue;
-    }
+  DumpExports(process, pe_file);
 
-    std::wstring const cur_path =
-      MakeExtendedPath(path_real + L"\\" + cur_file);
+  DumpImports(process, pe_file);
 
-    std::wcout << "\nCurrent path: \"" << cur_path << "\".\n";
-
-    try
-    {
-      if (hadesmem::detail::IsDirectory(cur_path) &&
-          !hadesmem::detail::IsSymlink(cur_path))
-      {
-        DumpDir(cur_path);
-      }
-
-      DumpFile(cur_path);
-    }
-    catch (hadesmem::Error const& e)
-    {
-      auto const last_error_ptr =
-        boost::get_error_info<hadesmem::ErrorCodeWinLast>(e);
-      if (last_error_ptr && *last_error_ptr == ERROR_SHARING_VIOLATION)
-      {
-        std::wcout << "\nSharing violation.\n";
-        continue;
-      }
-
-      if (last_error_ptr && *last_error_ptr == ERROR_ACCESS_DENIED)
-      {
-        std::wcout << "\nAccess denied.\n";
-        continue;
-      }
-
-      if (last_error_ptr && *last_error_ptr == ERROR_FILE_NOT_FOUND)
-      {
-        std::wcout << "\nFile not found.\n";
-        continue;
-      }
-
-      throw;
-    }
-  } while (::FindNextFile(handle.GetHandle(), &find_data));
-
-  DWORD const last_error = ::GetLastError();
-  if (last_error == ERROR_NO_MORE_FILES)
-  {
-    return;
-  }
-  HADESMEM_DETAIL_THROW_EXCEPTION(
-    hadesmem::Error() << hadesmem::ErrorString("FindNextFile failed.")
-                      << hadesmem::ErrorCodeWinLast(last_error));
-}
+  HandleWarnings(path);
 }
 
 void WarnForCurrentFile()
 {
   g_warned = true;
-}
-
-std::wstring PtrToString(void const* const ptr)
-{
-  std::wostringstream str;
-  str.imbue(std::locale::classic());
-  str << std::hex << reinterpret_cast<DWORD_PTR>(ptr);
-  return str.str();
 }
 
 int main(int /*argc*/, char * /*argv*/ [])
@@ -445,7 +282,9 @@ int main(int /*argc*/, char * /*argv*/ [])
       "warned", "dump list of files which cause warnings")(
       "warned-file",
       boost::program_options::wvalue<std::wstring>(),
-      "dump warned list to file instead of stdout");
+      "dump warned list to file instead of stdout")(
+      "warned-file-dynamic",
+      "dump warnings to file on the fly rather than at the end");
 
     std::vector<std::wstring> const args =
       boost::program_options::split_winmain(::GetCommandLine());
@@ -464,6 +303,21 @@ int main(int /*argc*/, char * /*argv*/ [])
     }
 
     g_warned_enabled = !!var_map.count("warned");
+    g_warned_dynamic = !!var_map.count("warned-file-dynamic");
+    if (var_map.count("warned-file"))
+    {
+      g_warned_file_path = var_map["warned-file"].as<std::wstring>();
+    }
+    else
+    {
+      if (g_warned_dynamic)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error()
+          << hadesmem::ErrorString(
+               "Please specify a file path for dynamic warnings."));
+      }
+    }
 
     try
     {
@@ -520,18 +374,12 @@ int main(int /*argc*/, char * /*argv*/ [])
 
     if (g_warned_enabled)
     {
-      if (var_map.count("warned-file"))
+      if (var_map.count("warned-file") && !var_map.count("warned-file-dynamic"))
       {
         std::wstring const warned_file_path =
           var_map["warned-file"].as<std::wstring>();
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-        std::wofstream warned_file(warned_file_path);
-#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-        // libstdc++ doesn't support wide character overloads for ifstream's
-        // construtor. :(
-        std::wofstream warned_file(
-          hadesmem::detail::WideCharToMultiByte(warned_file_path));
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+        std::wfstream warned_file(
+          hadesmem::detail::OpenFileWide(warned_file_path, std::ios::out));
         if (!warned_file)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(

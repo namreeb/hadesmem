@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
 #include <hadesmem/pelib/export_list.hpp>
@@ -70,7 +71,7 @@ void DumpExports(hadesmem::Process const& process,
   {
     std::wcout << "\n";
     std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
-    std::wcout << "\t\tVA: " << PtrToString(e.GetVa()) << "\n";
+    std::wcout << "\t\tVA: " << hadesmem::detail::PtrToHexString(e.GetVa()) << "\n";
     if (e.ByName())
     {
       std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";

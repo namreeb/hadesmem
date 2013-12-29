@@ -5,6 +5,14 @@
 
 #include <string>
 
-void WarnForCurrentFile();
+namespace hadesmem
+{
+class Process;
+class PeFile;
+}
 
-std::wstring PtrToString(void const* const ptr);
+void DumpPeFile(hadesmem::Process const& process,
+                hadesmem::PeFile const& pe_file,
+                std::wstring const& path);
+
+void WarnForCurrentFile();

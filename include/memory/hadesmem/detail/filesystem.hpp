@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -12,12 +13,39 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 
 namespace hadesmem
 {
 
 namespace detail
 {
+
+// TODO: Add throwing variants of OpenFile*.
+
+inline std::wfstream OpenFileWide(std::wstring const& path,
+                              std::ios_base::openmode mode)
+{
+#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  return std::wfstream{path, mode};
+#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  // libstdc++ doesn't support wide character overloads for ifstream's
+  // construtor. :(
+  return std::wfstream{hadesmem::detail::WideCharToMultiByte(path), mode};
+#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+}
+
+inline std::fstream OpenFileNarrow(std::wstring const& path,
+  std::ios_base::openmode mode)
+{
+#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  return std::fstream{ path, mode };
+#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  // libstdc++ doesn't support wide character overloads for ifstream's
+  // construtor. :(
+  return std::fstream{ hadesmem::detail::WideCharToMultiByte(path), mode };
+#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+}
 
 inline bool DoesFileExist(std::wstring const& path)
 {
