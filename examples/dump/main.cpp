@@ -72,6 +72,11 @@
 // handled, or add a note if it's not yet handled. Also add documentation for
 // tricks from the ReversingLabs "Undocumented PECOFF" whitepaper.
 
+// TODO: Multi-threading support.
+
+// TODO: Add helper functions such as "HasExportDir" etc. to avoid the
+// unnecessary memory allocations and exception handling.
+
 namespace
 {
 

@@ -15,6 +15,9 @@
 
 #include "main.hpp"
 
+// TODO: Detect multiple exports with the same name (used as part of import hint
+// trick).
+
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
 {
@@ -71,7 +74,8 @@ void DumpExports(hadesmem::Process const& process,
   {
     std::wcout << "\n";
     std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
-    std::wcout << "\t\tVA: " << hadesmem::detail::PtrToHexString(e.GetVa()) << "\n";
+    std::wcout << "\t\tVA: " << hadesmem::detail::PtrToHexString(e.GetVa())
+               << "\n";
     if (e.ByName())
     {
       std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
