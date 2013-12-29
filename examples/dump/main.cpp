@@ -62,7 +62,15 @@
 // 96 sections, etc. Add some extra consistentcy checking to help detect strange
 // PE files.
 
+// TODO: Investigate places where we have a try/catch because it's probably a
+// hack rather then the 'correct' solution. Fix or document all cases.
+
 // TODO: Split this tool up into multiple source files (more).
+
+// TODO: Improve this tool against edge cases like those in the Corkami PE
+// corpus. First step is to check each trick and document it if it's already
+// handled, or add a note if it's not yet handled. Also add documentation for
+// tricks from the ReversingLabs "Undocumented PECOFF" whitepaper.
 
 namespace
 {

@@ -197,6 +197,8 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     }
 
     // Windows will load specially crafted images with no sections.
+    // TODO: Improve the logic here using the information in "Zero section PE
+    // file" in ReversingLabs "Undocumented PECOFF" whitepaper.
     WORD num_sections = nt_headers.FileHeader.NumberOfSections;
     if (!num_sections)
     {
@@ -225,6 +227,9 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
     // 0x2e. Treat anything outside of that as invalid. For an example see
     // foldedhdr.exe from the Corkami PE corpus.
+    // TODO: According to ReversingLabs "Undocumented PECOFF" whitepaper,
+    // SizeOfImage should be rounded up using SectionAlignment. Investigate
+    // this.
     if (rva > nt_headers.OptionalHeader.SizeOfImage)
     {
       return nullptr;

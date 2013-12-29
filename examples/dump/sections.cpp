@@ -14,6 +14,9 @@
 void DumpSections(hadesmem::Process const& process,
                   hadesmem::PeFile const& pe_file)
 {
+  // TODO: Detect when a file has no sections.
+  // TODO: Detect when a file has more than 96 sections (allowed on Vista+, but
+  // technically outside of the spec).
   hadesmem::SectionList sections(process, pe_file);
 
   if (std::begin(sections) != std::end(sections))

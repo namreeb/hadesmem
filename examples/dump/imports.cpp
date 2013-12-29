@@ -15,6 +15,17 @@
 
 #include "main.hpp"
 
+// TODO: Detect imports which simply point back to exports from the same module
+// (also detect if the exports are forwarded, and also detect infinite loops).
+// Remember that all exports can have the same name, so we need to use the hint
+// first, then only use the name if we fail to find a match using the hint. See
+// "Import name table" and "Import name hint" in ReversingLabs "Undocumented
+// PECOFF" whitepaper for more information.
+
+// TODO: Detect and handle cases where an import descriptor has a virtual
+// terminator. See imports_vterm.exe from Corkami or "Import directory layout"
+// in ReversingLabs "Undocumented PECOFF" whitepaper for more information.
+
 namespace
 {
 
@@ -82,6 +93,10 @@ void DumpImports(hadesmem::Process const& process,
                << "\n";
     try
     {
+      // Import names don't need to consist of only printable characters, as
+      // long as they are zero-terminated.
+      // TODO: Find a solution to the above case, and perhaps use a vector<char>
+      // instead of a string in the cases where the name isn't printable.
       std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
     }
     catch (std::exception const& /*e*/)
@@ -91,6 +106,10 @@ void DumpImports(hadesmem::Process const& process,
     }
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
+
+    // TODO: According to "Import table" section of ReversingLabs "Undocumented
+    // PECOFF" whitepaper, the IAT is never optional. Investigate this and
+    // improve the code and/or add detection where appropriate.
 
     // Certain information gets destroyed by the Windows PE loader in
     // some circumstances. Nothing we can do but ignore it or resort

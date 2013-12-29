@@ -11,6 +11,13 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Detect when the file has a writable PE header (both methods). See
+// "Writable PE header" in the ReversingLabs "Undocumented PECOFF" whitepaper.
+
+// TODO: Detect using relocations as an obfuscation mechanism. See "File
+// encryption via relocations" in ReversingLabs "Undocumented PECOFF" whitepaper
+// for more information.
+
 namespace
 {
 
@@ -67,6 +74,14 @@ void DumpDosHeader(hadesmem::Process const& process,
     std::wcout << L' ' << r;
   }
   std::wcout << std::dec << "\n";
+  // TODO: Detect when e_lfanew is in the overlay and will not be mapped when
+  // loaded into memory. See "Self-destructing PE header" in the ReversingLabs
+  // "Undocumented PECOFF" whitepaper. Also investigate the second part of that
+  // trick in regards to FileAlignment and NtSizeOfHeaders.
+  // TODO: Detect when e_lfanew is set in a way that will cause the NT headers
+  // to overlap physical and virtual parts of the file, causing an 'on disk'
+  // header and an 'in memory' header. See "Dual PE header" in the ReversingLabs
+  // "Undocumented PECOFF" whitepaper.
   std::wcout << "\t\tNewHeaderOffset: " << std::hex
              << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
 }
@@ -90,6 +105,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << nt_hdrs.GetPointerToSymbolTable() << std::dec << "\n";
   std::wcout << "\t\tNumberOfSymbols: " << std::hex
              << nt_hdrs.GetNumberOfSymbols() << std::dec << "\n";
+  // TODO: Detect when SizeOfOptionalHeader has been set to put the section
+  // table in unmapped space (e.g. the overlay).
   std::wcout << "\t\tSizeOfOptionalHeader: " << std::hex
              << nt_hdrs.GetSizeOfOptionalHeader() << std::dec << "\n";
   std::wcout << "\t\tCharacteristics: " << std::hex
@@ -106,6 +123,12 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << nt_hdrs.GetSizeOfInitializedData() << std::dec << "\n";
   std::wcout << "\t\tSizeOfUninitializedData: " << std::hex
              << nt_hdrs.GetSizeOfUninitializedData() << std::dec << "\n";
+  // TODO: Detect a zero EP or an EP outside of the file (i.e. pointing to
+  // another non-relocated module). Zero EP should only cause a warning if the
+  // file is not a DLL, because for DLLs it simply means that DllMain is not
+  // called, but for EXEs it causes execution to start at the 'MZ'. See
+  // "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF" for more
+  // inforamtion.
   std::wcout << "\t\tAddressOfEntryPoint: " << std::hex
              << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
   std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode()
@@ -114,10 +137,14 @@ void DumpNtHeaders(hadesmem::Process const& process,
   std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData()
              << std::dec << "\n";
 #endif
+  // TODO: Detect strange ImageBase values (PECOFF spec says must be a
+  // multiplier of 65k, but loader doesn't care and allows you to use NULL).
   std::wcout << "\t\tImageBase: " << std::hex << nt_hdrs.GetImageBase()
              << std::dec << "\n";
+  // TODO: Detect unusual alignments.
   std::wcout << "\t\tSectionAlignment: " << std::hex
              << nt_hdrs.GetSectionAlignment() << std::dec << "\n";
+  // TODO: Detect unusual alignments.
   std::wcout << "\t\tFileAlignment: " << std::hex << nt_hdrs.GetFileAlignment()
              << std::dec << "\n";
   std::wcout << "\t\tMajorOperatingSystemVersion: "
