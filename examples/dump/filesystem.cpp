@@ -62,7 +62,7 @@ void DumpFile(std::wstring const& path)
   std::fstream& file = *file_ptr;
   if (!file)
   {
-    std::wcout << "\nFailed to open file.\n";
+    std::wcout << "\nFailed to open file (" << path << ").\n";
     return;
   }
 
@@ -175,13 +175,21 @@ void DumpDir(std::wstring const& path)
 
     try
     {
-      if (hadesmem::detail::IsDirectory(cur_path) &&
-          !hadesmem::detail::IsSymlink(cur_path))
+      if (hadesmem::detail::IsDirectory(cur_path))
       {
-        DumpDir(cur_path);
+        if (hadesmem::detail::IsSymlink(cur_path))
+        {
+          std::wcout << "\nSkipping symlink.\n";
+        }
+        else
+        {
+          DumpDir(cur_path);
+        }
       }
-
-      DumpFile(cur_path);
+      else
+      {
+        DumpFile(cur_path);
+      }
     }
     catch (hadesmem::Error const& e)
     {
