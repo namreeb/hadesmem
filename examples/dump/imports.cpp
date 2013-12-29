@@ -26,9 +26,14 @@
 // terminator. See imports_vterm.exe from Corkami or "Import directory layout"
 // in ReversingLabs "Undocumented PECOFF" whitepaper for more information.
 
+// TODO: Support bound imports (both old and new style).
+
 namespace
 {
 
+// TODO: Support dumping the IAT, not just the ILT, both as bound on disk and
+// also bound in-memory by the loader. Remember that it isn't just Ordinal or
+// Name, it's also Function or ForwarderString.
 void DumpImportThunk(hadesmem::ImportThunk const& thunk)
 {
   std::wcout << "\n";
@@ -114,6 +119,8 @@ void DumpImports(hadesmem::Process const& process,
     // Certain information gets destroyed by the Windows PE loader in
     // some circumstances. Nothing we can do but ignore it or resort
     // to reading the original data from disk.
+    // TODO: We should still support dumping the IAT, even if we can't dump the
+    // original Name we can still dump the Function.
     if (pe_file.GetType() == hadesmem::PeFileType::Image)
     {
       // Images without an INT/ILT are valid, but after an image
