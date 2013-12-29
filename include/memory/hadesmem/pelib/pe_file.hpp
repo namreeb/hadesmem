@@ -32,9 +32,9 @@
 // performing adjustments where required to fit in new data or remove
 // unnecessary space.
 
-// TODO: Decouple PeFile from Process. It should use a generic interface
-// instead.	Another potential alternative would be policy classes. Needs
-// investigation.
+// TODO: Decouple PeFile from Process (and other memory APIs). It should use a
+// generic interface instead.	Another potential alternative would be policy
+// classes. Needs investigation.
 
 // TODO: Decouple PeLib from the architecture being compiled for. Required
 // for cross-architecture support in hadesmem.
