@@ -55,6 +55,9 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk)
   catch (std::exception const& /*e*/)
   {
     std::wcout << "\t\t\tWARNING! Invalid ordinal or name.\n";
+    // TODO: Fix this for valid cases where the IAT is bound (or we're simply
+    // looking at it in-memory), as warning is a false positive (the file is
+    // fine, we're just interpreting it wrong).
     WarnForCurrentFile();
   }
   std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
