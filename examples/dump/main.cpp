@@ -92,6 +92,8 @@
 // TODO: Support ommiting output for warnings which are not of the specified
 // warning type.
 
+// TODO: Move as much corner-case logic as possible into PeLib itself.
+
 namespace
 {
 

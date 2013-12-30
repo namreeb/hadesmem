@@ -40,13 +40,8 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 
   bool const by_ordinal = thunk.ByOrdinal();
 
-  if (is_bound && by_ordinal)
-  {
-    std::wcout << "\t\t\tWARNING! Invalid import data (both bound and also "
-                  "imported by ordinal).\n";
-    WarnForCurrentFile(WarningType::kUnsupported);
-  }
-
+  // This check needs to be first, because it's possible to have invalid data in
+  // the IAT (i.e. -1) which will cause ByOrdinal to be true!
   if (is_bound)
   {
     std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
@@ -85,19 +80,27 @@ void DumpImports(hadesmem::Process const& process,
   {
     std::wcout << "\n\tImport Dirs:\n";
   }
+  else
+  {
+    std::wcout << "\n\tWARNING! Empty or invalid import directory.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
 
   std::uint32_t num_import_dirs = 0U;
   for (auto const& dir : import_dirs)
   {
     std::wcout << "\n";
 
+    DWORD const iat = dir.GetFirstThunk();
+    bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
+
+    if (iat_valid)
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
       // be invalid because it's ignored. Note that we simply skip here rather
       // than terminate, because it's possible to have such 'invalid' entries
       // in-between real entries.
-      hadesmem::ImportThunkList iat_thunks(
-        process, pe_file, dir.GetFirstThunk());
+      hadesmem::ImportThunkList iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
         std::wcout << "\t\tWARNING! Detected an invalid import dir (empty "
@@ -170,15 +173,16 @@ void DumpImports(hadesmem::Process const& process,
     // PECOFF" whitepaper, the IAT is never optional. Investigate this and
     // improve the code and/or add detection where appropriate.
     DWORD const ilt = dir.GetOriginalFirstThunk();
-    DWORD const iat = dir.GetFirstThunk();
     bool const use_ilt = !!ilt && ilt != iat;
     hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
     if (ilt_empty)
     {
-      // Has to be the ILT if we get here because we did a check for an empty/invalid IAT earlier on.
-      std::wcout << "\n\t\tWARNING! ILT is " << (ilt_valid ? "empty" : "invalid") << ".\n";
+      // Has to be the ILT if we get here because we did a check for an
+      // empty/invalid IAT earlier on.
+      std::wcout << "\n\t\tWARNING! ILT is "
+                 << (ilt_valid ? "empty" : "invalid") << ".\n";
 
       WarnForCurrentFile(WarningType::kSuspicious);
     }
@@ -218,13 +222,20 @@ void DumpImports(hadesmem::Process const& process,
         break;
       }
 
-      DumpImportThunk(thunk, is_ilt_bound);
+      // TODO: Should probably revert to using 'is_ilt_bound' instead of
+      // hardcoding false, but is it even legal to have a module that uses old
+      // style bindings with no ILT? Need to investigate, because it seems
+      // you're allowed to have modules like that when they're not actually
+      // bound, and the loader simply detects that the TimeDateStamp doesn't
+      // match and so treats the IAT as unbound? Investigate this further.
+      (void)is_ilt_bound;
+      DumpImportThunk(thunk, false);
     }
 
     // Windows will load PE files that have an invalid RVA for the ILT (lies
     // outside of the virtual space), and will fall back to the IAT in this
     // case.
-    if (iat && (ilt || !ilt_valid) && iat != ilt)
+    if (use_ilt && iat)
     {
       hadesmem::ImportThunkList iat_thunks(
         process, pe_file, dir.GetFirstThunk());
@@ -242,7 +253,18 @@ void DumpImports(hadesmem::Process const& process,
           break;
         }
 
-        DumpImportThunk(thunk, is_iat_bound);
+        // If the ILT is not empty (empty includes invalid) we simply treat the
+        // IAT as bound, regardless of whether it actually is. This is because
+        // apparently as long as you have a valid ILT you can put whatever the
+        // hell you want in the IAT, because it's going to be overwitten anyway.
+        // See tinynet.exe from the Corkami PE corpus for an example.
+        // TODO: Confirm this is correct.
+        // We only treat the IAT as bound if the ILT is also valid. Not sure if
+        // this is correct, but apparently it's possible to have a module with
+        // the TimeDateStamp set, indicating that the module is bound, even
+        // though it actually isn't (and XP will apparently load such a module).
+        // TODO: Confirm this is correct.
+        DumpImportThunk(thunk, (is_iat_bound || !ilt_empty) && ilt_valid);
       }
     }
   }

@@ -48,6 +48,10 @@ public:
     try
     {
       impl_->import_dir_ = ImportDir(process, pe_file, nullptr);
+      if (IsTerminator())
+      {
+        impl_.reset();
+      }
     }
     catch (std::exception const& /*e*/)
     {
@@ -99,12 +103,7 @@ public:
       impl_->import_dir_ =
         ImportDir(*impl_->process_, *impl_->pe_file_, cur_base + 1);
 
-      // If the Name is NULL then the other fields can be non-NULL
-      // but the entire entry will still be skipped by the Windows
-      // loader.
-      bool const has_name = !!impl_->import_dir_->GetNameRaw();
-      bool const has_iat = !!impl_->import_dir_->GetFirstThunk();
-      if (!has_name || !has_iat)
+      if (IsTerminator())
       {
         impl_.reset();
         return *this;
@@ -136,6 +135,16 @@ public:
   }
 
 private:
+  bool IsTerminator() const
+  {
+    // If the Name is NULL then the other fields can be non-NULL
+    // but the entire entry will still be skipped by the Windows
+    // loader.
+    bool const has_name = !!impl_->import_dir_->GetNameRaw();
+    bool const has_iat = !!impl_->import_dir_->GetFirstThunk();
+    return (!has_name || !has_iat);
+  }
+
   struct Impl
   {
     explicit Impl(Process const& process,

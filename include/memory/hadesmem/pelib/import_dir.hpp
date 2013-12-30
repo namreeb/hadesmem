@@ -66,6 +66,14 @@ public:
       }
     }
 
+    if (pe_file.GetType() == PeFileType::Data &&
+        (base_ + sizeof(PIMAGE_IMPORT_DESCRIPTOR)) >
+          static_cast<PBYTE>(pe_file.GetBase()) + pe_file.GetSize())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Import directory is virtual."));
+    }
+
     UpdateRead();
   }
 
