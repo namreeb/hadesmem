@@ -94,7 +94,6 @@ void DumpImports(hadesmem::Process const& process,
     DWORD const iat = dir.GetFirstThunk();
     bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
 
-    if (iat_valid)
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
       // be invalid because it's ignored. Note that we simply skip here rather
@@ -103,8 +102,8 @@ void DumpImports(hadesmem::Process const& process,
       hadesmem::ImportThunkList iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
-        std::wcout << "\t\tWARNING! Detected an invalid import dir (empty "
-                      "IAT). Skipping.\n";
+        std::wcout << "\n\t\tWARNING! IAT is "
+          << (iat_valid ? "empty" : "invalid") << ".\n";
         WarnForCurrentFile(WarningType::kSuspicious);
         continue;
       }
@@ -169,9 +168,6 @@ void DumpImports(hadesmem::Process const& process,
     // imports are bound in-memory. This will also mean we no longer need to
     // count the length of the ILT in order to terminate the IAT pass early.
 
-    // TODO: According to "Import table" section of ReversingLabs "Undocumented
-    // PECOFF" whitepaper, the IAT is never optional. Investigate this and
-    // improve the code and/or add detection where appropriate.
     DWORD const ilt = dir.GetOriginalFirstThunk();
     bool const use_ilt = !!ilt && ilt != iat;
     hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
@@ -201,8 +197,8 @@ void DumpImports(hadesmem::Process const& process,
     // bound import dir doesn't mean the IAT contains legitimate un-bound data,
     // it could just be complete garbage. Need to confirm this though...
     bool const is_bound = !!dir.GetTimeDateStamp();
-    // TODO: Support cases where we have a PeFileType of Image, but the module
-    // has been loaded with DONT_RESOLVE_DLL_REFERENCES (or equivalent).
+    // Assume that any PE files mapped as images in memory have had their
+    // imports resolved.
     bool const is_memory_bound =
       (pe_file.GetType() == hadesmem::PeFileType::Image) && !use_ilt;
     bool const is_ilt_bound = (is_bound && !use_ilt) || is_memory_bound;
@@ -258,13 +254,14 @@ void DumpImports(hadesmem::Process const& process,
         // apparently as long as you have a valid ILT you can put whatever the
         // hell you want in the IAT, because it's going to be overwitten anyway.
         // See tinynet.exe from the Corkami PE corpus for an example.
+        // Furthermore, we only treat the IAT as bound if the ILT is also valid.
+        // Not sure if this is correct, but apparently it's possible to have a
+        // module with the TimeDateStamp set, indicating that the module is
+        // bound, even though it actually isn't (and XP will apparently load
+        // such a module). See tinygui.exe from the Corkami PE corpus for an
+        // example.
         // TODO: Confirm this is correct.
-        // We only treat the IAT as bound if the ILT is also valid. Not sure if
-        // this is correct, but apparently it's possible to have a module with
-        // the TimeDateStamp set, indicating that the module is bound, even
-        // though it actually isn't (and XP will apparently load such a module).
-        // TODO: Confirm this is correct.
-        DumpImportThunk(thunk, (is_iat_bound || !ilt_empty) && ilt_valid);
+        DumpImportThunk(thunk, (is_iat_bound && ilt_valid) || !ilt_empty);
       }
     }
   }
