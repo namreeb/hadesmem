@@ -102,10 +102,9 @@ public:
       // If the Name is NULL then the other fields can be non-NULL
       // but the entire entry will still be skipped by the Windows
       // loader.
-      bool const has_name = impl_->import_dir_->GetNameRaw() != 0;
-      bool const has_ilt_or_iat = impl_->import_dir_->GetOriginalFirstThunk() ||
-                                  impl_->import_dir_->GetFirstThunk();
-      if (!has_name || !has_ilt_or_iat)
+      bool const has_name = !!impl_->import_dir_->GetNameRaw();
+      bool const has_iat = !!impl_->import_dir_->GetFirstThunk();
+      if (!has_name || !has_iat)
       {
         impl_.reset();
         return *this;

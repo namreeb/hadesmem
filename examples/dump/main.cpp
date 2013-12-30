@@ -80,6 +80,15 @@
 // TODO: Dump string representation of data where possible, such as bitmasks
 // (Charateristics etc.), data dir names, etc.
 
+// TODO: Use hex numbers everywhere to simplify the code? (e.g. Ordinals etc.)
+
+// TODO: Distinguish between different warning levels? We should probably have
+// two levels. One for regular warnings for strange/hostile files that use known
+// and handled tricks, and one for unexpected or unhandled things (to flag for
+// deeper investigation). Perhaps add a --warning-level flag.
+
+// TODO: Dump all TimeDateStamp as actual time-stamps.
+
 namespace
 {
 

@@ -28,40 +28,51 @@
 
 // TODO: Support bound imports (both old and new style).
 
+// TODO: Support forwarded imports. (Are these even a thing? What is
+// ForwarderString?)
+
 namespace
 {
 
-// TODO: Support dumping the IAT, not just the ILT, both as bound on disk and
-// also bound in-memory by the loader. Remember that it isn't just Ordinal or
-// Name, it's also Function or ForwarderString.
-void DumpImportThunk(hadesmem::ImportThunk const& thunk)
+void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 {
   std::wcout << "\n";
-  std::wcout << "\t\t\tAddressOfData: " << std::hex << thunk.GetAddressOfData()
-             << std::dec << "\n";
-  std::wcout << "\t\t\tOrdinalRaw: " << thunk.GetOrdinalRaw() << "\n";
-  try
+
+  bool const by_ordinal = thunk.ByOrdinal();
+
+  if (is_bound && by_ordinal)
   {
-    if (thunk.ByOrdinal())
+    std::wcout << "\t\t\tWARNING! Invalid import data (both bound and also "
+                  "imported by ordinal).\n";
+    WarnForCurrentFile();
+  }
+
+  if (is_bound)
+  {
+    std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
+               << std::dec << "\n";
+  }
+  else if (by_ordinal)
+  {
+    std::wcout << "\t\t\tOrdinalRaw: " << std::hex << thunk.GetOrdinalRaw()
+               << std::dec << "\n";
+    std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+  }
+  else
+  {
+    try
     {
-      std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
-    }
-    else
-    {
+      std::wcout << "\t\t\tAddressOfData: " << std::hex
+                 << thunk.GetAddressOfData() << std::dec << "\n";
       std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
       std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
     }
+    catch (std::exception const& /*e*/)
+    {
+      std::wcout << "\t\t\tWARNING! Invalid import thunk name data.\n";
+      WarnForCurrentFile();
+    }
   }
-  catch (std::exception const& /*e*/)
-  {
-    std::wcout << "\t\t\tWARNING! Invalid ordinal or name.\n";
-    // TODO: Fix this for valid cases where the IAT is bound (or we're simply
-    // looking at it in-memory), as warning is a false positive (the file is
-    // fine, we're just interpreting it wrong).
-    WarnForCurrentFile();
-  }
-  std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
-             << std::dec << "\n";
 }
 }
 
@@ -80,6 +91,22 @@ void DumpImports(hadesmem::Process const& process,
   {
     std::wcout << "\n";
 
+    {
+      // If the IAT is empty then the descriptor is skipped, and the name can
+      // be invalid because it's ignored. Note that we simply skip here rather
+      // than terminate, because it's possible to have such 'invalid' entries
+      // in-between real entries.
+      hadesmem::ImportThunkList iat_thunks(
+        process, pe_file, dir.GetFirstThunk());
+      if (std::begin(iat_thunks) == std::end(iat_thunks))
+      {
+        std::wcout << "\t\tWARNING! Detected an invalid import dir (empty "
+                      "IAT). Skipping.\n";
+        WarnForCurrentFile();
+        continue;
+      }
+    }
+
     // TODO: Come up with a better solution to this.
     if (num_import_dirs++ == 1000)
     {
@@ -93,10 +120,30 @@ void DumpImports(hadesmem::Process const& process,
 
     std::wcout << "\t\tOriginalFirstThunk: " << std::hex
                << dir.GetOriginalFirstThunk() << std::dec << "\n";
-    std::wcout << "\t\tTimeDateStamp: " << std::hex << dir.GetTimeDateStamp()
+    DWORD const time_date_stamp = dir.GetTimeDateStamp();
+    std::wcout << "\t\tTimeDateStamp: " << std::hex << time_date_stamp
                << std::dec << "\n";
-    std::wcout << "\t\tForwarderChain: " << std::hex << dir.GetForwarderChain()
+    if (time_date_stamp != 0 && time_date_stamp != static_cast<DWORD>(-1))
+    {
+      std::wcout << "\t\tWARNING! Detected old style bound imports. Currently "
+                    "unhandled.\n";
+      WarnForCurrentFile();
+    }
+    else if (time_date_stamp == static_cast<DWORD>(-1))
+    {
+      std::wcout << "\t\tWARNING! Detected new style bound imports. Currently "
+                    "unhandled.\n";
+      WarnForCurrentFile();
+    }
+    DWORD const forwarder_chain = dir.GetForwarderChain();
+    std::wcout << "\t\tForwarderChain: " << std::hex << forwarder_chain
                << std::dec << "\n";
+    if (forwarder_chain != 0 && forwarder_chain != static_cast<DWORD>(-1))
+    {
+      std::wcout << "\t\tWARNING! Detected old style forwarder chain. "
+                    "Currently unhandled.\n";
+      WarnForCurrentFile();
+    }
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec
                << "\n";
     try
@@ -115,69 +162,56 @@ void DumpImports(hadesmem::Process const& process,
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
 
+    // TODO: Parse the IAT and ILT in parallel, in order to easily detect when
+    // imports are bound in-memory. This will also mean we no longer need to
+    // count the length of the ILT in order to terminate the IAT pass early.
+
     // TODO: According to "Import table" section of ReversingLabs "Undocumented
     // PECOFF" whitepaper, the IAT is never optional. Investigate this and
     // improve the code and/or add detection where appropriate.
-
-    // Certain information gets destroyed by the Windows PE loader in
-    // some circumstances. Nothing we can do but ignore it or resort
-    // to reading the original data from disk.
-    // TODO: We should still support dumping the IAT, even if we can't dump the
-    // original Name we can still dump the Function.
-    if (pe_file.GetType() == hadesmem::PeFileType::Image)
+    DWORD const ilt = dir.GetOriginalFirstThunk();
+    DWORD const iat = dir.GetFirstThunk();
+    bool const use_ilt = !!ilt && ilt != iat;
+    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
+    bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
+    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
+    if (ilt_empty)
     {
-      // Images without an INT/ILT are valid, but after an image
-      // like this is loaded it is impossible to recover the name
-      // table.
-      if (!dir.GetOriginalFirstThunk())
+      if (ilt_valid)
       {
-        std::wcout << "\n\t\tWARNING! No INT for this module.\n";
-        WarnForCurrentFile();
-        continue;
-      }
-
-      // Some modules (packed modules are the only ones I've found
-      // so far) have import directories where the IAT RVA is the
-      // same as the INT/ILT RVA which effectively means there is
-      // no INT/ILT once the module is loaded.
-      if (dir.GetOriginalFirstThunk() == dir.GetFirstThunk())
-      {
-        std::wcout << "\n\t\tWARNING! IAT is same as INT for this module.\n";
-        WarnForCurrentFile();
-        continue;
-      }
-    }
-
-    hadesmem::ImportThunkList ilt_thunks(process,
-                                         pe_file,
-                                         dir.GetOriginalFirstThunk()
-                                           ? dir.GetOriginalFirstThunk()
-                                           : dir.GetFirstThunk());
-    if (std::begin(ilt_thunks) == std::end(ilt_thunks))
-    {
-      if (dir.GetOriginalFirstThunk())
-      {
-        std::wcout << "\n\t\tWARNING! ILT is empty or invalid.\n";
-        WarnForCurrentFile();
+        std::wcout << "\n\t\tWARNING! " << (use_ilt ? "ILT" : "IAT")
+                   << " is invalid.\n";
       }
       else
       {
-        std::wcout << "\n\t\tWARNING! IAT is empty or invalid.\n";
-        WarnForCurrentFile();
+        std::wcout << "\n\t\tWARNING! " << (use_ilt ? "ILT" : "IAT")
+                   << " is empty.\n";
       }
+
+      WarnForCurrentFile();
     }
     else
     {
-      if (dir.GetOriginalFirstThunk())
-      {
-        std::wcout << "\n\t\tImport Thunks (ILT):\n";
-      }
-      else
-      {
-        std::wcout << "\n\t\tImport Thunks (IAT):\n";
-      }
+      std::wcout << "\n\t\tImport Thunks (" << (use_ilt ? "ILT" : "IAT")
+                 << "):\n";
     }
 
+    // TODO: Distinguish between new and old binding styles and handle
+    // appropriately.
+    // TODO: Detect when the import dir says it is bound with the new style, but
+    // the file does not have a valid bound import dir. In this case it seems to
+    // be ignored by the loader. We should warn for this, but we probably can't
+    // change the way we interpret the data, because just because there's no
+    // bound import dir doesn't mean the IAT contains legitimate un-bound data,
+    // it could just be complete garbage. Need to confirm this though...
+    bool const is_bound = !!dir.GetTimeDateStamp();
+    // TODO: Support cases where we have a PeFileType of Image, but the module
+    // has been loaded with DONT_RESOLVE_DLL_REFERENCES (or equivalent).
+    bool const is_memory_bound =
+      (pe_file.GetType() == hadesmem::PeFileType::Image) && !use_ilt;
+    bool const is_ilt_bound = (is_bound && !use_ilt) || is_memory_bound;
+    bool const is_iat_bound =
+      is_bound || (pe_file.GetType() == hadesmem::PeFileType::Image);
     std::size_t count = 0U;
     for (auto const& thunk : ilt_thunks)
     {
@@ -192,15 +226,13 @@ void DumpImports(hadesmem::Process const& process,
         break;
       }
 
-      DumpImportThunk(thunk);
+      DumpImportThunk(thunk, is_ilt_bound);
     }
 
     // Windows will load PE files that have an invalid RVA for the ILT (lies
     // outside of the virtual space), and will fall back to the IAT in this
     // case.
-    bool const ilt_valid =
-      !!hadesmem::RvaToVa(process, pe_file, dir.GetOriginalFirstThunk());
-    if (dir.GetFirstThunk() && (dir.GetOriginalFirstThunk() || !ilt_valid))
+    if (iat && (ilt || !ilt_valid) && iat != ilt)
     {
       hadesmem::ImportThunkList iat_thunks(
         process, pe_file, dir.GetFirstThunk());
@@ -218,7 +250,7 @@ void DumpImports(hadesmem::Process const& process,
           break;
         }
 
-        DumpImportThunk(thunk);
+        DumpImportThunk(thunk, is_iat_bound);
       }
     }
   }
