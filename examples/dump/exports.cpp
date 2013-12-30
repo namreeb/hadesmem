@@ -52,7 +52,7 @@ void DumpExports(hadesmem::Process const& process,
   catch (std::exception const& /*e*/)
   {
     std::wcout << "\t\tWARNING! Name is invalid.\n";
-    WarnForCurrentFile();
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
              << std::dec << "\n";
@@ -88,7 +88,7 @@ void DumpExports(hadesmem::Process const& process,
     else
     {
       std::wcout << "\t\tWARNING! Entry not exported by name or ordinal.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     if (e.IsForwarded())
     {
@@ -109,7 +109,7 @@ void DumpExports(hadesmem::Process const& process,
         catch (std::exception const& /*e*/)
         {
           std::wcout << "\t\tWARNING! ForwarderOrdinal invalid.\n";
-          WarnForCurrentFile();
+          WarnForCurrentFile(WarningType::kSuspicious);
         }
       }
     }

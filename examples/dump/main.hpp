@@ -15,4 +15,13 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path);
 
-void WarnForCurrentFile();
+enum class WarningType
+{
+  kSuspicious, 
+  kUnsupported,
+  kAll = -1
+};
+
+void WarnForCurrentFile(WarningType warned_type);
+
+void ClearWarnForCurrentFile();

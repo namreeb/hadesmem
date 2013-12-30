@@ -89,6 +89,9 @@
 
 // TODO: Dump all TimeDateStamp as actual time-stamps.
 
+// TODO: Support ommiting output for warnings which are not of the specified
+// warning type.
+
 namespace
 {
 
@@ -100,6 +103,7 @@ bool g_warned_enabled = false;
 bool g_warned_dynamic = false;
 std::vector<std::wstring> g_all_warned;
 std::wstring g_warned_file_path;
+WarningType g_warned_type = WarningType::kAll;
 
 void HandleWarnings(std::wstring const& path)
 {
@@ -278,6 +282,8 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path)
 {
+  ClearWarnForCurrentFile();
+
   DumpHeaders(process, pe_file);
 
   DumpSections(process, pe_file);
@@ -291,9 +297,17 @@ void DumpPeFile(hadesmem::Process const& process,
   HandleWarnings(path);
 }
 
-void WarnForCurrentFile()
+void WarnForCurrentFile(WarningType warned_type)
 {
-  g_warned = true;
+  if (warned_type == g_warned_type || g_warned_type == WarningType::kAll)
+  {
+    g_warned = true;
+  }
+}
+
+void ClearWarnForCurrentFile()
+{
+  g_warned = false;
 }
 
 int main(int /*argc*/, char * /*argv*/ [])
@@ -312,7 +326,10 @@ int main(int /*argc*/, char * /*argv*/ [])
       boost::program_options::wvalue<std::wstring>(),
       "dump warned list to file instead of stdout")(
       "warned-file-dynamic",
-      "dump warnings to file on the fly rather than at the end");
+      "dump warnings to file on the fly rather than at the end")(
+      "warned-type",
+      boost::program_options::wvalue<int>(),
+      "filter warned file using warned type");
 
     std::vector<std::wstring> const args =
       boost::program_options::split_winmain(::GetCommandLine());
@@ -344,6 +361,23 @@ int main(int /*argc*/, char * /*argv*/ [])
           hadesmem::Error()
           << hadesmem::ErrorString(
                "Please specify a file path for dynamic warnings."));
+      }
+    }
+    if (var_map.count("warned-type"))
+    {
+      int const warned_type = var_map["warned-type"].as<int>();
+      switch (warned_type)
+      {
+      case static_cast<int>(WarningType::kSuspicious) :
+        g_warned_type = WarningType::kSuspicious;
+        break;
+      case static_cast<int>(WarningType::kUnsupported) :
+        g_warned_type = WarningType::kUnsupported;
+        break;
+      default:
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error() << hadesmem::ErrorString("Unknown warned type."));
+        break;
       }
     }
 

@@ -47,7 +47,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\t\tWARNING! TLS callbacks are inavlid.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     for (auto const c : callbacks)
     {

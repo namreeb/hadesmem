@@ -55,8 +55,6 @@ std::wstring MakeExtendedPath(std::wstring const& path)
 
 void DumpFile(std::wstring const& path)
 {
-  WarnForCurrentFile();
-
   std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFileNarrow(
     path, std::ios::in | std::ios::binary | std::ios::ate));
   std::fstream& file = *file_ptr;

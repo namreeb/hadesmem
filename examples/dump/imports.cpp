@@ -44,7 +44,7 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
   {
     std::wcout << "\t\t\tWARNING! Invalid import data (both bound and also "
                   "imported by ordinal).\n";
-    WarnForCurrentFile();
+    WarnForCurrentFile(WarningType::kUnsupported);
   }
 
   if (is_bound)
@@ -70,7 +70,7 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\t\t\tWARNING! Invalid import thunk name data.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
 }
@@ -102,7 +102,7 @@ void DumpImports(hadesmem::Process const& process,
       {
         std::wcout << "\t\tWARNING! Detected an invalid import dir (empty "
                       "IAT). Skipping.\n";
-        WarnForCurrentFile();
+        WarnForCurrentFile(WarningType::kSuspicious);
         continue;
       }
     }
@@ -114,7 +114,7 @@ void DumpImports(hadesmem::Process const& process,
                     "to avoid resource exhaustion attacks. Check PE file for "
                     "TLS AOI trick, virtual terminator trick, or other similar "
                     "attacks.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
 
@@ -127,13 +127,13 @@ void DumpImports(hadesmem::Process const& process,
     {
       std::wcout << "\t\tWARNING! Detected old style bound imports. Currently "
                     "unhandled.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     else if (time_date_stamp == static_cast<DWORD>(-1))
     {
       std::wcout << "\t\tWARNING! Detected new style bound imports. Currently "
                     "unhandled.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     DWORD const forwarder_chain = dir.GetForwarderChain();
     std::wcout << "\t\tForwarderChain: " << std::hex << forwarder_chain
@@ -142,7 +142,7 @@ void DumpImports(hadesmem::Process const& process,
     {
       std::wcout << "\t\tWARNING! Detected old style forwarder chain. "
                     "Currently unhandled.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec
                << "\n";
@@ -157,7 +157,7 @@ void DumpImports(hadesmem::Process const& process,
     catch (std::exception const& /*e*/)
     {
       std::wcout << "\t\tWARNING! Failed to read name.\n";
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";
@@ -177,18 +177,10 @@ void DumpImports(hadesmem::Process const& process,
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
     if (ilt_empty)
     {
-      if (ilt_valid)
-      {
-        std::wcout << "\n\t\tWARNING! " << (use_ilt ? "ILT" : "IAT")
-                   << " is invalid.\n";
-      }
-      else
-      {
-        std::wcout << "\n\t\tWARNING! " << (use_ilt ? "ILT" : "IAT")
-                   << " is empty.\n";
-      }
+      // Has to be the ILT if we get here because we did a check for an empty/invalid IAT earlier on.
+      std::wcout << "\n\t\tWARNING! ILT is " << (ilt_valid ? "empty" : "invalid") << ".\n";
 
-      WarnForCurrentFile();
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
     else
     {
@@ -222,7 +214,7 @@ void DumpImports(hadesmem::Process const& process,
                       "early to avoid resource exhaustion attacks. Check PE "
                       "file for TLS AOI trick, virtual terminator trick, or "
                       "other similar attacks.\n";
-        WarnForCurrentFile();
+        WarnForCurrentFile(WarningType::kUnsupported);
         break;
       }
 
@@ -246,7 +238,7 @@ void DumpImports(hadesmem::Process const& process,
         {
           std::wcout << "\n\t\t\tWARNING! IAT size does not match ILT size. "
                         "Stopping IAT enumeration early.\n";
-          WarnForCurrentFile();
+          WarnForCurrentFile(WarningType::kSuspicious);
           break;
         }
 
