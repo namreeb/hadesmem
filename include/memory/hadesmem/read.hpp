@@ -159,7 +159,7 @@ inline std::vector<T, Alloc>
 
   if (!count)
   {
-    return {};
+    return std::vector<T, Alloc>();
   }
 
   std::vector<T, Alloc> data(count);
