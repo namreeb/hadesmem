@@ -262,6 +262,11 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       }
       // Also only applies if the RVA is smaller than file alignment?
       // TODO: Verify this also.
+      // TODO: It seems this is broken for
+      // 00030855940c3b6c50789d203a9ba01d8d4cc0dc (seemingly invalid bound
+      // import dir RVA being resolved usign this branch). Worked around
+      // temporarily by checking for 0 on OffsetModuleName, perhaps that is the
+      // correct fix anyway?
       else if (rva < nt_headers.OptionalHeader.FileAlignment)
       {
         return base + rva;

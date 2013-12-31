@@ -53,7 +53,10 @@ public:
       {
         impl_.reset();
       }
-      impl_->start_bound_import_dir_ = impl_->bound_import_dir_;
+      else
+      {
+        impl_->start_bound_import_dir_ = impl_->bound_import_dir_;
+      }
     }
     catch (std::exception const& /*e*/)
     {
@@ -147,9 +150,14 @@ HADESMEM_DETAIL_NOEXCEPT:
 private:
   bool IsTerminator() const
   {
-    return !impl_->bound_import_dir_->GetTimeDateStamp() &&
-           !impl_->bound_import_dir_->GetOffsetModuleName() &&
-           !impl_->bound_import_dir_->GetNumberOfModuleForwarderRefs();
+    // Apparently all three fields are supposed to be zero, but it seems that
+    // may not be the case when it comes to the actual loader implementation.
+    // TODO: Use 00030855940c3b6c50789d203a9ba01d8d4cc0dc to verify this (will
+    // require patching a module that's loaded so that the corrupted timestamp
+    // matches).
+    // TODO: Verify this is correct.
+    return !impl_->bound_import_dir_->GetTimeDateStamp() ||
+           !impl_->bound_import_dir_->GetOffsetModuleName();
   }
 
   struct Impl
