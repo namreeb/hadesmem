@@ -112,6 +112,9 @@
 
 // TODO: Handle nullSOH-XP.exe from Corkami PE corpus.
 
+// TODO: Add warnings for cases like import virtual terminator etc that are
+// currently being detected and swallowed entirely in PeLib.
+
 namespace
 {
 
