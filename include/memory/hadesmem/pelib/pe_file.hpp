@@ -287,9 +287,12 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       reinterpret_cast<PIMAGE_SECTION_HEADER>(
         ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
         nt_headers.FileHeader.SizeOfOptionalHeader);
-    void const* const file_end = static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
+    void const* const file_end =
+      static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // Virtual section table.
-    // TODO: This only handles the case where the entire section table is virtual. Fix this to handle overlapped entries, or only the Nth section becoming virtual.
+    // TODO: This only handles the case where the entire section table is
+    // virtual. Fix this to handle overlapped entries, or only the Nth section
+    // becoming virtual.
     if (ptr_section_header > file_end)
     {
       if (rva > pe_file.GetSize())
@@ -348,6 +351,10 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       // lower address than any of the sections, so we want to detect this so we
       // can just treat the RVA as an offset from the module base (similar to
       // when the image is loaded).
+      // TODO: Apparently the above isn't always true, and there are extra
+      // restrictions (however I haven't yet figured them out exactly, but an
+      // experimental fix is in place below). Need to investigate this and fix
+      // it properly.
       if (virtual_beg <= rva)
       {
         in_header = false;
@@ -357,9 +364,32 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         Read<IMAGE_SECTION_HEADER>(process, ++ptr_section_header);
     }
 
+    // Doing the same thing as in the SizeOfHeaders check above because we're
+    // not sure of better criteria to base it off. Perhaps it's correct now?
+    // TODO: Investigate this further and fix it properly.
     if (in_header && rva < pe_file.GetSize())
     {
-      return base + rva;
+      // Only applies in low alignment, otherwise it's invalid?
+      // TODO: Should we be checking SectionAlignment here also, because the
+      // Corkami wiki implies that low alignment only applies when
+      // SectionAlignment is also lower than its normal lower bound.
+      // TODO: Verify this.
+      if (nt_headers.OptionalHeader.FileAlignment < 200)
+      {
+        return base + rva;
+      }
+      // Also only applies if the RVA is smaller than file alignment?
+      // TODO: Verify this also.
+      // TODO: Find a sample that relies on this...
+      else if (rva < nt_headers.OptionalHeader.FileAlignment)
+      {
+        return base + rva;
+      }
+      else
+      {
+        // TODO: Verify that this is correct.
+        return nullptr;
+      }
     }
 
     return nullptr;

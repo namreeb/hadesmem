@@ -101,6 +101,17 @@
 // Currently we're pushing on an extra zero as a hacky workaround for some
 // scenarios (like a virtually terminated string).
 
+// TODO: Handle "Dual PE Header" trick from ReversingLabs (example binary
+// available as foldedhdr.exe in Corkami PE corpus).
+
+// TODO: Handle imports_relocw7.exe from Corkami PE corpus.
+
+// TODO: Handle imports_virtdesc.exe from Corkami PE corpus.
+
+// TODO: Handle lfanew_relocw7.exe from Corkami PE corpus.
+
+// TODO: Handle nullSOH-XP.exe from Corkami PE corpus.
+
 namespace
 {
 
