@@ -17,22 +17,19 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
+#include <hadesmem/pelib/tls_dir.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextended-offsetof"
-#endif
-
-namespace hadesmem
-{
-
 // TODO: Handle forwarded imports.
 
 // TODO: Handle bound imports (both new way and old way).
+
+// TODO: This should really be called ImportDescriptor.
+
+namespace hadesmem
+{
 
 class ImportDir
 {
@@ -66,6 +63,9 @@ public:
       }
     }
 
+    // TODO: Fix this for cases where a virtual descriptor is 'real', rather
+    // than just used as a terminator. See imports_virtdesc.exe from the Corkami
+    // PE corpus for an example.
     if (pe_file.GetType() == PeFileType::Data &&
         (base_ + sizeof(PIMAGE_IMPORT_DESCRIPTOR)) >
           static_cast<PBYTE>(pe_file.GetBase()) + pe_file.GetSize())
@@ -90,6 +90,30 @@ public:
   void UpdateWrite()
   {
     Write(*process_, base_, data_);
+  }
+
+  // TODO: Think about what the best way to solve this is... Currently we're
+  // forcing the user to thunk about it, which may not be ideal.
+  // Check for TLS AOI trick.
+  bool IsTlsAoiTerminated() const
+  {
+    try
+    {
+      TlsDir tls_dir(*process_, *pe_file_);
+      ULONG_PTR const image_base = GetRuntimeBase(*process_, *pe_file_);
+      auto const address_of_index_raw =
+        RvaToVa(*process_,
+                *pe_file_,
+                static_cast<DWORD>(tls_dir.GetAddressOfIndex() - image_base));
+      return (address_of_index_raw ==
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name) ||
+              address_of_index_raw ==
+                base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, FirstThunk));
+    }
+    catch (std::exception const& /*e*/)
+    {
+      return false;
+    }
   }
 
   DWORD GetOriginalFirstThunk() const
@@ -224,7 +248,7 @@ inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs)
 inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
@@ -232,12 +256,8 @@ inline std::ostream& operator<<(std::ostream& lhs, ImportDir const& rhs)
 inline std::wostream& operator<<(std::wostream& lhs, ImportDir const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
 }
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif

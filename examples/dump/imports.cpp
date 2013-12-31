@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iterator>
 
+#include <hadesmem/pelib/bound_import_dir.hpp>
+#include <hadesmem/pelib/bound_import_dir_list.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
@@ -26,13 +28,35 @@
 // terminator. See imports_vterm.exe from Corkami or "Import directory layout"
 // in ReversingLabs "Undocumented PECOFF" whitepaper for more information.
 
-// TODO: Support bound imports (both old and new style).
+// TODO: Support old style bound imports and bound forwarded imports.
 
-// TODO: Support forwarded imports. (Are these even a thing? What is
-// ForwarderString?)
+// TODO: Are any fixes needed to properly support in-memory images, rather than
+// just on-disk files?
 
 namespace
 {
+
+bool HasBoundImportDir(hadesmem::Process const& process,
+                       hadesmem::PeFile const& pe_file)
+{
+  hadesmem::NtHeaders const nt_headers(process, pe_file);
+  // Intentionally not checking whether the RVA is valid, because we will detect
+  // an empty list in that case, at which point we want to warn because an
+  // invalid RVA is suspicious (even though it won't stop the file from
+  // loading).
+  return (nt_headers.GetNumberOfRvaAndSizes() >
+            static_cast<int>(hadesmem::PeDataDir::BoundImport) &&
+          nt_headers.GetDataDirectoryVirtualAddress(
+            hadesmem::PeDataDir::BoundImport));
+}
+
+bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
+                                         hadesmem::PeFile const& pe_file)
+{
+  hadesmem::BoundImportDirList bound_import_dirs(process, pe_file);
+
+  return (std::begin(bound_import_dirs) != std::end(bound_import_dirs));
+}
 
 void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 {
@@ -91,8 +115,24 @@ void DumpImports(hadesmem::Process const& process,
   {
     std::wcout << "\n";
 
+    if (dir.IsTlsAoiTerminated())
+    {
+      std::wcout << "\t\tWARNING! Detected TLS AOI trick! Assuming a Windows 7 "
+                    "style loader and terminating the list early.\n";
+      WarnForCurrentFile(WarningType::kSuspicious);
+      break;
+    }
+
     DWORD const iat = dir.GetFirstThunk();
     bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
+    DWORD const ilt = dir.GetOriginalFirstThunk();
+    bool const use_ilt = !!ilt && ilt != iat;
+    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
+    bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
+    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
+    // TODO: Is it possible to have an empty but valid ILT? Woulnd't that mean
+    // the IAT would also need to be empty? Is that (ILT with no thunks) even
+    // allowed? IAT with no thunks means it's skipped...
 
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
@@ -102,8 +142,8 @@ void DumpImports(hadesmem::Process const& process,
       hadesmem::ImportThunkList iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
-        std::wcout << "\n\t\tWARNING! IAT is "
-          << (iat_valid ? "empty" : "invalid") << ".\n";
+        std::wcout << "\t\tWARNING! IAT is "
+                   << (iat_valid ? "empty" : "invalid") << ".\n";
         WarnForCurrentFile(WarningType::kSuspicious);
         continue;
       }
@@ -125,17 +165,23 @@ void DumpImports(hadesmem::Process const& process,
     DWORD const time_date_stamp = dir.GetTimeDateStamp();
     std::wcout << "\t\tTimeDateStamp: " << std::hex << time_date_stamp
                << std::dec << "\n";
-    if (time_date_stamp != 0 && time_date_stamp != static_cast<DWORD>(-1))
+    if (time_date_stamp == static_cast<DWORD>(-1))
     {
-      std::wcout << "\t\tWARNING! Detected old style bound imports. Currently "
-                    "unhandled.\n";
-      WarnForCurrentFile(WarningType::kUnsupported);
-    }
-    else if (time_date_stamp == static_cast<DWORD>(-1))
-    {
-      std::wcout << "\t\tWARNING! Detected new style bound imports. Currently "
-                    "unhandled.\n";
-      WarnForCurrentFile(WarningType::kUnsupported);
+      // Don't just check whether the ILT is invalid, but also ensure that
+      // there's a valid bound import dir. In the case where the bound import
+      // dir is invalid we just treat the IAT as the ILT on disk. See
+      // dllmaxvals.dll for a PE file which has TimeDateStamp of 0xFFFFFFFF, no
+      // ILT, and no bound import dir.
+      // TODO: Is this allowed? I guess this is legal in the case where you
+      // bind a DLL that doesn't have an ILT to begin wtih, at which point it
+      // won't load if the bindings don't match, but we need to confirm this.
+      // Warn so we can find samples for further investigation.
+      if (!ilt_valid && HasValidNonEmptyBoundImportDescList(process, pe_file))
+      {
+        std::wcout << "\t\tWARNING! Detected new style bound imports with an "
+                      "invalid ILT. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
     }
     DWORD const forwarder_chain = dir.GetForwarderChain();
     std::wcout << "\t\tForwarderChain: " << std::hex << forwarder_chain
@@ -168,11 +214,6 @@ void DumpImports(hadesmem::Process const& process,
     // imports are bound in-memory. This will also mean we no longer need to
     // count the length of the ILT in order to terminate the IAT pass early.
 
-    DWORD const ilt = dir.GetOriginalFirstThunk();
-    bool const use_ilt = !!ilt && ilt != iat;
-    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
-    bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
-    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
     if (ilt_empty)
     {
       // Has to be the ILT if we get here because we did a check for an
@@ -263,6 +304,61 @@ void DumpImports(hadesmem::Process const& process,
         // TODO: Confirm this is correct.
         DumpImportThunk(thunk, (is_iat_bound && ilt_valid) || !ilt_empty);
       }
+    }
+  }
+}
+
+void DumpBoundImports(hadesmem::Process const& process,
+                      hadesmem::PeFile const& pe_file)
+{
+  // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
+  if (!HasBoundImportDir(process, pe_file))
+  {
+    return;
+  }
+
+  // TODO: Only attempt to read the bound import dir if the module actually has
+  // bound imports? Is this necessary anymore nwo that we've worked around the
+  // RVA resolution problem?
+
+  hadesmem::BoundImportDirList bound_import_dirs(process, pe_file);
+
+  if (std::begin(bound_import_dirs) != std::end(bound_import_dirs))
+  {
+    std::wcout << "\n\tBound Import Dirs:\n";
+  }
+  else
+  {
+    std::wcout << "\n\tWARNING! Empty or invalid bound import directory.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+
+  for (auto const& dir : bound_import_dirs)
+  {
+    std::wcout << "\n";
+
+    std::wcout << "\t\tTimeDateStamp: " << std::hex << dir.GetTimeDateStamp()
+               << std::dec << "\n";
+    std::wcout << "\t\tOffsetModuleName: " << std::hex
+               << dir.GetOffsetModuleName() << std::dec << "\n";
+    std::wcout << "\t\tModuleName: " << dir.GetModuleName().c_str() << "\n";
+    std::wcout << "\t\tNumberOfModuleForwarderRefs: " << std::hex
+               << dir.GetNumberOfModuleForwarderRefs() << std::dec << "\n";
+    auto const forwarder_refs = dir.GetModuleForwarderRefs();
+    if (std::begin(forwarder_refs) != std::end(forwarder_refs))
+    {
+      std::wcout << "\t\tModule Forwarder Refs:\n";
+    }
+    for (auto const& forwarder : forwarder_refs)
+    {
+      std::wcout << "\t\t\tTimeDateStamp: " << std::hex
+                 << forwarder.TimeDateStamp << std::dec << "\n";
+      std::wcout << "\t\t\tOffsetModuleName: " << std::hex
+                 << forwarder.OffsetModuleName << std::dec << "\n";
+      std::wcout << "\t\t\tModuleName: "
+                 << dir.GetNameForModuleForwarderRef(forwarder).c_str() << "\n";
+      std::wcout << "\t\t\tReserved: " << std::hex << forwarder.Reserved
+                 << std::dec << "\n";
     }
   }
 }

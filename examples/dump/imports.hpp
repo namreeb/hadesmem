@@ -12,3 +12,6 @@ class PeFile;
 
 void DumpImports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file);
+
+void DumpBoundImports(hadesmem::Process const& process,
+                      hadesmem::PeFile const& pe_file);

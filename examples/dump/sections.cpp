@@ -11,6 +11,8 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
+#include "main.hpp"
+
 // TODO: Detect when a file has no sections.
 
 // TODO: Detect when a file has more than 96 sections (allowed on Vista+, but
@@ -29,6 +31,11 @@ void DumpSections(hadesmem::Process const& process,
   for (auto const& s : sections)
   {
     std::wcout << "\n";
+    if (s.IsVirtual())
+    {
+      std::wcout << "\t\tWARNING! Section is virtual.\n";
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
     std::wcout << "\t\tName: " << s.GetName().c_str() << "\n";
     std::wcout << "\t\tVirtualAddress: " << std::hex << s.GetVirtualAddress()
                << std::dec << "\n";

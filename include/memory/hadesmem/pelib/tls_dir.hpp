@@ -207,7 +207,7 @@ inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs)
 inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
@@ -215,7 +215,7 @@ inline std::ostream& operator<<(std::ostream& lhs, TlsDir const& rhs)
 inline std::wostream& operator<<(std::wostream& lhs, TlsDir const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }

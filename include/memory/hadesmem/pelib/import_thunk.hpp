@@ -22,12 +22,6 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextended-offsetof"
-#endif
-
 // TODO: Support setting and writing back ImportThunk. (For IAT hooking.)
 
 namespace hadesmem
@@ -186,7 +180,7 @@ inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs)
 inline std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
@@ -194,12 +188,8 @@ inline std::ostream& operator<<(std::ostream& lhs, ImportThunk const& rhs)
 inline std::wostream& operator<<(std::wostream& lhs, ImportThunk const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
 }
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif

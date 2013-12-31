@@ -30,12 +30,6 @@
 
 // TODO: Support setting and writing back Export. (For EAT hooking.)
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextended-offsetof"
-#endif
-
 namespace hadesmem
 {
 
@@ -330,8 +324,3 @@ inline std::wostream& operator<<(std::wostream& lhs, Export const& rhs)
   return lhs;
 }
 }
-
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif

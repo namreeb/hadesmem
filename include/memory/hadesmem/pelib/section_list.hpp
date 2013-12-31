@@ -52,8 +52,20 @@ public:
     PBYTE base = static_cast<PBYTE>(nt_headers.GetBase()) +
                  offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
                  nt_headers.GetSizeOfOptionalHeader();
-
-    impl_->section_ = Section(process, pe_file, 0, base);
+    void const* const file_end =
+      static_cast<std::uint8_t*>(impl_->pe_file_->GetBase()) +
+      impl_->pe_file_->GetSize();
+    if (impl_->pe_file_->GetType() == PeFileType::Data && base > file_end)
+    {
+      // Virtual section table.
+      // TODO: Support partial overlap (this currently only covers if the entire
+      // table is virtual).
+      impl_->section_ = Section(process, pe_file, 0, Section::VirtualTag());
+    }
+    else
+    {
+      impl_->section_ = Section(process, pe_file, 0, base);
+    }
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
@@ -92,21 +104,35 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
+    // TODO: Track this in the iterator rather than the Section?
     WORD const number = impl_->section_->GetNumber();
 
     NtHeaders const nt_headers(*impl_->process_, *impl_->pe_file_);
-    if (number + 1 >= nt_headers.GetNumberOfSections())
+    if (number + 1U >= nt_headers.GetNumberOfSections())
     {
       impl_.reset();
       return *this;
     }
 
     PIMAGE_SECTION_HEADER new_base =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(impl_->section_->GetBase()) + 1;
-    impl_->section_ = Section(*impl_->process_,
-                              *impl_->pe_file_,
-                              static_cast<WORD>(number + 1),
-                              new_base);
+      reinterpret_cast<PIMAGE_SECTION_HEADER>(impl_->section_->GetBase()) + 1U;
+    void const* const file_end =
+      static_cast<std::uint8_t*>(impl_->pe_file_->GetBase()) +
+      impl_->pe_file_->GetSize();
+    if (impl_->pe_file_->GetType() == PeFileType::Data && ((new_base > file_end) || impl_->section_->IsVirtual()))
+    {
+      // Virtual section table.
+      // TODO: Support partial overlap (this currently only covers if the entire
+      // table is virtual).
+      impl_->section_ = Section(*impl_->process_, *impl_->pe_file_, static_cast<WORD>(number + 1U), Section::VirtualTag());
+    }
+    else
+    {
+      impl_->section_ = Section(*impl_->process_,
+                                *impl_->pe_file_,
+                                static_cast<WORD>(number + 1U),
+                                new_base);
+    }
 
     return *this;
   }

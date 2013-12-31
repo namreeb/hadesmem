@@ -23,12 +23,6 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextended-offsetof"
-#endif
-
 namespace hadesmem
 {
 
@@ -627,7 +621,3 @@ inline ULONG_PTR GetRuntimeBase(Process const& process, PeFile const& pe_file)
   return 0;
 }
 }
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif

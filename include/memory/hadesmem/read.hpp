@@ -157,12 +157,12 @@ inline std::vector<T, Alloc>
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
-  // Need to allocate space for at least one element otherwise
-  // std::vector<T>::data will return nullptr, which will in turn cause an
-  // assertion failure in ReadImpl. We can't just remove the assertion in
-  // ReadImpl either because ReadProcessMemory will fail if passed nullptr as
-  // the output buffer, even if the size is zero.
-  std::vector<T, Alloc> data((std::max)(static_cast<std::size_t>(1U), count));
+  if (!count)
+  {
+    return {};
+  }
+
+  std::vector<T, Alloc> data(count);
   detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
   return data;
 }

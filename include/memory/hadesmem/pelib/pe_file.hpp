@@ -63,6 +63,36 @@
 // TODO: Where possible, document the SHA1 of example files which prompted the
 // addition of corner cases.
 
+// TODO: In some cases we're doing checks in list types, in others we're doing
+// it in the underlying type. Make this more consistent. One one hand it makes
+// sense to do it in the underlying type for some checks, but on the other hand
+// other checks belong more in the list type... Think about things ilke
+// ImportDir virtual term or AOI term and which scenarios make more sense. When
+// users are using the underlying type directly do we want to detect and throw
+// on such tricks, or just let them handle it? Probably best to move all checks
+// to the list type, as it's the higher level API. However, whilst AOI trick
+// might make sense in the list type, handling the virtual trick makes more
+// sense in the underlying type, otherwise basic uses of it could cause a read
+// past the end of the buffer... Consider other scenarios other than imports
+// also...
+
+// TODO: Reduce dependencies various components have on each other (e.g.
+// ImportDir depends on TlsDir for detecting AOI trick, BoundImportDir depends
+// on ImportDir to ensure that we have imports before accessing bound imports,
+// etc.).
+
+// TODO: Perform more bounds checking to ensure we never read off the end of the
+// file etc. Especially when reading strings and other data which we don't know
+// the length of (but even for cases where we do know the length, we're only
+// checking it in very limited scenarios). Perhaps add new "SafeRead" or
+// "ClampedRead" APIs?
+
+// TODO: WE should be far more defensive than we are currently being. Validate
+// things such as whether offsets are within the file, within the expected data
+// dir, higher than an expected address (e.g. NameOffset for bound imports),
+// etc. Even if we can't always bail when we detect an inconsistency, we should
+// at least have some trace logging and the option to warn.
+
 namespace hadesmem
 {
 
@@ -221,7 +251,25 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     // zero, rather than finding the 'true' location in a section.
     if (rva < nt_headers.OptionalHeader.SizeOfHeaders)
     {
-      return base + rva;
+      // Only applies in low alignment, otherwise it's invalid?
+      // TODO: Should we be checking SectionAlignment here also, because the
+      // Corkami wiki implies that low alignment only applies when
+      // SectionAlignment is also lower than its normal lower bound.
+      // TODO: Verify this.
+      if (nt_headers.OptionalHeader.FileAlignment < 200)
+      {
+        return base + rva;
+      }
+      // Also only applies if the RVA is smaller than file alignment?
+      // TODO: Verify this also.
+      else if (rva < nt_headers.OptionalHeader.FileAlignment)
+      {
+        return base + rva;
+      }
+      else
+      {
+        return nullptr;
+      }
     }
 
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
@@ -239,6 +287,20 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       reinterpret_cast<PIMAGE_SECTION_HEADER>(
         ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
         nt_headers.FileHeader.SizeOfOptionalHeader);
+    void const* const file_end = static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
+    // Virtual section table.
+    // TODO: This only handles the case where the entire section table is virtual. Fix this to handle overlapped entries, or only the Nth section becoming virtual.
+    if (ptr_section_header > file_end)
+    {
+      if (rva > pe_file.GetSize())
+      {
+        return nullptr;
+      }
+      else
+      {
+        return base + rva;
+      }
+    }
     IMAGE_SECTION_HEADER section_header =
       Read<IMAGE_SECTION_HEADER>(process, ptr_section_header);
 

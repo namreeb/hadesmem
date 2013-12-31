@@ -34,7 +34,7 @@ public:
 
   Optional(Optional const& other) : t_(), valid_(false)
   {
-    if (other.valid)
+    if (other.valid_)
     {
       Construct(other.Get());
     }

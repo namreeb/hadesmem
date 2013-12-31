@@ -106,6 +106,7 @@ bool g_warned_dynamic = false;
 std::vector<std::wstring> g_all_warned;
 std::wstring g_warned_file_path;
 WarningType g_warned_type = WarningType::kAll;
+std::wstring g_current_file_path;
 
 void HandleWarnings(std::wstring const& path)
 {
@@ -296,7 +297,14 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpImports(process, pe_file);
 
+  DumpBoundImports(process, pe_file);
+
   HandleWarnings(path);
+}
+
+void SetCurrentFilePath(std::wstring const& path)
+{
+  g_current_file_path = path;
 }
 
 void WarnForCurrentFile(WarningType warned_type)
@@ -463,8 +471,13 @@ int main(int /*argc*/, char * /*argv*/ [])
   }
   catch (...)
   {
-    std::cerr << "\nError!\n";
-    std::cerr << boost::current_exception_diagnostic_information() << '\n';
+    std::cerr << "\nError!\n" << boost::current_exception_diagnostic_information() << '\n';
+
+    // TODO: Clean up this hack.
+    if (!g_current_file_path.empty())
+    {
+      std::wcerr << "\nCurrent file: " << g_current_file_path << "\n";
+    }
 
     return 1;
   }

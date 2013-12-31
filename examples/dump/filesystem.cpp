@@ -55,12 +55,14 @@ std::wstring MakeExtendedPath(std::wstring const& path)
 
 void DumpFile(std::wstring const& path)
 {
+  SetCurrentFilePath(path);
+
   std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFileNarrow(
     path, std::ios::in | std::ios::binary | std::ios::ate));
   std::fstream& file = *file_ptr;
   if (!file)
   {
-    std::wcout << "\nFailed to open file (" << path << ").\n";
+    std::wcout << "\nFailed to open file.\n";
     return;
   }
 
@@ -124,6 +126,12 @@ void DumpFile(std::wstring const& path)
   }
 
   DumpPeFile(process, pe_file, path);
+
+  // Zero out the buffer to ensure we don't leave over any memory that could
+  // caus non-deterministic results if we have a bug that causes us to read
+  // outside the file.
+  // TODO: Only do this in debug mode? Try AppVerif instead?
+  std::fill(std::begin(buf), std::end(buf), '0');
 }
 
 void DumpDir(std::wstring const& path)

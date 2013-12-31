@@ -22,24 +22,20 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: Fix the code so this hack can be removed.
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextended-offsetof"
-#endif
-
 namespace hadesmem
 {
 
 class Section
 {
 public:
+  // TODO: Take a pointer rather than number, like all the other APIs?
   explicit Section(Process const& process, PeFile const& pe_file, WORD number)
     : process_(&process),
       pe_file_(&pe_file),
       number_(number),
       base_(nullptr),
-      data_()
+      data_(),
+      is_virtual_(false)
   {
     NtHeaders const nt_headers(process, pe_file);
     if (number >= nt_headers.GetNumberOfSections())
@@ -60,9 +56,16 @@ public:
     UpdateRead();
   }
 
+  // TODO: Should this be adjusted for virtual sections?
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
+  }
+
+  // TODO: Fix this hack.
+  bool IsVirtual() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return is_virtual_;
   }
 
   void UpdateRead()
@@ -209,9 +212,27 @@ private:
       pe_file_(&pe_file),
       number_(number),
       base_(static_cast<PBYTE>(base)),
-      data_()
+      data_(),
+      is_virtual_(false)
   {
     UpdateRead();
+  }
+
+  // Create a fake entry for virtual section table.
+  // TODO: Clean up this hack.
+  struct VirtualTag {};
+  explicit Section(Process const& process,
+    PeFile const& pe_file,
+    WORD number, 
+    VirtualTag /*virtual_tag*/)
+    : process_(&process),
+    pe_file_(&pe_file),
+    number_(number),
+    base_(reinterpret_cast<PBYTE>(&data_)),
+    data_(),
+    is_virtual_(true)
+  {
+    ZeroMemory(&data_, sizeof(data_));
   }
 
   Process const* process_;
@@ -219,6 +240,7 @@ private:
   WORD number_;
   PBYTE base_;
   IMAGE_SECTION_HEADER data_;
+  bool is_virtual_;
 };
 
 inline bool operator==(Section const& lhs, Section const& rhs)
@@ -260,7 +282,7 @@ inline bool operator>=(Section const& lhs, Section const& rhs)
 inline std::ostream& operator<<(std::ostream& lhs, Section const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
@@ -268,12 +290,8 @@ inline std::ostream& operator<<(std::ostream& lhs, Section const& rhs)
 inline std::wostream& operator<<(std::wostream& lhs, Section const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
-  lhs << static_cast<void*>(rhs.GetBase());
+  lhs << rhs.GetBase();
   lhs.imbue(old);
   return lhs;
 }
 }
-
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif
