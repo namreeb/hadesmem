@@ -94,6 +94,13 @@
 
 // TODO: Move as much corner-case logic as possible into PeLib itself.
 
+// TODO: Check and use the value of the data directory sizes?
+
+// TODO: Test under Application Verifier to try and help find bugs where
+// things are virtually terminated or we're reading outside our buffer.
+// Currently we're pushing on an extra zero as a hacky workaround for some
+// scenarios (like a virtually terminated string).
+
 namespace
 {
 
@@ -471,7 +478,8 @@ int main(int /*argc*/, char * /*argv*/ [])
   }
   catch (...)
   {
-    std::cerr << "\nError!\n" << boost::current_exception_diagnostic_information() << '\n';
+    std::cerr << "\nError!\n"
+              << boost::current_exception_diagnostic_information() << '\n';
 
     // TODO: Clean up this hack.
     if (!g_current_file_path.empty())

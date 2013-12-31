@@ -110,10 +110,12 @@ void DumpFile(std::wstring const& path)
 
   hadesmem::Process const process(GetCurrentProcessId());
 
-  hadesmem::PeFile const pe_file(process,
-                                 buf.data(),
-                                 hadesmem::PeFileType::Data,
-                                 static_cast<DWORD>(buf.size()));
+  DWORD const pe_file_size = static_cast<DWORD>(buf.size());
+  // Add an extra null byte to work around virtually terminated strings.
+  // TODO: Fix the actual code properly and remove this hack.
+  buf.push_back('\0');
+  hadesmem::PeFile const pe_file(
+    process, buf.data(), hadesmem::PeFileType::Data, pe_file_size);
 
   try
   {
@@ -131,7 +133,8 @@ void DumpFile(std::wstring const& path)
   // caus non-deterministic results if we have a bug that causes us to read
   // outside the file.
   // TODO: Only do this in debug mode? Try AppVerif instead?
-  std::fill(std::begin(buf), std::end(buf), '0');
+  // TODO: Fix the code so this hack can be removed.
+  std::fill(std::begin(buf), std::end(buf), '\0');
 }
 
 void DumpDir(std::wstring const& path)

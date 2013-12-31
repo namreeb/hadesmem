@@ -200,6 +200,11 @@ void DumpImports(hadesmem::Process const& process,
       // long as they are zero-terminated.
       // TODO: Find a solution to the above case, and perhaps use a vector<char>
       // instead of a string in the cases where the name isn't printable.
+      // TODO: Detect and handle the case where the string is terminated
+      // virtually. Currently we have a hacky workaround where we push an
+      // extra zero onto the end of the buffer, so it should "just work" for
+      // now... But we definitely need to fix this properly. Test virtually
+      // terminated strings with maxsecxp.exe from the Corkami PE corpus.
       std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
     }
     catch (std::exception const& /*e*/)
