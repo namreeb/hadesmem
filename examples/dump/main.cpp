@@ -65,8 +65,6 @@
 // TODO: Investigate places where we have a try/catch because it's probably a
 // hack rather then the 'correct' solution. Fix or document all cases.
 
-// TODO: Split this tool up into multiple source files (more).
-
 // TODO: Improve this tool against edge cases like those in the Corkami PE
 // corpus. First step is to check each trick and document it if it's already
 // handled, or add a note if it's not yet handled. Also add documentation for
@@ -89,6 +87,8 @@
 
 // TODO: Dump all TimeDateStamp as actual time-stamps.
 
+// TODO: Warn for unusual time stamps.
+
 // TODO: Support ommiting output for warnings which are not of the specified
 // warning type.
 
@@ -101,19 +101,14 @@
 // Currently we're pushing on an extra zero as a hacky workaround for some
 // scenarios (like a virtually terminated string).
 
-// TODO: Handle "Dual PE Header" trick from ReversingLabs (example binary
-// available as foldedhdr.exe in Corkami PE corpus).
-
-// TODO: Handle imports_relocw7.exe from Corkami PE corpus.
-
-// TODO: Handle imports_virtdesc.exe from Corkami PE corpus.
-
-// TODO: Handle lfanew_relocw7.exe from Corkami PE corpus.
-
-// TODO: Handle nullSOH-XP.exe from Corkami PE corpus.
+// TODO: Handle all tricks and samples from the Corkami PE corpus and the
+// Undocumented PECOFF whitepaper by ReversingLabs.
 
 // TODO: Add warnings for cases like import virtual terminator etc that are
 // currently being detected and swallowed entirely in PeLib.
+
+// TODO: Refactor out the warning code to operate separately from the dumping
+// code where possible, without sacrificing too much performance.
 
 namespace
 {

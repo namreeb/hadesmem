@@ -183,7 +183,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   if (nt_hdrs.GetImageBase() > 0x80000000UL &&
       nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386)
   {
-    std::wcout << "\t\tWARNING! Detected zero ImageBase.\n";
+    std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // ImageBase must be a multiple of 0x10000
@@ -193,12 +193,36 @@ void DumpNtHeaders(hadesmem::Process const& process,
                   "0x10000).\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  // TODO: Detect unusual alignments.
   std::wcout << "\t\tSectionAlignment: " << std::hex
              << nt_hdrs.GetSectionAlignment() << std::dec << "\n";
-  // TODO: Detect unusual alignments.
+  // Sample: bigalign.exe (Corkami PE corpus).
+  // Sample: nosection*.exe (Corkami PE corpus).
+  if (nt_hdrs.GetSectionAlignment() < 0x200 ||
+      nt_hdrs.GetSectionAlignment() > 0x1000)
+  {
+    std::wcout << "\t\tWARNING! Unusual section alignment.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
   std::wcout << "\t\tFileAlignment: " << std::hex << nt_hdrs.GetFileAlignment()
              << std::dec << "\n";
+  // Sample: bigalign.exe (Corkami PE corpus).
+  // Sample: nosection*.exe (Corkami PE corpus).
+  if (nt_hdrs.GetFileAlignment() < 0x200 || nt_hdrs.GetFileAlignment() > 0x1000)
+  {
+    std::wcout << "\t\tWARNING! Unusual file alignment.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  if (nt_hdrs.GetSectionAlignment() < 0x800 &&
+      nt_hdrs.GetSectionAlignment() != nt_hdrs.GetFileAlignment())
+  {
+    std::wcout << "\t\tWARNING! Invalid alignment.\n";
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
+  if (nt_hdrs.GetFileAlignment() > nt_hdrs.GetSectionAlignment())
+  {
+    std::wcout << "\t\tWARNING! Invalid alignment.\n";
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
   std::wcout << "\t\tMajorOperatingSystemVersion: "
              << nt_hdrs.GetMajorOperatingSystemVersion() << "\n";
   std::wcout << "\t\tMinorOperatingSystemVersion: "
@@ -211,6 +235,13 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << nt_hdrs.GetMajorSubsystemVersion() << "\n";
   std::wcout << "\t\tMinorSubsystemVersion: "
              << nt_hdrs.GetMinorSubsystemVersion() << "\n";
+  if (nt_hdrs.GetMajorSubsystemVersion() < 3 ||
+      (nt_hdrs.GetMajorSubsystemVersion() == 3 &&
+       nt_hdrs.GetMinorSubsystemVersion() < 10))
+  {
+    std::wcout << "\t\tWARNING! Invalid subsystem version.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
   std::wcout << "\t\tWin32VersionValue: " << nt_hdrs.GetWin32VersionValue()
              << "\n";
   std::wcout << "\t\tSizeOfImage: " << std::hex << nt_hdrs.GetSizeOfImage()

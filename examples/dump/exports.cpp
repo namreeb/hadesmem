@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <memory>
+#include <set>
 
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/export.hpp>
@@ -14,9 +15,6 @@
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
-
-// TODO: Detect multiple exports with the same name (used as part of import hint
-// trick).
 
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
@@ -44,15 +42,24 @@ void DumpExports(hadesmem::Process const& process,
              << export_dir->GetMinorVersion() << std::dec << "\n";
   std::wcout << "\t\tName (Raw): " << std::hex << export_dir->GetNameRaw()
              << std::dec << "\n";
-  // Name is not guaranteed to be valid.
+  // Name is not guaranteed to be valid?
+  // TODO: Find a sample for this before relaxing the warining back to
+  // kSuspicious.
   try
   {
+    // Export dir name does not need to consist of only printable characters, as
+    // long as it is zero-terminated.
+    // Sample: dllweirdexp.dll
+    // TODO: Find a solution to the above case, and perhaps use a vector<char>
+    // instead of a string in the cases where the name isn't printable.
+    // TODO: Detect and handle the case where the string is terminated
+    // virtually.
     std::wcout << "\t\tName: " << export_dir->GetName().c_str() << "\n";
   }
   catch (std::exception const& /*e*/)
   {
     std::wcout << "\t\tWARNING! Name is invalid.\n";
-    WarnForCurrentFile(WarningType::kSuspicious);
+    WarnForCurrentFile(WarningType::kUnsupported);
   }
   std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
              << std::dec << "\n";
@@ -69,6 +76,8 @@ void DumpExports(hadesmem::Process const& process,
 
   std::wcout << "\n\tExports:\n";
 
+  std::set<std::string> export_names;
+
   hadesmem::ExportList exports(process, pe_file);
   for (auto const& e : exports)
   {
@@ -76,9 +85,27 @@ void DumpExports(hadesmem::Process const& process,
     std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
     std::wcout << "\t\tVA: " << hadesmem::detail::PtrToHexString(e.GetVa())
                << "\n";
+
     if (e.ByName())
     {
+      // Export names do not need to consist of only printable characters, as
+      // long as they are zero-terminated.
+      // Sample: dllweirdexp.dll
+      // TODO: Find a solution to the above case, and perhaps use a vector<char>
+      // instead of a string in the cases where the name isn't printable.
+      // TODO: Detect and handle the case where the string is terminated
+      // virtually.
       std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
+      // PE files can have duplicate exported function names (or even have them
+      // all identical) because the import hint is used to check the name first
+      // before performing a search.
+      // Sample: None ("Import name hint" section of "Undocumented PECOFF"
+      // whitepaper).
+      if (!export_names.insert(e.GetName()).second)
+      {
+        std::wcout << "\t\tWARNING! Detected duplicate export name.\n";
+        WarnForCurrentFile(WarningType::kSuspicious);
+      }
     }
     else if (e.ByOrdinal())
     {
@@ -90,6 +117,7 @@ void DumpExports(hadesmem::Process const& process,
       std::wcout << "\t\tWARNING! Entry not exported by name or ordinal.\n";
       WarnForCurrentFile(WarningType::kUnsupported);
     }
+
     if (e.IsForwarded())
     {
       std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";

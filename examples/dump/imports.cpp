@@ -24,10 +24,6 @@
 // "Import name table" and "Import name hint" in ReversingLabs "Undocumented
 // PECOFF" whitepaper for more information.
 
-// TODO: Detect and handle cases where an import descriptor has a virtual
-// terminator. See imports_vterm.exe from Corkami or "Import directory layout"
-// in ReversingLabs "Undocumented PECOFF" whitepaper for more information.
-
 // TODO: Support old style bound imports and bound forwarded imports.
 
 // TODO: Are any fixes needed to properly support in-memory images, rather than
@@ -115,6 +111,13 @@ void DumpImports(hadesmem::Process const& process,
   {
     std::wcout << "\n";
 
+    if (dir.IsVirtualTerminated())
+    {
+      std::wcout << "\t\tWARNING! Detected virtual termination trick.\n";
+      WarnForCurrentFile(WarningType::kSuspicious);
+      break;
+    }
+
     if (dir.IsTlsAoiTerminated())
     {
       std::wcout << "\t\tWARNING! Detected TLS AOI trick! Assuming a Windows 7 "
@@ -130,9 +133,6 @@ void DumpImports(hadesmem::Process const& process,
     hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
-    // TODO: Is it possible to have an empty but valid ILT? Woulnd't that mean
-    // the IAT would also need to be empty? Is that (ILT with no thunks) even
-    // allowed? IAT with no thunks means it's skipped...
 
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
@@ -201,10 +201,8 @@ void DumpImports(hadesmem::Process const& process,
       // TODO: Find a solution to the above case, and perhaps use a vector<char>
       // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
-      // virtually. Currently we have a hacky workaround where we push an
-      // extra zero onto the end of the buffer, so it should "just work" for
-      // now... But we definitely need to fix this properly. Test virtually
-      // terminated strings with maxsecxp.exe from the Corkami PE corpus.
+      // virtually.
+      // Sample: maxsecxp.exe (Corkami PE Corpus).
       std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
     }
     catch (std::exception const& /*e*/)
@@ -223,10 +221,17 @@ void DumpImports(hadesmem::Process const& process,
     {
       // Has to be the ILT if we get here because we did a check for an
       // empty/invalid IAT earlier on.
-      std::wcout << "\n\t\tWARNING! ILT is "
-                 << (ilt_valid ? "empty" : "invalid") << ".\n";
 
-      WarnForCurrentFile(WarningType::kSuspicious);
+      if (!ilt_valid)
+      {
+        std::wcout << "\n\t\tWARNING! ILT is invalid.\n";
+        WarnForCurrentFile(WarningType::kSuspicious);
+      }
+      else
+      {
+        std::wcout << "\n\t\tWARNING! ILT is empty.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
     }
     else
     {

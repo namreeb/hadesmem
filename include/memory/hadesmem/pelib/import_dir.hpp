@@ -63,17 +63,6 @@ public:
       }
     }
 
-    // TODO: Fix this for cases where a virtual descriptor is 'real', rather
-    // than just used as a terminator. See imports_virtdesc.exe from the Corkami
-    // PE corpus for an example.
-    if (pe_file.GetType() == PeFileType::Data &&
-        (base_ + sizeof(PIMAGE_IMPORT_DESCRIPTOR)) >
-          static_cast<PBYTE>(pe_file.GetBase()) + pe_file.GetSize())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Import directory is virtual."));
-    }
-
     UpdateRead();
   }
 
@@ -92,9 +81,29 @@ public:
     Write(*process_, base_, data_);
   }
 
+  // Check for virtual termination trick.
   // TODO: Think about what the best way to solve this is... Currently we're
   // forcing the user to thunk about it, which may not be ideal.
+  bool IsVirtualTerminated() const
+  {
+    // It's possible for the last entry to be in virtual space, because it only
+    // needs to have its Name or FirstThunk null.
+    // Sample: imports_virtdesc.exe from the Corkami PE corpus for an example.
+    // TODO: Fix this for cases where a virtual descriptor is 'real', rather
+    // than just used as a terminator.
+    if (pe_file_->GetType() == PeFileType::Data &&
+        (base_ + sizeof(IMAGE_IMPORT_DESCRIPTOR)) >=
+          static_cast<PBYTE>(pe_file_->GetBase()) + pe_file_->GetSize())
+    {
+      return true;
+    }
+
+    return false;
+  }
+
   // Check for TLS AOI trick.
+  // TODO: Think about what the best way to solve this is... Currently we're
+  // forcing the user to thunk about it, which may not be ideal.
   bool IsTlsAoiTerminated() const
   {
     try

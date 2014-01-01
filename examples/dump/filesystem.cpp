@@ -27,8 +27,6 @@ std::wstring MakeExtendedPath(std::wstring const& path)
 {
   if (path.compare(0, 2, L"\\\\"))
   {
-    // TODO: Fix this for paths longer than MAX_PATH. IsPathRelative and
-    // CombinePath both use APIs which are limited to MAX_PATH.
     if (hadesmem::detail::IsPathRelative(path))
     {
       return MakeExtendedPath(hadesmem::detail::CombinePath(
@@ -110,12 +108,10 @@ void DumpFile(std::wstring const& path)
 
   hadesmem::Process const process(GetCurrentProcessId());
 
-  DWORD const pe_file_size = static_cast<DWORD>(buf.size());
-  // Add an extra null byte to work around virtually terminated strings.
-  // TODO: Fix the actual code properly and remove this hack.
-  buf.push_back('\0');
-  hadesmem::PeFile const pe_file(
-    process, buf.data(), hadesmem::PeFileType::Data, pe_file_size);
+  hadesmem::PeFile const pe_file(process,
+                                 buf.data(),
+                                 hadesmem::PeFileType::Data,
+                                 static_cast<DWORD>(buf.size()));
 
   try
   {
@@ -128,13 +124,6 @@ void DumpFile(std::wstring const& path)
   }
 
   DumpPeFile(process, pe_file, path);
-
-  // Zero out the buffer to ensure we don't leave over any memory that could
-  // caus non-deterministic results if we have a bug that causes us to read
-  // outside the file.
-  // TODO: Only do this in debug mode? Try AppVerif instead?
-  // TODO: Fix the code so this hack can be removed.
-  std::fill(std::begin(buf), std::end(buf), '\0');
 }
 
 void DumpDir(std::wstring const& path)
