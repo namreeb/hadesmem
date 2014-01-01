@@ -88,7 +88,7 @@ void DumpFile(std::wstring const& path)
   }
 
   // Check for MZ signature
-  if (mz_buf[0] != 'M' && mz_buf[1] != 'Z')
+  if (mz_buf[0] != 'M' || mz_buf[1] != 'Z')
   {
     std::wcout << "\nNot a PE file (Pass 1).\n";
     return;
