@@ -23,7 +23,7 @@
 namespace hadesmem
 {
 
-// ImportDirIterator satisfies the requirements of an input iterator
+// BoundImportDirIterator satisfies the requirements of an input iterator
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 template <typename BoundImportDirT>
 class BoundImportDirIterator
@@ -71,7 +71,7 @@ public:
   BoundImportDirIterator& operator=(BoundImportDirIterator const&) = default;
 
   BoundImportDirIterator(BoundImportDirIterator&& other)
-HADESMEM_DETAIL_NOEXCEPT:
+    HADESMEM_DETAIL_NOEXCEPT:
   impl_(std::move(other.impl_))
   {
   }
@@ -151,11 +151,9 @@ private:
   bool IsTerminator() const
   {
     // Apparently all three fields are supposed to be zero, but it seems that
-    // may not be the case when it comes to the actual loader implementation.
-    // TODO: Use 00030855940c3b6c50789d203a9ba01d8d4cc0dc to verify this (will
-    // require patching a module that's loaded so that the corrupted timestamp
-    // matches).
+    // may not be the case when it comes to the actual loader implementation?
     // TODO: Verify this is correct.
+    // Sample: 00030855940c3b6c50789d203a9ba01d8d4cc0dc
     return !impl_->bound_import_dir_->GetTimeDateStamp() ||
            !impl_->bound_import_dir_->GetOffsetModuleName();
   }

@@ -11,6 +11,8 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
+#include "main.hpp"
+
 // TODO: Detect when the file has a writable PE header (both methods). See
 // "Writable PE header" in the ReversingLabs "Undocumented PECOFF" whitepaper.
 
@@ -61,6 +63,18 @@ void DumpDosHeader(hadesmem::Process const& process,
   for (auto const r : reserved_words_1)
   {
     std::wcout << L' ' << r;
+  }
+  // ReservedWords1 is officially defined as reserved and should be null.
+  // However, if non-null it overrides OS version values in the PEB after
+  // loading.
+  // Sample: winver.exe (Corkami PE Corpus)
+  if (std::find_if(std::begin(reserved_words_1),
+                   std::end(reserved_words_1),
+                   [](WORD w)
+  { return !!w; }) != std::end(reserved_words_1))
+  {
+    std::wcout << "\t\tWARNING! Detected non-zero data in ReservedWords1.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   std::wcout << std::dec << "\n";
   std::wcout << "\t\tOEMID: " << std::hex << dos_hdr.GetOEMID() << std::dec
@@ -123,26 +137,62 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << nt_hdrs.GetSizeOfInitializedData() << std::dec << "\n";
   std::wcout << "\t\tSizeOfUninitializedData: " << std::hex
              << nt_hdrs.GetSizeOfUninitializedData() << std::dec << "\n";
-  // TODO: Detect a zero EP or an EP outside of the file (i.e. pointing to
-  // another non-relocated module). Zero EP should only cause a warning if the
-  // file is not a DLL, because for DLLs it simply means that DllMain is not
-  // called, but for EXEs it causes execution to start at the 'MZ'. See
-  // "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF" for more
-  // inforamtion.
+  // TODO: Detect EP outside of the file (i.e. pointing to another non-relocated
+  // module). See "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF"
+  // for more inforamtion. Also see AddressOfEntryPoint in Corkami PE info.
   // TODO: For valid EPs inside the file, dump the section that it is in, and
   // also disassemble the first N instructions (for some reasonable value of N).
+  // TODO: Detect virtual overlap EP. (Sample: virtEP.exe from Corkami)
   std::wcout << "\t\tAddressOfEntryPoint: " << std::hex
              << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
+  // Entry point can be null. For DLLs this is fine, because it simply means the
+  // EP is not called, but for non-DLLs it means that execution starts at
+  // ImageBase, executing 'MZ' as 'dec ebp/pop edx'.
+  // Sample: nullEP.exe (Corkami PE Corpus).
+  if (!nt_hdrs.GetAddressOfEntryPoint() &&
+      !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
+  {
+    std::wcout << "\t\tWARNING! Detected zero EP in non-DLL PE.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  if (!RvaToVa(process, pe_file, nt_hdrs.GetAddressOfEntryPoint()))
+  {
+    std::wcout << "\t\tWARNING! Unable to resolve EP to file offset.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
   std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode()
              << std::dec << "\n";
 #if defined(HADESMEM_DETAIL_ARCH_X86)
   std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData()
              << std::dec << "\n";
 #endif
-  // TODO: Detect strange ImageBase values (PECOFF spec says must be a
-  // multiplier of 65k, but loader doesn't care and allows you to use NULL).
   std::wcout << "\t\tImageBase: " << std::hex << nt_hdrs.GetImageBase()
              << std::dec << "\n";
+  // ImageBase can be null under XP. In this case the binary is relocated to
+  // 0x10000.
+  // Sample: ibnullXP.exe (Corkami PE corpus).
+  if (!nt_hdrs.GetImageBase())
+  {
+    std::wcout << "\t\tWARNING! Detected zero ImageBase.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  // If ImageBase is in the kernel address range it's relocated to 0x1000.
+  // Sample: ibkernel.exe (Corkami PE corpus).
+  // TODO: Check whether this also occurs under x64, and add an equivalent check
+  // if applicable.
+  if (nt_hdrs.GetImageBase() > 0x80000000UL &&
+      nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386)
+  {
+    std::wcout << "\t\tWARNING! Detected zero ImageBase.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  // ImageBase must be a multiple of 0x10000
+  if (!!(nt_hdrs.GetImageBase() & 0xFFFF))
+  {
+    std::wcout << "\t\tWARNING! Detected invalid ImageBase (not a multiple of "
+                  "0x10000).\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
   // TODO: Detect unusual alignments.
   std::wcout << "\t\tSectionAlignment: " << std::hex
              << nt_hdrs.GetSectionAlignment() << std::dec << "\n";
