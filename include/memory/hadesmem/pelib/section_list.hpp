@@ -43,29 +43,15 @@ public:
     : impl_(std::make_shared<Impl>(process, pe_file))
   {
     NtHeaders const nt_headers(process, pe_file);
-    if (!nt_headers.GetNumberOfSections())
+    impl_->num_sections_ = nt_headers.GetNumberOfSections();
+    if (!impl_->num_sections_)
     {
       impl_.reset();
       return;
     }
 
-    PBYTE base = static_cast<PBYTE>(nt_headers.GetBase()) +
-                 offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-                 nt_headers.GetSizeOfOptionalHeader();
-    void const* const file_end =
-      static_cast<std::uint8_t*>(impl_->pe_file_->GetBase()) +
-      impl_->pe_file_->GetSize();
-    if (impl_->pe_file_->GetType() == PeFileType::Data && base > file_end)
-    {
-      // Virtual section table.
-      // TODO: Support partial overlap (this currently only covers if the entire
-      // table is virtual).
-      impl_->section_ = Section(process, pe_file, 0, Section::VirtualTag());
-    }
-    else
-    {
-      impl_->section_ = Section(process, pe_file, 0, base);
-    }
+    impl_->section_ = Section(process, pe_file, nullptr);
+    impl_->cur_section_ = 0U;
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
@@ -104,11 +90,9 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
-    // TODO: Track this in the iterator rather than the Section?
-    WORD const number = impl_->section_->GetNumber();
-
-    NtHeaders const nt_headers(*impl_->process_, *impl_->pe_file_);
-    if (number + 1U >= nt_headers.GetNumberOfSections())
+    // TODO: Handle overflow here for cases where we have the maximum number of
+    // sections?
+    if (++impl_->cur_section_ >= impl_->num_sections_)
     {
       impl_.reset();
       return *this;
@@ -116,23 +100,7 @@ public:
 
     PIMAGE_SECTION_HEADER new_base =
       reinterpret_cast<PIMAGE_SECTION_HEADER>(impl_->section_->GetBase()) + 1U;
-    void const* const file_end =
-      static_cast<std::uint8_t*>(impl_->pe_file_->GetBase()) +
-      impl_->pe_file_->GetSize();
-    if (impl_->pe_file_->GetType() == PeFileType::Data && ((new_base > file_end) || impl_->section_->IsVirtual()))
-    {
-      // Virtual section table.
-      // TODO: Support partial overlap (this currently only covers if the entire
-      // table is virtual).
-      impl_->section_ = Section(*impl_->process_, *impl_->pe_file_, static_cast<WORD>(number + 1U), Section::VirtualTag());
-    }
-    else
-    {
-      impl_->section_ = Section(*impl_->process_,
-                                *impl_->pe_file_,
-                                static_cast<WORD>(number + 1U),
-                                new_base);
-    }
+    impl_->section_ = Section(*impl_->process_, *impl_->pe_file_, new_base);
 
     return *this;
   }
@@ -168,6 +136,8 @@ private:
     Process const* process_;
     PeFile const* pe_file_;
     hadesmem::detail::Optional<Section> section_;
+    WORD num_sections_;
+    WORD cur_section_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as

@@ -97,6 +97,7 @@ namespace hadesmem
 {
 
 // TODO: Investigate whether there is a better way to implement this.
+// TODO: Rename with 'k' prefix?
 enum class PeFileType
 {
   Image,
@@ -295,10 +296,8 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // Virtual section table.
-    // TODO: This only handles the case where the entire section table is
-    // virtual. Fix this to handle overlapped entries, or only the Nth section
-    // becoming virtual.
-    if (ptr_section_header > file_end)
+    // TODO: Fix this to handle overlap.
+    if (ptr_section_header >= file_end)
     {
       if (rva > pe_file.GetSize())
       {
@@ -309,12 +308,25 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         return base + rva;
       }
     }
-    IMAGE_SECTION_HEADER section_header =
-      Read<IMAGE_SECTION_HEADER>(process, ptr_section_header);
 
     bool in_header = true;
     for (WORD i = 0; i < num_sections; ++i)
     {
+      // For a virtual section header, simply return nullptr. (Similar to above,
+      // except this time only the Nth entry onwards is virtual, rather than all
+      // the headers.)
+      // TODO: Handle overlap.
+      // TODO: Verify whether this is correct. Should we perhaps be doing more
+      // than just returning nullptr here?
+      // Sample: 00027f2aa26a1a1ae61e344b70fb2797765b1266
+      if (ptr_section_header + 1 > file_end)
+      {
+        return nullptr;
+      }
+
+      auto const section_header =
+        Read<IMAGE_SECTION_HEADER>(process, ptr_section_header);
+
       DWORD const virtual_beg = section_header.VirtualAddress;
       DWORD const virtual_size = section_header.Misc.VirtualSize;
       DWORD const raw_size = section_header.SizeOfRawData;
@@ -365,8 +377,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         in_header = false;
       }
 
-      section_header =
-        Read<IMAGE_SECTION_HEADER>(process, ++ptr_section_header);
+      ++ptr_section_header;
     }
 
     // Doing the same thing as in the SizeOfHeaders check above because we're

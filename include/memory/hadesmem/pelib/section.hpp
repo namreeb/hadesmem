@@ -28,32 +28,44 @@ namespace hadesmem
 class Section
 {
 public:
-  // TODO: Take a pointer rather than number, like all the other APIs?
-  explicit Section(Process const& process, PeFile const& pe_file, WORD number)
+  explicit Section(Process const& process,
+                   PeFile const& pe_file,
+                   PVOID base)
     : process_(&process),
       pe_file_(&pe_file),
-      number_(number),
-      base_(nullptr),
+      base_(static_cast<PBYTE>(base)),
       data_(),
       is_virtual_(false)
   {
-    NtHeaders const nt_headers(process, pe_file);
-    if (number >= nt_headers.GetNumberOfSections())
+    if (base_ == nullptr)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Invalid section number."));
+      NtHeaders const nt_headers(process, pe_file);
+      if (!nt_headers.GetNumberOfSections())
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("Image nas no sections."));
+      }
+
+      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
+              offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
+              nt_headers.GetSizeOfOptionalHeader();
     }
 
-    PIMAGE_SECTION_HEADER section_header =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(
-        static_cast<PBYTE>(nt_headers.GetBase()) +
-        offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-        nt_headers.GetSizeOfOptionalHeader()) +
-      number;
-
-    base_ = reinterpret_cast<PBYTE>(section_header);
-
-    UpdateRead();
+    // TODO: Support partial overlap.
+    // Sample: 00027f2aa26a1a1ae61e344b70fb2797765b1266
+    void const* const file_end =
+      static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
+    void const* const section_hdr_next =
+      reinterpret_cast<PIMAGE_SECTION_HEADER>(base_) + 1;
+    if (pe_file.GetType() == PeFileType::Data && section_hdr_next > file_end)
+    {
+      is_virtual_ = true;
+      ::ZeroMemory(&data_, sizeof(data_));
+    }
+    else
+    {
+      UpdateRead();
+    }
   }
 
   // TODO: Should this be adjusted for virtual sections?
@@ -76,11 +88,6 @@ public:
   void UpdateWrite()
   {
     Write(*process_, base_, data_);
-  }
-
-  WORD GetNumber() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return number_;
   }
 
   std::string GetName() const
@@ -204,40 +211,8 @@ public:
 private:
   template <typename SectionT> friend class SectionIterator;
 
-  explicit Section(Process const& process,
-                   PeFile const& pe_file,
-                   WORD number,
-                   PVOID base)
-    : process_(&process),
-      pe_file_(&pe_file),
-      number_(number),
-      base_(static_cast<PBYTE>(base)),
-      data_(),
-      is_virtual_(false)
-  {
-    UpdateRead();
-  }
-
-  // Create a fake entry for virtual section table.
-  // TODO: Clean up this hack.
-  struct VirtualTag {};
-  explicit Section(Process const& process,
-    PeFile const& pe_file,
-    WORD number, 
-    VirtualTag /*virtual_tag*/)
-    : process_(&process),
-    pe_file_(&pe_file),
-    number_(number),
-    base_(reinterpret_cast<PBYTE>(&data_)),
-    data_(),
-    is_virtual_(true)
-  {
-    ZeroMemory(&data_, sizeof(data_));
-  }
-
   Process const* process_;
   PeFile const* pe_file_;
-  WORD number_;
   PBYTE base_;
   IMAGE_SECTION_HEADER data_;
   bool is_virtual_;

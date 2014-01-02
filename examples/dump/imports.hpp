@@ -11,7 +11,9 @@ class PeFile;
 }
 
 void DumpImports(hadesmem::Process const& process,
-                 hadesmem::PeFile const& pe_file);
+                 hadesmem::PeFile const& pe_file,
+                 bool& has_new_bound_imports_any);
 
 void DumpBoundImports(hadesmem::Process const& process,
-                      hadesmem::PeFile const& pe_file);
+                      hadesmem::PeFile const& pe_file,
+                      bool has_new_bound_imports_any);

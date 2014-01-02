@@ -91,8 +91,10 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 }
 }
 
+// TODO: Fix the code so the bound import out-param is not necessary.
 void DumpImports(hadesmem::Process const& process,
-                 hadesmem::PeFile const& pe_file)
+                 hadesmem::PeFile const& pe_file,
+                 bool& has_new_bound_imports_any)
 {
   hadesmem::ImportDirList import_dirs(process, pe_file);
 
@@ -102,8 +104,13 @@ void DumpImports(hadesmem::Process const& process,
   }
   else
   {
+    // Currently set to Unsupported rather than Suspicious in order to more
+    // quickly identify files with broken RVA resolution (because broken RVA
+    // resolution is far more common than actual files with no imports, and even
+    // in the case of files with no imports they're typically interesting for
+    // other reasons anyway).
     std::wcout << "\n\tWARNING! Empty or invalid import directory.\n";
-    WarnForCurrentFile(WarningType::kSuspicious);
+    WarnForCurrentFile(WarningType::kUnsupported);
   }
 
   std::uint32_t num_import_dirs = 0U;
@@ -165,7 +172,13 @@ void DumpImports(hadesmem::Process const& process,
     DWORD const time_date_stamp = dir.GetTimeDateStamp();
     std::wcout << "\t\tTimeDateStamp: " << std::hex << time_date_stamp
                << std::dec << "\n";
-    if (time_date_stamp == static_cast<DWORD>(-1))
+    bool has_new_bound_imports = (time_date_stamp == static_cast<DWORD>(-1));
+    if (has_new_bound_imports)
+    {
+      has_new_bound_imports_any = true;
+    }
+    bool has_old_bound_imports = (!has_new_bound_imports && time_date_stamp);
+    if (has_new_bound_imports)
     {
       // Don't just check whether the ILT is invalid, but also ensure that
       // there's a valid bound import dir. In the case where the bound import
@@ -186,11 +199,54 @@ void DumpImports(hadesmem::Process const& process,
     DWORD const forwarder_chain = dir.GetForwarderChain();
     std::wcout << "\t\tForwarderChain: " << std::hex << forwarder_chain
                << std::dec << "\n";
+    if (forwarder_chain == static_cast<DWORD>(-1))
+    {
+      if (has_old_bound_imports)
+      {
+        // Not sure how common this is or if it's even allowed. I think it
+        // probably just gets ignored by the loader, but mark as unsupported to
+        // identify potential samples just in case.
+        std::wcout << "\t\tWARNING! Detected new style forwarder chain with no "
+                      "new style bound imports. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
+
+      if (!time_date_stamp)
+      {
+        // Not sure how common this is or if it's even allowed. I think it
+        // probably just gets ignored by the loader, but mark as unsupported to
+        // identify potential samples just in case.
+        std::wcout << "\t\tWARNING! Detected new style forwarder chain with no "
+                      "bound imports. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
+    }
     if (forwarder_chain != 0 && forwarder_chain != static_cast<DWORD>(-1))
     {
-      std::wcout << "\t\tWARNING! Detected old style forwarder chain. "
-                    "Currently unhandled.\n";
-      WarnForCurrentFile(WarningType::kUnsupported);
+      if (has_new_bound_imports)
+      {
+        // Not sure how common this is or if it's even allowed. I think it
+        // probably just gets ignored by the loader, but mark as unsupported to
+        // identify potential samples just in case.
+        std::wcout << "\t\tWARNING! Detected old style forwarder chain with "
+                      "new bound imports. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
+      else if (has_old_bound_imports)
+      {
+        std::wcout << "\t\tWARNING! Detected old style forwarder chain with "
+                      "old bound imports. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
+      else
+      {
+        // Not sure how common this is or if it's even allowed. I think it
+        // probably just gets ignored by the loader, but mark as unsupported to
+        // identify potential samples just in case.
+        std::wcout << "\t\tWARNING! Detected old style forwarder chain with no "
+                      "bound imports. Currently unhandled.\n";
+        WarnForCurrentFile(WarningType::kUnsupported);
+      }
     }
     std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec
                << "\n";
@@ -319,17 +375,33 @@ void DumpImports(hadesmem::Process const& process,
 }
 
 void DumpBoundImports(hadesmem::Process const& process,
-                      hadesmem::PeFile const& pe_file)
+                      hadesmem::PeFile const& pe_file,
+                      bool has_new_bound_imports_any)
 {
   // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
   if (!HasBoundImportDir(process, pe_file))
   {
+    // Not sure if this is allowed or not. Mark as unsupported in order to
+    // quickly identify potential samples.
+    if (has_new_bound_imports_any)
+    {
+      std::wcout << "\n\tWARNING! No bound import directory on file with an "
+                    "import dir indicating the presence of a bound import "
+                    "dir.\n";
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
+
     return;
   }
 
-  // TODO: Only attempt to read the bound import dir if the module actually has
-  // bound imports? Is this necessary anymore nwo that we've worked around the
-  // RVA resolution problem?
+  // Sample: 0006a1bb7043c1d2a7c475b69f39cfb6c1044151
+  if (!has_new_bound_imports_any)
+  {
+    std::wcout << "\n\tWARNING! Seemingly valid bound import directory on file "
+                  "with an import dir indicating no new bound import dir.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+    return;
+  }
 
   hadesmem::BoundImportDirList bound_import_dirs(process, pe_file);
 

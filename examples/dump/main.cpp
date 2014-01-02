@@ -311,9 +311,13 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpExports(process, pe_file);
 
-  DumpImports(process, pe_file);
+  // TODO: Fix the app/library so this is no longer necessary... Should the
+  // bound import dumper simply perform an extra validation pass on the import
+  // dir? What about perf? Needs more investigation.
+  bool has_new_bound_imports_any = false;
+  DumpImports(process, pe_file, has_new_bound_imports_any);
 
-  DumpBoundImports(process, pe_file);
+  DumpBoundImports(process, pe_file, has_new_bound_imports_any);
 
   HandleWarnings(path);
 }

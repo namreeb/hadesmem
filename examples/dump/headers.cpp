@@ -64,6 +64,7 @@ void DumpDosHeader(hadesmem::Process const& process,
   {
     std::wcout << L' ' << r;
   }
+  std::wcout << std::dec << "\n";
   // ReservedWords1 is officially defined as reserved and should be null.
   // However, if non-null it overrides OS version values in the PEB after
   // loading.
@@ -76,7 +77,6 @@ void DumpDosHeader(hadesmem::Process const& process,
     std::wcout << "\t\tWARNING! Detected non-zero data in ReservedWords1.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  std::wcout << std::dec << "\n";
   std::wcout << "\t\tOEMID: " << std::hex << dos_hdr.GetOEMID() << std::dec
              << "\n";
   std::wcout << "\t\tOEMInfo: " << std::hex << dos_hdr.GetOEMInfo() << std::dec
@@ -149,6 +149,9 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // EP is not called, but for non-DLLs it means that execution starts at
   // ImageBase, executing 'MZ' as 'dec ebp/pop edx'.
   // Sample: nullEP.exe (Corkami PE Corpus).
+  // The EP can also be null in the case where it is 'patched' via TLS, but this
+  // applies to all cases not just when the EP is null (it's just more likely in
+  // the case where it's null).
   if (!nt_hdrs.GetAddressOfEntryPoint() &&
       !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {

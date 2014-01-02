@@ -31,7 +31,7 @@ void TestSection()
 
   BOOST_TEST(nt_headers_1.GetNumberOfSections() >= 1);
 
-  hadesmem::Section section_1(process, pe_file_1, 0);
+  hadesmem::Section section_1(process, pe_file_1, nullptr);
 
   hadesmem::Section section_2(section_1);
   BOOST_TEST_EQ(section_1, section_2);
@@ -53,7 +53,7 @@ void TestSection()
     // TODO: Better tests.
     hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
     BOOST_TEST(cur_nt_headers.GetNumberOfSections() >= 1);
-    hadesmem::Section cur_section(process, cur_pe_file, 0);
+    hadesmem::Section cur_section(process, cur_pe_file, nullptr);
 
     auto const section_header_raw =
       hadesmem::Read<IMAGE_SECTION_HEADER>(process, cur_section.GetBase());

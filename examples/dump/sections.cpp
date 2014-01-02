@@ -34,7 +34,7 @@ void DumpSections(hadesmem::Process const& process,
     if (s.IsVirtual())
     {
       std::wcout << "\t\tWARNING! Section is virtual.\n";
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     std::wcout << "\t\tName: " << s.GetName().c_str() << "\n";
     std::wcout << "\t\tVirtualAddress: " << std::hex << s.GetVirtualAddress()
