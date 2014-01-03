@@ -120,7 +120,8 @@ void DumpImports(hadesmem::Process const& process,
 
     if (dir.IsVirtualTerminated())
     {
-      std::wcout << "\t\tWARNING! Detected virtual termination trick.\n";
+      std::wcout << "\t\tWARNING! Detected virtual termination trick. Stopping "
+                    "enumeration.\n";
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
@@ -128,7 +129,7 @@ void DumpImports(hadesmem::Process const& process,
     if (dir.IsTlsAoiTerminated())
     {
       std::wcout << "\t\tWARNING! Detected TLS AOI trick! Assuming a Windows 7 "
-                    "style loader and terminating the list early.\n";
+                    "style loader and stopping enumeration early.\n";
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
@@ -141,6 +142,17 @@ void DumpImports(hadesmem::Process const& process,
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
+    // TODO: Come up with a better solution to this.
+    if (num_import_dirs++ == 1000)
+    {
+      std::wcout << "\t\tWARNING! Processed 1000 import dirs. Stopping early "
+                    "to avoid resource exhaustion attacks. Check PE file for "
+                    "TLS AOI trick, virtual terminator trick, or other similar "
+                    "attacks.\n";
+      WarnForCurrentFile(WarningType::kUnsupported);
+      break;
+    }
+
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
       // be invalid because it's ignored. Note that we simply skip here rather
@@ -150,19 +162,28 @@ void DumpImports(hadesmem::Process const& process,
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
         std::wcout << "\t\tWARNING! IAT is "
-                   << (iat_valid ? "empty" : "invalid") << ".\n";
+                   << (iat_valid ? "empty" : "invalid")
+                   << ". Skipping directory.\n";
         WarnForCurrentFile(WarningType::kSuspicious);
         continue;
       }
     }
 
-    // TODO: Come up with a better solution to this.
-    if (num_import_dirs++ == 1000)
+    // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF. This is
+    // handled below in our ILT valid/empty checks (after dumping the dir data,
+    // but before dumping the thunks).
+    // Sample: maxvals.exe (Corkami PE Corpus)
+    // Sample: dllmaxvals.dll (Corkami PE Corpus)
+    // For anything else though treat the directory as invalid and skip.
+    // Sample: 0005b517dda0edcd73baf4d888e7b11571e3029e
+    // TODO: Verify this is correct. Probably easiest just to hot-patch the
+    // Corkami samples to make them similar to the unknown sample and see if
+    // they still run.
+    if (!ilt_valid && ilt != 0xFFFFFFFF && ilt != 0)
     {
-      std::wcout << "\t\tWARNING! Processed 1000 import dirs. Stopping early "
-                    "to avoid resource exhaustion attacks. Check PE file for "
-                    "TLS AOI trick, virtual terminator trick, or other similar "
-                    "attacks.\n";
+      // TODO: Come up with a less stupid message for this.
+      std::wcout
+        << "\t\tWARNING! ILT is extra invalid. Stopping enumeration.\n";
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }

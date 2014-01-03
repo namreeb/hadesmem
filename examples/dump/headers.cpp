@@ -96,8 +96,67 @@ void DumpDosHeader(hadesmem::Process const& process,
   // to overlap physical and virtual parts of the file, causing an 'on disk'
   // header and an 'in memory' header. See "Dual PE header" in the ReversingLabs
   // "Undocumented PECOFF" whitepaper.
+  // TODO: Warn on a non-standard value.
   std::wcout << "\t\tNewHeaderOffset: " << std::hex
              << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
+}
+
+std::wstring GetDataDirName(DWORD num)
+{
+  switch (static_cast<hadesmem::PeDataDir>(num))
+  {
+  case hadesmem::PeDataDir::Export:
+    return L"Export";
+
+  case hadesmem::PeDataDir::Import:
+    return L"Import";
+
+  case hadesmem::PeDataDir::Resource:
+    return L"Resource";
+
+  case hadesmem::PeDataDir::Exception:
+    return L"Exception";
+
+  case hadesmem::PeDataDir::Security:
+    return L"Security";
+
+  case hadesmem::PeDataDir::BaseReloc:
+    return L"BaseReloc";
+
+  case hadesmem::PeDataDir::Debug:
+    return L"Debug";
+
+  case hadesmem::PeDataDir::Architecture:
+    return L"Architecture";
+
+  case hadesmem::PeDataDir::GlobalPTR:
+    return L"GlobalPTR";
+
+  case hadesmem::PeDataDir::TLS:
+    return L"TLS";
+
+  case hadesmem::PeDataDir::LoadConfig:
+    return L"LoadConfig";
+
+  case hadesmem::PeDataDir::BoundImport:
+    return L"BoundImport";
+
+  case hadesmem::PeDataDir::IAT:
+    return L"IAT";
+
+  case hadesmem::PeDataDir::DelayImport:
+    return L"DelayImport";
+
+  case hadesmem::PeDataDir::COMDescriptor:
+    return L"COMDescriptor";
+
+  case hadesmem::PeDataDir::Reserved:
+    return L"Reserved";
+
+  default:
+    HADESMEM_DETAIL_ASSERT(false);
+    return L"UKNOWN";
+  }
 }
 
 void DumpNtHeaders(hadesmem::Process const& process,
@@ -143,8 +202,9 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // TODO: For valid EPs inside the file, dump the section that it is in, and
   // also disassemble the first N instructions (for some reasonable value of N).
   // TODO: Detect virtual overlap EP. (Sample: virtEP.exe from Corkami)
-  std::wcout << "\t\tAddressOfEntryPoint: " << std::hex
-             << nt_hdrs.GetAddressOfEntryPoint() << std::dec << "\n";
+  DWORD const addr_of_ep = nt_hdrs.GetAddressOfEntryPoint();
+  std::wcout << "\t\tAddressOfEntryPoint: " << std::hex << addr_of_ep
+             << std::dec << "\n";
   // Entry point can be null. For DLLs this is fine, because it simply means the
   // EP is not called, but for non-DLLs it means that execution starts at
   // ImageBase, executing 'MZ' as 'dec ebp/pop edx'.
@@ -152,16 +212,17 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // The EP can also be null in the case where it is 'patched' via TLS, but this
   // applies to all cases not just when the EP is null (it's just more likely in
   // the case where it's null).
-  if (!nt_hdrs.GetAddressOfEntryPoint() &&
-      !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
+  if (!addr_of_ep && !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {
     std::wcout << "\t\tWARNING! Detected zero EP in non-DLL PE.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  if (!RvaToVa(process, pe_file, nt_hdrs.GetAddressOfEntryPoint()))
+  if (addr_of_ep && !RvaToVa(process, pe_file, addr_of_ep))
   {
+    // Not actually unsupported, we just want to identify potential samples for
+    // now.
     std::wcout << "\t\tWARNING! Unable to resolve EP to file offset.\n";
-    WarnForCurrentFile(WarningType::kSuspicious);
+    WarnForCurrentFile(WarningType::kUnsupported);
   }
   std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode()
              << std::dec << "\n";
@@ -169,59 +230,62 @@ void DumpNtHeaders(hadesmem::Process const& process,
   std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData()
              << std::dec << "\n";
 #endif
-  std::wcout << "\t\tImageBase: " << std::hex << nt_hdrs.GetImageBase()
-             << std::dec << "\n";
+  ULONG_PTR const image_base = nt_hdrs.GetImageBase();
+  std::wcout << "\t\tImageBase: " << std::hex << image_base << std::dec << "\n";
   // ImageBase can be null under XP. In this case the binary is relocated to
   // 0x10000.
   // Sample: ibnullXP.exe (Corkami PE corpus).
-  if (!nt_hdrs.GetImageBase())
+  if (!image_base)
   {
     std::wcout << "\t\tWARNING! Detected zero ImageBase.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // If ImageBase is in the kernel address range it's relocated to 0x1000.
   // Sample: ibkernel.exe (Corkami PE corpus).
-  // TODO: Check whether this also occurs under x64, and add an equivalent check
-  // if applicable.
-  if (nt_hdrs.GetImageBase() > 0x80000000UL &&
-      nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386)
+  if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386 && image_base > 0x80000000UL)
   {
     std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
+  // Not sure if this is actually possible under x64.
+  // TODO: Check whether the image is allowed to load (similar to x86) in this
+  // case.
+  else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 && image_base > 0x80000000ULL)
+  {
+    std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
   // ImageBase must be a multiple of 0x10000
-  if (!!(nt_hdrs.GetImageBase() & 0xFFFF))
+  if (!!(image_base & 0xFFFF))
   {
     std::wcout << "\t\tWARNING! Detected invalid ImageBase (not a multiple of "
                   "0x10000).\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  std::wcout << "\t\tSectionAlignment: " << std::hex
-             << nt_hdrs.GetSectionAlignment() << std::dec << "\n";
+  DWORD const section_alignment = nt_hdrs.GetSectionAlignment();
+  std::wcout << "\t\tSectionAlignment: " << std::hex << section_alignment << std::dec << "\n";
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
-  if (nt_hdrs.GetSectionAlignment() < 0x200 ||
-      nt_hdrs.GetSectionAlignment() > 0x1000)
+  if (section_alignment < 0x200 || section_alignment > 0x1000)
   {
     std::wcout << "\t\tWARNING! Unusual section alignment.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  std::wcout << "\t\tFileAlignment: " << std::hex << nt_hdrs.GetFileAlignment()
-             << std::dec << "\n";
+  DWORD const file_alignment = nt_hdrs.GetFileAlignment();
+  std::wcout << "\t\tFileAlignment: " << std::hex << file_alignment << std::dec << "\n";
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
-  if (nt_hdrs.GetFileAlignment() < 0x200 || nt_hdrs.GetFileAlignment() > 0x1000)
+  if (file_alignment < 0x200 || file_alignment > 0x1000)
   {
     std::wcout << "\t\tWARNING! Unusual file alignment.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  if (nt_hdrs.GetSectionAlignment() < 0x800 &&
-      nt_hdrs.GetSectionAlignment() != nt_hdrs.GetFileAlignment())
+  if (section_alignment < 0x800 && section_alignment != file_alignment)
   {
     std::wcout << "\t\tWARNING! Invalid alignment.\n";
     WarnForCurrentFile(WarningType::kUnsupported);
   }
-  if (nt_hdrs.GetFileAlignment() > nt_hdrs.GetSectionAlignment())
+  if (file_alignment > section_alignment)
   {
     std::wcout << "\t\tWARNING! Invalid alignment.\n";
     WarnForCurrentFile(WarningType::kUnsupported);
@@ -267,18 +331,28 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << nt_hdrs.GetSizeOfHeapCommit() << std::dec << "\n";
   std::wcout << "\t\tLoaderFlags: " << std::hex << nt_hdrs.GetLoaderFlags()
              << std::dec << "\n";
+  DWORD const num_dirs = nt_hdrs.GetNumberOfRvaAndSizes();
   std::wcout << "\t\tNumberOfRvaAndSizes: " << nt_hdrs.GetNumberOfRvaAndSizes()
              << "\n";
-  DWORD num_dirs = GetNumberOfRvaAndSizesClamped(nt_hdrs);
-  std::wcout << "\t\tNumberOfRvaAndSizes (Clamped): " << num_dirs << "\n";
-  for (DWORD i = 0; i < num_dirs; ++i)
+  DWORD const num_dirs_clamped = GetNumberOfRvaAndSizesClamped(nt_hdrs);
+  std::wcout << "\t\tNumberOfRvaAndSizes (Clamped): " << num_dirs_clamped
+             << "\n";
+  if (num_dirs > num_dirs_clamped)
   {
-    std::wcout << "\t\tDataDirectoryVirtualAddress: " << std::hex
-               << nt_hdrs.GetDataDirectoryVirtualAddress(
-                    static_cast<hadesmem::PeDataDir>(i)) << std::dec << "\n";
-    std::wcout << "\t\tDataDirectorySize: " << std::hex
-               << nt_hdrs.GetDataDirectorySize(
-                    static_cast<hadesmem::PeDataDir>(i)) << std::dec << "\n";
+    std::wcout << "\t\tWARNING! Detected an invalid number of data directories.\n";
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  for (DWORD i = 0; i < num_dirs_clamped; ++i)
+  {
+    auto const data_dir_va = nt_hdrs.GetDataDirectoryVirtualAddress(
+      static_cast<hadesmem::PeDataDir>(i));
+    auto const data_dir_size =
+      nt_hdrs.GetDataDirectorySize(static_cast<hadesmem::PeDataDir>(i));
+    auto const data_dir_name = GetDataDirName(i);
+    std::wcout << "\t\tData Directory RVA: " << std::hex << data_dir_va << " ("
+               << data_dir_name << ")\n";
+    std::wcout << "\t\tData Directory Size: " << std::hex << data_dir_size
+               << " (" << data_dir_name << ")\n";
   }
 }
 }

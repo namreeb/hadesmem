@@ -42,7 +42,8 @@ enum class PeDataDir : std::uint32_t
   BoundImport,
   IAT,
   DelayImport,
-  COMDescriptor
+  COMDescriptor,
+  Reserved
 };
 
 class NtHeaders

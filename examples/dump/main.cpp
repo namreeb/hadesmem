@@ -110,6 +110,15 @@
 // TODO: Refactor out the warning code to operate separately from the dumping
 // code where possible, without sacrificing too much performance.
 
+// TODO: Clean up this tool. It's a disaster of spaghetti code (spaghetti is
+// delicious, but we should clean this up anyway...).
+
+// TODO: Add support for warning when a file takes longer than N
+// minutes/sections to analyze, with an optional forced-timeout.
+
+// TODO: Use setw/setfill/etc when logging in order to get consistently sized
+// output.
+
 namespace
 {
 
