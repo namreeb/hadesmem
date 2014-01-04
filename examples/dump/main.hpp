@@ -15,9 +15,6 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path);
 
-// TODO: Add a new 'hostile' flag for things that are not just suspicious, but
-// are actively hostile and never found in 'legitimate' modules, like the TLS
-// AOI trick?
 enum class WarningType
 {
   kSuspicious,

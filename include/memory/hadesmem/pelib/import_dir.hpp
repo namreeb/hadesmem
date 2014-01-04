@@ -88,7 +88,7 @@ public:
   {
     // It's possible for the last entry to be in virtual space, because it only
     // needs to have its Name or FirstThunk null.
-    // Sample: imports_virtdesc.exe from the Corkami PE corpus for an example.
+    // Sample: imports_virtdesc.exe (Corkami PE Corpus)
     // TODO: Fix this for cases where a virtual descriptor is 'real', rather
     // than just used as a terminator.
     if (pe_file_->GetType() == PeFileType::Data &&
@@ -102,6 +102,7 @@ public:
   }
 
   // Check for TLS AOI trick.
+  // Sample: manyimportsW7.exe (Corkami PE Corpus)
   // TODO: Think about what the best way to solve this is... Currently we're
   // forcing the user to thunk about it, which may not be ideal.
   bool IsTlsAoiTerminated() const
@@ -147,8 +148,41 @@ public:
 
   std::string GetName() const
   {
-    return ReadString<char>(*process_,
-                            RvaToVa(*process_, *pe_file_, GetNameRaw()));
+    DWORD const name_rva = GetNameRaw();
+
+    if (!name_rva)
+    {
+      return {};
+    }
+
+    auto name_va =
+      static_cast<std::uint8_t*>(RvaToVa(*process_, *pe_file_, name_rva));
+    if (pe_file_->GetType() == PeFileType::Image)
+    {
+      return ReadString<char>(*process_, name_va);
+    }
+    else if (pe_file_->GetType() == PeFileType::Data)
+    {
+      std::string name;
+      // Handle EOF termination.
+      // Sample: maxsecXP.exe (Corkami PE Corpus)
+      // TODO: Fix the perf of this.
+      // TODO: Detect and handle the case where the string is terminated
+      // virtually.
+      void const* const file_end =
+        static_cast<std::uint8_t const*>(pe_file_->GetBase()) +
+        pe_file_->GetSize();
+      while (name_va < file_end)
+      {
+        name.push_back(Read<char>(*process_, name_va));
+      }
+      return name;
+    }
+    else
+    {
+      HADESMEM_DETAIL_ASSERT(false);
+      return {};
+    }
   }
 
   DWORD GetFirstThunk() const

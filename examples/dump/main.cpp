@@ -80,11 +80,6 @@
 
 // TODO: Use hex numbers everywhere to simplify the code? (e.g. Ordinals etc.)
 
-// TODO: Distinguish between different warning levels? We should probably have
-// two levels. One for regular warnings for strange/hostile files that use known
-// and handled tricks, and one for unexpected or unhandled things (to flag for
-// deeper investigation). Perhaps add a --warning-level flag.
-
 // TODO: Dump all TimeDateStamp as actual time-stamps.
 
 // TODO: Warn for unusual time stamps.
@@ -101,11 +96,15 @@
 // Currently we're pushing on an extra zero as a hacky workaround for some
 // scenarios (like a virtually terminated string).
 
+// TODO: Add a new 'hostile' warning type for things that are not just
+// suspicious, but are actively hostile and never found in 'legitimate' modules,
+// like the AOI trick?
+
 // TODO: Handle all tricks and samples from the Corkami PE corpus and the
 // Undocumented PECOFF whitepaper by ReversingLabs.
 
-// TODO: Add warnings for cases like import virtual terminator etc that are
-// currently being detected and swallowed entirely in PeLib.
+// TODO: Add warnings for cases like that are currently being detected and
+// swallowed entirely in PeLib.
 
 // TODO: Refactor out the warning code to operate separately from the dumping
 // code where possible, without sacrificing too much performance.

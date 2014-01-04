@@ -279,13 +279,12 @@ void DumpImports(hadesmem::Process const& process,
       // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
-      // Sample: maxsecxp.exe (Corkami PE Corpus).
       std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
     }
     catch (std::exception const& /*e*/)
     {
-      std::wcout << "\t\tWARNING! Failed to read name.\n";
-      WarnForCurrentFile(WarningType::kSuspicious);
+      std::wcout << "\t\tWARNING! Failed to read import dir name.\n";
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
     std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
                << std::dec << "\n";

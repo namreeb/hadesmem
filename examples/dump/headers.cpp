@@ -159,6 +159,36 @@ std::wstring GetDataDirName(DWORD num)
   }
 }
 
+bool IsUnsupportedDataDir(DWORD num)
+{
+  switch (static_cast<hadesmem::PeDataDir>(num))
+  {
+  case hadesmem::PeDataDir::Export:
+  case hadesmem::PeDataDir::Import:
+  case hadesmem::PeDataDir::TLS:
+  case hadesmem::PeDataDir::BoundImport:
+    return false;
+
+  case hadesmem::PeDataDir::Resource:
+  case hadesmem::PeDataDir::Exception:
+  case hadesmem::PeDataDir::Security:
+  case hadesmem::PeDataDir::BaseReloc:
+  case hadesmem::PeDataDir::Debug:
+  case hadesmem::PeDataDir::Architecture:
+  case hadesmem::PeDataDir::GlobalPTR:
+  case hadesmem::PeDataDir::LoadConfig:
+  case hadesmem::PeDataDir::IAT:
+  case hadesmem::PeDataDir::DelayImport:
+  case hadesmem::PeDataDir::COMDescriptor:
+  case hadesmem::PeDataDir::Reserved:
+    return true;
+
+  default:
+    HADESMEM_DETAIL_ASSERT(false);
+    return true;
+  }
+}
+
 void DumpNtHeaders(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {
@@ -242,7 +272,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
   }
   // If ImageBase is in the kernel address range it's relocated to 0x1000.
   // Sample: ibkernel.exe (Corkami PE corpus).
-  if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386 && image_base > 0x80000000UL)
+  if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386 &&
+      image_base > 0x80000000UL)
   {
     std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
@@ -250,7 +281,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // Not sure if this is actually possible under x64.
   // TODO: Check whether the image is allowed to load (similar to x86) in this
   // case.
-  else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 && image_base > 0x80000000ULL)
+  else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
+           image_base > 0x80000000ULL)
   {
     std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
     WarnForCurrentFile(WarningType::kUnsupported);
@@ -263,7 +295,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DWORD const section_alignment = nt_hdrs.GetSectionAlignment();
-  std::wcout << "\t\tSectionAlignment: " << std::hex << section_alignment << std::dec << "\n";
+  std::wcout << "\t\tSectionAlignment: " << std::hex << section_alignment
+             << std::dec << "\n";
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
   if (section_alignment < 0x200 || section_alignment > 0x1000)
@@ -272,7 +305,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DWORD const file_alignment = nt_hdrs.GetFileAlignment();
-  std::wcout << "\t\tFileAlignment: " << std::hex << file_alignment << std::dec << "\n";
+  std::wcout << "\t\tFileAlignment: " << std::hex << file_alignment << std::dec
+             << "\n";
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
   if (file_alignment < 0x200 || file_alignment > 0x1000)
@@ -339,7 +373,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
              << "\n";
   if (num_dirs > num_dirs_clamped)
   {
-    std::wcout << "\t\tWARNING! Detected an invalid number of data directories.\n";
+    std::wcout
+      << "\t\tWARNING! Detected an invalid number of data directories.\n";
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   for (DWORD i = 0; i < num_dirs_clamped; ++i)
@@ -353,6 +388,12 @@ void DumpNtHeaders(hadesmem::Process const& process,
                << data_dir_name << ")\n";
     std::wcout << "\t\tData Directory Size: " << std::hex << data_dir_size
                << " (" << data_dir_name << ")\n";
+    if (IsUnsupportedDataDir(i))
+    {
+      std::wcout << "\t\tWARNING! " << data_dir_name
+                 << " data directory is unsupported.\n";
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
   }
 }
 }

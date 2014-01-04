@@ -49,16 +49,18 @@ void DumpExports(hadesmem::Process const& process,
   {
     // Export dir name does not need to consist of only printable characters, as
     // long as it is zero-terminated.
-    // Sample: dllweirdexp.dll
+    // Sample: dllweirdexp.dll (Corkami PE Corpus)
     // TODO: Find a solution to the above case, and perhaps use a vector<char>
     // instead of a string in the cases where the name isn't printable.
     // TODO: Detect and handle the case where the string is terminated
     // virtually.
+    // TODO: Detect and handle the case where the string is terminated by EOF
+    // (virtual termination special case).
     std::wcout << "\t\tName: " << export_dir->GetName().c_str() << "\n";
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\t\tWARNING! Name is invalid.\n";
+    std::wcout << "\t\tWARNING! Failed to read export dir name.\n";
     WarnForCurrentFile(WarningType::kUnsupported);
   }
   std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
@@ -95,6 +97,7 @@ void DumpExports(hadesmem::Process const& process,
       // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
+      // TODO: Detect and handle the case where the string is EOF terminated.
       std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
       // PE files can have duplicate exported function names (or even have them
       // all identical) because the import hint is used to check the name first

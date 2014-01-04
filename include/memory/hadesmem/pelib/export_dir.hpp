@@ -91,6 +91,9 @@ public:
     return data_.Name;
   }
 
+  // TODO: Detect and handle the case where the string is terminated
+  // virtually.
+  // TODO: Detect and handle the case where the string is EOF terminated.
   std::string GetName() const
   {
     DWORD const name_rva = GetNameRaw();
