@@ -149,14 +149,21 @@ public:
   std::string GetName() const
   {
     DWORD const name_rva = GetNameRaw();
-
     if (!name_rva)
     {
-      return {};
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Name RVA is invalid."));
     }
 
     auto name_va =
       static_cast<std::uint8_t*>(RvaToVa(*process_, *pe_file_, name_rva));
+    // It's possible for the RVA to be invalid on disk because it's fixed by relocations.
+    // TODO: Handle this case.
+    // Sample: imports_relocW7.exe
+    if (!name_va)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Name VA is invalid."));
+    }
+
     if (pe_file_->GetType() == PeFileType::Image)
     {
       return ReadString<char>(*process_, name_va);
@@ -174,14 +181,21 @@ public:
         pe_file_->GetSize();
       while (name_va < file_end)
       {
-        name.push_back(Read<char>(*process_, name_va));
+        if (char const c = Read<char>(*process_, name_va++))
+        {
+          name.push_back(c);
+        }
+        else
+        {
+          break;
+        }
       }
       return name;
     }
     else
     {
       HADESMEM_DETAIL_ASSERT(false);
-      return {};
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Unknown PE file type."));
     }
   }
 
