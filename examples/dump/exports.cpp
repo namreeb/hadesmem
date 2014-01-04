@@ -16,6 +16,10 @@
 
 #include "main.hpp"
 
+// TODO: Fix this for the case where the export dir is seemingly
+// corrupted/invalid, but actually has legitimate (and working) exports.
+// Sample: dllord.dll (Corkami PE Corpus)
+
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
 {
@@ -76,11 +80,18 @@ void DumpExports(hadesmem::Process const& process,
   std::wcout << "\t\tAddressOfNameOrdinals: " << std::hex
              << export_dir->GetAddressOfNameOrdinals() << std::dec << "\n";
 
-  std::wcout << "\n\tExports:\n";
-
   std::set<std::string> export_names;
 
   hadesmem::ExportList exports(process, pe_file);
+  if (std::begin(exports) != std::end(exports))
+  {
+    std::wcout << "\n\tExports:\n";
+  }
+  else
+  {
+    std::wcout << "\n\tWARNING! Empty or invalid export list.\n";
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
   for (auto const& e : exports)
   {
     std::wcout << "\n";
@@ -112,8 +123,10 @@ void DumpExports(hadesmem::Process const& process,
     }
     else if (e.ByOrdinal())
     {
-      std::wcout << "\t\tProcedureNumber: " << e.GetProcedureNumber() << "\n";
-      std::wcout << "\t\tOrdinalNumber: " << e.GetOrdinalNumber() << "\n";
+      std::wcout << "\t\tProcedureNumber: " << std::hex
+                 << e.GetProcedureNumber() << std::dec << "\n";
+      std::wcout << "\t\tOrdinalNumber: " << std::hex << e.GetOrdinalNumber()
+                 << std::dec << "\n";
     }
     else
     {
@@ -134,8 +147,8 @@ void DumpExports(hadesmem::Process const& process,
       {
         try
         {
-          std::wcout << "\t\tForwarderOrdinal: " << e.GetForwarderOrdinal()
-                     << "\n";
+          std::wcout << "\t\tForwarderOrdinal: " << std::hex
+                     << e.GetForwarderOrdinal() << std::dec << "\n";
         }
         catch (std::exception const& /*e*/)
         {
