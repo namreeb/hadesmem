@@ -219,6 +219,7 @@ install dist
     # Install both EXEs and DLLs.
     <install-type>SHARED_LIB
     <install-type>EXE
+    <install-type>PDB
   ;
 
 # Allow easy consumption by 3rd parties.
