@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstddef>
+#include <ostream>
 #include <string>
 
 namespace hadesmem
@@ -27,3 +29,82 @@ void SetCurrentFilePath(std::wstring const& path);
 void WarnForCurrentFile(WarningType warned_type);
 
 void ClearWarnForCurrentFile();
+
+class StreamFlagSaver
+{
+public:
+  explicit StreamFlagSaver(std::ios_base& str) : str_(&str), flags_(str.flags())
+  {
+  }
+
+  ~StreamFlagSaver()
+  {
+    str_->flags(flags_);
+  }
+
+  StreamFlagSaver(StreamFlagSaver const&) = delete;
+  StreamFlagSaver& operator=(StreamFlagSaver const&) = delete;
+
+private:
+  std::ios_base* str_;
+  std::ios_base::fmtflags flags_;
+};
+
+template <typename T>
+inline void WriteNamedHex(std::wostream& out,
+                          std::wstring const& name,
+                          T const& num,
+                          std::size_t tabs)
+{
+  StreamFlagSaver flags(out);
+  out << std::wstring(tabs, '\t') << name << ": " << std::hex << num << '\n';
+}
+
+template <typename T>
+inline void WriteNamedHexSuffix(std::wostream& out,
+                                std::wstring const& name,
+                                T const& num,
+                                std::wstring const& suffix,
+                                std::size_t tabs)
+{
+  StreamFlagSaver flags(out);
+  out << std::wstring(tabs, '\t') << name << ": " << std::hex << num << L" ("
+      << suffix << L")" << '\n';
+}
+
+template <typename C>
+inline void WriteNamedHexContainer(std::wostream& out,
+                                   std::wstring const& name,
+                                   C const& nums,
+                                   std::size_t tabs)
+{
+  StreamFlagSaver flags(out);
+  out << std::wstring(tabs, '\t') << name << ":" << std::hex;
+  for (auto const& num : nums)
+  {
+    out << ' ' << num;
+  }
+  out << '\n';
+}
+
+template <typename T>
+inline void WriteNamedNormal(std::wostream& out,
+                             std::wstring const& name,
+                             T const& num,
+                             std::size_t tabs)
+{
+  StreamFlagSaver flags(out);
+  out << std::wstring(tabs, '\t') << name << ": " << num << '\n';
+}
+
+template <typename T>
+inline void WriteNormal(std::wostream& out, T const& num, std::size_t tabs)
+{
+  StreamFlagSaver flags(out);
+  out << std::wstring(tabs, '\t') << num << '\n';
+}
+
+inline void WriteNewline(std::wostream& out)
+{
+  out << L'\n';
+}

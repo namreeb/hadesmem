@@ -19,6 +19,9 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Support forward iterators to allow binary search algorithms to be used
+// (because the export list must be sorted).
+
 namespace hadesmem
 {
 

@@ -6,54 +6,55 @@
 #include <iostream>
 #include <iterator>
 
+#include <hadesmem/pelib/nt_headers.hpp>
+#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/section.hpp>
 #include <hadesmem/pelib/section_list.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
-
-// TODO: Detect when a file has no sections.
-
-// TODO: Detect when a file has more than 96 sections (allowed on Vista+, but
-// technically outside of the spec).
 
 void DumpSections(hadesmem::Process const& process,
                   hadesmem::PeFile const& pe_file)
 {
   hadesmem::SectionList sections(process, pe_file);
 
+  std::wostream& out = std::wcout;
+
   if (std::begin(sections) != std::end(sections))
   {
-    std::wcout << "\n\tSections:\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Sections:", 1);
+  }
+  else
+  {
+    // Other checks on number of sections are done as part of header handling.
+    hadesmem::NtHeaders const nt_hdrs(process, pe_file);
+    if (nt_hdrs.GetNumberOfSections())
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Section list is inavlid.", 1);
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
   }
 
   for (auto const& s : sections)
   {
-    std::wcout << "\n";
+    WriteNewline(out);
     if (s.IsVirtual())
     {
-      std::wcout << "\t\tWARNING! Section is virtual.\n";
+      WriteNormal(out, L"WARNING! Section is virtual.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
-    std::wcout << "\t\tName: " << s.GetName().c_str() << "\n";
-    std::wcout << "\t\tVirtualAddress: " << std::hex << s.GetVirtualAddress()
-               << std::dec << "\n";
-    std::wcout << "\t\tVirtualSize: " << std::hex << s.GetVirtualSize()
-               << std::dec << "\n";
-    std::wcout << "\t\tPointerToRawData: " << std::hex
-               << s.GetPointerToRawData() << std::dec << "\n";
-    std::wcout << "\t\tSizeOfRawData: " << std::hex << s.GetSizeOfRawData()
-               << std::dec << "\n";
-    std::wcout << "\t\tPointerToRelocations: " << std::hex
-               << s.GetPointerToRelocations() << std::dec << "\n";
-    std::wcout << "\t\tPointerToLinenumbers: " << std::hex
-               << s.GetPointerToLinenumbers() << std::dec << "\n";
-    std::wcout << "\t\tNumberOfRelocations: " << std::hex
-               << s.GetNumberOfRelocations() << std::dec << "\n";
-    std::wcout << "\t\tNumberOfLinenumbers: " << std::hex
-               << s.GetNumberOfLinenumbers() << std::dec << "\n";
-    std::wcout << "\t\tCharacteristics: " << std::hex << s.GetCharacteristics()
-               << std::dec << "\n";
+    WriteNamedNormal(out, L"Name", s.GetName().c_str(), 2);
+    WriteNamedHex(out, L"VirtualAddress", s.GetVirtualAddress(), 2);
+    WriteNamedHex(out, L"VirtualSize", s.GetVirtualSize(), 2);
+    WriteNamedHex(out, L"PointerToRawData", s.GetPointerToRawData(), 2);
+    WriteNamedHex(out, L"SizeOfRawData", s.GetSizeOfRawData(), 2);
+    WriteNamedHex(out, L"PointerToRelocations", s.GetPointerToRelocations(), 2);
+    WriteNamedHex(out, L"PointerToLinenumbers", s.GetPointerToLinenumbers(), 2);
+    WriteNamedHex(out, L"NumberOfRelocations", s.GetNumberOfRelocations(), 2);
+    WriteNamedHex(out, L"NumberOfLinenumbers", s.GetNumberOfLinenumbers(), 2);
+    WriteNamedHex(out, L"Characteristics", s.GetCharacteristics(), 2);
   }
 }

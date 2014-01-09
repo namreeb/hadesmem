@@ -47,12 +47,6 @@
 // diassembling the EP, compiler detection, dumping more of the file format
 // (requires PeLib work), .NET/VB6/etc detection, hashing, etc.
 
-// TODO: Detect and handle tricks like TLS AOI, virtual terminator, etc.
-
-// TODO: Relax some current warnings which are firing for legitimate cases (like
-// bound imports causing warnings due to there no longer being a valid ordinal
-// or name RVA).
-
 // TODO: Add new warnings for strange cases which require more investigation.
 // This includes both new cases, and also existing cases which are currently
 // being ignored (including those ignored inside PeLib itself, like a lot of the
@@ -78,8 +72,6 @@
 // TODO: Dump string representation of data where possible, such as bitmasks
 // (Charateristics etc.), data dir names, etc.
 
-// TODO: Use hex numbers everywhere to simplify the code? (e.g. Ordinals etc.)
-
 // TODO: Dump all TimeDateStamp as actual time-stamps.
 
 // TODO: Warn for unusual time stamps.
@@ -90,11 +82,6 @@
 // TODO: Move as much corner-case logic as possible into PeLib itself.
 
 // TODO: Check and use the value of the data directory sizes?
-
-// TODO: Test under Application Verifier to try and help find bugs where
-// things are virtually terminated or we're reading outside our buffer.
-// Currently we're pushing on an extra zero as a hacky workaround for some
-// scenarios (like a virtually terminated string).
 
 // TODO: Add a new 'hostile' warning type for things that are not just
 // suspicious, but are actively hostile and never found in 'legitimate' modules,
@@ -107,16 +94,19 @@
 // swallowed entirely in PeLib.
 
 // TODO: Refactor out the warning code to operate separately from the dumping
-// code where possible, without sacrificing too much performance.
+// code where possible.
 
 // TODO: Clean up this tool. It's a disaster of spaghetti code (spaghetti is
 // delicious, but we should clean this up anyway...).
 
 // TODO: Add support for warning when a file takes longer than N
-// minutes/sections to analyze, with an optional forced-timeout.
+// minutes/sections to analyze, with an optional forced timeout.
 
 // TODO: Use setw/setfill/etc when logging in order to get consistently sized
 // output.
+
+// TODO: Use backup semantics flags and try to get backup privilege in order to
+// make directory enumeration find more files.
 
 namespace
 {
@@ -161,53 +151,56 @@ void DumpWarned(std::wostream& out)
 {
   if (!g_all_warned.empty())
   {
-    std::wcout << "\nDumping warned list.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Dumping warned list.", 0);
     for (auto const f : g_all_warned)
     {
-      out << f << "\n";
+      WriteNormal(out, f, 0);
     }
   }
 }
 
 void DumpRegions(hadesmem::Process const& process)
 {
-  std::wcout << "\nRegions:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"Regions:", 0);
 
   hadesmem::RegionList const regions(process);
   for (auto const& region : regions)
   {
-    std::wcout << "\n";
-    std::wcout << "\tBase: "
-               << hadesmem::detail::PtrToHexString(region.GetBase()) << "\n";
-    std::wcout << "\tAllocation Base: " << hadesmem::detail::PtrToHexString(
-                                             region.GetAllocBase()) << "\n";
-    std::wcout << "\tAllocation Protect: " << std::hex
-               << region.GetAllocProtect() << std::dec << "\n";
-    std::wcout << "\tSize: " << std::hex << region.GetSize() << std::dec
-               << "\n";
-    std::wcout << "\tState: " << std::hex << region.GetState() << std::dec
-               << "\n";
-    std::wcout << "\tProtect: " << std::hex << region.GetProtect() << std::dec
-               << "\n";
-    std::wcout << "\tType: " << std::hex << region.GetType() << std::dec
-               << "\n";
+    WriteNewline(out);
+    WriteNamedHex(
+      out, L"Base", reinterpret_cast<std::uintptr_t>(region.GetBase()), 1);
+    WriteNamedHex(out,
+                  L"Allocation Base",
+                  reinterpret_cast<std::uintptr_t>(region.GetAllocBase()),
+                  1);
+    WriteNamedHex(out, L"Allocation Protect", region.GetAllocProtect(), 1);
+    WriteNamedHex(out, L"Size", region.GetSize(), 1);
+    WriteNamedHex(out, L"State", region.GetState(), 1);
+    WriteNamedHex(out, L"Protect", region.GetProtect(), 1);
+    WriteNamedHex(out, L"Type", region.GetType(), 1);
   }
 }
 
 void DumpModules(hadesmem::Process const& process)
 {
-  std::wcout << "\nModules:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"Modules:", 0);
 
   hadesmem::ModuleList const modules(process);
   for (auto const& module : modules)
   {
-    std::wcout << "\n";
-    std::wcout << "\tHandle: "
-               << hadesmem::detail::PtrToHexString(module.GetHandle()) << "\n";
-    std::wcout << "\tSize: " << std::hex << module.GetSize() << std::dec
-               << "\n";
-    std::wcout << "\tName: " << module.GetName() << "\n";
-    std::wcout << "\tPath: " << module.GetPath() << "\n";
+    WriteNewline(out);
+    WriteNamedHex(
+      out, L"Handle", reinterpret_cast<std::uintptr_t>(module.GetHandle()), 1);
+    WriteNamedHex(out, L"Size", module.GetSize(), 1);
+    WriteNamedNormal(out, L"Name", module.GetName(), 1);
+    WriteNamedNormal(out, L"Path", module.GetPath(), 1);
 
     hadesmem::PeFile const pe_file(
       process, module.GetHandle(), hadesmem::PeFileType::Image, 0);
@@ -219,8 +212,8 @@ void DumpModules(hadesmem::Process const& process)
     }
     catch (std::exception const& /*e*/)
     {
-      std::wcout << "\n";
-      std::wcout << "\tWARNING! Not a valid PE file or architecture.\n";
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Not a valid PE file or architecture.", 1);
       g_warned = true;
       continue;
     }
@@ -231,18 +224,23 @@ void DumpModules(hadesmem::Process const& process)
 
 void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
 {
-  std::wcout << "\n";
-  std::wcout << "Usage: " << thread_entry.GetUsage() << "\n";
-  std::wcout << "ID: " << thread_entry.GetId() << "\n";
-  std::wcout << "Owner ID: " << thread_entry.GetOwnerId() << "\n";
-  std::wcout << "Base Priority: " << thread_entry.GetBasePriority() << "\n";
-  std::wcout << "Delta Priority: " << thread_entry.GetDeltaPriority() << "\n";
-  std::wcout << "Flags: " << thread_entry.GetFlags() << "\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNamedHex(out, L"Usage", thread_entry.GetUsage(), 0);
+  WriteNamedHex(out, L"ID", thread_entry.GetId(), 0);
+  WriteNamedHex(out, L"Owner ID", thread_entry.GetOwnerId(), 0);
+  WriteNamedHex(out, L"Base Priority", thread_entry.GetBasePriority(), 0);
+  WriteNamedHex(out, L"Delta Priority", thread_entry.GetDeltaPriority(), 0);
+  WriteNamedHex(out, L"Flags", thread_entry.GetFlags(), 0);
 }
 
 void DumpThreads(DWORD pid)
 {
-  std::wcout << "\nThreads:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"Threads:", 0);
 
   hadesmem::ThreadList threads(pid);
   for (auto const& thread_entry : threads)
@@ -253,12 +251,14 @@ void DumpThreads(DWORD pid)
 
 void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 {
-  std::wcout << "\n";
-  std::wcout << "ID: " << process_entry.GetId() << "\n";
-  std::wcout << "Threads: " << process_entry.GetThreads() << "\n";
-  std::wcout << "Parent: " << process_entry.GetParentId() << "\n";
-  std::wcout << "Priority: " << process_entry.GetPriority() << "\n";
-  std::wcout << "Name: " << process_entry.GetName() << "\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNamedHex(out, L"ID", process_entry.GetId(), 0);
+  WriteNamedHex(out, L"Threads", process_entry.GetThreads(), 0);
+  WriteNamedHex(out, L"Parent", process_entry.GetParentId(), 0);
+  WriteNamedHex(out, L"Priority", process_entry.GetPriority(), 0);
+  WriteNamedNormal(out, L"Normal", process_entry.GetName(), 0);
 
   DumpThreads(process_entry.GetId());
 
@@ -269,7 +269,9 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nCould not open process for further inspection.\n\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Could not open process for further inspection.", 0);
+    WriteNewline(out);
     return;
   }
 
@@ -278,15 +280,19 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   // TODO: Remove this once GetPath is fixed.
   try
   {
-    std::wcout << "\nPath (Win32): " << hadesmem::GetPath(*process) << "\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Path (Win32): " + hadesmem::GetPath(*process), 0);
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nWARNING! Could not get Win32 path to process.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Could not get Win32 path to process.", 0);
   }
-  std::wcout << "Path (NT): " << hadesmem::GetPathNative(*process) << "\n";
-  std::wcout << "WoW64: " << (hadesmem::IsWoW64(*process) ? "Yes" : "No")
-             << "\n";
+  WriteNormal(out, L"Path (NT): " + hadesmem::GetPathNative(*process), 0);
+  WriteNormal(out,
+              L"WoW64: " +
+                std::wstring(hadesmem::IsWoW64(*process) ? L"Yes" : L"No"),
+              0);
 
   DumpModules(*process);
 
@@ -295,7 +301,10 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 
 void DumpProcesses()
 {
-  std::wcout << "\nProcesses:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"Processes:", 0);
 
   hadesmem::ProcessList const processes;
   for (auto const& process_entry : processes)

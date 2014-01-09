@@ -26,17 +26,19 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     return;
   }
 
-  std::wcout << "\n\tTLS:\n";
+  std::wostream& out = std::wcout;
 
-  std::wcout << "\n";
-  std::wcout << "\t\tStartAddressOfRawData: " << std::hex
-             << tls_dir->GetStartAddressOfRawData() << std::dec << "\n";
-  std::wcout << "\t\tEndAddressOfRawData: " << std::hex
-             << tls_dir->GetEndAddressOfRawData() << std::dec << "\n";
-  std::wcout << "\t\tAddressOfIndex: " << std::hex
-             << tls_dir->GetAddressOfIndex() << std::dec << "\n";
-  std::wcout << "\t\tAddressOfCallBacks: " << std::hex
-             << tls_dir->GetAddressOfCallBacks() << std::dec << "\n";
+  WriteNewline(out);
+  WriteNormal(out, L"TLS:", 1);
+
+  WriteNewline(out);
+  WriteNamedHex(
+    out, L"StartAddressOfRawData", tls_dir->GetStartAddressOfRawData(), 2);
+  WriteNamedHex(
+    out, L"EndAddressOfRawData", tls_dir->GetEndAddressOfRawData(), 2);
+  WriteNamedHex(out, L"AddressOfIndex", tls_dir->GetAddressOfIndex(), 2);
+  WriteNamedHex(
+    out, L"AddressOfCallBacks", tls_dir->GetAddressOfCallBacks(), 2);
   if (tls_dir->GetAddressOfCallBacks())
   {
     std::vector<PIMAGE_TLS_CALLBACK> callbacks;
@@ -46,17 +48,14 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     }
     catch (std::exception const& /*e*/)
     {
-      std::wcout << "\t\tWARNING! TLS callbacks are inavlid.\n";
+      WriteNormal(out, L"TLS callbacks are inavlid.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
     for (auto const c : callbacks)
     {
-      std::wcout << "\t\tCallback: " << std::hex
-                 << reinterpret_cast<DWORD_PTR>(c) << std::dec << "\n";
+      WriteNamedHex(out, L"Callback", reinterpret_cast<DWORD_PTR>(c), 2);
     }
   }
-  std::wcout << "\t\tSizeOfZeroFill: " << std::hex
-             << tls_dir->GetSizeOfZeroFill() << std::dec << "\n";
-  std::wcout << "\t\tCharacteristics: " << std::hex
-             << tls_dir->GetCharacteristics() << std::dec << "\n";
+  WriteNamedHex(out, L"SizeOfZeroFill", tls_dir->GetSizeOfZeroFill(), 2);
+  WriteNamedHex(out, L"Characteristics", tls_dir->GetCharacteristics(), 2);
 }

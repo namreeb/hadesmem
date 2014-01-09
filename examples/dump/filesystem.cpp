@@ -53,6 +53,8 @@ std::wstring MakeExtendedPath(std::wstring const& path)
 
 void DumpFile(std::wstring const& path)
 {
+  std::wostream& out = std::wcout;
+
   SetCurrentFilePath(path);
 
   std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFileNarrow(
@@ -60,20 +62,23 @@ void DumpFile(std::wstring const& path)
   std::fstream& file = *file_ptr;
   if (!file)
   {
-    std::wcout << "\nFailed to open file.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Failed to open file.", 0);
     return;
   }
 
   std::streampos const size = file.tellg();
   if (size <= 0)
   {
-    std::wcout << "\nEmpty or invalid file.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Empty or invalid file.", 0);
     return;
   }
 
   if (!file.seekg(0, std::ios::beg))
   {
-    std::wcout << "\nWARNING! Seeking to beginning of file failed (1).\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Seeking to beginning of file failed (1).", 0);
     return;
   }
 
@@ -81,20 +86,23 @@ void DumpFile(std::wstring const& path)
   std::vector<char> mz_buf(2);
   if (!file.read(mz_buf.data(), 2))
   {
-    std::wcout << "\nWARNING! Failed to read header signature.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Failed to read header signature.", 0);
     return;
   }
 
   // Check for MZ signature
   if (mz_buf[0] != 'M' || mz_buf[1] != 'Z')
   {
-    std::wcout << "\nNot a PE file (Pass 1).\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Not a PE file (Pass 1).", 0);
     return;
   }
 
   if (!file.seekg(0, std::ios::beg))
   {
-    std::wcout << "\nWARNING! Seeking to beginning of file failed (2).\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Seeking to beginning of file failed (2).", 0);
     return;
   }
 
@@ -102,7 +110,8 @@ void DumpFile(std::wstring const& path)
 
   if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
   {
-    std::wcout << "\nWARNING! Failed to read file data.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Failed to read file data.", 0);
     return;
   }
 
@@ -119,7 +128,8 @@ void DumpFile(std::wstring const& path)
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\nNot a PE file or wrong architecture (Pass 2).\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Not a PE file or wrong architecture (Pass 2).", 0);
     return;
   }
 
@@ -128,7 +138,10 @@ void DumpFile(std::wstring const& path)
 
 void DumpDir(std::wstring const& path)
 {
-  std::wcout << "\nEntering dir: \"" << path << "\".\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"Entering dir: \"" + path + L"\".", 0);
 
   std::wstring path_real(path);
   if (path_real.back() == L'\\')
@@ -145,12 +158,14 @@ void DumpDir(std::wstring const& path)
     DWORD const last_error = ::GetLastError();
     if (last_error == ERROR_FILE_NOT_FOUND)
     {
-      std::wcout << "\nDirectory is empty.\n";
+      WriteNewline(out);
+      WriteNormal(out, L"Directory is empty.", 0);
       return;
     }
     if (last_error == ERROR_ACCESS_DENIED)
     {
-      std::wcout << "\nAccess denied to directory.\n";
+      WriteNewline(out);
+      WriteNormal(out, L"Access denied to directory.", 0);
       return;
     }
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -169,7 +184,8 @@ void DumpDir(std::wstring const& path)
     std::wstring const cur_path =
       MakeExtendedPath(path_real + L"\\" + cur_file);
 
-    std::wcout << "\nCurrent path: \"" << cur_path << "\".\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Current path: \"" + cur_path + L"\".", 0);
 
     try
     {
@@ -177,7 +193,8 @@ void DumpDir(std::wstring const& path)
       {
         if (hadesmem::detail::IsSymlink(cur_path))
         {
-          std::wcout << "\nSkipping symlink.\n";
+          WriteNewline(out);
+          WriteNormal(out, L"Skipping symlink.", 0);
         }
         else
         {
@@ -195,19 +212,22 @@ void DumpDir(std::wstring const& path)
         boost::get_error_info<hadesmem::ErrorCodeWinLast>(e);
       if (last_error_ptr && *last_error_ptr == ERROR_SHARING_VIOLATION)
       {
-        std::wcout << "\nSharing violation.\n";
+        WriteNewline(out);
+        WriteNormal(out, L"Sharing violation.", 0);
         continue;
       }
 
       if (last_error_ptr && *last_error_ptr == ERROR_ACCESS_DENIED)
       {
-        std::wcout << "\nAccess denied.\n";
+        WriteNewline(out);
+        WriteNormal(out, L"Access denied.", 0);
         continue;
       }
 
       if (last_error_ptr && *last_error_ptr == ERROR_FILE_NOT_FOUND)
       {
-        std::wcout << "\nFile not found.\n";
+        WriteNewline(out);
+        WriteNormal(out, L"File not found.", 0);
         continue;
       }
 

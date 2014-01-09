@@ -56,7 +56,9 @@ bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
 
 void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 {
-  std::wcout << "\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
 
   bool const by_ordinal = thunk.ByOrdinal();
 
@@ -64,27 +66,24 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
   // the IAT (i.e. -1) which will cause ByOrdinal to be true!
   if (is_bound)
   {
-    std::wcout << "\t\t\tFunction: " << std::hex << thunk.GetFunction()
-               << std::dec << "\n";
+    WriteNamedHex(out, L"Function", thunk.GetFunction(), 3);
   }
   else if (by_ordinal)
   {
-    std::wcout << "\t\t\tOrdinalRaw: " << std::hex << thunk.GetOrdinalRaw()
-               << std::dec << "\n";
-    std::wcout << "\t\t\tOrdinal: " << thunk.GetOrdinal() << "\n";
+    WriteNamedHex(out, L"OrdinalRaw", thunk.GetOrdinalRaw(), 3);
+    WriteNamedHex(out, L"Ordinal", thunk.GetOrdinal(), 3);
   }
   else
   {
     try
     {
-      std::wcout << "\t\t\tAddressOfData: " << std::hex
-                 << thunk.GetAddressOfData() << std::dec << "\n";
-      std::wcout << "\t\t\tHint: " << thunk.GetHint() << "\n";
-      std::wcout << "\t\t\tName: " << thunk.GetName().c_str() << "\n";
+      WriteNamedHex(out, L"AddressOfData", thunk.GetAddressOfData(), 3);
+      WriteNamedHex(out, L"Hint", thunk.GetHint(), 3);
+      WriteNamedHex(out, L"Name", thunk.GetName().c_str(), 3);
     }
     catch (std::exception const& /*e*/)
     {
-      std::wcout << "\t\t\tWARNING! Invalid import thunk name data.\n";
+      WriteNormal(out, L"WARNING! Invalid import thunk name data.", 3);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
@@ -96,11 +95,14 @@ void DumpImports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file,
                  bool& has_new_bound_imports_any)
 {
+  std::wostream& out = std::wcout;
+
   hadesmem::ImportDirList import_dirs(process, pe_file);
 
   if (std::begin(import_dirs) != std::end(import_dirs))
   {
-    std::wcout << "\n\tImport Dirs:\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Import Dirs:", 1);
   }
   else
   {
@@ -109,27 +111,32 @@ void DumpImports(hadesmem::Process const& process,
     // resolution is far more common than actual files with no imports, and even
     // in the case of files with no imports they're typically interesting for
     // other reasons anyway).
-    std::wcout << "\n\tWARNING! Empty or invalid import directory.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
 
   std::uint32_t num_import_dirs = 0U;
   for (auto const& dir : import_dirs)
   {
-    std::wcout << "\n";
+    WriteNewline(out);
 
     if (dir.IsVirtualTerminated())
     {
-      std::wcout << "\t\tWARNING! Detected virtual termination trick. Stopping "
-                    "enumeration.\n";
+      WriteNormal(
+        out,
+        L"WARNING! Detected virtual termination trick. Stopping enumeration.",
+        2);
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
 
     if (dir.IsTlsAoiTerminated())
     {
-      std::wcout << "\t\tWARNING! Detected TLS AOI trick! Assuming a Windows 7 "
-                    "style loader and stopping enumeration early.\n";
+      WriteNormal(out,
+                  L"WARNING! Detected TLS AOI trick! Assuming a "
+                    L"Windows 7 style loader and stopping enumeration early.",
+                  2);
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
@@ -145,10 +152,12 @@ void DumpImports(hadesmem::Process const& process,
     // TODO: Come up with a better solution to this.
     if (num_import_dirs++ == 1000)
     {
-      std::wcout << "\t\tWARNING! Processed 1000 import dirs. Stopping early "
-                    "to avoid resource exhaustion attacks. Check PE file for "
-                    "TLS AOI trick, virtual terminator trick, or other similar "
-                    "attacks.\n";
+      WriteNormal(
+        out,
+        L"WARNING! Processed 1000 import dirs. Stopping early to avoid "
+          L"resource exhaustion attacks. Check PE file for TLS AOI trick, "
+          L"virtual terminator trick, or other similar attacks.",
+        2);
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
@@ -161,9 +170,11 @@ void DumpImports(hadesmem::Process const& process,
       hadesmem::ImportThunkList iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
-        std::wcout << "\t\tWARNING! IAT is "
-                   << (iat_valid ? "empty" : "invalid")
-                   << ". Skipping directory.\n";
+        WriteNormal(out,
+                    L"WARNING! IAT is " +
+                      std::wstring(iat_valid ? L"empty" : L"invalid") +
+                      L". Skipping directory.",
+                    2);
         WarnForCurrentFile(WarningType::kSuspicious);
         continue;
       }
@@ -182,17 +193,15 @@ void DumpImports(hadesmem::Process const& process,
     if (!ilt_valid && ilt != 0xFFFFFFFF && ilt != 0)
     {
       // TODO: Come up with a less stupid message for this.
-      std::wcout
-        << "\t\tWARNING! ILT is extra invalid. Stopping enumeration.\n";
+      WriteNormal(
+        out, L"WARNING! ILT is extra invalid. Stopping enumeration.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
 
-    std::wcout << "\t\tOriginalFirstThunk: " << std::hex
-               << dir.GetOriginalFirstThunk() << std::dec << "\n";
+    WriteNamedHex(out, L"OriginalFirstThunk", dir.GetOriginalFirstThunk(), 2);
     DWORD const time_date_stamp = dir.GetTimeDateStamp();
-    std::wcout << "\t\tTimeDateStamp: " << std::hex << time_date_stamp
-               << std::dec << "\n";
+    WriteNamedHex(out, L"TimeDateStamp", time_date_stamp, 2);
     bool has_new_bound_imports = (time_date_stamp == static_cast<DWORD>(-1));
     if (has_new_bound_imports)
     {
@@ -212,14 +221,15 @@ void DumpImports(hadesmem::Process const& process,
       // Warn so we can find samples for further investigation.
       if (!ilt_valid && HasValidNonEmptyBoundImportDescList(process, pe_file))
       {
-        std::wcout << "\t\tWARNING! Detected new style bound imports with an "
-                      "invalid ILT. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected new style bound imports "
+                      L"with an invalid ILT. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
     DWORD const forwarder_chain = dir.GetForwarderChain();
-    std::wcout << "\t\tForwarderChain: " << std::hex << forwarder_chain
-               << std::dec << "\n";
+    WriteNamedHex(out, L"ForwarderChain", forwarder_chain, 2);
     if (forwarder_chain == static_cast<DWORD>(-1))
     {
       if (has_old_bound_imports)
@@ -227,8 +237,10 @@ void DumpImports(hadesmem::Process const& process,
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader, but mark as unsupported to
         // identify potential samples just in case.
-        std::wcout << "\t\tWARNING! Detected new style forwarder chain with no "
-                      "new style bound imports. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected new style forwarder chain with "
+                      L"no new style bound imports. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
 
@@ -237,8 +249,10 @@ void DumpImports(hadesmem::Process const& process,
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader, but mark as unsupported to
         // identify potential samples just in case.
-        std::wcout << "\t\tWARNING! Detected new style forwarder chain with no "
-                      "bound imports. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected new style forwarder chain "
+                      L"with no bound imports. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
@@ -249,14 +263,18 @@ void DumpImports(hadesmem::Process const& process,
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader, but mark as unsupported to
         // identify potential samples just in case.
-        std::wcout << "\t\tWARNING! Detected old style forwarder chain with "
-                      "new bound imports. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected old style forwarder chain "
+                      L"with new bound imports. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
       else if (has_old_bound_imports)
       {
-        std::wcout << "\t\tWARNING! Detected old style forwarder chain with "
-                      "old bound imports. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected old style forwarder chain "
+                      L"with old bound imports. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
       else
@@ -264,13 +282,14 @@ void DumpImports(hadesmem::Process const& process,
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader, but mark as unsupported to
         // identify potential samples just in case.
-        std::wcout << "\t\tWARNING! Detected old style forwarder chain with no "
-                      "bound imports. Currently unhandled.\n";
+        WriteNormal(out,
+                    L"WARNING! Detected old style forwarder chain "
+                      L"with no bound imports. Currently unhandled.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
-    std::wcout << "\t\tName (Raw): " << std::hex << dir.GetNameRaw() << std::dec
-               << "\n";
+    WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
     try
     {
       // Import names don't need to consist of only printable characters, as
@@ -279,15 +298,14 @@ void DumpImports(hadesmem::Process const& process,
       // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
-      std::wcout << "\t\tName: " << dir.GetName().c_str() << "\n";
+      WriteNamedNormal(out, L"Name", dir.GetName().c_str(), 2);
     }
     catch (std::exception const& /*e*/)
     {
-      std::wcout << "\t\tWARNING! Failed to read import dir name.\n";
+      WriteNormal(out, L"WARNING! Failed to read import dir name.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
-    std::wcout << "\t\tFirstThunk: " << std::hex << dir.GetFirstThunk()
-               << std::dec << "\n";
+    WriteNamedNormal(out, L"FirstThunk", dir.GetFirstThunk(), 2);
 
     // TODO: Parse the IAT and ILT in parallel, in order to easily detect when
     // imports are bound in-memory. This will also mean we no longer need to
@@ -300,19 +318,24 @@ void DumpImports(hadesmem::Process const& process,
 
       if (!ilt_valid)
       {
-        std::wcout << "\n\t\tWARNING! ILT is invalid.\n";
+        WriteNewline(out);
+        WriteNormal(out, L"WARNING! ILT is invalid.", 2);
         WarnForCurrentFile(WarningType::kSuspicious);
       }
       else
       {
-        std::wcout << "\n\t\tWARNING! ILT is empty.\n";
+        WriteNewline(out);
+        WriteNormal(out, L"WARNING! ILT is empty.", 2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
     else
     {
-      std::wcout << "\n\t\tImport Thunks (" << (use_ilt ? "ILT" : "IAT")
-                 << "):\n";
+      WriteNewline(out);
+      WriteNormal(out,
+                  L"Import Thunks (" + std::wstring(use_ilt ? L"ILT" : L"IAT") +
+                    L")",
+                  2);
     }
 
     // TODO: Distinguish between new and old binding styles and handle
@@ -337,10 +360,13 @@ void DumpImports(hadesmem::Process const& process,
       // TODO: Come up with a better solution to this.
       if (count++ == 1000)
       {
-        std::wcout << "\n\t\t\tWARNING! Processed 1000 import thunks. Stopping "
-                      "early to avoid resource exhaustion attacks. Check PE "
-                      "file for TLS AOI trick, virtual terminator trick, or "
-                      "other similar attacks.\n";
+        WriteNewline(out);
+        WriteNormal(
+          out, 
+          L"WARNING! Processed 1000 import thunks. Stopping early to "
+            L"avoid resource exhaustion attacks. Check PE file for TLS AOI "
+            L"trick, virtual terminator trick, or other similar attacks.", 
+          2);
         WarnForCurrentFile(WarningType::kUnsupported);
         break;
       }
@@ -364,14 +390,18 @@ void DumpImports(hadesmem::Process const& process,
         process, pe_file, dir.GetFirstThunk());
       if (std::begin(iat_thunks) != std::end(iat_thunks))
       {
-        std::wcout << "\n\t\tImport Thunks (IAT):\n";
+        WriteNewline(out);
+        WriteNormal(out, L"Import Thunks (IAT)", 2);
       }
       for (auto const& thunk : iat_thunks)
       {
         if (ilt_valid && !count--)
         {
-          std::wcout << "\n\t\t\tWARNING! IAT size does not match ILT size. "
-                        "Stopping IAT enumeration early.\n";
+          WriteNewline(out);
+          WriteNormal(out,
+                      L"WARNING! IAT size does not match ILT size. Stopping "
+                        L"IAT enumeration early.",
+                      2);
           WarnForCurrentFile(WarningType::kSuspicious);
           break;
         }
@@ -398,6 +428,8 @@ void DumpBoundImports(hadesmem::Process const& process,
                       hadesmem::PeFile const& pe_file,
                       bool has_new_bound_imports_any)
 {
+  std::wostream& out = std::wcout;
+
   // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
   if (!HasBoundImportDir(process, pe_file))
   {
@@ -405,9 +437,12 @@ void DumpBoundImports(hadesmem::Process const& process,
     // quickly identify potential samples.
     if (has_new_bound_imports_any)
     {
-      std::wcout << "\n\tWARNING! No bound import directory on file with an "
-                    "import dir indicating the presence of a bound import "
-                    "dir.\n";
+      WriteNewline(out);
+      WriteNormal(
+        out,
+        L"WARNING! No bound import directory on file with an import dir "
+          L"indicating the presence of a bound import dir.",
+        1);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
 
@@ -417,8 +452,12 @@ void DumpBoundImports(hadesmem::Process const& process,
   // Sample: 0006a1bb7043c1d2a7c475b69f39cfb6c1044151
   if (!has_new_bound_imports_any)
   {
-    std::wcout << "\n\tWARNING! Seemingly valid bound import directory on file "
-                  "with an import dir indicating no new bound import dir.\n";
+    WriteNewline(out);
+    WriteNormal(
+      out,
+      L"WARNING! Seemingly valid bound import directory on file with an "
+        L"import dir indicating no new bound import dir.",
+      1);
     WarnForCurrentFile(WarningType::kSuspicious);
     return;
   }
@@ -427,40 +466,43 @@ void DumpBoundImports(hadesmem::Process const& process,
 
   if (std::begin(bound_import_dirs) != std::end(bound_import_dirs))
   {
-    std::wcout << "\n\tBound Import Dirs:\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Bound Import Dirs:", 1);
   }
   else
   {
-    std::wcout << "\n\tWARNING! Empty or invalid bound import directory.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Empty or invalid bound import directory.", 1);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
 
+  // TODO: Warn and bail after processing N entries (similar to imports).
   for (auto const& dir : bound_import_dirs)
   {
-    std::wcout << "\n";
+    WriteNewline(out);
 
-    std::wcout << "\t\tTimeDateStamp: " << std::hex << dir.GetTimeDateStamp()
-               << std::dec << "\n";
-    std::wcout << "\t\tOffsetModuleName: " << std::hex
-               << dir.GetOffsetModuleName() << std::dec << "\n";
-    std::wcout << "\t\tModuleName: " << dir.GetModuleName().c_str() << "\n";
-    std::wcout << "\t\tNumberOfModuleForwarderRefs: " << std::hex
-               << dir.GetNumberOfModuleForwarderRefs() << std::dec << "\n";
+    WriteNamedHex(out, L"TimeDateStamp", dir.GetTimeDateStamp(), 2);
+    WriteNamedHex(out, L"OffsetModuleName", dir.GetOffsetModuleName(), 2);
+    WriteNamedHex(out, L"ModuleName", dir.GetModuleName().c_str(), 2);
+    WriteNamedHex(out,
+                  L"NumberOfModuleForwarderRefs",
+                  dir.GetNumberOfModuleForwarderRefs(),
+                  2);
+    // TODO: Add a proper API for this.
     auto const forwarder_refs = dir.GetModuleForwarderRefs();
     if (std::begin(forwarder_refs) != std::end(forwarder_refs))
     {
-      std::wcout << "\t\tModule Forwarder Refs:\n";
+      WriteNormal(out, L"Module Forwarder Refs:", 2);
     }
     for (auto const& forwarder : forwarder_refs)
     {
-      std::wcout << "\t\t\tTimeDateStamp: " << std::hex
-                 << forwarder.TimeDateStamp << std::dec << "\n";
-      std::wcout << "\t\t\tOffsetModuleName: " << std::hex
-                 << forwarder.OffsetModuleName << std::dec << "\n";
-      std::wcout << "\t\t\tModuleName: "
-                 << dir.GetNameForModuleForwarderRef(forwarder).c_str() << "\n";
-      std::wcout << "\t\t\tReserved: " << std::hex << forwarder.Reserved
-                 << std::dec << "\n";
+      WriteNamedHex(out, L"TimeDateStamp", forwarder.TimeDateStamp, 2);
+      WriteNamedHex(out, L"OffsetModuleName", forwarder.OffsetModuleName, 2);
+      WriteNamedNormal(out,
+                       L"ModuleName",
+                       dir.GetNameForModuleForwarderRef(forwarder).c_str(),
+                       2);
+      WriteNamedHex(out, L"Reserved", forwarder.Reserved, 2);
     }
   }
 }

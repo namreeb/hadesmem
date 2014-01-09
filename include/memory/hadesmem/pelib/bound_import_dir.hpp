@@ -142,7 +142,12 @@ public:
   std::string GetNameForModuleForwarderRef(
     IMAGE_BOUND_FORWARDER_REF const& forwarder) const
   {
-    HADESMEM_DETAIL_ASSERT(forwarder.OffsetModuleName);
+    // OffsetModuleName should never be zero, but apparently it's possible to
+    // have some files where it is zero anyway... Probably because the timestamp
+    // is intentionally invalid so it's never matched. For now, just ignore
+    // this case and hope for the best.
+    // TODO: Fix this parsing of files like this properly.
+    // Sample: 00308e5e699c475bf91fabbdb240e8fab2b9b2d5
     return ReadString<char>(*process_, start_ + forwarder.OffsetModuleName);
   }
 

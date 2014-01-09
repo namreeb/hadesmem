@@ -33,19 +33,17 @@ void DumpExports(hadesmem::Process const& process,
     return;
   }
 
-  std::wcout << "\n\tExport Dir:\n";
+  std::wostream& out = std::wcout;
 
-  std::wcout << "\n";
-  std::wcout << "\t\tCharacteristics: " << std::hex
-             << export_dir->GetCharacteristics() << std::dec << "\n";
-  std::wcout << "\t\tTimeDateStamp: " << std::hex
-             << export_dir->GetTimeDateStamp() << std::dec << "\n";
-  std::wcout << "\t\tMajorVersion: " << std::hex
-             << export_dir->GetMajorVersion() << std::dec << "\n";
-  std::wcout << "\t\tMinorVersion: " << std::hex
-             << export_dir->GetMinorVersion() << std::dec << "\n";
-  std::wcout << "\t\tName (Raw): " << std::hex << export_dir->GetNameRaw()
-             << std::dec << "\n";
+  WriteNewline(out);
+  WriteNormal(out, L"Export Dir:", 1);
+  WriteNewline(out);
+
+  WriteNamedHex(out, L"Characteristics", export_dir->GetCharacteristics(), 2);
+  WriteNamedHex(out, L"TimeDateStamp", export_dir->GetTimeDateStamp(), 2);
+  WriteNamedHex(out, L"MajorVersion", export_dir->GetMajorVersion(), 2);
+  WriteNamedHex(out, L"MinorVersion", export_dir->GetMinorVersion(), 2);
+  WriteNamedHex(out, L"Name (Raw)", export_dir->GetNameRaw(), 2);
   // Name is not guaranteed to be valid?
   // TODO: Find a sample for this before relaxing the warining back to
   // kSuspicious.
@@ -60,45 +58,42 @@ void DumpExports(hadesmem::Process const& process,
     // virtually.
     // TODO: Detect and handle the case where the string is terminated by EOF
     // (virtual termination special case).
-    std::wcout << "\t\tName: " << export_dir->GetName().c_str() << "\n";
+    WriteNamedNormal(out, L"Name", export_dir->GetName().c_str(), 2);
   }
   catch (std::exception const& /*e*/)
   {
-    std::wcout << "\t\tWARNING! Failed to read export dir name.\n";
+    WriteNormal(out, L"WARNING! Failed to read export dir name.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
-  std::wcout << "\t\tOrdinalBase: " << std::hex << export_dir->GetOrdinalBase()
-             << std::dec << "\n";
-  std::wcout << "\t\tNumberOfFunctions: " << std::hex
-             << export_dir->GetNumberOfFunctions() << std::dec << "\n";
-  std::wcout << "\t\tNumberOfNames: " << std::hex
-             << export_dir->GetNumberOfNames() << std::dec << "\n";
-  std::wcout << "\t\tAddressOfFunctions: " << std::hex
-             << export_dir->GetAddressOfFunctions() << std::dec << "\n";
-  std::wcout << "\t\tAddressOfNames: " << std::hex
-             << export_dir->GetAddressOfNames() << std::dec << "\n";
-  std::wcout << "\t\tAddressOfNameOrdinals: " << std::hex
-             << export_dir->GetAddressOfNameOrdinals() << std::dec << "\n";
+  WriteNamedHex(out, L"OrdinalBase", export_dir->GetOrdinalBase(), 2);
+  WriteNamedHex(
+    out, L"NumberOfFunctions", export_dir->GetNumberOfFunctions(), 2);
+  WriteNamedHex(out, L"NumberOfNames", export_dir->GetNumberOfNames(), 2);
+  WriteNamedHex(
+    out, L"AddressOfFunctions", export_dir->GetAddressOfFunctions(), 2);
+  WriteNamedHex(out, L"AddressOfNames", export_dir->GetAddressOfNames(), 2);
+  WriteNamedHex(
+    out, L"AddressOfNameOrdinals", export_dir->GetAddressOfNameOrdinals(), 2);
 
   std::set<std::string> export_names;
 
   hadesmem::ExportList exports(process, pe_file);
   if (std::begin(exports) != std::end(exports))
   {
-    std::wcout << "\n\tExports:\n";
+    WriteNewline(out);
+    WriteNormal(out, L"Exports:", 2);
   }
   else
   {
-    std::wcout << "\n\tWARNING! Empty or invalid export list.\n";
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! Empty or invalid export list.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
   for (auto const& e : exports)
   {
-    std::wcout << "\n";
-    std::wcout << "\t\tRVA: " << std::hex << e.GetRva() << std::dec << "\n";
-    std::wcout << "\t\tVA: " << hadesmem::detail::PtrToHexString(e.GetVa())
-               << "\n";
-
+    WriteNewline(out);
+    WriteNamedHex(out, L"RVA", e.GetRva(), 3);
+    WriteNamedHex(out, L"VA", reinterpret_cast<std::uintptr_t>(e.GetVa()), 3);
     if (e.ByName())
     {
       // Export names do not need to consist of only printable characters, as
@@ -109,7 +104,9 @@ void DumpExports(hadesmem::Process const& process,
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
       // TODO: Detect and handle the case where the string is EOF terminated.
-      std::wcout << "\t\tName: " << e.GetName().c_str() << "\n";
+      // TODO: Detect and warn when export names are not lexicographically
+      // ordered.
+      WriteNamedNormal(out, L"Name", e.GetName().c_str(), 3);
       // PE files can have duplicate exported function names (or even have them
       // all identical) because the import hint is used to check the name first
       // before performing a search.
@@ -117,42 +114,39 @@ void DumpExports(hadesmem::Process const& process,
       // whitepaper).
       if (!export_names.insert(e.GetName()).second)
       {
-        std::wcout << "\t\tWARNING! Detected duplicate export name.\n";
+        WriteNormal(out, L"WARNING! Detected duplicate export name.", 3);
         WarnForCurrentFile(WarningType::kSuspicious);
       }
     }
     else if (e.ByOrdinal())
     {
-      std::wcout << "\t\tProcedureNumber: " << std::hex
-                 << e.GetProcedureNumber() << std::dec << "\n";
-      std::wcout << "\t\tOrdinalNumber: " << std::hex << e.GetOrdinalNumber()
-                 << std::dec << "\n";
+      WriteNamedHex(out, L"ProcedureNumber", e.GetProcedureNumber(), 3);
+      WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
     }
     else
     {
-      std::wcout << "\t\tWARNING! Entry not exported by name or ordinal.\n";
+      WriteNormal(out, L"WARNING! Entry not exported by name or ordinal.", 3);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
 
     if (e.IsForwarded())
     {
-      std::wcout << "\t\tForwarder: " << e.GetForwarder().c_str() << "\n";
-      std::wcout << "\t\tForwarderModule: " << e.GetForwarderModule().c_str()
-                 << "\n";
-      std::wcout << "\t\tForwarderFunction: "
-                 << e.GetForwarderFunction().c_str() << "\n";
-      std::wcout << "\t\tIsForwardedByOrdinal: " << e.IsForwardedByOrdinal()
-                 << "\n";
+      WriteNamedNormal(out, L"Forwarder", e.GetForwarder().c_str(), 3);
+      WriteNamedNormal(
+        out, L"ForwarderModule", e.GetForwarderModule().c_str(), 3);
+      WriteNamedNormal(
+        out, L"ForwarderFunction", e.GetForwarderFunction().c_str(), 3);
+      WriteNamedNormal(
+        out, L"IsForwardedByOrdinal", e.IsForwardedByOrdinal(), 3);
       if (e.IsForwardedByOrdinal())
       {
         try
         {
-          std::wcout << "\t\tForwarderOrdinal: " << std::hex
-                     << e.GetForwarderOrdinal() << std::dec << "\n";
+          WriteNamedHex(out, L"ForwarderOrdinal", e.GetForwarderOrdinal(), 3);
         }
         catch (std::exception const& /*e*/)
         {
-          std::wcout << "\t\tWARNING! ForwarderOrdinal invalid.\n";
+          WriteNormal(out, L"WARNING! ForwarderOrdinal invalid.", 3);
           WarnForCurrentFile(WarningType::kSuspicious);
         }
       }

@@ -5,7 +5,12 @@
 
 #include <iostream>
 
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <udis86.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
@@ -26,45 +31,30 @@ namespace
 void DumpDosHeader(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {
-  std::wcout << "\n\tDOS Header:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"DOS Header:", 1);
 
   hadesmem::DosHeader dos_hdr(process, pe_file);
-  std::wcout << "\n";
-  std::wcout << "\t\tMagic: " << std::hex << dos_hdr.GetMagic() << std::dec
-             << "\n";
-  std::wcout << "\t\tBytesOnLastPage: " << std::hex
-             << dos_hdr.GetBytesOnLastPage() << std::dec << "\n";
-  std::wcout << "\t\tPagesInFile: " << std::hex << dos_hdr.GetPagesInFile()
-             << std::dec << "\n";
-  std::wcout << "\t\tRelocations: " << std::hex << dos_hdr.GetRelocations()
-             << std::dec << "\n";
-  std::wcout << "\t\tSizeOfHeaderInParagraphs: " << std::hex
-             << dos_hdr.GetSizeOfHeaderInParagraphs() << std::dec << "\n";
-  std::wcout << "\t\tMinExtraParagraphs: " << std::hex
-             << dos_hdr.GetMinExtraParagraphs() << std::dec << "\n";
-  std::wcout << "\t\tMaxExtraParagraphs: " << std::hex
-             << dos_hdr.GetMaxExtraParagraphs() << std::dec << "\n";
-  std::wcout << "\t\tInitialSS: " << std::hex << dos_hdr.GetInitialSS()
-             << std::dec << "\n";
-  std::wcout << "\t\tInitialSP: " << std::hex << dos_hdr.GetInitialSP()
-             << std::dec << "\n";
-  std::wcout << "\t\tChecksum: " << std::hex << dos_hdr.GetChecksum()
-             << std::dec << "\n";
-  std::wcout << "\t\tInitialIP: " << std::hex << dos_hdr.GetInitialIP()
-             << std::dec << "\n";
-  std::wcout << "\t\tInitialCS: " << std::hex << dos_hdr.GetInitialCS()
-             << std::dec << "\n";
-  std::wcout << "\t\tRelocTableFileAddr: " << std::hex
-             << dos_hdr.GetRelocTableFileAddr() << std::dec << "\n";
-  std::wcout << "\t\tOverlayNum: " << std::hex << dos_hdr.GetOverlayNum()
-             << std::dec << "\n";
-  std::wcout << "\t\tReservedWords1:" << std::hex;
+  WriteNewline(out);
+  WriteNamedHex(out, L"Magic", dos_hdr.GetMagic(), 2);
+  WriteNamedHex(out, L"BytesOnLastPage", dos_hdr.GetBytesOnLastPage(), 2);
+  WriteNamedHex(out, L"PagesInFile", dos_hdr.GetPagesInFile(), 2);
+  WriteNamedHex(out, L"Relocations", dos_hdr.GetRelocations(), 2);
+  WriteNamedHex(
+    out, L"SizeOfHeaderInParagraphs", dos_hdr.GetSizeOfHeaderInParagraphs(), 2);
+  WriteNamedHex(out, L"MinExtraParagraphs", dos_hdr.GetMinExtraParagraphs(), 2);
+  WriteNamedHex(out, L"MaxExtraParagraphs", dos_hdr.GetMaxExtraParagraphs(), 2);
+  WriteNamedHex(out, L"InitialSS", dos_hdr.GetInitialSS(), 2);
+  WriteNamedHex(out, L"InitialSP", dos_hdr.GetInitialSP(), 2);
+  WriteNamedHex(out, L"Checksum", dos_hdr.GetChecksum(), 2);
+  WriteNamedHex(out, L"InitialIP", dos_hdr.GetInitialIP(), 2);
+  WriteNamedHex(out, L"InitialCS", dos_hdr.GetInitialCS(), 2);
+  WriteNamedHex(out, L"RelocTableFileAddr", dos_hdr.GetRelocTableFileAddr(), 2);
+  WriteNamedHex(out, L"OverlayNum", dos_hdr.GetOverlayNum(), 2);
   auto const reserved_words_1 = dos_hdr.GetReservedWords1();
-  for (auto const r : reserved_words_1)
-  {
-    std::wcout << L' ' << r;
-  }
-  std::wcout << std::dec << "\n";
+  WriteNamedHexContainer(out, L"ReservedWords1", reserved_words_1, 2);
   // ReservedWords1 is officially defined as reserved and should be null.
   // However, if non-null it overrides OS version values in the PEB after
   // loading.
@@ -74,20 +64,13 @@ void DumpDosHeader(hadesmem::Process const& process,
                    [](WORD w)
   { return !!w; }) != std::end(reserved_words_1))
   {
-    std::wcout << "\t\tWARNING! Detected non-zero data in ReservedWords1.\n";
+    WriteNormal(out, L"WARNING! Detected non-zero data in ReservedWords1.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  std::wcout << "\t\tOEMID: " << std::hex << dos_hdr.GetOEMID() << std::dec
-             << "\n";
-  std::wcout << "\t\tOEMInfo: " << std::hex << dos_hdr.GetOEMInfo() << std::dec
-             << "\n";
-  std::wcout << "\t\tReservedWords2:" << std::hex;
-  auto const reserved_words_2 = dos_hdr.GetReservedWords2();
-  for (auto const r : reserved_words_2)
-  {
-    std::wcout << L' ' << r;
-  }
-  std::wcout << std::dec << "\n";
+  WriteNamedHex(out, L"OEMID", dos_hdr.GetOEMID(), 2);
+  WriteNamedHex(out, L"OEMInfo", dos_hdr.GetOEMInfo(), 2);
+  WriteNamedHexContainer(
+    out, L"ReservedWords2", dos_hdr.GetReservedWords2(), 2);
   // TODO: Detect when e_lfanew is in the overlay and will not be mapped when
   // loaded into memory. See "Self-destructing PE header" in the ReversingLabs
   // "Undocumented PECOFF" whitepaper. Also investigate the second part of that
@@ -97,8 +80,7 @@ void DumpDosHeader(hadesmem::Process const& process,
   // header and an 'in memory' header. See "Dual PE header" in the ReversingLabs
   // "Undocumented PECOFF" whitepaper.
   // TODO: Warn on a non-standard value.
-  std::wcout << "\t\tNewHeaderOffset: " << std::hex
-             << dos_hdr.GetNewHeaderOffset() << std::dec << "\n";
+  WriteNamedHex(out, L"NewHeaderOffset", dos_hdr.GetNewHeaderOffset(), 2);
 }
 
 std::wstring GetDataDirName(DWORD num)
@@ -192,40 +174,44 @@ bool IsUnsupportedDataDir(DWORD num)
 void DumpNtHeaders(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {
-  std::wcout << "\n\tNT Headers:\n";
+  std::wostream& out = std::wcout;
+
+  WriteNewline(out);
+  WriteNormal(out, L"DOS Header:", 1);
 
   hadesmem::NtHeaders nt_hdrs(process, pe_file);
-  std::wcout << "\n";
-  std::wcout << "\t\tSignature: " << std::hex << nt_hdrs.GetSignature()
-             << std::dec << "\n";
-  std::wcout << "\t\tMachine: " << std::hex << nt_hdrs.GetMachine() << std::dec
-             << "\n";
-  std::wcout << "\t\tNumberOfSections: " << std::hex
-             << nt_hdrs.GetNumberOfSections() << std::dec << "\n";
-  std::wcout << "\t\tTimeDateStamp: " << std::hex << nt_hdrs.GetTimeDateStamp()
-             << std::dec << "\n";
-  std::wcout << "\t\tPointerToSymbolTable: " << std::hex
-             << nt_hdrs.GetPointerToSymbolTable() << std::dec << "\n";
-  std::wcout << "\t\tNumberOfSymbols: " << std::hex
-             << nt_hdrs.GetNumberOfSymbols() << std::dec << "\n";
+  WriteNewline(out);
+  WriteNamedHex(out, L"Signature", nt_hdrs.GetSignature(), 2);
+  WriteNamedHex(out, L"Machine", nt_hdrs.GetMachine(), 2);
+  auto const num_sections = nt_hdrs.GetNumberOfSections();
+  WriteNamedHex(out, L"NumberOfSections", num_sections, 2);
+  if (!num_sections)
+  {
+    WriteNormal(out, L"WARNING! No sections.", 2);
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  if (num_sections > 96U)
+  {
+    WriteNormal(out, L"WARNING! More than 96 sections.", 2);
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  WriteNamedHex(out, L"TimeDateStamp", nt_hdrs.GetTimeDateStamp(), 2);
+  WriteNamedHex(
+    out, L"PointerToSymbolTable", nt_hdrs.GetPointerToSymbolTable(), 2);
+  WriteNamedHex(out, L"NumberOfSymbols", nt_hdrs.GetNumberOfSymbols(), 2);
   // TODO: Detect when SizeOfOptionalHeader has been set to put the section
   // table in unmapped space (e.g. the overlay).
-  std::wcout << "\t\tSizeOfOptionalHeader: " << std::hex
-             << nt_hdrs.GetSizeOfOptionalHeader() << std::dec << "\n";
-  std::wcout << "\t\tCharacteristics: " << std::hex
-             << nt_hdrs.GetCharacteristics() << std::dec << "\n";
-  std::wcout << "\t\tMagic: " << std::hex << nt_hdrs.GetMagic() << std::dec
-             << "\n";
-  std::wcout << "\t\tMajorLinkerVersion: " << nt_hdrs.GetMajorLinkerVersion()
-             << "\n";
-  std::wcout << "\t\tMinorLinkerVersion: " << nt_hdrs.GetMinorLinkerVersion()
-             << "\n";
-  std::wcout << "\t\tSizeOfCode: " << std::hex << nt_hdrs.GetSizeOfCode()
-             << std::dec << "\n";
-  std::wcout << "\t\tSizeOfInitializedData: " << std::hex
-             << nt_hdrs.GetSizeOfInitializedData() << std::dec << "\n";
-  std::wcout << "\t\tSizeOfUninitializedData: " << std::hex
-             << nt_hdrs.GetSizeOfUninitializedData() << std::dec << "\n";
+  WriteNamedHex(
+    out, L"SizeOfOptionalHeader", nt_hdrs.GetSizeOfOptionalHeader(), 2);
+  WriteNamedHex(out, L"Characteristics", nt_hdrs.GetCharacteristics(), 2);
+  WriteNamedHex(out, L"Magic", nt_hdrs.GetMagic(), 2);
+  WriteNamedHex(out, L"MajorLinkerVersion", nt_hdrs.GetMajorLinkerVersion(), 2);
+  WriteNamedHex(out, L"MinorLinkerVersion", nt_hdrs.GetMinorLinkerVersion(), 2);
+  WriteNamedHex(out, L"SizeOfCode", nt_hdrs.GetSizeOfCode(), 2);
+  WriteNamedHex(
+    out, L"SizeOfInitializedData", nt_hdrs.GetSizeOfInitializedData(), 2);
+  WriteNamedHex(
+    out, L"SizeOfUninitializedData", nt_hdrs.GetSizeOfUninitializedData(), 2);
   // TODO: Detect EP outside of the file (i.e. pointing to another non-relocated
   // module). See "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF"
   // for more inforamtion. Also see AddressOfEntryPoint in Corkami PE info.
@@ -233,8 +219,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // also disassemble the first N instructions (for some reasonable value of N).
   // TODO: Detect virtual overlap EP. (Sample: virtEP.exe from Corkami)
   DWORD const addr_of_ep = nt_hdrs.GetAddressOfEntryPoint();
-  std::wcout << "\t\tAddressOfEntryPoint: " << std::hex << addr_of_ep
-             << std::dec << "\n";
+  WriteNamedHex(out, L"AddressOfEntryPoint", addr_of_ep, 2);
   // Entry point can be null. For DLLs this is fine, because it simply means the
   // EP is not called, but for non-DLLs it means that execution starts at
   // ImageBase, executing 'MZ' as 'dec ebp/pop edx'.
@@ -244,137 +229,184 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // the case where it's null).
   if (!addr_of_ep && !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {
-    std::wcout << "\t\tWARNING! Detected zero EP in non-DLL PE.\n";
+    WriteNormal(out, L"WARNING! Detected zero EP in non-DLL PE.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  if (addr_of_ep && !RvaToVa(process, pe_file, addr_of_ep))
+  auto const ep_va = RvaToVa(process, pe_file, addr_of_ep);
+  if (addr_of_ep && !ep_va)
   {
     // Not actually unsupported, we just want to identify potential samples for
     // now.
-    std::wcout << "\t\tWARNING! Unable to resolve EP to file offset.\n";
+    WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
-  std::wcout << "\t\tBaseOfCode: " << std::hex << nt_hdrs.GetBaseOfCode()
-             << std::dec << "\n";
+  if (ep_va)
+  {
+    ud_t ud_obj;
+    ud_init(&ud_obj);
+    // TODO: Fix this so we don't risk overflow etc.
+    std::size_t size = 0U;
+    if (pe_file.GetType() == hadesmem::PeFileType::Data)
+    {
+      // TODO: Don't read so much unnecessary data. We know the maximum
+      // instruction length for the architecture, so we should at least clamp it
+      // based on that (and the max number of instructions to disassemble). This
+      // could also fail for 'hostile' PE files.
+      size = (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
+              pe_file.GetSize()) -
+             reinterpret_cast<std::uintptr_t>(ep_va);
+    }
+    else
+    {
+      // TODO: Fix this.
+      auto const mbi = hadesmem::detail::Query(process, ep_va);
+      size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) +
+             mbi.RegionSize - reinterpret_cast<std::uintptr_t>(ep_va);
+    }
+    ud_set_input_buffer(&ud_obj, static_cast<std::uint8_t*>(ep_va), size);
+    ud_set_syntax(&ud_obj, UD_SYN_INTEL);
+    ud_set_pc(&ud_obj, nt_hdrs.GetImageBase());
+#if defined(_M_AMD64)
+    ud_set_mode(&ud_obj, 64);
+#elif defined(_M_IX86)
+    ud_set_mode(&ud_obj, 32);
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+    // TODO: Experiment to find the "right" number of instructions to try and
+    // disassemble.
+    for (std::size_t i = 0; i < 10; ++i)
+    {
+      std::uint32_t const len = ud_disassemble(&ud_obj);
+      if (len == 0)
+      {
+        WriteNormal(out, L"WARNING! Disassembly failed.", 3);
+        WarnForCurrentFile(WarningType::kUnsupported);
+        break;
+      }
+
+      char const* const asm_str = ud_insn_asm(&ud_obj);
+      HADESMEM_DETAIL_ASSERT(asm_str);
+      char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
+      HADESMEM_DETAIL_ASSERT(asm_bytes_str);
+      auto const diasm_line =
+        hadesmem::detail::MultiByteToWideChar(asm_str) + L". [" +
+        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L"].";
+      WriteNormal(out, diasm_line, 3);
+    }
+  }
+  WriteNamedHex(out, L"BaseOfCode", nt_hdrs.GetBaseOfCode(), 2);
 #if defined(HADESMEM_DETAIL_ARCH_X86)
-  std::wcout << "\t\tBaseOfData: " << std::hex << nt_hdrs.GetBaseOfData()
-             << std::dec << "\n";
+  WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);
 #endif
   ULONG_PTR const image_base = nt_hdrs.GetImageBase();
-  std::wcout << "\t\tImageBase: " << std::hex << image_base << std::dec << "\n";
+  WriteNamedHex(out, L"ImageBase", image_base, 2);
   // ImageBase can be null under XP. In this case the binary is relocated to
   // 0x10000.
   // Sample: ibnullXP.exe (Corkami PE corpus).
   if (!image_base)
   {
-    std::wcout << "\t\tWARNING! Detected zero ImageBase.\n";
+    WriteNormal(out, L"WARNING! Detected zero ImageBase.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // If ImageBase is in the kernel address range it's relocated to 0x1000.
   // Sample: ibkernel.exe (Corkami PE corpus).
   if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_I386 &&
-      image_base > 0x80000000UL)
+      image_base >= (1UL << 31))
   {
-    std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
+    WriteNormal(out, L"WARNING! Detected kernel space ImageBase.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // Not sure if this is actually possible under x64.
   // TODO: Check whether the image is allowed to load (similar to x86) in this
   // case.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
-           image_base > 0x80000000ULL)
+           image_base >= (0xFFFFULL << 48))
   {
-    std::wcout << "\t\tWARNING! Detected kernel space ImageBase.\n";
+    // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
+    // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
+    // TODO: Also check the gap?
+    WriteNormal(out, L"WARNING! Detected kernel space ImageBase.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
   // ImageBase must be a multiple of 0x10000
   if (!!(image_base & 0xFFFF))
   {
-    std::wcout << "\t\tWARNING! Detected invalid ImageBase (not a multiple of "
-                  "0x10000).\n";
+    WriteNormal(
+      out,
+      L"WARNING! Detected invalid ImageBase (not a multiple of 0x10000).",
+      2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DWORD const section_alignment = nt_hdrs.GetSectionAlignment();
-  std::wcout << "\t\tSectionAlignment: " << std::hex << section_alignment
-             << std::dec << "\n";
+  WriteNamedHex(out, L"SectionAlignment", section_alignment, 2);
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
   if (section_alignment < 0x200 || section_alignment > 0x1000)
   {
-    std::wcout << "\t\tWARNING! Unusual section alignment.\n";
+    WriteNormal(out, L"WARNING! Unusual section alignment.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DWORD const file_alignment = nt_hdrs.GetFileAlignment();
-  std::wcout << "\t\tFileAlignment: " << std::hex << file_alignment << std::dec
-             << "\n";
+  WriteNamedHex(out, L"FileAlignment", file_alignment, 2);
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
   if (file_alignment < 0x200 || file_alignment > 0x1000)
   {
-    std::wcout << "\t\tWARNING! Unusual file alignment.\n";
+    WriteNormal(out, L"WARNING! Unusual file alignment.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   if (section_alignment < 0x800 && section_alignment != file_alignment)
   {
-    std::wcout << "\t\tWARNING! Invalid alignment.\n";
+    WriteNormal(out, L"WARNING! Unusual alignment.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
   if (file_alignment > section_alignment)
   {
-    std::wcout << "\t\tWARNING! Invalid alignment.\n";
+    WriteNormal(out, L"WARNING! Invalid alignment.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
-  std::wcout << "\t\tMajorOperatingSystemVersion: "
-             << nt_hdrs.GetMajorOperatingSystemVersion() << "\n";
-  std::wcout << "\t\tMinorOperatingSystemVersion: "
-             << nt_hdrs.GetMinorOperatingSystemVersion() << "\n";
-  std::wcout << "\t\tMajorImageVersion: " << nt_hdrs.GetMajorImageVersion()
-             << "\n";
-  std::wcout << "\t\tMinorImageVersion: " << nt_hdrs.GetMinorImageVersion()
-             << "\n";
-  std::wcout << "\t\tMajorSubsystemVersion: "
-             << nt_hdrs.GetMajorSubsystemVersion() << "\n";
-  std::wcout << "\t\tMinorSubsystemVersion: "
-             << nt_hdrs.GetMinorSubsystemVersion() << "\n";
+  WriteNamedHex(out,
+                L"MajorOperatingSystemVersion",
+                nt_hdrs.GetMajorOperatingSystemVersion(),
+                2);
+  WriteNamedHex(out,
+                L"MinorOperatingSystemVersion",
+                nt_hdrs.GetMinorOperatingSystemVersion(),
+                2);
+  WriteNamedHex(out, L"MajorImageVersion", nt_hdrs.GetMajorImageVersion(), 2);
+  WriteNamedHex(out, L"MinorImageVersion", nt_hdrs.GetMinorImageVersion(), 2);
+  WriteNamedHex(
+    out, L"MajorSubsystemVersion", nt_hdrs.GetMajorSubsystemVersion(), 2);
+  WriteNamedHex(
+    out, L"MinorSubsystemVersion", nt_hdrs.GetMinorSubsystemVersion(), 2);
   if (nt_hdrs.GetMajorSubsystemVersion() < 3 ||
       (nt_hdrs.GetMajorSubsystemVersion() == 3 &&
        nt_hdrs.GetMinorSubsystemVersion() < 10))
   {
-    std::wcout << "\t\tWARNING! Invalid subsystem version.\n";
+    WriteNormal(out, L"WARNING! Invalid subsystem version.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  std::wcout << "\t\tWin32VersionValue: " << nt_hdrs.GetWin32VersionValue()
-             << "\n";
-  std::wcout << "\t\tSizeOfImage: " << std::hex << nt_hdrs.GetSizeOfImage()
-             << std::dec << "\n";
-  std::wcout << "\t\tSizeOfHeaders: " << std::hex << nt_hdrs.GetSizeOfHeaders()
-             << std::dec << "\n";
-  std::wcout << "\t\tCheckSum: " << std::hex << nt_hdrs.GetCheckSum()
-             << std::dec << "\n";
-  std::wcout << "\t\tSubsystem: " << std::hex << nt_hdrs.GetSubsystem()
-             << std::dec << "\n";
-  std::wcout << "\t\tDllCharacteristics: " << std::hex
-             << nt_hdrs.GetDllCharacteristics() << std::dec << "\n";
-  std::wcout << "\t\tSizeOfStackReserve: " << std::hex
-             << nt_hdrs.GetSizeOfStackReserve() << std::dec << "\n";
-  std::wcout << "\t\tSizeOfStackCommit: " << std::hex
-             << nt_hdrs.GetSizeOfStackCommit() << std::dec << "\n";
-  std::wcout << "\t\tSizeOfHeapReserve: " << std::hex
-             << nt_hdrs.GetSizeOfHeapReserve() << std::dec << "\n";
-  std::wcout << "\t\tSizeOfHeapCommit: " << std::hex
-             << nt_hdrs.GetSizeOfHeapCommit() << std::dec << "\n";
-  std::wcout << "\t\tLoaderFlags: " << std::hex << nt_hdrs.GetLoaderFlags()
-             << std::dec << "\n";
+  WriteNamedHex(out, L"Win32VersionValue", nt_hdrs.GetWin32VersionValue(), 2);
+  WriteNamedHex(out, L"SizeOfImage", nt_hdrs.GetSizeOfImage(), 2);
+  WriteNamedHex(out, L"SizeOfHeaders", nt_hdrs.GetSizeOfHeaders(), 2);
+  WriteNamedHex(out, L"CheckSum", nt_hdrs.GetCheckSum(), 2);
+  WriteNamedHex(out, L"Subsystem", nt_hdrs.GetSubsystem(), 2);
+  WriteNamedHex(out, L"DllCharacteristics", nt_hdrs.GetDllCharacteristics(), 2);
+  WriteNamedHex(out, L"SizeOfStackReserve", nt_hdrs.GetSizeOfStackReserve(), 2);
+  WriteNamedHex(out, L"SizeOfStackCommit", nt_hdrs.GetSizeOfStackCommit(), 2);
+  WriteNamedHex(out, L"SizeOfHeapReserve", nt_hdrs.GetSizeOfHeapReserve(), 2);
+  WriteNamedHex(out, L"SizeOfHeapCommit", nt_hdrs.GetSizeOfHeapCommit(), 2);
+  WriteNamedHex(out, L"LoaderFlags", nt_hdrs.GetLoaderFlags(), 2);
   DWORD const num_dirs = nt_hdrs.GetNumberOfRvaAndSizes();
-  std::wcout << "\t\tNumberOfRvaAndSizes: " << nt_hdrs.GetNumberOfRvaAndSizes()
-             << "\n";
+  WriteNamedHex(out, L"NumberOfRvaAndSizes", num_dirs, 2);
   DWORD const num_dirs_clamped = GetNumberOfRvaAndSizesClamped(nt_hdrs);
-  std::wcout << "\t\tNumberOfRvaAndSizes (Clamped): " << num_dirs_clamped
-             << "\n";
+  WriteNamedHex(out, L"NumberOfRvaAndSizes (Clamped)", num_dirs_clamped, 2);
   if (num_dirs > num_dirs_clamped)
   {
-    std::wcout
-      << "\t\tWARNING! Detected an invalid number of data directories.\n";
+    WriteNormal(
+      out, L"WARNING! Detected an invalid number of data directories.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   for (DWORD i = 0; i < num_dirs_clamped; ++i)
@@ -384,14 +416,16 @@ void DumpNtHeaders(hadesmem::Process const& process,
     auto const data_dir_size =
       nt_hdrs.GetDataDirectorySize(static_cast<hadesmem::PeDataDir>(i));
     auto const data_dir_name = GetDataDirName(i);
-    std::wcout << "\t\tData Directory RVA: " << std::hex << data_dir_va << " ("
-               << data_dir_name << ")\n";
-    std::wcout << "\t\tData Directory Size: " << std::hex << data_dir_size
-               << " (" << data_dir_name << ")\n";
+    WriteNamedHexSuffix(
+      out, L"Data Directory VA", data_dir_va, data_dir_name, 2);
+    WriteNamedHexSuffix(
+      out, L"Data Directory Size", data_dir_size, data_dir_name, 2);
     if (IsUnsupportedDataDir(i))
     {
-      std::wcout << "\t\tWARNING! " << data_dir_name
-                 << " data directory is unsupported.\n";
+      WriteNormal(out,
+                  L"WARNING! " + data_dir_name +
+                    L" data directory is unsupported.",
+                  2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
