@@ -4,6 +4,7 @@
 #include "exports.hpp"
 
 #include <iostream>
+#include <locale>
 #include <memory>
 #include <set>
 
@@ -16,9 +17,18 @@
 
 #include "main.hpp"
 
-// TODO: Fix this for the case where the export dir is seemingly
-// corrupted/invalid, but actually has legitimate (and working) exports.
-// Sample: dllord.dll (Corkami PE Corpus)
+namespace
+{
+
+bool IsPrintableClassicLocale(std::string const& s)
+{
+  auto const i = std::find_if(std::begin(s),
+                              std::end(s),
+                              [](char c)
+  { return !std::isprint(c, std::locale::classic()); });
+  return i == std::end(s);
+}
+}
 
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
@@ -44,9 +54,8 @@ void DumpExports(hadesmem::Process const& process,
   WriteNamedHex(out, L"MajorVersion", export_dir->GetMajorVersion(), 2);
   WriteNamedHex(out, L"MinorVersion", export_dir->GetMinorVersion(), 2);
   WriteNamedHex(out, L"Name (Raw)", export_dir->GetNameRaw(), 2);
-  // Name is not guaranteed to be valid?
-  // TODO: Find a sample for this before relaxing the warining back to
-  // kSuspicious.
+  // Name is not guaranteed to be valid.
+  // Sample: dllord.dll (Corkami PE Corpus)
   try
   {
     // Export dir name does not need to consist of only printable characters, as
@@ -56,14 +65,14 @@ void DumpExports(hadesmem::Process const& process,
     // instead of a string in the cases where the name isn't printable.
     // TODO: Detect and handle the case where the string is terminated
     // virtually.
-    // TODO: Detect and handle the case where the string is terminated by EOF
-    // (virtual termination special case).
+    // TODO: Detect and handle the case where the string is EOF terminated.
+    // TODO: Detect and handle the case where the string is unreasonably long.
     WriteNamedNormal(out, L"Name", export_dir->GetName().c_str(), 2);
   }
   catch (std::exception const& /*e*/)
   {
     WriteNormal(out, L"WARNING! Failed to read export dir name.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   WriteNamedHex(out, L"OrdinalBase", export_dir->GetOrdinalBase(), 2);
   WriteNamedHex(
@@ -89,6 +98,8 @@ void DumpExports(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! Empty or invalid export list.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
+
+  // TODO: Warn and bail after processing N entries (similar to imports).
   for (auto const& e : exports)
   {
     WriteNewline(out);
@@ -96,37 +107,57 @@ void DumpExports(hadesmem::Process const& process,
     WriteNamedHex(out, L"VA", reinterpret_cast<std::uintptr_t>(e.GetVa()), 3);
     if (e.ByName())
     {
-      // Export names do not need to consist of only printable characters, as
-      // long as they are zero-terminated.
-      // Sample: dllweirdexp.dll
-      // TODO: Find a solution to the above case, and perhaps use a vector<char>
-      // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
       // TODO: Detect and handle the case where the string is EOF terminated.
       // TODO: Detect and warn when export names are not lexicographically
       // ordered.
-      WriteNamedNormal(out, L"Name", e.GetName().c_str(), 3);
+
+      auto const name = e.GetName();
+      // Export names do not need to consist of only printable characters, as
+      // long as they are zero-terminated.
+      // Sample: dllweirdexp.dll
+      if (!IsPrintableClassicLocale(name))
+      {
+        WriteNormal(out,
+                    L"WARNING! Detected unprintable export "
+                    L"name. Using empty name instead.",
+                    3);
+        WarnForCurrentFile(WarningType::kSuspicious);
+        WriteNamedNormal(out, L"Name", "", 3);
+      }
+      // Export names are mostly unused, and so can be anything. Treat anything
+      // longer than 1KB as invalid.
+      // Sample: dllweirdexp.dll
+      else if (name.size() > 1024)
+      {
+        WriteNormal(out,
+                    L"WARNING! Export name is suspiciously "
+                    L"long. Using empty name instead.",
+                    3);
+        WarnForCurrentFile(WarningType::kSuspicious);
+        WriteNamedNormal(out, L"Name", "", 3);
+      }
+      else
+      {
+        WriteNamedNormal(out, L"Name", name.c_str(), 3);
+      }
+
       // PE files can have duplicate exported function names (or even have them
       // all identical) because the import hint is used to check the name first
       // before performing a search.
       // Sample: None ("Import name hint" section of "Undocumented PECOFF"
       // whitepaper).
-      if (!export_names.insert(e.GetName()).second)
+      if (!export_names.insert(name).second)
       {
         WriteNormal(out, L"WARNING! Detected duplicate export name.", 3);
         WarnForCurrentFile(WarningType::kSuspicious);
       }
     }
-    else if (e.ByOrdinal())
+    else
     {
       WriteNamedHex(out, L"ProcedureNumber", e.GetProcedureNumber(), 3);
       WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
-    }
-    else
-    {
-      WriteNormal(out, L"WARNING! Entry not exported by name or ordinal.", 3);
-      WarnForCurrentFile(WarningType::kUnsupported);
     }
 
     if (e.IsForwarded())

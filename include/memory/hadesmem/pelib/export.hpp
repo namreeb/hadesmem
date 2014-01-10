@@ -66,31 +66,23 @@ public:
     {
       WORD* const ptr_ordinals = static_cast<WORD*>(
         RvaToVa(process, pe_file, export_dir.GetAddressOfNameOrdinals()));
-      if (!ptr_ordinals)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("AddressOfNameOrdinals invalid."));
-      }
-
       DWORD* const ptr_names = static_cast<DWORD*>(
         RvaToVa(process, pe_file, export_dir.GetAddressOfNames()));
-      if (!ptr_names)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("AddressOfNames invalid."));
-      }
 
-      std::vector<WORD> const name_ordinals =
-        ReadVector<WORD>(process, ptr_ordinals, num_names);
-      auto const name_ord_iter = std::find(
-        std::begin(name_ordinals), std::end(name_ordinals), ordinal_number_);
-      if (name_ord_iter != std::end(name_ordinals))
+      if (ptr_ordinals && ptr_names)
       {
-        by_name_ = true;
-        DWORD const name_rva = Read<DWORD>(
-          process,
-          ptr_names + std::distance(std::begin(name_ordinals), name_ord_iter));
-        name_ = ReadString<char>(process, RvaToVa(process, pe_file, name_rva));
+        std::vector<WORD> const name_ordinals =
+          ReadVector<WORD>(process, ptr_ordinals, num_names);
+        auto const name_ord_iter = std::find(
+          std::begin(name_ordinals), std::end(name_ordinals), ordinal_number_);
+        if (name_ord_iter != std::end(name_ordinals))
+        {
+          by_name_ = true;
+          DWORD const name_rva = Read<DWORD>(
+            process,
+            ptr_names + std::distance(std::begin(name_ordinals), name_ord_iter));
+          name_ = ReadString<char>(process, RvaToVa(process, pe_file, name_rva));
+        }
       }
     }
 
