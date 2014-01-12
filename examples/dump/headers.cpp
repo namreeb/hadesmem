@@ -322,7 +322,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // TODO: Check whether the image is allowed to load (similar to x86) in this
   // case.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
-           static_cast<std::int64_t>(image_base) >= (0xFFFFULL << 48))
+           static_cast<std::uint64_t>(image_base) >= (0xFFFFULL << 48))
   {
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
