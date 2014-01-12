@@ -206,6 +206,19 @@ public:
     return *this;
   }
 
+#else
+
+  // Workaround for Intel C++ compile error (Intel C++ 2013 SP1 Updaate 1).
+  // TODO: Fix this properly.
+
+  CreateAndInjectData(CreateAndInjectData const&) = delete;
+
+  CreateAndInjectData& operator=(CreateAndInjectData const&) = delete;
+
+  CreateAndInjectData(CreateAndInjectData&&) = default;
+
+  CreateAndInjectData& operator=(CreateAndInjectData&&) = default;
+
 #endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   Process GetProcess() const
