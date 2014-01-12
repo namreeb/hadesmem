@@ -23,13 +23,12 @@ void TestTlsDir()
 {
 // Use TLS to ensure that at least one module has a TLS dir
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local int tls_dummy = 0;
+  static thread_local std::int32_t = 0;
 #elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  static __declspec(thread) int tls_dummy = 0;
+  static __declspec(thread) std::int32_t tls_dummy = 0;
 #else
 #error "[HadesMem] Unsupported compiler."
 #endif
-  (void)tls_dummy;
 
   hadesmem::Process const process(::GetCurrentProcessId());
 
@@ -46,8 +45,6 @@ void TestTlsDir()
   BOOST_TEST_EQ(tls_dir_3, tls_dir_1);
   tls_dir_2 = std::move(tls_dir_3);
   BOOST_TEST_EQ(tls_dir_1, tls_dir_2);
-
-  bool processed_one_tls_dir = false;
 
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
@@ -66,7 +63,7 @@ void TestTlsDir()
       continue;
     }
 
-    processed_one_tls_dir = true;
+    ++tls_dummy;
 
     auto const tls_dir_raw =
       hadesmem::Read<IMAGE_TLS_DIRECTORY>(process, cur_tls_dir->GetBase());
@@ -101,7 +98,7 @@ void TestTlsDir()
     // other tests).
   }
 
-  BOOST_TEST(processed_one_tls_dir);
+  BOOST_TEST_NE(tls_dummy, 0);
 }
 
 int main()
