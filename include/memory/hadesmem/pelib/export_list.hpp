@@ -109,13 +109,25 @@ public:
       WORD ordinal_number =
         static_cast<WORD>((procedure_number - ordinal_base) + 1);
 
-      for (; Read<DWORD>(*impl_->process_, ptr_functions + ordinal_number) ==
-                 0UL &&
-               ordinal_number < export_dir.GetNumberOfFunctions();
-           ++ordinal_number)
-        ;
+      DWORD const num_funcs = export_dir.GetNumberOfFunctions();
 
-      if (ordinal_number >= export_dir.GetNumberOfFunctions())
+      for (; ((ordinal_number + ordinal_base) >= ordinal_base) &&
+               !Read<DWORD>(*impl_->process_, ptr_functions + ordinal_number) &&
+               ordinal_number < num_funcs;
+           ++ordinal_number)
+      {
+      }
+
+      // TODO: Add some way to bubble this up to a higher level so it can be
+      // detected and warned about.
+      // Sample: 00419a7efda844cc5161a2ca6b8a09446cd778c0
+      if ((ordinal_number + ordinal_base) < ordinal_base)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("Ordinal number overflow."));
+      }
+
+      if (ordinal_number >= num_funcs)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
           Error() << ErrorString("Invalid export number."));
