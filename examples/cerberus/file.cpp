@@ -219,7 +219,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
 {
   hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%d] [%p] [%d].",
+    "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%u] [%p] [%u].",
     file_handle,
     event,
     apc_routine,
