@@ -178,7 +178,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
   PULONG return_length) HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::LastErrorPreserver last_error;
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%u] [%p].",
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%lu] [%p].",
                                  system_information_class,
                                  system_information,
                                  system_information_length,
