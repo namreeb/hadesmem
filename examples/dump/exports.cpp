@@ -160,6 +160,8 @@ void DumpExports(hadesmem::Process const& process,
       WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
     }
 
+    // TODO: Disassemble the export EP if it is not a forwarded export.
+
     if (e.IsForwarded())
     {
       WriteNamedNormal(out, L"Forwarder", e.GetForwarder().c_str(), 3);

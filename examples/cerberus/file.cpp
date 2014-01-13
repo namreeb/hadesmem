@@ -228,9 +228,9 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
     file_information,
     length,
     file_information_class,
-    return_single_entry,
+    static_cast<std::uint32_t>(return_single_entry),
     file_name,
-    restart_scan);
+    static_cast<std::uint32_t>(restart_scan));
   auto& detour = GetNtQueryDirectoryFileDetour();
   auto const nt_query_directory_file =
     detour->GetTrampoline<decltype(&NtQueryDirectoryFileDetour)>();

@@ -120,6 +120,8 @@ public:
 
       // TODO: Add some way to bubble this up to a higher level so it can be
       // detected and warned about.
+      // TODO: Verify this is actually correct. Need to figure out what the 
+      // loader does in case of overflow etc.
       // Sample: 00419a7efda844cc5161a2ca6b8a09446cd778c0
       if ((ordinal_number + ordinal_base) < ordinal_base)
       {

@@ -624,8 +624,8 @@ private:
     DWORD_PTR const stub_size = jit.getCodeSize();
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Stub size = 0n%Iu, Expected stub size = 0n%Iu.",
-      stub_size,
-      expected_stub_size);
+      static_cast<std::size_t>(stub_size),
+      static_cast<std::size_t>(expected_stub_size));
     // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {
@@ -686,8 +686,8 @@ private:
     DWORD_PTR const stub_size = jit.getCodeSize();
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Stub size = 0n%Iu, Expected stub size = 0n%Iu.",
-      stub_size,
-      expected_stub_size);
+      static_cast<std::size_t>(stub_size),
+      static_cast<std::size_t>(expected_stub_size));
     // TODO: Should this be an assert?
     if (stub_size != expected_stub_size)
     {

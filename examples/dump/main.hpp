@@ -17,7 +17,7 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path);
 
-enum class WarningType
+enum class WarningType : int
 {
   kSuspicious,
   kUnsupported,
@@ -68,21 +68,21 @@ inline void WriteNamedHexSuffix(std::wostream& out,
                                 std::size_t tabs)
 {
   StreamFlagSaver flags(out);
-  out << std::wstring(tabs, '\t') << name << ": " << std::hex << num << L" ("
+  out << std::wstring(tabs, '\t') << name << ": 0x" << std::hex << num << L" ("
       << suffix << L")" << '\n';
 }
 
 template <typename C>
 inline void WriteNamedHexContainer(std::wostream& out,
                                    std::wstring const& name,
-                                   C const& nums,
+                                   C const& c,
                                    std::size_t tabs)
 {
   StreamFlagSaver flags(out);
   out << std::wstring(tabs, '\t') << name << ":" << std::hex;
-  for (auto const& num : nums)
+  for (auto const& e : c)
   {
-    out << ' ' << num;
+    out << ' ' << e;
   }
   out << '\n';
 }
@@ -90,18 +90,18 @@ inline void WriteNamedHexContainer(std::wostream& out,
 template <typename T>
 inline void WriteNamedNormal(std::wostream& out,
                              std::wstring const& name,
-                             T const& num,
+                             T const& t,
                              std::size_t tabs)
 {
   StreamFlagSaver flags(out);
-  out << std::wstring(tabs, '\t') << name << ": " << num << '\n';
+  out << std::wstring(tabs, '\t') << name << ": " << t << '\n';
 }
 
 template <typename T>
-inline void WriteNormal(std::wostream& out, T const& num, std::size_t tabs)
+inline void WriteNormal(std::wostream& out, T const& t, std::size_t tabs)
 {
   StreamFlagSaver flags(out);
-  out << std::wstring(tabs, '\t') << num << '\n';
+  out << std::wstring(tabs, '\t') << t << '\n';
 }
 
 inline void WriteNewline(std::wostream& out)
