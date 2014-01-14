@@ -23,7 +23,7 @@ void TestTlsDir()
 {
 // Use TLS to ensure that at least one module has a TLS dir
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local std::int32_t = 0;
+  static thread_local std::int32_t tls_dummy = 0;
 #elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) std::int32_t tls_dummy = 0;
 #else

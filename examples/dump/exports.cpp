@@ -99,10 +99,24 @@ void DumpExports(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kUnsupported);
   }
 
-  // TODO: Warn and bail after processing N entries (similar to imports).
+  std::uint32_t num_exports = 0U;
   for (auto const& e : exports)
   {
     WriteNewline(out);
+    
+    // Sample: 000d62d3841283151c0582a904e17d929c94292d
+    // TODO: Come up with a better solution to this.
+    if (num_exports++ == 1000)
+    {
+      WriteNormal(
+        out,
+        L"WARNING! Processed 1000 exports. Stopping early to avoid resource "
+          L"exhaustion attacks.",
+        2);
+      WarnForCurrentFile(WarningType::kUnsupported);
+      break;
+    }
+
     WriteNamedHex(out, L"RVA", e.GetRva(), 3);
     WriteNamedHex(out, L"VA", reinterpret_cast<std::uintptr_t>(e.GetVa()), 3);
     if (e.ByName())
@@ -154,11 +168,9 @@ void DumpExports(hadesmem::Process const& process,
         WarnForCurrentFile(WarningType::kSuspicious);
       }
     }
-    else
-    {
-      WriteNamedHex(out, L"ProcedureNumber", e.GetProcedureNumber(), 3);
-      WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
-    }
+
+    WriteNamedHex(out, L"ProcedureNumber", e.GetProcedureNumber(), 3);
+    WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
 
     // TODO: Disassemble the export EP if it is not a forwarded export.
 

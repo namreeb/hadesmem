@@ -291,9 +291,16 @@ public:
     return data_.OptionalHeader.NumberOfRvaAndSizes;
   }
 
+  // TODO: Add tests for this.
+  DWORD GetNumberOfRvaAndSizesClamped() const
+  {
+    DWORD const num_rvas_and_sizes = GetNumberOfRvaAndSizes();
+    return (std::min)(num_rvas_and_sizes, 0x10UL);
+  }
+
   DWORD GetDataDirectoryVirtualAddress(PeDataDir data_dir) const
   {
-    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizesClamped())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
         << ErrorString("Invalid data dir."));
@@ -305,7 +312,7 @@ public:
 
   DWORD GetDataDirectorySize(PeDataDir data_dir) const
   {
-    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
+    if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizesClamped())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
         << ErrorString("Invalid data dir."));
@@ -598,13 +605,6 @@ inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
   lhs << static_cast<void*>(rhs.GetBase());
   lhs.imbue(old);
   return lhs;
-}
-
-// TODO: Add tests for this.
-inline DWORD GetNumberOfRvaAndSizesClamped(NtHeaders const& nt_headers)
-{
-  DWORD const num_rvas_and_sizes = nt_headers.GetNumberOfRvaAndSizes();
-  return (std::min)(num_rvas_and_sizes, 0x10UL);
 }
 
 // TODO: Add tests for this.

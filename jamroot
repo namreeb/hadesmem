@@ -166,7 +166,7 @@ alias memory
     <library>shlwapi
     <library>user32
 	
-    <library>/boost//headers
+    <implicit-dependency>/boost//headers
 	
     <library>src/asmjit
 

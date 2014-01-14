@@ -11,6 +11,6 @@ alias pugixml
   :
     <include>"$(PUGIXML_ROOT)/src/"
 
-	<define>PUGIXML_HEADER_ONLY
-	<define>PUGIXML_WCHAR_MODE
+    <define>PUGIXML_HEADER_ONLY
+    <define>PUGIXML_WCHAR_MODE
   ;

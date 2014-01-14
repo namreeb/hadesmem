@@ -108,6 +108,10 @@
 // TODO: Use backup semantics flags and try to get backup privilege in order to
 // make directory enumeration find more files.
 
+// TODO: XML output mode (easier to port to a GUI in future).
+
+// TODO: GUI wrapper.
+
 namespace
 {
 

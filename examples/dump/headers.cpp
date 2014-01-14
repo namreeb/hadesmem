@@ -62,7 +62,7 @@ void DumpDosHeader(hadesmem::Process const& process,
   if (std::find_if(std::begin(reserved_words_1),
                    std::end(reserved_words_1),
                    [](WORD w)
-  { return !!w; }) != std::end(reserved_words_1))
+                   { return !!w; }) != std::end(reserved_words_1))
   {
     WriteNormal(out, L"WARNING! Detected non-zero data in ReservedWords1.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
@@ -301,6 +301,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);
 #endif
   ULONG_PTR const image_base = nt_hdrs.GetImageBase();
+  std::uint64_t const image_base_64 = image_base;
   WriteNamedHex(out, L"ImageBase", image_base, 2);
   // ImageBase can be null under XP. In this case the binary is relocated to
   // 0x10000.
@@ -322,7 +323,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // TODO: Check whether the image is allowed to load (similar to x86) in this
   // case.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
-           static_cast<std::uint64_t>(image_base) >= (0xFFFFULL << 48))
+           image_base_64 >= (0xFFFFULL << 48))
   {
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
@@ -401,7 +402,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   WriteNamedHex(out, L"LoaderFlags", nt_hdrs.GetLoaderFlags(), 2);
   DWORD const num_dirs = nt_hdrs.GetNumberOfRvaAndSizes();
   WriteNamedHex(out, L"NumberOfRvaAndSizes", num_dirs, 2);
-  DWORD const num_dirs_clamped = GetNumberOfRvaAndSizesClamped(nt_hdrs);
+  DWORD const num_dirs_clamped = nt_hdrs.GetNumberOfRvaAndSizesClamped();
   WriteNamedHex(out, L"NumberOfRvaAndSizes (Clamped)", num_dirs_clamped, 2);
   if (num_dirs > num_dirs_clamped)
   {

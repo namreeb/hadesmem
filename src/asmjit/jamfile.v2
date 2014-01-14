@@ -19,12 +19,12 @@ lib asmjit
   : 
     <link>static
 
-	# Static link
+    # Static link
     <define>ASMJIT_API=""
   : 
   : 
     <include>"$(ASMJIT_ROOT)/asmjit/src/"
 
-	# Static link
+    # Static link
     <define>ASMJIT_API=""
   ;
