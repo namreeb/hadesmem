@@ -79,7 +79,7 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
     {
       WriteNamedHex(out, L"AddressOfData", thunk.GetAddressOfData(), 3);
       WriteNamedHex(out, L"Hint", thunk.GetHint(), 3);
-      WriteNamedHex(out, L"Name", thunk.GetName().c_str(), 3);
+      WriteNamedNormal(out, L"Name", thunk.GetName().c_str(), 3);
     }
     catch (std::exception const& /*e*/)
     {
