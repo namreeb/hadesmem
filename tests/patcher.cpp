@@ -18,6 +18,7 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
@@ -84,7 +85,7 @@ void TestPatchRaw()
 
   hadesmem::Allocator const test_mem(process, 0x1000);
 
-  std::vector<BYTE> data = {0x00, 0x11, 0x22, 0x33, 0x44};
+  std::vector<BYTE> const data = {0x00, 0x11, 0x22, 0x33, 0x44};
   BOOST_TEST_EQ(data.size(), 5);
 
   hadesmem::PatchRaw patch(process, test_mem.GetBase(), data);
@@ -168,25 +169,23 @@ void TestPatchDetour()
 
   auto const free_asmjit_func = [](void* func)
   { AsmJit::MemoryManager::getGlobal()->free(func); };
-  void* hook_me_wrapper_raw = c.make();
-  std::unique_ptr<void, decltype(free_asmjit_func)> hook_me_wrapper_cleanup(
-    hook_me_wrapper_raw, free_asmjit_func);
+  void* const hook_me_wrapper_raw = c.make();
+  std::unique_ptr<void, decltype(free_asmjit_func)> const
+    hook_me_wrapper_cleanup(hook_me_wrapper_raw, free_asmjit_func);
 
-  auto const hook_me_wrapper = reinterpret_cast<decltype(&HookMe)>(
-    reinterpret_cast<DWORD_PTR>(hook_me_wrapper_raw));
+  auto const volatile hook_me_wrapper =
+    hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
 
-  auto const hook_me_packaged = [&]()
+  auto const hook_me_packaged = [=]()
   { return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8); };
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
   hadesmem::Process const process(::GetCurrentProcessId());
 
-  DWORD_PTR const target_ptr = reinterpret_cast<DWORD_PTR>(hook_me_wrapper);
-  DWORD_PTR const detour_ptr = reinterpret_cast<DWORD_PTR>(&HookMeHk);
   g_detour = std::make_unique<hadesmem::PatchDetour>(
     process,
-    reinterpret_cast<PVOID>(target_ptr),
-    reinterpret_cast<PVOID>(detour_ptr));
+    hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
+    hadesmem::detail::UnionCast<PVOID>(&HookMeHk));
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 

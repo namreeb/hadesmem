@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/program_options.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <tclap/CmdLine.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
@@ -139,8 +139,8 @@ void HandleWarnings(std::wstring const& path)
       if (!warned_file)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error() << hadesmem::ErrorString(
-                                 "Failed to open warned file for output."));
+          hadesmem::Error()
+          << hadesmem::ErrorString("Failed to open warned file for output."));
       }
       warned_file << path << '\n';
     }
@@ -231,12 +231,12 @@ void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
   std::wostream& out = std::wcout;
 
   WriteNewline(out);
-  WriteNamedHex(out, L"Usage", thread_entry.GetUsage(), 0);
-  WriteNamedHex(out, L"ID", thread_entry.GetId(), 0);
-  WriteNamedHex(out, L"Owner ID", thread_entry.GetOwnerId(), 0);
-  WriteNamedHex(out, L"Base Priority", thread_entry.GetBasePriority(), 0);
-  WriteNamedHex(out, L"Delta Priority", thread_entry.GetDeltaPriority(), 0);
-  WriteNamedHex(out, L"Flags", thread_entry.GetFlags(), 0);
+  WriteNamedHex(out, L"Usage", thread_entry.GetUsage(), 1);
+  WriteNamedHex(out, L"ID", thread_entry.GetId(), 1);
+  WriteNamedHex(out, L"Owner ID", thread_entry.GetOwnerId(), 1);
+  WriteNamedHex(out, L"Base Priority", thread_entry.GetBasePriority(), 1);
+  WriteNamedHex(out, L"Delta Priority", thread_entry.GetDeltaPriority(), 1);
+  WriteNamedHex(out, L"Flags", thread_entry.GetFlags(), 1);
 }
 
 void DumpThreads(DWORD pid)
@@ -361,75 +361,78 @@ void ClearWarnForCurrentFile()
   g_warned = false;
 }
 
-int main(int /*argc*/, char * /*argv*/ [])
+int main(int argc, char* argv[])
 {
   try
   {
     std::cout << "HadesMem Dumper [" << HADESMEM_VERSION_STRING << "]\n";
 
-    boost::program_options::options_description opts_desc("General options");
-    opts_desc.add_options()("help", "produce help message")(
-      "pid", boost::program_options::value<DWORD>(), "target process id")(
-      "file", boost::program_options::wvalue<std::wstring>(), "target file")(
-      "dir", boost::program_options::wvalue<std::wstring>(), "target dir")(
-      "warned", "dump list of files which cause warnings")(
+    TCLAP::CmdLine cmd("PE file format dumper", ' ', HADESMEM_VERSION_STRING);
+    TCLAP::ValueArg<DWORD> pid_arg(
+      "p", "pid", "Target process id", false, 0, "DWORD");
+    TCLAP::ValueArg<std::string> file_arg(
+      "f", "file", "Target file", false, "", "string");
+    TCLAP::ValueArg<std::string> dir_arg(
+      "d", "dir", "Target directory", false, "", "string");
+    TCLAP::SwitchArg all_arg("a", "all", "No target, dump everything");
+    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &file_arg, &dir_arg, &all_arg};
+    cmd.xorAdd(xor_args);
+    TCLAP::SwitchArg warned_arg(
+      "w", "warned", "Dump list of files which cause warnings", cmd);
+    TCLAP::ValueArg<std::string> warned_file_arg(
+      "x",
       "warned-file",
-      boost::program_options::wvalue<std::wstring>(),
-      "dump warned list to file instead of stdout")(
+      "Dump warned list to file instead of stdout",
+      false,
+      "",
+      "string",
+      cmd);
+    TCLAP::SwitchArg warned_file_dynamic_arg(
+      "y",
       "warned-file-dynamic",
-      "dump warnings to file on the fly rather than at the end")(
-      "warned-type",
-      boost::program_options::wvalue<int>(),
-      "filter warned file using warned type");
+      "Dump warnings to file on the fly rather than at the end",
+      cmd);
+    TCLAP::ValueArg<int> warned_type_arg("t",
+                                         "warned-type",
+                                         "Filter warned file using warned type",
+                                         false,
+                                         -1,
+                                         "int",
+                                         cmd);
+    cmd.parse(argc, argv);
 
-    std::vector<std::wstring> const args =
-      boost::program_options::split_winmain(::GetCommandLine());
-    boost::program_options::variables_map var_map;
-    boost::program_options::store(
-      boost::program_options::wcommand_line_parser(args)
-        .options(opts_desc)
-        .run(),
-      var_map);
-    boost::program_options::notify(var_map);
-
-    if (var_map.count("help"))
+    g_warned_enabled = warned_arg.getValue();
+    g_warned_dynamic = warned_file_dynamic_arg.getValue();
+    if (warned_file_arg.isSet())
     {
-      std::cout << '\n' << opts_desc << '\n';
-      return 1;
+      g_warned_file_path =
+        hadesmem::detail::MultiByteToWideChar(warned_file_arg.getValue());
     }
 
-    g_warned_enabled = !!var_map.count("warned");
-    g_warned_dynamic = !!var_map.count("warned-file-dynamic");
-    if (var_map.count("warned-file"))
+    if (g_warned_dynamic && g_warned_file_path.empty())
     {
-      g_warned_file_path = var_map["warned-file"].as<std::wstring>();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error()
+        << hadesmem::ErrorString(
+             "Please specify a file path for dynamic warnings."));
     }
-    else
+
+    int const warned_type = warned_type_arg.getValue();
+    switch (warned_type)
     {
-      if (g_warned_dynamic)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error()
-          << hadesmem::ErrorString(
-               "Please specify a file path for dynamic warnings."));
-      }
-    }
-    if (var_map.count("warned-type"))
-    {
-      int const warned_type = var_map["warned-type"].as<int>();
-      switch (warned_type)
-      {
-      case static_cast<int>(WarningType::kSuspicious) :
-        g_warned_type = WarningType::kSuspicious;
-        break;
-      case static_cast<int>(WarningType::kUnsupported) :
-        g_warned_type = WarningType::kUnsupported;
-        break;
-      default:
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error() << hadesmem::ErrorString("Unknown warned type."));
-        break;
-      }
+    case static_cast<int>(WarningType::kSuspicious) :
+      g_warned_type = WarningType::kSuspicious;
+      break;
+    case static_cast<int>(WarningType::kUnsupported) :
+      g_warned_type = WarningType::kUnsupported;
+      break;
+    case static_cast<int>(WarningType::kAll) :
+      g_warned_type = WarningType::kAll;
+      break;
+    default:
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Unknown warned type."));
+      break;
     }
 
     try
@@ -443,16 +446,16 @@ int main(int /*argc*/, char * /*argv*/ [])
       std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
     }
 
-    if (var_map.count("pid"))
+    if (pid_arg.isSet())
     {
-      DWORD pid = var_map["pid"].as<DWORD>();
+      DWORD const pid = pid_arg.getValue();
 
       hadesmem::ProcessList const processes;
       auto iter =
         std::find_if(std::begin(processes),
                      std::end(processes),
                      [pid](hadesmem::ProcessEntry const& process_entry)
-      { return process_entry.GetId() == pid; });
+                     { return process_entry.GetId() == pid; });
       if (iter != std::end(processes))
       {
         DumpProcessEntry(*iter);
@@ -460,17 +463,17 @@ int main(int /*argc*/, char * /*argv*/ [])
       else
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error() << hadesmem::ErrorString(
-                                 "Failed to find requested process."));
+          hadesmem::Error()
+          << hadesmem::ErrorString("Failed to find requested process."));
       }
     }
-    else if (var_map.count("file"))
+    else if (file_arg.isSet())
     {
-      DumpFile(var_map["file"].as<std::wstring>());
+      DumpFile(hadesmem::detail::MultiByteToWideChar(file_arg.getValue()));
     }
-    else if (var_map.count("dir"))
+    else if (dir_arg.isSet())
     {
-      DumpDir(var_map["dir"].as<std::wstring>());
+      DumpDir(hadesmem::detail::MultiByteToWideChar(dir_arg.getValue()));
     }
     else
     {
@@ -487,19 +490,18 @@ int main(int /*argc*/, char * /*argv*/ [])
 
     if (g_warned_enabled)
     {
-      if (var_map.count("warned-file") && !var_map.count("warned-file-dynamic"))
+      if (!g_warned_file_path.empty() && !g_warned_dynamic)
       {
-        std::wstring const warned_file_path =
-          var_map["warned-file"].as<std::wstring>();
         std::unique_ptr<std::wfstream> warned_file_ptr(
-          hadesmem::detail::OpenFileWide(warned_file_path, std::ios::out));
+          hadesmem::detail::OpenFileWide(g_warned_file_path, std::ios::out));
         std::wfstream& warned_file = *warned_file_ptr;
         if (!warned_file)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            hadesmem::Error() << hadesmem::ErrorString(
-                                   "Failed to open warned file for output."));
+            hadesmem::Error()
+            << hadesmem::ErrorString("Failed to open warned file for output."));
         }
+
         DumpWarned(warned_file);
       }
       else

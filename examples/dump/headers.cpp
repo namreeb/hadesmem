@@ -263,7 +263,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
       size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) +
              mbi.RegionSize - reinterpret_cast<std::uintptr_t>(ep_va);
     }
-    ud_set_input_buffer(&ud_obj, static_cast<std::uint8_t*>(ep_va), size);
+    auto const disasm_buf = hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
+    ud_set_input_buffer(&ud_obj, disasm_buf.data(), size);
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
     ud_set_pc(&ud_obj, nt_hdrs.GetImageBase());
 #if defined(_M_AMD64)
@@ -291,8 +292,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
       char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
       HADESMEM_DETAIL_ASSERT(asm_bytes_str);
       auto const diasm_line =
-        hadesmem::detail::MultiByteToWideChar(asm_str) + L". [" +
-        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L"].";
+        hadesmem::detail::MultiByteToWideChar(asm_str) + L" (" +
+        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L").";
       WriteNormal(out, diasm_line, 3);
     }
   }
@@ -421,7 +422,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
       out, L"Data Directory VA", data_dir_va, data_dir_name, 2);
     WriteNamedHexSuffix(
       out, L"Data Directory Size", data_dir_size, data_dir_name, 2);
-    if (IsUnsupportedDataDir(i))
+    if (data_dir_va && IsUnsupportedDataDir(i))
     {
       WriteNormal(out,
                   L"WARNING! " + data_dir_name +

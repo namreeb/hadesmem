@@ -135,7 +135,7 @@ void DumpImports(hadesmem::Process const& process,
     {
       WriteNormal(out,
                   L"WARNING! Detected TLS AOI trick! Assuming a "
-                    L"Windows 7 style loader and stopping enumeration early.",
+                  L"Windows 7 style loader and stopping enumeration early.",
                   2);
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
@@ -155,8 +155,8 @@ void DumpImports(hadesmem::Process const& process,
       WriteNormal(
         out,
         L"WARNING! Processed 1000 import dirs. Stopping early to avoid "
-          L"resource exhaustion attacks. Check PE file for TLS AOI trick, "
-          L"virtual terminator trick, or other similar attacks.",
+        L"resource exhaustion attacks. Check PE file for TLS AOI trick, "
+        L"virtual terminator trick, or other similar attacks.",
         2);
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
@@ -223,7 +223,7 @@ void DumpImports(hadesmem::Process const& process,
       {
         WriteNormal(out,
                     L"WARNING! Detected new style bound imports "
-                      L"with an invalid ILT. Currently unhandled.",
+                    L"with an invalid ILT. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -239,7 +239,7 @@ void DumpImports(hadesmem::Process const& process,
         // identify potential samples just in case.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain with "
-                      L"no new style bound imports. Currently unhandled.",
+                    L"no new style bound imports. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -251,7 +251,7 @@ void DumpImports(hadesmem::Process const& process,
         // identify potential samples just in case.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain "
-                      L"with no bound imports. Currently unhandled.",
+                    L"with no bound imports. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -265,7 +265,7 @@ void DumpImports(hadesmem::Process const& process,
         // identify potential samples just in case.
         WriteNormal(out,
                     L"WARNING! Detected old style forwarder chain "
-                      L"with new bound imports. Currently unhandled.",
+                    L"with new bound imports. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -273,7 +273,7 @@ void DumpImports(hadesmem::Process const& process,
       {
         WriteNormal(out,
                     L"WARNING! Detected old style forwarder chain "
-                      L"with old bound imports. Currently unhandled.",
+                    L"with old bound imports. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -284,7 +284,7 @@ void DumpImports(hadesmem::Process const& process,
         // identify potential samples just in case.
         WriteNormal(out,
                     L"WARNING! Detected old style forwarder chain "
-                      L"with no bound imports. Currently unhandled.",
+                    L"with no bound imports. Currently unhandled.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -305,7 +305,7 @@ void DumpImports(hadesmem::Process const& process,
       WriteNormal(out, L"WARNING! Failed to read import dir name.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
-    WriteNamedNormal(out, L"FirstThunk", dir.GetFirstThunk(), 2);
+    WriteNamedHex(out, L"FirstThunk", dir.GetFirstThunk(), 2);
 
     // TODO: Parse the IAT and ILT in parallel, in order to easily detect when
     // imports are bound in-memory. This will also mean we no longer need to
@@ -362,10 +362,10 @@ void DumpImports(hadesmem::Process const& process,
       {
         WriteNewline(out);
         WriteNormal(
-          out, 
+          out,
           L"WARNING! Processed 1000 import thunks. Stopping early to "
-            L"avoid resource exhaustion attacks. Check PE file for TLS AOI "
-            L"trick, virtual terminator trick, or other similar attacks.", 
+          L"avoid resource exhaustion attacks. Check PE file for TLS AOI "
+          L"trick, virtual terminator trick, or other similar attacks.",
           2);
         WarnForCurrentFile(WarningType::kUnsupported);
         break;
@@ -378,7 +378,12 @@ void DumpImports(hadesmem::Process const& process,
       // bound, and the loader simply detects that the TimeDateStamp doesn't
       // match and so treats the IAT as unbound? Investigate this further.
       (void)is_ilt_bound;
-      DumpImportThunk(thunk, false);
+      // In the case where we have an already mapped image with no ILT, the
+      // original name/ordinal inforamtion is long gone so all we have to work
+      // from in the IAT (which is bound).
+      bool const is_image_iat =
+        (pe_file.GetType() == hadesmem::PeFileType::Image && !use_ilt);
+      DumpImportThunk(thunk, is_image_iat);
     }
 
     // Windows will load PE files that have an invalid RVA for the ILT (lies
@@ -400,7 +405,7 @@ void DumpImports(hadesmem::Process const& process,
           WriteNewline(out);
           WriteNormal(out,
                       L"WARNING! IAT size does not match ILT size. Stopping "
-                        L"IAT enumeration early.",
+                      L"IAT enumeration early.",
                       2);
           WarnForCurrentFile(WarningType::kSuspicious);
           break;
@@ -441,7 +446,7 @@ void DumpBoundImports(hadesmem::Process const& process,
       WriteNormal(
         out,
         L"WARNING! No bound import directory on file with an import dir "
-          L"indicating the presence of a bound import dir.",
+        L"indicating the presence of a bound import dir.",
         1);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
@@ -456,7 +461,7 @@ void DumpBoundImports(hadesmem::Process const& process,
     WriteNormal(
       out,
       L"WARNING! Seemingly valid bound import directory on file with an "
-        L"import dir indicating no new bound import dir.",
+      L"import dir indicating no new bound import dir.",
       1);
     WarnForCurrentFile(WarningType::kSuspicious);
     return;

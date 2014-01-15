@@ -27,7 +27,6 @@ lib gdi32
 exe dump
   :
     [ glob dump/*.cpp ]
-    /boost//program_options/<link>static
   ;
   
 exe inject
