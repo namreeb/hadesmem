@@ -150,7 +150,7 @@ public:
       current = reloc_data + num_relocs;
     } while (current < end);
 
-    data_ = reloc_blocks;
+    data_ = std::move(reloc_blocks);
   }
 
   // TODO: Add setters and UpdateWrite.
