@@ -64,6 +64,8 @@ public:
     auto const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // TODO: Also fix this for images? Or is it discarded?
+    // TODO: Fix this to handle files with 'virtual' relocs which will still be loaded by Windows.
+    // Sample: virtrelocXP.exe
     if (pe_file.GetType() == hadesmem::PeFileType::Data &&
         (relocs_end < base_ || relocs_end > file_end))
     {
