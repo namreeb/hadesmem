@@ -32,7 +32,6 @@ exe dump
 exe inject
   :
     [ glob inject/*.cpp ]
-    /boost//program_options/<link>static
   ;
 
 lib injecttestdep

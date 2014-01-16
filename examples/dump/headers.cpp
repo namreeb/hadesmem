@@ -149,12 +149,12 @@ bool IsUnsupportedDataDir(DWORD num)
   case hadesmem::PeDataDir::Import:
   case hadesmem::PeDataDir::TLS:
   case hadesmem::PeDataDir::BoundImport:
+  case hadesmem::PeDataDir::BaseReloc:
     return false;
 
   case hadesmem::PeDataDir::Resource:
   case hadesmem::PeDataDir::Exception:
   case hadesmem::PeDataDir::Security:
-  case hadesmem::PeDataDir::BaseReloc:
   case hadesmem::PeDataDir::Debug:
   case hadesmem::PeDataDir::Architecture:
   case hadesmem::PeDataDir::GlobalPTR:
@@ -293,7 +293,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
       HADESMEM_DETAIL_ASSERT(asm_bytes_str);
       auto const diasm_line =
         hadesmem::detail::MultiByteToWideChar(asm_str) + L" (" +
-        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L").";
+        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L")";
       WriteNormal(out, diasm_line, 3);
     }
   }

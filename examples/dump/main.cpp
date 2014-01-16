@@ -39,6 +39,7 @@
 #include "filesystem.hpp"
 #include "headers.hpp"
 #include "imports.hpp"
+#include "relocations.hpp"
 #include "sections.hpp"
 #include "tls.hpp"
 
@@ -322,7 +323,18 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path)
 {
+  std::wostream& out = std::wcout;
+
   ClearWarnForCurrentFile();
+
+  std::uint32_t const k1MB = (1U << 20);
+  std::uint32_t const k100MB = k1MB * 100;
+  if (pe_file.GetSize() > k100MB)
+  {
+    // Not actually unsupported, just want to flag large files.
+    WriteNormal(out, L"WARNING! File is over 100MB.", 0);
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
 
   DumpHeaders(process, pe_file);
 
@@ -339,6 +351,8 @@ void DumpPeFile(hadesmem::Process const& process,
   DumpImports(process, pe_file, has_new_bound_imports_any);
 
   DumpBoundImports(process, pe_file, has_new_bound_imports_any);
+
+  DumpRelocations(process, pe_file);
 
   HandleWarnings(path);
 }

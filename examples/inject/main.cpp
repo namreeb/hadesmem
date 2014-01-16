@@ -3,22 +3,24 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/program_options.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <windows.h>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <tclap/CmdLine.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/call.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/injector.hpp>
@@ -29,71 +31,6 @@
 
 namespace
 {
-
-std::wstring PtrToString(void const* const ptr)
-{
-  std::wostringstream str;
-  str.imbue(std::locale::classic());
-  str << std::hex << reinterpret_cast<DWORD_PTR>(ptr);
-  return str.str();
-}
-
-boost::program_options::options_description GetOptionsDesc()
-{
-  boost::program_options::options_description opts_desc("General options");
-  opts_desc.add_options()("help", "produce help message")(
-    "pid", boost::program_options::value<DWORD>(), "target process id")(
-    "name",
-    boost::program_options::wvalue<std::wstring>(),
-    "target process name (running instance)")(
-    "name-forced",
-    "default to first matched process name "
-    "(no warnings about multiple instances)")(
-    "module", boost::program_options::wvalue<std::wstring>(), "module path")(
-    "path-resolution",
-    "perform (local) path resolution on "
-    "module path")("add-path", "add module dir to (remote) search order")(
-    "export",
-    boost::program_options::value<std::string>(),
-    "module export name (DWORD_PTR (*) ())")("inject", "inject module")(
-    "free", "free module")("run",
-                           boost::program_options::wvalue<std::wstring>(),
-                           "target process path (new instance)")(
-    "arg",
-    boost::program_options::wvalue<std::vector<std::wstring>>(),
-    "target process args (use once for each arg)")(
-    "work-dir",
-    boost::program_options::wvalue<std::wstring>(),
-    "target process working directory");
-
-  return opts_desc;
-}
-
-boost::program_options::variables_map
-  ParseOptions(boost::program_options::options_description const& opts_desc)
-{
-  std::vector<std::wstring> const args =
-    boost::program_options::split_winmain(GetCommandLine());
-  boost::program_options::variables_map var_map;
-  boost::program_options::store(
-    boost::program_options::wcommand_line_parser(args).options(opts_desc).run(),
-    var_map);
-  boost::program_options::notify(var_map);
-  return var_map;
-}
-
-bool IsOptionSet(std::string const& name,
-                 boost::program_options::variables_map const& var_map)
-{
-  return var_map.count(name) != 0;
-}
-
-template <typename T>
-T GetOptionValue(std::string const& name,
-                 boost::program_options::variables_map const& var_map)
-{
-  return var_map[name].as<T>();
-}
 
 DWORD FindProc(std::wstring const& proc_name, bool name_forced)
 {
@@ -106,13 +43,14 @@ DWORD FindProc(std::wstring const& proc_name, bool name_forced)
       std::find_if(std::begin(proc_list),
                    std::end(proc_list),
                    [&](hadesmem::ProcessEntry const& proc_entry)
-    {
+                   {
         return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) ==
                proc_name_upper;
       });
     if (proc_iter == std::end(proc_list))
     {
-      throw std::runtime_error("Failed to find process.");
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Failed to find process."));
     }
 
     return proc_iter->GetId();
@@ -124,21 +62,23 @@ DWORD FindProc(std::wstring const& proc_name, bool name_forced)
                  std::end(proc_list),
                  std::back_inserter(found_procs),
                  [&](hadesmem::ProcessEntry const& proc_entry)
-    {
+                 {
       return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) ==
              proc_name_upper;
     });
 
     if (found_procs.empty())
     {
-      throw std::runtime_error("Failed to find process.");
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Failed to find process."));
     }
 
     if (found_procs.size() > 1)
     {
-      throw std::runtime_error(
-        "Process name search found multiple "
-        "matches. Please specify a PID or use --name-forced.");
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString(
+                               "Process name search found multiple matches. "
+                               "Please specify a PID or use --name-forced."));
     }
 
     return found_procs.front().GetId();
@@ -146,78 +86,96 @@ DWORD FindProc(std::wstring const& proc_name, bool name_forced)
 }
 }
 
-int main(int argc, char * /*argv*/ [])
+int main(int argc, char* argv[])
 {
   try
   {
     std::cout << "HadesMem Injector [" << HADESMEM_VERSION_STRING << "]\n";
 
-    boost::program_options::options_description const opts_desc =
-      GetOptionsDesc();
-    boost::program_options::variables_map const var_map =
-      ParseOptions(opts_desc);
+    TCLAP::CmdLine cmd("DLL injector", ' ', HADESMEM_VERSION_STRING);
+    TCLAP::ValueArg<DWORD> pid_arg(
+      "p", "pid", "Target process id", false, 0, "DWORD");
+    TCLAP::ValueArg<std::string> name_arg(
+      "n", "name", "Target process name", false, "", "string");
+    TCLAP::ValueArg<std::string> run_arg(
+      "r", "run", "Target process path (new instance)", false, "", "string");
+    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &name_arg, &run_arg};
+    cmd.xorAdd(xor_args);
+    TCLAP::SwitchArg name_forced_arg(
+      "",
+      "name-forced",
+      "Default to first matched process name (no warning)",
+      cmd);
+    TCLAP::ValueArg<std::string> module_arg(
+      "m", "module", "Module path", true, "", "string", cmd);
+    TCLAP::SwitchArg path_resolution_arg(
+      "",
+      "path-resolution",
+      "Perform (local) path resolution on module path",
+      cmd);
+    TCLAP::SwitchArg add_path_arg(
+      "", "add-path", "Add module dir to (remote) search order", cmd);
+    TCLAP::ValueArg<std::string> export_arg(
+      "e",
+      "export",
+      "Module export name (DWORD_PTR (*) ())",
+      false,
+      "",
+      "string",
+      cmd);
+    TCLAP::SwitchArg inject_arg("i", "inject", "Inject module");
+    TCLAP::SwitchArg free_arg("f", "free", "Free module");
+    cmd.xorAdd(inject_arg, free_arg);
+    TCLAP::MultiArg<std::string> arg_arg(
+      "a",
+      "arg",
+      "Target process args (use once for each arg)",
+      false,
+      "string",
+      cmd);
+    TCLAP::ValueArg<std::string> work_dir_arg(
+      "w",
+      "work-dir",
+      "Target process working directory",
+      false,
+      "",
+      "string",
+      cmd);
+    cmd.parse(argc, argv);
 
-    if (IsOptionSet("help", var_map) || argc == 1)
+    bool const free = free_arg.isSet();
+    bool const run = run_arg.isSet();
+    if (free && run)
     {
-      std::cout << '\n' << opts_desc << '\n';
-      return 1;
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error()
+        << hadesmem::ErrorString(
+             "Modules can only be unloaded from running targets."));
     }
 
-    if (!IsOptionSet("module", var_map))
+    bool const inject = inject_arg.isSet();
+    if (!inject && run)
     {
-      throw std::runtime_error("Module path must be specified");
+      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
+                                      << hadesmem::ErrorString(
+                                           "Exports can only be called without "
+                                           "injection on running targets. Did "
+                                           "you mean to use --inject?"));
     }
 
-    bool const has_pid = IsOptionSet("pid", var_map);
-    bool const create_proc = IsOptionSet("run", var_map);
-    bool const has_name = IsOptionSet("name", var_map);
-    if ((has_pid && create_proc) || (has_pid && has_name) ||
-        (create_proc && has_name))
-    {
-      throw std::runtime_error(
-        "A process ID, process name, or "
-        "executable path must be specified, not a combination.");
-    }
-
-    if (!has_pid && !has_name && !create_proc)
-    {
-      throw std::runtime_error("A process ID, process name, or "
-                               "executable path must be specified.");
-    }
-
-    bool const inject = IsOptionSet("inject", var_map);
-    bool const free = IsOptionSet("free", var_map);
-    bool const call_export = IsOptionSet("export", var_map);
-
-    if (inject && free)
-    {
-      throw std::runtime_error("Please specify inject or free, not "
-                               "both.");
-    }
-
-    if (free && create_proc)
-    {
-      throw std::runtime_error("Modules can only be unloaded from "
-                               "running targets.");
-    }
-
-    if (!inject && create_proc)
-    {
-      throw std::runtime_error(
-        "Exports can only be called without "
-        "injection on running targets. Did you mean to use "
-        "--inject?");
-    }
-
+    bool const call_export = export_arg.isSet();
     if (!inject && !free && !call_export)
     {
-      throw std::runtime_error("Please choose action(s) to perform on "
-                               "the process (inject, free, export).");
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Please choose action(s) to "
+                                                   "perform on the process "
+                                                   "(inject, free, export)."));
     }
 
-    auto const module_path = GetOptionValue<std::wstring>("module", var_map);
-    bool const path_resolution = IsOptionSet("path-resolution", var_map);
-    bool const add_path = IsOptionSet("add-path", var_map);
+    auto const module_path =
+      hadesmem::detail::MultiByteToWideChar(module_arg.getValue());
+    bool const path_resolution = path_resolution_arg.isSet();
+    bool const add_path = add_path_arg.isSet();
 
     std::uint32_t flags = hadesmem::InjectFlags::kNone;
     if (path_resolution)
@@ -229,6 +187,8 @@ int main(int argc, char * /*argv*/ [])
       flags |= hadesmem::InjectFlags::kAddToSearchOrder;
     }
 
+    bool const has_pid = pid_arg.isSet();
+    bool const has_name = name_arg.isSet();
     if (has_pid || has_name)
     {
       try
@@ -246,13 +206,14 @@ int main(int argc, char * /*argv*/ [])
 
       if (has_pid)
       {
-        DWORD const pid = GetOptionValue<DWORD>("pid", var_map);
+        DWORD const pid = pid_arg.getValue();
         process = std::make_unique<hadesmem::Process>(pid);
       }
       else
       {
-        auto const proc_name = GetOptionValue<std::wstring>("name", var_map);
-        bool const name_forced = IsOptionSet("name-forced", var_map);
+        auto const proc_name =
+          hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
+        bool const name_forced = name_forced_arg.isSet();
 
         // Guard against potential PID reuse race condition. Unlikely
         // to ever happen in practice, but better safe than sorry.
@@ -270,8 +231,10 @@ int main(int argc, char * /*argv*/ [])
 
         if (proc_pid != proc_pid_2)
         {
-          throw std::runtime_error("Could not get handle to target "
-                                   "process (PID reuse race).");
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            hadesmem::Error()
+            << hadesmem::ErrorString("PleaseCould not get handle to target "
+                                     "process (PID reuse race)."));
         }
       }
 
@@ -282,7 +245,8 @@ int main(int argc, char * /*argv*/ [])
         module = hadesmem::InjectDll(*process, module_path, flags);
 
         std::wcout << "\nSuccessfully injected module at base "
-                      "address " << PtrToString(module) << ".\n";
+                      "address " << hadesmem::detail::PtrToHexString(module)
+                   << ".\n";
       }
       else
       {
@@ -299,7 +263,7 @@ int main(int argc, char * /*argv*/ [])
 
       if (call_export)
       {
-        auto const export_name = GetOptionValue<std::string>("export", var_map);
+        auto const export_name = export_arg.getValue();
         hadesmem::CallResult<DWORD_PTR> const export_ret =
           hadesmem::CallExport(*process, module, export_name);
 
@@ -313,24 +277,23 @@ int main(int argc, char * /*argv*/ [])
         hadesmem::FreeDll(*process, module);
 
         std::wcout << "\nSuccessfully freed module at base address "
-                   << PtrToString(module) << ".\n";
+                   << hadesmem::detail::PtrToHexString(module) << ".\n";
       }
     }
     else
     {
-      auto const exe_path = GetOptionValue<std::wstring>("run", var_map);
-      auto const exe_args =
-        IsOptionSet("arg", var_map)
-          ? GetOptionValue<std::vector<std::wstring>>("arg", var_map)
-          : std::vector<std::wstring>();
-      auto const export_name =
-        IsOptionSet("export", var_map)
-          ? GetOptionValue<std::string>("export", var_map)
-          : "";
+      auto const exe_path =
+        hadesmem::detail::MultiByteToWideChar(run_arg.getValue());
+      auto const exe_args_tmp = arg_arg.getValue();
+      std::vector<std::wstring> exe_args;
+      std::transform(std::begin(exe_args_tmp),
+                     std::end(exe_args_tmp),
+                     std::back_inserter(exe_args),
+                     [](std::string const& s)
+                     { return hadesmem::detail::MultiByteToWideChar(s); });
+      auto const export_name = export_arg.getValue();
       auto const work_dir =
-        IsOptionSet("work-dir", var_map)
-          ? GetOptionValue<std::wstring>("work-dir", var_map)
-          : L"";
+        hadesmem::detail::MultiByteToWideChar(work_dir_arg.getValue());
       hadesmem::CreateAndInjectData const inject_data =
         hadesmem::CreateAndInject(exe_path,
                                   work_dir,
@@ -342,8 +305,8 @@ int main(int argc, char * /*argv*/ [])
 
       std::wcout << "\nSuccessfully created target.\n";
       std::wcout << "Process ID: " << inject_data.GetProcess() << ".\n";
-      std::wcout << "Module Base: " << PtrToString(inject_data.GetModule())
-                 << ".\n";
+      std::wcout << "Module Base: " << hadesmem::detail::PtrToHexString(
+                                         inject_data.GetModule()) << ".\n";
       std::wcout << "Export Return: " << inject_data.GetExportRet() << ".\n";
       std::wcout << "Export LastError: " << inject_data.GetExportLastError()
                  << ".\n";
