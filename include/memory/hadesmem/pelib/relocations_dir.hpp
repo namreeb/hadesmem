@@ -64,8 +64,8 @@ public:
     auto const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // TODO: Also fix this for images? Or is it discarded?
-    if (pe_file.GetType() == hadesmem::PeFileType::Data && relocs_end < base_ ||
-        relocs_end > file_end)
+    if (pe_file.GetType() == hadesmem::PeFileType::Data &&
+        (relocs_end < base_ || relocs_end > file_end))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Relocations directory is outside file."));
@@ -120,8 +120,8 @@ public:
         continue;
       }
 
-      DWORD const num_relocs =
-        (reloc_dir.SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
+      DWORD const num_relocs = static_cast<DWORD>(
+        (reloc_dir.SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD));
       PWORD reloc_data = reinterpret_cast<PWORD>(
         static_cast<IMAGE_BASE_RELOCATION*>(current) + 1);
       void const* const reloc_data_end = reinterpret_cast<void const*>(
@@ -137,7 +137,7 @@ public:
         hadesmem::ReadVector<WORD>(*process_, reloc_data, num_relocs);
       for (auto const reloc : relocs_raw)
       {
-        BYTE const type = reloc >> 12;
+        BYTE const type = static_cast<BYTE>(reloc >> 12);
         WORD const offset = reloc & 0x0FFF;
         relocs.emplace_back(Reloc{type, offset});
       }

@@ -63,22 +63,8 @@ void DumpRelocations(hadesmem::Process const& process,
       WriteNamedHex(out, L"Type", reloc.type, 3);
       WriteNamedHex(out, L"Offset", reloc.offset, 3);
 
-      switch (reloc.type)
+      if (reloc.type > 10)
       {
-      case IMAGE_REL_BASED_ABSOLUTE:
-      case IMAGE_REL_BASED_HIGH:
-      case IMAGE_REL_BASED_LOW:
-      case IMAGE_REL_BASED_HIGHLOW:
-      case IMAGE_REL_BASED_HIGHADJ:
-      case IMAGE_REL_BASED_MACHINE_SPECIFIC_5:
-      case IMAGE_REL_BASED_RESERVED:
-      case IMAGE_REL_BASED_MACHINE_SPECIFIC_7:
-      case IMAGE_REL_BASED_MACHINE_SPECIFIC_8:
-      case IMAGE_REL_BASED_MACHINE_SPECIFIC_9:
-      case IMAGE_REL_BASED_DIR64:
-        break;
-
-      default:
         WriteNormal(out, L"WARNING! Unknown relocation type.", 2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
