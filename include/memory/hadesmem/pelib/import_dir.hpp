@@ -40,7 +40,7 @@ public:
     : process_(&process),
       pe_file_(&pe_file),
       base_(reinterpret_cast<PBYTE>(imp_desc)),
-      data_(), 
+      data_(),
       is_virtual_beg_(false)
   {
     if (!base_)
@@ -107,6 +107,10 @@ public:
     return base_;
   }
 
+  // TODO: Support virtual overlap trick properly, because currently we're
+  // reading garbage memory.
+  // TODO: Support virtual termination trick properly, because currently we're
+  // reading garbage memory.
   void UpdateRead()
   {
     data_ = Read<IMAGE_IMPORT_DESCRIPTOR>(*process_, base_);
@@ -131,8 +135,6 @@ public:
     // It's possible for the last entry to be in virtual space, because it only
     // needs to have its Name or FirstThunk null.
     // Sample: imports_vterm.exe (Corkami PE Corpus)
-    // TODO: Fix this for cases where a virtual descriptor is 'real', rather
-    // than just used as a terminator.
     if (pe_file_->GetType() == PeFileType::Data &&
         (base_ + sizeof(IMAGE_IMPORT_DESCRIPTOR)) >=
           static_cast<PBYTE>(pe_file_->GetBase()) + pe_file_->GetSize())
