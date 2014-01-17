@@ -32,17 +32,19 @@ void DumpRelocations(hadesmem::Process const& process,
 
   WriteNewline(out);
 
-  // TODO: Improve this.
-  if (relocations_dir->IsInvalid())
-  {
-    WriteNormal(out, L"WARNING! Detected invalid relocation block(s). Output may be partially or entirely incorrect.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
-  }
-
   auto const reloc_blocks = relocations_dir->GetRelocBlocks();
-  HADESMEM_DETAIL_ASSERT(!reloc_blocks.empty());
 
   WriteNormal(out, L"Relocation Blocks:", 1);
+
+  if (relocations_dir->IsInvalid())
+  {
+    WriteNewline(out);
+    WriteNormal(out,
+      L"WARNING! Detected invalid relocation block(s). Output may be "
+      L"partially or entirely incorrect.",
+      2);
+    WarnForCurrentFile(WarningType::kUnsupported);
+  }
 
   for (auto block : reloc_blocks)
   {
@@ -53,7 +55,15 @@ void DumpRelocations(hadesmem::Process const& process,
 
     WriteNewline(out);
 
-    WriteNormal(out, L"Relocations:", 2);
+    if (block.size)
+    {
+      WriteNormal(out, L"Relocations:", 2);
+    }
+    else
+    {
+      WriteNormal(out, L"WARNING! Detected zero sized relocation block.", 2);
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
 
     auto const& relocs = block.relocs;
     for (auto const reloc : relocs)

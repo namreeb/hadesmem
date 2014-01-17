@@ -87,7 +87,7 @@ inline void WriteNamedHexContainer(std::wostream& out,
                                    std::size_t tabs)
 {
   StreamFlagSaver<wchar_t> flags(out);
-  out << std::wstring(tabs, '\t') << name << ":" << std::hex
+  out << std::wstring(tabs, '\t') << name << ": " << std::hex
       << std::setw(sizeof(typename C::value_type) * 2) << std::setfill(L'0');
   for (auto const& e : c)
   {

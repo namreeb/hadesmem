@@ -263,7 +263,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
       size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) +
              mbi.RegionSize - reinterpret_cast<std::uintptr_t>(ep_va);
     }
-    auto const disasm_buf = hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
+    auto const disasm_buf =
+      hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
     ud_set_input_buffer(&ud_obj, disasm_buf.data(), size);
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
     ud_set_pc(&ud_obj, nt_hdrs.GetImageBase());
@@ -358,6 +359,17 @@ void DumpNtHeaders(hadesmem::Process const& process,
   {
     WriteNormal(out, L"WARNING! Unusual file alignment.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
+
+    // TODO: Find out if it's legal to have a file alignment < 0x200, but still
+    // have sections. This may impact whether or not part of RvaToVa is correct
+    // (explicitly using ~0x1FF instead of taking the min of 0x200 and the
+    // FileAlignment). Need to reverse what the loader does in this situations.
+    if (file_alignment < 0x200 && num_sections != 0)
+    {
+      WriteNormal(
+        out, L"WARNING! Low file alignment with non-zero section count.", 2);
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
   }
   if (section_alignment < 0x800 && section_alignment != file_alignment)
   {

@@ -199,6 +199,9 @@ inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
   return lhs;
 }
 
+// TODO: Rename this? It makes it sound like we're converting an RVA to a VA
+// based on the ImageBase of the PE file. Perhaps this should be called
+// ResolveRva instead?
 inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
 {
   PeFileType const type = pe_file.GetType();
@@ -280,7 +283,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
 
     // Apparently on XP it's possible to load a PE with a SizeOfImage of only
     // 0x2e. Treat anything outside of that as invalid. For an example see
-    // foldedhdr.exe from the Corkami PE corpus.
+    // tinyXP.exe from the Corkami PE corpus.
     // TODO: According to ReversingLabs "Undocumented PECOFF" whitepaper,
     // SizeOfImage should be rounded up using SectionAlignment. Investigate
     // this.
@@ -406,6 +409,15 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         // TODO: Verify that this is correct.
         return nullptr;
       }
+    }
+
+    // TODO: Need to verify whether this is correct for all cases (and doesn't
+    // break other samples). It currently feels like it's a hack and we're
+    // missing/overlooking the 'actual' fix.
+    // Sample: nullSOH-XP (Corkami PE Corpus)
+    if (rva < nt_headers.OptionalHeader.SizeOfImage && rva < pe_file.GetSize())
+    {
+      return base + rva;
     }
 
     return nullptr;

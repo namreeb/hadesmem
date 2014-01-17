@@ -46,6 +46,7 @@ void DumpSections(hadesmem::Process const& process,
       WriteNormal(out, L"WARNING! Section is virtual.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
+    // TODO: Detect and handle unprintable section name.
     WriteNamedNormal(out, L"Name", s.GetName().c_str(), 2);
     WriteNamedHex(out, L"VirtualAddress", s.GetVirtualAddress(), 2);
     WriteNamedHex(out, L"VirtualSize", s.GetVirtualSize(), 2);

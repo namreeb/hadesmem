@@ -130,6 +130,9 @@ project memory
     # optimized code. Code-gen is not affected, the only downside is that the 
     # size of the PDB is increased.
     <variant>release,<toolset>msvc:<cxxflags>/d2Zi+
+
+    # Make MSVC x86 binaries large address aware
+    <toolset>msvc,<address-model>32:<linkflags>/LARGEADDRESSAWARE
   :
     # Build under debug mode by default.
     default-build debug

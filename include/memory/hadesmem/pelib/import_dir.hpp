@@ -40,7 +40,8 @@ public:
     : process_(&process),
       pe_file_(&pe_file),
       base_(reinterpret_cast<PBYTE>(imp_desc)),
-      data_()
+      data_(), 
+      is_virtual_beg_(false)
   {
     if (!base_)
     {
@@ -58,8 +59,43 @@ public:
       base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, import_dir_rva));
       if (!base_)
       {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Import directory is invalid."));
+        // Try to detect import dirs with a partially virtual descriptor
+        // (overlapped at the beginning). Up to the first 3 DWORDS can be
+        // overlapped (because they're allowed to be zero without invalidating
+        // the entry).
+        // Sample: imports_virtdesc.exe (Corkami PE Corpus)
+        void* desc_raw_beg = nullptr;
+        int i = 3;
+        do
+        {
+          auto const new_rva =
+            static_cast<DWORD>(import_dir_rva + sizeof(DWORD) * i);
+          auto const new_va = RvaToVa(process, pe_file, new_rva);
+          if (!new_va)
+          {
+            break;
+          }
+          desc_raw_beg = new_va;
+        } while (--i);
+
+        if (desc_raw_beg)
+        {
+          auto const offset = sizeof(DWORD) * (i + 1);
+          auto const len = sizeof(IMAGE_IMPORT_DESCRIPTOR) - offset;
+          auto const buf =
+            ReadVector<std::uint8_t>(*process_, desc_raw_beg, len);
+          auto const data_beg =
+            reinterpret_cast<std::uint8_t*>(&data_) + offset;
+          ZeroMemory(&data_, sizeof(data_));
+          std::copy(std::begin(buf), std::end(buf), data_beg);
+          base_ = static_cast<std::uint8_t*>(desc_raw_beg) - offset;
+          is_virtual_beg_ = true;
+        }
+        else
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error() << ErrorString("Import directory is invalid."));
+        }
       }
     }
 
@@ -81,6 +117,12 @@ public:
     Write(*process_, base_, data_);
   }
 
+  // Check for virtual descriptor overlap trick.
+  bool IsVirtualBegin() const
+  {
+    return is_virtual_beg_;
+  }
+
   // Check for virtual termination trick.
   // TODO: Think about what the best way to solve this is... Currently we're
   // forcing the user to thunk about it, which may not be ideal.
@@ -88,7 +130,7 @@ public:
   {
     // It's possible for the last entry to be in virtual space, because it only
     // needs to have its Name or FirstThunk null.
-    // Sample: imports_virtdesc.exe (Corkami PE Corpus)
+    // Sample: imports_vterm.exe (Corkami PE Corpus)
     // TODO: Fix this for cases where a virtual descriptor is 'real', rather
     // than just used as a terminator.
     if (pe_file_->GetType() == PeFileType::Data &&
@@ -151,17 +193,20 @@ public:
     DWORD const name_rva = GetNameRaw();
     if (!name_rva)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Name RVA is invalid."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Name RVA is invalid."));
     }
 
     auto name_va =
       static_cast<std::uint8_t*>(RvaToVa(*process_, *pe_file_, name_rva));
-    // It's possible for the RVA to be invalid on disk because it's fixed by relocations.
+    // It's possible for the RVA to be invalid on disk because it's fixed by
+    // relocations.
     // TODO: Handle this case.
     // Sample: imports_relocW7.exe
     if (!name_va)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Name VA is invalid."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Name VA is invalid."));
     }
 
     if (pe_file_->GetType() == PeFileType::Image)
@@ -195,7 +240,8 @@ public:
     else
     {
       HADESMEM_DETAIL_ASSERT(false);
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Unknown PE file type."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                      << ErrorString("Unknown PE file type."));
     }
   }
 
@@ -264,6 +310,7 @@ private:
   PeFile const* pe_file_;
   PBYTE base_;
   IMAGE_IMPORT_DESCRIPTOR data_;
+  bool is_virtual_beg_;
 };
 
 inline bool operator==(ImportDir const& lhs, ImportDir const& rhs)

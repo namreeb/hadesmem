@@ -22,10 +22,11 @@ namespace
 
 bool IsPrintableClassicLocale(std::string const& s)
 {
-  auto const i = std::find_if(std::begin(s),
-                              std::end(s),
-                              [](char c)
-  { return !std::isprint(c, std::locale::classic()); });
+  auto const i =
+    std::find_if(std::begin(s),
+                 std::end(s),
+                 [](char c)
+                 { return !std::isprint(c, std::locale::classic()); });
   return i == std::end(s);
 }
 }
@@ -103,7 +104,7 @@ void DumpExports(hadesmem::Process const& process,
   for (auto const& e : exports)
   {
     WriteNewline(out);
-    
+
     // Sample: 000d62d3841283151c0582a904e17d929c94292d
     // TODO: Come up with a better solution to this.
     if (num_exports++ == 1000)
@@ -111,7 +112,7 @@ void DumpExports(hadesmem::Process const& process,
       WriteNormal(
         out,
         L"WARNING! Processed 1000 exports. Stopping early to avoid resource "
-          L"exhaustion attacks.",
+        L"exhaustion attacks.",
         2);
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
@@ -133,6 +134,7 @@ void DumpExports(hadesmem::Process const& process,
       // Sample: dllweirdexp.dll
       if (!IsPrintableClassicLocale(name))
       {
+        // TODO: Truncate instead of using an empty name.
         WriteNormal(out,
                     L"WARNING! Detected unprintable export "
                     L"name. Using empty name instead.",
@@ -145,6 +147,7 @@ void DumpExports(hadesmem::Process const& process,
       // Sample: dllweirdexp.dll
       else if (name.size() > 1024)
       {
+        // TODO: Truncate instead of using an empty name.
         WriteNormal(out,
                     L"WARNING! Export name is suspiciously "
                     L"long. Using empty name instead.",

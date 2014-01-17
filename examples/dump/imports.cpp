@@ -79,6 +79,8 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
     {
       WriteNamedHex(out, L"AddressOfData", thunk.GetAddressOfData(), 3);
       WriteNamedHex(out, L"Hint", thunk.GetHint(), 3);
+      // TODO: Do something similar to how export names are handled and handle
+      // cases where the name is unprintable, extremely long, etc.
       WriteNamedNormal(out, L"Name", thunk.GetName().c_str(), 3);
     }
     catch (std::exception const& /*e*/)
@@ -139,6 +141,15 @@ void DumpImports(hadesmem::Process const& process,
                   2);
       WarnForCurrentFile(WarningType::kSuspicious);
       break;
+    }
+
+    if (dir.IsVirtualBegin())
+    {
+      WriteNormal(
+        out,
+        L"WARNING! Detected virtual descriptor overlap trick.",
+        2);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
 
     DWORD const iat = dir.GetFirstThunk();
@@ -298,6 +309,8 @@ void DumpImports(hadesmem::Process const& process,
       // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
+      // TODO: Do something similar to how export names are handled and handle
+      // cases where the name is unprintable, extremely long, etc.
       WriteNamedNormal(out, L"Name", dir.GetName().c_str(), 2);
     }
     catch (std::exception const& /*e*/)
@@ -488,7 +501,7 @@ void DumpBoundImports(hadesmem::Process const& process,
 
     WriteNamedHex(out, L"TimeDateStamp", dir.GetTimeDateStamp(), 2);
     WriteNamedHex(out, L"OffsetModuleName", dir.GetOffsetModuleName(), 2);
-    WriteNamedHex(out, L"ModuleName", dir.GetModuleName().c_str(), 2);
+    WriteNamedNormal(out, L"ModuleName", dir.GetModuleName().c_str(), 2);
     WriteNamedHex(out,
                   L"NumberOfModuleForwarderRefs",
                   dir.GetNumberOfModuleForwarderRefs(),

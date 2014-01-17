@@ -25,9 +25,8 @@
 namespace hadesmem
 {
 
-// TODO: Fix the name of this.
-// TODO: Port the actual enumeration to a RelocationsList instead, and make this
-// class instead for operating on a single base reloc block at a time.
+// TODO: Rewrite this to be a RelocationBlock type, and then have
+// RelocationBlockList and RelocationList types to do the actual enumeration.
 class RelocationsDir
 {
 public:
@@ -64,7 +63,8 @@ public:
     auto const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // TODO: Also fix this for images? Or is it discarded?
-    // TODO: Fix this to handle files with 'virtual' relocs which will still be loaded by Windows.
+    // TODO: Fix this to handle files with 'virtual' relocs which will still be
+    // loaded by Windows.
     // Sample: virtrelocXP.exe
     if (pe_file.GetType() == hadesmem::PeFileType::Data &&
         (relocs_end < base_ || relocs_end > file_end))
@@ -115,15 +115,11 @@ public:
       auto const reloc_dir =
         hadesmem::Read<IMAGE_BASE_RELOCATION>(*process_, current);
 
-      // TODO: Check whether this is even valid... Should this mark as invalid
-      // instead of simply skipping?
-      if (!reloc_dir.SizeOfBlock)
-      {
-        continue;
-      }
-
       DWORD const num_relocs = static_cast<DWORD>(
-        (reloc_dir.SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD));
+        reloc_dir.SizeOfBlock
+          ? ((reloc_dir.SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) /
+             sizeof(WORD))
+          : 0);
       PWORD reloc_data = reinterpret_cast<PWORD>(
         static_cast<IMAGE_BASE_RELOCATION*>(current) + 1);
       void const* const reloc_data_end = reinterpret_cast<void const*>(
