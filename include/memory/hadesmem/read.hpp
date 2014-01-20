@@ -68,11 +68,14 @@ inline void
   std::copy(std::begin(data), std::end(data), out);
 }
 
+// TODO: Support truncate_address in other forms of the API?
+
 template <typename T, typename OutputIterator>
 void ReadStringEx(Process const& process,
                   PVOID address,
                   OutputIterator data,
-                  std::size_t chunk_len)
+                  std::size_t chunk_len,
+                  void* upper_bound)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsCharType<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<
@@ -87,8 +90,11 @@ void ReadStringEx(Process const& process,
       process, address, detail::ProtectGuardType::kRead);
 
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-    PVOID const region_next =
+    PVOID const region_next_real =
       static_cast<PBYTE>(mbi.BaseAddress) + mbi.RegionSize;
+    void* const region_next = upper_bound
+                                ? (std::min)(upper_bound, region_next_real)
+                                : region_next_real;
 
     T* cur = static_cast<T*>(address);
     while (cur + 1 <= region_next)
@@ -105,7 +111,7 @@ void ReadStringEx(Process const& process,
       auto const iter = std::find(std::begin(buf), std::end(buf), T());
       std::copy(std::begin(buf), iter, data);
 
-      if (iter != std::end(buf))
+      if (iter != std::end(buf) || region_next == upper_bound)
       {
         protect_guard.Restore();
         return;
@@ -120,13 +126,6 @@ void ReadStringEx(Process const& process,
   }
 }
 
-template <typename T, typename OutputIterator>
-void ReadString(Process const& process, PVOID address, OutputIterator data)
-{
-  std::size_t const chunk_len = 128;
-  return ReadStringEx<T>(process, address, data, chunk_len);
-}
-
 template <typename T,
           typename Traits = std::char_traits<T>,
           typename Alloc = std::allocator<T>>
@@ -134,8 +133,37 @@ std::basic_string<T, Traits, Alloc>
   ReadStringEx(Process const& process, PVOID address, std::size_t chunk_len)
 {
   std::basic_string<T, Traits, Alloc> data;
-  ReadStringEx<T>(process, address, std::back_inserter(data), chunk_len);
+  ReadStringEx<T>(
+    process, address, std::back_inserter(data), chunk_len, nullptr);
   return data;
+}
+
+template <typename T, typename OutputIterator>
+void ReadStringBounded(Process const& process,
+                       PVOID address,
+                       OutputIterator data,
+                       void* upper_bound)
+{
+  std::size_t const kChunkLen = 512;
+  return ReadStringEx<T>(process, address, data, kChunkLen, upper_bound);
+}
+
+template <typename T,
+          typename Traits = std::char_traits<T>,
+          typename Alloc = std::allocator<T>>
+std::basic_string<T, Traits, Alloc>
+  ReadStringBounded(Process const& process, PVOID address, void* upper_bound)
+{
+  std::basic_string<T, Traits, Alloc> data;
+  ReadStringBounded<T>(process, address, std::back_inserter(data), upper_bound);
+  return data;
+}
+
+template <typename T, typename OutputIterator>
+void ReadString(Process const& process, PVOID address, OutputIterator data)
+{
+  std::size_t const kChunkLen = 512;
+  return ReadStringEx<T>(process, address, data, kChunkLen);
 }
 
 template <typename T,
@@ -144,8 +172,8 @@ template <typename T,
 std::basic_string<T, Traits, Alloc> ReadString(Process const& process,
                                                PVOID address)
 {
-  std::size_t const chunk_len = 128;
-  return ReadStringEx<T>(process, address, chunk_len);
+  std::size_t const kChunkLen = 512;
+  return ReadStringEx<T>(process, address, kChunkLen);
 }
 
 template <typename T, typename Alloc>

@@ -73,16 +73,16 @@
 // TODO: Dump string representation of data where possible, such as bitmasks
 // (Charateristics etc.), data dir names, etc.
 
-// TODO: Dump all TimeDateStamp as actual time-stamps.
-
-// TODO: Warn for unusual time stamps.
+// TODO: Warn for unusual time stamps (very old, in the future, etc.).
 
 // TODO: Support ommiting output for warnings which are not of the specified
 // warning type.
 
 // TODO: Move as much corner-case logic as possible into PeLib itself.
 
-// TODO: Check and use the value of the data directory sizes?
+// TODO: Check and use the value of the data directory sizes? (e.g. To limit
+// IAT/EAT enumeration where it's available... Or does the Windows loader ignore
+// it even in this case?)
 
 // TODO: Add a new 'hostile' warning type for things that are not just
 // suspicious, but are actively hostile and never found in 'legitimate' modules,
@@ -102,9 +102,6 @@
 
 // TODO: Add support for warning when a file takes longer than N
 // minutes/sections to analyze, with an optional forced timeout.
-
-// TODO: Use setw/setfill/etc when logging in order to get consistently sized
-// output.
 
 // TODO: Use backup semantics flags and try to get backup privilege in order to
 // make directory enumeration find more files.

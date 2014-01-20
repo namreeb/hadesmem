@@ -4,7 +4,6 @@
 #include "exports.hpp"
 
 #include <iostream>
-#include <locale>
 #include <memory>
 #include <set>
 
@@ -16,20 +15,6 @@
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
-
-namespace
-{
-
-bool IsPrintableClassicLocale(std::string const& s)
-{
-  auto const i =
-    std::find_if(std::begin(s),
-                 std::end(s),
-                 [](char c)
-                 { return !std::isprint(c, std::locale::classic()); });
-  return i == std::end(s);
-}
-}
 
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
@@ -51,7 +36,15 @@ void DumpExports(hadesmem::Process const& process,
   WriteNewline(out);
 
   WriteNamedHex(out, L"Characteristics", export_dir->GetCharacteristics(), 2);
-  WriteNamedHex(out, L"TimeDateStamp", export_dir->GetTimeDateStamp(), 2);
+  DWORD const time_date_stamp = export_dir->GetTimeDateStamp();
+  std::wstring time_date_stamp_str;
+  if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
+  {
+    WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  WriteNamedHexSuffix(
+    out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
   WriteNamedHex(out, L"MajorVersion", export_dir->GetMajorVersion(), 2);
   WriteNamedHex(out, L"MinorVersion", export_dir->GetMinorVersion(), 2);
   WriteNamedHex(out, L"Name (Raw)", export_dir->GetNameRaw(), 2);

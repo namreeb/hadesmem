@@ -146,9 +146,7 @@ void DumpImports(hadesmem::Process const& process,
     if (dir.IsVirtualBegin())
     {
       WriteNormal(
-        out,
-        L"WARNING! Detected virtual descriptor overlap trick.",
-        2);
+        out, L"WARNING! Detected virtual descriptor overlap trick.", 2);
       WarnForCurrentFile(WarningType::kSuspicious);
     }
 
@@ -212,7 +210,14 @@ void DumpImports(hadesmem::Process const& process,
 
     WriteNamedHex(out, L"OriginalFirstThunk", dir.GetOriginalFirstThunk(), 2);
     DWORD const time_date_stamp = dir.GetTimeDateStamp();
-    WriteNamedHex(out, L"TimeDateStamp", time_date_stamp, 2);
+    std::wstring time_date_stamp_str;
+    if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
+    {
+      WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
+    WriteNamedHexSuffix(
+      out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
     bool has_new_bound_imports = (time_date_stamp == static_cast<DWORD>(-1));
     if (has_new_bound_imports)
     {
@@ -303,15 +308,41 @@ void DumpImports(hadesmem::Process const& process,
     WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
     try
     {
-      // Import names don't need to consist of only printable characters, as
-      // long as they are zero-terminated.
-      // TODO: Find a solution to the above case, and perhaps use a vector<char>
-      // instead of a string in the cases where the name isn't printable.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
-      // TODO: Do something similar to how export names are handled and handle
-      // cases where the name is unprintable, extremely long, etc.
-      WriteNamedNormal(out, L"Name", dir.GetName().c_str(), 2);
+
+      // Treat anything with unprintable characters as invalid. Mark it as
+      // unsupported because unlike export names the import names are actually
+      // used, so either the file is invalid or we're not parsing it correctly.
+      // Sample: 4ca95e23c2927a77c9b18d121f730b7e2f11ec67
+      // TODO: Fix perf for extremely long names. Instead of reading
+      // indefinitely and then checking the size after the fact, we should
+      // perform a bounded read.
+      auto imp_desc_name = dir.GetName();
+      if (!IsPrintableClassicLocale(imp_desc_name))
+      {
+        // TODO: Truncate instead of using an empty name.
+        WriteNormal(out,
+                    L"WARNING! Detected unprintable import descriptor name. "
+                    L"Using empty name instead.",
+                    2);
+        WarnForCurrentFile(WarningType::kUnsupported);
+        imp_desc_name = "";
+      }
+      // Treat anything longer than 1KB as invalid. Mark it as unsupported
+      // because unlike export names the import names are actually used; so
+      // either the file is invalid or we're not parsing it correctly.
+      else if (imp_desc_name.size() > 1024)
+      {
+        // TODO: Truncate instead of using an empty name.
+        WriteNormal(out,
+                    L"WARNING! Import descriptor name is suspiciously long. "
+                    L"Using empty name instead.",
+                    2);
+        WarnForCurrentFile(WarningType::kUnsupported);
+        imp_desc_name = "";
+      }
+      WriteNamedNormal(out, L"Name", imp_desc_name.c_str(), 2);
     }
     catch (std::exception const& /*e*/)
     {
@@ -499,7 +530,15 @@ void DumpBoundImports(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    WriteNamedHex(out, L"TimeDateStamp", dir.GetTimeDateStamp(), 2);
+    DWORD const time_date_stamp = dir.GetTimeDateStamp();
+    std::wstring time_date_stamp_str;
+    if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
+    {
+      WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
+    WriteNamedHexSuffix(
+      out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
     WriteNamedHex(out, L"OffsetModuleName", dir.GetOffsetModuleName(), 2);
     WriteNamedNormal(out, L"ModuleName", dir.GetModuleName().c_str(), 2);
     WriteNamedHex(out,
@@ -514,7 +553,15 @@ void DumpBoundImports(hadesmem::Process const& process,
     }
     for (auto const& forwarder : forwarder_refs)
     {
-      WriteNamedHex(out, L"TimeDateStamp", forwarder.TimeDateStamp, 2);
+      DWORD const fwd_time_date_stamp = forwarder.TimeDateStamp;
+      std::wstring fwd_time_date_stamp_str;
+      if (!ConvertTimeStamp(fwd_time_date_stamp, fwd_time_date_stamp_str))
+      {
+        WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+        WarnForCurrentFile(WarningType::kSuspicious);
+      }
+      WriteNamedHexSuffix(
+        out, L"TimeDateStamp", fwd_time_date_stamp, fwd_time_date_stamp_str, 2);
       WriteNamedHex(out, L"OffsetModuleName", forwarder.OffsetModuleName, 2);
       WriteNamedNormal(out,
                        L"ModuleName",

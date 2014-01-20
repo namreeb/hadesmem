@@ -86,7 +86,7 @@ public:
             ReadVector<std::uint8_t>(*process_, desc_raw_beg, len);
           auto const data_beg =
             reinterpret_cast<std::uint8_t*>(&data_) + offset;
-          ZeroMemory(&data_, sizeof(data_));
+          ::ZeroMemory(&data_, sizeof(data_));
           std::copy(std::begin(buf), std::end(buf), data_beg);
           base_ = static_cast<std::uint8_t*>(desc_raw_beg) - offset;
           is_virtual_beg_ = true;
@@ -217,27 +217,14 @@ public:
     }
     else if (pe_file_->GetType() == PeFileType::Data)
     {
-      std::string name;
       // Handle EOF termination.
       // Sample: maxsecXP.exe (Corkami PE Corpus)
-      // TODO: Fix the perf of this.
       // TODO: Detect and handle the case where the string is terminated
       // virtually.
-      void const* const file_end =
-        static_cast<std::uint8_t const*>(pe_file_->GetBase()) +
+      void* const file_end =
+        static_cast<std::uint8_t*>(pe_file_->GetBase()) +
         pe_file_->GetSize();
-      while (name_va < file_end)
-      {
-        if (char const c = Read<char>(*process_, name_va++))
-        {
-          name.push_back(c);
-        }
-        else
-        {
-          break;
-        }
-      }
-      return name;
+      return ReadStringBounded<char>(*process_, name_va, file_end);
     }
     else
     {

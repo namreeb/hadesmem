@@ -150,6 +150,7 @@ bool IsUnsupportedDataDir(DWORD num)
   case hadesmem::PeDataDir::TLS:
   case hadesmem::PeDataDir::BoundImport:
   case hadesmem::PeDataDir::BaseReloc:
+  case hadesmem::PeDataDir::IAT:
     return false;
 
   case hadesmem::PeDataDir::Resource:
@@ -159,7 +160,6 @@ bool IsUnsupportedDataDir(DWORD num)
   case hadesmem::PeDataDir::Architecture:
   case hadesmem::PeDataDir::GlobalPTR:
   case hadesmem::PeDataDir::LoadConfig:
-  case hadesmem::PeDataDir::IAT:
   case hadesmem::PeDataDir::DelayImport:
   case hadesmem::PeDataDir::COMDescriptor:
   case hadesmem::PeDataDir::Reserved:
@@ -195,7 +195,15 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! More than 96 sections.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  WriteNamedHex(out, L"TimeDateStamp", nt_hdrs.GetTimeDateStamp(), 2);
+  DWORD const time_date_stamp = nt_hdrs.GetTimeDateStamp();
+  std::wstring time_date_stamp_str;
+  if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
+  {
+    WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  WriteNamedHexSuffix(
+    out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
   WriteNamedHex(
     out, L"PointerToSymbolTable", nt_hdrs.GetPointerToSymbolTable(), 2);
   WriteNamedHex(out, L"NumberOfSymbols", nt_hdrs.GetNumberOfSymbols(), 2);
