@@ -431,4 +431,43 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
                                     << ErrorString("Unhandled file type."));
   }
 }
+
+namespace detail
+{
+
+// TODO: Handle virtual termination (need a sample).
+// TODO: Move this somewhere more appropriate.
+// TODO: Support notifying the caller when the string is EOF terminated
+// (out-param?).
+template <typename CharT>
+std::basic_string<CharT> CheckedReadString(Process const& process,
+                                           PeFile const& pe_file,
+                                           void* address)
+{
+  if (pe_file.GetType() == PeFileType::Image)
+  {
+    // TODO: Is extra bounds checking needed here for EOF?
+    return ReadString<CharT>(process, address);
+  }
+  else if (pe_file.GetType() == PeFileType::Data)
+  {
+    void* const file_end =
+      static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
+    if (address >= file_end)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Invalid VA."));
+    }
+    // Handle EOF termination.
+    // Sample: maxsecXP.exe (Corkami PE Corpus)
+    // TODO: Warn for EOF termination.
+    return ReadStringBounded<CharT>(process, address, file_end);
+  }
+  else
+  {
+    HADESMEM_DETAIL_ASSERT(false);
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("Unknown PE file type."));
+  }
+}
+}
 }

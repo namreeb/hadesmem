@@ -78,10 +78,12 @@ public:
         if (name_ord_iter != std::end(name_ordinals))
         {
           by_name_ = true;
-          DWORD const name_rva = Read<DWORD>(
-            process,
-            ptr_names + std::distance(std::begin(name_ordinals), name_ord_iter));
-          name_ = ReadString<char>(process, RvaToVa(process, pe_file, name_rva));
+          DWORD const name_rva =
+            Read<DWORD>(process,
+                        ptr_names + std::distance(std::begin(name_ordinals),
+                                                  name_ord_iter));
+          name_ = detail::CheckedReadString<char>(
+            process, pe_file, RvaToVa(process, pe_file, name_rva));
         }
       }
     }
@@ -108,8 +110,8 @@ public:
     if (func_rva > export_dir_start && func_rva < export_dir_end)
     {
       forwarded_ = true;
-      forwarder_ =
-        ReadString<char>(process, RvaToVa(process, pe_file, func_rva));
+      forwarder_ = detail::CheckedReadString<char>(
+        process, pe_file, RvaToVa(process, pe_file, func_rva));
 
       std::string::size_type const split_pos = forwarder_.rfind('.');
       if (split_pos != std::string::npos)

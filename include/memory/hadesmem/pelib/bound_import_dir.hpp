@@ -124,7 +124,8 @@ public:
 
   std::string GetModuleName() const
   {
-    return ReadString<char>(*process_, start_ + GetOffsetModuleName());
+    return detail::CheckedReadString<char>(
+      *process_, *pe_file_, start_ + GetOffsetModuleName());
   }
 
   WORD GetNumberOfModuleForwarderRefs() const
@@ -139,16 +140,17 @@ public:
   }
 
   // TODO: Remove this once forwarder refs are properly encapsulated.
-  std::string GetNameForModuleForwarderRef(
-    IMAGE_BOUND_FORWARDER_REF const& forwarder) const
+  std::string
+    GetNameForModuleForwarderRef(IMAGE_BOUND_FORWARDER_REF const& forwarder)
+    const
   {
     // OffsetModuleName should never be zero, but apparently it's possible to
     // have some files where it is zero anyway... Probably because the timestamp
     // is intentionally invalid so it's never matched. For now, just ignore
     // this case and hope for the best.
     // TODO: Fix this parsing of files like this properly.
-    // TODO: Also fix for offsets that lie outside the file.
-    return ReadString<char>(*process_, start_ + forwarder.OffsetModuleName);
+    return detail::CheckedReadString<char>(
+      *process_, *pe_file_, start_ + forwarder.OffsetModuleName);
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)

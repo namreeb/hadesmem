@@ -52,10 +52,6 @@ void DumpExports(hadesmem::Process const& process,
   // Sample: dllord.dll (Corkami PE Corpus)
   try
   {
-    // TODO: Detect and handle the case where the string is terminated
-    // virtually.
-    // TODO: Detect and handle the case where the string is EOF terminated.
-
     auto name = export_dir->GetName();
     // Export module names do not need to consist of only printable characters.
     if (!IsPrintableClassicLocale(name))
@@ -131,9 +127,6 @@ void DumpExports(hadesmem::Process const& process,
 
     if (e.ByName())
     {
-      // TODO: Detect and handle the case where the string is terminated
-      // virtually.
-      // TODO: Detect and handle the case where the string is EOF terminated.
       // TODO: Detect and warn when export names are not lexicographically
       // ordered.
 

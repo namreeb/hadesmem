@@ -303,9 +303,6 @@ void DumpImports(hadesmem::Process const& process,
     WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
     try
     {
-      // TODO: Detect and handle the case where the string is terminated
-      // virtually.
-
       // Treat anything with unprintable characters as invalid. Mark it as
       // unsupported because unlike export names the import names are actually
       // used, so either the file is invalid or we're not parsing it correctly.

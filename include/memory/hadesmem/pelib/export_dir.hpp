@@ -91,19 +91,22 @@ public:
     return data_.Name;
   }
 
-  // TODO: Detect and handle the case where the string is terminated
-  // virtually.
-  // TODO: Detect and handle the case where the string is EOF terminated.
   std::string GetName() const
   {
     DWORD const name_rva = GetNameRaw();
-
     if (!name_rva)
     {
       return {};
     }
 
-    return ReadString<char>(*process_, RvaToVa(*process_, *pe_file_, name_rva));
+    auto const name_va = RvaToVa(*process_, *pe_file_, name_rva);
+    if (!name_va)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+        << ErrorString("Name VA is invalid."));
+    }
+
+    return detail::CheckedReadString<char>(*process_, *pe_file_, name_va);
   }
 
   DWORD GetOrdinalBase() const

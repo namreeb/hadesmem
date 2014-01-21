@@ -211,27 +211,7 @@ public:
                                       << ErrorString("Name VA is invalid."));
     }
 
-    if (pe_file_->GetType() == PeFileType::Image)
-    {
-      return ReadString<char>(*process_, name_va);
-    }
-    else if (pe_file_->GetType() == PeFileType::Data)
-    {
-      // Handle EOF termination.
-      // Sample: maxsecXP.exe (Corkami PE Corpus)
-      // TODO: Detect and handle the case where the string is terminated
-      // virtually.
-      void* const file_end =
-        static_cast<std::uint8_t*>(pe_file_->GetBase()) +
-        pe_file_->GetSize();
-      return ReadStringBounded<char>(*process_, name_va, file_end);
-    }
-    else
-    {
-      HADESMEM_DETAIL_ASSERT(false);
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Unknown PE file type."));
-    }
+    return detail::CheckedReadString<char>(*process_, *pe_file_, name_va);
   }
 
   DWORD GetFirstThunk() const

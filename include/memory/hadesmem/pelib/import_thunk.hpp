@@ -103,8 +103,8 @@ public:
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error() << ErrorString("Invalid import name and hint."));
     }
-    return ReadString<char>(*process_,
-                            name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
+    return detail::CheckedReadString<char>(
+      *process_, *pe_file_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
   }
 
   void SetAddressOfData(DWORD_PTR address_of_data)
