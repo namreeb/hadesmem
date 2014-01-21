@@ -52,16 +52,35 @@ void DumpExports(hadesmem::Process const& process,
   // Sample: dllord.dll (Corkami PE Corpus)
   try
   {
-    // Export dir name does not need to consist of only printable characters, as
-    // long as it is zero-terminated.
-    // Sample: dllweirdexp.dll (Corkami PE Corpus)
-    // TODO: Find a solution to the above case, and perhaps use a vector<char>
-    // instead of a string in the cases where the name isn't printable.
     // TODO: Detect and handle the case where the string is terminated
     // virtually.
     // TODO: Detect and handle the case where the string is EOF terminated.
-    // TODO: Detect and handle the case where the string is unreasonably long.
-    WriteNamedNormal(out, L"Name", export_dir->GetName().c_str(), 2);
+
+    auto name = export_dir->GetName();
+    // Export module names do not need to consist of only printable characters.
+    if (!IsPrintableClassicLocale(name))
+    {
+      // TODO: Truncate instead of using an empty name.
+      WriteNormal(out,
+                  L"WARNING! Detected unprintable export module name. Using "
+                  L"empty name instead.",
+                  2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+      name = "";
+    }
+    // Export module names are mostly unused, and so can be anything. Treat
+    // anything longer than 1KB as invalid.
+    else if (name.size() > 1024)
+    {
+      // TODO: Truncate instead of using an empty name.
+      WriteNormal(out,
+                  L"WARNING! Export module name is suspiciously long. Using "
+                  L"empty name instead.",
+                  2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+      name = "";
+    }
+    WriteNamedNormal(out, L"Name", name.c_str(), 2);
   }
   catch (std::exception const& /*e*/)
   {
@@ -98,7 +117,6 @@ void DumpExports(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    // Sample: 000d62d3841283151c0582a904e17d929c94292d
     // TODO: Come up with a better solution to this.
     if (num_exports++ == 1000)
     {
@@ -111,8 +129,6 @@ void DumpExports(hadesmem::Process const& process,
       break;
     }
 
-    WriteNamedHex(out, L"RVA", e.GetRva(), 3);
-    WriteNamedHex(out, L"VA", reinterpret_cast<std::uintptr_t>(e.GetVa()), 3);
     if (e.ByName())
     {
       // TODO: Detect and handle the case where the string is terminated
@@ -168,8 +184,6 @@ void DumpExports(hadesmem::Process const& process,
     WriteNamedHex(out, L"ProcedureNumber", e.GetProcedureNumber(), 3);
     WriteNamedHex(out, L"OrdinalNumber", e.GetOrdinalNumber(), 3);
 
-    // TODO: Disassemble the export EP if it is not a forwarded export.
-
     if (e.IsForwarded())
     {
       WriteNamedNormal(out, L"Forwarder", e.GetForwarder().c_str(), 3);
@@ -190,6 +204,23 @@ void DumpExports(hadesmem::Process const& process,
           WriteNormal(out, L"WARNING! ForwarderOrdinal invalid.", 3);
           WarnForCurrentFile(WarningType::kSuspicious);
         }
+      }
+    }
+    else
+    {
+      auto const ep_rva = e.GetRva();
+      WriteNamedHex(out, L"RVA", e.GetRva(), 3);
+      auto const ep_va = e.GetVa();
+      WriteNamedHex(out, L"VA", reinterpret_cast<std::uintptr_t>(ep_va), 3);
+
+      if (ep_va)
+      {
+        DisassembleEp(process, pe_file, ep_rva, ep_va, 4);
+      }
+      else
+      {
+        WriteNormal(out, L"WARNING! Export VA is invalid.", 3);
+        WarnForCurrentFile(WarningType::kSuspicious);
       }
     }
   }

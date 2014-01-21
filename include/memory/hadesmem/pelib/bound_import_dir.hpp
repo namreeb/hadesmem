@@ -147,7 +147,7 @@ public:
     // is intentionally invalid so it's never matched. For now, just ignore
     // this case and hope for the best.
     // TODO: Fix this parsing of files like this properly.
-    // Sample: 00308e5e699c475bf91fabbdb240e8fab2b9b2d5
+    // TODO: Also fix for offsets that lie outside the file.
     return ReadString<char>(*process_, start_ + forwarder.OffsetModuleName);
   }
 

@@ -52,7 +52,6 @@ public:
     }
 
     // TODO: Support partial overlap.
-    // Sample: 00027f2aa26a1a1ae61e344b70fb2797765b1266
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     void const* const section_hdr_next =

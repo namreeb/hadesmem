@@ -5,10 +5,6 @@
 
 #include <iostream>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <udis86.h>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
@@ -235,7 +231,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // The EP can also be null in the case where it is 'patched' via TLS, but this
   // applies to all cases not just when the EP is null (it's just more likely in
   // the case where it's null).
-  if (!addr_of_ep && !!(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
+  if (!addr_of_ep && !(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {
     WriteNormal(out, L"WARNING! Detected zero EP in non-DLL PE.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
@@ -248,64 +244,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
-  if (ep_va)
-  {
-    ud_t ud_obj;
-    ud_init(&ud_obj);
-    // TODO: Fix this so we don't risk overflow etc.
-    std::size_t size = 0U;
-    if (pe_file.GetType() == hadesmem::PeFileType::Data)
-    {
-      // TODO: Don't read so much unnecessary data. We know the maximum
-      // instruction length for the architecture, so we should at least clamp it
-      // based on that (and the max number of instructions to disassemble). This
-      // could also fail for 'hostile' PE files.
-      size = (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
-              pe_file.GetSize()) -
-             reinterpret_cast<std::uintptr_t>(ep_va);
-    }
-    else
-    {
-      // TODO: Fix this.
-      auto const mbi = hadesmem::detail::Query(process, ep_va);
-      size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) +
-             mbi.RegionSize - reinterpret_cast<std::uintptr_t>(ep_va);
-    }
-    auto const disasm_buf =
-      hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
-    ud_set_input_buffer(&ud_obj, disasm_buf.data(), size);
-    ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-    ud_set_pc(&ud_obj, nt_hdrs.GetImageBase());
-#if defined(_M_AMD64)
-    ud_set_mode(&ud_obj, 64);
-#elif defined(_M_IX86)
-    ud_set_mode(&ud_obj, 32);
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-    // TODO: Experiment to find the "right" number of instructions to try and
-    // disassemble.
-    for (std::size_t i = 0; i < 10; ++i)
-    {
-      std::uint32_t const len = ud_disassemble(&ud_obj);
-      if (len == 0)
-      {
-        WriteNormal(out, L"WARNING! Disassembly failed.", 3);
-        WarnForCurrentFile(WarningType::kUnsupported);
-        break;
-      }
-
-      char const* const asm_str = ud_insn_asm(&ud_obj);
-      HADESMEM_DETAIL_ASSERT(asm_str);
-      char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
-      HADESMEM_DETAIL_ASSERT(asm_bytes_str);
-      auto const diasm_line =
-        hadesmem::detail::MultiByteToWideChar(asm_str) + L" (" +
-        hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L")";
-      WriteNormal(out, diasm_line, 3);
-    }
-  }
+  DisassembleEp(process, pe_file, addr_of_ep, ep_va, 3);
   WriteNamedHex(out, L"BaseOfCode", nt_hdrs.GetBaseOfCode(), 2);
 #if defined(HADESMEM_DETAIL_ARCH_X86)
   WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);

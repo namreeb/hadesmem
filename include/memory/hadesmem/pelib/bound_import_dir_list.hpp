@@ -153,7 +153,6 @@ private:
     // Apparently all three fields are supposed to be zero, but it seems that
     // may not be the case when it comes to the actual loader implementation?
     // TODO: Verify this is correct.
-    // Sample: 00030855940c3b6c50789d203a9ba01d8d4cc0dc
     return !impl_->bound_import_dir_->GetTimeDateStamp() ||
            !impl_->bound_import_dir_->GetOffsetModuleName();
   }

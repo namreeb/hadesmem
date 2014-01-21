@@ -37,6 +37,12 @@ void WarnForCurrentFile(WarningType warned_type);
 
 void ClearWarnForCurrentFile();
 
+void DisassembleEp(hadesmem::Process const& process,
+                   hadesmem::PeFile const& pe_file,
+                   std::uintptr_t ep_rva, 
+                   void* ep_va, 
+                   std::size_t tabs);
+
 // TODO: Clean up this header. It contains a lot of random code that doesn't
 // belong here.
 

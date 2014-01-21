@@ -321,7 +321,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       // TODO: Handle overlap.
       // TODO: Verify whether this is correct. Should we perhaps be doing more
       // than just returning nullptr here?
-      // Sample: 00027f2aa26a1a1ae61e344b70fb2797765b1266
       if (ptr_section_header + 1 > file_end)
       {
         return nullptr;

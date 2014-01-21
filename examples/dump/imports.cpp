@@ -189,16 +189,11 @@ void DumpImports(hadesmem::Process const& process,
       }
     }
 
-    // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF. This is
-    // handled below in our ILT valid/empty checks (after dumping the dir data,
-    // but before dumping the thunks).
+    // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF or 0. This is handled below in our ILT valid/empty checks (after dumping the dir data, but before dumping the thunks).
     // Sample: maxvals.exe (Corkami PE Corpus)
     // Sample: dllmaxvals.dll (Corkami PE Corpus)
-    // For anything else though treat the directory as invalid and skip.
-    // Sample: 0005b517dda0edcd73baf4d888e7b11571e3029e
-    // TODO: Verify this is correct. Probably easiest just to hot-patch the
-    // Corkami samples to make them similar to the unknown sample and see if
-    // they still run.
+    // For anything else though treat the directory as invalid and stop.
+    // TODO: Verify this is correct. Probably easiest just to hot-patch the Corkami samples to give them a random invalid RVA and see if they still run.
     if (!ilt_valid && ilt != 0xFFFFFFFF && ilt != 0)
     {
       // TODO: Come up with a less stupid message for this.
@@ -314,7 +309,6 @@ void DumpImports(hadesmem::Process const& process,
       // Treat anything with unprintable characters as invalid. Mark it as
       // unsupported because unlike export names the import names are actually
       // used, so either the file is invalid or we're not parsing it correctly.
-      // Sample: 4ca95e23c2927a77c9b18d121f730b7e2f11ec67
       // TODO: Fix perf for extremely long names. Instead of reading
       // indefinitely and then checking the size after the fact, we should
       // perform a bounded read.
@@ -498,7 +492,6 @@ void DumpBoundImports(hadesmem::Process const& process,
     return;
   }
 
-  // Sample: 0006a1bb7043c1d2a7c475b69f39cfb6c1044151
   if (!has_new_bound_imports_any)
   {
     WriteNewline(out);

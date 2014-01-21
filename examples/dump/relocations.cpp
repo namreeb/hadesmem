@@ -75,7 +75,7 @@ void DumpRelocations(hadesmem::Process const& process,
 
       if (reloc.type > 10)
       {
-        WriteNormal(out, L"WARNING! Unknown relocation type.", 2);
+        WriteNormal(out, L"WARNING! Unknown relocation type.", 3);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
