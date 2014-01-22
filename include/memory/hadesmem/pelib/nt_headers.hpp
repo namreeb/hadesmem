@@ -77,8 +77,6 @@ public:
 
   bool IsValid() const
   {
-    // TODO: Check whether the Magic check should be removed (i.e.
-    // whether Windows will load images with a NULL or invalid value).
     return IMAGE_NT_SIGNATURE == GetSignature() &&
            IMAGE_NT_OPTIONAL_HDR_MAGIC == GetMagic() &&
 #if defined(HADESMEM_DETAIL_ARCH_X86)

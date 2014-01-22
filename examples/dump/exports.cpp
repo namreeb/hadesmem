@@ -53,30 +53,7 @@ void DumpExports(hadesmem::Process const& process,
   try
   {
     auto name = export_dir->GetName();
-    // Export module names do not need to consist of only printable characters.
-    if (!IsPrintableClassicLocale(name))
-    {
-      // TODO: Truncate instead of using an empty name.
-      WriteNormal(out,
-                  L"WARNING! Detected unprintable export module name. Using "
-                  L"empty name instead.",
-                  2);
-      WarnForCurrentFile(WarningType::kSuspicious);
-      name = "";
-    }
-    // Export module names are mostly unused, and so can be anything. Treat
-    // anything longer than 1KB as invalid.
-    else if (name.size() > 1024)
-    {
-      // TODO: Truncate instead of using an empty name.
-      WriteNormal(out,
-                  L"WARNING! Export module name is suspiciously long. Using "
-                  L"empty name instead.",
-                  2);
-      WarnForCurrentFile(WarningType::kSuspicious);
-      name = "";
-    }
-    WriteNamedNormal(out, L"Name", name.c_str(), 2);
+    HandleLongOrUnprintableString(L"Name", L"export module name", 2, WarningType::kSuspicious, name);
   }
   catch (std::exception const& /*e*/)
   {
@@ -113,7 +90,6 @@ void DumpExports(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    // TODO: Come up with a better solution to this.
     if (num_exports++ == 1000)
     {
       WriteNormal(
@@ -131,36 +107,8 @@ void DumpExports(hadesmem::Process const& process,
       // ordered.
 
       auto const name = e.GetName();
-      // Export names do not need to consist of only printable characters, as
-      // long as they are zero-terminated.
       // Sample: dllweirdexp.dll
-      if (!IsPrintableClassicLocale(name))
-      {
-        // TODO: Truncate instead of using an empty name.
-        WriteNormal(out,
-                    L"WARNING! Detected unprintable export "
-                    L"name. Using empty name instead.",
-                    3);
-        WarnForCurrentFile(WarningType::kSuspicious);
-        WriteNamedNormal(out, L"Name", "", 3);
-      }
-      // Export names are mostly unused, and so can be anything. Treat anything
-      // longer than 1KB as invalid.
-      // Sample: dllweirdexp.dll
-      else if (name.size() > 1024)
-      {
-        // TODO: Truncate instead of using an empty name.
-        WriteNormal(out,
-                    L"WARNING! Export name is suspiciously "
-                    L"long. Using empty name instead.",
-                    3);
-        WarnForCurrentFile(WarningType::kSuspicious);
-        WriteNamedNormal(out, L"Name", "", 3);
-      }
-      else
-      {
-        WriteNamedNormal(out, L"Name", name.c_str(), 3);
-      }
+      HandleLongOrUnprintableString(L"Name", L"export name", 3, WarningType::kSuspicious, name);
 
       // PE files can have duplicate exported function names (or even have them
       // all identical) because the import hint is used to check the name first

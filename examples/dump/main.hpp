@@ -39,9 +39,19 @@ void ClearWarnForCurrentFile();
 
 void DisassembleEp(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file,
-                   std::uintptr_t ep_rva, 
-                   void* ep_va, 
+                   std::uintptr_t ep_rva,
+                   void* ep_va,
                    std::size_t tabs);
+
+void HandleLongOrUnprintableString(std::wstring const& name,
+                                   std::wstring const& description,
+                                   std::size_t tabs,
+                                   WarningType warning_type,
+                                   std::string value);
+
+std::string::size_type FindFirstUnprintableClassicLocale(std::string const& s);
+
+bool ConvertTimeStamp(std::time_t time, std::wstring& str);
 
 // TODO: Clean up this header. It contains a lot of random code that doesn't
 // belong here.
@@ -131,35 +141,4 @@ inline void WriteNormal(std::wostream& out, T const& t, std::size_t tabs)
 inline void WriteNewline(std::wostream& out)
 {
   out << L'\n';
-}
-
-inline bool IsPrintableClassicLocale(std::string const& s)
-{
-  auto const i =
-    std::find_if(std::begin(s),
-                 std::end(s),
-                 [](char c)
-                 { return !std::isprint(c, std::locale::classic()); });
-  return i == std::end(s);
-}
-
-inline bool ConvertTimeStamp(std::time_t time, std::wstring& str)
-{
-  // Using ctime rather than ctime_s because MinGW-w64 is apparently missing it.
-  // WARNING! The ctime function is not thread safe.
-  // TODO: Fix this.
-  auto const conv = std::ctime(&time);
-  if (conv)
-  {
-    // MSDN documents the ctime class of functions as returning a string that is
-    // exactly 26 characters long, of the form "Wed Jan 02 02:03:55 1980\n\0".
-    // Don't copy the newline or the extra null terminator.
-    str = hadesmem::detail::MultiByteToWideChar(std::string(conv, conv + 24));
-    return true;
-  }
-  else
-  {
-    str = L"Invalid";
-    return false;
-  }
 }

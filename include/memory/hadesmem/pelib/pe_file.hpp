@@ -18,8 +18,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
-// TODO: Extra sanity checking in all components. E.g. Check
-// NumberOfRvaAndSizes in NtHeaders before attempting to retrieve a data dir.
+// TODO: Extra sanity checking in all components.
 
 // TODO: Helper functions such as FindExport, FindImport, HasDataDir,
 // GetArchitecture, IsDotNet, GetPDB, etc.
@@ -40,25 +39,10 @@
 // for cross-architecture support in hadesmem.
 
 // TODO: Support more of the PE file format.
-// Overlay data.
-// Resource directory.
-// Exception directory.
-// Relocation directory.
-// Security directory.
-// Debug directory.
-// Load config directory.
-// Delay import directory.
-// Bound import directory.
-// IAT(as opposed to Import) directory.
-// CLR runtime directory support.
-// DOS stub.
-// Rich header.
-// Checksum.
-// etc.
-
-// TODO: Improve PeLib support for pathological cases like Corkami tests. We
-// should not only ensure we don't crash, but we should also ensure we're
-// actually getting the right data out!
+// (Overlay data. Resource directory. Exception directory. Relocation directory.
+// Security directory. Debug directory. Load config directory. Delay import
+// directory. Bound import directory. IAT(as opposed to Import) directory. CLR
+// runtime directory support. DOS stub. Rich header. Checksum. etc.)
 
 // TODO: Where possible, document the SHA1 of example files which prompted the
 // addition of corner cases.
@@ -81,13 +65,7 @@
 // on ImportDir to ensure that we have imports before accessing bound imports,
 // etc.).
 
-// TODO: Perform more bounds checking to ensure we never read off the end of the
-// file etc. Especially when reading strings and other data which we don't know
-// the length of (but even for cases where we do know the length, we're only
-// checking it in very limited scenarios). Perhaps add new "SafeRead" or
-// "ClampedRead" APIs?
-
-// TODO: WE should be far more defensive than we are currently being. Validate
+// TODO: We should be far more defensive than we are currently being. Validate
 // things such as whether offsets are within the file, within the expected data
 // dir, higher than an expected address (e.g. NameOffset for bound imports),
 // etc. Even if we can't always bail when we detect an inconsistency, we should
@@ -97,7 +75,7 @@ namespace hadesmem
 {
 
 // TODO: Investigate whether there is a better way to implement this.
-// TODO: Rename with 'k' prefix?
+// TODO: Rename with 'k' prefix.
 enum class PeFileType
 {
   Image,

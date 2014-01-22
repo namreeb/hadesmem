@@ -26,9 +26,6 @@
 
 // TODO: Support old style bound imports and bound forwarded imports.
 
-// TODO: Are any fixes needed to properly support in-memory images, rather than
-// just on-disk files?
-
 namespace
 {
 
@@ -79,9 +76,9 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
     {
       WriteNamedHex(out, L"AddressOfData", thunk.GetAddressOfData(), 3);
       WriteNamedHex(out, L"Hint", thunk.GetHint(), 3);
-      // TODO: Do something similar to how export names are handled and handle
-      // cases where the name is unprintable, extremely long, etc.
-      WriteNamedNormal(out, L"Name", thunk.GetName().c_str(), 3);
+      auto const name = thunk.GetName();
+      HandleLongOrUnprintableString(
+        L"Name", L"import thunk name data", 3, WarningType::kUnsupported, name);
     }
     catch (std::exception const& /*e*/)
     {
@@ -158,7 +155,6 @@ void DumpImports(hadesmem::Process const& process,
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
-    // TODO: Come up with a better solution to this.
     if (num_import_dirs++ == 1000)
     {
       WriteNormal(
@@ -189,11 +185,15 @@ void DumpImports(hadesmem::Process const& process,
       }
     }
 
-    // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF or 0. This is handled below in our ILT valid/empty checks (after dumping the dir data, but before dumping the thunks).
+    // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF or 0. This
+    // is handled below in our ILT valid/empty checks (after dumping the dir
+    // data, but before dumping the thunks).
     // Sample: maxvals.exe (Corkami PE Corpus)
     // Sample: dllmaxvals.dll (Corkami PE Corpus)
     // For anything else though treat the directory as invalid and stop.
-    // TODO: Verify this is correct. Probably easiest just to hot-patch the Corkami samples to give them a random invalid RVA and see if they still run.
+    // TODO: Verify this is correct. Probably easiest just to hot-patch the
+    // Corkami samples to give them a random invalid RVA and see if they still
+    // run.
     if (!ilt_valid && ilt != 0xFFFFFFFF && ilt != 0)
     {
       // TODO: Come up with a less stupid message for this.
@@ -303,37 +303,12 @@ void DumpImports(hadesmem::Process const& process,
     WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
     try
     {
-      // Treat anything with unprintable characters as invalid. Mark it as
-      // unsupported because unlike export names the import names are actually
-      // used, so either the file is invalid or we're not parsing it correctly.
-      // TODO: Fix perf for extremely long names. Instead of reading
-      // indefinitely and then checking the size after the fact, we should
-      // perform a bounded read.
       auto imp_desc_name = dir.GetName();
-      if (!IsPrintableClassicLocale(imp_desc_name))
-      {
-        // TODO: Truncate instead of using an empty name.
-        WriteNormal(out,
-                    L"WARNING! Detected unprintable import descriptor name. "
-                    L"Using empty name instead.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-        imp_desc_name = "";
-      }
-      // Treat anything longer than 1KB as invalid. Mark it as unsupported
-      // because unlike export names the import names are actually used; so
-      // either the file is invalid or we're not parsing it correctly.
-      else if (imp_desc_name.size() > 1024)
-      {
-        // TODO: Truncate instead of using an empty name.
-        WriteNormal(out,
-                    L"WARNING! Import descriptor name is suspiciously long. "
-                    L"Using empty name instead.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-        imp_desc_name = "";
-      }
-      WriteNamedNormal(out, L"Name", imp_desc_name.c_str(), 2);
+      HandleLongOrUnprintableString(L"Name",
+                                    L"import descriptor name",
+                                    2,
+                                    WarningType::kUnsupported,
+                                    imp_desc_name);
     }
     catch (std::exception const& /*e*/)
     {
@@ -373,14 +348,6 @@ void DumpImports(hadesmem::Process const& process,
                   2);
     }
 
-    // TODO: Distinguish between new and old binding styles and handle
-    // appropriately.
-    // TODO: Detect when the import dir says it is bound with the new style, but
-    // the file does not have a valid bound import dir. In this case it seems to
-    // be ignored by the loader. We should warn for this, but we probably can't
-    // change the way we interpret the data, because just because there's no
-    // bound import dir doesn't mean the IAT contains legitimate un-bound data,
-    // it could just be complete garbage. Need to confirm this though...
     bool const is_bound = !!dir.GetTimeDateStamp();
     // Assume that any PE files mapped as images in memory have had their
     // imports resolved.
@@ -392,16 +359,13 @@ void DumpImports(hadesmem::Process const& process,
     std::size_t count = 0U;
     for (auto const& thunk : ilt_thunks)
     {
-      // TODO: Come up with a better solution to this.
       if (count++ == 1000)
       {
         WriteNewline(out);
-        WriteNormal(
-          out,
-          L"WARNING! Processed 1000 import thunks. Stopping early to "
-          L"avoid resource exhaustion attacks. Check PE file for TLS AOI "
-          L"trick, virtual terminator trick, or other similar attacks.",
-          2);
+        WriteNormal(out,
+                    L"WARNING! Processed 1000 import thunks. Stopping early to "
+                    L"avoid resource exhaustion attacks.",
+                    2);
         WarnForCurrentFile(WarningType::kUnsupported);
         break;
       }
@@ -473,8 +437,7 @@ void DumpBoundImports(hadesmem::Process const& process,
   // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
   if (!HasBoundImportDir(process, pe_file))
   {
-    // Not sure if this is allowed or not. Mark as unsupported in order to
-    // quickly identify potential samples.
+    // Sample: dllmaxvals.dll (Corkami PE Corpus)
     if (has_new_bound_imports_any)
     {
       WriteNewline(out);
@@ -483,7 +446,7 @@ void DumpBoundImports(hadesmem::Process const& process,
         L"WARNING! No bound import directory on file with an import dir "
         L"indicating the presence of a bound import dir.",
         1);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
 
     return;

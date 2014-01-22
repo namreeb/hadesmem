@@ -90,16 +90,14 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
-    // TODO: Handle overflow here for cases where we have the maximum number of
-    // sections?
     if (++impl_->cur_section_ >= impl_->num_sections_)
     {
       impl_.reset();
       return *this;
     }
 
-    PIMAGE_SECTION_HEADER new_base =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(impl_->section_->GetBase()) + 1U;
+    auto const new_base =
+      static_cast<PIMAGE_SECTION_HEADER>(impl_->section_->GetBase()) + 1U;
     impl_->section_ = Section(*impl_->process_, *impl_->pe_file_, new_base);
 
     return *this;

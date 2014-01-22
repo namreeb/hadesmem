@@ -79,11 +79,6 @@
 
 // TODO: Warn for unusual time stamps (very old, in the future, etc.).
 
-// TODO: Support ommiting output for warnings which are not of the specified
-// warning type.
-
-// TODO: Move as much corner-case logic as possible into PeLib itself.
-
 // TODO: Check and use the value of the data directory sizes? (e.g. To limit
 // IAT/EAT enumeration where it's available... Or does the Windows loader ignore
 // it even in this case?)
@@ -91,15 +86,6 @@
 // TODO: Add a new 'hostile' warning type for things that are not just
 // suspicious, but are actively hostile and never found in 'legitimate' modules,
 // like the AOI trick?
-
-// TODO: Handle all tricks and samples from the Corkami PE corpus and the
-// Undocumented PECOFF whitepaper by ReversingLabs.
-
-// TODO: Add warnings for cases like that are currently being detected and
-// swallowed entirely in PeLib.
-
-// TODO: Refactor out the warning code to operate separately from the dumping
-// code where possible.
 
 // TODO: Clean up this tool. It's a disaster of spaghetti code (spaghetti is
 // delicious, but we should clean this up anyway...).
@@ -117,10 +103,18 @@
 // TODO: Fix all cases both in Dump and in PeLib where we're potentially reading
 // outside of the file/image.
 
+// TODO: Move as much corner-case logic as possible into PeLib itself.
+
 // TODO: Move all the "warnings" etc to PeLib itself (probably store inside
 // PeFile class? or make it specific to each part of the file e.g. exports,
 // imports, etc.). Need to think of the best way to handle it. Perhaps a set of
 // flags per part of the file?
+
+// TODO: Refactor out the warning code to operate separately from the dumping
+// code where possible.
+
+// TODO: Add warnings for cases like that are currently being detected and
+// swallowed entirely in PeLib.
 
 namespace
 {
@@ -461,6 +455,71 @@ void DisassembleEp(hadesmem::Process const& process,
       hadesmem::detail::MultiByteToWideChar(asm_str) + L" (" +
       hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L")";
     WriteNormal(out, diasm_line, tabs);
+  }
+}
+
+// TODO: Fix perf for extremely long names. Instead of reading
+// indefinitely and then checking the size after the fact, we should
+// perform a bounded read.
+void HandleLongOrUnprintableString(std::wstring const& name,
+                                   std::wstring const& description,
+                                   std::size_t tabs,
+                                   WarningType warning_type,
+                                   std::string value)
+{
+  std::wostream& out = std::wcout;
+
+  auto const unprintable = FindFirstUnprintableClassicLocale(value);
+  std::size_t const kMaxNameLength = 1024;
+  if (unprintable != std::string::npos)
+  {
+    WriteNormal(out,
+                L"WARNING! Detected unprintable " + description +
+                  L". Truncating.",
+                tabs);
+    WarnForCurrentFile(warning_type);
+    value.erase(unprintable);
+  }
+  else if (value.size() > kMaxNameLength)
+  {
+    WriteNormal(out,
+                L"WARNING! Detected suspiciously long " + description +
+                  L". Truncating.",
+                tabs);
+    WarnForCurrentFile(warning_type);
+    value.erase(kMaxNameLength);
+  }
+  WriteNamedNormal(out, name, value.c_str(), tabs);
+}
+
+std::string::size_type FindFirstUnprintableClassicLocale(std::string const& s)
+{
+  auto const i =
+    std::find_if(std::begin(s),
+                 std::end(s),
+                 [](char c)
+                 { return !std::isprint(c, std::locale::classic()); });
+  return i == std::end(s) ? std::string::npos : std::distance(std::begin(s), i);
+}
+
+bool ConvertTimeStamp(std::time_t time, std::wstring& str)
+{
+  // Using ctime rather than ctime_s because MinGW-w64 is apparently missing it.
+  // WARNING! The ctime function is not thread safe.
+  // TODO: Fix this.
+  auto const conv = std::ctime(&time);
+  if (conv)
+  {
+    // MSDN documents the ctime class of functions as returning a string that is
+    // exactly 26 characters long, of the form "Wed Jan 02 02:03:55 1980\n\0".
+    // Don't copy the newline or the extra null terminator.
+    str = hadesmem::detail::MultiByteToWideChar(std::string(conv, conv + 24));
+    return true;
+  }
+  else
+  {
+    str = L"Invalid";
+    return false;
   }
 }
 

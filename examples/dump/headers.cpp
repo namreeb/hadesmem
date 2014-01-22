@@ -219,8 +219,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // TODO: Detect EP outside of the file (i.e. pointing to another non-relocated
   // module). See "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF"
   // for more inforamtion. Also see AddressOfEntryPoint in Corkami PE info.
-  // TODO: For valid EPs inside the file, dump the section that it is in, and
-  // also disassemble the first N instructions (for some reasonable value of N).
+  // TODO: For valid EPs inside the file, dump the section that it is in.
   // TODO: Detect virtual overlap EP. (Sample: virtEP.exe from Corkami)
   DWORD const addr_of_ep = nt_hdrs.GetAddressOfEntryPoint();
   WriteNamedHex(out, L"AddressOfEntryPoint", addr_of_ep, 2);
