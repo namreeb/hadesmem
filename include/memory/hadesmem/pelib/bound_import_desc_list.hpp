@@ -13,7 +13,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/optional.hpp>
 #include <hadesmem/error.hpp>
-#include <hadesmem/pelib/bound_import_dir.hpp>
+#include <hadesmem/pelib/bound_import_desc.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
@@ -23,39 +23,37 @@
 namespace hadesmem
 {
 
-// BoundImportDirIterator satisfies the requirements of an input iterator
+// BoundImportDescriptorIterator satisfies the requirements of an input iterator
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
-template <typename BoundImportDirT>
-class BoundImportDirIterator
-  : public std::iterator<std::input_iterator_tag, BoundImportDirT>
+template <typename BoundImportDescriptorT>
+class BoundImportDescriptorIterator
+  : public std::iterator<std::input_iterator_tag, BoundImportDescriptorT>
 {
 public:
-  using BaseIteratorT = std::iterator<std::input_iterator_tag, BoundImportDirT>;
+  using BaseIteratorT =
+    std::iterator<std::input_iterator_tag, BoundImportDescriptorT>;
   using value_type = typename BaseIteratorT::value_type;
   using difference_type = typename BaseIteratorT::difference_type;
   using pointer = typename BaseIteratorT::pointer;
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR BoundImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
-    : impl_()
+  HADESMEM_DETAIL_CONSTEXPR
+  BoundImportDescriptorIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
   {
   }
 
-  explicit BoundImportDirIterator(Process const& process, PeFile const& pe_file)
+  explicit BoundImportDescriptorIterator(Process const& process,
+                                         PeFile const& pe_file)
     : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
-      impl_->bound_import_dir_ =
-        BoundImportDir(process, pe_file, nullptr, nullptr);
+      impl_->bound_import_desc_ =
+        BoundImportDescriptor(process, pe_file, nullptr, nullptr);
       if (IsTerminator())
       {
         impl_.reset();
-      }
-      else
-      {
-        impl_->start_bound_import_dir_ = impl_->bound_import_dir_;
       }
     }
     catch (std::exception const& /*e*/)
@@ -66,18 +64,18 @@ public:
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  BoundImportDirIterator(BoundImportDirIterator const&) = default;
+  BoundImportDescriptorIterator(BoundImportDescriptorIterator const&) = default;
 
-  BoundImportDirIterator& operator=(BoundImportDirIterator const&) = default;
+  BoundImportDescriptorIterator&
+    operator=(BoundImportDescriptorIterator const&) = default;
 
-  BoundImportDirIterator(BoundImportDirIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT:
-  impl_(std::move(other.impl_))
+  BoundImportDescriptorIterator(BoundImportDescriptorIterator&& other) HADESMEM_DETAIL_NOEXCEPT 
+    : impl_(std::move(other.impl_))
   {
   }
 
-  BoundImportDirIterator& operator=(BoundImportDirIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  BoundImportDescriptorIterator&
+    operator=(BoundImportDescriptorIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
@@ -89,29 +87,29 @@ public:
   reference operator*() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
-    return *impl_->bound_import_dir_;
+    return *impl_->bound_import_desc_;
   }
 
   pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
-    return &*impl_->bound_import_dir_;
+    return &*impl_->bound_import_desc_;
   }
 
-  BoundImportDirIterator& operator++()
+  BoundImportDescriptorIterator& operator++()
   {
     try
     {
       HADESMEM_DETAIL_ASSERT(impl_.get());
 
-      auto const cur_base = reinterpret_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
-        impl_->bound_import_dir_->GetBase());
+      auto const cur_base = static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
+        impl_->bound_import_desc_->GetBase());
       auto const new_base = reinterpret_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
         reinterpret_cast<PIMAGE_BOUND_FORWARDER_REF>(cur_base + 1) +
-        impl_->bound_import_dir_->GetNumberOfModuleForwarderRefs());
-      auto const start_base = reinterpret_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
-        impl_->start_bound_import_dir_->GetBase());
-      impl_->bound_import_dir_ = BoundImportDir(
+        impl_->bound_import_desc_->GetNumberOfModuleForwarderRefs());
+      auto const start_base = static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
+        impl_->bound_import_desc_->GetStart());
+      impl_->bound_import_desc_ = BoundImportDescriptor(
         *impl_->process_, *impl_->pe_file_, start_base, new_base);
 
       if (IsTerminator())
@@ -128,20 +126,20 @@ public:
     return *this;
   }
 
-  BoundImportDirIterator operator++(int)
+  BoundImportDescriptorIterator operator++(int)
   {
-    BoundImportDirIterator const iter(*this);
+    BoundImportDescriptorIterator const iter(*this);
     ++*this;
     return iter;
   }
 
-  bool operator==(BoundImportDirIterator const& other) const
+  bool operator==(BoundImportDescriptorIterator const& other) const
     HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(BoundImportDirIterator const& other) const
+  bool operator!=(BoundImportDescriptorIterator const& other) const
     HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
@@ -153,8 +151,8 @@ private:
     // Apparently all three fields are supposed to be zero, but it seems that
     // may not be the case when it comes to the actual loader implementation?
     // TODO: Verify this is correct.
-    return !impl_->bound_import_dir_->GetTimeDateStamp() ||
-           !impl_->bound_import_dir_->GetOffsetModuleName();
+    return !impl_->bound_import_desc_->GetTimeDateStamp() ||
+           !impl_->bound_import_desc_->GetOffsetModuleName();
   }
 
   struct Impl
@@ -163,15 +161,13 @@ private:
                   PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
       : process_(&process),
         pe_file_(&pe_file),
-        bound_import_dir_(),
-        start_bound_import_dir_()
+        bound_import_desc_()
     {
     }
 
     Process const* process_;
     PeFile const* pe_file_;
-    hadesmem::detail::Optional<BoundImportDir> bound_import_dir_;
-    hadesmem::detail::Optional<BoundImportDir> start_bound_import_dir_;
+    hadesmem::detail::Optional<BoundImportDescriptor> bound_import_desc_;
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as
@@ -179,46 +175,48 @@ private:
   std::shared_ptr<Impl> impl_;
 };
 
-class BoundImportDirList
+class BoundImportDescriptorList
 {
 public:
-  using value_type = BoundImportDir;
-  using iterator = BoundImportDirIterator<BoundImportDir>;
-  using const_iterator = BoundImportDirIterator<BoundImportDir const>;
+  using value_type = BoundImportDescriptor;
+  using iterator = BoundImportDescriptorIterator<BoundImportDescriptor>;
+  using const_iterator =
+    BoundImportDescriptorIterator<BoundImportDescriptor const>;
 
-  explicit BoundImportDirList(Process const& process, PeFile const& pe_file)
+  explicit BoundImportDescriptorList(Process const& process,
+                                     PeFile const& pe_file)
     : process_(&process), pe_file_(&pe_file)
   {
   }
 
   iterator begin()
   {
-    return BoundImportDirList::iterator(*process_, *pe_file_);
+    return iterator(*process_, *pe_file_);
   }
 
   const_iterator begin() const
   {
-    return BoundImportDirList::const_iterator(*process_, *pe_file_);
+    return const_iterator(*process_, *pe_file_);
   }
 
   const_iterator cbegin() const
   {
-    return BoundImportDirList::const_iterator(*process_, *pe_file_);
+    return const_iterator(*process_, *pe_file_);
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return BoundImportDirList::iterator();
+    return iterator();
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return BoundImportDirList::const_iterator();
+    return const_iterator();
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return BoundImportDirList::const_iterator();
+    return const_iterator();
   }
 
 private:

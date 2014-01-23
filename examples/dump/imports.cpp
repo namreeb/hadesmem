@@ -6,8 +6,10 @@
 #include <iostream>
 #include <iterator>
 
-#include <hadesmem/pelib/bound_import_dir.hpp>
-#include <hadesmem/pelib/bound_import_dir_list.hpp>
+#include <hadesmem/pelib/bound_import_desc.hpp>
+#include <hadesmem/pelib/bound_import_desc_list.hpp>
+#include <hadesmem/pelib/bound_import_fwd_ref.hpp>
+#include <hadesmem/pelib/bound_import_fwd_ref_list.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
@@ -46,7 +48,7 @@ bool HasBoundImportDir(hadesmem::Process const& process,
 bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
                                          hadesmem::PeFile const& pe_file)
 {
-  hadesmem::BoundImportDirList bound_import_dirs(process, pe_file);
+  hadesmem::BoundImportDescriptorList bound_import_dirs(process, pe_file);
 
   return (std::begin(bound_import_dirs) != std::end(bound_import_dirs));
 }
@@ -428,6 +430,7 @@ void DumpImports(hadesmem::Process const& process,
   }
 }
 
+// TODO: Move this into a different file.
 void DumpBoundImports(hadesmem::Process const& process,
                       hadesmem::PeFile const& pe_file,
                       bool has_new_bound_imports_any)
@@ -464,12 +467,12 @@ void DumpBoundImports(hadesmem::Process const& process,
     return;
   }
 
-  hadesmem::BoundImportDirList bound_import_dirs(process, pe_file);
+  hadesmem::BoundImportDescriptorList bound_import_descs(process, pe_file);
 
-  if (std::begin(bound_import_dirs) != std::end(bound_import_dirs))
+  if (std::begin(bound_import_descs) != std::end(bound_import_descs))
   {
     WriteNewline(out);
-    WriteNormal(out, L"Bound Import Dirs:", 1);
+    WriteNormal(out, L"Bound Import Descriptors:", 1);
   }
   else
   {
@@ -479,11 +482,11 @@ void DumpBoundImports(hadesmem::Process const& process,
   }
 
   // TODO: Warn and bail after processing N entries (similar to imports).
-  for (auto const& dir : bound_import_dirs)
+  for (auto const& desc : bound_import_descs)
   {
     WriteNewline(out);
 
-    DWORD const time_date_stamp = dir.GetTimeDateStamp();
+    DWORD const time_date_stamp = desc.GetTimeDateStamp();
     std::wstring time_date_stamp_str;
     if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
     {
@@ -492,35 +495,37 @@ void DumpBoundImports(hadesmem::Process const& process,
     }
     WriteNamedHexSuffix(
       out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
-    WriteNamedHex(out, L"OffsetModuleName", dir.GetOffsetModuleName(), 2);
-    WriteNamedNormal(out, L"ModuleName", dir.GetModuleName().c_str(), 2);
+    WriteNamedHex(out, L"OffsetModuleName", desc.GetOffsetModuleName(), 2);
+    WriteNamedNormal(out, L"ModuleName", desc.GetModuleName().c_str(), 2);
     WriteNamedHex(out,
                   L"NumberOfModuleForwarderRefs",
-                  dir.GetNumberOfModuleForwarderRefs(),
+                  desc.GetNumberOfModuleForwarderRefs(),
                   2);
-    // TODO: Add a proper API for this.
-    auto const forwarder_refs = dir.GetModuleForwarderRefs();
+    hadesmem::BoundImportForwarderRefList forwarder_refs(
+      process, pe_file, desc);
     if (std::begin(forwarder_refs) != std::end(forwarder_refs))
     {
+      WriteNewline(out);
       WriteNormal(out, L"Module Forwarder Refs:", 2);
     }
     for (auto const& forwarder : forwarder_refs)
     {
-      DWORD const fwd_time_date_stamp = forwarder.TimeDateStamp;
+      WriteNewline(out);
+
+      DWORD const fwd_time_date_stamp = forwarder.GetTimeDateStamp();
       std::wstring fwd_time_date_stamp_str;
       if (!ConvertTimeStamp(fwd_time_date_stamp, fwd_time_date_stamp_str))
       {
-        WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
+        WriteNormal(out, L"WARNING! Invalid timestamp.", 3);
         WarnForCurrentFile(WarningType::kSuspicious);
       }
       WriteNamedHexSuffix(
-        out, L"TimeDateStamp", fwd_time_date_stamp, fwd_time_date_stamp_str, 2);
-      WriteNamedHex(out, L"OffsetModuleName", forwarder.OffsetModuleName, 2);
-      WriteNamedNormal(out,
-                       L"ModuleName",
-                       dir.GetNameForModuleForwarderRef(forwarder).c_str(),
-                       2);
-      WriteNamedHex(out, L"Reserved", forwarder.Reserved, 2);
+        out, L"TimeDateStamp", fwd_time_date_stamp, fwd_time_date_stamp_str, 3);
+      WriteNamedHex(
+        out, L"OffsetModuleName", forwarder.GetOffsetModuleName(), 3);
+      WriteNamedNormal(
+        out, L"ModuleName", forwarder.GetModuleName().c_str(), 3);
+      WriteNamedHex(out, L"Reserved", forwarder.GetReserved(), 3);
     }
   }
 }

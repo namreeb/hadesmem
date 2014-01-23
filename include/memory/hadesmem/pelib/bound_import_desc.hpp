@@ -16,6 +16,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/error.hpp>
+#include <hadesmem/pelib/bound_import_fwd_ref.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
@@ -23,42 +24,25 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-// TODO: This should really be called BoundImportDescriptor.
-
 // TODO: Add tests.
 
 namespace hadesmem
 {
 
-class BoundImportDir
+class BoundImportDescriptor
 {
 public:
-  explicit BoundImportDir(Process const& process,
-                          PeFile const& pe_file,
-                          PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
-                          PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc)
+  explicit BoundImportDescriptor(Process const& process,
+                                 PeFile const& pe_file,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc)
     : process_(&process),
       pe_file_(&pe_file),
       start_(reinterpret_cast<PBYTE>(start)),
       base_(reinterpret_cast<PBYTE>(imp_desc)),
-      data_(),
-      forwarders_()
+      data_()
   {
     HADESMEM_DETAIL_ASSERT((start_ && base_) || (!start_ && !base_));
-
-    // Ensure we have a valid imort dir, otherwise the bound import dir is
-    // ignored and can be corrupt.
-    // TODO: Do this in a less awful way.
-    try
-    {
-      ImportDir const import_dir(process, pe_file, nullptr);
-    }
-    catch (std::exception const& /*e*/)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Bound import directory is invalid because "
-                               "import dir is missing."));
-    }
 
     if (!base_)
     {
@@ -102,14 +86,11 @@ public:
   void UpdateRead()
   {
     data_ = Read<IMAGE_BOUND_IMPORT_DESCRIPTOR>(*process_, base_);
-    forwarders_ = ReadVector<IMAGE_BOUND_FORWARDER_REF>(
-      *process_, base_ + sizeof(data_), data_.NumberOfModuleForwarderRefs);
   }
 
   void UpdateWrite()
   {
     Write(*process_, base_, data_);
-    WriteVector(*process_, base_ + sizeof(data_), forwarders_);
   }
 
   DWORD GetTimeDateStamp() const
@@ -131,26 +112,6 @@ public:
   WORD GetNumberOfModuleForwarderRefs() const
   {
     return data_.NumberOfModuleForwarderRefs;
-  }
-
-  // TODO: Encapsulate this into its own class, iterator, list, etc.
-  std::vector<IMAGE_BOUND_FORWARDER_REF> GetModuleForwarderRefs() const
-  {
-    return forwarders_;
-  }
-
-  // TODO: Remove this once forwarder refs are properly encapsulated.
-  std::string
-    GetNameForModuleForwarderRef(IMAGE_BOUND_FORWARDER_REF const& forwarder)
-    const
-  {
-    // OffsetModuleName should never be zero, but apparently it's possible to
-    // have some files where it is zero anyway... Probably because the timestamp
-    // is intentionally invalid so it's never matched. For now, just ignore
-    // this case and hope for the best.
-    // TODO: Fix this parsing of files like this properly.
-    return detail::CheckedReadString<char>(
-      *process_, *pe_file_, start_ + forwarder.OffsetModuleName);
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
@@ -178,46 +139,50 @@ private:
   PBYTE start_;
   PBYTE base_;
   IMAGE_BOUND_IMPORT_DESCRIPTOR data_;
-  std::vector<IMAGE_BOUND_FORWARDER_REF> forwarders_;
 };
 
-inline bool operator==(BoundImportDir const& lhs, BoundImportDir const& rhs)
+inline bool operator==(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(BoundImportDir const& lhs, BoundImportDir const& rhs)
+inline bool operator!=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(BoundImportDir const& lhs, BoundImportDir const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(BoundImportDescriptor const& lhs,
+                      BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(BoundImportDir const& lhs, BoundImportDir const& rhs)
+inline bool operator<=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(BoundImportDir const& lhs, BoundImportDir const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(BoundImportDescriptor const& lhs,
+                      BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(BoundImportDir const& lhs, BoundImportDir const& rhs)
+inline bool operator>=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs)
   HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
 
-inline std::ostream& operator<<(std::ostream& lhs, BoundImportDir const& rhs)
+inline std::ostream& operator<<(std::ostream& lhs,
+                                BoundImportDescriptor const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetBase();
@@ -225,7 +190,8 @@ inline std::ostream& operator<<(std::ostream& lhs, BoundImportDir const& rhs)
   return lhs;
 }
 
-inline std::wostream& operator<<(std::wostream& lhs, BoundImportDir const& rhs)
+inline std::wostream& operator<<(std::wostream& lhs,
+                                 BoundImportDescriptor const& rhs)
 {
   std::locale const old = lhs.imbue(std::locale::classic());
   lhs << rhs.GetBase();
