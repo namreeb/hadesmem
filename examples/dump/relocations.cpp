@@ -7,7 +7,10 @@
 
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
-#include <hadesmem/pelib/relocations_dir.hpp>
+#include <hadesmem/pelib/relocation.hpp>
+#include <hadesmem/pelib/relocation_list.hpp>
+#include <hadesmem/pelib/relocation_block.hpp>
+#include <hadesmem/pelib/relocation_block_list.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
@@ -15,35 +18,37 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+namespace
+{
+
+bool HasRelocationsDir(hadesmem::Process const& process,
+                       hadesmem::PeFile const& pe_file)
+{
+  hadesmem::NtHeaders const nt_headers(process, pe_file);
+  // Intentionally not checking whether the RVA or size is valid, because we
+  // will detect an empty list in that case, at which point we want to warn.
+  return (
+    nt_headers.GetNumberOfRvaAndSizes() >
+      static_cast<int>(hadesmem::PeDataDir::BaseReloc) &&
+    nt_headers.GetDataDirectoryVirtualAddress(hadesmem::PeDataDir::BaseReloc));
+}
+}
+
 void DumpRelocations(hadesmem::Process const& process,
                      hadesmem::PeFile const& pe_file)
 {
-  std::unique_ptr<hadesmem::RelocationsDir> relocations_dir;
-  try
-  {
-    relocations_dir =
-      std::make_unique<hadesmem::RelocationsDir>(process, pe_file);
-  }
-  catch (std::exception const& /*e*/)
-  {
-    return;
-  }
-
   std::wostream& out = std::wcout;
 
   WriteNewline(out);
 
-  auto const reloc_blocks = relocations_dir->GetRelocBlocks();
-
-  WriteNormal(out, L"Relocation Blocks:", 1);
-
-  if (relocations_dir->IsInvalid())
+  hadesmem::RelocationBlockList reloc_blocks(process, pe_file);
+  if (std::begin(reloc_blocks) != std::end(reloc_blocks))
   {
-    WriteNewline(out);
-    WriteNormal(out,
-      L"WARNING! Detected invalid relocation block(s). Output may be "
-      L"partially or entirely incorrect.",
-      2);
+    WriteNormal(out, L"Relocation Blocks:", 1);
+  }
+  else
+  {
+    WriteNormal(out, L"WARNING! Relocation block list is invalid.", 1);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
 
@@ -51,12 +56,14 @@ void DumpRelocations(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    WriteNamedHex(out, L"VirtualAddress", block.va, 2);
-    WriteNamedHex(out, L"SizeOfBlock", block.size, 2);
+    auto const va = block.GetVirtualAddress();
+    WriteNamedHex(out, L"VirtualAddress", va, 2);
+    auto const size = block.GetSizeOfBlock();
+    WriteNamedHex(out, L"SizeOfBlock", block.GetSizeOfBlock(), 2);
 
     WriteNewline(out);
 
-    if (block.size)
+    if (size)
     {
       WriteNormal(out, L"Relocations:", 2);
     }
@@ -66,15 +73,16 @@ void DumpRelocations(hadesmem::Process const& process,
       WarnForCurrentFile(WarningType::kUnsupported);
     }
 
-    auto const& relocs = block.relocs;
+    hadesmem::RelocationList relocs(process, pe_file, block.GetRelocationDataStart(), block.GetNumberOfRelocations());
     for (auto const reloc : relocs)
     {
       WriteNewline(out);
 
-      WriteNamedHex(out, L"Type", reloc.type, 3);
-      WriteNamedHex(out, L"Offset", reloc.offset, 3);
+      auto const type = reloc.GetType();
+      WriteNamedHex(out, L"Type", type, 3);
+      WriteNamedHex(out, L"Offset", reloc.GetOffset(), 3);
 
-      if (reloc.type > 10)
+      if (type > 10)
       {
         WriteNormal(out, L"WARNING! Unknown relocation type.", 3);
         WarnForCurrentFile(WarningType::kUnsupported);
