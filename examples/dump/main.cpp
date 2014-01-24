@@ -17,10 +17,6 @@
 #include <tclap/CmdLine.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <udis86.h>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
 #include <hadesmem/detail/filesystem.hpp>
@@ -39,13 +35,16 @@
 #include <hadesmem/thread_list.hpp>
 #include <hadesmem/thread_entry.hpp>
 
+#include "bound_imports.hpp"
 #include "exports.hpp"
 #include "filesystem.hpp"
 #include "headers.hpp"
 #include "imports.hpp"
+#include "print.hpp"
 #include "relocations.hpp"
 #include "sections.hpp"
 #include "tls.hpp"
+#include "warning.hpp"
 
 // TODO: Add functionality to make this tool more useful for reversing, such as
 // basic heuristics to detect suspicious files, packer/container detection,
@@ -119,54 +118,8 @@
 namespace
 {
 
-// Record all modules (on disk) which cause a warning when dumped, to make it
-// easier to isolate files which require further investigation.
-// TODO: Clean this up.
-bool g_warned = false;
-bool g_warned_enabled = false;
-bool g_warned_dynamic = false;
-std::vector<std::wstring> g_all_warned;
-std::wstring g_warned_file_path;
-WarningType g_warned_type = WarningType::kAll;
+// TODO: Clean up this hack.
 std::wstring g_current_file_path;
-
-void HandleWarnings(std::wstring const& path)
-{
-  if (g_warned_enabled && g_warned)
-  {
-    if (g_warned_dynamic)
-    {
-      std::unique_ptr<std::wfstream> warned_file_ptr(
-        hadesmem::detail::OpenFileWide(g_warned_file_path,
-                                       std::ios::out | std::ios::app));
-      std::wfstream& warned_file = *warned_file_ptr;
-      if (!warned_file)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error()
-          << hadesmem::ErrorString("Failed to open warned file for output."));
-      }
-      warned_file << path << '\n';
-    }
-    else
-    {
-      g_all_warned.push_back(path);
-    }
-  }
-}
-
-void DumpWarned(std::wostream& out)
-{
-  if (!g_all_warned.empty())
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Dumping warned list.", 0);
-    for (auto const f : g_all_warned)
-    {
-      WriteNormal(out, f, 0);
-    }
-  }
-}
 
 void DumpRegions(hadesmem::Process const& process)
 {
@@ -222,7 +175,6 @@ void DumpModules(hadesmem::Process const& process)
     {
       WriteNewline(out);
       WriteNormal(out, L"WARNING! Not a valid PE file or architecture.", 1);
-      g_warned = true;
       continue;
     }
 
@@ -365,99 +317,6 @@ void SetCurrentFilePath(std::wstring const& path)
   g_current_file_path = path;
 }
 
-void WarnForCurrentFile(WarningType warned_type)
-{
-  if (warned_type == g_warned_type || g_warned_type == WarningType::kAll)
-  {
-    g_warned = true;
-  }
-}
-
-void ClearWarnForCurrentFile()
-{
-  g_warned = false;
-}
-
-// TODO: Move this to somewhere more appropriate.
-void DisassembleEp(hadesmem::Process const& process,
-                   hadesmem::PeFile const& pe_file,
-                   std::uintptr_t ep_rva,
-                   void* ep_va,
-                   std::size_t tabs)
-{
-  if (!ep_va)
-  {
-    return;
-  }
-
-  std::wostream& out = std::wcout;
-
-  ud_t ud_obj;
-  ud_init(&ud_obj);
-  // TODO: Fix this so we don't risk overflow etc.
-  std::size_t size = 0U;
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    // TODO: Don't read so much unnecessary data. We know the maximum
-    // instruction length for the architecture, so we should at least clamp it
-    // based on that (and the max number of instructions to disassemble). This
-    // could also fail for 'hostile' PE files.
-    size = (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
-            pe_file.GetSize()) -
-           reinterpret_cast<std::uintptr_t>(ep_va);
-  }
-  else
-  {
-    // TODO: Fix this.
-    auto const mbi = hadesmem::detail::Query(process, ep_va);
-    size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) + mbi.RegionSize -
-           reinterpret_cast<std::uintptr_t>(ep_va);
-  }
-  auto const disasm_buf =
-    hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
-  ud_set_input_buffer(&ud_obj, disasm_buf.data(), size);
-  ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    hadesmem::NtHeaders const nt_headers(process, pe_file);
-    auto const eip = ep_rva + nt_headers.GetImageBase();
-    ud_set_pc(&ud_obj, eip);
-  }
-  else
-  {
-    ud_set_pc(&ud_obj, reinterpret_cast<std::uintptr_t>(ep_va));
-  }
-#if defined(_M_AMD64)
-  ud_set_mode(&ud_obj, 64);
-#elif defined(_M_IX86)
-  ud_set_mode(&ud_obj, 32);
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-
-  // TODO: Experiment to find the "right" number of instructions to try and
-  // disassemble.
-  for (std::size_t i = 0; i < 10; ++i)
-  {
-    std::uint32_t const len = ud_disassemble(&ud_obj);
-    if (len == 0)
-    {
-      WriteNormal(out, L"WARNING! Disassembly failed.", tabs);
-      WarnForCurrentFile(WarningType::kUnsupported);
-      break;
-    }
-
-    char const* const asm_str = ud_insn_asm(&ud_obj);
-    HADESMEM_DETAIL_ASSERT(asm_str);
-    char const* const asm_bytes_str = ud_insn_hex(&ud_obj);
-    HADESMEM_DETAIL_ASSERT(asm_bytes_str);
-    auto const diasm_line =
-      hadesmem::detail::MultiByteToWideChar(asm_str) + L" (" +
-      hadesmem::detail::MultiByteToWideChar(asm_bytes_str) + L")";
-    WriteNormal(out, diasm_line, tabs);
-  }
-}
-
 // TODO: Fix perf for extremely long names. Instead of reading
 // indefinitely and then checking the size after the fact, we should
 // perform a bounded read.
@@ -563,15 +422,15 @@ int main(int argc, char* argv[])
                                          cmd);
     cmd.parse(argc, argv);
 
-    g_warned_enabled = warned_arg.getValue();
-    g_warned_dynamic = warned_file_dynamic_arg.getValue();
+    SetWarningsEnabled(warned_arg.getValue());
+    SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());
     if (warned_file_arg.isSet())
     {
-      g_warned_file_path =
-        hadesmem::detail::MultiByteToWideChar(warned_file_arg.getValue());
+      SetWarnedFilePath(
+        hadesmem::detail::MultiByteToWideChar(warned_file_arg.getValue()));
     }
 
-    if (g_warned_dynamic && g_warned_file_path.empty())
+    if (GetDynamicWarningsEnabled() && GetWarnedFilePath().empty())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         hadesmem::Error()
@@ -583,13 +442,13 @@ int main(int argc, char* argv[])
     switch (warned_type)
     {
     case static_cast<int>(WarningType::kSuspicious) :
-      g_warned_type = WarningType::kSuspicious;
+      SetWarnedType(WarningType::kSuspicious);
       break;
     case static_cast<int>(WarningType::kUnsupported) :
-      g_warned_type = WarningType::kUnsupported;
+      SetWarnedType(WarningType::kUnsupported);
       break;
     case static_cast<int>(WarningType::kAll) :
-      g_warned_type = WarningType::kAll;
+      SetWarnedType(WarningType::kAll);
       break;
     default:
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -650,12 +509,12 @@ int main(int argc, char* argv[])
       DumpDir(root_path);
     }
 
-    if (g_warned_enabled)
+    if (GetWarningsEnabled())
     {
-      if (!g_warned_file_path.empty() && !g_warned_dynamic)
+      if (!GetWarnedFilePath().empty() && !GetDynamicWarningsEnabled())
       {
         std::unique_ptr<std::wfstream> warned_file_ptr(
-          hadesmem::detail::OpenFileWide(g_warned_file_path, std::ios::out));
+          hadesmem::detail::OpenFileWide(GetWarnedFilePath(), std::ios::out));
         std::wfstream& warned_file = *warned_file_ptr;
         if (!warned_file)
         {

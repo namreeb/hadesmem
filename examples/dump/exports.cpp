@@ -14,7 +14,10 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
+#include "disassemble.hpp"
 #include "main.hpp"
+#include "print.hpp"
+#include "warning.hpp"
 
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)

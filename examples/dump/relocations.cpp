@@ -12,8 +12,9 @@
 #include <hadesmem/read.hpp>
 
 #include "main.hpp"
+#include "print.hpp"
+#include "warning.hpp"
 
-// TODO: Make this a proper API as part of PeLib.
 void DumpRelocations(hadesmem::Process const& process,
                      hadesmem::PeFile const& pe_file)
 {

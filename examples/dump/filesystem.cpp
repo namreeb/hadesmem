@@ -17,6 +17,7 @@
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
+#include "print.hpp"
 
 namespace
 {

@@ -6,10 +6,7 @@
 #include <iostream>
 #include <iterator>
 
-#include <hadesmem/pelib/bound_import_desc.hpp>
 #include <hadesmem/pelib/bound_import_desc_list.hpp>
-#include <hadesmem/pelib/bound_import_fwd_ref.hpp>
-#include <hadesmem/pelib/bound_import_fwd_ref_list.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
 #include <hadesmem/pelib/import_thunk.hpp>
@@ -18,6 +15,8 @@
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
+#include "print.hpp"
+#include "warning.hpp"
 
 // TODO: Detect imports which simply point back to exports from the same module
 // (also detect if the exports are forwarded, and also detect infinite loops).
@@ -26,24 +25,8 @@
 // "Import name table" and "Import name hint" in ReversingLabs "Undocumented
 // PECOFF" whitepaper for more information.
 
-// TODO: Support old style bound imports and bound forwarded imports.
-
 namespace
 {
-
-bool HasBoundImportDir(hadesmem::Process const& process,
-                       hadesmem::PeFile const& pe_file)
-{
-  hadesmem::NtHeaders const nt_headers(process, pe_file);
-  // Intentionally not checking whether the RVA is valid, because we will detect
-  // an empty list in that case, at which point we want to warn because an
-  // invalid RVA is suspicious (even though it won't stop the file from
-  // loading).
-  return (nt_headers.GetNumberOfRvaAndSizes() >
-            static_cast<int>(hadesmem::PeDataDir::BoundImport) &&
-          nt_headers.GetDataDirectoryVirtualAddress(
-            hadesmem::PeDataDir::BoundImport));
-}
 
 bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
                                          hadesmem::PeFile const& pe_file)
@@ -91,7 +74,6 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 }
 }
 
-// TODO: Fix the code so the bound import out-param is not necessary.
 void DumpImports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file,
                  bool& has_new_bound_imports_any)
@@ -149,14 +131,6 @@ void DumpImports(hadesmem::Process const& process,
       WarnForCurrentFile(WarningType::kSuspicious);
     }
 
-    DWORD const iat = dir.GetFirstThunk();
-    bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
-    DWORD const ilt = dir.GetOriginalFirstThunk();
-    bool const use_ilt = !!ilt && ilt != iat;
-    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
-    bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
-    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
-
     if (num_import_dirs++ == 1000)
     {
       WriteNormal(
@@ -168,6 +142,9 @@ void DumpImports(hadesmem::Process const& process,
       WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
+
+    DWORD const iat = dir.GetFirstThunk();
+    bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
 
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
@@ -186,6 +163,12 @@ void DumpImports(hadesmem::Process const& process,
         continue;
       }
     }
+
+    DWORD const ilt = dir.GetOriginalFirstThunk();
+    bool const use_ilt = !!ilt && ilt != iat;
+    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
+    bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
+    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
     // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF or 0. This
     // is handled below in our ILT valid/empty checks (after dumping the dir
@@ -215,12 +198,12 @@ void DumpImports(hadesmem::Process const& process,
     }
     WriteNamedHexSuffix(
       out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
-    bool has_new_bound_imports = (time_date_stamp == static_cast<DWORD>(-1));
-    if (has_new_bound_imports)
-    {
-      has_new_bound_imports_any = true;
-    }
-    bool has_old_bound_imports = (!has_new_bound_imports && time_date_stamp);
+
+    bool const has_new_bound_imports =
+      (time_date_stamp == static_cast<DWORD>(-1));
+    has_new_bound_imports_any = has_new_bound_imports;
+    bool const has_old_bound_imports =
+      (!has_new_bound_imports && time_date_stamp);
     if (has_new_bound_imports)
     {
       // Don't just check whether the ILT is invalid, but also ensure that
@@ -241,6 +224,7 @@ void DumpImports(hadesmem::Process const& process,
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
+
     DWORD const forwarder_chain = dir.GetForwarderChain();
     WriteNamedHex(out, L"ForwarderChain", forwarder_chain, 2);
     if (forwarder_chain == static_cast<DWORD>(-1))
@@ -269,6 +253,8 @@ void DumpImports(hadesmem::Process const& process,
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
+
+    // TODO: Support old-style forwarder chains.
     if (forwarder_chain != 0 && forwarder_chain != static_cast<DWORD>(-1))
     {
       if (has_new_bound_imports)
@@ -302,7 +288,9 @@ void DumpImports(hadesmem::Process const& process,
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
+
     WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
+
     try
     {
       auto imp_desc_name = dir.GetName();
@@ -317,6 +305,7 @@ void DumpImports(hadesmem::Process const& process,
       WriteNormal(out, L"WARNING! Failed to read import dir name.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
+
     WriteNamedHex(out, L"FirstThunk", dir.GetFirstThunk(), 2);
 
     // TODO: Parse the IAT and ILT in parallel, in order to easily detect when
@@ -426,106 +415,6 @@ void DumpImports(hadesmem::Process const& process,
         // TODO: Confirm this is correct.
         DumpImportThunk(thunk, (is_iat_bound && ilt_valid) || !ilt_empty);
       }
-    }
-  }
-}
-
-// TODO: Move this into a different file.
-void DumpBoundImports(hadesmem::Process const& process,
-                      hadesmem::PeFile const& pe_file,
-                      bool has_new_bound_imports_any)
-{
-  std::wostream& out = std::wcout;
-
-  // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
-  if (!HasBoundImportDir(process, pe_file))
-  {
-    // Sample: dllmaxvals.dll (Corkami PE Corpus)
-    if (has_new_bound_imports_any)
-    {
-      WriteNewline(out);
-      WriteNormal(
-        out,
-        L"WARNING! No bound import directory on file with an import dir "
-        L"indicating the presence of a bound import dir.",
-        1);
-      WarnForCurrentFile(WarningType::kSuspicious);
-    }
-
-    return;
-  }
-
-  if (!has_new_bound_imports_any)
-  {
-    WriteNewline(out);
-    WriteNormal(
-      out,
-      L"WARNING! Seemingly valid bound import directory on file with an "
-      L"import dir indicating no new bound import dir.",
-      1);
-    WarnForCurrentFile(WarningType::kSuspicious);
-    return;
-  }
-
-  hadesmem::BoundImportDescriptorList bound_import_descs(process, pe_file);
-
-  if (std::begin(bound_import_descs) != std::end(bound_import_descs))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Bound Import Descriptors:", 1);
-  }
-  else
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Empty or invalid bound import directory.", 1);
-    WarnForCurrentFile(WarningType::kSuspicious);
-  }
-
-  // TODO: Warn and bail after processing N entries (similar to imports).
-  for (auto const& desc : bound_import_descs)
-  {
-    WriteNewline(out);
-
-    DWORD const time_date_stamp = desc.GetTimeDateStamp();
-    std::wstring time_date_stamp_str;
-    if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
-    {
-      WriteNormal(out, L"WARNING! Invalid timestamp.", 2);
-      WarnForCurrentFile(WarningType::kSuspicious);
-    }
-    WriteNamedHexSuffix(
-      out, L"TimeDateStamp", time_date_stamp, time_date_stamp_str, 2);
-    WriteNamedHex(out, L"OffsetModuleName", desc.GetOffsetModuleName(), 2);
-    WriteNamedNormal(out, L"ModuleName", desc.GetModuleName().c_str(), 2);
-    WriteNamedHex(out,
-                  L"NumberOfModuleForwarderRefs",
-                  desc.GetNumberOfModuleForwarderRefs(),
-                  2);
-    hadesmem::BoundImportForwarderRefList forwarder_refs(
-      process, pe_file, desc);
-    if (std::begin(forwarder_refs) != std::end(forwarder_refs))
-    {
-      WriteNewline(out);
-      WriteNormal(out, L"Module Forwarder Refs:", 2);
-    }
-    for (auto const& forwarder : forwarder_refs)
-    {
-      WriteNewline(out);
-
-      DWORD const fwd_time_date_stamp = forwarder.GetTimeDateStamp();
-      std::wstring fwd_time_date_stamp_str;
-      if (!ConvertTimeStamp(fwd_time_date_stamp, fwd_time_date_stamp_str))
-      {
-        WriteNormal(out, L"WARNING! Invalid timestamp.", 3);
-        WarnForCurrentFile(WarningType::kSuspicious);
-      }
-      WriteNamedHexSuffix(
-        out, L"TimeDateStamp", fwd_time_date_stamp, fwd_time_date_stamp_str, 3);
-      WriteNamedHex(
-        out, L"OffsetModuleName", forwarder.GetOffsetModuleName(), 3);
-      WriteNamedNormal(
-        out, L"ModuleName", forwarder.GetModuleName().c_str(), 3);
-      WriteNamedHex(out, L"Reserved", forwarder.GetReserved(), 3);
     }
   }
 }

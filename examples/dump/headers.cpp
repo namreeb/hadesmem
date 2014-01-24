@@ -12,7 +12,10 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
+#include "disassemble.hpp"
 #include "main.hpp"
+#include "print.hpp"
+#include "warning.hpp"
 
 // TODO: Detect when the file has a writable PE header (both methods). See
 // "Writable PE header" in the ReversingLabs "Undocumented PECOFF" whitepaper.

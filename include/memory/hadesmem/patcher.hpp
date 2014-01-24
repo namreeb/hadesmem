@@ -22,6 +22,7 @@
 
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
@@ -69,6 +70,11 @@
 // appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new
 // language features like noexcept, constexpr, etc. Consider other designs
 // entirely.
+
+// TODO: Add proper support for hooking different calling conventions without
+// relying on the detour calling convention matching the target. Especially
+// important for __thiscall etc where we're currently relying on undefined
+// behaviour to convert a member fn pointer to a void*.
 
 namespace hadesmem
 {
@@ -448,8 +454,7 @@ public:
 
   template <typename FuncT> FuncT GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return reinterpret_cast<FuncT>(
-      reinterpret_cast<DWORD_PTR>(trampoline_->GetBase()));
+    return hadesmem::detail::UnionCastUnchecked<FuncT>(trampoline_->GetBase());
   }
 
 private:
