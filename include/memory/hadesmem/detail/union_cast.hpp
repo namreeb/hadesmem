@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 
 namespace hadesmem
 {
