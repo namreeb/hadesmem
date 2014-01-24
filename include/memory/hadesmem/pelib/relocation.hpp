@@ -50,7 +50,8 @@ public:
 
   void UpdateWrite()
   {
-    WORD const data_tmp = (offset_ | (type_ << 12));
+    WORD const data_tmp = static_cast<WORD>(static_cast<DWORD>(offset_) |
+                                            (static_cast<DWORD>(type_) << 12));
     Write(*process_, base_, data_tmp);
   }
 

@@ -37,6 +37,11 @@ bool HasRelocationsDir(hadesmem::Process const& process,
 void DumpRelocations(hadesmem::Process const& process,
                      hadesmem::PeFile const& pe_file)
 {
+  if (!HasRelocationsDir(process, pe_file))
+  {
+    return;
+  }
+
   std::wostream& out = std::wcout;
 
   WriteNewline(out);
