@@ -111,6 +111,7 @@ void TestFindPattern()
   <FindPattern Module="ntdll.dll">
     <Flag Name="ThrowOnUnmatch"/>
     <Pattern Name="Int3 Then Nop" Data="CC 90"/>
+    <Pattern Name="Int3 Then Nop Next" Data="??" Start="Int3 Then Nop"/>
     <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e ?? 6f 6d"/>
     <Pattern Name="Int3 Then Nop 0x1000" Data="CC 90" StartRVA="0x1000"/>
   </FindPattern>
@@ -148,13 +149,17 @@ void TestFindPattern()
     find_pattern.Lookup(L"", L"FindPattern String"),
     static_cast<void*>(static_cast<std::uint8_t*>(find_pattern_string) -
                        process_base));
-  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 3UL);
+  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 4UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
                 static_cast<void*>(nullptr));
   auto const int3_then_nop =
     find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop");
   BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop), '\xCC');
-  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop) + 1), '\x90');
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop)+1), '\x90');
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop Next"),
+    static_cast<void*>(nullptr));
+  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop Next") > 
+    find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"));
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
                 static_cast<void*>(nullptr));
   BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String") >
