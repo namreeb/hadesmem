@@ -43,6 +43,13 @@
 
 // TODO: Allow custom regions to be specified (similar to module name).
 
+// TODO: Handle the case where after resolving a pattern, the result lives
+// outside the module (the heap, a different module, etc) and we want to use
+// that result as the starting address for a different pattern. Perhaps we can
+// merge this with the custom region todo, where instead of having a RegionRVA
+// we have a RegionName that takes a Pattern name and resolves it to the region
+// that pattern resides in.
+
 namespace hadesmem
 {
 
@@ -154,7 +161,7 @@ void* FindRaw(Process const& process,
                 n_beg,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-  { return (n_cur.IsWildcard()) || (h_cur == n_cur.GetData()); });
+                { return (n_cur.IsWildcard()) || (h_cur == n_cur.GetData()); });
 
   if (iter != h_end)
   {
