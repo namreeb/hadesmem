@@ -78,7 +78,10 @@ void DumpRelocations(hadesmem::Process const& process,
       WarnForCurrentFile(WarningType::kUnsupported);
     }
 
-    hadesmem::RelocationList relocs(process, pe_file, block.GetRelocationDataStart(), block.GetNumberOfRelocations());
+    hadesmem::RelocationList relocs(process,
+                                    pe_file,
+                                    block.GetRelocationDataStart(),
+                                    block.GetNumberOfRelocations());
     for (auto const reloc : relocs)
     {
       WriteNewline(out);
