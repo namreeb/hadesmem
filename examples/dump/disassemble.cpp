@@ -24,6 +24,44 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+namespace
+{
+
+std::size_t GetBytesToEndOfFileOrSection(hadesmem::Process const& process,
+                                         hadesmem::PeFile const& pe_file,
+                                         void* address)
+{
+  if (pe_file.GetType() == hadesmem::PeFileType::Data)
+  {
+    return (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
+            pe_file.GetSize()) -
+           reinterpret_cast<std::uintptr_t>(address);
+  }
+  else
+  {
+    auto const mbi = hadesmem::detail::Query(process, address);
+    return reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) + mbi.RegionSize -
+           reinterpret_cast<std::uintptr_t>(address);
+  }
+}
+
+std::uintptr_t GetEip(hadesmem::Process const& process,
+                      hadesmem::PeFile const& pe_file,
+                      std::uintptr_t rva,
+                      void* va)
+{
+  if (pe_file.GetType() == hadesmem::PeFileType::Data)
+  {
+    hadesmem::NtHeaders const nt_headers(process, pe_file);
+    return nt_headers.GetImageBase() + rva;
+  }
+  else
+  {
+    return reinterpret_cast<std::uintptr_t>(va);
+  }
+}
+}
+
 void DisassembleEp(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file,
                    std::uintptr_t ep_rva,
@@ -39,39 +77,22 @@ void DisassembleEp(hadesmem::Process const& process,
 
   ud_t ud_obj;
   ud_init(&ud_obj);
-  // TODO: Fix this so we don't risk overflow etc.
-  std::size_t size = 0U;
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    // TODO: Don't read so much unnecessary data. We know the maximum
-    // instruction length for the architecture, so we should at least clamp it
-    // based on that (and the max number of instructions to disassemble). This
-    // could also fail for 'hostile' PE files.
-    size = (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
-            pe_file.GetSize()) -
-           reinterpret_cast<std::uintptr_t>(ep_va);
-  }
-  else
-  {
-    // TODO: Fix this.
-    auto const mbi = hadesmem::detail::Query(process, ep_va);
-    size = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) + mbi.RegionSize -
-           reinterpret_cast<std::uintptr_t>(ep_va);
-  }
+  // Get the number of bytes from the EP to the end of the file (for data files)
+  // or the end of the section (for images - actually the end of the region, but
+  // close enough).
+  std::size_t max_buffer_size =
+    GetBytesToEndOfFileOrSection(process, pe_file, ep_va);
+  // Clamp the amount of data read to the theoretical maximum.
+  std::size_t const kMaxInstructions = 10U;
+  std::size_t const kMaxInstructionLen = 15U;
+  std::size_t const kMaxInstructionsBytes =
+    kMaxInstructions * kMaxInstructionLen;
+  max_buffer_size = (std::min)(max_buffer_size, kMaxInstructionsBytes);
   auto const disasm_buf =
-    hadesmem::ReadVector<std::uint8_t>(process, ep_va, size);
-  ud_set_input_buffer(&ud_obj, disasm_buf.data(), size);
+    hadesmem::ReadVector<std::uint8_t>(process, ep_va, max_buffer_size);
+  ud_set_input_buffer(&ud_obj, disasm_buf.data(), max_buffer_size);
   ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    hadesmem::NtHeaders const nt_headers(process, pe_file);
-    auto const eip = ep_rva + nt_headers.GetImageBase();
-    ud_set_pc(&ud_obj, eip);
-  }
-  else
-  {
-    ud_set_pc(&ud_obj, reinterpret_cast<std::uintptr_t>(ep_va));
-  }
+  ud_set_pc(&ud_obj, GetEip(process, pe_file, ep_rva, ep_va));
 #if defined(_M_AMD64)
   ud_set_mode(&ud_obj, 64);
 #elif defined(_M_IX86)
@@ -80,15 +101,20 @@ void DisassembleEp(hadesmem::Process const& process,
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-  // TODO: Experiment to find the "right" number of instructions to try and
-  // disassemble.
-  for (std::size_t i = 0; i < 10; ++i)
+  // Be pessimistic. Use the minimum theoretical amount of instrutions we could
+  // fit in our buffer.
+  std::size_t const instruction_count = max_buffer_size / kMaxInstructionLen;
+  for (std::size_t i = 0U; i < instruction_count; ++i)
   {
     std::uint32_t const len = ud_disassemble(&ud_obj);
     if (len == 0)
     {
       WriteNormal(out, L"WARNING! Disassembly failed.", tabs);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      // If we can't disassemble at least 5 instructions there's probably
+      // something strange about the function. Even in the case of a nullsub
+      // there is typically some INT3 or NOP padding after it...
+      WarnForCurrentFile(i < 5U ? WarningType::kUnsupported
+                                : WarningType::kSuspicious);
       break;
     }
 
