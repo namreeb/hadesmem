@@ -89,7 +89,7 @@ public:
   PWORD GetRelocationDataStart() const HADESMEM_DETAIL_NOEXCEPT
   {
     return reinterpret_cast<PWORD>(reinterpret_cast<std::uintptr_t>(base_) +
-                                   sizeof(PIMAGE_BASE_RELOCATION));
+                                   sizeof(IMAGE_BASE_RELOCATION));
   }
 
   bool IsInvalid() const HADESMEM_DETAIL_NOEXCEPT
