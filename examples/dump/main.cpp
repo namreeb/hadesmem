@@ -43,6 +43,7 @@
 #include "print.hpp"
 #include "relocations.hpp"
 #include "sections.hpp"
+#include "strings.hpp"
 #include "tls.hpp"
 #include "warning.hpp"
 
@@ -309,6 +310,8 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpRelocations(process, pe_file);
 
+  DumpStrings(process, pe_file);
+
   HandleWarnings(path);
 }
 
@@ -349,16 +352,6 @@ void HandleLongOrUnprintableString(std::wstring const& name,
     value.erase(kMaxNameLength);
   }
   WriteNamedNormal(out, name, value.c_str(), tabs);
-}
-
-std::string::size_type FindFirstUnprintableClassicLocale(std::string const& s)
-{
-  auto const i =
-    std::find_if(std::begin(s),
-                 std::end(s),
-                 [](char c)
-                 { return !std::isprint(c, std::locale::classic()); });
-  return i == std::end(s) ? std::string::npos : std::distance(std::begin(s), i);
 }
 
 bool ConvertTimeStamp(std::time_t time, std::wstring& str)

@@ -27,22 +27,11 @@
 namespace
 {
 
-std::size_t GetBytesToEndOfFileOrSection(hadesmem::Process const& process,
-                                         hadesmem::PeFile const& pe_file,
-                                         void* address)
+std::size_t GetBytesToEndOfFile(hadesmem::PeFile const& pe_file, void* address)
 {
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    return (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
-            pe_file.GetSize()) -
-           reinterpret_cast<std::uintptr_t>(address);
-  }
-  else
-  {
-    auto const mbi = hadesmem::detail::Query(process, address);
-    return reinterpret_cast<std::uintptr_t>(mbi.BaseAddress) + mbi.RegionSize -
-           reinterpret_cast<std::uintptr_t>(address);
-  }
+  return (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +
+          pe_file.GetSize()) -
+         reinterpret_cast<std::uintptr_t>(address);
 }
 
 std::uintptr_t GetEip(hadesmem::Process const& process,
@@ -77,11 +66,8 @@ void DisassembleEp(hadesmem::Process const& process,
 
   ud_t ud_obj;
   ud_init(&ud_obj);
-  // Get the number of bytes from the EP to the end of the file (for data files)
-  // or the end of the section (for images - actually the end of the region, but
-  // close enough).
-  std::size_t max_buffer_size =
-    GetBytesToEndOfFileOrSection(process, pe_file, ep_va);
+  // Get the number of bytes from the EP to the end of the file.
+  std::size_t max_buffer_size = GetBytesToEndOfFile(pe_file, ep_va);
   // Clamp the amount of data read to the theoretical maximum.
   std::size_t const kMaxInstructions = 10U;
   std::size_t const kMaxInstructionLen = 15U;

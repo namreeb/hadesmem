@@ -123,6 +123,11 @@ void ReadStringEx(Process const& process,
     address = region_next;
 
     protect_guard.Restore();
+
+    if (upper_bound && cur >= upper_bound)
+    {
+      return;
+    }
   }
 }
 

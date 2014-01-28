@@ -63,17 +63,26 @@ T StrToNum(std::basic_string<CharT> const& str)
   return out;
 }
 
-inline std::string WideCharToMultiByte(std::wstring const& in)
+inline std::string WideCharToMultiByte(std::string const& in, bool* lossy = nullptr)
 {
-  std::int32_t const buf_len =
-    ::WideCharToMultiByte(CP_OEMCP,
-                          WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
-                          in.c_str(),
-                          -1,
-                          nullptr,
-                          0,
-                          nullptr,
-                          nullptr);
+  if (lossy)
+  {
+    *lossy = false;
+  }
+
+  return in;
+}
+
+inline std::string WideCharToMultiByte(std::wstring const& in, bool* lossy = nullptr)
+{
+  std::int32_t const buf_len = ::WideCharToMultiByte(CP_OEMCP,
+                                                     WC_NO_BEST_FIT_CHARS,
+                                                     in.c_str(),
+                                                     -1,
+                                                     nullptr,
+                                                     0,
+                                                     nullptr,
+                                                     nullptr);
   if (!buf_len)
   {
     DWORD const last_error = ::GetLastError();
@@ -84,14 +93,15 @@ inline std::string WideCharToMultiByte(std::wstring const& in)
   HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
   std::vector<char> buf(static_cast<std::size_t>(buf_len));
+  BOOL lossy_tmp = FALSE;
   if (!::WideCharToMultiByte(CP_OEMCP,
-                             WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
+                             WC_NO_BEST_FIT_CHARS,
                              in.c_str(),
                              -1,
                              buf.data(),
                              buf_len,
                              nullptr,
-                             nullptr))
+                             &lossy_tmp))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -99,7 +109,17 @@ inline std::string WideCharToMultiByte(std::wstring const& in)
               << ErrorCodeWinLast(last_error));
   }
 
+  if (lossy)
+  {
+    *lossy = !!lossy_tmp;
+  }
+
   return buf.data();
+}
+
+inline std::wstring MultiByteToWideChar(std::wstring const& in)
+{
+  return in;
 }
 
 inline std::wstring MultiByteToWideChar(std::string const& in)

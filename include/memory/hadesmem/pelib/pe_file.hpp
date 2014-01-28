@@ -16,6 +16,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/region.hpp>
 #include <hadesmem/read.hpp>
 
 // TODO: Extra sanity checking in all components.
@@ -89,7 +90,10 @@ public:
                   PVOID address,
                   PeFileType type,
                   DWORD size)
-    : base_(static_cast<PBYTE>(address)), type_(type), size_(size)
+    : process_(&process),
+      base_(static_cast<PBYTE>(address)),
+      type_(type),
+      size_(size)
   {
     HADESMEM_DETAIL_ASSERT(base_ != 0);
     if (type == PeFileType::Data && !size)
@@ -98,10 +102,19 @@ public:
                                       << ErrorString("Invalid file size."));
     }
 
-    // Process is not actually used but we take it anyway for
-    // interface symetry and in case we want to change the
-    // implementation to use it later without breaking the interface.
-    (void)process;
+    if (type == PeFileType::Image && !size)
+    {
+      std::uint8_t* current = base_;
+      for (Region region(*process_, current); region.GetAllocBase() == base_;
+           current += region.GetSize(), region = Region(*process_, current))
+      {
+        SIZE_T const region_size = region.GetSize();
+        HADESMEM_DETAIL_ASSERT(region_size <
+                               (std::numeric_limits<DWORD>::max)());
+        size_ += static_cast<DWORD>(region.GetSize());
+        HADESMEM_DETAIL_ASSERT(size_ >= region.GetSize());
+      }
+    }
   }
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
@@ -120,6 +133,7 @@ public:
   }
 
 private:
+  Process const* process_;
   PBYTE base_;
   PeFileType type_;
   DWORD size_;
