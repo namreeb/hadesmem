@@ -26,6 +26,15 @@
 namespace hadesmem
 {
 
+namespace detail
+{
+template <typename T> struct ReadStringTraits
+{
+  // 4KB default chunk size
+  static std::size_t const kChunkLen = 0x1000;
+};
+}
+
 template <typename T> inline T Read(Process const& process, PVOID address)
 {
   HADESMEM_DETAIL_ASSERT(address != nullptr);
@@ -149,8 +158,11 @@ void ReadStringBounded(Process const& process,
                        OutputIterator data,
                        void* upper_bound)
 {
-  std::size_t const kChunkLen = 512;
-  return ReadStringEx<T>(process, address, data, kChunkLen, upper_bound);
+  return ReadStringEx<T>(process,
+                         address,
+                         data,
+                         detail::ReadStringTraits<T>::kChunkLen,
+                         upper_bound);
 }
 
 template <typename T,
@@ -167,8 +179,8 @@ std::basic_string<T, Traits, Alloc>
 template <typename T, typename OutputIterator>
 void ReadString(Process const& process, PVOID address, OutputIterator data)
 {
-  std::size_t const kChunkLen = 512;
-  return ReadStringEx<T>(process, address, data, kChunkLen);
+  return ReadStringEx<T>(
+    process, address, data, detail::ReadStringTraits<T>::kChunkLen);
 }
 
 template <typename T,
@@ -177,8 +189,8 @@ template <typename T,
 std::basic_string<T, Traits, Alloc> ReadString(Process const& process,
                                                PVOID address)
 {
-  std::size_t const kChunkLen = 512;
-  return ReadStringEx<T>(process, address, kChunkLen);
+  return ReadStringEx<T>(
+    process, address, detail::ReadStringTraits<T>::kChunkLen);
 }
 
 template <typename T, typename Alloc>

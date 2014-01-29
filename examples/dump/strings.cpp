@@ -3,6 +3,7 @@
 
 #include "strings.hpp"
 
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -24,63 +25,52 @@
 namespace
 {
 
-// TODO: Make this less slow...
-// TODO: Try and get the same results as Sysinternals Strings.
-template <typename CharT>
-void DumpStringsImpl(hadesmem::Process const& process, void* beg, void* end)
+void DumpStringsImpl(hadesmem::Process const& /*process*/,
+                     hadesmem::PeFile const& pe_file,
+                     void* beg,
+                     void* end,
+                     bool wide)
 {
   std::wostream& out = std::wcout;
 
-  std::uint8_t* current = static_cast<std::uint8_t*>(beg);
-  std::basic_string<CharT> buf;
-  do
+  // TODO: Fix this to support Images.
+  if (pe_file.GetType() != hadesmem::PeFileType::Data)
   {
-    hadesmem::ReadStringBounded<CharT>(
-      process, current, std::back_inserter(buf), end);
-    auto const skip_len = (buf.size() + 1) * sizeof(CharT);
+    WriteNormal(out,
+                L"WARNING! Skipping string dump (Image file type is curerntly "
+                L"unsupported).",
+                2);
+    WarnForCurrentFile(WarningType::kUnsupported);
+    return;
+  }
 
-    std::basic_string<CharT>::size_type unprint;
-    do
+  std::size_t const kMinStringLen = 3;
+
+  std::string buf;
+  std::locale const& loc = std::locale::classic();
+  for (std::uint8_t* current = static_cast<std::uint8_t*>(beg); current < end;
+       current += (wide ? 2 : 1))
+  {
+    // TODO: Fix this to support actual Unicode strings, not just wide strings
+    // with only ASCII characters.
+    bool const is_print = (wide ? *(current + 1) == 0 : true) &&
+                          std::isprint(static_cast<char>(*current), loc);
+    if (is_print)
     {
-      if (buf.size() < 3)
+      // TODO: Detect and truncate extremely long strings (with a warning).
+      buf += static_cast<char>(*current);
+    }
+
+    if (!is_print || current + (wide ? 2 : 1) == end)
+    {
+      if (buf.size() >= kMinStringLen)
       {
-        break;
+        WriteNamedNormal(out, L"String", buf.c_str(), 2);
       }
 
-      unprint = FindFirstUnprintableClassicLocale(buf);
-      if (unprint == 0)
-      {
-        buf.erase(std::begin(buf));
-      }
-      else
-      {
-        if (unprint >= 3)
-        {
-          bool lossy = false;
-          std::string const temp = hadesmem::detail::WideCharToMultiByte(
-            buf.substr(0, unprint), &lossy);
-          // TODO: Fix this... Currently we're throwing away anything that
-          // contains a character which is not representable in the OEMCP, which
-          // is clearly not what we want. Especially when dealing with Unicode
-          // strings. This means that in the case where a legitimate string has
-          // a bit of data before it that passes the isprint check but fails
-          // this check, we miss the entire thing!
-          if (!lossy)
-          {
-            WriteNamedNormal(out, L"String", temp.c_str(), 2);
-          }
-        }
-
-        if (unprint != std::basic_string<CharT>::npos)
-        {
-          buf.erase(std::begin(buf), std::begin(buf) + unprint);
-        }
-      }
-    } while (unprint != std::basic_string<CharT>::npos);
-
-    current += skip_len;
-    buf.clear();
-  } while (current < end);
+      buf.clear();
+    }
+  }
 }
 }
 
@@ -92,20 +82,20 @@ void DumpStrings(hadesmem::Process const& process,
   std::uint8_t* const file_beg = static_cast<std::uint8_t*>(pe_file.GetBase());
   void* const file_end = file_beg + pe_file.GetSize();
 
-  WriteNewline(out);
-  WriteNormal(out, L"ASCII Strings:", 1);
-  WriteNewline(out);
-  DumpStringsImpl<char>(process, file_beg, file_end);
-
-  // TODO: Fix Unicode string handling so we don't need two separate passes.
+  // TODO: Fix this to not require multiple passes.
 
   WriteNewline(out);
-  WriteNormal(out, L"Unicode Strings (Pass 1):", 1);
+  WriteNormal(out, L"Narrow Strings:", 1);
   WriteNewline(out);
-  DumpStringsImpl<wchar_t>(process, file_beg, file_end);
+  DumpStringsImpl(process, pe_file, file_beg, file_end, false);
 
   WriteNewline(out);
-  WriteNormal(out, L"Unicode Strings (Pass 2):", 1);
+  WriteNormal(out, L"Wide Strings (Pass 1):", 1);
   WriteNewline(out);
-  DumpStringsImpl<wchar_t>(process, file_beg + 1, file_end);
+  DumpStringsImpl(process, pe_file, file_beg, file_end, true);
+
+  WriteNewline(out);
+  WriteNormal(out, L"Wide Strings (Pass 2):", 1);
+  WriteNewline(out);
+  DumpStringsImpl(process, pe_file, file_beg + 1, file_end, true);
 }
