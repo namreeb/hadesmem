@@ -46,15 +46,17 @@ void DumpRelocations(hadesmem::Process const& process,
 
   WriteNewline(out);
 
-  hadesmem::RelocationBlockList reloc_blocks(process, pe_file);
+  hadesmem::RelocationBlockList const reloc_blocks(process, pe_file);
   if (std::begin(reloc_blocks) != std::end(reloc_blocks))
   {
     WriteNormal(out, L"Relocation Blocks:", 1);
   }
   else
   {
+    // Sample: dllmaxvals.dll (Corkami PE Corpus)
+    // Sample: fakerelocs.exe (Corkami PE Corpus)
     WriteNormal(out, L"WARNING! Relocation block list is invalid.", 1);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
 
   for (auto block : reloc_blocks)
@@ -75,13 +77,13 @@ void DumpRelocations(hadesmem::Process const& process,
     else
     {
       WriteNormal(out, L"WARNING! Detected zero sized relocation block.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
 
-    hadesmem::RelocationList relocs(process,
-                                    pe_file,
-                                    block.GetRelocationDataStart(),
-                                    block.GetNumberOfRelocations());
+    hadesmem::RelocationList const relocs(process,
+                                          pe_file,
+                                          block.GetRelocationDataStart(),
+                                          block.GetNumberOfRelocations());
     for (auto const reloc : relocs)
     {
       WriteNewline(out);
@@ -90,8 +92,14 @@ void DumpRelocations(hadesmem::Process const& process,
       WriteNamedHex(out, L"Type", type, 3);
       WriteNamedHex(out, L"Offset", reloc.GetOffset(), 3);
 
-      if (type > 10)
+      // 11 = IMAGE_REL_BASED_HIGH3ADJ
+      if (type > 11)
       {
+        // TODO: This is being incorrectly flagged on files which uses
+        // IMAGE_REL_BASED_HIGHADJ with an invalid parameter (because it is
+        // ignored until W8). When we detect this reloc type we should skip over
+        // the parameter (or log it) rathe than treating it as another reloc.
+        // Sample: reloc4.exe
         WriteNormal(out, L"WARNING! Unknown relocation type.", 3);
         WarnForCurrentFile(WarningType::kUnsupported);
       }

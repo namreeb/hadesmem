@@ -18,7 +18,7 @@
 
 void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
 {
-  std::unique_ptr<hadesmem::TlsDir> tls_dir;
+  std::unique_ptr<hadesmem::TlsDir const> tls_dir;
   try
   {
     tls_dir = std::make_unique<hadesmem::TlsDir>(process, pe_file);
@@ -51,7 +51,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     catch (std::exception const& /*e*/)
     {
       WriteNormal(out, L"WARNING! TLS callbacks are inavlid.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
     for (auto const c : callbacks)
     {

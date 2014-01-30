@@ -31,7 +31,7 @@ namespace
 bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
                                          hadesmem::PeFile const& pe_file)
 {
-  hadesmem::BoundImportDescriptorList bound_import_dirs(process, pe_file);
+  hadesmem::BoundImportDescriptorList const bound_import_dirs(process, pe_file);
 
   return (std::begin(bound_import_dirs) != std::end(bound_import_dirs));
 }
@@ -62,13 +62,14 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
       WriteNamedHex(out, L"AddressOfData", thunk.GetAddressOfData(), 3);
       WriteNamedHex(out, L"Hint", thunk.GetHint(), 3);
       auto const name = thunk.GetName();
+      // Sample: dllweirdexp-ld.exe
       HandleLongOrUnprintableString(
-        L"Name", L"import thunk name data", 3, WarningType::kUnsupported, name);
+        L"Name", L"import thunk name data", 3, WarningType::kSuspicious, name);
     }
     catch (std::exception const& /*e*/)
     {
       WriteNormal(out, L"WARNING! Invalid import thunk name data.", 3);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
   }
 }
@@ -80,7 +81,7 @@ void DumpImports(hadesmem::Process const& process,
 {
   std::wostream& out = std::wcout;
 
-  hadesmem::ImportDirList import_dirs(process, pe_file);
+  hadesmem::ImportDirList const import_dirs(process, pe_file);
 
   if (std::begin(import_dirs) != std::end(import_dirs))
   {
@@ -89,14 +90,14 @@ void DumpImports(hadesmem::Process const& process,
   }
   else
   {
-    // Currently set to Unsupported rather than Suspicious in order to more
-    // quickly identify files with broken RVA resolution (because broken RVA
-    // resolution is far more common than actual files with no imports, and even
-    // in the case of files with no imports they're typically interesting for
-    // other reasons anyway).
+    // This is probably a good thing to use to quickly identify files with
+    // broken RVA resolution (because broken RVA resolution is far more
+    // common than actual files with no imports).
+    // TODO: Fix this for files where we're currently getting it wrong.
+    // Sample: Lab10-01.sys (Practical Malware Analysis)
     WriteNewline(out);
     WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
 
   std::uint32_t num_import_dirs = 0U;
@@ -136,10 +137,9 @@ void DumpImports(hadesmem::Process const& process,
       WriteNormal(
         out,
         L"WARNING! Processed 1000 import dirs. Stopping early to avoid "
-        L"resource exhaustion attacks. Check PE file for TLS AOI trick, "
-        L"virtual terminator trick, or other similar attacks.",
+        L"resource exhaustion attacks.",
         2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
 
@@ -151,7 +151,7 @@ void DumpImports(hadesmem::Process const& process,
       // be invalid because it's ignored. Note that we simply skip here rather
       // than terminate, because it's possible to have such 'invalid' entries
       // in-between real entries.
-      hadesmem::ImportThunkList iat_thunks(process, pe_file, iat);
+      hadesmem::ImportThunkList const iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
         WriteNormal(out,
@@ -166,7 +166,8 @@ void DumpImports(hadesmem::Process const& process,
 
     DWORD const ilt = dir.GetOriginalFirstThunk();
     bool const use_ilt = !!ilt && ilt != iat;
-    hadesmem::ImportThunkList ilt_thunks(process, pe_file, use_ilt ? ilt : iat);
+    hadesmem::ImportThunkList const ilt_thunks(
+      process, pe_file, use_ilt ? ilt : iat);
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
     bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
@@ -184,7 +185,7 @@ void DumpImports(hadesmem::Process const& process,
       // TODO: Come up with a less stupid message for this.
       WriteNormal(
         out, L"WARNING! ILT is extra invalid. Stopping enumeration.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
 
@@ -232,25 +233,25 @@ void DumpImports(hadesmem::Process const& process,
       if (has_old_bound_imports)
       {
         // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader, but mark as unsupported to
-        // identify potential samples just in case.
+        // probably just gets ignored by the loader.
+        // TODO: Check this.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain with "
-                    L"no new style bound imports. Currently unhandled.",
+                    L"no new style bound imports.",
                     2);
-        WarnForCurrentFile(WarningType::kUnsupported);
+        WarnForCurrentFile(WarningType::kSuspicious);
       }
 
       if (!time_date_stamp)
       {
         // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader, but mark as unsupported to
-        // identify potential samples just in case.
+        // probably just gets ignored by the loader.
+        // TODO: Check this.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain "
-                    L"with no bound imports. Currently unhandled.",
+                    L"with no bound imports.",
                     2);
-        WarnForCurrentFile(WarningType::kUnsupported);
+        WarnForCurrentFile(WarningType::kSuspicious);
       }
     }
 
@@ -264,7 +265,7 @@ void DumpImports(hadesmem::Process const& process,
         // identify potential samples just in case.
         WriteNormal(out,
                     L"WARNING! Detected old style forwarder chain "
-                    L"with new bound imports. Currently unhandled.",
+                    L"with new bound imports.",
                     2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
@@ -297,13 +298,13 @@ void DumpImports(hadesmem::Process const& process,
       HandleLongOrUnprintableString(L"Name",
                                     L"import descriptor name",
                                     2,
-                                    WarningType::kUnsupported,
+                                    WarningType::kSuspicious,
                                     imp_desc_name);
     }
     catch (std::exception const& /*e*/)
     {
       WriteNormal(out, L"WARNING! Failed to read import dir name.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
 
     WriteNamedHex(out, L"FirstThunk", dir.GetFirstThunk(), 2);
@@ -357,7 +358,7 @@ void DumpImports(hadesmem::Process const& process,
                     L"WARNING! Processed 1000 import thunks. Stopping early to "
                     L"avoid resource exhaustion attacks.",
                     2);
-        WarnForCurrentFile(WarningType::kUnsupported);
+        WarnForCurrentFile(WarningType::kSuspicious);
         break;
       }
 
@@ -381,7 +382,7 @@ void DumpImports(hadesmem::Process const& process,
     // case.
     if (use_ilt && iat)
     {
-      hadesmem::ImportThunkList iat_thunks(
+      hadesmem::ImportThunkList const iat_thunks(
         process, pe_file, dir.GetFirstThunk());
       if (std::begin(iat_thunks) != std::end(iat_thunks))
       {

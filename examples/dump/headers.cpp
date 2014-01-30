@@ -140,7 +140,7 @@ std::wstring GetDataDirName(DWORD num)
   }
 }
 
-bool IsUnsupportedDataDir(DWORD num)
+bool IsSupportedDataDir(DWORD num)
 {
   switch (static_cast<hadesmem::PeDataDir>(num))
   {
@@ -150,7 +150,7 @@ bool IsUnsupportedDataDir(DWORD num)
   case hadesmem::PeDataDir::BoundImport:
   case hadesmem::PeDataDir::BaseReloc:
   case hadesmem::PeDataDir::IAT:
-    return false;
+    return true;
 
   case hadesmem::PeDataDir::Resource:
   case hadesmem::PeDataDir::Exception:
@@ -162,11 +162,11 @@ bool IsUnsupportedDataDir(DWORD num)
   case hadesmem::PeDataDir::DelayImport:
   case hadesmem::PeDataDir::COMDescriptor:
   case hadesmem::PeDataDir::Reserved:
-    return true;
+    return false;
 
   default:
     HADESMEM_DETAIL_ASSERT(false);
-    return true;
+    return false;
   }
 }
 
@@ -178,7 +178,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   WriteNewline(out);
   WriteNormal(out, L"DOS Header:", 1);
 
-  hadesmem::NtHeaders nt_hdrs(process, pe_file);
+  hadesmem::NtHeaders const nt_hdrs(process, pe_file);
   WriteNewline(out);
   WriteNamedHex(out, L"Signature", nt_hdrs.GetSignature(), 2);
   WriteNamedHex(out, L"Machine", nt_hdrs.GetMachine(), 2);
@@ -244,7 +244,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     // Not actually unsupported, we just want to identify potential samples for
     // now.
     WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   DisassembleEp(process, pe_file, addr_of_ep, ep_va, 3);
   WriteNamedHex(out, L"BaseOfCode", nt_hdrs.GetBaseOfCode(), 2);
@@ -315,9 +315,12 @@ void DumpNtHeaders(hadesmem::Process const& process,
     // FileAlignment). Need to reverse what the loader does in this situations.
     if (file_alignment < 0x200 && num_sections != 0)
     {
+      /// Sample: maxsecXP.exe.
+      /// Sample: maxsec_lowaligW7.exe.
+      /// Sample: nullSOH-XP.exe.
       WriteNormal(
         out, L"WARNING! Low file alignment with non-zero section count.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
   }
   if (section_alignment < 0x800 && section_alignment != file_alignment)
@@ -383,7 +386,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
       out, L"Data Directory VA", data_dir_va, data_dir_name, 2);
     WriteNamedHexSuffix(
       out, L"Data Directory Size", data_dir_size, data_dir_name, 2);
-    if (data_dir_va && IsUnsupportedDataDir(i))
+    if (data_dir_va && !IsSupportedDataDir(i))
     {
       WriteNormal(out,
                   L"WARNING! " + data_dir_name +

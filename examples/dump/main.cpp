@@ -288,6 +288,7 @@ void DumpPeFile(hadesmem::Process const& process,
   if (pe_file.GetSize() > k100MB)
   {
     // Not actually unsupported, just want to flag large files.
+    WriteNewline(out);
     WriteNormal(out, L"WARNING! File is over 100MB.", 0);
     WarnForCurrentFile(WarningType::kUnsupported);
   }

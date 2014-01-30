@@ -22,10 +22,10 @@
 void DumpExports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
 {
-  std::unique_ptr<hadesmem::ExportDir> export_dir;
+  std::unique_ptr<hadesmem::ExportDir const> export_dir;
   try
   {
-    export_dir = std::make_unique<hadesmem::ExportDir>(process, pe_file);
+    export_dir = std::make_unique<hadesmem::ExportDir const>(process, pe_file);
   }
   catch (std::exception const& /*e*/)
   {
@@ -56,7 +56,8 @@ void DumpExports(hadesmem::Process const& process,
   try
   {
     auto name = export_dir->GetName();
-    HandleLongOrUnprintableString(L"Name", L"export module name", 2, WarningType::kSuspicious, name);
+    HandleLongOrUnprintableString(
+      L"Name", L"export module name", 2, WarningType::kSuspicious, name);
   }
   catch (std::exception const& /*e*/)
   {
@@ -75,7 +76,7 @@ void DumpExports(hadesmem::Process const& process,
 
   std::set<std::string> export_names;
 
-  hadesmem::ExportList exports(process, pe_file);
+  hadesmem::ExportList const exports(process, pe_file);
   if (std::begin(exports) != std::end(exports))
   {
     WriteNewline(out);
@@ -85,7 +86,7 @@ void DumpExports(hadesmem::Process const& process,
   {
     WriteNewline(out);
     WriteNormal(out, L"WARNING! Empty or invalid export list.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
 
   std::uint32_t num_exports = 0U;
@@ -100,7 +101,7 @@ void DumpExports(hadesmem::Process const& process,
         L"WARNING! Processed 1000 exports. Stopping early to avoid resource "
         L"exhaustion attacks.",
         2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
       break;
     }
 
@@ -111,7 +112,8 @@ void DumpExports(hadesmem::Process const& process,
 
       auto const name = e.GetName();
       // Sample: dllweirdexp.dll
-      HandleLongOrUnprintableString(L"Name", L"export name", 3, WarningType::kSuspicious, name);
+      HandleLongOrUnprintableString(
+        L"Name", L"export name", 3, WarningType::kSuspicious, name);
 
       // PE files can have duplicate exported function names (or even have them
       // all identical) because the import hint is used to check the name first

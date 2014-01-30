@@ -71,7 +71,8 @@ void DumpBoundImports(hadesmem::Process const& process,
     return;
   }
 
-  hadesmem::BoundImportDescriptorList bound_import_descs(process, pe_file);
+  hadesmem::BoundImportDescriptorList const bound_import_descs(process,
+                                                               pe_file);
 
   if (std::begin(bound_import_descs) != std::end(bound_import_descs))
   {
@@ -115,7 +116,7 @@ void DumpBoundImports(hadesmem::Process const& process,
                   L"NumberOfModuleForwarderRefs",
                   desc.GetNumberOfModuleForwarderRefs(),
                   2);
-    hadesmem::BoundImportForwarderRefList forwarder_refs(
+    hadesmem::BoundImportForwarderRefList const forwarder_refs(
       process, pe_file, desc);
     if (std::begin(forwarder_refs) != std::end(forwarder_refs))
     {
