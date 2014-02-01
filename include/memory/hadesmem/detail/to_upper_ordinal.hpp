@@ -30,7 +30,7 @@ inline std::wstring ToUpperOrdinal(std::wstring const& str)
 
   assert(str_buf.size() < (std::numeric_limits<DWORD>::max)());
   DWORD const num_converted =
-    ::CharUpperBuff(str_buf.data(), static_cast<DWORD>(str_buf.size()));
+    ::CharUpperBuffW(str_buf.data(), static_cast<DWORD>(str_buf.size()));
   if (num_converted != str_buf.size())
   {
     DWORD const last_error = ::GetLastError();

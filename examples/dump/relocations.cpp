@@ -18,6 +18,9 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+// TODO: Add extra sanity checking (e.g. whether VirtualAddress is valid,
+// whether SizeOfBlock is valid, etc.).
+
 namespace
 {
 

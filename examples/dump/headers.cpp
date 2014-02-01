@@ -35,7 +35,7 @@ void DumpDosHeader(hadesmem::Process const& process,
   WriteNewline(out);
   WriteNormal(out, L"DOS Header:", 1);
 
-  hadesmem::DosHeader dos_hdr(process, pe_file);
+  hadesmem::DosHeader const dos_hdr(process, pe_file);
   WriteNewline(out);
   WriteNamedHex(out, L"Magic", dos_hdr.GetMagic(), 2);
   WriteNamedHex(out, L"BytesOnLastPage", dos_hdr.GetBytesOnLastPage(), 2);
@@ -230,9 +230,9 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // EP is not called, but for non-DLLs it means that execution starts at
   // ImageBase, executing 'MZ' as 'dec ebp/pop edx'.
   // Sample: nullEP.exe (Corkami PE Corpus).
-  // The EP can also be null in the case where it is 'patched' via TLS, but this
-  // applies to all cases not just when the EP is null (it's just more likely in
-  // the case where it's null).
+  // The EP can also be null in the case where it is 'patched' via TLS (although
+  // it doesn't actually have to be null, it can be anything, even a decoy value
+  // that seems correct).
   if (!addr_of_ep && !(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {
     WriteNormal(out, L"WARNING! Detected zero EP in non-DLL PE.", 2);
@@ -241,9 +241,13 @@ void DumpNtHeaders(hadesmem::Process const& process,
   auto const ep_va = RvaToVa(process, pe_file, addr_of_ep);
   if (addr_of_ep && !ep_va)
   {
-    // Not actually unsupported, we just want to identify potential samples for
-    // now.
     WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);
+    WarnForCurrentFile(WarningType::kSuspicious);
+  }
+  ULONG_PTR const image_base = nt_hdrs.GetImageBase();
+  if (image_base + addr_of_ep < image_base)
+  {
+    WriteNormal(out, L"WARNING! EP is at a negative offset.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DisassembleEp(process, pe_file, addr_of_ep, ep_va, 3);
@@ -251,7 +255,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
 #if defined(HADESMEM_DETAIL_ARCH_X86)
   WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);
 #endif
-  ULONG_PTR const image_base = nt_hdrs.GetImageBase();
   std::uint64_t const image_base_64 = image_base;
   WriteNamedHex(out, L"ImageBase", image_base, 2);
   // ImageBase can be null under XP. In this case the binary is relocated to

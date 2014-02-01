@@ -36,8 +36,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
-// TODO: Pattern generator.
-
 // TODO: Standalone app/example for FindPattern. For dumping results,
 // experimenting with patterns, automatically generating new patterns, etc.
 
@@ -49,6 +47,9 @@
 // merge this with the custom region todo, where instead of having a RegionRVA
 // we have a RegionName that takes a Pattern name and resolves it to the region
 // that pattern resides in.
+// Example: Using a pattern which finds the address of some dynamically
+// allocated shellcode, and then using that address as the start for a further
+// search inside the shellcode.
 
 namespace hadesmem
 {

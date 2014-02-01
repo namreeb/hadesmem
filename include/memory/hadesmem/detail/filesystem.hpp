@@ -13,6 +13,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/error.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
@@ -56,13 +57,13 @@ inline std::unique_ptr<std::fstream>
 
 inline bool DoesFileExist(std::wstring const& path)
 {
-  return ::GetFileAttributes(path.c_str()) != INVALID_FILE_ATTRIBUTES;
+  return ::GetFileAttributesW(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
 inline bool IsPathRelative(std::wstring const& path)
 {
   // TODO: Fix this for paths longer than MAX_PATH. (What other APIs are there?)
-  return ::PathIsRelative(path.c_str()) != FALSE;
+  return ::PathIsRelativeW(path.c_str()) != FALSE;
 }
 
 inline std::wstring CombinePath(std::wstring const& base,
@@ -85,13 +86,13 @@ inline std::wstring CombinePath(std::wstring const& base,
 inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
 {
   HANDLE const file =
-    ::CreateFile(path.c_str(),
-                 GENERIC_READ,
-                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
-                 nullptr,
-                 OPEN_EXISTING,
-                 FILE_FLAG_BACKUP_SEMANTICS,
-                 nullptr);
+    ::CreateFileW(path.c_str(),
+                  GENERIC_READ,
+                  FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+                  nullptr,
+                  OPEN_EXISTING,
+                  FILE_FLAG_BACKUP_SEMANTICS,
+                  nullptr);
   if (file == INVALID_HANDLE_VALUE)
   {
     DWORD const last_error = ::GetLastError();
@@ -140,7 +141,7 @@ inline bool ArePathsEquivalent(std::wstring const& left,
 
 inline std::wstring GetRootPath(std::wstring const& path)
 {
-  int const drive_num = ::PathGetDriveNumber(path.c_str());
+  int const drive_num = ::PathGetDriveNumberW(path.c_str());
   if (drive_num == -1)
   {
     DWORD const last_error = ::GetLastError();
@@ -163,9 +164,9 @@ inline std::wstring GetRootPath(std::wstring const& path)
   return drive_path.data();
 }
 
-inline DWORD GetFileAttributes(std::wstring const& path)
+inline DWORD GetFileAttributesWrapper(std::wstring const& path)
 {
-  DWORD const attributes = ::GetFileAttributes(path.c_str());
+  DWORD const attributes = ::GetFileAttributesW(path.c_str());
   if (attributes == INVALID_FILE_ATTRIBUTES)
   {
     DWORD const last_error = ::GetLastError();
@@ -179,14 +180,75 @@ inline DWORD GetFileAttributes(std::wstring const& path)
 
 inline bool IsDirectory(std::wstring const& path)
 {
-  DWORD const attributes = ::hadesmem::detail::GetFileAttributes(path.c_str());
+  DWORD const attributes =
+    ::hadesmem::detail::GetFileAttributesWrapper(path.c_str());
   return !!(attributes & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 inline bool IsSymlink(std::wstring const& path)
 {
-  DWORD const attributes = ::hadesmem::detail::GetFileAttributes(path.c_str());
+  DWORD const attributes =
+    ::hadesmem::detail::GetFileAttributesWrapper(path.c_str());
   return !!(attributes & FILE_ATTRIBUTE_REPARSE_POINT);
+}
+
+inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
+{
+  std::vector<wchar_t> full_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  DWORD len = GetFullPathNameW(path.c_str(),
+                               static_cast<DWORD>(full_path.size()),
+                               full_path.data(),
+                               nullptr);
+  if (!len || full_path.size() < len)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error() << ErrorString("GetFullPathNameW failed.")
+              << ErrorCodeWinLast(last_error) << ErrorCodeWinOther(len));
+  }
+
+  return full_path.data();
+}
+
+// Modified code from http://bit.ly/1int3Iv.
+// TODO: Use PathCchCanonicalizeEx because on Windows 8+?
+inline std::wstring MakeExtendedPath(std::wstring const& path)
+{
+  if (path.compare(0, 2, L"\\\\"))
+  {
+    if (hadesmem::detail::IsPathRelative(path))
+    {
+      // ..\foo\bar
+      return MakeExtendedPath(hadesmem::detail::CombinePath(
+        hadesmem::detail::GetSelfDirPath(), path));
+    }
+    else
+    {
+      if (path.compare(0, 1, L"\\"))
+      {
+        // c:\foo\bar
+        return L"\\\\?\\" + path;
+      }
+      else
+      {
+        // \foo\bar
+        return MakeExtendedPath(hadesmem::detail::GetFullPathNameWrapper(path));
+      }
+    }
+  }
+  else
+  {
+    if (path.compare(0, 3, L"\\\\?"))
+    {
+      // \\server\share\folder
+      return L"\\\\?\\UNC\\" + path.substr(2);
+    }
+    else
+    {
+      // \\?\c:\foo\bar
+      return path;
+    }
+  }
 }
 }
 }

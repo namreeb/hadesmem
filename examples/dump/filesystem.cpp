@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
@@ -18,39 +17,6 @@
 
 #include "main.hpp"
 #include "print.hpp"
-
-namespace
-{
-
-// Modified code from http://bit.ly/1int3Iv.
-// TODO: Use PathCchCanonicalizeEx on Windows 8+?
-std::wstring MakeExtendedPath(std::wstring const& path)
-{
-  if (path.compare(0, 2, L"\\\\"))
-  {
-    if (hadesmem::detail::IsPathRelative(path))
-    {
-      return MakeExtendedPath(hadesmem::detail::CombinePath(
-        hadesmem::detail::GetSelfDirPath(), path));
-    }
-    else
-    {
-      return L"\\\\?\\" + path;
-    }
-  }
-  else
-  {
-    if (path.compare(0, 3, L"\\\\?"))
-    {
-      return L"\\\\?\\UNC\\" + path.substr(2);
-    }
-    else
-    {
-      return path;
-    }
-  }
-}
-}
 
 void DumpFile(std::wstring const& path)
 {
@@ -151,9 +117,9 @@ void DumpDir(std::wstring const& path)
   }
 
   WIN32_FIND_DATA find_data;
-  ZeroMemory(&find_data, sizeof(find_data));
+  ::ZeroMemory(&find_data, sizeof(find_data));
   hadesmem::detail::SmartFindHandle const handle(
-    ::FindFirstFile((path_real + L"\\*").c_str(), &find_data));
+    ::FindFirstFileW((path_real + L"\\*").c_str(), &find_data));
   if (!handle.IsValid())
   {
     DWORD const last_error = ::GetLastError();
@@ -182,8 +148,7 @@ void DumpDir(std::wstring const& path)
       continue;
     }
 
-    std::wstring const cur_path =
-      MakeExtendedPath(path_real + L"\\" + cur_file);
+    std::wstring const cur_path = hadesmem::detail::MakeExtendedPath(path_real + L"\\" + cur_file);
 
     WriteNewline(out);
     WriteNormal(out, L"Current path: \"" + cur_path + L"\".", 0);
@@ -234,7 +199,7 @@ void DumpDir(std::wstring const& path)
 
       throw;
     }
-  } while (::FindNextFile(handle.GetHandle(), &find_data));
+  } while (::FindNextFileW(handle.GetHandle(), &find_data));
 
   DWORD const last_error = ::GetLastError();
   if (last_error == ERROR_NO_MORE_FILES)

@@ -41,7 +41,6 @@ void DumpBoundImports(hadesmem::Process const& process,
 {
   std::wostream& out = std::wcout;
 
-  // TODO: Add similar checks elsewhere to reduce unnecessary warnings?
   if (!HasBoundImportDir(process, pe_file))
   {
     // Sample: dllmaxvals.dll (Corkami PE Corpus)
