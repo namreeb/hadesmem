@@ -13,18 +13,18 @@ project
 
 lib asmjit 
   : 
-    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/*.cpp ] 
-    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/core/*.cpp ] 
-    [ glob $(ASMJIT_ROOT)/asmjit/src/asmjit/x86/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/src/asmjit/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/src/asmjit/base/*.cpp ] 
+    [ glob $(ASMJIT_ROOT)/src/asmjit/x86/*.cpp ] 
   : 
     <link>static
 
     # Static link
-    <define>ASMJIT_API=""
+    <define>ASMJIT_STATIC
   : 
   : 
-    <include>"$(ASMJIT_ROOT)/asmjit/src/"
+    <include>"$(ASMJIT_ROOT)/src/"
 
     # Static link
-    <define>ASMJIT_API=""
+    <define>ASMJIT_STATIC
   ;

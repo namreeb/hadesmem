@@ -209,7 +209,6 @@ public:
 #else
 
   // Workaround for Intel C++ compile error (Intel C++ 2013 SP1 Updaate 1).
-  // TODO: Fix this properly.
 
   CreateAndInjectData(CreateAndInjectData const&) = delete;
 
@@ -285,7 +284,7 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     std::for_each(args_beg,
                   args_end,
                   [&](std::wstring const& arg)
-    {
+                  {
       command_line_temp += L' ';
       detail::ArgvQuote(&command_line_temp, arg, false);
     });

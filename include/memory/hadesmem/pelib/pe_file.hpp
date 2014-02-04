@@ -111,8 +111,8 @@ public:
         SIZE_T const region_size = region.GetSize();
         HADESMEM_DETAIL_ASSERT(region_size <
                                (std::numeric_limits<DWORD>::max)());
-        size_ += static_cast<DWORD>(region.GetSize());
-        HADESMEM_DETAIL_ASSERT(size_ >= region.GetSize());
+        size_ += static_cast<DWORD>(region_size);
+        HADESMEM_DETAIL_ASSERT(size_ >= region_size);
       }
     }
   }

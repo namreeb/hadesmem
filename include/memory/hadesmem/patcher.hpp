@@ -8,6 +8,7 @@
 #include <locale>
 #include <memory>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
@@ -24,6 +25,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
@@ -75,6 +77,15 @@
 // relying on the detour calling convention matching the target. Especially
 // important for __thiscall etc where we're currently relying on undefined
 // behaviour to convert a member fn pointer to a void*.
+
+// TODO: Consolidate memory allocations where possible. Taking a page for
+// every trampoline (including two trampolines per patch on x64 -- fix
+// this too) is extremely wasteful. Perhaps allocate a block the size of
+// the allocation granularity then use a custom heap?
+
+// TODO: Support calling convention differences for target function and
+// detour function (calling convention only though, not args or return
+// type). Templates can be used to detect information if appropriate.
 
 namespace hadesmem
 {
@@ -205,7 +216,6 @@ public:
   }
 
 private:
-  // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
@@ -235,26 +245,25 @@ private:
   std::vector<BYTE> orig_;
 };
 
-// TODO: Consolidate memory allocations where possible. Taking a page for
-// every trampoline (including two trampolines per patch on x64 -- fix
-// this too) is extremely wasteful. Perhaps allocate a block the size of
-// the allocation granularity then use a custom heap?
-// TODO: Support calling convention differences for target function and
-// detour function (calling convention only though, not args or return
-// type). Templates can be used to detect information if appropriate.
 class PatchDetour
 {
 public:
-  // TODO: Template for function type(s).
-  explicit PatchDetour(Process const& process, PVOID target, PVOID detour)
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchDetour(Process const& process,
+                       TargetFuncT target,
+                       DetourFuncT detour)
     : process_(&process),
       applied_(false),
-      target_(target),
-      detour_(detour),
+      target_(detail::UnionCast<PVOID>(target)),
+      detour_(detail::UnionCast<PVOID>(detour)),
       trampoline_(),
       orig_(),
       trampolines_()
   {
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
+                                  std::is_pointer<TargetFuncT>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value ||
+                                  std::is_pointer<DetourFuncT>::value);
   }
 
   PatchDetour(PatchDetour const& other) = delete;
@@ -454,11 +463,12 @@ public:
 
   template <typename FuncT> FuncT GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
   {
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
+                                  std::is_pointer<FuncT>::value);
     return hadesmem::detail::UnionCastUnchecked<FuncT>(trampoline_->GetBase());
   }
 
 private:
-  // TODO: Code smell... This feels like code duplication.
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
@@ -559,11 +569,10 @@ private:
   bool IsNear(PVOID address, PVOID target)
   {
 #if defined(_M_AMD64)
-    std::ptrdiff_t const offset =
-      static_cast<PBYTE>(address) - static_cast<PBYTE>(target);
-    bool const is_near = (offset > -(static_cast<LONG_PTR>(1) << 31)) &&
-                         (offset < (static_cast<LONG_PTR>(1) << 31));
-    return is_near;
+    return static_cast<std::uintptr_t>(
+             reinterpret_cast<std::intptr_t>(target) -
+             reinterpret_cast<std::intptr_t>(address) - 5) <=
+           (std::numeric_limits<std::uint32_t>::max)();
 #elif defined(_M_IX86)
     (void)address;
     (void)target;
@@ -576,22 +585,28 @@ private:
   // TODO: Remove code duplication from WriteCall.
   DWORD_PTR WriteJump(PVOID address, PVOID target)
   {
-    AsmJit::X86Assembler jit;
+    asmjit::JitRuntime runtime;
     DWORD_PTR expected_stub_size = 0;
     std::vector<BYTE> jump_buf;
-    bool asmjit_bug = false;
+    bool asmjit_trampoline = false;
 
 #if defined(_M_AMD64)
+    asmjit::x64::Assembler jit(&runtime);
     if (IsNear(address, target))
     {
       // JMP <Target, Relative>
       jit.jmp(target);
 
-      // AsmJit generates the correct JMP instruction, but then
-      // adds a bunch of zero padding for no particular reason...
-      // TODO: Fix this.
+      // AsmJit allocates space for a trampoline in case the jump destination
+      // is out of range. We've already accounted for that though, so after
+      // code generation we just want to ensure the trampoline is unused
+      // (otherwise we -- or asmjit -- have a bug) and then drop it.
+      asmjit_trampoline = true;
+
+      // JMP <Target, Relative>
+      // JMP QWORD PTR [Trampoline]
+      // DB 8 ; Trampoline
       expected_stub_size = 0x13;
-      asmjit_bug = true;
     }
     else
     {
@@ -608,16 +623,17 @@ private:
       trampolines_.emplace_back(std::move(trampoline));
 
       // JMP QWORD PTR <Trampoline, Relative>
-      AsmJit::Label label(jit.newLabel());
+      asmjit::Label label(jit.newLabel());
       jit.bind(label);
       LONG_PTR const disp = static_cast<PBYTE>(tramp_addr) -
                             static_cast<PBYTE>(address) - sizeof(LONG);
-      jit.jmp(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
+      jit.jmp(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
 
       expected_stub_size = kJumpSize64;
     }
 
 #elif defined(_M_IX86)
+    asmjit::x86::Assembler jit(&runtime);
     // JMP <Target, Relative>
     jit.jmp(target);
 
@@ -631,7 +647,7 @@ private:
       "Stub size = 0n%Iu, Expected stub size = 0n%Iu.",
       static_cast<std::size_t>(stub_size),
       static_cast<std::size_t>(expected_stub_size));
-    // TODO: Should this be an assert?
+    HADESMEM_DETAIL_ASSERT(stub_size == expected_stub_size);
     if (stub_size != expected_stub_size)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
@@ -640,13 +656,19 @@ private:
 
     jump_buf.resize(stub_size);
 
-    jit.relocCode(jump_buf.data(), reinterpret_cast<DWORD_PTR>(address));
+    std::size_t const stub_size_real =
+      jit.relocCode(jump_buf.data(), reinterpret_cast<std::uintptr_t>(address));
 
-    // Remove the padding added due to AsmJit bug.
-    // TODO: Fix this.
-    if (asmjit_bug == true)
+    if (asmjit_trampoline == true)
     {
-      jump_buf.erase(std::begin(jump_buf) + kJumpSize32, std::end(jump_buf));
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Real stub size = 0n%Iu.", stub_size_real);
+      HADESMEM_DETAIL_ASSERT(stub_size_real == kJumpSize32);
+      if (stub_size_real != kJumpSize32)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+          << ErrorString("Unexpected real stub size."));
+      }
+      jump_buf.erase(std::begin(jump_buf) + stub_size_real, std::end(jump_buf));
       HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
     }
 
@@ -657,10 +679,11 @@ private:
 
   DWORD_PTR WriteCall(PVOID address, PVOID target)
   {
-    AsmJit::X86Assembler jit;
+    asmjit::JitRuntime runtime;
     DWORD_PTR expected_stub_size = 0;
 
 #if defined(_M_AMD64)
+    asmjit::x64::Assembler jit(&runtime);
     // TODO: Optimize this to avoid a trampoline where possible.
     // Similar to WriteJump. Try to consolidate the funcs.
     std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
@@ -672,14 +695,15 @@ private:
     trampolines_.emplace_back(std::move(trampoline));
 
     // CALL QWORD PTR <Trampoline, Relative>
-    AsmJit::Label label(jit.newLabel());
+    asmjit::Label label(jit.newLabel());
     jit.bind(label);
     LONG_PTR const disp = reinterpret_cast<LONG_PTR>(tramp_addr) -
                           reinterpret_cast<LONG_PTR>(address) - sizeof(LONG);
-    jit.call(AsmJit::qword_ptr(label, static_cast<sysint_t>(disp)));
+    jit.call(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
 
     expected_stub_size = kCallSize64;
 #elif defined(_M_IX86)
+    asmjit::x86::Assembler jit(&runtime);
     // CALL <Target, Relative>
     jit.call(target);
 

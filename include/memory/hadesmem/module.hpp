@@ -24,9 +24,6 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: When finding a module by name, allow disambiguation by checking the
-// headers (like the Windows loader does).
-
 namespace hadesmem
 {
 

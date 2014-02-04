@@ -305,5 +305,17 @@ HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__fastcall, DetailCallConv::kFastCall)
 HADESMEM_DETAIL_MAKE_FUNC_CALL_CONV(__vectorcall, DetailCallConv::kVectorCall)
 
 #endif
+
+template <typename FuncT> struct IsFunction
+{
+  // Using FuncCallConv as a fallback because libstdc++ does not support calling
+  // conventions in its std::is_function implementation.
+  static bool const value =
+    std::is_member_function_pointer<FuncT>::value ||
+    std::is_function<FuncT>::value ||
+    (std::is_pointer<FuncT>::value &&
+     std::is_function<std::remove_pointer_t<FuncT>>::value) ||
+    FuncCallConv<FuncT>::value != -1;
+};
 }
 }

@@ -108,7 +108,7 @@ void TestPatchRaw()
 
 void TestPatchDetour()
 {
-  using HookMeFuncBuilderT = AsmJit::FuncBuilder8<std::uint32_t,
+  using HookMeFuncBuilderT = asmjit::FuncBuilder8<std::uint32_t,
                                                   std::int32_t,
                                                   std::int32_t,
                                                   std::int32_t,
@@ -123,8 +123,9 @@ void TestPatchDetour()
 
   // TODO: Test different calling conventions etc.
 
-  AsmJit::X86Compiler c;
-  c.newFunc(AsmJit::kX86FuncConvDefault, HookMeFuncBuilderT());
+  asmjit::JitRuntime runtime;
+  asmjit::host::Compiler c(&runtime);
+  c.addFunc(asmjit::host::kFuncConvHost, HookMeFuncBuilderT());
 
   c.nop();
   c.nop();
@@ -138,37 +139,45 @@ void TestPatchDetour()
   c.nop();
   c.nop();
 
-  AsmJit::GpVar a1(c.getGpArg(0));
-  AsmJit::GpVar a2(c.getGpArg(1));
-  AsmJit::GpVar a3(c.getGpArg(2));
-  AsmJit::GpVar a4(c.getGpArg(3));
-  AsmJit::GpVar a5(c.getGpArg(4));
-  AsmJit::GpVar a6(c.getGpArg(5));
-  AsmJit::GpVar a7(c.getGpArg(6));
-  AsmJit::GpVar a8(c.getGpArg(7));
+  asmjit::host::GpVar a1(c, asmjit::kVarTypeInt32);
+  c.setArg(0, a1);
+  asmjit::host::GpVar a2(c, asmjit::kVarTypeInt32);
+  c.setArg(1, a2);
+  asmjit::host::GpVar a3(c, asmjit::kVarTypeInt32);
+  c.setArg(2, a3);
+  asmjit::host::GpVar a4(c, asmjit::kVarTypeInt32);
+  c.setArg(3, a4);
+  asmjit::host::GpVar a5(c, asmjit::kVarTypeInt32);
+  c.setArg(4, a5);
+  asmjit::host::GpVar a6(c, asmjit::kVarTypeInt32);
+  c.setArg(5, a6);
+  asmjit::host::GpVar a7(c, asmjit::kVarTypeInt32);
+  c.setArg(6, a7);
+  asmjit::host::GpVar a8(c, asmjit::kVarTypeInt32);
+  c.setArg(7, a8);
 
-  AsmJit::GpVar address(c.newGpVar());
-  c.mov(address, AsmJit::imm(reinterpret_cast<sysint_t>(&HookMe)));
+  asmjit::host::GpVar address(c.newGpVar());
+  c.mov(address, asmjit::imm_u(reinterpret_cast<std::uintptr_t>(&HookMe)));
 
-  AsmJit::GpVar var(c.newGpVar());
-  AsmJit::X86CompilerFuncCall* ctx = c.call(address);
-  ctx->setPrototype(AsmJit::kX86FuncConvDefault, HookMeFuncBuilderT());
-  ctx->setArgument(0, a1);
-  ctx->setArgument(1, a2);
-  ctx->setArgument(2, a3);
-  ctx->setArgument(3, a4);
-  ctx->setArgument(4, a5);
-  ctx->setArgument(5, a6);
-  ctx->setArgument(6, a7);
-  ctx->setArgument(7, a8);
-  ctx->setReturn(var);
+  asmjit::host::GpVar var(c.newGpVar());
+  asmjit::host::X86X64CallNode* ctx =
+    c.call(address, asmjit::host::kFuncConvHost, HookMeFuncBuilderT());
+  ctx->setArg(0, a1);
+  ctx->setArg(1, a2);
+  ctx->setArg(2, a3);
+  ctx->setArg(3, a4);
+  ctx->setArg(4, a5);
+  ctx->setArg(5, a6);
+  ctx->setArg(6, a7);
+  ctx->setArg(7, a8);
+  ctx->setRet(0, var);
 
   c.ret(var);
 
   c.endFunc();
 
   auto const free_asmjit_func = [](void* func)
-  { AsmJit::MemoryManager::getGlobal()->free(func); };
+  { asmjit::MemoryManager::getGlobal()->release(func); };
   void* const hook_me_wrapper_raw = c.make();
   std::unique_ptr<void, decltype(free_asmjit_func)> const
     hook_me_wrapper_cleanup(hook_me_wrapper_raw, free_asmjit_func);
