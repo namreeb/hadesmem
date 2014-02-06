@@ -30,8 +30,10 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
   Process const process(proc_id);
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
+  // RET
   std::array<BYTE, 1> const return_instr = {{0xC3}};
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
+  // RET 4
   std::array<BYTE, 3> const return_instr = {{0xC2, 0x04, 0x00}};
 #else
 #error "[HadesMem] Unsupported architecture."

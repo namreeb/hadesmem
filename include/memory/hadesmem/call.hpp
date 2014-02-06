@@ -51,7 +51,7 @@
 // externally instead of being regenerated for every call.
 
 // TODO: Once the JIT-once rewrite is complete, transition to using code
-// generated at compile-time with FASM and stored in a binary 'blob' (embedded
+// generated at compile-time with ASM and stored in a binary 'blob' (embedded
 // in the source). This will remove the dependency on AsmJit.
 
 // TODO: Split this mess up into multiple headers where possible.
@@ -403,7 +403,15 @@ private:
 namespace detail
 {
 
-#if defined(HADESMEM_DETAIL_ARCH_X86)
+inline std::uint32_t GetLow32(std::uint64_t i)
+{
+  return static_cast<std::uint32_t>(i & 0xFFFFFFFFUL);
+}
+
+inline std::uint32_t GetHigh32(std::uint64_t i)
+{
+  return static_cast<std::uint32_t>((i >> 32) & 0xFFFFFFFFUL);
+}
 
 class ArgVisitor32
 {
@@ -417,7 +425,7 @@ public:
   {
   }
 
-  void operator()(DWORD32 arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint32_t arg)HADESMEM_DETAIL_NOEXCEPT
   {
     switch (cur_arg_)
     {
@@ -464,15 +472,12 @@ public:
     --cur_arg_;
   }
 
-  void operator()(DWORD64 arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint64_t arg)HADESMEM_DETAIL_NOEXCEPT
   {
-    assembler_->mov(
-      asmjit::x86::eax,
-      asmjit::imm_u(static_cast<DWORD>((arg >> 32) & 0xFFFFFFFFUL)));
+    assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetHigh32(arg)));
     assembler_->push(asmjit::x86::eax);
 
-    assembler_->mov(asmjit::x86::eax,
-                    asmjit::imm_u(static_cast<DWORD>(arg & 0xFFFFFFFFUL)));
+    assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetLow32(arg)));
     assembler_->push(asmjit::x86::eax);
 
     --cur_arg_;
@@ -481,9 +486,9 @@ public:
   void operator()(float arg)HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
-    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
 
-    auto const arg_conv = UnionCast<DWORD>(arg);
+    auto const arg_conv = UnionCast<std::uint32_t>(arg);
 
     assembler_->mov(asmjit::x86::eax, asmjit::imm_u(arg_conv));
     assembler_->push(asmjit::x86::eax);
@@ -494,17 +499,14 @@ public:
   void operator()(double arg)HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
-    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
 
-    auto const arg_conv = UnionCast<DWORD64>(arg);
+    auto const arg_conv = UnionCast<std::uint64_t>(arg);
 
-    assembler_->mov(
-      asmjit::x86::eax,
-      asmjit::imm_u(static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFFUL)));
+    assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetHigh32(arg_conv)));
     assembler_->push(asmjit::x86::eax);
 
-    assembler_->mov(asmjit::x86::eax,
-                    asmjit::imm_u(static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL)));
+    assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetLow32(arg_conv)));
     assembler_->push(asmjit::x86::eax);
 
     --cur_arg_;
@@ -515,10 +517,6 @@ private:
   std::size_t cur_arg_;
   CallConv call_conv_;
 };
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
 
 class ArgVisitor64
 {
@@ -531,13 +529,16 @@ public:
   {
   }
 
-  void operator()(DWORD32 arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint32_t arg)HADESMEM_DETAIL_NOEXCEPT
   {
-    return (*this)(static_cast<DWORD64>(arg));
+    return (*this)(static_cast<std::uint64_t>(arg));
   }
 
-  void operator()(DWORD64 arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint64_t arg)HADESMEM_DETAIL_NOEXCEPT
   {
+    std::int32_t const stack_offs =
+      static_cast<std::int32_t>((cur_arg_ - 1) * 8);
+
     switch (cur_arg_)
     {
     case 1:
@@ -553,14 +554,10 @@ public:
       assembler_->mov(asmjit::x64::r9, asmjit::imm_u(arg));
       break;
     default:
-      assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>((cur_arg_ - 1) * 8)),
-        asmjit::imm_u(static_cast<DWORD>(arg & 0xFFFFFFFFUL)));
-      assembler_->mov(
-        asmjit::x64::dword_ptr(
-          asmjit::x64::rsp, static_cast<std::int32_t>((cur_arg_ - 1) * 8 + 4)),
-        asmjit::imm_u(static_cast<DWORD>((arg >> 32) & 0xFFFFFFFFUL)));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+                      asmjit::imm_u(GetLow32(arg)));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
+                      asmjit::imm_u(GetHigh32(arg)));
       break;
     }
 
@@ -570,11 +567,13 @@ public:
   void operator()(float arg)HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
-    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(DWORD));
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
 
-    auto const arg_conv = UnionCast<DWORD>(arg);
+    auto const arg_conv = UnionCast<std::uint32_t>(arg);
 
-    std::size_t const scratch_offs = num_args_ * 8;
+    std::int32_t const scratch_offs = static_cast<std::int32_t>(num_args_ * 8);
+    std::int32_t const stack_offs =
+      static_cast<std::int32_t>((cur_arg_ - 1) * 8);
 
     switch (cur_arg_)
     {
@@ -582,10 +581,8 @@ public:
     case 2:
     case 3:
     case 4:
-      assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)),
-        asmjit::imm_u(arg_conv));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
+                      asmjit::imm_u(arg_conv));
       break;
     default:
       break;
@@ -594,34 +591,24 @@ public:
     switch (cur_arg_)
     {
     case 1:
-      assembler_->movss(
-        asmjit::x64::xmm0,
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movss(asmjit::x64::xmm0,
+                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 2:
-      assembler_->movss(
-        asmjit::x64::xmm1,
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movss(asmjit::x64::xmm1,
+                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 3:
-      assembler_->movss(
-        asmjit::x64::xmm2,
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movss(asmjit::x64::xmm2,
+                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 4:
-      assembler_->movss(
-        asmjit::x64::xmm3,
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movss(asmjit::x64::xmm3,
+                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     default:
-      assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>((cur_arg_ - 1) * 8)),
-        asmjit::imm_u(arg_conv));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+                      asmjit::imm_u(arg_conv));
       break;
     }
 
@@ -631,14 +618,13 @@ public:
   void operator()(double arg)HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
-    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(DWORD64));
+    HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
 
-    auto const arg_conv = UnionCast<DWORD64>(arg);
+    auto const arg_conv = UnionCast<std::uint64_t>(arg);
 
-    DWORD const arg_low = static_cast<DWORD>(arg_conv & 0xFFFFFFFFUL);
-    DWORD const arg_high = static_cast<DWORD>((arg_conv >> 32) & 0xFFFFFFFFUL);
-
-    std::size_t const scratch_offs = num_args_ * 8;
+    std::int32_t const scratch_offs = static_cast<std::int32_t>(num_args_ * 8);
+    std::int32_t const stack_offs =
+      static_cast<std::int32_t>((cur_arg_ - 1) * 8);
 
     switch (cur_arg_)
     {
@@ -646,14 +632,11 @@ public:
     case 2:
     case 3:
     case 4:
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
+                      asmjit::imm_u(GetLow32(arg_conv)));
       assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)),
-        asmjit::imm_u(arg_low));
-      assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs + 4)),
-        asmjit::imm_u(arg_high));
+        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs + 4),
+        asmjit::imm_u(GetHigh32(arg_conv)));
       break;
     default:
       break;
@@ -662,38 +645,26 @@ public:
     switch (cur_arg_)
     {
     case 1:
-      assembler_->movsd(
-        asmjit::x64::xmm0,
-        asmjit::x64::qword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movsd(asmjit::x64::xmm0,
+                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 2:
-      assembler_->movsd(
-        asmjit::x64::xmm1,
-        asmjit::x64::qword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movsd(asmjit::x64::xmm1,
+                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 3:
-      assembler_->movsd(
-        asmjit::x64::xmm2,
-        asmjit::x64::qword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movsd(asmjit::x64::xmm2,
+                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     case 4:
-      assembler_->movsd(
-        asmjit::x64::xmm3,
-        asmjit::x64::qword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>(scratch_offs)));
+      assembler_->movsd(asmjit::x64::xmm3,
+                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
       break;
     default:
-      assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp,
-                               static_cast<std::int32_t>((cur_arg_ - 1) * 8)),
-        asmjit::imm_u(arg_low));
-      assembler_->mov(
-        asmjit::x64::dword_ptr(
-          asmjit::x64::rsp, static_cast<std::int32_t>((cur_arg_ - 1) * 8 + 4)),
-        asmjit::imm_u(arg_high));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+                      asmjit::imm_u(GetLow32(arg_conv)));
+      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
+                      asmjit::imm_u(GetHigh32(arg_conv)));
       break;
     }
 
@@ -705,10 +676,6 @@ private:
   std::size_t num_args_;
   std::size_t cur_arg_;
 };
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
-
-#if defined(HADESMEM_DETAIL_ARCH_X86)
 
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
@@ -808,10 +775,6 @@ inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
 
   assembler->ret(0x4);
 }
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
-
-#if defined(HADESMEM_DETAIL_ARCH_X64)
 
 struct ContainerSizeComparer
 {
@@ -933,8 +896,6 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
 
   assembler->ret();
 }
-
-#endif // #if defined(HADESMEM_DETAIL_ARCH_X64)
 
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,

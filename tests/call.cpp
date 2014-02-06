@@ -191,6 +191,8 @@ public:
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
+// No x64-specific calling conventions other than the default.
+
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
 
 DWORD_PTR __fastcall TestIntegerFast(std::uint32_t a,

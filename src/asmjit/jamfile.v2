@@ -21,10 +21,18 @@ lib asmjit
 
     # Static link
     <define>ASMJIT_STATIC
+
+    # Allow cross-jit
+    <define>ASMJIT_BUILD_X86
+    <define>ASMJIT_BUILD_X64
   : 
   : 
     <include>"$(ASMJIT_ROOT)/src/"
 
     # Static link
     <define>ASMJIT_STATIC
+
+    # Allow cross-jit
+    <define>ASMJIT_BUILD_X86
+    <define>ASMJIT_BUILD_X64
   ;

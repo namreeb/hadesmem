@@ -36,18 +36,21 @@
 extern std::unique_ptr<hadesmem::PatchDetour> g_detour;
 std::unique_ptr<hadesmem::PatchDetour> g_detour;
 
+extern std::unique_ptr<hadesmem::PatchDetour> g_detour_2;
+std::unique_ptr<hadesmem::PatchDetour> g_detour_2;
+
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic pop
 #endif
 
-std::uint32_t HookMe(std::int32_t i1,
-                     std::int32_t i2,
-                     std::int32_t i3,
-                     std::int32_t i4,
-                     std::int32_t i5,
-                     std::int32_t i6,
-                     std::int32_t i7,
-                     std::int32_t i8)
+std::uint32_t __cdecl HookMe(std::int32_t i1,
+                             std::int32_t i2,
+                             std::int32_t i3,
+                             std::int32_t i4,
+                             std::int32_t i5,
+                             std::int32_t i6,
+                             std::int32_t i7,
+                             std::int32_t i8)
 {
   std::string const foo("Foo");
   BOOST_TEST_EQ(foo, "Foo");
@@ -64,19 +67,34 @@ std::uint32_t HookMe(std::int32_t i1,
   return 0x1234;
 }
 
-std::uint32_t HookMeHk(std::int32_t i1,
-                       std::int32_t i2,
-                       std::int32_t i3,
-                       std::int32_t i4,
-                       std::int32_t i5,
-                       std::int32_t i6,
-                       std::int32_t i7,
-                       std::int32_t i8)
+extern "C" std::uint32_t __cdecl HookMeHk(std::int32_t i1,
+                                          std::int32_t i2,
+                                          std::int32_t i3,
+                                          std::int32_t i4,
+                                          std::int32_t i5,
+                                          std::int32_t i6,
+                                          std::int32_t i7,
+                                          std::int32_t i8)
 {
   BOOST_TEST(g_detour->GetTrampoline() != nullptr);
   auto const orig = g_detour->GetTrampoline<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1234UL);
   return 0x1337;
+}
+
+extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
+  std::int32_t i2,
+  std::int32_t i3,
+  std::int32_t i4,
+  std::int32_t i5,
+  std::int32_t i6,
+  std::int32_t i7,
+  std::int32_t i8)
+{
+  BOOST_TEST(g_detour_2->GetTrampoline() != nullptr);
+  auto const orig = g_detour_2->GetTrampoline<decltype(&HookMe)>();
+  BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1337UL);
+  return 0x5678;
 }
 
 void TestPatchRaw()
@@ -125,7 +143,14 @@ void TestPatchDetour()
 
   asmjit::JitRuntime runtime;
   asmjit::host::Compiler c(&runtime);
-  c.addFunc(asmjit::host::kFuncConvHost, HookMeFuncBuilderT());
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+  auto const call_conv = asmjit::host::kFuncConvHost;
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+  auto const call_conv = asmjit::host::kFuncConvCDecl;
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+  c.addFunc(call_conv, HookMeFuncBuilderT());
 
   c.nop();
   c.nop();
@@ -161,7 +186,7 @@ void TestPatchDetour()
 
   asmjit::host::GpVar var(c.newGpVar());
   asmjit::host::X86X64CallNode* ctx =
-    c.call(address, asmjit::host::kFuncConvHost, HookMeFuncBuilderT());
+    c.call(address, call_conv, HookMeFuncBuilderT());
   ctx->setArg(0, a1);
   ctx->setArg(1, a2);
   ctx->setArg(2, a3);
@@ -196,9 +221,22 @@ void TestPatchDetour()
     hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
     hadesmem::detail::UnionCast<PVOID>(&HookMeHk));
 
+  g_detour_2 = std::make_unique<hadesmem::PatchDetour>(
+    process,
+    hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
+    hadesmem::detail::UnionCast<PVOID>(&HookMeHk2));
+
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
   g_detour->Apply();
+
+  BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+
+  g_detour_2->Apply();
+
+  BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
+
+  g_detour_2->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
@@ -207,6 +245,14 @@ void TestPatchDetour()
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
   g_detour->Apply();
+
+  BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+
+  g_detour_2->Apply();
+
+  BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
+
+  g_detour_2->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
