@@ -364,11 +364,10 @@ public:
         (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
 
-      // TODO: Improved relative instruction rebuilding (including
-      // conditionals). x64 has far more IP relative instructions than x86.
-      // Prioritize most common instructions first, e.g. conditional jumps.
-      // TODO: Support more operand sizes for existing relative instruction
-      // support.
+      // TODO: Improve relative instruction rebuilding. x64 has far more IP
+      // relative instructions than x86. Prioritize most common instructions
+      // first, e.g. conditional jumps. This includes support for more operand
+      // sizes for existing relative instruction support.
       // TODO: Improve instruction rebuilding for cases such as jumps backwards
       // into the detour and fail safely (or whatever is appropriate).
       ud_operand_t const* const op = ud_insn_opr(&ud_obj, 0);
@@ -403,16 +402,17 @@ public:
             Error() << ErrorString("Unknown instruction size."));
         }
 
-        std::uint64_t const insn_base = ud_insn_off(&ud_obj);
-        std::uint32_t const insn_len = ud_insn_len(&ud_obj);
-
         auto const resolve_rel = [](
-          std::uint64_t base, std::int64_t target, std::uint32_t len)
+          std::uint64_t base, std::int64_t target, std::uint32_t insn_len)
         {
           return reinterpret_cast<std::uint8_t*>(
                    static_cast<std::uintptr_t>(base)) +
-                 target + len;
+                 target + insn_len;
         };
+
+        std::uint64_t const insn_base = ud_insn_off(&ud_obj);
+        std::uint32_t const insn_len = ud_insn_len(&ud_obj);
+
         auto const resolved_target =
           resolve_rel(insn_base, insn_target, insn_len);
         void* const jump_target =
@@ -697,6 +697,9 @@ private:
           // MOV DWORD PTR [RSP+4], <Target High>
           // RET
           jit.push(target_low);
+          // We could safe a few bytes here where this is some easy-to-generate
+          // pattern (e.g. 0xFFFFFFFF), but we'll worry about that if we ever
+          // actually need it.
           jit.mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, 4), target_high);
           jit.ret();
 

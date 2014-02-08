@@ -49,6 +49,9 @@ void TestThisProcess()
   std::wstring const path(hadesmem::GetPath(process));
   BOOST_TEST(!path.empty());
   BOOST_TEST(hadesmem::detail::DoesFileExist(path));
+  // TODO: Test that the native path is actually valid.
+  std::wstring const path_native(hadesmem::GetPathNative(process));
+  BOOST_TEST(!path_native.empty());
   BOOL is_wow64_real = FALSE;
   BOOST_TEST(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
   BOOST_TEST_EQ(hadesmem::IsWoW64(process), is_wow64_real != FALSE);

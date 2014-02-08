@@ -23,10 +23,8 @@ template <typename T, typename U = std::remove_cv_t<T>> struct IsCharType
 
 template <typename T> struct IsTriviallyCopyable
 {
-  // TODO: Update to use std::is_trivially_copyable trait when
-  // available in libstdc++.
-  // TODO: Update to use std::is_trivially_copyable when MSVC is
-  // fixed. Dev12 seems to be broken for arrays.
+  // std::is_trivially_copyable is unavailable in libstdc++ and broken in Dev12
+  // (for arrays).
   static bool const value = std::is_trivial<T>::value;
 };
 
@@ -215,20 +213,14 @@ HADESMEM_DETAIL_MAKE_FUNC_ARGS(__vectorcall)
 
 template <typename FuncT> using FuncArgsT = typename FuncArgs<FuncT>::type;
 
-// WARNING! Here be dragons... GCC sucks and doesn't properly
-// distinguish between function pointers with different calling
-// conventions. Depending on the ABI version you're using you either
-// get a compiler error or a linker error if you try to overload
-// based on the calling convention of a function pointer taken as
-// a parameter. What's even worse is that this also applies to
-// templates! So, in order to work around this I'm using a disgusting
-// hack whereby I use templates to detect the calling convention (if
-// any) of the type, which the compiler can then be used to
-// distinguish the different overloads from each other.
-// This is bad and GCC should feel bad...
-// TODO: Find a less heinous workaround, or at the very least clean
-// it up somehow to make it less disgusting at the spots where this
-// has to be used.
+// WARNING! Here be dragons... GCC doesn't properly distinguish between function
+// pointers with different calling conventions. Depending on the ABI version
+// you're using you either get a compiler error or a linker error if you try to
+// overload based on the calling convention of a function pointer taken as a
+// parameter. What's even worse is that this also applies to templates! So, in
+// order to work around this I'm using a disgusting hack whereby I use templates
+// to detect the calling convention (if any) of the type, which the compiler can
+// then use to distinguish the different overloads from each other.
 
 struct DetailCallConv
 {

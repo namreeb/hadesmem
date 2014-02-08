@@ -24,7 +24,7 @@ void DumpFile(std::wstring const& path)
 
   SetCurrentFilePath(path);
 
-  std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFileNarrow(
+  std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFile<char>(
     path, std::ios::in | std::ios::binary | std::ios::ate));
   std::fstream& file = *file_ptr;
   if (!file)
@@ -148,7 +148,8 @@ void DumpDir(std::wstring const& path)
       continue;
     }
 
-    std::wstring const cur_path = hadesmem::detail::MakeExtendedPath(path_real + L"\\" + cur_file);
+    std::wstring const cur_path =
+      hadesmem::detail::MakeExtendedPath(path_real + L"\\" + cur_file);
 
     WriteNewline(out);
     WriteNormal(out, L"Current path: \"" + cur_path + L"\".", 0);

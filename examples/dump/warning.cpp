@@ -47,8 +47,8 @@ void HandleWarnings(std::wstring const& path)
     if (g_warned_dynamic)
     {
       std::unique_ptr<std::wfstream> warned_file_ptr(
-        hadesmem::detail::OpenFileWide(g_warned_file_path,
-                                       std::ios::out | std::ios::app));
+        hadesmem::detail::OpenFile<wchar_t>(g_warned_file_path,
+                                            std::ios::out | std::ios::app));
       std::wfstream& warned_file = *warned_file_ptr;
       if (!warned_file)
       {

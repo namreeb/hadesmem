@@ -20,8 +20,7 @@ template <typename T,
           int DummyCallConvU = FuncCallConv<U>::value>
 inline T UnionCast(U const& u)
 {
-  // std::is_pod seems to be broken under Intel C++ 2013 SP1 Update 1.
-  // TODO: Fix this properly.
+  // std::is_pod is broken under Intel C++ 2013 SP1 Update 1.
 #if !defined(HADESMEM_INTEL)
   // Technically the use of std::is_pod could be relaxed, but this is true for 
   // all our use cases so it's good enough.

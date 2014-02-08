@@ -77,8 +77,6 @@ inline void
   std::copy(std::begin(data), std::end(data), out);
 }
 
-// TODO: Support truncate_address in other forms of the API?
-
 template <typename T, typename OutputIterator>
 void ReadStringEx(Process const& process,
                   PVOID address,

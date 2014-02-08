@@ -48,7 +48,9 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
 
   std::string buf;
   std::locale const& loc = std::locale::classic();
-  for (std::uint8_t* current = static_cast<std::uint8_t*>(beg); current < end;
+  auto const step = wide ? 2 : 1;
+  for (std::uint8_t* current = static_cast<std::uint8_t*>(beg);
+       (current + step - 1) < end;
        current += (wide ? 2 : 1))
   {
     // TODO: Fix this to support actual Unicode strings, not just wide strings

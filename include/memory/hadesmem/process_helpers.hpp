@@ -17,7 +17,6 @@
 namespace hadesmem
 {
 
-// TODO: Tests for this.
 inline std::wstring GetPathNative(Process const& process)
 {
   HMODULE const ntdll = GetModuleHandleW(L"ntdll");
@@ -76,7 +75,7 @@ inline std::wstring GetPathNative(Process const& process)
 // processes, where QueryFullProcessImageName fails with ERROR_GEN_FAILURE.
 inline std::wstring GetPath(Process const& process)
 {
-  return detail::QueryFullProcessImageName(process.GetHandle());
+  return detail::QueryFullProcessImageNameW(process.GetHandle());
 }
 
 inline bool IsWoW64(Process const& process)

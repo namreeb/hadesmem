@@ -17,41 +17,29 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
+#define HADESMEM_PATHCCH_ALLOW_LONG_PATHS 0x00000001
+
 namespace hadesmem
 {
 
 namespace detail
 {
 
-// TODO: Add throwing variants of OpenFile*.
-
 // libstdc++ doesn't support move operations on file-streams, so we have to
-// return a unique_ptr instead. :(
-inline std::unique_ptr<std::wfstream> OpenFileWide(std::wstring const& path,
-                                                   std::ios_base::openmode mode)
+// return a unique_ptr instead.
+template <typename CharT>
+inline std::unique_ptr<std::basic_fstream<CharT>>
+  OpenFile(std::wstring const& path, std::ios_base::openmode mode)
 {
 #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  return std::unique_ptr<std::wfstream>{new std::wfstream{path, mode}};
+  return std::unique_ptr<std::basic_fstream<CharT>>{
+    new std::basic_fstream<CharT>{path, mode}};
 #else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   // libstdc++ doesn't support wide character overloads for ifstream's
-  // construtor. :(
-  return std::unique_ptr<std::wfstream>{
-    new std::wfstream{hadesmem::detail::WideCharToMultiByte(path), mode}};
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-}
-
-// libstdc++ doesn't support move operations on file-streams, so we have to
-// return a unique_ptr instead. :(
-inline std::unique_ptr<std::fstream>
-  OpenFileNarrow(std::wstring const& path, std::ios_base::openmode mode)
-{
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  return std::unique_ptr<std::fstream>{new std::fstream{path, mode}};
-#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  // libstdc++ doesn't support wide character overloads for ifstream's
-  // construtor. :(
-  return std::unique_ptr<std::fstream>{
-    new std::fstream{hadesmem::detail::WideCharToMultiByte(path), mode}};
+  // construtor.
+  return std::unique_ptr<std::basic_fstream<CharT>>{
+    new std::basic_fstream<CharT>{hadesmem::detail::WideCharToMultiByte(path),
+                                  mode}};
 #endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 
@@ -62,15 +50,45 @@ inline bool DoesFileExist(std::wstring const& path)
 
 inline bool IsPathRelative(std::wstring const& path)
 {
-  // TODO: Fix this for paths longer than MAX_PATH. (What other APIs are there?)
-  return ::PathIsRelativeW(path.c_str()) != FALSE;
+  // Relative paths are always limited to a total of MAX_PATH characters
+  return (path.size() >= MAX_PATH) ? false : !!::PathIsRelativeW(path.c_str());
 }
 
 inline std::wstring CombinePath(std::wstring const& base,
                                 std::wstring const& append)
 {
-  // TODO: Fix this for paths longer than MAX_PATH. (Use PathCchCombineEx for
-  // Win 8+?)
+  // Use newer and better PathCchCombineEx if it's available.
+  detail::SmartModuleHandle const path_mod(
+    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll"));
+  if (path_mod.IsValid())
+  {
+    using PathCchCombineExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
+                                                size_t cchPathOut,
+                                                PCWSTR pszPathIn,
+                                                PCWSTR pszMore,
+                                                unsigned long dwFlags);
+    auto const path_cch_combine_ex = reinterpret_cast<PathCchCombineExFn>(
+      GetProcAddress(path_mod.GetHandle(), "PathCchCombineEx"));
+    if (path_cch_combine_ex)
+    {
+      std::vector<wchar_t> buffer(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+      HRESULT const hr = path_cch_combine_ex(buffer.data(),
+                                             buffer.size(),
+                                             base.c_str(),
+                                             append.c_str(),
+                                             HADESMEM_PATHCCH_ALLOW_LONG_PATHS);
+      if (!SUCCEEDED(hr))
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("PathCchCombineEx failed.")
+                  << ErrorCodeWinHr(hr));
+      }
+
+      return buffer.data();
+    }
+  }
+
+  // Fall back to older API with MAX_PATH limit.
   std::vector<wchar_t> buffer(MAX_PATH);
   if (!::PathCombineW(buffer.data(), base.c_str(), append.c_str()))
   {
@@ -210,10 +228,40 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
   return full_path.data();
 }
 
-// Modified code from http://bit.ly/1int3Iv.
-// TODO: Use PathCchCanonicalizeEx because on Windows 8+?
-inline std::wstring MakeExtendedPath(std::wstring const& path)
+inline std::wstring MakeExtendedPath(std::wstring path)
 {
+  // Use newer and better PathCchCanonicalizeEx if it's available, then fall
+  // through to the custom implementation to ensure we always get an extended
+  // path back out, rather than just when it's longer than MAX_PATH.
+  detail::SmartModuleHandle const path_mod(
+    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll"));
+  if (path_mod.IsValid())
+  {
+    using PathCchCanonicalizeExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
+                                                     size_t cchPathOut,
+                                                     PCWSTR pszPathIn,
+                                                     unsigned long dwFlags);
+    auto const path_cch_combine_ex = reinterpret_cast<PathCchCanonicalizeExFn>(
+      GetProcAddress(path_mod.GetHandle(), "PathCchCanonicalizeEx"));
+    if (path_cch_combine_ex)
+    {
+      std::vector<wchar_t> buffer(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+      HRESULT const hr = path_cch_combine_ex(buffer.data(),
+                                             buffer.size(),
+                                             path.c_str(),
+                                             HADESMEM_PATHCCH_ALLOW_LONG_PATHS);
+      if (!SUCCEEDED(hr))
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error() << ErrorString("PathCchCanonicalizeEx failed.")
+                  << ErrorCodeWinHr(hr));
+      }
+
+      path = buffer.data();
+    }
+  }
+
+  // Modified code from http://bit.ly/1int3Iv.
   if (path.compare(0, 2, L"\\\\"))
   {
     if (hadesmem::detail::IsPathRelative(path))

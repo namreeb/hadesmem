@@ -508,7 +508,8 @@ int main(int argc, char* argv[])
       if (!GetWarnedFilePath().empty() && !GetDynamicWarningsEnabled())
       {
         std::unique_ptr<std::wfstream> warned_file_ptr(
-          hadesmem::detail::OpenFileWide(GetWarnedFilePath(), std::ios::out));
+          hadesmem::detail::OpenFile<wchar_t>(GetWarnedFilePath(),
+                                              std::ios::out));
         std::wfstream& warned_file = *warned_file_ptr;
         if (!warned_file)
         {
