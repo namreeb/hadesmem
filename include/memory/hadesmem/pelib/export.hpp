@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -24,11 +24,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Constructor to create Export by name (optimize using binary
-// search).
-
-// TODO: Support setting and writing back Export. (For EAT hooking.)
 
 namespace hadesmem
 {

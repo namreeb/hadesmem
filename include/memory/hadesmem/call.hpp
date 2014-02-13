@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -35,32 +35,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Improve safety via EH. Both x86 and x64 (though they will require
-// different techniques).
-
-// TODO: Add support for more 'complex' argument and return types, including
-// struct/class/union, long double, SIMD types, cv qualifiers, ref qualifiers,
-// etc. A good reference for calling conventions is available at
-// http://bit.ly/3CvgMV.
-
-// TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated
-// code, 'private' functions, obfuscated code, etc).
-
-// TODO: Only JIT code for Call once, then cache. Rewrite to pull data
-// externally instead of being regenerated for every call.
-
-// TODO: Once the JIT-once rewrite is complete, transition to using code
-// generated at compile-time with ASM and stored in a binary 'blob' (embedded
-// in the source). This will remove the dependency on AsmJit.
-
-// TODO: Split this mess up into multiple headers where possible.
-
-// TODO: Consolidate memory allocations where possible.
-
-// TODO: Add support for __vectorcall calling convention.
-
-// TODO: Add support for varargs functions.
 
 namespace hadesmem
 {
@@ -962,10 +936,6 @@ inline Allocator GenerateCallCode(Process const& process,
 }
 }
 
-// TODO: Remove dependency on ArgsForwardIterator being an iterator with
-// value_type of std::vector<CallArg> (or rather, any container
-// supporting size() and rbegin()/rend(), but there's no good reason to
-// use anything but vector even if it's technically supported).
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
           typename ArgsForwardIterator,
@@ -1027,12 +997,6 @@ inline void CallMulti(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Creating remote thread and waiting.");
 
-  // TODO: Configurable timeout. This will complicate resource
-  // management however, as we will need to extend the lifetime of the
-  // remote memory in case it executes after we time out. Also, if it
-  // times out there is no way to try again in the future... Should we
-  // just leak the memory on timeout? Return a 'future' object? Some
-  // sort of combination? Requires more investigation...
   detail::CreateRemoteThreadAndWait(process, code_remote_pfn);
 
   HADESMEM_DETAIL_TRACE_A("Reading return values.");

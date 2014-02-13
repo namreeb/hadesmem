@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/process.hpp>
@@ -49,7 +49,6 @@ void TestThisProcess()
   std::wstring const path(hadesmem::GetPath(process));
   BOOST_TEST(!path.empty());
   BOOST_TEST(hadesmem::detail::DoesFileExist(path));
-  // TODO: Test that the native path is actually valid.
   std::wstring const path_native(hadesmem::GetPathNative(process));
   BOOST_TEST(!path_native.empty());
   BOOL is_wow64_real = FALSE;

@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -18,8 +18,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Add tests.
 
 namespace hadesmem
 {
@@ -73,7 +71,6 @@ public:
     // have some files where it is zero anyway... Probably because the timestamp
     // is intentionally invalid so it's never matched. For now, just ignore
     // this case and hope for the best.
-    // TODO: Fix this parsing of files like this properly.
     return detail::CheckedReadString<char>(
       *process_, *pe_file_, start_ + GetOffsetModuleName());
   }
@@ -97,8 +94,6 @@ public:
   {
     data_.Reserved = reserved;
   }
-
-  // TODO: SetModuleName
 
 private:
   Process const* process_;

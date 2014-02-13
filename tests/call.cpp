@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/call.hpp>
@@ -15,42 +15,34 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: Test argument combinations more thoroughly.
-
-// TODO: Improve multi-call testing.
-
-// TODO: Test all possible Call overloads.
-
-// TODO: Compile-fail tests.
-
-// TODO: Test all combinations of calling convention, pointer vs
-// non-ptr, etc.
-
 struct DummyType
 {
 };
 DummyType dummy_glob;
 
 using IntRetFuncT = std::int32_t (*)();
-HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
-  decltype(hadesmem::Call<IntRetFuncT>(
-    std::declval<hadesmem::Process>(), nullptr, hadesmem::CallConv::kDefault)
-             .GetReturnValue()),
-  std::int32_t>::value);
+HADESMEM_DETAIL_STATIC_ASSERT(
+  std::is_same<decltype(hadesmem::Call<IntRetFuncT>(
+                          std::declval<hadesmem::Process>(),
+                          nullptr,
+                          hadesmem::CallConv::kDefault).GetReturnValue()),
+               std::int32_t>::value);
 
 using DoubleRetFuncT = double (*)();
-HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
-  decltype(hadesmem::Call<DoubleRetFuncT>(
-    std::declval<hadesmem::Process>(), nullptr, hadesmem::CallConv::kDefault)
-             .GetReturnValue()),
-  double>::value);
+HADESMEM_DETAIL_STATIC_ASSERT(
+  std::is_same<decltype(hadesmem::Call<DoubleRetFuncT>(
+                          std::declval<hadesmem::Process>(),
+                          nullptr,
+                          hadesmem::CallConv::kDefault).GetReturnValue()),
+               double>::value);
 
 using PtrRetFuncT = DummyType* (*)();
-HADESMEM_DETAIL_STATIC_ASSERT(std::is_same<
-  decltype(hadesmem::Call<PtrRetFuncT>(
-    std::declval<hadesmem::Process>(), nullptr, hadesmem::CallConv::kDefault)
-             .GetReturnValue()),
-  DummyType*>::value);
+HADESMEM_DETAIL_STATIC_ASSERT(
+  std::is_same<decltype(hadesmem::Call<PtrRetFuncT>(
+                          std::declval<hadesmem::Process>(),
+                          nullptr,
+                          hadesmem::CallConv::kDefault).GetReturnValue()),
+               DummyType*>::value);
 
 DWORD_PTR TestInteger(std::uint32_t a,
                       std::uint32_t b,
@@ -317,27 +309,6 @@ void TestCall()
   BOOST_TEST_EQ(call_ret.GetReturnValue(), 1234UL);
   BOOST_TEST_EQ(call_ret.GetLastError(), 5678UL);
 
-// TODO: Add a new compile-fail test to ensure that this (and other
-// similar scenarios -- one test for each) doesn't compile.
-#if 0
-    std::uint32_t const lvalue_int_2 = 42U;
-    hadesmem::Call(
-        process,
-        &TestRvalueOnly,
-        hadesmem::CallConv::kDefault,
-        lvalue_int_2);
-#endif
-
-// TODO: Reenable this once we fix reference support (and also add an
-// lvalue reference test).
-#if 0
-    hadesmem::Call(
-        process,
-        &TestRvalueOnly,
-        hadesmem::CallConv::kDefault,
-        42U);
-#endif
-
   hadesmem::Call(process,
                  &TestInteger64,
                  hadesmem::CallConv::kDefault,
@@ -355,25 +326,10 @@ void TestCall()
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-// The following is an extremely disgusting hack that should never be
-// attempted anywhere by anyone. It relies on the fact that all tested
-// compilers will lay out the structures representing pointer to member
-// functions with the function address first (and other data after).
-// The C++ standard strictly forbids casting between the types below.
-// The C++ standard also forbids type punning using the technique below
-// (aka doing a store to a union using one type then doing a load from
-// the union using another type).
-// TODO: Find a way to do this without relying on undefined behavior.
-#if 0
-    union FuncConv
-    {
-        decltype(&ThiscallDummy::TestIntegerThis) pmfn;
-        void* pfn;
-    };
-    FuncConv func_conv;
-    func_conv.pmfn = &ThiscallDummy::TestIntegerThis;
-    auto const test_integer_this = func_conv.pfn;
-#endif
+  // WARNING! The code below invokes undefined behaviour. This relies on the
+  // fact that all tested compilers will lay out the structures representing
+  // pointer to member functions with the function address first (and other data
+  // after).
   ThiscallDummy const thiscall_dummy;
   auto const call_int_this_ret = hadesmem::Call(process,
                                                 &ThiscallDummy::TestIntegerThis,

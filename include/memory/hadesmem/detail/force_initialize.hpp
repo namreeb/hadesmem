@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -52,13 +52,6 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
 
   HADESMEM_DETAIL_TRACE_A("Starting remote thread.");
 
-  // TODO: Configurable timeout. This will complicate resource
-  // management however, as we will need to extend the lifetime of
-  // the remote memory in case it executes after we time out. Also,
-  // if it times out there is no way to try again in the future...
-  // Should we just leak the memory on timeout? Return a 'future'
-  // object? Some sort of combination? Requires more
-  // investigation...
   CreateRemoteThreadAndWait(process, stub_remote_pfn);
 
   HADESMEM_DETAIL_TRACE_A("Remote thread complete.");

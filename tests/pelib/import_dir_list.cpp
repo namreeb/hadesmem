@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/import_dir_list.hpp>
@@ -22,8 +22,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
-// TODO: Split up and improve these import tests.
-
 // Export something to ensure tests pass...
 extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy();
 extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy()
@@ -42,7 +40,6 @@ void TestImportDirList()
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
   {
-    // TODO: Also test PeFileType::Data
     hadesmem::PeFile const cur_pe_file(
       process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 

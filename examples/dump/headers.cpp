@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "headers.hpp"
@@ -16,13 +16,6 @@
 #include "main.hpp"
 #include "print.hpp"
 #include "warning.hpp"
-
-// TODO: Detect when the file has a writable PE header (both methods). See
-// "Writable PE header" in the ReversingLabs "Undocumented PECOFF" whitepaper.
-
-// TODO: Detect using relocations as an obfuscation mechanism. See "File
-// encryption via relocations" in ReversingLabs "Undocumented PECOFF" whitepaper
-// for more information.
 
 namespace
 {
@@ -70,15 +63,6 @@ void DumpDosHeader(hadesmem::Process const& process,
   WriteNamedHex(out, L"OEMInfo", dos_hdr.GetOEMInfo(), 2);
   WriteNamedHexContainer(
     out, L"ReservedWords2", dos_hdr.GetReservedWords2(), 2);
-  // TODO: Detect when e_lfanew is in the overlay and will not be mapped when
-  // loaded into memory. See "Self-destructing PE header" in the ReversingLabs
-  // "Undocumented PECOFF" whitepaper. Also investigate the second part of that
-  // trick in regards to FileAlignment and NtSizeOfHeaders.
-  // TODO: Detect when e_lfanew is set in a way that will cause the NT headers
-  // to overlap physical and virtual parts of the file, causing an 'on disk'
-  // header and an 'in memory' header. See "Dual PE header" in the ReversingLabs
-  // "Undocumented PECOFF" whitepaper.
-  // TODO: Warn on a non-standard value.
   WriteNamedHex(out, L"NewHeaderOffset", dos_hdr.GetNewHeaderOffset(), 2);
 }
 
@@ -206,8 +190,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
   WriteNamedHex(
     out, L"PointerToSymbolTable", nt_hdrs.GetPointerToSymbolTable(), 2);
   WriteNamedHex(out, L"NumberOfSymbols", nt_hdrs.GetNumberOfSymbols(), 2);
-  // TODO: Detect when SizeOfOptionalHeader has been set to put the section
-  // table in unmapped space (e.g. the overlay).
   WriteNamedHex(
     out, L"SizeOfOptionalHeader", nt_hdrs.GetSizeOfOptionalHeader(), 2);
   WriteNamedHex(out, L"Characteristics", nt_hdrs.GetCharacteristics(), 2);
@@ -219,11 +201,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
     out, L"SizeOfInitializedData", nt_hdrs.GetSizeOfInitializedData(), 2);
   WriteNamedHex(
     out, L"SizeOfUninitializedData", nt_hdrs.GetSizeOfUninitializedData(), 2);
-  // TODO: Detect EP outside of the file (i.e. pointing to another non-relocated
-  // module). See "AddressOfEntryPoint" in ReversingLabs "Undocumented PECOFF"
-  // for more inforamtion. Also see AddressOfEntryPoint in Corkami PE info.
-  // TODO: For valid EPs inside the file, dump the section that it is in.
-  // TODO: Detect virtual overlap EP. (Sample: virtEP.exe from Corkami)
   DWORD const addr_of_ep = nt_hdrs.GetAddressOfEntryPoint();
   WriteNamedHex(out, L"AddressOfEntryPoint", addr_of_ep, 2);
   // Entry point can be null. For DLLs this is fine, because it simply means the
@@ -274,14 +251,11 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // Not sure if this is actually possible under x64.
-  // TODO: Check whether the image is allowed to load (similar to x86) in this
-  // case.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
            image_base_64 >= (0xFFFFULL << 48))
   {
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
-    // TODO: Also check the gap?
     WriteNormal(out, L"WARNING! Detected kernel space ImageBase.", 2);
     WarnForCurrentFile(WarningType::kUnsupported);
   }
@@ -312,10 +286,6 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! Unusual file alignment.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
 
-    // TODO: Find out if it's legal to have a file alignment < 0x200, but still
-    // have sections. This may impact whether or not part of RvaToVa is correct
-    // (explicitly using ~0x1FF instead of taking the min of 0x200 and the
-    // FileAlignment). Need to reverse what the loader does in this situations.
     if (file_alignment < 0x200 && num_sections != 0)
     {
       /// Sample: maxsecXP.exe.

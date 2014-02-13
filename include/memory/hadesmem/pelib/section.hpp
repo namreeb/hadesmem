@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -51,7 +51,6 @@ public:
               nt_headers.GetSizeOfOptionalHeader();
     }
 
-    // TODO: Support partial overlap.
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     void const* const section_hdr_next =
@@ -67,13 +66,11 @@ public:
     }
   }
 
-  // TODO: Should this be adjusted for virtual sections?
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
-  // TODO: Fix this hack.
   bool IsVirtual() const HADESMEM_DETAIL_NOEXCEPT
   {
     return is_virtual_;

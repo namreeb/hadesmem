@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -17,8 +17,6 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
-
-// TODO: Add tests.
 
 namespace hadesmem
 {
@@ -150,7 +148,6 @@ private:
   {
     // Apparently all three fields are supposed to be zero, but it seems that
     // may not be the case when it comes to the actual loader implementation?
-    // TODO: Verify this is correct.
     return !impl_->bound_import_desc_->GetTimeDateStamp() ||
            !impl_->bound_import_desc_->GetOffsetModuleName();
   }

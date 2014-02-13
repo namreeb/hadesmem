@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/find_pattern.hpp>
@@ -12,14 +12,9 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: Clean up, expand, fix, etc these tests.
-
-// TODO: Add more tests.
-
-// TODO: Fix this hack properly.
 #if defined(HADESMEM_INTEL)
 #pragma warning(push)
-#pragma warning(disable: 1345)
+#pragma warning(disable : 1345)
 #endif // #if defined(HADESMEM_INTEL)
 
 void TestFindPattern()
@@ -87,7 +82,6 @@ void TestFindPattern()
                         std::end(rtlrandom),
                         static_cast<char const*>(rtl_random_string_absolute)));
 
-  // Todo: Lea test
   std::wstring const pattern_file_data = LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
@@ -117,12 +111,11 @@ void TestFindPattern()
   </FindPattern>
 </HadesMem>
 )";
-  // TODO: Actually validate that the results are correct.
   hadesmem::FindPattern find_pattern(process, pattern_file_data, true);
   find_pattern = hadesmem::FindPattern(process, pattern_file_data, true);
   BOOST_TEST_EQ(find_pattern.GetModuleMap().size(), 2UL);
   BOOST_TEST_EQ(find_pattern.GetPatternMap(L"").size(), 5UL);
-  
+
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"First Call"),
                 static_cast<void*>(nullptr));
   BOOST_TEST_NE(find_pattern.Lookup(L"", L"Zeros New"),
@@ -155,11 +148,11 @@ void TestFindPattern()
   auto const int3_then_nop =
     find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop");
   BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop), '\xCC');
-  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop)+1), '\x90');
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop) + 1), '\x90');
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop Next"),
-    static_cast<void*>(nullptr));
-  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop Next") > 
-    find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"));
+                static_cast<void*>(nullptr));
+  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop Next") >
+             find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"));
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
                 static_cast<void*>(nullptr));
   BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String") >
@@ -171,16 +164,15 @@ void TestFindPattern()
   BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"RtlRandom String"),
                     hadesmem::Error);
   BOOST_TEST_THROWS(find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
-    hadesmem::Error);
+                    hadesmem::Error);
   auto const int3_then_nop_0x1000 =
     find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop 0x1000");
   BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop_0x1000), '\xCC');
-  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop_0x1000)+1), '\x90');
-  auto const int3_then_nop_0x1000_rel = reinterpret_cast<std::uintptr_t>(int3_then_nop_0x1000)-ntdll_base;
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop_0x1000) + 1), '\x90');
+  auto const int3_then_nop_0x1000_rel =
+    reinterpret_cast<std::uintptr_t>(int3_then_nop_0x1000) - ntdll_base;
   BOOST_TEST(int3_then_nop_0x1000_rel >= 0x1000U);
 
-  // TODO: Fix the test to ensure we get the error we're expecting, rather
-  // than just any error.
   std::wstring const pattern_file_data_invalid1 = LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
@@ -234,8 +226,6 @@ void TestFindPattern()
   BOOST_TEST_THROWS(
     hadesmem::FindPattern(process, pattern_file_data_invalid4, true),
     hadesmem::Error);
-
-  // Todo: LoadFile test
 }
 
 int main()

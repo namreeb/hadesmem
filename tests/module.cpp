@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/module.hpp>
@@ -15,8 +15,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/process.hpp>
-
-// TODO: Test global var exports for FindProcedure.
 
 void TestModule()
 {

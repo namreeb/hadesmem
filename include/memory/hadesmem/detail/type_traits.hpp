@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -27,11 +27,6 @@ template <typename T> struct IsTriviallyCopyable
   // (for arrays).
   static bool const value = std::is_trivial<T>::value;
 };
-
-// TODO: Add support to traits for varargs functions (call conv is
-// ignored on varargs). Remember though that you can have args before
-// the elipsis, so you will need something like:
-// struct FuncResult<R(C::*)(Args......)>
 
 template <typename FuncT> struct FuncResult;
 

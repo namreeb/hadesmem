@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -70,9 +70,6 @@ inline std::wstring GetPathNative(Process const& process)
   return {buffer.data(), buffer.data() + process_id_info.ImageName.Length / 2};
 }
 
-// TODO: Use GetPathNative and then convert the path to a Win32 path instead,
-// because it bypasses access restrictions and also works for 'zombie'
-// processes, where QueryFullProcessImageName fails with ERROR_GEN_FAILURE.
 inline std::wstring GetPath(Process const& process)
 {
   return detail::QueryFullProcessImageNameW(process.GetHandle());

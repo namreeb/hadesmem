@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "warning.hpp"
@@ -18,7 +18,6 @@ namespace
 
 // Record all modules (on disk) which cause a warning when dumped, to make it
 // easier to isolate files which require further investigation.
-// TODO: Clean this up.
 bool g_warned = false;
 bool g_warned_enabled = false;
 bool g_warned_dynamic = false;

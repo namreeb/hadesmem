@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/patcher.hpp>
@@ -22,11 +22,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-// TODO: Patcher constructor tests
-// TODO: Address tests.
-// TODO: Stream overload tests.
-
-// TODO: Fix the code so this hack can be removed.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
@@ -135,11 +130,6 @@ void TestPatchDetour()
                                                   std::int32_t,
                                                   std::int32_t,
                                                   std::int32_t>;
-
-  // TODO: Generate different kinds of code to test all instruction
-  // resolution code and ensure we're covering all the important cases.
-
-  // TODO: Test different calling conventions etc.
 
   asmjit::JitRuntime runtime;
   asmjit::host::Compiler c(&runtime);

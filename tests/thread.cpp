@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/thread.hpp>
@@ -17,8 +17,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/thread_helpers.hpp>
 
-// TODO: Clean up this mess and write a proper scope exit wrapper for
-// use in the library.
 template <typename Func> class ScopeExit
 {
 public:

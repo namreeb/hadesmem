@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -185,15 +185,6 @@ public:
           {
             need_retry = true;
 
-            // TODO: Fix the case where an exception could be thrown due to a
-            // thread already being in the process of terminating. This would
-            // cause ERROR_INVALID_PARAMETER for OpenThread or
-            // ERROR_ACCESS_DENIED for SuspendThread (which we should then
-            // double-check with WaitForSingleObject to confirm that the thread
-            // is signaled). In these cases we should simply ignore the error
-            // and continue (because the thread is as good as suspended anyway).
-            // All other errors should cause a retry (but add trace logging of
-            // the exception details for debugging purposes).
             try
             {
               // Close potential race condition whereby after the snapshot is

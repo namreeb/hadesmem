@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -35,21 +35,6 @@
 #include <hadesmem/pelib/section_list.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
-
-// TODO: Standalone app/example for FindPattern. For dumping results,
-// experimenting with patterns, automatically generating new patterns, etc.
-
-// TODO: Allow custom regions to be specified (similar to module name).
-
-// TODO: Handle the case where after resolving a pattern, the result lives
-// outside the module (the heap, a different module, etc) and we want to use
-// that result as the starting address for a different pattern. Perhaps we can
-// merge this with the custom region todo, where instead of having a RegionRVA
-// we have a RegionName that takes a Pattern name and resolves it to the region
-// that pattern resides in.
-// Example: Using a pattern which finds the address of some dynamically
-// allocated shellcode, and then using that address as the start for a further
-// search inside the shellcode.
 
 namespace hadesmem
 {

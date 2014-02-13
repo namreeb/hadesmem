@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -33,7 +33,6 @@ public:
   {
     NtHeaders const nt_headers(process, pe_file);
 
-    // TODO: Some sort of API to handle this common case.
     DWORD const data_dir_va =
       nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::TLS);
     // Windows will load images which don't specify a size for the
@@ -148,8 +147,6 @@ public:
   {
     data_.AddressOfCallBacks = address_of_callbacks;
   }
-
-  // TODO: SetCallbacks function
 
   void SetSizeOfZeroFill(DWORD size_of_zero_fill)
   {

@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -32,49 +32,6 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Fix exception safety.
-
-// TODO: EAT hooking.
-
-// TODO: IAT hooking.
-
-// TODO: VEH hooking. (INT 3, DR, invalid instr, etc.)
-
-// TODO: VMT hooking.
-
-// TODO: Make hooking a transactional operation.
-
-// TODO: Support 'safe' unloading by incrementing/decrementing a counter for
-// each detour so it can be detect when your code is currently executing
-// before unloading? What other options are there?
-
-// TODO: Support passing a hook context. (This is needed to support multi-module
-// support properly in base hook. i.e. Two concurrent D3D instances.) Need to be
-// sure not to dirty registers though. Perhaps use a second trampoline in
-// patcher when jumping to detour to pass a hook context (containing original
-// trampoline, original module, etc).
-
-// TODO: Rewrite to not use AsmJit.
-
-// TODO: Add proper tests for edge cases trying to be handled (thread
-// suspension, thread redirection, instruction resolution, no free trampoline
-// blocks near a target address, short and far jumps, etc etc.)
-
-// TODO: Review, refactor, rewrite, etc this entire module. Put TODOs where
-// appropriate, remove and add APIs, fix bugs, clean up code, etc. Use new
-// language features like noexcept, constexpr, etc. Consider other designs
-// entirely.
-
-// TODO: Add proper support for hooking different calling conventions without
-// relying on the detour calling convention matching the target. Especially
-// important for __thiscall etc where we're currently relying on undefined
-// behaviour to convert a member fn pointer to a void*.
-
-// TODO: Consolidate memory allocations where possible. Taking a page for
-// every trampoline (including two trampolines per patch on x64 -- fix
-// this too) is extremely wasteful. Perhaps allocate a block the size of
-// the allocation granularity then use a custom heap?
 
 namespace hadesmem
 {
@@ -337,14 +294,8 @@ public:
 
     bool detour_near = IsNear(target_, detour_);
     HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
-    // TODO: Support push/ret WriteJump fallback for cases where we can't find a
-    // trampoline.
     std::size_t const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
 
-    // TODO: Detect cases where hooking may overflow past the end of
-    // a function, and fail. (Provide policy or flag to allow
-    // overriding this behaviour.) Examples may be instructions such
-    // as int 3, ret, jmp, etc.
     std::uint32_t instr_size = 0;
     do
     {
@@ -364,16 +315,9 @@ public:
         (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
 
-      // TODO: Improve relative instruction rebuilding. x64 has far more IP
-      // relative instructions than x86. Prioritize most common instructions
-      // first, e.g. conditional jumps. This includes support for more operand
-      // sizes for existing relative instruction support.
-      // TODO: Improve instruction rebuilding for cases such as jumps backwards
-      // into the detour and fail safely (or whatever is appropriate).
       ud_operand_t const* const op = ud_insn_opr(&ud_obj, 0);
       bool is_jimm = op && op->type == UD_OP_JIMM;
       // Handle JMP QWORD PTR [RIP+Rel32]. Necessary for hook chain support.
-      // TODO: Support more types of memory operand jumps.
       bool is_jmem = op && op->type == UD_OP_MEM && op->base == UD_R_RIP &&
                      op->index == UD_NONE && op->scale == 0 && op->size == 0x40;
       if ((ud_obj.mnemonic == UD_Ijmp || ud_obj.mnemonic == UD_Icall) && op &&
@@ -430,8 +374,6 @@ public:
       }
       else
       {
-        // TODO: Assert here on all known relative instructions on which we will
-        // crash at runtime when executing the trampoline.
         uint8_t const* const raw = ud_insn_ptr(&ud_obj);
         Write(*process_, tramp_cur, raw, raw + len);
         tramp_cur += len;
@@ -448,8 +390,6 @@ public:
 
     orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
 
-    // TODO: Instead of simply bailing in the case that this fails, we should
-    // instead redirect the IP to the equivalent spot in our trampoline.
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
     WriteJump(target_, detour_);
@@ -468,10 +408,7 @@ public:
 
     SuspendedProcess const suspended_process(process_->GetId());
 
-    // TODO: Verify whether we need to even check this...
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
-    // TODO: Instead of simply bailing in the case that this fails, we should
-    // instead redirect the IP to the equivalent spot in the target.
     detail::VerifyPatchThreads(
       process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
@@ -609,7 +546,6 @@ private:
 #endif
   }
 
-  // TODO: Remove code duplication from WriteCall.
   std::size_t
     WriteJump(void* address, void* target, bool push_ret_fallback = false)
   {
@@ -773,7 +709,6 @@ private:
 
 #if defined(_M_AMD64)
     asmjit::x64::Assembler jit(&runtime);
-    // TODO: Optimize this to avoid a trampoline where possible.
     std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
 
     PVOID tramp_addr = trampoline->GetBase();

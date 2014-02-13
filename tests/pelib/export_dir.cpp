@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/export_dir.hpp>
@@ -48,7 +48,6 @@ void TestExportDir()
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
   {
-    // TODO: Also test PeFileType::Data
     hadesmem::PeFile const cur_pe_file(
       process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
@@ -102,9 +101,6 @@ void TestExportDir()
     test_str_2.imbue(std::locale::classic());
     test_str_2 << cur_export_dir->GetBase();
     BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
-
-    // TODO: Ensure that base address is different across modules (similar to
-    // other tests).
   }
 
   BOOST_TEST(processed_one_export_dir);

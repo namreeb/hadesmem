@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/injector.hpp>
@@ -18,9 +18,6 @@ void TestInjector()
 {
   // Don't cause a fork bomb when we later re-launch ourselves to test injection
   // as part of process creation.
-  // TODO: Find a less stupid way of testing this. Relying on some random
-  // module not being present when there's no actual guarantee of this (what if
-  // some overlay software is injected globally etc) is ridiculous.
   HMODULE const d3d9_mod = ::GetModuleHandleW(L"d3d9.dll");
   BOOST_TEST_EQ(d3d9_mod, static_cast<HMODULE>(nullptr));
 
@@ -50,13 +47,6 @@ void TestInjector()
 
   // Free kernel32.dll in remote process.
   hadesmem::FreeDll(process, kernel32_mod_new_2);
-
-  // Todo: Test kPathResolution flag.
-  // TODO: Test export calling in CreateAndInject.
-  // TODO: Test work dir, args, etc in CreateAndInject.
-  // TODO: Test kAddToSearchOrder flag.
-  // TODO: Enumerate module list and ensure the target module has actually
-  // been loaded.
 
   {
     std::vector<std::wstring> args;

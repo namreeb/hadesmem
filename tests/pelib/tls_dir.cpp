@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/tls_dir.hpp>
@@ -49,7 +49,6 @@ void TestTlsDir()
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
   {
-    // TODO: Also test FileType_Data
     hadesmem::PeFile const cur_pe_file(
       process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
@@ -93,9 +92,6 @@ void TestTlsDir()
     test_str_2.imbue(std::locale::classic());
     test_str_2 << cur_tls_dir->GetBase();
     BOOST_TEST_EQ(test_str_1.str(), test_str_2.str());
-
-    // TODO: Ensure that base address is different across modules (similar to
-    // other tests).
   }
 
   BOOST_TEST_NE(tls_dummy, 0);

@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "relocations.hpp"
@@ -17,9 +17,6 @@
 #include "main.hpp"
 #include "print.hpp"
 #include "warning.hpp"
-
-// TODO: Add extra sanity checking (e.g. whether VirtualAddress is valid,
-// whether SizeOfBlock is valid, etc.).
 
 namespace
 {
@@ -98,11 +95,6 @@ void DumpRelocations(hadesmem::Process const& process,
       // 11 = IMAGE_REL_BASED_HIGH3ADJ
       if (type > 11)
       {
-        // TODO: This is being incorrectly flagged on files which uses
-        // IMAGE_REL_BASED_HIGHADJ with an invalid parameter (because it is
-        // ignored until W8). When we detect this reloc type we should skip over
-        // the parameter (or log it) rathe than treating it as another reloc.
-        // Sample: reloc4.exe
         WriteNormal(out, L"WARNING! Unknown relocation type.", 3);
         WarnForCurrentFile(WarningType::kUnsupported);
       }

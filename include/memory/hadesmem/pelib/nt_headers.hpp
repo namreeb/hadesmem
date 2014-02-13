@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -289,7 +289,6 @@ public:
     return data_.OptionalHeader.NumberOfRvaAndSizes;
   }
 
-  // TODO: Add tests for this.
   DWORD GetNumberOfRvaAndSizesClamped() const
   {
     DWORD const num_rvas_and_sizes = GetNumberOfRvaAndSizes();
@@ -605,7 +604,6 @@ inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
   return lhs;
 }
 
-// TODO: Add tests for this.
 inline ULONG_PTR GetRuntimeBase(Process const& process, PeFile const& pe_file)
 {
   switch (pe_file.GetType())

@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -17,19 +17,6 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/error.hpp>
-
-// TODO: Support cross architecture process manipulation (opening an x86
-// WoW64 process as native x64). Includes removing dependency of non-ntdll
-// in injected code and DLL loader, and adding cross architecture support
-// for pelib, thread, etc.
-
-// TODO: Process should keep track of its access mask (beginning with the least
-// amount of access possible - i.e. PROCESS_QUERY_LIMITED_INFORMATION). When a
-// components wants to perform an operation on a process (e.g. read memory) it
-// should first call a function with the required access mask to ensure that it
-// is available, and reopen the handle if not. This way we can keep privs as
-// limited as possible, which will be useful when we can only get limited access
-// to a process.
 
 namespace hadesmem
 {

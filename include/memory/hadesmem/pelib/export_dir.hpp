@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -172,8 +172,6 @@ public:
     std::string const current_name =
       ReadString<char>(*process_, RvaToVa(*process_, *pe_file_, name_rva));
 
-    // TODO: Support allocating space for a new name rather than just
-    // overwriting the existing one.
     if (name.size() > current_name.size())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(

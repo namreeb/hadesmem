@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/section.hpp>
@@ -45,12 +45,10 @@ void TestSection()
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
   {
-    // TODO: Also test FileType_Data
     hadesmem::PeFile const cur_pe_file(
       process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
     // Assume every module has at least one section.
-    // TODO: Better tests.
     hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
     BOOST_TEST(cur_nt_headers.GetNumberOfSections() >= 1);
     hadesmem::Section cur_section(process, cur_pe_file, nullptr);

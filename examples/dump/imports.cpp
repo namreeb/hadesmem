@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "imports.hpp"
@@ -17,13 +17,6 @@
 #include "main.hpp"
 #include "print.hpp"
 #include "warning.hpp"
-
-// TODO: Detect imports which simply point back to exports from the same module
-// (also detect if the exports are forwarded, and also detect infinite loops).
-// Remember that all exports can have the same name, so we need to use the hint
-// first, then only use the name if we fail to find a match using the hint. See
-// "Import name table" and "Import name hint" in ReversingLabs "Undocumented
-// PECOFF" whitepaper for more information.
 
 namespace
 {
@@ -93,8 +86,6 @@ void DumpImports(hadesmem::Process const& process,
     // This is probably a good thing to use to quickly identify files with
     // broken RVA resolution (because broken RVA resolution is far more
     // common than actual files with no imports).
-    // TODO: Fix this for files where we're currently getting it wrong.
-    // Sample: Lab10-01.sys (Practical Malware Analysis)
     WriteNewline(out);
     WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
     WarnForCurrentFile(WarningType::kSuspicious);
@@ -177,12 +168,8 @@ void DumpImports(hadesmem::Process const& process,
     // Sample: maxvals.exe (Corkami PE Corpus)
     // Sample: dllmaxvals.dll (Corkami PE Corpus)
     // For anything else though treat the directory as invalid and stop.
-    // TODO: Verify this is correct. Probably easiest just to hot-patch the
-    // Corkami samples to give them a random invalid RVA and see if they still
-    // run.
     if (!ilt_valid && ilt != 0xFFFFFFFF && ilt != 0)
     {
-      // TODO: Come up with a less stupid message for this.
       WriteNormal(
         out, L"WARNING! ILT is extra invalid. Stopping enumeration.", 2);
       WarnForCurrentFile(WarningType::kSuspicious);
@@ -212,10 +199,6 @@ void DumpImports(hadesmem::Process const& process,
       // dir is invalid we just treat the IAT as the ILT on disk. See
       // dllmaxvals.dll for a PE file which has TimeDateStamp of 0xFFFFFFFF, no
       // ILT, and no bound import dir.
-      // TODO: Is this allowed? I guess this is legal in the case where you
-      // bind a DLL that doesn't have an ILT to begin wtih, at which point it
-      // won't load if the bindings don't match, but we need to confirm this.
-      // Warn so we can find samples for further investigation.
       if (!ilt_valid && HasValidNonEmptyBoundImportDescList(process, pe_file))
       {
         WriteNormal(out,
@@ -234,10 +217,9 @@ void DumpImports(hadesmem::Process const& process,
       {
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader.
-        // TODO: Check this.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain with "
-                    L"no new style bound imports.",
+                    L"old style bound imports.",
                     2);
         WarnForCurrentFile(WarningType::kSuspicious);
       }
@@ -246,7 +228,6 @@ void DumpImports(hadesmem::Process const& process,
       {
         // Not sure how common this is or if it's even allowed. I think it
         // probably just gets ignored by the loader.
-        // TODO: Check this.
         WriteNormal(out,
                     L"WARNING! Detected new style forwarder chain "
                     L"with no bound imports.",
@@ -255,7 +236,6 @@ void DumpImports(hadesmem::Process const& process,
       }
     }
 
-    // TODO: Support old-style forwarder chains.
     if (forwarder_chain != 0 && forwarder_chain != static_cast<DWORD>(-1))
     {
       if (has_new_bound_imports)
@@ -309,10 +289,6 @@ void DumpImports(hadesmem::Process const& process,
 
     WriteNamedHex(out, L"FirstThunk", dir.GetFirstThunk(), 2);
 
-    // TODO: Parse the IAT and ILT in parallel, in order to easily detect when
-    // imports are bound in-memory. This will also mean we no longer need to
-    // count the length of the ILT in order to terminate the IAT pass early.
-
     if (ilt_empty)
     {
       // Has to be the ILT if we get here because we did a check for an
@@ -362,12 +338,6 @@ void DumpImports(hadesmem::Process const& process,
         break;
       }
 
-      // TODO: Should probably revert to using 'is_ilt_bound' instead of
-      // hardcoding false, but is it even legal to have a module that uses old
-      // style bindings with no ILT? Need to investigate, because it seems
-      // you're allowed to have modules like that when they're not actually
-      // bound, and the loader simply detects that the TimeDateStamp doesn't
-      // match and so treats the IAT as unbound? Investigate this further.
       (void)is_ilt_bound;
       // In the case where we have an already mapped image with no ILT, the
       // original name/ordinal inforamtion is long gone so all we have to work
@@ -413,7 +383,6 @@ void DumpImports(hadesmem::Process const& process,
         // bound, even though it actually isn't (and XP will apparently load
         // such a module). See tinygui.exe from the Corkami PE corpus for an
         // example.
-        // TODO: Confirm this is correct.
         DumpImportThunk(thunk, (is_iat_bound && ilt_valid) || !ilt_empty);
       }
     }

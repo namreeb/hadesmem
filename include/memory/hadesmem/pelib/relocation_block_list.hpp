@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -18,8 +18,6 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
-
-// TODO: Add tests.
 
 namespace hadesmem
 {
@@ -73,15 +71,10 @@ public:
         reinterpret_cast<std::uintptr_t>(base) + size);
       auto const file_end =
         static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
-      // TODO: Also fix this for images? Or is it discarded?
-      // TODO: Fix this to handle files with 'virtual' relocs which will still
-      // be
-      // loaded by Windows.
       // Sample: virtrelocXP.exe
       if (pe_file.GetType() == PeFileType::Data &&
           (impl_->reloc_dir_end_ < base || impl_->reloc_dir_end_ > file_end))
       {
-        // TODO: Warn for this.
         impl_.reset();
         return;
       }
@@ -93,7 +86,6 @@ public:
                         impl_->reloc_dir_end_);
       if (impl_->relocation_block_->IsInvalid())
       {
-        // TODO: Warn for this.
         impl_.reset();
         return;
       }
@@ -151,7 +143,6 @@ HADESMEM_DETAIL_NOEXCEPT:
       if (next_base < impl_->relocation_block_->GetBase() ||
           next_base >= impl_->reloc_dir_end_)
       {
-        // TODO: Warn for integer overflow or mis-aligned off-the-end data.
         impl_.reset();
         return *this;
       }
@@ -159,7 +150,6 @@ HADESMEM_DETAIL_NOEXCEPT:
         *impl_->process_, *impl_->pe_file_, next_base, impl_->reloc_dir_end_);
       if (impl_->relocation_block_->IsInvalid())
       {
-        // TODO: Warn for this.
         impl_.reset();
         return *this;
       }

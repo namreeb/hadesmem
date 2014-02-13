@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/read.hpp>
@@ -18,10 +18,6 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
-
-// TODO: Test reads against all page protection combination (especially
-// PAGE_NOCACHE and PAGE_WRITECOMBINE to confirm that they work and don't need
-// to be skipped like guard pages).
 
 void TestReadPod()
 {

@@ -1,6 +1,10 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include "file.hpp"
+
+#include <atomic>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -17,6 +21,7 @@
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
+#include "detour_ref_counter.hpp"
 #include "main.hpp"
 
 namespace winternl = hadesmem::detail::winternl;
@@ -28,6 +33,12 @@ std::unique_ptr<hadesmem::PatchDetour>& GetNtQueryDirectoryFileDetour()
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
+}
+
+std::atomic<std::uint32_t>& GetNtQueryDirectoryFileRefCount()
+{
+  static std::atomic<std::uint32_t> ref_count;
+  return ref_count;
 }
 
 template <winternl::FILE_INFORMATION_CLASS kInfoClass> struct InfoClassToBuffer;
@@ -84,8 +95,8 @@ public:
 
   DirectoryFileInformationEnum(DirectoryFileInformationEnum const&) = delete;
 
-  DirectoryFileInformationEnum& operator=(DirectoryFileInformationEnum const&) =
-    delete;
+  DirectoryFileInformationEnum&
+    operator=(DirectoryFileInformationEnum const&) = delete;
 
   void Advance() HADESMEM_DETAIL_NOEXCEPT
   {
@@ -217,6 +228,8 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
   PUNICODE_STRING file_name,
   BOOLEAN restart_scan) HADESMEM_DETAIL_NOEXCEPT
 {
+  DetourRefCounter ref_count(GetNtQueryDirectoryFileRefCount());
+
   hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%u] [%p] [%u].",
@@ -361,4 +374,18 @@ void DetourNtQueryDirectoryFile()
                                          nt_query_directory_file_detour));
   detour->Apply();
   HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile detoured.");
+}
+
+void UndetourNtQueryDirectoryFile()
+{
+  auto& detour = GetNtQueryDirectoryFileDetour();
+  detour->Remove();
+  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile undetoured.");
+  detour = nullptr;
+
+  auto& ref_count = GetNtQueryDirectoryFileRefCount();
+  while (ref_count.load())
+  {
+  }
+  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile free of references.");
 }

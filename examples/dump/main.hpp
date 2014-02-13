@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -13,9 +13,6 @@
 #include <vector>
 
 #include "warning.hpp"
-
-// TODO: Clean up this header. It contains a lot of random code that doesn't
-// belong here.
 
 namespace hadesmem
 {

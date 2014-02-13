@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/write.hpp>
@@ -17,9 +17,6 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
-
-// TODO: Improve tests by doing checks both before and after writes.
-// TODO: Don't read/write data on the stack.
 
 void TestWritePod()
 {

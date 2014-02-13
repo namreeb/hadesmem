@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "exports.hpp"
@@ -94,11 +94,12 @@ void DumpExports(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    if (num_exports++ == 1000)
+    // Some legitimate DLLs have well over 1000 exports (e.g. ntdll.dll).
+    if (num_exports++ == 10000)
     {
       WriteNormal(
         out,
-        L"WARNING! Processed 1000 exports. Stopping early to avoid resource "
+        L"WARNING! Processed 10000 exports. Stopping early to avoid resource "
         L"exhaustion attacks.",
         2);
       WarnForCurrentFile(WarningType::kSuspicious);
@@ -107,9 +108,6 @@ void DumpExports(hadesmem::Process const& process,
 
     if (e.ByName())
     {
-      // TODO: Detect and warn when export names are not lexicographically
-      // ordered.
-
       auto const name = e.GetName();
       // Sample: dllweirdexp.dll
       HandleLongOrUnprintableString(

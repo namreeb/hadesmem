@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "disassemble.hpp"
@@ -33,22 +33,6 @@ std::size_t GetBytesToEndOfFile(hadesmem::PeFile const& pe_file, void* address)
           pe_file.GetSize()) -
          reinterpret_cast<std::uintptr_t>(address);
 }
-
-std::uintptr_t GetEip(hadesmem::Process const& process,
-                      hadesmem::PeFile const& pe_file,
-                      std::uintptr_t rva,
-                      void* va)
-{
-  if (pe_file.GetType() == hadesmem::PeFileType::Data)
-  {
-    hadesmem::NtHeaders const nt_headers(process, pe_file);
-    return nt_headers.GetImageBase() + rva;
-  }
-  else
-  {
-    return reinterpret_cast<std::uintptr_t>(va);
-  }
-}
 }
 
 void DisassembleEp(hadesmem::Process const& process,
@@ -78,7 +62,8 @@ void DisassembleEp(hadesmem::Process const& process,
     hadesmem::ReadVector<std::uint8_t>(process, ep_va, max_buffer_size);
   ud_set_input_buffer(&ud_obj, disasm_buf.data(), max_buffer_size);
   ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-  ud_set_pc(&ud_obj, GetEip(process, pe_file, ep_rva, ep_va));
+  std::uintptr_t const ip = hadesmem::GetRuntimeBase(process, pe_file) + ep_rva;
+  ud_set_pc(&ud_obj, ip);
 #if defined(_M_AMD64)
   ud_set_mode(&ud_obj, 64);
 #elif defined(_M_IX86)

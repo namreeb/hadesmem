@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -48,8 +48,6 @@ public:
       old_protect_(0),
       mbi_(mbi)
   {
-    // TODO: Add a 'forced' mode to allow bypassing this for the rare cases
-    // where it may be necessary.
     if (IsBadProtect(mbi_))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(

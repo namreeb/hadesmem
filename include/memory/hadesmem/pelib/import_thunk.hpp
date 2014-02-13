@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -21,8 +21,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Support setting and writing back ImportThunk. (For IAT hooking.)
 
 namespace hadesmem
 {
@@ -117,8 +115,6 @@ public:
     data_.u1.Ordinal = ordinal_raw;
   }
 
-  // Todo: SetOrdinal function
-
   void SetFunction(DWORD_PTR function)
   {
     data_.u1.Function = function;
@@ -131,8 +127,6 @@ public:
     return Write(
       *process_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint), hint);
   }
-
-  // TODO: SetName function
 
 private:
   Process const* process_;

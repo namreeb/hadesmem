@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -18,9 +18,6 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
-
-// TODO: Support forward iterators to allow binary search algorithms to be used
-// (because the export list must be sorted).
 
 namespace hadesmem
 {
@@ -118,10 +115,6 @@ public:
       {
       }
 
-      // TODO: Add some way to bubble this up to a higher level so it can be
-      // detected and warned about.
-      // TODO: Verify this is actually correct. Need to figure out what the 
-      // loader does in case of overflow etc.
       if ((ordinal_number + ordinal_base) < ordinal_base)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(

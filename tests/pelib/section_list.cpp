@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/pelib/section_list.hpp>
@@ -46,7 +46,6 @@ void TestSectionList()
   hadesmem::ModuleList modules(process);
   for (auto const& mod : modules)
   {
-    // TODO: Also test PeFileType::Data
     hadesmem::PeFile const pe_file(
       process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
 
@@ -54,7 +53,6 @@ void TestSectionList()
     WORD const num_sections = nt_headers.GetNumberOfSections();
 
     // Assume every module has at least one section.
-    // TODO: Better tests.
     hadesmem::SectionList sections(process, pe_file);
     WORD section_count = 0;
     for (auto& section : sections)
@@ -108,7 +106,6 @@ void TestSectionList()
     BOOST_TEST(section_count == num_sections);
 
     // Assume every module has a '.text' section.
-    // TODO: Better tests.
     auto text_iter = std::find_if(std::begin(sections),
                                   std::end(sections),
                                   [](hadesmem::Section const& section)

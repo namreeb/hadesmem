@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "main.hpp"
@@ -47,79 +47,9 @@
 #include "tls.hpp"
 #include "warning.hpp"
 
-// TODO: Add functionality to make this tool more useful for reversing, such as
-// basic heuristics to detect suspicious files, packer/container detection,
-// diassembling the EP, compiler detection, dumping more of the file format
-// (requires PeLib work), .NET/VB6/etc detection, hashing, etc.
-
-// TODO: Add new warnings for strange cases which require more investigation.
-// This includes both new cases, and also existing cases which are currently
-// being ignored (including those ignored inside PeLib itself, like a lot of the
-// corner cases in RvaToVa). Examples include a virtual or null EP, invalid
-// number of data dirs, unknown DOS stub, strange RVAs which lie outside of the
-// image or inside the headers, non-standard alignments, no sections, more than
-// 96 sections, etc. Add some extra consistentcy checking to help detect strange
-// PE files.
-
-// TODO: Investigate places where we have a try/catch because it's probably a
-// hack rather then the 'correct' solution. Fix or document all cases.
-
-// TODO: Improve this tool against edge cases like those in the Corkami PE
-// corpus. First step is to check each trick and document it if it's already
-// handled, or add a note if it's not yet handled. Also add documentation for
-// tricks from the ReversingLabs "Undocumented PECOFF" whitepaper.
-
-// TODO: Multi-threading support.
-
-// TODO: Add helper functions such as "HasExportDir" etc. to avoid the
-// unnecessary memory allocations and exception handling.
-
-// TODO: Dump string representation of data where possible, such as bitmasks
-// (Charateristics etc.), data dir names, etc.
-
-// TODO: Warn for unusual time stamps (very old, in the future, etc.).
-
-// TODO: Check and use the value of the data directory sizes? (e.g. To limit
-// IAT/EAT enumeration where it's available... Or does the Windows loader ignore
-// it even in this case?)
-
-// TODO: Add a new 'hostile' warning type for things that are not just
-// suspicious, but are actively hostile and never found in 'legitimate' modules,
-// like the AOI trick?
-
-// TODO: Clean up this tool. It's a disaster of spaghetti code (spaghetti is
-// delicious, but we should clean this up anyway...).
-
-// TODO: Add support for warning when a file takes longer than N
-// minutes/sections to analyze, with an optional forced timeout.
-
-// TODO: Use backup semantics flags and try to get backup privilege in order to
-// make directory enumeration find more files.
-
-// TODO: XML output mode (easier to port to a GUI in future).
-
-// TODO: GUI wrapper.
-
-// TODO: Fix all cases both in Dump and in PeLib where we're potentially reading
-// outside of the file/image.
-
-// TODO: Move as much corner-case logic as possible into PeLib itself.
-
-// TODO: Move all the "warnings" etc to PeLib itself (probably store inside
-// PeFile class? or make it specific to each part of the file e.g. exports,
-// imports, etc.). Need to think of the best way to handle it. Perhaps a set of
-// flags per part of the file?
-
-// TODO: Refactor out the warning code to operate separately from the dumping
-// code where possible.
-
-// TODO: Add warnings for cases like that are currently being detected and
-// swallowed entirely in PeLib.
-
 namespace
 {
 
-// TODO: Clean up this hack.
 std::wstring g_current_file_path;
 
 void DumpRegions(hadesmem::Process const& process)
@@ -219,7 +149,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   WriteNamedHex(out, L"Threads", process_entry.GetThreads(), 0);
   WriteNamedHex(out, L"Parent", process_entry.GetParentId(), 0);
   WriteNamedHex(out, L"Priority", process_entry.GetPriority(), 0);
-  WriteNamedNormal(out, L"Normal", process_entry.GetName(), 0);
+  WriteNamedNormal(out, L"Name", process_entry.GetName(), 0);
 
   DumpThreads(process_entry.GetId());
 
@@ -238,7 +168,6 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 
   // Using the Win32 API to get a processes path can fail for 'zombie'
   // processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
-  // TODO: Remove this once GetPath is fixed.
   try
   {
     WriteNewline(out);
@@ -301,9 +230,6 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpExports(process, pe_file);
 
-  // TODO: Fix the app/library so this is no longer necessary... Should the
-  // bound import dumper simply perform an extra validation pass on the import
-  // dir? What about perf? Needs more investigation.
   bool has_new_bound_imports_any = false;
   DumpImports(process, pe_file, has_new_bound_imports_any);
 
@@ -321,9 +247,6 @@ void SetCurrentFilePath(std::wstring const& path)
   g_current_file_path = path;
 }
 
-// TODO: Fix perf for extremely long names. Instead of reading
-// indefinitely and then checking the size after the fact, we should
-// perform a bounded read.
 void HandleLongOrUnprintableString(std::wstring const& name,
                                    std::wstring const& description,
                                    std::size_t tabs,
@@ -359,7 +282,6 @@ bool ConvertTimeStamp(std::time_t time, std::wstring& str)
 {
   // Using ctime rather than ctime_s because MinGW-w64 is apparently missing it.
   // WARNING! The ctime function is not thread safe.
-  // TODO: Fix this.
   auto const conv = std::ctime(&time);
   if (conv)
   {
@@ -533,7 +455,6 @@ int main(int argc, char* argv[])
     std::cerr << "\nError!\n"
               << boost::current_exception_diagnostic_information() << '\n';
 
-    // TODO: Clean up this hack.
     if (!g_current_file_path.empty())
     {
       std::wcerr << "\nCurrent file: " << g_current_file_path << "\n";

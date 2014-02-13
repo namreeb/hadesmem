@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -29,11 +29,6 @@
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: .NET injection (without DLL dependency if possible).
-
-// TODO: IAT injection (to allow execution of code before Dllmain of other
-// modules are executed). Include support for .NET target processes.
 
 namespace hadesmem
 {
@@ -147,12 +142,6 @@ inline void FreeDll(Process const& process, HMODULE module)
   }
 }
 
-// TODO: Configurable timeout. This will complicate resource management
-// however, as we will need to extend the lifetime of the remote memory
-// in case it executes after we time out. Also, if it times out there
-// is no way to try again in the future... Should we just leak the memory
-// on timeout? Return a 'future' object? Some sort of combination?
-// Requires more investigation...
 inline CallResult<DWORD_PTR> CallExport(Process const& process,
                                         HMODULE module,
                                         std::string const& export_name)
@@ -345,13 +334,6 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     {
       if (!export_name.empty())
       {
-        // TODO: Configurable timeout. This will complicate
-        // resource management however, as we will need to extend
-        // the lifetime of the remote memory in case it executes
-        // after we time out. Also, if it times out there is no
-        // way to try again in the future... Should we just leak
-        // the memory on timeout? Return a 'future' object? Some
-        // sort of combination? Requires more investigation...
         return CallExport(process, remote_module, export_name);
       }
 

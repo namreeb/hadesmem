@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -21,12 +21,6 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
-
-// TODO: Handle forwarded imports.
-
-// TODO: Handle bound imports (both new way and old way).
-
-// TODO: This should really be called ImportDescriptor.
 
 namespace hadesmem
 {
@@ -107,10 +101,6 @@ public:
     return base_;
   }
 
-  // TODO: Support virtual overlap trick properly, because currently we're
-  // reading garbage memory.
-  // TODO: Support virtual termination trick properly, because currently we're
-  // reading garbage memory.
   void UpdateRead()
   {
     data_ = Read<IMAGE_IMPORT_DESCRIPTOR>(*process_, base_);
@@ -128,8 +118,6 @@ public:
   }
 
   // Check for virtual termination trick.
-  // TODO: Think about what the best way to solve this is... Currently we're
-  // forcing the user to thunk about it, which may not be ideal.
   bool IsVirtualTerminated() const
   {
     // It's possible for the last entry to be in virtual space, because it only
@@ -147,8 +135,6 @@ public:
 
   // Check for TLS AOI trick.
   // Sample: manyimportsW7.exe (Corkami PE Corpus)
-  // TODO: Think about what the best way to solve this is... Currently we're
-  // forcing the user to thunk about it, which may not be ideal.
   bool IsTlsAoiTerminated() const
   {
     try
@@ -201,9 +187,7 @@ public:
 
     auto name_va =
       static_cast<std::uint8_t*>(RvaToVa(*process_, *pe_file_, name_rva));
-    // It's possible for the RVA to be invalid on disk because it's fixed by
-    // relocations.
-    // TODO: Handle this case.
+    // It's possible for the RVA to be invalid on disk because it's fixed by relocations.
     // Sample: imports_relocW7.exe
     if (!name_va)
     {
@@ -258,8 +242,6 @@ public:
 
     std::string const cur_name = ReadString<char>(*process_, name_ptr);
 
-    // TODO: Support allocating space for a new name rather than just
-    // overwriting the existing one.
     if (name.size() > cur_name.size())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(

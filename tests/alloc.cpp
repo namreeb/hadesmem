@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2013 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include <hadesmem/alloc.hpp>
@@ -33,7 +33,6 @@ void TestAlloc()
   Free(process, address);
 
   BOOST_TEST_THROWS(Alloc(process, 0), hadesmem::Error);
-  // TODO: Add a 'Free' failure check without causing app verifier stops.
 }
 
 void TestAllocator()
