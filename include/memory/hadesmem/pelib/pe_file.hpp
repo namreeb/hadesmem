@@ -17,6 +17,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/region.hpp>
+#include <hadesmem/region_list.hpp>
 #include <hadesmem/read.hpp>
 
 namespace hadesmem
@@ -49,15 +50,22 @@ public:
 
     if (type == PeFileType::Image && !size)
     {
-      std::uint8_t* current = base_;
-      for (Region region(*process_, current); region.GetAllocBase() == base_;
-           current += region.GetSize(), region = Region(*process_, current))
+      RegionList regions(*process_);
+      for (auto const& region : regions)
       {
-        SIZE_T const region_size = region.GetSize();
-        HADESMEM_DETAIL_ASSERT(region_size <
-                               (std::numeric_limits<DWORD>::max)());
-        size_ += static_cast<DWORD>(region_size);
-        HADESMEM_DETAIL_ASSERT(size_ >= region_size);
+        if (region.GetAllocBase() == base_)
+        {
+          SIZE_T const region_size = region.GetSize();
+          HADESMEM_DETAIL_ASSERT(region_size <
+            (std::numeric_limits<DWORD>::max)());
+          size_ += static_cast<DWORD>(region_size);
+          HADESMEM_DETAIL_ASSERT(size_ >= region_size);
+        }
+
+        if (region.GetAllocBase() > base_)
+        {
+          break;
+        }
       }
     }
   }

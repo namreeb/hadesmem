@@ -43,7 +43,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
     return;
   }
 
-  std::size_t const kMinStringLen = 5;
+  std::size_t const kMinStringLen = 3;
 
   std::string buf;
   std::locale const& loc = std::locale::classic();
