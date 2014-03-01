@@ -18,7 +18,6 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <pugixml.hpp>
-#include <pugixml.cpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>

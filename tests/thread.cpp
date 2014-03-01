@@ -79,6 +79,11 @@ void TestThisThread()
   DWORD other_id = 0;
   hadesmem::detail::SmartHandle wait_thread(
     ::CreateThread(nullptr, 0, &WaitFunc, &quit_event, 0, &other_id));
+  // Disgusting hack to work around a potential race condition where we suspend
+  // the thread before it's actually waiting on our event, and instead it's
+  // still in its initialization routine and ends up holding a lock that the
+  // main thread will need (e.g. from malloc). See thread_140224_144550.dmp.
+  ::Sleep(5 * 1000);
   auto const cleanup_thread_func = [&]()
   {
 

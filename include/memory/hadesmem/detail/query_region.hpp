@@ -35,8 +35,8 @@ inline bool CanRead(MEMORY_BASIC_INFORMATION const& mbi)
   HADESMEM_DETAIL_NOEXCEPT
 {
   DWORD const read_prot = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY |
-                          PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE |
-                          PAGE_EXECUTE_WRITECOPY;
+                          PAGE_EXECUTE | PAGE_EXECUTE_READ |
+                          PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
   return (mbi.State == MEM_COMMIT) && !!(mbi.Protect & read_prot);
 }
 
