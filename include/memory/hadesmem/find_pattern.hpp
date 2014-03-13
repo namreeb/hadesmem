@@ -53,30 +53,10 @@ struct PatternFlags
 namespace detail
 {
 
-class PatternDataByte
+struct PatternDataByte
 {
-public:
-  HADESMEM_DETAIL_CONSTEXPR explicit PatternDataByte(std::uint8_t data,
-                                                     bool wildcard)
-    HADESMEM_DETAIL_NOEXCEPT : data_(data),
-                               wildcard_(wildcard)
-  {
-  }
-
-  HADESMEM_DETAIL_CONSTEXPR std::uint8_t GetData() const
-    HADESMEM_DETAIL_NOEXCEPT
-  {
-    return data_;
-  }
-
-  HADESMEM_DETAIL_CONSTEXPR bool IsWildcard() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    return wildcard_;
-  }
-
-private:
-  std::uint8_t data_;
-  bool wildcard_;
+  std::uint8_t data;
+  bool wildcard;
 };
 
 inline std::vector<PatternDataByte> ConvertData(std::wstring const& data)
@@ -119,7 +99,7 @@ inline std::vector<PatternDataByte> ConvertData(std::wstring const& data)
       }
     }
 
-    data_real.emplace_back(static_cast<std::uint8_t>(current), is_wildcard);
+    data_real.emplace_back(PatternDataByte{ static_cast<std::uint8_t>(current), is_wildcard });
   } while (!data_str.eof());
 
   return data_real;
@@ -146,7 +126,7 @@ void* FindRaw(Process const& process,
                 n_beg,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-                { return (n_cur.IsWildcard()) || (h_cur == n_cur.GetData()); });
+                { return n_cur.wildcard || h_cur == n_cur.data; });
 
   if (iter != h_end)
   {
@@ -204,7 +184,7 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
         Error() << ErrorString("Could not get section base address."));
     }
 
-    DWORD const section_size = s.GetSizeOfRawData();
+    DWORD const section_size = s.GetVirtualSize();
     if (!section_size)
     {
       continue;
@@ -388,10 +368,6 @@ public:
   using size_type = std::map<std::wstring, Pattern>::size_type;
 
   friend class FindPattern;
-
-  PatternMap() : map_()
-  {
-  }
 
   const_iterator find(std::wstring const& name) const
   {
