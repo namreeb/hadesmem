@@ -14,25 +14,25 @@ namespace hadesmem
 
 inline void GetSeDebugPrivilege()
 {
-  HANDLE process_token_temp = 0;
+  HANDLE process_token_temp = nullptr;
   if (!::OpenProcessToken(::GetCurrentProcess(),
                           TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
                           &process_token_temp))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("OpenProcessToken failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"OpenProcessToken failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
-  detail::SmartHandle const process_token(process_token_temp);
+  detail::SmartHandle const process_token{process_token_temp};
 
   LUID luid = {0, 0};
   if (!::LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("LookupPrivilegeValue failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"LookupPrivilegeValue failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   TOKEN_PRIVILEGES privileges;
@@ -50,8 +50,8 @@ inline void GetSeDebugPrivilege()
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("AdjustTokenPrivileges failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"AdjustTokenPrivileges failed."}
+              << ErrorCodeWinLast{last_error});
   }
 }
 }

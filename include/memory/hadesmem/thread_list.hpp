@@ -154,10 +154,6 @@ private:
 
   struct Impl
   {
-    Impl() HADESMEM_DETAIL_NOEXCEPT : snap_(INVALID_HANDLE_VALUE), thread_()
-    {
-    }
-
     detail::SmartSnapHandle snap_;
     hadesmem::detail::Optional<ThreadEntry> thread_;
   };

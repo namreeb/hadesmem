@@ -110,7 +110,7 @@ inline HMODULE InjectDll(Process const& process,
   auto const load_library_ret =
     Call(process,
          reinterpret_cast<decltype(&LoadLibraryExW)>(load_library),
-         CallConv::kWinApi,
+         CallConv::kStdCall,
          static_cast<LPCWSTR>(lib_file_remote.GetBase()),
          nullptr,
          add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
@@ -132,7 +132,7 @@ inline void FreeDll(Process const& process, HMODULE module)
   auto const free_library_ret =
     Call(process,
          reinterpret_cast<decltype(&FreeLibrary)>(free_library),
-         CallConv::kWinApi,
+         CallConv::kStdCall,
          module);
   if (!free_library_ret.GetReturnValue())
   {

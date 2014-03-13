@@ -415,7 +415,7 @@ void TestCall()
   auto const call_win = hadesmem::Call(
     process,
     reinterpret_cast<decltype(&GetProcAddress)>(get_proc_address),
-    hadesmem::CallConv::kWinApi,
+    hadesmem::CallConv::kStdCall,
     kernel32_mod,
     "GetProcAddress");
   BOOST_TEST_EQ(call_win.GetReturnValue(), get_proc_address);

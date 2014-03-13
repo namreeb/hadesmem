@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -25,6 +26,8 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
+#include <hadesmem/pelib/dos_header.hpp>
+#include <hadesmem/pelib/nt_headers.hpp>
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_entry.hpp>
@@ -40,6 +43,7 @@
 #include "filesystem.hpp"
 #include "headers.hpp"
 #include "imports.hpp"
+#include "memory.hpp"
 #include "print.hpp"
 #include "relocations.hpp"
 #include "sections.hpp"
@@ -182,11 +186,13 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   WriteNormal(out,
               L"WoW64: " +
                 std::wstring(hadesmem::IsWoW64(*process) ? L"Yes" : L"No"),
-              0);
+                0);
 
   DumpModules(*process);
 
   DumpRegions(*process);
+
+  DumpMemory(*process);
 }
 
 void DumpProcesses()

@@ -191,9 +191,11 @@ std::basic_string<T, Traits, Alloc> ReadString(Process const& process,
     process, address, detail::ReadStringTraits<T>::kChunkLen);
 }
 
-template <typename T, typename Alloc>
-inline std::vector<T, Alloc>
-  ReadVector(Process const& process, PVOID address, std::size_t count)
+template <typename T, typename Alloc = std::allocator<T>>
+inline std::vector<T, Alloc> ReadVectorEx(Process const& process,
+                                          PVOID address,
+                                          std::size_t count,
+                                          std::uint32_t flags)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
@@ -206,8 +208,39 @@ inline std::vector<T, Alloc>
   }
 
   std::vector<T, Alloc> data(count);
-  detail::ReadImpl(process, address, data.data(), sizeof(T) * count);
+  detail::ReadImpl(process, address, data.data(), sizeof(T) * count, flags);
   return data;
+}
+
+template <typename T, typename OutputIterator>
+inline void ReadVectorEx(Process const& process,
+                         PVOID address,
+                         std::size_t count,
+                         OutputIterator out,
+                         std::uint32_t flags)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_base_of<
+    std::output_iterator_tag,
+    typename std::iterator_traits<OutputIterator>::iterator_category>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
+
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+  auto const data = ReadVectorEx<T>(process, address, count, flags);
+  std::copy(std::begin(data), std::end(data), out);
+}
+
+template <typename T, typename Alloc>
+inline std::vector<T, Alloc>
+  ReadVector(Process const& process, PVOID address, std::size_t count)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
+
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+  return ReadVectorEx<T, Alloc>(process, address, count, ReadFlags::kNone);
 }
 
 template <typename T, typename OutputIterator>
@@ -224,7 +257,6 @@ inline void ReadVector(Process const& process,
 
   HADESMEM_DETAIL_ASSERT(address != nullptr);
 
-  auto const data = ReadVector<T>(process, address, count);
-  std::copy(std::begin(data), std::end(data), out);
+  return ReadVectorEx<T>(process, address, count, out, ReadFlags::kNone);
 }
 }

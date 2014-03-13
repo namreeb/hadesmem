@@ -126,10 +126,6 @@ public:
 private:
   struct Impl
   {
-    Impl() HADESMEM_DETAIL_NOEXCEPT : snap_(INVALID_HANDLE_VALUE), process_()
-    {
-    }
-
     detail::SmartSnapHandle snap_;
     hadesmem::detail::Optional<ProcessEntry> process_;
   };
@@ -145,10 +141,6 @@ public:
   using value_type = ProcessEntry;
   using iterator = ProcessIterator<ProcessEntry>;
   using const_iterator = ProcessIterator<ProcessEntry const>;
-
-  HADESMEM_DETAIL_CONSTEXPR ProcessList() HADESMEM_DETAIL_NOEXCEPT
-  {
-  }
 
   iterator begin()
   {

@@ -27,9 +27,9 @@ inline PVOID Alloc(Process const& process, SIZE_T size, PVOID base = nullptr)
   if (!address)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("VirtualAllocEx failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"VirtualAllocEx failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return address;
@@ -40,9 +40,9 @@ inline void Free(Process const& process, LPVOID address)
   if (!::VirtualFreeEx(process.GetHandle(), address, 0, MEM_RELEASE))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("VirtualFreeEx failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"VirtualFreeEx failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 }
 
@@ -50,21 +50,25 @@ class Allocator
 {
 public:
   explicit Allocator(Process const& process, SIZE_T size, PVOID base = nullptr)
-    : process_(&process), base_(Alloc(process, size, base)), size_(size)
+    : process_{&process}, base_{Alloc(process, size, base)}, size_{size}
   {
     HADESMEM_DETAIL_ASSERT(process_ != 0);
     HADESMEM_DETAIL_ASSERT(base_ != 0);
     HADESMEM_DETAIL_ASSERT(size_ != 0);
   }
 
+  explicit Allocator(Process&& process,
+                     SIZE_T size,
+                     PVOID base = nullptr) = delete;
+
   Allocator(Allocator const& other) = delete;
 
   Allocator& operator=(Allocator const& other) = delete;
 
   Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_),
-      base_(other.base_),
-      size_(other.size_)
+    : process_{other.process_},
+      base_{other.base_},
+      size_{other.size_}
   {
     other.process_ = nullptr;
     other.base_ = nullptr;

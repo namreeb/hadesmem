@@ -46,11 +46,12 @@ public:
 
     impl_->process_ = &process;
 
-    // CreateToolhelp32Snapshot can fail with ERROR_PARTIAL_COPY for 'zombie' processes.
+    // CreateToolhelp32Snapshot can fail with ERROR_PARTIAL_COPY for 'zombie'
+    // processes.
     try
     {
       impl_->snap_ = detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
-        impl_->process_->GetId());
+                                                      impl_->process_->GetId());
     }
     catch (std::exception const&)
     {
@@ -138,13 +139,7 @@ public:
 private:
   struct Impl
   {
-    Impl() HADESMEM_DETAIL_NOEXCEPT : process_(nullptr),
-                                      snap_(INVALID_HANDLE_VALUE),
-                                      module_()
-    {
-    }
-
-    Process const* process_;
+    Process const* process_{nullptr};
     detail::SmartSnapHandle snap_;
     hadesmem::detail::Optional<Module> module_;
   };

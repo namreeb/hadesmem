@@ -44,7 +44,6 @@ HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
 enum class CallConv
 {
   kDefault,
-  kWinApi,
   kCdecl,
   kStdCall,
   kThisCall,
@@ -61,8 +60,8 @@ public:
     std::is_same<double, std::remove_cv_t<T>>::value);
 
   HADESMEM_DETAIL_CONSTEXPR explicit CallResult(T result, DWORD last_error)
-    HADESMEM_DETAIL_NOEXCEPT : result_(result),
-                               last_error_(last_error)
+    HADESMEM_DETAIL_NOEXCEPT : result_{result},
+                               last_error_{last_error}
   {
   }
 
@@ -85,7 +84,7 @@ template <> class CallResult<void>
 {
 public:
   HADESMEM_DETAIL_CONSTEXPR explicit CallResult(DWORD last_error)
-    HADESMEM_DETAIL_NOEXCEPT : last_error_(last_error)
+    HADESMEM_DETAIL_NOEXCEPT : last_error_{last_error}
   {
   }
 
@@ -121,12 +120,10 @@ public:
   explicit CallResultRaw(DWORD64 return_i64,
                          float return_float,
                          double return_double,
-                         DWORD last_error) HADESMEM_DETAIL_NOEXCEPT : result_()
+                         DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
+    : result_(detail::CallResultRemote{return_i64, return_float, return_double,
+                                       last_error})
   {
-    result_.return_i64 = return_i64;
-    result_.return_float = return_float;
-    result_.return_double = return_double;
-    result_.last_error = last_error;
   }
 
   explicit CallResultRaw(detail::CallResultRemote const& result)
@@ -274,9 +271,7 @@ inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
 class CallArg
 {
 public:
-  template <typename T>
-  explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT : arg_(),
-                                                   type_(VariantType::kNone)
+  template <typename T> explicit CallArg(T t) HADESMEM_DETAIL_NOEXCEPT
   {
     using U = std::remove_cv_t<T>;
     HADESMEM_DETAIL_STATIC_ASSERT(
@@ -370,8 +365,10 @@ private:
     float f32;
     double f64;
   };
-  Variant arg_;
-  VariantType type_;
+
+  // MSVC Dev12 ICEs on 'Variant arg_{}'.
+  Variant arg_ = Variant{};
+  VariantType type_{VariantType::kNone};
 };
 
 namespace detail
@@ -393,54 +390,27 @@ public:
   ArgVisitor32(asmjit::x86::Assembler* assembler,
                std::size_t num_args,
                CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT
-    : assembler_(assembler),
-      cur_arg_(num_args),
-      call_conv_(call_conv)
+    : assembler_{assembler},
+      cur_arg_{num_args},
+      call_conv_{call_conv}
   {
   }
 
   void operator()(std::uint32_t arg)HADESMEM_DETAIL_NOEXCEPT
   {
-    switch (cur_arg_)
+    asmjit::x86::GpReg const regs[] = {asmjit::x86::ecx, asmjit::x86::edx};
+    auto const num_reg_args =
+      (call_conv_ == CallConv::kThisCall || call_conv_ == CallConv::kFastCall)
+        ? ((call_conv_ == CallConv::kThisCall) ? 1UL : 2UL)
+        : 0UL;
+    if (cur_arg_ > 0 && cur_arg_ <= num_reg_args)
     {
-    case 1:
-      switch (call_conv_)
-      {
-      case CallConv::kThisCall:
-      case CallConv::kFastCall:
-        assembler_->mov(asmjit::x86::ecx, asmjit::imm_u(arg));
-        break;
-      case CallConv::kDefault:
-      case CallConv::kWinApi:
-      case CallConv::kCdecl:
-      case CallConv::kStdCall:
-      case CallConv::kX64:
-        assembler_->mov(asmjit::x86::eax, asmjit::imm_u(arg));
-        assembler_->push(asmjit::x86::eax);
-        break;
-      }
-      break;
-    case 2:
-      switch (call_conv_)
-      {
-      case CallConv::kFastCall:
-        assembler_->mov(asmjit::x86::edx, asmjit::imm_u(arg));
-        break;
-      case CallConv::kDefault:
-      case CallConv::kWinApi:
-      case CallConv::kCdecl:
-      case CallConv::kStdCall:
-      case CallConv::kThisCall:
-      case CallConv::kX64:
-        assembler_->mov(asmjit::x86::eax, asmjit::imm_u(arg));
-        assembler_->push(asmjit::x86::eax);
-        break;
-      }
-      break;
-    default:
+      assembler_->mov(regs[cur_arg_ - 1], asmjit::imm_u(arg));
+    }
+    else
+    {
       assembler_->mov(asmjit::x86::eax, asmjit::imm_u(arg));
       assembler_->push(asmjit::x86::eax);
-      break;
     }
 
     --cur_arg_;
@@ -497,9 +467,9 @@ class ArgVisitor64
 public:
   ArgVisitor64(asmjit::x64::Assembler* assembler,
                std::size_t num_args) HADESMEM_DETAIL_NOEXCEPT
-    : assembler_(assembler),
-      num_args_(num_args),
-      cur_arg_(num_args)
+    : assembler_{assembler},
+      num_args_{num_args},
+      cur_arg_{num_args}
   {
   }
 
@@ -513,26 +483,18 @@ public:
     std::int32_t const stack_offs =
       static_cast<std::int32_t>((cur_arg_ - 1) * 8);
 
-    switch (cur_arg_)
+    if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-    case 1:
-      assembler_->mov(asmjit::x64::rcx, asmjit::imm_u(arg));
-      break;
-    case 2:
-      assembler_->mov(asmjit::x64::rdx, asmjit::imm_u(arg));
-      break;
-    case 3:
-      assembler_->mov(asmjit::x64::r8, asmjit::imm_u(arg));
-      break;
-    case 4:
-      assembler_->mov(asmjit::x64::r9, asmjit::imm_u(arg));
-      break;
-    default:
+      asmjit::x64::GpReg const regs[] = {asmjit::x64::rcx, asmjit::x64::rdx,
+                                         asmjit::x64::r8, asmjit::x64::r9};
+      assembler_->mov(regs[cur_arg_ - 1], asmjit::imm_u(arg));
+    }
+    else
+    {
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
                       asmjit::imm_u(GetLow32(arg)));
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
                       asmjit::imm_u(GetHigh32(arg)));
-      break;
     }
 
     --cur_arg_;
@@ -549,41 +511,19 @@ public:
     std::int32_t const stack_offs =
       static_cast<std::int32_t>((cur_arg_ - 1) * 8);
 
-    switch (cur_arg_)
+    if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
+      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0, asmjit::x64::xmm1,
+                                          asmjit::x64::xmm2, asmjit::x64::xmm3};
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
                       asmjit::imm_u(arg_conv));
-      break;
-    default:
-      break;
+      assembler_->movss(regs[cur_arg_ - 1],
+                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
     }
-
-    switch (cur_arg_)
+    else
     {
-    case 1:
-      assembler_->movss(asmjit::x64::xmm0,
-                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 2:
-      assembler_->movss(asmjit::x64::xmm1,
-                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 3:
-      assembler_->movss(asmjit::x64::xmm2,
-                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 4:
-      assembler_->movss(asmjit::x64::xmm3,
-                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    default:
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
                       asmjit::imm_u(arg_conv));
-      break;
     }
 
     --cur_arg_;
@@ -600,46 +540,24 @@ public:
     std::int32_t const stack_offs =
       static_cast<std::int32_t>((cur_arg_ - 1) * 8);
 
-    switch (cur_arg_)
+    if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
                       asmjit::imm_u(GetLow32(arg_conv)));
       assembler_->mov(
         asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs + 4),
         asmjit::imm_u(GetHigh32(arg_conv)));
-      break;
-    default:
-      break;
+      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0, asmjit::x64::xmm1,
+                                          asmjit::x64::xmm2, asmjit::x64::xmm3};
+      assembler_->movsd(regs[cur_arg_ - 1],
+                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
     }
-
-    switch (cur_arg_)
+    else
     {
-    case 1:
-      assembler_->movsd(asmjit::x64::xmm0,
-                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 2:
-      assembler_->movsd(asmjit::x64::xmm1,
-                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 3:
-      assembler_->movsd(asmjit::x64::xmm2,
-                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    case 4:
-      assembler_->movsd(asmjit::x64::xmm3,
-                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
-      break;
-    default:
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
                       asmjit::imm_u(GetLow32(arg_conv)));
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
                       asmjit::imm_u(GetHigh32(arg_conv)));
-      break;
     }
 
     --cur_arg_;
@@ -695,7 +613,7 @@ inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
     auto const& args = *args_full_beg;
     std::size_t const num_args = args.size();
 
-    ArgVisitor32 arg_visitor(assembler, num_args, call_conv);
+    ArgVisitor32 arg_visitor{assembler, num_args, call_conv};
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
@@ -818,11 +736,7 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
     auto const& args = *args_full_beg;
     std::size_t const num_args = args.size();
 
-    HADESMEM_DETAIL_ASSERT(*call_convs_beg == CallConv::kDefault ||
-                           *call_convs_beg == CallConv::kWinApi ||
-                           *call_convs_beg == CallConv::kX64);
-
-    ArgVisitor64 arg_visitor(assembler, num_args);
+    ArgVisitor64 arg_visitor{assembler, num_args};
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
@@ -883,7 +797,7 @@ inline Allocator GenerateCallCode(Process const& process,
 {
   HADESMEM_DETAIL_TRACE_A("GenerateCallCode called.");
 
-  Module const kernel32(process, L"kernel32.dll");
+  Module const kernel32{process, L"kernel32.dll"};
   auto const get_last_error = reinterpret_cast<DWORD_PTR>(
     FindProcedure(process, kernel32, "GetLastError"));
   auto const set_last_error = reinterpret_cast<DWORD_PTR>(
@@ -895,10 +809,10 @@ inline Allocator GenerateCallCode(Process const& process,
 
   asmjit::JitRuntime runtime;
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  asmjit::x64::Assembler assembler(&runtime);
+  asmjit::x64::Assembler assembler{&runtime};
   GenerateCallCode64(
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  asmjit::x86::Assembler assembler(&runtime);
+  asmjit::x86::Assembler assembler{&runtime};
   GenerateCallCode32(
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -918,7 +832,7 @@ inline Allocator GenerateCallCode(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
-  Allocator stub_mem_remote(process, stub_size);
+  Allocator stub_mem_remote{process, stub_size};
 
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
 
@@ -979,18 +893,18 @@ inline void CallMulti(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Allocating memory for return values.");
 
-  Allocator const return_values_remote(
-    process, sizeof(detail::CallResultRemote) * num_addresses);
+  Allocator const return_values_remote{
+    process, sizeof(detail::CallResultRemote) * num_addresses};
 
   HADESMEM_DETAIL_TRACE_A("Allocating memory for code stub.");
 
-  Allocator const code_remote(
+  Allocator const code_remote{
     detail::GenerateCallCode(process,
                              addresses_beg,
                              addresses_end,
                              call_convs_beg,
                              args_full_beg,
-                             return_values_remote.GetBase()));
+                             return_values_remote.GetBase())};
   LPTHREAD_START_ROUTINE code_remote_pfn =
     reinterpret_cast<LPTHREAD_START_ROUTINE>(
       reinterpret_cast<DWORD_PTR>(code_remote.GetBase()));
@@ -1021,11 +935,11 @@ inline CallResultRaw Call(Process const& process,
                           ArgsForwardIterator args_beg,
                           ArgsForwardIterator args_end)
 {
-  std::vector<void*> addresses;
-  addresses.push_back(address);
-  std::vector<CallConv> call_convs;
-  call_convs.push_back(call_conv);
+  std::vector<void*> addresses{address};
+  std::vector<CallConv> call_convs{call_conv};
   std::vector<std::vector<CallArg>> args_full;
+  // Using an initializer list for this causes an ICE under Intel C++
+  // (14.0.1.139 Build 20131008).
   args_full.emplace_back(args_beg, args_end);
   std::vector<CallResultRaw> results;
   CallMulti(process,
@@ -1034,7 +948,7 @@ inline CallResultRaw Call(Process const& process,
             std::begin(call_convs),
             std::begin(args_full),
             std::back_inserter(results));
-  BOOST_ASSERT(results.size() == 1);
+  HADESMEM_DETAIL_ASSERT(results.size() == 1);
   return results.front();
 }
 
@@ -1150,6 +1064,8 @@ public:
     : process_(&process), addresses_(), call_convs_(), args_()
   {
   }
+
+  explicit MultiCall(Process&& process) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
