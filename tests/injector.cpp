@@ -21,7 +21,7 @@ void TestInjector()
   HMODULE const d3d9_mod = ::GetModuleHandleW(L"d3d9.dll");
   BOOST_TEST_EQ(d3d9_mod, static_cast<HMODULE>(nullptr));
 
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process{::GetCurrentProcessId()};
 
   HMODULE const kernel32_mod = ::GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST_NE(kernel32_mod, static_cast<HMODULE>(nullptr));

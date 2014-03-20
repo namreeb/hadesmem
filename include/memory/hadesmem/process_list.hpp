@@ -36,11 +36,11 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  HADESMEM_DETAIL_CONSTEXPR ProcessIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
-  ProcessIterator(std::int32_t /*dummy*/) : impl_(std::make_shared<Impl>())
+  ProcessIterator(std::int32_t /*dummy*/) : impl_{std::make_shared<Impl>()}
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
@@ -54,7 +54,7 @@ public:
       return;
     }
 
-    impl_->process_ = ProcessEntry(*entry);
+    impl_->process_ = ProcessEntry{*entry};
   }
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
@@ -64,7 +64,7 @@ public:
   ProcessIterator& operator=(ProcessIterator const&) = default;
 
   ProcessIterator(ProcessIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -101,14 +101,14 @@ public:
       return *this;
     }
 
-    impl_->process_ = ProcessEntry(*entry);
+    impl_->process_ = ProcessEntry{*entry};
 
     return *this;
   }
 
   ProcessIterator operator++(int)
   {
-    ProcessIterator const iter(*this);
+    ProcessIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -126,13 +126,13 @@ public:
 private:
   struct Impl
   {
-    detail::SmartSnapHandle snap_;
-    hadesmem::detail::Optional<ProcessEntry> process_;
+    detail::SmartSnapHandle snap_{};
+    hadesmem::detail::Optional<ProcessEntry> process_{};
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as
   // required by InputIterator.
-  std::shared_ptr<Impl> impl_;
+  std::shared_ptr<Impl> impl_{};
 };
 
 class ProcessList

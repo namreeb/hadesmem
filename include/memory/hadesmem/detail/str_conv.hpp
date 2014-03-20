@@ -25,13 +25,13 @@ namespace detail
 // String must be hex.
 inline std::uintptr_t HexStrToPtr(std::wstring const& str)
 {
-  std::wstringstream ss(str);
+  std::wstringstream ss{str};
   ss.imbue(std::locale::classic());
   std::uintptr_t ptr = 0;
   if (!(ss >> std::hex >> ptr))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("String to pointer conversion failed."));
+      Error{} << ErrorString{"String to pointer conversion failed."});
   }
   return ptr;
 }
@@ -43,7 +43,7 @@ inline std::wstring PtrToHexString(void const* const ptr)
   if (!(ss << std::hex << reinterpret_cast<std::uintptr_t>(ptr)))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("Pointer to string conversion failed."));
+      Error{} << ErrorString{"Pointer to string conversion failed."});
   }
   return ss.str();
 }
@@ -52,18 +52,19 @@ template <typename T, typename CharT>
 T StrToNum(std::basic_string<CharT> const& str)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
-  std::basic_ostringstream<CharT> converter(str);
+  std::basic_ostringstream<CharT> converter{str};
   converter.imbue(std::locale::classic());
-  T out = 0;
+  T out{};
   if (!converter || (!converter >> out))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("Conversion failed."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Conversion failed."});
   }
   return out;
 }
 
-inline std::string WideCharToMultiByte(std::string const& in, bool* lossy = nullptr)
+inline std::string WideCharToMultiByte(std::string const& in,
+                                       bool* lossy = nullptr)
 {
   if (lossy)
   {
@@ -73,7 +74,8 @@ inline std::string WideCharToMultiByte(std::string const& in, bool* lossy = null
   return in;
 }
 
-inline std::string WideCharToMultiByte(std::wstring const& in, bool* lossy = nullptr)
+inline std::string WideCharToMultiByte(std::wstring const& in,
+                                       bool* lossy = nullptr)
 {
   std::int32_t const buf_len = ::WideCharToMultiByte(CP_OEMCP,
                                                      WC_NO_BEST_FIT_CHARS,
@@ -87,8 +89,8 @@ inline std::string WideCharToMultiByte(std::wstring const& in, bool* lossy = nul
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("WideCharToMultiByte failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"WideCharToMultiByte failed."}
+              << ErrorCodeWinLast{last_error});
   }
   HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
@@ -105,8 +107,8 @@ inline std::string WideCharToMultiByte(std::wstring const& in, bool* lossy = nul
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("WideCharToMultiByte failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"WideCharToMultiByte failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   if (lossy)
@@ -130,19 +132,19 @@ inline std::wstring MultiByteToWideChar(std::string const& in)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("MultiByteToWideChar failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"MultiByteToWideChar failed."}
+              << ErrorCodeWinLast{last_error});
   }
   HADESMEM_DETAIL_ASSERT(buf_len > 0);
 
   std::vector<wchar_t> buf(static_cast<std::size_t>(buf_len));
   if (!::MultiByteToWideChar(
-         CP_OEMCP, MB_ERR_INVALID_CHARS, in.c_str(), -1, buf.data(), buf_len))
+        CP_OEMCP, MB_ERR_INVALID_CHARS, in.c_str(), -1, buf.data(), buf_len))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("MultiByteToWideChar failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"MultiByteToWideChar failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   return buf.data();

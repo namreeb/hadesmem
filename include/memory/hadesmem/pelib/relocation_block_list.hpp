@@ -38,63 +38,67 @@ public:
   using iterator_category = typename BaseIteratorT::iterator_category;
 
   HADESMEM_DETAIL_CONSTEXPR RelocationBlockIterator() HADESMEM_DETAIL_NOEXCEPT
-    : impl_()
   {
   }
 
   explicit RelocationBlockIterator(Process const& process,
                                    PeFile const& pe_file)
-    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
-      NtHeaders const nt_headers(process, pe_file);
+      NtHeaders const nt_headers{process, pe_file};
 
       DWORD const data_dir_va =
         nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::BaseReloc);
       DWORD const size = nt_headers.GetDataDirectorySize(PeDataDir::BaseReloc);
       if (!data_dir_va || !size)
       {
-        impl_.reset();
         return;
       }
 
-      auto base = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
+      auto base = static_cast<std::uint8_t*>(RvaToVa(process, pe_file, data_dir_va));
       if (!base)
       {
-        impl_.reset();
         return;
       }
 
       // Cast to integer and back to avoid pointer overflow UB.
-      impl_->reloc_dir_end_ = reinterpret_cast<void const*>(
+      auto const reloc_dir_end = reinterpret_cast<void const*>(
         reinterpret_cast<std::uintptr_t>(base) + size);
       auto const file_end =
         static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
       // Sample: virtrelocXP.exe
       if (pe_file.GetType() == PeFileType::Data &&
-          (impl_->reloc_dir_end_ < base || impl_->reloc_dir_end_ > file_end))
+          (reloc_dir_end < base || reloc_dir_end > file_end))
       {
-        impl_.reset();
         return;
       }
 
-      impl_->relocation_block_ =
-        RelocationBlock(process,
-                        pe_file,
-                        reinterpret_cast<PIMAGE_BASE_RELOCATION>(base),
-                        impl_->reloc_dir_end_);
-      if (impl_->relocation_block_->IsInvalid())
+      RelocationBlock const relocation_block{
+        process, pe_file, reinterpret_cast<IMAGE_BASE_RELOCATION*>(base),
+        reloc_dir_end};
+      if (relocation_block.IsInvalid())
       {
-        impl_.reset();
         return;
       }
+
+      impl_ = std::make_shared<Impl>(
+        process, pe_file, relocation_block, reloc_dir_end);
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit RelocationBlockIterator(Process&& process,
+                                   PeFile const& pe_file) = delete;
+
+  explicit RelocationBlockIterator(Process const& process,
+                                   PeFile&& pe_file) = delete;
+
+  explicit RelocationBlockIterator(Process&& process,
+                                   PeFile&& pe_file) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -104,7 +108,7 @@ public:
 
   RelocationBlockIterator(RelocationBlockIterator&& other)
 HADESMEM_DETAIL_NOEXCEPT:
-  impl_(std::move(other.impl_))
+  impl_{std::move(other.impl_)}
   {
   }
 
@@ -146,8 +150,8 @@ HADESMEM_DETAIL_NOEXCEPT:
         impl_.reset();
         return *this;
       }
-      impl_->relocation_block_ = RelocationBlock(
-        *impl_->process_, *impl_->pe_file_, next_base, impl_->reloc_dir_end_);
+      impl_->relocation_block_ = RelocationBlock{
+        *impl_->process_, *impl_->pe_file_, next_base, impl_->reloc_dir_end_};
       if (impl_->relocation_block_->IsInvalid())
       {
         impl_.reset();
@@ -164,7 +168,7 @@ HADESMEM_DETAIL_NOEXCEPT:
 
   RelocationBlockIterator operator++(int)
   {
-    RelocationBlockIterator const iter(*this);
+    RelocationBlockIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -185,11 +189,13 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process,
-                  PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
+                  PeFile const& pe_file,
+                  RelocationBlock const& relocation_block,
+                  void const* reloc_dir_end) HADESMEM_DETAIL_NOEXCEPT
       : process_(&process),
         pe_file_(&pe_file),
-        relocation_block_(),
-        reloc_dir_end_(nullptr)
+        relocation_block_(relocation_block),
+        reloc_dir_end_(reloc_dir_end)
     {
     }
 
@@ -212,38 +218,46 @@ public:
   using const_iterator = RelocationBlockIterator<RelocationBlock const>;
 
   explicit RelocationBlockList(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file)
+    : process_{&process}, pe_file_{&pe_file}
   {
   }
 
+  explicit RelocationBlockList(Process&& process,
+                               PeFile const& pe_file) = delete;
+
+  explicit RelocationBlockList(Process const& process,
+                               PeFile&& pe_file) = delete;
+
+  explicit RelocationBlockList(Process&& process, PeFile&& pe_file) = delete;
+
   iterator begin()
   {
-    return iterator(*process_, *pe_file_);
+    return iterator{*process_, *pe_file_};
   }
 
   const_iterator begin() const
   {
-    return const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   const_iterator cbegin() const
   {
-    return const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
 private:

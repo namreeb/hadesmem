@@ -24,13 +24,13 @@ namespace hadesmem
 class Thread
 {
 public:
-  explicit Thread(DWORD id) : handle_(detail::OpenThreadAllAccess(id)), id_(id)
+  explicit Thread(DWORD id) : handle_{detail::OpenThreadAllAccess(id)}, id_{id}
   {
   }
 
   Thread(Thread const& other)
-    : handle_(detail::DuplicateHandle(other.handle_.GetHandle())),
-      id_(other.id_)
+    : handle_{detail::DuplicateHandle(other.handle_.GetHandle())},
+      id_{other.id_}
   {
   }
 
@@ -43,8 +43,8 @@ public:
   }
 
   Thread(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
-    : handle_(std::move(other.handle_)),
-      id_(other.id_)
+    : handle_{std::move(other.handle_)},
+      id_{other.id_}
   {
     other.id_ = 0;
   }

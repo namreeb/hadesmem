@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -50,15 +51,20 @@ class NtHeaders
 {
 public:
   explicit NtHeaders(Process const& process, PeFile const& pe_file)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(CalculateBase(*process_, *pe_file_)),
-      data_()
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{CalculateBase(*process_, *pe_file_)}
   {
     UpdateRead();
 
     EnsureValid();
   }
+
+  explicit NtHeaders(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit NtHeaders(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit NtHeaders(Process&& process, PeFile&& pe_file) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -93,7 +99,7 @@ public:
     if (!IsValid())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("NT headers signature invalid."));
+        Error{} << ErrorString{"NT headers signature invalid."});
     }
   }
 
@@ -299,24 +305,24 @@ public:
   {
     if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizesClamped())
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-        << ErrorString("Invalid data dir."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid data dir."});
     }
 
-    return data_.OptionalHeader.DataDirectory
-      [static_cast<std::uint32_t>(data_dir)].VirtualAddress;
+    return data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                data_dir)].VirtualAddress;
   }
 
   DWORD GetDataDirectorySize(PeDataDir data_dir) const
   {
     if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizesClamped())
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-        << ErrorString("Invalid data dir."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid data dir."});
     }
 
-    return data_.OptionalHeader.DataDirectory
-      [static_cast<std::uint32_t>(data_dir)].Size;
+    return data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                data_dir)].Size;
   }
 
   void SetSignature(DWORD signature)
@@ -518,8 +524,8 @@ public:
   {
     if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid data dir."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid data dir."});
     }
 
     data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(data_dir)]
@@ -530,8 +536,8 @@ public:
   {
     if (static_cast<DWORD>(data_dir) >= GetNumberOfRvaAndSizes())
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid data dir."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid data dir."});
     }
 
     data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(data_dir)]
@@ -541,15 +547,15 @@ public:
 private:
   PBYTE CalculateBase(Process const& process, PeFile const& pe_file) const
   {
-    DosHeader dos_header(process, pe_file);
+    DosHeader dos_header{process, pe_file};
     return static_cast<PBYTE>(dos_header.GetBase()) +
            dos_header.GetNewHeaderOffset();
   }
 
   Process const* process_;
   PeFile const* pe_file_;
-  PBYTE base_;
-  IMAGE_NT_HEADERS data_;
+  std::uint8_t* base_;
+  IMAGE_NT_HEADERS data_ = IMAGE_NT_HEADERS{};
 };
 
 inline bool operator==(NtHeaders const& lhs, NtHeaders const& rhs)

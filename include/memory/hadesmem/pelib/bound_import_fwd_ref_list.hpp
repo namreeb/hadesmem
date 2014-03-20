@@ -38,14 +38,13 @@ public:
   using iterator_category = typename BaseIteratorT::iterator_category;
 
   HADESMEM_DETAIL_CONSTEXPR
-  BoundImportForwarderRefIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  BoundImportForwarderRefIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
   explicit BoundImportForwarderRefIterator(Process const& process,
                                            PeFile const& pe_file,
                                            BoundImportDescriptor const& desc)
-    : impl_(std::make_shared<Impl>(process, pe_file, desc))
   {
     try
     {
@@ -55,19 +54,45 @@ public:
           static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(desc.GetStart());
         auto const base = reinterpret_cast<PIMAGE_BOUND_FORWARDER_REF>(
           static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(desc.GetBase()) + 1U);
-        impl_->bound_import_forwarder_ =
-          BoundImportForwarderRef(process, pe_file, start, base);
-      }
-      else
-      {
-        impl_.reset();
+        BoundImportForwarderRef const bound_import_forwarder{process, pe_file,
+                                                             start, base};
+        impl_ = std::make_shared<Impl>(
+          process, pe_file, desc, bound_import_forwarder);
       }
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit BoundImportForwarderRefIterator(Process&& process,
+                                           PeFile const& pe_file,
+                                           BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefIterator(Process const& process,
+                                           PeFile&& pe_file,
+                                           BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefIterator(Process const& process,
+                                           PeFile const& pe_file,
+                                           BoundImportDescriptor&& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefIterator(Process&& process,
+                                           PeFile&& pe_file,
+                                           BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefIterator(Process&& process,
+                                           PeFile const& pe_file,
+                                           BoundImportDescriptor&& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefIterator(
+    Process&& process, PeFile&& pe_file, BoundImportDescriptor&& desc) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -79,7 +104,7 @@ public:
 
   BoundImportForwarderRefIterator(BoundImportForwarderRefIterator&& other)
 HADESMEM_DETAIL_NOEXCEPT:
-  impl_(std::move(other.impl_))
+  impl_{std::move(other.impl_)}
   {
   }
 
@@ -123,8 +148,8 @@ HADESMEM_DETAIL_NOEXCEPT:
       auto const cur_base = reinterpret_cast<PIMAGE_BOUND_FORWARDER_REF>(
         impl_->bound_import_forwarder_->GetBase());
       auto const new_base = cur_base + 1;
-      impl_->bound_import_forwarder_ = BoundImportForwarderRef(
-        *impl_->process_, *impl_->pe_file_, start_base, new_base);
+      impl_->bound_import_forwarder_ = BoundImportForwarderRef{
+        *impl_->process_, *impl_->pe_file_, start_base, new_base};
     }
     catch (std::exception const& /*e*/)
     {
@@ -136,7 +161,7 @@ HADESMEM_DETAIL_NOEXCEPT:
 
   BoundImportForwarderRefIterator operator++(int)
   {
-    BoundImportForwarderRefIterator const iter(*this);
+    BoundImportForwarderRefIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -158,12 +183,12 @@ private:
   {
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
-                  BoundImportDescriptor const& desc) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        pe_file_(&pe_file),
-        bound_import_desc_(&desc),
-        bound_import_forwarder_(),
-        cur_fwd_ref_(0)
+                  BoundImportDescriptor const& desc,
+                  BoundImportForwarderRef const& forwarder)
+      HADESMEM_DETAIL_NOEXCEPT : process_{&process},
+                                 pe_file_{&pe_file},
+                                 bound_import_desc_{&desc},
+                                 bound_import_forwarder_{forwarder}
     {
     }
 
@@ -171,7 +196,7 @@ private:
     PeFile const* pe_file_;
     BoundImportDescriptor const* bound_import_desc_;
     hadesmem::detail::Optional<BoundImportForwarderRef> bound_import_forwarder_;
-    WORD cur_fwd_ref_;
+    WORD cur_fwd_ref_{};
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as
@@ -190,38 +215,65 @@ public:
   explicit BoundImportForwarderRefList(Process const& process,
                                        PeFile const& pe_file,
                                        BoundImportDescriptor const& desc)
-    : process_(&process), pe_file_(&pe_file), desc_(&desc)
+    : process_{&process}, pe_file_{&pe_file}, desc_{&desc}
   {
   }
 
+  explicit BoundImportForwarderRefList(Process&& process,
+                                       PeFile const& pe_file,
+                                       BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefList(Process const& process,
+                                       PeFile&& pe_file,
+                                       BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefList(Process const& process,
+                                       PeFile const& pe_file,
+                                       BoundImportDescriptor&& desc) = delete;
+
+  explicit BoundImportForwarderRefList(Process&& process,
+                                       PeFile&& pe_file,
+                                       BoundImportDescriptor const& desc) =
+    delete;
+
+  explicit BoundImportForwarderRefList(Process&& process,
+                                       PeFile const& pe_file,
+                                       BoundImportDescriptor&& desc) = delete;
+
+  explicit BoundImportForwarderRefList(Process&& process,
+                                       PeFile&& pe_file,
+                                       BoundImportDescriptor&& desc) = delete;
+
   iterator begin()
   {
-    return iterator(*process_, *pe_file_, *desc_);
+    return iterator{*process_, *pe_file_, *desc_};
   }
 
   const_iterator begin() const
   {
-    return const_iterator(*process_, *pe_file_, *desc_);
+    return const_iterator{*process_, *pe_file_, *desc_};
   }
 
   const_iterator cbegin() const
   {
-    return const_iterator(*process_, *pe_file_, *desc_);
+    return const_iterator{*process_, *pe_file_, *desc_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
 private:

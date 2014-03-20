@@ -37,28 +37,36 @@ public:
   using iterator_category = typename BaseIteratorT::iterator_category;
 
   HADESMEM_DETAIL_CONSTEXPR
-  BoundImportDescriptorIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  BoundImportDescriptorIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
   explicit BoundImportDescriptorIterator(Process const& process,
                                          PeFile const& pe_file)
-    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
-      impl_->bound_import_desc_ =
-        BoundImportDescriptor(process, pe_file, nullptr, nullptr);
-      if (IsTerminator())
+      BoundImportDescriptor const bound_import_desc{process, pe_file, nullptr,
+                                                    nullptr};
+      if (!IsTerminator(bound_import_desc))
       {
-        impl_.reset();
+        impl_ = std::make_shared<Impl>(process, pe_file, bound_import_desc);
       }
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit BoundImportDescriptorIterator(Process&& process,
+                                         PeFile const& pe_file) = delete;
+
+  explicit BoundImportDescriptorIterator(Process const& process,
+                                         PeFile&& pe_file) = delete;
+
+  explicit BoundImportDescriptorIterator(Process&& process,
+                                         PeFile&& pe_file) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -67,8 +75,9 @@ public:
   BoundImportDescriptorIterator&
     operator=(BoundImportDescriptorIterator const&) = default;
 
-  BoundImportDescriptorIterator(BoundImportDescriptorIterator&& other) HADESMEM_DETAIL_NOEXCEPT 
-    : impl_(std::move(other.impl_))
+  BoundImportDescriptorIterator(BoundImportDescriptorIterator&& other)
+HADESMEM_DETAIL_NOEXCEPT:
+  impl_(std::move(other.impl_))
   {
   }
 
@@ -103,14 +112,14 @@ public:
       auto const cur_base = static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
         impl_->bound_import_desc_->GetBase());
       auto const new_base = reinterpret_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
-        reinterpret_cast<PIMAGE_BOUND_FORWARDER_REF>(cur_base + 1) +
+        reinterpret_cast<IMAGE_BOUND_FORWARDER_REF*>(cur_base + 1) +
         impl_->bound_import_desc_->GetNumberOfModuleForwarderRefs());
       auto const start_base = static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(
         impl_->bound_import_desc_->GetStart());
-      impl_->bound_import_desc_ = BoundImportDescriptor(
-        *impl_->process_, *impl_->pe_file_, start_base, new_base);
+      impl_->bound_import_desc_ = BoundImportDescriptor{
+        *impl_->process_, *impl_->pe_file_, start_base, new_base};
 
-      if (IsTerminator())
+      if (IsTerminator(*impl_->bound_import_desc_))
       {
         impl_.reset();
         return *this;
@@ -126,7 +135,7 @@ public:
 
   BoundImportDescriptorIterator operator++(int)
   {
-    BoundImportDescriptorIterator const iter(*this);
+    BoundImportDescriptorIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -144,21 +153,22 @@ public:
   }
 
 private:
-  bool IsTerminator() const
+  bool IsTerminator(BoundImportDescriptor const& bound_import_desc) const
   {
     // Apparently all three fields are supposed to be zero, but it seems that
     // may not be the case when it comes to the actual loader implementation?
-    return !impl_->bound_import_desc_->GetTimeDateStamp() ||
-           !impl_->bound_import_desc_->GetOffsetModuleName();
+    return !bound_import_desc.GetTimeDateStamp() ||
+           !bound_import_desc.GetOffsetModuleName();
   }
 
   struct Impl
   {
     explicit Impl(Process const& process,
-                  PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        pe_file_(&pe_file),
-        bound_import_desc_()
+                  PeFile const& pe_file,
+                  BoundImportDescriptor const& bound_import_desc)
+      HADESMEM_DETAIL_NOEXCEPT : process_{&process},
+                                 pe_file_{&pe_file},
+                                 bound_import_desc_{bound_import_desc}
     {
     }
 
@@ -182,38 +192,47 @@ public:
 
   explicit BoundImportDescriptorList(Process const& process,
                                      PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file)
+    : process_{&process}, pe_file_{&pe_file}
   {
   }
 
+  explicit BoundImportDescriptorList(Process&& process,
+                                     PeFile const& pe_file) = delete;
+
+  explicit BoundImportDescriptorList(Process const& process,
+                                     PeFile&& pe_file) = delete;
+
+  explicit BoundImportDescriptorList(Process&& process,
+                                     PeFile&& pe_file) = delete;
+
   iterator begin()
   {
-    return iterator(*process_, *pe_file_);
+    return iterator{*process_, *pe_file_};
   }
 
   const_iterator begin() const
   {
-    return const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   const_iterator cbegin() const
   {
-    return const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return const_iterator();
+    return const_iterator{};
   }
 
 private:

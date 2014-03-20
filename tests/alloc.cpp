@@ -4,6 +4,7 @@
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/alloc.hpp>
 
+#include <cstdint>
 #include <sstream>
 #include <utility>
 
@@ -17,11 +18,12 @@
 
 void TestAlloc()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process{::GetCurrentProcessId()};
 
-  PVOID address = Alloc(process, 0x1000);
-  *static_cast<BYTE*>(address) = static_cast<BYTE>(0xFF);
-  BOOST_TEST_EQ(*static_cast<BYTE*>(address), static_cast<BYTE>(0xFF));
+  void* address = Alloc(process, 0x1000);
+  *static_cast<std::uint8_t*>(address) = static_cast<std::uint8_t>(0xFF);
+  BOOST_TEST_EQ(*static_cast<std::uint8_t*>(address),
+                static_cast<std::uint8_t>(0xFF));
   MEMORY_BASIC_INFORMATION mbi;
   ::ZeroMemory(&mbi, sizeof(mbi));
   BOOST_TEST(::VirtualQuery(address, &mbi, sizeof(mbi)));
@@ -37,13 +39,13 @@ void TestAlloc()
 
 void TestAllocator()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process{::GetCurrentProcessId()};
 
-  hadesmem::Allocator allocator_1(process, 0x1000);
+  hadesmem::Allocator allocator_1{process, 0x1000};
   BOOST_TEST(allocator_1.GetBase());
   BOOST_TEST_EQ(allocator_1.GetSize(), 0x1000UL);
 
-  hadesmem::Allocator allocator_2(std::move(allocator_1));
+  hadesmem::Allocator allocator_2{std::move(allocator_1)};
   BOOST_TEST(allocator_2.GetBase());
   BOOST_TEST_EQ(allocator_2.GetSize(), 0x1000UL);
 
@@ -52,8 +54,8 @@ void TestAllocator()
   BOOST_TEST_EQ(allocator_1.GetSize(), 0x1000UL);
   allocator_1.Free();
 
-  hadesmem::Allocator allocator_3(process, 0x1000);
-  hadesmem::Allocator allocator_4(process, 0x1000);
+  hadesmem::Allocator allocator_3{process, 0x1000};
+  hadesmem::Allocator allocator_4{process, 0x1000};
   BOOST_TEST_EQ(allocator_3, allocator_3);
   BOOST_TEST_NE(allocator_3, allocator_4);
   BOOST_TEST_NE(allocator_4, allocator_3);

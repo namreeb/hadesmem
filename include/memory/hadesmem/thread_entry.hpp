@@ -15,12 +15,12 @@ class ThreadEntry
 {
 public:
   HADESMEM_DETAIL_CONSTEXPR explicit ThreadEntry(THREADENTRY32 const& entry)
-    HADESMEM_DETAIL_NOEXCEPT : usage_(entry.cntUsage),
-                               thread_id_(entry.th32ThreadID),
-                               owner_process_id_(entry.th32OwnerProcessID),
-                               base_priority_(entry.tpBasePri),
-                               delta_priority_(entry.tpDeltaPri),
-                               flags_(entry.dwFlags)
+    HADESMEM_DETAIL_NOEXCEPT : usage_{entry.cntUsage},
+                               thread_id_{entry.th32ThreadID},
+                               owner_process_id_{entry.th32OwnerProcessID},
+                               base_priority_{entry.tpBasePri},
+                               delta_priority_{entry.tpDeltaPri},
+                               flags_{entry.dwFlags}
   {
   }
 

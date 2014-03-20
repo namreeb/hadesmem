@@ -33,8 +33,8 @@ namespace detail
 {
 
 inline void ReadUnchecked(Process const& process,
-                          LPVOID address,
-                          LPVOID data,
+                          void* address,
+                          void* data,
                           std::size_t len,
                           std::uint32_t /*flags*/ = ReadFlags::kNone)
 {
@@ -47,15 +47,15 @@ inline void ReadUnchecked(Process const& process,
       bytes_read != len)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("ReadProcessMemory failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"ReadProcessMemory failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 }
 
 inline void ReadImpl(Process const& process,
-                     LPVOID address,
-                     LPVOID data,
+                     void* address,
+                     void* data,
                      std::size_t len,
                      std::uint32_t flags = ReadFlags::kNone)
 {
@@ -66,9 +66,9 @@ inline void ReadImpl(Process const& process,
   {
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
 
-    LPVOID const address_end = static_cast<LPBYTE>(address) + len;
-    PVOID const region_next =
-      static_cast<PBYTE>(mbi.BaseAddress) + mbi.RegionSize;
+    void* const address_end = static_cast<std::uint8_t*>(address) + len;
+    void* const region_next =
+      static_cast<std::uint8_t*>(mbi.BaseAddress) + mbi.RegionSize;
 
     bool const should_zero_fill =
       (mbi.State == MEM_RESERVE && !!(flags & ReadFlags::kZeroFillReserved));
@@ -83,7 +83,7 @@ inline void ReadImpl(Process const& process,
       }
       else
       {
-        ProtectGuard protect_guard(process, mbi, ProtectGuardType::kRead);
+        ProtectGuard protect_guard{process, mbi, ProtectGuardType::kRead};
         ReadUnchecked(process, address, data, len, flags);
         protect_guard.Restore();
       }
@@ -92,8 +92,9 @@ inline void ReadImpl(Process const& process,
     }
     else
     {
-      std::size_t const len_new = reinterpret_cast<DWORD_PTR>(region_next) -
-                                  reinterpret_cast<DWORD_PTR>(address);
+      std::size_t const len_new =
+        reinterpret_cast<std::uintptr_t>(region_next) -
+        reinterpret_cast<std::uintptr_t>(address);
 
       if (should_zero_fill)
       {
@@ -103,13 +104,13 @@ inline void ReadImpl(Process const& process,
       }
       else
       {
-        ProtectGuard protect_guard(process, mbi, ProtectGuardType::kRead);
+        ProtectGuard protect_guard{process, mbi, ProtectGuardType::kRead};
         ReadUnchecked(process, address, data, len_new, flags);
         protect_guard.Restore();
       }
 
-      address = static_cast<LPBYTE>(address) + len_new;
-      data = static_cast<LPBYTE>(data) + len_new;
+      address = static_cast<std::uint8_t*>(address) + len_new;
+      data = static_cast<std::uint8_t*>(data) + len_new;
       len -= len_new;
     }
   }
@@ -117,7 +118,7 @@ inline void ReadImpl(Process const& process,
 
 template <typename T>
 T ReadImpl(Process const& process,
-           PVOID address,
+           void* address,
            std::uint32_t flags = ReadFlags::kNone)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);

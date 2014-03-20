@@ -27,7 +27,7 @@ namespace detail
 // uses) depends on the module enumeration APIs.
 inline void ForceLdrInitializeThunk(DWORD proc_id)
 {
-  Process const process(proc_id);
+  Process const process{proc_id};
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   // RET
@@ -41,7 +41,7 @@ inline void ForceLdrInitializeThunk(DWORD proc_id)
 
   HADESMEM_DETAIL_TRACE_A("Allocating memory for remote stub.");
 
-  Allocator const stub_remote(process, sizeof(return_instr));
+  Allocator const stub_remote{process, sizeof(return_instr)};
 
   HADESMEM_DETAIL_TRACE_A("Writing remote stub.");
 

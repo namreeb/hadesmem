@@ -28,16 +28,30 @@ public:
                   PeFile const& pe_file,
                   PIMAGE_BASE_RELOCATION base,
                   void const* reloc_dir_end)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(base)),
-      reloc_dir_end_(reloc_dir_end),
-      data_()
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{reinterpret_cast<std::uint8_t*>(base)},
+      reloc_dir_end_{reloc_dir_end}
   {
     UpdateRead();
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  RelocationBlock(Process&& process,
+                  PeFile const& pe_file,
+                  PIMAGE_BASE_RELOCATION base,
+                  void const* reloc_dir_end) = delete;
+
+  RelocationBlock(Process const& process,
+                  PeFile&& pe_file,
+                  PIMAGE_BASE_RELOCATION base,
+                  void const* reloc_dir_end) = delete;
+
+  RelocationBlock(Process&& process,
+                  PeFile&& pe_file,
+                  PIMAGE_BASE_RELOCATION base,
+                  void const* reloc_dir_end) = delete;
+
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -104,7 +118,7 @@ private:
   PeFile const* pe_file_;
   PBYTE base_;
   void const* reloc_dir_end_;
-  IMAGE_BASE_RELOCATION data_;
+  IMAGE_BASE_RELOCATION data_ = IMAGE_BASE_RELOCATION{};
 };
 
 inline bool operator==(RelocationBlock const& lhs, RelocationBlock const& rhs)

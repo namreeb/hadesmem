@@ -6,7 +6,9 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/process.hpp>
 
+#include "d3d11.hpp"
 #include "file.hpp"
+#include "module.hpp"
 #include "process.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
@@ -14,7 +16,7 @@
 
 hadesmem::Process& GetThisProcess()
 {
-  static hadesmem::Process process(::GetCurrentProcessId());
+  static hadesmem::Process process{::GetCurrentProcessId()};
   return process;
 }
 
@@ -24,6 +26,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
   {
     DetourNtQuerySystemInformation();
     DetourNtQueryDirectoryFile();
+    DetourNtMapViewOfSection();
+    DetourD3D11();
   }
   catch (...)
   {
@@ -41,6 +45,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
   {
     UndetourNtQuerySystemInformation();
     UndetourNtQueryDirectoryFile();
+    UndetourNtMapViewOfSection();
+    UndetourD3D11();
   }
   catch (...)
   {

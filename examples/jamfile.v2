@@ -12,16 +12,16 @@ project
     <warnings-as-errors>on
     
     <toolset>msvc:<cxxflags>"/analyze /sdl"
-    <toolset>gcc:<cxxflags>"-ansi -Wpedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++ -Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual -Winvalid-pch -Wno-multichar"
+    <toolset>gcc:<cxxflags>"-ansi -Wpedantic -Wextra -Weffc++ -Wshadow -Wconversion -Winit-self -Wmissing-include-dirs -Wstrict-aliasing -Wstrict-overflow=5 -Wno-effc++ -Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual -Winvalid-pch -Wno-multichar -Wno-missing-field-initializers -Wno-unused-but-set-parameter"
     <toolset>clang:<cxxflags>"-Weverything -Wstrict-aliasing -Wstrict-overflow=5 -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-disabled-macro-expansion"
     
     <library>/memory//memory
   ;
   
-lib gdi32
+lib d3d11
   :
   :
-    <name>gdi32
+    <name>d3d11
   ;
   
 exe dump
@@ -48,4 +48,5 @@ lib injecttest
 lib cerberus
   :
     [ glob cerberus/*.cpp ]
+    d3d11
   ;

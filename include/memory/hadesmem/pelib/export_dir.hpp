@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -28,9 +29,9 @@ class ExportDir
 {
 public:
   explicit ExportDir(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file), base_(nullptr), data_()
+    : process_{&process}, pe_file_{&pe_file}
   {
-    NtHeaders nt_headers(process, pe_file);
+    NtHeaders nt_headers{process, pe_file};
     DWORD const export_dir_rva =
       nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::Export);
     // Windows will load images which don't specify a size for the export
@@ -38,18 +39,25 @@ public:
     if (!export_dir_rva)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Export directory is invalid."));
+        Error{} << ErrorString{"Export directory is invalid."});
     }
 
-    base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, export_dir_rva));
+    base_ =
+      static_cast<std::uint8_t*>(RvaToVa(process, pe_file, export_dir_rva));
     if (!base_)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Export directory is invalid."));
+        Error{} << ErrorString{"Export directory is invalid."});
     }
 
     UpdateRead();
   }
+
+  explicit ExportDir(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit ExportDir(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit ExportDir(Process&& process, PeFile&& pe_file) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -102,8 +110,8 @@ public:
     auto const name_va = RvaToVa(*process_, *pe_file_, name_rva);
     if (!name_va)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-        << ErrorString("Name VA is invalid."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Name VA is invalid."});
     }
 
     return detail::CheckedReadString<char>(*process_, *pe_file_, name_va);
@@ -166,7 +174,7 @@ public:
     if (!name_rva)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Export dir has no name. Cannot overwrite."));
+        Error{} << ErrorString{"Export dir has no name. Cannot overwrite."});
     }
 
     std::string const current_name =
@@ -175,7 +183,7 @@ public:
     if (name.size() > current_name.size())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Cannot overwrite name with longer string."));
+        Error{} << ErrorString{"Cannot overwrite name with longer string."});
     }
 
     WriteString(*process_, RvaToVa(*process_, *pe_file_, name_rva), name);
@@ -212,10 +220,10 @@ public:
   }
 
 private:
-  Process const* process_;
-  PeFile const* pe_file_;
-  PBYTE base_;
-  IMAGE_EXPORT_DIRECTORY data_;
+  Process const* process_{};
+  PeFile const* pe_file_{};
+  PBYTE base_{};
+  IMAGE_EXPORT_DIRECTORY data_ = IMAGE_EXPORT_DIRECTORY{};
 };
 
 inline bool operator==(ExportDir const& lhs, ExportDir const& rhs)

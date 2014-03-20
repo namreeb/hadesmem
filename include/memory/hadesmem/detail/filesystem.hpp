@@ -58,8 +58,8 @@ inline std::wstring CombinePath(std::wstring const& base,
                                 std::wstring const& append)
 {
   // Use newer and better PathCchCombineEx if it's available.
-  detail::SmartModuleHandle const path_mod(
-    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll"));
+  detail::SmartModuleHandle const path_mod{
+    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
   if (path_mod.IsValid())
   {
     using PathCchCombineExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
@@ -80,8 +80,8 @@ inline std::wstring CombinePath(std::wstring const& base,
       if (!SUCCEEDED(hr))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("PathCchCombineEx failed.")
-                  << ErrorCodeWinHr(hr));
+          Error{} << ErrorString{"PathCchCombineEx failed."}
+                  << ErrorCodeWinHr{hr});
       }
 
       return buffer.data();
@@ -93,9 +93,9 @@ inline std::wstring CombinePath(std::wstring const& base,
   if (!::PathCombineW(buffer.data(), base.c_str(), append.c_str()))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("PathCombineW failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"PathCombineW failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return buffer.data();
@@ -114,8 +114,8 @@ inline SmartFileHandle OpenFileForMetadata(std::wstring const& path)
   if (file == INVALID_HANDLE_VALUE)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("CreateFile failed.")
-                                            << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"CreateFile failed."}
+                                            << ErrorCodeWinLast{last_error});
   }
 
   return SmartFileHandle(file);
@@ -129,8 +129,8 @@ inline BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE file)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("GetFileInformationByHandle failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"GetFileInformationByHandle failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   return file_info;
@@ -139,8 +139,8 @@ inline BY_HANDLE_FILE_INFORMATION GetFileInformationByHandle(HANDLE file)
 inline bool ArePathsEquivalent(std::wstring const& left,
                                std::wstring const& right)
 {
-  SmartFileHandle const left_file(OpenFileForMetadata(left));
-  SmartFileHandle const right_file(OpenFileForMetadata(right));
+  SmartFileHandle const left_file{OpenFileForMetadata(left)};
+  SmartFileHandle const right_file{OpenFileForMetadata(right)};
   BY_HANDLE_FILE_INFORMATION left_file_info =
     GetFileInformationByHandle(left_file.GetHandle());
   BY_HANDLE_FILE_INFORMATION right_file_info =
@@ -163,9 +163,9 @@ inline std::wstring GetRootPath(std::wstring const& path)
   if (drive_num == -1)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("PathGetDriveNumber failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"PathGetDriveNumber failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   std::vector<wchar_t> drive_path(4);
@@ -174,9 +174,9 @@ inline std::wstring GetRootPath(std::wstring const& path)
       drive_path[2] == L'\0')
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("PathBuildRoot failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"PathBuildRoot failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return drive_path.data();
@@ -188,9 +188,9 @@ inline DWORD GetFileAttributesWrapper(std::wstring const& path)
   if (attributes == INVALID_FILE_ATTRIBUTES)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("GetFileAttributes failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetFileAttributes failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return attributes;
@@ -221,8 +221,8 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("GetFullPathNameW failed.")
-              << ErrorCodeWinLast(last_error) << ErrorCodeWinOther(len));
+      Error{} << ErrorString{"GetFullPathNameW failed."}
+              << ErrorCodeWinLast{last_error} << ErrorCodeWinOther{len});
   }
 
   return full_path.data();
@@ -233,8 +233,8 @@ inline std::wstring MakeExtendedPath(std::wstring path)
   // Use newer and better PathCchCanonicalizeEx if it's available, then fall
   // through to the custom implementation to ensure we always get an extended
   // path back out, rather than just when it's longer than MAX_PATH.
-  detail::SmartModuleHandle const path_mod(
-    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll"));
+  detail::SmartModuleHandle const path_mod{
+    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
   if (path_mod.IsValid())
   {
     using PathCchCanonicalizeExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
@@ -253,8 +253,8 @@ inline std::wstring MakeExtendedPath(std::wstring path)
       if (!SUCCEEDED(hr))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("PathCchCanonicalizeEx failed.")
-                  << ErrorCodeWinHr(hr));
+          Error{} << ErrorString{"PathCchCanonicalizeEx failed."}
+                  << ErrorCodeWinHr{hr});
       }
 
       path = buffer.data();

@@ -30,14 +30,13 @@ namespace hadesmem
 class Module
 {
 public:
-  explicit Module(Process const& process, HMODULE handle)
-    : process_(&process), handle_(nullptr), size_(0), name_(), path_()
+  explicit Module(Process const& process, HMODULE handle) : process_{&process}
   {
     Initialize(handle);
   }
 
   explicit Module(Process const& process, std::wstring const& path)
-    : process_(&process), handle_(nullptr), size_(0), name_(), path_()
+    : process_{&process}
   {
     Initialize(path);
   }
@@ -49,11 +48,11 @@ public:
   Module& operator=(Module const&) = default;
 
   Module(Module&& other)
-    : process_(other.process_),
-      handle_(other.handle_),
-      size_(other.size_),
-      name_(std::move(other.name_)),
-      path_(std::move(other.path_))
+    : process_{other.process_},
+      handle_{other.handle_},
+      size_{other.size_},
+      name_{std::move(other.name_)},
+      path_{std::move(other.path_)}
   {
   }
 
@@ -93,9 +92,9 @@ public:
 private:
   template <typename ModuleT> friend class ModuleIterator;
 
-  using EntryCallback = std::function<bool(MODULEENTRY32 const&)>;
+  using EntryCallback = std::function<bool(MODULEENTRY32W const&)>;
 
-  explicit Module(Process const& process, MODULEENTRY32 const& entry)
+  explicit Module(Process const& process, MODULEENTRY32W const& entry)
     : process_(&process), handle_(nullptr), size_(0), name_(), path_()
   {
     Initialize(entry);
@@ -103,7 +102,7 @@ private:
 
   void Initialize(HMODULE handle)
   {
-    auto const handle_check = [&](MODULEENTRY32 const & entry)->bool
+    auto const handle_check = [&](MODULEENTRY32W const& entry)->bool
     {
       if (entry.hModule == handle || !handle)
       {
@@ -122,7 +121,7 @@ private:
 
     std::wstring const path_upper = detail::ToUpperOrdinal(path);
 
-    auto const path_check = [&](MODULEENTRY32 const & entry)->bool
+    auto const path_check = [&](MODULEENTRY32W const& entry)->bool
     {
       if (is_path)
       {
@@ -145,7 +144,7 @@ private:
     InitializeIf(path_check);
   }
 
-  void Initialize(MODULEENTRY32 const& entry)
+  void Initialize(MODULEENTRY32W const& entry)
   {
     handle_ = entry.hModule;
     size_ = entry.modBaseSize;
@@ -155,10 +154,10 @@ private:
 
   void InitializeIf(EntryCallback const& check_func)
   {
-    detail::SmartSnapHandle const snap(
-      detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, process_->GetId()));
+    detail::SmartSnapHandle const snap{
+      detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, process_->GetId())};
 
-    hadesmem::detail::Optional<MODULEENTRY32> entry;
+    hadesmem::detail::Optional<MODULEENTRY32W> entry;
     for (entry = detail::Module32First(snap.GetHandle()); entry;
          entry = detail::Module32Next(snap.GetHandle()))
     {
@@ -169,13 +168,13 @@ private:
       }
     }
 
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("Could not find module."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Could not find module."});
   }
 
   Process const* process_;
-  HMODULE handle_;
-  DWORD size_;
+  HMODULE handle_{nullptr};
+  DWORD size_{0UL};
   std::wstring name_;
   std::wstring path_;
 };

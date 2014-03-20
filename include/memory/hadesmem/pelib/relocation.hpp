@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <ostream>
 #include <utility>
@@ -24,51 +25,64 @@ namespace hadesmem
 class Relocation
 {
 public:
-  Relocation(Process const& process, PeFile const& pe_file, PWORD base)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(base)),
-      type_(0),
-      offset_(0)
+  explicit Relocation(Process const& process,
+                      PeFile const& pe_file,
+                      std::uint16_t* base)
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{reinterpret_cast<std::uint8_t*>(base)}
   {
     UpdateRead();
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  explicit Relocation(Process&& process,
+                      PeFile const& pe_file,
+                      std::uint16_t* base) = delete;
+
+  explicit Relocation(Process const& process,
+                      PeFile&& pe_file,
+                      std::uint16_t* base) = delete;
+
+  explicit Relocation(Process&& process,
+                      PeFile&& pe_file,
+                      std::uint16_t* base) = delete;
+
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
   void UpdateRead()
   {
-    auto const data_tmp = Read<WORD>(*process_, base_);
-    type_ = static_cast<BYTE>(data_tmp >> 12);
+    auto const data_tmp = Read<std::uint16_t>(*process_, base_);
+    type_ = static_cast<std::uint8_t>(data_tmp >> 12);
     offset_ = data_tmp & 0x0FFF;
   }
 
   void UpdateWrite()
   {
-    WORD const data_tmp = static_cast<WORD>(static_cast<DWORD>(offset_) |
-                                            (static_cast<DWORD>(type_) << 12));
+    auto const data_tmp =
+      static_cast<std::uint16_t>(static_cast<std::uint32_t>(offset_) |
+                                 (static_cast<std::uint32_t>(type_) << 12));
     Write(*process_, base_, data_tmp);
   }
 
-  BYTE GetType() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint8_t GetType() const HADESMEM_DETAIL_NOEXCEPT
   {
     return type_;
   }
 
-  void SetType(BYTE type) HADESMEM_DETAIL_NOEXCEPT
+  void SetType(std::uint8_t type) HADESMEM_DETAIL_NOEXCEPT
   {
     type_ = type;
   }
 
-  WORD GetOffset() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint16_t GetOffset() const HADESMEM_DETAIL_NOEXCEPT
   {
     return offset_;
   }
 
-  void SetOffset(WORD offset) HADESMEM_DETAIL_NOEXCEPT
+  void SetOffset(std::uint16_t offset) HADESMEM_DETAIL_NOEXCEPT
   {
     offset_ = offset;
   }
@@ -76,9 +90,9 @@ public:
 private:
   Process const* process_;
   PeFile const* pe_file_;
-  PBYTE base_;
-  BYTE type_;
-  WORD offset_;
+  std::uint8_t* base_;
+  std::uint8_t type_{};
+  std::uint16_t offset_{};
 };
 
 inline bool operator==(Relocation const& lhs, Relocation const& rhs)

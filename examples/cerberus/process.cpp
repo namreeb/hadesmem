@@ -42,7 +42,7 @@ std::atomic<std::uint32_t>& GetNtQuerySystemInformationRefCount()
   return ref_count;
 }
 
-bool HasNameImpl(PVOID pid, UNICODE_STRING const& path) HADESMEM_DETAIL_NOEXCEPT
+bool HasNameImpl(void* pid, UNICODE_STRING const& path) HADESMEM_DETAIL_NOEXCEPT
 {
   // Check whether buffer is valid or it's the first process in the list
   // (which is always System Idle Process).
@@ -50,7 +50,7 @@ bool HasNameImpl(PVOID pid, UNICODE_STRING const& path) HADESMEM_DETAIL_NOEXCEPT
 }
 
 std::wstring GetNameImpl(winternl::SYSTEM_INFORMATION_CLASS info_class,
-                         PVOID pid,
+                         void* pid,
                          UNICODE_STRING const& path)
 {
   if (pid == 0)
@@ -86,9 +86,7 @@ public:
     void* buffer_end) HADESMEM_DETAIL_NOEXCEPT
     : buffer_(GetRealBuffer(info_class, buffer)),
       buffer_end_(buffer_end),
-      prev_(nullptr),
-      info_class_(info_class),
-      unlinked_(false)
+      info_class_(info_class)
   {
     HADESMEM_DETAIL_ASSERT(buffer_);
     HADESMEM_DETAIL_ASSERT(buffer_end > buffer_);
@@ -196,9 +194,9 @@ private:
 
   winternl::SYSTEM_PROCESS_INFORMATION* buffer_;
   void* buffer_end_;
-  winternl::SYSTEM_PROCESS_INFORMATION* prev_;
+  winternl::SYSTEM_PROCESS_INFORMATION* prev_{};
   winternl::SYSTEM_INFORMATION_CLASS info_class_;
-  bool unlinked_;
+  bool unlinked_{};
 };
 
 extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
@@ -207,14 +205,15 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
   ULONG system_information_length,
   PULONG return_length) HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count(GetNtQuerySystemInformationRefCount());
+  DetourRefCounter ref_count{GetNtQuerySystemInformationRefCount()};
 
   hadesmem::detail::LastErrorPreserver last_error;
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%lu] [%p].",
-                                 system_information_class,
-                                 system_information,
-                                 system_information_length,
-                                 return_length);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "NtQuerySystemInformationDetour: Args: [%d] [%p] [%lu] [%p].",
+    system_information_class,
+    system_information,
+    system_information_length,
+    return_length);
   auto& detour = GetNtQuerySystemInformationDetour();
   auto const nt_query_system_information =
     detour->GetTrampoline<decltype(&NtQuerySystemInformationDetour)>();
@@ -224,7 +223,8 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
                                                system_information_length,
                                                return_length);
   last_error.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("NtQuerySystemInformationDetour: Ret: [%ld].",
+                                 ret);
 
   if (system_information_class != winternl::SystemProcessInformation &&
       system_information_class != winternl::SystemExtendedProcessInformation &&
@@ -232,13 +232,15 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       system_information_class != winternl::SystemFullProcessInformation &&
       system_information_class != winternl::SystemProcessIdInformation)
   {
-    HADESMEM_DETAIL_TRACE_A("Unhandled information class.");
+    HADESMEM_DETAIL_TRACE_A(
+      "NtQuerySystemInformationDetour: Unhandled information class.");
     return ret;
   }
 
   if (!NT_SUCCESS(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
+    HADESMEM_DETAIL_TRACE_A(
+      "NtQuerySystemInformationDetour: Trampoline returned failure.");
     return ret;
   }
 
@@ -253,17 +255,20 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       {
         auto const process_name = GetNameImpl(
           system_information_class, pid_info->ProcessId, pid_info->ImageName);
-        HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
+        HADESMEM_DETAIL_TRACE_FORMAT_W(
+          L"NtQuerySystemInformationDetour: Name: [%s].", process_name.c_str());
         if (process_name == L"hades.exe")
         {
-          HADESMEM_DETAIL_TRACE_A("Returning failure.");
+          HADESMEM_DETAIL_TRACE_A(
+            "NtQuerySystemInformationDetour: Returning failure.");
           return STATUS_INVALID_PARAMETER;
         }
       }
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("Enumerating processes.");
+      HADESMEM_DETAIL_TRACE_A(
+        "NtQuerySystemInformationDetour: Enumerating processes.");
       for (SystemProcessInformationEnum process_info{
              system_information_class, system_information,
              static_cast<std::uint8_t*>(system_information) +
@@ -274,16 +279,20 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
         if (process_info.HasName())
         {
           auto const process_name = process_info.GetName();
-          HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
+          HADESMEM_DETAIL_TRACE_FORMAT_W(
+            L"NtQuerySystemInformationDetour: Name: [%s].",
+            process_name.c_str());
           if (process_name == L"hades.exe")
           {
-            HADESMEM_DETAIL_TRACE_A("Unlinking process.");
+            HADESMEM_DETAIL_TRACE_A(
+              "NtQuerySystemInformationDetour: Unlinking process.");
             process_info.Unlink();
           }
         }
         else
         {
-          HADESMEM_DETAIL_TRACE_A("WARNING! Invalid name.");
+          HADESMEM_DETAIL_TRACE_A(
+            "NtQuerySystemInformationDetour: WARNING! Invalid name.");
         }
       }
     }
@@ -301,7 +310,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
 
 void DetourNtQuerySystemInformation()
 {
-  hadesmem::Module const ntdll(GetThisProcess(), L"ntdll.dll");
+  hadesmem::Module const ntdll{GetThisProcess(), L"ntdll.dll"};
   auto const nt_query_system_information = hadesmem::FindProcedure(
     GetThisProcess(), ntdll, "NtQuerySystemInformation");
   auto const nt_query_system_information_ptr =
@@ -309,23 +318,28 @@ void DetourNtQuerySystemInformation()
   auto const nt_query_system_information_detour =
     hadesmem::detail::UnionCast<void*>(&NtQuerySystemInformationDetour);
   auto& detour = GetNtQuerySystemInformationDetour();
-  detour.reset(new hadesmem::PatchDetour(GetThisProcess(),
-                                         nt_query_system_information_ptr,
-                                         nt_query_system_information_detour));
+  detour =
+    std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
+                                            nt_query_system_information_ptr,
+                                            nt_query_system_information_detour);
   detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("NtQuerySystemInformation detoured.");
+  HADESMEM_DETAIL_TRACE_A(
+    "DetourNtQuerySystemInformation: NtQuerySystemInformation detoured.");
 }
 
 void UndetourNtQuerySystemInformation()
 {
   auto& detour = GetNtQuerySystemInformationDetour();
   detour->Remove();
-  HADESMEM_DETAIL_TRACE_A("NtQuerySystemInformation undetoured.");
+  HADESMEM_DETAIL_TRACE_A(
+    "UndetourNtQuerySystemInformation: NtQuerySystemInformation undetoured.");
   detour = nullptr;
 
   auto& ref_count = GetNtQuerySystemInformationRefCount();
   while (ref_count.load())
   {
+    HADESMEM_DETAIL_TRACE_A("UndetourNtQuerySystemInformation: Spinning on ref count.");
   }
-  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile free of references.");
+  HADESMEM_DETAIL_TRACE_A("UndetourNtQuerySystemInformation: "
+                          "NtQueryDirectoryFile free of references.");
 }

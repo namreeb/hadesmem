@@ -34,27 +34,19 @@ public:
   explicit Export(Process const& process,
                   PeFile const& pe_file,
                   WORD procedure_number)
-    : process_(&process),
-      pe_file_(&pe_file),
-      rva_(0),
-      va_(nullptr),
-      name_(),
-      forwarder_(),
-      forwarder_split_(),
-      procedure_number_(procedure_number),
-      ordinal_number_(0),
-      by_name_(false),
-      forwarded_(false)
+    : process_{&process},
+      pe_file_{&pe_file},
+      procedure_number_{procedure_number}
   {
-    ExportDir const export_dir(process, pe_file);
+    ExportDir const export_dir{process, pe_file};
 
     auto const ordinal_base = static_cast<WORD>(export_dir.GetOrdinalBase());
     HADESMEM_DETAIL_ASSERT(procedure_number_ >= ordinal_base);
     ordinal_number_ = static_cast<WORD>(procedure_number_ - ordinal_base);
     if (ordinal_number_ >= export_dir.GetNumberOfFunctions())
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Ordinal out of range."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Ordinal out of range."});
     }
 
     if (DWORD const num_names = export_dir.GetNumberOfNames())
@@ -88,12 +80,12 @@ public:
     if (!ptr_functions)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("AddressOfFunctions invalid."));
+        Error{} << ErrorString{"AddressOfFunctions invalid."});
     }
     DWORD const func_rva =
       Read<DWORD>(process, ptr_functions + ordinal_number_);
 
-    NtHeaders const nt_headers(process, pe_file);
+    NtHeaders const nt_headers{process, pe_file};
 
     DWORD const export_dir_start =
       nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::Export);
@@ -117,7 +109,7 @@ public:
       else
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Invalid forwarder string format."));
+          Error{} << ErrorString{"Invalid forwarder string format."});
       }
     }
     else
@@ -127,6 +119,18 @@ public:
     }
   }
 
+  explicit Export(Process&& process,
+                  PeFile const& pe_file,
+                  WORD procedure_number) = delete;
+
+  explicit Export(Process const& process,
+                  PeFile&& pe_file,
+                  WORD procedure_number) = delete;
+
+  explicit Export(Process&& process,
+                  PeFile&& pe_file,
+                  WORD procedure_number) = delete;
+
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   Export(Export const&) = default;
@@ -134,17 +138,17 @@ public:
   Export& operator=(Export const&) = default;
 
   Export(Export&& other)
-    : process_(other.process_),
-      pe_file_(other.pe_file_),
-      rva_(other.rva_),
-      va_(other.va_),
-      name_(std::move(other.name_)),
-      forwarder_(std::move(other.forwarder_)),
-      forwarder_split_(std::move(other.forwarder_split_)),
-      procedure_number_(other.procedure_number_),
-      ordinal_number_(other.ordinal_number_),
-      by_name_(other.by_name_),
-      forwarded_(other.forwarded_)
+    : process_{other.process_},
+      pe_file_{other.pe_file_},
+      rva_{other.rva_},
+      va_{other.va_},
+      name_{std::move(other.name_)},
+      forwarder_{std::move(other.forwarder_)},
+      forwarder_split_{std::move(other.forwarder_split_)},
+      procedure_number_{other.procedure_number_},
+      ordinal_number_{other.ordinal_number_},
+      by_name_{other.by_name_},
+      forwarded_{other.forwarded_}
   {
   }
 
@@ -232,33 +236,33 @@ public:
     if (!IsForwardedByOrdinal())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Function is not exported by ordinal."));
+        Error{} << ErrorString{"Function is not exported by ordinal."});
     }
 
     try
     {
-      std::string const forwarder_function(GetForwarderFunction());
+      std::string const forwarder_function{GetForwarderFunction()};
       return detail::StrToNum<WORD>(forwarder_function.substr(1));
     }
     catch (std::exception const& /*e*/)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Invalid forwarder ordinal detected."));
+        Error{} << ErrorString{"Invalid forwarder ordinal detected."});
     }
   }
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
-  DWORD rva_;
-  PVOID va_;
+  DWORD rva_{};
+  void* va_{};
   std::string name_;
   std::string forwarder_;
   std::pair<std::string, std::string> forwarder_split_;
-  WORD procedure_number_;
-  WORD ordinal_number_;
-  bool by_name_;
-  bool forwarded_;
+  WORD procedure_number_{};
+  WORD ordinal_number_{};
+  bool by_name_{};
+  bool forwarded_{};
 };
 
 inline bool operator==(Export const& lhs, Export const& rhs)

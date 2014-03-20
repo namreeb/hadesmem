@@ -34,9 +34,9 @@ inline FARPROC GetProcAddressInternalFromPred(Process const& process,
 {
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(FARPROC) == sizeof(void*));
 
-  PeFile const pe_file(process, module, PeFileType::Image, 0);
+  PeFile const pe_file{process, module, PeFileType::Image, 0};
 
-  ExportList const exports(process, pe_file);
+  ExportList const exports{process, pe_file};
   auto const iter = std::find_if(std::begin(exports), std::end(exports), pred);
   if (iter != std::end(exports))
   {
@@ -67,9 +67,9 @@ inline FARPROC GetProcAddressFromExport(Process const& process, Export const& e)
 {
   if (e.IsForwarded())
   {
-    std::string const forwarder_module_name(e.GetForwarderModule());
-    Module const forwarder_module(process,
-                                  MultiByteToWideChar(forwarder_module_name));
+    std::string const forwarder_module_name{e.GetForwarderModule()};
+    Module const forwarder_module{process,
+                                  MultiByteToWideChar(forwarder_module_name)};
     if (e.IsForwardedByOrdinal())
     {
       return GetProcAddressInternal(

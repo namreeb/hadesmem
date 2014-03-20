@@ -32,13 +32,13 @@ inline void WriteUnchecked(Process const& process,
 
   SIZE_T bytes_written = 0;
   if (!::WriteProcessMemory(
-         process.GetHandle(), address, data, len, &bytes_written) ||
+        process.GetHandle(), address, data, len, &bytes_written) ||
       bytes_written != len)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("WriteProcessMemory failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"WriteProcessMemory failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 }
 
@@ -53,13 +53,13 @@ inline void WriteImpl(Process const& process,
 
   for (;;)
   {
-    ProtectGuard protect_guard(process, address, ProtectGuardType::kWrite);
+    ProtectGuard protect_guard{process, address, ProtectGuardType::kWrite};
 
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
-    PVOID const region_next =
-      static_cast<PBYTE>(mbi.BaseAddress) + mbi.RegionSize;
+    void* const region_next =
+      static_cast<std::uint8_t*>(mbi.BaseAddress) + mbi.RegionSize;
 
-    LPVOID const address_end = static_cast<LPBYTE>(address) + len;
+    void* const address_end = static_cast<std::uint8_t*>(address) + len;
     if (address_end <= region_next)
     {
       WriteUnchecked(process, address, data, len);
@@ -70,15 +70,16 @@ inline void WriteImpl(Process const& process,
     }
     else
     {
-      std::size_t const len_new = reinterpret_cast<DWORD_PTR>(region_next) -
-                                  reinterpret_cast<DWORD_PTR>(address);
+      std::size_t const len_new =
+        reinterpret_cast<std::uintptr_t>(region_next) -
+        reinterpret_cast<std::uintptr_t>(address);
 
       WriteUnchecked(process, address, data, len_new);
 
       protect_guard.Restore();
 
-      address = static_cast<LPBYTE>(address) + len_new;
-      data = static_cast<LPCBYTE>(data) + len_new;
+      address = static_cast<std::uint8_t*>(address) + len_new;
+      data = static_cast<std::uint8_t const*>(data) + len_new;
       len -= len_new;
     }
   }

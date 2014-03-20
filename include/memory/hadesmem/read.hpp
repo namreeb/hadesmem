@@ -93,8 +93,8 @@ void ReadStringEx(Process const& process,
 
   for (;;)
   {
-    detail::ProtectGuard protect_guard(
-      process, address, detail::ProtectGuardType::kRead);
+    detail::ProtectGuard protect_guard{process, address,
+                                       detail::ProtectGuardType::kRead};
 
     MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, address);
     PVOID const region_next_real =

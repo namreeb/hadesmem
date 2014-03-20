@@ -35,12 +35,12 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ModuleIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  HADESMEM_DETAIL_CONSTEXPR ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
   explicit ModuleIterator(Process const& process)
-    : impl_(std::make_shared<Impl>())
+    : impl_{std::make_shared<Impl>()}
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
@@ -67,8 +67,10 @@ public:
       return;
     }
 
-    impl_->module_ = Module(*impl_->process_, *entry);
+    impl_->module_ = Module{*impl_->process_, *entry};
   }
+
+  explicit ModuleIterator(Process&& process) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -77,7 +79,7 @@ public:
   ModuleIterator& operator=(ModuleIterator const&) = default;
 
   ModuleIterator(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -114,14 +116,14 @@ public:
       return *this;
     }
 
-    impl_->module_ = Module(*impl_->process_, *entry);
+    impl_->module_ = Module{*impl_->process_, *entry};
 
     return *this;
   }
 
   ModuleIterator operator++(int)
   {
-    ModuleIterator const iter(*this);
+    ModuleIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -140,13 +142,13 @@ private:
   struct Impl
   {
     Process const* process_{nullptr};
-    detail::SmartSnapHandle snap_;
-    hadesmem::detail::Optional<Module> module_;
+    detail::SmartSnapHandle snap_{};
+    hadesmem::detail::Optional<Module> module_{};
   };
 
   // Using a shared_ptr to provide shallow copy semantics, as
   // required by InputIterator.
-  std::shared_ptr<Impl> impl_;
+  std::shared_ptr<Impl> impl_{};
 };
 
 class ModuleList
@@ -157,9 +159,12 @@ public:
   using const_iterator = ModuleIterator<Module const>;
 
   HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process const& process)
-    HADESMEM_DETAIL_NOEXCEPT : process_(&process)
+    HADESMEM_DETAIL_NOEXCEPT : process_{&process}
   {
   }
+
+  HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process&& process)
+    HADESMEM_DETAIL_NOEXCEPT = delete;
 
   iterator begin()
   {

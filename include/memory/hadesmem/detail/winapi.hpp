@@ -29,9 +29,9 @@ inline bool IsWoW64Process(HANDLE handle)
   if (!::IsWow64Process(handle, &is_wow64))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("IsWoW64Process failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"IsWoW64Process failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return is_wow64 != FALSE;
@@ -43,9 +43,9 @@ inline detail::SmartHandle OpenProcess(DWORD id, DWORD access)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("OpenProcess failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"OpenProcess failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return detail::SmartHandle(handle);
@@ -62,8 +62,8 @@ inline detail::SmartHandle OpenThread(DWORD id, DWORD access)
   if (!handle)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("OpenThread failed.")
-                                            << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"OpenThread failed."}
+                                            << ErrorCodeWinLast{last_error});
   }
 
   return detail::SmartHandle(handle);
@@ -88,9 +88,9 @@ inline detail::SmartHandle DuplicateHandle(HANDLE handle)
                          DUPLICATE_SAME_ACCESS))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("DuplicateHandle failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"DuplicateHandle failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   return detail::SmartHandle(new_handle);
@@ -106,8 +106,8 @@ inline std::wstring QueryFullProcessImageName(HANDLE handle)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("QueryFullProcessImageName failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"QueryFullProcessImageName failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   return path.data();

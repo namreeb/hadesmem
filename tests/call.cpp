@@ -396,7 +396,7 @@ void TestCall()
     hadesmem::Call(process, &TestCallVoidRet, hadesmem::CallConv::kDefault);
   BOOST_TEST_EQ(call_ret_void.GetLastError(), 0U);
 
-  HMODULE const kernel32_mod = ::GetModuleHandle(L"kernel32.dll");
+  HMODULE const kernel32_mod = ::GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST(kernel32_mod != nullptr);
 
 #if defined(HADESMEM_MSVC)
@@ -420,7 +420,7 @@ void TestCall()
     "GetProcAddress");
   BOOST_TEST_EQ(call_win.GetReturnValue(), get_proc_address);
 
-  hadesmem::MultiCall multi_call(process);
+  hadesmem::MultiCall multi_call{ process };
   multi_call.Add<void (*)(DWORD)>(
     &MultiThreadSet, hadesmem::CallConv::kDefault, 0x1337UL);
   multi_call.Add<DWORD (*)()>(&MultiThreadGet, hadesmem::CallConv::kDefault);

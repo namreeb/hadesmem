@@ -36,14 +36,12 @@ public:
   using iterator_category = typename BaseIteratorT::iterator_category;
 
   HADESMEM_DETAIL_CONSTEXPR ImportThunkIterator() HADESMEM_DETAIL_NOEXCEPT
-    : impl_()
   {
   }
 
   explicit ImportThunkIterator(Process const& process,
                                PeFile const& pe_file,
                                DWORD first_thunk)
-    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
@@ -51,22 +49,34 @@ public:
         RvaToVa(process, pe_file, first_thunk));
       if (!thunk_ptr)
       {
-        impl_.reset();
         return;
       }
 
-      impl_->import_thunk_ = ImportThunk(process, pe_file, thunk_ptr);
-      if (!impl_->import_thunk_->GetAddressOfData())
+      ImportThunk thunk{process, pe_file, thunk_ptr};
+      if (!thunk.GetAddressOfData())
       {
-        impl_.reset();
         return;
       }
+
+      impl_ = std::make_shared<Impl>(process, pe_file, thunk);
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit ImportThunkIterator(Process&& process,
+                               PeFile const& pe_file,
+                               DWORD first_thunk) = delete;
+
+  explicit ImportThunkIterator(Process const& process,
+                               PeFile&& pe_file,
+                               DWORD first_thunk) = delete;
+
+  explicit ImportThunkIterator(Process&& process,
+                               PeFile&& pe_file,
+                               DWORD first_thunk) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -75,7 +85,7 @@ public:
   ImportThunkIterator& operator=(ImportThunkIterator const&) = default;
 
   ImportThunkIterator(ImportThunkIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -110,7 +120,7 @@ public:
       auto const cur_base =
         reinterpret_cast<PIMAGE_THUNK_DATA>(impl_->import_thunk_->GetBase());
       impl_->import_thunk_ =
-        ImportThunk(*impl_->process_, *impl_->pe_file_, cur_base + 1);
+        ImportThunk{*impl_->process_, *impl_->pe_file_, cur_base + 1};
 
       if (!impl_->import_thunk_->GetAddressOfData())
       {
@@ -128,7 +138,7 @@ public:
 
   ImportThunkIterator operator++(int)
   {
-    ImportThunkIterator const iter(*this);
+    ImportThunkIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -149,10 +159,11 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process,
-                  PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        pe_file_(&pe_file),
-        import_thunk_()
+                  PeFile const& pe_file,
+                  ImportThunk const& thunk) HADESMEM_DETAIL_NOEXCEPT
+      : process_{&process},
+        pe_file_{&pe_file},
+        import_thunk_{thunk}
     {
     }
 
@@ -176,38 +187,50 @@ public:
   explicit ImportThunkList(Process const& process,
                            PeFile const& pe_file,
                            DWORD first_thunk)
-    : process_(&process), pe_file_(&pe_file), first_thunk_(first_thunk)
+    : process_{&process}, pe_file_{&pe_file}, first_thunk_{first_thunk}
   {
   }
 
+  explicit ImportThunkList(Process&& process,
+                           PeFile const& pe_file,
+                           DWORD first_thunk) = delete;
+
+  explicit ImportThunkList(Process const& process,
+                           PeFile&& pe_file,
+                           DWORD first_thunk) = delete;
+
+  explicit ImportThunkList(Process&& process,
+                           PeFile&& pe_file,
+                           DWORD first_thunk) = delete;
+
   iterator begin()
   {
-    return ImportThunkList::iterator(*process_, *pe_file_, first_thunk_);
+    return iterator{*process_, *pe_file_, first_thunk_};
   }
 
   const_iterator begin() const
   {
-    return ImportThunkList::const_iterator(*process_, *pe_file_, first_thunk_);
+    return const_iterator{*process_, *pe_file_, first_thunk_};
   }
 
   const_iterator cbegin() const
   {
-    return ImportThunkList::const_iterator(*process_, *pe_file_, first_thunk_);
+    return const_iterator{*process_, *pe_file_, first_thunk_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportThunkList::iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportThunkList::const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportThunkList::const_iterator();
+    return const_iterator{};
   }
 
 private:

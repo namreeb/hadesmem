@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -27,15 +28,23 @@ class DosHeader
 {
 public:
   explicit DosHeader(Process const& process,
-                     PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
-    : process_(&process),
-      base_(static_cast<PBYTE>(pe_file.GetBase())),
-      data_()
+                     PeFile const& pe_file)
+    : process_{&process},
+      base_{static_cast<std::uint8_t*>(pe_file.GetBase())}
   {
     UpdateRead();
 
     EnsureValid();
   }
+
+  explicit DosHeader(Process&& process,
+                     PeFile const& pe_file) = delete;
+
+  explicit DosHeader(Process const& process,
+                     PeFile&& pe_file) = delete;
+
+  explicit DosHeader(Process&& process,
+                     PeFile&& pe_file) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -52,7 +61,7 @@ public:
     if (!IsValid())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("DOS header magic invalid."));
+        Error{} << ErrorString{"DOS header magic invalid."});
     }
   }
 
@@ -268,7 +277,7 @@ public:
 private:
   Process const* process_;
   PBYTE base_;
-  IMAGE_DOS_HEADER data_;
+  IMAGE_DOS_HEADER data_ = IMAGE_DOS_HEADER{};
 };
 
 inline bool operator==(DosHeader const& lhs, DosHeader const& rhs)

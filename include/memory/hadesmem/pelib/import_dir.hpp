@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -31,15 +32,13 @@ public:
   explicit ImportDir(Process const& process,
                      PeFile const& pe_file,
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(imp_desc)),
-      data_(),
-      is_virtual_beg_(false)
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{reinterpret_cast<std::uint8_t*>(imp_desc)}
   {
     if (!base_)
     {
-      NtHeaders nt_headers(process, pe_file);
+      NtHeaders nt_headers{process, pe_file};
       DWORD const import_dir_rva =
         nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::Import);
       // Windows will load images which don't specify a size for the import
@@ -47,10 +46,11 @@ public:
       if (!import_dir_rva)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Import directory is invalid."));
+          Error{} << ErrorString{"Import directory is invalid."});
       }
 
-      base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, import_dir_rva));
+      base_ =
+        static_cast<std::uint8_t*>(RvaToVa(process, pe_file, import_dir_rva));
       if (!base_)
       {
         // Try to detect import dirs with a partially virtual descriptor
@@ -88,7 +88,7 @@ public:
         else
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Import directory is invalid."));
+            Error{} << ErrorString{"Import directory is invalid."});
         }
       }
     }
@@ -96,7 +96,19 @@ public:
     UpdateRead();
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  explicit ImportDir(Process&& process,
+                     PeFile const& pe_file,
+                     PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
+
+  explicit ImportDir(Process const& process,
+                     PeFile&& pe_file,
+                     PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
+
+  explicit ImportDir(Process&& process,
+                     PeFile&& pe_file,
+                     PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
+
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -123,14 +135,9 @@ public:
     // It's possible for the last entry to be in virtual space, because it only
     // needs to have its Name or FirstThunk null.
     // Sample: imports_vterm.exe (Corkami PE Corpus)
-    if (pe_file_->GetType() == PeFileType::Data &&
-        (base_ + sizeof(IMAGE_IMPORT_DESCRIPTOR)) >=
-          static_cast<PBYTE>(pe_file_->GetBase()) + pe_file_->GetSize())
-    {
-      return true;
-    }
-
-    return false;
+    return (pe_file_->GetType() == PeFileType::Data &&
+            (base_ + sizeof(IMAGE_IMPORT_DESCRIPTOR)) >=
+              static_cast<PBYTE>(pe_file_->GetBase()) + pe_file_->GetSize());
   }
 
   // Check for TLS AOI trick.
@@ -139,7 +146,7 @@ public:
   {
     try
     {
-      TlsDir tls_dir(*process_, *pe_file_);
+      TlsDir tls_dir{*process_, *pe_file_};
       ULONG_PTR const image_base = GetRuntimeBase(*process_, *pe_file_);
       auto const address_of_index_raw =
         RvaToVa(*process_,
@@ -181,18 +188,19 @@ public:
     DWORD const name_rva = GetNameRaw();
     if (!name_rva)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Name RVA is invalid."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Name RVA is invalid."});
     }
 
     auto name_va =
       static_cast<std::uint8_t*>(RvaToVa(*process_, *pe_file_, name_rva));
-    // It's possible for the RVA to be invalid on disk because it's fixed by relocations.
+    // It's possible for the RVA to be invalid on disk because it's fixed by
+    // relocations.
     // Sample: imports_relocW7.exe
     if (!name_va)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Name VA is invalid."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Name VA is invalid."});
     }
 
     return detail::CheckedReadString<char>(*process_, *pe_file_, name_va);
@@ -229,15 +237,15 @@ public:
       Read<DWORD>(*process_, base_ + offsetof(IMAGE_IMPORT_DESCRIPTOR, Name));
     if (!name_rva)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Name RVA is null."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Name RVA is null."});
     }
 
     PVOID name_ptr = RvaToVa(*process_, *pe_file_, name_rva);
     if (!name_ptr)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Name VA is null."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Name VA is null."});
     }
 
     std::string const cur_name = ReadString<char>(*process_, name_ptr);
@@ -245,7 +253,7 @@ public:
     if (name.size() > cur_name.size())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("New name longer than existing name."));
+        Error{} << ErrorString{"New name longer than existing name."});
     }
 
     return WriteString(*process_, name_ptr, name);
@@ -260,8 +268,8 @@ private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
-  IMAGE_IMPORT_DESCRIPTOR data_;
-  bool is_virtual_beg_;
+  IMAGE_IMPORT_DESCRIPTOR data_ = IMAGE_IMPORT_DESCRIPTOR{};
+  bool is_virtual_beg_{};
 };
 
 inline bool operator==(ImportDir const& lhs, ImportDir const& rhs)

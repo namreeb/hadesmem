@@ -22,12 +22,11 @@ public:
   using HandleT = typename Policy::HandleT;
 
   HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
-    : handle_(GetInvalid())
   {
   }
 
   explicit HADESMEM_DETAIL_CONSTEXPR
-    SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT : handle_(handle)
+    SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT : handle_{handle}
   {
   }
 
@@ -45,7 +44,7 @@ public:
   }
 
   SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
-    : handle_(other.handle_)
+    : handle_{other.handle_}
   {
     other.handle_ = GetInvalid();
   }
@@ -91,8 +90,8 @@ public:
     {
       DWORD const last_error = ::GetLastError();
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("SmartHandle cleanup failed.")
-                << ErrorCodeWinLast(last_error));
+        Error{} << ErrorString{"SmartHandle cleanup failed."}
+                << ErrorCodeWinLast{last_error});
     }
 
     handle_ = GetInvalid();
@@ -126,7 +125,7 @@ private:
     }
   }
 
-  HandleT handle_;
+  HandleT handle_{GetInvalid()};
 };
 
 struct HandlePolicy
@@ -165,7 +164,7 @@ using SmartSnapHandle = SmartHandleImpl<SnapPolicy>;
 
 struct LibraryPolicy
 {
-  typedef HMODULE HandleT;
+  using HandleT = HMODULE;
 
   static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
   {
@@ -213,5 +212,23 @@ struct FindPolicy
 };
 
 using SmartFindHandle = SmartHandleImpl<FindPolicy>;
+
+struct ComPolicy
+{
+  using HandleT = IUnknown*;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    handle->Release();
+    return true;
+  }
+};
+
+using SmartComHandle = SmartHandleImpl<ComPolicy>;
 }
 }

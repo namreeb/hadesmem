@@ -19,7 +19,7 @@
 
 void TestFindPattern()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process{::GetCurrentProcessId()};
 
   std::uintptr_t const process_base =
     reinterpret_cast<std::uintptr_t>(::GetModuleHandleW(nullptr));
@@ -111,8 +111,8 @@ void TestFindPattern()
   </FindPattern>
 </HadesMem>
 )";
-  hadesmem::FindPattern find_pattern(process, pattern_file_data, true);
-  find_pattern = hadesmem::FindPattern(process, pattern_file_data, true);
+  hadesmem::FindPattern find_pattern{process, pattern_file_data, true};
+  find_pattern = hadesmem::FindPattern{process, pattern_file_data, true};
   BOOST_TEST_EQ(find_pattern.GetModuleMap().size(), 2UL);
   BOOST_TEST_EQ(find_pattern.GetPatternMap(L"").size(), 5UL);
 
@@ -182,7 +182,7 @@ void TestFindPattern()
 </HadesMem>
 )";
   BOOST_TEST_THROWS(
-    hadesmem::FindPattern(process, pattern_file_data_invalid1, true),
+    (hadesmem::FindPattern{process, pattern_file_data_invalid1, true}),
     hadesmem::Error);
 
   std::wstring const pattern_file_data_invalid2 = LR"(
@@ -196,7 +196,7 @@ void TestFindPattern()
 </HadesMem>
 )";
   BOOST_TEST_THROWS(
-    hadesmem::FindPattern(process, pattern_file_data_invalid2, true),
+    (hadesmem::FindPattern{process, pattern_file_data_invalid2, true}),
     hadesmem::Error);
 
   std::wstring const pattern_file_data_invalid3 = LR"(
@@ -210,7 +210,7 @@ void TestFindPattern()
 </HadesMem>
 )";
   BOOST_TEST_THROWS(
-    hadesmem::FindPattern(process, pattern_file_data_invalid3, true),
+    (hadesmem::FindPattern{process, pattern_file_data_invalid3, true}),
     hadesmem::Error);
 
   std::wstring const pattern_file_data_invalid4 = LR"(
@@ -224,7 +224,7 @@ void TestFindPattern()
 </HadesMem>
 )";
   BOOST_TEST_THROWS(
-    hadesmem::FindPattern(process, pattern_file_data_invalid4, true),
+    (hadesmem::FindPattern{process, pattern_file_data_invalid4, true}),
     hadesmem::Error);
 }
 

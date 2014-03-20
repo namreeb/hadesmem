@@ -31,13 +31,24 @@ public:
   explicit ImportThunk(Process const& process,
                        PeFile const& pe_file,
                        PIMAGE_THUNK_DATA thunk)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(reinterpret_cast<PBYTE>(thunk)),
-      data_()
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{reinterpret_cast<std::uint8_t*>(thunk)}
   {
     UpdateRead();
   }
+
+  explicit ImportThunk(Process&& process,
+                       PeFile const& pe_file,
+                       PIMAGE_THUNK_DATA thunk) = delete;
+
+  explicit ImportThunk(Process const& process,
+                       PeFile&& pe_file,
+                       PIMAGE_THUNK_DATA thunk) = delete;
+
+  explicit ImportThunk(Process&& process,
+                       PeFile&& pe_file,
+                       PIMAGE_THUNK_DATA thunk) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -81,12 +92,12 @@ public:
 
   WORD GetHint() const
   {
-    PBYTE const name_import = static_cast<PBYTE>(
+    auto const name_import = static_cast<std::uint8_t*>(
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
     if (!name_import)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Invalid import name and hint."));
+        Error{} << ErrorString{"Invalid import name and hint."});
     }
     return Read<WORD>(*process_,
                       name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint));
@@ -94,12 +105,12 @@ public:
 
   std::string GetName() const
   {
-    PBYTE const name_import = static_cast<PBYTE>(
+    auto const name_import = static_cast<std::uint8_t*>(
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
     if (!name_import)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Invalid import name and hint."));
+        Error{} << ErrorString{"Invalid import name and hint."});
     }
     return detail::CheckedReadString<char>(
       *process_, *pe_file_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
@@ -122,7 +133,7 @@ public:
 
   void SetHint(WORD hint)
   {
-    PBYTE const name_import = static_cast<PBYTE>(
+    std::uint8_t* const name_import = static_cast<PBYTE>(
       RvaToVa(*process_, *pe_file_, static_cast<DWORD>(GetAddressOfData())));
     return Write(
       *process_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Hint), hint);
@@ -132,7 +143,7 @@ private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
-  IMAGE_THUNK_DATA data_;
+  IMAGE_THUNK_DATA data_ = IMAGE_THUNK_DATA{};
 };
 
 inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs)

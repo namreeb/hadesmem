@@ -34,12 +34,11 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR RegionIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  HADESMEM_DETAIL_CONSTEXPR RegionIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
   explicit RegionIterator(Process const& process)
-    : impl_()
   {
     // VirtualQuery can fail with ERROR_ACCESS_DENIED for 'zombie' processes.
     try
@@ -48,9 +47,11 @@ public:
     }
     catch (std::exception const&)
     {
-      return;
+      // Don't need to do anything.
     }
   }
+
+  explicit RegionIterator(Process&& process) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -59,7 +60,7 @@ public:
   RegionIterator& operator=(RegionIterator const&) = default;
 
   RegionIterator(RegionIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -95,7 +96,7 @@ public:
       auto const next = static_cast<char const* const>(base) + size;
       MEMORY_BASIC_INFORMATION const mbi =
         detail::Query(*impl_->process_, next);
-      impl_->region_ = Region(*impl_->process_, mbi);
+      impl_->region_ = Region{*impl_->process_, mbi};
     }
     catch (std::exception const& /*e*/)
     {
@@ -107,7 +108,7 @@ public:
 
   RegionIterator operator++(int)
   {
-    RegionIterator const iter(*this);
+    RegionIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -126,11 +127,10 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        region_()
+      : process_{&process}
     {
       MEMORY_BASIC_INFORMATION const mbi = detail::Query(process, nullptr);
-      region_ = Region(process, mbi);
+      region_ = Region{process, mbi};
     }
 
     Process const* process_;
@@ -149,9 +149,11 @@ public:
   using iterator = RegionIterator<Region>;
   using const_iterator = RegionIterator<Region const>;
 
-  explicit RegionList(Process const& process) : process_(&process)
+  explicit RegionList(Process const& process) : process_{ &process }
   {
   }
+
+  explicit RegionList(Process&& process) = delete;
 
   iterator begin()
   {

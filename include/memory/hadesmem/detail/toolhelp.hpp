@@ -31,8 +31,8 @@ inline detail::SmartSnapHandle CreateToolhelp32Snapshot(DWORD flags, DWORD pid)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("CreateToolhelp32Snapshot failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"CreateToolhelp32Snapshot failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   return snap;
@@ -55,35 +55,35 @@ hadesmem::detail::Optional<Entry>
       return hadesmem::detail::Optional<Entry>();
     }
 
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString(error.c_str())
-                                            << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{error.c_str()}
+                                            << ErrorCodeWinLast{last_error});
   }
 
   return hadesmem::detail::Optional<Entry>(entry);
 }
 
-inline hadesmem::detail::Optional<MODULEENTRY32> Module32First(HANDLE snap)
+inline hadesmem::detail::Optional<MODULEENTRY32W> Module32First(HANDLE snap)
 {
-  return Toolhelp32Enum<MODULEENTRY32, decltype(&::Module32First)>(
+  return Toolhelp32Enum<MODULEENTRY32W, decltype(&::Module32FirstW)>(
     &::Module32First, snap, "Module32First failed.");
 }
 
-inline hadesmem::detail::Optional<MODULEENTRY32> Module32Next(HANDLE snap)
+inline hadesmem::detail::Optional<MODULEENTRY32W> Module32Next(HANDLE snap)
 {
-  return Toolhelp32Enum<MODULEENTRY32, decltype(&::Module32Next)>(
-    &::Module32Next, snap, "Module32Next failed.");
+  return Toolhelp32Enum<MODULEENTRY32W, decltype(&::Module32NextW)>(
+    &::Module32NextW, snap, "Module32Next failed.");
 }
 
-inline hadesmem::detail::Optional<PROCESSENTRY32> Process32First(HANDLE snap)
+inline hadesmem::detail::Optional<PROCESSENTRY32W> Process32First(HANDLE snap)
 {
-  return Toolhelp32Enum<PROCESSENTRY32, decltype(&::Process32First)>(
-    &::Process32First, snap, "Process32First failed.");
+  return Toolhelp32Enum<PROCESSENTRY32W, decltype(&::Process32FirstW)>(
+    &::Process32FirstW, snap, "Process32First failed.");
 }
 
-inline hadesmem::detail::Optional<PROCESSENTRY32> Process32Next(HANDLE snap)
+inline hadesmem::detail::Optional<PROCESSENTRY32W> Process32Next(HANDLE snap)
 {
-  return Toolhelp32Enum<PROCESSENTRY32, decltype(&::Process32Next)>(
-    &::Process32Next, snap, "Process32Next failed.");
+  return Toolhelp32Enum<PROCESSENTRY32W, decltype(&::Process32NextW)>(
+    &::Process32NextW, snap, "Process32Next failed.");
 }
 
 inline hadesmem::detail::Optional<THREADENTRY32> Thread32First(HANDLE snap)

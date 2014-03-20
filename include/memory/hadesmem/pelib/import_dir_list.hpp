@@ -36,26 +36,30 @@ public:
   using iterator_category = typename BaseIteratorT::iterator_category;
 
   HADESMEM_DETAIL_CONSTEXPR ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
-    : impl_()
   {
   }
 
   explicit ImportDirIterator(Process const& process, PeFile const& pe_file)
-    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
-      impl_->import_dir_ = ImportDir(process, pe_file, nullptr);
-      if (IsTerminator())
+      ImportDir const import_dir{process, pe_file, nullptr};
+      if (!IsTerminator(import_dir))
       {
-        impl_.reset();
+        impl_ = std::make_shared<Impl>(process, pe_file, import_dir);
       }
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit ImportDirIterator(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit ImportDirIterator(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit ImportDirIterator(Process&& process, PeFile&& pe_file) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -64,7 +68,7 @@ public:
   ImportDirIterator& operator=(ImportDirIterator const&) = default;
 
   ImportDirIterator(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -99,9 +103,9 @@ public:
       auto const cur_base = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(
         impl_->import_dir_->GetBase());
       impl_->import_dir_ =
-        ImportDir(*impl_->process_, *impl_->pe_file_, cur_base + 1);
+        ImportDir{*impl_->process_, *impl_->pe_file_, cur_base + 1};
 
-      if (IsTerminator())
+      if (IsTerminator(*impl_->import_dir_))
       {
         impl_.reset();
         return *this;
@@ -117,7 +121,7 @@ public:
 
   ImportDirIterator operator++(int)
   {
-    ImportDirIterator const iter(*this);
+    ImportDirIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -133,23 +137,24 @@ public:
   }
 
 private:
-  bool IsTerminator() const
+  bool IsTerminator(ImportDir const& import_dir) const
   {
     // If the Name is NULL then the other fields can be non-NULL
     // but the entire entry will still be skipped by the Windows
     // loader.
-    bool const has_name = !!impl_->import_dir_->GetNameRaw();
-    bool const has_iat = !!impl_->import_dir_->GetFirstThunk();
+    bool const has_name = !!import_dir.GetNameRaw();
+    bool const has_iat = !!import_dir.GetFirstThunk();
     return (!has_name || !has_iat);
   }
 
   struct Impl
   {
     explicit Impl(Process const& process,
-                  PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        pe_file_(&pe_file),
-        import_dir_()
+                  PeFile const& pe_file,
+                  ImportDir const& import_dir) HADESMEM_DETAIL_NOEXCEPT
+      : process_{&process},
+        pe_file_{&pe_file},
+        import_dir_{import_dir}
     {
     }
 
@@ -171,38 +176,44 @@ public:
   using const_iterator = ImportDirIterator<ImportDir const>;
 
   explicit ImportDirList(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file)
+    : process_{&process}, pe_file_{&pe_file}
   {
   }
 
+  explicit ImportDirList(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit ImportDirList(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit ImportDirList(Process&& process, PeFile&& pe_file) = delete;
+
   iterator begin()
   {
-    return ImportDirList::iterator(*process_, *pe_file_);
+    return iterator{*process_, *pe_file_};
   }
 
   const_iterator begin() const
   {
-    return ImportDirList::const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   const_iterator cbegin() const
   {
-    return ImportDirList::const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportDirList::iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportDirList::const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ImportDirList::const_iterator();
+    return const_iterator{};
   }
 
 private:

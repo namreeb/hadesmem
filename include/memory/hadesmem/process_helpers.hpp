@@ -23,9 +23,9 @@ inline std::wstring GetPathNative(Process const& process)
   if (!ntdll)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("GetModuleHandleW failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetModuleHandleW failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   FARPROC const nt_query_system_information_proc =
@@ -33,9 +33,9 @@ inline std::wstring GetPathNative(Process const& process)
   if (!nt_query_system_information_proc)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("GetProcAddress failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetProcAddress failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   using NtQuerySystemInformationPtr = NTSTATUS(
@@ -63,8 +63,8 @@ inline std::wstring GetPathNative(Process const& process)
   if (!NT_SUCCESS(status))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("NtQuerySystemInformation failed.")
-              << ErrorCodeWinStatus(status));
+      Error{} << ErrorString{"NtQuerySystemInformation failed."}
+              << ErrorCodeWinStatus{status});
   }
 
   return {buffer.data(), buffer.data() + process_id_info.ImageName.Length / 2};

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <locale>
 #include <ostream>
@@ -29,18 +30,33 @@ public:
                                    PeFile const& pe_file,
                                    PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                    PIMAGE_BOUND_FORWARDER_REF fwd_ref)
-    : process_(&process),
-      pe_file_(&pe_file),
-      start_(reinterpret_cast<PBYTE>(start)),
-      base_(reinterpret_cast<PBYTE>(fwd_ref)),
-      data_()
+    : process_{&process},
+      pe_file_{&pe_file},
+      start_{reinterpret_cast<std::uint8_t*>(start)},
+      base_{reinterpret_cast<std::uint8_t*>(fwd_ref)},
+      data_{}
   {
     HADESMEM_DETAIL_ASSERT(start_ && base_);
 
     UpdateRead();
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  explicit BoundImportForwarderRef(Process&& process,
+                                   PeFile const& pe_file,
+                                   PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                   PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
+
+  explicit BoundImportForwarderRef(Process const& process,
+                                   PeFile&& pe_file,
+                                   PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                   PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
+
+  explicit BoundImportForwarderRef(Process&& process,
+                                   PeFile&& pe_file,
+                                   PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                   PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
+
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }

@@ -18,15 +18,15 @@
 
 void TestModule()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const process{::GetCurrentProcessId()};
 
-  hadesmem::Module const this_mod(process, nullptr);
-  BOOST_TEST_EQ(this_mod.GetHandle(), GetModuleHandle(nullptr));
+  hadesmem::Module const this_mod{process, nullptr};
+  BOOST_TEST_EQ(this_mod.GetHandle(), ::GetModuleHandleW(nullptr));
   BOOST_TEST_NE(this_mod.GetSize(), 0U);
   BOOST_TEST(hadesmem::detail::ToUpperOrdinal(this_mod.GetName()) ==
              L"MODULE.EXE");
   BOOST_TEST(this_mod.GetPath().size() > this_mod.GetName().size());
-  hadesmem::Module const this_mod_other(process, GetModuleHandle(nullptr));
+  hadesmem::Module const this_mod_other{process, ::GetModuleHandleW(nullptr)};
   BOOST_TEST_EQ(this_mod, this_mod_other);
   BOOST_TEST(this_mod >= this_mod_other);
   BOOST_TEST(this_mod <= this_mod_other);
@@ -34,18 +34,18 @@ void TestModule()
   BOOST_TEST(!(this_mod < this_mod_other));
   BOOST_TEST_THROWS(FindProcedure(process, this_mod, "non_existant_export"),
                     hadesmem::Error);
-  hadesmem::Module this_mod_copy(this_mod);
+  hadesmem::Module this_mod_copy{this_mod};
   BOOST_TEST_EQ(this_mod, this_mod_copy);
-  hadesmem::Module this_mod_moved(std::move(this_mod_copy));
+  hadesmem::Module this_mod_moved{std::move(this_mod_copy)};
   BOOST_TEST_EQ(this_mod_moved, this_mod);
   this_mod_copy = std::move(this_mod_moved);
   BOOST_TEST_EQ(this_mod_copy, this_mod);
 
-  BOOST_TEST_THROWS(hadesmem::Module(process, L""), hadesmem::Error);
+  BOOST_TEST_THROWS((hadesmem::Module{process, L""}), hadesmem::Error);
 
-  hadesmem::Module const ntdll_mod(process, L"NtDll.DlL");
+  hadesmem::Module const ntdll_mod{process, L"NtDll.DlL"};
   BOOST_TEST_NE(ntdll_mod, this_mod);
-  BOOST_TEST_EQ(ntdll_mod.GetHandle(), ::GetModuleHandle(L"ntdll.dll"));
+  BOOST_TEST_EQ(ntdll_mod.GetHandle(), ::GetModuleHandleW(L"ntdll.dll"));
   BOOST_TEST_NE(ntdll_mod.GetSize(), 0U);
   BOOST_TEST(hadesmem::detail::ToUpperOrdinal(ntdll_mod.GetName()) ==
              L"NTDLL.DLL");
@@ -53,13 +53,13 @@ void TestModule()
   // Use an API that's unlikely to be hooked.
   BOOST_TEST_EQ(FindProcedure(process, ntdll_mod, "RtlRandom"),
                 GetProcAddress(ntdll_mod.GetHandle(), "RtlRandom"));
-  hadesmem::Module const ntdll_mod_other(process, L"ntdll.dll");
+  hadesmem::Module const ntdll_mod_other{process, L"ntdll.dll"};
   BOOST_TEST_EQ(ntdll_mod, ntdll_mod_other);
-  hadesmem::Module const ntdll_mod_from_handle(process,
-                                               ::GetModuleHandle(L"ntdll.dll"));
+  hadesmem::Module const ntdll_mod_from_handle{
+    process, ::GetModuleHandleW(L"ntdll.dll")};
   BOOST_TEST_EQ(ntdll_mod, ntdll_mod_from_handle);
   std::vector<wchar_t> system_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  UINT const sys_path_len = GetSystemDirectory(
+  UINT const sys_path_len = ::GetSystemDirectoryW(
     system_path.data(), static_cast<UINT>(system_path.size()));
   BOOST_TEST_NE(sys_path_len, 0U);
   BOOST_TEST(sys_path_len <
@@ -69,7 +69,7 @@ void TestModule()
   hadesmem::Module const ntdll_mod_from_path(process, ntdll_path);
   BOOST_TEST_EQ(ntdll_mod, ntdll_mod_from_path);
 
-  if (GetModuleHandle(nullptr) < GetModuleHandle(L"ntdll.dll"))
+  if (::GetModuleHandleW(nullptr) < ::GetModuleHandleW(L"ntdll.dll"))
   {
     BOOST_TEST(this_mod < ntdll_mod);
   }

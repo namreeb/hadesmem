@@ -10,7 +10,8 @@
 #define HADESMEM_DETAIL_STATUS_NO_SUCH_FILE (static_cast<NTSTATUS>(0xC000000FL))
 #define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
   (static_cast<NTSTATUS>(0x80000006L))
-#define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH (static_cast<NTSTATUS>(0xC0000004L))
+#define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH                            \
+  (static_cast<NTSTATUS>(0xC0000004L))
 
 namespace hadesmem
 {
@@ -504,6 +505,170 @@ struct FILE_OBJECTID_INFORMATION
     UCHAR ExtendedInfo[48];
   } u;
 };
+
+enum SECTION_INHERIT
+{
+  ViewShare = 1,
+  ViewUnmap = 2
+};
+
+typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME* PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+
+struct RTL_ACTIVATION_CONTEXT_STACK_FRAME
+{
+  PRTL_ACTIVATION_CONTEXT_STACK_FRAME Previous;
+  _ACTIVATION_CONTEXT * ActivationContext;
+  ULONG Flags;
+};
+
+struct ACTIVATION_CONTEXT_STACK
+{
+  PRTL_ACTIVATION_CONTEXT_STACK_FRAME ActiveFrame;
+  LIST_ENTRY FrameListCache;
+  ULONG Flags;
+  ULONG NextCookieSequenceNumber;
+  ULONG StackId;
+};
+
+typedef ACTIVATION_CONTEXT_STACK* PACTIVATION_CONTEXT_STACK;
+
+struct GDI_TEB_BATCH
+{
+  ULONG Offset;
+  ULONG HDC;
+  ULONG Buffer[310];
+};
+
+struct TEB_ACTIVE_FRAME_CONTEXT
+{
+  ULONG Flags;
+  CHAR * FrameName;
+};
+
+typedef TEB_ACTIVE_FRAME_CONTEXT* PTEB_ACTIVE_FRAME_CONTEXT;
+
+typedef struct TEB_ACTIVE_FRAME* PTEB_ACTIVE_FRAME;
+
+struct TEB_ACTIVE_FRAME
+{
+  ULONG Flags;
+  PTEB_ACTIVE_FRAME Previous;
+  PTEB_ACTIVE_FRAME_CONTEXT Context;
+};
+
+struct TEB
+{
+  NT_TIB NtTib;
+  PVOID EnvironmentPointer;
+  CLIENT_ID ClientId;
+  PVOID ActiveRpcHandle;
+  PVOID ThreadLocalStoragePointer;
+  PPEB ProcessEnvironmentBlock;
+  ULONG LastErrorValue;
+  ULONG CountOfOwnedCriticalSections;
+  PVOID CsrClientThread;
+  PVOID Win32ThreadInfo;
+  ULONG User32Reserved[26];
+  ULONG UserReserved[5];
+  PVOID WOW32Reserved;
+  ULONG CurrentLocale;
+  ULONG FpSoftwareStatusRegister;
+  VOID * SystemReserved1[54];
+  LONG ExceptionCode;
+  PACTIVATION_CONTEXT_STACK ActivationContextStackPointer;
+  UCHAR SpareBytes1[36];
+  ULONG TxFsContext;
+  GDI_TEB_BATCH GdiTebBatch;
+  CLIENT_ID RealClientId;
+  PVOID GdiCachedProcessHandle;
+  ULONG GdiClientPID;
+  ULONG GdiClientTID;
+  PVOID GdiThreadLocalInfo;
+  ULONG Win32ClientInfo[62];
+  VOID * glDispatchTable[233];
+  ULONG glReserved1[29];
+  PVOID glReserved2;
+  PVOID glSectionInfo;
+  PVOID glSection;
+  PVOID glTable;
+  PVOID glCurrentRC;
+  PVOID glContext;
+  ULONG LastStatusValue;
+  UNICODE_STRING StaticUnicodeString;
+  WCHAR StaticUnicodeBuffer[261];
+  PVOID DeallocationStack;
+  VOID * TlsSlots[64];
+  LIST_ENTRY TlsLinks;
+  PVOID Vdm;
+  PVOID ReservedForNtRpc;
+  VOID * DbgSsReserved[2];
+  ULONG HardErrorMode;
+  VOID * Instrumentation[9];
+  GUID ActivityId;
+  PVOID SubProcessTag;
+  PVOID EtwLocalData;
+  PVOID EtwTraceData;
+  PVOID WinSockData;
+  ULONG GdiBatchCount;
+  UCHAR SpareBool0;
+  UCHAR SpareBool1;
+  UCHAR SpareBool2;
+  UCHAR IdealProcessor;
+  ULONG GuaranteedStackBytes;
+  PVOID ReservedForPerf;
+  PVOID ReservedForOle;
+  ULONG WaitingOnLoaderLock;
+  PVOID SavedPriorityState;
+  ULONG SoftPatchPtr1;
+  PVOID ThreadPoolData;
+  VOID * * TlsExpansionSlots;
+  ULONG ImpersonationLocale;
+  ULONG IsImpersonating;
+  PVOID NlsCache;
+  PVOID pShimData;
+  ULONG HeapVirtualAffinity;
+  PVOID CurrentTransactionHandle;
+  PTEB_ACTIVE_FRAME ActiveFrame;
+  PVOID FlsData;
+  PVOID PreferredLanguages;
+  PVOID UserPrefLanguages;
+  PVOID MergedPrefLanguages;
+  ULONG MuiImpersonation;
+  WORD CrossTebFlags;
+  ULONG SpareCrossTebBits : 16;
+  WORD SameTebFlags;
+  ULONG DbgSafeThunkCall : 1;
+  ULONG DbgInDebugPrint : 1;
+  ULONG DbgHasFiberData : 1;
+  ULONG DbgSkipThreadAttach : 1;
+  ULONG DbgWerInShipAssertCode : 1;
+  ULONG DbgRanProcessInit : 1;
+  ULONG DbgClonedThread : 1;
+  ULONG DbgSuppressDebugMsg : 1;
+  ULONG SpareSameTebBits : 8;
+  PVOID TxnScopeEnterCallback;
+  PVOID TxnScopeExitCallback;
+  PVOID TxnScopeContext;
+  ULONG LockCount;
+  ULONG ProcessRundown;
+  UINT64 LastSwitchTime;
+  UINT64 TotalSwitchOutTime;
+  LARGE_INTEGER WaitReasonBitMap;
+};
+
+#if defined(HADESMEM_DETAIL_ARCH_X64) 
+inline TEB* GetCurrentTeb()
+{
+  return reinterpret_cast<TEB*>(__readgsqword(offsetof(NT_TIB, Self)));
+}
+#elif defined(HADESMEM_DETAIL_ARCH_X86) 
+inline TEB* GetCurrentTeb()
+{
+  return reinterpret_cast<TEB*>(__readfsdword(offsetof(NT_TIB, Self)));
+}
+#else 
+#error "[HadesMem] Unsupported architecture."
+#endif
 }
 }
 }

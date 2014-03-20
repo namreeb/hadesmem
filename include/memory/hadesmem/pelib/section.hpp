@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -28,14 +29,10 @@ namespace hadesmem
 class Section
 {
 public:
-  explicit Section(Process const& process,
-                   PeFile const& pe_file,
-                   PVOID base)
-    : process_(&process),
-      pe_file_(&pe_file),
-      base_(static_cast<PBYTE>(base)),
-      data_(),
-      is_virtual_(false)
+  explicit Section(Process const& process, PeFile const& pe_file, void* base)
+    : process_{&process},
+      pe_file_{&pe_file},
+      base_{static_cast<std::uint8_t*>(base)}
   {
     if (base_ == nullptr)
     {
@@ -43,7 +40,7 @@ public:
       if (!nt_headers.GetNumberOfSections())
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Image nas no sections."));
+          Error{} << ErrorString{"Image nas no sections."});
       }
 
       base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
@@ -66,7 +63,13 @@ public:
     }
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  explicit Section(Process&& process, PeFile const& pe_file, void* base);
+
+  explicit Section(Process const& process, PeFile&& pe_file, void* base);
+
+  explicit Section(Process&& process, PeFile&& pe_file, void* base);
+
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -147,7 +150,7 @@ public:
     if (name.size() > 8)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("New section name too large."));
+        Error{} << ErrorString{"New section name too large."});
     }
 
     std::copy(std::begin(name),
@@ -209,9 +212,9 @@ private:
 
   Process const* process_;
   PeFile const* pe_file_;
-  PBYTE base_;
-  IMAGE_SECTION_HEADER data_;
-  bool is_virtual_;
+  std::uint8_t* base_;
+  IMAGE_SECTION_HEADER data_ = IMAGE_SECTION_HEADER{};
+  bool is_virtual_{};
 };
 
 inline bool operator==(Section const& lhs, Section const& rhs)

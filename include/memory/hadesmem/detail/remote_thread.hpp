@@ -19,14 +19,14 @@ inline SmartHandle CreateRemoteThreadAndWait(Process const& process,
                                              LPTHREAD_START_ROUTINE func,
                                              DWORD timeout = INFINITE)
 {
-  SmartHandle remote_thread(::CreateRemoteThread(
-    process.GetHandle(), nullptr, 0, func, nullptr, 0, nullptr));
+  SmartHandle remote_thread{::CreateRemoteThread(
+    process.GetHandle(), nullptr, 0, func, nullptr, 0, nullptr)};
   if (!remote_thread.GetHandle())
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("CreateRemoteThread failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"CreateRemoteThread failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
   DWORD const wait_res =
@@ -36,13 +36,13 @@ inline SmartHandle CreateRemoteThreadAndWait(Process const& process,
     if (wait_res == WAIT_TIMEOUT)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("WaitForSingleObject timeout."));
+        Error{} << ErrorString{"WaitForSingleObject timeout."});
     }
 
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("WaitForSingleObject failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"WaitForSingleObject failed."}
+              << ErrorCodeWinLast{last_error});
   }
 
   return remote_thread;

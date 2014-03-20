@@ -25,28 +25,28 @@ class Process
 {
 public:
   explicit Process(DWORD id)
-    : handle_(detail::OpenProcessAllAccess(id)), id_(id)
+    : handle_{detail::OpenProcessAllAccess(id)}, id_{id}
   {
     CheckWoW64();
   }
 
   Process(Process const& other)
-    : handle_(detail::DuplicateHandle(other.handle_.GetHandle())),
-      id_(other.id_)
+    : handle_{detail::DuplicateHandle(other.handle_.GetHandle())},
+      id_{other.id_}
   {
   }
 
   Process& operator=(Process const& other)
   {
-    Process tmp(other);
+    Process tmp{other};
     *this = std::move(tmp);
 
     return *this;
   }
 
   Process(Process&& other) HADESMEM_DETAIL_NOEXCEPT
-    : handle_(std::move(other.handle_)),
-      id_(other.id_)
+    : handle_{std::move(other.handle_)},
+      id_{other.id_}
   {
     other.id_ = 0;
   }
@@ -89,8 +89,8 @@ private:
         detail::IsWoW64Process(handle_.GetHandle()))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Cross-architecture process manipulation is "
-                               "currently unsupported."));
+        Error{} << ErrorString{"Cross-architecture process manipulation is "
+                               "currently unsupported."});
     }
   }
 

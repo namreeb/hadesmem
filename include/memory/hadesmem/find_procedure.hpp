@@ -23,7 +23,7 @@ inline FARPROC FindProcedure(Process const& process,
   if (!remote_func)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("GetProcAddressInternal failed."));
+      Error{} << ErrorString{"GetProcAddressInternal failed."});
   }
 
   return remote_func;
@@ -37,7 +37,7 @@ inline FARPROC
   if (!remote_func)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("GetProcAddressInternal failed."));
+      Error{} << ErrorString{"GetProcAddressInternal failed."});
   }
 
   return remote_func;

@@ -34,17 +34,17 @@ public:
                                  PeFile const& pe_file,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc)
-    : process_(&process),
-      pe_file_(&pe_file),
-      start_(reinterpret_cast<PBYTE>(start)),
-      base_(reinterpret_cast<PBYTE>(imp_desc)),
-      data_()
+    : process_{&process},
+      pe_file_{&pe_file},
+      start_{reinterpret_cast<std::uint8_t*>(start)},
+      base_{reinterpret_cast<std::uint8_t*>(imp_desc)},
+      data_{}
   {
     HADESMEM_DETAIL_ASSERT((start_ && base_) || (!start_ && !base_));
 
     if (!base_)
     {
-      NtHeaders nt_headers(process, pe_file);
+      NtHeaders nt_headers{process, pe_file};
       DWORD const import_dir_rva =
         nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::BoundImport);
       // Windows will load images which don't specify a size for the import
@@ -52,14 +52,15 @@ public:
       if (!import_dir_rva)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Bound import directory is invalid."));
+          Error{} << ErrorString{"Bound import directory is invalid."});
       }
 
-      base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, import_dir_rva));
+      base_ =
+        static_cast<std::uint8_t*>(RvaToVa(process, pe_file, import_dir_rva));
       if (!base_)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Bound import directory is invalid."));
+          Error{} << ErrorString{"Bound import directory is invalid."});
       }
     }
 
@@ -70,6 +71,24 @@ public:
 
     UpdateRead();
   }
+
+  explicit BoundImportDescriptor(Process&& process,
+                                 PeFile const& pe_file,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
+    delete;
+
+  explicit BoundImportDescriptor(Process const& process,
+                                 PeFile&& pe_file,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
+    delete;
+
+  explicit BoundImportDescriptor(Process&& process,
+                                 PeFile&& pe_file,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
+                                 PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
+    delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {

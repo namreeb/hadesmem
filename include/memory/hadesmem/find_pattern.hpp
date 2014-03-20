@@ -76,20 +76,20 @@ inline std::vector<PatternDataByte> ConvertData(std::wstring const& data)
     std::wstring data_cur_str;
     if (!(data_str >> data_cur_str))
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Data parsing failed."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Data parsing failed."});
     }
 
     bool const is_wildcard = (data_cur_str == L"??");
     std::uint32_t current = 0U;
     if (!is_wildcard)
     {
-      std::wistringstream conv(data_cur_str);
+      std::wistringstream conv{data_cur_str};
       conv.imbue(std::locale::classic());
       if (!(conv >> std::hex >> current))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Data conversion failed."));
+          Error{} << ErrorString{"Data conversion failed."});
       }
 
       if (current > static_cast<std::uint8_t>(-1))
@@ -99,7 +99,8 @@ inline std::vector<PatternDataByte> ConvertData(std::wstring const& data)
       }
     }
 
-    data_real.emplace_back(PatternDataByte{ static_cast<std::uint8_t>(current), is_wildcard });
+    data_real.emplace_back(
+      PatternDataByte{static_cast<std::uint8_t>(current), is_wildcard});
   } while (!data_str.eof());
 
   return data_real;
@@ -266,8 +267,8 @@ void* Find(Process const& process,
 
   if (!!(flags & PatternFlags::kThrowOnUnmatch))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("Could not match pattern."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Could not match pattern."});
   }
 
   return nullptr;
@@ -525,6 +526,10 @@ public:
     }
   }
 
+  explicit FindPattern(Process&& process,
+                       std::wstring const& pattern,
+                       bool in_memory_file) = delete;
+
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   FindPattern(FindPattern const&) = default;
@@ -563,8 +568,8 @@ public:
     }
     catch (std::out_of_range const&)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid module name."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid module name."});
     }
   }
 
@@ -592,9 +597,9 @@ private:
     if (!load_result)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Loading XML file failed.")
-                << ErrorCodeOther(load_result.status)
-                << ErrorStringOther(load_result.description()));
+        Error{} << ErrorString{"Loading XML file failed."}
+                << ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
+                << ErrorStringOther{load_result.description()});
     }
 
     LoadPatternFileImpl(doc);
@@ -607,9 +612,9 @@ private:
     if (!load_result)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Loading XML file failed.")
-                << ErrorCodeOther(load_result.status)
-                << ErrorStringOther(load_result.description()));
+        Error{} << ErrorString{"Loading XML file failed."}
+                << ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
+                << ErrorStringOther{load_result.description()});
     }
 
     LoadPatternFileImpl(doc);
@@ -624,8 +629,8 @@ private:
     }
     catch (std::out_of_range const&)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid pattern name."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid pattern name."});
     }
   }
 
@@ -730,14 +735,14 @@ private:
     if (!attr)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find attribute for node."));
+        Error{} << ErrorString{"Failed to find attribute for node."});
     }
 
     std::wstring const value = attr.value();
     if (value.empty())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find value for attribute."));
+        Error{} << ErrorString{"Failed to find value for attribute."});
     }
 
     return value;
@@ -756,7 +761,7 @@ private:
     if (value.empty())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find value for attribute."));
+        Error{} << ErrorString{"Failed to find value for attribute."});
     }
 
     return value;
@@ -788,7 +793,7 @@ private:
       else
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Unknown 'Flag' value."));
+          Error{} << ErrorString{"Unknown 'Flag' value."});
       }
     }
 
@@ -802,7 +807,7 @@ private:
     if (!hadesmem_root)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find 'HadesMem' root node."));
+        Error{} << ErrorString{"Failed to find 'HadesMem' root node."});
     }
 
     std::map<std::wstring, FindPatternInfo> pattern_infos_full;
@@ -828,7 +833,7 @@ private:
 
         std::uint32_t const pattern_flags = ReadFlags(pattern);
 
-        PatternInfo pattern_info{pattern_name,      pattern_data, pattern_start,
+        PatternInfo pattern_info{pattern_name, pattern_data, pattern_start,
                                  pattern_start_rva, pattern_flags};
 
         std::vector<ManipInfo> pattern_manips;
@@ -857,8 +862,8 @@ private:
           else
           {
             HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error() << ErrorString("Unknown value for 'Name' attribute for "
-                                     "'Manipulator' node."));
+              Error{} << ErrorString{"Unknown value for 'Name' attribute for "
+                                     "'Manipulator' node."});
           }
 
           auto const manipulator_operand1 = manipulator.attribute(L"Operand1");
@@ -902,7 +907,7 @@ private:
         if (!m.has_operand1 || m.has_operand2)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Invalid manipulator operands for 'Add'."));
+            Error{} << ErrorString{"Invalid manipulator operands for 'Add'."});
         }
 
         address = Add(base, address, flags, m.operand1);
@@ -913,7 +918,7 @@ private:
         if (!m.has_operand1 || m.has_operand2)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Invalid manipulator operands for 'Sub'."));
+            Error{} << ErrorString{"Invalid manipulator operands for 'Sub'."});
         }
 
         address = Sub(base, address, flags, m.operand1);
@@ -924,7 +929,7 @@ private:
         if (!m.has_operand1 || !m.has_operand2)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Invalid manipulator operands for 'Rel'."));
+            Error{} << ErrorString{"Invalid manipulator operands for 'Rel'."});
         }
 
         address = Rel(base, address, flags, m.operand1, m.operand2);
@@ -935,7 +940,7 @@ private:
         if (m.has_operand1 || m.has_operand2)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Invalid manipulator operands for 'Lea'."));
+            Error{} << ErrorString{"Invalid manipulator operands for 'Lea'."});
         }
 
         address = Lea(base, address, flags);
@@ -943,8 +948,8 @@ private:
         break;
 
       default:
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                        << ErrorString("Unknown manipulator."));
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                        << ErrorString{"Unknown manipulator."});
 
         break;
       }

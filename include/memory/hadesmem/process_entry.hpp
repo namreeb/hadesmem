@@ -19,11 +19,11 @@ class ProcessEntry
 {
 public:
   explicit ProcessEntry(PROCESSENTRY32W const& entry)
-    : id_(entry.th32ProcessID),
-      threads_(entry.cntThreads),
-      parent_(entry.th32ParentProcessID),
-      priority_(entry.pcPriClassBase),
-      name_(entry.szExeFile)
+    : id_{entry.th32ProcessID},
+      threads_{entry.cntThreads},
+      parent_{entry.th32ParentProcessID},
+      priority_{entry.pcPriClassBase},
+      name_{entry.szExeFile}
   {
   }
 
@@ -34,11 +34,11 @@ public:
   ProcessEntry& operator=(ProcessEntry const&) = default;
 
   ProcessEntry(ProcessEntry&& other)
-    : id_(other.id_),
-      threads_(other.threads_),
-      parent_(other.parent_),
-      priority_(other.priority_),
-      name_(std::move(other.name_))
+    : id_{other.id_},
+      threads_{other.threads_},
+      parent_{other.parent_},
+      priority_{other.priority_},
+      name_{std::move(other.name_)}
   {
   }
 

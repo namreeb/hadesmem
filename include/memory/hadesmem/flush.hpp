@@ -18,8 +18,8 @@ inline void
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("FlushInstructionCache failed.")
-              << ErrorCodeWinLast(last_error));
+      Error{} << ErrorString{"FlushInstructionCache failed."}
+              << ErrorCodeWinLast{last_error});
   }
 }
 }

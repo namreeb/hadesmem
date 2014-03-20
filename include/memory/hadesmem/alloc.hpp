@@ -17,6 +17,18 @@
 namespace hadesmem
 {
 
+namespace detail
+{
+inline PVOID TryAlloc(Process const& process, SIZE_T size, PVOID base = nullptr)
+{
+  return ::VirtualAllocEx(process.GetHandle(),
+                          base,
+                          size,
+                          MEM_COMMIT | MEM_RESERVE,
+                          PAGE_EXECUTE_READWRITE);
+}
+}
+
 inline PVOID Alloc(Process const& process, SIZE_T size, PVOID base = nullptr)
 {
   PVOID const address = ::VirtualAllocEx(process.GetHandle(),
@@ -49,8 +61,13 @@ inline void Free(Process const& process, LPVOID address)
 class Allocator
 {
 public:
-  explicit Allocator(Process const& process, SIZE_T size, PVOID base = nullptr)
-    : process_{&process}, base_{Alloc(process, size, base)}, size_{size}
+  explicit Allocator(Process const& process,
+                     SIZE_T size,
+                     PVOID base = nullptr,
+                     bool allocated = false)
+    : process_{&process},
+      base_{allocated ? base : Alloc(process, size, base)},
+      size_{size}
   {
     HADESMEM_DETAIL_ASSERT(process_ != 0);
     HADESMEM_DETAIL_ASSERT(base_ != 0);

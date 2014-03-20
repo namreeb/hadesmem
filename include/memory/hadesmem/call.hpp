@@ -366,9 +366,8 @@ private:
     double f64;
   };
 
-  // MSVC Dev12 ICEs on 'Variant arg_{}'.
-  Variant arg_ = Variant{};
-  VariantType type_{VariantType::kNone};
+  Variant arg_;
+  VariantType type_;
 };
 
 namespace detail

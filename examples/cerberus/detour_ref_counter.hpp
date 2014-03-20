@@ -12,7 +12,7 @@ struct DetourRefCounter
 {
 public:
   DetourRefCounter(std::atomic<std::uint32_t>& ref_count)
-    : ref_count_(&ref_count)
+    : ref_count_{ &ref_count }
   {
     ++(*ref_count_);
   }

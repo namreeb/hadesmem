@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -29,9 +30,9 @@ class TlsDir
 {
 public:
   explicit TlsDir(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file), base_(nullptr), data_()
+    : process_{&process}, pe_file_{&pe_file}
   {
-    NtHeaders const nt_headers(process, pe_file);
+    NtHeaders const nt_headers{process, pe_file};
 
     DWORD const data_dir_va =
       nt_headers.GetDataDirectoryVirtualAddress(PeDataDir::TLS);
@@ -40,20 +41,20 @@ public:
     if (!data_dir_va)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("PE file has no TLS directory."));
+        Error{} << ErrorString{"PE file has no TLS directory."});
     }
 
-    base_ = static_cast<PBYTE>(RvaToVa(process, pe_file, data_dir_va));
+    base_ = static_cast<std::uint8_t*>(RvaToVa(process, pe_file, data_dir_va));
     if (!base_)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("TLS directory is invalid."));
+        Error{} << ErrorString{"TLS directory is invalid."});
     }
 
     UpdateRead();
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
@@ -104,7 +105,7 @@ public:
     if (!callbacks_raw)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("TLS callbacks are invalid."));
+        Error{} << ErrorString{"TLS callbacks are invalid."});
     }
 
     for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*process_, callbacks_raw);
@@ -161,8 +162,8 @@ public:
 private:
   Process const* process_;
   PeFile const* pe_file_;
-  PBYTE base_;
-  IMAGE_TLS_DIRECTORY data_;
+  std::uint8_t* base_{};
+  IMAGE_TLS_DIRECTORY data_ = IMAGE_TLS_DIRECTORY{};
 };
 
 inline bool operator==(TlsDir const& lhs, TlsDir const& rhs)

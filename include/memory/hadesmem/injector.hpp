@@ -61,8 +61,7 @@ inline HMODULE InjectDll(Process const& process,
     }
 
     return path;
-  }
-  ();
+  }();
 
   bool const add_path = !!(flags & InjectFlags::kAddToSearchOrder);
   if (add_path && detail::IsPathRelative(path_real))
@@ -93,7 +92,7 @@ inline HMODULE InjectDll(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Allocating memory for module path.");
 
-  Allocator const lib_file_remote(process, path_buf_size);
+  Allocator const lib_file_remote{process, path_buf_size};
 
   HADESMEM_DETAIL_TRACE_A("Writing memory for module path.");
 
@@ -101,7 +100,7 @@ inline HMODULE InjectDll(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Finding LoadLibraryExW.");
 
-  Module const kernel32_mod(process, L"kernel32.dll");
+  Module const kernel32_mod{process, L"kernel32.dll"};
   auto const load_library =
     FindProcedure(process, kernel32_mod, "LoadLibraryExW");
 
@@ -117,8 +116,8 @@ inline HMODULE InjectDll(Process const& process,
   if (!load_library_ret.GetReturnValue())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("LoadLibraryExW failed.")
-              << ErrorCodeWinLast(load_library_ret.GetLastError()));
+      Error{} << ErrorString{"LoadLibraryExW failed."}
+              << ErrorCodeWinLast{load_library_ret.GetLastError()});
   }
 
   return load_library_ret.GetReturnValue();
@@ -126,7 +125,7 @@ inline HMODULE InjectDll(Process const& process,
 
 inline void FreeDll(Process const& process, HMODULE module)
 {
-  Module const kernel32_mod(process, L"kernel32.dll");
+  Module const kernel32_mod{process, L"kernel32.dll"};
   auto const free_library = FindProcedure(process, kernel32_mod, "FreeLibrary");
 
   auto const free_library_ret =
@@ -137,8 +136,8 @@ inline void FreeDll(Process const& process, HMODULE module)
   if (!free_library_ret.GetReturnValue())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error() << ErrorString("FreeLibrary failed.")
-              << ErrorCodeWinLast(free_library_ret.GetLastError()));
+      Error{} << ErrorString{"FreeLibrary failed."}
+              << ErrorCodeWinLast{free_library_ret.GetLastError()});
   }
 }
 
@@ -146,7 +145,7 @@ inline CallResult<DWORD_PTR> CallExport(Process const& process,
                                         HMODULE module,
                                         std::string const& export_name)
 {
-  Module const module_remote(process, module);
+  Module const module_remote{process, module};
   auto const export_ptr = FindProcedure(process, module_remote, export_name);
 
   return Call(
@@ -161,13 +160,19 @@ public:
                                DWORD_PTR export_ret,
                                DWORD export_last_error,
                                detail::SmartHandle&& thread_handle)
-    : process_(process),
-      module_(module),
-      export_ret_(export_ret),
-      export_last_error_(export_last_error),
-      thread_handle_(std::move(thread_handle))
+    : process_{process},
+      module_{module},
+      export_ret_{export_ret},
+      export_last_error_{export_last_error},
+      thread_handle_{std::move(thread_handle)}
   {
   }
+
+  explicit CreateAndInjectData(Process&& process,
+    HMODULE module,
+    DWORD_PTR export_ret,
+    DWORD export_last_error,
+    detail::SmartHandle&& thread_handle) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -176,11 +181,11 @@ public:
   CreateAndInjectData& operator=(CreateAndInjectData const&) = delete;
 
   CreateAndInjectData(CreateAndInjectData&& other)
-    : process_(std::move(other.process_)),
-      module_(other.module_),
-      export_ret_(other.export_ret_),
-      export_last_error_(other.export_last_error_),
-      thread_handle_(std::move(other.thread_handle_))
+    : process_{std::move(other.process_)},
+      module_{other.module_},
+      export_ret_{other.export_ret_},
+      export_last_error_{other.export_last_error_},
+      thread_handle_{std::move(other.thread_handle_)}
   {
   }
 
@@ -239,9 +244,9 @@ public:
     if (::ResumeThread(thread_handle_.GetHandle()) == static_cast<DWORD>(-1))
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("ResumeThread failed.")
-                                      << ErrorCodeWinLast(last_error));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"ResumeThread failed."}
+                                      << ErrorCodeWinLast{last_error});
     }
   }
 
@@ -270,13 +275,12 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
   {
     std::wstring command_line_temp;
     detail::ArgvQuote(&command_line_temp, path, false);
-    std::for_each(args_beg,
-                  args_end,
-                  [&](std::wstring const& arg)
-                  {
+    auto const parse_arg = [&](std::wstring const& arg)
+    {
       command_line_temp += L' ';
       detail::ArgvQuote(&command_line_temp, arg, false);
-    });
+    };
+    std::for_each(args_beg, args_end, parse_arg);
     return command_line_temp;
   }();
 
@@ -296,8 +300,7 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     }
 
     return work_dir;
-  }
-  ();
+  }();
 
   STARTUPINFO start_info;
   ::ZeroMemory(&start_info, sizeof(start_info));
@@ -316,17 +319,17 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
                         &proc_info))
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("CreateProcess failed.")
-                                    << ErrorCodeWinLast(last_error));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"CreateProcess failed."}
+                                    << ErrorCodeWinLast{last_error});
   }
 
-  detail::SmartHandle const proc_handle(proc_info.hProcess);
-  detail::SmartHandle thread_handle(proc_info.hThread);
+  detail::SmartHandle const proc_handle{proc_info.hProcess};
+  detail::SmartHandle thread_handle{proc_info.hThread};
 
   try
   {
-    Process const process(proc_info.dwProcessId);
+    Process const process{proc_info.dwProcessId};
 
     HMODULE const remote_module = InjectDll(process, module, flags);
 
@@ -346,18 +349,16 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
       {
         DWORD const last_error = ::GetLastError();
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("ResumeThread failed.")
-                  << ErrorCodeWinLast(last_error)
-                  << ErrorCodeWinRet(export_ret.GetReturnValue())
-                  << ErrorCodeWinOther(export_ret.GetLastError()));
+          Error{} << ErrorString{"ResumeThread failed."}
+                  << ErrorCodeWinLast{last_error}
+                  << ErrorCodeWinRet{export_ret.GetReturnValue()}
+                  << ErrorCodeWinOther{export_ret.GetLastError()});
       }
     }
 
-    return CreateAndInjectData(process,
-                               remote_module,
-                               export_ret.GetReturnValue(),
-                               export_ret.GetLastError(),
-                               std::move(thread_handle));
+    return CreateAndInjectData{
+      process, remote_module, export_ret.GetReturnValue(),
+      export_ret.GetLastError(), std::move(thread_handle)};
   }
   catch (std::exception const& /*e*/)
   {

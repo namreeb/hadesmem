@@ -40,19 +40,25 @@ public:
   }
 
   explicit ExportIterator(Process const& process, PeFile const& pe_file)
-    : impl_(std::make_shared<Impl>(process, pe_file))
   {
     try
     {
-      ExportDir const export_dir(process, pe_file);
-      impl_->export_ = Export(
-        process, pe_file, static_cast<WORD>(export_dir.GetOrdinalBase()));
+      ExportDir const export_dir{process, pe_file};
+      Export const exp{process, pe_file,
+                       static_cast<WORD>(export_dir.GetOrdinalBase())};
+      impl_ = std::make_shared<Impl>(process, pe_file, exp);
     }
     catch (std::exception const& /*e*/)
     {
-      impl_.reset();
+      // Nothing to do here.
     }
   }
+
+  explicit ExportIterator(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit ExportIterator(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit ExportIterator(Process&& process, PeFile&& pe_file) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -61,7 +67,7 @@ public:
   ExportIterator& operator=(ExportIterator const&) = default;
 
   ExportIterator(ExportIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_))
+    : impl_{std::move(other.impl_)}
   {
   }
 
@@ -92,7 +98,7 @@ public:
     {
       HADESMEM_DETAIL_ASSERT(impl_.get());
 
-      ExportDir const export_dir(*impl_->process_, *impl_->pe_file_);
+      ExportDir const export_dir{*impl_->process_, *impl_->pe_file_};
 
       DWORD* ptr_functions =
         static_cast<DWORD*>(RvaToVa(*impl_->process_,
@@ -118,20 +124,20 @@ public:
       if ((ordinal_number + ordinal_base) < ordinal_base)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Ordinal number overflow."));
+          Error{} << ErrorString{"Ordinal number overflow."});
       }
 
       if (ordinal_number >= num_funcs)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Invalid export number."));
+          Error{} << ErrorString{"Invalid export number."});
       }
 
       WORD const new_procedure_number =
         static_cast<WORD>(ordinal_number + ordinal_base);
 
       impl_->export_ =
-        Export(*impl_->process_, *impl_->pe_file_, new_procedure_number);
+        Export{*impl_->process_, *impl_->pe_file_, new_procedure_number};
     }
     catch (std::exception const& /*e*/)
     {
@@ -143,7 +149,7 @@ public:
 
   ExportIterator operator++(int)
   {
-    ExportIterator const iter(*this);
+    ExportIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -162,10 +168,11 @@ private:
   struct Impl
   {
     explicit Impl(Process const& process,
-                  PeFile const& pe_file) HADESMEM_DETAIL_NOEXCEPT
-      : process_(&process),
-        pe_file_(&pe_file),
-        export_()
+                  PeFile const& pe_file,
+                  Export const& exp) HADESMEM_DETAIL_NOEXCEPT
+      : process_{&process},
+        pe_file_{&pe_file},
+        export_(exp)
     {
     }
 
@@ -187,38 +194,44 @@ public:
   using const_iterator = ExportIterator<Export const>;
 
   explicit ExportList(Process const& process, PeFile const& pe_file)
-    : process_(&process), pe_file_(&pe_file)
+    : process_{&process}, pe_file_{&pe_file}
   {
   }
 
+  explicit ExportList(Process&& process, PeFile const& pe_file) = delete;
+
+  explicit ExportList(Process const& process, PeFile&& pe_file) = delete;
+
+  explicit ExportList(Process&& process, PeFile&& pe_file) = delete;
+
   iterator begin()
   {
-    return ExportList::iterator(*process_, *pe_file_);
+    return iterator{*process_, *pe_file_};
   }
 
   const_iterator begin() const
   {
-    return ExportList::const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   const_iterator cbegin() const
   {
-    return ExportList::const_iterator(*process_, *pe_file_);
+    return const_iterator{*process_, *pe_file_};
   }
 
   iterator end() HADESMEM_DETAIL_NOEXCEPT
   {
-    return ExportList::iterator();
+    return iterator{};
   }
 
   const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ExportList::const_iterator();
+    return const_iterator{};
   }
 
   const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
   {
-    return ExportList::const_iterator();
+    return const_iterator{};
   }
 
 private:

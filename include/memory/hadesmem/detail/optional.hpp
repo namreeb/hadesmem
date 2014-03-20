@@ -17,22 +17,21 @@ namespace detail
 template <typename T> class Optional
 {
 public:
-  HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT : t_(),
-                                                                  valid_(false)
+  HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
-  explicit Optional(T const& t) : t_(), valid_(false)
+  explicit Optional(T const& t)
   {
     Construct(t);
   }
 
-  explicit Optional(T&& t) : t_(), valid_(false)
+  explicit Optional(T&& t)
   {
     Construct(std::move(t));
   }
 
-  Optional(Optional const& other) : t_(), valid_(false)
+  Optional(Optional const& other)
   {
     if (other.valid_)
     {
@@ -42,13 +41,13 @@ public:
 
   Optional& operator=(Optional const& other)
   {
-    Optional tmp(other);
+    Optional tmp{other};
     *this = std::move(tmp);
 
     return *this;
   }
 
-  Optional(Optional&& other) : t_(), valid_(false)
+  Optional(Optional&& other)
   {
     if (other.valid_)
     {
@@ -159,8 +158,8 @@ private:
     }
   }
 
-  std::aligned_storage_t<sizeof(T), std::alignment_of<T>::value> t_;
-  bool valid_;
+  std::aligned_storage_t<sizeof(T), std::alignment_of<T>::value> t_{};
+  bool valid_{false};
 };
 
 template <typename T>

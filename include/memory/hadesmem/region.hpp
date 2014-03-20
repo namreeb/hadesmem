@@ -21,8 +21,8 @@ namespace hadesmem
 class Region
 {
 public:
-  explicit Region(Process const& process, LPCVOID address)
-    : process_(&process), mbi_(detail::Query(process, address))
+  explicit Region(Process const& process, void const* address)
+    : process_{&process}, mbi_(detail::Query(process, address))
   {
   }
 

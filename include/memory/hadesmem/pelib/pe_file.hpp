@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <ostream>
@@ -33,42 +34,44 @@ class PeFile
 {
 public:
   explicit PeFile(Process const& process,
-                  PVOID address,
+                  void* address,
                   PeFileType type,
                   DWORD size)
-    : process_(&process),
-      base_(static_cast<PBYTE>(address)),
-      type_(type),
-      size_(size)
+    : process_{&process},
+      base_{static_cast<std::uint8_t*>(address)},
+      type_{type},
+      size_{size}
   {
     HADESMEM_DETAIL_ASSERT(base_ != 0);
     if (type == PeFileType::Data && !size)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid file size."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid file size."});
     }
 
     if (type == PeFileType::Image && !size)
     {
-      RegionList regions(*process_);
-      for (auto const& region : regions)
+      RegionList regions{*process_};
+      auto iter = std::find_if(std::begin(regions),
+                               std::end(regions),
+                               [&](Region const& region)
+                               { return region.GetAllocBase() == base_; });
+      while (iter != std::end(regions) && iter->GetAllocBase() == base_)
       {
-        if (region.GetAllocBase() == base_)
-        {
-          SIZE_T const region_size = region.GetSize();
-          HADESMEM_DETAIL_ASSERT(region_size <
-            (std::numeric_limits<DWORD>::max)());
-          size_ += static_cast<DWORD>(region_size);
-          HADESMEM_DETAIL_ASSERT(size_ >= region_size);
-        }
-
-        if (region.GetAllocBase() > base_)
-        {
-          break;
-        }
+        SIZE_T const region_size = iter->GetSize();
+        HADESMEM_DETAIL_ASSERT(region_size <
+                               (std::numeric_limits<DWORD>::max)());
+        size_ += static_cast<DWORD>(region_size);
+        HADESMEM_DETAIL_ASSERT(size_ >= region_size);
+        ++iter;
       }
     }
   }
+
+  explicit PeFile(Process&& process,
+                  void* address,
+                  PeFileType type,
+                  DWORD size) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -159,8 +162,8 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     IMAGE_DOS_HEADER dos_header = Read<IMAGE_DOS_HEADER>(process, base);
     if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid DOS header."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid DOS header."});
     }
 
     BYTE* ptr_nt_headers = base + dos_header.e_lfanew;
@@ -168,8 +171,8 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       Read<IMAGE_NT_HEADERS>(process, ptr_nt_headers);
     if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Invalid NT headers."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid NT headers."});
     }
 
     // Windows will load specially crafted images with no sections.
@@ -216,7 +219,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       return nullptr;
     }
 
-    IMAGE_SECTION_HEADER* ptr_section_header =
+    auto ptr_section_header =
       reinterpret_cast<PIMAGE_SECTION_HEADER>(
         ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
         nt_headers.FileHeader.SizeOfOptionalHeader);
@@ -332,8 +335,8 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
   }
   else
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("Unhandled file type."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Unhandled file type."});
   }
 }
 
@@ -355,7 +358,7 @@ std::basic_string<CharT> CheckedReadString(Process const& process,
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     if (address >= file_end)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error() << ErrorString("Invalid VA."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Invalid VA."});
     }
     // Handle EOF termination.
     // Sample: maxsecXP.exe (Corkami PE Corpus)
@@ -364,8 +367,8 @@ std::basic_string<CharT> CheckedReadString(Process const& process,
   else
   {
     HADESMEM_DETAIL_ASSERT(false);
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("Unknown PE file type."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Unknown PE file type."});
   }
 }
 }

@@ -41,7 +41,7 @@ namespace detail
 
 inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
 {
-  ThreadList threads(pid);
+  ThreadList threads{pid};
   for (auto const& thread_entry : threads)
   {
     if (thread_entry.GetId() == ::GetCurrentThreadId())
@@ -49,7 +49,7 @@ inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
       continue;
     }
 
-    Thread const thread(thread_entry.GetId());
+    Thread const thread{thread_entry.GetId()};
     auto const context = GetThreadContext(thread, CONTEXT_CONTROL);
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     auto const ip = reinterpret_cast<void const*>(context.Rip);
@@ -61,7 +61,7 @@ inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
     if (target <= ip && ip < static_cast<std::uint8_t*>(target) + len)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Thread is currently executing patch target."));
+        Error{} << ErrorString{"Thread is currently executing patch target."});
     }
   }
 }
@@ -71,22 +71,26 @@ class PatchRaw
 {
 public:
   explicit PatchRaw(Process const& process,
-                    PVOID target,
-                    std::vector<BYTE> const& data)
-    : process_(&process), applied_(false), target_(target), data_(data), orig_()
+                    void* target,
+                    std::vector<std::uint8_t> const& data)
+    : process_{&process}, target_{target}, data_{data}
   {
   }
+
+  explicit PatchRaw(Process&& process,
+                    PVOID target,
+                    std::vector<std::uint8_t> const& data) = delete;
 
   PatchRaw(PatchRaw const& other) = delete;
 
   PatchRaw& operator=(PatchRaw const& other) = delete;
 
   PatchRaw(PatchRaw&& other)
-    : process_(other.process_),
-      applied_(other.applied_),
-      target_(other.target_),
-      data_(std::move(other.data_)),
-      orig_(std::move(other.orig_))
+    : process_{other.process_},
+      applied_{other.applied_},
+      target_{other.target_},
+      data_{std::move(other.data_)},
+      orig_{std::move(other.orig_)}
   {
     other.process_ = nullptr;
     other.applied_ = false;
@@ -130,11 +134,11 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process{process_->GetId()};
 
     detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
 
-    orig_ = ReadVector<BYTE>(*process_, target_, data_.size());
+    orig_ = ReadVector<std::uint8_t>(*process_, target_, data_.size());
 
     WriteVector(*process_, target_, data_);
 
@@ -150,7 +154,7 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process{process_->GetId()};
 
     detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
 
@@ -185,10 +189,10 @@ private:
   }
 
   Process const* process_;
-  bool applied_;
+  bool applied_{false};
   PVOID target_;
   std::vector<BYTE> data_;
-  std::vector<BYTE> orig_;
+  std::vector<std::uint8_t> orig_;
 };
 
 class PatchDetour
@@ -198,13 +202,9 @@ public:
   explicit PatchDetour(Process const& process,
                        TargetFuncT target,
                        DetourFuncT detour)
-    : process_(&process),
-      applied_(false),
-      target_(detail::UnionCast<PVOID>(target)),
-      detour_(detail::UnionCast<PVOID>(detour)),
-      trampoline_(),
-      orig_(),
-      trampolines_()
+    : process_{&process},
+      target_{detail::UnionCast<void*>(target)},
+      detour_{detail::UnionCast<void*>(detour)}
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
                                   std::is_pointer<TargetFuncT>::value);
@@ -212,18 +212,23 @@ public:
                                   std::is_pointer<DetourFuncT>::value);
   }
 
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchDetour(Process&& process,
+                       TargetFuncT target,
+                       DetourFuncT detour) = delete;
+
   PatchDetour(PatchDetour const& other) = delete;
 
   PatchDetour& operator=(PatchDetour const& other) = delete;
 
   PatchDetour(PatchDetour&& other)
-    : process_(other.process_),
-      applied_(other.applied_),
-      target_(other.target_),
-      detour_(other.detour_),
-      trampoline_(std::move(other.trampoline_)),
-      orig_(std::move(other.orig_)),
-      trampolines_(std::move(other.trampolines_))
+    : process_{other.process_},
+      applied_{other.applied_},
+      target_{other.target_},
+      detour_{other.detour_},
+      trampoline_{std::move(other.trampoline_)},
+      orig_{std::move(other.orig_)},
+      trampolines_{std::move(other.trampolines_)}
   {
     other.process_ = nullptr;
     other.applied_ = false;
@@ -268,16 +273,16 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process{process_->GetId()};
 
     std::uint32_t const kMaxInstructionLen = 15;
     std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
 
     trampoline_ = std::make_unique<Allocator>(*process_, kTrampSize);
-    PBYTE tramp_cur = static_cast<PBYTE>(trampoline_->GetBase());
+    auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
-    std::vector<BYTE> const buffer(
-      ReadVector<BYTE>(*process_, target_, kTrampSize));
+    auto const buffer =
+      ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
 
     ud_t ud_obj;
     ud_init(&ud_obj);
@@ -302,8 +307,8 @@ public:
       std::uint32_t const len = ud_disassemble(&ud_obj);
       if (len == 0)
       {
-        HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                        << ErrorString("Disassembly failed."));
+        HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                        << ErrorString{"Disassembly failed."});
       }
 
 #if !defined(HADESMEM_NO_TRACE)
@@ -323,28 +328,26 @@ public:
       if ((ud_obj.mnemonic == UD_Ijmp || ud_obj.mnemonic == UD_Icall) && op &&
           (is_jimm || is_jmem))
       {
-        std::int64_t insn_target = 0;
         std::uint16_t const size = is_jimm ? op->size : op->offset;
         HADESMEM_DETAIL_TRACE_FORMAT_A("Operand/offset size is %hu.", size);
-        switch (size)
+        std::int64_t const insn_target = [&]()->std::int64_t
         {
-        case sizeof(std::int8_t) * CHAR_BIT:
-          insn_target = op->lval.sbyte;
-          break;
-        case sizeof(std::int16_t) * CHAR_BIT:
-          insn_target = op->lval.sword;
-          break;
-        case sizeof(std::int32_t) * CHAR_BIT:
-          insn_target = op->lval.sdword;
-          break;
-        case sizeof(std::int64_t) * CHAR_BIT:
-          insn_target = op->lval.sqword;
-          break;
-        default:
-          HADESMEM_DETAIL_ASSERT(false);
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Unknown instruction size."));
-        }
+          switch (size)
+          {
+          case sizeof(std::int8_t) * CHAR_BIT:
+            return op->lval.sbyte;
+          case sizeof(std::int16_t) * CHAR_BIT:
+            return op->lval.sword;
+          case sizeof(std::int32_t) * CHAR_BIT:
+            return op->lval.sdword;
+          case sizeof(std::int64_t) * CHAR_BIT:
+            return op->lval.sqword;
+          default:
+            HADESMEM_DETAIL_ASSERT(false);
+            HADESMEM_DETAIL_THROW_EXCEPTION(
+              Error{} << ErrorString{"Unknown instruction size."});
+          }
+        }();
 
         auto const resolve_rel = [](
           std::uint64_t base, std::int64_t target, std::uint32_t insn_len)
@@ -374,7 +377,7 @@ public:
       }
       else
       {
-        uint8_t const* const raw = ud_insn_ptr(&ud_obj);
+        std::uint8_t const* const raw = ud_insn_ptr(&ud_obj);
         Write(*process_, tramp_cur, raw, raw + len);
         tramp_cur += len;
       }
@@ -382,13 +385,13 @@ public:
       instr_size += len;
     } while (instr_size < jump_size);
 
-    tramp_cur +=
-      WriteJump(tramp_cur, static_cast<PBYTE>(target_) + instr_size, true);
+    tramp_cur += WriteJump(
+      tramp_cur, static_cast<std::uint8_t*>(target_) + instr_size, true);
 
     FlushInstructionCache(
       *process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    orig_ = ReadVector<BYTE>(*process_, target_, jump_size);
+    orig_ = ReadVector<std::uint8_t>(*process_, target_, jump_size);
 
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
@@ -406,7 +409,7 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process(process_->GetId());
+    SuspendedProcess const suspended_process{process_->GetId()};
 
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
     detail::VerifyPatchThreads(
@@ -462,53 +465,49 @@ private:
   std::unique_ptr<Allocator> AllocatePageNear(PVOID address)
   {
     SYSTEM_INFO sys_info;
-    ZeroMemory(&sys_info, sizeof(sys_info));
+    ::ZeroMemory(&sys_info, sizeof(sys_info));
     GetSystemInfo(&sys_info);
     DWORD const page_size = sys_info.dwPageSize;
 
 #if defined(_M_AMD64)
-    LONG_PTR const search_beg = (std::max)(
-      reinterpret_cast<LONG_PTR>(address) - 0x7FFFFF00LL,
-      reinterpret_cast<LONG_PTR>(sys_info.lpMinimumApplicationAddress));
-    LONG_PTR const search_end = (std::min)(
-      reinterpret_cast<LONG_PTR>(address) + 0x7FFFFF00LL,
-      reinterpret_cast<LONG_PTR>(sys_info.lpMaximumApplicationAddress));
+    std::intptr_t const search_beg = (std::max)(
+      reinterpret_cast<std::intptr_t>(address) - 0x7FFFFF00LL,
+      reinterpret_cast<std::intptr_t>(sys_info.lpMinimumApplicationAddress));
+    std::intptr_t const search_end = (std::min)(
+      reinterpret_cast<std::intptr_t>(address) + 0x7FFFFF00LL,
+      reinterpret_cast<std::intptr_t>(sys_info.lpMaximumApplicationAddress));
 
     std::unique_ptr<Allocator> trampoline;
 
-    auto const allocate_tramp = [](Process const & process,
+    auto const allocate_tramp = [](Process const& process,
                                    PVOID addr,
                                    SIZE_T size)->std::unique_ptr<Allocator>
     {
-      try
-      {
-        return std::make_unique<Allocator>(process, size, addr);
-      }
-      catch (std::exception const& /*e*/)
-      {
-        return std::unique_ptr<Allocator>();
-      }
+      auto const new_addr = detail::TryAlloc(process, size, addr);
+      return new_addr ? std::make_unique<Allocator>(process, size, new_addr, true)
+                     : std::unique_ptr<Allocator>();
     };
 
-    for (LONG_PTR base = reinterpret_cast<LONG_PTR>(address), index = 0;
+    for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
+                       index = 0;
          base + index < search_end || base - index > search_beg;
          index += page_size)
     {
-      LONG_PTR const higher = base + index;
+      std::intptr_t const higher = base + index;
       if (higher < search_end)
       {
         if (trampoline = allocate_tramp(
-              *process_, reinterpret_cast<PVOID>(higher), page_size))
+              *process_, reinterpret_cast<void*>(higher), page_size))
         {
           break;
         }
       }
 
-      LONG_PTR const lower = base - index;
+      std::intptr_t const lower = base - index;
       if (lower > search_beg)
       {
         if (trampoline = allocate_tramp(
-              *process_, reinterpret_cast<PVOID>(lower), page_size))
+              *process_, reinterpret_cast<void*>(lower), page_size))
         {
           break;
         }
@@ -518,7 +517,7 @@ private:
     if (!trampoline)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find trampoline memory block."));
+        Error{} << ErrorString{"Failed to find trampoline memory block."});
     }
 
     return trampoline;
@@ -612,8 +611,8 @@ private:
         {
           // We're out of options...
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            Error() << ErrorString("Unable to use a relative or trampoline "
-                                   "jump, and push/ret fallback is disabled."));
+            Error{} << ErrorString{"Unable to use a relative or trampoline "
+                                   "jump, and push/ret fallback is disabled."});
         }
 
         HADESMEM_DETAIL_TRACE_A("Using push/ret 'jump'.");
@@ -675,8 +674,8 @@ private:
     HADESMEM_DETAIL_ASSERT(stub_size == expected_stub_size);
     if (stub_size != expected_stub_size)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Unexpected stub size."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Unexpected stub size."});
     }
 
     jump_buf.resize(stub_size);
@@ -691,7 +690,7 @@ private:
       if (stub_size_real != kJumpSize32)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error() << ErrorString("Unexpected real stub size."));
+          Error{} << ErrorString{"Unexpected real stub size."});
       }
       jump_buf.erase(std::begin(jump_buf) + stub_size_real, std::end(jump_buf));
       HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
@@ -744,8 +743,8 @@ private:
     HADESMEM_DETAIL_ASSERT(stub_size == expected_stub_size);
     if (stub_size != expected_stub_size)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Unexpected stub size."));
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Unexpected stub size."});
     }
 
     std::vector<std::uint8_t> jump_buf(stub_size);
@@ -772,7 +771,7 @@ private:
 #endif
 
   Process const* process_;
-  bool applied_;
+  bool applied_{false};
   PVOID target_;
   PVOID detour_;
   std::unique_ptr<Allocator> trampoline_;

@@ -35,24 +35,24 @@ public:
   explicit ProtectGuard(Process const& process,
                         PVOID address,
                         ProtectGuardType type)
-    : ProtectGuard(process, Query(process, address), type)
+    : ProtectGuard{process, Query(process, address), type}
   {
   }
 
   explicit ProtectGuard(Process const& process,
                         MEMORY_BASIC_INFORMATION const& mbi,
                         ProtectGuardType type)
-    : process_(&process),
-      type_(type),
-      can_read_or_write_(false),
-      old_protect_(0),
+    : process_{&process},
+      type_{type},
+      can_read_or_write_{false},
+      old_protect_{0},
       mbi_(mbi)
   {
     if (IsBadProtect(mbi_))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString(
-                     "Attempt to access page with a 'bad' protection mask."));
+        Error{} << ErrorString{
+                     "Attempt to access page with a 'bad' protection mask."});
     }
 
     can_read_or_write_ =
@@ -64,15 +64,23 @@ public:
     }
   }
 
+  explicit ProtectGuard(Process&& process,
+    PVOID address,
+    ProtectGuardType type) = delete;
+
+  explicit ProtectGuard(Process&& process,
+    MEMORY_BASIC_INFORMATION const& mbi,
+    ProtectGuardType type) = delete;
+
   ProtectGuard(ProtectGuard const& other) = delete;
 
   ProtectGuard& operator=(ProtectGuard const& other) = delete;
 
   ProtectGuard(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
-    : process_(other.process_),
-      type_(other.type_),
-      can_read_or_write_(other.can_read_or_write_),
-      old_protect_(other.old_protect_),
+    : process_{other.process_},
+      type_{other.type_},
+      can_read_or_write_{other.can_read_or_write_},
+      old_protect_{other.old_protect_},
       mbi_(other.mbi_)
   {
     other.old_protect_ = 0;

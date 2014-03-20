@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include <windows.h>
@@ -33,40 +34,46 @@ inline void OutputDebugString(wchar_t const* const s)
 #if !defined(HADESMEM_NO_TRACE)
 
 #define HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN                           \
-  \
-do                                                                        \
+                                                                               \
+  do                                                                           \
   \
 {
 
 #define HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END                             \
   \
 }                                                                         \
-  while ((void)0, 0)
+  \
+while((void)0, 0)
 
-#define HADESMEM_DETAIL_TRACE_RAW(x) hadesmem::detail::OutputDebugString(x)
+#define HADESMEM_DETAIL_TRACE_RAW(x) ::hadesmem::detail::OutputDebugString(x)
+
+template <typename CharT, typename FuncT, typename FormatT, typename... Args>
+void TraceFormatImpl(FuncT func, FormatT format, Args&&... args)
+{
+  std::int32_t const num_char =
+    func(nullptr, 0, format, std::forward<Args>(args)...);
+  HADESMEM_DETAIL_ASSERT(num_char > 0);
+  if (num_char > 0)
+  {
+    std::vector<CharT> trace_buffer(static_cast<std::size_t>(num_char + 1));
+    std::int32_t const num_char_actual =
+      func(trace_buffer.data(),
+           static_cast<std::size_t>(num_char),
+           format,
+           std::forward<Args>(args)...);
+    HADESMEM_DETAIL_ASSERT(num_char_actual > 0);
+    (void)num_char_actual;
+    std::wstringstream formatter;
+    formatter << __FUNCTION__ << ": " << trace_buffer.data() << "\n";
+    HADESMEM_DETAIL_TRACE_RAW(formatter.str().c_str());
+  }
+}
 
 #define HADESMEM_DETAIL_TRACE_FORMAT_IMPL(                                     \
   detail_char_type, detail_format_func, detail_format, ...)                    \
                                                                                \
-  HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN std::int32_t const              \
-    detail_num_char =                                                          \
-      detail_format_func(nullptr, 0, detail_format, __VA_ARGS__);              \
-  HADESMEM_DETAIL_ASSERT(detail_num_char > 0);                                 \
-  if (detail_num_char > 0)                                                     \
-  {                                                                            \
-    std::vector<detail_char_type> detail_trace_buffer(                         \
-      static_cast<std::size_t>(detail_num_char + 1));                          \
-    std::int32_t const detail_num_char_actual =                                \
-      detail_format_func(detail_trace_buffer.data(),                           \
-                         static_cast<std::size_t>(detail_num_char),            \
-                         detail_format,                                        \
-                         __VA_ARGS__);                                         \
-    HADESMEM_DETAIL_ASSERT(detail_num_char_actual > 0);                        \
-    (void) detail_num_char_actual;                                             \
-    std::wstringstream formatter;                                              \
-    formatter << __FUNCTION__ << ": " << detail_trace_buffer.data() << "\n";   \
-    HADESMEM_DETAIL_TRACE_RAW(formatter.str().c_str());                        \
-  }                                                                            \
+  HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN TraceFormatImpl<                \
+    detail_char_type>(detail_format_func, detail_format, __VA_ARGS__);         \
   HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END
 
 #define HADESMEM_DETAIL_TRACE_FORMAT_A(format, ...)                            \

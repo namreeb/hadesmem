@@ -313,12 +313,10 @@ int main(int argc, char* argv[])
     TCLAP::CmdLine cmd("PE file format dumper", ' ', HADESMEM_VERSION_STRING);
     TCLAP::ValueArg<DWORD> pid_arg(
       "p", "pid", "Target process id", false, 0, "DWORD");
-    TCLAP::ValueArg<std::string> file_arg(
-      "f", "file", "Target file", false, "", "string");
-    TCLAP::ValueArg<std::string> dir_arg(
-      "d", "dir", "Target directory", false, "", "string");
+    TCLAP::ValueArg<std::string> path_arg(
+      "f", "path", "Target path (file or directory)", false, "", "string");
     TCLAP::SwitchArg all_arg("a", "all", "No target, dump everything");
-    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &file_arg, &dir_arg, &all_arg};
+    std::vector<TCLAP::Arg*> xor_args{ &pid_arg, &path_arg, &all_arg };
     cmd.xorAdd(xor_args);
     TCLAP::SwitchArg warned_arg(
       "w", "warned", "Dump list of files which cause warnings", cmd);
@@ -410,13 +408,17 @@ int main(int argc, char* argv[])
           << hadesmem::ErrorString("Failed to find requested process."));
       }
     }
-    else if (file_arg.isSet())
+    else if (path_arg.isSet())
     {
-      DumpFile(hadesmem::detail::MultiByteToWideChar(file_arg.getValue()));
-    }
-    else if (dir_arg.isSet())
-    {
-      DumpDir(hadesmem::detail::MultiByteToWideChar(dir_arg.getValue()));
+      auto const path = hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
+      if (hadesmem::detail::IsDirectory(path))
+      {
+        DumpDir(path);
+      }
+      else
+      {
+        DumpFile(path);
+      }
     }
     else
     {

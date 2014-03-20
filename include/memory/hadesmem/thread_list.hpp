@@ -35,8 +35,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ThreadIterator() HADESMEM_DETAIL_NOEXCEPT : impl_(),
-                                                                        pid_(0)
+  HADESMEM_DETAIL_CONSTEXPR ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
   {
   }
 
@@ -58,7 +57,7 @@ public:
 
     if (IsTargetThread(entry->th32OwnerProcessID))
     {
-      impl_->thread_ = ThreadEntry(*entry);
+      impl_->thread_ = ThreadEntry{*entry};
     }
     else
     {
@@ -73,8 +72,8 @@ public:
   ThreadIterator& operator=(ThreadIterator const&) = default;
 
   ThreadIterator(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_(std::move(other.impl_)),
-      pid_(other.pid_)
+    : impl_{std::move(other.impl_)},
+      pid_{other.pid_}
   {
   }
 
@@ -111,7 +110,7 @@ public:
 
   ThreadIterator operator++(int)
   {
-    ThreadIterator const iter(*this);
+    ThreadIterator const iter{*this};
     ++*this;
     return iter;
   }
@@ -141,7 +140,7 @@ private:
 
       if (IsTargetThread(entry->th32OwnerProcessID))
       {
-        impl_->thread_ = ThreadEntry(*entry);
+        impl_->thread_ = ThreadEntry{*entry};
         break;
       }
     }
@@ -161,7 +160,7 @@ private:
   // Using a shared_ptr to provide shallow copy semantics, as
   // required by InputIterator.
   std::shared_ptr<Impl> impl_;
-  DWORD pid_;
+  DWORD pid_{0};
 };
 
 class ThreadList
@@ -172,7 +171,6 @@ public:
   using const_iterator = ThreadIterator<ThreadEntry const>;
 
   HADESMEM_DETAIL_CONSTEXPR ThreadList() HADESMEM_DETAIL_NOEXCEPT
-    : pid_(static_cast<DWORD>(-1))
   {
   }
 
@@ -212,6 +210,6 @@ public:
   }
 
 private:
-  DWORD pid_;
+  DWORD pid_{static_cast<DWORD>(-1)};
 };
 }
