@@ -30,11 +30,20 @@
 
 // Modified version of code from http://bit.ly/1iizOJR.
 
-ID3D11Device* g_device = nullptr;
-ID3D11DeviceContext* g_device_context = nullptr;
-
 namespace
 {
+
+ID3D11Device*& GetDevice()
+{
+  static ID3D11Device* device;
+  return device;
+}
+
+ID3D11DeviceContext*& GetDeviceContext()
+{
+  static ID3D11DeviceContext* device_context;
+  return device_context;
+}
 
 std::unique_ptr<hadesmem::PatchDetour>& GetIDXGISwapChainPresentDetour()
 {
@@ -95,9 +104,12 @@ extern "C" HRESULT WINAPI
   static std::once_flag once;
   auto const init = [&]()
   {
-    if (SUCCEEDED(swap_chain->GetDevice(__uuidof(g_device), reinterpret_cast<void**>(&g_device))))
+    auto& device = GetDevice();
+    auto& device_context = GetDeviceContext();
+    if (SUCCEEDED(swap_chain->GetDevice(__uuidof(device),
+                                        reinterpret_cast<void**>(&device))))
     {
-      g_device->GetImmediateContext(&g_device_context);
+      device->GetImmediateContext(&device_context);
 
       // Put init code here.
     }
@@ -192,18 +204,50 @@ D3D11Funcs FindD3D11Funcs()
   IDXGISwapChain* swap_chain = nullptr;
   ID3D11Device* device = nullptr;
   ID3D11DeviceContext* device_context = nullptr;
-  HRESULT const hr = ::D3D11CreateDeviceAndSwapChain(nullptr,
-                                                   D3D_DRIVER_TYPE_HARDWARE,
-                                                   nullptr,
-                                                   0,
-                                                   &feature_level,
-                                                   1,
-                                                   D3D11_SDK_VERSION,
-                                                   &swap_chain_desc,
-                                                   &swap_chain,
-                                                   &device,
-                                                   nullptr,
-                                                   &device_context);
+  using D3D11CreateDeviceAndSwapChainFn =
+    HRESULT (*)(IDXGIAdapter* pAdapter,
+                D3D_DRIVER_TYPE DriverType,
+                HMODULE Software,
+                UINT Flags,
+                const D3D_FEATURE_LEVEL* pFeatureLevels,
+                UINT FeatureLevels,
+                UINT SDKVersion,
+                const DXGI_SWAP_CHAIN_DESC* pSwapChainDesc,
+                IDXGISwapChain** ppSwapChain,
+                ID3D11Device** ppDevice,
+                D3D_FEATURE_LEVEL* pFeatureLevel,
+                ID3D11DeviceContext** ppImmediateContext);
+  HMODULE const d3d11mod = ::GetModuleHandleW(L"d3d11.dll");
+  if (!d3d11mod)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"GetModuleHandle failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+  auto const d3d11_create_device_and_swap_chain =
+    reinterpret_cast<D3D11CreateDeviceAndSwapChainFn>(
+      ::GetProcAddress(d3d11mod, "D3D11CreateDeviceAndSwapChain"));
+  if (!d3d11_create_device_and_swap_chain)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"GetProcAddress failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+  HRESULT const hr =
+    d3d11_create_device_and_swap_chain(nullptr,
+                                       D3D_DRIVER_TYPE_HARDWARE,
+                                       nullptr,
+                                       0,
+                                       &feature_level,
+                                       1,
+                                       D3D11_SDK_VERSION,
+                                       &swap_chain_desc,
+                                       &swap_chain,
+                                       &device,
+                                       nullptr,
+                                       &device_context);
   if (FAILED(hr))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -216,7 +260,7 @@ D3D11Funcs FindD3D11Funcs()
   hadesmem::detail::SmartComHandle const device_context_cleanup(device_context);
 
   void** swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
-  void** device_context_vtable = *reinterpret_cast<void***>(g_device_context);
+  void** device_context_vtable = *reinterpret_cast<void***>(device_context);
 
   D3D11Funcs funcs{};
   funcs.present = swap_chain_vtable[8];
