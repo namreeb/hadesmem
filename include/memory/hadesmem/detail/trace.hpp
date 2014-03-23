@@ -48,7 +48,7 @@ while((void)0, 0)
 #define HADESMEM_DETAIL_TRACE_RAW(x) ::hadesmem::detail::OutputDebugString(x)
 
 template <typename CharT, typename FuncT, typename FormatT, typename... Args>
-void TraceFormatImpl(FuncT func, FormatT format, Args&&... args)
+void TraceFormatImpl(char const* function, FuncT func, FormatT format, Args&&... args)
 {
   std::int32_t const num_char =
     func(nullptr, 0, format, std::forward<Args>(args)...);
@@ -64,7 +64,7 @@ void TraceFormatImpl(FuncT func, FormatT format, Args&&... args)
     HADESMEM_DETAIL_ASSERT(num_char_actual > 0);
     (void)num_char_actual;
     std::wstringstream formatter;
-    formatter << __FUNCTION__ << ": " << trace_buffer.data() << "\n";
+    formatter << function << ": " << trace_buffer.data() << "\n";
     HADESMEM_DETAIL_TRACE_RAW(formatter.str().c_str());
   }
 }
@@ -73,7 +73,7 @@ void TraceFormatImpl(FuncT func, FormatT format, Args&&... args)
   detail_char_type, detail_format_func, detail_format, ...)                    \
                                                                                \
   HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN TraceFormatImpl<                \
-    detail_char_type>(detail_format_func, detail_format, __VA_ARGS__);         \
+    detail_char_type>(__FUNCTION__, detail_format_func, detail_format, __VA_ARGS__);         \
   HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END
 
 #define HADESMEM_DETAIL_TRACE_FORMAT_A(format, ...)                            \
