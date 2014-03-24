@@ -27,7 +27,11 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     DetourNtQuerySystemInformation();
     DetourNtQueryDirectoryFile();
     DetourNtMapViewOfSection();
-    DetourD3D11();
+
+    // If these aren't currently loaded they will be hooked on load via the
+    // NtMapViewOfSection hook.
+    DetourD3D11(nullptr);
+    DetourDXGI(nullptr);
   }
   catch (...)
   {
@@ -46,6 +50,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     UndetourNtQuerySystemInformation();
     UndetourNtQueryDirectoryFile();
     UndetourNtMapViewOfSection();
+    UndetourDXGI();
     UndetourD3D11();
   }
   catch (...)

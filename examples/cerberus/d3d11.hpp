@@ -3,6 +3,10 @@
 
 #pragma once
 
-void DetourD3D11();
+void DetourD3D11(HMODULE base);
+
+void DetourDXGI(HMODULE base);
 
 void UndetourD3D11();
+
+void UndetourDXGI();

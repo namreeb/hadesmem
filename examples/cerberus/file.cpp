@@ -190,7 +190,7 @@ void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
 {
   HADESMEM_DETAIL_ASSERT(length >= sizeof(BufferT));
 
-  HADESMEM_DETAIL_TRACE_A("EnumFiles: Enumerating files.");
+  HADESMEM_DETAIL_TRACE_A("Enumerating files.");
   for (DirectoryFileInformationEnum<kInfoClass, BufferT> directory_info{
          file_information, length, status};
        directory_info.IsValid();
@@ -199,17 +199,16 @@ void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
     if (directory_info.HasName())
     {
       auto const file_name = directory_info.GetName();
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"EnumFiles: Name: [%s].",
-                                     file_name.c_str());
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", file_name.c_str());
       if (file_name == L"hades.exe")
       {
-        HADESMEM_DETAIL_TRACE_A("EnumFiles: Unlinking file.");
+        HADESMEM_DETAIL_TRACE_A("Unlinking file.");
         directory_info.Unlink();
       }
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("EnumFiles: WARNING! Invalid name.");
+      HADESMEM_DETAIL_TRACE_A("WARNING! Invalid name.");
     }
   }
 }
@@ -231,8 +230,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
 
   hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "NtQueryDirectoryFileDetour: Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] "
-    "[%d] [%u] [%p] [%u].",
+    "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%u] [%p] [%u].",
     file_handle,
     event,
     apc_routine,
@@ -260,8 +258,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
                                      file_name,
                                      restart_scan);
   last_error.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("NtQueryDirectoryFileDetour: Ret: [%ld].",
-                                 ret);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (file_information_class != winternl::FileDirectoryInformation &&
       file_information_class != winternl::FileFullDirectoryInformation &&
@@ -270,22 +267,19 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
       file_information_class != winternl::FileIdBothDirectoryInformation &&
       file_information_class != winternl::FileIdFullDirectoryInformation)
   {
-    HADESMEM_DETAIL_TRACE_A(
-      "NtQueryDirectoryFileDetour: WARNING! Unhandled information class.");
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled information class.");
     return ret;
   }
 
   if (apc_routine)
   {
-    HADESMEM_DETAIL_TRACE_A(
-      "NtQueryDirectoryFileDetour: WARNING! Unhandled asynchronous call.");
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled asynchronous call.");
     return ret;
   }
 
   if (!NT_SUCCESS(ret))
   {
-    HADESMEM_DETAIL_TRACE_A(
-      "NtQueryDirectoryFileDetour: Trampoline returned failure.");
+    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
     return ret;
   }
 
@@ -378,23 +372,20 @@ void DetourNtQueryDirectoryFile()
                                             nt_query_directory_file_ptr,
                                             nt_query_directory_file_detour);
   detour->Apply();
-  HADESMEM_DETAIL_TRACE_A(
-    "DetourNtQueryDirectoryFile: NtQueryDirectoryFile detoured.");
+  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile detoured.");
 }
 
 void UndetourNtQueryDirectoryFile()
 {
   auto& detour = GetNtQueryDirectoryFileDetour();
   detour->Remove();
-  HADESMEM_DETAIL_TRACE_A(
-    "UndetourNtQueryDirectoryFile: NtQueryDirectoryFile undetoured.");
+  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile undetoured.");
   detour = nullptr;
 
   auto& ref_count = GetNtQueryDirectoryFileRefCount();
   while (ref_count.load())
   {
-    HADESMEM_DETAIL_TRACE_A("UndetourNtQueryDirectoryFile: Spinning on ref count.");
+    HADESMEM_DETAIL_TRACE_A("Spinning on NtQueryDirectoryFile ref count.");
   }
-  HADESMEM_DETAIL_TRACE_A(
-    "UndetourNtQueryDirectoryFile: NtQueryDirectoryFile free of references.");
+  HADESMEM_DETAIL_TRACE_A("NtQueryDirectoryFile free of references.");
 }

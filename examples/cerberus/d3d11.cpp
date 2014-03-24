@@ -21,14 +21,11 @@
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/detail/last_error.hpp>
 #include <hadesmem/find_procedure.hpp>
-#include <hadesmem/module.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
-
-// Modified version of code from http://bit.ly/1iizOJR.
 
 namespace
 {
@@ -57,33 +54,55 @@ std::atomic<std::uint32_t>& GetIDXGISwapChainPresentRefCount()
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetID3D11DeviceContextDrawIndexedDetour()
+std::unique_ptr<hadesmem::PatchDetour>& GetIDXGIFactoryCreateSwapChainDetour()
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetID3D11DeviceContextDrawIndexedRefCount()
+std::atomic<std::uint32_t>& GetIDXGIFactoryCreateSwapChainRefCount()
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetID3D11DeviceContextClearRenderTargetViewDetour()
+std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceDetour()
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetID3D11DeviceContextClearRenderTargetViewRefCount()
+std::atomic<std::uint32_t>& GetD3D11CreateDeviceRefCount()
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
+std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceAndSwapChainDetour()
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::atomic<std::uint32_t>& GetD3D11CreateDeviceAndSwapChainRefCount()
+{
+  static std::atomic<std::uint32_t> ref_count;
+  return ref_count;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>& GetCreateDXGIFactoryDetour()
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::atomic<std::uint32_t>& GetCreateDXGIFactoryRefCount()
+{
+  static std::atomic<std::uint32_t> ref_count;
+  return ref_count;
+}
+
+// Modified version of code from http://bit.ly/1iizOJR.
 extern "C" HRESULT WINAPI
   IDXGISwapChainPresentDetour(IDXGISwapChain* swap_chain,
                               UINT sync_interval,
@@ -93,10 +112,7 @@ extern "C" HRESULT WINAPI
 
   hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "IDXGISwapChainPresentDetour: Args: [%p] [%u] [%u].",
-    swap_chain,
-    sync_interval,
-    flags);
+    "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
   auto& detour = GetIDXGISwapChainPresentDetour();
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
@@ -121,248 +137,473 @@ extern "C" HRESULT WINAPI
   last_error.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
   last_error.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("NtQuerySystemInformationDetour: Ret: [%ld].",
-                                 ret);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
   return ret;
 }
 
-extern "C" void WINAPI
-  ID3D11DeviceContextDrawIndexedDetour(ID3D11DeviceContext* context,
-                                       UINT index_count,
-                                       UINT start_index_location,
-                                       INT base_vertex_location)
+void HookDXGISwapChain(IDXGISwapChain* swap_chain)
 {
-  DetourRefCounter ref_count{GetID3D11DeviceContextDrawIndexedRefCount()};
+  void** const swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
+  auto const present = swap_chain_vtable[8];
+  auto const present_detour_fn =
+    hadesmem::detail::UnionCast<void*>(&IDXGISwapChainPresentDetour);
+  auto& present_detour = GetIDXGISwapChainPresentDetour();
+  if (!present_detour)
+  {
+    present_detour = std::make_unique<hadesmem::PatchDetour>(
+      GetThisProcess(), present, present_detour_fn);
+    present_detour->Apply();
+    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present detoured.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present already detoured.");
+  }
+}
+
+extern "C" HRESULT WINAPI
+  IDXGIFactoryCreateSwapChainDetour(IDXGIFactory* factory,
+                                    IUnknown* device,
+                                    DXGI_SWAP_CHAIN_DESC* desc,
+                                    IDXGISwapChain** swap_chain)
+{
+  DetourRefCounter ref_count{GetIDXGIFactoryCreateSwapChainRefCount()};
 
   hadesmem::detail::LastErrorPreserver last_error;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "ID3D11DeviceContextDrawIndexedDetour: Args: [%p] [%u] [%u] [%d].",
-    context,
-    index_count,
-    start_index_location,
-    base_vertex_location);
-  auto& detour = GetID3D11DeviceContextDrawIndexedDetour();
-  auto const draw_indexed =
-    detour->GetTrampoline<decltype(&ID3D11DeviceContextDrawIndexedDetour)>();
+    "Args: [%p] [%p] [%p] [%p].", factory, device, desc, swap_chain);
+  auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
+  auto const create_swap_chain =
+    detour->GetTrampoline<decltype(&IDXGIFactoryCreateSwapChainDetour)>();
   last_error.Revert();
-  draw_indexed(
-    context, index_count, start_index_location, base_vertex_location);
+  auto const ret = create_swap_chain(factory, device, desc, swap_chain);
   last_error.Update();
-  return;
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (SUCCEEDED(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+    HookDXGISwapChain(*swap_chain);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+  }
+
+  return ret;
 }
 
-extern "C" void WINAPI ID3D11DeviceContextClearRenderTargetViewDetour(
-  ID3D11DeviceContext* context,
-  ID3D11RenderTargetView* render_target_view,
-  const FLOAT color_rgba[4])
+void HookDXGIFactory(IDXGIFactory* dxgi_factory)
 {
-  DetourRefCounter ref_count{
-    GetID3D11DeviceContextClearRenderTargetViewRefCount()};
+  void** const dxgi_factory_vtable = *reinterpret_cast<void***>(dxgi_factory);
+  auto const create_swap_chain = dxgi_factory_vtable[10];
+  auto const create_swap_chain_detour_fn =
+    hadesmem::detail::UnionCast<void*>(&IDXGIFactoryCreateSwapChainDetour);
+  auto& create_swap_chain_detour = GetIDXGIFactoryCreateSwapChainDetour();
+  if (!create_swap_chain_detour)
+  {
+    create_swap_chain_detour = std::make_unique<hadesmem::PatchDetour>(
+      GetThisProcess(), create_swap_chain, create_swap_chain_detour_fn);
+    create_swap_chain_detour->Apply();
+    HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain detoured.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain already detoured.");
+  }
+}
+
+extern "C" HRESULT WINAPI
+  D3D11CreateDeviceDetour(IDXGIAdapter* adapter,
+                          D3D_DRIVER_TYPE driver_type,
+                          HMODULE software,
+                          UINT flags,
+                          const D3D_FEATURE_LEVEL* ptr_feature_levels,
+                          UINT feature_levels,
+                          UINT sdk_version,
+                          ID3D11Device** device,
+                          D3D_FEATURE_LEVEL* feature_level,
+                          ID3D11DeviceContext** immediate_context)
+{
+  DetourRefCounter ref_count{GetD3D11CreateDeviceRefCount()};
 
   hadesmem::detail::LastErrorPreserver last_error;
-  HADESMEM_DETAIL_TRACE_FORMAT_A("ID3D11DeviceContextClearRenderTargetViewDetou"
-                                 "r: Args: [%p] [%p] [%f] [%f] [%f] [%f].",
-                                 context,
-                                 render_target_view,
-                                 color_rgba[0],
-                                 color_rgba[1],
-                                 color_rgba[2],
-                                 color_rgba[3]);
-  auto& detour = GetID3D11DeviceContextClearRenderTargetViewDetour();
-  auto const clear_render_target_view = detour->GetTrampoline<
-    decltype(&ID3D11DeviceContextClearRenderTargetViewDetour)>();
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
+    adapter,
+    driver_type,
+    software,
+    flags,
+    ptr_feature_levels,
+    feature_levels,
+    sdk_version,
+    device,
+    feature_level,
+    immediate_context);
+  auto& detour = GetD3D11CreateDeviceDetour();
+  auto const d3d11_create_device =
+    detour->GetTrampoline<decltype(&D3D11CreateDeviceDetour)>();
   last_error.Revert();
-  clear_render_target_view(context, render_target_view, color_rgba);
+  auto const ret = d3d11_create_device(adapter,
+                                       driver_type,
+                                       software,
+                                       flags,
+                                       ptr_feature_levels,
+                                       feature_levels,
+                                       sdk_version,
+                                       device,
+                                       feature_level,
+                                       immediate_context);
   last_error.Update();
-  return;
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (SUCCEEDED(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+    IDXGIDevice* dxgi_device;
+    if (SUCCEEDED((*device)->QueryInterface(__uuidof(IDXGIDevice),
+                                            (void**)&dxgi_device)))
+    {
+      IDXGIAdapter* dxgi_adapter;
+      if (SUCCEEDED(dxgi_device->GetParent(__uuidof(IDXGIAdapter),
+                                           (void**)&dxgi_adapter)))
+      {
+        IDXGIFactory* dxgi_factory;
+        if (SUCCEEDED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
+                                              (void**)&dxgi_factory)))
+        {
+          HookDXGIFactory(dxgi_factory);
+        }
+        else
+        {
+          HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIFactory.");
+        }
+      }
+      else
+      {
+        HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIAdapter.");
+      }
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIDevice.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+  }
+
+  return ret;
 }
 
-struct D3D11Funcs
+extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
+  IDXGIAdapter* adapter,
+  D3D_DRIVER_TYPE driver_type,
+  HMODULE software,
+  UINT flags,
+  const D3D_FEATURE_LEVEL* ptr_feature_levels,
+  UINT feature_levels,
+  UINT sdk_version,
+  const DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
+  IDXGISwapChain** swap_chain,
+  ID3D11Device** device,
+  D3D_FEATURE_LEVEL* feature_level,
+  ID3D11DeviceContext** immediate_context)
 {
-  void* present;
-  void* draw_indexed;
-  void* clear_render_target_view;
-};
+  DetourRefCounter ref_count{GetD3D11CreateDeviceAndSwapChainRefCount()};
 
-D3D11Funcs FindD3D11Funcs()
-{
-  HWND const window = GetForegroundWindow();
-  D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
-  DXGI_SWAP_CHAIN_DESC swap_chain_desc{};
-  swap_chain_desc.BufferCount = 1;
-  swap_chain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  swap_chain_desc.OutputWindow = window;
-  swap_chain_desc.SampleDesc.Count = 1;
-  swap_chain_desc.Windowed =
-    !!(GetWindowLong(window, GWL_STYLE) & WS_POPUP) ? FALSE : TRUE;
-  swap_chain_desc.BufferDesc.ScanlineOrdering =
-    DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-  swap_chain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-  swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-  IDXGISwapChain* swap_chain = nullptr;
-  ID3D11Device* device = nullptr;
-  ID3D11DeviceContext* device_context = nullptr;
-  using D3D11CreateDeviceAndSwapChainFn =
-    HRESULT (*)(IDXGIAdapter* pAdapter,
-                D3D_DRIVER_TYPE DriverType,
-                HMODULE Software,
-                UINT Flags,
-                const D3D_FEATURE_LEVEL* pFeatureLevels,
-                UINT FeatureLevels,
-                UINT SDKVersion,
-                const DXGI_SWAP_CHAIN_DESC* pSwapChainDesc,
-                IDXGISwapChain** ppSwapChain,
-                ID3D11Device** ppDevice,
-                D3D_FEATURE_LEVEL* pFeatureLevel,
-                ID3D11DeviceContext** ppImmediateContext);
-  HMODULE const d3d11mod = ::GetModuleHandleW(L"d3d11.dll");
-  if (!d3d11mod)
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"GetModuleHandle failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
-  }
+  hadesmem::detail::LastErrorPreserver last_error;
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
+    adapter,
+    driver_type,
+    software,
+    flags,
+    ptr_feature_levels,
+    feature_levels,
+    sdk_version,
+    swap_chain_desc,
+    swap_chain,
+    device,
+    feature_level,
+    immediate_context);
+  auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
   auto const d3d11_create_device_and_swap_chain =
-    reinterpret_cast<D3D11CreateDeviceAndSwapChainFn>(
-      ::GetProcAddress(d3d11mod, "D3D11CreateDeviceAndSwapChain"));
-  if (!d3d11_create_device_and_swap_chain)
+    detour->GetTrampoline<decltype(&D3D11CreateDeviceAndSwapChainDetour)>();
+  last_error.Revert();
+  auto const ret = d3d11_create_device_and_swap_chain(adapter,
+                                                      driver_type,
+                                                      software,
+                                                      flags,
+                                                      ptr_feature_levels,
+                                                      feature_levels,
+                                                      sdk_version,
+                                                      swap_chain_desc,
+                                                      swap_chain,
+                                                      device,
+                                                      feature_level,
+                                                      immediate_context);
+  last_error.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (SUCCEEDED(ret))
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"GetProcAddress failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+    HookDXGISwapChain(*swap_chain);
   }
-  HRESULT const hr =
-    d3d11_create_device_and_swap_chain(nullptr,
-                                       D3D_DRIVER_TYPE_HARDWARE,
-                                       nullptr,
-                                       0,
-                                       &feature_level,
-                                       1,
-                                       D3D11_SDK_VERSION,
-                                       &swap_chain_desc,
-                                       &swap_chain,
-                                       &device,
-                                       nullptr,
-                                       &device_context);
-  if (FAILED(hr))
+  else
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{
-                             "D3D11CreateDeviceAndSwapChain failed."}
-                        << hadesmem::ErrorCodeWinHr{hr});
+    HADESMEM_DETAIL_TRACE_A("Failed.");
   }
-  hadesmem::detail::SmartComHandle const swap_chain_cleanup(swap_chain);
-  hadesmem::detail::SmartComHandle const device_cleanup(device);
-  hadesmem::detail::SmartComHandle const device_context_cleanup(device_context);
 
-  void** swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
-  void** device_context_vtable = *reinterpret_cast<void***>(device_context);
-
-  D3D11Funcs funcs{};
-  funcs.present = swap_chain_vtable[8];
-  funcs.draw_indexed = device_context_vtable[12];
-  funcs.clear_render_target_view = device_context_vtable[50];
-
-  return funcs;
-}
+  return ret;
 }
 
-void DetourD3D11()
+extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
 {
-  auto const funcs = FindD3D11Funcs();
+  DetourRefCounter ref_count{GetCreateDXGIFactoryRefCount()};
 
+  hadesmem::detail::LastErrorPreserver last_error;
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
+  auto& detour = GetCreateDXGIFactoryDetour();
+  auto const create_dxgi_factory =
+    detour->GetTrampoline<decltype(&CreateDXGIFactoryDetour)>();
+  last_error.Revert();
+  auto const ret = create_dxgi_factory(riid, factory);
+  last_error.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (SUCCEEDED(ret))
   {
-    auto const present_detour =
-      hadesmem::detail::UnionCast<void*>(&IDXGISwapChainPresentDetour);
-    auto& detour = GetIDXGISwapChainPresentDetour();
-    detour = std::make_unique<hadesmem::PatchDetour>(
-      GetThisProcess(), funcs.present, present_detour);
-    detour->Apply();
-    HADESMEM_DETAIL_TRACE_A("DetourD3D11: IDXGISwapChain::Present detoured.");
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+    if (riid == __uuidof(IDXGIFactory))
+    {
+      HADESMEM_DETAIL_TRACE_A("Hooking IDXGIFactory.");
+
+      HookDXGIFactory(static_cast<IDXGIFactory*>(*factory));
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Unsupported GUID.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
   }
 
+  return ret;
+}
+}
+
+void DetourD3D11(HMODULE base)
+{
+  if (!base)
   {
-    auto const draw_indexed_detour =
-      hadesmem::detail::UnionCast<void*>(&ID3D11DeviceContextDrawIndexedDetour);
-    auto& detour = GetID3D11DeviceContextDrawIndexedDetour();
-    detour = std::make_unique<hadesmem::PatchDetour>(
-      GetThisProcess(), funcs.draw_indexed, draw_indexed_detour);
-    detour->Apply();
-    HADESMEM_DETAIL_TRACE_A(
-      "DetourD3D11: ID3D11DeviceContext::DrawIndexed detoured.");
+    base = ::GetModuleHandleW(L"d3d11");
   }
 
+  if (!base)
   {
-    auto const clear_render_target_view_detour =
-      hadesmem::detail::UnionCast<void*>(
-        &ID3D11DeviceContextClearRenderTargetViewDetour);
-    auto& detour = GetID3D11DeviceContextClearRenderTargetViewDetour();
-    detour =
-      std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
-                                              funcs.clear_render_target_view,
-                                              clear_render_target_view_detour);
-    detour->Apply();
-    HADESMEM_DETAIL_TRACE_A(
-      "DetourD3D11: ID3D11DeviceContext::ClearRenderTargetView detoured.");
+    HADESMEM_DETAIL_TRACE_A("Failed to find D3D11 module.");
+    return;
+  }
+
+  if (!GetD3D11CreateDeviceDetour())
+  {
+    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+      GetThisProcess(), base, "D3D11CreateDevice");
+    if (orig_fn)
+    {
+      auto const detour_fn =
+        hadesmem::detail::UnionCast<void*>(&D3D11CreateDeviceDetour);
+      auto& detour = GetD3D11CreateDeviceDetour();
+      detour = std::make_unique<hadesmem::PatchDetour>(
+        GetThisProcess(), orig_fn, detour_fn);
+      detour->Apply();
+      HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice detoured.");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Could not find D3D11CreateDevice export.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice already detoured.");
+  }
+
+  if (!GetD3D11CreateDeviceAndSwapChainDetour())
+  {
+    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+      GetThisProcess(), base, "D3D11CreateDeviceAndSwapChain");
+    if (orig_fn)
+    {
+      auto const detour_fn = hadesmem::detail::UnionCast<void*>(
+        &D3D11CreateDeviceAndSwapChainDetour);
+      auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
+      detour = std::make_unique<hadesmem::PatchDetour>(
+        GetThisProcess(), orig_fn, detour_fn);
+      detour->Apply();
+      HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain detoured.");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "Could not find D3D11CreateDeviceAndSwapChain export.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain already detoured.");
+  }
+}
+
+void DetourDXGI(HMODULE base)
+{
+  if (!base)
+  {
+    base = ::GetModuleHandleW(L"DXGI");
+  }
+
+  if (!base)
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to find DXGI module.");
+    return;
+  }
+
+  if (!GetCreateDXGIFactoryDetour())
+  {
+    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+      GetThisProcess(), base, "CreateDXGIFactory");
+    if (orig_fn)
+    {
+      auto const detour_fn =
+        hadesmem::detail::UnionCast<void*>(&CreateDXGIFactoryDetour);
+      auto& detour = GetCreateDXGIFactoryDetour();
+      detour = std::make_unique<hadesmem::PatchDetour>(
+        GetThisProcess(), orig_fn, detour_fn);
+      detour->Apply();
+      HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory detoured.");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Could not find CreateDXGIFactory export.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory already detoured.");
   }
 }
 
 void UndetourD3D11()
 {
+  if (GetD3D11CreateDeviceAndSwapChainDetour())
+  {
+    auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
+    detour->Remove();
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain undetoured.");
+    detour = nullptr;
+
+    auto& ref_count = GetD3D11CreateDeviceAndSwapChainRefCount();
+    while (ref_count.load())
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "Spinning on D3D11CreateDeviceAndSwapChain ref count.");
+    }
+    HADESMEM_DETAIL_TRACE_A(
+      "D3D11CreateDeviceAndSwapChain free of references.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "D3D11CreateDeviceAndSwapChain not detoured. Skipping.");
+  }
+
+  if (GetD3D11CreateDeviceDetour())
+  {
+    auto& detour = GetD3D11CreateDeviceDetour();
+    detour->Remove();
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice undetoured.");
+    detour = nullptr;
+
+    auto& ref_count = GetD3D11CreateDeviceRefCount();
+    while (ref_count.load())
+    {
+      HADESMEM_DETAIL_TRACE_A("Spinning on D3D11CreateDevice ref count.");
+    }
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice free of references.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice not detoured. Skipping.");
+  }
+}
+
+void UndetourDXGI()
+{
+  if (GetCreateDXGIFactoryDetour())
+  {
+    auto& detour = GetCreateDXGIFactoryDetour();
+    detour->Remove();
+    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory undetoured.");
+    detour = nullptr;
+
+    auto& ref_count = GetCreateDXGIFactoryRefCount();
+    while (ref_count.load())
+    {
+      HADESMEM_DETAIL_TRACE_A("Spinning on CreateDXGIFactory ref count.");
+    }
+    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory free of references.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory not detoured. Skipping.");
+  }
+
+  if (GetIDXGIFactoryCreateSwapChainDetour())
+  {
+    auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
+    detour->Remove();
+    HADESMEM_DETAIL_TRACE_A("IDXGIFactoryCreateSwapChain undetoured.");
+    detour = nullptr;
+
+    auto& ref_count = GetIDXGIFactoryCreateSwapChainRefCount();
+    while (ref_count.load())
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "Spinning on IDXGIFactoryCreateSwapChain ref count.");
+    }
+    HADESMEM_DETAIL_TRACE_A("IDXGIFactoryCreateSwapChain free of references.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "IDXGIFactoryCreateSwapChain not detoured. Skipping.");
+  }
+
+  if (GetIDXGISwapChainPresentDetour())
   {
     auto& detour = GetIDXGISwapChainPresentDetour();
     detour->Remove();
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourD3D11: IDXGISwapChain::Present undetoured.");
+    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present undetoured.");
     detour = nullptr;
 
     auto& ref_count = GetIDXGISwapChainPresentRefCount();
     while (ref_count.load())
     {
-      HADESMEM_DETAIL_TRACE_A(
-        "UndetourD3D11: Spinning on IDXGISwapChain::Present ref count.");
+      HADESMEM_DETAIL_TRACE_A("Spinning on IDXGISwapChain::Present ref count.");
     }
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourD3D11: IDXGISwapChain::Present free of references.");
+    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present free of references.");
   }
-
+  else
   {
-    auto& detour = GetID3D11DeviceContextDrawIndexedDetour();
-    detour->Remove();
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourD3D11: ID3D11DeviceContext::DrawIndexed undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetID3D11DeviceContextDrawIndexedRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A("UndetourD3D11: Spinning on "
-                              "ID3D11DeviceContext::DrawIndexed ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourD3D11: ID3D11DeviceContext::DrawIndexed free of references.");
-  }
-
-  {
-    auto& detour = GetID3D11DeviceContextClearRenderTargetViewDetour();
-    detour->Remove();
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourD3D11: ID3D11DeviceContext::ClearRenderTargetView undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetID3D11DeviceContextClearRenderTargetViewRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A("UndetourD3D11: Spinning on "
-                              "ID3D11DeviceContext::ClearRenderTargetView ref "
-                              "count.");
-    }
-    HADESMEM_DETAIL_TRACE_A("UndetourD3D11: "
-                            "ID3D11DeviceContext::ClearRenderTargetView free "
-                            "of references.");
+    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present not detoured. Skipping.");
   }
 }

@@ -82,7 +82,7 @@ inline HMODULE InjectDll(Process const& process,
       Error() << ErrorString("Could not find module file."));
   }
 
-  HADESMEM_DETAIL_TRACE_A("Calling ForceLdrInitializeThunk.\n");
+  HADESMEM_DETAIL_TRACE_A("Calling ForceLdrInitializeThunk.");
 
   detail::ForceLdrInitializeThunk(process.GetId());
 

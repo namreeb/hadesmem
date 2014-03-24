@@ -22,6 +22,7 @@
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
+#include "d3d11.hpp"
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
 
@@ -68,17 +69,17 @@ private:
   bool* in_hook_;
 };
 
-extern "C" NTSTATUS WINAPI NtMapViewOfSectionDetour(
-  HANDLE section,
-  HANDLE process,
-  PVOID* base,
-  ULONG_PTR zero_bits,
-  SIZE_T commit_size,
-  PLARGE_INTEGER section_offset,
-  PSIZE_T view_size,
-  winternl::SECTION_INHERIT inherit_disposition,
-  ULONG alloc_type,
-  ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
+extern "C" NTSTATUS WINAPI
+  NtMapViewOfSectionDetour(HANDLE section,
+                           HANDLE process,
+                           PVOID* base,
+                           ULONG_PTR zero_bits,
+                           SIZE_T commit_size,
+                           PLARGE_INTEGER section_offset,
+                           PSIZE_T view_size,
+                           winternl::SECTION_INHERIT inherit_disposition,
+                           ULONG alloc_type,
+                           ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
 
@@ -117,49 +118,48 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionDetour(
   // This has to be after all our recursion checks, rather than before (which
   // would be better) because OutputDebugString calls MapViewOfFile when DBWIN
   // is running.
-  HADESMEM_DETAIL_TRACE_FORMAT_A("NtMapViewOfSectionDetour: Args: [%p] [%p] "
-                                 "[%p] [%Iu] [%Iu] [%p] [%p] [%d] [%u] [%u].",
-                                 section,
-                                 process,
-                                 base,
-                                 zero_bits,
-                                 commit_size,
-                                 section_offset,
-                                 view_size,
-                                 inherit_disposition,
-                                 alloc_type,
-                                 alloc_protect);
-  HADESMEM_DETAIL_TRACE_FORMAT_A("NtMapViewOfSectionDetour: Ret: [%ld].", ret);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Args: [%p] [%p] [%p] [%Iu] [%Iu] [%p] [%p] [%d] [%u] [%u].",
+    section,
+    process,
+    base,
+    zero_bits,
+    commit_size,
+    section_offset,
+    view_size,
+    inherit_disposition,
+    alloc_type,
+    alloc_protect);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
     if (!pid)
     {
-      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSectionDetour: Unkown process.");
+      HADESMEM_DETAIL_TRACE_A("Unkown process.");
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSectionDetour: Different process.");
+      HADESMEM_DETAIL_TRACE_A("Different process.");
     }
     return ret;
   }
 
-  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSectionDetour: Current process.");
+  HADESMEM_DETAIL_TRACE_A("Current process.");
 
   try
   {
     if (NT_SUCCESS(ret))
     {
-      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSectionDetour: Succeeded.");
+      HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
       hadesmem::Region const region{GetThisProcess(), *base};
       DWORD const region_type = region.GetType();
       if (region_type != MEM_IMAGE)
       {
-        HADESMEM_DETAIL_TRACE_FORMAT_A(
-          "NtMapViewOfSectionDetour: Not an image. Type given was %lx.",
-          region_type);
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Not an image. Type given was %lx.",
+                                       region_type);
         return ret;
       }
 
@@ -167,36 +167,39 @@ extern "C" NTSTATUS WINAPI NtMapViewOfSectionDetour(
         winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer;
       if (!arbitrary_user_pointer)
       {
-        HADESMEM_DETAIL_TRACE_A(
-          "NtMapViewOfSectionDetour: No arbitrary user pointer.");
+        HADESMEM_DETAIL_TRACE_A("No arbitrary user pointer.");
         return ret;
       }
 
       std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"NtMapViewOfSectionDetour: Path is %s.",
-                                     path.c_str());
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
 
       auto const backslash = path.find_last_of(L'\\');
       std::size_t const name_beg =
         (backslash != std::wstring::npos ? backslash + 1 : 0);
       std::wstring const module_name(std::begin(path) + name_beg,
                                      std::end(path));
-      HADESMEM_DETAIL_TRACE_FORMAT_W(
-        L"NtMapViewOfSectionDetour: Module name is %s.", module_name.c_str());
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module name is %s.",
+                                     module_name.c_str());
       std::wstring const module_name_upper =
         hadesmem::detail::ToUpperOrdinal(module_name);
 
       if (module_name_upper == L"D3D11" || module_name_upper == L"D3D11.DLL")
       {
-        HADESMEM_DETAIL_TRACE_A(
-          "NtMapViewOfSectionDetour: D3D11 loaded. Applying hooks.");
+        HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
 
-        // DetourD3D11Module(reinterpret_cast<HMODULE>(*base));
+        DetourD3D11(reinterpret_cast<HMODULE>(*base));
+      }
+      else if (module_name_upper == L"DXGI" || module_name_upper == L"DXGI.DLL")
+      {
+        HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
+
+        DetourDXGI(reinterpret_cast<HMODULE>(*base));
       }
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("NtMapViewOfSectionDetour: Failed.");
+      HADESMEM_DETAIL_TRACE_A("Failed.");
     }
   }
   catch (...)
@@ -225,24 +228,20 @@ void DetourNtMapViewOfSection()
                                             nt_map_view_of_section_ptr,
                                             nt_map_view_of_section_detour);
   detour->Apply();
-  HADESMEM_DETAIL_TRACE_A(
-    "DetourNtMapViewOfSection: NtMapViewOfSection detoured.");
+  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection detoured.");
 }
 
 void UndetourNtMapViewOfSection()
 {
   auto& detour = GetNtMapViewOfSectionDetour();
   detour->Remove();
-  HADESMEM_DETAIL_TRACE_A(
-    "UndetourNtQuerySystemInformation: NtMapViewOfSection undetoured.");
+  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection undetoured.");
   detour = nullptr;
 
   auto& ref_count = GetNtMapViewOfSectionRefCount();
   while (ref_count.load())
   {
-    HADESMEM_DETAIL_TRACE_A(
-      "UndetourNtQuerySystemInformation: Spinning on ref count.");
+    HADESMEM_DETAIL_TRACE_A("Spinning on NtMapViewOfSection ref count.");
   }
-  HADESMEM_DETAIL_TRACE_A(
-    "UndetourNtQuerySystemInformation: NtMapViewOfSection free of references.");
+  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection free of references.");
 }
