@@ -236,7 +236,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
 
   if (!NT_SUCCESS(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
+    HADESMEM_DETAIL_TRACE_A("Failed.");
     return ret;
   }
 
@@ -254,7 +254,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
         HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
         if (process_name == L"hades.exe")
         {
-          HADESMEM_DETAIL_TRACE_A("Returning failure.");
+          HADESMEM_DETAIL_TRACE_A("Returning failure to hide process.");
           return STATUS_INVALID_PARAMETER;
         }
       }

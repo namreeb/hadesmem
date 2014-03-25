@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "process.hpp"
+#include "d3d11.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -23,6 +23,7 @@
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
+#include <hadesmem/region.hpp>
 
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
@@ -403,6 +404,12 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
 
 void DetourD3D11(HMODULE base)
 {
+  if (GetD3D11Module().first)
+  {
+    HADESMEM_DETAIL_TRACE_A("D3D11 already detoured.");
+    return;
+  }
+
   if (!base)
   {
     base = ::GetModuleHandleW(L"d3d11");
@@ -411,6 +418,17 @@ void DetourD3D11(HMODULE base)
   if (!base)
   {
     HADESMEM_DETAIL_TRACE_A("Failed to find D3D11 module.");
+    return;
+  }
+
+  try
+  {
+    hadesmem::Region region(GetThisProcess(), base);
+    GetD3D11Module() = std::make_pair(region.GetBase(), region.GetSize());
+  }
+  catch (std::exception const& /*e*/)
+  {
+    HADESMEM_DETAIL_ASSERT(false);
     return;
   }
 
@@ -466,6 +484,12 @@ void DetourD3D11(HMODULE base)
 
 void DetourDXGI(HMODULE base)
 {
+  if (GetDXGIModule().first)
+  {
+    HADESMEM_DETAIL_TRACE_A("DXGI already detoured.");
+    return;
+  }
+
   if (!base)
   {
     base = ::GetModuleHandleW(L"DXGI");
@@ -474,6 +498,17 @@ void DetourDXGI(HMODULE base)
   if (!base)
   {
     HADESMEM_DETAIL_TRACE_A("Failed to find DXGI module.");
+    return;
+  }
+
+  try
+  {
+    hadesmem::Region region(GetThisProcess(), base);
+    GetDXGIModule() = std::make_pair(region.GetBase(), region.GetSize());
+  }
+  catch (std::exception const& /*e*/)
+  {
+    HADESMEM_DETAIL_ASSERT(false);
     return;
   }
 
@@ -502,12 +537,18 @@ void DetourDXGI(HMODULE base)
   }
 }
 
-void UndetourD3D11()
+void UndetourD3D11(bool remove)
 {
+  if (!GetD3D11Module().first)
+  {
+    HADESMEM_DETAIL_TRACE_A("D3D11 not detoured.");
+    return;
+  }
+
   if (GetD3D11CreateDeviceAndSwapChainDetour())
   {
     auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-    detour->Remove();
+    remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain undetoured.");
     detour = nullptr;
 
@@ -529,7 +570,7 @@ void UndetourD3D11()
   if (GetD3D11CreateDeviceDetour())
   {
     auto& detour = GetD3D11CreateDeviceDetour();
-    detour->Remove();
+    remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice undetoured.");
     detour = nullptr;
 
@@ -544,14 +585,22 @@ void UndetourD3D11()
   {
     HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice not detoured. Skipping.");
   }
+
+  GetD3D11Module() = std::make_pair(nullptr, 0);
 }
 
-void UndetourDXGI()
+void UndetourDXGI(bool remove)
 {
+  if (!GetDXGIModule().first)
+  {
+    HADESMEM_DETAIL_TRACE_A("DXGI not detoured.");
+    return;
+  }
+
   if (GetCreateDXGIFactoryDetour())
   {
     auto& detour = GetCreateDXGIFactoryDetour();
-    detour->Remove();
+    remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory undetoured.");
     detour = nullptr;
 
@@ -570,7 +619,7 @@ void UndetourDXGI()
   if (GetIDXGIFactoryCreateSwapChainDetour())
   {
     auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
-    detour->Remove();
+    remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_A("IDXGIFactoryCreateSwapChain undetoured.");
     detour = nullptr;
 
@@ -591,7 +640,7 @@ void UndetourDXGI()
   if (GetIDXGISwapChainPresentDetour())
   {
     auto& detour = GetIDXGISwapChainPresentDetour();
-    detour->Remove();
+    remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present undetoured.");
     detour = nullptr;
 
@@ -606,4 +655,18 @@ void UndetourDXGI()
   {
     HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present not detoured. Skipping.");
   }
+
+  GetDXGIModule() = std::make_pair(nullptr, 0);
+}
+
+std::pair<void*, SIZE_T>& GetD3D11Module()
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+std::pair<void*, SIZE_T>& GetDXGIModule()
+{
+  static std::pair<void*, SIZE_T> module{ nullptr, 0 };
+  return module;
 }

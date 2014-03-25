@@ -134,6 +134,12 @@ public:
       return;
     }
 
+    if (detached_)
+    {
+      HADESMEM_DETAIL_ASSERT(false);
+      return;
+    }
+
     SuspendedProcess const suspended_process{process_->GetId()};
 
     detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
@@ -165,6 +171,13 @@ public:
     applied_ = false;
   }
 
+  void Detach()
+  {
+    applied_ = false;
+
+    detached_ = true;
+  }
+
 private:
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
@@ -190,6 +203,7 @@ private:
 
   Process const* process_;
   bool applied_{false};
+  bool detached_{false};
   PVOID target_;
   std::vector<BYTE> data_;
   std::vector<std::uint8_t> orig_;
@@ -270,6 +284,12 @@ public:
   {
     if (applied_)
     {
+      return;
+    }
+
+    if (detached_)
+    {
+      HADESMEM_DETAIL_ASSERT(false);
       return;
     }
 
@@ -424,6 +444,13 @@ public:
     applied_ = false;
   }
 
+  void Detach()
+  {
+    applied_ = false;
+
+    detached_ = true;
+  }
+
   PVOID GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
   {
     return trampoline_->GetBase();
@@ -484,8 +511,9 @@ private:
                                    SIZE_T size)->std::unique_ptr<Allocator>
     {
       auto const new_addr = detail::TryAlloc(process, size, addr);
-      return new_addr ? std::make_unique<Allocator>(process, size, new_addr, true)
-                     : std::unique_ptr<Allocator>();
+      return new_addr
+               ? std::make_unique<Allocator>(process, size, new_addr, true)
+               : std::unique_ptr<Allocator>();
     };
 
     for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
@@ -772,6 +800,7 @@ private:
 
   Process const* process_;
   bool applied_{false};
+  bool detached_{false};
   PVOID target_;
   PVOID detour_;
   std::unique_ptr<Allocator> trampoline_;

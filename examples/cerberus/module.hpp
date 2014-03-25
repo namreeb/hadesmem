@@ -5,4 +5,8 @@
 
 void DetourNtMapViewOfSection();
 
+void DetourNtUnmapViewOfSection();
+
 void UndetourNtMapViewOfSection();
+
+void UndetourNtUnmapViewOfSection();

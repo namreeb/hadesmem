@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include "process.hpp"
+#include "module.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -38,6 +38,18 @@ std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
 }
 
 std::atomic<std::uint32_t>& GetNtMapViewOfSectionRefCount()
+{
+  static std::atomic<std::uint32_t> ref_count;
+  return ref_count;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -135,14 +147,7 @@ extern "C" NTSTATUS WINAPI
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
-    if (!pid)
-    {
-      HADESMEM_DETAIL_TRACE_A("Unkown process.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Different process.");
-    }
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
     return ret;
   }
 
@@ -171,7 +176,7 @@ extern "C" NTSTATUS WINAPI
         return ret;
       }
 
-      std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
+      std::wstring const path{ static_cast<PCWSTR>(arbitrary_user_pointer) };
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
 
       auto const backslash = path.find_last_of(L'\\');
@@ -211,6 +216,89 @@ extern "C" NTSTATUS WINAPI
 
   return ret;
 }
+
+extern "C" NTSTATUS WINAPI
+  NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  DetourRefCounter ref_count{GetNtUnmapViewOfSectionRefCount()};
+
+  hadesmem::detail::LastErrorPreserver last_error;
+  auto& detour = GetNtUnmapViewOfSectionDetour();
+  auto const nt_unmap_view_of_section =
+    detour->GetTrampoline<decltype(&NtUnmapViewOfSectionDetour)>();
+  last_error.Revert();
+  auto const ret = nt_unmap_view_of_section(process, base);
+  last_error.Update();
+
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool in_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool in_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  if (in_hook)
+  {
+    return ret;
+  }
+
+  RecursionProtector recursion_protector{&in_hook};
+  recursion_protector.Set();
+
+  // This has to be after all our recursion checks, rather than before (which
+  // would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN
+  // is running.
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", process, base);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  DWORD const pid = ::GetProcessId(process);
+  if (!pid || pid != ::GetCurrentProcessId())
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
+    return ret;
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Current process.");
+
+  try
+  {
+    if (NT_SUCCESS(ret))
+    {
+      HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+      auto const d3d11_mod = GetD3D11Module();
+      if (base >= d3d11_mod.first &&
+          base < static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second)
+      {
+        HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
+
+        UndetourD3D11(false);
+      }
+
+      auto const dxgi_mod = GetDXGIModule();
+      if (base >= dxgi_mod.first &&
+          base < static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second)
+      {
+        HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
+
+        UndetourDXGI(false);
+      }
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Failed.");
+    }
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+  }
+
+  return ret;
+}
 }
 
 void DetourNtMapViewOfSection()
@@ -231,6 +319,24 @@ void DetourNtMapViewOfSection()
   HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection detoured.");
 }
 
+void DetourNtUnmapViewOfSection()
+{
+  hadesmem::Module const ntdll{GetThisProcess(), L"ntdll.dll"};
+  auto const nt_unmap_view_of_section =
+    hadesmem::FindProcedure(GetThisProcess(), ntdll, "NtUnmapViewOfSection");
+  auto const nt_unmap_view_of_section_ptr =
+    hadesmem::detail::UnionCast<void*>(nt_unmap_view_of_section);
+  auto const nt_unmap_view_of_section_detour =
+    hadesmem::detail::UnionCast<void*>(&NtUnmapViewOfSectionDetour);
+  auto& detour = GetNtUnmapViewOfSectionDetour();
+  detour =
+    std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
+                                            nt_unmap_view_of_section_ptr,
+                                            nt_unmap_view_of_section_detour);
+  detour->Apply();
+  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection detoured.");
+}
+
 void UndetourNtMapViewOfSection()
 {
   auto& detour = GetNtMapViewOfSectionDetour();
@@ -244,4 +350,19 @@ void UndetourNtMapViewOfSection()
     HADESMEM_DETAIL_TRACE_A("Spinning on NtMapViewOfSection ref count.");
   }
   HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection free of references.");
+}
+
+void UndetourNtUnmapViewOfSection()
+{
+  auto& detour = GetNtMapViewOfSectionDetour();
+  detour->Remove();
+  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection undetoured.");
+  detour = nullptr;
+
+  auto& ref_count = GetNtUnmapViewOfSectionRefCount();
+  while (ref_count.load())
+  {
+    HADESMEM_DETAIL_TRACE_A("Spinning on NtUnmapViewOfSection ref count.");
+  }
+  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection free of references.");
 }
