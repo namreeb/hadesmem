@@ -142,7 +142,7 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-void HookDXGISwapChain(IDXGISwapChain* swap_chain)
+void DetourDXGISwapChain(IDXGISwapChain* swap_chain)
 {
   void** const swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
   auto const present = swap_chain_vtable[8];
@@ -185,7 +185,7 @@ extern "C" HRESULT WINAPI
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
-    HookDXGISwapChain(*swap_chain);
+    DetourDXGISwapChain(*swap_chain);
   }
   else
   {
@@ -195,7 +195,7 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-void HookDXGIFactory(IDXGIFactory* dxgi_factory)
+void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
 {
   void** const dxgi_factory_vtable = *reinterpret_cast<void***>(dxgi_factory);
   auto const create_swap_chain = dxgi_factory_vtable[10];
@@ -275,7 +275,7 @@ extern "C" HRESULT WINAPI
         if (SUCCEEDED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
                                               (void**)&dxgi_factory)))
         {
-          HookDXGIFactory(dxgi_factory);
+          DetourDXGIFactory(dxgi_factory);
         }
         else
         {
@@ -354,7 +354,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
-    HookDXGISwapChain(*swap_chain);
+    DetourDXGISwapChain(*swap_chain);
   }
   else
   {
@@ -384,9 +384,9 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
 
     if (riid == __uuidof(IDXGIFactory))
     {
-      HADESMEM_DETAIL_TRACE_A("Hooking IDXGIFactory.");
+      HADESMEM_DETAIL_TRACE_A("Detouring IDXGIFactory.");
 
-      HookDXGIFactory(static_cast<IDXGIFactory*>(*factory));
+      DetourDXGIFactory(static_cast<IDXGIFactory*>(*factory));
     }
     else
     {
