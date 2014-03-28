@@ -57,17 +57,6 @@ std::atomic<std::uint32_t>& GetNtCreateUserProcessRefCount()
   return ref_count;
 }
 
-std::wstring UnicodeStringToStlString(UNICODE_STRING const& str)
-{
-  if (!str.Buffer || !str.Length)
-  {
-    return {};
-  }
-
-  auto const str_end = std::find(str.Buffer, str.Buffer + str.Length, L'\0');
-  return {str.Buffer, str_end};
-}
-
 bool HasNameImpl(void* pid, UNICODE_STRING const& path) HADESMEM_DETAIL_NOEXCEPT
 {
   // Check whether buffer is valid or it's the first process in the list
