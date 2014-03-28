@@ -5,4 +5,8 @@
 
 void DetourNtQuerySystemInformation();
 
+void DetourNtCreateUserProcess();
+
 void UndetourNtQuerySystemInformation();
+
+void UndetourNtCreateUserProcess();

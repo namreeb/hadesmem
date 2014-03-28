@@ -15,8 +15,9 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/last_error_preserver.hpp>
+#include <hadesmem/detail/recursion_protector.hpp>
 #include <hadesmem/detail/winternl.hpp>
-#include <hadesmem/detail/last_error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/patcher.hpp>
@@ -55,32 +56,6 @@ std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
   return ref_count;
 }
 
-class RecursionProtector
-{
-public:
-  explicit RecursionProtector(bool* in_hook) : in_hook_{in_hook}
-  {
-  }
-
-  ~RecursionProtector()
-  {
-    Revert();
-  }
-
-  void Set()
-  {
-    *in_hook_ = true;
-  }
-
-  void Revert()
-  {
-    *in_hook_ = false;
-  }
-
-private:
-  bool* in_hook_;
-};
-
 extern "C" NTSTATUS WINAPI
   NtMapViewOfSectionDetour(HANDLE section,
                            HANDLE process,
@@ -95,11 +70,11 @@ extern "C" NTSTATUS WINAPI
 {
   DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   auto& detour = GetNtMapViewOfSectionDetour();
   auto const nt_map_view_of_section =
     detour->GetTrampoline<decltype(&NtMapViewOfSectionDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = nt_map_view_of_section(section,
                                           process,
                                           base,
@@ -110,7 +85,7 @@ extern "C" NTSTATUS WINAPI
                                           inherit_disposition,
                                           alloc_type,
                                           alloc_protect);
-  last_error.Update();
+  last_error_preserver.Update();
 
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool in_hook = false;
@@ -124,7 +99,9 @@ extern "C" NTSTATUS WINAPI
     return ret;
   }
 
-  RecursionProtector recursion_protector{&in_hook};
+  // Need recursion protection because NtMapViewOfSection is eventually called
+  // by a lot of APIs, and we can't really avoid them all.
+  hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
   // This has to be after all our recursion checks, rather than before (which
@@ -176,7 +153,7 @@ extern "C" NTSTATUS WINAPI
         return ret;
       }
 
-      std::wstring const path{ static_cast<PCWSTR>(arbitrary_user_pointer) };
+      std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
 
       auto const backslash = path.find_last_of(L'\\');
@@ -223,13 +200,13 @@ extern "C" NTSTATUS WINAPI
 {
   DetourRefCounter ref_count{GetNtUnmapViewOfSectionRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   auto& detour = GetNtUnmapViewOfSectionDetour();
   auto const nt_unmap_view_of_section =
     detour->GetTrampoline<decltype(&NtUnmapViewOfSectionDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = nt_unmap_view_of_section(process, base);
-  last_error.Update();
+  last_error_preserver.Update();
 
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool in_hook = false;
@@ -243,7 +220,7 @@ extern "C" NTSTATUS WINAPI
     return ret;
   }
 
-  RecursionProtector recursion_protector{&in_hook};
+  hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
   // This has to be after all our recursion checks, rather than before (which

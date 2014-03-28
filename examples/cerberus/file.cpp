@@ -15,7 +15,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/winternl.hpp>
-#include <hadesmem/detail/last_error.hpp>
+#include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/patcher.hpp>
@@ -228,7 +228,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
 {
   DetourRefCounter ref_count{GetNtQueryDirectoryFileRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%u] [%p] [%u].",
     file_handle,
@@ -245,7 +245,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
   auto& detour = GetNtQueryDirectoryFileDetour();
   auto const nt_query_directory_file =
     detour->GetTrampoline<decltype(&NtQueryDirectoryFileDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto ret = nt_query_directory_file(file_handle,
                                      event,
                                      apc_routine,
@@ -257,7 +257,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
                                      return_single_entry,
                                      file_name,
                                      restart_scan);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (file_information_class != winternl::FileDirectoryInformation &&

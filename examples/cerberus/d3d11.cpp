@@ -19,7 +19,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/winternl.hpp>
-#include <hadesmem/detail/last_error.hpp>
+#include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
@@ -111,7 +111,7 @@ extern "C" HRESULT WINAPI
 {
   DetourRefCounter ref_count{GetIDXGISwapChainPresentRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
   auto& detour = GetIDXGISwapChainPresentDetour();
@@ -135,9 +135,9 @@ extern "C" HRESULT WINAPI
 
   // Put drawing code here.
 
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
   return ret;
 }
@@ -170,15 +170,15 @@ extern "C" HRESULT WINAPI
 {
   DetourRefCounter ref_count{GetIDXGIFactoryCreateSwapChainRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%p].", factory, device, desc, swap_chain);
   auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
   auto const create_swap_chain =
     detour->GetTrampoline<decltype(&IDXGIFactoryCreateSwapChainDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = create_swap_chain(factory, device, desc, swap_chain);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (SUCCEEDED(ret))
@@ -229,7 +229,7 @@ extern "C" HRESULT WINAPI
 {
   DetourRefCounter ref_count{GetD3D11CreateDeviceRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
     adapter,
@@ -245,7 +245,7 @@ extern "C" HRESULT WINAPI
   auto& detour = GetD3D11CreateDeviceDetour();
   auto const d3d11_create_device =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = d3d11_create_device(adapter,
                                        driver_type,
                                        software,
@@ -256,7 +256,7 @@ extern "C" HRESULT WINAPI
                                        device,
                                        feature_level,
                                        immediate_context);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (SUCCEEDED(ret))
@@ -316,7 +316,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 {
   DetourRefCounter ref_count{GetD3D11CreateDeviceAndSwapChainRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
     adapter,
@@ -334,7 +334,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
   auto const d3d11_create_device_and_swap_chain =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceAndSwapChainDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = d3d11_create_device_and_swap_chain(adapter,
                                                       driver_type,
                                                       software,
@@ -347,7 +347,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
                                                       device,
                                                       feature_level,
                                                       immediate_context);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (SUCCEEDED(ret))
@@ -368,14 +368,14 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
 {
   DetourRefCounter ref_count{GetCreateDXGIFactoryRefCount()};
 
-  hadesmem::detail::LastErrorPreserver last_error;
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
   auto& detour = GetCreateDXGIFactoryDetour();
   auto const create_dxgi_factory =
     detour->GetTrampoline<decltype(&CreateDXGIFactoryDetour)>();
-  last_error.Revert();
+  last_error_preserver.Revert();
   auto const ret = create_dxgi_factory(riid, factory);
-  last_error.Update();
+  last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (SUCCEEDED(ret))

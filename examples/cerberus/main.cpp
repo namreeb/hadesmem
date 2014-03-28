@@ -25,6 +25,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
   try
   {
     DetourNtQuerySystemInformation();
+    DetourNtCreateUserProcess();
     DetourNtQueryDirectoryFile();
     DetourNtMapViewOfSection();
     DetourNtUnmapViewOfSection();
@@ -49,6 +50,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
   try
   {
     UndetourNtQuerySystemInformation();
+    DetourNtCreateUserProcess();
     UndetourNtQueryDirectoryFile();
     UndetourNtMapViewOfSection();
     UndetourNtUnmapViewOfSection();
