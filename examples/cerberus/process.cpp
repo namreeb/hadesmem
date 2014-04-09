@@ -34,24 +34,28 @@ namespace
 {
 
 std::unique_ptr<hadesmem::PatchDetour>& GetNtQuerySystemInformationDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetNtQuerySystemInformationRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetNtCreateUserProcessDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetNtCreateUserProcessRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -148,15 +152,12 @@ public:
 
     HADESMEM_DETAIL_ASSERT(!unlinked_);
 
-    // Anything but first in the list
     if (prev_)
     {
-      // Middle of the list
       if (buffer_->NextEntryOffset)
       {
         prev_->NextEntryOffset += buffer_->NextEntryOffset;
       }
-      // Last in the list
       else
       {
         prev_->NextEntryOffset = 0UL;
@@ -164,7 +165,6 @@ public:
 
       unlinked_ = true;
     }
-    // First in the list
     else
     {
       // Unlinking the first process is unsupported.
@@ -221,13 +221,15 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
   PULONG return_length) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtQuerySystemInformationRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%lu] [%p].",
                                  system_information_class,
                                  system_information,
                                  system_information_length,
                                  return_length);
+#endif
   auto& detour = GetNtQuerySystemInformationDetour();
   auto const nt_query_system_information =
     detour->GetTrampoline<decltype(&NtQuerySystemInformationDetour)>();
@@ -237,7 +239,9 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
                                                system_information_length,
                                                return_length);
   last_error_preserver.Update();
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+#endif
 
   if (system_information_class != winternl::SystemProcessInformation &&
       system_information_class != winternl::SystemExtendedProcessInformation &&
@@ -245,13 +249,17 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       system_information_class != winternl::SystemFullProcessInformation &&
       system_information_class != winternl::SystemProcessIdInformation)
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_A("Unhandled information class.");
+#endif
     return ret;
   }
 
   if (!NT_SUCCESS(ret))
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_A("Failed.");
+#endif
     return ret;
   }
 
@@ -266,7 +274,9 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       {
         auto const process_name = GetNameImpl(
           system_information_class, pid_info->ProcessId, pid_info->ImageName);
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
         HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
+#endif
         if (process_name == L"hades.exe")
         {
           HADESMEM_DETAIL_TRACE_A("Returning failure to hide process.");
@@ -276,7 +286,9 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
     }
     else
     {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
       HADESMEM_DETAIL_TRACE_A("Enumerating processes.");
+#endif
       for (SystemProcessInformationEnum process_info{
              system_information_class, system_information,
              static_cast<std::uint8_t*>(system_information) +
@@ -287,7 +299,9 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
         if (process_info.HasName())
         {
           auto const process_name = process_info.GetName();
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
           HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
+#endif
           if (process_name == L"hades.exe")
           {
             HADESMEM_DETAIL_TRACE_A("Unlinking process.");
@@ -323,10 +337,11 @@ extern "C" NTSTATUS WINAPI
                             PRTL_USER_PROCESS_PARAMETERS process_parameters,
                             PVOID /*PPS_CREATE_INFO*/ create_info,
                             PVOID /*PPS_ATTRIBUTE_LIST*/ attribute_list)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtCreateUserProcessRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%lu] [%lu] [%p] [%p] [%lu] [%lu] [%p] [%p] [%p].",
     process_handle,
@@ -401,7 +416,7 @@ extern "C" NTSTATUS WINAPI
       auto const self_path = hadesmem::detail::GetSelfPath();
       auto const module_name = self_path.substr(self_path.rfind(L'\\') + 1);
       auto const command_line =
-        injector_dir + L"\\inject.exe --pid " + std::to_wstring(pid) +
+        L"\"" + injector_dir + L"\\inject.exe\" --pid " + std::to_wstring(pid) +
         L" --inject --export Load --add-path --path-resolution --module " +
         module_name;
       std::vector<wchar_t> command_line_buf(std::begin(command_line),

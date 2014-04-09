@@ -11,19 +11,15 @@
 struct DetourRefCounter
 {
 public:
-  DetourRefCounter(std::atomic<std::uint32_t>& ref_count)
+  DetourRefCounter(std::atomic<std::uint32_t>& ref_count) HADESMEM_DETAIL_NOEXCEPT
     : ref_count_{ &ref_count }
   {
     ++(*ref_count_);
   }
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
   DetourRefCounter(DetourRefCounter const&) = delete;
 
   DetourRefCounter& operator=(DetourRefCounter const&) = delete;
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
   ~DetourRefCounter()
   {

@@ -30,12 +30,14 @@ namespace
 {
 
 std::unique_ptr<hadesmem::PatchDetour>& GetNtQueryDirectoryFileDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetNtQueryDirectoryFileRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -190,7 +192,9 @@ void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
 {
   HADESMEM_DETAIL_ASSERT(length >= sizeof(BufferT));
 
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_A("Enumerating files.");
+#endif
   for (DirectoryFileInformationEnum<kInfoClass, BufferT> directory_info{
          file_information, length, status};
        directory_info.IsValid();
@@ -202,7 +206,9 @@ void EnumFiles(PVOID file_information, ULONG length, NTSTATUS* status)
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", file_name.c_str());
       if (file_name == L"hades.exe")
       {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
         HADESMEM_DETAIL_TRACE_A("Unlinking file.");
+#endif
         directory_info.Unlink();
       }
     }
@@ -227,8 +233,9 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
   BOOLEAN restart_scan) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtQueryDirectoryFileRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%p] [%p] [%p] [%lu] [%d] [%u] [%p] [%u].",
     file_handle,
@@ -242,6 +249,7 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
     static_cast<std::uint32_t>(return_single_entry),
     file_name,
     static_cast<std::uint32_t>(restart_scan));
+#endif
   auto& detour = GetNtQueryDirectoryFileDetour();
   auto const nt_query_directory_file =
     detour->GetTrampoline<decltype(&NtQueryDirectoryFileDetour)>();
@@ -258,7 +266,9 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
                                      file_name,
                                      restart_scan);
   last_error_preserver.Update();
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+#endif
 
   if (file_information_class != winternl::FileDirectoryInformation &&
       file_information_class != winternl::FileFullDirectoryInformation &&
@@ -267,19 +277,25 @@ extern "C" NTSTATUS WINAPI NtQueryDirectoryFileDetour(
       file_information_class != winternl::FileIdBothDirectoryInformation &&
       file_information_class != winternl::FileIdFullDirectoryInformation)
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled information class.");
+#endif
     return ret;
   }
 
   if (apc_routine)
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled asynchronous call.");
+#endif
     return ret;
   }
 
   if (!NT_SUCCESS(ret))
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_A("Trampoline returned failure.");
+#endif
     return ret;
   }
 

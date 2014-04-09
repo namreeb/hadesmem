@@ -33,24 +33,28 @@ namespace
 {
 
 std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetNtMapViewOfSectionRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -69,8 +73,8 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto& detour = GetNtMapViewOfSectionDetour();
   auto const nt_map_view_of_section =
     detour->GetTrampoline<decltype(&NtMapViewOfSectionDetour)>();
@@ -104,9 +108,10 @@ extern "C" NTSTATUS WINAPI
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
-  // This has to be after all our recursion checks, rather than before (which
-  // would be better) because OutputDebugString calls MapViewOfFile when DBWIN
-  // is running.
+// This has to be after all our recursion checks, rather than before (which
+// would be better) because OutputDebugString calls MapViewOfFile when DBWIN
+// is running.
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%Iu] [%Iu] [%p] [%p] [%d] [%u] [%u].",
     section,
@@ -120,68 +125,77 @@ extern "C" NTSTATUS WINAPI
     alloc_type,
     alloc_protect);
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+#endif
+
+  if (!NT_SUCCESS(ret))
+  {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+#endif
+  }
 
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
+#endif
     return ret;
   }
 
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_A("Current process.");
+#endif
 
   try
   {
-    if (NT_SUCCESS(ret))
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+#endif
+
+    hadesmem::Region const region{GetThisProcess(), *base};
+    DWORD const region_type = region.GetType();
+    if (region_type != MEM_IMAGE)
     {
-      HADESMEM_DETAIL_TRACE_A("Succeeded.");
-
-      hadesmem::Region const region{GetThisProcess(), *base};
-      DWORD const region_type = region.GetType();
-      if (region_type != MEM_IMAGE)
-      {
-        HADESMEM_DETAIL_TRACE_FORMAT_A("Not an image. Type given was %lx.",
-                                       region_type);
-        return ret;
-      }
-
-      void* const arbitrary_user_pointer =
-        winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer;
-      if (!arbitrary_user_pointer)
-      {
-        HADESMEM_DETAIL_TRACE_A("No arbitrary user pointer.");
-        return ret;
-      }
-
-      std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
-
-      auto const backslash = path.find_last_of(L'\\');
-      std::size_t const name_beg =
-        (backslash != std::wstring::npos ? backslash + 1 : 0);
-      std::wstring const module_name(std::begin(path) + name_beg,
-                                     std::end(path));
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module name is %s.",
-                                     module_name.c_str());
-      std::wstring const module_name_upper =
-        hadesmem::detail::ToUpperOrdinal(module_name);
-
-      if (module_name_upper == L"D3D11" || module_name_upper == L"D3D11.DLL")
-      {
-        HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
-
-        DetourD3D11(reinterpret_cast<HMODULE>(*base));
-      }
-      else if (module_name_upper == L"DXGI" || module_name_upper == L"DXGI.DLL")
-      {
-        HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
-
-        DetourDXGI(reinterpret_cast<HMODULE>(*base));
-      }
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Not an image. Type given was %lx.",
+                                     region_type);
+#endif
+      return ret;
     }
-    else
+
+    void* const arbitrary_user_pointer =
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer;
+    if (!arbitrary_user_pointer)
     {
-      HADESMEM_DETAIL_TRACE_A("Failed.");
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+      HADESMEM_DETAIL_TRACE_A("No arbitrary user pointer.");
+#endif
+      return ret;
+    }
+
+    std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path is %s.", path.c_str());
+
+    auto const backslash = path.find_last_of(L'\\');
+    std::size_t const name_beg =
+      (backslash != std::wstring::npos ? backslash + 1 : 0);
+    std::wstring const module_name(std::begin(path) + name_beg, std::end(path));
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module name is %s.", module_name.c_str());
+    std::wstring const module_name_upper =
+      hadesmem::detail::ToUpperOrdinal(module_name);
+
+    if (module_name_upper == L"D3D11" || module_name_upper == L"D3D11.DLL")
+    {
+      HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
+
+      DetourD3D11(reinterpret_cast<HMODULE>(*base));
+    }
+    else if (module_name_upper == L"DXGI" || module_name_upper == L"DXGI.DLL")
+    {
+      HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
+
+      DetourDXGI(reinterpret_cast<HMODULE>(*base));
     }
   }
   catch (...)
@@ -199,8 +213,8 @@ extern "C" NTSTATUS WINAPI
   HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetNtUnmapViewOfSectionRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto& detour = GetNtUnmapViewOfSectionDetour();
   auto const nt_unmap_view_of_section =
     detour->GetTrampoline<decltype(&NtUnmapViewOfSectionDetour)>();
@@ -223,48 +237,56 @@ extern "C" NTSTATUS WINAPI
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
-  // This has to be after all our recursion checks, rather than before (which
-  // would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN
-  // is running.
+// This has to be after all our recursion checks, rather than before (which
+// would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN
+// is running.
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", process, base);
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+#endif
+
+  if (!NT_SUCCESS(ret))
+  {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+#endif
+  }
 
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
     HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
+#endif
     return ret;
   }
 
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_A("Current process.");
+#endif
 
   try
   {
-    if (NT_SUCCESS(ret))
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
+    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+#endif
+
+    auto const d3d11_mod = GetD3D11Module();
+    if (base >= d3d11_mod.first &&
+        base < static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second)
     {
-      HADESMEM_DETAIL_TRACE_A("Succeeded.");
+      HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
 
-      auto const d3d11_mod = GetD3D11Module();
-      if (base >= d3d11_mod.first &&
-          base < static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second)
-      {
-        HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
-
-        UndetourD3D11(false);
-      }
-
-      auto const dxgi_mod = GetDXGIModule();
-      if (base >= dxgi_mod.first &&
-          base < static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second)
-      {
-        HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
-
-        UndetourDXGI(false);
-      }
+      UndetourD3D11(false);
     }
-    else
+
+    auto const dxgi_mod = GetDXGIModule();
+    if (base >= dxgi_mod.first &&
+        base < static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second)
     {
-      HADESMEM_DETAIL_TRACE_A("Failed.");
+      HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
+
+      UndetourDXGI(false);
     }
   }
   catch (...)

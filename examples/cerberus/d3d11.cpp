@@ -31,73 +31,83 @@
 namespace
 {
 
-ID3D11Device*& GetDevice()
+ID3D11Device*& GetDevice() HADESMEM_DETAIL_NOEXCEPT
 {
   static ID3D11Device* device;
   return device;
 }
 
-ID3D11DeviceContext*& GetDeviceContext()
+ID3D11DeviceContext*& GetDeviceContext() HADESMEM_DETAIL_NOEXCEPT
 {
   static ID3D11DeviceContext* device_context;
   return device_context;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetIDXGISwapChainPresentDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetIDXGISwapChainPresentRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetIDXGIFactoryCreateSwapChainDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetIDXGIFactoryCreateSwapChainRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetD3D11CreateDeviceRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceAndSwapChainDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetD3D11CreateDeviceAndSwapChainRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 std::unique_ptr<hadesmem::PatchDetour>& GetCreateDXGIFactoryDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
 std::atomic<std::uint32_t>& GetCreateDXGIFactoryRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -107,13 +117,15 @@ std::atomic<std::uint32_t>& GetCreateDXGIFactoryRefCount()
 extern "C" HRESULT WINAPI
   IDXGISwapChainPresentDetour(IDXGISwapChain* swap_chain,
                               UINT sync_interval,
-                              UINT flags)
+                              UINT flags) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetIDXGISwapChainPresentRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
+#endif
   auto& detour = GetIDXGISwapChainPresentDetour();
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
@@ -121,6 +133,8 @@ extern "C" HRESULT WINAPI
   static std::once_flag once;
   auto const init = [&]()
   {
+    HADESMEM_DETAIL_TRACE_A("Performing initialization.");
+
     auto& device = GetDevice();
     auto& device_context = GetDeviceContext();
     if (SUCCEEDED(swap_chain->GetDevice(__uuidof(device),
@@ -138,7 +152,9 @@ extern "C" HRESULT WINAPI
   last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
   last_error_preserver.Update();
+#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+#endif
   return ret;
 }
 
@@ -167,10 +183,11 @@ extern "C" HRESULT WINAPI
                                     IUnknown* device,
                                     DXGI_SWAP_CHAIN_DESC* desc,
                                     IDXGISwapChain** swap_chain)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetIDXGIFactoryCreateSwapChainRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%p] [%p] [%p].", factory, device, desc, swap_chain);
   auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
@@ -226,10 +243,11 @@ extern "C" HRESULT WINAPI
                           ID3D11Device** device,
                           D3D_FEATURE_LEVEL* feature_level,
                           ID3D11DeviceContext** immediate_context)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetD3D11CreateDeviceRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
     adapter,
@@ -259,43 +277,39 @@ extern "C" HRESULT WINAPI
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
-  if (SUCCEEDED(ret))
-  {
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
-
-    IDXGIDevice* dxgi_device;
-    if (SUCCEEDED((*device)->QueryInterface(__uuidof(IDXGIDevice),
-                                            (void**)&dxgi_device)))
-    {
-      IDXGIAdapter* dxgi_adapter;
-      if (SUCCEEDED(dxgi_device->GetParent(__uuidof(IDXGIAdapter),
-                                           (void**)&dxgi_adapter)))
-      {
-        IDXGIFactory* dxgi_factory;
-        if (SUCCEEDED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
-                                              (void**)&dxgi_factory)))
-        {
-          DetourDXGIFactory(dxgi_factory);
-        }
-        else
-        {
-          HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIFactory.");
-        }
-      }
-      else
-      {
-        HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIAdapter.");
-      }
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIDevice.");
-    }
-  }
-  else
+  if (FAILED(ret))
   {
     HADESMEM_DETAIL_TRACE_A("Failed.");
+    return ret;
   }
+
+  HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+  IDXGIDevice* dxgi_device = nullptr;
+  if (FAILED((*device)->QueryInterface(__uuidof(IDXGIDevice),
+                                       reinterpret_cast<void**>(&dxgi_device))))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIDevice.");
+    return ret;
+  }
+
+  IDXGIAdapter* dxgi_adapter = nullptr;
+  if (FAILED(dxgi_device->GetParent(__uuidof(IDXGIAdapter),
+                                    reinterpret_cast<void**>(&dxgi_adapter))))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIAdapter.");
+    return ret;
+  }
+
+  IDXGIFactory* dxgi_factory = nullptr;
+  if (FAILED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
+                                     reinterpret_cast<void**>(&dxgi_factory))))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIFactory.");
+    return ret;
+  }
+
+  DetourDXGIFactory(dxgi_factory);
 
   return ret;
 }
@@ -312,11 +326,11 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   IDXGISwapChain** swap_chain,
   ID3D11Device** device,
   D3D_FEATURE_LEVEL* feature_level,
-  ID3D11DeviceContext** immediate_context)
+  ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetD3D11CreateDeviceAndSwapChainRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
     adapter,
@@ -365,10 +379,11 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 }
 
 extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   DetourRefCounter ref_count{GetCreateDXGIFactoryRefCount()};
-
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
   auto& detour = GetCreateDXGIFactoryDetour();
   auto const create_dxgi_factory =
@@ -659,14 +674,14 @@ void UndetourDXGI(bool remove)
   GetDXGIModule() = std::make_pair(nullptr, 0);
 }
 
-std::pair<void*, SIZE_T>& GetD3D11Module()
+std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
-std::pair<void*, SIZE_T>& GetDXGIModule()
+std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::pair<void*, SIZE_T> module{ nullptr, 0 };
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
