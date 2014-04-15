@@ -145,7 +145,8 @@ private:
       Destroy();
     }
 
-    new (&t_) T(std::forward<U>(u));
+	// Avoid picking up placement new overloads
+    ::new (static_cast<void*>(&t_)) T(std::forward<U>(u));
     valid_ = true;
   }
 
