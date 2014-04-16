@@ -108,6 +108,7 @@ void TestFindPattern()
     <Pattern Name="Int3 Then Nop Next" Data="??" Start="Int3 Then Nop"/>
     <Pattern Name="RtlRandom String" Data="52 74 6c 52 61 6e ?? 6f 6d"/>
     <Pattern Name="Int3 Then Nop 0x1000" Data="CC 90" StartRVA="0x1000"/>
+    <Pattern Name="Int3 Then Nop NtClose" Data="CC 90" StartExport="NtClose"/>
   </FindPattern>
 </HadesMem>
 )";
@@ -142,7 +143,7 @@ void TestFindPattern()
     find_pattern.Lookup(L"", L"FindPattern String"),
     static_cast<void*>(static_cast<std::uint8_t*>(find_pattern_string) -
                        process_base));
-  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 4UL);
+  BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 5UL);
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop"),
                 static_cast<void*>(nullptr));
   auto const int3_then_nop =
@@ -167,11 +168,20 @@ void TestFindPattern()
                     hadesmem::Error);
   auto const int3_then_nop_0x1000 =
     find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop 0x1000");
+  BOOST_TEST_NE(int3_then_nop_0x1000, static_cast<void*>(nullptr));
   BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop_0x1000), '\xCC');
   BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop_0x1000) + 1), '\x90');
   auto const int3_then_nop_0x1000_rel =
     reinterpret_cast<std::uintptr_t>(int3_then_nop_0x1000) - ntdll_base;
   BOOST_TEST(int3_then_nop_0x1000_rel >= 0x1000U);
+  auto const int3_then_nop_nt_close =
+    find_pattern.Lookup(L"ntdll.dll", L"Int3 Then Nop NtClose");
+  BOOST_TEST_NE(int3_then_nop_nt_close, static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(*static_cast<char const*>(int3_then_nop_nt_close), '\xCC');
+  BOOST_TEST_EQ(*(static_cast<char const*>(int3_then_nop_nt_close)+1), '\x90');
+  hadesmem::Module const ntdll(process, L"ntdll.dll");
+  auto const nt_close = FindProcedure(process, ntdll, "NtClose");
+  BOOST_TEST(int3_then_nop_nt_close > nt_close);
 
   std::wstring const pattern_file_data_invalid1 = LR"(
 <?xml version="1.0" encoding="utf-8"?>

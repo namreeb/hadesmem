@@ -137,13 +137,16 @@ extern "C" HRESULT WINAPI
 
     auto& device = GetDevice();
     auto& device_context = GetDeviceContext();
-    if (SUCCEEDED(swap_chain->GetDevice(__uuidof(device),
-                                        reinterpret_cast<void**>(&device))))
+    if (FAILED(swap_chain->GetDevice(__uuidof(device),
+                                     reinterpret_cast<void**>(&device))))
     {
-      device->GetImmediateContext(&device_context);
-
-      // Put init code here.
+      HADESMEM_DETAIL_TRACE_A("WARNING! Failed to get device from swap chain.");
+      return;
     }
+
+    device->GetImmediateContext(&device_context);
+
+    // Put init code here.
   };
   std::call_once(once, init);
 

@@ -24,8 +24,10 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
+#include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
@@ -140,7 +142,7 @@ void* FindRaw(Process const& process,
 
 struct ModuleRegionInfo
 {
-  std::uintptr_t base;
+  std::shared_ptr<Module> module;
   using ScanRegion = std::pair<std::uint8_t*, std::uint8_t*>;
   std::vector<ScanRegion> code_regions;
   std::vector<ScanRegion> data_regions;
@@ -153,16 +155,15 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
 
   if (module.empty())
   {
-    Module const module_ex{process, nullptr};
-    mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
+    mod_info.module = std::make_shared<Module>(process, nullptr);
   }
   else
   {
-    Module const module_ex{process, module};
-    mod_info.base = reinterpret_cast<std::uintptr_t>(module_ex.GetHandle());
+    mod_info.module = std::make_shared<Module>(process, module);
   }
 
-  auto const base = reinterpret_cast<std::uint8_t*>(mod_info.base);
+  auto const base =
+    reinterpret_cast<std::uint8_t*>(mod_info.module->GetHandle());
   PeFile const pe_file{process, base, hadesmem::PeFileType::Image, 0};
   DosHeader const dos_header{process, pe_file};
   NtHeaders const nt_headers{process, pe_file};
@@ -261,7 +262,9 @@ void* Find(Process const& process,
     if (void* const address = Find(process, region, start, n_beg, n_end))
     {
       return !!(flags & PatternFlags::kRelativeAddress)
-               ? static_cast<std::uint8_t*>(address) - mod_info.base
+               ? static_cast<std::uint8_t*>(address) -
+                   reinterpret_cast<std::uintptr_t>(
+                     mod_info.module->GetHandle())
                : address;
     }
   }
@@ -288,7 +291,9 @@ inline void* Find(Process const& process,
   auto const mod_info = detail::GetModuleInfo(process, module);
   auto const needle = detail::ConvertData(data);
   void* const start_abs =
-    start ? reinterpret_cast<std::uint8_t*>(mod_info.base) + start : nullptr;
+    start
+      ? reinterpret_cast<std::uint8_t*>(mod_info.module->GetHandle()) + start
+      : nullptr;
   return detail::Find(
     process, mod_info, std::begin(needle), std::end(needle), flags, start_abs);
 }
@@ -641,6 +646,7 @@ private:
     std::wstring data;
     std::wstring start;
     std::wstring start_rva;
+    std::wstring start_export;
     std::uint32_t flags;
   };
 
@@ -832,10 +838,14 @@ private:
         auto const pattern_start_rva =
           GetOptionalAttributeValue(pattern, L"StartRVA");
 
+        auto const pattern_start_export =
+          GetOptionalAttributeValue(pattern, L"StartExport");
+
         std::uint32_t const pattern_flags = ReadFlags(pattern);
 
-        PatternInfo pattern_info{pattern_name, pattern_data, pattern_start,
-                                 pattern_start_rva, pattern_flags};
+        PatternInfo pattern_info{pattern_name,         pattern_data,
+                                 pattern_start,        pattern_start_rva,
+                                 pattern_start_export, pattern_flags};
 
         std::vector<ManipInfo> pattern_manips;
 
@@ -959,9 +969,9 @@ private:
     return address;
   }
 
-  std::uintptr_t GetStartRva(std::wstring const& module,
-                             std::uintptr_t base,
-                             std::wstring const& start) const
+  std::uintptr_t GetStartRvaFromPattern(std::wstring const& module,
+                                        std::uintptr_t base,
+                                        std::wstring const& start) const
   {
     std::uintptr_t start_rva = 0U;
     if (!start.empty())
@@ -972,6 +982,20 @@ private:
       {
         start_rva -= base;
       }
+    }
+
+    return start_rva;
+  }
+
+  std::uintptr_t GetStartRvaFromExport(Module const& module,
+                                       std::wstring const& start) const
+  {
+    std::uintptr_t start_rva = 0U;
+    if (!start.empty())
+    {
+      start_rva = reinterpret_cast<std::uintptr_t>(
+        FindProcedure(*process_, module, detail::WideCharToMultiByte(start)));
+      start_rva -= reinterpret_cast<std::uintptr_t>(module.GetHandle());
     }
 
     return start_rva;
@@ -988,6 +1012,8 @@ private:
 
       auto const mod_info =
         detail::GetModuleInfo(*process_, patterns_info_full_pair.first);
+      auto const base =
+        reinterpret_cast<std::uintptr_t>(mod_info.module->GetHandle());
       auto const& module = patterns_info_full_pair.first;
       auto const& patterns_info_full = patterns_info_full_pair.second;
       auto const& pattern_infos = patterns_info_full.patterns;
@@ -995,25 +1021,29 @@ private:
       {
         std::uint32_t const flags = patterns_info_full.flags | p.pattern.flags;
         void* address = nullptr;
-        if (!p.pattern.start_rva.empty())
+        std::uintptr_t const start_rva = [&]()->std::uintptr_t
         {
-          std::uintptr_t const start_rva =
-            detail::HexStrToPtr(p.pattern.start_rva);
-          address = ::hadesmem::Find(
-            *process_, module, p.pattern.data, flags, start_rva);
-        }
-        else
-        {
-          std::uintptr_t const start_rva =
-            GetStartRva(module, mod_info.base, p.pattern.start);
-          address = ::hadesmem::Find(
-            *process_, module, p.pattern.data, flags, start_rva);
-        }
+          if (!p.pattern.start_rva.empty())
+          {
+            return detail::HexStrToPtr(p.pattern.start_rva);
+          }
+          else if (!p.pattern.start_export.empty())
+          {
+            return GetStartRvaFromExport(*mod_info.module,
+                                         p.pattern.start_export);
+          }
+          else
+          {
+            return GetStartRvaFromPattern(module, base, p.pattern.start);
+          }
+        }();
+
+        address =
+          ::hadesmem::Find(*process_, module, p.pattern.data, flags, start_rva);
 
         if (address)
         {
-          address =
-            ApplyManipulators(address, flags, mod_info.base, p.manipulators);
+          address = ApplyManipulators(address, flags, base, p.manipulators);
         }
 
         find_pattern_datas_[patterns_info_full_pair.first][p.pattern.name] =
