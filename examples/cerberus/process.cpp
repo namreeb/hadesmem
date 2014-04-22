@@ -223,13 +223,11 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
   DetourRefCounter ref_count{GetNtQuerySystemInformationRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%p] [%lu] [%p].",
-                                 system_information_class,
-                                 system_information,
-                                 system_information_length,
-                                 return_length);
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d] [%p] [%lu] [%p].",
+                                       system_information_class,
+                                       system_information,
+                                       system_information_length,
+                                       return_length);
   auto& detour = GetNtQuerySystemInformationDetour();
   auto const nt_query_system_information =
     detour->GetTrampoline<decltype(&NtQuerySystemInformationDetour)>();
@@ -239,9 +237,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
                                                system_information_length,
                                                return_length);
   last_error_preserver.Update();
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
 
   if (system_information_class != winternl::SystemProcessInformation &&
       system_information_class != winternl::SystemExtendedProcessInformation &&
@@ -249,17 +245,13 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       system_information_class != winternl::SystemFullProcessInformation &&
       system_information_class != winternl::SystemProcessIdInformation)
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Unhandled information class.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Unhandled information class.");
     return ret;
   }
 
   if (!NT_SUCCESS(ret))
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Failed.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
     return ret;
   }
 
@@ -274,9 +266,8 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
       {
         auto const process_name = GetNameImpl(
           system_information_class, pid_info->ProcessId, pid_info->ImageName);
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-        HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
-#endif
+        HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Name: [%s].",
+                                             process_name.c_str());
         if (process_name == L"hades.exe")
         {
           HADESMEM_DETAIL_TRACE_A("Returning failure to hide process.");
@@ -286,9 +277,7 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
     }
     else
     {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-      HADESMEM_DETAIL_TRACE_A("Enumerating processes.");
-#endif
+      HADESMEM_DETAIL_TRACE_NOISY_A("Enumerating processes.");
       for (SystemProcessInformationEnum process_info{
              system_information_class, system_information,
              static_cast<std::uint8_t*>(system_information) +
@@ -299,9 +288,8 @@ extern "C" NTSTATUS WINAPI NtQuerySystemInformationDetour(
         if (process_info.HasName())
         {
           auto const process_name = process_info.GetName();
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-          HADESMEM_DETAIL_TRACE_FORMAT_W(L"Name: [%s].", process_name.c_str());
-#endif
+          HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Name: [%s].",
+                                               process_name.c_str());
           if (process_name == L"hades.exe")
           {
             HADESMEM_DETAIL_TRACE_A("Unlinking process.");

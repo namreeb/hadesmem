@@ -993,8 +993,18 @@ private:
     std::uintptr_t start_rva = 0U;
     if (!start.empty())
     {
-      start_rva = reinterpret_cast<std::uintptr_t>(
-        FindProcedure(*process_, module, detail::WideCharToMultiByte(start)));
+      if (start[0] == '#' && start.size() > 1U)
+      {
+        auto const ordinal_str = start.substr(1);
+        start_rva = reinterpret_cast<std::uintptr_t>(
+          FindProcedure(*process_, module, detail::StrToNum<WORD>(ordinal_str)));
+      }
+      else
+      {
+        start_rva = reinterpret_cast<std::uintptr_t>(
+          FindProcedure(*process_, module, detail::WideCharToMultiByte(start)));
+      }
+
       start_rva -= reinterpret_cast<std::uintptr_t>(module.GetHandle());
     }
 

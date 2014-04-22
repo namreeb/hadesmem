@@ -52,10 +52,10 @@ template <typename T, typename CharT>
 T StrToNum(std::basic_string<CharT> const& str)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
-  std::basic_ostringstream<CharT> converter{str};
+  std::basic_istringstream<CharT> converter{str};
   converter.imbue(std::locale::classic());
-  T out{};
-  if (!converter || (!converter >> out))
+  T out;
+  if (!converter || !(converter >> out))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"Conversion failed."});

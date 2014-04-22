@@ -122,10 +122,8 @@ extern "C" HRESULT WINAPI
   DetourRefCounter ref_count{GetIDXGISwapChainPresentRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
-#endif
   auto& detour = GetIDXGISwapChainPresentDetour();
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
@@ -155,9 +153,7 @@ extern "C" HRESULT WINAPI
   last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
   last_error_preserver.Update();
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
   return ret;
 }
 

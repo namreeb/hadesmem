@@ -108,11 +108,10 @@ extern "C" NTSTATUS WINAPI
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
-// This has to be after all our recursion checks, rather than before (which
-// would be better) because OutputDebugString calls MapViewOfFile when DBWIN
-// is running.
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  // This has to be after all our recursion checks, rather than before (which
+  // would be better) because OutputDebugString calls MapViewOfFile when DBWIN
+  // is running.
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%p] [%p] [%Iu] [%Iu] [%p] [%p] [%d] [%u] [%u].",
     section,
     process,
@@ -124,43 +123,33 @@ extern "C" NTSTATUS WINAPI
     inherit_disposition,
     alloc_type,
     alloc_protect);
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
 
   if (!NT_SUCCESS(ret))
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Failed.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Unkown or different process [%lu].",
+                                         pid);
     return ret;
   }
 
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_A("Current process.");
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_A("Current process.");
 
   try
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     hadesmem::Region const region{GetThisProcess(), *base};
     DWORD const region_type = region.GetType();
     if (region_type != MEM_IMAGE)
     {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Not an image. Type given was %lx.",
-                                     region_type);
-#endif
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Not an image. Type given was %lx.",
+                                           region_type);
       return ret;
     }
 
@@ -168,9 +157,7 @@ extern "C" NTSTATUS WINAPI
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer;
     if (!arbitrary_user_pointer)
     {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-      HADESMEM_DETAIL_TRACE_A("No arbitrary user pointer.");
-#endif
+      HADESMEM_DETAIL_TRACE_NOISY_A("No arbitrary user pointer.");
       return ret;
     }
 
@@ -237,39 +224,30 @@ extern "C" NTSTATUS WINAPI
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
-// This has to be after all our recursion checks, rather than before (which
-// would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN
-// is running.
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", process, base);
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
-#endif
+  // This has to be after all our recursion checks, rather than before (which
+  // would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN
+  // is running.
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p] [%p].", process, base);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
 
   if (!NT_SUCCESS(ret))
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Failed.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   DWORD const pid = ::GetProcessId(process);
   if (!pid || pid != ::GetCurrentProcessId())
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Unkown or different process [%lu].", pid);
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Unkown or different process [%lu].",
+                                         pid);
     return ret;
   }
 
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-  HADESMEM_DETAIL_TRACE_A("Current process.");
-#endif
+  HADESMEM_DETAIL_TRACE_NOISY_A("Current process.");
 
   try
   {
-#ifdef HADESMEM_DETAIL_CERBERUS_TRACE_NOISY
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
-#endif
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     auto const d3d11_mod = GetD3D11Module();
     if (base >= d3d11_mod.first &&
