@@ -9,6 +9,8 @@
 
 #include <hadesmem/config.hpp>
 
+void InitializeD3D11();
+
 void DetourD3D11(HMODULE base);
 
 void DetourDXGI(HMODULE base);

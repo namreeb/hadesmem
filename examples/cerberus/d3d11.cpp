@@ -27,6 +27,7 @@
 
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
+#include "module.hpp"
 
 namespace
 {
@@ -414,6 +415,57 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
 
   return ret;
 }
+}
+
+void InitializeD3D11()
+{
+  HADESMEM_DETAIL_TRACE_A("Initializing D3D11.");
+
+  auto const on_map = [](
+    HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
+  {
+    if (name == L"D3D11" || name == L"D3D11.DLL")
+    {
+      HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
+
+      DetourD3D11(module);
+    }
+    else if (name == L"DXGI" || name == L"DXGI.DLL")
+    {
+      HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
+
+      DetourDXGI(module);
+    }
+  };
+  RegisterOnMapCallback(on_map);
+  HADESMEM_DETAIL_TRACE_A("Registered for OnMap.");
+
+  auto const on_unmap = [](HMODULE module)
+  {
+    auto const d3d11_mod = GetD3D11Module();
+    auto const d3d11_mod_beg = d3d11_mod.first;
+    void* const d3d11_mod_end =
+      static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second;
+    if (module >= d3d11_mod_beg && module < d3d11_mod_end)
+    {
+      HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
+
+      UndetourD3D11(false);
+    }
+
+    auto const dxgi_mod = GetDXGIModule();
+    auto const dxgi_mod_beg = d3d11_mod.first;
+    void* const dxgi_mod_end =
+      static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second;
+    if (module >= dxgi_mod_beg && module < dxgi_mod_end)
+    {
+      HADESMEM_DETAIL_TRACE_A("DXGI nuloaded. Removing hooks.");
+
+      UndetourDXGI(false);
+    }
+  };
+  RegisterOnUnmapCallback(on_unmap);
+  HADESMEM_DETAIL_TRACE_A("Registered for OnUnmap.");
 }
 
 void DetourD3D11(HMODULE base)

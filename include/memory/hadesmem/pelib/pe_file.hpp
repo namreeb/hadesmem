@@ -15,6 +15,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/region_alloc_size.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/region.hpp>
@@ -51,20 +52,7 @@ public:
 
     if (type == PeFileType::Image && !size)
     {
-      RegionList regions{*process_};
-      auto iter = std::find_if(std::begin(regions),
-                               std::end(regions),
-                               [&](Region const& region)
-                               { return region.GetAllocBase() == base_; });
-      while (iter != std::end(regions) && iter->GetAllocBase() == base_)
-      {
-        SIZE_T const region_size = iter->GetSize();
-        HADESMEM_DETAIL_ASSERT(region_size <
-                               (std::numeric_limits<DWORD>::max)());
-        size_ += static_cast<DWORD>(region_size);
-        HADESMEM_DETAIL_ASSERT(size_ >= region_size);
-        ++iter;
-      }
+      size_ = detail::GetRegionAllocSize(*process_, base_);
     }
   }
 

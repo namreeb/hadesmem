@@ -23,7 +23,7 @@
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
-#include "d3d11.hpp"
+#include "callbacks.hpp"
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
 
@@ -58,6 +58,18 @@ std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
+}
+
+Callbacks<OnMapCallback>& GetOnMapCallbacks()
+{
+  static Callbacks<OnMapCallback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnUnmapCallback>& GetOnUnmapCallbacks()
+{
+  static Callbacks<OnUnmapCallback> callbacks;
+  return callbacks;
 }
 
 extern "C" NTSTATUS WINAPI
@@ -172,18 +184,8 @@ extern "C" NTSTATUS WINAPI
     std::wstring const module_name_upper =
       hadesmem::detail::ToUpperOrdinal(module_name);
 
-    if (module_name_upper == L"D3D11" || module_name_upper == L"D3D11.DLL")
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
-
-      DetourD3D11(reinterpret_cast<HMODULE>(*base));
-    }
-    else if (module_name_upper == L"DXGI" || module_name_upper == L"DXGI.DLL")
-    {
-      HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
-
-      DetourDXGI(reinterpret_cast<HMODULE>(*base));
-    }
+    auto& callbacks = GetOnMapCallbacks();
+    callbacks.Run(reinterpret_cast<HMODULE>(*base), path, module_name_upper);
   }
   catch (...)
   {
@@ -249,23 +251,8 @@ extern "C" NTSTATUS WINAPI
   {
     HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-    auto const d3d11_mod = GetD3D11Module();
-    if (base >= d3d11_mod.first &&
-        base < static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second)
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
-
-      UndetourD3D11(false);
-    }
-
-    auto const dxgi_mod = GetDXGIModule();
-    if (base >= dxgi_mod.first &&
-        base < static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second)
-    {
-      HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
-
-      UndetourDXGI(false);
-    }
+    auto& callbacks = GetOnUnmapCallbacks();
+    callbacks.Run(reinterpret_cast<HMODULE>(base));
   }
   catch (...)
   {
@@ -331,7 +318,7 @@ void UndetourNtMapViewOfSection()
 
 void UndetourNtUnmapViewOfSection()
 {
-  auto& detour = GetNtMapViewOfSectionDetour();
+  auto& detour = GetNtUnmapViewOfSectionDetour();
   detour->Remove();
   HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection undetoured.");
   detour = nullptr;
@@ -342,4 +329,29 @@ void UndetourNtUnmapViewOfSection()
     HADESMEM_DETAIL_TRACE_A("Spinning on NtUnmapViewOfSection ref count.");
   }
   HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection free of references.");
+}
+
+std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback)
+{
+  auto& callbacks = GetOnMapCallbacks();
+  return callbacks.Register(callback);
+}
+
+std::size_t
+  RegisterOnUnmapCallback(std::function<OnUnmapCallback> const& callback)
+{
+  auto& callbacks = GetOnUnmapCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnMapCallback(std::size_t id)
+{
+  auto& callbacks = GetOnMapCallbacks();
+  return callbacks.Unregister(id);
+}
+
+void UnregisterOnUnmapCallback(std::size_t id)
+{
+  auto& callbacks = GetOnUnmapCallbacks();
+  return callbacks.Unregister(id);
 }
