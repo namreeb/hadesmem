@@ -450,6 +450,8 @@ void InitializeD3D11()
     {
       HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
 
+      // Detach instead of remove hooks because when we get the notification the
+      // memory region is already gone.
       UndetourD3D11(false);
     }
 
@@ -459,8 +461,10 @@ void InitializeD3D11()
       static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second;
     if (module >= dxgi_mod_beg && module < dxgi_mod_end)
     {
-      HADESMEM_DETAIL_TRACE_A("DXGI nuloaded. Removing hooks.");
+      HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
 
+      // Detach instead of remove hooks because when we get the notification the
+      // memory region is already gone.
       UndetourDXGI(false);
     }
   };

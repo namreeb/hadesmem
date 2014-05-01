@@ -52,7 +52,9 @@ public:
 
     if (type == PeFileType::Image && !size)
     {
-      size_ = detail::GetRegionAllocSize(*process_, base_);
+      auto const region_alloc_size = detail::GetRegionAllocSize(*process_, base_);
+      HADESMEM_DETAIL_ASSERT(region_alloc_size < (std::numeric_limits<DWORD>::max)());
+      size_ = static_cast<DWORD>(region_alloc_size);
     }
   }
 

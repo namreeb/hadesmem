@@ -25,6 +25,10 @@
 namespace
 {
 
+// Check whether any threads are currently executing code in our module. This
+// does not check whether we are on the stack, but that should be handled by the
+// ref counting done in all the hooks. This is not foolproof, but it's better
+// than nothing and will reduce the potential danger window even further.
 bool IsSafeToUnload()
 {
   auto const& process = GetThisProcess();
@@ -78,7 +82,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    // Support deferred hooking
+    // Support deferred hooking (via module load notifications).
     InitializeD3D11();
 
     DetourNtQuerySystemInformation();

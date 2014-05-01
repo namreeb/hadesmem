@@ -8,7 +8,7 @@
 
 #include <hadesmem/config.hpp>
 
-struct DetourRefCounter
+class DetourRefCounter
 {
 public:
   DetourRefCounter(std::atomic<std::uint32_t>& ref_count) HADESMEM_DETAIL_NOEXCEPT
@@ -21,9 +21,26 @@ public:
 
   DetourRefCounter& operator=(DetourRefCounter const&) = delete;
 
+  DetourRefCounter(DetourRefCounter&& other) HADESMEM_DETAIL_NOEXCEPT
+    : ref_count_(other.ref_count_)
+  {
+    other.ref_count_ = nullptr;
+  }
+
+  DetourRefCounter& operator=(DetourRefCounter&& other) HADESMEM_DETAIL_NOEXCEPT
+  {
+    ref_count_ = other.ref_count_;
+    other.ref_count_ = nullptr;
+
+    return *this;
+  }
+
   ~DetourRefCounter()
   {
-    --(*ref_count_);
+    if (ref_count_)
+    {
+      --(*ref_count_);
+    }
   }
 
 private:
