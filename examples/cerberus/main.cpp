@@ -15,7 +15,6 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "d3d11.hpp"
-#include "file.hpp"
 #include "module.hpp"
 #include "process.hpp"
 
@@ -85,9 +84,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     // Support deferred hooking (via module load notifications).
     InitializeD3D11();
 
-    DetourNtQuerySystemInformation();
     DetourNtCreateUserProcess();
-    DetourNtQueryDirectoryFile();
     DetourNtMapViewOfSection();
     DetourNtUnmapViewOfSection();
 
@@ -110,9 +107,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    UndetourNtQuerySystemInformation();
     UndetourNtCreateUserProcess();
-    UndetourNtQueryDirectoryFile();
     UndetourNtMapViewOfSection();
     UndetourNtUnmapViewOfSection();
 

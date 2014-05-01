@@ -3,10 +3,6 @@
 
 #pragma once
 
-void DetourNtQuerySystemInformation();
-
 void DetourNtCreateUserProcess();
-
-void UndetourNtQuerySystemInformation();
 
 void UndetourNtCreateUserProcess();
