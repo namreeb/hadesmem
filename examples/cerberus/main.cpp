@@ -16,6 +16,7 @@
 
 #include "d3d11.hpp"
 #include "module.hpp"
+#include "plugin.hpp"
 #include "process.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
@@ -91,6 +92,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     DetourD3D11(nullptr);
     DetourDXGI(nullptr);
 
+    LoadPlugins();
+
     return 0;
   }
   catch (...)
@@ -113,6 +116,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 
     UndetourDXGI(true);
     UndetourD3D11(true);
+
+    UnloadPlugins();
 
     if (!IsSafeToUnload())
     {

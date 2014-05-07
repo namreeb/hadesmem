@@ -22,21 +22,27 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
-#pragma GCC diagnostic ignored "-Wexit-time-destructors"
-#endif
+namespace
+{
 
-extern std::unique_ptr<hadesmem::PatchDetour> g_detour;
-std::unique_ptr<hadesmem::PatchDetour> g_detour;
+std::unique_ptr<hadesmem::PatchDetour>& GetDetour1()
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
 
-extern std::unique_ptr<hadesmem::PatchDetour> g_detour_2;
-std::unique_ptr<hadesmem::PatchDetour> g_detour_2;
+std::unique_ptr<hadesmem::PatchDetour>& GetDetour2()
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
 
-#if defined(HADESMEM_CLANG)
-#pragma GCC diagnostic pop
-#endif
+hadesmem::Process& GetThisProcess()
+{
+  static hadesmem::Process process(::GetCurrentProcessId());
+  return process;
+}
+}
 
 std::uint32_t __cdecl HookMe(std::int32_t i1,
                              std::int32_t i2,
@@ -71,30 +77,32 @@ extern "C" std::uint32_t __cdecl HookMeHk(std::int32_t i1,
                                           std::int32_t i7,
                                           std::int32_t i8)
 {
-  BOOST_TEST(g_detour->GetTrampoline() != nullptr);
-  auto const orig = g_detour->GetTrampoline<decltype(&HookMe)>();
+  auto& detour_1 = GetDetour1();
+  BOOST_TEST(detour_1->GetTrampoline() != nullptr);
+  auto const orig = detour_1->GetTrampoline<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1234UL);
   return 0x1337;
 }
 
 extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
-  std::int32_t i2,
-  std::int32_t i3,
-  std::int32_t i4,
-  std::int32_t i5,
-  std::int32_t i6,
-  std::int32_t i7,
-  std::int32_t i8)
+                                           std::int32_t i2,
+                                           std::int32_t i3,
+                                           std::int32_t i4,
+                                           std::int32_t i5,
+                                           std::int32_t i6,
+                                           std::int32_t i7,
+                                           std::int32_t i8)
 {
-  BOOST_TEST(g_detour_2->GetTrampoline() != nullptr);
-  auto const orig = g_detour_2->GetTrampoline<decltype(&HookMe)>();
+  auto& detour_2 = GetDetour2();
+  BOOST_TEST(detour_2->GetTrampoline() != nullptr);
+  auto const orig = detour_2->GetTrampoline<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1337UL);
   return 0x5678;
 }
 
 void TestPatchRaw()
 {
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const& process = GetThisProcess();
 
   hadesmem::Allocator const test_mem(process, 0x1000);
 
@@ -204,49 +212,51 @@ void TestPatchDetour()
   { return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8); };
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
-  hadesmem::Process const process(::GetCurrentProcessId());
+  hadesmem::Process const& process = GetThisProcess();
 
-  g_detour = std::make_unique<hadesmem::PatchDetour>(
+  auto& detour_1 = GetDetour1();
+  detour_1 = std::make_unique<hadesmem::PatchDetour>(
     process,
     hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
     hadesmem::detail::UnionCast<PVOID>(&HookMeHk));
 
-  g_detour_2 = std::make_unique<hadesmem::PatchDetour>(
+  auto& detour_2 = GetDetour2();
+  detour_2 = std::make_unique<hadesmem::PatchDetour>(
     process,
     hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
     hadesmem::detail::UnionCast<PVOID>(&HookMeHk2));
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
-  g_detour->Apply();
+  detour_1->Apply();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  g_detour_2->Apply();
+  detour_2->Apply();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
 
-  g_detour_2->Remove();
+  detour_2->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  g_detour->Remove();
+  detour_1->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
-  g_detour->Apply();
+  detour_1->Apply();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  g_detour_2->Apply();
+  detour_2->Apply();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
 
-  g_detour_2->Remove();
+  detour_2->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  g_detour->Remove();
+  detour_1->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 }

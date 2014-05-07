@@ -43,3 +43,8 @@ lib cerberus
   :
     [ glob cerberus/*.cpp ]
   ;
+
+lib plugin
+  :
+    [ glob plugin/*.cpp ]
+  ;

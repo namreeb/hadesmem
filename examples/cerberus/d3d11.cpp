@@ -25,6 +25,7 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/region.hpp>
 
+#include "callbacks.hpp"
 #include "detour_ref_counter.hpp"
 #include "main.hpp"
 #include "module.hpp"
@@ -114,6 +115,12 @@ std::atomic<std::uint32_t>& GetCreateDXGIFactoryRefCount()
   return ref_count;
 }
 
+Callbacks<OnFrameCallback>& GetOnFrameCallbacks()
+{
+  static Callbacks<OnFrameCallback> callbacks;
+  return callbacks;
+}
+
 // Modified version of code from http://bit.ly/1iizOJR.
 extern "C" HRESULT WINAPI
   IDXGISwapChainPresentDetour(IDXGISwapChain* swap_chain,
@@ -149,7 +156,8 @@ extern "C" HRESULT WINAPI
   };
   std::call_once(once, init);
 
-  // Put drawing code here.
+  auto& callbacks = GetOnFrameCallbacks();
+  callbacks.Run(swap_chain, GetDevice(), GetDeviceContext());
 
   last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
@@ -739,4 +747,16 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
+}
+
+std::size_t RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback)
+{
+  auto& callbacks = GetOnFrameCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnFrameCallback(std::size_t id)
+{
+  auto& callbacks = GetOnFrameCallbacks();
+  return callbacks.Unregister(id);
 }

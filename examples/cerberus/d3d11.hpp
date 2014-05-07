@@ -4,8 +4,11 @@
 #pragma once
 
 #include <utility>
+#include <functional>
 
 #include <windows.h>
+
+#include <d3d11.h>
 
 #include <hadesmem/config.hpp>
 
@@ -22,3 +25,9 @@ void UndetourDXGI(bool remove);
 std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT;
 
 std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT;
+
+typedef void OnFrameCallback(IDXGISwapChain* swap_chain, ID3D11Device* device, ID3D11DeviceContext* device_context);
+
+std::size_t RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
+
+void UnregisterOnFrameCallback(std::size_t id);

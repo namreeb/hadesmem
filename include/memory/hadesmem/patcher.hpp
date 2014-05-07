@@ -293,6 +293,14 @@ public:
       return;
     }
 
+    // Reset the trampolines here because we don't do it in remove, otherwise
+    // there's a potential race condition where we want to unhook and unload
+    // safely, so we unhook the function, then try waiting on our ref count to
+    // become zero, but we haven't actually called the trampoline yet, so we end
+    // up jumping to the memory we just free'd!
+    trampoline_ = nullptr;
+    trampolines_.clear();
+
     SuspendedProcess const suspended_process{process_->GetId()};
 
     std::uint32_t const kMaxInstructionLen = 15;
@@ -437,9 +445,8 @@ public:
 
     WriteVector(*process_, target_, orig_);
 
-    trampoline_.reset();
-
-    trampolines_.clear();
+    // Don't free trampolines here. Do it in Apply/destructor. See comments in
+    // Apply for the rationale.
 
     applied_ = false;
   }

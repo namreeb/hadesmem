@@ -24,7 +24,9 @@ public:
   void Unregister(std::size_t id)
   {
     std::lock_guard<std::mutex> lock(mutex_);
-    callbacks_.erase(id);
+    auto const num_removed = callbacks_.erase(id);
+    HADESMEM_DETAIL_ASSERT(num_removed == 1);
+    (void)num_removed;
   }
 
   template <typename... Args> void Run(Args&&... args) const
