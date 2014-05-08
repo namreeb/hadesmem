@@ -3,6 +3,14 @@
 
 #pragma once
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 void DetourNtCreateUserProcess();
 
 void UndetourNtCreateUserProcess();
+}
+}

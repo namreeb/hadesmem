@@ -8,6 +8,12 @@
 
 #include <windows.h>
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 void DetourNtMapViewOfSection();
 
 void DetourNtUnmapViewOfSection();
@@ -22,11 +28,13 @@ typedef void OnMapCallback(HMODULE module,
 
 std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback);
 
+void UnregisterOnMapCallback(std::size_t id);
+
 typedef void OnUnmapCallback(HMODULE module);
 
 std::size_t
   RegisterOnUnmapCallback(std::function<OnUnmapCallback> const& callback);
 
-void UnregisterOnMapCallback(std::size_t id);
-
 void UnregisterOnUnmapCallback(std::size_t id);
+}
+}

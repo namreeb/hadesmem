@@ -15,6 +15,7 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "d3d11.hpp"
+#include "exception.hpp"
 #include "module.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
@@ -25,13 +26,35 @@
 namespace
 {
 
+// This is a nasty hack to call any APIs which may be called from a static
+// destructor. We want to ensure that we call it nice and early, so it's not
+// called after we load our plugins, because otherwise it will be destructed
+// before the plugin's are automatically unloaded via the static destructor of
+// the plugin list, and when plugins try to unregister their callbacks (or
+// whatever they're doing) they will go boom. This is a nasty workaround, but
+// it's guaranteed by the standard to work, because we always use function local
+// statics which are guaranteed to be destructed in a deterministic order.
+void UseAllStatics()
+{
+  // Have to use 'real' callbacks rather than just passing in an empty
+  // std::function object because we might not be the only thread running at the
+  // moment.
+  auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/,
+                                    ID3D11Device* /*device*/,
+                                    ID3D11DeviceContext* /*device_context*/)
+  {};
+  auto const on_frame_id =
+    hadesmem::cerberus::RegisterOnFrameCallback(on_frame_callback);
+  hadesmem::cerberus::UnregisterOnFrameCallback(on_frame_id);
+}
+
 // Check whether any threads are currently executing code in our module. This
 // does not check whether we are on the stack, but that should be handled by the
 // ref counting done in all the hooks. This is not foolproof, but it's better
 // than nothing and will reduce the potential danger window even further.
 bool IsSafeToUnload()
 {
-  auto const& process = GetThisProcess();
+  auto const& process = hadesmem::cerberus::GetThisProcess();
   bool safe = true;
   std::size_t retries = 5;
   do
@@ -72,10 +95,18 @@ bool IsSafeToUnload()
 }
 }
 
-hadesmem::Process& GetThisProcess()
+namespace hadesmem
 {
-  static hadesmem::Process process{::GetCurrentProcessId()};
+
+namespace cerberus
+{
+
+Process& GetThisProcess()
+{
+  static Process process{::GetCurrentProcessId()};
   return process;
+}
+}
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
@@ -83,16 +114,19 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
   try
   {
     // Support deferred hooking (via module load notifications).
-    InitializeD3D11();
+    hadesmem::cerberus::InitializeD3D11();
 
-    DetourNtCreateUserProcess();
-    DetourNtMapViewOfSection();
-    DetourNtUnmapViewOfSection();
+    hadesmem::cerberus::DetourNtCreateUserProcess();
+    hadesmem::cerberus::DetourNtMapViewOfSection();
+    hadesmem::cerberus::DetourNtUnmapViewOfSection();
+    hadesmem::cerberus::DetourRtlAddVectoredExceptionHandler();
 
-    DetourD3D11(nullptr);
-    DetourDXGI(nullptr);
+    hadesmem::cerberus::DetourD3D11(nullptr);
+    hadesmem::cerberus::DetourDXGI(nullptr);
 
-    LoadPlugins();
+    UseAllStatics();
+
+    hadesmem::cerberus::LoadPlugins();
 
     return 0;
   }
@@ -110,14 +144,15 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    UndetourNtCreateUserProcess();
-    UndetourNtMapViewOfSection();
-    UndetourNtUnmapViewOfSection();
+    hadesmem::cerberus::UndetourNtCreateUserProcess();
+    hadesmem::cerberus::UndetourNtMapViewOfSection();
+    hadesmem::cerberus::UndetourNtUnmapViewOfSection();
+    hadesmem::cerberus::UndetourRtlAddVectoredExceptionHandler();
 
-    UndetourDXGI(true);
-    UndetourD3D11(true);
+    hadesmem::cerberus::UndetourDXGI(true);
+    hadesmem::cerberus::UndetourD3D11(true);
 
-    UnloadPlugins();
+    hadesmem::cerberus::UnloadPlugins();
 
     if (!IsSafeToUnload())
     {

@@ -10,7 +10,11 @@
 
 #include <d3d11.h>
 
-#include <hadesmem/config.hpp>
+namespace hadesmem
+{
+
+namespace cerberus
+{
 
 void InitializeD3D11();
 
@@ -22,12 +26,13 @@ void UndetourD3D11(bool remove);
 
 void UndetourDXGI(bool remove);
 
-std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT;
+typedef void OnFrameCallback(IDXGISwapChain* swap_chain,
+                             ID3D11Device* device,
+                             ID3D11DeviceContext* device_context);
 
-std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT;
-
-typedef void OnFrameCallback(IDXGISwapChain* swap_chain, ID3D11Device* device, ID3D11DeviceContext* device_context);
-
-std::size_t RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
+std::size_t
+  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
 
 void UnregisterOnFrameCallback(std::size_t id);
+}
+}

@@ -7,6 +7,12 @@
 #include <map>
 #include <mutex>
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 template <typename Func> class Callbacks
 {
 public:
@@ -43,3 +49,5 @@ private:
   std::size_t next_id_ = std::size_t{};
   std::map<std::size_t, Callback> callbacks_;
 };
+}
+}

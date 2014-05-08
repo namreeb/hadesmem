@@ -115,9 +115,23 @@ std::atomic<std::uint32_t>& GetCreateDXGIFactoryRefCount()
   return ref_count;
 }
 
-Callbacks<OnFrameCallback>& GetOnFrameCallbacks()
+std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
 {
-  static Callbacks<OnFrameCallback> callbacks;
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+  GetOnFrameCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -127,7 +141,8 @@ extern "C" HRESULT WINAPI
                               UINT sync_interval,
                               UINT flags) HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetIDXGISwapChainPresentRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetIDXGISwapChainPresentRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
@@ -176,7 +191,7 @@ void DetourDXGISwapChain(IDXGISwapChain* swap_chain)
   if (!present_detour)
   {
     present_detour = std::make_unique<hadesmem::PatchDetour>(
-      GetThisProcess(), present, present_detour_fn);
+      hadesmem::cerberus::GetThisProcess(), present, present_detour_fn);
     present_detour->Apply();
     HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present detoured.");
   }
@@ -193,7 +208,8 @@ extern "C" HRESULT WINAPI
                                     IDXGISwapChain** swap_chain)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetIDXGIFactoryCreateSwapChainRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetIDXGIFactoryCreateSwapChainRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -230,7 +246,9 @@ void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
   if (!create_swap_chain_detour)
   {
     create_swap_chain_detour = std::make_unique<hadesmem::PatchDetour>(
-      GetThisProcess(), create_swap_chain, create_swap_chain_detour_fn);
+      hadesmem::cerberus::GetThisProcess(),
+      create_swap_chain,
+      create_swap_chain_detour_fn);
     create_swap_chain_detour->Apply();
     HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain detoured.");
   }
@@ -253,7 +271,8 @@ extern "C" HRESULT WINAPI
                           ID3D11DeviceContext** immediate_context)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetD3D11CreateDeviceRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetD3D11CreateDeviceRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -336,7 +355,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   D3D_FEATURE_LEVEL* feature_level,
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetD3D11CreateDeviceAndSwapChainRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetD3D11CreateDeviceAndSwapChainRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -389,7 +409,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetCreateDXGIFactoryRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetCreateDXGIFactoryRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
@@ -424,6 +445,12 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
   return ret;
 }
 }
+
+namespace hadesmem
+{
+
+namespace cerberus
+{
 
 void InitializeD3D11()
 {
@@ -501,7 +528,7 @@ void DetourD3D11(HMODULE base)
 
   try
   {
-    hadesmem::Region region(GetThisProcess(), base);
+    Region region(GetThisProcess(), base);
     GetD3D11Module() = std::make_pair(region.GetBase(), region.GetSize());
   }
   catch (std::exception const& /*e*/)
@@ -512,15 +539,14 @@ void DetourD3D11(HMODULE base)
 
   if (!GetD3D11CreateDeviceDetour())
   {
-    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+    auto const orig_fn = detail::GetProcAddressInternal(
       GetThisProcess(), base, "D3D11CreateDevice");
     if (orig_fn)
     {
-      auto const detour_fn =
-        hadesmem::detail::UnionCast<void*>(&D3D11CreateDeviceDetour);
+      auto const detour_fn = detail::UnionCast<void*>(&D3D11CreateDeviceDetour);
       auto& detour = GetD3D11CreateDeviceDetour();
-      detour = std::make_unique<hadesmem::PatchDetour>(
-        GetThisProcess(), orig_fn, detour_fn);
+      detour =
+        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice detoured.");
     }
@@ -536,15 +562,15 @@ void DetourD3D11(HMODULE base)
 
   if (!GetD3D11CreateDeviceAndSwapChainDetour())
   {
-    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+    auto const orig_fn = detail::GetProcAddressInternal(
       GetThisProcess(), base, "D3D11CreateDeviceAndSwapChain");
     if (orig_fn)
     {
-      auto const detour_fn = hadesmem::detail::UnionCast<void*>(
-        &D3D11CreateDeviceAndSwapChainDetour);
+      auto const detour_fn =
+        detail::UnionCast<void*>(&D3D11CreateDeviceAndSwapChainDetour);
       auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-      detour = std::make_unique<hadesmem::PatchDetour>(
-        GetThisProcess(), orig_fn, detour_fn);
+      detour =
+        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain detoured.");
     }
@@ -581,7 +607,7 @@ void DetourDXGI(HMODULE base)
 
   try
   {
-    hadesmem::Region region(GetThisProcess(), base);
+    Region region(GetThisProcess(), base);
     GetDXGIModule() = std::make_pair(region.GetBase(), region.GetSize());
   }
   catch (std::exception const& /*e*/)
@@ -592,15 +618,14 @@ void DetourDXGI(HMODULE base)
 
   if (!GetCreateDXGIFactoryDetour())
   {
-    auto const orig_fn = hadesmem::detail::GetProcAddressInternal(
+    auto const orig_fn = detail::GetProcAddressInternal(
       GetThisProcess(), base, "CreateDXGIFactory");
     if (orig_fn)
     {
-      auto const detour_fn =
-        hadesmem::detail::UnionCast<void*>(&CreateDXGIFactoryDetour);
+      auto const detour_fn = detail::UnionCast<void*>(&CreateDXGIFactoryDetour);
       auto& detour = GetCreateDXGIFactoryDetour();
-      detour = std::make_unique<hadesmem::PatchDetour>(
-        GetThisProcess(), orig_fn, detour_fn);
+      detour =
+        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory detoured.");
     }
@@ -737,19 +762,8 @@ void UndetourDXGI(bool remove)
   GetDXGIModule() = std::make_pair(nullptr, 0);
 }
 
-std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::pair<void*, SIZE_T> module{nullptr, 0};
-  return module;
-}
-
-std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::pair<void*, SIZE_T> module{nullptr, 0};
-  return module;
-}
-
-std::size_t RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback)
+std::size_t
+  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback)
 {
   auto& callbacks = GetOnFrameCallbacks();
   return callbacks.Register(callback);
@@ -759,4 +773,6 @@ void UnregisterOnFrameCallback(std::size_t id)
 {
   auto& callbacks = GetOnFrameCallbacks();
   return callbacks.Unregister(id);
+}
+}
 }

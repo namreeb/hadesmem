@@ -60,15 +60,19 @@ std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
   return ref_count;
 }
 
-Callbacks<OnMapCallback>& GetOnMapCallbacks()
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>&
+  GetOnMapCallbacks()
 {
-  static Callbacks<OnMapCallback> callbacks;
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>
+    callbacks;
   return callbacks;
 }
 
-Callbacks<OnUnmapCallback>& GetOnUnmapCallbacks()
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>&
+  GetOnUnmapCallbacks()
 {
-  static Callbacks<OnUnmapCallback> callbacks;
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -84,7 +88,8 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetNtMapViewOfSectionRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto& detour = GetNtMapViewOfSectionDetour();
@@ -156,7 +161,7 @@ extern "C" NTSTATUS WINAPI
   {
     HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-    hadesmem::Region const region{GetThisProcess(), *base};
+    hadesmem::Region const region{hadesmem::cerberus::GetThisProcess(), *base};
     DWORD const region_type = region.GetType();
     if (region_type != MEM_IMAGE)
     {
@@ -201,7 +206,8 @@ extern "C" NTSTATUS WINAPI
   NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetNtUnmapViewOfSectionRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetNtUnmapViewOfSectionRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto& detour = GetNtUnmapViewOfSectionDetour();
@@ -265,38 +271,42 @@ extern "C" NTSTATUS WINAPI
 }
 }
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 void DetourNtMapViewOfSection()
 {
-  hadesmem::Module const ntdll{GetThisProcess(), L"ntdll.dll"};
+  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
   auto const nt_map_view_of_section =
-    hadesmem::FindProcedure(GetThisProcess(), ntdll, "NtMapViewOfSection");
+    FindProcedure(GetThisProcess(), ntdll, "NtMapViewOfSection");
   auto const nt_map_view_of_section_ptr =
-    hadesmem::detail::UnionCast<void*>(nt_map_view_of_section);
+    detail::UnionCast<void*>(nt_map_view_of_section);
   auto const nt_map_view_of_section_detour =
-    hadesmem::detail::UnionCast<void*>(&NtMapViewOfSectionDetour);
+    detail::UnionCast<void*>(&NtMapViewOfSectionDetour);
   auto& detour = GetNtMapViewOfSectionDetour();
-  detour =
-    std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
-                                            nt_map_view_of_section_ptr,
-                                            nt_map_view_of_section_detour);
+  detour = std::make_unique<PatchDetour>(GetThisProcess(),
+                                         nt_map_view_of_section_ptr,
+                                         nt_map_view_of_section_detour);
   detour->Apply();
   HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection detoured.");
 }
 
 void DetourNtUnmapViewOfSection()
 {
-  hadesmem::Module const ntdll{GetThisProcess(), L"ntdll.dll"};
+  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
   auto const nt_unmap_view_of_section =
-    hadesmem::FindProcedure(GetThisProcess(), ntdll, "NtUnmapViewOfSection");
+    FindProcedure(GetThisProcess(), ntdll, "NtUnmapViewOfSection");
   auto const nt_unmap_view_of_section_ptr =
-    hadesmem::detail::UnionCast<void*>(nt_unmap_view_of_section);
+    detail::UnionCast<void*>(nt_unmap_view_of_section);
   auto const nt_unmap_view_of_section_detour =
-    hadesmem::detail::UnionCast<void*>(&NtUnmapViewOfSectionDetour);
+    detail::UnionCast<void*>(&NtUnmapViewOfSectionDetour);
   auto& detour = GetNtUnmapViewOfSectionDetour();
-  detour =
-    std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
-                                            nt_unmap_view_of_section_ptr,
-                                            nt_unmap_view_of_section_detour);
+  detour = std::make_unique<PatchDetour>(GetThisProcess(),
+                                         nt_unmap_view_of_section_ptr,
+                                         nt_unmap_view_of_section_detour);
   detour->Apply();
   HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection detoured.");
 }
@@ -354,4 +364,6 @@ void UnregisterOnUnmapCallback(std::size_t id)
 {
   auto& callbacks = GetOnUnmapCallbacks();
   return callbacks.Unregister(id);
+}
+}
 }

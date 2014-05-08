@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <hadesmem/process.hpp>
-
 namespace hadesmem
 {
 
 namespace cerberus
 {
 
-hadesmem::Process& GetThisProcess();
+void DetourRtlAddVectoredExceptionHandler();
+
+void UndetourRtlAddVectoredExceptionHandler();
 }
 }

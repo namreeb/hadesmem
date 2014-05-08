@@ -11,11 +11,12 @@
 
 namespace
 {
-std::uint32_t g_on_frame_callback_id{};
+std::size_t g_on_frame_callback_id{};
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
-  LoadPlugin(CerberusInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
+  LoadPlugin(hadesmem::cerberus::PluginInterface* cerberus)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
@@ -26,7 +27,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
                                       ID3D11DeviceContext* /*device_context*/)
     { HADESMEM_DETAIL_TRACE_A("Got an OnFrame event."); };
     g_on_frame_callback_id =
-      cerberus->RegisterOnFrameCallback(on_frame_callback);
+      cerberus->GetD3D11Interface()->RegisterOnFrameCallback(on_frame_callback);
 
     return 0;
   }
@@ -41,13 +42,15 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
-  UnloadPlugin(CerberusInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
+  UnloadPlugin(hadesmem::cerberus::PluginInterface* cerberus)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    cerberus->UnregisterOnFrameCallback(g_on_frame_callback_id);
+    cerberus->GetD3D11Interface()->UnregisterOnFrameCallback(
+      g_on_frame_callback_id);
     g_on_frame_callback_id = static_cast<std::uint32_t>(-1);
 
     return 0;

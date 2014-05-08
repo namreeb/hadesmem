@@ -5,13 +5,29 @@
 
 #include "d3d11.hpp"
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 void LoadPlugins();
 
 void UnloadPlugins();
 
-struct CerberusInterface
+class D3D11Interface
 {
-  virtual std::size_t RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback) = 0;
+public:
+  virtual std::size_t
+    RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback) = 0;
 
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
 };
+
+class PluginInterface
+{
+public:
+  virtual D3D11Interface* GetD3D11Interface() = 0;
+};
+}
+}

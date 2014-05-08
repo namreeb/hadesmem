@@ -8,11 +8,17 @@
 
 #include <hadesmem/config.hpp>
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 class DetourRefCounter
 {
 public:
-  DetourRefCounter(std::atomic<std::uint32_t>& ref_count) HADESMEM_DETAIL_NOEXCEPT
-    : ref_count_{ &ref_count }
+  DetourRefCounter(std::atomic<std::uint32_t>& ref_count)
+    HADESMEM_DETAIL_NOEXCEPT : ref_count_{&ref_count}
   {
     ++(*ref_count_);
   }
@@ -46,3 +52,5 @@ public:
 private:
   std::atomic<std::uint32_t>* ref_count_;
 };
+}
+}

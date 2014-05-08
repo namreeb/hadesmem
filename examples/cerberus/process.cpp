@@ -57,7 +57,8 @@ extern "C" NTSTATUS WINAPI
                             PVOID /*PPS_ATTRIBUTE_LIST*/ attribute_list)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  DetourRefCounter ref_count{GetNtCreateUserProcessRefCount()};
+  hadesmem::cerberus::DetourRefCounter ref_count{
+    GetNtCreateUserProcessRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -73,6 +74,17 @@ extern "C" NTSTATUS WINAPI
     process_parameters,
     create_info,
     attribute_list);
+  if (process_parameters && process_parameters->ImagePathName.Buffer &&
+      process_parameters->ImagePathName.Length)
+  {
+    std::wstring const image_path_name(
+      process_parameters->ImagePathName.Buffer,
+      process_parameters->ImagePathName.Buffer +
+        process_parameters->ImagePathName.Length);
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"ImagePathName: [%s] [%lu].",
+                                   image_path_name.c_str(),
+                                   process_parameters->ImagePathName.Length);
+  }
   auto& detour = GetNtCreateUserProcessDetour();
   auto const nt_create_user_process =
     detour->GetTrampoline<decltype(&NtCreateUserProcessDetour)>();
@@ -148,20 +160,25 @@ extern "C" NTSTATUS WINAPI
 }
 }
 
+namespace hadesmem
+{
+
+namespace cerberus
+{
+
 void DetourNtCreateUserProcess()
 {
-  hadesmem::Module const ntdll{GetThisProcess(), L"ntdll.dll"};
+  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
   auto const nt_create_user_process =
-    hadesmem::FindProcedure(GetThisProcess(), ntdll, "NtCreateUserProcess");
+    FindProcedure(GetThisProcess(), ntdll, "NtCreateUserProcess");
   auto const nt_create_user_process_ptr =
-    hadesmem::detail::UnionCast<void*>(nt_create_user_process);
+    detail::UnionCast<void*>(nt_create_user_process);
   auto const nt_create_user_process_detour =
-    hadesmem::detail::UnionCast<void*>(&NtCreateUserProcessDetour);
+    detail::UnionCast<void*>(&NtCreateUserProcessDetour);
   auto& detour = GetNtCreateUserProcessDetour();
-  detour =
-    std::make_unique<hadesmem::PatchDetour>(GetThisProcess(),
-                                            nt_create_user_process_ptr,
-                                            nt_create_user_process_detour);
+  detour = std::make_unique<PatchDetour>(GetThisProcess(),
+                                         nt_create_user_process_ptr,
+                                         nt_create_user_process_detour);
   detour->Apply();
   HADESMEM_DETAIL_TRACE_A("NtCreateUserProcess detoured.");
 }
@@ -179,4 +196,6 @@ void UndetourNtCreateUserProcess()
     HADESMEM_DETAIL_TRACE_A("Spinning on NtCreateUserProcess ref count.");
   }
   HADESMEM_DETAIL_TRACE_A("NtCreateUserProcess free of references.");
+}
+}
 }
