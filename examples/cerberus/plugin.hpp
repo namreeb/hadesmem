@@ -18,6 +18,8 @@ void UnloadPlugins();
 class D3D11Interface
 {
 public:
+  virtual ~D3D11Interface() {}
+
   virtual std::size_t
     RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback) = 0;
 
@@ -27,6 +29,8 @@ public:
 class PluginInterface
 {
 public:
+  virtual ~PluginInterface() {}
+
   virtual D3D11Interface* GetD3D11Interface() = 0;
 };
 }

@@ -216,24 +216,26 @@ template <typename FuncT> using FuncArgsT = typename FuncArgs<FuncT>::type;
 // order to work around this I'm using a disgusting hack whereby I use templates
 // to detect the calling convention (if any) of the type, which the compiler can
 // then use to distinguish the different overloads from each other.
-// 
-//                     ^    ^
-//                    / \  //\
-//      |\___/|      /   \//  .\
-//      /O  O  \__  /    //  | \ \
-//     /     /  \/_/    //   |  \  \
-//     @___@'    \/_   //    |   \   \ 
-//        |       \/_ //     |    \    \ 
-//        |        \///      |     \     \ 
-//       _|_ /   )  //       |      \     _\
-//      '/,_ _ _/  ( ; -.    |    _ _\.-~        .-~~~^-.
-//      ,-{        _      `-.|.-~-.           .~         `.
-//       '/\      /                 ~-. _ .-~      .-~^-.  \
-//          `.   {            }                   /      \  \
-//        .----~-.\        \-'                 .~         \  `. \^-.
-//       ///.----..>    c   \             _ -~             `.  ^-`   ^-_
-//         ///-._ _ _ _ _ _ _}^ - - - - ~                     ~--,   .-~
-//
+/*
+
+                     ^    ^
+                    / \  //\
+      |\___/|      /   \//  .\
+      /O  O  \__  /    //  | \ \
+     /     /  \/_/    //   |  \  \
+     @___@'    \/_   //    |   \   \ 
+        |       \/_ //     |    \    \ 
+        |        \///      |     \     \ 
+       _|_ /   )  //       |      \     _\
+      '/,_ _ _/  ( ; -.    |    _ _\.-~        .-~~~^-.
+      ,-{        _      `-.|.-~-.           .~         `.
+       '/\      /                 ~-. _ .-~      .-~^-.  \
+          `.   {            }                   /      \  \
+        .----~-.\        \-'                 .~         \  `. \^-.
+       ///.----..>    c   \             _ -~             `.  ^-`   ^-_
+         ///-._ _ _ _ _ _ _}^ - - - - ~                     ~--,   .-~
+
+*/
 
 struct DetailCallConv
 {
