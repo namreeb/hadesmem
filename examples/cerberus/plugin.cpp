@@ -15,7 +15,7 @@
 namespace
 {
 
-class D3D11 : public hadesmem::cerberus::D3D11Interface
+class D3D11Impl : public hadesmem::cerberus::D3D11Interface
 {
 public:
   virtual std::size_t RegisterOnFrameCallback(
@@ -27,6 +27,32 @@ public:
   virtual void UnregisterOnFrameCallback(std::size_t id) final
   {
     hadesmem::cerberus::UnregisterOnFrameCallback(id);
+  }
+};
+
+class ModuleImpl : public hadesmem::cerberus::ModuleInterface
+{
+public:
+  virtual std::size_t RegisterOnMapCallback(
+    std::function<hadesmem::cerberus::OnMapCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnMapCallback(callback);
+  }
+
+  virtual void UnregisterOnMapCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnMapCallback(id);
+  }
+
+  virtual std::size_t RegisterOnUnmapCallback(
+    std::function<hadesmem::cerberus::OnUnmapCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnUnmapCallback(callback);
+  }
+
+  virtual void UnregisterOnUnmapCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnUnmapCallback(id);
   }
 };
 
@@ -82,6 +108,11 @@ public:
     return &d3d11_;
   }
 
+  virtual hadesmem::cerberus::ModuleInterface* GetModuleInterface() final
+  {
+    return &module_;
+  }
+
   void Unload()
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A("Unloading plugin. [%p]", base_);
@@ -114,7 +145,8 @@ public:
 private:
   std::wstring path_;
   HMODULE base_{};
-  D3D11 d3d11_;
+  D3D11Impl d3d11_;
+  ModuleImpl module_;
 };
 
 std::vector<Plugin>& GetPlugins()

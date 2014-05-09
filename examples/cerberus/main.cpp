@@ -3,6 +3,8 @@
 
 #include "main.hpp"
 
+#include <mutex>
+
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
@@ -113,10 +115,24 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+
+    // Not using std::call_once because we may throw during initialization, and
+    // we don't want to allow a retry in this case.
+    static bool is_initialized = false;
+    if (is_initialized)
+    {
+      HADESMEM_DETAIL_TRACE_A("Already initialized. Bailing.");
+      return 1;
+    }
+
+    is_initialized = true;
+
     // Support deferred hooking (via module load notifications).
     hadesmem::cerberus::InitializeD3D11();
 
-    hadesmem::cerberus::DetourNtCreateUserProcess();
+    hadesmem::cerberus::DetourCreateProcessInternalW();
     hadesmem::cerberus::DetourNtMapViewOfSection();
     hadesmem::cerberus::DetourNtUnmapViewOfSection();
     hadesmem::cerberus::DetourRtlAddVectoredExceptionHandler();
@@ -144,7 +160,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    hadesmem::cerberus::UndetourNtCreateUserProcess();
+    hadesmem::cerberus::UndetourCreateProcessInternalW();
     hadesmem::cerberus::UndetourNtMapViewOfSection();
     hadesmem::cerberus::UndetourNtUnmapViewOfSection();
     hadesmem::cerberus::UndetourRtlAddVectoredExceptionHandler();

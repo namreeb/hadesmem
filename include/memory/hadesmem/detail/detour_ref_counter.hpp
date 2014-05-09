@@ -11,7 +11,7 @@
 namespace hadesmem
 {
 
-namespace cerberus
+namespace detail
 {
 
 class DetourRefCounter

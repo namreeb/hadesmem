@@ -7,11 +7,16 @@
 #include <winnt.h>
 #include <winternl.h>
 
+// Structures/enums/macros/etc. shamelessly taken from
+// http://bit.ly/1cxEVDJ, http://bit.ly/1cm5xnC, http://bit.ly/1bXTstU,
+// http://bit.ly/1nuwpd6, etc.
+
 #define HADESMEM_DETAIL_STATUS_NO_SUCH_FILE (static_cast<NTSTATUS>(0xC000000FL))
 #define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
   (static_cast<NTSTATUS>(0x80000006L))
 #define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH                            \
-  (static_cast<NTSTATUS>(0xC0000004L))
+  (static_cast<NTSTATUS>(0xC0000004L)
+#define HADESMEM_DETAIL_RTL_USER_PROC_PARAMS_NORMALIZED 0x00000001
 
 namespace hadesmem
 {
@@ -21,9 +26,6 @@ namespace detail
 
 namespace winternl
 {
-
-// Structures/enums/etc. shamelessly taken from
-// http://bit.ly/1cxEVDJ, http://bit.ly/1cm5xnC, http://bit.ly/1bXTstU, etc.
 
 enum SYSTEM_INFORMATION_CLASS
 {
@@ -512,12 +514,13 @@ enum SECTION_INHERIT
   ViewUnmap = 2
 };
 
-typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME* PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME*
+  PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
 
 struct RTL_ACTIVATION_CONTEXT_STACK_FRAME
 {
   PRTL_ACTIVATION_CONTEXT_STACK_FRAME Previous;
-  _ACTIVATION_CONTEXT * ActivationContext;
+  _ACTIVATION_CONTEXT* ActivationContext;
   ULONG Flags;
 };
 
@@ -542,7 +545,7 @@ struct GDI_TEB_BATCH
 struct TEB_ACTIVE_FRAME_CONTEXT
 {
   ULONG Flags;
-  CHAR * FrameName;
+  CHAR* FrameName;
 };
 
 typedef TEB_ACTIVE_FRAME_CONTEXT* PTEB_ACTIVE_FRAME_CONTEXT;
@@ -573,7 +576,7 @@ struct TEB
   PVOID WOW32Reserved;
   ULONG CurrentLocale;
   ULONG FpSoftwareStatusRegister;
-  VOID * SystemReserved1[54];
+  VOID* SystemReserved1[54];
   LONG ExceptionCode;
   PACTIVATION_CONTEXT_STACK ActivationContextStackPointer;
   UCHAR SpareBytes1[36];
@@ -585,7 +588,7 @@ struct TEB
   ULONG GdiClientTID;
   PVOID GdiThreadLocalInfo;
   ULONG Win32ClientInfo[62];
-  VOID * glDispatchTable[233];
+  VOID* glDispatchTable[233];
   ULONG glReserved1[29];
   PVOID glReserved2;
   PVOID glSectionInfo;
@@ -597,13 +600,13 @@ struct TEB
   UNICODE_STRING StaticUnicodeString;
   WCHAR StaticUnicodeBuffer[261];
   PVOID DeallocationStack;
-  VOID * TlsSlots[64];
+  VOID* TlsSlots[64];
   LIST_ENTRY TlsLinks;
   PVOID Vdm;
   PVOID ReservedForNtRpc;
-  VOID * DbgSsReserved[2];
+  VOID* DbgSsReserved[2];
   ULONG HardErrorMode;
-  VOID * Instrumentation[9];
+  VOID* Instrumentation[9];
   GUID ActivityId;
   PVOID SubProcessTag;
   PVOID EtwLocalData;
@@ -621,7 +624,7 @@ struct TEB
   PVOID SavedPriorityState;
   ULONG SoftPatchPtr1;
   PVOID ThreadPoolData;
-  VOID * * TlsExpansionSlots;
+  VOID** TlsExpansionSlots;
   ULONG ImpersonationLocale;
   ULONG IsImpersonating;
   PVOID NlsCache;
@@ -656,19 +659,75 @@ struct TEB
   LARGE_INTEGER WaitReasonBitMap;
 };
 
-#if defined(HADESMEM_DETAIL_ARCH_X64) 
+#if defined(HADESMEM_DETAIL_ARCH_X64)
 inline TEB* GetCurrentTeb()
 {
   return reinterpret_cast<TEB*>(__readgsqword(offsetof(NT_TIB, Self)));
 }
-#elif defined(HADESMEM_DETAIL_ARCH_X86) 
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
 inline TEB* GetCurrentTeb()
 {
   return reinterpret_cast<TEB*>(__readfsdword(offsetof(NT_TIB, Self)));
 }
-#else 
+#else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+struct CURDIR
+{
+  UNICODE_STRING DosPath;
+  VOID* Handle;
+};
+
+typedef CURDIR* PCURDIR;
+
+struct RTL_DRIVE_LETTER_CURDIR
+{
+  UINT16 Flags;
+  UINT16 Length;
+  ULONG32 TimeStamp;
+  STRING DosPath;
+};
+
+typedef RTL_DRIVE_LETTER_CURDIR* PRTL_DRIVE_LETTER_CURDIR;
+
+struct RTL_USER_PROCESS_PARAMETERS
+{
+  ULONG32 MaximumLength;
+  ULONG32 Length;
+  ULONG32 Flags;
+  ULONG32 DebugFlags;
+  VOID* ConsoleHandle;
+  ULONG32 ConsoleFlags;
+  UINT8 _PADDING0_[0x4];
+  VOID* StandardInput;
+  VOID* StandardOutput;
+  VOID* StandardError;
+  CURDIR CurrentDirectory;
+  UNICODE_STRING DllPath;
+  UNICODE_STRING ImagePathName;
+  UNICODE_STRING CommandLine;
+  VOID* Environment;
+  ULONG32 StartingX;
+  ULONG32 StartingY;
+  ULONG32 CountX;
+  ULONG32 CountY;
+  ULONG32 CountCharsX;
+  ULONG32 CountCharsY;
+  ULONG32 FillAttribute;
+  ULONG32 WindowFlags;
+  ULONG32 ShowWindowFlags;
+  UINT8 _PADDING1_[0x4];
+  UNICODE_STRING WindowTitle;
+  UNICODE_STRING DesktopInfo;
+  UNICODE_STRING ShellInfo;
+  UNICODE_STRING RuntimeData;
+  RTL_DRIVE_LETTER_CURDIR CurrentDirectores[32];
+  UINT64 EnvironmentSize;
+  UINT64 EnvironmentVersion;
+};
+
+typedef RTL_USER_PROCESS_PARAMETERS* PRTL_USER_PROCESS_PARAMETERS;
 }
 }
 }

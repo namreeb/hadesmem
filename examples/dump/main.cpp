@@ -4,6 +4,7 @@
 #include "main.hpp"
 
 #include <algorithm>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -13,9 +14,10 @@
 #include <vector>
 
 #include <windows.h>
+#include <time.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <tclap/CmdLine.h>
+#include <tclap/cmdline.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
@@ -186,7 +188,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
   WriteNormal(out,
               L"WoW64: " +
                 std::wstring(hadesmem::IsWoW64(*process) ? L"Yes" : L"No"),
-                0);
+              0);
 
   DumpModules(*process);
 
@@ -286,22 +288,38 @@ void HandleLongOrUnprintableString(std::wstring const& name,
 
 bool ConvertTimeStamp(std::time_t time, std::wstring& str)
 {
-  // Using ctime rather than ctime_s because MinGW-w64 is apparently missing it.
-  // WARNING! The ctime function is not thread safe.
-  auto const conv = std::ctime(&time);
-  if (conv)
-  {
-    // MSDN documents the ctime class of functions as returning a string that is
-    // exactly 26 characters long, of the form "Wed Jan 02 02:03:55 1980\n\0".
-    // Don't copy the newline or the extra null terminator.
-    str = hadesmem::detail::MultiByteToWideChar(std::string(conv, conv + 24));
-    return true;
-  }
-  else
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  std::tm local_time{};
+  auto const local_time_conv = localtime_r(&time, &local_time);
+#else
+  std::tm local_time{};
+  auto const local_time_conv = localtime_s(&local_time, &time);
+#endif
+  if (local_time_conv)
   {
     str = L"Invalid";
     return false;
   }
+
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  char local_time_buf[26]{};
+  auto const local_time_fmt = asctime_r(&local_time, local_time_buf);
+#else
+  char local_time_buf[26]{};
+  auto const local_time_fmt = asctime_s(local_time_buf, &local_time);
+#endif
+  if (local_time_fmt)
+  {
+    str = L"Invalid";
+    return false;
+  }
+
+  // MSDN documents the ctime class of functions as returning a string that is
+  // exactly 26 characters long, of the form "Wed Jan 02 02:03:55 1980\n\0".
+  // Don't copy the newline or the extra null terminator.
+  str = hadesmem::detail::MultiByteToWideChar(
+    std::string{local_time_buf, local_time_buf + 24});
+  return true;
 }
 
 int main(int argc, char* argv[])
@@ -316,7 +334,7 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<std::string> path_arg(
       "f", "path", "Target path (file or directory)", false, "", "string");
     TCLAP::SwitchArg all_arg("a", "all", "No target, dump everything");
-    std::vector<TCLAP::Arg*> xor_args{ &pid_arg, &path_arg, &all_arg };
+    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &path_arg, &all_arg};
     cmd.xorAdd(xor_args);
     TCLAP::SwitchArg warned_arg(
       "w", "warned", "Dump list of files which cause warnings", cmd);
@@ -410,7 +428,8 @@ int main(int argc, char* argv[])
     }
     else if (path_arg.isSet())
     {
-      auto const path = hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
+      auto const path =
+        hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
       if (hadesmem::detail::IsDirectory(path))
       {
         DumpDir(path);

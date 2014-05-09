@@ -11,13 +11,13 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
-#include "detour_ref_counter.hpp"
 #include "main.hpp"
 
 namespace
@@ -41,7 +41,7 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   ULONG first_handler, PVECTORED_EXCEPTION_HANDLER vectored_handler)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetRtlAddVectoredExceptionHandlerRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

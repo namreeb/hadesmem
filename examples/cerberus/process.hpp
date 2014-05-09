@@ -9,8 +9,8 @@ namespace hadesmem
 namespace cerberus
 {
 
-void DetourNtCreateUserProcess();
+void DetourCreateProcessInternalW();
 
-void UndetourNtCreateUserProcess();
+void UndetourCreateProcessInternalW();
 }
 }

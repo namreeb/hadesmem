@@ -18,15 +18,15 @@
 #include <d3d11.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/winternl.hpp>
+#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
+#include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/region.hpp>
 
 #include "callbacks.hpp"
-#include "detour_ref_counter.hpp"
 #include "main.hpp"
 #include "module.hpp"
 
@@ -141,7 +141,7 @@ extern "C" HRESULT WINAPI
                               UINT sync_interval,
                               UINT flags) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetIDXGISwapChainPresentRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -208,7 +208,7 @@ extern "C" HRESULT WINAPI
                                     IDXGISwapChain** swap_chain)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetIDXGIFactoryCreateSwapChainRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -271,7 +271,7 @@ extern "C" HRESULT WINAPI
                           ID3D11DeviceContext** immediate_context)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetD3D11CreateDeviceRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -355,7 +355,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   D3D_FEATURE_LEVEL* feature_level,
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetD3D11CreateDeviceAndSwapChainRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -409,7 +409,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetCreateDXGIFactoryRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

@@ -15,6 +15,7 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/recursion_protector.hpp>
 #include <hadesmem/detail/winternl.hpp>
@@ -24,7 +25,6 @@
 #include <hadesmem/process.hpp>
 
 #include "callbacks.hpp"
-#include "detour_ref_counter.hpp"
 #include "main.hpp"
 
 namespace winternl = hadesmem::detail::winternl;
@@ -88,7 +88,7 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetNtMapViewOfSectionRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -206,7 +206,7 @@ extern "C" NTSTATUS WINAPI
   NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::cerberus::DetourRefCounter ref_count{
+  hadesmem::detail::DetourRefCounter ref_count{
     GetNtUnmapViewOfSectionRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
