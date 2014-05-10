@@ -18,6 +18,18 @@ project
     <library>/memory//memory
   ;
   
+lib ole32
+  :
+  :
+    <name>ole32
+  ;
+
+lib comctl32
+  :
+  :
+    <name>comctl32
+  ;
+
 exe dump
   :
     [ glob dump/*.cpp ]
@@ -47,4 +59,6 @@ lib cerberus
 lib plugin
   :
     [ glob plugin/*.cpp ]
+	ole32
+	comctl32
   ;

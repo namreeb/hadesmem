@@ -107,7 +107,7 @@ void TestPatchRaw()
   hadesmem::Allocator const test_mem(process, 0x1000);
 
   std::vector<BYTE> const data = {0x00, 0x11, 0x22, 0x33, 0x44};
-  BOOST_TEST_EQ(data.size(), 5);
+  BOOST_TEST_EQ(data.size(), 5UL);
 
   hadesmem::PatchRaw patch(process, test_mem.GetBase(), data);
 
