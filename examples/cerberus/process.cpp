@@ -112,7 +112,7 @@ extern "C" BOOL WINAPI
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
   recursion_protector.Set();
 
-  if (!NT_SUCCESS(ret))
+  if (!ret)
   {
     HADESMEM_DETAIL_TRACE_A("Failed.");
     return ret;

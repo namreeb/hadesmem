@@ -151,28 +151,37 @@ extern "C" HRESULT WINAPI
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
 
-  static std::once_flag once;
-  auto const init = [&]()
+  try
   {
-    HADESMEM_DETAIL_TRACE_A("Performing initialization.");
-
-    auto& device = GetDevice();
-    auto& device_context = GetDeviceContext();
-    if (FAILED(swap_chain->GetDevice(__uuidof(device),
-                                     reinterpret_cast<void**>(&device))))
+    static std::once_flag once;
+    auto const init = [&]()
     {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Failed to get device from swap chain.");
-      return;
-    }
+      HADESMEM_DETAIL_TRACE_A("Performing initialization.");
 
-    device->GetImmediateContext(&device_context);
+      auto& device = GetDevice();
+      auto& device_context = GetDeviceContext();
+      if (FAILED(swap_chain->GetDevice(__uuidof(device),
+        reinterpret_cast<void**>(&device))))
+      {
+        HADESMEM_DETAIL_TRACE_A("WARNING! Failed to get device from swap chain.");
+        return;
+      }
 
-    // Put init code here.
-  };
-  std::call_once(once, init);
+      device->GetImmediateContext(&device_context);
 
-  auto& callbacks = GetOnFrameCallbacks();
-  callbacks.Run(swap_chain, GetDevice(), GetDeviceContext());
+      // Put init code here.
+    };
+    std::call_once(once, init);
+
+    auto& callbacks = GetOnFrameCallbacks();
+    callbacks.Run(swap_chain, GetDevice(), GetDeviceContext());
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+  }
 
   last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
