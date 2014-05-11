@@ -23,11 +23,17 @@ lib ole32
   :
     <name>ole32
   ;
-
+  
 lib comctl32
   :
   :
     <name>comctl32
+  ;
+
+lib gdi32
+  :
+  :
+    <name>gdi32
   ;
 
 exe dump
@@ -61,4 +67,12 @@ lib plugin
     [ glob plugin/*.cpp ]
 	ole32
 	comctl32
+  ;
+
+lib esoraptor
+  :
+    [ glob esoraptor/*.cpp ]
+	ole32
+	comctl32
+	gdi32
   ;

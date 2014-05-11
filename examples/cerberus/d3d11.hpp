@@ -26,9 +26,7 @@ void UndetourD3D11(bool remove);
 
 void UndetourDXGI(bool remove);
 
-typedef void OnFrameCallback(IDXGISwapChain* swap_chain,
-                             ID3D11Device* device,
-                             ID3D11DeviceContext* device_context);
+typedef void OnFrameCallback(IDXGISwapChain* swap_chain);
 
 std::size_t
   RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);

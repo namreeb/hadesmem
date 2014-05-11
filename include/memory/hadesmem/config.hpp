@@ -58,6 +58,16 @@
 #define HADESMEM_DETAIL_NO_CONSTEXPR
 #endif // #if defined(HADESMEM_MSVC)
 
+#if defined(_M_IX86)
+#define HADESMEM_DETAIL_ARCH_X86
+#elif defined(_M_AMD64)
+#define HADESMEM_DETAIL_ARCH_X64
+#else // #if defined(_M_IX86)
+// #elif defined(_M_AMD64)
+#error "[HadesMem] Unsupported architecture."
+#endif // #if defined(_M_IX86)
+// #elif defined(_M_AMD64)
+
 #if (defined(HADESMEM_GCC) || defined(HADESMEM_CLANG) ||                       \
      defined(HADESMEM_INTEL)) ||                                               \
   !(defined(HADESMEM_DETAIL_ARCH_X64) ||                                       \
@@ -82,16 +92,6 @@
 #else // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
 #define HADESMEM_DETAIL_CONSTEXPR constexpr
 #endif // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
-
-#if defined(_M_IX86)
-#define HADESMEM_DETAIL_ARCH_X86
-#elif defined(_M_AMD64)
-#define HADESMEM_DETAIL_ARCH_X64
-#else // #if defined(_M_IX86)
-// #elif defined(_M_AMD64)
-#error "[HadesMem] Unsupported architecture."
-#endif // #if defined(_M_IX86)
-// #elif defined(_M_AMD64)
 
 #define HADESMEM_DETAIL_DLLEXPORT __declspec(dllexport)
 

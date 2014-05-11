@@ -33,18 +33,6 @@
 namespace
 {
 
-ID3D11Device*& GetDevice() HADESMEM_DETAIL_NOEXCEPT
-{
-  static ID3D11Device* device;
-  return device;
-}
-
-ID3D11DeviceContext*& GetDeviceContext() HADESMEM_DETAIL_NOEXCEPT
-{
-  static ID3D11DeviceContext* device_context;
-  return device_context;
-}
-
 std::unique_ptr<hadesmem::PatchDetour>& GetIDXGISwapChainPresentDetour()
   HADESMEM_DETAIL_NOEXCEPT
 {
@@ -158,23 +146,12 @@ extern "C" HRESULT WINAPI
     {
       HADESMEM_DETAIL_TRACE_A("Performing initialization.");
 
-      auto& device = GetDevice();
-      auto& device_context = GetDeviceContext();
-      if (FAILED(swap_chain->GetDevice(__uuidof(device),
-        reinterpret_cast<void**>(&device))))
-      {
-        HADESMEM_DETAIL_TRACE_A("WARNING! Failed to get device from swap chain.");
-        return;
-      }
-
-      device->GetImmediateContext(&device_context);
-
       // Put init code here.
     };
     std::call_once(once, init);
 
     auto& callbacks = GetOnFrameCallbacks();
-    callbacks.Run(swap_chain, GetDevice(), GetDeviceContext());
+    callbacks.Run(swap_chain);
   }
   catch (...)
   {
@@ -235,7 +212,14 @@ extern "C" HRESULT WINAPI
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
-    DetourDXGISwapChain(*swap_chain);
+    if (swap_chain)
+    {
+      DetourDXGISwapChain(*swap_chain);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
+    }
   }
   else
   {
@@ -281,7 +265,7 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
-    GetD3D11CreateDeviceRefCount()};
+    GetD3D11CreateDeviceRefCount() };
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -301,15 +285,15 @@ extern "C" HRESULT WINAPI
     detour->GetTrampoline<decltype(&D3D11CreateDeviceDetour)>();
   last_error_preserver.Revert();
   auto const ret = d3d11_create_device(adapter,
-                                       driver_type,
-                                       software,
-                                       flags,
-                                       ptr_feature_levels,
-                                       feature_levels,
-                                       sdk_version,
-                                       device,
-                                       feature_level,
-                                       immediate_context);
+    driver_type,
+    software,
+    flags,
+    ptr_feature_levels,
+    feature_levels,
+    sdk_version,
+    device,
+    feature_level,
+    immediate_context);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
@@ -322,30 +306,61 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
   IDXGIDevice* dxgi_device = nullptr;
-  if (FAILED((*device)->QueryInterface(__uuidof(IDXGIDevice),
-                                       reinterpret_cast<void**>(&dxgi_device))))
-  {
-    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIDevice.");
-    return ret;
-  }
-
   IDXGIAdapter* dxgi_adapter = nullptr;
-  if (FAILED(dxgi_device->GetParent(__uuidof(IDXGIAdapter),
-                                    reinterpret_cast<void**>(&dxgi_adapter))))
-  {
-    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIAdapter.");
-    return ret;
-  }
-
   IDXGIFactory* dxgi_factory = nullptr;
-  if (FAILED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
-                                     reinterpret_cast<void**>(&dxgi_factory))))
+
+  try
   {
-    HADESMEM_DETAIL_TRACE_A("Failed to get IDXGIFactory.");
-    return ret;
+    if (FAILED((*device)->QueryInterface(__uuidof(IDXGIDevice),
+      reinterpret_cast<void**>(&dxgi_device))))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{ "ID3D11Device::QueryInterface failed." }
+      << hadesmem::ErrorCodeWinLast{ last_error });
+    }
+
+    if (FAILED(dxgi_device->GetParent(__uuidof(IDXGIAdapter),
+      reinterpret_cast<void**>(&dxgi_adapter))))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{ "IDXGIDevice::GetParent failed." }
+      << hadesmem::ErrorCodeWinLast{ last_error });
+    }
+
+    if (FAILED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
+      reinterpret_cast<void**>(&dxgi_factory))))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{ "IDXGIAdapter::GetParent failed." }
+      << hadesmem::ErrorCodeWinLast{ last_error });
+    }
+
+    DetourDXGIFactory(dxgi_factory);
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
   }
 
-  DetourDXGIFactory(dxgi_factory);
+  if (dxgi_factory)
+  {
+    dxgi_factory->Release();
+  }
+
+  if (dxgi_adapter)
+  {
+    dxgi_adapter->Release();
+  }
+
+  if (dxgi_device)
+  {
+    dxgi_device->Release();
+  }
 
   return ret;
 }
@@ -405,7 +420,14 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
-    DetourDXGISwapChain(*swap_chain);
+    if (swap_chain)
+    {
+      DetourDXGISwapChain(*swap_chain);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
+    }
   }
   else
   {

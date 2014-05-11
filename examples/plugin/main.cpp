@@ -29,9 +29,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   {
     HADESMEM_DETAIL_TRACE_A("Initializing.");
 
-    auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/,
-                                      ID3D11Device* /*device*/,
-                                      ID3D11DeviceContext* /*device_context*/)
+    auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/)
     { HADESMEM_DETAIL_TRACE_A("Got an OnFrame event."); };
     g_on_frame_callback_id =
       cerberus->GetD3D11Interface()->RegisterOnFrameCallback(on_frame_callback);

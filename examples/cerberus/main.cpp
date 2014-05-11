@@ -41,9 +41,22 @@ void UseAllStatics()
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
   // moment.
-  auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/,
-                                    ID3D11Device* /*device*/,
-                                    ID3D11DeviceContext* /*device_context*/)
+
+  auto const on_map_callback = [](HMODULE /*module*/,
+                                  std::wstring const& /*path*/,
+                                  std::wstring const& /*name*/)
+  {};
+  auto const on_map_id =
+    hadesmem::cerberus::RegisterOnMapCallback(on_map_callback);
+  hadesmem::cerberus::UnregisterOnMapCallback(on_map_id);
+
+  auto const on_unmap_callback = [](HMODULE /*module*/)
+  {};
+  auto const on_unmap_id =
+    hadesmem::cerberus::RegisterOnUnmapCallback(on_unmap_callback);
+  hadesmem::cerberus::UnregisterOnUnmapCallback(on_unmap_id);
+
+  auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/)
   {};
   auto const on_frame_id =
     hadesmem::cerberus::RegisterOnFrameCallback(on_frame_callback);
@@ -129,6 +142,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 
     is_initialized = true;
 
+    UseAllStatics();
+
     // Support deferred hooking (via module load notifications).
     hadesmem::cerberus::InitializeD3D11();
 
@@ -139,8 +154,6 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
-
-    UseAllStatics();
 
     hadesmem::cerberus::LoadPlugins();
 

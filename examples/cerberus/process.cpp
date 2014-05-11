@@ -1,3 +1,4 @@
+
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
@@ -30,6 +31,43 @@
 namespace
 {
 
+class EnsureResumeThread
+{
+public:
+  explicit EnsureResumeThread(HANDLE handle) HADESMEM_DETAIL_NOEXCEPT
+    : handle_(handle)
+  {
+  }
+
+  ~EnsureResumeThread()
+  {
+    try
+    {
+      Cleanup();
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+    }
+  }
+
+private:
+  void Cleanup()
+  {
+    if (ResumeThread(handle_) == static_cast<DWORD>(-1))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"ResumeThread failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+  }
+
+  HANDLE handle_;
+};
+
 std::unique_ptr<hadesmem::PatchDetour>& GetCreateProcessInternalWDetour()
   HADESMEM_DETAIL_NOEXCEPT
 {
@@ -56,7 +94,7 @@ extern "C" BOOL WINAPI
                                LPCWSTR current_directory,
                                LPSTARTUPINFOW startup_info,
                                LPPROCESS_INFORMATION process_info,
-                               PHANDLE new_token)
+                               PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetCreateProcessInternalWRefCount()};
@@ -76,6 +114,14 @@ extern "C" BOOL WINAPI
     startup_info,
     process_info,
     new_token);
+  if (application_name)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Application Name: [%s]", application_name);
+  }
+  if (command_line)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Command Line: [%s]", command_line);
+  }
   auto& detour = GetCreateProcessInternalWDetour();
   auto const nt_create_user_process =
     detour->GetTrampoline<decltype(&CreateProcessInternalWDetour)>();
@@ -86,7 +132,7 @@ extern "C" BOOL WINAPI
                                           process_attributes,
                                           thread_attributes,
                                           inherit_handles,
-                                          creation_flags,
+                                          creation_flags | CREATE_SUSPENDED,
                                           environment,
                                           current_directory,
                                           startup_info,
@@ -94,6 +140,12 @@ extern "C" BOOL WINAPI
                                           new_token);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  std::unique_ptr<EnsureResumeThread> resume_thread;
+  if (ret && !(creation_flags & CREATE_SUSPENDED))
+  {
+    resume_thread.reset(new EnsureResumeThread(process_info->hThread));
+  }
 
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool in_hook = false;
