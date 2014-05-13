@@ -34,11 +34,13 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
     g_on_frame_callback_id =
       cerberus->GetD3D11Interface()->RegisterOnFrameCallback(on_frame_callback);
 
-    g_window_thread.reset(new std::thread(WindowThread,
-                                          hadesmem::detail::GetHandleToSelf(),
-                                          nullptr,
-                                          nullptr,
-                                          SW_SHOW));
+    // Using a wrapper lambda to work around a GCC link error on x86
+    auto const window_thread = []()
+    {
+      WindowThread(
+        hadesmem::detail::GetHandleToSelf(), nullptr, nullptr, SW_SHOW);
+    };
+    g_window_thread.reset(new std::thread(window_thread));
     g_window_thread->detach();
 
     return 0;

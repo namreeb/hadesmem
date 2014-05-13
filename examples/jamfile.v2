@@ -65,14 +65,6 @@ lib cerberus
 lib plugin
   :
     [ glob plugin/*.cpp ]
-	ole32
-	comctl32
-  ;
-
-lib esoraptor
-  :
-    [ glob esoraptor/*.cpp ]
-	ole32
-	comctl32
-	gdi32
+    ole32
+    comctl32
   ;
