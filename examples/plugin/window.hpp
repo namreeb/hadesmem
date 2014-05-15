@@ -5,8 +5,10 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/smart_handle.hpp>
+
 int PASCAL WindowThread(HINSTANCE hinst, HINSTANCE, LPSTR, int nShowCmd);
 
 HWND& GetWindowHandle();
 
-HANDLE& GetThreadHandle();
+hadesmem::detail::SmartHandle& GetThreadHandle();

@@ -76,10 +76,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
 
-    auto const thread = GetThreadHandle();
-    if (thread)
+    auto const& thread = GetThreadHandle();
+    if (thread.IsValid())
     {
-      DWORD const wait_result = ::WaitForSingleObject(thread, INFINITE);
+      DWORD const wait_result = ::WaitForSingleObject(thread.GetHandle(), INFINITE);
       if (wait_result != WAIT_OBJECT_0)
       {
         DWORD const last_error = ::GetLastError();
