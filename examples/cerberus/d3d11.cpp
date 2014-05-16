@@ -522,7 +522,7 @@ void InitializeD3D11()
     }
 
     auto const dxgi_mod = GetDXGIModule();
-    auto const dxgi_mod_beg = d3d11_mod.first;
+    auto const dxgi_mod_beg = dxgi_mod.first;
     void* const dxgi_mod_end =
       static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second;
     if (module >= dxgi_mod_beg && module < dxgi_mod_end)
@@ -540,7 +540,10 @@ void InitializeD3D11()
 
 void DetourD3D11(HMODULE base)
 {
-  if (GetD3D11Module().first)
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  auto& module = GetD3D11Module();
+  if (module.first)
   {
     HADESMEM_DETAIL_TRACE_A("D3D11 already detoured.");
     return;
@@ -557,10 +560,12 @@ void DetourD3D11(HMODULE base)
     return;
   }
 
+  auto const& process = GetThisProcess();
+
   try
   {
-    Region region(GetThisProcess(), base);
-    GetD3D11Module() = std::make_pair(region.GetBase(), region.GetSize());
+    Region const region(process, base);
+    module = std::make_pair(region.GetBase(), region.GetSize());
   }
   catch (std::exception const& /*e*/)
   {
@@ -571,13 +576,12 @@ void DetourD3D11(HMODULE base)
   if (!GetD3D11CreateDeviceDetour())
   {
     auto const orig_fn = detail::GetProcAddressInternal(
-      GetThisProcess(), base, "D3D11CreateDevice");
+      process, base, "D3D11CreateDevice");
     if (orig_fn)
     {
       auto const detour_fn = detail::UnionCast<void*>(&D3D11CreateDeviceDetour);
       auto& detour = GetD3D11CreateDeviceDetour();
-      detour =
-        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
+      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice detoured.");
     }
@@ -594,14 +598,13 @@ void DetourD3D11(HMODULE base)
   if (!GetD3D11CreateDeviceAndSwapChainDetour())
   {
     auto const orig_fn = detail::GetProcAddressInternal(
-      GetThisProcess(), base, "D3D11CreateDeviceAndSwapChain");
+      process, base, "D3D11CreateDeviceAndSwapChain");
     if (orig_fn)
     {
       auto const detour_fn =
         detail::UnionCast<void*>(&D3D11CreateDeviceAndSwapChainDetour);
       auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-      detour =
-        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
+      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain detoured.");
     }
@@ -619,7 +622,10 @@ void DetourD3D11(HMODULE base)
 
 void DetourDXGI(HMODULE base)
 {
-  if (GetDXGIModule().first)
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  auto& module = GetDXGIModule();
+  if (module.first)
   {
     HADESMEM_DETAIL_TRACE_A("DXGI already detoured.");
     return;
@@ -636,10 +642,12 @@ void DetourDXGI(HMODULE base)
     return;
   }
 
+  auto const& process = GetThisProcess();
+
   try
   {
-    Region region(GetThisProcess(), base);
-    GetDXGIModule() = std::make_pair(region.GetBase(), region.GetSize());
+    Region const region(process, base);
+    module = std::make_pair(region.GetBase(), region.GetSize());
   }
   catch (std::exception const& /*e*/)
   {
@@ -650,13 +658,12 @@ void DetourDXGI(HMODULE base)
   if (!GetCreateDXGIFactoryDetour())
   {
     auto const orig_fn = detail::GetProcAddressInternal(
-      GetThisProcess(), base, "CreateDXGIFactory");
+      process, base, "CreateDXGIFactory");
     if (orig_fn)
     {
       auto const detour_fn = detail::UnionCast<void*>(&CreateDXGIFactoryDetour);
       auto& detour = GetCreateDXGIFactoryDetour();
-      detour =
-        std::make_unique<PatchDetour>(GetThisProcess(), orig_fn, detour_fn);
+      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
       detour->Apply();
       HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory detoured.");
     }

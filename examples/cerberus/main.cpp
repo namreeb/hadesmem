@@ -38,6 +38,8 @@ namespace
 // statics which are guaranteed to be destructed in a deterministic order.
 void UseAllStatics()
 {
+  hadesmem::cerberus::GetThisProcess();
+
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
   // moment.
