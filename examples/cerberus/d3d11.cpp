@@ -305,6 +305,12 @@ extern "C" HRESULT WINAPI
 
   HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
+  if (!device)
+  {
+    HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
+    return ret;
+  }
+
   IDXGIDevice* dxgi_device = nullptr;
   IDXGIAdapter* dxgi_adapter = nullptr;
   IDXGIFactory* dxgi_factory = nullptr;
