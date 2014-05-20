@@ -60,17 +60,26 @@ public:
 
     if (!can_read_or_write_)
     {
-      old_protect_ = Protect(process, mbi_, PAGE_EXECUTE_READWRITE);
+      try
+      {
+        old_protect_ = Protect(process, mbi_, PAGE_EXECUTE_READWRITE);
+      }
+      catch (...)
+      {
+        // Try and fall back to PAGE_READWRITE because we might not be allowed
+        // to set EXECUTE.
+        old_protect_ = Protect(process, mbi_, PAGE_READWRITE);
+      }
     }
   }
 
   explicit ProtectGuard(Process&& process,
-    PVOID address,
-    ProtectGuardType type) = delete;
+                        PVOID address,
+                        ProtectGuardType type) = delete;
 
   explicit ProtectGuard(Process&& process,
-    MEMORY_BASIC_INFORMATION const& mbi,
-    ProtectGuardType type) = delete;
+                        MEMORY_BASIC_INFORMATION const& mbi,
+                        ProtectGuardType type) = delete;
 
   ProtectGuard(ProtectGuard const& other) = delete;
 

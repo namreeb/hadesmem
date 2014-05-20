@@ -12,7 +12,7 @@
 
 #include "../cerberus/plugin.hpp"
 
-#include "window.hpp"
+#include "root_window.hpp"
 
 namespace
 {
@@ -79,7 +79,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
     auto const& thread = GetThreadHandle();
     if (thread.IsValid())
     {
-      DWORD const wait_result = ::WaitForSingleObject(thread.GetHandle(), INFINITE);
+      DWORD const wait_result =
+        ::WaitForSingleObject(thread.GetHandle(), INFINITE);
       if (wait_result != WAIT_OBJECT_0)
       {
         DWORD const last_error = ::GetLastError();
