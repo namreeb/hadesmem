@@ -21,11 +21,13 @@ namespace detail
 
 inline HMODULE GetHandleToSelf()
 {
-  MEMORY_BASIC_INFORMATION mem_info;
-  ::ZeroMemory(&mem_info, sizeof(mem_info));
   auto const this_func_ptr = reinterpret_cast<void const*>(
     reinterpret_cast<std::uintptr_t>(&GetHandleToSelf));
-  if (!::VirtualQuery(this_func_ptr, &mem_info, sizeof(mem_info)))
+  HMODULE handle{};
+  if (!::GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                              GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            static_cast<wchar_t const*>(this_func_ptr),
+                            &handle))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
@@ -33,7 +35,7 @@ inline HMODULE GetHandleToSelf()
                                     << ErrorCodeWinLast{last_error});
   }
 
-  return static_cast<HMODULE>(mem_info.AllocationBase);
+  return handle;
 }
 
 inline std::wstring GetSelfPath()

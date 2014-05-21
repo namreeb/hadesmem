@@ -568,16 +568,7 @@ void DetourD3D11(HMODULE base)
 
   auto const& process = GetThisProcess();
 
-  try
-  {
-    Region const region(process, base);
-    module = std::make_pair(region.GetBase(), region.GetSize());
-  }
-  catch (std::exception const& /*e*/)
-  {
-    HADESMEM_DETAIL_ASSERT(false);
-    return;
-  }
+  module = std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
   if (!GetD3D11CreateDeviceDetour())
   {
@@ -650,16 +641,7 @@ void DetourDXGI(HMODULE base)
 
   auto const& process = GetThisProcess();
 
-  try
-  {
-    Region const region(process, base);
-    module = std::make_pair(region.GetBase(), region.GetSize());
-  }
-  catch (std::exception const& /*e*/)
-  {
-    HADESMEM_DETAIL_ASSERT(false);
-    return;
-  }
+  module = std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
   if (!GetCreateDXGIFactoryDetour())
   {
@@ -686,7 +668,8 @@ void DetourDXGI(HMODULE base)
 
 void UndetourD3D11(bool remove)
 {
-  if (!GetD3D11Module().first)
+  auto& module = GetD3D11Module();
+  if (!module.first)
   {
     HADESMEM_DETAIL_TRACE_A("D3D11 not detoured.");
     return;
@@ -733,12 +716,13 @@ void UndetourD3D11(bool remove)
     HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice not detoured. Skipping.");
   }
 
-  GetD3D11Module() = std::make_pair(nullptr, 0);
+  module = std::make_pair(nullptr, 0);
 }
 
 void UndetourDXGI(bool remove)
 {
-  if (!GetDXGIModule().first)
+  auto& module = GetDXGIModule();
+  if (!module.first)
   {
     HADESMEM_DETAIL_TRACE_A("DXGI not detoured.");
     return;
@@ -803,7 +787,7 @@ void UndetourDXGI(bool remove)
     HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present not detoured. Skipping.");
   }
 
-  GetDXGIModule() = std::make_pair(nullptr, 0);
+  module = std::make_pair(nullptr, 0);
 }
 
 std::size_t

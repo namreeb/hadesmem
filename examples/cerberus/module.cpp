@@ -88,8 +88,7 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{
-    GetNtMapViewOfSectionRefCount()};
+  hadesmem::detail::DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto& detour = GetNtMapViewOfSectionDetour();

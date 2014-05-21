@@ -21,6 +21,9 @@ namespace hadesmem
 namespace detail
 {
 
+// This will not work to get the size of images mapped with large pages. Always
+// putting images at the start of a large page would reduce the effectiveness of
+// ASLR, so its location is randomized.
 inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
                                  void const* base)
 {
@@ -37,6 +40,11 @@ inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
     size += static_cast<DWORD>(region_size);
     HADESMEM_DETAIL_ASSERT(size >= region_size);
     ++iter;
+  }
+  if (!size)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error{} << ErrorString{"Invalid region allocation size."});
   }
   return size;
 }
