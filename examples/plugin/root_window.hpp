@@ -12,6 +12,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
+#include "radar.hpp"
 #include "window.hpp"
 
 #define WM_APP_UPDATE_RADAR WM_APP
@@ -24,36 +25,6 @@ int PASCAL WindowThread(HINSTANCE instance,
                         HINSTANCE prev_instance,
                         LPSTR cmd_line,
                         int show_cmd);
-
-extern std::mutex g_radar_frame_mutex;
-extern std::condition_variable g_radar_frame_cv;
-extern bool g_radar_frame_processed;
-extern bool g_radar_enabled;
-
-struct Vec3f
-{
-  float x, z, y;
-};
-
-struct RadarData
-{
-  struct LocalPlayerData
-  {
-    Vec3f pos_;
-    double heading_;
-  };
-
-  LocalPlayerData player_;
-
-  struct UnitData
-  {
-    Vec3f pos_;
-    COLORREF colour_;
-    char const* name_;
-  };
-
-  std::vector<UnitData> units_;
-};
 
 class RootWindow : public Window
 {

@@ -20,11 +20,6 @@
 // GUI programming, so this code is terrible and should only serve as an example
 // of what not to do! Seriously, this code is bad and I should feel bad.
 
-std::mutex g_radar_frame_mutex;
-std::condition_variable g_radar_frame_cv;
-bool g_radar_frame_processed = false;
-bool g_radar_enabled = true;
-
 namespace
 {
 
@@ -47,19 +42,6 @@ void SetDefaultFont(HWND hwnd)
 
 LRESULT RootWindow::OnCreate()
 {
-  // Dummy data
-  radar_data_.player_ = {{200, 100, 100}, 0};
-  radar_data_.units_.emplace_back(
-    RadarData::UnitData{Vec3f{250, 150, 50}, RGB(255, 0, 0), "Cat"});
-  radar_data_.units_.emplace_back(
-    RadarData::UnitData{Vec3f{200, 50, 150}, RGB(0, 255, 0), "Dog"});
-  radar_data_.units_.emplace_back(
-    RadarData::UnitData{Vec3f{125, 0, 75}, RGB(0, 0, 255), "raptorfactor"});
-  radar_data_.units_.emplace_back(RadarData::UnitData{
-    Vec3f{150, -50, 150}, RGB(255, 255, 0), "Sir Herpington of Derpingsworth"});
-  radar_data_.units_.emplace_back(
-    RadarData::UnitData{Vec3f{175, -150, 25}, RGB(0, 255, 255), "Foo"});
-
   auto const hwnd = GetHandle();
   SetDefaultFont(hwnd);
   tab_wnd_ = CreateTabControl(hwnd);
@@ -635,9 +617,9 @@ LRESULT RootWindow::HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam)
     return OnCreate();
 
   case WM_NCDESTROY:
-    g_radar_enabled = false;
-    g_radar_frame_processed = true;
-    g_radar_frame_cv.notify_one();
+    GetRadarEnabled() = false;
+    GetRadarFrameProcessed() = true;
+    GetRadarFrameConditionVariable().notify_one();
     ::PostQuitMessage(0);
     break;
 
@@ -653,11 +635,11 @@ LRESULT RootWindow::HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 
   case WM_APP_UPDATE_RADAR:
   {
-    std::lock_guard<std::mutex> lock(g_radar_frame_mutex);
+    std::lock_guard<std::mutex> lock(GetRadarFrameMutex());
     BOOST_SCOPE_EXIT_ALL(&)
     {
-      g_radar_frame_processed = true;
-      g_radar_frame_cv.notify_one();
+      GetRadarFrameProcessed() = true;
+      GetRadarFrameConditionVariable().notify_one();
     };
     UpdateRadar(reinterpret_cast<RadarData*>(wparam));
     return 0;

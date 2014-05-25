@@ -12,6 +12,7 @@
 
 #include "../cerberus/plugin.hpp"
 
+#include "radar.hpp"
 #include "root_window.hpp"
 
 namespace
@@ -29,11 +30,6 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   {
     HADESMEM_DETAIL_TRACE_A("Initializing.");
 
-    auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/)
-    { HADESMEM_DETAIL_TRACE_NOISY_A("Got an OnFrame event."); };
-    g_on_frame_callback_id =
-      cerberus->GetD3D11Interface()->RegisterOnFrameCallback(on_frame_callback);
-
     // Using a wrapper lambda to work around a GCC link error on x86
     auto const window_thread = []()
     {
@@ -42,6 +38,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
     };
     g_window_thread.reset(new std::thread(window_thread));
     g_window_thread->detach();
+
+    InitializeRadar(cerberus);
 
     return 0;
   }
@@ -63,9 +61,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   {
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    cerberus->GetD3D11Interface()->UnregisterOnFrameCallback(
-      g_on_frame_callback_id);
-    g_on_frame_callback_id = static_cast<std::uint32_t>(-1);
+    CleanupRadar(cerberus);
 
     auto const hwnd = GetWindowHandle();
     if (hwnd && ::SendMessageW(hwnd, WM_CLOSE, 0, 0))
