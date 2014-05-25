@@ -19,7 +19,7 @@ namespace
 {
 std::size_t g_on_frame_callback_id{static_cast<std::uint32_t>(-1)};
 
-void UpdateRadar(void* /*base*/)
+void UpdateRadar()
 {
   auto const hwnd = GetWindowHandle();
   if (!hwnd || !GetRadarEnabled())
@@ -55,12 +55,10 @@ void UpdateRadar(void* /*base*/)
 
 void OnFrame(IDXGISwapChain* /*swap_chain*/)
 {
-  static auto const base = GetModuleHandleW(nullptr);
-
   static std::uint64_t frames{};
   if (frames++ % 30)
   {
-    UpdateRadar(base);
+    UpdateRadar();
   }
 }
 }
