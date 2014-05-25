@@ -84,3 +84,27 @@ void CleanupRadar(hadesmem::cerberus::PluginInterface* cerberus)
     g_on_frame_callback_id = static_cast<std::uint32_t>(-1);
   }
 }
+
+std::mutex& GetRadarFrameMutex()
+{
+  static std::mutex radar_frame_mutex;
+  return radar_frame_mutex;
+}
+
+std::condition_variable& GetRadarFrameConditionVariable()
+{
+  static std::condition_variable radar_frame_condition_variable;
+  return radar_frame_condition_variable;
+}
+
+bool& GetRadarFrameProcessed()
+{
+  static bool radar_frame_processed = false;
+  return radar_frame_processed;
+}
+
+bool& GetRadarEnabled()
+{
+  static bool radar_frame_enabled = false;
+  return radar_frame_enabled;
+}
