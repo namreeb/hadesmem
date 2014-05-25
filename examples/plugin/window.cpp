@@ -12,13 +12,13 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
-LRESULT Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT Window::HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
-  switch (uMsg)
+  switch (msg)
   {
   case WM_NCDESTROY:
   {
-    LRESULT const lres = ::DefWindowProcW(hwnd_, uMsg, wParam, lParam);
+    LRESULT const lres = ::DefWindowProcW(hwnd_, msg, wparam, lparam);
     (void)::SetWindowLongPtrW(hwnd_, GWLP_USERDATA, 0);
     delete this;
     return lres;
@@ -29,44 +29,44 @@ LRESULT Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 
   case WM_PRINTCLIENT:
-    OnPrintClient(reinterpret_cast<HDC>(wParam));
+    OnPrintClient(reinterpret_cast<HDC>(wparam));
     return 0;
   }
 
-  return ::DefWindowProcW(hwnd_, uMsg, wParam, lParam);
+  return ::DefWindowProcW(hwnd_, msg, wparam, lparam);
 }
 
-void Window::WinRegisterClass(WNDCLASS* pwc)
+void Window::WinRegisterClass(WNDCLASSEX* pwc)
 {
-  if (!::RegisterClassW(pwc))
+  if (!::RegisterClassExW(pwc))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"RegisterClassW failed."}
+      hadesmem::Error{} << hadesmem::ErrorString{"RegisterClassExW failed."}
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 }
 
-HWND Window::WinCreateWindow(DWORD dwExStyle,
-                             LPCWSTR pszName,
-                             DWORD dwStyle,
+HWND Window::WinCreateWindow(DWORD ex_style,
+                             LPCWSTR name,
+                             DWORD style,
                              int x,
                              int y,
                              int cx,
                              int cy,
-                             HWND hwndParent,
+                             HWND parent_wnd,
                              HMENU hmenu)
 {
   Register();
-  return ::CreateWindowExW(dwExStyle,
+  return ::CreateWindowExW(ex_style,
                            ClassName(),
-                           pszName,
-                           dwStyle,
+                           name,
+                           style,
                            x,
                            y,
                            cx,
                            cy,
-                           hwndParent,
+                           parent_wnd,
                            hmenu,
                            instance_,
                            this);
@@ -74,23 +74,20 @@ HWND Window::WinCreateWindow(DWORD dwExStyle,
 
 void Window::Register()
 {
-  WNDCLASS wc;
-  wc.style = 0;
+  WNDCLASSEX wc{};
+  wc.cbSize = sizeof(wc);
+  wc.style = CS_DBLCLKS;
   wc.lpfnWndProc = Window::WndProc;
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
   wc.hInstance = instance_;
-  wc.hIcon = nullptr;
   wc.hCursor = ::LoadCursorW(nullptr, IDC_ARROW);
-  wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-  wc.lpszMenuName = nullptr;
+  wc.hbrBackground = ::GetSysColorBrush(COLOR_BTNFACE);
   wc.lpszClassName = ClassName();
   WinRegisterClass(&wc);
 }
 
 void Window::OnPaint()
 {
-  PAINTSTRUCT ps;
+  PAINTSTRUCT ps{};
   if (!::BeginPaint(hwnd_, &ps))
   {
     DWORD const last_error = ::GetLastError();
@@ -99,7 +96,15 @@ void Window::OnPaint()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  PaintContent(&ps);
+  try
+  {
+    PaintContent(&ps);
+  }
+  catch (...)
+  {
+    (void)::EndPaint(hwnd_, &ps);
+    throw;
+  }
 
   if (!::EndPaint(hwnd_, &ps))
   {
@@ -112,7 +117,7 @@ void Window::OnPaint()
 
 void Window::OnPrintClient(HDC hdc)
 {
-  PAINTSTRUCT ps;
+  PAINTSTRUCT ps{};
   ps.hdc = hdc;
 
   if (!::GetClientRect(hwnd_, &ps.rcPaint))
@@ -127,16 +132,16 @@ void Window::OnPrintClient(HDC hdc)
 }
 
 LRESULT CALLBACK
-  Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+  Window::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   HADESMEM_DETAIL_NOEXCEPT
 {
   Window* self = nullptr;
 
   try
   {
-    if (uMsg == WM_NCCREATE)
+    if (msg == WM_NCCREATE)
     {
-      LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
+      LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lparam);
       self = reinterpret_cast<Window*>(lpcs->lpCreateParams);
       self->hwnd_ = hwnd;
       ::SetLastError(0);
@@ -157,8 +162,8 @@ LRESULT CALLBACK
         reinterpret_cast<Window*>(::GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     }
 
-    return self ? self->HandleMessage(uMsg, wParam, lParam)
-                : ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
+    return self ? self->HandleMessage(msg, wparam, lparam)
+                : ::DefWindowProcW(hwnd, msg, wparam, lparam);
   }
   catch (...)
   {
@@ -166,6 +171,6 @@ LRESULT CALLBACK
       boost::current_exception_diagnostic_information().c_str());
     HADESMEM_DETAIL_ASSERT(false);
 
-    return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
+    return ::DefWindowProcW(hwnd, msg, wparam, lparam);
   }
 }

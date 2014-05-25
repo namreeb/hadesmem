@@ -230,5 +230,39 @@ struct ComPolicy
 };
 
 using SmartComHandle = SmartHandleImpl<ComPolicy>;
+
+struct GdiObjectPolicy
+{
+  using HandleT = HGDIOBJ;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+    static bool Cleanup(HandleT handle)
+  {
+    return ::DeleteObject(handle) != 0;
+  }
+};
+
+using SmartGdiObjectHandle = SmartHandleImpl<GdiObjectPolicy>;
+
+struct DeleteDcPolicy
+{
+  using HandleT = HDC;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+    static bool Cleanup(HandleT handle)
+  {
+    return ::DeleteDC(handle) != 0;
+  }
+};
+
+using SmartDeleteDcHandle = SmartHandleImpl<DeleteDcPolicy>;
 }
 }

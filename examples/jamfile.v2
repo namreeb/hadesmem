@@ -65,6 +65,7 @@ lib cerberus
 lib plugin
   :
     [ glob plugin/*.cpp ]
-    ole32
     comctl32
+    gdi32
+	ole32
   ;

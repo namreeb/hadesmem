@@ -10,7 +10,7 @@
 class Window
 {
 public:
-  explicit Window(HINSTANCE hinst) : instance_{hinst}
+  explicit Window(HINSTANCE instance) : instance_{instance}
   {
   }
 
@@ -25,7 +25,7 @@ public:
   }
 
 protected:
-  virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+  virtual LRESULT HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam);
 
   virtual void PaintContent(PAINTSTRUCT* /*pps*/)
   {
@@ -33,21 +33,21 @@ protected:
 
   virtual LPCWSTR ClassName() const = 0;
 
-  virtual void WinRegisterClass(WNDCLASS* pwc);
+  virtual void WinRegisterClass(WNDCLASSEX* pwc);
 
   virtual ~Window()
   {
   }
 
-  HWND WinCreateWindow(DWORD dwExStyle,
-                       LPCWSTR pszName,
-                       DWORD dwStyle,
+  HWND WinCreateWindow(DWORD ex_style,
+                       LPCWSTR name,
+                       DWORD style,
                        int x,
                        int y,
                        int cx,
                        int cy,
-                       HWND hwndParent,
-                       HMENU hmenu);
+                       HWND parend_wnd,
+                       HMENU menu);
 
 private:
   void Register();
@@ -57,9 +57,9 @@ private:
   void OnPrintClient(HDC hdc);
 
   static LRESULT CALLBACK WndProc(HWND hwnd,
-                                  UINT uMsg,
-                                  WPARAM wParam,
-                                  LPARAM lParam) HADESMEM_DETAIL_NOEXCEPT;
+                                  UINT msg,
+                                  WPARAM wparam,
+                                  LPARAM lparam) HADESMEM_DETAIL_NOEXCEPT;
 
 protected:
   HWND hwnd_{};
