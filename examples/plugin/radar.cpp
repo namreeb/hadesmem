@@ -103,6 +103,6 @@ bool& GetRadarFrameProcessed()
 
 bool& GetRadarEnabled()
 {
-  static bool radar_frame_enabled = false;
+  static bool radar_frame_enabled = true;
   return radar_frame_enabled;
 }
