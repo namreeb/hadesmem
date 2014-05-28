@@ -17,8 +17,6 @@
 
 namespace
 {
-std::size_t g_on_frame_callback_id{};
-
 std::unique_ptr<std::thread> g_window_thread{};
 }
 
@@ -29,6 +27,11 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   try
   {
     HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+    // Preemptively fix a potential order of destruction issue by ensuring this
+    // is used very early.
+    auto const& thread = GetThreadHandle();
+    (void)thread;
 
     // Using a wrapper lambda to work around a GCC link error on x86
     auto const window_thread = []()
