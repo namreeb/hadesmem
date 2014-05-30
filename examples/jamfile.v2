@@ -46,6 +46,11 @@ exe inject
     [ glob inject/*.cpp ]
   ;
 
+exe esomod
+  :
+    [ glob esomod/*.cpp ]
+  ;
+
 lib injecttestdep
   :
     [ glob injecttestdep/*.cpp ]
