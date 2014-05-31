@@ -76,6 +76,65 @@ DWORD FindProc(std::wstring const& proc_name, bool name_forced)
     return found_procs.front().GetId();
   }
 }
+
+void SetFov(hadesmem::Process const& process, float fov)
+{
+  std::cout << "\nPreparing to set FoV.\n";
+
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A58435                 jnz     loc_A58641
+  // .text:00A5843B                 mov     edx, dword_1BCA930
+  auto const camera_manager_ref = static_cast<std::uint8_t*>(hadesmem::Find(
+    process,
+    L"",
+    L"0x0F 0x85 ?? ?? ?? ?? 0x8B 0x15 ?? ?? ?? ?? 0x8B 0x4A 0x14",
+    hadesmem::PatternFlags::kThrowOnUnmatch,
+    0));
+  std::cout << "Got camera manager ref. ["
+            << static_cast<void*>(camera_manager_ref) << "].\n";
+
+  auto const kCameraManagerRefOffset = 0x08;
+  auto const camera_manager_ptr = hadesmem::Read<std::uint8_t*>(
+    process, camera_manager_ref + kCameraManagerRefOffset);
+  std::cout << "Got camera manager ptr. ["
+            << static_cast<void*>(camera_manager_ptr) << "].\n";
+
+  auto const camera_manager =
+    hadesmem::Read<std::uint8_t*>(process, camera_manager_ptr);
+  std::cout << "Got camera manager. [" << static_cast<void*>(camera_manager)
+            << "].\n";
+
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A72AB0                 cmp     dword ptr [ecx+14h], 0
+  auto const kCameraOffset = 0x14;
+  auto const camera =
+    hadesmem::Read<std::uint8_t*>(process, camera_manager + kCameraOffset);
+  std::cout << "Got camera. [" << static_cast<void*>(camera) << "].\n";
+
+  auto const kDegToRad = 0.01745327934622765f;
+  auto const fov_rads = fov * kDegToRad;
+  std::cout << "New FoV is " << fov_rads << ".\n";
+
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A780C6                 fadd    dword ptr [esi+478h]
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A79620                 fadd    dword ptr [esi+478h]
+  auto const kCameraVertFov3pOffset = 0x478;
+  auto const vert_fov_3p = camera + kCameraVertFov3pOffset;
+  std::cout << "Writing 3rd person FoV. [" << static_cast<void*>(vert_fov_3p)
+            << "].\n";
+  hadesmem::Write(process, vert_fov_3p, fov_rads);
+
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A780B5                 fld     dword ptr [esi+47Ch]
+  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+  // .text:00A794D4                 fld     dword ptr [esi+47Ch]
+  auto const kCameraVertFov1pOffset = 0x47C;
+  auto const vert_fov_1p = camera + kCameraVertFov1pOffset;
+  std::cout << "Writing 1st person FoV. [" << static_cast<void*>(vert_fov_1p)
+            << "].\n";
+  hadesmem::Write(process, vert_fov_1p, fov_rads);
+}
 }
 
 int main(int argc, char* argv[])
@@ -125,58 +184,10 @@ int main(int argc, char* argv[])
           "Could not get handle to target process (PID reuse race)."});
     }
 
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A58435                 jnz     loc_A58641
-    // .text:00A5843B                 mov     edx, dword_1BCA930
-    auto const camera_manager_ref = static_cast<std::uint8_t*>(hadesmem::Find(
-      *process,
-      L"",
-      L"0x0F 0x85 ?? ?? ?? ?? 0x8B 0x15 ?? ?? ?? ?? 0x8B 0x4A 0x14",
-      hadesmem::PatternFlags::kThrowOnUnmatch,
-      0));
-    std::cout << "Got camera manager ref. ["
-              << static_cast<void*>(camera_manager_ref) << "].\n";
-
-    auto const kCameraManagerRefOffset = 0x08;
-    auto const camera_manager_ptr = hadesmem::Read<std::uint8_t*>(
-      *process, camera_manager_ref + kCameraManagerRefOffset);
-    std::cout << "Got camera manager ptr. ["
-              << static_cast<void*>(camera_manager_ptr) << "].\n";
-
-    auto const camera_manager =
-      hadesmem::Read<std::uint8_t*>(*process, camera_manager_ptr);
-    std::cout << "Got camera manager. [" << static_cast<void*>(camera_manager)
-              << "].\n";
-
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A72AB0                 cmp     dword ptr [ecx+14h], 0
-    auto const kCameraOffset = 0x14;
-    auto const camera =
-      hadesmem::Read<std::uint8_t*>(*process, camera_manager + kCameraOffset);
-    std::cout << "Got camera. [" << static_cast<void*>(camera) << "].\n";
-
-    auto const new_fov = fov_arg.getValue() * 0.01745327934622765f;
-    std::cout << "New FoV is " << new_fov << ".\n";
-
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A780C6                 fadd    dword ptr [esi+478h]
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A79620                 fadd    dword ptr [esi+478h]
-    auto const kCameraVertFov3pOffset = 0x478;
-    auto const vert_fov_3p = camera + kCameraVertFov3pOffset;
-    std::cout << "Writing 3rd person FoV. [" << static_cast<void*>(vert_fov_3p)
-              << "].\n";
-    hadesmem::Write(*process, vert_fov_3p, new_fov);
-
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A780B5                 fld     dword ptr [esi+47Ch]
-    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-    // .text:00A794D4                 fld     dword ptr [esi+47Ch]
-    auto const kCameraVertFov1pOffset = 0x47C;
-    auto const vert_fov_1p = camera + kCameraVertFov1pOffset;
-    std::cout << "Writing 1st person FoV. [" << static_cast<void*>(vert_fov_1p)
-              << "].\n";
-    hadesmem::Write(*process, vert_fov_1p, new_fov);
+    if (fov_arg.isSet())
+    {
+      SetFov(*process, fov_arg.getValue());
+    }
 
     std::cout << "Finished.\n";
 
