@@ -88,11 +88,17 @@ int main(int argc, char* argv[])
     // This should probably have some value constraints set, but it's more
     // entertaining to leave it open so people can set it to silly values.
     TCLAP::ValueArg<float> fov_arg{
-      "", "fov", "Set field of view (in degrees)", false, 50.0f, "float", cmd};
+      "",
+      "fov",
+      "Set field of view (in degrees) (default 50.0)",
+      false,
+      50.0f,
+      "float",
+      cmd};
     TCLAP::ValueArg<float> max_camera_distance_arg{
       "",
       "max-camera-dist",
-      "Set max camera zoom distance",
+      "Set max camera zoom distance (default 10.0)",
       false,
       10.0f,
       "float",
@@ -103,30 +109,36 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<std::uint32_t> tone_mapping_arg{
       "",
       "tone-mapping",
-      "Set tone mapping type (a.k.a shader filters)",
+      "Set tone mapping type (a.k.a shader filters) (game currently supports "
+      "values 0 through 5)",
       false,
       0,
       "uint32_t",
       cmd};
-    TCLAP::ValueArg<float> min_view_distance_arg{"",
-                                                 "min-view-dist",
-                                                 "Set minimum view distance",
-                                                 false,
-                                                 0.40000001f,
-                                                 "float",
-                                                 cmd};
-    TCLAP::ValueArg<float> max_view_distance_arg{"",
-                                                 "max-view-dist",
-                                                 "Set maximum view distance",
-                                                 false,
-                                                 2.0f,
-                                                 "float",
-                                                 cmd};
-    TCLAP::SwitchArg fog_arg{"", "fog", "Toggle fog", cmd};
-    TCLAP::SwitchArg anaglyph_arg{"", "3d", "Toggle anaglyph 3D", cmd};
-    TCLAP::SwitchArg watermark_arg{"", "watermark", "Toggle watermark", cmd};
+    TCLAP::ValueArg<float> min_view_distance_arg{
+      "",
+      "min-view-dist",
+      "Set minimum view distance. (default 0.4)",
+      false,
+      0.40000001f,
+      "float",
+      cmd};
+    TCLAP::ValueArg<float> max_view_distance_arg{
+      "",
+      "max-view-dist",
+      "Set maximum view distance (default 2.0)",
+      false,
+      2.0f,
+      "float",
+      cmd};
+    TCLAP::SwitchArg fog_arg{"", "fog", "Toggle fog (default on)", cmd};
+    TCLAP::SwitchArg anaglyph_arg{
+      "", "3d", "Toggle anaglyph 3D (default off)", cmd};
     TCLAP::SwitchArg fader_arg{
-      "", "fader", "Toggle fader (force high quality models)", cmd};
+      "",
+      "fader",
+      "Toggle fader (turn off to force high quality models) (default on)",
+      cmd};
     cmd.parse(argc, argv);
 
     try
@@ -207,11 +219,6 @@ int main(int argc, char* argv[])
     if (anaglyph_arg.isSet())
     {
       Toggle3D(*process);
-    }
-
-    if (watermark_arg.isSet())
-    {
-      ToggleWatermark(*process);
     }
 
     if (fader_arg.isSet())
