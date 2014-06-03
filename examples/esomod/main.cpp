@@ -32,7 +32,6 @@
 #include "fov.hpp"
 #include "tone_mapping.hpp"
 #include "view_distances.hpp"
-#include "watermark.hpp"
 
 namespace
 {
@@ -131,6 +130,14 @@ int main(int argc, char* argv[])
       2.0f,
       "float",
       cmd};
+    TCLAP::ValueArg<float> cur_view_distance_arg{
+      "",
+      "view-dist",
+      "Set current view distance (clamped to min-view-dist and max-view-dist)",
+      false,
+      2.0f,
+      "float",
+      cmd};
     TCLAP::SwitchArg fog_arg{"", "fog", "Toggle fog (default on)", cmd};
     TCLAP::SwitchArg anaglyph_arg{
       "", "3d", "Toggle anaglyph 3D (default off)", cmd};
@@ -202,13 +209,17 @@ int main(int argc, char* argv[])
 
     bool const set_min_view_distance = min_view_distance_arg.isSet();
     bool const set_max_view_distance = max_view_distance_arg.isSet();
-    if (set_min_view_distance || set_max_view_distance)
+    bool const set_cur_view_distance = cur_view_distance_arg.isSet();
+    if (set_min_view_distance || set_max_view_distance || set_cur_view_distance)
     {
       auto const min_view_distance =
         set_min_view_distance ? &min_view_distance_arg.getValue() : nullptr;
       auto const max_view_distance =
         set_max_view_distance ? &max_view_distance_arg.getValue() : nullptr;
-      SetViewDistances(*process, min_view_distance, max_view_distance);
+      auto const cur_view_distance =
+        set_cur_view_distance ? &cur_view_distance_arg.getValue() : nullptr;
+      SetViewDistances(
+        *process, min_view_distance, max_view_distance, cur_view_distance);
     }
 
     if (fog_arg.isSet())

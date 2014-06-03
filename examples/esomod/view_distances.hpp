@@ -6,4 +6,7 @@ namespace hadesmem
 class Process;
 }
 
-void SetViewDistances(hadesmem::Process const& process, float* min, float* max);
+void SetViewDistances(hadesmem::Process const& process,
+                      float* min,
+                      float* max,
+                      float* value);
