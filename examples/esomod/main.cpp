@@ -26,6 +26,7 @@
 #include <hadesmem/write.hpp>
 
 #include "3d.hpp"
+#include "camera_distance.hpp"
 #include "fader.hpp"
 #include "fog.hpp"
 #include "fov.hpp"
@@ -87,7 +88,9 @@ int main(int argc, char* argv[])
     // This should probably have some value constraints set, but it's more
     // entertaining to leave it open so people can set it to silly values.
     TCLAP::ValueArg<float> fov_arg{
-      "", "fov", "Set field of view (in degrees)", false, 50.0f, "float", cmd};
+      "", "fov", "Set field of view (in degrees)", false, 50.0f, "float", cmd };
+    TCLAP::ValueArg<float> max_camera_distance_arg{
+      "", "max-camera-dist", "Set max camera distance", false, 10.0f, "float", cmd };
     // Values above 5 seem to be invalid, but leave it open in case that changes
     // in the future (that way if the patterns don't need updating I don't need
     // to do anything).
@@ -98,7 +101,7 @@ int main(int argc, char* argv[])
       false,
       0,
       "uint32_t",
-      cmd};
+      cmd };
     TCLAP::ValueArg<float> min_view_distance_arg{"",
                                                  "min-view-dist",
                                                  "Set minimum view distance",
@@ -167,6 +170,11 @@ int main(int argc, char* argv[])
     if (fov_arg.isSet())
     {
       SetFov(*process, fov_arg.getValue());
+    }
+
+    if (max_camera_distance_arg.isSet())
+    {
+      SetMaxCameraDistance(*process, max_camera_distance_arg.getValue());
     }
 
     if (tone_mapping_arg.isSet())
