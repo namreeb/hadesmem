@@ -1,6 +1,8 @@
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include "fov.hpp"
+
 #include <iostream>
 
 #include <hadesmem/error.hpp>
@@ -9,7 +11,18 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
-void SetFov(hadesmem::Process const& process, float fov)
+namespace
+{
+
+float DegToRad(float f)
+{
+  auto const kPi = 3.14159265f;
+  auto const kDegToRad = kPi / 180.0f;
+  return f * kDegToRad;
+}
+}
+
+void SetFov(hadesmem::Process const& process, float* third, float* first)
 {
   std::cout << "\nPreparing to set FoV.\n";
 
@@ -43,29 +56,33 @@ void SetFov(hadesmem::Process const& process, float fov)
     hadesmem::Read<std::uint8_t*>(process, camera_manager + kCameraOffset);
   std::cout << "Got camera. [" << static_cast<void*>(camera) << "].\n";
 
-  auto const kPi = 3.14159265f;
-  auto const kDegToRad = kPi / 180.0f;
-  auto const fov_rads = fov * kDegToRad;
+  if (third)
+  {
+    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+    // .text:00A780C6                 fadd    dword ptr [esi+478h]
+    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+    // .text:00A79620                 fadd    dword ptr [esi+478h]
+    auto const kCameraVertFov3pOffset = 0x478;
+    auto const vert_fov_3p = camera + kCameraVertFov3pOffset;
+    std::cout << "Writing 3rd person FoV. [" << static_cast<void*>(vert_fov_3p)
+              << "].\n";
+    hadesmem::Write(process, vert_fov_3p, DegToRad(*third));
 
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00A780C6                 fadd    dword ptr [esi+478h]
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00A79620                 fadd    dword ptr [esi+478h]
-  auto const kCameraVertFov3pOffset = 0x478;
-  auto const vert_fov_3p = camera + kCameraVertFov3pOffset;
-  std::cout << "Writing 3rd person FoV. [" << static_cast<void*>(vert_fov_3p)
-            << "].\n";
-  hadesmem::Write(process, vert_fov_3p, fov_rads);
+    std::cout << "New 3rd person is " << *third << ".\n";
+  }
 
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00A780B5                 fld     dword ptr [esi+47Ch]
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00A794D4                 fld     dword ptr [esi+47Ch]
-  auto const kCameraVertFov1pOffset = 0x47C;
-  auto const vert_fov_1p = camera + kCameraVertFov1pOffset;
-  std::cout << "Writing 1st person FoV. [" << static_cast<void*>(vert_fov_1p)
-            << "].\n";
-  hadesmem::Write(process, vert_fov_1p, fov_rads);
+  if (first)
+  {
+    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+    // .text:00A780B5                 fld     dword ptr [esi+47Ch]
+    // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
+    // .text:00A794D4                 fld     dword ptr [esi+47Ch]
+    auto const kCameraVertFov1pOffset = 0x47C;
+    auto const vert_fov_1p = camera + kCameraVertFov1pOffset;
+    std::cout << "Writing 1st person FoV. [" << static_cast<void*>(vert_fov_1p)
+              << "].\n";
+    hadesmem::Write(process, vert_fov_1p, DegToRad(*first));
 
-  std::cout << "New FoV is " << fov_rads << ".\n";
+    std::cout << "New 1st person is " << *first << ".\n";
+  }
 }

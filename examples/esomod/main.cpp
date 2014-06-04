@@ -89,7 +89,24 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<float> fov_arg{
       "",
       "fov",
-      "Set field of view (in degrees) (default 50.0)",
+      "Set vertical field of view (in degrees) (default "
+      "50.0) for both perspectives",
+      false,
+      50.0f,
+      "float",
+      cmd};
+    TCLAP::ValueArg<float> fov_3p_arg{
+      "",
+      "fov-3p",
+      "Set vertical field of view (in degrees) (default 50.0) for 3rd person",
+      false,
+      50.0f,
+      "float",
+      cmd};
+    TCLAP::ValueArg<float> fov_1p_arg{
+      "",
+      "fov-3p",
+      "Set vertical field of view (in degrees) (default 50.0) for 1st person",
       false,
       50.0f,
       "float",
@@ -192,9 +209,27 @@ int main(int argc, char* argv[])
       }
     }
 
-    if (fov_arg.isSet())
+    bool const set_fov_both = fov_arg.isSet();
+    bool const set_fov_3p = fov_3p_arg.isSet();
+    bool const set_fov_1p = fov_1p_arg.isSet();
+    if (set_fov_both)
     {
-      SetFov(*process, fov_arg.getValue());
+      if (set_fov_3p || set_fov_1p)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error{} << hadesmem::ErrorString{
+            "Please set the FoV using either the perspective-specific flags or "
+            "the general flag, but not both."});
+      }
+
+      float* fov_both = &fov_arg.getValue();
+      SetFov(*process, fov_both, fov_both);
+    }
+    else
+    {
+      float* fov_3p = set_fov_3p ? &fov_3p_arg.getValue() : nullptr;
+      float* fov_1p = set_fov_1p ? &fov_1p_arg.getValue() : nullptr;
+      SetFov(*process, fov_3p, fov_1p);
     }
 
     if (max_camera_distance_arg.isSet())

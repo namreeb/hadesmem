@@ -1,6 +1,8 @@
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
+#include "view_distances.hpp"
+
 #include <iostream>
 
 #include <hadesmem/error.hpp>

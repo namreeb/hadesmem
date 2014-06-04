@@ -6,4 +6,4 @@ namespace hadesmem
 class Process;
 }
 
-void SetFov(hadesmem::Process const& process, float fov);
+void SetFov(hadesmem::Process const& process, float* third, float* first);
