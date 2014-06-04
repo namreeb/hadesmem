@@ -18,28 +18,27 @@ void SetViewDistances(hadesmem::Process const& process,
 {
   std::cout << "\nPreparing to set view distances.\n";
 
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00AB4D6A                 shr     edx, 2
-  // .text:00AB4D6D                 test    dl, 1
-  // .text:00AB4D70                 jz      short loc_AB4DAD
-  // .text:00AB4D72                 fld     flt_1B22D68
-  // .text:00AB4D78                 fld     ds:flt_18BC738
+  // eso.rc.1.2.0.999025 (dumped with module base of 0x00A90000)
+  // .text:00CBCB1A                 jz      short loc_CBCB5A
+  // .text:00CBCB1C                 fld     flt_1E82620
+  // .text:00CBCB22                 fld     ds:flt_1C0F76C
+  // .text:00CBCB28                 fcom    st(1)
   auto const max_and_cur_view_distance_ref = static_cast<std::uint8_t*>(
     hadesmem::Find(process,
                    L"",
-                   L"C1 EA 02 F6 C2 01 74 ?? D9 05",
+                   L"74 ?? D9 05 ?? ?? ?? ?? D9 05 ?? ?? ?? ?? D8 D1",
                    hadesmem::PatternFlags::kThrowOnUnmatch,
                    0));
   std::cout << "Got tone mapping type ref. ["
             << static_cast<void*>(max_and_cur_view_distance_ref) << "].\n";
 
-  auto const kCurrentViewDistanceRefOffset = 0x0A;
+  auto const kCurrentViewDistanceRefOffset = 0x04;
   auto const cur_view_distance_ptr = hadesmem::Read<std::uint8_t*>(
     process, max_and_cur_view_distance_ref + kCurrentViewDistanceRefOffset);
   std::cout << "Got current view distance ptr. ["
             << static_cast<void*>(cur_view_distance_ptr) << "].\n";
 
-  auto const kMaxViewDistanceRefOffset = 0x10;
+  auto const kMaxViewDistanceRefOffset = 0x0A;
   auto const max_view_distance_ptr = hadesmem::Read<std::uint8_t*>(
     process, max_and_cur_view_distance_ref + kMaxViewDistanceRefOffset);
   std::cout << "Got max view distance ptr. ["

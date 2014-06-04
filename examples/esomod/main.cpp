@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
       float* fov_both = &fov_arg.getValue();
       SetFov(*process, fov_both, fov_both);
     }
-    else
+    else if (set_fov_3p || set_fov_1p)
     {
       float* fov_3p = set_fov_3p ? &fov_3p_arg.getValue() : nullptr;
       float* fov_1p = set_fov_1p ? &fov_1p_arg.getValue() : nullptr;
