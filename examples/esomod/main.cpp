@@ -2,6 +2,7 @@
 // See the file COPYING for copying permission.
 
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -30,6 +31,7 @@
 #include "fader.hpp"
 #include "fog.hpp"
 #include "fov.hpp"
+#include "time.hpp"
 #include "tone_mapping.hpp"
 #include "view_distances.hpp"
 
@@ -105,7 +107,7 @@ int main(int argc, char* argv[])
       cmd};
     TCLAP::ValueArg<float> fov_1p_arg{
       "",
-      "fov-3p",
+      "fov-1p",
       "Set vertical field of view (in degrees) (default 50.0) for 1st person",
       false,
       50.0f,
@@ -119,14 +121,21 @@ int main(int argc, char* argv[])
       10.0f,
       "float",
       cmd};
+    TCLAP::ValueArg<float> time_arg{"",
+                                    "time",
+                                    "Set time (to change day/night/etc) (range "
+                                    "of [0, 24), e.g. 13.5 for 1330)",
+                                    false,
+                                    12.0f,
+                                    "float",
+                                    cmd};
     // Values above 5 seem to be invalid, but leave it open in case that changes
     // in the future (that way if the patterns don't need updating I don't need
     // to do anything).
     TCLAP::ValueArg<std::uint32_t> tone_mapping_arg{
       "",
       "tone-mapping",
-      "Set tone mapping type (a.k.a shader filters) (game currently supports "
-      "values 0 through 5)",
+      "Set tone mapping type (a.k.a shader filters) (range of [0, 5])",
       false,
       0,
       "uint32_t",
@@ -150,7 +159,7 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<float> cur_view_distance_arg{
       "",
       "view-dist",
-      "Set current view distance (clamped to min-view-dist and max-view-dist)",
+      "Set current view distance (range of [min-view-dist, max-view-dist])",
       false,
       2.0f,
       "float",
@@ -235,6 +244,11 @@ int main(int argc, char* argv[])
     if (max_camera_distance_arg.isSet())
     {
       SetMaxCameraDistance(*process, max_camera_distance_arg.getValue());
+    }
+
+    if (time_arg.isSet())
+    {
+      SetTime(*process, time_arg.getValue());
     }
 
     if (tone_mapping_arg.isSet())

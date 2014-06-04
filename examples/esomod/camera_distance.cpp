@@ -15,7 +15,7 @@ void SetMaxCameraDistance(hadesmem::Process const& process, float value)
 {
   std::cout << "\nPreparing to set max camera distance.\n";
 
-  // eso.live.1.1.3.998958 (dumped with module base of 002D0000)
+  // eso.live.1.1.3.998958 (dumped with module base of 0x002D0000)
   // .text:0038DFF1                   fld1
   // .text:0038DFF3                   mov     ecx, dword_153C96C
   // .text:0038DFF9                   fstp    [ebp+var_4]
@@ -40,7 +40,7 @@ void SetMaxCameraDistance(hadesmem::Process const& process, float value)
   std::cout << "Got camera manager. ["
             << static_cast<void*>(global_pointer_manager) << "].\n";
 
-  // eso.live.1.1.3.998958 (dumped with module base of 002D0000)
+  // eso.live.1.1.3.998958 (dumped with module base of 0x002D0000)
   // .text:0043C6D0                 mov     eax, [ecx + 4Ch]
   auto const kCameraConstraintsOffset = 0x4C;
   auto const camera_constraints = hadesmem::Read<std::uint8_t*>(
@@ -48,7 +48,7 @@ void SetMaxCameraDistance(hadesmem::Process const& process, float value)
   std::cout << "Got camera constraints. ["
             << static_cast<void*>(camera_constraints) << "].\n";
 
-  // eso.live.1.1.3.998958 (dumped with module base of 002D0000)
+  // eso.live.1.1.3.998958 (dumped with module base of 0x002D0000)
   // .text:0033AD65                 fld     dword ptr[esi + 64h]
   auto const kMaxCameraDistanceOffset = 0x64;
   auto const max_camera_distance =
