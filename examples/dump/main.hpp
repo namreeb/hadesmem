@@ -38,11 +38,12 @@ template <typename CharT>
 typename std::basic_string<CharT>::size_type
   FindFirstUnprintableClassicLocale(std::basic_string<CharT> const& s)
 {
-  auto const i =
-    std::find_if(std::begin(s),
-                 std::end(s),
-                 [](CharT c)
-                 { return !std::isprint(c, std::locale::classic()); });
+  auto const i = std::find_if(std::begin(s),
+                              std::end(s),
+                              [](CharT c)
+                              {
+    return !std::isprint(c, std::locale::classic());
+  });
   return i == std::end(s) ? std::basic_string<CharT>::npos
                           : std::distance(std::begin(s), i);
 }

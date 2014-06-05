@@ -69,8 +69,8 @@ void TraceFormatImpl(char const* function,
     (void)num_char_actual;
     auto const trace_buffer_formatted =
       ::hadesmem::detail::WideCharToMultiByte(trace_buffer.data());
-    std::int32_t const num_char_formatted =
-      _snprintf(nullptr, 0, "%s: %s\n", function, trace_buffer_formatted.c_str());
+    std::int32_t const num_char_formatted = _snprintf(
+      nullptr, 0, "%s: %s\n", function, trace_buffer_formatted.c_str());
     if (num_char_formatted > 0)
     {
       std::vector<char> formatted_buffer(

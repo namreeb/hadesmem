@@ -146,38 +146,38 @@ private:
   IMAGE_THUNK_DATA data_ = IMAGE_THUNK_DATA{};
 };
 
-inline bool operator==(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(ImportThunk const& lhs,
+                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(ImportThunk const& lhs,
+                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(ImportThunk const& lhs,
+                      ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(ImportThunk const& lhs,
+                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(ImportThunk const& lhs,
+                      ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(ImportThunk const& lhs, ImportThunk const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(ImportThunk const& lhs,
+                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

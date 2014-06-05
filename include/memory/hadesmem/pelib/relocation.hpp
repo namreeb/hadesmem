@@ -95,38 +95,38 @@ private:
   std::uint16_t offset_{};
 };
 
-inline bool operator==(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Relocation const& lhs,
+                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Relocation const& lhs,
+                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Relocation const& lhs,
+                      Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Relocation const& lhs,
+                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Relocation const& lhs,
+                      Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Relocation const& lhs, Relocation const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Relocation const& lhs,
+                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

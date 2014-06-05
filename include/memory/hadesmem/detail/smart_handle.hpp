@@ -240,7 +240,7 @@ struct GdiObjectPolicy
     return nullptr;
   }
 
-    static bool Cleanup(HandleT handle)
+  static bool Cleanup(HandleT handle)
   {
     return ::DeleteObject(handle) != 0;
   }
@@ -257,7 +257,7 @@ struct DeleteDcPolicy
     return nullptr;
   }
 
-    static bool Cleanup(HandleT handle)
+  static bool Cleanup(HandleT handle)
   {
     return ::DeleteDC(handle) != 0;
   }

@@ -86,8 +86,8 @@ public:
   {
   }
 
-  RelocationIterator& operator=(RelocationIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  RelocationIterator&
+    operator=(RelocationIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
@@ -140,14 +140,14 @@ public:
     return iter;
   }
 
-  bool operator==(RelocationIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+  bool
+    operator==(RelocationIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(RelocationIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+  bool
+    operator!=(RelocationIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }

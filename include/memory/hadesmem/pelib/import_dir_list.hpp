@@ -72,8 +72,8 @@ public:
   {
   }
 
-  ImportDirIterator& operator=(ImportDirIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  ImportDirIterator&
+    operator=(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 

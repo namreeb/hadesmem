@@ -121,8 +121,8 @@ public:
                          float return_float,
                          double return_double,
                          DWORD last_error) HADESMEM_DETAIL_NOEXCEPT
-    : result_(detail::CallResultRemote{return_i64, return_float, return_double,
-                                       last_error})
+    : result_(detail::CallResultRemote{
+        return_i64, return_float, return_double, last_error})
   {
   }
 
@@ -484,8 +484,8 @@ public:
 
     if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-      asmjit::x64::GpReg const regs[] = {asmjit::x64::rcx, asmjit::x64::rdx,
-                                         asmjit::x64::r8, asmjit::x64::r9};
+      asmjit::x64::GpReg const regs[] = {
+        asmjit::x64::rcx, asmjit::x64::rdx, asmjit::x64::r8, asmjit::x64::r9};
       assembler_->mov(regs[cur_arg_ - 1], asmjit::imm_u(arg));
     }
     else
@@ -512,8 +512,10 @@ public:
 
     if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0, asmjit::x64::xmm1,
-                                          asmjit::x64::xmm2, asmjit::x64::xmm3};
+      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0,
+                                          asmjit::x64::xmm1,
+                                          asmjit::x64::xmm2,
+                                          asmjit::x64::xmm3};
       assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
                       asmjit::imm_u(arg_conv));
       assembler_->movss(regs[cur_arg_ - 1],
@@ -546,8 +548,10 @@ public:
       assembler_->mov(
         asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs + 4),
         asmjit::imm_u(GetHigh32(arg_conv)));
-      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0, asmjit::x64::xmm1,
-                                          asmjit::x64::xmm2, asmjit::x64::xmm3};
+      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0,
+                                          asmjit::x64::xmm1,
+                                          asmjit::x64::xmm2,
+                                          asmjit::x64::xmm3};
       assembler_->movsd(regs[cur_arg_ - 1],
                         asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
     }
@@ -616,7 +620,9 @@ inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  { arg.Apply(std::ref(arg_visitor)); });
+                  {
+      arg.Apply(std::ref(arg_visitor));
+    });
 
     assembler->mov(asmjit::x86::eax,
                    asmjit::imm_u(reinterpret_cast<std::uintptr_t>(address)));
@@ -739,7 +745,9 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  { arg.Apply(std::ref(arg_visitor)); });
+                  {
+      arg.Apply(std::ref(arg_visitor));
+    });
 
     assembler->mov(asmjit::x64::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
@@ -924,7 +932,9 @@ inline void CallMulti(Process const& process,
                  std::end(return_vals_remote),
                  results,
                  [](detail::CallResultRemote const& r)
-                 { return static_cast<CallResultRaw>(r); });
+                 {
+    return static_cast<CallResultRaw>(r);
+  });
 }
 
 template <typename ArgsForwardIterator>

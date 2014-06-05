@@ -52,7 +52,9 @@ void TestProcessListAlgorithm()
   auto const this_iter = std::find_if(std::begin(process_list_1),
                                       std::end(process_list_1),
                                       [](hadesmem::ProcessEntry const& entry)
-  { return entry.GetId() == ::GetCurrentProcessId(); });
+                                      {
+    return entry.GetId() == ::GetCurrentProcessId();
+  });
   BOOST_TEST(this_iter != std::end(process_list_1));
 }
 

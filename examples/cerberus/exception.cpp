@@ -30,16 +30,16 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetRtlAddVectoredExceptionHandlerRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>&
+  GetRtlAddVectoredExceptionHandlerRefCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
-  ULONG first_handler, PVECTORED_EXCEPTION_HANDLER vectored_handler)
-  HADESMEM_DETAIL_NOEXCEPT
+  ULONG first_handler,
+  PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetRtlAddVectoredExceptionHandlerRefCount()};

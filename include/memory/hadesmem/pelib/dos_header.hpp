@@ -27,24 +27,19 @@ namespace hadesmem
 class DosHeader
 {
 public:
-  explicit DosHeader(Process const& process,
-                     PeFile const& pe_file)
-    : process_{&process},
-      base_{static_cast<std::uint8_t*>(pe_file.GetBase())}
+  explicit DosHeader(Process const& process, PeFile const& pe_file)
+    : process_{&process}, base_{static_cast<std::uint8_t*>(pe_file.GetBase())}
   {
     UpdateRead();
 
     EnsureValid();
   }
 
-  explicit DosHeader(Process&& process,
-                     PeFile const& pe_file) = delete;
+  explicit DosHeader(Process&& process, PeFile const& pe_file) = delete;
 
-  explicit DosHeader(Process const& process,
-                     PeFile&& pe_file) = delete;
+  explicit DosHeader(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit DosHeader(Process&& process,
-                     PeFile&& pe_file) = delete;
+  explicit DosHeader(Process&& process, PeFile&& pe_file) = delete;
 
   PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
@@ -280,38 +275,38 @@ private:
   IMAGE_DOS_HEADER data_ = IMAGE_DOS_HEADER{};
 };
 
-inline bool operator==(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(DosHeader const& lhs,
+                       DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(DosHeader const& lhs,
+                       DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(DosHeader const& lhs,
+                      DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(DosHeader const& lhs,
+                       DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(DosHeader const& lhs,
+                      DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(DosHeader const& lhs, DosHeader const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(DosHeader const& lhs,
+                       DosHeader const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -52,8 +52,10 @@ public:
 
     if (type == PeFileType::Image && !size)
     {
-      auto const region_alloc_size = detail::GetRegionAllocSize(*process_, base_);
-      HADESMEM_DETAIL_ASSERT(region_alloc_size < (std::numeric_limits<DWORD>::max)());
+      auto const region_alloc_size =
+        detail::GetRegionAllocSize(*process_, base_);
+      HADESMEM_DETAIL_ASSERT(region_alloc_size <
+                             (std::numeric_limits<DWORD>::max)());
       size_ = static_cast<DWORD>(region_alloc_size);
     }
   }
@@ -85,38 +87,38 @@ private:
   DWORD size_;
 };
 
-inline bool operator==(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(PeFile const& lhs,
+                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(PeFile const& lhs,
+                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(PeFile const& lhs,
+                      PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(PeFile const& lhs,
+                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(PeFile const& lhs,
+                      PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(PeFile const& lhs, PeFile const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(PeFile const& lhs,
+                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
@@ -209,10 +211,9 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       return nullptr;
     }
 
-    auto ptr_section_header =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(
-        ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-        nt_headers.FileHeader.SizeOfOptionalHeader);
+    auto ptr_section_header = reinterpret_cast<PIMAGE_SECTION_HEADER>(
+      ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
+      nt_headers.FileHeader.SizeOfOptionalHeader);
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // Virtual section table.

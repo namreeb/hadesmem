@@ -61,9 +61,9 @@ void DumpMemory(hadesmem::Process const& process)
   try
   {
     hadesmem::PeFile const pe_file(process,
-      module.GetHandle(),
-      hadesmem::PeFileType::Image,
-      static_cast<DWORD>(module.GetSize()));
+                                   module.GetHandle(),
+                                   hadesmem::PeFileType::Image,
+                                   static_cast<DWORD>(module.GetSize()));
     hadesmem::NtHeaders nt_headers(process, pe_file);
   }
   catch (std::exception const& /*e*/)
@@ -188,22 +188,19 @@ void DumpMemory(hadesmem::Process const& process)
   if (!dump_file->write(reinterpret_cast<char const*>(raw_new.data()),
                         raw_new.size()))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                    << hadesmem::ErrorString(
-                                         "Unable to write to dump file."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Unable to write to dump file."));
   }
 
   if (dir_mismatch)
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                    << hadesmem::ErrorString(
-                                         "Mismatch in import dir processing."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Mismatch in import dir processing."));
   }
 
   if (thunk_mismatch)
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error() << hadesmem::ErrorString(
-                             "Mismatch in import thunk processing."));
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Mismatch in import thunk processing."));
   }
 }

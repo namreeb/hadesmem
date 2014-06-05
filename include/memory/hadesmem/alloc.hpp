@@ -166,38 +166,38 @@ private:
   SIZE_T size_;
 };
 
-inline bool operator==(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Allocator const& lhs,
+                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Allocator const& lhs,
+                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Allocator const& lhs,
+                      Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Allocator const& lhs,
+                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Allocator const& lhs,
+                      Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Allocator const& lhs, Allocator const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Allocator const& lhs,
+                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

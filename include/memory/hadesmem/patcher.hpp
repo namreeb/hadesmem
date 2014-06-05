@@ -358,7 +358,7 @@ public:
       {
         std::uint16_t const size = is_jimm ? op->size : op->offset;
         HADESMEM_DETAIL_TRACE_FORMAT_A("Operand/offset size is %hu.", size);
-        std::int64_t const insn_target = [&]()->std::int64_t
+        std::int64_t const insn_target = [&]() -> std::int64_t
         {
           switch (size)
           {
@@ -515,7 +515,7 @@ private:
 
     auto const allocate_tramp = [](Process const& process,
                                    PVOID addr,
-                                   SIZE_T size)->std::unique_ptr<Allocator>
+                                   SIZE_T size) -> std::unique_ptr<Allocator>
     {
       auto const new_addr = detail::TryAlloc(process, size, addr);
       return new_addr

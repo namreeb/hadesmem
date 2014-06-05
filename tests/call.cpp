@@ -420,7 +420,7 @@ void TestCall()
     "GetProcAddress");
   BOOST_TEST_EQ(call_win.GetReturnValue(), get_proc_address);
 
-  hadesmem::MultiCall multi_call{ process };
+  hadesmem::MultiCall multi_call{process};
   multi_call.Add<void (*)(DWORD)>(
     &MultiThreadSet, hadesmem::CallConv::kDefault, 0x1337UL);
   multi_call.Add<DWORD (*)()>(&MultiThreadGet, hadesmem::CallConv::kDefault);

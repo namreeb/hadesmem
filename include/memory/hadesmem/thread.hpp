@@ -103,38 +103,38 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Thread const& lhs,
+                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Thread const& lhs,
+                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Thread const& lhs,
+                      Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Thread const& lhs,
+                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Thread const& lhs,
+                      Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Thread const& lhs, Thread const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Thread const& lhs,
+                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }

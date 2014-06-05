@@ -89,8 +89,8 @@ public:
   {
   }
 
-  ImportThunkIterator& operator=(ImportThunkIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  ImportThunkIterator&
+    operator=(ImportThunkIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 
@@ -143,14 +143,14 @@ public:
     return iter;
   }
 
-  bool operator==(ImportThunkIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+  bool
+    operator==(ImportThunkIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(ImportThunkIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+  bool
+    operator!=(ImportThunkIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
   {
     return !(*this == other);
   }

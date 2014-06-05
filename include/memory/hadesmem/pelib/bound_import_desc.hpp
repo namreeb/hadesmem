@@ -154,16 +154,16 @@ private:
   IMAGE_BOUND_IMPORT_DESCRIPTOR data_;
 };
 
-inline bool operator==(BoundImportDescriptor const& lhs,
-                       BoundImportDescriptor const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator==(BoundImportDescriptor const& lhs,
+             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(BoundImportDescriptor const& lhs,
-                       BoundImportDescriptor const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator!=(BoundImportDescriptor const& lhs,
+             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
@@ -174,9 +174,9 @@ inline bool operator<(BoundImportDescriptor const& lhs,
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(BoundImportDescriptor const& lhs,
-                       BoundImportDescriptor const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator<=(BoundImportDescriptor const& lhs,
+             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
@@ -187,9 +187,9 @@ inline bool operator>(BoundImportDescriptor const& lhs,
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(BoundImportDescriptor const& lhs,
-                       BoundImportDescriptor const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator>=(BoundImportDescriptor const& lhs,
+             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

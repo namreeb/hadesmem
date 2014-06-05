@@ -116,38 +116,38 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Process const& lhs,
+                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Process const& lhs,
+                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Process const& lhs,
+                      Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Process const& lhs,
+                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Process const& lhs,
+                      Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Process const& lhs, Process const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Process const& lhs,
+                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetId() >= rhs.GetId();
 }

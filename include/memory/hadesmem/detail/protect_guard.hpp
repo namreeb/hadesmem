@@ -52,7 +52,7 @@ public:
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error{} << ErrorString{
-                     "Attempt to access page with a 'bad' protection mask."});
+          "Attempt to access page with a 'bad' protection mask."});
     }
 
     can_read_or_write_ =

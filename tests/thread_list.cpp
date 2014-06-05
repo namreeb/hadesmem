@@ -73,7 +73,9 @@ void TestThreadListAlgorithm()
   auto const this_iter = std::find_if(std::begin(thread_list_1),
                                       std::end(thread_list_1),
                                       [](hadesmem::ThreadEntry const& thread)
-  { return thread.GetId() == ::GetCurrentThreadId(); });
+                                      {
+    return thread.GetId() == ::GetCurrentThreadId();
+  });
   BOOST_TEST(this_iter != std::end(thread_list_1));
 }
 

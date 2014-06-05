@@ -72,8 +72,8 @@ DWORD FindProc(std::wstring const& proc_name, bool name_forced)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         hadesmem::Error{} << hadesmem::ErrorString{
-                               "Process name search found multiple matches. "
-                               "Please specify a PID or use --name-forced."});
+          "Process name search found multiple matches. "
+          "Please specify a PID or use --name-forced."});
     }
 
     return found_procs.front().GetId();
@@ -88,36 +88,54 @@ int main(int argc, char* argv[])
     std::cout << "HadesMem Injector [" << HADESMEM_VERSION_STRING << "]\n";
 
     TCLAP::CmdLine cmd{"DLL injector", ' ', HADESMEM_VERSION_STRING};
-    TCLAP::ValueArg<DWORD> pid_arg{"p",   "pid", "Target process id",
-                                   false, 0,     "DWORD"};
-    TCLAP::ValueArg<std::string> name_arg{"n",   "name", "Target process name",
-                                          false, "",     "string"};
+    TCLAP::ValueArg<DWORD> pid_arg{
+      "p", "pid", "Target process id", false, 0, "DWORD"};
+    TCLAP::ValueArg<std::string> name_arg{
+      "n", "name", "Target process name", false, "", "string"};
     TCLAP::ValueArg<std::string> run_arg{
       "r", "run", "Target process path (new instance)", false, "", "string"};
     std::vector<TCLAP::Arg*> xor_args{&pid_arg, &name_arg, &run_arg};
     cmd.xorAdd(xor_args);
     TCLAP::SwitchArg name_forced_arg{
-      "", "name-forced", "Default to first matched process name (no warning)",
+      "",
+      "name-forced",
+      "Default to first matched process name (no warning)",
       cmd};
-    TCLAP::ValueArg<std::string> module_arg{"m", "module", "Module path", true,
-                                            "",  "string", cmd};
+    TCLAP::ValueArg<std::string> module_arg{
+      "m", "module", "Module path", true, "", "string", cmd};
     TCLAP::SwitchArg path_resolution_arg{
-      "", "path-resolution", "Perform (local) path resolution on module path",
+      "",
+      "path-resolution",
+      "Perform (local) path resolution on module path",
       cmd};
     TCLAP::SwitchArg add_path_arg{
       "", "add-path", "Add module dir to (remote) search order", cmd};
     TCLAP::ValueArg<std::string> export_arg{
-      "e", "export", "Module export name (DWORD_PTR (*) ())", false,
-      "",  "string", cmd};
+      "e",
+      "export",
+      "Module export name (DWORD_PTR (*) ())",
+      false,
+      "",
+      "string",
+      cmd};
     TCLAP::SwitchArg inject_arg{"i", "inject", "Inject module"};
     TCLAP::SwitchArg free_arg{"f", "free", "Free module"};
     cmd.xorAdd(inject_arg, free_arg);
     TCLAP::MultiArg<std::string> arg_arg{
-      "a",   "arg",    "Target process args (use once for each arg)",
-      false, "string", cmd};
+      "a",
+      "arg",
+      "Target process args (use once for each arg)",
+      false,
+      "string",
+      cmd};
     TCLAP::ValueArg<std::string> work_dir_arg{
-      "w", "work-dir", "Target process working directory", false,
-      "",  "string",   cmd};
+      "w",
+      "work-dir",
+      "Target process working directory",
+      false,
+      "",
+      "string",
+      cmd};
     cmd.parse(argc, argv);
 
     bool const free = free_arg.isSet();
@@ -125,9 +143,8 @@ int main(int argc, char* argv[])
     if (free && run)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{}
-        << hadesmem::ErrorString{
-             "Modules can only be unloaded from running targets."});
+        hadesmem::Error{} << hadesmem::ErrorString{
+          "Modules can only be unloaded from running targets."});
     }
 
     bool const inject = inject_arg.isSet();
@@ -135,9 +152,9 @@ int main(int argc, char* argv[])
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
                                       << hadesmem::ErrorString{
-                                           "Exports can only be called without "
-                                           "injection on running targets. Did "
-                                           "you mean to use --inject?"});
+                                        "Exports can only be called without "
+                                        "injection on running targets. Did "
+                                        "you mean to use --inject?"});
     }
 
     bool const call_export = export_arg.isSet();
@@ -209,9 +226,8 @@ int main(int argc, char* argv[])
         if (proc_pid != proc_pid_2)
         {
           HADESMEM_DETAIL_THROW_EXCEPTION(
-            hadesmem::Error{}
-            << hadesmem::ErrorString{
-                 "Could not get handle to target process (PID reuse race)."});
+            hadesmem::Error{} << hadesmem::ErrorString{
+              "Could not get handle to target process (PID reuse race)."});
         }
       }
 
@@ -267,7 +283,9 @@ int main(int argc, char* argv[])
                      std::end(exe_args_tmp),
                      std::back_inserter(exe_args),
                      [](std::string const& s)
-                     { return hadesmem::detail::MultiByteToWideChar(s); });
+                     {
+        return hadesmem::detail::MultiByteToWideChar(s);
+      });
       auto const export_name = export_arg.getValue();
       auto const work_dir =
         hadesmem::detail::MultiByteToWideChar(work_dir_arg.getValue());

@@ -54,8 +54,8 @@ public:
           static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(desc.GetStart());
         auto const base = reinterpret_cast<PIMAGE_BOUND_FORWARDER_REF>(
           static_cast<PIMAGE_BOUND_IMPORT_DESCRIPTOR>(desc.GetBase()) + 1U);
-        BoundImportForwarderRef const bound_import_forwarder{process, pe_file,
-                                                             start, base};
+        BoundImportForwarderRef const bound_import_forwarder{
+          process, pe_file, start, base};
         impl_ = std::make_shared<Impl>(
           process, pe_file, desc, bound_import_forwarder);
       }
@@ -103,8 +103,7 @@ public:
     operator=(BoundImportForwarderRefIterator const&) = default;
 
   BoundImportForwarderRefIterator(BoundImportForwarderRefIterator&& other)
-HADESMEM_DETAIL_NOEXCEPT:
-  impl_{std::move(other.impl_)}
+    HADESMEM_DETAIL_NOEXCEPT : impl_{std::move(other.impl_)}
   {
   }
 

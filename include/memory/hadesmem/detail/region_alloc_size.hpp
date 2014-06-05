@@ -31,7 +31,9 @@ inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
   auto iter = std::find_if(std::begin(regions),
                            std::end(regions),
                            [&](Region const& region)
-                           { return region.GetAllocBase() == base; });
+                           {
+    return region.GetAllocBase() == base;
+  });
   SIZE_T size{};
   while (iter != std::end(regions) && iter->GetAllocBase() == base)
   {

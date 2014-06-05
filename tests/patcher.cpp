@@ -200,7 +200,9 @@ void TestPatchDetour()
   c.endFunc();
 
   auto const free_asmjit_func = [](void* func)
-  { asmjit::MemoryManager::getGlobal()->release(func); };
+  {
+    asmjit::MemoryManager::getGlobal()->release(func);
+  };
   void* const hook_me_wrapper_raw = c.make();
   std::unique_ptr<void, decltype(free_asmjit_func)> const
     hook_me_wrapper_cleanup(hook_me_wrapper_raw, free_asmjit_func);
@@ -209,7 +211,9 @@ void TestPatchDetour()
     hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
 
   auto const hook_me_packaged = [=]()
-  { return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8); };
+  {
+    return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
+  };
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
   hadesmem::Process const& process = GetThisProcess();

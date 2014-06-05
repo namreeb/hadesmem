@@ -39,14 +39,14 @@ public:
     return owner_process_id_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR LONG GetBasePriority() const
-    HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR LONG
+    GetBasePriority() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_priority_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR LONG GetDeltaPriority() const
-    HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR LONG
+    GetDeltaPriority() const HADESMEM_DETAIL_NOEXCEPT
   {
     return delta_priority_;
   }

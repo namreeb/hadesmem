@@ -53,7 +53,7 @@ inline HMODULE InjectDll(Process const& process,
 
   bool const path_resolution = !!(flags & InjectFlags::kPathResolution);
 
-  std::wstring const path_real = [&]()->std::wstring
+  std::wstring const path_real = [&]() -> std::wstring
   {
     if (path_resolution && detail::IsPathRelative(path))
     {
@@ -169,10 +169,10 @@ public:
   }
 
   explicit CreateAndInjectData(Process&& process,
-    HMODULE module,
-    DWORD_PTR export_ret,
-    DWORD export_last_error,
-    detail::SmartHandle&& thread_handle) = delete;
+                               HMODULE module,
+                               DWORD_PTR export_ret,
+                               DWORD export_last_error,
+                               detail::SmartHandle&& thread_handle) = delete;
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
@@ -288,7 +288,7 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
                                  std::end(command_line));
   proc_args.push_back(L'\0');
 
-  std::wstring const work_dir_real = [&]()->std::wstring
+  std::wstring const work_dir_real = [&]() -> std::wstring
   {
     if (work_dir.empty() && !path.empty() && !detail::IsPathRelative(path))
     {
@@ -356,9 +356,11 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
       }
     }
 
-    return CreateAndInjectData{
-      process, remote_module, export_ret.GetReturnValue(),
-      export_ret.GetLastError(), std::move(thread_handle)};
+    return CreateAndInjectData{process,
+                               remote_module,
+                               export_ret.GetReturnValue(),
+                               export_ret.GetLastError(),
+                               std::move(thread_handle)};
   }
   catch (std::exception const& /*e*/)
   {

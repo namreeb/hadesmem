@@ -130,7 +130,9 @@ void* FindRaw(Process const& process,
                 n_beg,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-                { return n_cur.wildcard || h_cur == n_cur.data; });
+                {
+      return n_cur.wildcard || h_cur == n_cur.data;
+    });
 
   if (iter != h_end)
   {
@@ -316,8 +318,8 @@ public:
     return address_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const
-    HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR std::uint32_t
+    GetFlags() const HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -327,39 +329,39 @@ private:
   std::uint32_t flags_{PatternFlags::kNone};
 };
 
-inline bool operator==(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() == rhs.GetAddress() &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
-inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Pattern const& lhs,
+                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() < rhs.GetAddress();
 }
 
-inline bool operator<=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() <= rhs.GetAddress();
 }
 
-inline bool operator>(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Pattern const& lhs,
+                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() > rhs.GetAddress();
 }
 
-inline bool operator>=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() >= rhs.GetAddress();
 }
@@ -411,14 +413,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(PatternMap const& lhs, PatternMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(PatternMap const& lhs,
+                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(PatternMap const& lhs,
+                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -488,14 +490,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(ModuleMap const& lhs,
+                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(ModuleMap const& lhs,
+                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -843,9 +845,12 @@ private:
 
         std::uint32_t const pattern_flags = ReadFlags(pattern);
 
-        PatternInfo pattern_info{pattern_name,         pattern_data,
-                                 pattern_start,        pattern_start_rva,
-                                 pattern_start_export, pattern_flags};
+        PatternInfo pattern_info{pattern_name,
+                                 pattern_data,
+                                 pattern_start,
+                                 pattern_start_rva,
+                                 pattern_start_export,
+                                 pattern_flags};
 
         std::vector<ManipInfo> pattern_manips;
 
@@ -996,8 +1001,8 @@ private:
       if (start[0] == '#' && start.size() > 1U)
       {
         auto const ordinal_str = start.substr(1);
-        start_rva = reinterpret_cast<std::uintptr_t>(
-          FindProcedure(*process_, module, detail::StrToNum<WORD>(ordinal_str)));
+        start_rva = reinterpret_cast<std::uintptr_t>(FindProcedure(
+          *process_, module, detail::StrToNum<WORD>(ordinal_str)));
       }
       else
       {
@@ -1031,7 +1036,7 @@ private:
       {
         std::uint32_t const flags = patterns_info_full.flags | p.pattern.flags;
         void* address = nullptr;
-        std::uintptr_t const start_rva = [&]()->std::uintptr_t
+        std::uintptr_t const start_rva = [&]() -> std::uintptr_t
         {
           if (!p.pattern.start_rva.empty())
           {

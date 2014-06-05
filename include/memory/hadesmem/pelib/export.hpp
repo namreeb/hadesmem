@@ -265,38 +265,38 @@ private:
   bool forwarded_{};
 };
 
-inline bool operator==(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Export const& lhs,
+                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetProcedureNumber() == rhs.GetProcedureNumber();
 }
 
-inline bool operator!=(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Export const& lhs,
+                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Export const& lhs,
+                      Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetProcedureNumber() < rhs.GetProcedureNumber();
 }
 
-inline bool operator<=(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Export const& lhs,
+                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetProcedureNumber() <= rhs.GetProcedureNumber();
 }
 
-inline bool operator>(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Export const& lhs,
+                      Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetProcedureNumber() > rhs.GetProcedureNumber();
 }
 
-inline bool operator>=(Export const& lhs, Export const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Export const& lhs,
+                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetProcedureNumber() >= rhs.GetProcedureNumber();
 }

@@ -109,7 +109,9 @@ void TestSectionList()
     auto text_iter = std::find_if(std::begin(sections),
                                   std::end(sections),
                                   [](hadesmem::Section const& section)
-    { return section.GetName() == ".data"; });
+                                  {
+      return section.GetName() == ".data";
+    });
     BOOST_TEST(text_iter != std::end(sections));
   }
 }

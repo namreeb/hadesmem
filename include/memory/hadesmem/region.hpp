@@ -75,38 +75,38 @@ private:
   MEMORY_BASIC_INFORMATION mbi_;
 };
 
-inline bool operator==(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Region const& lhs,
+                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Region const& lhs,
+                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Region const& lhs,
+                      Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Region const& lhs,
+                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Region const& lhs,
+                      Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Region const& lhs, Region const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Region const& lhs,
+                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

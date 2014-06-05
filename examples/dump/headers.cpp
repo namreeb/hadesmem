@@ -54,7 +54,9 @@ void DumpDosHeader(hadesmem::Process const& process,
   if (std::find_if(std::begin(reserved_words_1),
                    std::end(reserved_words_1),
                    [](WORD w)
-                   { return !!w; }) != std::end(reserved_words_1))
+                   {
+        return !!w;
+      }) != std::end(reserved_words_1))
   {
     WriteNormal(out, L"WARNING! Detected non-zero data in ReservedWords1.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);

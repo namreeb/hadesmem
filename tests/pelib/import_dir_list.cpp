@@ -51,7 +51,7 @@ void TestImportDirList()
       auto iter = std::find_if(std::begin(import_dirs),
                                std::end(import_dirs),
                                [](hadesmem::ImportDir const& i)
-      {
+                               {
         return i.GetName() == "kernel32" || i.GetName() == "kernel32.dll" ||
                i.GetName() == "KERNEL32.dll" || i.GetName() == "KERNEL32.DLL";
       });
@@ -62,7 +62,9 @@ void TestImportDirList()
       auto iter2 = std::find_if(std::begin(import_thunks),
                                 std::end(import_thunks),
                                 [](hadesmem::ImportThunk const& i)
-      { return i.ByOrdinal() ? false : i.GetName() == "GetCurrentProcessId"; });
+                                {
+        return i.ByOrdinal() ? false : i.GetName() == "GetCurrentProcessId";
+      });
       BOOST_TEST(iter2 != std::end(import_thunks));
     }
     for (auto const& d : import_dirs)

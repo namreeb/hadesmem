@@ -32,29 +32,29 @@ namespace winternl = hadesmem::detail::winternl;
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetNtMapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetNtMapViewOfSectionRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>&
+  GetNtMapViewOfSectionRefCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetNtUnmapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>&
+  GetNtUnmapViewOfSectionRefCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -202,8 +202,8 @@ extern "C" NTSTATUS WINAPI
 }
 
 extern "C" NTSTATUS WINAPI
-  NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
-  HADESMEM_DETAIL_NOEXCEPT
+  NtUnmapViewOfSectionDetour(HANDLE process,
+                             PVOID base) HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetNtUnmapViewOfSectionRefCount()};

@@ -47,19 +47,22 @@ void UseAllStatics()
   auto const on_map_callback = [](HMODULE /*module*/,
                                   std::wstring const& /*path*/,
                                   std::wstring const& /*name*/)
-  {};
+  {
+  };
   auto const on_map_id =
     hadesmem::cerberus::RegisterOnMapCallback(on_map_callback);
   hadesmem::cerberus::UnregisterOnMapCallback(on_map_id);
 
   auto const on_unmap_callback = [](HMODULE /*module*/)
-  {};
+  {
+  };
   auto const on_unmap_id =
     hadesmem::cerberus::RegisterOnUnmapCallback(on_unmap_callback);
   hadesmem::cerberus::UnregisterOnUnmapCallback(on_unmap_id);
 
   auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/)
-  {};
+  {
+  };
   auto const on_frame_id =
     hadesmem::cerberus::RegisterOnFrameCallback(on_frame_callback);
   hadesmem::cerberus::UnregisterOnFrameCallback(on_frame_id);
@@ -110,6 +113,18 @@ bool IsSafeToUnload()
 
   return safe;
 }
+
+bool& GetInititalizeFlag()
+{
+  static bool initialized = false;
+  return initialized;
+}
+
+std::mutex& GetInitializeMutex()
+{
+  static std::mutex mutex;
+  return mutex;
+}
 }
 
 namespace hadesmem
@@ -130,12 +145,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
-    static std::mutex mutex;
+    std::mutex& mutex = GetInitializeMutex();
     std::lock_guard<std::mutex> lock(mutex);
 
-    // Not using std::call_once because we may throw during initialization, and
-    // we don't want to allow a retry in this case.
-    static bool is_initialized = false;
+    bool& is_initialized = GetInititalizeFlag();
     if (is_initialized)
     {
       HADESMEM_DETAIL_TRACE_A("Already initialized. Bailing.");
@@ -175,6 +188,18 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
+    std::mutex& mutex = GetInitializeMutex();
+    std::lock_guard<std::mutex> lock(mutex);
+
+    bool& is_initialized = GetInititalizeFlag();
+    if (!is_initialized)
+    {
+      HADESMEM_DETAIL_TRACE_A("Already cleaned up. Bailing.");
+      return 1;
+    }
+
+    is_initialized = false;
+
     hadesmem::cerberus::UndetourCreateProcessInternalW();
     hadesmem::cerberus::UndetourNtMapViewOfSection();
     hadesmem::cerberus::UndetourNtUnmapViewOfSection();
@@ -202,9 +227,9 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
   }
 }
 
-BOOL WINAPI
-  DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, LPVOID /*reserved*/)
-  HADESMEM_DETAIL_NOEXCEPT
+BOOL WINAPI DllMain(HINSTANCE /*instance*/,
+                    DWORD /*reason*/,
+                    LPVOID /*reserved*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return TRUE;
 }

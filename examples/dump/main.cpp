@@ -371,21 +371,20 @@ int main(int argc, char* argv[])
     if (GetDynamicWarningsEnabled() && GetWarnedFilePath().empty())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error()
-        << hadesmem::ErrorString(
-             "Please specify a file path for dynamic warnings."));
+        hadesmem::Error() << hadesmem::ErrorString(
+          "Please specify a file path for dynamic warnings."));
     }
 
     int const warned_type = warned_type_arg.getValue();
     switch (warned_type)
     {
-    case static_cast<int>(WarningType::kSuspicious) :
+    case static_cast<int>(WarningType::kSuspicious):
       SetWarnedType(WarningType::kSuspicious);
       break;
-    case static_cast<int>(WarningType::kUnsupported) :
+    case static_cast<int>(WarningType::kUnsupported):
       SetWarnedType(WarningType::kUnsupported);
       break;
-    case static_cast<int>(WarningType::kAll) :
+    case static_cast<int>(WarningType::kAll):
       SetWarnedType(WarningType::kAll);
       break;
     default:
@@ -414,7 +413,9 @@ int main(int argc, char* argv[])
         std::find_if(std::begin(processes),
                      std::end(processes),
                      [pid](hadesmem::ProcessEntry const& process_entry)
-                     { return process_entry.GetId() == pid; });
+                     {
+          return process_entry.GetId() == pid;
+        });
       if (iter != std::end(processes))
       {
         DumpProcessEntry(*iter);

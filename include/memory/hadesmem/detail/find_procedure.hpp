@@ -51,7 +51,9 @@ inline FARPROC GetProcAddressInternal(Process const& process,
                                       std::string const& name)
 {
   auto const pred = [&](Export const& e)
-  { return e.ByName() && e.GetName() == name; };
+  {
+    return e.ByName() && e.GetName() == name;
+  };
   return GetProcAddressInternalFromPred(process, module, pred);
 }
 
@@ -59,7 +61,9 @@ inline FARPROC
   GetProcAddressInternal(Process const& process, HMODULE module, WORD ordinal)
 {
   auto const pred = [&](Export const& e)
-  { return e.ByOrdinal() && e.GetProcedureNumber() == ordinal; };
+  {
+    return e.ByOrdinal() && e.GetProcedureNumber() == ordinal;
+  };
   return GetProcAddressInternalFromPred(process, module, pred);
 }
 

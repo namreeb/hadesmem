@@ -44,8 +44,8 @@ public:
     try
     {
       ExportDir const export_dir{process, pe_file};
-      Export const exp{process, pe_file,
-                       static_cast<WORD>(export_dir.GetOrdinalBase())};
+      Export const exp{
+        process, pe_file, static_cast<WORD>(export_dir.GetOrdinalBase())};
       impl_ = std::make_shared<Impl>(process, pe_file, exp);
     }
     catch (std::exception const& /*e*/)

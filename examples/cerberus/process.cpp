@@ -68,15 +68,15 @@ private:
   HANDLE handle_;
 };
 
-std::unique_ptr<hadesmem::PatchDetour>& GetCreateProcessInternalWDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetCreateProcessInternalWDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetCreateProcessInternalWRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>&
+  GetCreateProcessInternalWRefCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;

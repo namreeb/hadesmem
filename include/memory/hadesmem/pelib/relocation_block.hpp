@@ -121,38 +121,38 @@ private:
   IMAGE_BASE_RELOCATION data_ = IMAGE_BASE_RELOCATION{};
 };
 
-inline bool operator==(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(RelocationBlock const& lhs,
+                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(RelocationBlock const& lhs,
+                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(RelocationBlock const& lhs,
+                      RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(RelocationBlock const& lhs,
+                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(RelocationBlock const& lhs,
+                      RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(RelocationBlock const& lhs, RelocationBlock const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(RelocationBlock const& lhs,
+                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

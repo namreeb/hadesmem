@@ -59,7 +59,9 @@ void TestModuleListAlgorithm()
   auto const user32_iter = std::find_if(std::begin(module_list_1),
                                         std::end(module_list_1),
                                         [](hadesmem::Module const& module)
-  { return module.GetHandle() == ::GetModuleHandle(L"user32.dll"); });
+                                        {
+    return module.GetHandle() == ::GetModuleHandle(L"user32.dll");
+  });
   BOOST_TEST(user32_iter != std::end(module_list_1));
 }
 

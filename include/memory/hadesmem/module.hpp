@@ -102,7 +102,7 @@ private:
 
   void Initialize(HMODULE handle)
   {
-    auto const handle_check = [&](MODULEENTRY32W const& entry)->bool
+    auto const handle_check = [&](MODULEENTRY32W const& entry) -> bool
     {
       if (entry.hModule == handle || !handle)
       {
@@ -121,7 +121,7 @@ private:
 
     std::wstring const path_upper = detail::ToUpperOrdinal(path);
 
-    auto const path_check = [&](MODULEENTRY32W const& entry)->bool
+    auto const path_check = [&](MODULEENTRY32W const& entry) -> bool
     {
       if (is_path)
       {
@@ -179,38 +179,38 @@ private:
   std::wstring path_;
 };
 
-inline bool operator==(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Module const& lhs,
+                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() == rhs.GetHandle();
 }
 
-inline bool operator!=(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Module const& lhs,
+                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Module const& lhs,
+                      Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() < rhs.GetHandle();
 }
 
-inline bool operator<=(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Module const& lhs,
+                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() <= rhs.GetHandle();
 }
 
-inline bool operator>(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Module const& lhs,
+                      Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() > rhs.GetHandle();
 }
 
-inline bool operator>=(Module const& lhs, Module const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Module const& lhs,
+                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetHandle() >= rhs.GetHandle();
 }

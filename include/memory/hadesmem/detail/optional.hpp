@@ -127,12 +127,12 @@ public:
     return static_cast<T const*>(static_cast<void const*>(&t_));
   }
 
-  T* operator->() HADESMEM_DETAIL_NOEXCEPT
+  T * operator->() HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }
 
-  T const* operator->() const HADESMEM_DETAIL_NOEXCEPT
+  T const * operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }
@@ -145,7 +145,7 @@ private:
       Destroy();
     }
 
-	// Avoid picking up placement new overloads
+    // Avoid picking up placement new overloads
     ::new (static_cast<void*>(&t_)) T(std::forward<U>(u));
     valid_ = true;
   }

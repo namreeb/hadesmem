@@ -20,9 +20,8 @@ namespace
 std::unique_ptr<std::thread> g_window_thread{};
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
-  LoadPlugin(hadesmem::cerberus::PluginInterface* cerberus)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR LoadPlugin(
+  hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
@@ -56,9 +55,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   }
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
-  UnloadPlugin(hadesmem::cerberus::PluginInterface* cerberus)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR UnloadPlugin(
+  hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
@@ -103,9 +101,9 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR
   }
 }
 
-BOOL WINAPI
-  DllMain(HINSTANCE /*instance*/, DWORD /*reason*/, LPVOID /*reserved*/)
-  HADESMEM_DETAIL_NOEXCEPT
+BOOL WINAPI DllMain(HINSTANCE /*instance*/,
+                    DWORD /*reason*/,
+                    LPVOID /*reserved*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return TRUE;
 }

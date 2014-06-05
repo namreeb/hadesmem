@@ -90,7 +90,9 @@ void TestRegionListAlgorithm()
   auto user32_iter = std::find_if(std::begin(region_list_1),
                                   std::end(region_list_1),
                                   [user32_mod](hadesmem::Region const& region)
-  { return region.GetBase() == user32_mod; });
+                                  {
+    return region.GetBase() == user32_mod;
+  });
   BOOST_TEST(user32_iter != std::end(region_list_1));
 }
 

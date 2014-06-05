@@ -131,9 +131,10 @@ void Window::OnPrintClient(HDC hdc)
   PaintContent(&ps);
 }
 
-LRESULT CALLBACK
-  Window::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-  HADESMEM_DETAIL_NOEXCEPT
+LRESULT CALLBACK Window::WndProc(HWND hwnd,
+                                 UINT msg,
+                                 WPARAM wparam,
+                                 LPARAM lparam) HADESMEM_DETAIL_NOEXCEPT
 {
   Window* self = nullptr;
 

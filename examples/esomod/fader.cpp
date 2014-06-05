@@ -26,19 +26,18 @@ void ToggleFader(hadesmem::Process const& process)
                    L"8D 7E ?? 8D 9E ?? ?? ?? ?? D9 1B 80 3D",
                    hadesmem::PatternFlags::kThrowOnUnmatch,
                    0));
-  std::cout << "Got fader flag ref. ["
-            << static_cast<void*>(fader_flag_ref) << "].\n";
+  std::cout << "Got fader flag ref. [" << static_cast<void*>(fader_flag_ref)
+            << "].\n";
 
   auto const kFaderFlagRefOffset = 0x0D;
   auto const fader_flag_ptr = hadesmem::Read<std::uint8_t*>(
     process, fader_flag_ref + kFaderFlagRefOffset);
-  std::cout << "Got fader flag ptr. ["
-            << static_cast<void*>(fader_flag_ptr) << "].\n";
+  std::cout << "Got fader flag ptr. [" << static_cast<void*>(fader_flag_ptr)
+            << "].\n";
 
-  auto const fader_flag =
-    hadesmem::Read<std::uint8_t>(process, fader_flag_ptr);
-  std::cout << "Old fader flag is "
-            << static_cast<std::uint32_t>(fader_flag) << ".\n";
+  auto const fader_flag = hadesmem::Read<std::uint8_t>(process, fader_flag_ptr);
+  std::cout << "Old fader flag is " << static_cast<std::uint32_t>(fader_flag)
+            << ".\n";
   auto const new_fader_flag = static_cast<std::uint8_t>(!fader_flag);
   hadesmem::Write(process, fader_flag_ptr, new_fader_flag);
   std::cout << "New fader flag is "

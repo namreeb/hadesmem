@@ -64,37 +64,37 @@ hadesmem::detail::Optional<Entry>
 
 inline hadesmem::detail::Optional<MODULEENTRY32W> Module32First(HANDLE snap)
 {
-  return Toolhelp32Enum<MODULEENTRY32W, decltype(&::Module32FirstW)>(
+  return Toolhelp32Enum<MODULEENTRY32W, decltype(& ::Module32FirstW)>(
     &::Module32First, snap, "Module32First failed.");
 }
 
 inline hadesmem::detail::Optional<MODULEENTRY32W> Module32Next(HANDLE snap)
 {
-  return Toolhelp32Enum<MODULEENTRY32W, decltype(&::Module32NextW)>(
+  return Toolhelp32Enum<MODULEENTRY32W, decltype(& ::Module32NextW)>(
     &::Module32NextW, snap, "Module32Next failed.");
 }
 
 inline hadesmem::detail::Optional<PROCESSENTRY32W> Process32First(HANDLE snap)
 {
-  return Toolhelp32Enum<PROCESSENTRY32W, decltype(&::Process32FirstW)>(
+  return Toolhelp32Enum<PROCESSENTRY32W, decltype(& ::Process32FirstW)>(
     &::Process32FirstW, snap, "Process32First failed.");
 }
 
 inline hadesmem::detail::Optional<PROCESSENTRY32W> Process32Next(HANDLE snap)
 {
-  return Toolhelp32Enum<PROCESSENTRY32W, decltype(&::Process32NextW)>(
+  return Toolhelp32Enum<PROCESSENTRY32W, decltype(& ::Process32NextW)>(
     &::Process32NextW, snap, "Process32Next failed.");
 }
 
 inline hadesmem::detail::Optional<THREADENTRY32> Thread32First(HANDLE snap)
 {
-  return Toolhelp32Enum<THREADENTRY32, decltype(&::Thread32First)>(
+  return Toolhelp32Enum<THREADENTRY32, decltype(& ::Thread32First)>(
     &::Thread32First, snap, "Thread32First failed.");
 }
 
 inline hadesmem::detail::Optional<THREADENTRY32> Thread32Next(HANDLE snap)
 {
-  return Toolhelp32Enum<THREADENTRY32, decltype(&::Thread32Next)>(
+  return Toolhelp32Enum<THREADENTRY32, decltype(& ::Thread32Next)>(
     &::Thread32Next, snap, "Thread32Next failed.");
 }
 }

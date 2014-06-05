@@ -46,8 +46,8 @@ public:
   {
     try
     {
-      BoundImportDescriptor const bound_import_desc{process, pe_file, nullptr,
-                                                    nullptr};
+      BoundImportDescriptor const bound_import_desc{
+        process, pe_file, nullptr, nullptr};
       if (!IsTerminator(bound_import_desc))
       {
         impl_ = std::make_shared<Impl>(process, pe_file, bound_import_desc);
@@ -76,8 +76,7 @@ public:
     operator=(BoundImportDescriptorIterator const&) = default;
 
   BoundImportDescriptorIterator(BoundImportDescriptorIterator&& other)
-HADESMEM_DETAIL_NOEXCEPT:
-  impl_(std::move(other.impl_))
+    HADESMEM_DETAIL_NOEXCEPT : impl_(std::move(other.impl_))
   {
   }
 

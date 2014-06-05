@@ -149,7 +149,7 @@ public:
   using iterator = RegionIterator<Region>;
   using const_iterator = RegionIterator<Region const>;
 
-  explicit RegionList(Process const& process) : process_{ &process }
+  explicit RegionList(Process const& process) : process_{&process}
   {
   }
 

@@ -56,7 +56,8 @@ public:
         return;
       }
 
-      auto base = static_cast<std::uint8_t*>(RvaToVa(process, pe_file, data_dir_va));
+      auto base =
+        static_cast<std::uint8_t*>(RvaToVa(process, pe_file, data_dir_va));
       if (!base)
       {
         return;
@@ -75,7 +76,9 @@ public:
       }
 
       RelocationBlock const relocation_block{
-        process, pe_file, reinterpret_cast<IMAGE_BASE_RELOCATION*>(base),
+        process,
+        pe_file,
+        reinterpret_cast<IMAGE_BASE_RELOCATION*>(base),
         reloc_dir_end};
       if (relocation_block.IsInvalid())
       {
@@ -107,13 +110,12 @@ public:
   RelocationBlockIterator& operator=(RelocationBlockIterator const&) = default;
 
   RelocationBlockIterator(RelocationBlockIterator&& other)
-HADESMEM_DETAIL_NOEXCEPT:
-  impl_{std::move(other.impl_)}
+    HADESMEM_DETAIL_NOEXCEPT : impl_{std::move(other.impl_)}
   {
   }
 
-  RelocationBlockIterator& operator=(RelocationBlockIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  RelocationBlockIterator&
+    operator=(RelocationBlockIterator&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     impl_ = std::move(other.impl_);
 

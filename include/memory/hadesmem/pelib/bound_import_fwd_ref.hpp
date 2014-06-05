@@ -119,44 +119,44 @@ private:
   IMAGE_BOUND_FORWARDER_REF data_;
 };
 
-inline bool operator==(BoundImportForwarderRef const& lhs,
-                       BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator==(BoundImportForwarderRef const& lhs,
+             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(BoundImportForwarderRef const& lhs,
-                       BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator!=(BoundImportForwarderRef const& lhs,
+             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(BoundImportForwarderRef const& lhs,
-                      BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator<(BoundImportForwarderRef const& lhs,
+            BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(BoundImportForwarderRef const& lhs,
-                       BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator<=(BoundImportForwarderRef const& lhs,
+             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(BoundImportForwarderRef const& lhs,
-                      BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator>(BoundImportForwarderRef const& lhs,
+            BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(BoundImportForwarderRef const& lhs,
-                       BoundImportForwarderRef const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool
+  operator>=(BoundImportForwarderRef const& lhs,
+             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
