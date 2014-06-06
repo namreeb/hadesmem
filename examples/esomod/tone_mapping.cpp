@@ -35,7 +35,7 @@ void SetToneMappingType(hadesmem::Process const& process, std::uint32_t type)
     // type was being set though so it seems a bit pointless, but maybe I've
     // simply overlooked it or they plan on adding that in the future... Either
     // way, I didn't look very hard and this new pattern works so I'll continue
-    // doing it this way until the functionality is properly exposed in the UI.
+    // doing it this way until the functionality is properly exposed.
     // eso.rc.1.2.0.999025 (dumped with module base of 0x00A90000)
     // .text:00E8A424                 jz      short loc_E8A443
     // .text:00E8A426                 lea     ecx, [ebp+var_C8]
