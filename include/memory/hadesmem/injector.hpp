@@ -302,11 +302,9 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     return work_dir;
   }();
 
-  STARTUPINFO start_info;
-  ::ZeroMemory(&start_info, sizeof(start_info));
+  STARTUPINFO start_info{};
   start_info.cb = static_cast<DWORD>(sizeof(start_info));
-  PROCESS_INFORMATION proc_info;
-  ::ZeroMemory(&proc_info, sizeof(proc_info));
+  PROCESS_INFORMATION proc_info{};
   if (!::CreateProcessW(path.c_str(),
                         proc_args.data(),
                         nullptr,

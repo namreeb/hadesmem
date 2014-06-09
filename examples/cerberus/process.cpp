@@ -198,10 +198,8 @@ extern "C" BOOL WINAPI
       std::vector<wchar_t> command_line_buf(std::begin(injector_command_line),
                                             std::end(injector_command_line));
       command_line_buf.push_back(L'\0');
-      STARTUPINFO start_info;
-      ::ZeroMemory(&start_info, sizeof(start_info));
-      PROCESS_INFORMATION proc_info;
-      ::ZeroMemory(&proc_info, sizeof(proc_info));
+      STARTUPINFO start_info{};
+      PROCESS_INFORMATION proc_info{};
       if (!::CreateProcessW(nullptr,
                             command_line_buf.data(),
                             nullptr,

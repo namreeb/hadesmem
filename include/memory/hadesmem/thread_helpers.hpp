@@ -66,8 +66,7 @@ inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
       Error() << ErrorString("GetThreadContext called for current thread."));
   }
 
-  CONTEXT context;
-  ZeroMemory(&context, sizeof(context));
+  CONTEXT context{};
   context.ContextFlags = context_flags;
   if (!::GetThreadContext(thread.GetHandle(), &context))
   {

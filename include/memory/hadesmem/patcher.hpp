@@ -498,8 +498,7 @@ private:
   // Inspired by EasyHook.
   std::unique_ptr<Allocator> AllocatePageNear(PVOID address)
   {
-    SYSTEM_INFO sys_info;
-    ::ZeroMemory(&sys_info, sizeof(sys_info));
+    SYSTEM_INFO sys_info{};
     GetSystemInfo(&sys_info);
     DWORD const page_size = sys_info.dwPageSize;
 
@@ -603,10 +602,10 @@ private:
       // (otherwise we -- or asmjit -- have a bug) and then drop it.
       asmjit_trampoline = true;
 
-      // JMP <Target, Relative>
-      // JMP QWORD PTR [Trampoline]
-      // DB 8 ; Trampoline
-      expected_stub_size = 0x13;
+      // Asmjit emits a 6-byte JMP/CALL with a REX prefix so it can be patched
+      // to a JMP QWORD PTR if required (6 bytes for the JMP/CALL, 8 bytes for
+      // the trampoline).
+      expected_stub_size = 0xE;
     }
     else
     {
@@ -721,13 +720,17 @@ private:
     if (asmjit_trampoline == true)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A("Real stub size = 0n%Iu.", stub_size_real);
-      HADESMEM_DETAIL_ASSERT(stub_size_real == kJumpSize32);
-      if (stub_size_real != kJumpSize32)
+      auto const kAsmJitJmpSize32 = kJumpSize32 + 1;
+      HADESMEM_DETAIL_ASSERT(stub_size_real == kAsmJitJmpSize32);
+      if (stub_size_real != kAsmJitJmpSize32)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
           Error{} << ErrorString{"Unexpected real stub size."});
       }
       jump_buf.erase(std::begin(jump_buf) + stub_size_real, std::end(jump_buf));
+      jump_buf.erase(std::begin(jump_buf));
+      // We removed the prefix so we need to adjust the displacement.
+      *reinterpret_cast<std::uint32_t*>(&jump_buf[1]) += 1;
       HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
     }
 

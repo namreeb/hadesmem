@@ -116,8 +116,7 @@ void DumpDir(std::wstring const& path)
     path_real.pop_back();
   }
 
-  WIN32_FIND_DATA find_data;
-  ::ZeroMemory(&find_data, sizeof(find_data));
+  WIN32_FIND_DATA find_data{};
   hadesmem::detail::SmartFindHandle const handle(
     ::FindFirstFileW((path_real + L"\\*").c_str(), &find_data));
   if (!handle.IsValid())

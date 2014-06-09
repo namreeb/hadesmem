@@ -35,8 +35,7 @@ inline void GetSeDebugPrivilege()
               << ErrorCodeWinLast{last_error});
   }
 
-  TOKEN_PRIVILEGES privileges;
-  ::ZeroMemory(&privileges, sizeof(privileges));
+  TOKEN_PRIVILEGES privileges{};
   privileges.PrivilegeCount = 1;
   privileges.Privileges[0].Luid = luid;
   privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;

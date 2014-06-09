@@ -29,10 +29,20 @@ inline HMODULE GetHandleToSelf()
                             static_cast<wchar_t const*>(this_func_ptr),
                             &handle))
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                    << ErrorString{"VirtualQuery failed."}
-                                    << ErrorCodeWinLast{last_error});
+    // Use VirtualQuery as a backup. Normally we wouldn't want to do this
+    // because it doesn't work properly for modules mapped with large pages, but
+    // we also want to try and make this work in the case where we have been
+    // manually mapped.
+    MEMORY_BASIC_INFORMATION mbi{};
+    if (!::VirtualQuery(this_func_ptr, &mbi, sizeof(mbi)))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"VirtualQuery failed."}
+                                      << ErrorCodeWinLast{last_error});
+    }
+
+    return reinterpret_cast<HMODULE>(mbi.AllocationBase);
   }
 
   return handle;

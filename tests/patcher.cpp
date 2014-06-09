@@ -199,9 +199,9 @@ void TestPatchDetour()
 
   c.endFunc();
 
-  auto const free_asmjit_func = [](void* func)
+  auto const free_asmjit_func = [&](void* func)
   {
-    asmjit::MemoryManager::getGlobal()->release(func);
+    runtime.release(func);
   };
   void* const hook_me_wrapper_raw = c.make();
   std::unique_ptr<void, decltype(free_asmjit_func)> const

@@ -17,8 +17,7 @@ namespace detail
 
 inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 {
-  MEMORY_BASIC_INFORMATION mbi;
-  ::ZeroMemory(&mbi, sizeof(mbi));
+  MEMORY_BASIC_INFORMATION mbi{};
   if (::VirtualQueryEx(process.GetHandle(), address, &mbi, sizeof(mbi)) !=
       sizeof(mbi))
   {

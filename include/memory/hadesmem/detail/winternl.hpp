@@ -559,6 +559,89 @@ struct TEB_ACTIVE_FRAME
   PTEB_ACTIVE_FRAME_CONTEXT Context;
 };
 
+struct PEB
+{
+  UCHAR InheritedAddressSpace;
+  UCHAR ReadImageFileExecOptions;
+  UCHAR BeingDebugged;
+  UCHAR BitField;
+  PVOID Mutant;
+  PVOID ImageBaseAddress;
+  PPEB_LDR_DATA Ldr;
+  PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
+  PVOID SubSystemData;
+  PVOID ProcessHeap;
+  PRTL_CRITICAL_SECTION FastPebLock;
+  PVOID AtlThunkSListPtr;
+  PVOID IFEOKey;
+  ULONG CrossProcessFlags;
+  ULONG ProcessInJob : 1;
+  ULONG ProcessInitializing : 1;
+  ULONG ReservedBits0 : 30;
+  union
+  {
+    PVOID KernelCallbackTable;
+    PVOID UserSharedInfoPtr;
+  };
+  ULONG SystemReserved[1];
+  ULONG SpareUlong;
+  PVOID /*PPEB_FREE_BLOCK*/ FreeList;
+  ULONG TlsExpansionCounter;
+  PVOID TlsBitmap;
+  ULONG TlsBitmapBits[2];
+  PVOID ReadOnlySharedMemoryBase;
+  PVOID HotpatchInformation;
+  VOID** ReadOnlyStaticServerData;
+  PVOID AnsiCodePageData;
+  PVOID OemCodePageData;
+  PVOID UnicodeCaseTableData;
+  ULONG NumberOfProcessors;
+  ULONG NtGlobalFlag;
+  LARGE_INTEGER CriticalSectionTimeout;
+  ULONG HeapSegmentReserve;
+  ULONG HeapSegmentCommit;
+  ULONG HeapDeCommitTotalFreeThreshold;
+  ULONG HeapDeCommitFreeBlockThreshold;
+  ULONG NumberOfHeaps;
+  ULONG MaximumNumberOfHeaps;
+  VOID** ProcessHeaps;
+  PVOID GdiSharedHandleTable;
+  PVOID ProcessStarterHelper;
+  ULONG GdiDCAttributeList;
+  PRTL_CRITICAL_SECTION LoaderLock;
+  ULONG OSMajorVersion;
+  ULONG OSMinorVersion;
+  WORD OSBuildNumber;
+  WORD OSCSDVersion;
+  ULONG OSPlatformId;
+  ULONG ImageSubsystem;
+  ULONG ImageSubsystemMajorVersion;
+  ULONG ImageSubsystemMinorVersion;
+  ULONG ImageProcessAffinityMask;
+  ULONG GdiHandleBuffer[34];
+  PVOID PostProcessInitRoutine;
+  PVOID TlsExpansionBitmap;
+  ULONG TlsExpansionBitmapBits[32];
+  ULONG SessionId;
+  ULARGE_INTEGER AppCompatFlags;
+  ULARGE_INTEGER AppCompatFlagsUser;
+  PVOID pShimData;
+  PVOID AppCompatInfo;
+  UNICODE_STRING CSDVersion;
+  PVOID /*_ACTIVATION_CONTEXT_DATA**/ ActivationContextData;
+  PVOID /*_ASSEMBLY_STORAGE_MAP**/ ProcessAssemblyStorageMap;
+  PVOID /*_ACTIVATION_CONTEXT_DATA**/ SystemDefaultActivationContextData;
+  PVOID /*_ASSEMBLY_STORAGE_MAP**/ SystemAssemblyStorageMap;
+  ULONG MinimumStackCommit;
+  PVOID /*_FLS_CALLBACK_INFO**/ FlsCallback;
+  LIST_ENTRY FlsListHead;
+  PVOID FlsBitmap;
+  ULONG FlsBitmapBits[4];
+  ULONG FlsHighIndex;
+  PVOID WerRegistrationData;
+  PVOID WerShipAssertPtr;
+};
+
 struct TEB
 {
   NT_TIB NtTib;
@@ -566,7 +649,7 @@ struct TEB
   CLIENT_ID ClientId;
   PVOID ActiveRpcHandle;
   PVOID ThreadLocalStoragePointer;
-  PPEB ProcessEnvironmentBlock;
+  PEB* ProcessEnvironmentBlock;
   ULONG LastErrorValue;
   ULONG CountOfOwnedCriticalSections;
   PVOID CsrClientThread;

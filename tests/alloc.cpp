@@ -24,8 +24,7 @@ void TestAlloc()
   *static_cast<std::uint8_t*>(address) = static_cast<std::uint8_t>(0xFF);
   BOOST_TEST_EQ(*static_cast<std::uint8_t*>(address),
                 static_cast<std::uint8_t>(0xFF));
-  MEMORY_BASIC_INFORMATION mbi;
-  ::ZeroMemory(&mbi, sizeof(mbi));
+  MEMORY_BASIC_INFORMATION mbi{};
   BOOST_TEST(::VirtualQuery(address, &mbi, sizeof(mbi)));
   BOOST_TEST_EQ(mbi.BaseAddress, address);
   BOOST_TEST_EQ(mbi.RegionSize, 0x1000UL);

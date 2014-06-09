@@ -44,8 +44,7 @@ hadesmem::detail::Optional<Entry>
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_pod<Entry>::value);
 
-  Entry entry;
-  ::ZeroMemory(&entry, sizeof(entry));
+  Entry entry{};
   entry.dwSize = static_cast<DWORD>(sizeof(entry));
   if (!func(snap, &entry))
   {
