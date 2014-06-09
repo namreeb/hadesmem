@@ -309,6 +309,11 @@ public:
     trampoline_ = std::make_unique<Allocator>(*process_, kTrampSize);
     auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Target = %p, Detour = %p, Trampoline = %p.",
+                                   target_,
+                                   detour_,
+                                   trampoline_->GetBase());
+
     auto const buffer =
       ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
 
@@ -392,7 +397,7 @@ public:
           resolve_rel(insn_base, insn_target, insn_len);
         void* const jump_target =
           is_jimm ? resolved_target : Read<void*>(*process_, resolved_target);
-        HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target is 0x%p.", jump_target);
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target = %p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
         {
           tramp_cur += WriteJump(tramp_cur, jump_target, true);
@@ -413,6 +418,8 @@ public:
       instr_size += len;
     } while (instr_size < jump_size);
 
+    HADESMEM_DETAIL_TRACE_A("Writing jump back to original code.");
+
     tramp_cur += WriteJump(
       tramp_cur, static_cast<std::uint8_t*>(target_) + instr_size, true);
 
@@ -422,6 +429,8 @@ public:
     orig_ = ReadVector<std::uint8_t>(*process_, target_, jump_size);
 
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+
+    HADESMEM_DETAIL_TRACE_A("Writing jump to detour.");
 
     WriteJump(target_, detour_);
 
@@ -582,6 +591,12 @@ private:
   std::size_t
     WriteJump(void* address, void* target, bool push_ret_fallback = false)
   {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Address = %p, Target = %p, Push Ret Fallback = %u.",
+      address,
+      target,
+      static_cast<std::uint32_t>(push_ret_fallback));
+
     asmjit::JitRuntime runtime;
     std::size_t expected_stub_size = 0;
     std::vector<std::uint8_t> jump_buf;
@@ -621,9 +636,10 @@ private:
 
       if (trampoline)
       {
-        HADESMEM_DETAIL_TRACE_A("Using trampoline jump.");
-
         void* tramp_addr = trampoline->GetBase();
+
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "Using trampoline jump. Trampoline = %p.", tramp_addr);
 
         Write(*process_, tramp_addr, target);
 
@@ -633,8 +649,7 @@ private:
         asmjit::Label label(jit.newLabel());
         jit.bind(label);
         std::intptr_t const disp = static_cast<std::uint8_t*>(tramp_addr) -
-                                   static_cast<std::uint8_t*>(address) -
-                                   sizeof(std::int32_t);
+                                   static_cast<std::uint8_t*>(address);
         jit.jmp(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
 
         expected_stub_size = kJumpSize64;
