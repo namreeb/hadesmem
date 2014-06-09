@@ -383,6 +383,10 @@ inline std::uint32_t GetHigh32(std::uint64_t i)
   return static_cast<std::uint32_t>((i >> 32) & 0xFFFFFFFFUL);
 }
 
+#if defined(HADESMEM_GCC)
+#pragma GCC visibility push(hidden)
+#endif // #if defined(HADESMEM_GCC)
+
 class ArgVisitor32
 {
 public:
@@ -571,6 +575,10 @@ private:
   std::size_t num_args_;
   std::size_t cur_arg_;
 };
+
+#if defined(HADESMEM_GCC)
+#pragma GCC visibility pop
+#endif // #if defined(HADESMEM_GCC)
 
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
