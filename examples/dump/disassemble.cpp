@@ -64,9 +64,9 @@ void DisassembleEp(hadesmem::Process const& process,
   ud_set_syntax(&ud_obj, UD_SYN_INTEL);
   std::uintptr_t const ip = hadesmem::GetRuntimeBase(process, pe_file) + ep_rva;
   ud_set_pc(&ud_obj, ip);
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
   ud_set_mode(&ud_obj, 64);
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
   ud_set_mode(&ud_obj, 32);
 #else
 #error "[HadesMem] Unsupported architecture."

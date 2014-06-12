@@ -8,11 +8,8 @@
 #include <ole2.h>
 #include <commctrl.h>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <boost/scope_exit.hpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/scope_warden.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
@@ -234,10 +231,7 @@ void RootWindow::PaintRadar(HWND hwnd)
                                     << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    ::ReleaseDC(hwnd, radar_wnd_dc);
-  };
+  HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_dc, ::ReleaseDC(hwnd, radar_wnd_dc););
 
   RECT rr{};
   if (!::GetClientRect(hwnd, &rr))
@@ -282,10 +276,8 @@ void RootWindow::PaintRadar(HWND hwnd)
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  BOOST_SCOPE_EXIT_ALL(&)
-  {
-    ::SelectObject(mem_dc.GetHandle(), old_obj);
-  };
+  HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_obj,
+                               ::SelectObject(mem_dc.GetHandle(), old_obj););
 
   HGDIOBJ old_obj_tmp =
     ::SelectObject(mem_dc.GetHandle(), ::GetStockObject(BLACK_BRUSH));
@@ -636,11 +628,11 @@ LRESULT RootWindow::HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam)
   case WM_APP_UPDATE_RADAR:
   {
     std::lock_guard<std::mutex> lock(GetRadarFrameMutex());
-    BOOST_SCOPE_EXIT_ALL(&)
-    {
+    HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_frame,
+                                 {
       GetRadarFrameProcessed() = true;
       GetRadarFrameConditionVariable().notify_one();
-    };
+    });
     UpdateRadar(reinterpret_cast<RadarData*>(wparam));
     return 0;
   }

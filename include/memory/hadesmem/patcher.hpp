@@ -322,9 +322,9 @@ public:
     ud_set_input_buffer(&ud_obj, buffer.data(), buffer.size());
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
     ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target_));
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
     ud_set_mode(&ud_obj, 64);
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     ud_set_mode(&ud_obj, 32);
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -511,7 +511,7 @@ private:
     GetSystemInfo(&sys_info);
     DWORD const page_size = sys_info.dwPageSize;
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
     std::intptr_t const search_beg = (std::max)(
       reinterpret_cast<std::intptr_t>(address) - 0x7FFFFF00LL,
       reinterpret_cast<std::intptr_t>(sys_info.lpMinimumApplicationAddress));
@@ -564,7 +564,7 @@ private:
     }
 
     return trampoline;
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     (void)address;
     return std::make_unique<Allocator>(*process_, page_size);
 #else
@@ -574,12 +574,12 @@ private:
 
   bool IsNear(void* address, void* target)
   {
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
     auto const rel = reinterpret_cast<std::intptr_t>(target) -
                      reinterpret_cast<std::intptr_t>(address) - 5;
     return rel > (std::numeric_limits<std::uint32_t>::min)() &&
            rel < (std::numeric_limits<std::uint32_t>::max)();
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     (void)address;
     (void)target;
     return true;
@@ -602,7 +602,7 @@ private:
     std::vector<std::uint8_t> jump_buf;
     bool asmjit_trampoline = false;
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
     asmjit::x64::Assembler jit(&runtime);
     if (IsNear(address, target))
     {
@@ -704,7 +704,7 @@ private:
       }
     }
 
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     (void)push_ret_fallback;
     asmjit::x86::Assembler jit(&runtime);
     // JMP <Target, Relative>
@@ -759,7 +759,7 @@ private:
     asmjit::JitRuntime runtime;
     std::size_t expected_stub_size = 0;
 
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
     asmjit::x64::Assembler jit(&runtime);
     std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
 
@@ -778,7 +778,7 @@ private:
     jit.call(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
 
     expected_stub_size = kCallSize64;
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     asmjit::x86::Assembler jit(&runtime);
     // CALL <Target, Relative>
     jit.call(target);
@@ -811,12 +811,12 @@ private:
 
   static std::size_t const kJumpSize32 = 5;
   static std::size_t const kCallSize32 = 5;
-#if defined(_M_AMD64)
+#if defined(HADESMEM_DETAIL_ARCH_X64)
   static std::size_t const kJumpSize64 = 6;
   static std::size_t const kCallSize64 = 6;
   static std::size_t const kPushRetSizeBig64 = 14;
   static std::size_t const kPushRetSizeSmall64 = 6;
-#elif defined(_M_IX86)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
   static std::size_t const kJumpSize64 = kJumpSize32;
   static std::size_t const kCallSize64 = kCallSize32;
 #else
