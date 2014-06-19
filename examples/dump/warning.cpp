@@ -70,7 +70,7 @@ void DumpWarned(std::wostream& out)
   {
     WriteNewline(out);
     WriteNormal(out, L"Dumping warned list.", 0);
-    for (auto const f : g_all_warned)
+    for (auto const& f : g_all_warned)
     {
       WriteNormal(out, f, 0);
     }

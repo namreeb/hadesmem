@@ -11,6 +11,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
 namespace hadesmem
@@ -33,6 +34,8 @@ inline HMODULE GetHandleToSelf()
     // because it doesn't work properly for modules mapped with large pages, but
     // we also want to try and make this work in the case where we have been
     // manually mapped.
+    HADESMEM_DETAIL_TRACE_A(
+      "GetModuleHandleExW failed, using VirtualQuery fallback.");
     MEMORY_BASIC_INFORMATION mbi{};
     if (!::VirtualQuery(this_func_ptr, &mbi, sizeof(mbi)))
     {

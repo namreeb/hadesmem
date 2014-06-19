@@ -23,9 +23,10 @@
 
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
@@ -49,16 +50,8 @@ inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
       continue;
     }
 
-    Thread const thread{thread_entry.GetId()};
-    auto const context = GetThreadContext(thread, CONTEXT_CONTROL);
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-    auto const ip = reinterpret_cast<void const*>(context.Rip);
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-    auto const ip = reinterpret_cast<void const*>(context.Eip);
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-    if (target <= ip && ip < static_cast<std::uint8_t*>(target) + len)
+    if (IsExecutingInRange(
+          thread_entry, target, static_cast<std::uint8_t*>(target) + len))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error{} << ErrorString{"Thread is currently executing patch target."});

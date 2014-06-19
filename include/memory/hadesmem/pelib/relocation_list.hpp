@@ -173,8 +173,7 @@ private:
     DWORD cur_{};
   };
 
-  // Using a shared_ptr to provide shallow copy semantics, as
-  // required by InputIterator.
+  // Shallow copy semantics, as required by InputIterator.
   std::shared_ptr<Impl> impl_;
 };
 

@@ -53,7 +53,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
       WriteNormal(out, L"WARNING! TLS callbacks are inavlid.", 2);
       WarnForCurrentFile(WarningType::kSuspicious);
     }
-    for (auto const c : callbacks)
+    for (auto const& c : callbacks)
     {
       WriteNamedHex(out, L"Callback", reinterpret_cast<DWORD_PTR>(c), 2);
     }

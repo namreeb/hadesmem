@@ -142,7 +142,7 @@ void DumpMemory(hadesmem::Process const& process)
   hadesmem::ImportDirList const import_dirs(local_process, pe_file);
   hadesmem::ImportDirList const import_dirs_new(local_process, pe_file_new);
   auto i = std::begin(import_dirs), j = std::begin(import_dirs_new);
-  bool dir_mismatch = false, thunk_mismatch = false;
+  bool thunk_mismatch = false;
   for (; i != std::end(import_dirs) && j != std::end(import_dirs_new); ++i, ++j)
   {
     hadesmem::ImportThunkList const import_thunks(
@@ -157,15 +157,9 @@ void DumpMemory(hadesmem::Process const& process)
       b->SetFunction(a->GetFunction());
       b->UpdateWrite();
     }
-    if ((a != std::end(import_thunks)) ^ (b != std::end(import_thunks_new)))
-    {
-      thunk_mismatch = true;
-    }
+    thunk_mismatch = thunk_mismatch || ((a != std::end(import_thunks)) ^ (b != std::end(import_thunks_new)));
   }
-  if ((i != std::end(import_dirs)) ^ (j != std::end(import_dirs)))
-  {
-    dir_mismatch = true;
-  }
+  bool const dir_mismatch = (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
 
   WriteNormal(out, L"Writing file.", 1);
   auto const proc_path = hadesmem::GetPath(process);

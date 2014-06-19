@@ -122,6 +122,10 @@ extern "C" BOOL WINAPI
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Command Line: [%s]", command_line);
   }
+  if (!!(creation_flags & DEBUG_PROCESS))
+  {
+    HADESMEM_DETAIL_TRACE_A("Debug flag detected.");
+  }
   auto& detour = GetCreateProcessInternalWDetour();
   auto const nt_create_user_process =
     detour->GetTrampoline<decltype(&CreateProcessInternalWDetour)>();

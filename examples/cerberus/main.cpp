@@ -3,6 +3,8 @@
 
 #include "main.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <mutex>
 
 #include <windows.h>
@@ -10,6 +12,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/region_alloc_size.hpp>
+#include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/thread.hpp>
 #include <hadesmem/thread_entry.hpp>
@@ -42,7 +45,7 @@ void UseAllStatics()
 
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
-  // moment.
+  // moment and calling an empty function wrapper throws.
 
   auto const on_map_callback = [](HMODULE /*module*/,
                                   std::wstring const& /*path*/,
@@ -75,41 +78,30 @@ void UseAllStatics()
 bool IsSafeToUnload()
 {
   auto const& process = hadesmem::cerberus::GetThisProcess();
-  bool safe = true;
-  std::size_t retries = 5;
-  do
+  auto const this_module =
+    reinterpret_cast<std::uint8_t*>(hadesmem::detail::GetHandleToSelf());
+  auto const this_module_size = hadesmem::detail::GetRegionAllocSize(
+    process, reinterpret_cast<void const*>(this_module));
+
+  bool safe = false;
+  for (std::size_t retries = 5; retries && !safe; --retries)
   {
     hadesmem::SuspendedProcess suspend{process.GetId()};
     hadesmem::ThreadList threads{process.GetId()};
-    safe = true;
-    for (auto const& thread_entry : threads)
+
+    std::function<bool(hadesmem::ThreadEntry const& thread_entry)> const
+      is_safe = [&](hadesmem::ThreadEntry const& thread_entry)
     {
       auto const id = thread_entry.GetId();
-      if (id == ::GetCurrentThreadId())
-      {
-        continue;
-      }
+      return id == ::GetCurrentThreadId() ||
+             !hadesmem::detail::IsExecutingInRange(
+               thread_entry, this_module, this_module + this_module_size);
+    };
 
-      hadesmem::Thread const thread{id};
-      auto const context = GetThreadContext(thread, CONTEXT_CONTROL);
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-      auto const ip = reinterpret_cast<void const*>(context.Rip);
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-      auto const ip = reinterpret_cast<void const*>(context.Eip);
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
-      HADESMEM_DETAIL_ASSERT(ip);
-      auto const this_module =
-        reinterpret_cast<std::uint8_t*>(hadesmem::detail::GetHandleToSelf());
-      auto const this_module_size = hadesmem::detail::GetRegionAllocSize(
-        process, reinterpret_cast<void const*>(this_module));
-      if (ip >= this_module && ip < this_module + this_module_size)
-      {
-        safe = false;
-      }
-    }
-  } while (!safe && retries--);
+    safe = std::find_if(std::begin(threads),
+                        std::end(threads),
+                        std::not1(is_safe)) == std::end(threads);
+  }
 
   return safe;
 }

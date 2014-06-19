@@ -71,7 +71,7 @@ inline HMODULE InjectDll(Process const& process,
                              "path or path resolution is used."));
   }
 
-  // Note: Only performing this check when path resolution is enabled,
+  // Only performing this check when path resolution is enabled
   // because otherwise we would need to perform the check in the
   // context of the remote process, which is not possible to do without
   // introducing race conditions and other potential problems. So we

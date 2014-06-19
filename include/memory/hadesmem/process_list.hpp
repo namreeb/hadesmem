@@ -130,9 +130,8 @@ private:
     hadesmem::detail::Optional<ProcessEntry> process_{};
   };
 
-  // Using a shared_ptr to provide shallow copy semantics, as
-  // required by InputIterator.
-  std::shared_ptr<Impl> impl_{};
+  // Shallow copy semantics, as required by InputIterator.
+  std::shared_ptr<Impl> impl_;
 };
 
 class ProcessList

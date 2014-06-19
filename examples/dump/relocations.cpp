@@ -59,7 +59,7 @@ void DumpRelocations(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kSuspicious);
   }
 
-  for (auto block : reloc_blocks)
+  for (auto const& block : reloc_blocks)
   {
     WriteNewline(out);
 
@@ -84,7 +84,7 @@ void DumpRelocations(hadesmem::Process const& process,
                                           pe_file,
                                           block.GetRelocationDataStart(),
                                           block.GetNumberOfRelocations());
-    for (auto const reloc : relocs)
+    for (auto const& reloc : relocs)
     {
       WriteNewline(out);
 

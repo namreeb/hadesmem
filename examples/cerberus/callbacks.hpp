@@ -20,6 +20,10 @@ template <typename Func> class Callbacks
 public:
   using Callback = std::function<Func>;
 
+  Callbacks()
+    : srw_lock_(SRWLOCK_INIT)
+  { }
+
   std::size_t Register(Callback const& callback)
   {
     hadesmem::detail::AcquireSRWLock lock(
@@ -50,7 +54,7 @@ public:
   }
 
 private:
-  mutable SRWLOCK srw_lock_ = SRWLOCK_INIT;
+  mutable SRWLOCK srw_lock_;
   std::size_t next_id_ = std::size_t{};
   std::map<std::size_t, Callback> callbacks_;
 };
