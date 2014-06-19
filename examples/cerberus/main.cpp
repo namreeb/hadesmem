@@ -89,18 +89,16 @@ bool IsSafeToUnload()
     hadesmem::SuspendedProcess suspend{process.GetId()};
     hadesmem::ThreadList threads{process.GetId()};
 
-    std::function<bool(hadesmem::ThreadEntry const& thread_entry)> const
-      is_safe = [&](hadesmem::ThreadEntry const& thread_entry)
+    auto const is_unsafe = [&](hadesmem::ThreadEntry const& thread_entry)
     {
       auto const id = thread_entry.GetId();
-      return id == ::GetCurrentThreadId() ||
-             !hadesmem::detail::IsExecutingInRange(
+      return id != ::GetCurrentThreadId() &&
+             hadesmem::detail::IsExecutingInRange(
                thread_entry, this_module, this_module + this_module_size);
     };
 
-    safe = std::find_if(std::begin(threads),
-                        std::end(threads),
-                        std::not1(is_safe)) == std::end(threads);
+    safe = std::find_if(std::begin(threads), std::end(threads), is_unsafe) ==
+           std::end(threads);
   }
 
   return safe;
