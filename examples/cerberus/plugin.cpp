@@ -15,18 +15,33 @@
 namespace
 {
 
-class D3D11Impl : public hadesmem::cerberus::D3D11Interface
+class D3D9Impl : public hadesmem::cerberus::D3D9Interface
 {
 public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
+  virtual std::size_t RegisterOnFrameCallback(std::function<
+    hadesmem::cerberus::OnFrameCallbackD3D9> const& callback) final
   {
-    return hadesmem::cerberus::RegisterOnFrameCallback(callback);
+    return hadesmem::cerberus::RegisterOnFrameCallbackD3D9(callback);
   }
 
   virtual void UnregisterOnFrameCallback(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnFrameCallback(id);
+    hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(id);
+  }
+};
+
+class D3D11Impl : public hadesmem::cerberus::D3D11Interface
+{
+public:
+  virtual std::size_t RegisterOnFrameCallback(std::function<
+    hadesmem::cerberus::OnFrameCallbackD3D11> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnFrameCallbackD3D11(callback);
+  }
+
+  virtual void UnregisterOnFrameCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnFrameCallbackD3D11(id);
   }
 };
 
@@ -103,6 +118,11 @@ public:
     }
   }
 
+  virtual hadesmem::cerberus::D3D9Interface* GetD3D9Interface() final
+  {
+    return &d3d9_;
+  }
+
   virtual hadesmem::cerberus::D3D11Interface* GetD3D11Interface() final
   {
     return &d3d11_;
@@ -145,6 +165,7 @@ public:
 private:
   std::wstring path_;
   HMODULE base_{};
+  D3D9Impl d3d9_;
   D3D11Impl d3d11_;
   ModuleImpl module_;
 };

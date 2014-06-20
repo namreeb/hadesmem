@@ -17,7 +17,8 @@
 
 namespace
 {
-std::size_t g_on_frame_callback_id{static_cast<std::uint32_t>(-1)};
+std::size_t g_on_frame_callback_id_d3d9{static_cast<std::uint32_t>(-1)};
+std::size_t g_on_frame_callback_id_d3d11{static_cast<std::uint32_t>(-1)};
 
 void UpdateRadar()
 {
@@ -36,7 +37,7 @@ void UpdateRadar()
   radar_data.units_.emplace_back(
     RadarData::UnitData{Vec3f{125, 0, 75}, RGB(0, 0, 255), "raptorfactor"});
   radar_data.units_.emplace_back(RadarData::UnitData{
-    Vec3f{150, -50, 150}, RGB(255, 255, 0), "Sir Herpington of Derpingsworth"});
+    Vec3f{150, -50, 150}, RGB(255, 255, 0), "Blah Blah Blah"});
   radar_data.units_.emplace_back(
     RadarData::UnitData{Vec3f{175, -150, 25}, RGB(0, 255, 255), "Foo"});
 
@@ -53,7 +54,7 @@ void UpdateRadar()
   radar_frame_processed = false;
 }
 
-void OnFrame(IDXGISwapChain* /*swap_chain*/)
+void OnFrame()
 {
   static std::uint64_t frames{};
   if (frames++ % 30)
@@ -61,25 +62,45 @@ void OnFrame(IDXGISwapChain* /*swap_chain*/)
     UpdateRadar();
   }
 }
+
+void OnFrameD3D9(IDirect3DDevice9* /*device*/)
+{
+  return OnFrame();
+}
+
+void OnFrameD3D11(IDXGISwapChain* /*swap_chain*/)
+{
+  return OnFrame();
+}
 }
 
 void InitializeRadar(hadesmem::cerberus::PluginInterface* cerberus)
 {
   HADESMEM_DETAIL_TRACE_A("Initializing.");
 
-  g_on_frame_callback_id =
-    cerberus->GetD3D11Interface()->RegisterOnFrameCallback(OnFrame);
+  g_on_frame_callback_id_d3d9 =
+    cerberus->GetD3D9Interface()->RegisterOnFrameCallback(OnFrameD3D9);
+
+  g_on_frame_callback_id_d3d11 =
+    cerberus->GetD3D11Interface()->RegisterOnFrameCallback(OnFrameD3D11);
 }
 
 void CleanupRadar(hadesmem::cerberus::PluginInterface* cerberus)
 {
   HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-  if (g_on_frame_callback_id != static_cast<std::uint32_t>(-1))
+  if (g_on_frame_callback_id_d3d9 != static_cast<std::uint32_t>(-1))
+  {
+    cerberus->GetD3D9Interface()->UnregisterOnFrameCallback(
+      g_on_frame_callback_id_d3d9);
+    g_on_frame_callback_id_d3d9 = static_cast<std::uint32_t>(-1);
+  }
+
+  if (g_on_frame_callback_id_d3d11 != static_cast<std::uint32_t>(-1))
   {
     cerberus->GetD3D11Interface()->UnregisterOnFrameCallback(
-      g_on_frame_callback_id);
-    g_on_frame_callback_id = static_cast<std::uint32_t>(-1);
+      g_on_frame_callback_id_d3d11);
+    g_on_frame_callback_id_d3d11 = static_cast<std::uint32_t>(-1);
   }
 }
 

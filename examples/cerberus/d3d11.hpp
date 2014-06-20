@@ -26,11 +26,11 @@ void UndetourD3D11(bool remove);
 
 void UndetourDXGI(bool remove);
 
-typedef void OnFrameCallback(IDXGISwapChain* swap_chain);
+typedef void OnFrameCallbackD3D11(IDXGISwapChain* swap_chain);
 
-std::size_t
-  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
+std::size_t RegisterOnFrameCallbackD3D11(
+  std::function<OnFrameCallbackD3D11> const& callback);
 
-void UnregisterOnFrameCallback(std::size_t id);
+void UnregisterOnFrameCallbackD3D11(std::size_t id);
 }
 }

@@ -27,6 +27,7 @@
 #include <hadesmem/region.hpp>
 
 #include "callbacks.hpp"
+#include "helper.hpp"
 #include "main.hpp"
 #include "module.hpp"
 
@@ -115,10 +116,10 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
-  GetOnFrameCallbacks()
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D11>&
+  GetOnFrameCallbacksD3D11()
 {
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D11>
     callbacks;
   return callbacks;
 }
@@ -135,22 +136,10 @@ extern "C" HRESULT WINAPI
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
-  auto& detour = GetIDXGISwapChainPresentDetour();
-  auto const present =
-    detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
 
   try
   {
-    static std::once_flag once;
-    auto const init = [&]()
-    {
-      HADESMEM_DETAIL_TRACE_A("Performing initialization.");
-
-      // Put init code here.
-    };
-    std::call_once(once, init);
-
-    auto& callbacks = GetOnFrameCallbacks();
+    auto& callbacks = GetOnFrameCallbacksD3D11();
     callbacks.Run(swap_chain);
   }
   catch (...)
@@ -160,6 +149,9 @@ extern "C" HRESULT WINAPI
     HADESMEM_DETAIL_ASSERT(false);
   }
 
+  auto& detour = GetIDXGISwapChainPresentDetour();
+  auto const present =
+    detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
   last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
   last_error_preserver.Update();
@@ -169,21 +161,30 @@ extern "C" HRESULT WINAPI
 
 void DetourDXGISwapChain(IDXGISwapChain* swap_chain)
 {
-  void** const swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
-  auto const present = swap_chain_vtable[8];
-  auto const present_detour_fn =
-    hadesmem::detail::UnionCast<void*>(&IDXGISwapChainPresentDetour);
-  auto& present_detour = GetIDXGISwapChainPresentDetour();
-  if (!present_detour)
+  try
   {
-    present_detour = std::make_unique<hadesmem::PatchDetour>(
-      hadesmem::cerberus::GetThisProcess(), present, present_detour_fn);
-    present_detour->Apply();
-    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present detoured.");
+    auto& present_detour = GetIDXGISwapChainPresentDetour();
+    if (!present_detour)
+    {
+      void** const swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
+      auto const present = swap_chain_vtable[8];
+      auto const present_detour_fn =
+        hadesmem::detail::UnionCast<void*>(&IDXGISwapChainPresentDetour);
+      present_detour = std::make_unique<hadesmem::PatchDetour>(
+        hadesmem::cerberus::GetThisProcess(), present, present_detour_fn);
+      present_detour->Apply();
+      HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present detoured.");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present already detoured.");
+    }
   }
-  else
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present already detoured.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
   }
 }
 
@@ -230,23 +231,34 @@ extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
 
 void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
 {
-  void** const dxgi_factory_vtable = *reinterpret_cast<void***>(dxgi_factory);
-  auto const create_swap_chain = dxgi_factory_vtable[10];
-  auto const create_swap_chain_detour_fn =
-    hadesmem::detail::UnionCast<void*>(&IDXGIFactoryCreateSwapChainDetour);
-  auto& create_swap_chain_detour = GetIDXGIFactoryCreateSwapChainDetour();
-  if (!create_swap_chain_detour)
+  try
   {
-    create_swap_chain_detour = std::make_unique<hadesmem::PatchDetour>(
-      hadesmem::cerberus::GetThisProcess(),
-      create_swap_chain,
-      create_swap_chain_detour_fn);
-    create_swap_chain_detour->Apply();
-    HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain detoured.");
+    auto& create_swap_chain_detour = GetIDXGIFactoryCreateSwapChainDetour();
+    if (!create_swap_chain_detour)
+    {
+      void** const dxgi_factory_vtable =
+        *reinterpret_cast<void***>(dxgi_factory);
+      auto const create_swap_chain = dxgi_factory_vtable[10];
+      auto const create_swap_chain_detour_fn =
+        hadesmem::detail::UnionCast<void*>(&IDXGIFactoryCreateSwapChainDetour);
+      create_swap_chain_detour = std::make_unique<hadesmem::PatchDetour>(
+        hadesmem::cerberus::GetThisProcess(),
+        create_swap_chain,
+        create_swap_chain_detour_fn);
+      create_swap_chain_detour->Apply();
+      HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain detoured.");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "IDXGIFactory::CreateSwapChain already detoured.");
+    }
   }
-  else
+  catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain already detoured.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
   }
 }
 
@@ -676,46 +688,14 @@ void UndetourD3D11(bool remove)
     return;
   }
 
-  if (GetD3D11CreateDeviceAndSwapChainDetour())
-  {
-    auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-    remove ? detour->Remove() : detour->Detach();
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetD3D11CreateDeviceAndSwapChainRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Spinning on D3D11CreateDeviceAndSwapChain ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A(
-      "D3D11CreateDeviceAndSwapChain free of references.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      "D3D11CreateDeviceAndSwapChain not detoured. Skipping.");
-  }
-
-  if (GetD3D11CreateDeviceDetour())
-  {
-    auto& detour = GetD3D11CreateDeviceDetour();
-    remove ? detour->Remove() : detour->Detach();
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetD3D11CreateDeviceRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A("Spinning on D3D11CreateDevice ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice free of references.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice not detoured. Skipping.");
-  }
+  UndetourFunc(L"D3D11CreateDeviceAndSwapChain",
+               GetD3D11CreateDeviceAndSwapChainDetour(),
+               GetD3D11CreateDeviceAndSwapChainRefCount(),
+               remove);
+  UndetourFunc(L"D3D11CreateDevice",
+               GetD3D11CreateDeviceDetour(),
+               GetD3D11CreateDeviceRefCount(),
+               remove);
 
   module = std::make_pair(nullptr, 0);
 }
@@ -729,78 +709,32 @@ void UndetourDXGI(bool remove)
     return;
   }
 
-  if (GetCreateDXGIFactoryDetour())
-  {
-    auto& detour = GetCreateDXGIFactoryDetour();
-    remove ? detour->Remove() : detour->Detach();
-    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetCreateDXGIFactoryRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A("Spinning on CreateDXGIFactory ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory free of references.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory not detoured. Skipping.");
-  }
-
-  if (GetIDXGIFactoryCreateSwapChainDetour())
-  {
-    auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
-    remove ? detour->Remove() : detour->Detach();
-    HADESMEM_DETAIL_TRACE_A("IDXGIFactoryCreateSwapChain undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetIDXGIFactoryCreateSwapChainRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Spinning on IDXGIFactoryCreateSwapChain ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A("IDXGIFactoryCreateSwapChain free of references.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      "IDXGIFactoryCreateSwapChain not detoured. Skipping.");
-  }
-
-  if (GetIDXGISwapChainPresentDetour())
-  {
-    auto& detour = GetIDXGISwapChainPresentDetour();
-    remove ? detour->Remove() : detour->Detach();
-    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present undetoured.");
-    detour = nullptr;
-
-    auto& ref_count = GetIDXGISwapChainPresentRefCount();
-    while (ref_count.load())
-    {
-      HADESMEM_DETAIL_TRACE_A("Spinning on IDXGISwapChain::Present ref count.");
-    }
-    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present free of references.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present not detoured. Skipping.");
-  }
+  UndetourFunc(L"CreateDXGIFactory",
+               GetCreateDXGIFactoryDetour(),
+               GetCreateDXGIFactoryRefCount(),
+               remove);
+  UndetourFunc(L"IDXGIFactory::CreateSwapChain",
+               GetIDXGIFactoryCreateSwapChainDetour(),
+               GetIDXGIFactoryCreateSwapChainRefCount(),
+               remove);
+  UndetourFunc(L"IDXGISwapChain::Present",
+               GetIDXGISwapChainPresentDetour(),
+               GetIDXGISwapChainPresentRefCount(),
+               remove);
 
   module = std::make_pair(nullptr, 0);
 }
 
-std::size_t
-  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback)
+std::size_t RegisterOnFrameCallbackD3D11(
+  std::function<OnFrameCallbackD3D11> const& callback)
 {
-  auto& callbacks = GetOnFrameCallbacks();
+  auto& callbacks = GetOnFrameCallbacksD3D11();
   return callbacks.Register(callback);
 }
 
-void UnregisterOnFrameCallback(std::size_t id)
+void UnregisterOnFrameCallbackD3D11(std::size_t id)
 {
-  auto& callbacks = GetOnFrameCallbacks();
+  auto& callbacks = GetOnFrameCallbacksD3D11();
   return callbacks.Unregister(id);
 }
 }

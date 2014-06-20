@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "d3d9.hpp"
 #include "d3d11.hpp"
 #include "module.hpp"
 
@@ -16,6 +17,19 @@ void LoadPlugins();
 
 void UnloadPlugins();
 
+class D3D9Interface
+{
+public:
+  virtual ~D3D9Interface()
+  {
+  }
+
+  virtual std::size_t RegisterOnFrameCallback(
+    std::function<OnFrameCallbackD3D9> const& callback) = 0;
+
+  virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
+};
+
 class D3D11Interface
 {
 public:
@@ -23,8 +37,8 @@ public:
   {
   }
 
-  virtual std::size_t
-    RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback) = 0;
+  virtual std::size_t RegisterOnFrameCallback(
+    std::function<OnFrameCallbackD3D11> const& callback) = 0;
 
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
 };
@@ -53,6 +67,8 @@ public:
   virtual ~PluginInterface()
   {
   }
+
+  virtual D3D9Interface* GetD3D9Interface() = 0;
 
   virtual D3D11Interface* GetD3D11Interface() = 0;
 

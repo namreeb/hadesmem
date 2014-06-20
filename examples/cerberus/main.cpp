@@ -19,6 +19,7 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/thread_list.hpp>
 
+#include "d3d9.hpp"
 #include "d3d11.hpp"
 #include "exception.hpp"
 #include "module.hpp"
@@ -63,12 +64,19 @@ void UseAllStatics()
     hadesmem::cerberus::RegisterOnUnmapCallback(on_unmap_callback);
   hadesmem::cerberus::UnregisterOnUnmapCallback(on_unmap_id);
 
-  auto const on_frame_callback = [](IDXGISwapChain* /*swap_chain*/)
+  auto const on_frame_callback_d3d9 = [](IDirect3DDevice9* /*device*/)
   {
   };
-  auto const on_frame_id =
-    hadesmem::cerberus::RegisterOnFrameCallback(on_frame_callback);
-  hadesmem::cerberus::UnregisterOnFrameCallback(on_frame_id);
+  auto const on_frame_id_d3d9 =
+    hadesmem::cerberus::RegisterOnFrameCallbackD3D9(on_frame_callback_d3d9);
+  hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(on_frame_id_d3d9);
+
+  auto const on_frame_callback_d3d11 = [](IDXGISwapChain* /*swap_chain*/)
+  {
+  };
+  auto const on_frame_id_d3d11 =
+    hadesmem::cerberus::RegisterOnFrameCallbackD3D11(on_frame_callback_d3d11);
+  hadesmem::cerberus::UnregisterOnFrameCallbackD3D11(on_frame_id_d3d11);
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -150,6 +158,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     UseAllStatics();
 
     // Support deferred hooking (via module load notifications).
+    hadesmem::cerberus::InitializeD3D9();
     hadesmem::cerberus::InitializeD3D11();
 
     hadesmem::cerberus::DetourCreateProcessInternalW();
@@ -157,6 +166,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourNtUnmapViewOfSection();
     hadesmem::cerberus::DetourRtlAddVectoredExceptionHandler();
 
+    hadesmem::cerberus::DetourD3D9(nullptr);
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
 
@@ -197,6 +207,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 
     hadesmem::cerberus::UndetourDXGI(true);
     hadesmem::cerberus::UndetourD3D11(true);
+    hadesmem::cerberus::UndetourD3D9(true);
 
     hadesmem::cerberus::UnloadPlugins();
 
