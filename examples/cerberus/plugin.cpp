@@ -7,8 +7,14 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <pugixml.hpp>
+#include <pugixml.cpp>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
 #include <hadesmem/error.hpp>
 #include <hadesmem/detail/filesystem.hpp>
+#include <hadesmem/detail/pugixml_helpers.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/trace.hpp>
 
@@ -175,6 +181,67 @@ std::vector<Plugin>& GetPlugins()
   static std::vector<Plugin> plugins;
   return plugins;
 }
+
+void LoadPluginsFileImpl(pugi::xml_document const& doc)
+{
+  auto const hadesmem_root = doc.child(L"HadesMem");
+  if (!hadesmem_root)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
+                                      "Failed to find 'HadesMem' root node."});
+  }
+
+  auto const cerberus_node = hadesmem_root.child(L"Cerberus");
+  if (!cerberus_node)
+  {
+    return;
+  }
+
+  auto& plugins = GetPlugins();
+  for (auto const& plugin_node : cerberus_node.children(L"Plugin"))
+  {
+    auto path =
+      hadesmem::detail::pugixml::GetAttributeValue(plugin_node, L"Path");
+    if (hadesmem::detail::IsPathRelative(path))
+    {
+      path =
+        hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), path);
+    }
+    plugins.emplace_back(path);
+  }
+}
+
+void LoadPluginsFile(std::wstring const& path)
+{
+  pugi::xml_document doc;
+  auto const load_result = doc.load_file(path.c_str());
+  if (!load_result)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"Loading XML file failed."}
+      << hadesmem::ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
+      << hadesmem::ErrorStringOther{load_result.description()});
+  }
+
+  LoadPluginsFileImpl(doc);
+}
+
+void LoadPluginsMemory(std::wstring const& data)
+{
+  pugi::xml_document doc;
+  auto const load_result = doc.load(data.c_str());
+  if (!load_result)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"Loading XML file failed."}
+      << hadesmem::ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
+      << hadesmem::ErrorStringOther{load_result.description()});
+  }
+
+  LoadPluginsFileImpl(doc);
+}
 }
 
 namespace hadesmem
@@ -187,10 +254,24 @@ void LoadPlugins()
 {
   HADESMEM_DETAIL_TRACE_A("Loading plugins.");
 
-  auto& plugins = GetPlugins();
-  auto const path = hadesmem::detail::CombinePath(
-    hadesmem::detail::GetSelfDirPath(), L"plugin.dll");
-  plugins.emplace_back(path);
+  auto const config_path = hadesmem::detail::CombinePath(
+    hadesmem::detail::GetSelfDirPath(), L"hadesmem.xml");
+  if (hadesmem::detail::DoesFileExist(config_path))
+  {
+    LoadPluginsFile(config_path);
+  }
+  else
+  {
+    std::wstring const config_xml = LR"(
+<?xml version="1.0" encoding="utf-8"?>
+<HadesMem>
+  <Cerberus>
+    <Plugin Path="plugin.dll"/>
+  </Cerberus>
+</HadesMem>
+)";
+    LoadPluginsMemory(config_xml);
+  }
 }
 
 void UnloadPlugins()

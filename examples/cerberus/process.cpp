@@ -26,6 +26,7 @@
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
+#include "helpers.hpp"
 #include "main.hpp"
 
 namespace
@@ -305,17 +306,10 @@ void DetourCreateProcessInternalW()
 
 void UndetourCreateProcessInternalW()
 {
-  auto& detour = GetCreateProcessInternalWDetour();
-  detour->Remove();
-  HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW undetoured.");
-  detour = nullptr;
-
-  auto& ref_count = GetCreateProcessInternalWRefCount();
-  while (ref_count.load())
-  {
-    HADESMEM_DETAIL_TRACE_A("Spinning on CreateProcessInternalW ref count.");
-  }
-  HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW free of references.");
+  UndetourFunc(L"CreateProcessInternalW",
+               GetCreateProcessInternalWDetour(),
+               GetCreateProcessInternalWRefCount(),
+               true);
 }
 }
 }

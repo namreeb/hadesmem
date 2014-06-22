@@ -19,6 +19,7 @@
 #include <hadesmem/process.hpp>
 
 #include "main.hpp"
+#include "helpers.hpp"
 
 namespace
 {
@@ -86,18 +87,10 @@ void DetourRtlAddVectoredExceptionHandler()
 
 void UndetourRtlAddVectoredExceptionHandler()
 {
-  auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
-  detour->Remove();
-  HADESMEM_DETAIL_TRACE_A("RtlAddVectoredExceptionHandler undetoured.");
-  detour = nullptr;
-
-  auto& ref_count = GetRtlAddVectoredExceptionHandlerRefCount();
-  while (ref_count.load())
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      "Spinning on RtlAddVectoredExceptionHandler ref count.");
-  }
-  HADESMEM_DETAIL_TRACE_A("RtlAddVectoredExceptionHandler free of references.");
+  UndetourFunc(L"RtlAddVectoredExceptionHandler",
+               GetRtlAddVectoredExceptionHandlerDetour(),
+               GetRtlAddVectoredExceptionHandlerRefCount(),
+               true);
 }
 }
 }

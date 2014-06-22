@@ -23,6 +23,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/pugixml_helpers.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
@@ -737,51 +738,12 @@ private:
     }
   }
 
-  std::wstring GetAttributeValue(pugi::xml_node const& node,
-                                 std::wstring const& name) const
-  {
-    auto const attr = node.attribute(name.c_str());
-    if (!attr)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"Failed to find attribute for node."});
-    }
-
-    std::wstring const value = attr.value();
-    if (value.empty())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"Failed to find value for attribute."});
-    }
-
-    return value;
-  }
-
-  std::wstring GetOptionalAttributeValue(pugi::xml_node const& node,
-                                         std::wstring const& name) const
-  {
-    auto const attr = node.attribute(name.c_str());
-    if (!attr)
-    {
-      return {};
-    }
-
-    std::wstring const value = attr.value();
-    if (value.empty())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"Failed to find value for attribute."});
-    }
-
-    return value;
-  }
-
   std::uint32_t ReadFlags(pugi::xml_node const& node) const
   {
     std::uint32_t flags = PatternFlags::kNone;
     for (auto const& flag : node.children(L"Flag"))
     {
-      auto const flag_name = GetAttributeValue(flag, L"Name");
+      auto const flag_name = detail::pugixml::GetAttributeValue(flag, L"Name");
 
       if (flag_name == L"None")
       {
@@ -822,8 +784,9 @@ private:
     std::map<std::wstring, FindPatternInfo> pattern_infos_full;
     for (auto const& find_pattern_node : hadesmem_root.children(L"FindPattern"))
     {
-      auto const module_name = detail::ToUpperOrdinal(
-        GetOptionalAttributeValue(find_pattern_node, L"Module"));
+      auto const module_name =
+        detail::ToUpperOrdinal(detail::pugixml::GetOptionalAttributeValue(
+          find_pattern_node, L"Module"));
 
       std::uint32_t const flags = ReadFlags(find_pattern_node);
 
@@ -831,17 +794,20 @@ private:
 
       for (auto const& pattern : find_pattern_node.children(L"Pattern"))
       {
-        auto const pattern_name = GetAttributeValue(pattern, L"Name");
+        auto const pattern_name =
+          detail::pugixml::GetAttributeValue(pattern, L"Name");
 
-        auto const pattern_data = GetAttributeValue(pattern, L"Data");
+        auto const pattern_data =
+          detail::pugixml::GetAttributeValue(pattern, L"Data");
 
-        auto const pattern_start = GetOptionalAttributeValue(pattern, L"Start");
+        auto const pattern_start =
+          detail::pugixml::GetOptionalAttributeValue(pattern, L"Start");
 
         auto const pattern_start_rva =
-          GetOptionalAttributeValue(pattern, L"StartRVA");
+          detail::pugixml::GetOptionalAttributeValue(pattern, L"StartRVA");
 
         auto const pattern_start_export =
-          GetOptionalAttributeValue(pattern, L"StartExport");
+          detail::pugixml::GetOptionalAttributeValue(pattern, L"StartExport");
 
         std::uint32_t const pattern_flags = ReadFlags(pattern);
 
@@ -856,7 +822,8 @@ private:
 
         for (auto const& manipulator : pattern.children(L"Manipulator"))
         {
-          auto const manipulator_name = GetAttributeValue(manipulator, L"Name");
+          auto const manipulator_name =
+            detail::pugixml::GetAttributeValue(manipulator, L"Name");
 
           ManipInfo::Manipulator type = ManipInfo::Manipulator::kAdd;
           if (manipulator_name == L"Add")

@@ -27,7 +27,7 @@
 #include <hadesmem/region.hpp>
 
 #include "callbacks.hpp"
-#include "helper.hpp"
+#include "helpers.hpp"
 #include "main.hpp"
 #include "module.hpp"
 

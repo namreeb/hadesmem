@@ -25,6 +25,7 @@
 #include <hadesmem/process.hpp>
 
 #include "callbacks.hpp"
+#include "helpers.hpp"
 #include "main.hpp"
 
 namespace winternl = hadesmem::detail::winternl;
@@ -327,17 +328,10 @@ void UndetourNtMapViewOfSection()
 
 void UndetourNtUnmapViewOfSection()
 {
-  auto& detour = GetNtUnmapViewOfSectionDetour();
-  detour->Remove();
-  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection undetoured.");
-  detour = nullptr;
-
-  auto& ref_count = GetNtUnmapViewOfSectionRefCount();
-  while (ref_count.load())
-  {
-    HADESMEM_DETAIL_TRACE_A("Spinning on NtUnmapViewOfSection ref count.");
-  }
-  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection free of references.");
+  UndetourFunc(L"NtUnmapViewOfSection",
+               GetNtUnmapViewOfSectionDetour(),
+               GetNtUnmapViewOfSectionRefCount(),
+               true);
 }
 
 std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback)
