@@ -161,6 +161,7 @@ extern "C" BOOL WINAPI
 #endif
   if (in_hook)
   {
+    HADESMEM_DETAIL_TRACE_A("Recursion detected.");
     return ret;
   }
 

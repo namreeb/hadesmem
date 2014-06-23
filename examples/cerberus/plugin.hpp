@@ -4,7 +4,7 @@
 #pragma once
 
 #include "d3d9.hpp"
-#include "d3d11.hpp"
+#include "dxgi.hpp"
 #include "module.hpp"
 
 namespace hadesmem
@@ -30,15 +30,15 @@ public:
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
 };
 
-class D3D11Interface
+class DXGIInterface
 {
 public:
-  virtual ~D3D11Interface()
+  virtual ~DXGIInterface()
   {
   }
 
   virtual std::size_t RegisterOnFrameCallback(
-    std::function<OnFrameCallbackD3D11> const& callback) = 0;
+    std::function<OnFrameCallbackDXGI> const& callback) = 0;
 
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
 };
@@ -70,7 +70,7 @@ public:
 
   virtual D3D9Interface* GetD3D9Interface() = 0;
 
-  virtual D3D11Interface* GetD3D11Interface() = 0;
+  virtual DXGIInterface* GetDXGIInterface() = 0;
 
   virtual ModuleInterface* GetModuleInterface() = 0;
 };

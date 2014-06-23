@@ -36,18 +36,18 @@ public:
   }
 };
 
-class D3D11Impl : public hadesmem::cerberus::D3D11Interface
+class DXGIImpl : public hadesmem::cerberus::DXGIInterface
 {
 public:
   virtual std::size_t RegisterOnFrameCallback(std::function<
-    hadesmem::cerberus::OnFrameCallbackD3D11> const& callback) final
+    hadesmem::cerberus::OnFrameCallbackDXGI> const& callback) final
   {
-    return hadesmem::cerberus::RegisterOnFrameCallbackD3D11(callback);
+    return hadesmem::cerberus::RegisterOnFrameCallbackDXGI(callback);
   }
 
   virtual void UnregisterOnFrameCallback(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnFrameCallbackD3D11(id);
+    hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(id);
   }
 };
 
@@ -129,7 +129,7 @@ public:
     return &d3d9_;
   }
 
-  virtual hadesmem::cerberus::D3D11Interface* GetD3D11Interface() final
+  virtual hadesmem::cerberus::DXGIInterface* GetDXGIInterface() final
   {
     return &d3d11_;
   }
@@ -172,7 +172,7 @@ private:
   std::wstring path_;
   HMODULE base_{};
   D3D9Impl d3d9_;
-  D3D11Impl d3d11_;
+  DXGIImpl d3d11_;
   ModuleImpl module_;
 };
 

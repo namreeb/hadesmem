@@ -18,7 +18,7 @@
 namespace
 {
 std::size_t g_on_frame_callback_id_d3d9{static_cast<std::uint32_t>(-1)};
-std::size_t g_on_frame_callback_id_d3d11{static_cast<std::uint32_t>(-1)};
+std::size_t g_on_frame_callback_id_dxgi{static_cast<std::uint32_t>(-1)};
 
 void UpdateRadar()
 {
@@ -68,7 +68,7 @@ void OnFrameD3D9(IDirect3DDevice9* /*device*/)
   return OnFrame();
 }
 
-void OnFrameD3D11(IDXGISwapChain* /*swap_chain*/)
+void OnFrameDXGI(IDXGISwapChain* /*swap_chain*/)
 {
   return OnFrame();
 }
@@ -81,8 +81,8 @@ void InitializeRadar(hadesmem::cerberus::PluginInterface* cerberus)
   g_on_frame_callback_id_d3d9 =
     cerberus->GetD3D9Interface()->RegisterOnFrameCallback(OnFrameD3D9);
 
-  g_on_frame_callback_id_d3d11 =
-    cerberus->GetD3D11Interface()->RegisterOnFrameCallback(OnFrameD3D11);
+  g_on_frame_callback_id_dxgi =
+    cerberus->GetDXGIInterface()->RegisterOnFrameCallback(OnFrameDXGI);
 }
 
 void CleanupRadar(hadesmem::cerberus::PluginInterface* cerberus)
@@ -96,11 +96,11 @@ void CleanupRadar(hadesmem::cerberus::PluginInterface* cerberus)
     g_on_frame_callback_id_d3d9 = static_cast<std::uint32_t>(-1);
   }
 
-  if (g_on_frame_callback_id_d3d11 != static_cast<std::uint32_t>(-1))
+  if (g_on_frame_callback_id_dxgi != static_cast<std::uint32_t>(-1))
   {
-    cerberus->GetD3D11Interface()->UnregisterOnFrameCallback(
-      g_on_frame_callback_id_d3d11);
-    g_on_frame_callback_id_d3d11 = static_cast<std::uint32_t>(-1);
+    cerberus->GetDXGIInterface()->UnregisterOnFrameCallback(
+      g_on_frame_callback_id_dxgi);
+    g_on_frame_callback_id_dxgi = static_cast<std::uint32_t>(-1);
   }
 }
 
