@@ -19,9 +19,6 @@
 #include <hadesmem/detail/toolhelp.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
-#include <hadesmem/pelib/export.hpp>
-#include <hadesmem/pelib/export_list.hpp>
-#include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/process.hpp>
 
 namespace hadesmem

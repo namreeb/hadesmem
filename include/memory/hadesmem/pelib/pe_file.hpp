@@ -17,6 +17,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/region_alloc_size.hpp>
 #include <hadesmem/error.hpp>
+#include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/region_list.hpp>
@@ -52,11 +53,19 @@ public:
 
     if (type == PeFileType::Image && !size)
     {
-      auto const region_alloc_size =
-        detail::GetRegionAllocSize(*process_, base_);
-      HADESMEM_DETAIL_ASSERT(region_alloc_size <
-                             (std::numeric_limits<DWORD>::max)());
-      size_ = static_cast<DWORD>(region_alloc_size);
+      try
+      {
+        Module const module{process, reinterpret_cast<HMODULE>(address)};
+        size_ = module.GetSize();
+      }
+      catch (...)
+      {
+        auto const region_alloc_size =
+          detail::GetRegionAllocSize(*process_, base_);
+        HADESMEM_DETAIL_ASSERT(region_alloc_size <
+                               (std::numeric_limits<DWORD>::max)());
+        size_ = static_cast<DWORD>(region_alloc_size);
+      }
     }
   }
 
