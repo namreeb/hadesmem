@@ -34,43 +34,43 @@
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetDirect3DCreate9Detour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetDirect3DCreate9Detour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetDirect3DCreate9RefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetDirect3DCreate9RefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDirect3D9CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3D9CreateDeviceDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetIDirect3D9CreateDeviceRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetIDirect3D9CreateDeviceRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDirect3DDevice9EndSceneDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3DDevice9EndSceneDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetIDirect3DDevice9EndSceneRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetIDirect3DDevice9EndSceneRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -90,8 +90,9 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>&
   return callbacks;
 }
 
-extern "C" HRESULT WINAPI IDirect3DDevice9EndSceneDetour(
-  IDirect3DDevice9* device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  IDirect3DDevice9EndSceneDetour(IDirect3DDevice9* device)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetIDirect3DDevice9EndSceneRefCount()};
@@ -151,14 +152,15 @@ void DetourDirect3DDevice9(IDirect3DDevice9* device)
   }
 }
 
-extern "C" HRESULT WINAPI IDirect3D9CreateDeviceDetour(
-  IDirect3D9* direct3d9,
-  UINT adapter,
-  D3DDEVTYPE device_type,
-  HWND focus_window,
-  DWORD behavior_flags,
-  D3DPRESENT_PARAMETERS* presentation_params,
-  IDirect3DDevice9** returned_device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  IDirect3D9CreateDeviceDetour(IDirect3D9* direct3d9,
+                               UINT adapter,
+                               D3DDEVTYPE device_type,
+                               HWND focus_window,
+                               DWORD behavior_flags,
+                               D3DPRESENT_PARAMETERS* presentation_params,
+                               IDirect3DDevice9** returned_device)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetIDirect3D9CreateDeviceRefCount()};
@@ -238,8 +240,8 @@ void DetourDirect3D9(IDirect3D9* direct3d9)
   }
 }
 
-extern "C" IDirect3D9* WINAPI
-  Direct3DCreate9Detour(UINT sdk_version) HADESMEM_DETAIL_NOEXCEPT
+extern "C" IDirect3D9* WINAPI Direct3DCreate9Detour(UINT sdk_version)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{GetDirect3DCreate9RefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -276,38 +278,8 @@ namespace cerberus
 
 void InitializeD3D9()
 {
-  HADESMEM_DETAIL_TRACE_A("Initializing D3D9.");
-
-  auto const on_map = [](
-    HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
-  {
-    if (name == L"D3D9" || name == L"D3D9.DLL")
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D9 loaded. Applying hooks.");
-
-      DetourD3D9(module);
-    }
-  };
-  RegisterOnMapCallback(on_map);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnMap.");
-
-  auto const on_unmap = [](HMODULE module)
-  {
-    auto const d3d9_mod = GetD3D9Module();
-    auto const d3d9_mod_beg = d3d9_mod.first;
-    void* const d3d9_mod_end =
-      static_cast<std::uint8_t*>(d3d9_mod.first) + d3d9_mod.second;
-    if (module >= d3d9_mod_beg && module < d3d9_mod_end)
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D9 unloaded. Removing hooks.");
-
-      // Detach instead of remove hooks because when we get the notification the
-      // memory region is already gone.
-      UndetourD3D9(false);
-    }
-  };
-  RegisterOnUnmapCallback(on_unmap);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnUnmap.");
+  InitializeSupportForModule(
+    L"D3D9", &DetourD3D9, &UndetourD3D9, &GetD3D9Module);
 }
 
 void DetourD3D9(HMODULE base)

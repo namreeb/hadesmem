@@ -87,7 +87,7 @@ extern "C" HRESULT WINAPI
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
+    "Args: [%p] [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
     adapter,
     driver_type,
     software,
@@ -158,7 +158,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Args: [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
+    "Args: [%p] [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
     adapter,
     driver_type,
     software,
@@ -202,6 +202,20 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
     }
+
+    if (device)
+    {
+      auto const factory_wrapper =
+        hadesmem::cerberus::GetDXGIFactoryFromDevice(*device);
+      if (auto const dxgi_factory = factory_wrapper.GetFactory())
+      {
+        hadesmem::cerberus::DetourDXGIFactory(dxgi_factory);
+      }
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
+    }
   }
   else
   {
@@ -220,38 +234,8 @@ namespace cerberus
 
 void InitializeD3D11()
 {
-  HADESMEM_DETAIL_TRACE_A("Initializing D3D11.");
-
-  auto const on_map = [](
-    HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
-  {
-    if (name == L"D3D11" || name == L"D3D11.DLL")
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D11 loaded. Applying hooks.");
-
-      DetourD3D11(module);
-    }
-  };
-  RegisterOnMapCallback(on_map);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnMap.");
-
-  auto const on_unmap = [](HMODULE module)
-  {
-    auto const d3d11_mod = GetD3D11Module();
-    auto const d3d11_mod_beg = d3d11_mod.first;
-    void* const d3d11_mod_end =
-      static_cast<std::uint8_t*>(d3d11_mod.first) + d3d11_mod.second;
-    if (module >= d3d11_mod_beg && module < d3d11_mod_end)
-    {
-      HADESMEM_DETAIL_TRACE_A("D3D11 unloaded. Removing hooks.");
-
-      // Detach instead of remove hooks because when we get the notification the
-      // memory region is already gone.
-      UndetourD3D11(false);
-    }
-  };
-  RegisterOnUnmapCallback(on_unmap);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnUnmap.");
+  InitializeSupportForModule(
+    L"D3D11", &DetourD3D11, &UndetourD3D11, &GetD3D11Module);
 }
 
 void DetourD3D11(HMODULE base)

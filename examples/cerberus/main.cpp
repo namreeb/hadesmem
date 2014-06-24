@@ -20,6 +20,7 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "d3d9.hpp"
+#include "d3d10.hpp"
 #include "d3d11.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
@@ -156,8 +157,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 
     // Support deferred hooking (via module load notifications).
     hadesmem::cerberus::InitializeD3D9();
-    hadesmem::cerberus::InitializeDXGI();
+    hadesmem::cerberus::InitializeD3D10();
+    hadesmem::cerberus::InitializeD3D101();
     hadesmem::cerberus::InitializeD3D11();
+    hadesmem::cerberus::InitializeDXGI();
 
     hadesmem::cerberus::DetourCreateProcessInternalW();
     hadesmem::cerberus::DetourNtMapViewOfSection();
@@ -165,6 +168,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourRtlAddVectoredExceptionHandler();
 
     hadesmem::cerberus::DetourD3D9(nullptr);
+    hadesmem::cerberus::DetourD3D10(nullptr);
+    hadesmem::cerberus::DetourD3D101(nullptr);
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
 
@@ -205,6 +210,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 
     hadesmem::cerberus::UndetourDXGI(true);
     hadesmem::cerberus::UndetourD3D11(true);
+    hadesmem::cerberus::UndetourD3D101(true);
+    hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
 
     hadesmem::cerberus::UnloadPlugins();

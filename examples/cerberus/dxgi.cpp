@@ -215,38 +215,8 @@ namespace cerberus
 
 void InitializeDXGI()
 {
-  HADESMEM_DETAIL_TRACE_A("Initializing DXGI.");
-
-  auto const on_map = [](
-    HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
-  {
-    if (name == L"DXGI" || name == L"DXGI.DLL")
-    {
-      HADESMEM_DETAIL_TRACE_A("DXGI loaded. Applying hooks.");
-
-      DetourDXGI(module);
-    }
-  };
-  RegisterOnMapCallback(on_map);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnMap.");
-
-  auto const on_unmap = [](HMODULE module)
-  {
-    auto const dxgi_mod = GetDXGIModule();
-    auto const dxgi_mod_beg = dxgi_mod.first;
-    void* const dxgi_mod_end =
-      static_cast<std::uint8_t*>(dxgi_mod.first) + dxgi_mod.second;
-    if (module >= dxgi_mod_beg && module < dxgi_mod_end)
-    {
-      HADESMEM_DETAIL_TRACE_A("DXGI unloaded. Removing hooks.");
-
-      // Detach instead of remove hooks because when we get the notification the
-      // memory region is already gone.
-      UndetourDXGI(false);
-    }
-  };
-  RegisterOnUnmapCallback(on_unmap);
-  HADESMEM_DETAIL_TRACE_A("Registered for OnUnmap.");
+  InitializeSupportForModule(
+    L"DXGI", &DetourDXGI, &UndetourDXGI, &GetDXGIModule);
 }
 
 void DetourDXGI(HMODULE base)
