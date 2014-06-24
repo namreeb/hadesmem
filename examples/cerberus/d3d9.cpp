@@ -127,22 +127,13 @@ void DetourDirect3DDevice9(IDirect3DDevice9* device)
 {
   try
   {
-    auto& end_scene_detour = GetIDirect3DDevice9EndSceneDetour();
-    if (!end_scene_detour)
-    {
-      void** const device_vtable = *reinterpret_cast<void***>(device);
-      auto const end_scene = device_vtable[42];
-      auto const end_scene_detour_fn =
-        hadesmem::detail::UnionCast<void*>(&IDirect3DDevice9EndSceneDetour);
-      end_scene_detour = std::make_unique<hadesmem::PatchDetour>(
-        hadesmem::cerberus::GetThisProcess(), end_scene, end_scene_detour_fn);
-      end_scene_detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("IDirect3DDevice9::EndScene detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("IDirect3DDevice9::EndScene already detoured.");
-    }
+    auto const& process = hadesmem::cerberus::GetThisProcess();
+    hadesmem::cerberus::DetourFunc(process,
+      L"IDirect3DDevice9::EndScene",
+      device,
+      42,
+      GetIDirect3DDevice9EndSceneDetour(),
+      IDirect3DDevice9EndSceneDetour);
   }
   catch (...)
   {
@@ -213,24 +204,13 @@ void DetourDirect3D9(IDirect3D9* direct3d9)
 {
   try
   {
-    auto& create_device_detour = GetIDirect3D9CreateDeviceDetour();
-    if (!create_device_detour)
-    {
-      void** const direct3d9_vtable = *reinterpret_cast<void***>(direct3d9);
-      auto const create_device = direct3d9_vtable[16];
-      auto const create_device_detour_fn =
-        hadesmem::detail::UnionCast<void*>(&IDirect3D9CreateDeviceDetour);
-      create_device_detour = std::make_unique<hadesmem::PatchDetour>(
-        hadesmem::cerberus::GetThisProcess(),
-        create_device,
-        create_device_detour_fn);
-      create_device_detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("IDirect3D9::CreateDevice detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("IDirect3D9::CreateDevice already detoured.");
-    }
+    auto const& process = hadesmem::cerberus::GetThisProcess();
+    hadesmem::cerberus::DetourFunc(process,
+      L"IDirect3D9::CreateDevice",
+      direct3d9,
+      16,
+      GetIDirect3D9CreateDeviceDetour(),
+      IDirect3D9CreateDeviceDetour);
   }
   catch (...)
   {
@@ -279,7 +259,7 @@ namespace cerberus
 void InitializeD3D9()
 {
   InitializeSupportForModule(
-    L"D3D9", &DetourD3D9, &UndetourD3D9, &GetD3D9Module);
+    L"D3D9", DetourD3D9, UndetourD3D9, GetD3D9Module);
 }
 
 void DetourD3D9(HMODULE base)
@@ -309,27 +289,11 @@ void DetourD3D9(HMODULE base)
   module =
     std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
-  if (!GetDirect3DCreate9Detour())
-  {
-    auto const orig_fn =
-      detail::GetProcAddressInternal(process, base, "Direct3DCreate9");
-    if (orig_fn)
-    {
-      auto const detour_fn = detail::UnionCast<void*>(&Direct3DCreate9Detour);
-      auto& detour = GetDirect3DCreate9Detour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("Direct3DCreate9 detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Could not find Direct3DCreate9 export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("Direct3DCreate9 already detoured.");
-  }
+  DetourFunc(process,
+             base,
+             "Direct3DCreate9",
+             GetDirect3DCreate9Detour(),
+             Direct3DCreate9Detour);
 }
 
 void UndetourD3D9(bool remove)

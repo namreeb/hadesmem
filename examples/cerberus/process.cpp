@@ -1,4 +1,3 @@
-
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
@@ -69,15 +68,15 @@ private:
   HANDLE handle_;
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetCreateProcessInternalWDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetCreateProcessInternalWDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetCreateProcessInternalWRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetCreateProcessInternalWRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -290,19 +289,13 @@ namespace cerberus
 
 void DetourCreateProcessInternalW()
 {
-  Module const kernel32{GetThisProcess(), L"kernelbase.dll"};
-  auto const create_process_internal_w =
-    FindProcedure(GetThisProcess(), kernel32, "CreateProcessInternalW");
-  auto const create_process_internal_w_ptr =
-    detail::UnionCast<void*>(create_process_internal_w);
-  auto const create_process_internal_w_detour =
-    detail::UnionCast<void*>(&CreateProcessInternalWDetour);
-  auto& detour = GetCreateProcessInternalWDetour();
-  detour = std::make_unique<PatchDetour>(GetThisProcess(),
-                                         create_process_internal_w_ptr,
-                                         create_process_internal_w_detour);
-  detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("CreateProcessInternalW detoured.");
+  auto const& process = GetThisProcess();
+  auto const kernelbase_mod = ::GetModuleHandleW(L"kernelbase");
+  DetourFunc(process,
+             kernelbase_mod,
+             "CreateProcessInternalW",
+             GetCreateProcessInternalWDetour(),
+             CreateProcessInternalWDetour);
 }
 
 void UndetourCreateProcessInternalW()

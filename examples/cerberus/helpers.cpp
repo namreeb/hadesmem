@@ -4,6 +4,7 @@
 #include "helpers.hpp"
 
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/find_procedure.hpp>
 
 #include "module.hpp"
 
@@ -12,6 +13,54 @@ namespace hadesmem
 
 namespace cerberus
 {
+
+void DetourFunc(Process const& process,
+                std::wstring const& name,
+                void* interface_ptr,
+                std::size_t index,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                void* detour_fn)
+{
+  if (!detour)
+  {
+    void** const vtable = *reinterpret_cast<void***>(interface_ptr);
+    auto const target_fn = vtable[index];
+    detour =
+      std::make_unique<hadesmem::PatchDetour>(process, target_fn, detour_fn);
+    detour->Apply();
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s detoured.", name.c_str());
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s already detoured.", name.c_str());
+  }
+}
+
+void DetourFunc(Process const& process,
+                HMODULE base,
+                std::string const& name,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                void* detour_fn)
+{
+  if (!detour)
+  {
+    auto const orig_fn = detail::GetProcAddressInternal(process, base, name);
+    if (orig_fn)
+    {
+      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
+      detour->Apply();
+      HADESMEM_DETAIL_TRACE_FORMAT_A("%s detoured.", name.c_str());
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Could not find %s export.", name.c_str());
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("%s already detoured.", name.c_str());
+  }
+}
 
 void UndetourFunc(std::wstring const& name,
                   std::unique_ptr<hadesmem::PatchDetour>& detour,

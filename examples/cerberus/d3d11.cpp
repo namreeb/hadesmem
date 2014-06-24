@@ -235,7 +235,7 @@ namespace cerberus
 void InitializeD3D11()
 {
   InitializeSupportForModule(
-    L"D3D11", &DetourD3D11, &UndetourD3D11, &GetD3D11Module);
+    L"D3D11", DetourD3D11, UndetourD3D11, GetD3D11Module);
 }
 
 void DetourD3D11(HMODULE base)
@@ -265,51 +265,16 @@ void DetourD3D11(HMODULE base)
   module =
     std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
-  if (!GetD3D11CreateDeviceDetour())
-  {
-    auto const orig_fn =
-      detail::GetProcAddressInternal(process, base, "D3D11CreateDevice");
-    if (orig_fn)
-    {
-      auto const detour_fn = detail::UnionCast<void*>(&D3D11CreateDeviceDetour);
-      auto& detour = GetD3D11CreateDeviceDetour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Could not find D3D11CreateDevice export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDevice already detoured.");
-  }
-
-  if (!GetD3D11CreateDeviceAndSwapChainDetour())
-  {
-    auto const orig_fn = detail::GetProcAddressInternal(
-      process, base, "D3D11CreateDeviceAndSwapChain");
-    if (orig_fn)
-    {
-      auto const detour_fn =
-        detail::UnionCast<void*>(&D3D11CreateDeviceAndSwapChainDetour);
-      auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Could not find D3D11CreateDeviceAndSwapChain export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D11CreateDeviceAndSwapChain already detoured.");
-  }
+  DetourFunc(process,
+             base,
+             "D3D11CreateDevice",
+             GetD3D11CreateDeviceDetour(),
+             D3D11CreateDeviceDetour);
+  DetourFunc(process,
+             base,
+             "D3D11CreateDeviceAndSwapChain",
+             GetD3D11CreateDeviceAndSwapChainDetour(),
+             D3D11CreateDeviceAndSwapChainDetour);
 }
 
 void UndetourD3D11(bool remove)

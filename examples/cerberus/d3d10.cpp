@@ -372,13 +372,13 @@ namespace cerberus
 void InitializeD3D10()
 {
   InitializeSupportForModule(
-    L"D3D10", &DetourD3D10, &UndetourD3D10, &GetD3D10Module);
+    L"D3D10", DetourD3D10, UndetourD3D10, GetD3D10Module);
 }
 
 void InitializeD3D101()
 {
   InitializeSupportForModule(
-    L"D3D10_1", &DetourD3D101, &UndetourD3D101, &GetD3D101Module);
+    L"D3D10_1", DetourD3D101, UndetourD3D101, GetD3D101Module);
 }
 
 void DetourD3D10(HMODULE base)
@@ -408,51 +408,16 @@ void DetourD3D10(HMODULE base)
   module =
     std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
-  if (!GetD3D10CreateDeviceDetour())
-  {
-    auto const orig_fn =
-      detail::GetProcAddressInternal(process, base, "D3D10CreateDevice");
-    if (orig_fn)
-    {
-      auto const detour_fn = detail::UnionCast<void*>(&D3D10CreateDeviceDetour);
-      auto& detour = GetD3D10CreateDeviceDetour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D10CreateDevice detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Could not find D3D10CreateDevice export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D10CreateDevice already detoured.");
-  }
-
-  if (!GetD3D10CreateDeviceAndSwapChainDetour())
-  {
-    auto const orig_fn = detail::GetProcAddressInternal(
-      process, base, "D3D10CreateDeviceAndSwapChain");
-    if (orig_fn)
-    {
-      auto const detour_fn =
-        detail::UnionCast<void*>(&D3D10CreateDeviceAndSwapChainDetour);
-      auto& detour = GetD3D10CreateDeviceAndSwapChainDetour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D10CreateDeviceAndSwapChain detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Could not find D3D10CreateDeviceAndSwapChain export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D10CreateDeviceAndSwapChain already detoured.");
-  }
+  DetourFunc(process,
+             base,
+             "D3D10CreateDevice",
+             GetD3D10CreateDeviceDetour(),
+             D3D10CreateDeviceDetour);
+  DetourFunc(process,
+             base,
+             "D3D10CreateDeviceAndSwapChain",
+             GetD3D10CreateDeviceAndSwapChainDetour(),
+             D3D10CreateDeviceAndSwapChainDetour);
 }
 
 void UndetourD3D10(bool remove)
@@ -503,52 +468,16 @@ void DetourD3D101(HMODULE base)
   module =
     std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
-  if (!GetD3D10CreateDevice1Detour())
-  {
-    auto const orig_fn =
-      detail::GetProcAddressInternal(process, base, "D3D10CreateDevice1");
-    if (orig_fn)
-    {
-      auto const detour_fn =
-        detail::UnionCast<void*>(&D3D10CreateDevice1Detour);
-      auto& detour = GetD3D10CreateDevice1Detour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D10CreateDevice1 detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Could not find D3D10CreateDevice1 export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D10CreateDevice1 already detoured.");
-  }
-
-  if (!GetD3D10CreateDeviceAndSwapChain1Detour())
-  {
-    auto const orig_fn = detail::GetProcAddressInternal(
-      process, base, "D3D10CreateDeviceAndSwapChain1");
-    if (orig_fn)
-    {
-      auto const detour_fn =
-        detail::UnionCast<void*>(&D3D10CreateDeviceAndSwapChain1Detour);
-      auto& detour = GetD3D10CreateDeviceAndSwapChain1Detour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("D3D10CreateDeviceAndSwapChain1 detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Could not find D3D10CreateDeviceAndSwapChain1 export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D10CreateDeviceAndSwapChain1 already detoured.");
-  }
+  DetourFunc(process,
+             base,
+             "D3D10CreateDevice1",
+             GetD3D10CreateDevice1Detour(),
+             D3D10CreateDevice1Detour);
+  DetourFunc(process,
+             base,
+             "D3D10CreateDeviceAndSwapChain1",
+             GetD3D10CreateDeviceAndSwapChain1Detour(),
+             D3D10CreateDeviceAndSwapChain1Detour);
 }
 
 void UndetourD3D101(bool remove)

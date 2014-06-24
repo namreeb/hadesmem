@@ -11,13 +11,62 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/union_cast.hpp>
 #include <hadesmem/patcher.hpp>
+#include <hadesmem/process.hpp>
 
 namespace hadesmem
 {
 
 namespace cerberus
 {
+
+void DetourFunc(Process const& process,
+                std::wstring const& name,
+                void* interface_ptr,
+                std::size_t index,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                void* detour_fn);
+
+template <typename Func>
+void DetourFunc(Process const& process,
+                std::wstring const& name,
+                void* interface_ptr,
+                std::size_t index,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                Func detour_fn)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
+                                std::is_pointer<Func>::value);
+
+  return DetourFunc(process,
+                    name,
+                    interface_ptr,
+                    index,
+                    detour,
+                    detail::UnionCast<void*>(detour_fn));
+}
+
+void DetourFunc(Process const& process,
+                HMODULE base,
+                std::string const& name,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                void* detour_fn);
+
+template <typename Func>
+void DetourFunc(Process const& process,
+                HMODULE base,
+                std::string const& name,
+                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                Func detour_fn)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
+                                std::is_pointer<Func>::value);
+
+  return DetourFunc(
+    process, base, name, detour, detail::UnionCast<void*>(detour_fn));
+}
 
 void UndetourFunc(std::wstring const& name,
                   std::unique_ptr<hadesmem::PatchDetour>& detour,
@@ -29,6 +78,5 @@ void InitializeSupportForModule(
   std::function<void(HMODULE)> const& detour_func,
   std::function<void(bool)> const& undetour_func,
   std::function<std::pair<void*, SIZE_T>&()> const& get_module_func);
-
 }
 }

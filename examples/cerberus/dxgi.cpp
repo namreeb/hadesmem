@@ -246,27 +246,11 @@ void DetourDXGI(HMODULE base)
   module =
     std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
-  if (!GetCreateDXGIFactoryDetour())
-  {
-    auto const orig_fn =
-      detail::GetProcAddressInternal(process, base, "CreateDXGIFactory");
-    if (orig_fn)
-    {
-      auto const detour_fn = detail::UnionCast<void*>(&CreateDXGIFactoryDetour);
-      auto& detour = GetCreateDXGIFactoryDetour();
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
-      detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Could not find CreateDXGIFactory export.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("CreateDXGIFactory already detoured.");
-  }
+  DetourFunc(process,
+             base,
+             "CreateDXGIFactory",
+             GetCreateDXGIFactoryDetour(),
+             CreateDXGIFactoryDetour);
 }
 
 void UndetourDXGI(bool remove)
@@ -311,22 +295,13 @@ void DetourDXGISwapChain(IDXGISwapChain* swap_chain)
 {
   try
   {
-    auto& present_detour = GetIDXGISwapChainPresentDetour();
-    if (!present_detour)
-    {
-      void** const swap_chain_vtable = *reinterpret_cast<void***>(swap_chain);
-      auto const present = swap_chain_vtable[8];
-      auto const present_detour_fn =
-        hadesmem::detail::UnionCast<void*>(&IDXGISwapChainPresentDetour);
-      present_detour = std::make_unique<hadesmem::PatchDetour>(
-        hadesmem::cerberus::GetThisProcess(), present, present_detour_fn);
-      present_detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("IDXGISwapChain::Present already detoured.");
-    }
+    auto const& process = GetThisProcess();
+    DetourFunc(process,
+               L"IDXGISwapChain::Present",
+               swap_chain,
+               8,
+               GetIDXGISwapChainPresentDetour(),
+               IDXGISwapChainPresentDetour);
   }
   catch (...)
   {
@@ -340,26 +315,13 @@ void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
 {
   try
   {
-    auto& create_swap_chain_detour = GetIDXGIFactoryCreateSwapChainDetour();
-    if (!create_swap_chain_detour)
-    {
-      void** const dxgi_factory_vtable =
-        *reinterpret_cast<void***>(dxgi_factory);
-      auto const create_swap_chain = dxgi_factory_vtable[10];
-      auto const create_swap_chain_detour_fn =
-        hadesmem::detail::UnionCast<void*>(&IDXGIFactoryCreateSwapChainDetour);
-      create_swap_chain_detour = std::make_unique<hadesmem::PatchDetour>(
-        hadesmem::cerberus::GetThisProcess(),
-        create_swap_chain,
-        create_swap_chain_detour_fn);
-      create_swap_chain_detour->Apply();
-      HADESMEM_DETAIL_TRACE_A("IDXGIFactory::CreateSwapChain detoured.");
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "IDXGIFactory::CreateSwapChain already detoured.");
-    }
+    auto const& process = GetThisProcess();
+    DetourFunc(process,
+               L"IDXGIFactory::CreateSwapChain",
+               dxgi_factory,
+               10,
+               GetIDXGISwapChainPresentDetour(),
+               IDXGISwapChainPresentDetour);
   }
   catch (...)
   {

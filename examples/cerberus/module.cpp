@@ -33,29 +33,29 @@ namespace winternl = hadesmem::detail::winternl;
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetNtMapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetNtMapViewOfSectionRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetNtMapViewOfSectionRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetNtUnmapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetNtUnmapViewOfSectionRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
@@ -203,8 +203,8 @@ extern "C" NTSTATUS WINAPI
 }
 
 extern "C" NTSTATUS WINAPI
-  NtUnmapViewOfSectionDetour(HANDLE process,
-                             PVOID base) HADESMEM_DETAIL_NOEXCEPT
+  NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetNtUnmapViewOfSectionRefCount()};
@@ -279,51 +279,32 @@ namespace cerberus
 
 void DetourNtMapViewOfSection()
 {
-  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
-  auto const nt_map_view_of_section =
-    FindProcedure(GetThisProcess(), ntdll, "NtMapViewOfSection");
-  auto const nt_map_view_of_section_ptr =
-    detail::UnionCast<void*>(nt_map_view_of_section);
-  auto const nt_map_view_of_section_detour =
-    detail::UnionCast<void*>(&NtMapViewOfSectionDetour);
-  auto& detour = GetNtMapViewOfSectionDetour();
-  detour = std::make_unique<PatchDetour>(GetThisProcess(),
-                                         nt_map_view_of_section_ptr,
-                                         nt_map_view_of_section_detour);
-  detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection detoured.");
+  auto const& process = GetThisProcess();
+  auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
+  DetourFunc(process,
+             ntdll_mod,
+             "NtMapViewOfSection",
+             GetNtMapViewOfSectionDetour(),
+             NtMapViewOfSectionDetour);
 }
 
 void DetourNtUnmapViewOfSection()
 {
-  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
-  auto const nt_unmap_view_of_section =
-    FindProcedure(GetThisProcess(), ntdll, "NtUnmapViewOfSection");
-  auto const nt_unmap_view_of_section_ptr =
-    detail::UnionCast<void*>(nt_unmap_view_of_section);
-  auto const nt_unmap_view_of_section_detour =
-    detail::UnionCast<void*>(&NtUnmapViewOfSectionDetour);
-  auto& detour = GetNtUnmapViewOfSectionDetour();
-  detour = std::make_unique<PatchDetour>(GetThisProcess(),
-                                         nt_unmap_view_of_section_ptr,
-                                         nt_unmap_view_of_section_detour);
-  detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("NtUnmapViewOfSection detoured.");
+  auto const& process = GetThisProcess();
+  auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
+  DetourFunc(process,
+             ntdll_mod,
+             "NtUnmapViewOfSection",
+             GetNtUnmapViewOfSectionDetour(),
+             NtUnmapViewOfSectionDetour);
 }
 
 void UndetourNtMapViewOfSection()
 {
-  auto& detour = GetNtMapViewOfSectionDetour();
-  detour->Remove();
-  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection undetoured.");
-  detour = nullptr;
-
-  auto& ref_count = GetNtMapViewOfSectionRefCount();
-  while (ref_count.load())
-  {
-    HADESMEM_DETAIL_TRACE_A("Spinning on NtMapViewOfSection ref count.");
-  }
-  HADESMEM_DETAIL_TRACE_A("NtMapViewOfSection free of references.");
+  UndetourFunc(L"NtMapViewOfSection",
+               GetNtMapViewOfSectionDetour(),
+               GetNtMapViewOfSectionRefCount(),
+               true);
 }
 
 void UndetourNtUnmapViewOfSection()

@@ -31,16 +31,16 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
-std::atomic<std::uint32_t>&
-  GetRtlAddVectoredExceptionHandlerRefCount() HADESMEM_DETAIL_NOEXCEPT
+std::atomic<std::uint32_t>& GetRtlAddVectoredExceptionHandlerRefCount()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::atomic<std::uint32_t> ref_count;
   return ref_count;
 }
 
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
-  ULONG first_handler,
-  PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
+  ULONG first_handler, PVECTORED_EXCEPTION_HANDLER vectored_handler)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   hadesmem::detail::DetourRefCounter ref_count{
     GetRtlAddVectoredExceptionHandlerRefCount()};
@@ -69,20 +69,13 @@ namespace cerberus
 
 void DetourRtlAddVectoredExceptionHandler()
 {
-  Module const ntdll{GetThisProcess(), L"ntdll.dll"};
-  auto const rtl_add_vectored_exception_handler =
-    FindProcedure(GetThisProcess(), ntdll, "RtlAddVectoredExceptionHandler");
-  auto const rtl_add_vectored_exception_handler_ptr =
-    detail::UnionCast<void*>(rtl_add_vectored_exception_handler);
-  auto const rtl_add_vectored_exception_handler_detour =
-    detail::UnionCast<void*>(&RtlAddVectoredExceptionHandlerDetour);
-  auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
-  detour =
-    std::make_unique<PatchDetour>(GetThisProcess(),
-                                  rtl_add_vectored_exception_handler_ptr,
-                                  rtl_add_vectored_exception_handler_detour);
-  detour->Apply();
-  HADESMEM_DETAIL_TRACE_A("RtlAddVectoredExceptionHandler detoured.");
+  auto const& process = GetThisProcess();
+  auto const kernelbase_mod = ::GetModuleHandleW(L"ntdll");
+  DetourFunc(process,
+             kernelbase_mod,
+             "RtlAddVectoredExceptionHandler",
+             GetRtlAddVectoredExceptionHandlerDetour(),
+             RtlAddVectoredExceptionHandlerDetour);
 }
 
 void UndetourRtlAddVectoredExceptionHandler()
