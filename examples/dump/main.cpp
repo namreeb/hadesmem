@@ -330,16 +330,18 @@ int main(int argc, char* argv[])
 
     TCLAP::CmdLine cmd("PE file format dumper", ' ', HADESMEM_VERSION_STRING);
     TCLAP::ValueArg<DWORD> pid_arg(
-      "p", "pid", "Target process id", false, 0, "DWORD");
+      "", "pid", "Target process id", false, 0, "DWORD");
+    TCLAP::ValueArg<std::string> name_arg(
+      "", "name", "Target process name", false, "", "string");
     TCLAP::ValueArg<std::string> path_arg(
-      "f", "path", "Target path (file or directory)", false, "", "string");
-    TCLAP::SwitchArg all_arg("a", "all", "No target, dump everything");
-    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &path_arg, &all_arg};
+      "", "path", "Target path (file or directory)", false, "", "string");
+    TCLAP::SwitchArg all_arg("", "all", "No target, dump everything");
+    std::vector<TCLAP::Arg*> xor_args{&pid_arg, &name_arg, &path_arg, &all_arg};
     cmd.xorAdd(xor_args);
     TCLAP::SwitchArg warned_arg(
-      "w", "warned", "Dump list of files which cause warnings", cmd);
+      "", "warned", "Dump list of files which cause warnings", cmd);
     TCLAP::ValueArg<std::string> warned_file_arg(
-      "x",
+      "",
       "warned-file",
       "Dump warned list to file instead of stdout",
       false,
@@ -347,11 +349,11 @@ int main(int argc, char* argv[])
       "string",
       cmd);
     TCLAP::SwitchArg warned_file_dynamic_arg(
-      "y",
+      "",
       "warned-file-dynamic",
       "Dump warnings to file on the fly rather than at the end",
       cmd);
-    TCLAP::ValueArg<int> warned_type_arg("t",
+    TCLAP::ValueArg<int> warned_type_arg("",
                                          "warned-type",
                                          "Filter warned file using warned type",
                                          false,
@@ -426,6 +428,13 @@ int main(int argc, char* argv[])
           hadesmem::Error()
           << hadesmem::ErrorString("Failed to find requested process."));
       }
+    }
+    else if (name_arg.isSet())
+    {
+      auto const proc_name =
+        hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
+      auto const proc_entry = hadesmem::GetProcessEntryByName(proc_name, false);
+      DumpProcessEntry(proc_entry);
     }
     else if (path_arg.isSet())
     {

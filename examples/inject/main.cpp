@@ -21,65 +21,11 @@
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/str_conv.hpp>
-#include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/injector.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/process_entry.hpp>
-#include <hadesmem/process_list.hpp>
-
-namespace
-{
-
-DWORD FindProc(std::wstring const& proc_name, bool name_forced)
-{
-  std::wstring const proc_name_upper =
-    hadesmem::detail::ToUpperOrdinal(proc_name);
-  auto const compare_proc_name = [&](hadesmem::ProcessEntry const& proc_entry)
-  {
-    return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) ==
-           proc_name_upper;
-  };
-  hadesmem::ProcessList proc_list;
-  if (name_forced)
-  {
-    auto const proc_iter = std::find_if(
-      std::begin(proc_list), std::end(proc_list), compare_proc_name);
-    if (proc_iter == std::end(proc_list))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"Failed to find process."});
-    }
-
-    return proc_iter->GetId();
-  }
-  else
-  {
-    std::vector<hadesmem::ProcessEntry> found_procs;
-    std::copy_if(std::begin(proc_list),
-                 std::end(proc_list),
-                 std::back_inserter(found_procs),
-                 compare_proc_name);
-
-    if (found_procs.empty())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"Failed to find process."});
-    }
-
-    if (found_procs.size() > 1)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{
-          "Process name search found multiple matches. "
-          "Please specify a PID or use --name-forced."});
-    }
-
-    return found_procs.front().GetId();
-  }
-}
-}
+#include <hadesmem/process_helpers.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -89,11 +35,11 @@ int main(int argc, char* argv[])
 
     TCLAP::CmdLine cmd{"DLL injector", ' ', HADESMEM_VERSION_STRING};
     TCLAP::ValueArg<DWORD> pid_arg{
-      "p", "pid", "Target process id", false, 0, "DWORD"};
+      "", "pid", "Target process id", false, 0, "DWORD"};
     TCLAP::ValueArg<std::string> name_arg{
-      "n", "name", "Target process name", false, "", "string"};
+      "", "name", "Target process name", false, "", "string"};
     TCLAP::ValueArg<std::string> run_arg{
-      "r", "run", "Target process path (new instance)", false, "", "string"};
+      "", "run", "Target process path (new instance)", false, "", "string"};
     std::vector<TCLAP::Arg*> xor_args{&pid_arg, &name_arg, &run_arg};
     cmd.xorAdd(xor_args);
     TCLAP::SwitchArg name_forced_arg{
@@ -102,7 +48,7 @@ int main(int argc, char* argv[])
       "Default to first matched process name (no warning)",
       cmd};
     TCLAP::ValueArg<std::string> module_arg{
-      "m", "module", "Module path", true, "", "string", cmd};
+      "", "module", "Module path", true, "", "string", cmd};
     TCLAP::SwitchArg path_resolution_arg{
       "",
       "path-resolution",
@@ -111,25 +57,25 @@ int main(int argc, char* argv[])
     TCLAP::SwitchArg add_path_arg{
       "", "add-path", "Add module dir to (remote) search order", cmd};
     TCLAP::ValueArg<std::string> export_arg{
-      "e",
+      "",
       "export",
       "Module export name (DWORD_PTR (*) ())",
       false,
       "",
       "string",
       cmd};
-    TCLAP::SwitchArg inject_arg{"i", "inject", "Inject module"};
-    TCLAP::SwitchArg free_arg{"f", "free", "Free module"};
+    TCLAP::SwitchArg inject_arg{"", "inject", "Inject module"};
+    TCLAP::SwitchArg free_arg{"", "free", "Free module"};
     cmd.xorAdd(inject_arg, free_arg);
     TCLAP::MultiArg<std::string> arg_arg{
-      "a",
+      "",
       "arg",
       "Target process args (use once for each arg)",
       false,
       "string",
       cmd};
     TCLAP::ValueArg<std::string> work_dir_arg{
-      "w",
+      "",
       "work-dir",
       "Target process working directory",
       false,
@@ -208,27 +154,8 @@ int main(int argc, char* argv[])
         auto const proc_name =
           hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
         bool const name_forced = name_forced_arg.isSet();
-
-        // Guard against potential PID reuse race condition. Unlikely
-        // to ever happen in practice, but better safe than sorry.
-        DWORD proc_pid = 0;
-        DWORD proc_pid_2 = 0;
-        DWORD retries = 3;
-        do
-        {
-          proc_pid = FindProc(proc_name, name_forced);
-          process = std::make_unique<hadesmem::Process>(proc_pid);
-
-          proc_pid_2 = FindProc(proc_name, name_forced);
-          hadesmem::Process process_2{proc_pid_2};
-        } while (proc_pid != proc_pid_2 && retries--);
-
-        if (proc_pid != proc_pid_2)
-        {
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            hadesmem::Error{} << hadesmem::ErrorString{
-              "Could not get handle to target process (PID reuse race)."});
-        }
+        process = std::make_unique<hadesmem::Process>(
+          hadesmem::GetProcessByName(proc_name, name_forced));
       }
 
       HMODULE module = nullptr;

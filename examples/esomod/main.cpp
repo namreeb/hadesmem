@@ -21,8 +21,7 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_pattern.hpp>
 #include <hadesmem/process.hpp>
-#include <hadesmem/process_entry.hpp>
-#include <hadesmem/process_list.hpp>
+#include <hadesmem/process_helpers.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
@@ -34,43 +33,6 @@
 #include "time.hpp"
 #include "tone_mapping.hpp"
 #include "view_distances.hpp"
-
-namespace
-{
-
-DWORD FindProc(std::wstring const& proc_name)
-{
-  std::wstring const proc_name_upper =
-    hadesmem::detail::ToUpperOrdinal(proc_name);
-  auto const compare_proc_name = [&](hadesmem::ProcessEntry const& proc_entry)
-  {
-    return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) ==
-           proc_name_upper;
-  };
-  hadesmem::ProcessList proc_list;
-  std::vector<hadesmem::ProcessEntry> found_procs;
-  std::copy_if(std::begin(proc_list),
-               std::end(proc_list),
-               std::back_inserter(found_procs),
-               compare_proc_name);
-
-  if (found_procs.empty())
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"Failed to find process."});
-  }
-
-  if (found_procs.size() > 1)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{
-        "Process name search found multiple matches. "
-        "Please use --pid."});
-  }
-
-  return found_procs.front().GetId();
-}
-}
 
 int main(int argc, char* argv[])
 {
@@ -194,28 +156,9 @@ int main(int argc, char* argv[])
     }
     else
     {
-      // Guard against potential PID reuse race condition. Unlikely
-      // to ever happen in practice, but better safe than sorry.
-      DWORD proc_pid = 0;
-      DWORD proc_pid_2 = 0;
-      std::uint32_t retries = 3;
-      do
-      {
-        std::wstring const kProcName = L"eso.exe";
-
-        proc_pid = FindProc(kProcName);
-        process = std::make_unique<hadesmem::Process>(proc_pid);
-
-        proc_pid_2 = FindProc(kProcName);
-        hadesmem::Process process_2{proc_pid_2};
-      } while (proc_pid != proc_pid_2 && retries--);
-
-      if (proc_pid != proc_pid_2)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error{} << hadesmem::ErrorString{
-            "Could not get handle to target process (PID reuse race)."});
-      }
+      std::wstring const kProcName = L"eso.exe";
+      process = std::make_unique<hadesmem::Process>(
+        hadesmem::GetProcessByName(kProcName, false));
     }
 
     bool const set_fov_both = fov_arg.isSet();

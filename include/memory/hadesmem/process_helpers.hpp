@@ -3,19 +3,94 @@
 
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/error.hpp>
-#include <hadesmem/process.hpp>
+#include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/winternl.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/process_entry.hpp>
+#include <hadesmem/process_list.hpp>
 
 namespace hadesmem
 {
+
+inline ProcessEntry GetProcessEntryByName(std::wstring const& proc_name,
+                                          bool name_forced = false)
+{
+  std::wstring const proc_name_upper =
+    hadesmem::detail::ToUpperOrdinal(proc_name);
+  auto const compare_proc_name = [&](hadesmem::ProcessEntry const& proc_entry)
+  {
+    return hadesmem::detail::ToUpperOrdinal(proc_entry.GetName()) ==
+           proc_name_upper;
+  };
+  hadesmem::ProcessList proc_list;
+  if (name_forced)
+  {
+    auto const proc_iter = std::find_if(
+      std::begin(proc_list), std::end(proc_list), compare_proc_name);
+    if (proc_iter == std::end(proc_list))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"Failed to find process."});
+    }
+
+    return *proc_iter;
+  }
+  else
+  {
+    std::vector<hadesmem::ProcessEntry> found_procs;
+    std::copy_if(std::begin(proc_list),
+                 std::end(proc_list),
+                 std::back_inserter(found_procs),
+                 compare_proc_name);
+
+    if (found_procs.empty())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"Failed to find process."});
+    }
+
+    if (found_procs.size() > 1)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{
+          "Process name search found multiple matches."});
+    }
+
+    return found_procs.front();
+  }
+}
+
+inline Process GetProcessByName(std::wstring const& proc_name,
+                                bool name_forced = false)
+{
+  // Guard against potential PID reuse race condition. Unlikely
+  // to ever happen in practice, but better safe than sorry.
+  DWORD retries = 3;
+  do
+  {
+    hadesmem::Process process_1{
+      GetProcessEntryByName(proc_name, name_forced).GetId()};
+    hadesmem::Process process_2{
+      GetProcessEntryByName(proc_name, name_forced).GetId()};
+    if (process_1 == process_2)
+    {
+      return process_1;
+    }
+  } while (retries--);
+
+  HADESMEM_DETAIL_THROW_EXCEPTION(
+    hadesmem::Error{} << hadesmem::ErrorString{
+      "Could not get handle to target process (PID reuse race)."});
+}
 
 inline std::wstring GetPathNative(Process const& process)
 {
