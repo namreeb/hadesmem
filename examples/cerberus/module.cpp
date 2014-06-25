@@ -4,7 +4,6 @@
 #include "module.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <cstdint>
 #include <iterator>
 #include <memory>
@@ -40,25 +39,11 @@ std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetNtMapViewOfSectionRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
-}
-
 std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
   HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
-}
-
-std::atomic<std::uint32_t>& GetNtUnmapViewOfSectionRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
 }
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>&
@@ -89,10 +74,10 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{GetNtMapViewOfSectionRefCount()};
+  auto& detour = GetNtMapViewOfSectionDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  auto& detour = GetNtMapViewOfSectionDetour();
   auto const nt_map_view_of_section =
     detour->GetTrampoline<decltype(&NtMapViewOfSectionDetour)>();
   last_error_preserver.Revert();
@@ -206,11 +191,10 @@ extern "C" NTSTATUS WINAPI
   NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{
-    GetNtUnmapViewOfSectionRefCount()};
+  auto& detour = GetNtUnmapViewOfSectionDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  auto& detour = GetNtUnmapViewOfSectionDetour();
   auto const nt_unmap_view_of_section =
     detour->GetTrampoline<decltype(&NtUnmapViewOfSectionDetour)>();
   last_error_preserver.Revert();
@@ -301,18 +285,12 @@ void DetourNtUnmapViewOfSection()
 
 void UndetourNtMapViewOfSection()
 {
-  UndetourFunc(L"NtMapViewOfSection",
-               GetNtMapViewOfSectionDetour(),
-               GetNtMapViewOfSectionRefCount(),
-               true);
+  UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
 }
 
 void UndetourNtUnmapViewOfSection()
 {
-  UndetourFunc(L"NtUnmapViewOfSection",
-               GetNtUnmapViewOfSectionDetour(),
-               GetNtUnmapViewOfSectionRefCount(),
-               true);
+  UndetourFunc(L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
 }
 
 std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback)

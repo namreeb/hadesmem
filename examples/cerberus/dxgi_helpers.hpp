@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <dxgi.h>
 
 #include <hadesmem/config.hpp>
@@ -18,8 +20,12 @@ class DXGIFactoryWrapper
 public:
   DXGIFactoryWrapper(IDXGIDevice* device,
                      IDXGIAdapter* adapter,
-                     IDXGIFactory* factory)
-    : device_(device), adapter_(adapter), factory_(factory)
+                     IDXGIFactory* factory,
+                     std::uint32_t factory_revision)
+    : device_{device},
+      adapter_{adapter},
+      factory_{factory},
+      factory_revision_{factory_revision}
   {
   }
 
@@ -29,8 +35,10 @@ public:
 
 #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
 
-  DXGIFactoryWrapper(DXGIFactoryWrapper&& other)
-    : device_(other.device_), adapter_(other.adapter_), factory_(other.factory_)
+  DXGIFactoryWrapper(DXGIFactoryWrapper&& other) HADESMEM_DETAIL_NOEXCEPT
+    : device_(other.device_),
+      adapter_(other.adapter_),
+      factory_(other.factory_)
   {
     other.device_ = nullptr;
     other.adapter_ = nullptr;
@@ -38,6 +46,7 @@ public:
   }
 
   DXGIFactoryWrapper& operator=(DXGIFactoryWrapper&& other)
+    HADESMEM_DETAIL_NOEXCEPT
   {
     Cleanup();
 
@@ -65,7 +74,7 @@ public:
     Cleanup();
   }
 
-  void Cleanup()
+  void Cleanup() HADESMEM_DETAIL_NOEXCEPT
   {
     if (factory_)
     {
@@ -88,10 +97,16 @@ public:
     return factory_;
   }
 
+  std::uint32_t GetFactoryRevision() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return factory_revision_;
+  }
+
 private:
   IDXGIDevice* device_{};
   IDXGIAdapter* adapter_{};
   IDXGIFactory* factory_{};
+  std::uint32_t factory_revision_{};
 };
 
 DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device);

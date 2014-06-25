@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <climits>
 #include <cstdint>
 #include <locale>
@@ -235,7 +236,8 @@ public:
       detour_{other.detour_},
       trampoline_{std::move(other.trampoline_)},
       orig_{std::move(other.orig_)},
-      trampolines_{std::move(other.trampolines_)}
+      trampolines_{std::move(other.trampolines_)},
+      ref_count_{other.ref_count_.load()}
   {
     other.process_ = nullptr;
     other.applied_ = false;
@@ -264,6 +266,8 @@ public:
     orig_ = std::move(other.orig_);
 
     trampolines_ = std::move(other.trampolines_);
+
+    ref_count_ = other.ref_count_.load();
 
     return *this;
   }
@@ -470,6 +474,17 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
                                   std::is_pointer<FuncT>::value);
     return hadesmem::detail::UnionCastUnchecked<FuncT>(trampoline_->GetBase());
+  }
+
+  // Ref count is user-managed and only here for convenience purposes.
+  std::atomic<std::uint32_t>& GetRefCount()
+  {
+    return ref_count_;
+  }
+
+  std::atomic<std::uint32_t> const& GetRefCount() const
+  {
+    return ref_count_;
   }
 
 private:
@@ -824,5 +839,6 @@ private:
   std::unique_ptr<Allocator> trampoline_;
   std::vector<BYTE> orig_;
   std::vector<std::unique_ptr<Allocator>> trampolines_;
+  std::atomic<std::uint32_t> ref_count_;
 };
 }

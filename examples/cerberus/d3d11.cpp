@@ -4,7 +4,6 @@
 #include "d3d11.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <cstdint>
 #include <iterator>
 #include <memory>
@@ -43,25 +42,11 @@ std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceDetour()
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetD3D11CreateDeviceRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
-}
-
 std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceAndSwapChainDetour()
   HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
-}
-
-std::atomic<std::uint32_t>& GetD3D11CreateDeviceAndSwapChainRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
 }
 
 std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
@@ -83,7 +68,8 @@ extern "C" HRESULT WINAPI
                           ID3D11DeviceContext** immediate_context)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{GetD3D11CreateDeviceRefCount()};
+  auto& detour = GetD3D11CreateDeviceDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -98,7 +84,6 @@ extern "C" HRESULT WINAPI
     device,
     feature_level,
     immediate_context);
-  auto& detour = GetD3D11CreateDeviceDetour();
   auto const d3d11_create_device =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceDetour)>();
   last_error_preserver.Revert();
@@ -133,7 +118,8 @@ extern "C" HRESULT WINAPI
     hadesmem::cerberus::GetDXGIFactoryFromDevice(*device);
   if (auto const dxgi_factory = factory_wrapper.GetFactory())
   {
-    hadesmem::cerberus::DetourDXGIFactory(dxgi_factory);
+    hadesmem::cerberus::DetourDXGIFactoryByRevision(
+      dxgi_factory, factory_wrapper.GetFactoryRevision());
   }
 
   return ret;
@@ -153,8 +139,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   D3D_FEATURE_LEVEL* feature_level,
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{
-    GetD3D11CreateDeviceAndSwapChainRefCount()};
+  auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -171,7 +157,6 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
     device,
     feature_level,
     immediate_context);
-  auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
   auto const d3d11_create_device_and_swap_chain =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceAndSwapChainDetour)>();
   last_error_preserver.Revert();
@@ -196,7 +181,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 
     if (swap_chain)
     {
-      hadesmem::cerberus::DetourDXGISwapChain(*swap_chain);
+      hadesmem::cerberus::DetourDXGISwapChainByRevision(*swap_chain, 0);
     }
     else
     {
@@ -209,7 +194,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
         hadesmem::cerberus::GetDXGIFactoryFromDevice(*device);
       if (auto const dxgi_factory = factory_wrapper.GetFactory())
       {
-        hadesmem::cerberus::DetourDXGIFactory(dxgi_factory);
+        hadesmem::cerberus::DetourDXGIFactoryByRevision(
+          dxgi_factory, factory_wrapper.GetFactoryRevision());
       }
     }
     else
@@ -240,62 +226,35 @@ void InitializeD3D11()
 
 void DetourD3D11(HMODULE base)
 {
-  HADESMEM_DETAIL_TRACE_A("Called.");
-
-  auto& module = GetD3D11Module();
-  if (module.first)
-  {
-    HADESMEM_DETAIL_TRACE_A("D3D11 already detoured.");
-    return;
-  }
-
-  if (!base)
-  {
-    base = ::GetModuleHandleW(L"d3d11");
-  }
-
-  if (!base)
-  {
-    HADESMEM_DETAIL_TRACE_A("Failed to find D3D11 module.");
-    return;
-  }
-
   auto const& process = GetThisProcess();
-
-  module =
-    std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
-
-  DetourFunc(process,
-             base,
-             "D3D11CreateDevice",
-             GetD3D11CreateDeviceDetour(),
-             D3D11CreateDeviceDetour);
-  DetourFunc(process,
-             base,
-             "D3D11CreateDeviceAndSwapChain",
-             GetD3D11CreateDeviceAndSwapChainDetour(),
-             D3D11CreateDeviceAndSwapChainDetour);
+  auto& module = GetD3D11Module();
+  if (CommonDetourModule(process, L"D3D11", base, module))
+  {
+    DetourFunc(process,
+               base,
+               "D3D11CreateDevice",
+               GetD3D11CreateDeviceDetour(),
+               D3D11CreateDeviceDetour);
+    DetourFunc(process,
+               base,
+               "D3D11CreateDeviceAndSwapChain",
+               GetD3D11CreateDeviceAndSwapChainDetour(),
+               D3D11CreateDeviceAndSwapChainDetour);
+  }
 }
 
 void UndetourD3D11(bool remove)
 {
   auto& module = GetD3D11Module();
-  if (!module.first)
+  if (CommonUndetourModule(L"D3D11", module))
   {
-    HADESMEM_DETAIL_TRACE_A("D3D11 not detoured.");
-    return;
+    UndetourFunc(L"D3D11CreateDeviceAndSwapChain",
+                 GetD3D11CreateDeviceAndSwapChainDetour(),
+                 remove);
+    UndetourFunc(L"D3D11CreateDevice", GetD3D11CreateDeviceDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
   }
-
-  UndetourFunc(L"D3D11CreateDeviceAndSwapChain",
-               GetD3D11CreateDeviceAndSwapChainDetour(),
-               GetD3D11CreateDeviceAndSwapChainRefCount(),
-               remove);
-  UndetourFunc(L"D3D11CreateDevice",
-               GetD3D11CreateDeviceDetour(),
-               GetD3D11CreateDeviceRefCount(),
-               remove);
-
-  module = std::make_pair(nullptr, 0);
 }
 }
 }

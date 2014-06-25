@@ -7,6 +7,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
@@ -104,12 +105,12 @@ void TestPatchRaw()
 {
   hadesmem::Process const& process = GetThisProcess();
 
-  hadesmem::Allocator const test_mem(process, 0x1000);
+  hadesmem::Allocator const test_mem{process, 0x1000};
 
   std::vector<BYTE> const data = {0x00, 0x11, 0x22, 0x33, 0x44};
   BOOST_TEST_EQ(data.size(), 5UL);
 
-  hadesmem::PatchRaw patch(process, test_mem.GetBase(), data);
+  hadesmem::PatchRaw patch{process, test_mem.GetBase(), data};
 
   auto const orig = hadesmem::ReadVector<BYTE>(process, test_mem.GetBase(), 5);
 
@@ -127,7 +128,7 @@ void TestPatchRaw()
   BOOST_TEST(data == apply);
 }
 
-void TestPatchDetour()
+void GenerateBasicCall(asmjit::host::Compiler& c)
 {
   using HookMeFuncBuilderT = asmjit::FuncBuilder8<std::uint32_t,
                                                   std::int32_t,
@@ -139,8 +140,6 @@ void TestPatchDetour()
                                                   std::int32_t,
                                                   std::int32_t>;
 
-  asmjit::JitRuntime runtime;
-  asmjit::host::Compiler c(&runtime);
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   auto const call_conv = asmjit::host::kFuncConvHost;
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -149,18 +148,7 @@ void TestPatchDetour()
 #error "[HadesMem] Unsupported architecture."
 #endif
   c.addFunc(call_conv, HookMeFuncBuilderT());
-
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
-  c.nop();
+  c.getFunc()->setHint(asmjit::kFuncHintNaked, true);
 
   asmjit::host::GpVar a1(c, asmjit::kVarTypeInt32);
   c.setArg(0, a1);
@@ -198,24 +186,17 @@ void TestPatchDetour()
   c.ret(var);
 
   c.endFunc();
+}
 
-  auto const free_asmjit_func = [&](void* func)
-  {
-    runtime.release(func);
-  };
-  void* const hook_me_wrapper_raw = c.make();
-  std::unique_ptr<void, decltype(free_asmjit_func)> const
-    hook_me_wrapper_cleanup(hook_me_wrapper_raw, free_asmjit_func);
+void GenerateBasicJmp(asmjit::host::Assembler& a)
+{
+  a.jmp(reinterpret_cast<void*>(&HookMe));
+}
 
-  auto const volatile hook_me_wrapper =
-    hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
-
-  auto const hook_me_packaged = [=]()
-  {
-    return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
-  };
-  BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
-
+template <typename WrapperFunc, typename PackagedFunc>
+void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
+                           PackagedFunc hook_me_packaged)
+{
   hadesmem::Process const& process = GetThisProcess();
 
   auto& detour_1 = GetDetour1();
@@ -263,6 +244,133 @@ void TestPatchDetour()
   detour_1->Remove();
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
+
+  detour_2 = nullptr;
+  detour_1 = nullptr;
+}
+
+#if defined(HADESMEM_GCC)
+#pragma GCC visibility push(hidden)
+#endif // #if defined(HADESMEM_GCC)
+
+class AsmJitMemoryReleaser
+{
+public:
+  AsmJitMemoryReleaser(asmjit::JitRuntime& runtime, void* func)
+    : runtime_{&runtime}, func_{func}
+  {
+  }
+
+  AsmJitMemoryReleaser(AsmJitMemoryReleaser const& other) = delete;
+
+  AsmJitMemoryReleaser& operator=(AsmJitMemoryReleaser const& other) = delete;
+
+  AsmJitMemoryReleaser(AsmJitMemoryReleaser&& other)
+    : runtime_{other.runtime_}, func_{other.func_}
+  {
+    other.runtime_ = nullptr;
+    other.func_ = nullptr;
+  }
+
+  AsmJitMemoryReleaser& operator=(AsmJitMemoryReleaser&& other)
+  {
+    CleanupUnchecked();
+
+    std::swap(runtime_, other.runtime_);
+    std::swap(func_, other.func_);
+
+    return *this;
+  }
+
+  ~AsmJitMemoryReleaser()
+  {
+    CleanupUnchecked();
+  }
+
+  void Cleanup()
+  {
+    if (func_)
+    {
+      auto const error = runtime_->release(func_);
+      (void)error;
+      HADESMEM_DETAIL_ASSERT(error == 0);
+    }
+
+    runtime_ = nullptr;
+    func_ = nullptr;
+  }
+
+  void CleanupUnchecked()
+  {
+    try
+    {
+      Cleanup();
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+    }
+
+    runtime_ = nullptr;
+    func_ = nullptr;
+  }
+
+private:
+  asmjit::JitRuntime* runtime_;
+  void* func_;
+};
+
+#if defined(HADESMEM_GCC)
+#pragma GCC visibility pop
+#endif // #if defined(HADESMEM_GCC)
+
+using HookPackageData = std::tuple<decltype(&HookMe),
+                                   std::function<std::uint32_t()>,
+                                   AsmJitMemoryReleaser>;
+
+HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
+                                            asmjit::CodeGen& c)
+{
+  void* const hook_me_wrapper_raw = c.make();
+  AsmJitMemoryReleaser hook_me_wrapper_cleanup{runtime, hook_me_wrapper_raw};
+
+  auto const volatile hook_me_wrapper =
+    hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
+
+  auto const hook_me_packaged = [=]()
+  { return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8); };
+  BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
+
+  return std::make_tuple(
+    hook_me_wrapper, hook_me_packaged, std::move(hook_me_wrapper_cleanup));
+}
+
+void TestPatchDetourCall()
+{
+  asmjit::JitRuntime runtime;
+  asmjit::host::Compiler c{&runtime};
+  GenerateBasicCall(c);
+  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, c);
+  TestPatchDetourCommon(std::get<0>(wrapper_and_package),
+                        std::get<1>(wrapper_and_package));
+}
+
+void TestPatchDetourJmp()
+{
+  asmjit::JitRuntime runtime;
+  asmjit::host::Assembler a{&runtime};
+  GenerateBasicJmp(a);
+  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a);
+  TestPatchDetourCommon(std::get<0>(wrapper_and_package),
+                        std::get<1>(wrapper_and_package));
+}
+
+void TestPatchDetour()
+{
+  TestPatchDetourCall();
+  TestPatchDetourJmp();
 }
 
 int main()

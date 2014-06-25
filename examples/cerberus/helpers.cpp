@@ -64,21 +64,22 @@ void DetourFunc(Process const& process,
 
 void UndetourFunc(std::wstring const& name,
                   std::unique_ptr<hadesmem::PatchDetour>& detour,
-                  std::atomic<std::uint32_t>& ref_count,
                   bool remove)
 {
   if (detour)
   {
     remove ? detour->Remove() : detour->Detach();
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s undetoured.", name.c_str());
-    detour = nullptr;
 
+    auto& ref_count = detour->GetRefCount();
     while (ref_count.load())
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"Spinning on %s ref count.",
                                      name.c_str());
     }
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s free of references.", name.c_str());
+
+    detour = nullptr;
   }
   else
   {
@@ -130,6 +131,46 @@ void InitializeSupportForModule(
   RegisterOnUnmapCallback(on_unmap);
   HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnUnmap for %s.",
                                  module_name_upper.c_str());
+}
+
+bool CommonDetourModule(Process const& process,
+                        std::wstring const& name,
+                        HMODULE& base,
+                        std::pair<void*, SIZE_T>& detoured_mod)
+{
+  if (detoured_mod.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s already detoured.", name.c_str());
+    return false;
+  }
+
+  if (!base)
+  {
+    base = ::GetModuleHandleW(name.c_str());
+  }
+
+  if (!base)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Failed to find %s module.", name.c_str());
+    return false;
+  }
+
+  detoured_mod =
+    std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
+
+  return true;
+}
+
+bool CommonUndetourModule(std::wstring const& name,
+                          std::pair<void*, SIZE_T>& detoured_mod)
+{
+  if (!detoured_mod.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s not detoured.", name.c_str());
+    return false;
+  }
+
+  return true;
 }
 }
 }

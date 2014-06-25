@@ -4,7 +4,6 @@
 #include "process.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <cstdint>
 #include <iterator>
 #include <memory>
@@ -75,13 +74,6 @@ std::unique_ptr<hadesmem::PatchDetour>& GetCreateProcessInternalWDetour()
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetCreateProcessInternalWRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
-}
-
 extern "C" BOOL WINAPI
   CreateProcessInternalWDetour(HANDLE token,
                                LPCWSTR application_name,
@@ -96,8 +88,8 @@ extern "C" BOOL WINAPI
                                LPPROCESS_INFORMATION process_info,
                                PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{
-    GetCreateProcessInternalWRefCount()};
+  auto& detour = GetCreateProcessInternalWDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -126,7 +118,6 @@ extern "C" BOOL WINAPI
   {
     HADESMEM_DETAIL_TRACE_A("Debug flag detected.");
   }
-  auto& detour = GetCreateProcessInternalWDetour();
   auto const nt_create_user_process =
     detour->GetTrampoline<decltype(&CreateProcessInternalWDetour)>();
   last_error_preserver.Revert();
@@ -300,10 +291,8 @@ void DetourCreateProcessInternalW()
 
 void UndetourCreateProcessInternalW()
 {
-  UndetourFunc(L"CreateProcessInternalW",
-               GetCreateProcessInternalWDetour(),
-               GetCreateProcessInternalWRefCount(),
-               true);
+  UndetourFunc(
+    L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), true);
 }
 }
 }

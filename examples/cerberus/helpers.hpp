@@ -26,7 +26,7 @@ void DetourFunc(Process const& process,
                 std::wstring const& name,
                 void* interface_ptr,
                 std::size_t index,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                std::unique_ptr<PatchDetour>& detour,
                 void* detour_fn);
 
 template <typename Func>
@@ -34,7 +34,7 @@ void DetourFunc(Process const& process,
                 std::wstring const& name,
                 void* interface_ptr,
                 std::size_t index,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                std::unique_ptr<PatchDetour>& detour,
                 Func detour_fn)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
@@ -51,14 +51,14 @@ void DetourFunc(Process const& process,
 void DetourFunc(Process const& process,
                 HMODULE base,
                 std::string const& name,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                std::unique_ptr<PatchDetour>& detour,
                 void* detour_fn);
 
 template <typename Func>
 void DetourFunc(Process const& process,
                 HMODULE base,
                 std::string const& name,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
+                std::unique_ptr<PatchDetour>& detour,
                 Func detour_fn)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
@@ -69,8 +69,7 @@ void DetourFunc(Process const& process,
 }
 
 void UndetourFunc(std::wstring const& name,
-                  std::unique_ptr<hadesmem::PatchDetour>& detour,
-                  std::atomic<std::uint32_t>& ref_count,
+                  std::unique_ptr<PatchDetour>& detour,
                   bool remove);
 
 void InitializeSupportForModule(
@@ -78,5 +77,13 @@ void InitializeSupportForModule(
   std::function<void(HMODULE)> const& detour_func,
   std::function<void(bool)> const& undetour_func,
   std::function<std::pair<void*, SIZE_T>&()> const& get_module_func);
+
+bool CommonDetourModule(Process const& process,
+                        std::wstring const& name,
+                        HMODULE& base,
+                        std::pair<void*, SIZE_T>& detoured_mod);
+
+bool CommonUndetourModule(std::wstring const& name,
+                          std::pair<void*, SIZE_T>& detoured_mod);
 }
 }

@@ -3,7 +3,6 @@
 
 #include "exception.hpp"
 
-#include <atomic>
 #include <memory>
 
 #include <windows.h>
@@ -31,24 +30,16 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
-std::atomic<std::uint32_t>& GetRtlAddVectoredExceptionHandlerRefCount()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::atomic<std::uint32_t> ref_count;
-  return ref_count;
-}
-
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   ULONG first_handler, PVECTORED_EXCEPTION_HANDLER vectored_handler)
   HADESMEM_DETAIL_NOEXCEPT
 {
-  hadesmem::detail::DetourRefCounter ref_count{
-    GetRtlAddVectoredExceptionHandlerRefCount()};
+  auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%lu] [%p].", first_handler, vectored_handler);
-  auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
   auto const rtl_add_vectored_exception_handler =
     detour->GetTrampoline<decltype(&RtlAddVectoredExceptionHandlerDetour)>();
   last_error_preserver.Revert();
@@ -82,7 +73,6 @@ void UndetourRtlAddVectoredExceptionHandler()
 {
   UndetourFunc(L"RtlAddVectoredExceptionHandler",
                GetRtlAddVectoredExceptionHandlerDetour(),
-               GetRtlAddVectoredExceptionHandlerRefCount(),
                true);
 }
 }

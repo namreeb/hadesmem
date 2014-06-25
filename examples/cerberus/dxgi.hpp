@@ -3,12 +3,14 @@
 
 #pragma once
 
+#include <cstdint>
 #include <utility>
 #include <functional>
 
 #include <windows.h>
 
 #include <dxgi.h>
+#include <dxgi1_3.h>
 
 namespace hadesmem
 {
@@ -29,8 +31,10 @@ std::size_t RegisterOnFrameCallbackDXGI(
 
 void UnregisterOnFrameCallbackDXGI(std::size_t id);
 
-void DetourDXGISwapChain(IDXGISwapChain* swap_chain);
+void DetourDXGISwapChainByRevision(IDXGISwapChain* swap_chain,
+                                   std::uint32_t revision);
 
-void DetourDXGIFactory(IDXGIFactory* dxgi_factory);
+void DetourDXGIFactoryByRevision(IDXGIFactory* dxgi_factory,
+                                 std::uint32_t revision);
 }
 }
