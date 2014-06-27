@@ -1,15 +1,11 @@
 # src/pugixml/jamfile.v2
 
-# Use PugiXML library
-import os ;
-local PUGIXML_ROOT = [ os.environ PUGIXML_ROOT ] ;
-
 alias pugixml
   :
   :
   :
   :
-    <include>"$(PUGIXML_ROOT)/src/"
+    <include>"pugixml/src/"
 
     <define>PUGIXML_HEADER_ONLY
     <define>PUGIXML_WCHAR_MODE

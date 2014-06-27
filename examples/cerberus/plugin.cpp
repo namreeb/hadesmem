@@ -18,6 +18,11 @@
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/trace.hpp>
 
+#if defined(HADESMEM_INTEL)
+#pragma warning(push)
+#pragma warning(disable : 1345)
+#endif // #if defined(HADESMEM_INTEL)
+
 namespace
 {
 
@@ -283,3 +288,7 @@ void UnloadPlugins()
 }
 }
 }
+
+#if defined(HADESMEM_INTEL)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_INTEL)

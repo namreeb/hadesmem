@@ -394,14 +394,16 @@ public:
           resolve_rel(insn_base, insn_target, insn_len);
         void* const jump_target =
           is_jimm ? resolved_target : Read<void*>(*process_, resolved_target);
-        HADESMEM_DETAIL_TRACE_FORMAT_A("Jump target = %p.", jump_target);
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Jump/call target = %p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
         {
+          HADESMEM_DETAIL_TRACE_A("Writing resolved jump.");
           tramp_cur += WriteJump(tramp_cur, jump_target, true);
         }
         else
         {
           HADESMEM_DETAIL_ASSERT(ud_obj.mnemonic == UD_Icall);
+          HADESMEM_DETAIL_TRACE_A("Writing resolved call.");
           tramp_cur += WriteCall(tramp_cur, jump_target);
         }
       }
@@ -596,6 +598,80 @@ private:
 #endif
   }
 
+  std::vector<std::uint8_t> GenJump32(void* address, void* target)
+  {
+    std::vector<std::uint8_t> buf = {0xE9, 0xEB, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 1;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
+
+  std::vector<std::uint8_t> GenJumpTramp64(void* address, void* target)
+  {
+    std::vector<std::uint8_t> buf = {0xFF, 0x25, 0xEF, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 2;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
+
+  std::vector<std::uint8_t> GenPush32Ret(void* target)
+  {
+    std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
+                                     0x68,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // RET
+                                     0xC3};
+    auto const op_len = 1;
+    auto const target_low = static_cast<std::uint32_t>(
+      reinterpret_cast<std::uintptr_t>(target) & 0xFFFFFFFF);
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) = target_low;
+    return buf;
+  }
+
+  std::vector<std::uint8_t> GenPush64Ret(void* target)
+  {
+    std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
+                                     0x68,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
+                                     0xC7,
+                                     0x44,
+                                     0x24,
+                                     0x04,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // RET
+                                     0xC3};
+    auto const low_data_offs = 1;
+    auto const high_data_offs = 9;
+    auto const target_uint = reinterpret_cast<std::uint64_t>(target);
+    auto const target_high =
+      static_cast<std::uint32_t>((target_uint >> 32) & 0xFFFFFFFF);
+    auto const target_low =
+      static_cast<std::uint32_t>(target_uint & 0xFFFFFFFF);
+    *reinterpret_cast<std::uint32_t*>(&buf[low_data_offs]) = target_low;
+    *reinterpret_cast<std::uint32_t*>(&buf[high_data_offs]) = target_high;
+    return buf;
+  }
+
   std::size_t
     WriteJump(void* address, void* target, bool push_ret_fallback = false)
   {
@@ -605,30 +681,14 @@ private:
       target,
       static_cast<std::uint32_t>(push_ret_fallback));
 
-    asmjit::JitRuntime runtime;
-    std::size_t expected_stub_size = 0;
     std::vector<std::uint8_t> jump_buf;
-    bool asmjit_trampoline = false;
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-    asmjit::x64::Assembler jit(&runtime);
     if (IsNear(address, target))
     {
       HADESMEM_DETAIL_TRACE_A("Using relative jump.");
-
-      // JMP <Target, Relative>
-      jit.jmp(target);
-
-      // AsmJit allocates space for a trampoline in case the jump destination
-      // is out of range. We've already accounted for that though, so after
-      // code generation we just want to ensure the trampoline is unused
-      // (otherwise we -- or asmjit -- have a bug) and then drop it.
-      asmjit_trampoline = true;
-
-      // Asmjit emits a 6-byte JMP/CALL with a REX prefix so it can be patched
-      // to a JMP QWORD PTR if required (6 bytes for the JMP/CALL, 8 bytes for
-      // the trampoline).
-      expected_stub_size = 0xE;
+      jump_buf = GenJump32(address, target);
+      HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
     }
     else
     {
@@ -653,14 +713,8 @@ private:
 
         trampolines_.emplace_back(std::move(trampoline));
 
-        // JMP QWORD PTR <Trampoline, Relative>
-        asmjit::Label label(jit.newLabel());
-        jit.bind(label);
-        std::intptr_t const disp = static_cast<std::uint8_t*>(tramp_addr) -
-                                   static_cast<std::uint8_t*>(address);
-        jit.jmp(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
-
-        expected_stub_size = kJumpSize64;
+        jump_buf = GenJumpTramp64(address, tramp_addr);
+        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize64);
       }
       else
       {
@@ -674,88 +728,28 @@ private:
 
         HADESMEM_DETAIL_TRACE_A("Using push/ret 'jump'.");
 
-        auto const target_uint = reinterpret_cast<std::uintptr_t>(target);
-        auto const target_high =
-          static_cast<std::uint32_t>((target_uint >> 32) & 0xFFFFFFFF);
-        auto const target_low =
-          static_cast<std::uint32_t>(target_uint & 0xFFFFFFFF);
-
+        auto const target_high = static_cast<std::uint32_t>(
+          (reinterpret_cast<std::uintptr_t>(target) >> 32) & 0xFFFFFFFF);
         if (target_high)
         {
           HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is big.");
-
-          // PUSH DWORD <Target Low> ; Actually allocates 64-bytes of stack
-          // space
-          // MOV DWORD PTR [RSP+4], <Target High>
-          // RET
-          jit.push(target_low);
-          // We could safe a few bytes here where this is some easy-to-generate
-          // pattern (e.g. 0xFFFFFFFF), but we'll worry about that if we ever
-          // actually need it.
-          jit.mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, 4), target_high);
-          jit.ret();
-
-          expected_stub_size = kPushRetSizeBig64;
+          jump_buf = GenPush64Ret(target);
+          HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize64);
         }
         else
         {
           HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is small.");
-
-          // PUSH DWORD <Target Low> ; Actually allocates 64-bytes of stack
-          // space
-          // RET
-          jit.push(target_low);
-          jit.ret();
-
-          expected_stub_size = kPushRetSizeSmall64;
+          jump_buf = GenPush32Ret(target);
+          HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize32);
         }
       }
     }
-
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-    (void)push_ret_fallback;
-    asmjit::x86::Assembler jit(&runtime);
-    // JMP <Target, Relative>
-    jit.jmp(target);
-
-    expected_stub_size = kJumpSize32;
+    HADESMEM_DETAIL_TRACE_A("Using relative jump.");
+    jump_buf = GenJump32(address, target);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-
-    std::size_t const stub_size = jit.getCodeSize();
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Stub size = 0n%Iu, Expected stub size = 0n%Iu.",
-      stub_size,
-      expected_stub_size);
-    HADESMEM_DETAIL_ASSERT(stub_size == expected_stub_size);
-    if (stub_size != expected_stub_size)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                      << ErrorString{"Unexpected stub size."});
-    }
-
-    jump_buf.resize(stub_size);
-
-    std::size_t const stub_size_real =
-      jit.relocCode(jump_buf.data(), reinterpret_cast<std::uintptr_t>(address));
-
-    if (asmjit_trampoline == true)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Real stub size = 0n%Iu.", stub_size_real);
-      auto const kAsmJitJmpSize32 = kJumpSize32 + 1;
-      HADESMEM_DETAIL_ASSERT(stub_size_real == kAsmJitJmpSize32);
-      if (stub_size_real != kAsmJitJmpSize32)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error{} << ErrorString{"Unexpected real stub size."});
-      }
-      jump_buf.erase(std::begin(jump_buf) + stub_size_real, std::end(jump_buf));
-      jump_buf.erase(std::begin(jump_buf));
-      // We removed the prefix so we need to adjust the displacement.
-      *reinterpret_cast<std::uint32_t*>(&jump_buf[1]) += 1;
-      HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
-    }
 
     WriteVector(*process_, address, jump_buf);
 
@@ -764,6 +758,9 @@ private:
 
   std::size_t WriteCall(void* address, void* target)
   {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Address = %p, Target = %p", address, target);
+
     asmjit::JitRuntime runtime;
     std::size_t expected_stub_size = 0;
 
@@ -822,8 +819,8 @@ private:
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   static std::size_t const kJumpSize64 = 6;
   static std::size_t const kCallSize64 = 6;
-  static std::size_t const kPushRetSizeBig64 = 14;
-  static std::size_t const kPushRetSizeSmall64 = 6;
+  static std::size_t const kPushRetSize64 = 14;
+  static std::size_t const kPushRetSize32 = 6;
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
   static std::size_t const kJumpSize64 = kJumpSize32;
   static std::size_t const kCallSize64 = kCallSize32;

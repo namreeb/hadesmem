@@ -101,12 +101,7 @@ private:
   {
     auto const handle_check = [&](MODULEENTRY32W const& entry) -> bool
     {
-      if (entry.hModule == handle || !handle)
-      {
-        return true;
-      }
-
-      return false;
+      return (entry.hModule == handle || !handle);
     };
 
     InitializeIf(handle_check);
@@ -120,22 +115,8 @@ private:
 
     auto const path_check = [&](MODULEENTRY32W const& entry) -> bool
     {
-      if (is_path)
-      {
-        if (detail::ArePathsEquivalent(path, entry.szExePath))
-        {
-          return true;
-        }
-      }
-      else
-      {
-        if (path_upper == detail::ToUpperOrdinal(entry.szModule))
-        {
-          return true;
-        }
-      }
-
-      return false;
+      return is_path ? (detail::ArePathsEquivalent(path, entry.szExePath))
+                     : (path_upper == detail::ToUpperOrdinal(entry.szModule));
     };
 
     InitializeIf(path_check);

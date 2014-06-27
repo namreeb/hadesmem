@@ -72,5 +72,5 @@ lib plugin
     [ glob plugin/*.cpp ]
     comctl32
     gdi32
-	ole32
+    ole32
   ;

@@ -4,7 +4,6 @@
 #include "dxgi_helpers.hpp"
 
 #include <dxgi.h>
-#include <dxgi1_3.h>
 
 #include <hadesmem/detail/trace.hpp>
 
@@ -19,7 +18,7 @@ DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device)
   IDXGIDevice* dxgi_device = nullptr;
   IDXGIAdapter* dxgi_adapter = nullptr;
   IDXGIFactory* dxgi_factory = nullptr;
-  std::uint32_t factory_revision = 2;
+  std::uint32_t factory_revision = 1;
 
   try
   {
@@ -44,23 +43,18 @@ DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device)
     }
 
     if (FAILED(dxgi_adapter->GetParent(
-          __uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgi_factory))))
+          __uuidof(IDXGIFactory1), reinterpret_cast<void**>(&dxgi_factory))))
     {
+
       --factory_revision;
       if (FAILED(dxgi_adapter->GetParent(
-            __uuidof(IDXGIFactory1), reinterpret_cast<void**>(&dxgi_factory))))
+            __uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgi_factory))))
       {
-
-        --factory_revision;
-        if (FAILED(dxgi_adapter->GetParent(
-              __uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgi_factory))))
-        {
-          DWORD const last_error = ::GetLastError();
-          HADESMEM_DETAIL_THROW_EXCEPTION(
-            hadesmem::Error{}
-            << hadesmem::ErrorString{"IDXGIAdapter::GetParent failed."}
-            << hadesmem::ErrorCodeWinLast{last_error});
-        }
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error{}
+          << hadesmem::ErrorString{"IDXGIAdapter::GetParent failed."}
+          << hadesmem::ErrorCodeWinLast{last_error});
       }
     }
   }

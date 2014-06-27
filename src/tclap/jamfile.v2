@@ -1,13 +1,9 @@
 # src/tclap/jamfile.v2
 
-# Use TCLAP library
-import os ;
-local TCLAP_ROOT = [ os.environ TCLAP_ROOT ] ;
-
 alias tclap
   :
   :
   :
   :
-    <include>"$(TCLAP_ROOT)/include/"
+    <include>"tclap/include/"
   ;

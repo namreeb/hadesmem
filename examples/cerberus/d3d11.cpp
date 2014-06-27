@@ -27,7 +27,6 @@
 
 #include "callbacks.hpp"
 #include "dxgi.hpp"
-#include "dxgi_helpers.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 #include "module.hpp"
@@ -114,13 +113,7 @@ extern "C" HRESULT WINAPI
     return ret;
   }
 
-  auto const factory_wrapper =
-    hadesmem::cerberus::GetDXGIFactoryFromDevice(*device);
-  if (auto const dxgi_factory = factory_wrapper.GetFactory())
-  {
-    hadesmem::cerberus::DetourDXGIFactoryByRevision(
-      dxgi_factory, factory_wrapper.GetFactoryRevision());
-  }
+  hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
 
   return ret;
 }
@@ -181,7 +174,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 
     if (swap_chain)
     {
-      hadesmem::cerberus::DetourDXGISwapChainByRevision(*swap_chain, 0);
+      hadesmem::cerberus::DetourDXGISwapChain(*swap_chain);
     }
     else
     {
@@ -190,13 +183,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 
     if (device)
     {
-      auto const factory_wrapper =
-        hadesmem::cerberus::GetDXGIFactoryFromDevice(*device);
-      if (auto const dxgi_factory = factory_wrapper.GetFactory())
-      {
-        hadesmem::cerberus::DetourDXGIFactoryByRevision(
-          dxgi_factory, factory_wrapper.GetFactoryRevision());
-      }
+      hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
     }
     else
     {
