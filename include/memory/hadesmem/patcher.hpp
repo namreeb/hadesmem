@@ -13,10 +13,6 @@
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <asmjit/asmjit.h>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
-#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <udis86.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -329,7 +325,7 @@ public:
 
     bool detour_near = IsNear(target_, detour_);
     HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
-    std::size_t const jump_size = detour_near ? kJumpSize32 : kJumpSize64;
+    std::size_t const jump_size = detour_near ? kJmpSize32 : kJmpSize64;
 
     std::uint32_t instr_size = 0;
     do
@@ -431,7 +427,7 @@ public:
 
     HADESMEM_DETAIL_TRACE_A("Writing jump to detour.");
 
-    WriteJump(target_, detour_);
+    WriteJump(target_, detour_, false);
 
     FlushInstructionCache(*process_, target_, instr_size);
 
@@ -598,7 +594,7 @@ private:
 #endif
   }
 
-  std::vector<std::uint8_t> GenJump32(void* address, void* target)
+  std::vector<std::uint8_t> GenJmp32(void* address, void* target)
   {
     std::vector<std::uint8_t> buf = {0xE9, 0xEB, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
@@ -611,9 +607,35 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenJumpTramp64(void* address, void* target)
+  std::vector<std::uint8_t> GenCall32(void* address, void* target)
+  {
+    std::vector<std::uint8_t> buf = {0xE8, 0xEB, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 1;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
+
+  std::vector<std::uint8_t> GenJmpTramp64(void* address, void* target)
   {
     std::vector<std::uint8_t> buf = {0xFF, 0x25, 0xEF, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 2;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
+
+  std::vector<std::uint8_t> GenCallTramp64(void* address, void* target)
+  {
+    std::vector<std::uint8_t> buf = {0xFF, 0x15, 0xEF, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
     auto const op_len = 2;
     auto const disp = reinterpret_cast<std::uintptr_t>(target) -
@@ -673,7 +695,7 @@ private:
   }
 
   std::size_t
-    WriteJump(void* address, void* target, bool push_ret_fallback = false)
+    WriteJump(void* address, void* target, bool push_ret_fallback)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Address = %p, Target = %p, Push Ret Fallback = %u.",
@@ -687,8 +709,8 @@ private:
     if (IsNear(address, target))
     {
       HADESMEM_DETAIL_TRACE_A("Using relative jump.");
-      jump_buf = GenJump32(address, target);
-      HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize32);
+      jump_buf = GenJmp32(address, target);
+      HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize32);
     }
     else
     {
@@ -713,8 +735,8 @@ private:
 
         trampolines_.emplace_back(std::move(trampoline));
 
-        jump_buf = GenJumpTramp64(address, tramp_addr);
-        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJumpSize64);
+        jump_buf = GenJmpTramp64(address, tramp_addr);
+        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize64);
       }
       else
       {
@@ -746,7 +768,8 @@ private:
     }
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
     HADESMEM_DETAIL_TRACE_A("Using relative jump.");
-    jump_buf = GenJump32(address, target);
+    jump_buf = GenJmp32(address, target);
+    HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize32);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
@@ -761,68 +784,44 @@ private:
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Address = %p, Target = %p", address, target);
 
-    asmjit::JitRuntime runtime;
-    std::size_t expected_stub_size = 0;
+    std::vector<std::uint8_t> call_buf;
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-    asmjit::x64::Assembler jit(&runtime);
     std::unique_ptr<Allocator> trampoline = AllocatePageNear(address);
 
     PVOID tramp_addr = trampoline->GetBase();
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Using trampoline call. Trampoline = %p.",
+                                   tramp_addr);
 
     Write(*process_, tramp_addr, reinterpret_cast<std::uintptr_t>(target));
 
     trampolines_.emplace_back(std::move(trampoline));
 
-    // CALL QWORD PTR <Trampoline, Relative>
-    asmjit::Label label(jit.newLabel());
-    jit.bind(label);
-    std::intptr_t const disp = reinterpret_cast<std::intptr_t>(tramp_addr) -
-                               reinterpret_cast<std::intptr_t>(address) -
-                               sizeof(std::int32_t);
-    jit.call(asmjit::x64::qword_ptr(label, static_cast<std::int32_t>(disp)));
-
-    expected_stub_size = kCallSize64;
+    call_buf = GenCallTramp64(address, tramp_addr);
+    HADESMEM_DETAIL_ASSERT(call_buf.size() == kCallSize64);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-    asmjit::x86::Assembler jit(&runtime);
-    // CALL <Target, Relative>
-    jit.call(target);
-
-    expected_stub_size = kCallSize32;
+    HADESMEM_DETAIL_TRACE_A("Using relative call.");
+    call_buf = GenCall32(address, target);
+    HADESMEM_DETAIL_ASSERT(call_buf.size() == kCallSize32);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    std::size_t const stub_size = jit.getCodeSize();
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Stub size = 0n%Iu, Expected stub size = 0n%Iu.",
-      static_cast<std::size_t>(stub_size),
-      static_cast<std::size_t>(expected_stub_size));
-    HADESMEM_DETAIL_ASSERT(stub_size == expected_stub_size);
-    if (stub_size != expected_stub_size)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                      << ErrorString{"Unexpected stub size."});
-    }
+    WriteVector(*process_, address, call_buf);
 
-    std::vector<std::uint8_t> jump_buf(stub_size);
-
-    jit.relocCode(jump_buf.data(), reinterpret_cast<std::uintptr_t>(address));
-
-    WriteVector(*process_, address, jump_buf);
-
-    return stub_size;
+    return call_buf.size();
   }
 
-  static std::size_t const kJumpSize32 = 5;
+  static std::size_t const kJmpSize32 = 5;
   static std::size_t const kCallSize32 = 5;
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  static std::size_t const kJumpSize64 = 6;
+  static std::size_t const kJmpSize64 = 6;
   static std::size_t const kCallSize64 = 6;
   static std::size_t const kPushRetSize64 = 14;
   static std::size_t const kPushRetSize32 = 6;
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  static std::size_t const kJumpSize64 = kJumpSize32;
+  static std::size_t const kJmpSize64 = kJmpSize32;
   static std::size_t const kCallSize64 = kCallSize32;
 #else
 #error "[HadesMem] Unsupported architecture."
