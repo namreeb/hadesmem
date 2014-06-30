@@ -158,6 +158,8 @@ public:
     other.base_ = nullptr;
     other.unload_ = false;
     other.call_export_ = false;
+
+    return *this;
   }
 
   ~Plugin()
