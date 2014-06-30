@@ -27,6 +27,7 @@
 #include "module.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
+#include "render.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
 // purposes only.
@@ -172,6 +173,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourD3D101(nullptr);
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
+
+    hadesmem::cerberus::InitializeRender();
 
     hadesmem::cerberus::LoadPlugins();
 

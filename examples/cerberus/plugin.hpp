@@ -6,6 +6,7 @@
 #include "d3d9.hpp"
 #include "dxgi.hpp"
 #include "module.hpp"
+#include "render.hpp"
 
 namespace hadesmem
 {
@@ -73,6 +74,8 @@ public:
   virtual DXGIInterface* GetDXGIInterface() = 0;
 
   virtual ModuleInterface* GetModuleInterface() = 0;
+
+  virtual RenderInterface* GetRenderInterface() = 0;
 };
 }
 }

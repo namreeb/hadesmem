@@ -22,6 +22,8 @@
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/trace.hpp>
 
+#include "callbacks.hpp"
+
 #if defined(HADESMEM_INTEL)
 #pragma warning(push)
 #pragma warning(disable : 1345)
@@ -176,6 +178,11 @@ public:
   virtual hadesmem::cerberus::ModuleInterface* GetModuleInterface() final
   {
     return &module_;
+  }
+
+  virtual hadesmem::cerberus::RenderInterface* GetRenderInterface() final
+  {
+    return &hadesmem::cerberus::GetRenderInterface();
   }
 
   void Unload()

@@ -7,6 +7,8 @@
 #include <map>
 #include <mutex>
 
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/srw_lock.hpp>
 
 namespace hadesmem
@@ -43,13 +45,22 @@ public:
     (void)num_removed;
   }
 
-  template <typename... Args> void Run(Args&&... args) const
+  template <typename... Args> void Run(Args&&... args) const HADESMEM_DETAIL_NOEXCEPT
   {
     hadesmem::detail::AcquireSRWLock lock(
       &srw_lock_, hadesmem::detail::SRWLockType::Shared);
     for (auto const& callback : callbacks_)
     {
-      callback.second(std::forward<Args&&>(args)...);
+      try
+      {
+        callback.second(std::forward<Args&&>(args)...);
+      }
+      catch (...)
+      {
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information().c_str());
+        HADESMEM_DETAIL_ASSERT(false);
+      }
     }
   }
 

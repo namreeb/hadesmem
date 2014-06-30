@@ -65,6 +65,7 @@ lib injecttest
 lib cerberus
   :
     [ glob cerberus/*.cpp ]
+    gdi32
   ;
 
 lib plugin

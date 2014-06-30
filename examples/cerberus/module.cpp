@@ -235,21 +235,10 @@ extern "C" NTSTATUS WINAPI
     return ret;
   }
 
-  HADESMEM_DETAIL_TRACE_NOISY_A("Current process.");
+  HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded. Current process.");
 
-  try
-  {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
-
-    auto& callbacks = GetOnUnmapCallbacks();
-    callbacks.Run(reinterpret_cast<HMODULE>(base));
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
-  }
+  auto& callbacks = GetOnUnmapCallbacks();
+  callbacks.Run(reinterpret_cast<HMODULE>(base));
 
   return ret;
 }

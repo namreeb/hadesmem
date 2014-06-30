@@ -95,17 +95,8 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
 
-  try
-  {
-    auto& callbacks = GetOnFrameCallbacksDXGI();
-    callbacks.Run(swap_chain);
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
-  }
+  auto& callbacks = GetOnFrameCallbacksDXGI();
+  callbacks.Run(swap_chain);
 
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();

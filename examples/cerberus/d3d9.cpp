@@ -91,17 +91,8 @@ extern "C" HRESULT WINAPI IDirect3DDevice9EndSceneDetour(
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
 
-  try
-  {
-    auto& callbacks = GetOnFrameCallbacksD3D9();
-    callbacks.Run(device);
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
-  }
+  auto& callbacks = GetOnFrameCallbacksD3D9();
+  callbacks.Run(device);
 
   auto const end_scene =
     detour->GetTrampoline<decltype(&IDirect3DDevice9EndSceneDetour)>();
