@@ -256,6 +256,7 @@ extern "C" BOOL WINAPI
                             hadesmem::InjectFlags::kAddToSearchOrder);
       HADESMEM_DETAIL_TRACE_FORMAT_A("Injected module. [%p]", module);
       auto const export_result = hadesmem::CallExport(process, module, "Load");
+      (void)export_result;
       HADESMEM_DETAIL_TRACE_FORMAT_A("Called export. [%Iu] [%lu]",
                                      export_result.GetReturnValue(),
                                      export_result.GetLastError());

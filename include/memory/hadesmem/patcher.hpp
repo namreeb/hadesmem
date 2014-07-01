@@ -697,6 +697,7 @@ private:
   std::size_t
     WriteJump(void* address, void* target, bool push_ret_fallback)
   {
+    (void)push_ret_fallback;
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Address = %p, Target = %p, Push Ret Fallback = %u.",
       address,

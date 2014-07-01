@@ -75,6 +75,9 @@ project memory
     <define>WINVER=_WIN32_WINNT_VISTA
     <define>_WIN32_WINNT=_WIN32_WINNT_VISTA
     
+    # Disable tracing on release builds
+    <variant>release:<define>HADESMEM_NO_TRACE
+    
     # Compile for x86/x64, with static linking to the multi-threaded runtime.
     <architecture>x86
     <threading>multi

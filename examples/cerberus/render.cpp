@@ -103,7 +103,7 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
     }
 
     auto const create_font_hr = render_info.fw1_factory_->CreateFontWrapper(
-      render_info.device_, L"Tahoma", &render_info.font_wrapper_);
+      render_info.device_, L"Consolas", &render_info.font_wrapper_);
     if (FAILED(create_font_hr))
     {
       render_info.fw1_factory_->Release();

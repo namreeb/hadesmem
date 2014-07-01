@@ -106,34 +106,6 @@ void TraceFormatImpl(char const* function,
 
 #define HADESMEM_DETAIL_TRACE_W(x) HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s", x)
 
-#if defined(HADESMEM_DETAIL_TRACE_NOISY)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_RAW(x) HADESMEM_DETAIL_TRACE_RAW(x)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(format, ...)                      \
-  HADESMEM_DETAIL_TRACE_FORMAT_A(format, __VA_ARGS__)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(format, ...)                      \
-  HADESMEM_DETAIL_TRACE_FORMAT_W(format, __VA_ARGS__)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_A(x) HADESMEM_DETAIL_TRACE_A(x)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_W(x) HADESMEM_DETAIL_TRACE_W(x)
-
-#else
-
-#define HADESMEM_DETAIL_TRACE_NOISY_RAW(x)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(format, ...)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(format, ...)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_A(x)
-
-#define HADESMEM_DETAIL_TRACE_NOISY_W(x)
-
-#endif
-
 #else // #if !defined(HADESMEM_NO_TRACE)
 
 #define HADESMEM_DETAIL_TRACE_RAW(x)
@@ -147,3 +119,33 @@ void TraceFormatImpl(char const* function,
 #define HADESMEM_DETAIL_TRACE_FORMAT_W(...)
 
 #endif // #if !defined(HADESMEM_NO_TRACE)
+
+#if !defined(HADESMEM_NO_TRACE) && defined(HADESMEM_DETAIL_TRACE_NOISY)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_RAW(x) HADESMEM_DETAIL_TRACE_RAW(x)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(format, ...)                      \
+  HADESMEM_DETAIL_TRACE_FORMAT_A(format, __VA_ARGS__)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(format, ...)                      \
+  HADESMEM_DETAIL_TRACE_FORMAT_W(format, __VA_ARGS__)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_A(x) HADESMEM_DETAIL_TRACE_A(x)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_W(x) HADESMEM_DETAIL_TRACE_W(x)
+
+#else // #if !defined(HADESMEM_NO_TRACE) && 
+// defined(HADESMEM_DETAIL_TRACE_NOISY)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_RAW(x)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(format, ...)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(format, ...)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_A(x)
+
+#define HADESMEM_DETAIL_TRACE_NOISY_W(x)
+
+#endif // #if !defined(HADESMEM_NO_TRACE) && 
+// defined(HADESMEM_DETAIL_TRACE_NOISY)

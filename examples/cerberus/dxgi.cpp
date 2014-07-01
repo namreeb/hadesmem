@@ -19,6 +19,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/patcher.hpp>

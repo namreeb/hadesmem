@@ -21,6 +21,7 @@ void DetourFunc(Process const& process,
                 std::unique_ptr<hadesmem::PatchDetour>& detour,
                 void* detour_fn)
 {
+  (void)name;
   if (!detour)
   {
     void** const vtable = *reinterpret_cast<void***>(interface_ptr);
@@ -66,6 +67,7 @@ void UndetourFunc(std::wstring const& name,
                   std::unique_ptr<hadesmem::PatchDetour>& detour,
                   bool remove)
 {
+  (void)name;
   if (detour)
   {
     remove ? detour->Remove() : detour->Detach();
@@ -164,6 +166,7 @@ bool CommonDetourModule(Process const& process,
 bool CommonUndetourModule(std::wstring const& name,
                           std::pair<void*, SIZE_T>& detoured_mod)
 {
+  (void)name;
   if (!detoured_mod.first)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s not detoured.", name.c_str());
