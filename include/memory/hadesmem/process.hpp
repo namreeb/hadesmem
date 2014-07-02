@@ -24,14 +24,13 @@ namespace hadesmem
 class Process
 {
 public:
-  explicit Process(DWORD id)
-    : handle_{detail::OpenProcessAllAccess(id)}, id_{id}
+  explicit Process(DWORD id) : handle_{OpenProcess(id)}, id_{id}
   {
     CheckWoW64();
   }
 
   Process(Process const& other)
-    : handle_{detail::DuplicateHandle(other.handle_.GetHandle())},
+    : handle_{DuplicateHandle(other.id_, other.handle_.GetHandle())},
       id_{other.id_}
   {
   }
@@ -53,6 +52,8 @@ public:
 
   Process& operator=(Process&& other) HADESMEM_DETAIL_NOEXCEPT
   {
+    CleanupUnchecked();
+
     handle_ = std::move(other.handle_);
     id_ = other.id_;
 
@@ -78,7 +79,14 @@ public:
 
   void Cleanup()
   {
-    handle_.Cleanup();
+    if (id_ != ::GetCurrentProcessId())
+    {
+      handle_.Cleanup();
+    }
+    else
+    {
+      handle_.Detach();
+    }
     id_ = 0;
   }
 
@@ -110,6 +118,20 @@ private:
       id_ = 0;
       handle_ = nullptr;
     }
+  }
+
+  HANDLE OpenProcess(DWORD id) const
+  {
+    return id == ::GetCurrentProcessId()
+             ? ::GetCurrentProcess()
+             : detail::OpenProcessAllAccess(id).Detach();
+  }
+
+  HANDLE DuplicateHandle(DWORD id, HANDLE handle) const
+  {
+    return id == ::GetCurrentProcessId()
+             ? ::GetCurrentProcess()
+             : detail::DuplicateHandle(handle).Detach();
   }
 
   detail::SmartHandle handle_;
