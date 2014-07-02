@@ -19,6 +19,7 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 
 #include "callbacks.hpp"
 #include "dxgi.hpp"
@@ -41,7 +42,6 @@ struct RenderInfoD3D11
   IDXGISwapChain* swap_chain_{};
   ID3D11Device* device_;
   ID3D11DeviceContext* context_;
-  IFW1Factory* fw1_factory_{};
   IFW1FontWrapper* font_wrapper_{};
 };
 
@@ -93,30 +93,28 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 
     render_info.device_->GetImmediateContext(&render_info.context_);
 
+    IFW1Factory* fw1_factory{};
     auto const create_factory_hr =
-      FW1CreateFactory(FW1_VERSION, &render_info.fw1_factory_);
+      FW1CreateFactory(FW1_VERSION, &fw1_factory);
     if (FAILED(create_factory_hr))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         hadesmem::Error{} << hadesmem::ErrorString{"FW1CreateFactory failed."}
                           << hadesmem::ErrorCodeWinHr{create_factory_hr});
     }
+    hadesmem::detail::SmartComHandle fw1_factory_cleanup(fw1_factory);
 
-    auto const create_font_hr = render_info.fw1_factory_->CreateFontWrapper(
+    auto const create_font_hr = fw1_factory->CreateFontWrapper(
       render_info.device_, L"Consolas", &render_info.font_wrapper_);
     if (FAILED(create_font_hr))
     {
-      render_info.fw1_factory_->Release();
-      render_info.fw1_factory_ = nullptr;
-
       HADESMEM_DETAIL_THROW_EXCEPTION(
         hadesmem::Error{} << hadesmem::ErrorString{
                                "IFW1Factory::CreateFontWrapper failed."}
                           << hadesmem::ErrorCodeWinHr{create_font_hr});
     }
 
-    render_info.fw1_factory_->Release();
-    render_info.fw1_factory_ = nullptr;
+    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
 }
 
@@ -171,6 +169,12 @@ namespace hadesmem
 namespace cerberus
 {
 
+RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static RenderImpl render_impl;
+  return render_impl;
+}
+
 void InitializeRender()
 {
   auto const dxgi_callback_id =
@@ -193,13 +197,6 @@ void UnregisterOnFrameCallback(std::size_t id)
 {
   auto& callbacks = GetOnFrameCallbacks();
   return callbacks.Unregister(id);
-}
-
-hadesmem::cerberus::RenderInterface& GetRenderInterface()
-  HADESMEM_DETAIL_NOEXCEPT
-{
-  static RenderImpl render_impl;
-  return render_impl;
 }
 }
 }

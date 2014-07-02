@@ -34,14 +34,13 @@ public:
   virtual void DrawWatermark() = 0;
 };
 
+RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
+
 void InitializeRender();
 
 std::size_t
   RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
 
 void UnregisterOnFrameCallback(std::size_t id);
-
-hadesmem::cerberus::RenderInterface&
-  GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

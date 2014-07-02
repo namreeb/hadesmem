@@ -32,6 +32,32 @@ namespace winternl = hadesmem::detail::winternl;
 namespace
 {
 
+class ModuleImpl : public hadesmem::cerberus::ModuleInterface
+{
+public:
+  virtual std::size_t RegisterOnMapCallback(
+    std::function<hadesmem::cerberus::OnMapCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnMapCallback(callback);
+  }
+
+  virtual void UnregisterOnMapCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnMapCallback(id);
+  }
+
+  virtual std::size_t RegisterOnUnmapCallback(
+    std::function<hadesmem::cerberus::OnUnmapCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnUnmapCallback(callback);
+  }
+
+  virtual void UnregisterOnUnmapCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnUnmapCallback(id);
+  }
+};
+
 std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
   HADESMEM_DETAIL_NOEXCEPT
 {
@@ -249,6 +275,12 @@ namespace hadesmem
 
 namespace cerberus
 {
+
+ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static ModuleImpl module_impl;
+  return module_impl;
+}
 
 void DetourNtMapViewOfSection()
 {

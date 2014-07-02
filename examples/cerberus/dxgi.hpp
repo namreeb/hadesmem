@@ -11,19 +11,36 @@
 
 #include <dxgi.h>
 
+#include <hadesmem/config.hpp>
+
 namespace hadesmem
 {
 
 namespace cerberus
 {
 
+typedef void OnFrameCallbackDXGI(IDXGISwapChain* swap_chain);
+
+class DXGIInterface
+{
+public:
+  virtual ~DXGIInterface()
+  {
+  }
+
+  virtual std::size_t RegisterOnFrameCallback(
+    std::function<OnFrameCallbackDXGI> const& callback) = 0;
+
+  virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
+};
+
+DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT;
+
 void InitializeDXGI();
 
 void DetourDXGI(HMODULE base);
 
 void UndetourDXGI(bool remove);
-
-typedef void OnFrameCallbackDXGI(IDXGISwapChain* swap_chain);
 
 std::size_t RegisterOnFrameCallbackDXGI(
   std::function<OnFrameCallbackDXGI> const& callback);

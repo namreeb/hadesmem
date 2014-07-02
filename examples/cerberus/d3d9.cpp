@@ -33,36 +33,52 @@
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetDirect3DCreate9Detour() HADESMEM_DETAIL_NOEXCEPT
+class D3D9Impl : public hadesmem::cerberus::D3D9Interface
+{
+public:
+  virtual std::size_t RegisterOnFrameCallback(
+    std::function<hadesmem::cerberus::OnFrameCallbackD3D9> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnFrameCallbackD3D9(callback);
+  }
+
+  virtual void UnregisterOnFrameCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(id);
+  }
+};
+
+std::unique_ptr<hadesmem::PatchDetour>& GetDirect3DCreate9Detour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetDirect3DCreate9ExDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetDirect3DCreate9ExDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDirect3D9CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3D9CreateDeviceDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDirect3D9ExCreateDeviceExDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3D9ExCreateDeviceExDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDirect3DDevice9EndSceneDetour() HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3DDevice9EndSceneDetour()
+  HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -82,8 +98,9 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>&
   return callbacks;
 }
 
-extern "C" HRESULT WINAPI IDirect3DDevice9EndSceneDetour(
-  IDirect3DDevice9* device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  IDirect3DDevice9EndSceneDetour(IDirect3DDevice9* device)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDirect3DDevice9EndSceneDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -126,14 +143,15 @@ void DetourDirect3DDevice9(IDirect3DDevice9* device)
   }
 }
 
-extern "C" HRESULT WINAPI IDirect3D9CreateDeviceDetour(
-  IDirect3D9* direct3d9,
-  UINT adapter,
-  D3DDEVTYPE device_type,
-  HWND focus_window,
-  DWORD behavior_flags,
-  D3DPRESENT_PARAMETERS* presentation_params,
-  IDirect3DDevice9** returned_device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  IDirect3D9CreateDeviceDetour(IDirect3D9* direct3d9,
+                               UINT adapter,
+                               D3DDEVTYPE device_type,
+                               HWND focus_window,
+                               DWORD behavior_flags,
+                               D3DPRESENT_PARAMETERS* presentation_params,
+                               IDirect3DDevice9** returned_device)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDirect3D9CreateDeviceDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -181,15 +199,16 @@ extern "C" HRESULT WINAPI IDirect3D9CreateDeviceDetour(
   return ret;
 }
 
-extern "C" HRESULT WINAPI IDirect3D9ExCreateDeviceExDetour(
-  IDirect3D9* direct3d9,
-  UINT adapter,
-  D3DDEVTYPE device_type,
-  HWND focus_window,
-  DWORD behavior_flags,
-  D3DPRESENT_PARAMETERS* presentation_params,
-  D3DDISPLAYMODEEX* fullscreen_display_mode,
-  IDirect3DDevice9Ex** returned_device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  IDirect3D9ExCreateDeviceExDetour(IDirect3D9* direct3d9,
+                                   UINT adapter,
+                                   D3DDEVTYPE device_type,
+                                   HWND focus_window,
+                                   DWORD behavior_flags,
+                                   D3DPRESENT_PARAMETERS* presentation_params,
+                                   D3DDISPLAYMODEEX* fullscreen_display_mode,
+                                   IDirect3DDevice9Ex** returned_device)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDirect3D9ExCreateDeviceExDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -286,8 +305,8 @@ void DetourDirect3D9(IDirect3D9Ex* direct3d9)
   DetourDirect3D9(static_cast<IDirect3D9*>(direct3d9));
 }
 
-extern "C" IDirect3D9* WINAPI
-  Direct3DCreate9Detour(UINT sdk_version) HADESMEM_DETAIL_NOEXCEPT
+extern "C" IDirect3D9* WINAPI Direct3DCreate9Detour(UINT sdk_version)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetDirect3DCreate9Detour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -316,8 +335,8 @@ extern "C" IDirect3D9* WINAPI
 }
 
 extern "C" HRESULT WINAPI
-  Direct3DCreate9ExDetour(UINT sdk_version,
-                          IDirect3D9Ex** d3d9_ex) HADESMEM_DETAIL_NOEXCEPT
+  Direct3DCreate9ExDetour(UINT sdk_version, IDirect3D9Ex** d3d9_ex)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetDirect3DCreate9ExDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -351,6 +370,12 @@ namespace hadesmem
 
 namespace cerberus
 {
+
+D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static D3D9Impl d3d9_impl;
+  return d3d9_impl;
+}
 
 void InitializeD3D9()
 {

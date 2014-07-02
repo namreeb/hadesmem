@@ -76,6 +76,11 @@ void UseAllStatics()
   auto const on_frame_id_dxgi =
     hadesmem::cerberus::RegisterOnFrameCallbackDXGI(on_frame_callback_dxgi);
   hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(on_frame_id_dxgi);
+
+  hadesmem::cerberus::GetModuleInterface();
+  hadesmem::cerberus::GetD3D9Interface();
+  hadesmem::cerberus::GetDXGIInterface();
+  hadesmem::cerberus::GetRenderInterface();
 }
 
 // Check whether any threads are currently executing code in our module. This

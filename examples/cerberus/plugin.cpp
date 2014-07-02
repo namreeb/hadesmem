@@ -32,64 +32,6 @@
 namespace
 {
 
-class D3D9Impl : public hadesmem::cerberus::D3D9Interface
-{
-public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackD3D9> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnFrameCallbackD3D9(callback);
-  }
-
-  virtual void UnregisterOnFrameCallback(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(id);
-  }
-};
-
-class DXGIImpl : public hadesmem::cerberus::DXGIInterface
-{
-public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackDXGI> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnFrameCallbackDXGI(callback);
-  }
-
-  virtual void UnregisterOnFrameCallback(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(id);
-  }
-};
-
-class ModuleImpl : public hadesmem::cerberus::ModuleInterface
-{
-public:
-  virtual std::size_t RegisterOnMapCallback(
-    std::function<hadesmem::cerberus::OnMapCallback> const& callback) final
-  {
-    return hadesmem::cerberus::RegisterOnMapCallback(callback);
-  }
-
-  virtual void UnregisterOnMapCallback(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnMapCallback(id);
-  }
-
-  virtual std::size_t RegisterOnUnmapCallback(
-    std::function<hadesmem::cerberus::OnUnmapCallback> const& callback) final
-  {
-    return hadesmem::cerberus::RegisterOnUnmapCallback(callback);
-  }
-
-  virtual void UnregisterOnUnmapCallback(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnUnmapCallback(id);
-  }
-};
-
 class Plugin : public hadesmem::cerberus::PluginInterface
 {
 public:
@@ -132,9 +74,6 @@ public:
   Plugin(Plugin&& other) HADESMEM_DETAIL_NOEXCEPT
     : path_{std::move(other.path_)},
       base_{other.base_},
-      d3d9_{other.d3d9_},
-      d3d11_{other.d3d11_},
-      module_{other.module_},
       unload_{other.unload_},
       call_export_{other.call_export_}
   {
@@ -149,9 +88,6 @@ public:
 
     path_ = std::move(other.path_);
     base_ = other.base_;
-    d3d9_ = other.d3d9_;
-    d3d11_ = other.d3d11_;
-    module_ = other.module_;
     unload_ = other.unload_;
     call_export_ = other.call_export_;
 
@@ -167,19 +103,19 @@ public:
     UnloadUnchecked();
   }
 
+  virtual hadesmem::cerberus::ModuleInterface* GetModuleInterface() final
+  {
+    return &hadesmem::cerberus::GetModuleInterface();
+  }
+
   virtual hadesmem::cerberus::D3D9Interface* GetD3D9Interface() final
   {
-    return &d3d9_;
+    return &hadesmem::cerberus::GetD3D9Interface();
   }
 
   virtual hadesmem::cerberus::DXGIInterface* GetDXGIInterface() final
   {
-    return &d3d11_;
-  }
-
-  virtual hadesmem::cerberus::ModuleInterface* GetModuleInterface() final
-  {
-    return &module_;
+    return &hadesmem::cerberus::GetDXGIInterface();
   }
 
   virtual hadesmem::cerberus::RenderInterface* GetRenderInterface() final
@@ -250,9 +186,6 @@ private:
 
   std::wstring path_;
   HMODULE base_{};
-  D3D9Impl d3d9_;
-  DXGIImpl d3d11_;
-  ModuleImpl module_;
   bool unload_{};
   bool call_export_{};
 };
