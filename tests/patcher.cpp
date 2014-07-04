@@ -193,23 +193,28 @@ void GenerateBasicJmp(asmjit::host::Assembler& a)
   a.jmp(reinterpret_cast<void*>(&HookMe));
 }
 
-template <typename WrapperFunc, typename PackagedFunc>
+template <typename PatchType, typename WrapperFunc, typename PackagedFunc>
 void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
                            PackagedFunc hook_me_packaged)
 {
   hadesmem::Process const& process = GetThisProcess();
 
   auto& detour_1 = GetDetour1();
-  detour_1 = std::make_unique<hadesmem::PatchDetour>(
+  detour_1 = std::make_unique<PatchType>(
     process,
     hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
     hadesmem::detail::UnionCast<PVOID>(&HookMeHk));
 
+  bool const can_chain = detour_1->CanHookChain();
+
   auto& detour_2 = GetDetour2();
-  detour_2 = std::make_unique<hadesmem::PatchDetour>(
-    process,
-    hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
-    hadesmem::detail::UnionCast<PVOID>(&HookMeHk2));
+  if (can_chain)
+  {
+    detour_2 = std::make_unique<PatchType>(
+      process,
+      hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
+      hadesmem::detail::UnionCast<PVOID>(&HookMeHk2));
+  }
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
@@ -217,13 +222,16 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  detour_2->Apply();
+  if (can_chain)
+  {
+    detour_2->Apply();
 
-  BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
+    BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
 
-  detour_2->Remove();
+    detour_2->Remove();
 
-  BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+    BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+  }
 
   detour_1->Remove();
 
@@ -233,13 +241,16 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
 
-  detour_2->Apply();
+  if (can_chain)
+  {
+    detour_2->Apply();
 
-  BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
+    BOOST_TEST_EQ(hook_me_packaged(), 0x5678UL);
 
-  detour_2->Remove();
+    detour_2->Remove();
 
-  BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+    BOOST_TEST_EQ(hook_me_packaged(), 0x1337UL);
+  }
 
   detour_1->Remove();
 
@@ -340,42 +351,51 @@ HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
     hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
 
   auto const hook_me_packaged = [=]()
-  { return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8); };
+  {
+    return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
+  };
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
 
   return std::make_tuple(
     hook_me_wrapper, hook_me_packaged, std::move(hook_me_wrapper_cleanup));
 }
 
-void TestPatchDetourCall()
+template <typename PatchType> void TestPatchDetourCall()
 {
   asmjit::JitRuntime runtime;
   asmjit::host::Compiler c{&runtime};
   GenerateBasicCall(c);
   auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, c);
-  TestPatchDetourCommon(std::get<0>(wrapper_and_package),
-                        std::get<1>(wrapper_and_package));
+  TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
+                                   std::get<1>(wrapper_and_package));
 }
 
-void TestPatchDetourJmp()
+template <typename PatchType> void TestPatchDetourJmp()
 {
   asmjit::JitRuntime runtime;
   asmjit::host::Assembler a{&runtime};
   GenerateBasicJmp(a);
   auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a);
-  TestPatchDetourCommon(std::get<0>(wrapper_and_package),
-                        std::get<1>(wrapper_and_package));
+  TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
+                                   std::get<1>(wrapper_and_package));
 }
 
 void TestPatchDetour()
 {
-  TestPatchDetourCall();
-  TestPatchDetourJmp();
+  TestPatchDetourCall<hadesmem::PatchDetour>();
+  TestPatchDetourJmp<hadesmem::PatchDetour>();
+}
+
+void TestPatchVeh()
+{
+  TestPatchDetourCall<hadesmem::PatchVeh>();
+  TestPatchDetourJmp<hadesmem::PatchVeh>();
 }
 
 int main()
 {
   TestPatchRaw();
   TestPatchDetour();
+  TestPatchVeh();
   return boost::report_errors();
 }

@@ -38,9 +38,8 @@ namespace
 class DXGIImpl : public hadesmem::cerberus::DXGIInterface
 {
 public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackDXGI> const& callback)
-    final
+  virtual std::size_t RegisterOnFrameCallback(std::function<
+    hadesmem::cerberus::OnFrameCallbackDXGI> const& callback) final
   {
     return hadesmem::cerberus::RegisterOnFrameCallbackDXGI(callback);
   }
@@ -51,36 +50,36 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>& GetIDXGISwapChainPresentDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDXGISwapChainPresentDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetIDXGIFactoryCreateSwapChainDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDXGIFactoryCreateSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetCreateDXGIFactoryDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetCreateDXGIFactoryDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetCreateDXGIFactory1Detour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetCreateDXGIFactory1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetCreateDXGIFactory2Detour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetCreateDXGIFactory2Detour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -106,30 +105,29 @@ extern "C" HRESULT WINAPI
                               UINT flags) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDXGISwapChainPresentDetour();
-  //hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
-  //hadesmem::detail::LastErrorPreserver last_error_preserver;
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  //HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
-  //  "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+    "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
 
-  //auto& callbacks = GetOnFrameCallbacksDXGI();
-  //callbacks.Run(swap_chain);
+  auto& callbacks = GetOnFrameCallbacksDXGI();
+  callbacks.Run(swap_chain);
 
   auto const present =
     detour->GetTrampoline<decltype(&IDXGISwapChainPresentDetour)>();
-  //last_error_preserver.Revert();
+  last_error_preserver.Revert();
   auto const ret = present(swap_chain, sync_interval, flags);
-  //last_error_preserver.Update();
-  //HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
   return ret;
 }
 
-extern "C" HRESULT WINAPI
-  IDXGIFactoryCreateSwapChainDetour(IDXGIFactory* factory,
-                                    IUnknown* device,
-                                    DXGI_SWAP_CHAIN_DESC* desc,
-                                    IDXGISwapChain** swap_chain)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
+  IDXGIFactory* factory,
+  IUnknown* device,
+  DXGI_SWAP_CHAIN_DESC* desc,
+  IDXGISwapChain** swap_chain) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -183,8 +181,8 @@ void DetourDXGIFactoryByGuid(REFIID riid, void** factory)
   }
 }
 
-extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  CreateDXGIFactoryDetour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactoryDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -212,8 +210,8 @@ extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(REFIID riid, void** factory)
   return ret;
 }
 
-extern "C" HRESULT WINAPI CreateDXGIFactory1Detour(REFIID riid, void** factory)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  CreateDXGIFactory1Detour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactory1Detour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -242,8 +240,9 @@ extern "C" HRESULT WINAPI CreateDXGIFactory1Detour(REFIID riid, void** factory)
 }
 
 extern "C" HRESULT WINAPI
-  CreateDXGIFactory2Detour(UINT flags, REFIID riid, void** factory)
-  HADESMEM_DETAIL_NOEXCEPT
+  CreateDXGIFactory2Detour(UINT flags,
+                           REFIID riid,
+                           void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactory2Detour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};

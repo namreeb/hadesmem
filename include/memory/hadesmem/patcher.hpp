@@ -7,6 +7,7 @@
 #include <climits>
 #include <cstdint>
 #include <locale>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <type_traits>
@@ -20,6 +21,7 @@
 
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/srw_lock.hpp>
 #include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
@@ -268,7 +270,7 @@ public:
     return *this;
   }
 
-  ~PatchDetour()
+  virtual ~PatchDetour()
   {
     RemoveUnchecked();
   }
@@ -323,9 +325,7 @@ public:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    bool detour_near = IsNear(target_, detour_);
-    HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
-    std::size_t const jump_size = detour_near ? kJmpSize32 : kJmpSize64;
+    std::size_t const patch_size = GetPatchSize();
 
     std::uint32_t instr_size = 0;
     do
@@ -411,7 +411,7 @@ public:
       }
 
       instr_size += len;
-    } while (instr_size < jump_size);
+    } while (instr_size < patch_size);
 
     HADESMEM_DETAIL_TRACE_A("Writing jump back to original code.");
 
@@ -421,13 +421,11 @@ public:
     FlushInstructionCache(
       *process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    orig_ = ReadVector<std::uint8_t>(*process_, target_, jump_size);
+    orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
 
     detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
-    HADESMEM_DETAIL_TRACE_A("Writing jump to detour.");
-
-    WriteJump(target_, detour_, false);
+    WritePatch();
 
     FlushInstructionCache(*process_, target_, instr_size);
 
@@ -447,7 +445,7 @@ public:
     detail::VerifyPatchThreads(
       process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
-    WriteVector(*process_, target_, orig_);
+    RemovePatch();
 
     // Don't free trampolines here. Do it in Apply/destructor. See comments in
     // Apply for the rationale.
@@ -485,7 +483,36 @@ public:
     return ref_count_;
   }
 
-private:
+  bool CanHookChain() const
+  {
+    return CanHookChainImpl();
+  }
+
+protected:
+  virtual std::size_t GetPatchSize() const
+  {
+    bool detour_near = IsNear(target_, detour_);
+    HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
+    return detour_near ? kJmpSize32 : kJmpSize64;
+  }
+
+  virtual void WritePatch()
+  {
+    HADESMEM_DETAIL_TRACE_A("Writing jump to detour.");
+
+    WriteJump(target_, detour_, false);
+  }
+
+  virtual void RemovePatch()
+  {
+    WriteVector(*process_, target_, orig_);
+  }
+
+  virtual bool CanHookChainImpl() const
+  {
+    return true;
+  }
+
   void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
     try
@@ -578,7 +605,7 @@ private:
 #endif
   }
 
-  bool IsNear(void* address, void* target)
+  bool IsNear(void* address, void* target) const HADESMEM_DETAIL_NOEXCEPT
   {
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     auto const rel = reinterpret_cast<std::intptr_t>(target) -
@@ -594,7 +621,7 @@ private:
 #endif
   }
 
-  std::vector<std::uint8_t> GenJmp32(void* address, void* target)
+  std::vector<std::uint8_t> GenJmp32(void* address, void* target) const
   {
     std::vector<std::uint8_t> buf = {0xE9, 0xEB, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
@@ -607,7 +634,7 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenCall32(void* address, void* target)
+  std::vector<std::uint8_t> GenCall32(void* address, void* target) const
   {
     std::vector<std::uint8_t> buf = {0xE8, 0xEB, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
@@ -620,7 +647,7 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenJmpTramp64(void* address, void* target)
+  std::vector<std::uint8_t> GenJmpTramp64(void* address, void* target) const
   {
     std::vector<std::uint8_t> buf = {0xFF, 0x25, 0xEF, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
@@ -633,7 +660,7 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenCallTramp64(void* address, void* target)
+  std::vector<std::uint8_t> GenCallTramp64(void* address, void* target) const
   {
     std::vector<std::uint8_t> buf = {0xFF, 0x15, 0xEF, 0xBE, 0xAD, 0xDE};
     auto const dst_len = sizeof(std::uint32_t);
@@ -646,7 +673,7 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenPush32Ret(void* target)
+  std::vector<std::uint8_t> GenPush32Ret(void* target) const
   {
     std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
                                      0x68,
@@ -663,7 +690,7 @@ private:
     return buf;
   }
 
-  std::vector<std::uint8_t> GenPush64Ret(void* target)
+  std::vector<std::uint8_t> GenPush64Ret(void* target) const
   {
     std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
                                      0x68,
@@ -694,8 +721,7 @@ private:
     return buf;
   }
 
-  std::size_t
-    WriteJump(void* address, void* target, bool push_ret_fallback)
+  std::size_t WriteJump(void* address, void* target, bool push_ret_fallback)
   {
     (void)push_ret_fallback;
     HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -837,5 +863,159 @@ private:
   std::vector<BYTE> orig_;
   std::vector<std::unique_ptr<Allocator>> trampolines_;
   std::atomic<std::uint32_t> ref_count_;
+};
+
+class PatchVeh : public PatchDetour
+{
+public:
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchVeh(Process const& process,
+                    TargetFuncT target,
+                    DetourFuncT detour)
+    : PatchDetour{process, target, detour}
+  {
+    Initialize();
+
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
+                                  std::is_pointer<TargetFuncT>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value ||
+                                  std::is_pointer<DetourFuncT>::value);
+  }
+
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchVeh(Process&& process,
+                    TargetFuncT target,
+                    DetourFuncT detour) = delete;
+
+  PatchVeh(PatchVeh const& other) = delete;
+
+  PatchVeh& operator=(PatchVeh const& other) = delete;
+
+  PatchVeh(PatchVeh&& other) : PatchDetour{std::move(other)}
+  {
+  }
+
+  PatchVeh& operator=(PatchVeh&& other)
+  {
+    PatchDetour::operator=(std::move(other));
+    return *this;
+  }
+
+protected:
+  virtual std::size_t GetPatchSize() const override
+  {
+    // 0xCC
+    return 1;
+  }
+
+  virtual void WritePatch() override
+  {
+    {
+      hadesmem::detail::AcquireSRWLock const lock(
+        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+      auto& veh_hooks = GetVehHooks();
+      HADESMEM_DETAIL_ASSERT(veh_hooks.find(target_) == std::end(veh_hooks));
+      veh_hooks[target_] = this;
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");
+
+    std::vector<std::uint8_t> const buf = {0xCC};
+    WriteVector(*process_, target_, buf);
+  }
+
+  virtual void RemovePatch() override
+  {
+    WriteVector(*process_, target_, orig_);
+
+    {
+      hadesmem::detail::AcquireSRWLock const lock(
+        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+      auto& veh_hooks = GetVehHooks();
+      veh_hooks.erase(target_);
+    }
+  }
+
+  virtual bool CanHookChainImpl() const override
+  {
+    return false;
+  }
+
+  static void Initialize()
+  {
+    auto& initialized = GetInitialized();
+    if (initialized)
+    {
+      return;
+    }
+
+    auto const veh_handle = ::AddVectoredExceptionHandler(1, &VectoredHandler);
+    if (!veh_handle)
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"AddVectoredExceptionHandler failed."}
+                << ErrorCodeWinLast{last_error});
+    }
+    static detail::SmartRemoveVectoredExceptionHandler const remove_veh(
+      veh_handle);
+
+    initialized = true;
+  }
+
+  static LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS exception_pointers)
+  {
+    if (exception_pointers->ExceptionRecord->ExceptionCode !=
+        EXCEPTION_BREAKPOINT)
+    {
+      return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    {
+      hadesmem::detail::AcquireSRWLock const lock(
+        &GetSrwLock(), hadesmem::detail::SRWLockType::Shared);
+
+      auto& veh_hooks = GetVehHooks();
+      auto const iter =
+        veh_hooks.find(exception_pointers->ExceptionRecord->ExceptionAddress);
+      if (iter == std::end(veh_hooks))
+      {
+        return EXCEPTION_CONTINUE_SEARCH;
+      }
+
+      PatchVeh* patch = iter->second;
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+      exception_pointers->ContextRecord->Rip =
+        reinterpret_cast<std::uintptr_t>(patch->detour_);
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+      exception_pointers->ContextRecord->Eip =
+        reinterpret_cast<std::uintptr_t>(patch->detour_);
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+    }
+
+    return EXCEPTION_CONTINUE_EXECUTION;
+  }
+
+  static bool& GetInitialized()
+  {
+    static bool initialized = false;
+    return initialized;
+  }
+
+  static std::map<void*, PatchVeh*>& GetVehHooks()
+  {
+    static std::map<void*, PatchVeh*> veh_hooks;
+    return veh_hooks;
+  }
+
+  static SRWLOCK& GetSrwLock()
+  {
+    static SRWLOCK srw_lock = SRWLOCK_INIT;
+    return srw_lock;
+  }
 };
 }

@@ -264,5 +264,23 @@ struct DeleteDcPolicy
 };
 
 using SmartDeleteDcHandle = SmartHandleImpl<DeleteDcPolicy>;
+
+struct VectoredExceptionHandlerPolicy
+{
+  using HandleT = PVOID;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::RemoveVectoredExceptionHandler(handle) != 0;
+  }
+};
+
+using SmartRemoveVectoredExceptionHandler =
+  SmartHandleImpl<VectoredExceptionHandlerPolicy>;
 }
 }
