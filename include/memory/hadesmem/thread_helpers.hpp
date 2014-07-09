@@ -60,7 +60,8 @@ inline DWORD ResumeThread(Thread const& thread)
 
 inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
 {
-  if (::GetCurrentThreadId() == thread.GetId())
+  if (::GetCurrentThreadId() == thread.GetId() &&
+      context_flags != CONTEXT_DEBUG_REGISTERS)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       Error() << ErrorString("GetThreadContext called for current thread."));

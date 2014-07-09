@@ -386,16 +386,23 @@ void TestPatchDetour()
   TestPatchDetourJmp<hadesmem::PatchDetour>();
 }
 
-void TestPatchVeh()
+void TestPatchInt3()
 {
-  TestPatchDetourCall<hadesmem::PatchVeh>();
-  TestPatchDetourJmp<hadesmem::PatchVeh>();
+  TestPatchDetourCall<hadesmem::PatchInt3>();
+  TestPatchDetourJmp<hadesmem::PatchInt3>();
+}
+
+void TestPatchDr()
+{
+  TestPatchDetourCall<hadesmem::PatchDr>();
+  TestPatchDetourJmp<hadesmem::PatchDr>();
 }
 
 int main()
 {
   TestPatchRaw();
   TestPatchDetour();
-  TestPatchVeh();
+  TestPatchInt3();
+  TestPatchDr();
   return boost::report_errors();
 }

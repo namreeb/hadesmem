@@ -30,6 +30,8 @@
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
+#include <hadesmem/thread.hpp>
+#include <hadesmem/thread_list.hpp>
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
 
@@ -505,6 +507,8 @@ protected:
 
   virtual void RemovePatch()
   {
+    HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
+
     WriteVector(*process_, target_, orig_);
   }
 
@@ -874,6 +878,13 @@ public:
                     DetourFuncT detour)
     : PatchDetour{process, target, detour}
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{
+          "VEH based hooks on remote processes are currently unsupported."});
+    }
+
     Initialize();
 
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
@@ -904,43 +915,22 @@ public:
 protected:
   virtual std::size_t GetPatchSize() const override
   {
-    // 0xCC
-    return 1;
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }
 
   virtual void WritePatch() override
   {
-    {
-      hadesmem::detail::AcquireSRWLock const lock(
-        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
-
-      auto& veh_hooks = GetVehHooks();
-      HADESMEM_DETAIL_ASSERT(veh_hooks.find(target_) == std::end(veh_hooks));
-      veh_hooks[target_] = this;
-    }
-
-    HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");
-
-    std::vector<std::uint8_t> const buf = {0xCC};
-    WriteVector(*process_, target_, buf);
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }
 
   virtual void RemovePatch() override
   {
-    WriteVector(*process_, target_, orig_);
-
-    {
-      hadesmem::detail::AcquireSRWLock const lock(
-        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
-
-      auto& veh_hooks = GetVehHooks();
-      veh_hooks.erase(target_);
-    }
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }
 
   virtual bool CanHookChainImpl() const override
   {
-    return false;
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }
 
   static void Initialize()
@@ -967,35 +957,85 @@ protected:
 
   static LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS exception_pointers)
   {
-    if (exception_pointers->ExceptionRecord->ExceptionCode !=
-        EXCEPTION_BREAKPOINT)
+    switch (exception_pointers->ExceptionRecord->ExceptionCode)
+    {
+    case EXCEPTION_BREAKPOINT:
+      return HandleBreakpoint(exception_pointers);
+
+    case EXCEPTION_SINGLE_STEP:
+      return HandleSingleStep(exception_pointers);
+
+    default:
+      return EXCEPTION_CONTINUE_SEARCH;
+    }
+  }
+
+  static LONG CALLBACK HandleBreakpoint(PEXCEPTION_POINTERS exception_pointers)
+  {
+    hadesmem::detail::AcquireSRWLock const lock(
+      &GetSrwLock(), hadesmem::detail::SRWLockType::Shared);
+
+    auto& veh_hooks = GetVehHooks();
+    auto const iter =
+      veh_hooks.find(exception_pointers->ExceptionRecord->ExceptionAddress);
+    if (iter == std::end(veh_hooks))
     {
       return EXCEPTION_CONTINUE_SEARCH;
     }
 
-    {
-      hadesmem::detail::AcquireSRWLock const lock(
-        &GetSrwLock(), hadesmem::detail::SRWLockType::Shared);
-
-      auto& veh_hooks = GetVehHooks();
-      auto const iter =
-        veh_hooks.find(exception_pointers->ExceptionRecord->ExceptionAddress);
-      if (iter == std::end(veh_hooks))
-      {
-        return EXCEPTION_CONTINUE_SEARCH;
-      }
-
-      PatchVeh* patch = iter->second;
+    PatchVeh* patch = iter->second;
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-      exception_pointers->ContextRecord->Rip =
-        reinterpret_cast<std::uintptr_t>(patch->detour_);
+    exception_pointers->ContextRecord->Rip =
+      reinterpret_cast<std::uintptr_t>(patch->detour_);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-      exception_pointers->ContextRecord->Eip =
-        reinterpret_cast<std::uintptr_t>(patch->detour_);
+    exception_pointers->ContextRecord->Eip =
+      reinterpret_cast<std::uintptr_t>(patch->detour_);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+    return EXCEPTION_CONTINUE_EXECUTION;
+  }
+
+  static LONG CALLBACK HandleSingleStep(PEXCEPTION_POINTERS exception_pointers)
+  {
+    hadesmem::detail::AcquireSRWLock const lock(
+      &GetSrwLock(), hadesmem::detail::SRWLockType::Shared);
+
+    auto& veh_hooks = GetVehHooks();
+    auto const iter =
+      veh_hooks.find(exception_pointers->ExceptionRecord->ExceptionAddress);
+    if (iter == std::end(veh_hooks))
+    {
+      return EXCEPTION_CONTINUE_SEARCH;
     }
+
+    auto& dr_hooks = GetDrHooks();
+    auto const dr_hook_iter = dr_hooks.find(::GetCurrentThreadId());
+    if (dr_hook_iter == std::end(dr_hooks))
+    {
+      return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    std::uintptr_t const dr_index = dr_hook_iter->second;
+    if (!(exception_pointers->ContextRecord->Dr6 & (1ULL << dr_index)))
+    {
+      return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    exception_pointers->ContextRecord->Dr6 = 0;
+    exception_pointers->ContextRecord->EFlags |= (1ULL << 16);
+
+    PatchVeh* patch = iter->second;
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+    exception_pointers->ContextRecord->Rip =
+      reinterpret_cast<std::uintptr_t>(patch->detour_);
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+    exception_pointers->ContextRecord->Eip =
+      reinterpret_cast<std::uintptr_t>(patch->detour_);
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
 
     return EXCEPTION_CONTINUE_EXECUTION;
   }
@@ -1012,10 +1052,253 @@ protected:
     return veh_hooks;
   }
 
+  static std::map<DWORD, std::uintptr_t>& GetDrHooks()
+  {
+    static std::map<DWORD, std::uintptr_t> dr_hooks;
+    return dr_hooks;
+  }
+
   static SRWLOCK& GetSrwLock()
   {
     static SRWLOCK srw_lock = SRWLOCK_INIT;
     return srw_lock;
+  }
+};
+
+class PatchInt3 : public PatchVeh
+{
+public:
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchInt3(Process const& process,
+                     TargetFuncT target,
+                     DetourFuncT detour)
+    : PatchVeh{process, target, detour}
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
+                                  std::is_pointer<TargetFuncT>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value ||
+                                  std::is_pointer<DetourFuncT>::value);
+  }
+
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchInt3(Process&& process,
+                     TargetFuncT target,
+                     DetourFuncT detour) = delete;
+
+  PatchInt3(PatchInt3 const& other) = delete;
+
+  PatchInt3& operator=(PatchInt3 const& other) = delete;
+
+  PatchInt3(PatchInt3&& other) : PatchVeh{std::move(other)}
+  {
+  }
+
+  PatchInt3& operator=(PatchInt3&& other)
+  {
+    PatchVeh::operator=(std::move(other));
+    return *this;
+  }
+
+protected:
+  virtual std::size_t GetPatchSize() const override
+  {
+    // 0xCC
+    return 1;
+  }
+
+  virtual void WritePatch() override
+  {
+    auto& veh_hooks = GetVehHooks();
+
+    {
+      hadesmem::detail::AcquireSRWLock const lock(
+        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+      HADESMEM_DETAIL_ASSERT(veh_hooks.find(target_) == std::end(veh_hooks));
+      veh_hooks[target_] = this;
+    }
+
+    try
+    {
+      HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");
+
+      std::vector<std::uint8_t> const buf = {0xCC};
+      WriteVector(*process_, target_, buf);
+    }
+    catch (...)
+    {
+      veh_hooks.erase(this);
+      throw;
+    }
+  }
+
+  virtual void RemovePatch() override
+  {
+    HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
+
+    WriteVector(*process_, target_, orig_);
+
+    {
+      hadesmem::detail::AcquireSRWLock const lock(
+        &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+      auto& veh_hooks = GetVehHooks();
+      veh_hooks.erase(target_);
+    }
+  }
+
+  virtual bool CanHookChainImpl() const override
+  {
+    return false;
+  }
+};
+
+// DANGER DANGER WILL ROBINSON
+// This currently has some serious limitations. Notably:
+//   Not even close to 'production' quality. Full of subtle bugs, gaps, etc.
+//   Can only hook the 'current' thread.
+//   Can only set one hook per thread.
+//   No validation. e.g. Lets you orphan an existing hook by setting a new one.
+//   Stomps over other things which may be using the debug registers.
+//   Stomps over other types of VEH hooks (e.g. will stomp over an INT3 hook 
+//     on the same addres.
+//   Not handling TID reuse or invalidation.
+//   Other bad things. Seriously, my head hurts from thinking of all the corner
+//     cases.
+class PatchDr : public PatchVeh
+{
+public:
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchDr(Process const& process,
+                   TargetFuncT target,
+                   DetourFuncT detour)
+    : PatchVeh{process, target, detour}
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
+                                  std::is_pointer<TargetFuncT>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value ||
+                                  std::is_pointer<DetourFuncT>::value);
+  }
+
+  template <typename TargetFuncT, typename DetourFuncT>
+  explicit PatchDr(Process&& process,
+                   TargetFuncT target,
+                   DetourFuncT detour) = delete;
+
+  PatchDr(PatchDr const& other) = delete;
+
+  PatchDr& operator=(PatchDr const& other) = delete;
+
+  PatchDr(PatchDr&& other) : PatchVeh{std::move(other)}
+  {
+  }
+
+  PatchDr& operator=(PatchDr&& other)
+  {
+    PatchVeh::operator=(std::move(other));
+    return *this;
+  }
+
+protected:
+  virtual std::size_t GetPatchSize() const override
+  {
+    // The patch size is actually zero, but we need to pretend that we've patch
+    // something so we can generate the trampoline to jump over it.
+    return 1;
+  }
+
+  virtual void WritePatch() override
+  {
+    hadesmem::detail::AcquireSRWLock const lock(
+      &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+    auto& veh_hooks = GetVehHooks();
+
+    {
+      HADESMEM_DETAIL_ASSERT(veh_hooks.find(target_) == std::end(veh_hooks));
+      veh_hooks[target_] = this;
+    }
+
+    try
+    {
+      HADESMEM_DETAIL_TRACE_A("Setting DR hook.");
+
+      auto& dr_hooks = GetDrHooks();
+      auto const thread_id = ::GetCurrentThreadId();
+      HADESMEM_DETAIL_ASSERT(dr_hooks.find(thread_id) == std::end(dr_hooks));
+
+      Thread const thread(thread_id);
+      auto context = GetThreadContext(thread, CONTEXT_DEBUG_REGISTERS);
+
+      std::uint32_t dr_index = static_cast<std::uint32_t>(-1);
+      for (std::uint32_t i = 0; i < 4; ++i)
+      {
+        if (!(context.Dr7 & (1ULL << (i * 2))) && *(&context.Dr0 + i) == 0)
+        {
+          dr_index = i;
+          break;
+        }
+      }
+
+      if (dr_index == static_cast<std::uint32_t>(-1))
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error{} << ErrorString{"No free debug registers."});
+      }
+
+      dr_hooks[ ::GetCurrentThreadId()] = dr_index;
+
+      *(&context.Dr0 + dr_index) = reinterpret_cast<std::uintptr_t>(target_);
+      context.Dr7 |= (1ULL << (dr_index * 2));
+      // Execution
+      std::uintptr_t break_type = 0;
+      context.Dr7 |= (break_type << (16 + 4 * dr_index));
+      // 1 byte
+      std::uintptr_t break_len = 0;
+      context.Dr7 |= (break_len << (18 + 4 * dr_index));
+      // Local exact
+      std::uintptr_t local_enable = 1 << 8;
+      context.Dr7 |= local_enable;
+
+      SetThreadContext(thread, context);
+    }
+    catch (...)
+    {
+      veh_hooks.erase(this);
+      throw;
+    }
+  }
+
+  virtual void RemovePatch() override
+  {
+    hadesmem::detail::AcquireSRWLock const lock(
+      &GetSrwLock(), hadesmem::detail::SRWLockType::Exclusive);
+
+    HADESMEM_DETAIL_TRACE_A("Unsetting DR hook.");
+
+    auto& dr_hooks = GetDrHooks();
+    auto const thread_id = ::GetCurrentThreadId();
+    HADESMEM_DETAIL_ASSERT(dr_hooks.find(thread_id) != std::end(dr_hooks));
+    auto const dr_index = dr_hooks[ ::GetCurrentThreadId()];
+
+    Thread const thread(thread_id);
+    auto context = GetThreadContext(thread, CONTEXT_DEBUG_REGISTERS);
+    *(&context.Dr0 + dr_index) = 0;
+    context.Dr7 &= ~(1ULL << (dr_index * 2));
+
+    SetThreadContext(thread, context);
+
+    dr_hooks.erase(::GetCurrentThreadId());
+
+    {
+      auto& veh_hooks = GetVehHooks();
+      veh_hooks.erase(target_);
+    }
+  }
+
+  virtual bool CanHookChainImpl() const override
+  {
+    return false;
   }
 };
 }

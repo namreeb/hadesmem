@@ -87,6 +87,7 @@ public:
     {
       handle_.Detach();
     }
+
     id_ = 0;
   }
 

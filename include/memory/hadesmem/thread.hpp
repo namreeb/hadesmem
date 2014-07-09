@@ -24,12 +24,12 @@ namespace hadesmem
 class Thread
 {
 public:
-  explicit Thread(DWORD id) : handle_{detail::OpenThreadAllAccess(id)}, id_{id}
+  explicit Thread(DWORD id) : handle_{OpenThread(id)}, id_{id}
   {
   }
 
   Thread(Thread const& other)
-    : handle_{detail::DuplicateHandle(other.handle_.GetHandle())},
+    : handle_{DuplicateHandle(other.id_, other.handle_.GetHandle())},
       id_{other.id_}
   {
   }
@@ -51,6 +51,8 @@ public:
 
   Thread& operator=(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
   {
+    CleanupUnchecked();
+
     handle_ = std::move(other.handle_);
     id_ = other.id_;
 
@@ -59,7 +61,7 @@ public:
     return *this;
   }
 
-  ~Thread() HADESMEM_DETAIL_NOEXCEPT
+  ~Thread()
   {
     CleanupUnchecked();
   }
@@ -76,7 +78,15 @@ public:
 
   void Cleanup()
   {
-    handle_.Cleanup();
+    if (id_ != ::GetCurrentThreadId())
+    {
+      handle_.Cleanup();
+    }
+    else
+    {
+      handle_.Detach();
+    }
+
     id_ = 0;
   }
 
@@ -97,6 +107,20 @@ private:
       id_ = 0;
       handle_ = nullptr;
     }
+  }
+
+  HANDLE OpenThread(DWORD id) const
+  {
+    return id == ::GetCurrentThreadId()
+             ? ::GetCurrentThread()
+             : detail::OpenThreadAllAccess(id).Detach();
+  }
+
+  HANDLE DuplicateHandle(DWORD id, HANDLE handle) const
+  {
+    return id == ::GetCurrentThreadId()
+             ? ::GetCurrentThread()
+             : detail::DuplicateHandle(handle).Detach();
   }
 
   detail::SmartHandle handle_;

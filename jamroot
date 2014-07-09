@@ -240,9 +240,10 @@ install dist
     <install-dependencies>on
     
     # Install both EXEs and DLLs.
-    <install-type>SHARED_LIB
     <install-type>EXE
+    <install-type>SHARED_LIB
     <install-type>PDB
+    <install-type>LIB
   ;
 
 # Allow easy consumption by 3rd parties.
