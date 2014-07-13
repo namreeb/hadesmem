@@ -131,9 +131,7 @@ void* FindRaw(Process const& process,
                 n_beg,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-                {
-      return n_cur.wildcard || h_cur == n_cur.data;
-    });
+                { return n_cur.wildcard || h_cur == n_cur.data; });
 
   if (iter != h_end)
   {
@@ -319,8 +317,8 @@ public:
     return address_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR std::uint32_t
-    GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -330,39 +328,39 @@ private:
   std::uint32_t flags_{PatternFlags::kNone};
 };
 
-inline bool operator==(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() == rhs.GetAddress() &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
-inline bool operator!=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Pattern const& lhs,
-                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() < rhs.GetAddress();
 }
 
-inline bool operator<=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() <= rhs.GetAddress();
 }
 
-inline bool operator>(Pattern const& lhs,
-                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() > rhs.GetAddress();
 }
 
-inline bool operator>=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Pattern const& lhs, Pattern const& rhs)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() >= rhs.GetAddress();
 }
@@ -414,14 +412,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(PatternMap const& lhs,
-                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(PatternMap const& lhs, PatternMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(PatternMap const& lhs,
-                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -491,14 +489,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(ModuleMap const& lhs,
-                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(ModuleMap const& lhs,
-                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
+    HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -727,9 +725,9 @@ private:
         !!(flags & PatternFlags::kRelativeAddress);
       std::uintptr_t const real_base = is_relative_address ? base : 0;
       auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
-      auto const result = Read<std::uint8_t*>(*process_, real_address) +
-                          reinterpret_cast<std::uintptr_t>(real_address) +
-                          size - offset;
+      auto const result = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::uintptr_t>(real_address) +
+        Read<std::uint32_t>(*process_, real_address) + size - offset);
       return is_relative_address ? result - base : result;
     }
     catch (std::exception const& /*e*/)
