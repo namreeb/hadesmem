@@ -658,7 +658,8 @@ private:
       kAdd,
       kSub,
       kRel,
-      kLea
+      kLea,
+      kAnd
     };
 
     Manipulator type;
@@ -702,15 +703,33 @@ private:
     {
       bool const is_relative_address =
         !!(flags & PatternFlags::kRelativeAddress);
-      std::uintptr_t real_base = is_relative_address ? base : 0;
+      std::uintptr_t const real_base = is_relative_address ? base : 0;
       auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
       std::uint8_t* const result = Read<std::uint8_t*>(*process_, real_address);
       return is_relative_address ? result - base : result;
     }
-    catch (std::exception const& /*e*/)
+    catch (...)
     {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+
       return nullptr;
     }
+  }
+
+  void* And(std::uintptr_t base,
+            void* address,
+            std::uint32_t flags,
+            std::uintptr_t mask) const
+  {
+    bool const is_relative_address = !!(flags & PatternFlags::kRelativeAddress);
+    std::uintptr_t const real_base = is_relative_address ? base : 0;
+    auto const real_address =
+      reinterpret_cast<std::uintptr_t>(address) + real_base;
+    std::uint8_t* const result =
+      reinterpret_cast<std::uint8_t*>(real_address & mask);
+    return is_relative_address ? result - base : result;
   }
 
   void* Rel(std::uintptr_t base,
@@ -730,8 +749,12 @@ private:
         Read<std::uint32_t>(*process_, real_address) + size - offset);
       return is_relative_address ? result - base : result;
     }
-    catch (std::exception const& /*e*/)
+    catch (...)
     {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+
       return nullptr;
     }
   }
@@ -840,6 +863,10 @@ private:
           {
             type = ManipInfo::Manipulator::kLea;
           }
+          else if (manipulator_name == L"And")
+          {
+            type = ManipInfo::Manipulator::kAnd;
+          }
           else
           {
             HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -925,6 +952,17 @@ private:
         }
 
         address = Lea(base, address, flags);
+
+        break;
+
+      case ManipInfo::Manipulator::kAnd:
+        if (!m.has_operand1 || m.has_operand2)
+        {
+          HADESMEM_DETAIL_THROW_EXCEPTION(
+            Error{} << ErrorString{"Invalid manipulator operands for 'And'."});
+        }
+
+        address = And(base, address, flags, m.operand1);
 
         break;
 
