@@ -29,11 +29,28 @@ public:
 
   explicit ScopeWarden(F&&) = delete;
 
-  ScopeWarden(const ScopeWarden&) = delete;
+  ScopeWarden(ScopeWarden const&) = delete;
 
-  ScopeWarden& operator=(const ScopeWarden&) = delete;
+  ScopeWarden& operator=(ScopeWarden const&) = delete;
+
+  ScopeWarden(ScopeWarden&& other) HADESMEM_DETAIL_NOEXCEPT : f_(other.f_)
+  {
+    other.f_ = nullptr;
+  }
+
+  ScopeWarden& operator=(ScopeWarden&& other) HADESMEM_DETAIL_NOEXCEPT
+  {
+    Cleanup();
+    std::swap(f_, other.f_);
+  }
 
   ~ScopeWarden()
+  {
+    Cleanup();
+  }
+
+private:
+  void Cleanup() HADESMEM_DETAIL_NOEXCEPT
   {
     if (f_)
     {
@@ -48,18 +65,17 @@ public:
         HADESMEM_DETAIL_ASSERT(false);
         std::terminate();
       }
+
+      f_ = nullptr;
     }
   }
 
-private:
   F* f_;
 };
-}
-}
 
-#define HADESMEM_DETAIL_SCOPE_WARDEN(NAME, ...)                                \
-  auto xx##NAME##xx = [&]()                                                    \
-  {                                                                            \
-    __VA_ARGS__                                                                \
-  };                                                                           \
-  ::hadesmem::detail::ScopeWarden<decltype(xx##NAME##xx)> NAME(xx##NAME##xx)
+template <typename F> inline ScopeWarden<F> MakeScopeWarden(F& f)
+{
+  return ScopeWarden<F>{f};
+}
+}
+}

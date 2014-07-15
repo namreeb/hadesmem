@@ -231,7 +231,9 @@ void RootWindow::PaintRadar(HWND hwnd)
                                     << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_dc, ::ReleaseDC(hwnd, radar_wnd_dc););
+  auto const cleanup_dc = [&]()
+  { ::ReleaseDC(hwnd, radar_wnd_dc); };
+  auto const scope_cleanup_dc = hadesmem::detail::MakeScopeWarden(cleanup_dc);
 
   RECT rr{};
   if (!::GetClientRect(hwnd, &rr))
@@ -276,8 +278,9 @@ void RootWindow::PaintRadar(HWND hwnd)
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_obj,
-                               ::SelectObject(mem_dc.GetHandle(), old_obj););
+  auto const cleanup_obj = [&]()
+  { ::SelectObject(mem_dc.GetHandle(), old_obj); };
+  auto const scope_cleanup_obj = hadesmem::detail::MakeScopeWarden(cleanup_obj);
 
   HGDIOBJ old_obj_tmp =
     ::SelectObject(mem_dc.GetHandle(), ::GetStockObject(BLACK_BRUSH));
@@ -628,11 +631,13 @@ LRESULT RootWindow::HandleMessage(UINT msg, WPARAM wparam, LPARAM lparam)
   case WM_APP_UPDATE_RADAR:
   {
     std::lock_guard<std::mutex> lock(GetRadarFrameMutex());
-    HADESMEM_DETAIL_SCOPE_WARDEN(cleanup_frame,
-                                 {
+    auto const cleanup_frame = [&]()
+    {
       GetRadarFrameProcessed() = true;
       GetRadarFrameConditionVariable().notify_one();
-    });
+    };
+    auto const scope_cleanup_frame =
+      hadesmem::detail::MakeScopeWarden(cleanup_frame);
     UpdateRadar(reinterpret_cast<RadarData*>(wparam));
     return 0;
   }
