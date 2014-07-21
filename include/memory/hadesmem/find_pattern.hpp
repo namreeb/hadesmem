@@ -45,13 +45,11 @@ namespace hadesmem
 struct PatternFlags
 {
   enum : std::uint32_t
-  {
-    kNone = 0,
+  { kNone = 0,
     kThrowOnUnmatch = 1 << 0,
     kRelativeAddress = 1 << 1,
     kScanData = 1 << 2,
-    kInvalidFlagMaxValue = 1 << 3
-  };
+    kInvalidFlagMaxValue = 1 << 3 };
 };
 
 namespace detail
@@ -654,13 +652,11 @@ private:
   struct ManipInfo
   {
     enum class Manipulator
-    {
-      kAdd,
+    { kAdd,
       kSub,
       kRel,
       kLea,
-      kAnd
-    };
+      kAnd };
 
     Manipulator type;
     bool has_operand1;
@@ -718,18 +714,13 @@ private:
     }
   }
 
-  void* And(std::uintptr_t base,
+  void* And(std::uintptr_t /*base*/,
             void* address,
-            std::uint32_t flags,
+            std::uint32_t /*flags*/,
             std::uintptr_t mask) const
   {
-    bool const is_relative_address = !!(flags & PatternFlags::kRelativeAddress);
-    std::uintptr_t const real_base = is_relative_address ? base : 0;
-    auto const real_address =
-      reinterpret_cast<std::uintptr_t>(address) + real_base;
-    std::uint8_t* const result =
-      reinterpret_cast<std::uint8_t*>(real_address & mask);
-    return is_relative_address ? result - base : result;
+    return reinterpret_cast<void*>(reinterpret_cast<std::uintptr_t>(address) &
+                                   mask);
   }
 
   void* Rel(std::uintptr_t base,
