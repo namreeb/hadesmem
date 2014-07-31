@@ -50,6 +50,11 @@ exe esomod
   :
     [ glob esomod/*.cpp ]
   ;
+  
+exe divinity_trainer
+  :
+    [ glob divinity_trainer/*.cpp ]
+  ;
 
 lib injecttestdep
   :

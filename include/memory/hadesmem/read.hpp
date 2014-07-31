@@ -42,6 +42,13 @@ template <typename T> inline T Read(Process const& process, PVOID address)
   return detail::ReadImpl<T>(process, address);
 }
 
+template <typename T> inline T ReadUnsafe(Process const& process, PVOID address)
+{
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+  return detail::ReadUnsafeImpl<T>(process, address);
+}
+
 template <typename T, std::size_t N>
 inline std::array<T, N> Read(Process const& process, PVOID address)
 {
@@ -71,7 +78,7 @@ template <typename T, typename OutputIterator>
 inline void
   Read(Process const& process, PVOID address, std::size_t n, OutputIterator out)
 {
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(n ? address != nullptr : true);
 
   auto const data = ReadVector<T>(process, address, n);
   std::copy(std::begin(data), std::end(data), out);
@@ -200,11 +207,11 @@ inline std::vector<T, Alloc> ReadVectorEx(Process const& process,
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count ? address != nullptr : true);
 
   if (!count)
   {
-    return std::vector<T, Alloc>();
+    return {};
   }
 
   std::vector<T, Alloc> data(count);
@@ -225,7 +232,7 @@ inline void ReadVectorEx(Process const& process,
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count ? address != nullptr : true);
 
   auto const data = ReadVectorEx<T>(process, address, count, flags);
   std::copy(std::begin(data), std::end(data), out);
@@ -238,7 +245,7 @@ inline std::vector<T, Alloc>
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count ? address != nullptr : true);
 
   return ReadVectorEx<T, Alloc>(process, address, count, ReadFlags::kNone);
 }
@@ -255,7 +262,7 @@ inline void ReadVector(Process const& process,
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsTriviallyCopyable<T>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
 
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(count ? address != nullptr : true);
 
   return ReadVectorEx<T>(process, address, count, out, ReadFlags::kNone);
 }

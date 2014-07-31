@@ -23,10 +23,8 @@ namespace hadesmem
 struct ReadFlags
 {
   enum : std::uint32_t
-  {
-    kNone,
-    kZeroFillReserved
-  };
+  { kNone,
+    kZeroFillReserved };
 };
 
 namespace detail
@@ -38,8 +36,13 @@ inline void ReadUnchecked(Process const& process,
                           std::size_t len,
                           std::uint32_t /*flags*/ = ReadFlags::kNone)
 {
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(len ? address != nullptr : true);
   HADESMEM_DETAIL_ASSERT(data != nullptr);
+
+  if (!len)
+  {
+    return;
+  }
 
   SIZE_T bytes_read = 0;
   if (!::ReadProcessMemory(
@@ -59,8 +62,13 @@ inline void ReadImpl(Process const& process,
                      std::size_t len,
                      std::uint32_t flags = ReadFlags::kNone)
 {
-  HADESMEM_DETAIL_ASSERT(address != nullptr);
+  HADESMEM_DETAIL_ASSERT(len ? address != nullptr : true);
   HADESMEM_DETAIL_ASSERT(data != nullptr);
+
+  if (!len)
+  {
+    return;
+  }
 
   for (;;)
   {
@@ -114,6 +122,20 @@ inline void ReadImpl(Process const& process,
       len -= len_new;
     }
   }
+}
+
+template <typename T>
+T ReadUnsafeImpl(Process const& process,
+                 void* address,
+                 std::uint32_t flags = ReadFlags::kNone)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_default_constructible<T>::value);
+
+  HADESMEM_DETAIL_ASSERT(address != nullptr);
+
+  T data;
+  ReadImpl(process, address, std::addressof(data), sizeof(data), flags);
+  return data;
 }
 
 template <typename T>

@@ -1270,7 +1270,7 @@ protected:
 
     *(&context.Dr0 + dr_index) = reinterpret_cast<std::uintptr_t>(target_);
     // Set appropriate L0-L3 flag
-    context.Dr7 |= (1ULL << (dr_index * 2));
+    context.Dr7 |= static_cast<std::uintptr_t>(1ULL << (dr_index * 2));
     // Set appropriate RW0-RW3 field (Execution)
     std::uintptr_t break_type = 0;
     context.Dr7 |= (break_type << (16 + 4 * dr_index));
@@ -1306,7 +1306,7 @@ protected:
     // Clear the appropriate DR
     *(&context.Dr0 + dr_index) = 0;
     // Clear appropriate L0-L3 flag
-    context.Dr7 &= ~(1ULL << (dr_index * 2));
+    context.Dr7 &= ~static_cast<std::uintptr_t>(1ULL << (dr_index * 2));
 
     SetThreadContext(thread, context);
 

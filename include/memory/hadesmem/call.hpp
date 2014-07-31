@@ -42,14 +42,12 @@ namespace hadesmem
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
 
 enum class CallConv
-{
-  kDefault,
+{ kDefault,
   kCdecl,
   kStdCall,
   kThisCall,
   kFastCall,
-  kX64
-};
+  kX64 };
 
 template <typename T> class CallResult
 {
@@ -350,13 +348,11 @@ private:
   }
 
   enum class VariantType
-  {
-    kNone,
+  { kNone,
     kInt32,
     kInt64,
     kFloat32,
-    kFloat64
-  };
+    kFloat64 };
 
   union Variant
   {
@@ -628,9 +624,7 @@ inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  {
-      arg.Apply(std::ref(arg_visitor));
-    });
+                  { arg.Apply(std::ref(arg_visitor)); });
 
     assembler->mov(asmjit::x86::eax,
                    asmjit::imm_u(reinterpret_cast<std::uintptr_t>(address)));
@@ -753,9 +747,7 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  {
-      arg.Apply(std::ref(arg_visitor));
-    });
+                  { arg.Apply(std::ref(arg_visitor)); });
 
     assembler->mov(asmjit::x64::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
@@ -940,17 +932,15 @@ inline void CallMulti(Process const& process,
                  std::end(return_vals_remote),
                  results,
                  [](detail::CallResultRemote const& r)
-                 {
-    return static_cast<CallResultRaw>(r);
-  });
+                 { return static_cast<CallResultRaw>(r); });
 }
 
 template <typename ArgsForwardIterator>
-inline CallResultRaw Call(Process const& process,
-                          void* address,
-                          CallConv call_conv,
-                          ArgsForwardIterator args_beg,
-                          ArgsForwardIterator args_end)
+inline CallResultRaw CallRaw(Process const& process,
+                             void* address,
+                             CallConv call_conv,
+                             ArgsForwardIterator args_beg,
+                             ArgsForwardIterator args_end)
 {
   std::vector<void*> addresses{address};
   std::vector<CallConv> call_convs{call_conv};
@@ -1024,7 +1014,7 @@ inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
   detail::BuildCallArgs<FuncT, 0>(std::back_inserter(call_args),
                                   std::forward<Args>(args)...);
 
-  CallResultRaw const ret = Call(
+  CallResultRaw const ret = CallRaw(
     process, address, call_conv, std::begin(call_args), std::end(call_args));
   using ResultT = detail::FuncResultT<FuncT>;
   return detail::CallResultRawToCallResult<ResultT>(ret);

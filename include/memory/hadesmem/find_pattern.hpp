@@ -249,7 +249,8 @@ void* Find(Process const& process,
            NeedleIterator n_beg,
            NeedleIterator n_end,
            std::uint32_t flags,
-           void* start)
+           void* start,
+           std::wstring const* name)
 {
   HADESMEM_DETAIL_ASSERT(n_beg != n_end);
 
@@ -270,8 +271,10 @@ void* Find(Process const& process,
 
   if (!!(flags & PatternFlags::kThrowOnUnmatch))
   {
+    auto const name_narrow = name ? WideCharToMultiByte(*name) : std::string();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                    << ErrorString{"Could not match pattern."});
+                                    << ErrorString{"Could not match pattern."}
+                                    << ErrorStringOther{name_narrow});
   }
 
   return nullptr;
@@ -282,7 +285,8 @@ inline void* Find(Process const& process,
                   std::wstring const& module,
                   std::wstring const& data,
                   std::uint32_t flags,
-                  std::uintptr_t start)
+                  std::uintptr_t start,
+                  std::wstring const* name = nullptr)
 {
   HADESMEM_DETAIL_ASSERT(
     !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
@@ -293,8 +297,13 @@ inline void* Find(Process const& process,
     start
       ? reinterpret_cast<std::uint8_t*>(mod_info.module->GetHandle()) + start
       : nullptr;
-  return detail::Find(
-    process, mod_info, std::begin(needle), std::end(needle), flags, start_abs);
+  return detail::Find(process,
+                      mod_info,
+                      std::begin(needle),
+                      std::end(needle),
+                      flags,
+                      start_abs,
+                      name);
 }
 
 class Pattern
@@ -1047,8 +1056,8 @@ private:
           }
         }();
 
-        address =
-          ::hadesmem::Find(*process_, module, p.pattern.data, flags, start_rva);
+        address = ::hadesmem::Find(
+          *process_, module, p.pattern.data, flags, start_rva, &p.pattern.name);
 
         if (address)
         {
