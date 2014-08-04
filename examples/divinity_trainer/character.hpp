@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <hadesmem/process.hpp>
+
 #include "std_string.hpp"
 #include "vec3f.hpp"
 
@@ -20,6 +22,7 @@ enum CharacterFlags
   CharacterFlags_IsFloating = 0x800000,
   CharacterFlags_IsInFightMode = 0x1000000,
   CharacterFlags_CanSpotSneakers = 0x2000000,
+  CharacterFlags_HasReputationEffects = 0x20000000,
 };
 
 struct CharacterTemplate
@@ -31,7 +34,7 @@ struct CharacterTemplate
   StdStringA name_;
   int field_2C;
   int field_30;
-  int field_34[200];
+  int field_34[500];
 };
 
 struct CharacterStats
@@ -50,12 +53,7 @@ struct CharacterStats
   int reputation_;
   int field_F8;
   int trait_order_;
-  int field_100[12];
-  int field_130;
-  int field_134;
-  int field_138[15];
-  int field_174;
-  int field_178[100];
+  int field_100[150];
 };
 
 struct CharacterPlayerData
@@ -64,7 +62,7 @@ struct CharacterPlayerData
   int attribute_points_;
   int ability_points_;
   int talent_points_;
-  int field_20[100];
+  int field_20[200];
 };
 
 struct Character
@@ -111,7 +109,7 @@ struct Character
   virtual CharacterTemplate*
     SetCurrentTemplate(CharacterTemplate* /*current_template*/)
   {
-      return nullptr;
+    return nullptr;
   }
 
   virtual CharacterTemplate* GetCurrentTemplate()
@@ -154,10 +152,159 @@ struct Character
     return nullptr;
   }
 
-  // More unknown virtual functions...
+  virtual void Unknown004C()
+  {
+  }
+
+  virtual void Unknown0050()
+  {
+  }
+
+  virtual void Unknown0054()
+  {
+  }
+
+  virtual void Unknown0058()
+  {
+  }
+
+  virtual void Unknown005C()
+  {
+  }
+
+  virtual void Unknown0060()
+  {
+  }
+
+  virtual void Unknown0064()
+  {
+  }
+
+  virtual void Unknown0068()
+  {
+  }
+
+  virtual void Unknown006C()
+  {
+  }
+
+  virtual void Unknown0070()
+  {
+  }
+
+  virtual void Unknown0074()
+  {
+  }
+
+  virtual void Unknown0078()
+  {
+  }
+
+  virtual void Unknown007C()
+  {
+  }
+
+  virtual void Unknown0080()
+  {
+  }
+
+  virtual void Unknown0084()
+  {
+  }
+
+  virtual void Unknown0088()
+  {
+  }
+
+  virtual void Unknown008C()
+  {
+  }
+
+  virtual void Unknown0090()
+  {
+  }
+
+  virtual void Unknown0094()
+  {
+  }
+
+  virtual void Unknown0098()
+  {
+  }
+
+  virtual void Unknown009C()
+  {
+  }
+
+  virtual void Unknown00A0()
+  {
+  }
+
+  virtual void Unknown00A4()
+  {
+  }
+
+  virtual void Unknown00A8()
+  {
+  }
+
+  virtual void Unknown00AC()
+  {
+  }
+
+  virtual void Unknown00B0()
+  {
+  }
+
+  virtual void Unknown00B4()
+  {
+  }
+
+  virtual void Unknown00BC()
+  {
+  }
+
+  virtual void Unknown00C0()
+  {
+  }
+
+  virtual void Unknown00C4()
+  {
+  }
+
+  virtual void Unknown00C8()
+  {
+  }
+
+  virtual void Unknown00CC()
+  {
+  }
+
+  virtual void Unknown00D0()
+  {
+  }
+
+  virtual void Unknown00D4()
+  {
+  }
+
+  virtual CharacterTemplate*
+    SetOriginalTemplate(CharacterTemplate* /*character_template*/)
+  {
+    return nullptr;
+  }
+
+  virtual CharacterTemplate* GetOriginalTemplate()
+  {
+    return nullptr;
+  }
+
+  virtual void Unknown00E0()
+  {
+  }
 
   Vec3f position_;
-  int handle_;
+  unsigned int handle_;
   CharacterFlags flags_;
   int field_18;
   char* region_;
@@ -238,3 +385,5 @@ struct Character
   StdStringW* custom_kickstarter_name_;
   int field_154[50];
 };
+
+void DumpCharacter(hadesmem::Process const& process, Character* character_ptr);

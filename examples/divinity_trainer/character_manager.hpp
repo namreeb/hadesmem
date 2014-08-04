@@ -3,6 +3,11 @@
 
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
+#include <hadesmem/process.hpp>
+
 #include "character.hpp"
 
 struct CharacterPartyManager
@@ -27,11 +32,18 @@ struct CharacterManager
   int field_1C;
   int field_20;
   int field_24;
-  WORD* character_type_id_array_;
+  std::uint16_t* character_type_id_array_;
   int field_2C[14];
   int field_64;
   int field_68;
   int field_6C[12];
   CharacterPartyManager party_manager_;
-  int field_100[50];
+  int field_100[100];
 };
+
+std::vector<Character*> DumpCharacterArray(hadesmem::Process const& process,
+                                           Character** ptr_array,
+                                           std::uint16_t* type_id_array,
+                                           std::uint32_t array_len);
+
+void DumpCharacterManager(hadesmem::Process const& process, std::uint8_t* base);
