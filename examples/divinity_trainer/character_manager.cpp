@@ -28,14 +28,14 @@ std::vector<Character*> DumpCharacterArray(hadesmem::Process const& process,
     auto const character_ptr = character_ptr_array[i];
     if (type_id_array)
     {
-      printf("Character %X: %p (Type: %X)\n",
+      printf("Character %X: %p (Type: %04X)\n",
              i,
-             character_ptr,
+             static_cast<void*>(character_ptr),
              character_type_id_array[i]);
     }
     else
     {
-      printf("Character %X: %p\n", i, character_ptr);
+      printf("Character %X: %p\n", i, static_cast<void*>(character_ptr));
     }
 
     if (character_ptr != 0)
@@ -61,13 +61,14 @@ void DumpCharacterManager(hadesmem::Process const& process, std::uint8_t* base)
   auto const character_manager =
     hadesmem::Read<CharacterManager>(process, character_manager_ptr);
   printf("CharacterManager::CharacterPtrArray: %p\n",
-         character_manager.character_ptr_array_);
+         static_cast<void*>(character_manager.character_ptr_array_));
   printf("CharacterManager::CharacterPtrArrayLen: %X\n",
          character_manager.character_ptr_array_len_);
   printf("CharacterManager::CharacterTypeIdArray: %p\n",
-         character_manager.character_type_id_array_);
+         static_cast<void*>(character_manager.character_type_id_array_));
   printf("CharacterManager::PartyMemberPtrArray: %p\n",
-         character_manager.party_manager_.party_member_ptr_array_);
+         static_cast<void*>(
+           character_manager.party_manager_.party_member_ptr_array_));
   printf("CharacterManager::PartyMemberPtrArrayLen: %X\n",
          character_manager.party_manager_.party_member_ptr_array_len_);
   printf("\n");

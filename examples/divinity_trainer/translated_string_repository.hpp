@@ -55,7 +55,7 @@ void DumpStringRespositoryHashTable(hadesmem::Process const& process,
   {
     auto const entry_ptr = hadesmem::Read<typename HashTableT::Entry*>(
       process, hash_table.table_ + i);
-    printf("\nHead: %p\n", entry_ptr);
+    printf("\nHead: %p\n", static_cast<void*>(entry_ptr));
 
     for (auto entry =
            hadesmem::Read<typename HashTableT::Entry>(process, entry_ptr);
@@ -65,7 +65,7 @@ void DumpStringRespositoryHashTable(hadesmem::Process const& process,
     {
       printf("\n");
 
-      printf("Next: %p\n", entry.next_);
+      printf("Next: %p\n", static_cast<void*>(entry.next_));
       printf("String (Address): %p\n", entry.key_);
       printf("String: %s\n",
              hadesmem::ReadString<char>(process, entry.key_).c_str());

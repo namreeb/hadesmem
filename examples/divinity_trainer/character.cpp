@@ -46,17 +46,19 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
          hadesmem::ReadString<char>(process, character.region_).c_str());
   printf("UUID: %s\n",
          hadesmem::ReadString<char>(process, character.uuid_).c_str());
-  printf("CurrentTemplate: %p\n", character.current_template_);
+  printf("CurrentTemplate: %p\n",
+         static_cast<void*>(character.current_template_));
   auto const current_character_template =
     hadesmem::Read<CharacterTemplate>(process, character.current_template_);
   printf("CurrentTemplate::Name: %s\n",
          GetString(process, current_character_template.name_).c_str());
-  printf("OriginalTemplate: %p\n", character.original_template_);
+  printf("OriginalTemplate: %p\n",
+         static_cast<void*>(character.original_template_));
   auto const original_character_template =
     hadesmem::Read<CharacterTemplate>(process, character.current_template_);
   printf("OriginalTemplate::Name: %s\n",
          GetString(process, original_character_template.name_).c_str());
-  printf("Stats: %p\n", character.stats_);
+  printf("Stats: %p\n", static_cast<void*>(character.stats_));
   auto const character_stats =
     hadesmem::Read<CharacterStats>(process, character.stats_);
   printf("Stats::Level: %d\n", character_stats.level_);
@@ -66,10 +68,10 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
   printf("Stats::BonusAP: %d\n", character_stats.bonus_action_points_);
   printf("Stats::XP: %d\n", character_stats.experience_);
   printf("Stats::Reputation: %d\n", character_stats.reputation_);
-  printf("Stats::TraitOrder: %p\n", character_stats.trait_order_);
+  printf("Stats::TraitOrder: %08X\n", character_stats.trait_order_);
   printf("IsInCombat: %d\n", character.is_in_combat_);
   printf("ReservedPeerId: %d\n", character.reserved_peer_id_);
-  printf("PlayerData: %p\n", character.player_data_);
+  printf("PlayerData: %p\n", static_cast<void*>(character.player_data_));
   if (character.player_data_)
   {
     auto const character_player_data =
