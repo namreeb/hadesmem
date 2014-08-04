@@ -23,7 +23,7 @@ std::vector<Character*> DumpCharacterArray(hadesmem::Process const& process,
     type_id_array
       ? hadesmem::ReadVector<std::uint16_t>(process, type_id_array, array_len)
       : std::vector<std::uint16_t>();
-  for (std::size_t i = 0; i < character_ptr_array.size(); ++i)
+  for (std::uint32_t i = 0; i < character_ptr_array.size(); ++i)
   {
     auto const character_ptr = character_ptr_array[i];
     if (type_id_array)
