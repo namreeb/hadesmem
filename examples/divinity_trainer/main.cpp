@@ -21,6 +21,7 @@
 #include <hadesmem/process_helpers.hpp>
 
 #include "character_manager.hpp"
+#include "item_manager.hpp"
 #include "translated_string_repository.hpp"
 
 int main(int argc, char* argv[])
@@ -72,6 +73,8 @@ int main(int argc, char* argv[])
     std::cout << '\n';
 
     DumpCharacterManager(*process, base);
+
+    DumpItemManager(*process, base);
 
     DumpStringRepository(*process, base);
 

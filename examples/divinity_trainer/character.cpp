@@ -16,32 +16,30 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
   printf("Handle: %08X\n", character.handle_);
   printf("Flags: %08X\n", character.flags_);
   printf("Flags::IsPlayer: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsPlayer));
+         !!(character.flags_ & CharacterFlags_IsPlayer));
   printf("Flags::IsPartyMember: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsPartyMember));
-  printf("Flags::IsDead: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsDead));
+         !!(character.flags_ & CharacterFlags_IsPartyMember));
+  printf("Flags::IsDead: %d\n", !!(character.flags_ & CharacterFlags_IsDead));
   printf("Flags::IsSummon: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsSummon));
+         !!(character.flags_ & CharacterFlags_IsSummon));
   printf("Flags::IsInvulnerable: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsInvulnerable));
+         !!(character.flags_ & CharacterFlags_IsInvulnerable));
   printf("Flags::IsImmortal: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsImmortal));
+         !!(character.flags_ & CharacterFlags_IsImmortal));
   printf("Flags::IsStoryNpc: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsStoryNpc));
+         !!(character.flags_ & CharacterFlags_IsStoryNpc));
   printf("Flags::CanFight: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_CanFight));
+         !!(character.flags_ & CharacterFlags_CanFight));
   printf("Flags::IsInvisible: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsVisible));
+         !!(character.flags_ & CharacterFlags_IsVisible));
   printf("Flags::IsFloating: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsFloating));
+         !!(character.flags_ & CharacterFlags_IsFloating));
   printf("Flags::IsInFightMode: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_IsInFightMode));
+         !!(character.flags_ & CharacterFlags_IsInFightMode));
   printf("Flags::CanSpotSneakers: %d\n",
-         !!(character.flags_ & CharacterFlags::CharacterFlags_CanSpotSneakers));
-  printf(
-    "Flags::HasReputationEffects: %d\n",
-    !!(character.flags_ & CharacterFlags::CharacterFlags_HasReputationEffects));
+         !!(character.flags_ & CharacterFlags_CanSpotSneakers));
+  printf("Flags::HasReputationEffects: %d\n",
+         !!(character.flags_ & CharacterFlags_HasReputationEffects));
   printf("Region: %s\n",
          hadesmem::ReadString<char>(process, character.region_).c_str());
   printf("UUID: %s\n",
@@ -58,6 +56,7 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
     hadesmem::Read<CharacterTemplate>(process, character.current_template_);
   printf("OriginalTemplate::Name: %s\n",
          GetString(process, original_character_template.name_).c_str());
+  printf("Flags2: %08X\n", character.flags_2_);
   printf("Stats: %p\n", static_cast<void*>(character.stats_));
   auto const character_stats =
     hadesmem::Read<CharacterStats>(process, character.stats_);

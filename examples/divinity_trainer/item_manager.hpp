@@ -4,16 +4,15 @@
 #pragma once
 
 #include "item.hpp"
+#include "game_object_manager.hpp"
 
-struct ItemManager
+struct ItemManager : GameObjectManager<Item>
 {
-  int field_0;
-  int field_4;
-  int field_8;
-  Item **item_ptr_array_;
-  int field_10;
-  int item_ptr_array_len_;
-  int field_18[4];
-  WORD *item_type_id_array_;
-  int field_2C[200];
 };
+
+std::vector<Item*> DumpItemArray(hadesmem::Process const& process,
+                                 Item** ptr_array,
+                                 std::uint16_t* type_id_array,
+                                 std::uint32_t array_len);
+
+void DumpItemManager(hadesmem::Process const& process, std::uint8_t* base);

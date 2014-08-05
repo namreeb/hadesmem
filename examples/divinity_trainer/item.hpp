@@ -22,13 +22,20 @@ struct ItemStats
   int durability_counter_;
   int repair_durability_penalty_;
   int field_10C;
-  int item_type_;
+  char* item_type_;
   int field_114[100];
 };
 
 struct ItemTemplate
 {
-  int field_0[500];
+  int field_0;
+  int field_4;
+  int field_8;
+  char* uuid_;
+  StdStringA name_;
+  int field_2C;
+  int field_30;
+  int field_34[500];
 };
 
 struct Item
@@ -255,10 +262,12 @@ struct Item
 
   virtual ItemTemplate* SetOriginalTemplate(ItemTemplate* /*item_template*/)
   {
+    return nullptr;
   }
 
   virtual ItemTemplate* GetOriginalTemplate()
   {
+    return nullptr;
   }
 
   virtual void Unknown00E0()
@@ -266,7 +275,7 @@ struct Item
   }
 
   Vec3f position_;
-  int handle_;
+  unsigned int handle_;
   ItemFlags flags_;
   int field_18;
   int level_;
@@ -284,23 +293,25 @@ struct Item
   ItemStats* stats_;
   int field_84;
   int field_88;
-  int inventory_;
-  int parent_;
+  unsigned int inventory_;
+  unsigned int parent_;
   int slot_;
   int amount_;
   int vitality_;
   int field_A0;
-  int key_;
+  unsigned int key_;
   int lock_level_;
-  int surface_check_timer_;
-  int life_time_;
-  int item_machine_;
-  int plan_manager_;
-  int variable_manager_;
-  int status_manager_;
+  float surface_check_timer_;
+  float life_time_;
+  void* item_machine_;
+  void* plan_manager_;
+  void* variable_manager_;
+  void* status_manager_;
   int field_C4;
   int field_C8;
-  int owner_;
+  unsigned int owner_;
   int field_D0;
   int field_D4[100];
 };
+
+void DumpItem(hadesmem::Process const& process, Item* item_ptr);
