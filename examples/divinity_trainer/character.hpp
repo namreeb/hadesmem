@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/process.hpp>
 
 #include "std_string.hpp"
@@ -385,5 +386,7 @@ struct Character
   StdStringW* custom_kickstarter_name_;
   int field_154[50];
 };
+
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Character) == 0x21C);
 
 void DumpCharacter(hadesmem::Process const& process, Character* character_ptr);

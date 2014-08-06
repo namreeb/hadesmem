@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/process.hpp>
+
 #include "std_string.hpp"
 #include "vec3f.hpp"
 
@@ -278,7 +281,7 @@ struct Item
   unsigned int handle_;
   ItemFlags flags_;
   int field_18;
-  int level_;
+  char* level_;
   int field_20[9];
   float scale_;
   char* uuid_;
@@ -295,11 +298,12 @@ struct Item
   int field_88;
   unsigned int inventory_;
   unsigned int parent_;
-  int slot_;
+  short slot_;
+  short field_96;
   int amount_;
   int vitality_;
   int field_A0;
-  unsigned int key_;
+  char* key_;
   int lock_level_;
   float surface_check_timer_;
   float life_time_;
@@ -313,5 +317,7 @@ struct Item
   int field_D0;
   int field_D4[100];
 };
+
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Item) == 0x264);
 
 void DumpItem(hadesmem::Process const& process, Item* item_ptr);

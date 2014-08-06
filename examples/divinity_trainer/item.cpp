@@ -16,6 +16,8 @@ void DumpItem(hadesmem::Process const& process, Item* item_ptr)
   printf("Flags: %08X\n", item.flags_);
   printf("Flags::ItemFlags_IsVisible: %d\n",
          !!(item.flags_ & ItemFlags::ItemFlags_IsVisible));
+  printf("Level: %s\n",
+         hadesmem::ReadString<char>(process, item.level_).c_str());
   printf("Scale: %f\n", item.scale_);
   printf("UUID: %s\n", hadesmem::ReadString<char>(process, item.uuid_).c_str());
   printf("Flags2: %08X\n", item.flags_2_);
@@ -49,14 +51,15 @@ void DumpItem(hadesmem::Process const& process, Item* item_ptr)
     printf("Stats::DurabilityCounter: %d\n", item_stats.durability_counter_);
     printf("Stats::RepairDurabilityPenalty: %d\n",
            item_stats.repair_durability_penalty_);
-    printf("Stats::ItemType: %s\n", hadesmem::ReadString<char>(process, item_stats.item_type_).c_str());
+    printf("Stats::ItemType: %s\n",
+           hadesmem::ReadString<char>(process, item_stats.item_type_).c_str());
   }
   printf("Inventory: %08X\n", item.inventory_);
   printf("Parent: %08X\n", item.parent_);
   printf("Slot: %d\n", item.slot_);
   printf("Amount: %d\n", item.amount_);
   printf("Vitality: %d\n", item.vitality_);
-  printf("Key: %08X\n", item.key_);
+  printf("Key: %s\n", hadesmem::ReadString<char>(process, item.key_).c_str());
   printf("LockLevel: %d\n", item.lock_level_);
   printf("SurfaceCheckTimer: %f\n", item.surface_check_timer_);
   printf("LifeTime: %f\n", item.life_time_);
