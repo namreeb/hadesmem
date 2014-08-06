@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <hadesmem/config.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/process.hpp>
 
@@ -318,6 +319,8 @@ struct Item
   int field_D4[100];
 };
 
+#if defined(HADESMEM_DETAIL_ARCH_X86)
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Item) == 0x264);
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
 void DumpItem(hadesmem::Process const& process, Item* item_ptr);

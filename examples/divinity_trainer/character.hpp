@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <hadesmem/config.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/process.hpp>
 
@@ -387,6 +388,8 @@ struct Character
   int field_154[50];
 };
 
+#if defined(HADESMEM_DETAIL_ARCH_X86)
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Character) == 0x21C);
+#endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
 void DumpCharacter(hadesmem::Process const& process, Character* character_ptr);
