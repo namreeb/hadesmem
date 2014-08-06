@@ -1,0 +1,26 @@
+# src/anttweakbar/jamfile.v2
+
+project 
+  : 
+    requirements 
+
+    <warnings>off
+  ;
+
+lib anttweakbar 
+  : 
+    [ glob anttweakbar/src/*.cpp ] 
+  : 
+    <include>"anttweakbar/include/"
+
+    <link>static
+
+    # Static link
+    <define>TW_STATIC
+  : 
+  : 
+    <include>"anttweakbar/include/"
+
+    # Static link
+    <define>TW_STATIC
+  ;
