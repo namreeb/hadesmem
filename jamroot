@@ -36,6 +36,12 @@ use-project /fw1fontwrapper
     src/fw1fontwrapper
   ;
   
+# Use AntTweakBar library. 
+use-project /anttweakbar
+  :
+    src/anttweakbar
+  ;
+  
 # Use HadesMem tests.
 use-project /tests
   :
@@ -195,6 +201,8 @@ alias memory
     <library>src/tclap
 
     <library>src/fw1fontwrapper
+
+    <library>src/anttweakbar
 
     <include>"./include/memory"
   ;

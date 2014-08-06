@@ -347,7 +347,7 @@ namespace GLCore { PFNGLGetProcAddress _glGetProcAddress = NULL; }
             return 1; // "OpenGL library already loaded"
         }
     
-        g_OGLCoreModule = LoadLibrary("OPENGL32.DLL");
+        g_OGLCoreModule = LoadLibraryA("OPENGL32.DLL");
         if( g_OGLCoreModule )
         {
             // Info(VERB_LOW, "Load %d OpenGL Core functions", g_NbOGLCoreFunc);

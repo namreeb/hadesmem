@@ -12,6 +12,7 @@ lib anttweakbar
     [ glob anttweakbar/src/*.cpp ] 
   : 
     <include>"anttweakbar/include/"
+    <include>"anttweakbar/obj/"
 
     <link>static
 
@@ -20,6 +21,7 @@ lib anttweakbar
   : 
   : 
     <include>"anttweakbar/include/"
+    <include>"anttweakbar/obj/"
 
     # Static link
     <define>TW_STATIC
