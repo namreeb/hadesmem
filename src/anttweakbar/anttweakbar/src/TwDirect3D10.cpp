@@ -17,6 +17,8 @@
 #define D3D10_IGNORE_SDK_LAYERS // d3d10sdklayers.h may not exist
 #include <d3d10.h>
 
+#include <algorithm>
+
 
 using namespace std;
 
@@ -306,7 +308,7 @@ int CTwGraphDirect3D10::Init()
         {
             s_ErrorMsg[errOffset++] = ':';
             s_ErrorMsg[errOffset++] = '\n';
-            errLen = min(errors->GetBufferSize(), ERR_MSG_MAX_LEN-errOffset-2);
+            errLen = (std::min)(static_cast<std::size_t>(errors->GetBufferSize()), ERR_MSG_MAX_LEN-errOffset-2);
             strncpy(s_ErrorMsg+errOffset, static_cast<char *>(errors->GetBufferPointer()), errLen);
             errors->Release();
             errors = NULL;

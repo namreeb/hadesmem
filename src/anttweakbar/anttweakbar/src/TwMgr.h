@@ -490,7 +490,7 @@ struct CTwFPU
 {
     CTwFPU()    
     { 
-    #ifdef ANT_WINDOWS
+    #if defined(ANT_WINDOWS) && defined(_MSC_VER)
         state0 = _controlfp(0, 0); 
         if( (state0&MCW_PC)==_PC_24 )   // we need at least _PC_53
             _controlfp(_PC_53, MCW_PC);
@@ -500,7 +500,7 @@ struct CTwFPU
     }
     ~CTwFPU()
     {
-    #ifdef ANT_WINDOWS      
+    #if defined(ANT_WINDOWS) && defined(_MSC_VER)
         if( (state0&MCW_PC)==_PC_24 )
             _controlfp(_PC_24, MCW_PC);
     #else

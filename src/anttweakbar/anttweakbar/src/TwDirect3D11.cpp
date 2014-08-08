@@ -17,6 +17,9 @@
 #define D3D11_IGNORE_SDK_LAYERS // d3d11sdklayers.h may not exist
 #include <d3d11.h>
 
+#ifndef D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE
+#define	D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE	( 16 )
+#endif
 
 using namespace std;
 
