@@ -64,7 +64,7 @@ hadesmem::detail::Optional<Entry>
 inline hadesmem::detail::Optional<MODULEENTRY32W> Module32First(HANDLE snap)
 {
   return Toolhelp32Enum<MODULEENTRY32W, decltype(& ::Module32FirstW)>(
-    &::Module32First, snap, "Module32First failed.");
+    &::Module32FirstW, snap, "Module32First failed.");
 }
 
 inline hadesmem::detail::Optional<MODULEENTRY32W> Module32Next(HANDLE snap)
