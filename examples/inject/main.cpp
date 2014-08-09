@@ -82,6 +82,8 @@ int main(int argc, char* argv[])
       "",
       "string",
       cmd};
+    TCLAP::ValueArg<DWORD> steam_app_id_arg{
+      "", "steam-app-id", "Steam app id", false, 0, "uint32_t", cmd};
     cmd.parse(argc, argv);
 
     bool const free = free_arg.isSet();
@@ -110,6 +112,14 @@ int main(int argc, char* argv[])
         hadesmem::Error{} << hadesmem::ErrorString{"Please choose action(s) to "
                                                    "perform on the process "
                                                    "(inject, free, export)."});
+    }
+
+    auto const steam_app_id = steam_app_id_arg.getValue();
+    if (steam_app_id && !run)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{
+          "Steam app ID is only supported when launching the target."});
     }
 
     auto const module_path =
@@ -210,9 +220,7 @@ int main(int argc, char* argv[])
                      std::end(exe_args_tmp),
                      std::back_inserter(exe_args),
                      [](std::string const& s)
-                     {
-        return hadesmem::detail::MultiByteToWideChar(s);
-      });
+                     { return hadesmem::detail::MultiByteToWideChar(s); });
       auto const export_name = export_arg.getValue();
       auto const work_dir =
         hadesmem::detail::MultiByteToWideChar(work_dir_arg.getValue());
@@ -223,7 +231,8 @@ int main(int argc, char* argv[])
                                   std::end(exe_args),
                                   module_path,
                                   export_name,
-                                  flags);
+                                  flags,
+                                  steam_app_id);
 
       std::wcout << "\nSuccessfully created target.\n";
       std::wcout << "Process ID: " << inject_data.GetProcess() << ".\n";

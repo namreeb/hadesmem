@@ -63,6 +63,20 @@ T StrToNum(std::basic_string<CharT> const& str)
   return out;
 }
 
+template <typename CharT, typename T>
+std::basic_string<CharT> NumToStr(T num)
+{
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
+  std::basic_ostringstream<CharT> converter;
+  converter.imbue(std::locale::classic());
+  if (!converter || !(converter << num))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+    << ErrorString{ "Conversion failed." });
+  }
+  return converter.str();
+}
+
 inline std::string WideCharToMultiByte(std::string const& in,
                                        bool* lossy = nullptr)
 {
