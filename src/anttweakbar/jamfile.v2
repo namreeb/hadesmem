@@ -18,6 +18,7 @@ lib anttweakbar
 
     # Static link
     <define>TW_STATIC
+    <define>TW_NO_LIB_PRAGMA
   : 
   : 
     <include>"anttweakbar/include/"
@@ -25,4 +26,5 @@ lib anttweakbar
 
     # Static link
     <define>TW_STATIC
+    <define>TW_NO_LIB_PRAGMA
   ;
