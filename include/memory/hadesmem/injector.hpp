@@ -307,7 +307,7 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     var.second.resize(HADESMEM_DETAIL_MAX_PATH_UNICODE);
 
     auto const err = ::GetEnvironmentVariableW(
-      name.c_str(), var.second.data(), var.second.size());
+      name.c_str(), var.second.data(), static_cast<DWORD>(var.second.size()));
     if (!err || err > var.second.size())
     {
       DWORD const last_error = ::GetLastError();
