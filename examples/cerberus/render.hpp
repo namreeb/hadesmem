@@ -31,7 +31,7 @@ public:
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 
-  virtual void DrawWatermark() = 0;
+  virtual void DrawTweakBar() = 0;
 };
 
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;

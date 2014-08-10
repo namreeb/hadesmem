@@ -15,6 +15,10 @@
 #include <dxgi.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+#include <anttweakbar.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
+#include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <fw1fontwrapper.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -39,6 +43,7 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
 struct RenderInfoD3D11
 {
   bool first_time_{true};
+  bool tw_initialized_{false};
   IDXGISwapChain* swap_chain_{};
   ID3D11Device* device_;
   ID3D11DeviceContext* context_;
@@ -51,70 +56,92 @@ RenderInfoD3D11& GetRenderInfoD3D11() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-// Modified from http://bit.ly/1iizOJR
+void HandleChangedSwapChain(IDXGISwapChain* swap_chain,
+                            RenderInfoD3D11& render_info)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
+                                 render_info.swap_chain_,
+                                 swap_chain);
+  render_info.swap_chain_ = swap_chain;
+
+  if (render_info.font_wrapper_)
+  {
+    render_info.font_wrapper_->Release();
+    render_info.font_wrapper_ = nullptr;
+  }
+
+  render_info.device_ = nullptr;
+  render_info.context_ = nullptr;
+
+  render_info.first_time_ = true;
+
+  if (render_info.tw_initialized_)
+  {
+    if (!TwTerminate())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
+    }
+
+    render_info.tw_initialized_ = false;
+  }
+}
+
+void InitializeD3D11RenderInfo(IDXGISwapChain* swap_chain,
+                               RenderInfoD3D11& render_info)
+{
+  HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+  render_info.first_time_ = false;
+
+  auto const get_device_hr =
+    swap_chain->GetDevice(__uuidof(render_info.device_),
+                          reinterpret_cast<void**>(&render_info.device_));
+  if (FAILED(get_device_hr))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{
+                                         "IDXGISwapChain::GetDevice failed."}
+                                    << hadesmem::ErrorCodeWinHr{get_device_hr});
+  }
+
+  render_info.device_->GetImmediateContext(&render_info.context_);
+
+  if (!TwInit(TW_DIRECT3D11, render_info.device_))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{"TwInit failed."});
+  }
+
+  render_info.tw_initialized_ = true;
+
+  if (!TwWindowSize(800, 600))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."});
+  }
+
+  auto const bar = TwNewBar("HadesMem");
+  if (!bar)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
+}
+
 void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 {
   auto& render_info = GetRenderInfoD3D11();
   if (render_info.swap_chain_ != swap_chain)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
-                                   render_info.swap_chain_,
-                                   swap_chain);
-    render_info.swap_chain_ = swap_chain;
-
-    if (render_info.font_wrapper_)
-    {
-      render_info.font_wrapper_->Release();
-      render_info.font_wrapper_ = nullptr;
-    }
-
-    render_info.device_ = nullptr;
-    render_info.context_ = nullptr;
-
-    render_info.first_time_ = true;
+    HandleChangedSwapChain(swap_chain, render_info);
   }
 
   if (render_info.first_time_)
   {
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
-
-    render_info.first_time_ = false;
-
-    auto const get_device_hr =
-      swap_chain->GetDevice(__uuidof(render_info.device_),
-                            reinterpret_cast<void**>(&render_info.device_));
-    if (FAILED(get_device_hr))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{
-                               "IDXGISwapChain::GetDevice failed."}
-                          << hadesmem::ErrorCodeWinHr{get_device_hr});
-    }
-
-    render_info.device_->GetImmediateContext(&render_info.context_);
-
-    IFW1Factory* fw1_factory{};
-    auto const create_factory_hr =
-      FW1CreateFactory(FW1_VERSION, &fw1_factory);
-    if (FAILED(create_factory_hr))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"FW1CreateFactory failed."}
-                          << hadesmem::ErrorCodeWinHr{create_factory_hr});
-    }
-    hadesmem::detail::SmartComHandle fw1_factory_cleanup(fw1_factory);
-
-    auto const create_font_hr = fw1_factory->CreateFontWrapper(
-      render_info.device_, L"Consolas", &render_info.font_wrapper_);
-    if (FAILED(create_font_hr))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{
-                               "IFW1Factory::CreateFontWrapper failed."}
-                          << hadesmem::ErrorCodeWinHr{create_font_hr});
-    }
-
-    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
+    InitializeD3D11RenderInfo(swap_chain, render_info);
   }
 }
 
@@ -127,18 +154,12 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   callbacks.Run(&render_interface);
 }
 
-void DrawWatermarkImpl()
+void DrawTweakBarImpl()
 {
-  auto& render_info = GetRenderInfoD3D11();
-  if (render_info.font_wrapper_)
+  if (!TwDraw())
   {
-    render_info.font_wrapper_->DrawString(render_info.context_,
-                                          L"HadesMem (D3D11 Mode)",
-                                          15.0f,
-                                          15.0f,
-                                          15.0f,
-                                          0xFF2525FF,
-                                          FW1_RESTORESTATE);
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{"TwDraw failed."});
   }
 }
 
@@ -156,9 +177,9 @@ public:
     hadesmem::cerberus::UnregisterOnFrameCallback(id);
   }
 
-  virtual void DrawWatermark() final
+  virtual void DrawTweakBar() final
   {
-    DrawWatermarkImpl();
+    DrawTweakBarImpl();
   }
 };
 }
@@ -181,9 +202,9 @@ void InitializeRender()
     hadesmem::cerberus::RegisterOnFrameCallbackDXGI(OnFrameDXGI);
   (void)dxgi_callback_id;
 
-  auto const draw_watermark = [](RenderInterface* render)
-  { render->DrawWatermark(); };
-  RegisterOnFrameCallback(draw_watermark);
+  auto const draw_tweak_bar = [](RenderInterface* render)
+  { render->DrawTweakBar(); };
+  RegisterOnFrameCallback(draw_tweak_bar);
 }
 
 std::size_t
