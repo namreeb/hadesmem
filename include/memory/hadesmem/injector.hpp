@@ -325,9 +325,9 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
   };
 
   auto const write_steam_env_var = [](std::wstring const& name,
-                                      std::uint32_t steam_app_id)
+                                      std::uint32_t steam_app_id_)
   {
-    auto const steam_app_id_str = detail::NumToStr<wchar_t>(steam_app_id);
+    auto const steam_app_id_str = detail::NumToStr<wchar_t>(steam_app_id_);
     if (!::SetEnvironmentVariableW(name.c_str(), steam_app_id_str.c_str()))
     {
       DWORD const last_error = ::GetLastError();
