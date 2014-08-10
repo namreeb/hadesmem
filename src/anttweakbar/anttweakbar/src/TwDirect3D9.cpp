@@ -24,6 +24,22 @@ using namespace std;
 const char *g_ErrCantLoadD3D9   = "Cannot load Direct3D9 library dynamically";
 const char *g_ErrCantUnloadD3D9 = "Cannot unload Direct3D9 library";
 
+#ifdef __MINGW32__
+
+#define UUID_DECL(type,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8)                 \
+  extern "C++" {                                                        \
+  static const IID uuid_##type = {l,w1,w2, {b1,b2,b3,b4,b5,b6,b7,b8}}; \
+  template<> const GUID &__mingw_uuidof<type>() {                     \
+  return uuid_##type;                                               \
+}                                                                   \
+  template<> const GUID &__mingw_uuidof<type*>() {                    \
+  return __mingw_uuidof<type>();                                    \
+}                                                                   \
+}
+
+UUID_DECL(IDirect3DDevice9Ex, 0xB18B10CE, 0x2649, 0x405a, 0x87, 0x0F, 0x95, 0xF7, 0x77, 0xD4, 0x31, 0x3A);
+
+#endif
 
 //  ---------------------------------------------------------------------------
 
