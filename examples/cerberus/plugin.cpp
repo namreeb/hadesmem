@@ -292,6 +292,16 @@ void LoadPlugins()
   }
   else
   {
+#if defined(HADESMEM_GCC)
+    std::wstring const config_xml = LR"(
+<?xml version="1.0" encoding="utf-8"?>
+<HadesMem>
+  <Cerberus>
+    <Plugin Path="libplugin.dll"/>
+  </Cerberus>
+</HadesMem>
+)";
+#else
     std::wstring const config_xml = LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
@@ -300,6 +310,7 @@ void LoadPlugins()
   </Cerberus>
 </HadesMem>
 )";
+#endif
     LoadPluginsMemory(config_xml);
   }
 }

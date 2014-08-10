@@ -158,10 +158,9 @@ void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
     reinterpret_cast<void**>(&render_info.device_));
   if (FAILED(get_device_hr))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{
-                                         "IDXGISwapChain::GetDevice failed."}
-                                    << hadesmem::ErrorCodeWinHr{get_device_hr});
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
+    return;
   }
 
   if (!TwInit(TW_DIRECT3D11, render_info.device_))
@@ -199,10 +198,9 @@ void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
     reinterpret_cast<void**>(&render_info.device_));
   if (FAILED(get_device_hr))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{
-                                         "IDXGISwapChain::GetDevice failed."}
-                                    << hadesmem::ErrorCodeWinHr{get_device_hr});
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
+    return;
   }
 
   if (!TwInit(TW_DIRECT3D10, render_info.device_))
