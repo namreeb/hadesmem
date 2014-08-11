@@ -38,10 +38,11 @@ using ErrorCodeWinLast = boost::error_info<struct TagErrorCodeWinLast, DWORD>;
 using ErrorCodeWinOther =
   boost::error_info<struct TagErrorCodeWinOther, DWORD_PTR>;
 using ErrorCodeOther = boost::error_info<struct TagErrorCodeOther, DWORD_PTR>;
-using ErrorCodeWinHr = boost::error_info<struct TagErrorCodeOther, HRESULT>;
+using ErrorCodeWinHr = boost::error_info<struct TagErrorCodWinHr, HRESULT>;
 using ErrorCodeWinStatus =
-  boost::error_info<struct TagErrorCodeOther, NTSTATUS>;
-using ErrorStringOther = boost::error_info<struct TagErrorString, std::string>;
+  boost::error_info<struct TagErrorCodeWinStatus, NTSTATUS>;
+using ErrorStringOther =
+  boost::error_info<struct TagErrorStringOther, std::string>;
 }
 
 #define HADESMEM_DETAIL_THROW_EXCEPTION(x) BOOST_THROW_EXCEPTION(x)
