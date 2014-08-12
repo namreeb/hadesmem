@@ -48,8 +48,8 @@ public:
     : process_{other.process_},
       handle_{other.handle_},
       size_{other.size_},
-      name_{std::move(other.name_)},
-      path_{std::move(other.path_)}
+      name_(std::move(other.name_)),
+      path_(std::move(other.path_))
   {
   }
 

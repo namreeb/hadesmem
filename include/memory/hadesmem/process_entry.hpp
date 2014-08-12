@@ -23,7 +23,7 @@ public:
       threads_{entry.cntThreads},
       parent_{entry.th32ParentProcessID},
       priority_{entry.pcPriClassBase},
-      name_{entry.szExeFile}
+      name_(entry.szExeFile)
   {
   }
 
@@ -38,7 +38,7 @@ public:
       threads_{other.threads_},
       parent_{other.parent_},
       priority_{other.priority_},
-      name_{std::move(other.name_)}
+      name_(std::move(other.name_))
   {
   }
 

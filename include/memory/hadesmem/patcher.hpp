@@ -68,7 +68,7 @@ public:
   explicit PatchRaw(Process const& process,
                     void* target,
                     std::vector<std::uint8_t> const& data)
-    : process_{&process}, target_{target}, data_{data}
+    : process_{&process}, target_{target}, data_(data)
   {
   }
 
@@ -84,8 +84,8 @@ public:
     : process_{other.process_},
       applied_{other.applied_},
       target_{other.target_},
-      data_{std::move(other.data_)},
-      orig_{std::move(other.orig_)}
+      data_(std::move(other.data_)),
+      orig_(std::move(other.orig_))
   {
     other.process_ = nullptr;
     other.applied_ = false;
@@ -236,8 +236,8 @@ public:
       target_{other.target_},
       detour_{other.detour_},
       trampoline_{std::move(other.trampoline_)},
-      orig_{std::move(other.orig_)},
-      trampolines_{std::move(other.trampolines_)},
+      orig_(std::move(other.orig_)),
+      trampolines_(std::move(other.trampolines_)),
       ref_count_{other.ref_count_.load()}
   {
     other.process_ = nullptr;

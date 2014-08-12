@@ -35,7 +35,7 @@ namespace
 class Plugin : public hadesmem::cerberus::PluginInterface
 {
 public:
-  explicit Plugin(std::wstring const& path) : path_{path}
+  explicit Plugin(std::wstring const& path) : path_(path)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Loading plugin. [%s]", path.c_str());
 
@@ -72,7 +72,7 @@ public:
   Plugin& operator=(Plugin const& other) = delete;
 
   Plugin(Plugin&& other) HADESMEM_DETAIL_NOEXCEPT
-    : path_{std::move(other.path_)},
+    : path_(std::move(other.path_)),
       base_{other.base_},
       unload_{other.unload_},
       call_export_{other.call_export_}
