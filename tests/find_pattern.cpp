@@ -111,10 +111,10 @@ void TestFindPattern()
   </FindPattern>
   <FindPattern Module="ntdll.dll">
     <Flag Name="ThrowOnUnmatch"/>
-    <Pattern Name="Nop Then Int3" Data="90 CC"/>
-    <Pattern Name="Nop Then Int3 Next" Data="??" Start="Nop Then Int3"/>
-    <Pattern Name="Nop Then Int3 0x1000" Data="90 CC" StartRVA="0x1000"/>
-    <Pattern Name="Nop Then Int3 NtClose" Data="90 CC" StartExport="NtClose"/>
+    <Pattern Name="Two Nop" Data="90 90"/>
+    <Pattern Name="Two Nop Next" Data="??" Start="Two Nop"/>
+    <Pattern Name="Two Nop 0x1000" Data="90 90" StartRVA="0x1000"/>
+    <Pattern Name="Two Nop NtClose" Data="90 90" StartExport="NtClose"/>
     <Pattern Name="Nop Ordinal 1" Data="90" StartExport="#1"/>
   </FindPattern>
 </HadesMem>
@@ -151,16 +151,15 @@ void TestFindPattern()
     static_cast<void*>(static_cast<std::uint8_t*>(find_pattern_string) -
                        process_base));
   BOOST_TEST_EQ(find_pattern.GetPatternMap(L"ntdll.dll").size(), 5UL);
-  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3"),
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Two Nop"),
                 static_cast<void*>(nullptr));
-  auto const nop_then_int3 =
-    find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3");
-  BOOST_TEST_EQ(*static_cast<char const*>(nop_then_int3), '\x90');
-  BOOST_TEST_EQ(*(static_cast<char const*>(nop_then_int3) + 1), '\xCC');
-  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3 Next"),
+  auto const two_nop = find_pattern.Lookup(L"ntdll.dll", L"Two Nop");
+  BOOST_TEST_EQ(*static_cast<char const*>(two_nop), '\x90');
+  BOOST_TEST_EQ(*(static_cast<char const*>(two_nop) + 1), '\x90');
+  BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"Two Nop Next"),
                 static_cast<void*>(nullptr));
-  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3 Next") >
-             find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3"));
+  BOOST_TEST(find_pattern.Lookup(L"ntdll.dll", L"Two Nop Next") >
+             find_pattern.Lookup(L"ntdll.dll", L"Two Nop"));
 // Temporarily disabled
 #if 0
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
@@ -172,28 +171,27 @@ void TestFindPattern()
   BOOST_TEST_NE(find_pattern.Lookup(L"ntdll.dll", L"RtlRandom String"),
                 find_pattern.Lookup(L"", L"FindPattern String"));
 #endif
-  BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"Nop Then Int3"),
+  BOOST_TEST_THROWS(find_pattern.Lookup(L"DoesNotExist", L"Two Nop"),
                     hadesmem::Error);
   BOOST_TEST_THROWS(find_pattern.Lookup(L"ntdll.dll", L"DoesNotExist"),
                     hadesmem::Error);
-  auto const nop_then_int3_0x1000 =
-    find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3 0x1000");
-  BOOST_TEST_NE(nop_then_int3_0x1000, static_cast<void*>(nullptr));
-  BOOST_TEST_EQ(*static_cast<char const*>(nop_then_int3_0x1000), '\x90');
-  BOOST_TEST_EQ(*(static_cast<char const*>(nop_then_int3_0x1000) + 1), '\xCC');
-  auto const nop_then_int3_0x1000_rel =
-    reinterpret_cast<std::uintptr_t>(nop_then_int3_0x1000) - ntdll_base;
-  BOOST_TEST(nop_then_int3_0x1000_rel >= 0x1000U);
-  auto const nop_then_int3_nt_close =
-    find_pattern.Lookup(L"ntdll.dll", L"Nop Then Int3 NtClose");
-  BOOST_TEST_NE(nop_then_int3_nt_close, static_cast<void*>(nullptr));
-  BOOST_TEST_EQ(*static_cast<char const*>(nop_then_int3_nt_close), '\x90');
-  BOOST_TEST_EQ(*(static_cast<char const*>(nop_then_int3_nt_close) + 1),
-                '\xCC');
+  auto const two_nop_0x1000 =
+    find_pattern.Lookup(L"ntdll.dll", L"Two Nop 0x1000");
+  BOOST_TEST_NE(two_nop_0x1000, static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(*static_cast<char const*>(two_nop_0x1000), '\x90');
+  BOOST_TEST_EQ(*(static_cast<char const*>(two_nop_0x1000) + 1), '\x90');
+  auto const two_nop_0x1000_rel =
+    reinterpret_cast<std::uintptr_t>(two_nop_0x1000) - ntdll_base;
+  BOOST_TEST(two_nop_0x1000_rel >= 0x1000U);
+  auto const two_nop_nt_close =
+    find_pattern.Lookup(L"ntdll.dll", L"Two Nop NtClose");
+  BOOST_TEST_NE(two_nop_nt_close, static_cast<void*>(nullptr));
+  BOOST_TEST_EQ(*static_cast<char const*>(two_nop_nt_close), '\x90');
+  BOOST_TEST_EQ(*(static_cast<char const*>(two_nop_nt_close) + 1), '\x90');
   hadesmem::Module const ntdll(process, L"ntdll.dll");
   auto const nt_close = hadesmem::detail::UnionCast<void*>(
     FindProcedure(process, ntdll, "NtClose"));
-  BOOST_TEST(nop_then_int3_nt_close > nt_close);
+  BOOST_TEST(two_nop_nt_close > nt_close);
   auto const nop_ordinal_1 =
     find_pattern.Lookup(L"ntdll.dll", L"Nop Ordinal 1");
   BOOST_TEST_NE(nop_ordinal_1, static_cast<void*>(nullptr));
