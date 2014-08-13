@@ -39,7 +39,7 @@ struct ItemTemplate
   StdStringA name_;
   int field_2C;
   int field_30;
-  int field_34[500];
+  //int field_34[500];
 };
 
 struct Item

@@ -9,8 +9,8 @@ struct Offsets
 {
   enum : std::uint32_t
   {
-    g_character_manager = 0x00E4C524 - 0x00400000,
-    g_item_manager = 0x00E4C60C - 0x00400000,
-    g_translated_string_repository = 0x00DEC4C4 - 0x00400000,
+    g_character_manager = 0x00E53714 - 0x00400000,
+    g_item_manager = 0x00E537FC - 0x00400000,
+    g_translated_string_repository = 0x00DF36B4 - 0x00400000,
   };
 };
