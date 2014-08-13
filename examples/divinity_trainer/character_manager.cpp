@@ -58,6 +58,7 @@ void DumpCharacterManager(hadesmem::Process const& process, std::uint8_t* base)
 {
   auto const character_manager_ptr = hadesmem::Read<CharacterManager*>(
     process, base + Offsets::g_character_manager);
+  printf("CharacterManager: %p\n", static_cast<void*>(character_manager_ptr));
   auto const character_manager =
     hadesmem::Read<CharacterManager>(process, character_manager_ptr);
   printf("CharacterManager::CharacterPtrArray: %p\n",
