@@ -293,7 +293,7 @@ struct Item
   int field_70;
   ItemTemplate* current_template_;
   ItemTemplate* original_template_;
-  int field_7C;
+  char* stats_id_;
   ItemStats* stats_;
   int field_84;
   int field_88;

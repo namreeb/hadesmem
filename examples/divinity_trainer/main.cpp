@@ -22,6 +22,7 @@
 
 #include "character_manager.hpp"
 #include "item_manager.hpp"
+#include "inventory_manager.hpp"
 #include "translated_string_repository.hpp"
 
 int main(int argc, char* argv[])
@@ -75,6 +76,8 @@ int main(int argc, char* argv[])
     DumpCharacterManager(*process, base);
 
     DumpItemManager(*process, base);
+
+    DumpInventoryManager(*process, base);
 
     DumpStringRepository(*process, base);
 
