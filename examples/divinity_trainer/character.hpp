@@ -55,7 +55,7 @@ struct CharacterStats
   int reputation_;
   int field_F8;
   int trait_order_;
-  int field_100[150];
+  //int field_100[150];
 };
 
 struct CharacterPlayerData
@@ -385,11 +385,11 @@ struct Character
   int gender_;
   int combat_data_;
   StdStringW* custom_kickstarter_name_;
-  int field_154[50];
+  //int field_154[50];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)
-HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Character) == 0x21C);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Character) == 0x154);
 #endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
 void DumpCharacter(hadesmem::Process const& process, Character* character_ptr);

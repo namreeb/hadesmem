@@ -24,15 +24,15 @@ struct Inventory
   int gold_;
   int field_30;
   int field_34;
-  unsigned int *item_handles_;
+  unsigned int* item_handles_;
   int field_3C;
-  int num_items_;
+  int capacity_;
   int field_44;
-  int field_48[100];
+  //int field_48[100];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)
-HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Inventory) == 0x1D8);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Inventory) == 0x48);
 #endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
 void DumpInventory(hadesmem::Process const& process, Inventory* inventory_ptr);

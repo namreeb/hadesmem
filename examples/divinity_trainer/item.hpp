@@ -27,7 +27,7 @@ struct ItemStats
   int repair_durability_penalty_;
   int field_10C;
   char* item_type_;
-  int field_114[100];
+  //int field_114[100];
 };
 
 struct ItemTemplate
@@ -316,11 +316,11 @@ struct Item
   int field_C8;
   unsigned int owner_;
   int field_D0;
-  int field_D4[100];
+  //int field_D4[100];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)
-HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Item) == 0x264);
+HADESMEM_DETAIL_STATIC_ASSERT(sizeof(Item) == 0xD4);
 #endif // #if defined(HADESMEM_DETAIL_ARCH_X86)
 
 void DumpItem(hadesmem::Process const& process, Item* item_ptr);

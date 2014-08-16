@@ -57,6 +57,11 @@ void DumpStringRespositoryHashTable(hadesmem::Process const& process,
       process, hash_table.table_ + i);
     printf("\nHead: %p\n", static_cast<void*>(entry_ptr));
 
+    if (!entry_ptr)
+    {
+      continue;
+    }
+
     for (auto entry =
            hadesmem::Read<typename HashTableT::Entry>(process, entry_ptr);
          ;
