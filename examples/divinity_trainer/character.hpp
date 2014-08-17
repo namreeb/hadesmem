@@ -7,12 +7,14 @@
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/process.hpp>
 
+#include "hash_table.hpp"
 #include "std_string.hpp"
 #include "vec3f.hpp"
 
 enum CharacterFlags
 {
   CharacterFlags_IsPlayer = 0x2,
+  CharacterFlags_IsMultiPlayer = 0x4,
   CharacterFlags_IsPartyMember = 0x8,
   CharacterFlags_IsDead = 0x80,
   CharacterFlags_IsSummon = 0x100,
@@ -27,16 +29,51 @@ enum CharacterFlags
   CharacterFlags_HasReputationEffects = 0x20000000,
 };
 
+enum CharacterFlags2
+{
+  CharacterFlags2_Global = 0x1,
+  CharacterFlags2_HasOsirisDialog = 0x2,
+  CharacterFlags2_HasDefaultDialog = 0x4,
+  CharacterFlags2_TurnEnded = 0x8,
+  CharacterFlags2_TreasureGeneratedForTrader = 0x20,
+  CharacterFlags2_Trader = 0x40,
+  CharacterFlags2_IsBoss = 0x80,
+  CharacterFlags2_ScriptAllowsAoO = 0x100,
+  CharacterFlags2_IsResurrected = 0x200,
+  CharacterFlags2_IsPet = 0x800,
+};
+
+struct GameObjectName
+{
+  virtual ~GameObjectName() {}
+
+  char *fixed_narrow_;
+  StdStringA std_narrow_;
+  StdStringW std_wide_;
+};
+
+struct GameObjectNameData
+{
+  virtual ~GameObjectNameData() {}
+
+  GameObjectName name_1_;
+  GameObjectName name_2_;
+};
+
 struct CharacterTemplate
 {
   int field_0;
   int field_4;
   int field_8;
-  char* uuid_;
+  char *uuid_;
   StdStringA name_;
   int field_2C;
   int field_30;
-  //int field_34[500];
+  int field_34[74];
+  GameObjectNameData name_data_;
+  int field_1E0[9];
+  char *alignment_;
+  //int field_208[200];
 };
 
 struct CharacterStats
@@ -58,13 +95,98 @@ struct CharacterStats
   //int field_100[150];
 };
 
+struct CharacterPlayerCustomData
+{
+  bool initialized_;
+  char field_1;
+  char field_2;
+  char field_3;
+  StdStringW name_;
+  GameObjectNameData name_data_;
+  char *class_type_;
+  int skin_color_;
+  int hair_color_;
+  int cloth_color_1_;
+  int cloth_color_2_;
+  int cloth_color_3_;
+  int is_male_;
+  int race_;
+  int field_C4[32];
+  char *icon_;
+  int random_;
+  char *owner_profile_id_;
+  char *reserved_profile_id_;
+  char *ai_personality_;
+  char *speaker_;
+  char *hench_man_id_;
+};
+
+struct CharacterAlignmentData
+{
+  int field_0;
+  int field_4;
+  int field_8;
+  int field_C;
+  char *alignment_;
+};
+
 struct CharacterPlayerData
 {
   int field_0[5];
   int attribute_points_;
   int ability_points_;
   int talent_points_;
-  int field_20[200];
+  int field_20[19];
+  int can_trade_with_;
+  int field_70[7];
+  char level_up_marker_;
+  char selected_skill_set_index_;
+  char field_8E;
+  char field_8F;
+  CharacterPlayerCustomData player_custom_data_;
+  int field_1F0[6];
+  int previous_position_id_;
+  char helmet_option_;
+  char field_20D;
+  char field_20E;
+  char field_20F;
+  //int field_210[50];
+};
+
+struct CharacterCombatData
+{
+  int field_0[3];
+  int unk_flags_;
+  int unk_status_array_[100];
+};
+
+struct CharacterStatus
+{
+  virtual ~CharacterStatus() {}
+
+  int field_4[100];
+};
+
+struct CharacterStatusManager
+{
+  int field_0[40];
+  CharacterStatus **status_ptr_array_;
+  int field_A4;
+  int num_statuses_;
+  int field_AC[100];
+};
+
+struct CharacterSkill
+{
+  int field_0[100];
+};
+
+struct CharacterSkillManager
+{
+  int field_0;
+  int unk_character_handle_;
+  HashTable<char*, CharacterSkill*> skills_;
+  int field_10[100];
 };
 
 struct Character
@@ -306,57 +428,55 @@ struct Character
   }
 
   Vec3f position_;
-  unsigned int handle_;
-  CharacterFlags flags_;
-  int field_18;
-  char* region_;
-  int field_20[9];
+  int handle_;
+  int flags_;
+  float field_18;
+  char *level_;
+  Vec3f rotate_[3];
   float scale_;
-  char* uuid_;
+  char *uuid_;
   int field_4C;
   int field_50;
   int field_54;
   int field_58;
   int field_5C;
-  CharacterTemplate* current_template_;
-  CharacterTemplate* original_template_;
-  int flags_2_;
+  CharacterTemplate *current_template_;
+  CharacterTemplate *original_template_;
+  CharacterFlags2 flags_2_;
   int field_6C;
   int field_70;
   int field_74;
   int field_78;
-  int field_7C;
-  int animation_override_;
+  CharacterAlignmentData *alignment_data_;
+  char *animation_override_;
   char needs_update_;
   char script_force_update_;
   char field_86;
   char field_87;
-  CharacterStats* stats_;
+  CharacterStats *stats_;
   int inventory_handle_;
-  int movement_machine_;
+  void* movement_machine_;
   int field_94;
-  int steering_machine_;
+  void* steering_machine_;
   int field_9C;
   int field_A0;
   int field_A4;
-  int field_A8;
+  void* osiris_controller_;
   int field_AC;
   int field_B0;
   int field_B4;
   int field_B8;
-  int field_BC;
-  int status_manager_;
-  int skill_manager_;
-  int variable_manager_;
+  void* dialog_controller_;
+  CharacterStatusManager *status_manager_;
+  CharacterSkillManager *skill_manager_;
+  void* variable_manager_;
   int field_CC;
   int field_D0;
   int field_D4;
-  void* owner_;
+  int owner_;
   int field_DC;
-  char field_E0;
-  char is_in_combat_;
-  char field_E2;
-  char field_E3;
+  __int16 team_id_;
+  __int16 field_E2;
   float life_time_;
   float trigger_traps_timer_;
   float surface_distance_check_;
@@ -371,20 +491,20 @@ struct Character
   int field_110;
   int field_114;
   int hostile_count_;
-  int plan_manager_;
+  void* plan_manager_;
   int partial_ap_;
   int current_aoo_;
   int registered_trigger_;
   int field_12C;
   int field_130;
   int field_134;
-  CharacterPlayerData* player_data_;
+  CharacterPlayerData *player_data_;
   int field_13C;
   int field_140;
   int field_144;
   int gender_;
-  int combat_data_;
-  StdStringW* custom_kickstarter_name_;
+  CharacterCombatData *combat_data_;
+  StdStringW *custom_kickstarter_name_;
   //int field_154[50];
 };
 
