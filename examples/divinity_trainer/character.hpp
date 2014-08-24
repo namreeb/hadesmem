@@ -60,20 +60,119 @@ struct GameObjectNameData
   GameObjectName name_2_;
 };
 
+struct FlaggedCString
+{
+  char *cstr_;
+  char initialized_;
+  char field_5;
+  char field_6;
+  char field_7;
+};
+
+struct FlaggedBool
+{
+  bool bool_;
+  bool initialized_;
+};
+
+struct FlaggedFloat
+{
+  float float_;
+  bool initialized_;
+  char field_5;
+  char field_6;
+  char field_7;
+};
+
+struct FlaggedDword
+{
+  int dword_;
+  char initialized_;
+  char field_5;
+  char field_6;
+  char field_7;
+};
+
 struct CharacterTemplate
 {
-  int field_0;
+  int vtable_;
   int field_4;
   int field_8;
-  char *uuid_;
+  char *map_key_;
   StdStringA name_;
-  int field_2C;
+  char *template_name_;
   int field_30;
-  int field_34[74];
+  bool is_global_;
+  char field_35;
+  char field_36;
+  char field_37;
+  char *level_name_;
+  int field_3C;
+  int field_40[34];
+  char *visual_template_;
+  int field_CC;
+  char *physics_template_;
+  int field_D4;
+  bool cast_shadow_[2];
+  bool recieve_decal_[2];
+  bool is_reflecting_[2];
+  char field_DE;
+  char field_DF;
+  int field_E0;
+  int field_E4;
+  bool mod_removed_;
+  char field_E9;
+  bool has_parent_mod_relation_;
+  char field_EB;
+  int field_EC[28];
   GameObjectNameData name_data_;
-  int field_1E0[9];
-  char *alignment_;
-  //int field_208[200];
+  int field_1E0[7];
+  FlaggedCString icon_;
+  FlaggedCString alignment_;
+  FlaggedCString stats_;
+  FlaggedCString skill_set_;
+  FlaggedCString equipment_;
+  int field_224;
+  int field_228;
+  int field_22C;
+  int field_230;
+  int field_234;
+  FlaggedCString light_id_;
+  FlaggedCString hit_fx_;
+  FlaggedCString default_dialog_;
+  FlaggedFloat walk_speed_;
+  FlaggedFloat run_speed_;
+  FlaggedBool can_fight_;
+  FlaggedBool can_see_through_;
+  FlaggedBool can_shoot_through_;
+  FlaggedBool is_player_;
+  FlaggedBool floating_;
+  FlaggedBool spot_sneakers_;
+  FlaggedBool is_boss_;
+  FlaggedBool can_open_doors_;
+  FlaggedBool avoid_traps_;
+  FlaggedBool influence_treasure_level_;
+  FlaggedDword equipment_class_;
+  int field_27C;
+  StdStringA *unk_str_narrow_array_ptr_;
+  int field_284;
+  int unk_str_narrow_array_count_;
+  int field_28C;
+  int on_death_actions_;
+  int field_294[4];
+  FlaggedDword blood_surface_type_;
+  int field_2AC[9];
+  FlaggedCString trophy_id_;
+  FlaggedCString sound_switch_;
+  FlaggedCString combat_group_id_;
+  FlaggedDword level_override_;
+  FlaggedDword gender_;
+  FlaggedCString speaker_;
+  FlaggedCString alt_speaker_;
+  FlaggedCString speaker_greeting_override_;
+  FlaggedBool force_unsheath_skills_;
+  FlaggedBool can_be_teleported_;
+  //int field_314[100];
 };
 
 struct CharacterStats

@@ -96,7 +96,7 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
                          "CurrentTemplate::NameData");
   printf("CurrentTemplate::Alignment: %s\n",
          hadesmem::ReadString<char>(
-           process, current_character_template.alignment_).c_str());
+           process, current_character_template.alignment_.cstr_).c_str());
   printf("OriginalTemplate: %p\n",
          static_cast<void*>(character.original_template_));
   auto const original_character_template =
@@ -109,7 +109,7 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
                          "OriginalTemplate::NameData");
   printf("OriginalTemplate::Alignment: %s\n",
          hadesmem::ReadString<char>(
-           process, original_character_template.alignment_).c_str());
+           process, original_character_template.alignment_.cstr_).c_str());
   printf("Flags2: %08X\n", character.flags_2_);
   printf("Flags::Global: %d\n",
          !!(character.flags_2_ & CharacterFlags2_Global));
