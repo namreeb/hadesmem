@@ -278,6 +278,11 @@ public:
     RemoveUnchecked();
   }
 
+  bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return applied_;
+  }
+
   void Apply()
   {
     if (applied_)
