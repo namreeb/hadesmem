@@ -5,13 +5,11 @@
 
 #include "offsets.hpp"
 
-void DumpHashTableEntry(hadesmem::Process const& process,
-                        TranslatedStringData const& data)
+void DumpHashTableEntry(hadesmem::Process const& /*process*/,
+                        TranslatedUnknownData const& data)
 {
   printf("Value::Unknown0000: %p\n", data.unknown_0000_);
-  printf("Value::UUID (Address): %p\n", data.uuid_);
-  printf("Value::UUID: %s\n",
-         hadesmem::ReadString<char>(process, data.uuid_).c_str());
+  printf("Value::Unknown0004: %p\n", data.unknown_0004_);
   printf("Value::Unknown0008: %p\n", data.unknown_0008_);
   printf("Value::Unknown000C: %p\n", data.unknown_000C_);
 }
@@ -23,6 +21,22 @@ void DumpHashTableEntry(hadesmem::Process const& /*process*/,
   printf("Value::Unknown0004: %p\n", data.unknown_0004_);
   printf("Value::Unknown0008: %p\n", data.unknown_0008_);
   printf("Value::Unknown000C: %p\n", data.unknown_000C_);
+}
+
+void DumpHashTableEntry(hadesmem::Process const& process,
+                        TranslatedStringData const& data)
+{
+  printf("Value::Unknown0000: %p\n", data.unknown_0000_);
+  printf("Value::UUID (Address): %p\n", data.uuid_);
+  printf("Value::UUID: %s\n",
+         hadesmem::ReadString<char>(process, data.uuid_).c_str());
+  printf("Value::Unknown0008: %p\n", data.unknown_0008_);
+  printf("Value::Unknown000C: %p\n", data.unknown_000C_);
+}
+
+void DumpHashTableEntry(hadesmem::Process const& process, TriString const& data)
+{
+  DumpTriString(process, data, "Value", "");
 }
 
 void DumpStringRepository(hadesmem::Process const& process, std::uint8_t* base)
@@ -38,11 +52,15 @@ void DumpStringRepository(hadesmem::Process const& process, std::uint8_t* base)
          translated_string_repository.vtable_);
   printf("\n");
 
-  printf("Dumping translated strings.\n\n");
+  printf("Dumping translated unknown.\n\n");
   DumpStringRespositoryHashTable(process,
-                                 translated_string_repository.strings_);
+                                 translated_string_repository.unknown_);
 
   printf("Dumping translated numbers.\n\n");
   DumpStringRespositoryHashTable(process,
                                  translated_string_repository.numbers_);
+
+  printf("Dumping translated strings.\n\n");
+  DumpStringRespositoryHashTable(process,
+                                 translated_string_repository.strings_);
 }

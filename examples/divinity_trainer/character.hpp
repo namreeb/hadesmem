@@ -9,6 +9,7 @@
 
 #include "hash_table.hpp"
 #include "std_string.hpp"
+#include "tri_string.hpp"
 #include "vec3f.hpp"
 
 enum CharacterFlags
@@ -41,23 +42,6 @@ enum CharacterFlags2
   CharacterFlags2_ScriptAllowsAoO = 0x100,
   CharacterFlags2_IsResurrected = 0x200,
   CharacterFlags2_IsPet = 0x800,
-};
-
-struct GameObjectName
-{
-  virtual ~GameObjectName() {}
-
-  char *fixed_narrow_;
-  StdStringA std_narrow_;
-  StdStringW std_wide_;
-};
-
-struct GameObjectNameData
-{
-  virtual ~GameObjectNameData() {}
-
-  GameObjectName name_1_;
-  GameObjectName name_2_;
 };
 
 struct FlaggedCString
@@ -125,7 +109,7 @@ struct CharacterTemplate
   bool has_parent_mod_relation_;
   char field_EB;
   int field_EC[28];
-  GameObjectNameData name_data_;
+  TriStringPairPoly name_data_;
   int field_1E0[7];
   FlaggedCString icon_;
   FlaggedCString alignment_;
@@ -201,7 +185,7 @@ struct CharacterPlayerCustomData
   char field_2;
   char field_3;
   StdStringW name_;
-  GameObjectNameData name_data_;
+  TriStringPairPoly name_data_;
   char *class_type_;
   int skin_color_;
   int hair_color_;

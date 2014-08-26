@@ -43,12 +43,15 @@ void DumpItem(hadesmem::Process const& process, Item* item_ptr)
     hadesmem::ReadString<char>(process, original_item_template.uuid_).c_str());
   printf("OriginalTemplate::Name: %s\n",
          GetString(process, original_item_template.name_).c_str());
-  printf("StatsId: %s\n", hadesmem::ReadString<char>(process, item.stats_id_).c_str());
+  printf("StatsId: %s\n",
+         hadesmem::ReadString<char>(process, item.stats_id_).c_str());
   printf("Stats: %p\n", static_cast<void*>(item.stats_));
   if (item.stats_)
   {
-    auto const item_stats = hadesmem::Read<ItemStats>(process, item.stats_);
+    auto const item_stats =
+      hadesmem::ReadUnsafe<ItemStats>(process, item.stats_);
     printf("Stats::Level: %d\n", item_stats.level_);
+    DumpTriStringPairPoly(process, item_stats.name_data_, "Stats::NameData");
     printf("Stats::IsIdentified: %d\n", item_stats.is_identified_);
     printf("Stats::Durability: %d\n", item_stats.durability_);
     printf("Stats::DurabilityCounter: %d\n", item_stats.durability_counter_);

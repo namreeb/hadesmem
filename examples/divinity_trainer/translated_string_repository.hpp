@@ -10,6 +10,7 @@
 #include <hadesmem/read.hpp>
 
 #include "hash_table.hpp"
+#include "tri_string.hpp"
 
 struct TranslatedStringData
 {
@@ -29,23 +30,55 @@ struct TranslatedNumberData
   // More data? Size is a complete guess.
 };
 
+struct TranslatedUnknownData
+{
+  void* unknown_0000_;
+  void* unknown_0004_;
+  void* unknown_0008_;
+  void* unknown_000C_;
+  // More data? Size is a complete guess.
+};
+
 struct TranslatedStringRepository
 {
   void* vtable_;
-  int field_0[5];
+  int field_4;
+  int field_8;
+  HashTable<std::uint32_t, TranslatedUnknownData> unknown_;
+  int field_14;
   HashTable<char*, TranslatedNumberData> numbers_;
   int field_20;
-  HashTable<char*, TranslatedStringData> strings_;
+  HashTable<char*, TriString> strings_;
   int field_2C[50];
 };
+
+void DumpHashTableEntry(hadesmem::Process const& process,
+                        TranslatedUnknownData const& data);
+
+void DumpHashTableEntry(hadesmem::Process const& process,
+                        TranslatedNumberData const& data);
 
 void DumpHashTableEntry(hadesmem::Process const& process,
                         TranslatedStringData const& data);
 
 void DumpHashTableEntry(hadesmem::Process const& process,
-                        TranslatedNumberData const& data);
+                        TriString const& data);
 
 void DumpStringRepository(hadesmem::Process const& process, std::uint8_t* base);
+
+inline void DumpStringRepositoryHashTableKey(hadesmem::Process const& process,
+                                             char* key)
+{
+  printf("Key (Address): %p\n", key);
+  printf("Key: %s\n", hadesmem::ReadString<char>(process, key).c_str());
+}
+
+inline void
+  DumpStringRepositoryHashTableKey(hadesmem::Process const& /*process*/,
+                                   std::uint32_t key)
+{
+  printf("Key: %08X\n", key);
+}
 
 template <typename HashTableT>
 void DumpStringRespositoryHashTable(hadesmem::Process const& process,
@@ -63,17 +96,15 @@ void DumpStringRespositoryHashTable(hadesmem::Process const& process,
     }
 
     for (auto entry =
-           hadesmem::Read<typename HashTableT::Entry>(process, entry_ptr);
+           hadesmem::ReadUnsafe<typename HashTableT::Entry>(process, entry_ptr);
          ;
-         entry =
-           hadesmem::Read<typename HashTableT::Entry>(process, entry.next_))
+         entry = hadesmem::ReadUnsafe<typename HashTableT::Entry>(process,
+                                                                  entry.next_))
     {
       printf("\n");
 
       printf("Next: %p\n", static_cast<void*>(entry.next_));
-      printf("String (Address): %p\n", entry.key_);
-      printf("String: %s\n",
-             hadesmem::ReadString<char>(process, entry.key_).c_str());
+      DumpStringRepositoryHashTableKey(process, entry.key_);
       DumpHashTableEntry(process, entry.value_);
 
       if (entry.next_ == nullptr)

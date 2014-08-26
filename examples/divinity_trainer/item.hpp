@@ -8,6 +8,7 @@
 #include <hadesmem/process.hpp>
 
 #include "std_string.hpp"
+#include "tri_string.hpp"
 #include "vec3f.hpp"
 
 enum ItemFlags
@@ -19,7 +20,12 @@ struct ItemStats
 {
   int field_0;
   int level_;
-  int field_8[56];
+  int field_8[8];
+  TriStringPairPoly name_data_;
+  int field_AC;
+  int field_B0[6];
+  int field_C8;
+  int field_CC[7];
   int is_identified_;
   int field_EC[5];
   int durability_;
@@ -27,7 +33,7 @@ struct ItemStats
   int repair_durability_penalty_;
   int field_10C;
   char* item_type_;
-  //int field_114[100];
+  // int field_114[100];
 };
 
 struct ItemTemplate
@@ -39,7 +45,7 @@ struct ItemTemplate
   StdStringA name_;
   int field_2C;
   int field_30;
-  //int field_34[500];
+  // int field_34[500];
 };
 
 struct Item
@@ -316,7 +322,7 @@ struct Item
   int field_C8;
   unsigned int owner_;
   int field_D0;
-  //int field_D4[100];
+  // int field_D4[100];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)

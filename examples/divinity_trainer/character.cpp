@@ -5,33 +5,6 @@
 
 #include <cstdio>
 
-void DumpGameObjectNameData(hadesmem::Process const& process,
-                            GameObjectNameData const& name_data,
-                            std::string const& type_name)
-{
-  printf("%s::Name1::FixedString: %s.\n",
-         type_name.c_str(),
-         hadesmem::ReadString<char>(process, name_data.name_1_.fixed_narrow_)
-           .c_str());
-  printf("%s::Name1::StdNarrow: %s.\n",
-         type_name.c_str(),
-         GetString(process, name_data.name_1_.std_narrow_).c_str());
-  printf("%s::Name1::StdWide: %ls.\n",
-         type_name.c_str(),
-         GetString(process, name_data.name_1_.std_wide_).c_str());
-
-  printf("%s::Name2::FixedString: %s.\n",
-         type_name.c_str(),
-         hadesmem::ReadString<char>(process, name_data.name_2_.fixed_narrow_)
-           .c_str());
-  printf("%s::Name2::StdNarrow: %s.\n",
-         type_name.c_str(),
-         GetString(process, name_data.name_2_.std_narrow_).c_str());
-  printf("%s::Name2::StdWide: %ls.\n",
-         type_name.c_str(),
-         GetString(process, name_data.name_2_.std_wide_).c_str());
-}
-
 void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
 {
   auto const character =
@@ -91,9 +64,9 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
                                             character.current_template_);
   printf("CurrentTemplate::Name: %s\n",
          GetString(process, current_character_template.name_).c_str());
-  DumpGameObjectNameData(process,
-                         current_character_template.name_data_,
-                         "CurrentTemplate::NameData");
+  DumpTriStringPairPoly(process,
+                        current_character_template.name_data_,
+                        "CurrentTemplate::NameData");
   printf("CurrentTemplate::Alignment: %s\n",
          hadesmem::ReadString<char>(
            process, current_character_template.alignment_.cstr_).c_str());
@@ -104,9 +77,9 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
                                             character.current_template_);
   printf("OriginalTemplate::Name: %s\n",
          GetString(process, original_character_template.name_).c_str());
-  DumpGameObjectNameData(process,
-                         original_character_template.name_data_,
-                         "OriginalTemplate::NameData");
+  DumpTriStringPairPoly(process,
+                        original_character_template.name_data_,
+                        "OriginalTemplate::NameData");
   printf("OriginalTemplate::Alignment: %s\n",
          hadesmem::ReadString<char>(
            process, original_character_template.alignment_.cstr_).c_str());
@@ -188,7 +161,7 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
       printf("PlayerData::PlayerCustomData::Name: %ls.\n",
              GetString(process, character_player_data.player_custom_data_.name_)
                .c_str());
-      DumpGameObjectNameData(
+      DumpTriStringPairPoly(
         process,
         character_player_data.player_custom_data_.name_data_,
         "PlayerData::PlayerCustomData::NameData");
