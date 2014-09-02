@@ -119,13 +119,13 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
   printf("SteeringMachine: %p\n", character.steering_machine_);
   printf("OsirisController: %p\n", character.osiris_controller_);
   printf("DialogController: %p\n", character.dialog_controller_);
-  printf("StatusManager: %p\n", character.status_manager_);
+  printf("StatusManager: %p\n", static_cast<void*>(character.status_manager_));
   auto const character_status_manager =
     hadesmem::ReadUnsafe<CharacterStatusManager>(process,
                                                  character.status_manager_);
   printf("StatusManager::NumStatuses: %d\n",
          character_status_manager.num_statuses_);
-  printf("SkillManager: %p\n", character.skill_manager_);
+  printf("SkillManager: %p\n", static_cast<void*>(character.skill_manager_));
   printf("VariableManager: %p\n", character.variable_manager_);
   printf("Owner: %08X\n", character.owner_);
   printf("TeamID: %d\n", character.team_id_);
@@ -168,7 +168,7 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
     }
   }
   printf("Gender: %d\n", character.gender_);
-  printf("CombatData: %p\n", character.combat_data_);
+  printf("CombatData: %p\n", static_cast<void*>(character.combat_data_));
   if (character.custom_kickstarter_name_)
   {
     auto const custom_kickstarter_name =
