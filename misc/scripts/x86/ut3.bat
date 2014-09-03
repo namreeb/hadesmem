@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Unreal Tournament 3\Binaries\UT3.exe" --inject --steam-app-id 13210 --export Load --add-path --path-resolution --module cerberus.dll

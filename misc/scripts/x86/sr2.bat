@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Saints Row 2\SR2_pc.exe" --inject --steam-app-id 9480 --export Load --add-path --path-resolution --module cerberus.dll

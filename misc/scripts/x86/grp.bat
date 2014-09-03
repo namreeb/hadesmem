@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Tom Clancy's Ghost Recon Online\Launcher.exe" --inject --steam-app-id 243870 --export Load --add-path --path-resolution --module cerberus.dll

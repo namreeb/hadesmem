@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Just Cause 2\JustCause2.exe" --inject --steam-app-id 8190 --export Load --add-path --path-resolution --module cerberus.dll

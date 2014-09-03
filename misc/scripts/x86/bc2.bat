@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Battlefield Bad Company 2\BFBC2Game.exe" --inject --steam-app-id 24960 --export Load --add-path --path-resolution --module cerberus.dll
