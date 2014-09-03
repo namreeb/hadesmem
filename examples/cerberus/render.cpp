@@ -78,6 +78,58 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
+bool AntTweakBarInitializedAny()
+{
+  return GetRenderInfoD3D9().tw_initialized_ ||
+         GetRenderInfoD3D10().tw_initialized_ ||
+         GetRenderInfoD3D11().tw_initialized_;
+}
+
+void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
+{
+  if (AntTweakBarInitializedAny())
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "WARNING! AntTweakBar is already initialized. Skipping.");
+    return;
+  }
+
+  if (!TwInit(api, device))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{"TwInit failed."});
+  }
+
+  initialized = true;
+
+  if (!TwWindowSize(800, 600))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."});
+  }
+
+  auto const bar = TwNewBar("HadesMem");
+  if (!bar)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
+  }
+}
+
+void CleanupAntTweakBar(bool& initialized)
+{
+  if (initialized)
+  {
+    if (!TwTerminate())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
+    }
+
+    initialized = false;
+  }
+}
+
 void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
                                  RenderInfoD3D11& render_info)
 {
@@ -90,16 +142,7 @@ void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
 
   render_info.first_time_ = true;
 
-  if (render_info.tw_initialized_)
-  {
-    if (!TwTerminate())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
-    }
-
-    render_info.tw_initialized_ = false;
-  }
+  CleanupAntTweakBar(render_info.tw_initialized_);
 }
 
 void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
@@ -114,16 +157,7 @@ void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
 
   render_info.first_time_ = true;
 
-  if (render_info.tw_initialized_)
-  {
-    if (!TwTerminate())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
-    }
-
-    render_info.tw_initialized_ = false;
-  }
+  CleanupAntTweakBar(render_info.tw_initialized_);
 }
 
 void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
@@ -135,16 +169,7 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
 
   render_info.first_time_ = true;
 
-  if (render_info.tw_initialized_)
-  {
-    if (!TwTerminate())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
-    }
-
-    render_info.tw_initialized_ = false;
-  }
+  CleanupAntTweakBar(render_info.tw_initialized_);
 }
 
 void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
@@ -163,26 +188,8 @@ void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
     return;
   }
 
-  if (!TwInit(TW_DIRECT3D11, render_info.device_))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwInit failed."});
-  }
-
-  render_info.tw_initialized_ = true;
-
-  if (!TwWindowSize(800, 600))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."});
-  }
-
-  auto const bar = TwNewBar("HadesMem");
-  if (!bar)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
-  }
+  InitializeAntTweakBar(
+    TW_DIRECT3D11, render_info.device_, render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -203,26 +210,8 @@ void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
     return;
   }
 
-  if (!TwInit(TW_DIRECT3D10, render_info.device_))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwInit failed."});
-  }
-
-  render_info.tw_initialized_ = true;
-
-  if (!TwWindowSize(800, 600))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."});
-  }
-
-  auto const bar = TwNewBar("HadesMem");
-  if (!bar)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
-  }
+  InitializeAntTweakBar(
+    TW_DIRECT3D10, render_info.device_, render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -233,26 +222,8 @@ void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
 
   render_info.first_time_ = false;
 
-  if (!TwInit(TW_DIRECT3D9, render_info.device_))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwInit failed."});
-  }
-
-  render_info.tw_initialized_ = true;
-
-  if (!TwWindowSize(800, 600))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."});
-  }
-
-  auto const bar = TwNewBar("HadesMem");
-  if (!bar)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
-  }
+  InitializeAntTweakBar(
+    TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -331,6 +302,12 @@ void DrawTweakBarImpl()
 class RenderImpl : public hadesmem::cerberus::RenderInterface
 {
 public:
+  virtual ~RenderImpl() final
+  {
+    bool initialized = AntTweakBarInitializedAny();
+    CleanupAntTweakBar(initialized);
+  }
+
   virtual std::size_t RegisterOnFrame(
     std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
   {
