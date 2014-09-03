@@ -10,7 +10,7 @@ project
 lib anttweakbar 
   : 
     [ glob anttweakbar/src/*.cpp ] 
-    [ glob anttweakbar/src/TwEventWin.c.c ] 
+    [ glob anttweakbar/src/TwEventWin.c ] 
   : 
     <include>"anttweakbar/include/"
     <include>"anttweakbar/obj/"
