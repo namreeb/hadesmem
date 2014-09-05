@@ -30,8 +30,6 @@ public:
     RegisterOnFrame(std::function<OnFrameCallback> const& callback) = 0;
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
-
-  virtual void DrawTweakBar() = 0;
 };
 
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;

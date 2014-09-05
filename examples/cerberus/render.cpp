@@ -24,45 +24,20 @@
 #include "callbacks.hpp"
 #include "d3d9.hpp"
 #include "dxgi.hpp"
+#include "input.hpp"
 #include "main.hpp"
 
 namespace
 {
 
-struct WindowInfo
+void WindowProcCallback(
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled)
 {
-  HWND old_hwnd_{nullptr};
-  WNDPROC old_wndproc_{nullptr};
-};
-
-WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
-{
-  static WindowInfo window_info;
-  return window_info;
-}
-
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-  LRESULT ret = 0;
-  WindowInfo& window_info = GetWindowInfo();
-
   // Window #0 will always exist if TwInit has completed successfully.
-  if (TwWindowExists(0) && TwEventWin(hwnd, msg, wparam, lparam))
+  if (::TwWindowExists(0) && ::TwEventWin(hwnd, msg, wparam, lparam))
   {
-    // Event has been handled by AntTweakBar.
-    ret = 0;
+    handled = true;
   }
-  else if (window_info.old_wndproc_ != nullptr)
-  {
-    ret =
-      ::CallWindowProcW(window_info.old_wndproc_, hwnd, msg, wparam, lparam);
-  }
-  else
-  {
-    ret = ::DefWindowProcW(hwnd, msg, wparam, lparam);
-  }
-
-  return ret;
 }
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
@@ -77,7 +52,6 @@ struct RenderInfoDXGI
 {
   bool first_time_{true};
   bool tw_initialized_{false};
-  bool wndproc_swapped_{false};
   IDXGISwapChain* swap_chain_{};
 };
 
@@ -107,7 +81,6 @@ struct RenderInfoD3D9
 {
   bool first_time_{true};
   bool tw_initialized_{false};
-  bool wndproc_swapped_{false};
   IDirect3DDevice9* device_{};
 };
 
@@ -126,8 +99,7 @@ bool AntTweakBarInitializedAny()
 
 void InitializeWndprocHook(RenderInfoDXGI& render_info)
 {
-  WindowInfo& window_info = GetWindowInfo();
-  if (window_info.old_wndproc_ == nullptr)
+  if (!hadesmem::cerberus::IsWindowHooked())
   {
     DXGI_SWAP_CHAIN_DESC desc;
     auto const get_desc_hr = render_info.swap_chain_->GetDesc(&desc);
@@ -137,21 +109,14 @@ void InitializeWndprocHook(RenderInfoDXGI& render_info)
         hadesmem::Error{} << hadesmem::ErrorString{"GetDesc failed."}
                           << hadesmem::ErrorCodeWinHr{get_desc_hr});
     }
-    window_info.old_hwnd_ = desc.OutputWindow;
-    window_info.old_wndproc_ = reinterpret_cast<WNDPROC>(
-      ::SetWindowLongPtrW(desc.OutputWindow,
-                          GWLP_WNDPROC,
-                          reinterpret_cast<LONG_PTR>(&WindowProc)));
-    render_info.wndproc_swapped_ = true;
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Replaced window procedure located at %p.",
-                                   window_info.old_wndproc_);
+
+    hadesmem::cerberus::HandleWindowChange(desc.OutputWindow);
   }
 }
 
 void InitializeWndprocHook(RenderInfoD3D9& render_info)
 {
-  WindowInfo& window_info = GetWindowInfo();
-  if (window_info.old_wndproc_ == nullptr)
+  if (!hadesmem::cerberus::IsWindowHooked())
   {
     IDirect3D9* d3d9 = nullptr;
     render_info.device_->GetDirect3D(&d3d9);
@@ -166,14 +131,8 @@ void InitializeWndprocHook(RenderInfoD3D9& render_info)
                                "GetCreationParameters failed."}
                           << hadesmem::ErrorCodeWinHr{get_create_params_hr});
     }
-    window_info.old_hwnd_ = create_params.hFocusWindow;
-    window_info.old_wndproc_ = reinterpret_cast<WNDPROC>(
-      ::SetWindowLongPtrW(create_params.hFocusWindow,
-                          GWLP_WNDPROC,
-                          reinterpret_cast<LONG_PTR>(&WindowProc)));
-    render_info.wndproc_swapped_ = true;
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Replaced window procedure located at %p.",
-                                   window_info.old_wndproc_);
+
+    hadesmem::cerberus::HandleWindowChange(create_params.hFocusWindow);
   }
 }
 
@@ -186,7 +145,7 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
     return;
   }
 
-  if (!TwInit(api, device))
+  if (!::TwInit(api, device))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
                                     << hadesmem::ErrorString{"TwInit failed."});
@@ -194,15 +153,13 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 
   initialized = true;
 
-  auto& window_info = GetWindowInfo();
-  RECT wnd_rect{0, 0, 0, 0};
-  if (!window_info.old_hwnd_ ||
-      !GetWindowRect(window_info.old_hwnd_, &wnd_rect))
+  RECT wnd_rect{0, 0, 800, 600};
+  if (auto const window = hadesmem::cerberus::GetCurrentWindow())
   {
-    wnd_rect = RECT{0, 0, 800, 600};
+    (void)GetWindowRect(window, &wnd_rect);
   }
 
-  if (!TwWindowSize(wnd_rect.right, wnd_rect.bottom))
+  if (!::TwWindowSize(wnd_rect.right, wnd_rect.bottom))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -210,7 +167,7 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  auto const bar = TwNewBar("HadesMem");
+  auto const bar = ::TwNewBar("HadesMem");
   if (!bar)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -232,25 +189,6 @@ void CleanupAntTweakBar(bool& initialized)
   }
 }
 
-void CleanupWndproc(bool& wndproc_swapped)
-{
-  if (wndproc_swapped)
-  {
-    WindowInfo& window_info = GetWindowInfo();
-    if (window_info.old_wndproc_ != nullptr)
-    {
-      ::SetWindowLongPtrW(window_info.old_hwnd_,
-                          GWLP_WNDPROC,
-                          reinterpret_cast<LONG_PTR>(window_info.old_wndproc_));
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Reset window procedure located at %p.",
-                                     window_info.old_wndproc_);
-      window_info.old_hwnd_ = nullptr;
-      window_info.old_wndproc_ = nullptr;
-      wndproc_swapped = false;
-    }
-  }
-}
-
 void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
                                  RenderInfoD3D11& render_info)
 {
@@ -265,7 +203,7 @@ void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  CleanupWndproc(render_info.wndproc_swapped_);
+  hadesmem::cerberus::HandleWindowChange(nullptr);
 }
 
 void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
@@ -282,7 +220,7 @@ void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  CleanupWndproc(render_info.wndproc_swapped_);
+  hadesmem::cerberus::HandleWindowChange(nullptr);
 }
 
 void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
@@ -296,7 +234,7 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  CleanupWndproc(render_info.wndproc_swapped_);
+  hadesmem::cerberus::HandleWindowChange(nullptr);
 }
 
 void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
@@ -451,11 +389,6 @@ public:
   {
     hadesmem::cerberus::UnregisterOnFrameCallback(id);
   }
-
-  virtual void DrawTweakBar() final
-  {
-    DrawTweakBarImpl();
-  }
 };
 }
 
@@ -473,17 +406,15 @@ RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeRender()
 {
-  auto const dxgi_callback_id =
-    hadesmem::cerberus::RegisterOnFrameCallbackDXGI(OnFrameDXGI);
-  (void)dxgi_callback_id;
+  RegisterOnFrameCallbackDXGI(OnFrameDXGI);
 
-  auto const d3d9_callback_id =
-    hadesmem::cerberus::RegisterOnFrameCallbackD3D9(OnFrameD3D9);
-  (void)d3d9_callback_id;
+  RegisterOnFrameCallbackD3D9(OnFrameD3D9);
 
-  auto const draw_tweak_bar = [](RenderInterface* render)
-  { render->DrawTweakBar(); };
+  auto const draw_tweak_bar = [](RenderInterface* /*render*/)
+  { DrawTweakBarImpl(); };
   RegisterOnFrameCallback(draw_tweak_bar);
+  
+  RegisterOnWndProcMsgCallback(WindowProcCallback);
 }
 
 std::size_t
