@@ -5,6 +5,7 @@
 
 #include "d3d9.hpp"
 #include "dxgi.hpp"
+#include "input.hpp"
 #include "module.hpp"
 #include "render.hpp"
 
@@ -32,6 +33,8 @@ public:
   virtual DXGIInterface* GetDXGIInterface() = 0;
 
   virtual RenderInterface* GetRenderInterface() = 0;
+
+  virtual InputInterface* GetInputInterface() = 0;
 };
 }
 }

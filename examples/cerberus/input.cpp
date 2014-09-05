@@ -76,7 +76,7 @@ namespace hadesmem
 namespace cerberus
 {
 
-InputInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
+InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static InputImpl input_impl;
   return input_impl;

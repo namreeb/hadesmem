@@ -123,6 +123,11 @@ public:
     return &hadesmem::cerberus::GetRenderInterface();
   }
 
+  virtual hadesmem::cerberus::InputInterface* GetInputInterface() final
+  {
+    return &hadesmem::cerberus::GetInputInterface();
+  }
+
   void Unload()
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A("Unloading plugin. [%p]", base_);
