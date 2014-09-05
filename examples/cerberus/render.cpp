@@ -375,8 +375,11 @@ class RenderImpl : public hadesmem::cerberus::RenderInterface
 public:
   virtual ~RenderImpl() final
   {
-    bool initialized = AntTweakBarInitializedAny();
-    CleanupAntTweakBar(initialized);
+    // This is causing crashes when we're being unloaded after d3d9 has
+    // unloaded. Need to fix this properly before reenabling... For now lets
+    // just leak.
+    // bool initialized = AntTweakBarInitializedAny();
+    // CleanupAntTweakBar(initialized);
   }
 
   virtual std::size_t RegisterOnFrame(
@@ -413,7 +416,7 @@ void InitializeRender()
   auto const draw_tweak_bar = [](RenderInterface* /*render*/)
   { DrawTweakBarImpl(); };
   RegisterOnFrameCallback(draw_tweak_bar);
-  
+
   RegisterOnWndProcMsgCallback(WindowProcCallback);
 }
 
