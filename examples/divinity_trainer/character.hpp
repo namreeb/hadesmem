@@ -256,7 +256,7 @@ struct CharacterStatusManager
   CharacterStatus **status_ptr_array_;
   int field_A4;
   int num_statuses_;
-  int field_AC[100];
+  //int field_AC[100];
 };
 
 struct CharacterSkill
