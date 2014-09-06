@@ -20,6 +20,10 @@ namespace cerberus
 
 typedef void OnFrameCallbackD3D9(IDirect3DDevice9* device);
 
+typedef void
+  OnResetCallbackD3D9(IDirect3DDevice9* device,
+                      D3DPRESENT_PARAMETERS* presentation_parameters);
+
 class D3D9Interface
 {
 public:
@@ -31,6 +35,11 @@ public:
     std::function<OnFrameCallbackD3D9> const& callback) = 0;
 
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnResetCallback(
+    std::function<OnResetCallbackD3D9> const& callback) = 0;
+
+  virtual void UnregisterOnResetCallback(std::size_t id) = 0;
 };
 
 D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT;
@@ -45,5 +54,10 @@ std::size_t RegisterOnFrameCallbackD3D9(
   std::function<OnFrameCallbackD3D9> const& callback);
 
 void UnregisterOnFrameCallbackD3D9(std::size_t id);
+
+std::size_t RegisterOnResetCallbackD3D9(
+  std::function<OnResetCallbackD3D9> const& callback);
+
+void UnregisterOnResetCallbackD3D9(std::size_t id);
 }
 }

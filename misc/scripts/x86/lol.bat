@@ -1,0 +1,1 @@
+inject.exe --run "C:\Riot Games\League of Legends\lol.launcher.exe" --inject --steam-app-id 13210 --export Load --add-path --path-resolution --module cerberus.dll

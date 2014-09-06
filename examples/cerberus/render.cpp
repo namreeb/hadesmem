@@ -145,6 +145,8 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
     return;
   }
 
+  HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar.");
+
   if (!::TwInit(api, device))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
@@ -156,8 +158,13 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
   RECT wnd_rect{0, 0, 800, 600};
   if (auto const window = hadesmem::cerberus::GetCurrentWindow())
   {
-    (void)GetWindowRect(window, &wnd_rect);
+    if (!::GetClientRect(window, &wnd_rect))
+    {
+      wnd_rect = RECT{0, 0, 800, 600};
+    }
   }
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Window size is %ldx%ld.", wnd_rect.right, wnd_rect.bottom);
 
   if (!::TwWindowSize(wnd_rect.right, wnd_rect.bottom))
   {
@@ -341,6 +348,18 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
   }
 }
 
+void HandleOnResetD3D9(IDirect3DDevice9* device,
+                       D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
+{
+  auto& render_info = GetRenderInfoD3D9();
+  CleanupAntTweakBar(render_info.tw_initialized_);
+
+  HADESMEM_DETAIL_ASSERT(device == render_info.device_);
+
+  InitializeAntTweakBar(
+    TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
+}
+
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
   HandleOnFrameD3D11(swap_chain);
@@ -359,6 +378,12 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   auto& callbacks = GetOnFrameCallbacks();
   auto& render_interface = hadesmem::cerberus::GetRenderInterface();
   callbacks.Run(&render_interface);
+}
+
+void OnResetD3D9(IDirect3DDevice9* device,
+                 D3DPRESENT_PARAMETERS* presentation_parameters)
+{
+  HandleOnResetD3D9(device, presentation_parameters);
 }
 
 void DrawTweakBarImpl()
@@ -412,6 +437,8 @@ void InitializeRender()
   RegisterOnFrameCallbackDXGI(OnFrameDXGI);
 
   RegisterOnFrameCallbackD3D9(OnFrameD3D9);
+
+  RegisterOnResetCallbackD3D9(OnResetD3D9);
 
   auto const draw_tweak_bar = [](RenderInterface* /*render*/)
   { DrawTweakBarImpl(); };

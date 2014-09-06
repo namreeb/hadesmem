@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Far Cry 3\bin\farcry3_d3d11.exe" --inject --steam-app-id 220240 --export Load --add-path --path-resolution --module cerberus.dll

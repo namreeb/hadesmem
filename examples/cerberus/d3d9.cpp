@@ -47,6 +47,18 @@ public:
   {
     hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(id);
   }
+
+  virtual std::size_t RegisterOnResetCallback(
+    std::function<hadesmem::cerberus::OnResetCallbackD3D9> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnResetCallbackD3D9(callback);
+  }
+
+  virtual void UnregisterOnResetCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnResetCallbackD3D9(id);
+  }
 };
 
 std::unique_ptr<hadesmem::PatchDetour>& GetDirect3DCreate9Detour()
@@ -84,6 +96,13 @@ std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3DDevice9EndSceneDetour()
   return detour;
 }
 
+std::unique_ptr<hadesmem::PatchDetour>& GetIDirect3DDevice9ResetDetour()
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
 std::pair<void*, SIZE_T>& GetD3D9Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -96,6 +115,38 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>&
   static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>
     callbacks;
   return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>&
+  GetOnResetCallbacksD3D9()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>
+    callbacks;
+  return callbacks;
+}
+
+extern "C" HRESULT WINAPI
+  IDirect3DDevice9ResetDetour(IDirect3DDevice9* device,
+                              D3DPRESENT_PARAMETERS* presentation_parameters)
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetIDirect3DDevice9ResetDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
+
+  auto& callbacks = GetOnResetCallbacksD3D9();
+  callbacks.Run(device, presentation_parameters);
+
+  auto const reset =
+    detour->GetTrampoline<decltype(&IDirect3DDevice9ResetDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = reset(device, presentation_parameters);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
 }
 
 extern "C" HRESULT WINAPI
@@ -128,12 +179,20 @@ void DetourDirect3DDevice9(IDirect3DDevice9* device)
   try
   {
     auto const& process = hadesmem::cerberus::GetThisProcess();
+
     hadesmem::cerberus::DetourFunc(process,
                                    L"IDirect3DDevice9::EndScene",
                                    device,
                                    42,
                                    GetIDirect3DDevice9EndSceneDetour(),
                                    IDirect3DDevice9EndSceneDetour);
+
+    hadesmem::cerberus::DetourFunc(process,
+                                   L"IDirect3DDevice9::Reset",
+                                   device,
+                                   16,
+                                   GetIDirect3DDevice9ResetDetour(),
+                                   IDirect3DDevice9ResetDetour);
   }
   catch (...)
   {
@@ -413,6 +472,8 @@ void UndetourD3D9(bool remove)
     UndetourFunc(L"IDirect3D9Ex::CreateDeviceEx",
                  GetIDirect3D9ExCreateDeviceExDetour(),
                  remove);
+    UndetourFunc(
+      L"IDirect3DDevice9::Reset", GetIDirect3DDevice9ResetDetour(), remove);
     UndetourFunc(L"IDirect3DDevice9::EndScene",
                  GetIDirect3DDevice9EndSceneDetour(),
                  remove);
@@ -431,6 +492,19 @@ std::size_t RegisterOnFrameCallbackD3D9(
 void UnregisterOnFrameCallbackD3D9(std::size_t id)
 {
   auto& callbacks = GetOnFrameCallbacksD3D9();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnResetCallbackD3D9(
+  std::function<OnResetCallbackD3D9> const& callback)
+{
+  auto& callbacks = GetOnResetCallbacksD3D9();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnResetCallbackD3D9(std::size_t id)
+{
+  auto& callbacks = GetOnResetCallbacksD3D9();
   return callbacks.Unregister(id);
 }
 }
