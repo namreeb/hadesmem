@@ -396,8 +396,8 @@ void DetourD3D9(HMODULE base)
     DetourFunc(process,
                base,
                "Direct3DCreate9Ex",
-               GetDirect3DCreate9Detour(),
-               Direct3DCreate9Detour);
+               GetDirect3DCreate9ExDetour(),
+               Direct3DCreate9ExDetour);
   }
 }
 
@@ -407,7 +407,7 @@ void UndetourD3D9(bool remove)
   if (CommonUndetourModule(L"D3D9", module))
   {
     UndetourFunc(L"Direct3DCreate9", GetDirect3DCreate9Detour(), remove);
-    UndetourFunc(L"Direct3DCreate9Ex", GetDirect3DCreate9Detour(), remove);
+    UndetourFunc(L"Direct3DCreate9Ex", GetDirect3DCreate9ExDetour(), remove);
     UndetourFunc(
       L"IDirect3D9::CreateDevice", GetIDirect3D9CreateDeviceDetour(), remove);
     UndetourFunc(L"IDirect3D9Ex::CreateDeviceEx",
