@@ -186,6 +186,8 @@ void CleanupAntTweakBar(bool& initialized)
 {
   if (initialized)
   {
+    HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
+
     if (!TwTerminate())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -352,12 +354,23 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
                        D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {
   auto& render_info = GetRenderInfoD3D9();
-  CleanupAntTweakBar(render_info.tw_initialized_);
 
-  HADESMEM_DETAIL_ASSERT(device == render_info.device_);
+  if (device == render_info.device_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
-  InitializeAntTweakBar(
-    TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
+    CleanupAntTweakBar(render_info.tw_initialized_);
+
+    InitializeAntTweakBar(
+      TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected reset on unknown device. Ours = %p, Theirs = %p.",
+      render_info.device_,
+      device);
+  }
 }
 
 void OnFrameDXGI(IDXGISwapChain* swap_chain)

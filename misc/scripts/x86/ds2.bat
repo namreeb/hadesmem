@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Dark Souls 2\Game\DarkSoulsII.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

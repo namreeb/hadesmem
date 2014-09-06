@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Call of Duty Ghosts\iw6sp64_ship.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
