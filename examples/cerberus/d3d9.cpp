@@ -59,6 +59,18 @@ public:
   {
     hadesmem::cerberus::UnregisterOnResetCallbackD3D9(id);
   }
+
+  virtual std::size_t RegisterOnUnloadCallback(
+    std::function<hadesmem::cerberus::OnUnloadCallbackD3D9> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnUnloadCallbackD3D9(callback);
+  }
+
+  virtual void UnregisterOnUnloadCallback(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnUnloadCallbackD3D9(id);
+  }
 };
 
 std::unique_ptr<hadesmem::PatchDetour>& GetDirect3DCreate9Detour()
@@ -118,9 +130,17 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>&
 }
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>&
-  GetOnResetCallbacksD3D9()
+GetOnResetCallbacksD3D9()
 {
   static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D9>&
+GetOnUnloadCallbacksD3D9()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D9>
     callbacks;
   return callbacks;
 }
@@ -480,6 +500,9 @@ void UndetourD3D9(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
+
+  auto const& callbacks = GetOnUnloadCallbacksD3D9();
+  callbacks.Run();
 }
 
 std::size_t RegisterOnFrameCallbackD3D9(
@@ -505,6 +528,19 @@ std::size_t RegisterOnResetCallbackD3D9(
 void UnregisterOnResetCallbackD3D9(std::size_t id)
 {
   auto& callbacks = GetOnResetCallbacksD3D9();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnUnloadCallbackD3D9(
+  std::function<OnUnloadCallbackD3D9> const& callback)
+{
+  auto& callbacks = GetOnUnloadCallbacksD3D9();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnUnloadCallbackD3D9(std::size_t id)
+{
+  auto& callbacks = GetOnUnloadCallbacksD3D9();
   return callbacks.Unregister(id);
 }
 }

@@ -23,6 +23,8 @@
 
 #include "callbacks.hpp"
 #include "d3d9.hpp"
+#include "d3d10.hpp"
+#include "d3d11.hpp"
 #include "dxgi.hpp"
 #include "input.hpp"
 #include "main.hpp"
@@ -399,7 +401,7 @@ void OnResetD3D9(IDirect3DDevice9* device,
   HandleOnResetD3D9(device, presentation_parameters);
 }
 
-void DrawTweakBarImpl()
+void OnFrameGeneric(hadesmem::cerberus::RenderInterface* /*render*/)
 {
   if (!TwDraw())
   {
@@ -408,16 +410,37 @@ void DrawTweakBarImpl()
   }
 }
 
+void OnUnloadD3D9()
+{
+  auto& render_info = GetRenderInfoD3D9();
+  CleanupAntTweakBar(render_info.tw_initialized_);
+}
+
+void OnUnloadD3D10()
+{
+  auto& render_info = GetRenderInfoD3D10();
+  CleanupAntTweakBar(render_info.tw_initialized_);
+}
+
+void OnUnloadD3D11()
+{
+  auto& render_info = GetRenderInfoD3D11();
+  CleanupAntTweakBar(render_info.tw_initialized_);
+}
+
 class RenderImpl : public hadesmem::cerberus::RenderInterface
 {
 public:
   virtual ~RenderImpl() final
   {
-    // This is causing crashes when we're being unloaded after d3d9 has
-    // unloaded. Need to fix this properly before reenabling... For now lets
-    // just leak.
-    // bool initialized = AntTweakBarInitializedAny();
-    // CleanupAntTweakBar(initialized);
+    auto& render_info_d3d9 = GetRenderInfoD3D9();
+    CleanupAntTweakBar(render_info_d3d9.tw_initialized_);
+
+    auto& render_info_d3d10 = GetRenderInfoD3D10();
+    CleanupAntTweakBar(render_info_d3d10.tw_initialized_);
+
+    auto& render_info_d3d11 = GetRenderInfoD3D11();
+    CleanupAntTweakBar(render_info_d3d11.tw_initialized_);
   }
 
   virtual std::size_t RegisterOnFrame(
@@ -453,11 +476,15 @@ void InitializeRender()
 
   RegisterOnResetCallbackD3D9(OnResetD3D9);
 
-  auto const draw_tweak_bar = [](RenderInterface* /*render*/)
-  { DrawTweakBarImpl(); };
-  RegisterOnFrameCallback(draw_tweak_bar);
+  RegisterOnFrameCallback(OnFrameGeneric);
 
   RegisterOnWndProcMsgCallback(WindowProcCallback);
+
+  RegisterOnUnloadCallbackD3D9(OnUnloadD3D9);
+
+  RegisterOnUnloadCallbackD3D10(OnUnloadD3D10);
+
+  RegisterOnUnloadCallbackD3D11(OnUnloadD3D11);
 }
 
 std::size_t

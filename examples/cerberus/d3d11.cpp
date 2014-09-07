@@ -54,6 +54,14 @@ std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D11>&
+  GetOnUnloadCallbacksD3D11()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnUnloadCallbackD3D11> callbacks;
+  return callbacks;
+}
+
 extern "C" HRESULT WINAPI
   D3D11CreateDeviceDetour(IDXGIAdapter* adapter,
                           D3D_DRIVER_TYPE driver_type,
@@ -242,6 +250,22 @@ void UndetourD3D11(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
+
+  auto const& callbacks = GetOnUnloadCallbacksD3D11();
+  callbacks.Run();
+}
+
+std::size_t RegisterOnUnloadCallbackD3D11(
+  std::function<OnUnloadCallbackD3D11> const& callback)
+{
+  auto& callbacks = GetOnUnloadCallbacksD3D11();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnUnloadCallbackD3D11(std::size_t id)
+{
+  auto& callbacks = GetOnUnloadCallbacksD3D11();
+  return callbacks.Unregister(id);
 }
 }
 }
