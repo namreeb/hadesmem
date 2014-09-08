@@ -446,24 +446,6 @@ void OnFrameGeneric(hadesmem::cerberus::RenderInterface* /*render*/)
   }
 }
 
-void OnUnloadD3D9()
-{
-  auto& render_info = GetRenderInfoD3D9();
-  CleanupAntTweakBar(render_info.tw_initialized_);
-}
-
-void OnUnloadD3D10()
-{
-  auto& render_info = GetRenderInfoD3D10();
-  CleanupAntTweakBar(render_info.tw_initialized_);
-}
-
-void OnUnloadD3D11()
-{
-  auto& render_info = GetRenderInfoD3D11();
-  CleanupAntTweakBar(render_info.tw_initialized_);
-}
-
 class RenderImpl : public hadesmem::cerberus::RenderInterface
 {
 public:
@@ -515,12 +497,6 @@ void InitializeRender()
   RegisterOnFrameCallback(OnFrameGeneric);
 
   RegisterOnWndProcMsgCallback(WindowProcCallback);
-
-  RegisterOnUnloadCallbackD3D9(OnUnloadD3D9);
-
-  RegisterOnUnloadCallbackD3D10(OnUnloadD3D10);
-
-  RegisterOnUnloadCallbackD3D11(OnUnloadD3D11);
 }
 
 std::size_t
