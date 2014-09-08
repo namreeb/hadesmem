@@ -187,10 +187,24 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
   RECT wnd_rect{0, 0, 800, 600};
   if (auto const window = hadesmem::cerberus::GetCurrentWindow())
   {
-    if (!::GetClientRect(window, &wnd_rect))
+    HADESMEM_DETAIL_TRACE_A("Have a window.");
+
+    if (!::GetClientRect(window, &wnd_rect) || wnd_rect.right == 0 ||
+        wnd_rect.bottom == 0)
     {
+      HADESMEM_DETAIL_TRACE_A(
+        "GetClientRect failed (or returned an invalid box).");
+
       wnd_rect = RECT{0, 0, 800, 600};
     }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Got client rect.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Do not have a window.");
   }
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Window size is %ldx%ld.", wnd_rect.right, wnd_rect.bottom);
