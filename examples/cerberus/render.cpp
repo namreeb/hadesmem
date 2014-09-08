@@ -449,18 +449,6 @@ void OnFrameGeneric(hadesmem::cerberus::RenderInterface* /*render*/)
 class RenderImpl : public hadesmem::cerberus::RenderInterface
 {
 public:
-  virtual ~RenderImpl() final
-  {
-    auto& render_info_d3d9 = GetRenderInfoD3D9();
-    CleanupAntTweakBar(render_info_d3d9.tw_initialized_);
-
-    auto& render_info_d3d10 = GetRenderInfoD3D10();
-    CleanupAntTweakBar(render_info_d3d10.tw_initialized_);
-
-    auto& render_info_d3d11 = GetRenderInfoD3D11();
-    CleanupAntTweakBar(render_info_d3d11.tw_initialized_);
-  }
-
   virtual std::size_t RegisterOnFrame(
     std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
   {
