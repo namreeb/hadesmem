@@ -233,10 +233,12 @@ int TW_CALL TwEventWin(void *wnd, unsigned int msg, unsigned PARAM_INT _W64 wPar
         break;
     }
 
+#if 0
     if( handled )
         // Event has been handled by AntTweakBar, so we invalidate the window 
         // content to send a WM_PAINT which will redraw the tweak bar(s).
         InvalidateRect(wnd, NULL, FALSE);
+#endif
 
     return handled;
 }

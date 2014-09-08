@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Dead Rising 3\deadrising3.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

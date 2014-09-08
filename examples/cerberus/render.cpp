@@ -54,6 +54,7 @@ struct RenderInfoDXGI
 {
   bool first_time_{true};
   bool tw_initialized_{false};
+  bool wnd_hooked_{false};
   IDXGISwapChain* swap_chain_{};
 };
 
@@ -83,6 +84,7 @@ struct RenderInfoD3D9
 {
   bool first_time_{true};
   bool tw_initialized_{false};
+  bool wnd_hooked_{false};
   IDirect3DDevice9* device_{};
 };
 
@@ -99,7 +101,7 @@ bool AntTweakBarInitializedAny()
          GetRenderInfoD3D11().tw_initialized_;
 }
 
-void InitializeWndprocHook(RenderInfoDXGI& render_info)
+bool InitializeWndprocHook(RenderInfoDXGI& render_info)
 {
   if (!hadesmem::cerberus::IsWindowHooked())
   {
@@ -112,11 +114,22 @@ void InitializeWndprocHook(RenderInfoDXGI& render_info)
                           << hadesmem::ErrorCodeWinHr{get_desc_hr});
     }
 
-    hadesmem::cerberus::HandleWindowChange(desc.OutputWindow);
+    if (desc.OutputWindow)
+    {
+      hadesmem::cerberus::HandleWindowChange(desc.OutputWindow);
+
+      return true;
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Null swap chain output window. Ignoring.");
+    }
   }
+
+  return false;
 }
 
-void InitializeWndprocHook(RenderInfoD3D9& render_info)
+bool InitializeWndprocHook(RenderInfoD3D9& render_info)
 {
   if (!hadesmem::cerberus::IsWindowHooked())
   {
@@ -134,8 +147,22 @@ void InitializeWndprocHook(RenderInfoD3D9& render_info)
                           << hadesmem::ErrorCodeWinHr{get_create_params_hr});
     }
 
-    hadesmem::cerberus::HandleWindowChange(create_params.hFocusWindow);
+    // Pretty sure we should be doing something with hDeviceWindow from the
+    // presentation params as well, depending on whether or not the game is
+    // windowed...
+    if (create_params.hFocusWindow)
+    {
+      hadesmem::cerberus::HandleWindowChange(create_params.hFocusWindow);
+
+      return true;
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Null device focus window. Ignoring.");
+    }
   }
+
+  return false;
 }
 
 void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
@@ -214,7 +241,10 @@ void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  hadesmem::cerberus::HandleWindowChange(nullptr);
+  if (render_info.wnd_hooked_)
+  {
+    hadesmem::cerberus::HandleWindowChange(nullptr);
+  }
 }
 
 void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
@@ -231,7 +261,10 @@ void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  hadesmem::cerberus::HandleWindowChange(nullptr);
+  if (render_info.wnd_hooked_)
+  {
+    hadesmem::cerberus::HandleWindowChange(nullptr);
+  }
 }
 
 void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
@@ -245,7 +278,10 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
 
   CleanupAntTweakBar(render_info.tw_initialized_);
 
-  hadesmem::cerberus::HandleWindowChange(nullptr);
+  if (render_info.wnd_hooked_)
+  {
+    hadesmem::cerberus::HandleWindowChange(nullptr);
+  }
 }
 
 void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
@@ -264,7 +300,7 @@ void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
     return;
   }
 
-  InitializeWndprocHook(render_info);
+  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
   InitializeAntTweakBar(
     TW_DIRECT3D11, render_info.device_, render_info.tw_initialized_);
@@ -288,7 +324,7 @@ void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
     return;
   }
 
-  InitializeWndprocHook(render_info);
+  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
   InitializeAntTweakBar(
     TW_DIRECT3D10, render_info.device_, render_info.tw_initialized_);
@@ -302,7 +338,7 @@ void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
 
   render_info.first_time_ = false;
 
-  InitializeWndprocHook(render_info);
+  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
   InitializeAntTweakBar(
     TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);

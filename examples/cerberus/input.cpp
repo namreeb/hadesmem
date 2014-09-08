@@ -8,8 +8,13 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/detour_ref_counter.hpp>
+#include <hadesmem/detail/last_error_preserver.hpp>
+#include <hadesmem/patcher.hpp>
 
 #include "callbacks.hpp"
+#include "helpers.hpp"
+#include "main.hpp"
 
 namespace
 {
@@ -25,6 +30,19 @@ WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
 {
   static WindowInfo window_info;
   return window_info;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>& GetDirectInput8CreateDetour()
+  HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::pair<void*, SIZE_T>& GetDirectInput8Module() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
 }
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
@@ -53,9 +71,49 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
            : ::DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 
+HRESULT WINAPI DirectInput8CreateDetour(HINSTANCE hinst,
+                                        DWORD dwVersion,
+                                        REFIID riidltf,
+                                        LPVOID* ppvOut,
+                                        LPUNKNOWN punkOuter)
+{
+  auto& detour = GetDirectInput8CreateDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%u] [%p] [%p] [%p].",
+                                 hinst,
+                                 dwVersion,
+                                 riidltf,
+                                 ppvOut,
+                                 punkOuter);
+  auto const direct_input_8_create =
+    detour->GetTrampoline<decltype(&DirectInput8CreateDetour)>();
+  last_error_preserver.Revert();
+  auto const ret =
+    direct_input_8_create(hinst, dwVersion, riidltf, ppvOut, punkOuter);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (FAILED(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+    return ret;
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+  return ret;
+}
+
 class InputImpl : public hadesmem::cerberus::InputInterface
 {
 public:
+  ~InputImpl()
+  {
+    hadesmem::cerberus::HandleWindowChange(nullptr);
+  }
+
   virtual std::size_t RegisterOnWndProcMsg(
     std::function<hadesmem::cerberus::OnWndProcMsgCallback> const& callback)
     final
@@ -84,6 +142,35 @@ InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeInput()
 {
+  InitializeSupportForModule(L"dinput8",
+                             DetourDirectInput8,
+                             UndetourDirectInput8,
+                             GetDirectInput8Module);
+}
+
+void DetourDirectInput8(HMODULE base)
+{
+  auto const& process = GetThisProcess();
+  auto& module = GetDirectInput8Module();
+  if (CommonDetourModule(process, L"dinput8", base, module))
+  {
+    DetourFunc(process,
+               base,
+               "DirectInput8Create",
+               GetDirectInput8CreateDetour(),
+               DirectInput8CreateDetour);
+  }
+}
+
+void UndetourDirectInput8(bool remove)
+{
+  auto& module = GetDirectInput8Module();
+  if (CommonUndetourModule(L"dinput8", module))
+  {
+    UndetourFunc(L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
+  }
 }
 
 std::size_t RegisterOnWndProcMsgCallback(

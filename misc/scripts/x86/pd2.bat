@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\PAYDAY 2\payday2_win32_release.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

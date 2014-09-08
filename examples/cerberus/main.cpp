@@ -81,6 +81,7 @@ void UseAllStatics()
   hadesmem::cerberus::GetD3D9Interface();
   hadesmem::cerberus::GetDXGIInterface();
   hadesmem::cerberus::GetRenderInterface();
+  hadesmem::cerberus::GetInputInterface();
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -167,6 +168,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeD3D101();
     hadesmem::cerberus::InitializeD3D11();
     hadesmem::cerberus::InitializeDXGI();
+    hadesmem::cerberus::InitializeInput();
 
     hadesmem::cerberus::DetourCreateProcessInternalW();
     hadesmem::cerberus::DetourNtMapViewOfSection();
@@ -178,6 +180,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourD3D101(nullptr);
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
+    hadesmem::cerberus::DetourDirectInput8(nullptr);
 
     hadesmem::cerberus::InitializeRender();
 
@@ -221,6 +224,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D101(true);
     hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
+    hadesmem::cerberus::UndetourDirectInput8(true);
 
     hadesmem::cerberus::UnloadPlugins();
 

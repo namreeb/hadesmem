@@ -37,6 +37,10 @@ InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
 
 void InitializeInput();
 
+void DetourDirectInput8(HMODULE base);
+
+void UndetourDirectInput8(bool remove);
+
 std::size_t RegisterOnWndProcMsgCallback(
   std::function<OnWndProcMsgCallback> const& callback);
 
