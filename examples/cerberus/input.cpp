@@ -54,6 +54,7 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto const& callbacks = GetOnWndProcMsgCallbacks();
   bool handled = false;
@@ -76,6 +77,7 @@ HRESULT WINAPI DirectInput8CreateDetour(HINSTANCE hinst,
                                         REFIID riidltf,
                                         LPVOID* ppvOut,
                                         LPUNKNOWN punkOuter)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetDirectInput8CreateDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
@@ -111,7 +113,16 @@ class InputImpl : public hadesmem::cerberus::InputInterface
 public:
   ~InputImpl()
   {
-    hadesmem::cerberus::HandleWindowChange(nullptr);
+    try
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+    }
   }
 
   virtual std::size_t RegisterOnWndProcMsg(
@@ -230,12 +241,12 @@ void HandleWindowChange(HWND wnd)
   }
 }
 
-bool IsWindowHooked()
+bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetWindowInfo().hooked_;
 }
 
-HWND GetCurrentWindow()
+HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetWindowInfo().old_hwnd_;
 }
