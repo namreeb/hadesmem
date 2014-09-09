@@ -6,7 +6,10 @@
 #include <cstdint>
 
 #include <windows.h>
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/detour_ref_counter.hpp>
