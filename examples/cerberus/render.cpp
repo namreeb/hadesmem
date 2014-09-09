@@ -279,6 +279,8 @@ void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
   {
     hadesmem::cerberus::HandleWindowChange(nullptr);
   }
+
+  render_info.wnd_hooked_ = false;
 }
 
 void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
@@ -296,6 +298,8 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
   {
     hadesmem::cerberus::HandleWindowChange(nullptr);
   }
+
+  render_info.wnd_hooked_ = false;
 }
 
 void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)

@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include <windows.h>
+#include <dinput.h>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/detour_ref_counter.hpp>
@@ -32,8 +33,22 @@ WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
   return window_info;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetDirectInput8CreateDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetDirectInput8CreateDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInput8ACreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInput8WCreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -72,28 +87,110 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
            : ::DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 
-HRESULT WINAPI DirectInput8CreateDetour(HINSTANCE hinst,
-                                        DWORD dwVersion,
-                                        REFIID riidltf,
-                                        LPVOID* ppvOut,
-                                        LPUNKNOWN punkOuter)
-  HADESMEM_DETAIL_NOEXCEPT
+HRESULT WINAPI
+  IDirectInput8ACreateDeviceDetour(IDirectInput8A* input,
+                                   REFGUID rguid,
+                                   LPDIRECTINPUTDEVICE* direct_input_device,
+                                   LPUNKNOWN unk_outer)
+{
+  auto& detour = GetIDirectInput8ACreateDeviceDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p] [%p] [%p].",
+                                 input,
+                                 &rguid,
+                                 direct_input_device,
+                                 unk_outer);
+
+  auto const create_device =
+    detour->GetTrampoline<decltype(&IDirectInput8ACreateDeviceDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = create_device(input, rguid, direct_input_device, unk_outer);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
+}
+
+HRESULT WINAPI
+  IDirectInput8WCreateDeviceDetour(IDirectInput8W* input,
+                                   REFGUID rguid,
+                                   LPDIRECTINPUTDEVICE* direct_input_device,
+                                   LPUNKNOWN unk_outer)
+{
+  auto& detour = GetIDirectInput8WCreateDeviceDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p] [%p] [%p].",
+                                 input,
+                                 &rguid,
+                                 direct_input_device,
+                                 unk_outer);
+
+  auto const create_device =
+    detour->GetTrampoline<decltype(&IDirectInput8WCreateDeviceDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = create_device(input, rguid, direct_input_device, unk_outer);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
+}
+
+void DetourDirectInput8(void* direct_input, bool narrow)
+{
+  HADESMEM_DETAIL_TRACE_A("Detouring IDirectInput8.");
+
+  try
+  {
+    auto const& process = hadesmem::cerberus::GetThisProcess();
+
+    if (narrow)
+    {
+      hadesmem::cerberus::DetourFunc(process,
+                                     L"IDirectInput8A::CreateDevice",
+                                     direct_input,
+                                     3,
+                                     GetIDirectInput8ACreateDeviceDetour(),
+                                     IDirectInput8ACreateDeviceDetour);
+    }
+    else
+    {
+      hadesmem::cerberus::DetourFunc(process,
+                                     L"IDirectInput8W::CreateDevice",
+                                     direct_input,
+                                     3,
+                                     GetIDirectInput8WCreateDeviceDetour(),
+                                     IDirectInput8WCreateDeviceDetour);
+    }
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+  }
+}
+
+HRESULT WINAPI
+  DirectInput8CreateDetour(HINSTANCE hinst,
+                           DWORD version,
+                           REFIID riid,
+                           LPVOID* out,
+                           LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetDirectInput8CreateDetour();
   hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%u] [%p] [%p] [%p].",
-                                 hinst,
-                                 dwVersion,
-                                 riidltf,
-                                 ppvOut,
-                                 punkOuter);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Args: [%p] [%u] [%p] [%p] [%p].", hinst, version, &riid, out, unk_outer);
   auto const direct_input_8_create =
     detour->GetTrampoline<decltype(&DirectInput8CreateDetour)>();
   last_error_preserver.Revert();
-  auto const ret =
-    direct_input_8_create(hinst, dwVersion, riidltf, ppvOut, punkOuter);
+  auto const ret = direct_input_8_create(hinst, version, riid, out, unk_outer);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
@@ -104,6 +201,20 @@ HRESULT WINAPI DirectInput8CreateDetour(HINSTANCE hinst,
   }
 
   HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+  if (riid == IID_IDirectInput8A)
+  {
+    DetourDirectInput8(*out, true);
+  }
+  else if (riid == IID_IDirectInput8W)
+  {
+    DetourDirectInput8(*out, false);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unknown IID.");
+    HADESMEM_DETAIL_ASSERT(false);
+  }
 
   return ret;
 }
@@ -125,9 +236,8 @@ public:
     }
   }
 
-  virtual std::size_t RegisterOnWndProcMsg(
-    std::function<hadesmem::cerberus::OnWndProcMsgCallback> const& callback)
-    final
+  virtual std::size_t RegisterOnWndProcMsg(std::function<
+    hadesmem::cerberus::OnWndProcMsgCallback> const& callback) final
   {
     return hadesmem::cerberus::RegisterOnWndProcMsgCallback(callback);
   }
