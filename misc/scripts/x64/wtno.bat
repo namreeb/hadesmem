@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Wolfenstein The New Order\WolfNewOrder_x64.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

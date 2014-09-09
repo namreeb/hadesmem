@@ -36,6 +36,12 @@ lib gdi32
     <name>gdi32
   ;
 
+lib dxguid
+  :
+  :
+    <name>dxguid
+  ;
+
 exe dump
   :
     [ glob dump/*.cpp ]
@@ -71,6 +77,7 @@ lib cerberus
   :
     [ glob cerberus/*.cpp ]
     gdi32
+    dxguid
   ;
 
 lib plugin

@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Battlefield 4\bf4.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
