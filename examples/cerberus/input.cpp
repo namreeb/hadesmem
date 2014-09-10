@@ -142,7 +142,7 @@ HRESULT WINAPI
   return ret;
 }
 
-void DetourDirectInput8(void* direct_input, bool narrow)
+void DetourDirectInput8(REFIID riid, void* direct_input)
 {
   HADESMEM_DETAIL_TRACE_A("Detouring IDirectInput8.");
 
@@ -150,7 +150,7 @@ void DetourDirectInput8(void* direct_input, bool narrow)
   {
     auto const& process = hadesmem::cerberus::GetThisProcess();
 
-    if (narrow)
+    if (riid == IID_IDirectInput8A)
     {
       hadesmem::cerberus::DetourFunc(process,
                                      L"IDirectInput8A::CreateDevice",
@@ -159,7 +159,7 @@ void DetourDirectInput8(void* direct_input, bool narrow)
                                      GetIDirectInput8ACreateDeviceDetour(),
                                      IDirectInput8ACreateDeviceDetour);
     }
-    else
+    else if (riid == IID_IDirectInput8W)
     {
       hadesmem::cerberus::DetourFunc(process,
                                      L"IDirectInput8W::CreateDevice",
@@ -167,6 +167,11 @@ void DetourDirectInput8(void* direct_input, bool narrow)
                                      3,
                                      GetIDirectInput8WCreateDeviceDetour(),
                                      IDirectInput8WCreateDeviceDetour);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Unknown IID.");
+      HADESMEM_DETAIL_ASSERT(false);
     }
   }
   catch (...)
@@ -205,19 +210,7 @@ HRESULT WINAPI
 
   HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
-  if (riid == IID_IDirectInput8A)
-  {
-    DetourDirectInput8(*out, true);
-  }
-  else if (riid == IID_IDirectInput8W)
-  {
-    DetourDirectInput8(*out, false);
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("WARNING! Unknown IID.");
-    HADESMEM_DETAIL_ASSERT(false);
-  }
+  DetourDirectInput8(riid, out);
 
   return ret;
 }
@@ -325,6 +318,8 @@ void HandleWindowChange(HWND wnd)
                                      window_info.old_wndproc_);
     }
 
+    HADESMEM_DETAIL_TRACE_A("Clearing window hook data.");
+
     window_info.old_hwnd_ = nullptr;
     window_info.old_wndproc_ = nullptr;
     window_info.hooked_ = false;
@@ -351,6 +346,10 @@ void HandleWindowChange(HWND wnd)
     window_info.hooked_ = true;
     HADESMEM_DETAIL_TRACE_FORMAT_A("Replaced window procedure located at %p.",
                                    window_info.old_wndproc_);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
   }
 }
 

@@ -125,6 +125,10 @@ bool InitializeWndprocHook(RenderInfoDXGI& render_info)
       HADESMEM_DETAIL_TRACE_A("Null swap chain output window. Ignoring.");
     }
   }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+  }
 
   return false;
 }
@@ -160,6 +164,10 @@ bool InitializeWndprocHook(RenderInfoD3D9& render_info)
     {
       HADESMEM_DETAIL_TRACE_A("Null device focus window. Ignoring.");
     }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
   }
 
   return false;
