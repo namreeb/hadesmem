@@ -142,7 +142,7 @@ HRESULT WINAPI
   return ret;
 }
 
-void DetourDirectInput8(REFIID riid, void* direct_input)
+void DetourDirectInput8(REFIID riid, void** direct_input)
 {
   HADESMEM_DETAIL_TRACE_A("Detouring IDirectInput8.");
 
@@ -154,7 +154,7 @@ void DetourDirectInput8(REFIID riid, void* direct_input)
     {
       hadesmem::cerberus::DetourFunc(process,
                                      L"IDirectInput8A::CreateDevice",
-                                     direct_input,
+                                     *direct_input,
                                      3,
                                      GetIDirectInput8ACreateDeviceDetour(),
                                      IDirectInput8ACreateDeviceDetour);
@@ -163,7 +163,7 @@ void DetourDirectInput8(REFIID riid, void* direct_input)
     {
       hadesmem::cerberus::DetourFunc(process,
                                      L"IDirectInput8W::CreateDevice",
-                                     direct_input,
+                                     *direct_input,
                                      3,
                                      GetIDirectInput8WCreateDeviceDetour(),
                                      IDirectInput8WCreateDeviceDetour);
