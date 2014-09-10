@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\FEAR2\FEAR2.exe" --inject --steam-app-id 16450 --export Load --add-path --path-resolution --module cerberus.dll

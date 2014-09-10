@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\PAYDAY The Heist\payday_win32_release.exe" --inject --steam-app-id 24240 --export Load --add-path --path-resolution --module cerberus.dll

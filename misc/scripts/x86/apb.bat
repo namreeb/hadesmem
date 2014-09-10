@@ -1,1 +1,1 @@
-inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\APB Reloaded\Binaries\APB.exe" --inject --steam-app-id 113400 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\APB Reloaded\Binaries\APB.exe" --inject --steam-app-id 113400 --export Load --add-path --path-resolution --module cerberus.dll

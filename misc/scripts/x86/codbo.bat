@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\Call of Duty Black Ops\BlackOps.exe" --inject --steam-app-id 42700 --export Load --add-path --path-resolution --module cerberus.dll

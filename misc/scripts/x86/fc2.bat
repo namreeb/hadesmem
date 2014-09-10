@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\Far Cry 2\bin\FarCry2.exe" --inject --steam-app-id 19900 --export Load --add-path --path-resolution --module cerberus.dll

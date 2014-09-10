@@ -94,7 +94,7 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-bool AntTweakBarInitializedAny()
+bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetRenderInfoD3D9().tw_initialized_ ||
          GetRenderInfoD3D10().tw_initialized_ ||
@@ -186,8 +186,9 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 
   if (!::TwInit(api, device))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwInit failed."});
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwInit failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
   initialized = true;
@@ -222,14 +223,16 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
+                        << hadesmem::ErrorCodeWinLast{last_error}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
   auto const bar = ::TwNewBar("HadesMem");
   if (!bar)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."});
+      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 }
 

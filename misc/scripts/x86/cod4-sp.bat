@@ -1,1 +1,1 @@
-inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Call of Duty 4\iw3sp.exe" --inject --steam-app-id 7940 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\Call of Duty 4\iw3sp.exe" --inject --steam-app-id 7940 --export Load --add-path --path-resolution --module cerberus.dll

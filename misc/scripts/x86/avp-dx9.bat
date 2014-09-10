@@ -1,1 +1,1 @@
-inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\Aliens vs Predator\AvP.exe" --inject --steam-app-id 10680 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\Aliens vs Predator\AvP.exe" --inject --steam-app-id 10680 --export Load --add-path --path-resolution --module cerberus.dll
