@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Crysis 3\Bin32\Crysis3.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
