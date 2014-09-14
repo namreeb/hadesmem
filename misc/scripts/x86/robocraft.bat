@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Robocraft\Robocraft.exe" --inject --steam-app-id 301520 --export Load --add-path --path-resolution --module cerberus.dll

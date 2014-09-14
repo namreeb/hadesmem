@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Half-Life 2\hl2.exe" --inject --steam-app-id 220 --export Load --add-path --path-resolution --module cerberus.dll

@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\the witcher 2\Launcher.exe" --inject --steam-app-id 20920 --export Load --add-path --path-resolution --module cerberus.dll

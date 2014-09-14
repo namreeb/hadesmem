@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Team Fortress 2\hl2.exe" --inject --steam-app-id 440 --export Load --add-path --path-resolution --module cerberus.dll

@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Crysis Warhead\Bin64\Crysis64.exe" --inject --steam-app-id 17330 --export Load --add-path --path-resolution --module cerberus.dll

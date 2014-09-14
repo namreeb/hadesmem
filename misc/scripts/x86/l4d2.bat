@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Left 4 Dead 2\left4dead2.exe" --inject --steam-app-id 550 --export Load --add-path --path-resolution --module cerberus.dll

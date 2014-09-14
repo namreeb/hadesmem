@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Grand Theft Auto San Andreas\gta-sa.exe" --inject --steam-app-id 12120 --export Load --add-path --path-resolution --module cerberus.dll

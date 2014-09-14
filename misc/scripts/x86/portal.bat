@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Portal\hl2.exe" --inject --steam-app-id 400 --export Load --add-path --path-resolution --module cerberus.dll

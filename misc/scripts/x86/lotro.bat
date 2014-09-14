@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Lord of the Rings Online\lotroclient.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

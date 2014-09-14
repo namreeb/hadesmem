@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Path of Exile\PathOfExileSteam.exe" --inject --steam-app-id 238960 --export Load --add-path --path-resolution --module cerberus.dll

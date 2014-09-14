@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Call of Duty Modern Warfare 2\iw4sp.exe" --inject --steam-app-id 10180 --export Load --add-path --path-resolution --module cerberus.dll

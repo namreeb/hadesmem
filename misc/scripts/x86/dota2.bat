@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\dota 2 beta\dota.exe" --inject --steam-app-id 570 --export Load --add-path --path-resolution --module cerberus.dll

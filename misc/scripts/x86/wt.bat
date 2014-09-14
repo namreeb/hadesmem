@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\War Thunder\launcher.exe" --inject --steam-app-id 236390 --export Load --add-path --path-resolution --module cerberus.dll

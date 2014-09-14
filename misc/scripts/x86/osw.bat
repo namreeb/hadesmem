@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Stranger's Wrath\Launcher.exe" --inject --steam-app-id 15750 --export Load --add-path --path-resolution --module cerberus.dll
