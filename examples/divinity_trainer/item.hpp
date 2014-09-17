@@ -27,13 +27,13 @@ struct ItemStats
   int field_C8;
   int field_CC[7];
   int is_identified_;
-  int field_EC[5];
+  int field_EC[4];
   int durability_;
   int durability_counter_;
   int repair_durability_penalty_;
-  int field_10C;
-  char* item_type_;
-  // int field_114[100];
+  int field_108;
+  char *item_type_;
+  //int field_110[100];
 };
 
 struct ItemTemplate
