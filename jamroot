@@ -29,12 +29,6 @@ use-project /tclap
   :
     src/tclap
   ;
- 
-# Use FW1FontWrapper library. 
-use-project /fw1fontwrapper
-  :
-    src/fw1fontwrapper
-  ;
   
 # Use AntTweakBar library. 
 use-project /anttweakbar
@@ -199,8 +193,6 @@ alias memory
     <library>src/pugixml
 
     <library>src/tclap
-
-    <library>src/fw1fontwrapper
 
     <library>src/anttweakbar
 

@@ -174,6 +174,11 @@ public:
     HADESMEM_DETAIL_TRACE_A("Unloaded plugin.");
   }
 
+  std::wstring GetPath() const
+  {
+    return path_;
+  }
+
 private:
   void UnloadUnchecked() HADESMEM_DETAIL_NOEXCEPT
   {
@@ -201,6 +206,17 @@ std::vector<Plugin>& GetPlugins()
   return plugins;
 }
 
+std::wstring CanonicalizePluginPath(std::wstring path)
+{
+  if (hadesmem::detail::IsPathRelative(path))
+  {
+    path =
+      hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), path);
+  }
+  path = hadesmem::detail::MakeExtendedPath(path);
+  return path;
+}
+
 void LoadPluginsFileImpl(pugi::xml_document const& doc)
 {
   auto const hadesmem_root = doc.child(L"HadesMem");
@@ -216,7 +232,6 @@ void LoadPluginsFileImpl(pugi::xml_document const& doc)
     return;
   }
 
-  auto& plugins = GetPlugins();
   for (auto const& plugin_node : cerberus_node.children(L"Plugin"))
   {
     auto const process_name =
@@ -237,12 +252,7 @@ void LoadPluginsFileImpl(pugi::xml_document const& doc)
 
     auto path =
       hadesmem::detail::pugixml::GetAttributeValue(plugin_node, L"Path");
-    if (hadesmem::detail::IsPathRelative(path))
-    {
-      path =
-        hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), path);
-    }
-    plugins.emplace_back(path);
+    hadesmem::cerberus::LoadPlugin(path);
   }
 }
 
@@ -285,6 +295,52 @@ namespace hadesmem
 namespace cerberus
 {
 
+void LoadPlugin(std::wstring const& path)
+{
+  auto& plugins = GetPlugins();
+  std::wstring path_real = CanonicalizePluginPath(path);
+  auto const plugin = std::find_if(std::begin(plugins),
+                                   std::end(plugins),
+                                   [&](Plugin const& plugin)
+                                   {
+    return hadesmem::detail::ToUpperOrdinal(plugin.GetPath()) ==
+           hadesmem::detail::ToUpperOrdinal(path_real);
+  });
+  if (plugin == std::end(plugins))
+  {
+    plugins.emplace_back(path_real);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"WARNING! Attempt to reload already loaded plugin. <%s>",
+      path_real.c_str());
+  }
+}
+
+void UnloadPlugin(std::wstring const& path)
+{
+  auto& plugins = GetPlugins();
+  std::wstring path_real = CanonicalizePluginPath(path);
+  auto const plugin = std::find_if(std::begin(plugins),
+                                   std::end(plugins),
+                                   [&](Plugin const& plugin)
+                                   {
+    return hadesmem::detail::ToUpperOrdinal(plugin.GetPath()) ==
+           hadesmem::detail::ToUpperOrdinal(path_real);
+  });
+  if (plugin == std::end(plugins))
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"WARNING! Attempt to unload plugin which is not loaded. <%s>",
+      path_real.c_str());
+  }
+  else
+  {
+    plugins.erase(plugin);
+  }
+}
+
 void LoadPlugins()
 {
   HADESMEM_DETAIL_TRACE_A("Loading plugins.");
@@ -302,7 +358,7 @@ void LoadPlugins()
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <Cerberus>
-    <Plugin Path="libplugin.dll"/>
+    <Plugin Path="libcxexample.dll"/>
   </Cerberus>
 </HadesMem>
 )";
@@ -311,7 +367,7 @@ void LoadPlugins()
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
   <Cerberus>
-    <Plugin Path="plugin.dll"/>
+    <Plugin Path="cxexample.dll"/>
   </Cerberus>
 </HadesMem>
 )";

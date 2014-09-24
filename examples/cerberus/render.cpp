@@ -20,6 +20,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 
 #include "callbacks.hpp"
 #include "d3d9.hpp"
@@ -27,6 +28,7 @@
 #include "d3d11.hpp"
 #include "dxgi.hpp"
 #include "input.hpp"
+#include "plugin.hpp"
 #include "main.hpp"
 
 namespace
@@ -60,7 +62,7 @@ struct RenderInfoDXGI
 
 struct RenderInfoD3D11 : RenderInfoDXGI
 {
-  ID3D11Device* device_;
+  ID3D11Device* device_{};
 };
 
 RenderInfoD3D11& GetRenderInfoD3D11() HADESMEM_DETAIL_NOEXCEPT
@@ -71,7 +73,7 @@ RenderInfoD3D11& GetRenderInfoD3D11() HADESMEM_DETAIL_NOEXCEPT
 
 struct RenderInfoD3D10 : RenderInfoDXGI
 {
-  ID3D10Device* device_;
+  ID3D10Device* device_{};
 };
 
 RenderInfoD3D10& GetRenderInfoD3D10() HADESMEM_DETAIL_NOEXCEPT
@@ -173,6 +175,31 @@ bool InitializeWndprocHook(RenderInfoD3D9& render_info)
   return false;
 }
 
+std::string& GetPluginPathTw()
+{
+  static std::string path;
+  return path;
+}
+
+void TW_CALL CopyStdStringToClientTw(std::string& dst, const std::string& src)
+{
+  dst = src;
+}
+
+void TW_CALL LoadPluginCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
+  hadesmem::cerberus::LoadPlugin(
+    hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+}
+
+void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
+  hadesmem::cerberus::UnloadPlugin(
+    hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+}
+
 void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 {
   if (AntTweakBarInitializedAny())
@@ -227,11 +254,49 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
+  TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
+
   auto const bar = ::TwNewBar("HadesMem");
   if (!bar)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const load_button = ::TwAddButton(bar,
+                                         "LoadPluginBtn",
+                                         &LoadPluginCallbackTw,
+                                         nullptr,
+                                         " label='Load Plugin' ");
+  if (!load_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const unload_button = ::TwAddButton(bar,
+                                           "UnloadPluginBtn",
+                                           &UnloadPluginCallbackTw,
+                                           nullptr,
+                                           " label='Unload Plugin' ");
+  if (!unload_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const plugin_path = ::TwAddVarRW(bar,
+                                        "LoadPluginPath",
+                                        TW_TYPE_STDSTRING,
+                                        &GetPluginPathTw(),
+                                        " label='Plugin Path' ");
+  if (!plugin_path)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 }

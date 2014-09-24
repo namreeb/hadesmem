@@ -383,8 +383,8 @@ public:
           }
         }();
 
-        auto const resolve_rel = [](
-          std::uint64_t base, std::int64_t target, std::uint32_t insn_len)
+        auto const resolve_rel =
+          [](std::uint64_t base, std::int64_t target, std::uint32_t insn_len)
         {
           return reinterpret_cast<std::uint8_t*>(
                    static_cast<std::uintptr_t>(base)) +
@@ -564,9 +564,9 @@ protected:
 
     std::unique_ptr<Allocator> trampoline;
 
-    auto const allocate_tramp = [](Process const& process,
-                                   PVOID addr,
-                                   SIZE_T size) -> std::unique_ptr<Allocator>
+    auto const allocate_tramp =
+      [](Process const& process, PVOID addr, SIZE_T size)
+        -> std::unique_ptr<Allocator>
     {
       auto const new_addr = detail::TryAlloc(process, size, addr);
       return new_addr
@@ -1127,7 +1127,9 @@ protected:
     }
 
     auto const cleanup_hook = [&]()
-    { veh_hooks.erase(target_); };
+    {
+      veh_hooks.erase(target_);
+    };
     auto scope_cleanup_hook = hadesmem::detail::MakeScopeWarden(cleanup_hook);
 
     HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");
@@ -1229,7 +1231,8 @@ protected:
       (void)veh_hooks_removed;
       HADESMEM_DETAIL_ASSERT(veh_hooks_removed);
     };
-    auto scope_veh_cleanup_hook = hadesmem::detail::MakeScopeWarden(veh_cleanup_hook);
+    auto scope_veh_cleanup_hook =
+      hadesmem::detail::MakeScopeWarden(veh_cleanup_hook);
 
     HADESMEM_DETAIL_TRACE_A("Setting DR hook.");
 
@@ -1249,7 +1252,7 @@ protected:
       // it's a nice additional sanity check. This may require a
       // user-controlable flag in future though if the code being hooked is
       // 'hostile'.
-      bool const dr_available = *(&context.Dr0 + i) == 0;
+      bool const dr_available = !(&context.Dr0)[i];
       if (control_available && dr_available)
       {
         dr_index = i;
@@ -1263,7 +1266,7 @@ protected:
         Error{} << ErrorString{"No free debug registers."});
     }
 
-    dr_hooks[::GetCurrentThreadId()] = dr_index;
+    dr_hooks[ ::GetCurrentThreadId()] = dr_index;
 
     auto const dr_cleanup_hook = [&]()
     {
@@ -1271,9 +1274,10 @@ protected:
       (void)dr_hooks_removed;
       HADESMEM_DETAIL_ASSERT(dr_hooks_removed);
     };
-    auto scope_dr_cleanup_hook = hadesmem::detail::MakeScopeWarden(dr_cleanup_hook);
+    auto scope_dr_cleanup_hook =
+      hadesmem::detail::MakeScopeWarden(dr_cleanup_hook);
 
-    *(&context.Dr0 + dr_index) = reinterpret_cast<std::uintptr_t>(target_);
+    (&context.Dr0)[dr_index] = reinterpret_cast<std::uintptr_t>(target_);
     // Set appropriate L0-L3 flag
     context.Dr7 |= static_cast<std::uintptr_t>(1ULL << (dr_index * 2));
     // Set appropriate RW0-RW3 field (Execution)

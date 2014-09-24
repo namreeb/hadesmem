@@ -232,7 +232,9 @@ void RootWindow::PaintRadar(HWND hwnd)
   }
 
   auto const cleanup_dc = [&]()
-  { ::ReleaseDC(hwnd, radar_wnd_dc); };
+  {
+    ::ReleaseDC(hwnd, radar_wnd_dc);
+  };
   auto const scope_cleanup_dc = hadesmem::detail::MakeScopeWarden(cleanup_dc);
 
   RECT rr{};
@@ -279,7 +281,9 @@ void RootWindow::PaintRadar(HWND hwnd)
   }
 
   auto const cleanup_obj = [&]()
-  { ::SelectObject(mem_dc.GetHandle(), old_obj); };
+  {
+    ::SelectObject(mem_dc.GetHandle(), old_obj);
+  };
   auto const scope_cleanup_obj = hadesmem::detail::MakeScopeWarden(cleanup_obj);
 
   HGDIOBJ old_obj_tmp =
@@ -715,6 +719,8 @@ int PASCAL WindowThread(HINSTANCE instance,
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
 
+    std::wstring const class_name = prw->ClassName();
+
     auto& hwnd = GetWindowHandle();
     hwnd = prw->GetHandle();
 
@@ -725,6 +731,14 @@ int PASCAL WindowThread(HINSTANCE instance,
     {
       ::TranslateMessage(&msg);
       ::DispatchMessageW(&msg);
+    }
+
+    if (!::UnregisterClassW(class_name.c_str(), instance))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"UnregisterClassW failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
     }
 
     return 0;

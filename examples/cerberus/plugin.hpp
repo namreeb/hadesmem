@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "d3d9.hpp"
 #include "dxgi.hpp"
 #include "input.hpp"
@@ -18,6 +20,10 @@ namespace cerberus
 void LoadPlugins();
 
 void UnloadPlugins();
+
+void LoadPlugin(std::wstring const& path);
+
+void UnloadPlugin(std::wstring const& path);
 
 class PluginInterface
 {

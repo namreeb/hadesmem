@@ -80,9 +80,9 @@ lib cerberus
     dxguid
   ;
 
-lib plugin
+lib cxexample
   :
-    [ glob plugin/*.cpp ]
+    [ glob cxexample/*.cpp ]
     comctl32
     gdi32
     ole32
