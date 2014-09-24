@@ -247,15 +247,23 @@ struct CharacterStatus
 {
   virtual ~CharacterStatus() {}
 
-  int field_4[100];
+  int field_4[11];
+  CharacterAlignmentData *charmed_alignment_data_;
+  int field_34[100];
+};
+
+struct CharacterStatusManagerCharacterStatusVector
+{
+  CharacterStatus **statuses_;
+  unsigned int capacity_;
+  unsigned int size_;
 };
 
 struct CharacterStatusManager
 {
-  int field_0[40];
-  CharacterStatus **status_ptr_array_;
-  int field_A4;
-  int num_statuses_;
+  void *vtable_;
+  int field_4[39];
+  CharacterStatusManagerCharacterStatusVector statuses_;
   //int field_AC[100];
 };
 

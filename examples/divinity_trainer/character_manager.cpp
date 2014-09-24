@@ -4,10 +4,13 @@
 #include "character_manager.hpp"
 
 #include <cstdio>
+#include <set>
 
 #include <hadesmem/read.hpp>
 
 #include "offsets.hpp"
+
+extern std::set<void*> status_vtables;
 
 std::vector<Character*> DumpCharacterArray(hadesmem::Process const& process,
                                            Character** ptr_array,
@@ -86,4 +89,11 @@ void DumpCharacterManager(hadesmem::Process const& process, std::uint8_t* base)
     character_manager.party_manager_.party_member_ptr_array_,
     nullptr,
     character_manager.party_manager_.party_member_ptr_array_len_);
+
+  printf("Dumping character status vtables.\n\n");
+  for (auto const& vtable : status_vtables)
+  {
+    printf("0x%p\n", vtable);
+  }
+  printf("\n");
 }

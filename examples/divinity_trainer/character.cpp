@@ -4,6 +4,9 @@
 #include "character.hpp"
 
 #include <cstdio>
+#include <set>
+
+std::set<void*> status_vtables;
 
 void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
 {
@@ -123,8 +126,24 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
   auto const character_status_manager =
     hadesmem::ReadUnsafe<CharacterStatusManager>(process,
                                                  character.status_manager_);
-  printf("StatusManager::NumStatuses: %d\n",
-         character_status_manager.num_statuses_);
+  printf("StatusManager::Statuses::Size: %u\n",
+         character_status_manager.statuses_.size_);
+  printf("StatusManager::Statuses::Capacity: %u\n",
+         character_status_manager.statuses_.capacity_);
+  auto const statuses = hadesmem::ReadVector<CharacterStatus*>(
+    process,
+    character_status_manager.statuses_.statuses_,
+    character_status_manager.statuses_.size_);
+  for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(statuses.size());
+       ++i)
+  {
+    printf("StatusManager::Statuses::Status %u: 0x%p\n",
+           i,
+           static_cast<void*>(statuses[i]));
+    auto const status_vtable = hadesmem::Read<void*>(process, statuses[i]);
+    printf("StatusManager::Statuses::Status::VTable: 0x%p\n", status_vtable);
+    status_vtables.insert(status_vtable);
+  }
   printf("SkillManager: %p\n", static_cast<void*>(character.skill_manager_));
   printf("VariableManager: %p\n", character.variable_manager_);
   printf("Owner: %08X\n", character.owner_);
