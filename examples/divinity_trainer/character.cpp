@@ -108,7 +108,11 @@ void DumpCharacter(hadesmem::Process const& process, Character* character_ptr)
   printf("Flags::IsPet: %d\n", !!(character.flags_2_ & CharacterFlags2_IsPet));
   printf("Stats: %p\n", static_cast<void*>(character.stats_));
   auto const character_stats =
-    hadesmem::Read<CharacterStats>(process, character.stats_);
+    hadesmem::ReadUnsafe<CharacterStats>(process, character.stats_);
+  DumpTriStringPairPoly(
+    process,
+    character_stats.field_28,
+    "Stats::Field28");
   printf("Stats::Level: %d\n", character_stats.level_);
   printf("Stats::HP: %d\n", character_stats.vitality_);
   printf("Stats::MP: %d\n", character_stats.magic_points_);

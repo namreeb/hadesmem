@@ -161,9 +161,13 @@ struct CharacterTemplate
 
 struct CharacterStats
 {
-  int field_0;
+  virtual ~CharacterStats() {}
+
   int level_;
-  int field_8[51];
+  int field_8[7];
+  char *field_24;
+  TriStringPairPoly field_28;
+  int field_AC[10];
   int vitality_;
   int magic_points_;
   int action_points_;
@@ -173,9 +177,19 @@ struct CharacterStats
   int field_EC;
   int field_F0;
   int reputation_;
-  int field_F8;
+  int flags_;
   int trait_order_;
-  //int field_100[150];
+  int field_100[9];
+  int field_124;
+  int field_128;
+  int field_12C;
+  int field_130;
+  int field_134;
+  int field_138[16];
+  int field_178;
+  int field_17C;
+  int field_180;
+  int field_184[100];
 };
 
 struct CharacterPlayerCustomData
