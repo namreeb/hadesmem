@@ -301,9 +301,9 @@ void LoadPlugin(std::wstring const& path)
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin = std::find_if(std::begin(plugins),
                                    std::end(plugins),
-                                   [&](Plugin const& plugin)
+                                   [&](Plugin const& p)
                                    {
-    return hadesmem::detail::ToUpperOrdinal(plugin.GetPath()) ==
+    return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
            hadesmem::detail::ToUpperOrdinal(path_real);
   });
   if (plugin == std::end(plugins))
@@ -324,9 +324,9 @@ void UnloadPlugin(std::wstring const& path)
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin = std::find_if(std::begin(plugins),
                                    std::end(plugins),
-                                   [&](Plugin const& plugin)
+                                   [&](Plugin const& p)
                                    {
-    return hadesmem::detail::ToUpperOrdinal(plugin.GetPath()) ==
+    return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
            hadesmem::detail::ToUpperOrdinal(path_real);
   });
   if (plugin == std::end(plugins))

@@ -48,8 +48,8 @@ void UnregisterOnWndProcMsgCallback(std::size_t id);
 
 void HandleWindowChange(HWND wnd);
 
-bool IsWindowHooked();
+bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
 
-HWND GetCurrentWindow();
+HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT;
 }
 }
