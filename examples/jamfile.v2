@@ -87,3 +87,12 @@ lib cxexample
     gdi32
     ole32
   ;
+
+lib cxdivinity
+  :
+    [ glob cxdivinity/*.cpp ]
+    [ glob cxdivinity/sdk/*.cpp ]
+    comctl32
+    gdi32
+    ole32
+  ;
