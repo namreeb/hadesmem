@@ -14,10 +14,6 @@
 #include <d3d10.h>
 #include <dxgi.h>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <anttweakbar.h>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
@@ -34,6 +30,29 @@
 namespace
 {
 
+class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
+{
+public:
+  virtual TwBar* TwNewBar(const char* bar_name) final
+  {
+    return ::TwNewBar(bar_name);
+  }
+  virtual int TwAddButton(TwBar* bar,
+                          const char* name,
+                          TwButtonCallback callback,
+                          void* client_data,
+                          const char* def) final
+  {
+    return ::TwAddButton(bar, name, callback, client_data, def);
+  }
+};
+
+hadesmem::cerberus::AntTweakBarInterface& GetAntTweakBarInterface()
+{
+  static AntTweakBarImpl ant_tweak_bar;
+  return ant_tweak_bar;
+}
+
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled)
 {
@@ -49,6 +68,23 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
 {
   static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
     callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnAntTweakBarInitializeCallback>&
+  GetOnAntTweakBarInitializeCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnAntTweakBarInitializeCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnAntTweakBarCleanupCallback>&
+  GetOnAntTweakBarCleanupCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnAntTweakBarCleanupCallback> callbacks;
   return callbacks;
 }
 
@@ -299,6 +335,10 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
+
+  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+  auto& ant_tweak_bar = GetAntTweakBarInterface();
+  callbacks.Run(&ant_tweak_bar);
 }
 
 void CleanupAntTweakBar(bool& initialized)
@@ -314,6 +354,10 @@ void CleanupAntTweakBar(bool& initialized)
     }
 
     initialized = false;
+
+    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+    auto& ant_tweak_bar = GetAntTweakBarInterface();
+    callbacks.Run(&ant_tweak_bar);
   }
 }
 
@@ -512,8 +556,7 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   HandleOnFrameD3D10(swap_chain);
 
   auto& callbacks = GetOnFrameCallbacks();
-  auto& render_interface = hadesmem::cerberus::GetRenderInterface();
-  callbacks.Run(&render_interface);
+  callbacks.Run();
 }
 
 void OnFrameD3D9(IDirect3DDevice9* device)
@@ -521,8 +564,7 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   HandleOnFrameD3D9(device);
 
   auto& callbacks = GetOnFrameCallbacks();
-  auto& render_interface = hadesmem::cerberus::GetRenderInterface();
-  callbacks.Run(&render_interface);
+  callbacks.Run();
 }
 
 void OnResetD3D9(IDirect3DDevice9* device,
@@ -531,7 +573,7 @@ void OnResetD3D9(IDirect3DDevice9* device,
   HandleOnResetD3D9(device, presentation_parameters);
 }
 
-void OnFrameGeneric(hadesmem::cerberus::RenderInterface* /*render*/)
+void OnFrameGeneric()
 {
   if (!TwDraw())
   {
@@ -552,6 +594,29 @@ public:
   virtual void UnregisterOnFrame(std::size_t id) final
   {
     hadesmem::cerberus::UnregisterOnFrameCallback(id);
+  }
+
+  virtual std::size_t RegisterOnAntTweakBarInitialize(std::function<
+    hadesmem::cerberus::OnAntTweakBarInitializeCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnAntTweakBarInitializeCallback(
+      callback);
+  }
+
+  virtual void UnregisterOnAntTweakBarInitialize(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnAntTweakBarInitializeCallback(id);
+  }
+
+  virtual std::size_t RegisterOnAntTweakBarCleanup(std::function<
+    hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
+  {
+    return hadesmem::cerberus::RegisterOnAntTweakBarCleanupCallback(callback);
+  }
+
+  virtual void UnregisterOnAntTweakBarCleanup(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnAntTweakBarCleanupCallback(id);
   }
 };
 }
@@ -591,6 +656,32 @@ std::size_t
 void UnregisterOnFrameCallback(std::size_t id)
 {
   auto& callbacks = GetOnFrameCallbacks();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnAntTweakBarInitializeCallback(
+  std::function<OnAntTweakBarInitializeCallback> const& callback)
+{
+  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnAntTweakBarInitializeCallback(std::size_t id)
+{
+  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnAntTweakBarCleanupCallback(
+  std::function<OnAntTweakBarCleanupCallback> const& callback)
+{
+  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnAntTweakBarCleanupCallback(std::size_t id)
+{
+  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
   return callbacks.Unregister(id);
 }
 }
