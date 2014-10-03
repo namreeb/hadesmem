@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "ability.hpp"
 #include "character_template.hpp"
 #include "static_assert.hpp"
@@ -136,7 +138,7 @@ struct CharacterStatsPermanantBoost
   int talents_;
   int unk_maybe_talents_related_1_;
   int unk_maybe_talents_related_2_;
-  __int16 traits_[18];
+  std::int16_t traits_[18];
   int flags_;
   int boost_conditions_;
   int translation_key_;
@@ -268,7 +270,7 @@ struct CharacterPlayerData
   int field_84;
   int field_88;
   bool level_up_marker_;
-  unsigned __int8 selected_skill_set_index_;
+  std::uint8_t selected_skill_set_index_;
   char field_8E;
   char field_8F;
   CharacterPlayerCustomData player_custom_data_;
@@ -391,8 +393,8 @@ struct CharacterData
   int field_D4;
   CharacterOwner* owner_;
   int field_DC;
-  __int16 team_id_;
-  __int16 field_E2;
+  std::int16_t team_id_;
+  std::int16_t field_E2;
   float life_time_;
   float trigger_traps_timer_;
   float surface_distance_check_;

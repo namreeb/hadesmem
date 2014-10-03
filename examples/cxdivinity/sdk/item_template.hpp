@@ -3,12 +3,22 @@
 
 #pragma once
 
+#include <cstdint>
+
+#include <hadesmem/config.hpp>
+
 #include "flagged.hpp"
 #include "static_assert.hpp"
 #include "std_string.hpp"
 
 namespace divinity
 {
+
+// Need to figure out how to replicate the vtable layout from the game.
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif // #if defined(HADESMEM_GCC)
 
 struct ItemTemplate
 {
@@ -67,7 +77,7 @@ struct ItemTemplate
   FlaggedBool is_surface_interactable_;
   FlaggedBool is_surface_cloud_interactable_;
   FlaggedBool treasure_on_destroy_;
-  __int16 field_222;
+  std::int16_t field_222;
   int unknown_tooltip_related_;
   int field_228;
   FlaggedCString stats_;
@@ -114,6 +124,10 @@ struct ItemTemplate
   FlaggedCString alt_speaker_;
   FlaggedCString spaker_greeting_override_;
 };
+
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(ItemTemplate) == 0x39C);
 }

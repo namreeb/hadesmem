@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "item_template.hpp"
 #include "static_assert.hpp"
 #include "std_string.hpp"
@@ -73,8 +75,8 @@ struct ItemData
   int field_88;
   int inventory_;
   int parent_;
-  __int16 slot_;
-  __int16 field_96;
+  std::int16_t slot_;
+  std::int16_t field_96;
   int amount_;
   int vitality_;
   int field_A0;

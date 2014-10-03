@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "static_assert.hpp"
 #include "std_string.hpp"
 #include "vec3f.hpp"
@@ -141,8 +143,8 @@ struct GameObjectStatus
   virtual void Unknown0068() = 0;
 
   char* field_4;
-  __int16 field_8;
-  __int16 field_A;
+  std::int16_t field_8;
+  std::int16_t field_A;
   int can_enter_chance_;
   float activate_timer_;
   float life_time_;
@@ -151,7 +153,7 @@ struct GameObjectStatus
   unsigned int unk_handle_1_;
   int parent_;
   int status_source_;
-  __int16 team_id_;
+  std::int16_t team_id_;
   char flags_;
   char field_2F;
 };
@@ -193,8 +195,8 @@ struct GameObjectStatusHitDamageData
   int field_1C;
   int death_type_;
   int armor_absorption_;
-  __int16 effect_flags_;
-  __int16 field_2A;
+  std::int16_t effect_flags_;
+  std::int16_t field_2A;
 };
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(GameObjectStatusHitDamageData) ==
@@ -389,8 +391,8 @@ struct GameObjectStatusCombat : public GameObjectStatus
   char field_32;
   char field_33;
   float field_34;
-  __int16 field_38;
-  __int16 field_3A;
+  std::int16_t field_38;
+  std::int16_t field_3A;
 };
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(GameObjectStatusCombat) == 0x3C);
@@ -778,7 +780,7 @@ HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(GameObjectStatusVoidAura) == 0x34);
 struct GameObjectStatusMaterial : public GameObjectStatus
 {
   char* material_uuid_;
-  unsigned __int8 apply_flags_;
+  std::uint8_t apply_flags_;
   bool is_overlay_material_;
   bool fading_;
   bool apply_normal_map_;

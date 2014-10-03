@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "static_assert.hpp"
 
 namespace divinity
@@ -25,14 +27,14 @@ struct Inventory
   virtual bool Serialize(int a2) = 0;
 
   int field_4;
-  __int16 field_8;
-  __int16 field_A;
+  std::int16_t field_8;
+  std::int16_t field_A;
   int field_C;
   int field_10;
   int field_14;
   int field_18;
   unsigned int unknown_handle_;
-  unsigned __int8 equipment_slots_;
+  std::uint8_t equipment_slots_;
   char field_21;
   char field_22;
   char field_23;

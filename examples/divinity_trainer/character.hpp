@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/process.hpp>
@@ -580,8 +582,8 @@ struct Character
   int field_D4;
   int owner_;
   int field_DC;
-  __int16 team_id_;
-  __int16 field_E2;
+  std::int16_t team_id_;
+  std::int16_t field_E2;
   float life_time_;
   float trigger_traps_timer_;
   float surface_distance_check_;
