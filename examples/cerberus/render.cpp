@@ -37,6 +37,12 @@ public:
   {
     return ::TwNewBar(bar_name);
   }
+
+  virtual int TwDeleteBar(TwBar* bar) final
+  {
+    return ::TwDeleteBar(bar);
+  }
+
   virtual int TwAddButton(TwBar* bar,
                           const char* name,
                           TwButtonCallback callback,
@@ -225,13 +231,23 @@ void TW_CALL CopyStdStringToClientTw(std::string& dst, const std::string& src)
 void TW_CALL LoadPluginCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
+
   hadesmem::cerberus::LoadPlugin(
     hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+
+  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+  auto& ant_tweak_bar = GetAntTweakBarInterface();
+  callbacks.Run(&ant_tweak_bar);
 }
 
 void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
+
+  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+  auto& ant_tweak_bar = GetAntTweakBarInterface();
+  callbacks.Run(&ant_tweak_bar);
+
   hadesmem::cerberus::UnloadPlugin(
     hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
 }

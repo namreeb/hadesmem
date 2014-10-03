@@ -30,6 +30,8 @@ public:
 
   virtual TwBar* TwNewBar(const char* bar_name) = 0;
 
+  virtual int TwDeleteBar(TwBar* bar) = 0;
+
   virtual int TwAddButton(TwBar* bar,
                           const char* name,
                           TwButtonCallback callback,

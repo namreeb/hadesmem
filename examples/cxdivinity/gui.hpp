@@ -6,3 +6,5 @@
 #include "../cerberus/plugin.hpp"
 
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus);
+
+void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus);

@@ -33,11 +33,13 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR LoadPlugin(
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR UnloadPlugin(
-  hadesmem::cerberus::PluginInterface* /*cerberus*/) HADESMEM_DETAIL_NOEXCEPT
+  hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
 {
   try
   {
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    CleanupGui(cerberus);
 
     return 0;
   }
