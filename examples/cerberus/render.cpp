@@ -363,6 +363,10 @@ void CleanupAntTweakBar(bool& initialized)
   {
     HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
+    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+    auto& ant_tweak_bar = GetAntTweakBarInterface();
+    callbacks.Run(&ant_tweak_bar);
+
     if (!TwTerminate())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -370,10 +374,6 @@ void CleanupAntTweakBar(bool& initialized)
     }
 
     initialized = false;
-
-    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-    auto& ant_tweak_bar = GetAntTweakBarInterface();
-    callbacks.Run(&ant_tweak_bar);
   }
 }
 
