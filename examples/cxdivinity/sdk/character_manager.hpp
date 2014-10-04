@@ -59,3 +59,5 @@ HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(CharacterManager) == 0x10C);
 }
 
 void DumpCharacterManager(divinity::CharacterManager* character_manager);
+
+void DumpCharacterManagerPartyManager(divinity::CharacterManager* character_manager);

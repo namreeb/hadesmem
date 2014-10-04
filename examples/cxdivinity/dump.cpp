@@ -10,7 +10,7 @@
 #include "sdk/character_manager.hpp"
 #include "sdk/offset.hpp"
 
-void DumpInfoCallback()
+void DumpFullInfoCallback()
 {
   auto const base =
     reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
@@ -18,4 +18,14 @@ void DumpInfoCallback()
     *reinterpret_cast<divinity::CharacterManager**>(
       base + divinity::DataOffsets::g_character_manager);
   DumpCharacterManager(character_manager);
+}
+
+void DumpPartyInfoCallback()
+{
+  auto const base =
+    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
+  auto const character_manager =
+    *reinterpret_cast<divinity::CharacterManager**>(
+    base + divinity::DataOffsets::g_character_manager);
+  DumpCharacterManagerPartyManager(character_manager);
 }

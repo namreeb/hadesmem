@@ -20,11 +20,18 @@ std::uint32_t g_on_ant_tweak_bar_cleanup_callback_id =
 
 TwBar* g_tweak_bar = nullptr;
 
-void TW_CALL DumpInfoCallbackTw(void* /*client_data*/)
+void TW_CALL DumpFullInfoCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_A("Called.");
 
-  DumpInfoCallback();
+  DumpFullInfoCallback();
+}
+
+void TW_CALL DumpPartyInfoCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpPartyInfoCallback();
 }
 
 void OnAntTweakBarInitialize(
@@ -47,12 +54,26 @@ void OnAntTweakBarInitialize(
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
-  auto const dump_button = ant_tweak_bar->TwAddButton(g_tweak_bar,
-                                                      "CXDivinity_DumpBtn",
-                                                      &DumpInfoCallbackTw,
-                                                      nullptr,
-                                                      " label='Dump Info' ");
-  if (!dump_button)
+  auto const dump_full_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpFullBtn",
+                               &DumpFullInfoCallbackTw,
+                               nullptr,
+                               " label='Dump Full Info' ");
+  if (!dump_full_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const dump_party_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpPartyBtn",
+                               &DumpPartyInfoCallbackTw,
+                               nullptr,
+                               " label='Dump Party Info' ");
+  if (!dump_party_button)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
