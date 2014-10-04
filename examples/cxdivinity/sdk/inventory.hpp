@@ -57,3 +57,5 @@ struct Inventory
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(Inventory) == 0x60);
 }
+
+void DumpInventory(divinity::Inventory* inventory, int debug_id);

@@ -3,6 +3,12 @@
 
 #pragma once
 
-void DumpFullInfoCallback();
+void DumpFullInfo();
 
-void DumpPartyInfoCallback();
+void DumpCharacterInfo();
+
+void DumpPartyInfo();
+
+void DumpItemInfo();
+
+void DumpInventoryInfo();

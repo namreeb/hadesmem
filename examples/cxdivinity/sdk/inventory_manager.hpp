@@ -29,3 +29,5 @@ struct InventoryManager
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(InventoryManager) == 0x98);
 }
+
+void DumpInventoryManager(divinity::InventoryManager* inventory_manager);

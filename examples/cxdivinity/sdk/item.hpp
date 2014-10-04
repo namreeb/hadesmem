@@ -226,3 +226,5 @@ struct Item
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(Item) == 0xE0);
 }
+
+void DumpItem(divinity::Item* item, int debug_id);

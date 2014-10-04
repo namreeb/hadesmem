@@ -24,14 +24,35 @@ void TW_CALL DumpFullInfoCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_A("Called.");
 
-  DumpFullInfoCallback();
+  DumpFullInfo();
+}
+
+void TW_CALL DumpCharacterInfoCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpCharacterInfo();
 }
 
 void TW_CALL DumpPartyInfoCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_A("Called.");
 
-  DumpPartyInfoCallback();
+  DumpPartyInfo();
+}
+
+void TW_CALL DumpItemInfoCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpItemInfo();
+}
+
+void TW_CALL DumpInventoryInfoCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpInventoryInfo();
 }
 
 void OnAntTweakBarInitialize(
@@ -74,6 +95,19 @@ void OnAntTweakBarInitialize(
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
+  auto const dump_character_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpCharacterBtn",
+                               &DumpCharacterInfoCallbackTw,
+                               nullptr,
+                               " label='Dump Character Info' ");
+  if (!dump_character_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
   auto const dump_party_button =
     ant_tweak_bar->TwAddButton(g_tweak_bar,
                                "CXDivinity_DumpPartyBtn",
@@ -85,6 +119,32 @@ void OnAntTweakBarInitialize(
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
                         << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const dump_item_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpItemBtn",
+                               &DumpItemInfoCallbackTw,
+                               nullptr,
+                               " label='Dump Item Info' ");
+  if (!dump_item_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const dump_inventory_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+    "CXDivinity_DumpInventoryBtn",
+    &DumpInventoryInfoCallbackTw,
+    nullptr,
+    " label='Dump Inventory Info' ");
+  if (!dump_inventory_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{ "TwAddButton failed." }
+    << hadesmem::ErrorStringOther{ TwGetLastError() });
   }
 }
 

@@ -26,3 +26,5 @@ struct ItemManager
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(ItemManager) == 0xA8);
 }
+
+void DumpItemManager(divinity::ItemManager* item_manager);
