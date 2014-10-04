@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "static_assert.hpp"
 #include "std_string.hpp"
 
@@ -28,3 +30,10 @@ struct TriStringPairPoly
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(TriStringPairPoly) == 0x84);
 }
+
+void DumpTriString(std::string const& type_name,
+                   std::string const& sub_name,
+                   divinity::TriString* tri_string);
+
+void DumpTriStringPairPoly(std::string const& type_name,
+                           divinity::TriStringPairPoly* tri_string_pair);

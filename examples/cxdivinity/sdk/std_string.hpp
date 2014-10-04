@@ -3,44 +3,55 @@
 
 #pragma once
 
+#include <string>
+
 #include "static_assert.hpp"
 
 namespace divinity
 {
 
-union StdStringABuf
+template <typename CharT> union StdStringBufT
 {
-  char buf_[16];
-  char* ptr_;
+  CharT buf_[0x10 / sizeof(CharT)];
+  CharT* ptr_;
+  char pad_[0x10];
 };
 
-HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringABuf) == 0x10);
+using StdStringBufA = StdStringBufT<char>;
 
-union StdStringWBuf
-{
-  wchar_t buf_[8];
-  wchar_t* ptr_;
-};
+HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringBufA) == 0x10);
 
-HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringWBuf) == 0x10);
+using StdStringBufW = StdStringBufT<wchar_t>;
 
-struct StdStringA
+HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringBufW) == 0x10);
+
+template <typename CharT> struct StdStringT
 {
   void* alloc_;
-  StdStringABuf storage_;
+  StdStringBufT<CharT> storage_;
   unsigned int size_;
   unsigned int capacity_;
 };
+
+using StdStringA = StdStringT<char>;
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringA) == 0x1C);
 
-struct StdStringW
-{
-  void* alloc_;
-  StdStringWBuf storage_;
-  unsigned int size_;
-  unsigned int capacity_;
-};
+using StdStringW = StdStringT<wchar_t>;
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringW) == 0x1C);
+}
+
+template <typename CharT>
+std::basic_string<CharT> ConvertStdString(divinity::StdStringT<CharT>* string)
+{
+  return (string->size_ >= (0x10 / sizeof(CharT))) ? string->storage_.ptr_
+                                                   : string->storage_.buf_;
+}
+
+template <typename CharT>
+CharT* GetStdStringRaw(divinity::StdStringT<CharT>* string)
+{
+  return (string->size_ >= (0x10 / sizeof(CharT))) ? string->storage_.ptr_
+                                                   : string->storage_.buf_;
 }

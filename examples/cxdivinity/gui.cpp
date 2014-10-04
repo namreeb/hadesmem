@@ -68,6 +68,7 @@ void
   if (g_tweak_bar != nullptr)
   {
     ant_tweak_bar->TwDeleteBar(g_tweak_bar);
+    g_tweak_bar = nullptr;
   }
 }
 }
