@@ -352,6 +352,8 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
+  HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar initialization callbacks.");
+
   auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
   auto& ant_tweak_bar = GetAntTweakBarInterface();
   callbacks.Run(&ant_tweak_bar);
@@ -361,11 +363,13 @@ void CleanupAntTweakBar(bool& initialized)
 {
   if (initialized)
   {
-    HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
+    HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar cleanup callbacks.");
 
     auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
     auto& ant_tweak_bar = GetAntTweakBarInterface();
     callbacks.Run(&ant_tweak_bar);
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
     if (!TwTerminate())
     {
