@@ -30,35 +30,6 @@
 namespace
 {
 
-class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
-{
-public:
-  virtual TwBar* TwNewBar(const char* bar_name) final
-  {
-    return ::TwNewBar(bar_name);
-  }
-
-  virtual int TwDeleteBar(TwBar* bar) final
-  {
-    return ::TwDeleteBar(bar);
-  }
-
-  virtual int TwAddButton(TwBar* bar,
-                          const char* name,
-                          TwButtonCallback callback,
-                          void* client_data,
-                          const char* def) final
-  {
-    return ::TwAddButton(bar, name, callback, client_data, def);
-  }
-};
-
-hadesmem::cerberus::AntTweakBarInterface& GetAntTweakBarInterface()
-{
-  static AntTweakBarImpl ant_tweak_bar;
-  return ant_tweak_bar;
-}
-
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled)
 {
@@ -144,6 +115,34 @@ bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
          GetRenderInfoD3D10().tw_initialized_ ||
          GetRenderInfoD3D11().tw_initialized_;
 }
+
+class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
+{
+public:
+  virtual bool IsInitialized() final
+  {
+    return AntTweakBarInitializedAny();
+  }
+
+  virtual TwBar* TwNewBar(const char* bar_name) final
+  {
+    return ::TwNewBar(bar_name);
+  }
+
+  virtual int TwDeleteBar(TwBar* bar) final
+  {
+    return ::TwDeleteBar(bar);
+  }
+
+  virtual int TwAddButton(TwBar* bar,
+                          const char* name,
+                          TwButtonCallback callback,
+                          void* client_data,
+                          const char* def) final
+  {
+    return ::TwAddButton(bar, name, callback, client_data, def);
+  }
+};
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)
 {
@@ -234,19 +233,11 @@ void TW_CALL LoadPluginCallbackTw(void* /*client_data*/)
 
   hadesmem::cerberus::LoadPlugin(
     hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
-
-  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-  auto& ant_tweak_bar = GetAntTweakBarInterface();
-  callbacks.Run(&ant_tweak_bar);
 }
 
 void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
-
-  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-  auto& ant_tweak_bar = GetAntTweakBarInterface();
-  callbacks.Run(&ant_tweak_bar);
 
   hadesmem::cerberus::UnloadPlugin(
     hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
@@ -355,7 +346,7 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
   HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar initialization callbacks.");
 
   auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-  auto& ant_tweak_bar = GetAntTweakBarInterface();
+  auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   callbacks.Run(&ant_tweak_bar);
 }
 
@@ -366,7 +357,7 @@ void CleanupAntTweakBar(bool& initialized)
     HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar cleanup callbacks.");
 
     auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-    auto& ant_tweak_bar = GetAntTweakBarInterface();
+    auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
     callbacks.Run(&ant_tweak_bar);
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
@@ -638,6 +629,12 @@ public:
   {
     hadesmem::cerberus::UnregisterOnAntTweakBarCleanupCallback(id);
   }
+
+  virtual hadesmem::cerberus::AntTweakBarInterface*
+    GetAntTweakBarInterface() final
+  {
+    return &hadesmem::cerberus::GetAntTweakBarInterface();
+  }
 };
 }
 
@@ -651,6 +648,12 @@ RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static RenderImpl render_impl;
   return render_impl;
+}
+
+AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static AntTweakBarImpl ant_tweak_bar;
+  return ant_tweak_bar;
 }
 
 void InitializeRender()

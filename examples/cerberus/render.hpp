@@ -28,6 +28,8 @@ public:
   {
   }
 
+  virtual bool IsInitialized() = 0;
+
   virtual TwBar* TwNewBar(const char* bar_name) = 0;
 
   virtual int TwDeleteBar(TwBar* bar) = 0;
@@ -38,6 +40,8 @@ public:
                           void* client_data,
                           const char* def) = 0;
 };
+
+AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
 
 typedef void OnFrameCallback();
 
@@ -67,6 +71,8 @@ public:
     std::function<OnAntTweakBarCleanupCallback> const& callback) = 0;
 
   virtual void UnregisterOnAntTweakBarCleanup(std::size_t id) = 0;
+
+  virtual AntTweakBarInterface* GetAntTweakBarInterface() = 0;
 };
 
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;

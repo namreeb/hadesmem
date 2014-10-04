@@ -46,6 +46,13 @@ void OnAntTweakBarInitialize(
     return;
   }
 
+  if (!ant_tweak_bar->IsInitialized())
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "WARNING! AntTweakBar is not initialized by Cerberus. Skipping.");
+    return;
+  }
+
   g_tweak_bar = ant_tweak_bar->TwNewBar("CXDivinity");
   if (!g_tweak_bar)
   {
@@ -86,6 +93,13 @@ void
 {
   HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
+  if (!ant_tweak_bar->IsInitialized())
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "WARNING! AntTweakBar is not initialized by Cerberus. Skipping.");
+    return;
+  }
+
   if (g_tweak_bar != nullptr)
   {
     ant_tweak_bar->TwDeleteBar(g_tweak_bar);
@@ -102,6 +116,9 @@ void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
   g_on_ant_tweak_bar_cleanup_callback_id =
     cerberus->GetRenderInterface()->RegisterOnAntTweakBarCleanup(
       &OnAntTweakBarCleanup);
+
+  OnAntTweakBarInitialize(
+    cerberus->GetRenderInterface()->GetAntTweakBarInterface());
 }
 
 void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
@@ -118,4 +135,7 @@ void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
     cerberus->GetRenderInterface()->UnregisterOnAntTweakBarCleanup(
       g_on_ant_tweak_bar_cleanup_callback_id);
   }
+
+  OnAntTweakBarCleanup(
+    cerberus->GetRenderInterface()->GetAntTweakBarInterface());
 }
