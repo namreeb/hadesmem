@@ -3,6 +3,9 @@
 
 #include "gui.hpp"
 
+#include <cstddef>
+#include <cstdint>
+
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
@@ -12,11 +15,11 @@
 namespace
 {
 
-std::uint32_t g_on_ant_tweak_bar_initialize_callback_id =
-  static_cast<std::uint32_t>(-1);
+std::size_t g_on_ant_tweak_bar_initialize_callback_id =
+  static_cast<std::size_t>(-1);
 
-std::uint32_t g_on_ant_tweak_bar_cleanup_callback_id =
-  static_cast<std::uint32_t>(-1);
+std::size_t g_on_ant_tweak_bar_cleanup_callback_id =
+  static_cast<std::size_t>(-1);
 
 TwBar* g_tweak_bar = nullptr;
 
@@ -136,15 +139,15 @@ void OnAntTweakBarInitialize(
 
   auto const dump_inventory_button =
     ant_tweak_bar->TwAddButton(g_tweak_bar,
-    "CXDivinity_DumpInventoryBtn",
-    &DumpInventoryInfoCallbackTw,
-    nullptr,
-    " label='Dump Inventory Info' ");
+                               "CXDivinity_DumpInventoryBtn",
+                               &DumpInventoryInfoCallbackTw,
+                               nullptr,
+                               " label='Dump Inventory Info' ");
   if (!dump_inventory_button)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{ "TwAddButton failed." }
-    << hadesmem::ErrorStringOther{ TwGetLastError() });
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 }
 
@@ -183,14 +186,13 @@ void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 
 void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
-  if (g_on_ant_tweak_bar_initialize_callback_id !=
-      static_cast<std::uint32_t>(-1))
+  if (g_on_ant_tweak_bar_initialize_callback_id != static_cast<std::size_t>(-1))
   {
     cerberus->GetRenderInterface()->UnregisterOnAntTweakBarInitialize(
       g_on_ant_tweak_bar_initialize_callback_id);
   }
 
-  if (g_on_ant_tweak_bar_cleanup_callback_id != static_cast<std::uint32_t>(-1))
+  if (g_on_ant_tweak_bar_cleanup_callback_id != static_cast<std::size_t>(-1))
   {
     cerberus->GetRenderInterface()->UnregisterOnAntTweakBarCleanup(
       g_on_ant_tweak_bar_cleanup_callback_id);

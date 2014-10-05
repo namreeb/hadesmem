@@ -43,14 +43,14 @@ HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(StdStringW) == 0x1C);
 }
 
 template <typename CharT>
-std::basic_string<CharT> ConvertStdString(divinity::StdStringT<CharT>* string)
-{
-  return GetStdStringRaw(string);
-}
-
-template <typename CharT>
 CharT* GetStdStringRaw(divinity::StdStringT<CharT>* string)
 {
   return (string->capacity_ < (0x10 / sizeof(CharT))) ? string->storage_.buf_
                                                       : string->storage_.ptr_;
+}
+
+template <typename CharT>
+std::basic_string<CharT> ConvertStdString(divinity::StdStringT<CharT>* string)
+{
+  return GetStdStringRaw(string);
 }
