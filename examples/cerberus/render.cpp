@@ -30,11 +30,49 @@
 namespace
 {
 
+bool& GetAntTweakBarVisible()
+{
+  static bool visible = true;
+  return visible;
+}
+
+void ToggleAntTweakBarVisible()
+{
+  auto& visible = GetAntTweakBarVisible();
+  visible = !visible;
+  if (visible)
+  {
+    HADESMEM_DETAIL_TRACE_A("Showing all tweak bars.");
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Hiding all tweak bars.");
+  }
+
+  for (int i = 0; i < ::TwGetBarCount(); ++i)
+  {
+    auto const bar = ::TwGetBarByIndex(i);
+    auto const name = ::TwGetBarName(bar);
+    auto const define = std::string(name) + " visible=" +
+                        (visible ? std::string("true") : std::string("false"));
+    ::TwDefine(define.c_str());
+  }
+}
+
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled)
 {
+  if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
+      ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
+  {
+    ToggleAntTweakBarVisible();
+    handled = true;
+    return;
+  }
+
+  auto& visible = GetAntTweakBarVisible();
   // Window #0 will always exist if TwInit has completed successfully.
-  if (::TwWindowExists(0) && ::TwEventWin(hwnd, msg, wparam, lparam))
+  if (visible && ::TwWindowExists(0) && ::TwEventWin(hwnd, msg, wparam, lparam))
   {
     handled = true;
   }
