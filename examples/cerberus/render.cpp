@@ -231,16 +231,34 @@ void TW_CALL LoadPluginCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
 
-  hadesmem::cerberus::LoadPlugin(
-    hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+  try
+  {
+    hadesmem::cerberus::LoadPlugin(
+      hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to load plugin.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+  }
 }
 
 void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
 
-  hadesmem::cerberus::UnloadPlugin(
-    hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+  try
+  {
+    hadesmem::cerberus::UnloadPlugin(
+      hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed to unload plugin.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+  }
 }
 
 void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
