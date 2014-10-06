@@ -57,6 +57,20 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInputDevice8AGetDeviceDataDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInputDevice8WGetDeviceDataDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
 std::pair<void*, SIZE_T>& GetDirectInput8Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -91,9 +105,93 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 HRESULT WINAPI
+  IDirectInputDevice8AGetDeviceDataDetour(IDirectInputDeviceA* device,
+                                          DWORD cb_object_data,
+                                          LPDIDEVICEOBJECTDATA dev_obj_data,
+                                          LPDWORD in_out,
+                                          DWORD flags)
+{
+  auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  auto const get_device_data =
+    detour->GetTrampoline<decltype(&IDirectInputDevice8AGetDeviceDataDetour)>();
+  last_error_preserver.Revert();
+  auto const ret =
+    get_device_data(device, cb_object_data, dev_obj_data, in_out, flags);
+  last_error_preserver.Update();
+
+  return ret;
+}
+
+HRESULT WINAPI
+  IDirectInputDevice8WGetDeviceDataDetour(IDirectInputDeviceW* device,
+                                          DWORD cb_object_data,
+                                          LPDIDEVICEOBJECTDATA dev_obj_data,
+                                          LPDWORD in_out,
+                                          DWORD flags)
+{
+  auto& detour = GetIDirectInputDevice8WGetDeviceDataDetour();
+  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  auto const get_device_data =
+    detour->GetTrampoline<decltype(&IDirectInputDevice8WGetDeviceDataDetour)>();
+  last_error_preserver.Revert();
+  auto const ret =
+    get_device_data(device, cb_object_data, dev_obj_data, in_out, flags);
+  last_error_preserver.Update();
+
+  return ret;
+}
+
+void DetourDirectInputDevice8(REFIID riid, void* device)
+{
+  HADESMEM_DETAIL_TRACE_A("Detouring IDirectInputDevice8.");
+
+  try
+  {
+    auto const& process = hadesmem::cerberus::GetThisProcess();
+
+    if (riid == IID_IDirectInputDevice8A)
+    {
+      hadesmem::cerberus::DetourFunc(
+        process,
+        L"IDirectInputDevice8A::GetDeviceData",
+        device,
+        10,
+        GetIDirectInputDevice8AGetDeviceDataDetour(),
+        IDirectInputDevice8AGetDeviceDataDetour);
+    }
+    else if (riid == IID_IDirectInputDevice8W)
+    {
+      hadesmem::cerberus::DetourFunc(
+        process,
+        L"IDirectInputDevice8W::GetDeviceData",
+        device,
+        10,
+        GetIDirectInputDevice8WGetDeviceDataDetour(),
+        IDirectInputDevice8WGetDeviceDataDetour);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Unknown IID.");
+      HADESMEM_DETAIL_ASSERT(false);
+    }
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+  }
+}
+
+HRESULT WINAPI
   IDirectInput8ACreateDeviceDetour(IDirectInput8A* input,
                                    REFGUID rguid,
-                                   LPDIRECTINPUTDEVICE* direct_input_device,
+                                   IDirectInputDeviceA** direct_input_device,
                                    LPUNKNOWN unk_outer)
 {
   auto& detour = GetIDirectInput8ACreateDeviceDetour();
@@ -113,13 +211,23 @@ HRESULT WINAPI
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
+  if (FAILED(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+    return ret;
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+  DetourDirectInputDevice8(IID_IDirectInputDevice8A, *direct_input_device);
+
   return ret;
 }
 
 HRESULT WINAPI
   IDirectInput8WCreateDeviceDetour(IDirectInput8W* input,
                                    REFGUID rguid,
-                                   LPDIRECTINPUTDEVICE* direct_input_device,
+                                   IDirectInputDeviceW** direct_input_device,
                                    LPUNKNOWN unk_outer)
 {
   auto& detour = GetIDirectInput8WCreateDeviceDetour();
@@ -138,6 +246,16 @@ HRESULT WINAPI
   auto const ret = create_device(input, rguid, direct_input_device, unk_outer);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
+
+  if (FAILED(ret))
+  {
+    HADESMEM_DETAIL_TRACE_A("Failed.");
+    return ret;
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Succeeded.");
+
+  DetourDirectInputDevice8(IID_IDirectInputDevice8W, *direct_input_device);
 
   return ret;
 }
@@ -232,8 +350,9 @@ public:
     }
   }
 
-  virtual std::size_t RegisterOnWndProcMsg(std::function<
-    hadesmem::cerberus::OnWndProcMsgCallback> const& callback) final
+  virtual std::size_t RegisterOnWndProcMsg(
+    std::function<hadesmem::cerberus::OnWndProcMsgCallback> const& callback)
+    final
   {
     return hadesmem::cerberus::RegisterOnWndProcMsgCallback(callback);
   }
@@ -285,6 +404,18 @@ void UndetourDirectInput8(bool remove)
   if (CommonUndetourModule(L"dinput8", module))
   {
     UndetourFunc(L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
+    UndetourFunc(L"IDirectInput8A::CreateDevice",
+                 GetIDirectInput8ACreateDeviceDetour(),
+                 remove);
+    UndetourFunc(L"IDirectInput8W::CreateDevice",
+                 GetIDirectInput8WCreateDeviceDetour(),
+                 remove);
+    UndetourFunc(L"IDirectInputDevice8A::GetDeviceData",
+                 GetIDirectInputDevice8AGetDeviceDataDetour(),
+                 remove);
+    UndetourFunc(L"IDirectInputDevice8W::GetDeviceData",
+                 GetIDirectInputDevice8WGetDeviceDataDetour(),
+                 remove);
 
     module = std::make_pair(nullptr, 0);
   }
