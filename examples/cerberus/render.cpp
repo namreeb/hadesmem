@@ -30,7 +30,7 @@
 namespace
 {
 
-bool& GetAntTweakBarVisible()
+bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = true;
   return visible;
@@ -398,6 +398,9 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
+
+  auto& visible = GetAntTweakBarVisible();
+  visible = true;
 
   HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar initialization callbacks.");
 
