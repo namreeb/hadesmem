@@ -122,8 +122,6 @@ project memory
     <variant>release,<toolset>msvc:<linkflags>"/LTCG"
     <variant>release,<toolset>intel:<cxxflags>"/GL"
     <variant>release,<toolset>intel:<linkflags>"/LTCG"
-    <variant>release,<toolset>gcc:<cxxflags>"-flto"
-    <variant>release,<toolset>clang:<cxxflags>"-flto"
 
     # Enable more MSVC optimizations
     <toolset>msvc,<variant>release:<cxxflags>"/Gw /Gy"
