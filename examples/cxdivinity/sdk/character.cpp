@@ -7,6 +7,8 @@
 
 void DumpCharacter(divinity::Character* character, int debug_id)
 {
+  (void)debug_id;
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Got character %d: %p.", debug_id, character);
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Position: %f %f %f",

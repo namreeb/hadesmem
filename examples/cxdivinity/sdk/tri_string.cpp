@@ -11,6 +11,9 @@ void DumpTriString(std::string const& type_name,
                    std::string const& sub_name,
                    divinity::TriString* tri_string)
 {
+  (void)type_name;
+  (void)tri_string;
+
   if (sub_name.empty())
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A(
