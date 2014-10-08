@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 void DumpFullInfo();
 
 void DumpCharacterInfo();
@@ -12,3 +14,7 @@ void DumpPartyInfo();
 void DumpItemInfo();
 
 void DumpInventoryInfo();
+
+void DumpStringInfo();
+
+void DumpNamedGameObjectInfo(std::wstring const& name);

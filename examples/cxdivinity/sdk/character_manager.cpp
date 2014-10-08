@@ -3,10 +3,26 @@
 
 #include "character_manager.hpp"
 
+#include <windows.h>
+
 #include <hadesmem/detail/trace.hpp>
 
-void DumpCharacterManager(divinity::CharacterManager* character_manager)
+#include "offset.hpp"
+
+divinity::CharacterManager* GetCharacterManager()
 {
+  auto const base =
+    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
+  auto const character_manager =
+    *reinterpret_cast<divinity::CharacterManager**>(
+      base + divinity::DataOffsets::g_character_manager);
+  return character_manager;
+}
+
+void DumpCharacterManager()
+{
+  auto const character_manager = GetCharacterManager();
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Got character manager: %p.",
                                  character_manager);
   for (int i = 0; i < character_manager->character_ptr_array_len_; ++i)
@@ -18,9 +34,10 @@ void DumpCharacterManager(divinity::CharacterManager* character_manager)
   }
 }
 
-void DumpCharacterManagerPartyManager(
-  divinity::CharacterManager* character_manager)
+void DumpCharacterManagerPartyManager()
 {
+  auto const character_manager = GetCharacterManager();
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Got character manager: %p.",
                                  character_manager);
 
@@ -45,4 +62,26 @@ void DumpCharacterManagerPartyManager(
       DumpCharacter(character, i);
     }
   }
+}
+
+std::vector<divinity::Character*> GetCharactersByName(std::wstring const& name)
+{
+  auto const character_manager = GetCharacterManager();
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Got character manager: %p.",
+    character_manager);
+  std::vector<divinity::Character*> characters;
+  for (int i = 0; i < character_manager->character_ptr_array_len_; ++i)
+  {
+    if (auto character = character_manager->character_ptr_array_[i])
+    {
+      auto const cur_name = GetDisplayName(character);
+      if (cur_name == name)
+      {
+        characters.push_back(character);
+      }
+    }
+  }
+
+  return characters;
 }

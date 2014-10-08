@@ -180,6 +180,12 @@ public:
   {
     return ::TwAddButton(bar, name, callback, client_data, def);
   }
+
+  virtual int TwAddVarRW(
+    TwBar* bar, const char* name, TwType type, void* var, const char* def) final
+  {
+    return ::TwAddVarRW(bar, name, type, var, def);
+  }
 };
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)

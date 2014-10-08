@@ -561,3 +561,5 @@ HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(Character) == 0x158);
 }
 
 void DumpCharacter(divinity::Character* character, int debug_id);
+
+std::wstring GetDisplayName(divinity::Character* character);

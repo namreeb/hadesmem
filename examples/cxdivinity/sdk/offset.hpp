@@ -18,4 +18,13 @@ struct DataOffsets
     g_translated_string_repository = 0x00E2DE38 - 0x00400000,
   };
 };
+
+struct FunctionOffsets
+{
+  enum : std::uint32_t
+  {
+    g_tri_string_pair_poly_constructor = 0x0042DCD0 - 0x00400000,
+    g_tri_string_pair_poly_destructor = 0x00474400 - 0x00400000,
+  };
+};
 }

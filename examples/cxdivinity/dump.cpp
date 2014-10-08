@@ -12,6 +12,7 @@
 #include "sdk/inventory_manager.hpp"
 #include "sdk/item_manager.hpp"
 #include "sdk/offset.hpp"
+#include "sdk/translated_string_repository.hpp"
 
 void DumpFullInfo()
 {
@@ -28,46 +29,52 @@ void DumpCharacterInfo()
 {
   HADESMEM_DETAIL_TRACE_A("Dumping character info.");
 
-  auto const base =
-    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
-  auto const character_manager =
-    *reinterpret_cast<divinity::CharacterManager**>(
-    base + divinity::DataOffsets::g_character_manager);
-  DumpCharacterManager(character_manager);
+  DumpCharacterManager();
 }
 
 void DumpPartyInfo()
 {
   HADESMEM_DETAIL_TRACE_A("Dumping party info.");
 
-  auto const base =
-    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
-  auto const character_manager =
-    *reinterpret_cast<divinity::CharacterManager**>(
-    base + divinity::DataOffsets::g_character_manager);
-  DumpCharacterManagerPartyManager(character_manager);
+  DumpCharacterManagerPartyManager();
 }
 
 void DumpItemInfo()
 {
   HADESMEM_DETAIL_TRACE_A("Dumping item info.");
 
-  auto const base =
-    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
-  auto const item_manager =
-    *reinterpret_cast<divinity::ItemManager**>(
-    base + divinity::DataOffsets::g_item_manager);
-  DumpItemManager(item_manager);
+  DumpItemManager();
 }
 
 void DumpInventoryInfo()
 {
   HADESMEM_DETAIL_TRACE_A("Dumping inventory info.");
 
-  auto const base =
-    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
-  auto const inventory_manager =
-    *reinterpret_cast<divinity::InventoryManager**>(
-    base + divinity::DataOffsets::g_inventory_manager);
-  DumpInventoryManager(inventory_manager);
+  DumpInventoryManager();
+}
+
+void DumpStringInfo()
+{
+  HADESMEM_DETAIL_TRACE_A("Dumping string info.");
+
+  DumpTranslatedStringRepository();
+}
+
+void DumpNamedGameObjectInfo(std::wstring const& name)
+{
+  HADESMEM_DETAIL_TRACE_A("Dumping characters by name.");
+
+  auto const characters = GetCharactersByName(name);
+  for (std::size_t i = 0; i < characters.size(); ++i)
+  {
+    DumpCharacter(characters[i], i);
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Dumping items by name.");
+
+  auto const items = GetItemsByName(name);
+  for (std::size_t i = 0; i < items.size(); ++i)
+  {
+    DumpItem(items[i], i);
+  }
 }

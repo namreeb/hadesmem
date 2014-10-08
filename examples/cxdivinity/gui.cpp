@@ -23,6 +23,8 @@ std::size_t g_on_ant_tweak_bar_cleanup_callback_id =
 
 TwBar* g_tweak_bar = nullptr;
 
+std::string g_game_object_name;
+
 void TW_CALL DumpFullInfoCallbackTw(void* /*client_data*/)
 {
   HADESMEM_DETAIL_TRACE_A("Called.");
@@ -56,6 +58,21 @@ void TW_CALL DumpInventoryInfoCallbackTw(void* /*client_data*/)
   HADESMEM_DETAIL_TRACE_A("Called.");
 
   DumpInventoryInfo();
+}
+
+void TW_CALL DumpStringInfoCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpStringInfo();
+}
+
+void TW_CALL DumpNamedGameObjectCallbackTw(void* /*client_data*/)
+{
+  HADESMEM_DETAIL_TRACE_A("Called.");
+
+  DumpNamedGameObjectInfo(
+    hadesmem::detail::MultiByteToWideChar(g_game_object_name));
 }
 
 void OnAntTweakBarInitialize(
@@ -144,6 +161,45 @@ void OnAntTweakBarInitialize(
                                nullptr,
                                " label='Dump Inventory Info' ");
   if (!dump_inventory_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const dump_string_button =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpStringBtn",
+                               &DumpStringInfoCallbackTw,
+                               nullptr,
+                               " label='Dump String Info' ");
+  if (!dump_string_button)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const game_object_name =
+    ant_tweak_bar->TwAddVarRW(g_tweak_bar,
+                              "CXDivinity_GameObjectName",
+                              TW_TYPE_STDSTRING,
+                              &g_game_object_name,
+                              " label='GameObject Name' ");
+  if (!game_object_name)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
+                        << hadesmem::ErrorStringOther{TwGetLastError()});
+  }
+
+  auto const dump_named_game_object =
+    ant_tweak_bar->TwAddButton(g_tweak_bar,
+                               "CXDivinity_DumpNamedGameObjectBtn",
+                               &DumpNamedGameObjectCallbackTw,
+                               nullptr,
+                               " label='Dump GameObject' ");
+  if (!dump_named_game_object)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}

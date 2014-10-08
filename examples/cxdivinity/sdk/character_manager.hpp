@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "character.hpp"
 #include "static_assert.hpp"
@@ -58,6 +60,10 @@ struct CharacterManager
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(CharacterManager) == 0x10C);
 }
 
-void DumpCharacterManager(divinity::CharacterManager* character_manager);
+divinity::CharacterManager* GetCharacterManager();
 
-void DumpCharacterManagerPartyManager(divinity::CharacterManager* character_manager);
+void DumpCharacterManager();
+
+void DumpCharacterManagerPartyManager();
+
+std::vector<divinity::Character*> GetCharactersByName(std::wstring const& name);

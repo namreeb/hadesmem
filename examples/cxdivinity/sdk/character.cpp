@@ -248,4 +248,15 @@ void DumpCharacter(divinity::Character* character, int debug_id)
       L"CustomKickStarterName: %s",
       GetStdStringRaw(character->character_data_.custom_kickstarter_name_));
   }
+
+  auto name_data = divinity::MakeTriStringPairPoly();
+  character->GetNameData(&*name_data);
+  DumpTriStringPairPoly("FullNameData", &*name_data);
+}
+
+std::wstring GetDisplayName(divinity::Character* character)
+{
+  auto name_data = divinity::MakeTriStringPairPoly();
+  character->GetNameData(&*name_data);
+  return ConvertStdString(&name_data->name_1_.std_wide_);
 }

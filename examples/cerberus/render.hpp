@@ -39,6 +39,9 @@ public:
                           TwButtonCallback callback,
                           void* client_data,
                           const char* def) = 0;
+
+  virtual int TwAddVarRW(
+    TwBar* bar, const char* name, TwType type, void* var, const char* def) = 0;
 };
 
 AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;

@@ -7,6 +7,46 @@
 
 #include <hadesmem/detail/trace.hpp>
 
+#include "offset.hpp"
+
+namespace divinity
+{
+
+TriStringPairPoly* ConstructTriStringPairPoly()
+{
+  typedef TriStringPairPoly*(__thiscall * tTriStringPairPoly__Constructor)(
+    TriStringPairPoly * p);
+  auto const base =
+    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
+  auto const tri_string_pair_poly_constructor =
+    reinterpret_cast<tTriStringPairPoly__Constructor>(
+      base + FunctionOffsets::g_tri_string_pair_poly_constructor);
+  TriStringPairPoly* p =
+    reinterpret_cast<TriStringPairPoly*>(new char[sizeof(TriStringPairPoly)]);
+  tri_string_pair_poly_constructor(p);
+  return p;
+}
+
+void DestructTriStringPairPoly(TriStringPairPoly* p)
+{
+  typedef int(__thiscall *
+              tTriStringPairPoly__Destructor)(TriStringPairPoly * p, char a2);
+  auto const base =
+    reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
+  auto const tri_string_pair_poly_destructor =
+    reinterpret_cast<tTriStringPairPoly__Destructor>(
+      base + FunctionOffsets::g_tri_string_pair_poly_destructor);
+  tri_string_pair_poly_destructor(p, 0);
+  delete[] reinterpret_cast<char*>(p);
+}
+
+std::shared_ptr<TriStringPairPoly> MakeTriStringPairPoly()
+{
+  auto const p = ConstructTriStringPairPoly();
+  return {p, &DestructTriStringPairPoly};
+}
+}
+
 void DumpTriString(std::string const& type_name,
                    std::string const& sub_name,
                    divinity::TriString* tri_string)

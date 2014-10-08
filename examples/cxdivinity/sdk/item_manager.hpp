@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "item.hpp"
 #include "static_assert.hpp"
@@ -27,4 +29,8 @@ struct ItemManager
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(ItemManager) == 0xA8);
 }
 
-void DumpItemManager(divinity::ItemManager* item_manager);
+divinity::ItemManager* GetItemManager();
+
+void DumpItemManager();
+
+std::vector<divinity::Item*> GetItemsByName(std::wstring const& name);

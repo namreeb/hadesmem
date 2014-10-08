@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "static_assert.hpp"
@@ -29,6 +30,12 @@ struct TriStringPairPoly
 };
 
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(TriStringPairPoly) == 0x84);
+
+TriStringPairPoly* ConstructTriStringPairPoly();
+
+void DestructTriStringPairPoly(TriStringPairPoly* p);
+
+std::shared_ptr<TriStringPairPoly> MakeTriStringPairPoly();
 }
 
 void DumpTriString(std::string const& type_name,

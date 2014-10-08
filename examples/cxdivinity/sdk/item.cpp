@@ -84,4 +84,15 @@ void DumpItem(divinity::Item* item, int debug_id)
   HADESMEM_DETAIL_TRACE_FORMAT_A("StatusManager: %p",
                                  item->item_data_.status_manager_);
   HADESMEM_DETAIL_TRACE_FORMAT_A("Owner: %08X", item->item_data_.owner_handle_);
+
+  auto name_data = divinity::MakeTriStringPairPoly();
+  item->GetNameData(&*name_data);
+  DumpTriStringPairPoly("FullNameData", &*name_data);
+}
+
+std::wstring GetDisplayName(divinity::Item* item)
+{
+  auto name_data = divinity::MakeTriStringPairPoly();
+  item->GetNameData(&*name_data);
+  return ConvertStdString(&name_data->name_1_.std_wide_);
 }
