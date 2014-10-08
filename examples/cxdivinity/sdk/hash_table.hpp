@@ -17,7 +17,9 @@ template <typename Key, typename Value> struct HashTable
     Value value_;
   };
 
-  std::uint32_t size_;
+  std::size_t num_buckets_;
   Entry** table_;
+  std::size_t num_entries_;
 };
+
 }

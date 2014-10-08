@@ -9,6 +9,7 @@
 #include <hadesmem/detail/trace.hpp>
 
 #include "hash_table.hpp"
+#include "static_assert.hpp"
 #include "tri_string.hpp"
 
 namespace divinity
@@ -47,12 +48,11 @@ struct TranslatedStringRepository
   int field_4;
   int field_8;
   HashTable<std::uint32_t, TranslatedUnknownData> unknown_;
-  int field_14;
   HashTable<char*, TranslatedNumberData> numbers_;
-  int field_20;
   HashTable<char*, TriString> strings_;
-  int field_2C[50];
 };
+
+HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(TranslatedStringRepository) == 0x30);
 }
 
 void DumpHashTableEntry(divinity::TranslatedUnknownData* data);

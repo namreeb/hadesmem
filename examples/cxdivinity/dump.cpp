@@ -67,7 +67,7 @@ void DumpNamedGameObjectInfo(std::wstring const& name)
   auto const characters = GetCharactersByName(name);
   for (std::size_t i = 0; i < characters.size(); ++i)
   {
-    DumpCharacter(characters[i], i);
+    DumpCharacter(characters[i], static_cast<int>(i));
   }
 
   HADESMEM_DETAIL_TRACE_A("Dumping items by name.");
@@ -75,6 +75,6 @@ void DumpNamedGameObjectInfo(std::wstring const& name)
   auto const items = GetItemsByName(name);
   for (std::size_t i = 0; i < items.size(); ++i)
   {
-    DumpItem(items[i], i);
+    DumpItem(items[i], static_cast<int>(i));
   }
 }

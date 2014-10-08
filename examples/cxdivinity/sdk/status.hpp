@@ -178,10 +178,9 @@ struct GameObjectStatusManager
   int field_60[16];
   GameObjectStatusManagerGameObjectVector statuses_;
   int unknown_handle_maybe_parent_;
-  // int field_B0[100];
 };
 
-// HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(GameObjectStatusManager) == 0x240);
+HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(GameObjectStatusManager) == 0xB0);
 
 struct GameObjectStatusHitDamageData
 {
