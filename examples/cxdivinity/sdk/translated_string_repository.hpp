@@ -79,7 +79,7 @@ inline void DumpStringRepositoryHashTableKey(std::uint32_t key)
 template <typename HashTableT>
 void DumpStringRespositoryHashTable(HashTableT* hash_table)
 {
-  for (std::uint32_t i = 0; i < hash_table->size_; ++i)
+  for (std::uint32_t i = 0; i < hash_table->num_buckets_; ++i)
   {
     auto const entry_ptr = hash_table->table_[i];
     printf("Head: %p", static_cast<void*>(entry_ptr));
