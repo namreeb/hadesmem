@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Crysis 2 - Maximum Edition\bin32\Crysis2Launcher.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

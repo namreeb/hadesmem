@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Outlast\Binaries\Win64\OLGame.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

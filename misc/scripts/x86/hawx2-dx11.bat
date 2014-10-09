@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Tom Clancys HAWX 2\HAWX2_DX11.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

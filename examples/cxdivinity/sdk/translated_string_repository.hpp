@@ -67,7 +67,6 @@ void DumpTranslatedStringRepository();
 
 inline void DumpStringRepositoryHashTableKey(char* key)
 {
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Key (Address): %p", key);
   HADESMEM_DETAIL_TRACE_FORMAT_A("Key: %s", key);
 }
 
@@ -81,24 +80,17 @@ void DumpStringRespositoryHashTable(HashTableT* hash_table)
 {
   for (std::uint32_t i = 0; i < hash_table->num_buckets_; ++i)
   {
-    auto const entry_ptr = hash_table->table_[i];
-    printf("Head: %p", static_cast<void*>(entry_ptr));
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Bucket: %u", i);
 
-    if (!entry_ptr)
+    auto entry = hash_table->table_[i];
+    while (entry)
     {
-      continue;
-    }
-
-    for (auto entry = entry_ptr;; entry = entry->next_)
-    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Entry: %p", entry);
       HADESMEM_DETAIL_TRACE_FORMAT_A("Next: %p", entry->next_);
       DumpStringRepositoryHashTableKey(entry->key_);
       DumpHashTableEntry(&entry->value_);
 
-      if (entry->next_ == nullptr)
-      {
-        break;
-      }
+      entry = entry->next_;
     }
   }
 }
