@@ -55,28 +55,25 @@ struct TranslatedStringRepository
 HADESMEM_DETAIL_STATIC_ASSERT_X86(sizeof(TranslatedStringRepository) == 0x30);
 }
 
-void DumpHashTableEntry(divinity::TranslatedUnknownData* data);
+void DumpTranslatedStringRepositoryHashTableEntry(
+  divinity::TranslatedUnknownData* data);
 
-void DumpHashTableEntry(divinity::TranslatedNumberData* data);
+void DumpTranslatedStringRepositoryHashTableEntry(
+  divinity::TranslatedNumberData* data);
 
-void DumpHashTableEntry(divinity::TranslatedStringData* data);
+void DumpTranslatedStringRepositoryHashTableEntry(
+  divinity::TranslatedStringData* data);
 
-void DumpHashTableEntry(divinity::TriString* data);
+void DumpTranslatedStringRepositoryHashTableEntry(divinity::TriString* data);
+
+void DumpTranslatedStringRepositoryHashTableKey(char* key);
+
+void DumpTranslatedStringRepositoryHashTableKey(std::uint32_t key);
 
 void DumpTranslatedStringRepository();
 
-inline void DumpStringRepositoryHashTableKey(char* key)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Key: %s", key);
-}
-
-inline void DumpStringRepositoryHashTableKey(std::uint32_t key)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Key: %08X", key);
-}
-
 template <typename HashTableT>
-void DumpStringRespositoryHashTable(HashTableT* hash_table)
+void DumpTranslatedStringRepositoryHashTable(HashTableT* hash_table)
 {
   for (std::uint32_t i = 0; i < hash_table->num_buckets_; ++i)
   {
@@ -87,8 +84,8 @@ void DumpStringRespositoryHashTable(HashTableT* hash_table)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A("Entry: %p", entry);
       HADESMEM_DETAIL_TRACE_FORMAT_A("Next: %p", entry->next_);
-      DumpStringRepositoryHashTableKey(entry->key_);
-      DumpHashTableEntry(&entry->value_);
+      DumpTranslatedStringRepositoryHashTableKey(entry->key_);
+      DumpTranslatedStringRepositoryHashTableEntry(&entry->value_);
 
       entry = entry->next_;
     }

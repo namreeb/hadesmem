@@ -14,8 +14,8 @@ namespace divinity
 
 TriStringPairPoly* ConstructTriStringPairPoly()
 {
-  typedef TriStringPairPoly*(__thiscall * tTriStringPairPoly__Constructor)(
-    TriStringPairPoly * p);
+  typedef TriStringPairPoly*(__fastcall * tTriStringPairPoly__Constructor)(
+    TriStringPairPoly * p, int dummy_edx);
   auto const base =
     reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
   auto const tri_string_pair_poly_constructor =
@@ -23,20 +23,20 @@ TriStringPairPoly* ConstructTriStringPairPoly()
       base + FunctionOffsets::g_tri_string_pair_poly_constructor);
   TriStringPairPoly* p =
     reinterpret_cast<TriStringPairPoly*>(new char[sizeof(TriStringPairPoly)]);
-  tri_string_pair_poly_constructor(p);
+  tri_string_pair_poly_constructor(p, 0xDEADBEEF);
   return p;
 }
 
 void DestructTriStringPairPoly(TriStringPairPoly* p)
 {
-  typedef int(__thiscall *
-              tTriStringPairPoly__Destructor)(TriStringPairPoly * p, char a2);
+  typedef int(__fastcall *
+              tTriStringPairPoly__Destructor)(TriStringPairPoly * p, int dummy_edx, char a2);
   auto const base =
     reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
   auto const tri_string_pair_poly_destructor =
     reinterpret_cast<tTriStringPairPoly__Destructor>(
       base + FunctionOffsets::g_tri_string_pair_poly_destructor);
-  tri_string_pair_poly_destructor(p, 0);
+  tri_string_pair_poly_destructor(p, 0xDEADBEEF, 0);
   delete[] reinterpret_cast<char*>(p);
 }
 
