@@ -17,8 +17,7 @@ template <typename T, typename U = std::remove_cv_t<T>> struct IsCharType
 {
   static bool const value =
     std::is_same<U, char>::value || std::is_same<U, signed char>::value ||
-    std::is_same<U, unsigned char>::value || std::is_same<U, wchar_t>::value ||
-    std::is_same<U, char16_t>::value || std::is_same<U, char32_t>::value;
+    std::is_same<U, unsigned char>::value || std::is_same<U, wchar_t>::value;
 };
 
 template <typename T> struct IsTriviallyCopyable
