@@ -359,7 +359,7 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
                         << hadesmem::ErrorStringOther{TwGetLastError()});
   }
 
-  TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
+  ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
 
   auto const bar = ::TwNewBar("HadesMem");
   if (!bar)
@@ -427,7 +427,7 @@ void CleanupAntTweakBar(bool& initialized)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
-    if (!TwTerminate())
+    if (!::TwTerminate())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
         hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
@@ -651,7 +651,7 @@ void OnResetD3D9(IDirect3DDevice9* device,
 
 void OnFrameGeneric()
 {
-  if (!TwDraw())
+  if (!::TwDraw())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
                                     << hadesmem::ErrorString{"TwDraw failed."});

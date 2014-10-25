@@ -5,9 +5,10 @@
 
 #include <cstdint>
 
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "ability.hpp"
 #include "character_template.hpp"
-#include "static_assert.hpp"
 #include "status.hpp"
 #include "std_string.hpp"
 #include "tri_string.hpp"

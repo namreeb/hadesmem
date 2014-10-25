@@ -7,9 +7,9 @@
 #include <cstdio>
 
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/static_assert_x86.hpp>
 
 #include "hash_table.hpp"
-#include "static_assert.hpp"
 #include "tri_string.hpp"
 
 namespace divinity

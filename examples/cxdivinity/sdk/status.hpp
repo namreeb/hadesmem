@@ -5,7 +5,8 @@
 
 #include <cstdint>
 
-#include "static_assert.hpp"
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "std_string.hpp"
 #include "vec3f.hpp"
 

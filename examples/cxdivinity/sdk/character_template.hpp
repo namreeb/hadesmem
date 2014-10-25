@@ -3,8 +3,9 @@
 
 #pragma once
 
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "flagged.hpp"
-#include "static_assert.hpp"
 #include "std_string.hpp"
 
 namespace divinity

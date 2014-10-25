@@ -5,8 +5,9 @@
 
 #include <cstdint>
 
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "item_template.hpp"
-#include "static_assert.hpp"
 #include "std_string.hpp"
 #include "vec3f.hpp"
 

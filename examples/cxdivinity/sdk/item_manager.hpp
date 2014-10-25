@@ -7,8 +7,9 @@
 #include <string>
 #include <vector>
 
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "item.hpp"
-#include "static_assert.hpp"
 
 namespace divinity
 {

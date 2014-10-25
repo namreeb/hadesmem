@@ -5,8 +5,9 @@
 
 #include <cstdint>
 
+#include <hadesmem/detail/static_assert_x86.hpp>
+
 #include "inventory.hpp"
-#include "static_assert.hpp"
 
 namespace divinity
 {
