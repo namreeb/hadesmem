@@ -134,7 +134,7 @@ void TraceFormatImpl(char const* function,
 
 #define HADESMEM_DETAIL_TRACE_NOISY_W(x) HADESMEM_DETAIL_TRACE_W(x)
 
-#else // #if !defined(HADESMEM_NO_TRACE) && 
+#else // #if !defined(HADESMEM_NO_TRACE) &&
 // defined(HADESMEM_DETAIL_TRACE_NOISY)
 
 #define HADESMEM_DETAIL_TRACE_NOISY_RAW(x)
@@ -147,5 +147,5 @@ void TraceFormatImpl(char const* function,
 
 #define HADESMEM_DETAIL_TRACE_NOISY_W(x)
 
-#endif // #if !defined(HADESMEM_NO_TRACE) && 
+#endif // #if !defined(HADESMEM_NO_TRACE) &&
 // defined(HADESMEM_DETAIL_TRACE_NOISY)

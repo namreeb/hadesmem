@@ -99,7 +99,8 @@ private:
 
   void Initialize(HMODULE handle)
   {
-    auto const handle_check = [&](MODULEENTRY32W const& entry) -> bool
+    auto const handle_check = [&](MODULEENTRY32W const& entry)
+                                -> bool
     {
       return (entry.hModule == handle || !handle);
     };
@@ -113,7 +114,8 @@ private:
 
     std::wstring const path_upper = detail::ToUpperOrdinal(path);
 
-    auto const path_check = [&](MODULEENTRY32W const& entry) -> bool
+    auto const path_check = [&](MODULEENTRY32W const& entry)
+                              -> bool
     {
       return is_path ? (detail::ArePathsEquivalent(path, entry.szExePath))
                      : (path_upper == detail::ToUpperOrdinal(entry.szModule));

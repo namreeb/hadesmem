@@ -32,8 +32,8 @@ struct ItemStats
   int durability_counter_;
   int repair_durability_penalty_;
   int field_108;
-  char *item_type_;
-  //int field_110[100];
+  char* item_type_;
+  // int field_110[100];
 };
 
 struct ItemTemplate

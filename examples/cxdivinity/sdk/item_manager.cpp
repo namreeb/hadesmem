@@ -13,9 +13,8 @@ divinity::ItemManager* GetItemManager()
 {
   auto const base =
     reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
-  auto const item_manager =
-    *reinterpret_cast<divinity::ItemManager**>(
-    base + divinity::DataOffsets::g_item_manager);
+  auto const item_manager = *reinterpret_cast<divinity::ItemManager**>(
+                              base + divinity::DataOffsets::g_item_manager);
   return item_manager;
 }
 
@@ -37,8 +36,7 @@ std::vector<divinity::Item*> GetItemsByName(std::wstring const& name)
 {
   auto const item_manager = GetItemManager();
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Got item manager: %p.",
-    item_manager);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Got item manager: %p.", item_manager);
   std::vector<divinity::Item*> items;
   for (int i = 0; i < item_manager->item_ptr_array_len_; ++i)
   {

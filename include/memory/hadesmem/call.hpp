@@ -42,12 +42,14 @@ namespace hadesmem
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
 
 enum class CallConv
-{ kDefault,
+{
+  kDefault,
   kCdecl,
   kStdCall,
   kThisCall,
   kFastCall,
-  kX64 };
+  kX64
+};
 
 template <typename T> class CallResult
 {
@@ -348,11 +350,13 @@ private:
   }
 
   enum class VariantType
-  { kNone,
+  {
+    kNone,
     kInt32,
     kInt64,
     kFloat32,
-    kFloat64 };
+    kFloat64
+  };
 
   union Variant
   {
@@ -395,7 +399,7 @@ public:
   {
   }
 
-  void operator()(std::uint32_t arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint32_t arg) HADESMEM_DETAIL_NOEXCEPT
   {
     asmjit::x86::GpReg const regs[] = {asmjit::x86::ecx, asmjit::x86::edx};
     auto const num_reg_args =
@@ -415,7 +419,7 @@ public:
     --cur_arg_;
   }
 
-  void operator()(std::uint64_t arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint64_t arg) HADESMEM_DETAIL_NOEXCEPT
   {
     assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetHigh32(arg)));
     assembler_->push(asmjit::x86::eax);
@@ -426,7 +430,7 @@ public:
     --cur_arg_;
   }
 
-  void operator()(float arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
@@ -439,7 +443,7 @@ public:
     --cur_arg_;
   }
 
-  void operator()(double arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
@@ -472,12 +476,12 @@ public:
   {
   }
 
-  void operator()(std::uint32_t arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint32_t arg) HADESMEM_DETAIL_NOEXCEPT
   {
     return (*this)(static_cast<std::uint64_t>(arg));
   }
 
-  void operator()(std::uint64_t arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(std::uint64_t arg) HADESMEM_DETAIL_NOEXCEPT
   {
     std::int32_t const stack_offs =
       static_cast<std::int32_t>((cur_arg_ - 1) * 8);
@@ -499,7 +503,7 @@ public:
     --cur_arg_;
   }
 
-  void operator()(float arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(float arg) HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
@@ -530,7 +534,7 @@ public:
     --cur_arg_;
   }
 
-  void operator()(double arg)HADESMEM_DETAIL_NOEXCEPT
+  void operator()(double arg) HADESMEM_DETAIL_NOEXCEPT
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
@@ -624,7 +628,9 @@ inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  { arg.Apply(std::ref(arg_visitor)); });
+                  {
+      arg.Apply(std::ref(arg_visitor));
+    });
 
     assembler->mov(asmjit::x86::eax,
                    asmjit::imm_u(reinterpret_cast<std::uintptr_t>(address)));
@@ -747,7 +753,9 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
     std::for_each(args.rbegin(),
                   args.rend(),
                   [&](CallArg const& arg)
-                  { arg.Apply(std::ref(arg_visitor)); });
+                  {
+      arg.Apply(std::ref(arg_visitor));
+    });
 
     assembler->mov(asmjit::x64::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
@@ -932,7 +940,9 @@ inline void CallMulti(Process const& process,
                  std::end(return_vals_remote),
                  results,
                  [](detail::CallResultRemote const& r)
-                 { return static_cast<CallResultRaw>(r); });
+                 {
+    return static_cast<CallResultRaw>(r);
+  });
 }
 
 template <typename ArgsForwardIterator>

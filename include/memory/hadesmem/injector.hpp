@@ -36,11 +36,13 @@ namespace hadesmem
 struct InjectFlags
 {
   enum : std::uint32_t
-  { kNone = 0,
+  {
+    kNone = 0,
     kPathResolution = 1 << 0,
     kAddToSearchOrder = 1 << 1,
     kKeepSuspended = 1 << 2,
-    kInvalidFlagMaxValue = 1 << 3 };
+    kInvalidFlagMaxValue = 1 << 3
+  };
 };
 
 inline HMODULE InjectDll(Process const& process,
@@ -301,8 +303,8 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     return work_dir;
   }();
 
-  auto const read_steam_env_var = [](std::wstring const& name,
-                                     std::pair<bool, std::vector<wchar_t>>& var)
+  auto const read_steam_env_var =
+    [](std::wstring const& name, std::pair<bool, std::vector<wchar_t>>& var)
   {
     var.second.resize(HADESMEM_DETAIL_MAX_PATH_UNICODE);
 
@@ -324,8 +326,8 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     var.first = true;
   };
 
-  auto const write_steam_env_var = [](std::wstring const& name,
-                                      std::uint32_t steam_app_id_)
+  auto const write_steam_env_var =
+    [](std::wstring const& name, std::uint32_t steam_app_id_)
   {
     auto const steam_app_id_str = detail::NumToStr<wchar_t>(steam_app_id_);
     if (!::SetEnvironmentVariableW(name.c_str(), steam_app_id_str.c_str()))
@@ -369,8 +371,8 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
                                     << ErrorCodeWinLast{last_error});
   }
 
-  auto const restore_steam_env_var = [](
-    std::wstring const& name, std::pair<bool, std::vector<wchar_t>>& var)
+  auto const restore_steam_env_var =
+    [](std::wstring const& name, std::pair<bool, std::vector<wchar_t>>& var)
   {
     if (!::SetEnvironmentVariableW(name.c_str(),
                                    var.first ? var.second.data() : nullptr))

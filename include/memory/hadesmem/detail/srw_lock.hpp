@@ -22,8 +22,10 @@ enum class SRWLockType
 class AcquireSRWLock
 {
 public:
-  explicit AcquireSRWLock(SRWLOCK* lock, SRWLockType type) HADESMEM_DETAIL_NOEXCEPT
-    : lock_{lock}, type_{type}
+  explicit AcquireSRWLock(SRWLOCK* lock,
+                          SRWLockType type) HADESMEM_DETAIL_NOEXCEPT
+    : lock_{lock},
+      type_{type}
   {
     HADESMEM_DETAIL_ASSERT(lock_);
 

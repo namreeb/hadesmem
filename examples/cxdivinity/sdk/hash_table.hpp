@@ -21,5 +21,4 @@ template <typename Key, typename Value> struct HashTable
   Entry** table_;
   std::uint32_t num_entries_;
 };
-
 }

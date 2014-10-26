@@ -45,11 +45,13 @@ namespace hadesmem
 struct PatternFlags
 {
   enum : std::uint32_t
-  { kNone = 0,
+  {
+    kNone = 0,
     kThrowOnUnmatch = 1 << 0,
     kRelativeAddress = 1 << 1,
     kScanData = 1 << 2,
-    kInvalidFlagMaxValue = 1 << 3 };
+    kInvalidFlagMaxValue = 1 << 3
+  };
 };
 
 namespace detail
@@ -129,7 +131,9 @@ void* FindRaw(Process const& process,
                 n_beg,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-                { return n_cur.wildcard || h_cur == n_cur.data; });
+                {
+      return n_cur.wildcard || h_cur == n_cur.data;
+    });
 
   if (iter != h_end)
   {
@@ -324,8 +328,8 @@ public:
     return address_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR std::uint32_t GetFlags() const
-    HADESMEM_DETAIL_NOEXCEPT
+  HADESMEM_DETAIL_CONSTEXPR std::uint32_t
+    GetFlags() const HADESMEM_DETAIL_NOEXCEPT
   {
     return flags_;
   }
@@ -335,39 +339,39 @@ private:
   std::uint32_t flags_{PatternFlags::kNone};
 };
 
-inline bool operator==(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator==(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() == rhs.GetAddress() &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
-inline bool operator!=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator!=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<(Pattern const& lhs,
+                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() < rhs.GetAddress();
 }
 
-inline bool operator<=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator<=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() <= rhs.GetAddress();
 }
 
-inline bool operator>(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>(Pattern const& lhs,
+                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() > rhs.GetAddress();
 }
 
-inline bool operator>=(Pattern const& lhs, Pattern const& rhs)
-  HADESMEM_DETAIL_NOEXCEPT
+inline bool operator>=(Pattern const& lhs,
+                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
 {
   return lhs.GetAddress() >= rhs.GetAddress();
 }
@@ -419,14 +423,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(PatternMap const& lhs, PatternMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(PatternMap const& lhs,
+                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(PatternMap const& lhs, PatternMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(PatternMap const& lhs,
+                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -496,14 +500,14 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator==(ModuleMap const& lhs,
+                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs)
-    HADESMEM_DETAIL_NOEXCEPT
+  friend bool operator!=(ModuleMap const& lhs,
+                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
   {
     return !(lhs == rhs);
   }
@@ -661,11 +665,13 @@ private:
   struct ManipInfo
   {
     enum class Manipulator
-    { kAdd,
+    {
+      kAdd,
       kSub,
       kRel,
       kLea,
-      kAnd };
+      kAnd
+    };
 
     Manipulator type;
     bool has_operand1;

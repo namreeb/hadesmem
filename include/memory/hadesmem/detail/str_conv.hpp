@@ -63,8 +63,7 @@ T StrToNum(std::basic_string<CharT> const& str)
   return out;
 }
 
-template <typename CharT, typename T>
-std::basic_string<CharT> NumToStr(T num)
+template <typename CharT, typename T> std::basic_string<CharT> NumToStr(T num)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
   std::basic_ostringstream<CharT> converter;
@@ -72,7 +71,7 @@ std::basic_string<CharT> NumToStr(T num)
   if (!converter || !(converter << num))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-    << ErrorString{ "Conversion failed." });
+                                    << ErrorString{"Conversion failed."});
   }
   return converter.str();
 }

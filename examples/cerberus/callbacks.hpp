@@ -22,9 +22,9 @@ template <typename Func> class Callbacks
 public:
   using Callback = std::function<Func>;
 
-  Callbacks()
-    : srw_lock_(SRWLOCK_INIT)
-  { }
+  Callbacks() : srw_lock_(SRWLOCK_INIT)
+  {
+  }
 
   std::size_t Register(Callback const& callback)
   {
@@ -45,7 +45,8 @@ public:
     (void)num_removed;
   }
 
-  template <typename... Args> void Run(Args&&... args) const HADESMEM_DETAIL_NOEXCEPT
+  template <typename... Args>
+  void Run(Args&&... args) const HADESMEM_DETAIL_NOEXCEPT
   {
     hadesmem::detail::AcquireSRWLock lock(
       &srw_lock_, hadesmem::detail::SRWLockType::Shared);

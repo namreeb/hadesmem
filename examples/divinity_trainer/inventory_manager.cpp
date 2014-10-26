@@ -56,8 +56,8 @@ std::vector<Inventory*> DumpItemArray(hadesmem::Process const& process,
 
 void DumpInventoryManager(hadesmem::Process const& process, std::uint8_t* base)
 {
-  auto const inventory_manager_ptr =
-    hadesmem::Read<InventoryManager*>(process, base + Offsets::g_inventory_manager);
+  auto const inventory_manager_ptr = hadesmem::Read<InventoryManager*>(
+    process, base + Offsets::g_inventory_manager);
   auto const inventory_manager =
     hadesmem::Read<InventoryManager>(process, inventory_manager_ptr);
   printf("InventoryManager::InventoryPtrArray: %p\n",

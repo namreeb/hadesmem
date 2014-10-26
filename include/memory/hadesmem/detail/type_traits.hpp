@@ -93,13 +93,13 @@ template <typename FuncT> struct FuncArity;
 template <typename C, typename R, typename... Args>
 struct FuncArity<R (C::*)(Args...)>
 {
-  static std::size_t const value = sizeof...(Args)+1;
+  static std::size_t const value = sizeof...(Args) + 1;
 };
 
 template <typename C, typename R, typename... Args>
 struct FuncArity<R (C::*)(Args...) const>
 {
-  static std::size_t const value = sizeof...(Args)+1;
+  static std::size_t const value = sizeof...(Args) + 1;
 };
 
 #define HADESMEM_DETAIL_MAKE_FUNC_ARITY(call_conv)                             \

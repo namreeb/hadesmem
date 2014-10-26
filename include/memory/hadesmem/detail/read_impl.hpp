@@ -23,8 +23,10 @@ namespace hadesmem
 struct ReadFlags
 {
   enum : std::uint32_t
-  { kNone,
-    kZeroFillReserved };
+  {
+    kNone,
+    kZeroFillReserved
+  };
 };
 
 namespace detail

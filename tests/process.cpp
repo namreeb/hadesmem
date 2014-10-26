@@ -55,7 +55,7 @@ void TestThisProcess()
   BOOST_TEST(::IsWow64Process(GetCurrentProcess(), &is_wow64_real));
   BOOST_TEST_EQ(hadesmem::IsWoW64(process), is_wow64_real != FALSE);
   process.Cleanup();
-  //BOOST_TEST_THROWS(hadesmem::GetSeDebugPrivilege(), hadesmem::Error);
+  // BOOST_TEST_THROWS(hadesmem::GetSeDebugPrivilege(), hadesmem::Error);
 }
 
 int main()

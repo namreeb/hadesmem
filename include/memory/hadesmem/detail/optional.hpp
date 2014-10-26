@@ -127,12 +127,12 @@ public:
     return static_cast<T const*>(static_cast<void const*>(&t_));
   }
 
-  T * operator->() HADESMEM_DETAIL_NOEXCEPT
+  T* operator->() HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }
 
-  T const * operator->() const HADESMEM_DETAIL_NOEXCEPT
+  T const* operator->() const HADESMEM_DETAIL_NOEXCEPT
   {
     return GetPtr();
   }

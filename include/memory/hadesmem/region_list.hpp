@@ -116,7 +116,7 @@ public:
       return *this;
     }
 
-    impl_->region_ = Region{ *impl_->process_, mbi };
+    impl_->region_ = Region{*impl_->process_, mbi};
 
     return *this;
   }

@@ -28,7 +28,7 @@ struct Inventory
   int field_3C;
   int capacity_;
   int field_44;
-  //int field_48[100];
+  // int field_48[100];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)

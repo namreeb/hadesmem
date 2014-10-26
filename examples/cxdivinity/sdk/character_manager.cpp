@@ -69,7 +69,7 @@ std::vector<divinity::Character*> GetCharactersByName(std::wstring const& name)
   auto const character_manager = GetCharacterManager();
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Got character manager: %p.",
-    character_manager);
+                                 character_manager);
   std::vector<divinity::Character*> characters;
   for (int i = 0; i < character_manager->character_ptr_array_len_; ++i)
   {

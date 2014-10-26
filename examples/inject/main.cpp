@@ -220,7 +220,9 @@ int main(int argc, char* argv[])
                      std::end(exe_args_tmp),
                      std::back_inserter(exe_args),
                      [](std::string const& s)
-                     { return hadesmem::detail::MultiByteToWideChar(s); });
+                     {
+        return hadesmem::detail::MultiByteToWideChar(s);
+      });
       auto const export_name = export_arg.getValue();
       auto const work_dir =
         hadesmem::detail::MultiByteToWideChar(work_dir_arg.getValue());

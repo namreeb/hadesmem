@@ -29,8 +29,8 @@ TriStringPairPoly* ConstructTriStringPairPoly()
 
 void DestructTriStringPairPoly(TriStringPairPoly* p)
 {
-  typedef int(__fastcall *
-              tTriStringPairPoly__Destructor)(TriStringPairPoly * p, int dummy_edx, char a2);
+  typedef int(__fastcall * tTriStringPairPoly__Destructor)(
+    TriStringPairPoly * p, int dummy_edx, char a2);
   auto const base =
     reinterpret_cast<std::uint8_t*>(::GetModuleHandleW(nullptr));
   auto const tri_string_pair_poly_destructor =

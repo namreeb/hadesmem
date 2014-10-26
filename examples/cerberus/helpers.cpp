@@ -99,8 +99,8 @@ void InitializeSupportForModule(
                                  module_name_upper.c_str());
 
   std::wstring const module_name_upper_with_ext{module_name_upper + L".DLL"};
-  auto const on_map = [=](
-    HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
+  auto const on_map =
+    [=](HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
   {
     if (name == module_name_upper || name == module_name_upper_with_ext)
     {

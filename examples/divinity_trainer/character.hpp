@@ -48,7 +48,7 @@ enum CharacterFlags2
 
 struct FlaggedCString
 {
-  char *cstr_;
+  char* cstr_;
   char initialized_;
   char field_5;
   char field_6;
@@ -84,20 +84,20 @@ struct CharacterTemplate
   int vtable_;
   int field_4;
   int field_8;
-  char *map_key_;
+  char* map_key_;
   StdStringA name_;
-  char *template_name_;
+  char* template_name_;
   int field_30;
   bool is_global_;
   char field_35;
   char field_36;
   char field_37;
-  char *level_name_;
+  char* level_name_;
   int field_3C;
   int field_40[34];
-  char *visual_template_;
+  char* visual_template_;
   int field_CC;
-  char *physics_template_;
+  char* physics_template_;
   int field_D4;
   bool cast_shadow_[2];
   bool recieve_decal_[2];
@@ -140,7 +140,7 @@ struct CharacterTemplate
   FlaggedBool influence_treasure_level_;
   FlaggedDword equipment_class_;
   int field_27C;
-  StdStringA *unk_str_narrow_array_ptr_;
+  StdStringA* unk_str_narrow_array_ptr_;
   int field_284;
   int unk_str_narrow_array_count_;
   int field_28C;
@@ -158,16 +158,18 @@ struct CharacterTemplate
   FlaggedCString speaker_greeting_override_;
   FlaggedBool force_unsheath_skills_;
   FlaggedBool can_be_teleported_;
-  //int field_314[100];
+  // int field_314[100];
 };
 
 struct CharacterStats
 {
-  virtual ~CharacterStats() {}
+  virtual ~CharacterStats()
+  {
+  }
 
   int level_;
   int field_8[7];
-  char *field_24;
+  char* field_24;
   TriStringPairPoly field_28;
   int field_AC[10];
   int vitality_;
@@ -202,7 +204,7 @@ struct CharacterPlayerCustomData
   char field_3;
   StdStringW name_;
   TriStringPairPoly name_data_;
-  char *class_type_;
+  char* class_type_;
   int skin_color_;
   int hair_color_;
   int cloth_color_1_;
@@ -211,13 +213,13 @@ struct CharacterPlayerCustomData
   int is_male_;
   int race_;
   int field_C4[32];
-  char *icon_;
+  char* icon_;
   int random_;
-  char *owner_profile_id_;
-  char *reserved_profile_id_;
-  char *ai_personality_;
-  char *speaker_;
-  char *hench_man_id_;
+  char* owner_profile_id_;
+  char* reserved_profile_id_;
+  char* ai_personality_;
+  char* speaker_;
+  char* hench_man_id_;
 };
 
 struct CharacterAlignmentData
@@ -226,7 +228,7 @@ struct CharacterAlignmentData
   int field_4;
   int field_8;
   int field_C;
-  char *alignment_;
+  char* alignment_;
 };
 
 struct CharacterPlayerData
@@ -249,7 +251,7 @@ struct CharacterPlayerData
   char field_20D;
   char field_20E;
   char field_20F;
-  //int field_210[50];
+  // int field_210[50];
 };
 
 struct CharacterCombatData
@@ -261,26 +263,28 @@ struct CharacterCombatData
 
 struct CharacterStatus
 {
-  virtual ~CharacterStatus() {}
+  virtual ~CharacterStatus()
+  {
+  }
 
   int field_4[11];
-  CharacterAlignmentData *charmed_alignment_data_;
+  CharacterAlignmentData* charmed_alignment_data_;
   int field_34[100];
 };
 
 struct CharacterStatusManagerCharacterStatusVector
 {
-  CharacterStatus **statuses_;
+  CharacterStatus** statuses_;
   unsigned int capacity_;
   unsigned int size_;
 };
 
 struct CharacterStatusManager
 {
-  void *vtable_;
+  void* vtable_;
   int field_4[39];
   CharacterStatusManagerCharacterStatusVector statuses_;
-  //int field_AC[100];
+  // int field_AC[100];
 };
 
 struct CharacterSkill
@@ -538,29 +542,29 @@ struct Character
   int handle_;
   int flags_;
   float field_18;
-  char *level_;
+  char* level_;
   Vec3f rotate_[3];
   float scale_;
-  char *uuid_;
+  char* uuid_;
   int field_4C;
   int field_50;
   int field_54;
   int field_58;
   int field_5C;
-  CharacterTemplate *current_template_;
-  CharacterTemplate *original_template_;
+  CharacterTemplate* current_template_;
+  CharacterTemplate* original_template_;
   CharacterFlags2 flags_2_;
   int field_6C;
   int field_70;
   int field_74;
   int field_78;
-  CharacterAlignmentData *alignment_data_;
-  char *animation_override_;
+  CharacterAlignmentData* alignment_data_;
+  char* animation_override_;
   char needs_update_;
   char script_force_update_;
   char field_86;
   char field_87;
-  CharacterStats *stats_;
+  CharacterStats* stats_;
   int inventory_handle_;
   void* movement_machine_;
   int field_94;
@@ -574,8 +578,8 @@ struct Character
   int field_B4;
   int field_B8;
   void* dialog_controller_;
-  CharacterStatusManager *status_manager_;
-  CharacterSkillManager *skill_manager_;
+  CharacterStatusManager* status_manager_;
+  CharacterSkillManager* skill_manager_;
   void* variable_manager_;
   int field_CC;
   int field_D0;
@@ -605,14 +609,14 @@ struct Character
   int field_12C;
   int field_130;
   int field_134;
-  CharacterPlayerData *player_data_;
+  CharacterPlayerData* player_data_;
   int field_13C;
   int field_140;
   int field_144;
   int gender_;
-  CharacterCombatData *combat_data_;
-  StdStringW *custom_kickstarter_name_;
-  //int field_154[50];
+  CharacterCombatData* combat_data_;
+  StdStringW* custom_kickstarter_name_;
+  // int field_154[50];
 };
 
 #if defined(HADESMEM_DETAIL_ARCH_X86)

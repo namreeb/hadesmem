@@ -45,8 +45,8 @@ public:
     other.factory_ = nullptr;
   }
 
-  DXGIFactoryWrapper& operator=(DXGIFactoryWrapper&& other)
-    HADESMEM_DETAIL_NOEXCEPT
+  DXGIFactoryWrapper&
+    operator=(DXGIFactoryWrapper&& other) HADESMEM_DETAIL_NOEXCEPT
   {
     Cleanup();
 

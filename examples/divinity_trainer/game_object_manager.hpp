@@ -3,8 +3,7 @@
 
 #pragma once
 
-template <typename T>
-struct GameObjectManager
+template <typename T> struct GameObjectManager
 {
   int field_0;
   int field_4;
