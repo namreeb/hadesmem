@@ -13,6 +13,7 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/optional.hpp>
 #include <hadesmem/detail/query_region.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/protect.hpp>
@@ -40,14 +41,19 @@ public:
 
   explicit RegionIterator(Process const& process)
   {
-    // VirtualQuery can fail with ERROR_ACCESS_DENIED for 'zombie' processes.
     try
     {
       impl_ = std::make_shared<Impl>(process);
     }
-    catch (std::exception const&)
+    catch (hadesmem::Error const& e)
     {
-      // Don't need to do anything.
+      // VirtualQuery can fail with ERROR_ACCESS_DENIED for 'zombie' processes.
+      auto const last_error_ptr =
+        boost::get_error_info<hadesmem::ErrorCodeWinLast>(e);
+      if (!last_error_ptr || *last_error_ptr != ERROR_ACCESS_DENIED)
+      {
+        throw;
+      }
     }
   }
 
@@ -87,21 +93,30 @@ public:
 
   RegionIterator& operator++()
   {
+    HADESMEM_DETAIL_ASSERT(impl_.get());
+
+    void const* const base = impl_->region_->GetBase();
+    SIZE_T const size = impl_->region_->GetSize();
+    auto const next = static_cast<char const* const>(base) + size;
+    MEMORY_BASIC_INFORMATION mbi{};
     try
     {
-      HADESMEM_DETAIL_ASSERT(impl_.get());
-
-      void const* const base = impl_->region_->GetBase();
-      SIZE_T const size = impl_->region_->GetSize();
-      auto const next = static_cast<char const* const>(base) + size;
-      MEMORY_BASIC_INFORMATION const mbi =
-        detail::Query(*impl_->process_, next);
-      impl_->region_ = Region{*impl_->process_, mbi};
+      mbi = detail::Query(*impl_->process_, next);
     }
-    catch (std::exception const& /*e*/)
+    catch (hadesmem::Error const& e)
     {
+      auto const last_error_ptr =
+        boost::get_error_info<hadesmem::ErrorCodeWinLast>(e);
+      if (!last_error_ptr || *last_error_ptr != ERROR_INVALID_PARAMETER)
+      {
+        throw;
+      }
+
       impl_.reset();
+      return *this;
     }
+
+    impl_->region_ = Region{ *impl_->process_, mbi };
 
     return *this;
   }

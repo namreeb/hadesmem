@@ -34,15 +34,15 @@
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetD3D11CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetD3D11CreateDeviceAndSwapChainDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetD3D11CreateDeviceAndSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -62,21 +62,21 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D11>&
   return callbacks;
 }
 
-extern "C" HRESULT WINAPI
-  D3D11CreateDeviceDetour(IDXGIAdapter* adapter,
-                          D3D_DRIVER_TYPE driver_type,
-                          HMODULE software,
-                          UINT flags,
-                          const D3D_FEATURE_LEVEL* ptr_feature_levels,
-                          UINT feature_levels,
-                          UINT sdk_version,
-                          ID3D11Device** device,
-                          D3D_FEATURE_LEVEL* feature_level,
-                          ID3D11DeviceContext** immediate_context)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
+  IDXGIAdapter* adapter,
+  D3D_DRIVER_TYPE driver_type,
+  HMODULE software,
+  UINT flags,
+  const D3D_FEATURE_LEVEL* ptr_feature_levels,
+  UINT feature_levels,
+  UINT sdk_version,
+  ID3D11Device** device,
+  D3D_FEATURE_LEVEL* feature_level,
+  ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D11CreateDeviceDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -141,7 +141,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D11CreateDeviceAndSwapChainDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

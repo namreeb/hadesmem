@@ -38,8 +38,9 @@ namespace
 class DXGIImpl : public hadesmem::cerberus::DXGIInterface
 {
 public:
-  virtual std::size_t RegisterOnFrameCallback(std::function<
-    hadesmem::cerberus::OnFrameCallbackDXGI> const& callback) final
+  virtual std::size_t RegisterOnFrameCallback(
+    std::function<hadesmem::cerberus::OnFrameCallbackDXGI> const& callback)
+    final
   {
     return hadesmem::cerberus::RegisterOnFrameCallbackDXGI(callback);
   }
@@ -105,7 +106,8 @@ extern "C" HRESULT WINAPI
                               UINT flags) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDXGISwapChainPresentDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
@@ -130,7 +132,8 @@ extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
   IDXGISwapChain** swap_chain) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDXGIFactoryCreateSwapChainDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -185,7 +188,8 @@ extern "C" HRESULT WINAPI
   CreateDXGIFactoryDetour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactoryDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
@@ -214,7 +218,8 @@ extern "C" HRESULT WINAPI
   CreateDXGIFactory1Detour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactory1Detour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
@@ -245,7 +250,8 @@ extern "C" HRESULT WINAPI
                            void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateDXGIFactory2Detour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);

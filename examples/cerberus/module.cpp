@@ -58,15 +58,15 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>& GetNtMapViewOfSectionDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetNtMapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetNtUnmapViewOfSectionDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetNtUnmapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -101,7 +101,8 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetNtMapViewOfSectionDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_map_view_of_section =
@@ -214,11 +215,12 @@ extern "C" NTSTATUS WINAPI
 }
 
 extern "C" NTSTATUS WINAPI
-  NtUnmapViewOfSectionDetour(HANDLE process, PVOID base)
-  HADESMEM_DETAIL_NOEXCEPT
+  NtUnmapViewOfSectionDetour(HANDLE process,
+                             PVOID base) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetNtUnmapViewOfSectionDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_unmap_view_of_section =

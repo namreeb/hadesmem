@@ -112,7 +112,8 @@ HRESULT WINAPI
                                           DWORD flags)
 {
   auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
@@ -133,7 +134,8 @@ HRESULT WINAPI
                                           DWORD flags)
 {
   auto& detour = GetIDirectInputDevice8WGetDeviceDataDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
@@ -195,7 +197,8 @@ HRESULT WINAPI
                                    LPUNKNOWN unk_outer)
 {
   auto& detour = GetIDirectInput8ACreateDeviceDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p] [%p] [%p].",
@@ -231,7 +234,8 @@ HRESULT WINAPI
                                    LPUNKNOWN unk_outer)
 {
   auto& detour = GetIDirectInput8WCreateDeviceDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p] [%p] [%p].",
@@ -308,7 +312,8 @@ HRESULT WINAPI
                            LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetDirectInput8CreateDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

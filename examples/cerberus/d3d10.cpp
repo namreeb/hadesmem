@@ -35,22 +35,22 @@
 namespace
 {
 
-std::unique_ptr<hadesmem::PatchDetour>& GetD3D10CreateDeviceDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetD3D10CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetD3D10CreateDeviceAndSwapChainDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetD3D10CreateDeviceAndSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>& GetD3D10CreateDevice1Detour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetD3D10CreateDevice1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -83,16 +83,17 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D10>&
   return callbacks;
 }
 
-extern "C" HRESULT WINAPI D3D10CreateDeviceDetour(IDXGIAdapter* adapter,
-                                                  D3D10_DRIVER_TYPE driver_type,
-                                                  HMODULE software,
-                                                  UINT flags,
-                                                  UINT sdk_version,
-                                                  ID3D10Device** device)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI
+  D3D10CreateDeviceDetour(IDXGIAdapter* adapter,
+                          D3D10_DRIVER_TYPE driver_type,
+                          HMODULE software,
+                          UINT flags,
+                          UINT sdk_version,
+                          ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D10CreateDeviceDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%d] [%p] [%u] [%u] [%p].",
@@ -129,19 +130,19 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceDetour(IDXGIAdapter* adapter,
   return ret;
 }
 
-extern "C" HRESULT WINAPI
-  D3D10CreateDeviceAndSwapChainDetour(IDXGIAdapter* adapter,
-                                      D3D10_DRIVER_TYPE driver_type,
-                                      HMODULE software,
-                                      UINT flags,
-                                      UINT sdk_version,
-                                      DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
-                                      IDXGISwapChain** swap_chain,
-                                      ID3D10Device** device)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
+  IDXGIAdapter* adapter,
+  D3D10_DRIVER_TYPE driver_type,
+  HMODULE software,
+  UINT flags,
+  UINT sdk_version,
+  DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
+  IDXGISwapChain** swap_chain,
+  ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D10CreateDeviceAndSwapChainDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -208,7 +209,8 @@ extern "C" HRESULT WINAPI
                            ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D10CreateDevice1Detour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%d] [%p] [%u] [%d] [%u] [%p].",
@@ -246,20 +248,20 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-extern "C" HRESULT WINAPI
-  D3D10CreateDeviceAndSwapChain1Detour(IDXGIAdapter* adapter,
-                                       D3D10_DRIVER_TYPE driver_type,
-                                       HMODULE software,
-                                       UINT flags,
-                                       D3D10_FEATURE_LEVEL1 hardware_level,
-                                       UINT sdk_version,
-                                       DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
-                                       IDXGISwapChain** swap_chain,
-                                       ID3D10Device** device)
-  HADESMEM_DETAIL_NOEXCEPT
+extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
+  IDXGIAdapter* adapter,
+  D3D10_DRIVER_TYPE driver_type,
+  HMODULE software,
+  UINT flags,
+  D3D10_FEATURE_LEVEL1 hardware_level,
+  UINT sdk_version,
+  DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
+  IDXGISwapChain** swap_chain,
+  ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetD3D10CreateDeviceAndSwapChain1Detour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

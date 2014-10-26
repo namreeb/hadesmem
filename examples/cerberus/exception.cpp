@@ -31,11 +31,12 @@ std::unique_ptr<hadesmem::PatchDetour>&
 }
 
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
-  ULONG first_handler, PVECTORED_EXCEPTION_HANDLER vectored_handler)
-  HADESMEM_DETAIL_NOEXCEPT
+  ULONG first_handler,
+  PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

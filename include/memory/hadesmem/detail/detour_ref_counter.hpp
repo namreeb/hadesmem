@@ -5,8 +5,10 @@
 
 #include <atomic>
 #include <cstdint>
+#include <type_traits>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 
 namespace hadesmem
 {
@@ -14,11 +16,13 @@ namespace hadesmem
 namespace detail
 {
 
-class DetourRefCounter
+template <typename T> class DetourRefCounter
 {
 public:
-  DetourRefCounter(std::atomic<std::uint32_t>& ref_count)
-    HADESMEM_DETAIL_NOEXCEPT : ref_count_{&ref_count}
+  HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
+
+  DetourRefCounter(std::atomic<T>& ref_count) HADESMEM_DETAIL_NOEXCEPT
+    : ref_count_{&ref_count}
   {
     ++(*ref_count_);
   }
@@ -50,7 +54,13 @@ public:
   }
 
 private:
-  std::atomic<std::uint32_t>* ref_count_;
+  std::atomic<T>* ref_count_;
 };
+
+template <typename T>
+DetourRefCounter<T> MakeDetourRefCounter(std::atomic<T>& ref_count)
+{
+  return DetourRefCounter<T>{ref_count};
+}
 }
 }

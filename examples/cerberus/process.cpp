@@ -67,8 +67,8 @@ private:
   HANDLE handle_;
 };
 
-std::unique_ptr<hadesmem::PatchDetour>& GetCreateProcessInternalWDetour()
-  HADESMEM_DETAIL_NOEXCEPT
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetCreateProcessInternalWDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -89,7 +89,8 @@ extern "C" BOOL WINAPI
                                PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetCreateProcessInternalWDetour();
-  hadesmem::detail::DetourRefCounter ref_count{detour->GetRefCount()};
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
