@@ -23,7 +23,6 @@
 
 namespace hadesmem
 {
-
 inline DWORD SuspendThread(Thread const& thread)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.",

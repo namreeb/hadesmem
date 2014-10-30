@@ -32,7 +32,6 @@
 
 namespace
 {
-
 class D3D9Impl : public hadesmem::cerberus::D3D9Interface
 {
 public:
@@ -448,10 +447,8 @@ extern "C" HRESULT WINAPI
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT
 {
   static D3D9Impl d3d9_impl;

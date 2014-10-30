@@ -15,10 +15,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline std::wstring ToUpperOrdinal(std::wstring const& str)
 {
   if (str.empty())

@@ -14,13 +14,10 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 namespace pugixml
 {
-
 inline std::wstring GetAttributeValue(pugi::xml_node const& node,
                                       std::wstring const& name)
 {

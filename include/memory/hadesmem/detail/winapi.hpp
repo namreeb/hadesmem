@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline SYSTEM_INFO GetSystemInfo()
 {
   SYSTEM_INFO sys_info{};

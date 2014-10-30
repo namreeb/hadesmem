@@ -17,10 +17,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline void WriteUnchecked(Process const& process,
                            PVOID address,
                            LPCVOID data,

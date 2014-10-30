@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline DWORD Protect(Process const& process,
                      MEMORY_BASIC_INFORMATION const& mbi,
                      DWORD protect)

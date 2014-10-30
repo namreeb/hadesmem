@@ -26,7 +26,7 @@
 #include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
@@ -38,10 +38,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
 {
   ThreadList threads{pid};
@@ -212,8 +210,8 @@ public:
                        TargetFuncT target,
                        DetourFuncT detour)
     : process_{&process},
-      target_{detail::UnionCast<void*>(target)},
-      detour_{detail::UnionCast<void*>(detour)}
+      target_{detail::AliasCast<void*>(target)},
+      detour_{detail::AliasCast<void*>(detour)}
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
                                   std::is_pointer<TargetFuncT>::value);
@@ -477,7 +475,7 @@ public:
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
                                   std::is_pointer<FuncT>::value);
-    return hadesmem::detail::UnionCastUnchecked<FuncT>(trampoline_->GetBase());
+    return hadesmem::detail::AliasCastUnchecked<FuncT>(trampoline_->GetBase());
   }
 
   // Ref count is user-managed and only here for convenience purposes.

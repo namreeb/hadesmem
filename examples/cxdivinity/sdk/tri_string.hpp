@@ -12,7 +12,6 @@
 
 namespace divinity
 {
-
 struct TriString
 {
   void* vtable_;

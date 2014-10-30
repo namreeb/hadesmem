@@ -12,7 +12,6 @@
 
 namespace divinity
 {
-
 struct CharacterAlignmentData;
 
 enum Status

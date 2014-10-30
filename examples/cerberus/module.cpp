@@ -31,7 +31,6 @@ namespace winternl = hadesmem::detail::winternl;
 
 namespace
 {
-
 class ModuleImpl : public hadesmem::cerberus::ModuleInterface
 {
 public:
@@ -274,10 +273,8 @@ extern "C" NTSTATUS WINAPI
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static ModuleImpl module_impl;

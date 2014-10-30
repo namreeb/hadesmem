@@ -17,10 +17,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 class AntTweakBarInterface
 {
 public:

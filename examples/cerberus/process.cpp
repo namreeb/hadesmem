@@ -29,7 +29,6 @@
 
 namespace
 {
-
 class EnsureResumeThread
 {
 public:
@@ -276,10 +275,8 @@ extern "C" BOOL WINAPI
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void DetourCreateProcessInternalW()
 {
   auto const& process = GetThisProcess();

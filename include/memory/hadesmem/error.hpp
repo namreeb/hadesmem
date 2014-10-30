@@ -17,7 +17,6 @@
 
 namespace hadesmem
 {
-
 // Header-only library unfortunately means no vtable/rtti anchor.
 #if defined(HADESMEM_CLANG)
 #pragma GCC diagnostic push

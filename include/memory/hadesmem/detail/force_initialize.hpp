@@ -15,10 +15,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 // This is used to generate a 'nullsub' function, which is called
 // in the context of the remote process in order to 'force' a
 // call to ntdll.dll!LdrInitializeThunk. This is necessary

@@ -10,10 +10,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 template <typename T> class Optional
 {
 public:

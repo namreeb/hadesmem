@@ -18,7 +18,6 @@
 
 namespace hadesmem
 {
-
 template <typename T>
 inline void Write(Process const& process, PVOID address, T const& data)
 {

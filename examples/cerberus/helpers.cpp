@@ -10,10 +10,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void DetourFunc(Process const& process,
                 std::wstring const& name,
                 void* interface_ptr,

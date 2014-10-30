@@ -12,10 +12,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 typedef void OnMapCallback(HMODULE module,
                            std::wstring const& path,
                            std::wstring const& name);

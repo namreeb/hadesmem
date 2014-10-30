@@ -13,7 +13,6 @@
 
 namespace
 {
-
 float DegToRad(float f)
 {
   auto const kPi = 3.14159265f;

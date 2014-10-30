@@ -14,7 +14,6 @@
 
 namespace hadesmem
 {
-
 class ProcessEntry
 {
 public:

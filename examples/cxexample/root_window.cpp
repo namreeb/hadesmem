@@ -19,7 +19,6 @@
 
 namespace
 {
-
 struct EnsureCoUninitialize
 {
   ~EnsureCoUninitialize()

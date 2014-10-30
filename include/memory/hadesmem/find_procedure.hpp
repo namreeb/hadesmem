@@ -13,7 +13,6 @@
 
 namespace hadesmem
 {
-
 inline FARPROC FindProcedure(Process const& process,
                              Module const& module,
                              std::string const& name)

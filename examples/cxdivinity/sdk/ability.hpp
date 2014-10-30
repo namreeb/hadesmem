@@ -5,7 +5,6 @@
 
 namespace divinity
 {
-
 enum Ability
 {
   Ability_WarriorLore = 0x0,

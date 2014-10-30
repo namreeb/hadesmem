@@ -16,10 +16,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline HMODULE GetHandleToSelf()
 {
   auto const this_func_ptr = reinterpret_cast<void const*>(

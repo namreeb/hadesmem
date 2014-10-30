@@ -5,7 +5,6 @@
 
 namespace divinity
 {
-
 enum Talent
 {
   Talent_ItemMovement = 0x1,

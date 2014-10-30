@@ -16,7 +16,6 @@
 
 namespace divinity
 {
-
 enum CharacterFlags
 {
   CharacterFlags_IsPlayer = 0x2,

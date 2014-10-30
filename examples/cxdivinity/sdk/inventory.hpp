@@ -9,7 +9,6 @@
 
 namespace divinity
 {
-
 struct InventoryItems
 {
   int field_0;

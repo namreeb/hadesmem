@@ -8,7 +8,6 @@
 
 namespace hadesmem
 {
-
 class Process;
 class PeFile;
 }

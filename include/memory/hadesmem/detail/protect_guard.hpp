@@ -19,10 +19,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 enum class ProtectGuardType
 {
   kRead,

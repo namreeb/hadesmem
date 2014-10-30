@@ -9,10 +9,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 class LastErrorPreserver
 {
 public:

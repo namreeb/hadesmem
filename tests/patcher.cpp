@@ -19,13 +19,12 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
 namespace
 {
-
 std::unique_ptr<hadesmem::PatchDetour>& GetDetour1()
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
@@ -202,8 +201,8 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
   auto& detour_1 = GetDetour1();
   detour_1 = std::make_unique<PatchType>(
     process,
-    hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
-    hadesmem::detail::UnionCast<PVOID>(&HookMeHk));
+    hadesmem::detail::AliasCast<PVOID>(hook_me_wrapper),
+    hadesmem::detail::AliasCast<PVOID>(&HookMeHk));
 
   bool const can_chain = detour_1->CanHookChain();
 
@@ -212,8 +211,8 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
   {
     detour_2 = std::make_unique<PatchType>(
       process,
-      hadesmem::detail::UnionCast<PVOID>(hook_me_wrapper),
-      hadesmem::detail::UnionCast<PVOID>(&HookMeHk2));
+      hadesmem::detail::AliasCast<PVOID>(hook_me_wrapper),
+      hadesmem::detail::AliasCast<PVOID>(&HookMeHk2));
   }
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
@@ -348,7 +347,7 @@ HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
   AsmJitMemoryReleaser hook_me_wrapper_cleanup{runtime, hook_me_wrapper_raw};
 
   auto const volatile hook_me_wrapper =
-    hadesmem::detail::UnionCast<decltype(&HookMe)>(hook_me_wrapper_raw);
+    hadesmem::detail::AliasCast<decltype(&HookMe)>(hook_me_wrapper_raw);
 
   auto const hook_me_packaged = [=]()
   {

@@ -34,7 +34,6 @@
 
 namespace
 {
-
 std::unique_ptr<hadesmem::PatchDetour>&
   GetD3D10CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -323,10 +322,8 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void InitializeD3D10()
 {
   InitializeSupportForModule(

@@ -25,7 +25,6 @@
 
 namespace hadesmem
 {
-
 class Section
 {
 public:

@@ -14,10 +14,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline std::uintptr_t GetThreadContextIp(CONTEXT const& context)
 {
 #if defined(HADESMEM_DETAIL_ARCH_X64)

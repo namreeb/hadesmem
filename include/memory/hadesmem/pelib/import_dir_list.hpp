@@ -20,7 +20,6 @@
 
 namespace hadesmem
 {
-
 // ImportDirIterator satisfies the requirements of an input iterator
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 template <typename ImportDirT>

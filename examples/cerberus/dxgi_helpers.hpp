@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 class DXGIFactoryWrapper
 {
 public:

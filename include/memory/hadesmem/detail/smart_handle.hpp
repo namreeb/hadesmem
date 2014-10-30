@@ -12,10 +12,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 template <typename Policy> class SmartHandleImpl
 {
 public:

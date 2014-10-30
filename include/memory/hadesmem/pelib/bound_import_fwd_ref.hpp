@@ -22,7 +22,6 @@
 
 namespace hadesmem
 {
-
 class BoundImportForwarderRef
 {
 public:

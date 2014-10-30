@@ -32,7 +32,6 @@
 
 namespace hadesmem
 {
-
 struct InjectFlags
 {
   enum : std::uint32_t

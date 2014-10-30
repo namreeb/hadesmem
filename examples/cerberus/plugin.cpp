@@ -31,7 +31,6 @@
 
 namespace
 {
-
 class Plugin : public hadesmem::cerberus::PluginInterface
 {
 public:
@@ -291,10 +290,8 @@ void LoadPluginsMemory(std::wstring const& data)
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void LoadPlugin(std::wstring const& path)
 {
   auto& plugins = GetPlugins();

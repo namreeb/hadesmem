@@ -15,10 +15,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline detail::SmartSnapHandle CreateToolhelp32Snapshot(DWORD flags, DWORD pid)
 {
   detail::SmartSnapHandle snap;

@@ -7,10 +7,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 class RecursionProtector
 {
 public:

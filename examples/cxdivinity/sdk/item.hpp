@@ -13,7 +13,6 @@
 
 namespace divinity
 {
-
 enum ItemFlags
 {
   ItemFlags_OnStage_Maybe = 0x4,

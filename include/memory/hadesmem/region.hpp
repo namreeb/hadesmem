@@ -17,7 +17,6 @@
 
 namespace hadesmem
 {
-
 class Region
 {
 public:

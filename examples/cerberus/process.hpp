@@ -5,10 +5,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void DetourCreateProcessInternalW();
 
 void UndetourCreateProcessInternalW();

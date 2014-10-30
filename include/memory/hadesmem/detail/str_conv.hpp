@@ -18,10 +18,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 // String must be hex.
 inline std::uintptr_t HexStrToPtr(std::wstring const& str)
 {

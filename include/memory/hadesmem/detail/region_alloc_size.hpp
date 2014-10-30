@@ -19,10 +19,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
                                  void const* base)
 {

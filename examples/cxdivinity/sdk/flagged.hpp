@@ -9,7 +9,6 @@
 
 namespace divinity
 {
-
 template <typename T> struct FlaggedT
 {
   T value_;

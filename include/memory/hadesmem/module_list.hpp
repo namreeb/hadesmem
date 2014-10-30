@@ -21,7 +21,6 @@
 
 namespace hadesmem
 {
-
 // ModuleIterator satisfies the requirements of an input iterator
 // (C++ Standard, 24.2.1, Input Iterators [input.iterators]).
 template <typename ModuleT>

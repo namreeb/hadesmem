@@ -24,7 +24,6 @@
 
 namespace
 {
-
 void DumpStringsImpl(hadesmem::Process const& /*process*/,
                      hadesmem::PeFile const& pe_file,
                      void* beg,

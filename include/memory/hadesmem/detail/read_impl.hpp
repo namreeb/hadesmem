@@ -19,7 +19,6 @@
 
 namespace hadesmem
 {
-
 struct ReadFlags
 {
   enum : std::uint32_t
@@ -31,7 +30,6 @@ struct ReadFlags
 
 namespace detail
 {
-
 inline void ReadUnchecked(Process const& process,
                           void* address,
                           void* data,

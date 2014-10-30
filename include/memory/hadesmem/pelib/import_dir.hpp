@@ -25,7 +25,6 @@
 
 namespace hadesmem
 {
-
 class ImportDir
 {
 public:

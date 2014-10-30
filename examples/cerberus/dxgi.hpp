@@ -15,10 +15,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 typedef void OnFrameCallbackDXGI(IDXGISwapChain* swap_chain);
 
 class DXGIInterface

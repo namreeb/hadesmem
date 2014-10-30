@@ -13,10 +13,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 template <typename Func> class Callbacks
 {
 public:

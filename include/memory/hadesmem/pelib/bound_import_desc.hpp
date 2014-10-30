@@ -26,7 +26,6 @@
 
 namespace hadesmem
 {
-
 class BoundImportDescriptor
 {
 public:

@@ -13,7 +13,6 @@
 
 namespace divinity
 {
-
 struct CharacterPartyManagerCharacterVector
 {
   Character** characters_;

@@ -30,7 +30,6 @@
 
 namespace
 {
-
 std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 {
   if (!m)

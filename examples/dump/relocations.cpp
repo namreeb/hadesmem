@@ -20,7 +20,6 @@
 
 namespace
 {
-
 bool HasRelocationsDir(hadesmem::Process const& process,
                        hadesmem::PeFile const& pe_file)
 {

@@ -19,7 +19,6 @@
 
 namespace
 {
-
 void DumpDosHeader(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {

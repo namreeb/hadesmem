@@ -11,7 +11,6 @@
 
 namespace divinity
 {
-
 struct InventoryManager
 {
   void* vtable_;

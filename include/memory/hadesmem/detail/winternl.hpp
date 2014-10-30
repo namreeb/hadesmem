@@ -20,13 +20,10 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 namespace winternl
 {
-
 enum SYSTEM_INFORMATION_CLASS
 {
   SystemBasicInformation = 0x0000,

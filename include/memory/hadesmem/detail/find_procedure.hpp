@@ -11,7 +11,7 @@
 #include <hadesmem/pelib/export_list.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/pelib/export.hpp>
@@ -20,10 +20,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline FARPROC GetProcAddressFromExport(Process const& process,
                                         Export const& e);
 
@@ -86,7 +84,7 @@ inline FARPROC GetProcAddressFromExport(Process const& process, Export const& e)
     }
   }
 
-  return UnionCast<FARPROC>(e.GetVa());
+  return AliasCast<FARPROC>(e.GetVa());
 }
 }
 }

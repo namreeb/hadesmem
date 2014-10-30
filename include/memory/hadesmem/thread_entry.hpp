@@ -10,7 +10,6 @@
 
 namespace hadesmem
 {
-
 class ThreadEntry
 {
 public:

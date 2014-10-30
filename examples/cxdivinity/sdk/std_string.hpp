@@ -9,7 +9,6 @@
 
 namespace divinity
 {
-
 template <typename CharT> union StdStringBufT
 {
   CharT buf_[0x10 / sizeof(CharT)];

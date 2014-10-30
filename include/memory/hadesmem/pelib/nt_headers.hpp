@@ -26,7 +26,6 @@
 
 namespace hadesmem
 {
-
 enum class PeDataDir : std::uint32_t
 {
   Export,

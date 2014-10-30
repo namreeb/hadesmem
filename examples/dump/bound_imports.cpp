@@ -19,7 +19,6 @@
 
 namespace
 {
-
 bool HasBoundImportDir(hadesmem::Process const& process,
                        hadesmem::PeFile const& pe_file)
 {

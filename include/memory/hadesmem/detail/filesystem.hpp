@@ -21,10 +21,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 // libstdc++ doesn't support move operations on file-streams, so we have to
 // return a unique_ptr instead.
 template <typename CharT>

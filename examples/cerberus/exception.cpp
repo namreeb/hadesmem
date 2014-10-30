@@ -22,7 +22,6 @@
 
 namespace
 {
-
 std::unique_ptr<hadesmem::PatchDetour>&
   GetRtlAddVectoredExceptionHandlerDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -55,10 +54,8 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void DetourRtlAddVectoredExceptionHandler()
 {
   auto const& process = GetThisProcess();

@@ -13,10 +13,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void LoadPlugins();
 
 void UnloadPlugins();

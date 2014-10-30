@@ -27,7 +27,6 @@
 
 namespace hadesmem
 {
-
 class Export
 {
 public:

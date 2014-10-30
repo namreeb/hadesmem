@@ -7,7 +7,6 @@
 
 namespace divinity
 {
-
 template <typename Key, typename Value> struct HashTable
 {
   struct Entry

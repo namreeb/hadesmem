@@ -34,7 +34,6 @@
 
 namespace
 {
-
 // This is a nasty hack to call any APIs which may be called from a static
 // destructor. We want to ensure that we call it nice and early, so it's not
 // called after we load our plugins, because otherwise it will be destructed
@@ -136,10 +135,8 @@ std::mutex& GetInitializeMutex()
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 Process& GetThisProcess()
 {
   static Process process{::GetCurrentProcessId()};

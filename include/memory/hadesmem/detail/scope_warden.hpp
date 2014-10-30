@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 template <typename F> class ScopeWarden
 {
 public:

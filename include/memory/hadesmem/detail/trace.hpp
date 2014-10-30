@@ -16,10 +16,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline void OutputDebugString(char const* const s)
 {
   ::OutputDebugStringA(s);
@@ -39,7 +37,6 @@ inline void OutputDebugString(wchar_t const* const s)
   do                                                                           \
   \
 {
-
 #define HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END                             \
   \
 }                                                                         \

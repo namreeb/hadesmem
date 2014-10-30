@@ -7,10 +7,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 hadesmem::Process& GetThisProcess();
 }
 }

@@ -16,7 +16,6 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
 inline PVOID TryAlloc(Process const& process, SIZE_T size, PVOID base = nullptr)

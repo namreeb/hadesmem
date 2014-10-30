@@ -34,7 +34,6 @@
 
 namespace
 {
-
 class DXGIImpl : public hadesmem::cerberus::DXGIInterface
 {
 public:
@@ -168,7 +167,6 @@ extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
 
 void DetourDXGIFactoryByGuid(REFIID riid, void** factory)
 {
-
   if (riid == __uuidof(IDXGIFactory))
   {
     hadesmem::cerberus::DetourDXGIFactory(static_cast<IDXGIFactory*>(*factory));
@@ -279,10 +277,8 @@ extern "C" HRESULT WINAPI
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static DXGIImpl dxgi_impl;

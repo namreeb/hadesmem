@@ -20,7 +20,6 @@
 
 namespace hadesmem
 {
-
 inline ProcessEntry GetProcessEntryByName(std::wstring const& proc_name,
                                           bool name_forced = false)
 {

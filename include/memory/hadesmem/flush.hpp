@@ -10,7 +10,6 @@
 
 namespace hadesmem
 {
-
 inline void
   FlushInstructionCache(Process const& process, LPCVOID address, SIZE_T size)
 {

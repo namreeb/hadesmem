@@ -25,7 +25,6 @@
 
 namespace hadesmem
 {
-
 enum class PeFileType
 {
   Image,
@@ -342,7 +341,6 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
 
 namespace detail
 {
-
 template <typename CharT>
 std::basic_string<CharT> CheckedReadString(Process const& process,
                                            PeFile const& pe_file,

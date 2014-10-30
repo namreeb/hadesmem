@@ -14,7 +14,6 @@
 
 namespace
 {
-
 std::size_t g_on_ant_tweak_bar_initialize_callback_id =
   static_cast<std::size_t>(-1);
 

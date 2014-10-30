@@ -55,7 +55,6 @@
 
 namespace
 {
-
 std::wstring g_current_file_path;
 
 void DumpRegions(hadesmem::Process const& process)

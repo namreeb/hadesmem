@@ -10,10 +10,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 typedef void OnUnloadCallbackD3D10();
 
 void InitializeD3D10();

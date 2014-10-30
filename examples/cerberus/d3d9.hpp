@@ -14,10 +14,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 typedef void OnFrameCallbackD3D9(IDirect3DDevice9* device);
 
 typedef void

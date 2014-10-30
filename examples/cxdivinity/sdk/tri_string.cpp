@@ -11,7 +11,6 @@
 
 namespace divinity
 {
-
 TriStringPairPoly* ConstructTriStringPairPoly()
 {
   typedef TriStringPairPoly*(__fastcall * tTriStringPairPoly__Constructor)(

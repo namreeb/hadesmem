@@ -13,7 +13,6 @@
 
 namespace divinity
 {
-
 struct ItemManager
 {
   void* vtable_;

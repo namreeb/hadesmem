@@ -26,7 +26,6 @@
 
 namespace
 {
-
 std::size_t GetBytesToEndOfFile(hadesmem::PeFile const& pe_file, void* address)
 {
   return (reinterpret_cast<std::uintptr_t>(pe_file.GetBase()) +

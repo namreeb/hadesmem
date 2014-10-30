@@ -9,10 +9,8 @@
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device)
 {
   IDXGIDevice* dxgi_device = nullptr;
@@ -45,7 +43,6 @@ DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device)
     if (FAILED(dxgi_adapter->GetParent(
           __uuidof(IDXGIFactory1), reinterpret_cast<void**>(&dxgi_factory))))
     {
-
       --factory_revision;
       if (FAILED(dxgi_adapter->GetParent(
             __uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgi_factory))))

@@ -11,7 +11,6 @@
 
 namespace hadesmem
 {
-
 inline void GetSeDebugPrivilege()
 {
   HANDLE process_token_temp = nullptr;

@@ -14,7 +14,6 @@
 
 namespace divinity
 {
-
 struct TranslatedStringData
 {
   void* unknown_0000_;

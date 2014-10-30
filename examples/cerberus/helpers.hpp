@@ -12,16 +12,14 @@
 #include <windows.h>
 
 #include <hadesmem/detail/static_assert.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 void DetourFunc(Process const& process,
                 std::wstring const& name,
                 void* interface_ptr,
@@ -45,7 +43,7 @@ void DetourFunc(Process const& process,
                     interface_ptr,
                     index,
                     detour,
-                    detail::UnionCast<void*>(detour_fn));
+                    detail::AliasCast<void*>(detour_fn));
 }
 
 void DetourFunc(Process const& process,
@@ -65,7 +63,7 @@ void DetourFunc(Process const& process,
                                 std::is_pointer<Func>::value);
 
   return DetourFunc(
-    process, base, name, detour, detail::UnionCast<void*>(detour_fn));
+    process, base, name, detour, detail::AliasCast<void*>(detour_fn));
 }
 
 void UndetourFunc(std::wstring const& name,

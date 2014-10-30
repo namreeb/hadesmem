@@ -21,7 +21,6 @@
 
 namespace hadesmem
 {
-
 class Relocation
 {
 public:

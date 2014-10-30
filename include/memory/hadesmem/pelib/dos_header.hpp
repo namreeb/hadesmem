@@ -23,7 +23,6 @@
 
 namespace hadesmem
 {
-
 class DosHeader
 {
 public:

@@ -10,7 +10,6 @@
 
 namespace divinity
 {
-
 struct CharacterTemplateTreasures
 {
   char** cstrs_;

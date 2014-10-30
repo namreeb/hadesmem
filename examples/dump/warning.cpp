@@ -15,7 +15,6 @@
 
 namespace
 {
-
 // Record all modules (on disk) which cause a warning when dumped, to make it
 // easier to isolate files which require further investigation.
 bool g_warned = false;

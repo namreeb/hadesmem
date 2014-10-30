@@ -22,7 +22,6 @@
 
 namespace
 {
-
 struct WindowInfo
 {
   HWND old_hwnd_{nullptr};
@@ -371,10 +370,8 @@ public:
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static InputImpl input_impl;

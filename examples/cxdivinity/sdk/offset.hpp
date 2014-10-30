@@ -7,7 +7,6 @@
 
 namespace divinity
 {
-
 struct DataOffsets
 {
   enum : std::uint32_t

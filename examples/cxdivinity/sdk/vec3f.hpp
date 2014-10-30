@@ -7,7 +7,6 @@
 
 namespace divinity
 {
-
 struct Vec3f
 {
   float x_;

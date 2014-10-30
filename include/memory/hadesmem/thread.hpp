@@ -20,7 +20,6 @@
 
 namespace hadesmem
 {
-
 class Thread
 {
 public:

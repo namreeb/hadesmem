@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline SmartHandle CreateRemoteThreadAndWait(Process const& process,
                                              LPTHREAD_START_ROUTINE func,
                                              DWORD timeout = INFINITE)

@@ -13,7 +13,6 @@
 
 namespace divinity
 {
-
 // Need to figure out how to replicate the vtable layout from the game.
 #if defined(HADESMEM_GCC)
 #pragma GCC diagnostic push

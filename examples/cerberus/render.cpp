@@ -29,7 +29,6 @@
 
 namespace
 {
-
 bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = true;
@@ -705,10 +704,8 @@ public:
 
 namespace hadesmem
 {
-
 namespace cerberus
 {
-
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static RenderImpl render_impl;

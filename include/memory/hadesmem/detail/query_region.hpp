@@ -11,10 +11,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 {
   MEMORY_BASIC_INFORMATION mbi{};

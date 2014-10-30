@@ -5,7 +5,6 @@
 
 namespace divinity
 {
-
 enum Trait
 {
   Trait_Forgiving = 0x0,

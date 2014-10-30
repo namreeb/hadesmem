@@ -27,7 +27,7 @@
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
-#include <hadesmem/detail/union_cast.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/flush.hpp>
@@ -38,7 +38,6 @@
 
 namespace hadesmem
 {
-
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
 
 enum class CallConv
@@ -99,7 +98,6 @@ private:
 
 namespace detail
 {
-
 struct CallResultRemote
 {
   DWORD64 return_i64;
@@ -252,7 +250,6 @@ private:
 
 namespace detail
 {
-
 template <typename T>
 CallResult<T> CallResultRawToCallResult(CallResultRaw const& result)
   HADESMEM_DETAIL_NOEXCEPT
@@ -372,7 +369,6 @@ private:
 
 namespace detail
 {
-
 inline std::uint32_t GetLow32(std::uint64_t i)
 {
   return static_cast<std::uint32_t>(i & 0xFFFFFFFFUL);
@@ -435,7 +431,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
 
-    auto const arg_conv = UnionCast<std::uint32_t>(arg);
+    auto const arg_conv = AliasCast<std::uint32_t>(arg);
 
     assembler_->mov(asmjit::x86::eax, asmjit::imm_u(arg_conv));
     assembler_->push(asmjit::x86::eax);
@@ -448,7 +444,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
 
-    auto const arg_conv = UnionCast<std::uint64_t>(arg);
+    auto const arg_conv = AliasCast<std::uint64_t>(arg);
 
     assembler_->mov(asmjit::x86::eax, asmjit::imm_u(GetHigh32(arg_conv)));
     assembler_->push(asmjit::x86::eax);
@@ -508,7 +504,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == 4);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(float) == sizeof(std::uint32_t));
 
-    auto const arg_conv = UnionCast<std::uint32_t>(arg);
+    auto const arg_conv = AliasCast<std::uint32_t>(arg);
 
     std::int32_t const scratch_offs = static_cast<std::int32_t>(num_args_ * 8);
     std::int32_t const stack_offs =
@@ -539,7 +535,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == 8);
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(double) == sizeof(std::uint64_t));
 
-    auto const arg_conv = UnionCast<std::uint64_t>(arg);
+    auto const arg_conv = AliasCast<std::uint64_t>(arg);
 
     std::int32_t const scratch_offs = static_cast<std::int32_t>(num_args_ * 8);
     std::int32_t const stack_offs =
@@ -954,10 +950,8 @@ inline CallResultRaw CallRaw(Process const& process,
 {
   std::vector<void*> addresses{address};
   std::vector<CallConv> call_convs{call_conv};
-  std::vector<std::vector<CallArg>> args_full;
-  // Using an initializer list for this causes an ICE under Intel C++
-  // (14.0.1.139 Build 20131008).
-  args_full.emplace_back(args_beg, args_end);
+  std::vector<std::vector<CallArg>> args_full{
+    std::vector<CallArg>{args_beg, args_end}};
   std::vector<CallResultRaw> results;
   CallMulti(process,
             std::begin(addresses),
@@ -971,12 +965,11 @@ inline CallResultRaw CallRaw(Process const& process,
 
 namespace detail
 {
-
 template <typename FuncT,
           std::int32_t N,
           typename T,
           typename OutputIterator,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+          int = detail::FuncCallConv<FuncT>::value>
 inline void AddCallArg(OutputIterator call_args, T&& arg)
 {
   using RealT = typename std::tuple_element<N, FuncArgsT<FuncT>>::type;
@@ -989,7 +982,7 @@ inline void AddCallArg(OutputIterator call_args, T&& arg)
 template <typename FuncT,
           std::int32_t N,
           typename OutputIterator,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+          int = detail::FuncCallConv<FuncT>::value>
 inline void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return;
@@ -1000,7 +993,7 @@ template <typename FuncT,
           typename T,
           typename OutputIterator,
           typename... Args,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+          int = detail::FuncCallConv<FuncT>::value>
 inline void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
@@ -1010,7 +1003,7 @@ inline void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 
 template <typename FuncT,
           typename... Args,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+          int = detail::FuncCallConv<FuncT>::value>
 inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
                                                    void* address,
                                                    CallConv call_conv,
@@ -1032,26 +1025,22 @@ inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
 
 namespace detail
 {
-
-template <typename FuncT,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
 inline void* FuncToPointerImpl(FuncT func, std::true_type)
 {
   using FuncPtrT = std::add_pointer_t<FuncT>;
   auto const func_ptr = static_cast<FuncPtrT>(func);
-  return detail::UnionCastUnchecked<void*>(func_ptr);
+  return detail::AliasCastUnchecked<void*>(func_ptr);
 }
 
-template <typename FuncT,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
 inline void* FuncToPointerImpl(FuncT func, std::false_type)
 {
   auto const func_ptr = static_cast<FuncT>(func);
-  return detail::UnionCastUnchecked<void*>(func_ptr);
+  return detail::AliasCastUnchecked<void*>(func_ptr);
 }
 
-template <typename FuncT,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
 inline void* FuncToPointer(FuncT func)
 {
   return FuncToPointerImpl(func, std::is_function<FuncT>());
@@ -1060,7 +1049,7 @@ inline void* FuncToPointer(FuncT func)
 
 template <typename FuncT,
           typename... Args,
-          int DummyCallConv = detail::FuncCallConv<FuncT>::value>
+          int = detail::FuncCallConv<FuncT>::value>
 inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
                                                    FuncT address,
                                                    CallConv call_conv,

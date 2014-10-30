@@ -10,7 +10,6 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
 enum class SRWLockType
@@ -48,7 +47,6 @@ public:
 
   AcquireSRWLock& operator=(AcquireSRWLock&& other) HADESMEM_DETAIL_NOEXCEPT
   {
-
     Cleanup();
 
     lock_ = other.lock_;

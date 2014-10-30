@@ -41,7 +41,6 @@
 
 namespace hadesmem
 {
-
 struct PatternFlags
 {
   enum : std::uint32_t
@@ -56,7 +55,6 @@ struct PatternFlags
 
 namespace detail
 {
-
 struct PatternDataByte
 {
   std::uint8_t data;

@@ -9,10 +9,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 template <typename T, typename U = std::remove_cv_t<T>> struct IsCharType
 {
   static bool const value =

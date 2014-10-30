@@ -9,10 +9,8 @@
 
 namespace hadesmem
 {
-
 namespace detail
 {
-
 // http://bit.ly/eI8fOe
 inline void ArgvQuote(std::wstring* command_line,
                       std::wstring const& argument,

@@ -5,7 +5,6 @@
 
 namespace hadesmem
 {
-
 class Process;
 }
 

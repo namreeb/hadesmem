@@ -189,7 +189,7 @@ void TestFindPattern()
   BOOST_TEST_EQ(*static_cast<char const*>(two_nop_nt_close), '\x90');
   BOOST_TEST_EQ(*(static_cast<char const*>(two_nop_nt_close) + 1), '\x90');
   hadesmem::Module const ntdll(process, L"ntdll.dll");
-  auto const nt_close = hadesmem::detail::UnionCast<void*>(
+  auto const nt_close = hadesmem::detail::AliasCast<void*>(
     FindProcedure(process, ntdll, "NtClose"));
   BOOST_TEST(two_nop_nt_close > nt_close);
   auto const nop_ordinal_1 =
@@ -197,7 +197,7 @@ void TestFindPattern()
   BOOST_TEST_NE(nop_ordinal_1, static_cast<void*>(nullptr));
   BOOST_TEST_EQ(*static_cast<char const*>(nop_ordinal_1), '\x90');
   auto const ordinal_1 =
-    hadesmem::detail::UnionCast<void*>(FindProcedure(process, ntdll, 1));
+    hadesmem::detail::AliasCast<void*>(FindProcedure(process, ntdll, 1));
   BOOST_TEST(nop_ordinal_1 > ordinal_1);
 
   std::wstring const pattern_file_data_invalid1 = LR"(
