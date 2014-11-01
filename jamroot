@@ -88,6 +88,9 @@ project memory
     # not affect program correctness.
     <toolset>msvc:<cxxflags>"/wd4503"
     <toolset>intel:<cxxflags>"/Qwd2586"
+    # Disable extremely noisy and impossible to suppress warning about 
+    # parameters being unreferenced (caused by Boost).
+    <toolset>intel:<cxxflags>"/Qwd869"
     # Disable behavior change 'warning', "an object of POD type constructed 
     # with an initializer of the form () will be default-initialized". This 
     # warning can be safely ignored as it's just a notification about a 
@@ -117,11 +120,10 @@ project memory
     <toolset>clang:<cxxflags>"-std=c++1y"
     <toolset>intel:<cxxflags>"/Qstd=c++11"
     
-    # Enable LTO/LTCG
+    # Enable LTO/LTCG 
     <variant>release,<toolset>msvc:<cxxflags>"/GL"
     <variant>release,<toolset>msvc:<linkflags>"/LTCG"
-    <variant>release,<toolset>intel:<cxxflags>"/GL"
-    <variant>release,<toolset>intel:<linkflags>"/LTCG"
+    <variant>release,<toolset>intel:<cxxflags>"/Qipo"
 
     # Enable more MSVC optimizations
     <toolset>msvc,<variant>release:<cxxflags>"/Gw /Gy"
