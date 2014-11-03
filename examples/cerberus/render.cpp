@@ -185,6 +185,11 @@ public:
   {
     return ::TwAddVarRW(bar, name, type, var, def);
   }
+
+  virtual char const* TwGetLastError() final
+  {
+    return ::TwGetLastError();
+  }
 };
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)

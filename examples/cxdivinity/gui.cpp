@@ -96,9 +96,10 @@ void OnAntTweakBarInitialize(
   g_tweak_bar = ant_tweak_bar->TwNewBar("CXDivinity");
   if (!g_tweak_bar)
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{"TwNewBar failed."}
+                                    << hadesmem::ErrorStringOther{
+                                         ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_full_button =
@@ -111,7 +112,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_character_button =
@@ -124,7 +126,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_party_button =
@@ -137,7 +140,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_item_button =
@@ -150,7 +154,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_inventory_button =
@@ -163,7 +168,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_string_button =
@@ -176,7 +182,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const game_object_name =
@@ -189,7 +196,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 
   auto const dump_named_game_object =
@@ -202,7 +210,8 @@ void OnAntTweakBarInitialize(
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{
+                             ant_tweak_bar->TwGetLastError()});
   }
 }
 
