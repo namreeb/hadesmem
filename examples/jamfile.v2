@@ -57,11 +57,6 @@ exe esomod
     [ glob esomod/*.cpp ]
   ;
   
-exe divinity_trainer
-  :
-    [ glob divinity_trainer/*.cpp ]
-  ;
-
 lib injecttestdep
   :
     [ glob injecttestdep/*.cpp ]
@@ -88,20 +83,3 @@ lib cxexample
     ole32
   ;
   
-lib cxdivinity
-  :
-    [ glob cxdivinity/*.cpp ]
-    [ glob cxdivinity/sdk/*.cpp ]
-    comctl32
-    gdi32
-    ole32
-  ;
-
-lib cxwormsclanwars
-  :
-    [ glob cxwormsclanwars/*.cpp ]
-    [ glob cxwormsclanwars/sdk/*.cpp ]
-    comctl32
-    gdi32
-    ole32
-  ;

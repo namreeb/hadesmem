@@ -44,7 +44,7 @@ void OnAntTweakBarInitialize(
     return;
   }
 
-  g_tweak_bar = ant_tweak_bar->TwNewBar("CXWormsClanWars");
+  g_tweak_bar = ant_tweak_bar->TwNewBar("CXExample");
   if (!g_tweak_bar)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
@@ -55,7 +55,7 @@ void OnAntTweakBarInitialize(
 
   auto const placeholder_button =
     ant_tweak_bar->TwAddButton(g_tweak_bar,
-                               "CXWormsClanWars_PlaceholderBtn",
+                               "CXExample_PlaceholderBtn",
                                &PlaceholderCallbackTw,
                                nullptr,
                                " label='Placeholder' ");

@@ -1,24 +1,15 @@
 // Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
-#include <thread>
-
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
 #include "../cerberus/plugin.hpp"
 
-#include "radar.hpp"
-#include "root_window.hpp"
-
-namespace
-{
-std::unique_ptr<std::thread> g_window_thread{};
-}
+#include "gui.hpp"
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR LoadPlugin(
   hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
@@ -27,21 +18,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR LoadPlugin(
   {
     HADESMEM_DETAIL_TRACE_A("Initializing.");
 
-    // Preemptively fix a potential order of destruction issue by ensuring this
-    // is used very early.
-    auto const& thread = GetThreadHandle();
-    (void)thread;
-
-    // Using a wrapper lambda to work around a GCC link error on x86
-    auto const window_thread = []()
-    {
-      WindowThread(
-        hadesmem::detail::GetHandleToSelf(), nullptr, nullptr, SW_SHOW);
-    };
-    g_window_thread.reset(new std::thread(window_thread));
-    g_window_thread->detach();
-
-    InitializeRadar(cerberus);
+    InitializeGui(cerberus);
 
     return 0;
   }
@@ -62,32 +39,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR UnloadPlugin(
   {
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupRadar(cerberus);
-
-    auto const hwnd = GetWindowHandle();
-    if (hwnd && ::SendMessageW(hwnd, WM_CLOSE, 0, 0))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"SendMessageW failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    auto const& thread = GetThreadHandle();
-    if (thread.IsValid())
-    {
-      DWORD const wait_result =
-        ::WaitForSingleObject(thread.GetHandle(), INFINITE);
-      if (wait_result != WAIT_OBJECT_0)
-      {
-        DWORD const last_error = ::GetLastError();
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error{}
-          << hadesmem::ErrorString{"WaitForSingleObject failed."}
-          << hadesmem::ErrorCodeWinLast{last_error}
-          << hadesmem::ErrorCodeWinOther(wait_result));
-      }
-    }
+    CleanupGui(cerberus);
 
     return 0;
   }
