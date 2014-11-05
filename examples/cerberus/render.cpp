@@ -24,6 +24,7 @@
 #include "d3d11.hpp"
 #include "dxgi.hpp"
 #include "input.hpp"
+#include "opengl.hpp"
 #include "plugin.hpp"
 #include "main.hpp"
 
@@ -146,11 +147,26 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
+struct RenderInfoOGL
+{
+  bool first_time_{ true };
+  bool tw_initialized_{ false };
+  bool wnd_hooked_{ false };
+  HDC device_{};
+};
+
+RenderInfoOGL& GetRenderInfoOGL() HADESMEM_DETAIL_NOEXCEPT
+{
+  static RenderInfoOGL render_info;
+  return render_info;
+}
+
 bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetRenderInfoD3D9().tw_initialized_ ||
          GetRenderInfoD3D10().tw_initialized_ ||
-         GetRenderInfoD3D11().tw_initialized_;
+         GetRenderInfoD3D11().tw_initialized_ || 
+         GetRenderInfoOGL().tw_initialized_;
 }
 
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
@@ -254,6 +270,29 @@ bool InitializeWndprocHook(RenderInfoD3D9& render_info)
     else
     {
       HADESMEM_DETAIL_TRACE_A("Null device focus window. Ignoring.");
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+  }
+
+  return false;
+}
+
+bool InitializeWndprocHook(RenderInfoOGL& render_info)
+{
+  if (!hadesmem::cerberus::IsWindowHooked())
+  {
+    if (HWND wnd = ::WindowFromDC(render_info.device_))
+    {
+      hadesmem::cerberus::HandleWindowChange(wnd);
+      return true;
+    }
+    else
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Failed to get window handle (%ld). Ignoring.", last_error);
     }
   }
   else
@@ -502,6 +541,23 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
   render_info.wnd_hooked_ = false;
 }
 
+void HandleChangedDeviceOGL(HDC device, RenderInfoOGL& render_info)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new device. Old = %p, New = %p.", render_info.device_, device);
+  render_info.device_ = device;
+
+  render_info.first_time_ = true;
+
+  CleanupAntTweakBar(render_info.tw_initialized_);
+
+  if (render_info.wnd_hooked_)
+  {
+    hadesmem::cerberus::HandleWindowChange(nullptr);
+  }
+
+  render_info.wnd_hooked_ = false;
+}
+
 void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
 {
   HADESMEM_DETAIL_TRACE_A("Initializing.");
@@ -564,6 +620,20 @@ void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
 
+void InitializeOGLRenderInfo(RenderInfoOGL& render_info)
+{
+  HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+  render_info.first_time_ = false;
+
+  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+  InitializeAntTweakBar(
+    TW_OPENGL, render_info.device_, render_info.tw_initialized_);
+
+  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
+}
+
 void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 {
   auto& render_info = GetRenderInfoD3D11();
@@ -606,6 +676,20 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
   }
 }
 
+void HandleOnFrameOGL(HDC device)
+{
+  auto& render_info = GetRenderInfoOGL();
+  if (render_info.device_ != device)
+  {
+    HandleChangedDeviceOGL(device, render_info);
+  }
+
+  if (render_info.first_time_)
+  {
+    InitializeOGLRenderInfo(render_info);
+  }
+}
+
 void HandleOnResetD3D9(IDirect3DDevice9* device,
                        D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {
@@ -642,6 +726,14 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
   HandleOnFrameD3D9(device);
+
+  auto& callbacks = GetOnFrameCallbacks();
+  callbacks.Run();
+}
+
+void OnFrameOGL(HDC device)
+{
+  HandleOnFrameOGL(device);
 
   auto& callbacks = GetOnFrameCallbacks();
   callbacks.Run();
@@ -730,6 +822,8 @@ void InitializeRender()
   RegisterOnFrameCallbackD3D9(OnFrameD3D9);
 
   RegisterOnResetCallbackD3D9(OnResetD3D9);
+
+  RegisterOnFrameCallbackOGL(OnFrameOGL);
 
   RegisterOnFrameCallback(OnFrameGeneric);
 

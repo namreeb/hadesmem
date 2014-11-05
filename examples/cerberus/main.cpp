@@ -25,6 +25,7 @@
 #include "dxgi.hpp"
 #include "exception.hpp"
 #include "module.hpp"
+#include "opengl.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
 #include "render.hpp"
@@ -197,6 +198,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
+    hadesmem::cerberus::DetourOGL(nullptr);
 
     hadesmem::cerberus::InitializeRender();
 
