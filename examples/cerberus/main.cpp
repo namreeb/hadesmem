@@ -80,10 +80,25 @@ void UseAllStatics()
     hadesmem::cerberus::RegisterOnFrameCallbackDXGI(on_frame_callback_dxgi);
   hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(on_frame_id_dxgi);
 
+  auto const on_tw_init = [](hadesmem::cerberus::AntTweakBarInterface*)
+  {
+  };
+  auto const on_tw_init_id =
+    hadesmem::cerberus::RegisterOnAntTweakBarInitializeCallback(on_tw_init);
+  hadesmem::cerberus::UnregisterOnAntTweakBarInitializeCallback(on_tw_init_id);
+
+  auto const on_tw_cleanup = [](hadesmem::cerberus::AntTweakBarInterface*)
+  {
+  };
+  auto const on_tw_cleanup_id =
+    hadesmem::cerberus::RegisterOnAntTweakBarCleanupCallback(on_tw_cleanup);
+  hadesmem::cerberus::UnregisterOnAntTweakBarCleanupCallback(on_tw_cleanup_id);
+
   hadesmem::cerberus::GetModuleInterface();
   hadesmem::cerberus::GetD3D9Interface();
   hadesmem::cerberus::GetDXGIInterface();
   hadesmem::cerberus::GetRenderInterface();
+  hadesmem::cerberus::GetAntTweakBarInterface();
   hadesmem::cerberus::GetInputInterface();
 }
 
