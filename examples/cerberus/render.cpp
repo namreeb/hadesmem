@@ -162,7 +162,15 @@ void WindowProcCallback(
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
-void OnSetCursor(HCURSOR /*cursor*/, bool* handled)
+void OnSetCursor(HCURSOR /*cursor*/, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible())
+  {
+    *handled = true;
+  }
+}
+
+void OnDirectInput(bool* handled) HADESMEM_DETAIL_NOEXCEPT
 {
   if (GetAntTweakBarVisible())
   {
@@ -927,6 +935,8 @@ void InitializeRender()
   RegisterOnWndProcMsgCallback(WindowProcCallback);
 
   RegisterOnSetCursorCallback(OnSetCursor);
+
+  RegisterOnDirectInputCallback(OnDirectInput);
 }
 
 std::size_t

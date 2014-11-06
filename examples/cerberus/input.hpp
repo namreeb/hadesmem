@@ -20,6 +20,8 @@ typedef void OnWndProcMsgCallback(
 
 typedef void OnSetCursorCallback(HCURSOR cursor, bool* handled);
 
+typedef void OnDirectInputCallback(bool* handled);
+
 class InputInterface
 {
 public:
@@ -36,6 +38,11 @@ public:
     RegisterOnSetCursor(std::function<OnSetCursorCallback> const& callback) = 0;
 
   virtual void UnregisterOnSetCursor(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnDirectInput(
+    std::function<OnDirectInputCallback> const& callback) = 0;
+
+  virtual void UnregisterOnDirectInput(std::size_t id) = 0;
 };
 
 InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -59,6 +66,11 @@ std::size_t RegisterOnSetCursorCallback(
   std::function<OnSetCursorCallback> const& callback);
 
 void UnregisterOnSetCursorCallback(std::size_t id);
+
+std::size_t RegisterOnDirectInputCallback(
+  std::function<OnDirectInputCallback> const& callback);
+
+void UnregisterOnDirectInputCallback(std::size_t id);
 
 void HandleWindowChange(HWND wnd);
 

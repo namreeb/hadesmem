@@ -57,6 +57,20 @@ std::unique_ptr<hadesmem::PatchDetour>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInputDevice8AGetDeviceStateDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetIDirectInputDevice8WGetDeviceStateDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
   GetIDirectInputDevice8AGetDeviceDataDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
@@ -105,6 +119,14 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnDirectInputCallback>&
+  GetOnDirectInputCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnDirectInputCallback> callbacks;
+  return callbacks;
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   HADESMEM_DETAIL_NOEXCEPT
 {
@@ -125,12 +147,79 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 HRESULT WINAPI
+  IDirectInputDevice8AGetDeviceStateDetour(IDirectInputDeviceA* device,
+                                           DWORD data_len,
+                                           LPVOID data) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto const& callbacks = GetOnDirectInputCallbacks();
+  bool handled = false;
+  callbacks.Run(&handled);
+
+  if (handled)
+  {
+    return E_FAIL;
+  }
+
+  auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  auto const get_device_data =
+    detour
+      ->GetTrampoline<decltype(&IDirectInputDevice8AGetDeviceStateDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = get_device_data(device, data_len, data);
+  last_error_preserver.Update();
+
+  return ret;
+}
+
+HRESULT WINAPI
+  IDirectInputDevice8WGetDeviceStateDetour(IDirectInputDeviceW* device,
+                                           DWORD data_len,
+                                           LPVOID data) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto const& callbacks = GetOnDirectInputCallbacks();
+  bool handled = false;
+  callbacks.Run(&handled);
+
+  if (handled)
+  {
+    return E_FAIL;
+  }
+
+  auto& detour = GetIDirectInputDevice8WGetDeviceStateDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  auto const get_device_data =
+    detour
+      ->GetTrampoline<decltype(&IDirectInputDevice8WGetDeviceStateDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = get_device_data(device, data_len, data);
+  last_error_preserver.Update();
+
+  return ret;
+}
+
+HRESULT WINAPI
   IDirectInputDevice8AGetDeviceDataDetour(IDirectInputDeviceA* device,
                                           DWORD cb_object_data,
                                           LPDIDEVICEOBJECTDATA dev_obj_data,
                                           LPDWORD in_out,
-                                          DWORD flags)
+                                          DWORD flags) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto const& callbacks = GetOnDirectInputCallbacks();
+  bool handled = false;
+  callbacks.Run(&handled);
+
+  if (handled)
+  {
+    return E_FAIL;
+  }
+
   auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
@@ -151,8 +240,17 @@ HRESULT WINAPI
                                           DWORD cb_object_data,
                                           LPDIDEVICEOBJECTDATA dev_obj_data,
                                           LPDWORD in_out,
-                                          DWORD flags)
+                                          DWORD flags) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto const& callbacks = GetOnDirectInputCallbacks();
+  bool handled = false;
+  callbacks.Run(&handled);
+
+  if (handled)
+  {
+    return E_FAIL;
+  }
+
   auto& detour = GetIDirectInputDevice8WGetDeviceDataDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
@@ -180,6 +278,14 @@ void DetourDirectInputDevice8(REFIID riid, void* device)
     {
       hadesmem::cerberus::DetourFunc(
         process,
+        L"IDirectInputDevice8A::GetDeviceState",
+        device,
+        9,
+        GetIDirectInputDevice8AGetDeviceStateDetour(),
+        IDirectInputDevice8AGetDeviceStateDetour);
+
+      hadesmem::cerberus::DetourFunc(
+        process,
         L"IDirectInputDevice8A::GetDeviceData",
         device,
         10,
@@ -188,6 +294,14 @@ void DetourDirectInputDevice8(REFIID riid, void* device)
     }
     else if (riid == IID_IDirectInputDevice8W)
     {
+      hadesmem::cerberus::DetourFunc(
+        process,
+        L"IDirectInputDevice8W::GetDeviceState",
+        device,
+        9,
+        GetIDirectInputDevice8WGetDeviceStateDetour(),
+        IDirectInputDevice8WGetDeviceStateDetour);
+
       hadesmem::cerberus::DetourFunc(
         process,
         L"IDirectInputDevice8W::GetDeviceData",
@@ -214,7 +328,7 @@ HRESULT WINAPI
   IDirectInput8ACreateDeviceDetour(IDirectInput8A* input,
                                    REFGUID rguid,
                                    IDirectInputDeviceA** direct_input_device,
-                                   LPUNKNOWN unk_outer)
+                                   LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDirectInput8ACreateDeviceDetour();
   auto const ref_counter =
@@ -251,7 +365,7 @@ HRESULT WINAPI
   IDirectInput8WCreateDeviceDetour(IDirectInput8W* input,
                                    REFGUID rguid,
                                    IDirectInputDeviceW** direct_input_device,
-                                   LPUNKNOWN unk_outer)
+                                   LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetIDirectInput8WCreateDeviceDetour();
   auto const ref_counter =
@@ -433,6 +547,18 @@ public:
   {
     hadesmem::cerberus::UnregisterOnSetCursorCallback(id);
   }
+
+  virtual std::size_t RegisterOnDirectInput(
+    std::function<hadesmem::cerberus::OnDirectInputCallback> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnDirectInputCallback(callback);
+  }
+
+  virtual void UnregisterOnDirectInput(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnDirectInputCallback(id);
+  }
 };
 }
 
@@ -482,6 +608,12 @@ void UndetourDirectInput8(bool remove)
                  remove);
     UndetourFunc(L"IDirectInput8W::CreateDevice",
                  GetIDirectInput8WCreateDeviceDetour(),
+                 remove);
+    UndetourFunc(L"IDirectInputDevice8A::GetDeviceState",
+                 GetIDirectInputDevice8AGetDeviceStateDetour(),
+                 remove);
+    UndetourFunc(L"IDirectInputDevice8W::GetDeviceState",
+                 GetIDirectInputDevice8WGetDeviceStateDetour(),
                  remove);
     UndetourFunc(L"IDirectInputDevice8A::GetDeviceData",
                  GetIDirectInputDevice8AGetDeviceDataDetour(),
@@ -539,6 +671,19 @@ std::size_t RegisterOnSetCursorCallback(
 void UnregisterOnSetCursorCallback(std::size_t id)
 {
   auto& callbacks = GetOnSetCursorCallbacks();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnDirectInputCallback(
+  std::function<OnDirectInputCallback> const& callback)
+{
+  auto& callbacks = GetOnDirectInputCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnDirectInputCallback(std::size_t id)
+{
+  auto& callbacks = GetOnDirectInputCallbacks();
   return callbacks.Unregister(id);
 }
 
