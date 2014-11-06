@@ -51,30 +51,29 @@ void UseAllStatics()
   // std::function object because we might not be the only thread running at the
   // moment and calling an empty function wrapper throws.
 
-  auto const on_map_callback = [](HMODULE /*module*/,
-                                  std::wstring const& /*path*/,
-                                  std::wstring const& /*name*/)
+  auto const on_map_callback =
+    [](HMODULE, std::wstring const&, std::wstring const&)
   {
   };
   auto const on_map_id =
     hadesmem::cerberus::RegisterOnMapCallback(on_map_callback);
   hadesmem::cerberus::UnregisterOnMapCallback(on_map_id);
 
-  auto const on_unmap_callback = [](HMODULE /*module*/)
+  auto const on_unmap_callback = [](HMODULE)
   {
   };
   auto const on_unmap_id =
     hadesmem::cerberus::RegisterOnUnmapCallback(on_unmap_callback);
   hadesmem::cerberus::UnregisterOnUnmapCallback(on_unmap_id);
 
-  auto const on_frame_callback_d3d9 = [](IDirect3DDevice9* /*device*/)
+  auto const on_frame_callback_d3d9 = [](IDirect3DDevice9*)
   {
   };
   auto const on_frame_id_d3d9 =
     hadesmem::cerberus::RegisterOnFrameCallbackD3D9(on_frame_callback_d3d9);
   hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(on_frame_id_d3d9);
 
-  auto const on_frame_callback_dxgi = [](IDXGISwapChain* /*swap_chain*/)
+  auto const on_frame_callback_dxgi = [](IDXGISwapChain*)
   {
   };
   auto const on_frame_id_dxgi =
@@ -243,6 +242,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
+    hadesmem::cerberus::UndetourOGL(nullptr);
 
     hadesmem::cerberus::UnloadPlugins();
 
