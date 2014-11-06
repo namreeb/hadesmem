@@ -22,6 +22,10 @@ typedef void OnSetCursorCallback(HCURSOR cursor, bool* handled);
 
 typedef void OnDirectInputCallback(bool* handled);
 
+typedef void OnGetCursorPosCallback(LPPOINT point, bool* handled);
+
+typedef void OnSetCursorPosCallback(int x, int y, bool* handled);
+
 class InputInterface
 {
 public:
@@ -38,6 +42,16 @@ public:
     RegisterOnSetCursor(std::function<OnSetCursorCallback> const& callback) = 0;
 
   virtual void UnregisterOnSetCursor(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnGetCursorPos(std::function<OnGetCursorPosCallback> const& callback) = 0;
+
+  virtual void UnregisterOnGetCursorPos(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnSetCursorPos(std::function<OnSetCursorPosCallback> const& callback) = 0;
+
+  virtual void UnregisterOnSetCursorPos(std::size_t id) = 0;
 
   virtual std::size_t RegisterOnDirectInput(
     std::function<OnDirectInputCallback> const& callback) = 0;
@@ -67,6 +81,16 @@ std::size_t RegisterOnSetCursorCallback(
 
 void UnregisterOnSetCursorCallback(std::size_t id);
 
+std::size_t RegisterOnGetCursorPosCallback(
+  std::function<OnGetCursorPosCallback> const& callback);
+
+void UnregisterOnGetCursorPosCallback(std::size_t id);
+
+std::size_t RegisterOnSetCursorPosCallback(
+  std::function<OnSetCursorPosCallback> const& callback);
+
+void UnregisterOnSetCursorPosCallback(std::size_t id);
+
 std::size_t RegisterOnDirectInputCallback(
   std::function<OnDirectInputCallback> const& callback);
 
@@ -79,5 +103,7 @@ bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
 HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT;
 
 bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+
+bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

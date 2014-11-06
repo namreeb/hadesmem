@@ -43,6 +43,12 @@ bool& GetCursorShown() HADESMEM_DETAIL_NOEXCEPT
   return cursor_shown;
 }
 
+POINT& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
+{
+  static POINT cursor_pos{};
+  return cursor_pos;
+}
+
 bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = false;
@@ -60,14 +66,14 @@ void SetAntTweakBarVisible(bool visible)
     ::TwDefine(define.c_str());
   }
 
-  bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
-  disable_hook = true;
-  auto reset_hook_flag_fn = [&]()
+  bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
+  disable_set_cursor_hook = true;
+  auto reset_set_cursor_hook_flag_fn = [&]()
   {
-    disable_hook = false;
+    disable_set_cursor_hook = false;
   };
-  auto const ensure_reset_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_hook_flag_fn);
+  auto const ensure_reset_set_cursor_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
 
   HCURSOR const arrow_cursor = ::LoadCursorW(nullptr, IDC_ARROW);
   if (!arrow_cursor)
@@ -108,6 +114,34 @@ void SetAntTweakBarVisible(bool visible)
     } while (::ShowCursor(TRUE));
   }
   cursor_shown = !!(cursor_info.flags & CURSOR_SHOWING);
+
+  bool& disable_get_cursor_pos_hook = hadesmem::cerberus::GetDisableGetCursorPosHook();
+  disable_get_cursor_pos_hook = true;
+  auto reset_get_cursor_pos_hook_flag_fn = [&]()
+  {
+    disable_get_cursor_pos_hook = false;
+  };
+  auto const ensure_reset_get_cursor_pos_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
+
+  auto& old_cursor_pos = GetOldCursorPos();
+  if (visible)
+  {
+    POINT cur_cursor_pos{};
+    if (!::GetCursorPos(&cur_cursor_pos))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{ "GetCursorPos failed." }
+      << hadesmem::ErrorCodeWinLast{ last_error });
+    }
+
+    old_cursor_pos = cur_cursor_pos;
+  }
+  else
+  {
+    old_cursor_pos = POINT{};
+  }
 }
 
 void ToggleAntTweakBarVisible()
@@ -145,20 +179,30 @@ void WindowProcCallback(
      msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
      msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
      msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
-     msg == WM_MOUSEWHEEL);
+     msg == WM_MOUSEWHEEL || msg == WM_INPUT);
   if (visible && ::TwWindowExists(0) && blocked_msg)
   {
     *handled = true;
   }
 
-  bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
-  disable_hook = true;
-  auto reset_hook_flag_fn = [&]()
+  bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
+  disable_set_cursor_hook = true;
+  auto reset_set_cursor_hook_flag_fn = [&]()
   {
-    disable_hook = false;
+    disable_set_cursor_hook = false;
   };
-  auto const ensure_reset_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_hook_flag_fn);
+  auto const ensure_reset_set_cursor_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
+
+  bool& disable_get_cursor_pos_hook = hadesmem::cerberus::GetDisableGetCursorPosHook();
+  disable_get_cursor_pos_hook = true;
+  auto reset_get_cursor_pos_hook_flag_fn = [&]()
+  {
+    disable_get_cursor_pos_hook = false;
+  };
+  auto const ensure_reset_get_cursor_pos_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
+
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
@@ -174,6 +218,30 @@ void OnDirectInput(bool* handled) HADESMEM_DETAIL_NOEXCEPT
 {
   if (GetAntTweakBarVisible())
   {
+    *handled = true;
+  }
+}
+
+void OnGetCursorPos(LPPOINT point, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible() && point)
+  {
+    auto& old_cursor_pos = GetOldCursorPos();
+    point->x = old_cursor_pos.x;
+    point->y = old_cursor_pos.y;
+
+    *handled = true;
+  }
+}
+
+void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible())
+  {
+    auto& old_cursor_pos = GetOldCursorPos();
+    old_cursor_pos.x = x;
+    old_cursor_pos.y = y;
+
     *handled = true;
   }
 }
@@ -935,6 +1003,10 @@ void InitializeRender()
   RegisterOnWndProcMsgCallback(WindowProcCallback);
 
   RegisterOnSetCursorCallback(OnSetCursor);
+
+  RegisterOnGetCursorPosCallback(OnGetCursorPos);
+
+  RegisterOnSetCursorPosCallback(OnSetCursorPos);
 
   RegisterOnDirectInputCallback(OnDirectInput);
 }
