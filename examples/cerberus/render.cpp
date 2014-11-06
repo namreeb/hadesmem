@@ -15,6 +15,7 @@
 #include <dxgi.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/scope_warden.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
@@ -36,6 +37,12 @@ HCURSOR& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
   return old_cursor;
 }
 
+bool& GetCursorShown() HADESMEM_DETAIL_NOEXCEPT
+{
+  static bool cursor_shown = false;
+  return cursor_shown;
+}
+
 bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = false;
@@ -55,11 +62,52 @@ void SetAntTweakBarVisible(bool visible)
 
   bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
   disable_hook = true;
+  auto reset_hook_flag_fn = [&]()
+  {
+    disable_hook = false;
+  };
+  auto const ensure_reset_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_hook_flag_fn);
+
+  HCURSOR const arrow_cursor = ::LoadCursorW(nullptr, IDC_ARROW);
+  if (!arrow_cursor)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"LoadCursorW failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
   auto& old_cursor = GetOldCursor();
-  HCURSOR const new_cursor =
-    visible ? ::LoadCursorW(nullptr, IDC_ARROW) : old_cursor;
+  HCURSOR const new_cursor = visible ? arrow_cursor : old_cursor;
   old_cursor = ::SetCursor(new_cursor);
-  disable_hook = false;
+
+  CURSORINFO cursor_info = {sizeof(cursor_info)};
+  if (!::GetCursorInfo(&cursor_info))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"GetCursorInfo failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  auto& cursor_shown = GetCursorShown();
+  bool const cur_cursor_shown = !!(cursor_info.flags & CURSOR_SHOWING);
+  if (cur_cursor_shown && !visible && !cursor_shown)
+  {
+    do
+    {
+      HADESMEM_DETAIL_TRACE_A("Hiding cursor.");
+    } while (!::ShowCursor(FALSE));
+  }
+  else if (!cur_cursor_shown && visible && !cursor_shown)
+  {
+    do
+    {
+      HADESMEM_DETAIL_TRACE_A("Showing cursor.");
+    } while (::ShowCursor(TRUE));
+  }
+  cursor_shown = !!(cursor_info.flags & CURSOR_SHOWING);
 }
 
 void ToggleAntTweakBarVisible()
@@ -105,8 +153,13 @@ void WindowProcCallback(
 
   bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
   disable_hook = true;
+  auto reset_hook_flag_fn = [&]()
+  {
+    disable_hook = false;
+  };
+  auto const ensure_reset_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_hook_flag_fn);
   ::TwEventWin(hwnd, msg, wparam, lparam);
-  disable_hook = false;
 }
 
 void OnSetCursor(HCURSOR /*cursor*/, bool* handled)
