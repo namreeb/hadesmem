@@ -30,10 +30,36 @@
 
 namespace
 {
+HCURSOR& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
+{
+  static HCURSOR old_cursor = nullptr;
+  return old_cursor;
+}
+
 bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
-  static bool visible = true;
+  static bool visible = false;
   return visible;
+}
+
+void SetAntTweakBarVisible(bool visible)
+{
+  for (int i = 0; i < ::TwGetBarCount(); ++i)
+  {
+    auto const bar = ::TwGetBarByIndex(i);
+    auto const name = ::TwGetBarName(bar);
+    auto const define = std::string(name) + " visible=" +
+                        (visible ? std::string("true") : std::string("false"));
+    ::TwDefine(define.c_str());
+  }
+
+  bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
+  disable_hook = true;
+  auto& old_cursor = GetOldCursor();
+  HCURSOR const new_cursor =
+    visible ? ::LoadCursorW(nullptr, IDC_ARROW) : old_cursor;
+  old_cursor = ::SetCursor(new_cursor);
+  disable_hook = false;
 }
 
 void ToggleAntTweakBarVisible()
@@ -49,32 +75,45 @@ void ToggleAntTweakBarVisible()
     HADESMEM_DETAIL_TRACE_A("Hiding all tweak bars.");
   }
 
-  for (int i = 0; i < ::TwGetBarCount(); ++i)
-  {
-    auto const bar = ::TwGetBarByIndex(i);
-    auto const name = ::TwGetBarName(bar);
-    auto const define = std::string(name) + " visible=" +
-                        (visible ? std::string("true") : std::string("false"));
-    ::TwDefine(define.c_str());
-  }
+  SetAntTweakBarVisible(visible);
 }
 
 void WindowProcCallback(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled)
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
 {
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
       ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
   {
     ToggleAntTweakBarVisible();
-    handled = true;
+    *handled = true;
     return;
   }
 
   auto& visible = GetAntTweakBarVisible();
   // Window #0 will always exist if TwInit has completed successfully.
-  if (visible && ::TwWindowExists(0) && ::TwEventWin(hwnd, msg, wparam, lparam))
+  bool const blocked_msg =
+    (msg == WM_CHAR || msg == WM_KEYDOWN || msg == WM_KEYUP ||
+     msg == WM_MOUSEMOVE || msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN ||
+     msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
+     msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
+     msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
+     msg == WM_MOUSEWHEEL);
+  if (visible && ::TwWindowExists(0) && blocked_msg)
   {
-    handled = true;
+    *handled = true;
+  }
+
+  bool& disable_hook = hadesmem::cerberus::GetDisableSetCursorHook();
+  disable_hook = true;
+  ::TwEventWin(hwnd, msg, wparam, lparam);
+  disable_hook = false;
+}
+
+void OnSetCursor(HCURSOR /*cursor*/, bool* handled)
+{
+  if (GetAntTweakBarVisible())
+  {
+    *handled = true;
   }
 }
 
@@ -147,17 +186,17 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-struct RenderInfoOGL
+struct RenderInfoOpenGL32
 {
-  bool first_time_{ true };
-  bool tw_initialized_{ false };
-  bool wnd_hooked_{ false };
+  bool first_time_{true};
+  bool tw_initialized_{false};
+  bool wnd_hooked_{false};
   HDC device_{};
 };
 
-RenderInfoOGL& GetRenderInfoOGL() HADESMEM_DETAIL_NOEXCEPT
+RenderInfoOpenGL32& GetRenderInfoOpenGL32() HADESMEM_DETAIL_NOEXCEPT
 {
-  static RenderInfoOGL render_info;
+  static RenderInfoOpenGL32 render_info;
   return render_info;
 }
 
@@ -165,8 +204,8 @@ bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetRenderInfoD3D9().tw_initialized_ ||
          GetRenderInfoD3D10().tw_initialized_ ||
-         GetRenderInfoD3D11().tw_initialized_ || 
-         GetRenderInfoOGL().tw_initialized_;
+         GetRenderInfoD3D11().tw_initialized_ ||
+         GetRenderInfoOpenGL32().tw_initialized_;
 }
 
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
@@ -280,7 +319,7 @@ bool InitializeWndprocHook(RenderInfoD3D9& render_info)
   return false;
 }
 
-bool InitializeWndprocHook(RenderInfoOGL& render_info)
+bool InitializeWndprocHook(RenderInfoOpenGL32& render_info)
 {
   if (!hadesmem::cerberus::IsWindowHooked())
   {
@@ -292,7 +331,8 @@ bool InitializeWndprocHook(RenderInfoOGL& render_info)
     else
     {
       DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Failed to get window handle (%ld). Ignoring.", last_error);
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Failed to get window handle (%ld). Ignoring.", last_error);
     }
   }
   else
@@ -449,13 +489,16 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
   }
 
   auto& visible = GetAntTweakBarVisible();
-  visible = true;
 
-  HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar initialization callbacks.");
+  HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
 
   auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   callbacks.Run(&ant_tweak_bar);
+
+  HADESMEM_DETAIL_TRACE_A("Setting tweak bar visibilty.");
+
+  SetAntTweakBarVisible(visible);
 }
 
 void CleanupAntTweakBar(bool& initialized)
@@ -541,9 +584,10 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
   render_info.wnd_hooked_ = false;
 }
 
-void HandleChangedDeviceOGL(HDC device, RenderInfoOGL& render_info)
+void HandleChangedDeviceOpenGL32(HDC device, RenderInfoOpenGL32& render_info)
 {
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new device. Old = %p, New = %p.", render_info.device_, device);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Got a new device. Old = %p, New = %p.", render_info.device_, device);
   render_info.device_ = device;
 
   render_info.first_time_ = true;
@@ -620,7 +664,7 @@ void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
 
-void InitializeOGLRenderInfo(RenderInfoOGL& render_info)
+void InitializeOpenGL32RenderInfo(RenderInfoOpenGL32& render_info)
 {
   HADESMEM_DETAIL_TRACE_A("Initializing.");
 
@@ -676,17 +720,17 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
   }
 }
 
-void HandleOnFrameOGL(HDC device)
+void HandleOnFrameOpenGL32(HDC device)
 {
-  auto& render_info = GetRenderInfoOGL();
+  auto& render_info = GetRenderInfoOpenGL32();
   if (render_info.device_ != device)
   {
-    HandleChangedDeviceOGL(device, render_info);
+    HandleChangedDeviceOpenGL32(device, render_info);
   }
 
   if (render_info.first_time_)
   {
-    InitializeOGLRenderInfo(render_info);
+    InitializeOpenGL32RenderInfo(render_info);
   }
 }
 
@@ -731,9 +775,9 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   callbacks.Run();
 }
 
-void OnFrameOGL(HDC device)
+void OnFrameOpenGL32(HDC device)
 {
-  HandleOnFrameOGL(device);
+  HandleOnFrameOpenGL32(device);
 
   auto& callbacks = GetOnFrameCallbacks();
   callbacks.Run();
@@ -823,11 +867,13 @@ void InitializeRender()
 
   RegisterOnResetCallbackD3D9(OnResetD3D9);
 
-  RegisterOnFrameCallbackOGL(OnFrameOGL);
+  RegisterOnFrameCallbackOpenGL32(OnFrameOpenGL32);
 
   RegisterOnFrameCallback(OnFrameGeneric);
 
   RegisterOnWndProcMsgCallback(WindowProcCallback);
+
+  RegisterOnSetCursorCallback(OnSetCursor);
 }
 
 std::size_t

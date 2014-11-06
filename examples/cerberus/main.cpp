@@ -197,7 +197,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
-    hadesmem::cerberus::DetourOGL(nullptr);
+    hadesmem::cerberus::DetourUser32(nullptr);
+    hadesmem::cerberus::DetourOpenGL32(nullptr);
 
     hadesmem::cerberus::InitializeRender();
 
@@ -242,7 +243,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
-    hadesmem::cerberus::UndetourOGL(nullptr);
+    hadesmem::cerberus::UndetourUser32(true);
+    hadesmem::cerberus::UndetourOpenGL32(nullptr);
 
     hadesmem::cerberus::UnloadPlugins();
 

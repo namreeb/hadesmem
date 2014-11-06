@@ -84,12 +84,33 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
   return callbacks;
 }
 
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetSetCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>&
+  GetOnSetCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>
+    callbacks;
+  return callbacks;
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   HADESMEM_DETAIL_NOEXCEPT
 {
   auto const& callbacks = GetOnWndProcMsgCallbacks();
   bool handled = false;
-  callbacks.Run(hwnd, msg, wparam, lparam, handled);
+  callbacks.Run(hwnd, msg, wparam, lparam, &handled);
 
   if (handled)
   {
@@ -337,6 +358,41 @@ HRESULT WINAPI
   return ret;
 }
 
+HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetSetCursorDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p].", cursor);
+
+  if (!hadesmem::cerberus::GetDisableSetCursorHook())
+  {
+    auto const& callbacks = GetOnSetCursorCallbacks();
+    bool handled = false;
+    callbacks.Run(cursor, &handled);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_A("SetCursor handled. Not calling trampoline.");
+      return nullptr;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("SetCursor hook disabled, skipping callbacks.");
+  }
+
+  auto const set_cursor = detour->GetTrampoline<decltype(&SetCursorDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = set_cursor(cursor);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%p].", ret);
+
+  return ret;
+}
+
 class InputImpl : public hadesmem::cerberus::InputInterface
 {
 public:
@@ -365,6 +421,18 @@ public:
   {
     hadesmem::cerberus::UnregisterOnWndProcMsgCallback(id);
   }
+
+  virtual std::size_t RegisterOnSetCursor(
+    std::function<hadesmem::cerberus::OnSetCursorCallback> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnSetCursorCallback(callback);
+  }
+
+  virtual void UnregisterOnSetCursor(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnSetCursorCallback(id);
+  }
 };
 }
 
@@ -384,6 +452,9 @@ void InitializeInput()
                              DetourDirectInput8,
                              UndetourDirectInput8,
                              GetDirectInput8Module);
+
+  InitializeSupportForModule(
+    L"user32", DetourUser32, UndetourUser32, GetUser32Module);
 }
 
 void DetourDirectInput8(HMODULE base)
@@ -423,6 +494,28 @@ void UndetourDirectInput8(bool remove)
   }
 }
 
+void DetourUser32(HMODULE base)
+{
+  auto const& process = GetThisProcess();
+  auto& module = GetUser32Module();
+  if (CommonDetourModule(process, L"user32", base, module))
+  {
+    DetourFunc(
+      process, base, "SetCursor", GetSetCursorDetour(), SetCursorDetour);
+  }
+}
+
+void UndetourUser32(bool remove)
+{
+  auto& module = GetDirectInput8Module();
+  if (CommonUndetourModule(L"user32", module))
+  {
+    UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
+  }
+}
+
 std::size_t RegisterOnWndProcMsgCallback(
   std::function<OnWndProcMsgCallback> const& callback)
 {
@@ -433,6 +526,19 @@ std::size_t RegisterOnWndProcMsgCallback(
 void UnregisterOnWndProcMsgCallback(std::size_t id)
 {
   auto& callbacks = GetOnWndProcMsgCallbacks();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnSetCursorCallback(
+  std::function<OnSetCursorCallback> const& callback)
+{
+  auto& callbacks = GetOnSetCursorCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnSetCursorCallback(std::size_t id)
+{
+  auto& callbacks = GetOnSetCursorCallbacks();
   return callbacks.Unregister(id);
 }
 
@@ -494,6 +600,18 @@ bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT
 HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetWindowInfo().old_hwnd_;
+}
+
+bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool disable_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool disable_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return disable_hook;
 }
 }
 }

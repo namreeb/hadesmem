@@ -16,44 +16,44 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnFrameCallbackOGL(HDC device);
+typedef void OnFrameCallbackOpenGL32(HDC device);
 
-typedef void OnUnloadCallbackOGL();
+typedef void OnUnloadCallbackOpenGL32();
 
-class OGLInterface
+class OpenGL32Interface
 {
 public:
-  virtual ~OGLInterface()
+  virtual ~OpenGL32Interface()
   {
   }
 
   virtual std::size_t RegisterOnFrameCallback(
-    std::function<OnFrameCallbackOGL> const& callback) = 0;
+    std::function<OnFrameCallbackOpenGL32> const& callback) = 0;
 
   virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
 
   virtual std::size_t RegisterOnUnloadCallback(
-    std::function<OnUnloadCallbackOGL> const& callback) = 0;
+    std::function<OnUnloadCallbackOpenGL32> const& callback) = 0;
 
   virtual void UnregisterOnUnloadCallback(std::size_t id) = 0;
 };
 
-OGLInterface& GetOGLInterface() HADESMEM_DETAIL_NOEXCEPT;
+OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT;
 
-void InitializeOGL();
+void InitializeOpenGL32();
 
-void DetourOGL(HMODULE base);
+void DetourOpenGL32(HMODULE base);
 
-void UndetourOGL(bool remove);
+void UndetourOpenGL32(bool remove);
 
-std::size_t RegisterOnFrameCallbackOGL(
-  std::function<OnFrameCallbackOGL> const& callback);
+std::size_t RegisterOnFrameCallbackOpenGL32(
+  std::function<OnFrameCallbackOpenGL32> const& callback);
 
-void UnregisterOnFrameCallbackOGL(std::size_t id);
+void UnregisterOnFrameCallbackOpenGL32(std::size_t id);
 
-std::size_t RegisterOnUnloadCallbackOGL(
-  std::function<OnUnloadCallbackOGL> const& callback);
+std::size_t RegisterOnUnloadCallbackOpenGL32(
+  std::function<OnUnloadCallbackOpenGL32> const& callback);
 
-void UnregisterOnUnloadCallbackOGL(std::size_t id);
+void UnregisterOnUnloadCallbackOpenGL32(std::size_t id);
 }
 }

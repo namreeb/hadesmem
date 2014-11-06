@@ -30,30 +30,31 @@
 
 namespace
 {
-class OGLImpl : public hadesmem::cerberus::OGLInterface
+class OpenGL32Impl : public hadesmem::cerberus::OpenGL32Interface
 {
 public:
   virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackOGL> const& callback) final
+    std::function<hadesmem::cerberus::OnFrameCallbackOpenGL32> const& callback)
+    final
   {
-    return hadesmem::cerberus::RegisterOnFrameCallbackOGL(callback);
+    return hadesmem::cerberus::RegisterOnFrameCallbackOpenGL32(callback);
   }
 
   virtual void UnregisterOnFrameCallback(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnFrameCallbackOGL(id);
+    hadesmem::cerberus::UnregisterOnFrameCallbackOpenGL32(id);
   }
 
   virtual std::size_t RegisterOnUnloadCallback(
-    std::function<hadesmem::cerberus::OnUnloadCallbackOGL> const& callback)
+    std::function<hadesmem::cerberus::OnUnloadCallbackOpenGL32> const& callback)
     final
   {
-    return hadesmem::cerberus::RegisterOnUnloadCallbackOGL(callback);
+    return hadesmem::cerberus::RegisterOnUnloadCallbackOpenGL32(callback);
   }
 
   virtual void UnregisterOnUnloadCallback(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnUnloadCallbackOGL(id);
+    hadesmem::cerberus::UnregisterOnUnloadCallbackOpenGL32(id);
   }
 };
 
@@ -64,25 +65,25 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetOGLModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetOpenGL32Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackOGL>&
-  GetOnFrameCallbacksOGL()
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackOpenGL32>&
+  GetOnFrameCallbacksOpenGL32()
 {
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackOGL>
-    callbacks;
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnFrameCallbackOpenGL32> callbacks;
   return callbacks;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackOGL>&
-  GetOnUnloadCallbacksOGL()
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackOpenGL32>&
+  GetOnUnloadCallbacksOpenGL32()
 {
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackOGL>
-    callbacks;
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnUnloadCallbackOpenGL32> callbacks;
   return callbacks;
 }
 
@@ -95,7 +96,7 @@ extern "C" BOOL WINAPI WglSwapBuffersDetour(HDC device) HADESMEM_DETAIL_NOEXCEPT
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
 
-  auto& callbacks = GetOnFrameCallbacksOGL();
+  auto& callbacks = GetOnFrameCallbacksOpenGL32();
   callbacks.Run(device);
 
   auto const end_scene =
@@ -113,21 +114,22 @@ namespace hadesmem
 {
 namespace cerberus
 {
-OGLInterface& GetOGLInterface() HADESMEM_DETAIL_NOEXCEPT
+OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT
 {
-  static OGLImpl impl;
+  static OpenGL32Impl impl;
   return impl;
 }
 
-void InitializeOGL()
+void InitializeOpenGL32()
 {
-  InitializeSupportForModule(L"OpenGL32", DetourOGL, UndetourOGL, GetOGLModule);
+  InitializeSupportForModule(
+    L"OpenGL32", DetourOpenGL32, UndetourOpenGL32, GetOpenGL32Module);
 }
 
-void DetourOGL(HMODULE base)
+void DetourOpenGL32(HMODULE base)
 {
   auto const& process = GetThisProcess();
-  auto& module = GetOGLModule();
+  auto& module = GetOpenGL32Module();
   if (CommonDetourModule(process, L"OpenGL32", base, module))
   {
     DetourFunc(process,
@@ -138,9 +140,9 @@ void DetourOGL(HMODULE base)
   }
 }
 
-void UndetourOGL(bool remove)
+void UndetourOpenGL32(bool remove)
 {
-  auto& module = GetOGLModule();
+  auto& module = GetOpenGL32Module();
   if (CommonUndetourModule(L"OpenGL32", module))
   {
     UndetourFunc(L"wglSwapBuffers", GetWglSwapBuffersDetour(), remove);
@@ -148,33 +150,33 @@ void UndetourOGL(bool remove)
     module = std::make_pair(nullptr, 0);
   }
 
-  auto const& callbacks = GetOnUnloadCallbacksOGL();
+  auto const& callbacks = GetOnUnloadCallbacksOpenGL32();
   callbacks.Run();
 }
 
-std::size_t
-  RegisterOnFrameCallbackOGL(std::function<OnFrameCallbackOGL> const& callback)
+std::size_t RegisterOnFrameCallbackOpenGL32(
+  std::function<OnFrameCallbackOpenGL32> const& callback)
 {
-  auto& callbacks = GetOnFrameCallbacksOGL();
+  auto& callbacks = GetOnFrameCallbacksOpenGL32();
   return callbacks.Register(callback);
 }
 
-void UnregisterOnFrameCallbackOGL(std::size_t id)
+void UnregisterOnFrameCallbackOpenGL32(std::size_t id)
 {
-  auto& callbacks = GetOnFrameCallbacksOGL();
+  auto& callbacks = GetOnFrameCallbacksOpenGL32();
   return callbacks.Unregister(id);
 }
 
-std::size_t RegisterOnUnloadCallbackOGL(
-  std::function<OnUnloadCallbackOGL> const& callback)
+std::size_t RegisterOnUnloadCallbackOpenGL32(
+  std::function<OnUnloadCallbackOpenGL32> const& callback)
 {
-  auto& callbacks = GetOnUnloadCallbacksOGL();
+  auto& callbacks = GetOnUnloadCallbacksOpenGL32();
   return callbacks.Register(callback);
 }
 
-void UnregisterOnUnloadCallbackOGL(std::size_t id)
+void UnregisterOnUnloadCallbackOpenGL32(std::size_t id)
 {
-  auto& callbacks = GetOnUnloadCallbacksOGL();
+  auto& callbacks = GetOnUnloadCallbacksOpenGL32();
   return callbacks.Unregister(id);
 }
 }

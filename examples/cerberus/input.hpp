@@ -16,7 +16,9 @@ namespace hadesmem
 namespace cerberus
 {
 typedef void OnWndProcMsgCallback(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool& handled);
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled);
+
+typedef void OnSetCursorCallback(HCURSOR cursor, bool* handled);
 
 class InputInterface
 {
@@ -29,6 +31,11 @@ public:
     std::function<OnWndProcMsgCallback> const& callback) = 0;
 
   virtual void UnregisterOnWndProcMsg(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnSetCursor(std::function<OnSetCursorCallback> const& callback) = 0;
+
+  virtual void UnregisterOnSetCursor(std::size_t id) = 0;
 };
 
 InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -39,15 +46,26 @@ void DetourDirectInput8(HMODULE base);
 
 void UndetourDirectInput8(bool remove);
 
+void DetourUser32(HMODULE base);
+
+void UndetourUser32(bool remove);
+
 std::size_t RegisterOnWndProcMsgCallback(
   std::function<OnWndProcMsgCallback> const& callback);
 
 void UnregisterOnWndProcMsgCallback(std::size_t id);
+
+std::size_t RegisterOnSetCursorCallback(
+  std::function<OnSetCursorCallback> const& callback);
+
+void UnregisterOnSetCursorCallback(std::size_t id);
 
 void HandleWindowChange(HWND wnd);
 
 bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
 
 HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT;
+
+bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 }
 }
