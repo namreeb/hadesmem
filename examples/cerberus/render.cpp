@@ -4,7 +4,6 @@
 #include "render.hpp"
 
 #include <cstdint>
-#include <queue>
 
 #include <windows.h>
 #include <winnt.h>
@@ -19,7 +18,6 @@
 #include <hadesmem/detail/scope_warden.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
-#include <hadesmem/detail/srw_lock.hpp>
 
 #include "callbacks.hpp"
 #include "d3d9.hpp"
@@ -33,26 +31,6 @@
 
 namespace
 {
-SRWLOCK& GetWndprocInputQueueLock() HADESMEM_DETAIL_NOEXCEPT
-{
-  static SRWLOCK lock = SRWLOCK_INIT;
-  return lock;
-}
-
-struct WndprocInput
-{
-  HWND hwnd_;
-  UINT msg_;
-  WPARAM wparam_;
-  LPARAM lparam_;
-};
-
-std::queue<WndprocInput>& GetWndprocInputQueue()
-{
-  static std::queue<WndprocInput> input;
-  return input;
-}
-
 int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static int show_cursor_count{};
@@ -201,13 +179,30 @@ void ToggleAntTweakBarVisible()
   SetAntTweakBarVisible(visible, !visible);
 }
 
-void HandleInput(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+void WindowProcCallback(
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
 {
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
       ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
   {
     ToggleAntTweakBarVisible();
+    *handled = true;
     return;
+  }
+
+  auto& visible = GetAntTweakBarVisible();
+  bool const blocked_msg =
+    (msg == WM_CHAR || msg == WM_KEYDOWN || msg == WM_KEYUP ||
+     msg == WM_MOUSEMOVE || msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN ||
+     msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
+     msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
+     msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
+     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN ||
+     msg == WM_SYSKEYUP);
+  // Window #0 will always exist if TwInit has completed successfully.
+  if (visible && ::TwWindowExists(0) && blocked_msg)
+  {
+    *handled = true;
   }
 
   bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
@@ -230,58 +225,6 @@ void HandleInput(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
 
   ::TwEventWin(hwnd, msg, wparam, lparam);
-}
-
-void HandleInputQueue()
-{
-  WndprocInput entry{};
-  {
-    auto& srw_lock = GetWndprocInputQueueLock();
-    hadesmem::detail::AcquireSRWLock lock(
-      &srw_lock, hadesmem::detail::SRWLockType::Exclusive);
-    auto& input = GetWndprocInputQueue();
-    while (!input.empty())
-    {
-      entry = input.back();
-      input.pop();
-    }
-  }
-  HandleInput(entry.hwnd_, entry.msg_, entry.wparam_, entry.lparam_);
-}
-
-void WindowProcCallback(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
-{
-  WndprocInput entry{ hwnd, msg, wparam, lparam };
-  {
-    auto& srw_lock = GetWndprocInputQueueLock();
-    hadesmem::detail::AcquireSRWLock lock(
-      &srw_lock, hadesmem::detail::SRWLockType::Exclusive);
-    auto& input = GetWndprocInputQueue();
-    input.push(entry);
-  }
-
-  if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
-      ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
-  {
-    *handled = true;
-    return;
-  }
-
-  auto& visible = GetAntTweakBarVisible();
-  bool const blocked_msg =
-    (msg == WM_CHAR || msg == WM_KEYDOWN || msg == WM_KEYUP ||
-     msg == WM_MOUSEMOVE || msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN ||
-     msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
-     msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
-     msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
-     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN ||
-     msg == WM_SYSKEYUP);
-  // Window #0 will always exist if TwInit has completed successfully.
-  if (visible && ::TwWindowExists(0) && blocked_msg)
-  {
-    *handled = true;
-  }
 }
 
 void OnSetCursor(HCURSOR cursor,
@@ -1028,8 +971,6 @@ void OnResetD3D9(IDirect3DDevice9* device,
 
 void OnFrameGeneric()
 {
-  HandleInputQueue();
-
   if (!::TwDraw())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
