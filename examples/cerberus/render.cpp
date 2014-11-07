@@ -57,6 +57,8 @@ bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 
 void SetAntTweakBarVisible(bool visible, bool old_visible)
 {
+  HADESMEM_DETAIL_TRACE_A("Setting tweak bars visibility attribute.");
+
   for (int i = 0; i < ::TwGetBarCount(); ++i)
   {
     auto const bar = ::TwGetBarByIndex(i);
@@ -89,10 +91,12 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
   {
     if (visible)
     {
+      HADESMEM_DETAIL_TRACE_A("Setting arrow cursor.");
       old_cursor.second = ::SetCursor(arrow_cursor);
     }
     else if (old_cursor.first)
     {
+      HADESMEM_DETAIL_TRACE_A("Setting old cursor.");
       old_cursor.second = ::SetCursor(old_cursor.second);
     }
     old_cursor.first = true;
@@ -148,13 +152,15 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
   }
   else if (!visible && visible != old_visible)
   {
-    while (show_cursor_count)
+    while (show_cursor_count > 0)
     {
       HADESMEM_DETAIL_TRACE_A("Hiding cursor.");
       ::ShowCursor(FALSE);
       --show_cursor_count;
     }
   }
+
+  HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
 void ToggleAntTweakBarVisible()
