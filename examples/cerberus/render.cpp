@@ -223,12 +223,14 @@ void WindowProcCallback(
 
 void OnSetCursor(HCURSOR cursor, bool* handled, HCURSOR* retval) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto& old_cursor = GetOldCursor();
+  HCURSOR const old_cursor_raw = old_cursor.second;
+  old_cursor.first = true;
+  old_cursor.second = cursor;
+
   if (GetAntTweakBarVisible())
   {
-    auto& old_cursor = GetOldCursor();
-    old_cursor.first = true;
-    *retval = old_cursor.second;
-    old_cursor.second = cursor;
+    *retval = old_cursor_raw;
     *handled = true;
   }
 }
