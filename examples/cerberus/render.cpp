@@ -31,6 +31,12 @@
 
 namespace
 {
+  int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
+  {
+    static int show_cursor_count{};
+    return show_cursor_count;
+  }
+
 std::pair<bool, HCURSOR>& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<bool, HCURSOR> old_cursor{};
@@ -49,7 +55,7 @@ bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
   return visible;
 }
 
-void SetAntTweakBarVisible(bool visible)
+void SetAntTweakBarVisible(bool visible, bool old_visible)
 {
   for (int i = 0; i < ::TwGetBarCount(); ++i)
   {
@@ -79,14 +85,17 @@ void SetAntTweakBarVisible(bool visible)
   }
 
   auto& old_cursor = GetOldCursor();
-  if (visible)
+  if (visible != old_visible)
   {
+    if (visible)
+    {
+      old_cursor.second = ::SetCursor(arrow_cursor);
+    }
+    else if (old_cursor.first)
+    {
+      old_cursor.second = ::SetCursor(old_cursor.second);
+    }
     old_cursor.first = true;
-    old_cursor.second = ::SetCursor(arrow_cursor);
-  }
-  else if (old_cursor.first)
-  {
-    old_cursor.second = ::SetCursor(old_cursor.second);
   }
 
   bool& disable_get_cursor_pos_hook =
@@ -117,6 +126,35 @@ void SetAntTweakBarVisible(bool visible)
   {
     old_cursor_pos = POINT{};
   }
+
+  bool& disable_show_cursor_hook =
+    hadesmem::cerberus::GetDisableShowCursorHook();
+  disable_show_cursor_hook = true;
+  auto reset_show_cursor_hook_flag_fn = [&]()
+  {
+    disable_show_cursor_hook = false;
+  };
+  auto const ensure_reset_show_cursor_hook_flag =
+    hadesmem::detail::MakeScopeWarden(reset_show_cursor_hook_flag_fn);
+
+  auto& show_cursor_count = GetShowCursorCount();
+  if (visible && visible != old_visible)
+  {
+    do
+    {
+      HADESMEM_DETAIL_TRACE_A("Showing cursor.");
+      ++show_cursor_count;
+    } while (::ShowCursor(TRUE) < 0);
+  }
+  else if (!visible && visible != old_visible)
+  {
+    while (show_cursor_count)
+    {
+      HADESMEM_DETAIL_TRACE_A("Hiding cursor.");
+      ::ShowCursor(FALSE);
+      --show_cursor_count;
+    }
+  }
 }
 
 void ToggleAntTweakBarVisible()
@@ -132,7 +170,7 @@ void ToggleAntTweakBarVisible()
     HADESMEM_DETAIL_TRACE_A("Hiding all tweak bars.");
   }
 
-  SetAntTweakBarVisible(visible);
+  SetAntTweakBarVisible(visible, !visible);
 }
 
 void WindowProcCallback(
@@ -147,7 +185,6 @@ void WindowProcCallback(
   }
 
   auto& visible = GetAntTweakBarVisible();
-  // Window #0 will always exist if TwInit has completed successfully.
   bool const blocked_msg =
     (msg == WM_CHAR || msg == WM_KEYDOWN || msg == WM_KEYUP ||
      msg == WM_MOUSEMOVE || msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN ||
@@ -156,6 +193,7 @@ void WindowProcCallback(
      msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
      msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN || 
      msg == WM_SYSKEYUP);
+  // Window #0 will always exist if TwInit has completed successfully.
   if (visible && ::TwWindowExists(0) && blocked_msg)
   {
     *handled = true;
@@ -223,6 +261,25 @@ void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
     old_cursor_pos.x = x;
     old_cursor_pos.y = y;
 
+    *handled = true;
+  }
+}
+
+void OnShowCursor(BOOL show, bool* handled, int* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible())
+  {
+    auto& show_cursor_count = GetShowCursorCount();
+    if (show)
+    {
+      ++show_cursor_count;
+    }
+    else
+    {
+      --show_cursor_count;
+    }
+
+    *retval = show_cursor_count;
     *handled = true;
   }
 }
@@ -608,7 +665,9 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 
   HADESMEM_DETAIL_TRACE_A("Setting tweak bar visibilty.");
 
-  SetAntTweakBarVisible(visible);
+  SetAntTweakBarVisible(visible, visible);
+
+  HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
 void CleanupAntTweakBar(bool& initialized)
@@ -988,6 +1047,8 @@ void InitializeRender()
   RegisterOnGetCursorPosCallback(OnGetCursorPos);
 
   RegisterOnSetCursorPosCallback(OnSetCursorPos);
+
+  RegisterOnShowCursorCallback(OnShowCursor);
 
   RegisterOnDirectInputCallback(OnDirectInput);
 }

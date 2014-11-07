@@ -119,6 +119,13 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetShowCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
 std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -146,6 +153,14 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorPosCallback>&
 {
   static hadesmem::cerberus::Callbacks<
     hadesmem::cerberus::OnSetCursorPosCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>&
+  GetOnShowCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -604,6 +619,43 @@ BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
+int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetShowCursorDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d].", show);
+
+  if (!hadesmem::cerberus::GetDisableShowCursorHook())
+  {
+    auto const& callbacks = GetOnShowCursorCallbacks();
+    bool handled = false;
+    int retval{};
+    callbacks.Run(show, &handled, &retval);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_A("ShowCursor handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", retval);
+      return retval;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A("ShowCursor hook disabled, skipping callbacks.");
+  }
+
+  auto const show_cursor = detour->GetTrampoline<decltype(&ShowCursorDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = show_cursor(show);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
+
 class InputImpl : public hadesmem::cerberus::InputInterface
 {
 public:
@@ -667,6 +719,18 @@ public:
   virtual void UnregisterOnSetCursorPos(std::size_t id) final
   {
     hadesmem::cerberus::UnregisterOnSetCursorPosCallback(id);
+  }
+
+  virtual std::size_t RegisterOnShowCursor(
+    std::function<hadesmem::cerberus::OnShowCursorCallback> const& callback)
+    final
+  {
+    return hadesmem::cerberus::RegisterOnShowCursorCallback(callback);
+  }
+
+  virtual void UnregisterOnShowCursor(std::size_t id) final
+  {
+    hadesmem::cerberus::UnregisterOnShowCursorCallback(id);
   }
 
   virtual std::size_t RegisterOnDirectInput(
@@ -765,6 +829,7 @@ void DetourUser32(HMODULE base)
                "SetCursorPos",
                GetSetCursorPosDetour(),
                SetCursorPosDetour);
+    DetourFunc(process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
   }
 }
 
@@ -776,6 +841,7 @@ void UndetourUser32(bool remove)
     UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
     UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
     UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
+    UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
@@ -830,6 +896,19 @@ std::size_t RegisterOnSetCursorPosCallback(
 void UnregisterOnSetCursorPosCallback(std::size_t id)
 {
   auto& callbacks = GetOnSetCursorPosCallbacks();
+  return callbacks.Unregister(id);
+}
+
+std::size_t RegisterOnShowCursorCallback(
+  std::function<OnShowCursorCallback> const& callback)
+{
+  auto& callbacks = GetOnShowCursorCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnShowCursorCallback(std::size_t id)
+{
+  auto& callbacks = GetOnShowCursorCallbacks();
   return callbacks.Unregister(id);
 }
 
@@ -919,6 +998,18 @@ bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT
 }
 
 bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool disable_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool disable_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return disable_hook;
+}
+
+bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool disable_hook = false;
