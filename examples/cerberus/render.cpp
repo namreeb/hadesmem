@@ -31,11 +31,11 @@
 
 namespace
 {
-  int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
-  {
-    static int show_cursor_count{};
-    return show_cursor_count;
-  }
+int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
+{
+  static int show_cursor_count{};
+  return show_cursor_count;
+}
 
 std::pair<bool, HCURSOR>& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -191,7 +191,7 @@ void WindowProcCallback(
      msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
      msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
      msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
-     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN || 
+     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN ||
      msg == WM_SYSKEYUP);
   // Window #0 will always exist if TwInit has completed successfully.
   if (visible && ::TwWindowExists(0) && blocked_msg)
@@ -221,7 +221,9 @@ void WindowProcCallback(
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
-void OnSetCursor(HCURSOR cursor, bool* handled, HCURSOR* retval) HADESMEM_DETAIL_NOEXCEPT
+void OnSetCursor(HCURSOR cursor,
+                 bool* handled,
+                 HCURSOR* retval) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& old_cursor = GetOldCursor();
   HCURSOR const old_cursor_raw = old_cursor.second;
@@ -267,7 +269,8 @@ void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
   }
 }
 
-void OnShowCursor(BOOL show, bool* handled, int* retval) HADESMEM_DETAIL_NOEXCEPT
+void
+  OnShowCursor(BOOL show, bool* handled, int* retval) HADESMEM_DETAIL_NOEXCEPT
 {
   if (GetAntTweakBarVisible())
   {

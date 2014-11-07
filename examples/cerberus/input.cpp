@@ -829,7 +829,8 @@ void DetourUser32(HMODULE base)
                "SetCursorPos",
                GetSetCursorPosDetour(),
                SetCursorPosDetour);
-    DetourFunc(process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
+    DetourFunc(
+      process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
   }
 }
 
