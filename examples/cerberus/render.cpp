@@ -154,7 +154,8 @@ void WindowProcCallback(
      msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
      msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
      msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
-     msg == WM_MOUSEWHEEL || msg == WM_INPUT);
+     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN || 
+     msg == WM_SYSKEYUP);
   if (visible && ::TwWindowExists(0) && blocked_msg)
   {
     *handled = true;
