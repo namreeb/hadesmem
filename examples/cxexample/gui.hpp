@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "../cerberus/plugin.hpp"
+#include <cerberus/plugin.hpp>
 
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus);
 

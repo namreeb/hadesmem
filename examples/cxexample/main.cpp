@@ -7,7 +7,7 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
-#include "../cerberus/plugin.hpp"
+#include <cerberus/plugin.hpp>
 
 #include "gui.hpp"
 

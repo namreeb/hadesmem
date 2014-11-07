@@ -515,12 +515,14 @@ HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
   {
     auto const& callbacks = GetOnSetCursorCallbacks();
     bool handled = false;
-    callbacks.Run(cursor, &handled);
+    HCURSOR retval{};
+    callbacks.Run(cursor, &handled, &retval);
 
     if (handled)
     {
       HADESMEM_DETAIL_TRACE_A("SetCursor handled. Not calling trampoline.");
-      return nullptr;
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%p].", retval);
+      return retval;
     }
   }
   else

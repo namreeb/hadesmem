@@ -31,16 +31,10 @@
 
 namespace
 {
-HCURSOR& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
+std::pair<bool, HCURSOR>& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
 {
-  static HCURSOR old_cursor = nullptr;
+  static std::pair<bool, HCURSOR> old_cursor{};
   return old_cursor;
-}
-
-bool& GetCursorShown() HADESMEM_DETAIL_NOEXCEPT
-{
-  static bool cursor_shown = false;
-  return cursor_shown;
 }
 
 POINT& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
@@ -85,37 +79,18 @@ void SetAntTweakBarVisible(bool visible)
   }
 
   auto& old_cursor = GetOldCursor();
-  HCURSOR const new_cursor = visible ? arrow_cursor : old_cursor;
-  old_cursor = ::SetCursor(new_cursor);
-
-  CURSORINFO cursor_info = {sizeof(cursor_info)};
-  if (!::GetCursorInfo(&cursor_info))
+  if (visible)
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"GetCursorInfo failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
+    old_cursor.first = true;
+    old_cursor.second = ::SetCursor(arrow_cursor);
+  }
+  else if (old_cursor.first)
+  {
+    old_cursor.second = ::SetCursor(old_cursor.second);
   }
 
-  auto& cursor_shown = GetCursorShown();
-  bool const cur_cursor_shown = !!(cursor_info.flags & CURSOR_SHOWING);
-  if (cur_cursor_shown && !visible && !cursor_shown)
-  {
-    do
-    {
-      HADESMEM_DETAIL_TRACE_A("Hiding cursor.");
-    } while (!::ShowCursor(FALSE));
-  }
-  else if (!cur_cursor_shown && visible && !cursor_shown)
-  {
-    do
-    {
-      HADESMEM_DETAIL_TRACE_A("Showing cursor.");
-    } while (::ShowCursor(TRUE));
-  }
-  cursor_shown = !!(cursor_info.flags & CURSOR_SHOWING);
-
-  bool& disable_get_cursor_pos_hook = hadesmem::cerberus::GetDisableGetCursorPosHook();
+  bool& disable_get_cursor_pos_hook =
+    hadesmem::cerberus::GetDisableGetCursorPosHook();
   disable_get_cursor_pos_hook = true;
   auto reset_get_cursor_pos_hook_flag_fn = [&]()
   {
@@ -132,8 +107,8 @@ void SetAntTweakBarVisible(bool visible)
     {
       DWORD const last_error = ::GetLastError();
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{ "GetCursorPos failed." }
-      << hadesmem::ErrorCodeWinLast{ last_error });
+        hadesmem::Error{} << hadesmem::ErrorString{"GetCursorPos failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
     }
 
     old_cursor_pos = cur_cursor_pos;
@@ -194,7 +169,8 @@ void WindowProcCallback(
   auto const ensure_reset_set_cursor_hook_flag =
     hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
 
-  bool& disable_get_cursor_pos_hook = hadesmem::cerberus::GetDisableGetCursorPosHook();
+  bool& disable_get_cursor_pos_hook =
+    hadesmem::cerberus::GetDisableGetCursorPosHook();
   disable_get_cursor_pos_hook = true;
   auto reset_get_cursor_pos_hook_flag_fn = [&]()
   {
@@ -206,10 +182,14 @@ void WindowProcCallback(
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
-void OnSetCursor(HCURSOR /*cursor*/, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+void OnSetCursor(HCURSOR cursor, bool* handled, HCURSOR* retval) HADESMEM_DETAIL_NOEXCEPT
 {
   if (GetAntTweakBarVisible())
   {
+    auto& old_cursor = GetOldCursor();
+    old_cursor.first = true;
+    *retval = old_cursor.second;
+    old_cursor.second = cursor;
     *handled = true;
   }
 }

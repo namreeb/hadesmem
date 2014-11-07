@@ -18,7 +18,7 @@ namespace cerberus
 typedef void OnWndProcMsgCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled);
 
-typedef void OnSetCursorCallback(HCURSOR cursor, bool* handled);
+typedef void OnSetCursorCallback(HCURSOR cursor, bool* handled, HCURSOR* retval);
 
 typedef void OnDirectInputCallback(bool* handled);
 
