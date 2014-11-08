@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Assassins Creed 4\AC4BFSP.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

@@ -240,26 +240,9 @@ void WindowProcCallback(
   }
 
   auto& visible = GetAntTweakBarVisible();
-  UINT const blocked_msgs[] = {WM_CHAR,
-                               WM_KEYDOWN,
-                               WM_KEYUP,
-                               WM_MOUSEMOVE,
-                               WM_LBUTTONDOWN,
-                               WM_RBUTTONDOWN,
-                               WM_MBUTTONDOWN,
-                               WM_LBUTTONUP,
-                               WM_RBUTTONUP,
-                               WM_MBUTTONUP,
-                               WM_RBUTTONDBLCLK,
-                               WM_LBUTTONDBLCLK,
-                               WM_MBUTTONDBLCLK,
-                               WM_MOUSEWHEEL,
-                               WM_INPUT,
-                               WM_SYSKEYDOWN,
-                               WM_SYSKEYUP};
-  bool const blocked_msg =
-    std::find(std::begin(blocked_msgs), std::end(blocked_msgs), msg) !=
-    std::end(blocked_msgs);
+  bool const blocked_msg = msg == WM_INPUT ||
+                           (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
+                           (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
   // Window #0 will always exist if TwInit has completed successfully.
   if (visible && ::TwWindowExists(0) && blocked_msg)
   {

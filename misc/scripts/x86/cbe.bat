@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Sid Meiers Civilization Beyond Earth\CivilizationBe_DX11.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

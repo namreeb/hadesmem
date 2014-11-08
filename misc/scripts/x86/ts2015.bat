@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Train Simulator 2015\RailWorks\RailWorks.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

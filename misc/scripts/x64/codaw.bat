@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Call of Duty Advanced Warfare\s1_sp64_ship.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

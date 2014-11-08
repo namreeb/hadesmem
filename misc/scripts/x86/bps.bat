@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\ Borderlands The Pre-Sequel\Binaries\Win32\BorderlandsPreSequel.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

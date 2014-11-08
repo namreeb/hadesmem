@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Hitman Absolution - Professional Edition\HMA.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

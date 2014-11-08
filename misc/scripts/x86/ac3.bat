@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Assassin's Creed III\AC3SP.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

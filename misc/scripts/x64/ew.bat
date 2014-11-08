@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\The Evil Within\EvilWithin.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

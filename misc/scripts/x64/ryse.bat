@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Ryse Son of Rome\Bin64\Ryse.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

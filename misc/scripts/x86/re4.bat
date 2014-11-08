@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Resident Evil 4 - Ultimate HD Edition\Bin32\bio4.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

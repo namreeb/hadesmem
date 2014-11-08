@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Final Fantasy XIII\FFXiiiLauncher.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

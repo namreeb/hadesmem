@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Company of Heroes - Complete Edition\RelicCOH.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
