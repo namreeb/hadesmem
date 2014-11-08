@@ -100,27 +100,27 @@ void InitializeSupportForModule(
 
   std::wstring const module_name_upper_with_ext{module_name_upper + L".DLL"};
   auto const on_map =
-    [=](HMODULE module, std::wstring const& /*path*/, std::wstring const& name)
+    [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
   {
     if (name == module_name_upper || name == module_name_upper_with_ext)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s loaded. Applying hooks.",
                                      module_name_upper.c_str());
 
-      detour_func(module);
+      detour_func(mod);
     }
   };
   module.RegisterOnMap(on_map);
   HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
                                  module_name_upper.c_str());
 
-  auto const on_unmap = [=](HMODULE module)
+  auto const on_unmap = [=](HMODULE mod)
   {
     auto const d3d10_mod = get_module_func();
     auto const d3d10_mod_beg = d3d10_mod.first;
     void* const d3d10_mod_end =
       static_cast<std::uint8_t*>(d3d10_mod.first) + d3d10_mod.second;
-    if (module >= d3d10_mod_beg && module < d3d10_mod_end)
+    if (mod >= d3d10_mod_beg && mod < d3d10_mod_end)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
                                      module_name_upper.c_str());
