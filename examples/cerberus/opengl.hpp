@@ -16,9 +16,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnFrameCallbackOpenGL32(HDC device);
-
-typedef void OnUnloadCallbackOpenGL32();
+typedef void OnFrameOpenGL32Callback(HDC device);
 
 class OpenGL32Interface
 {
@@ -27,15 +25,10 @@ public:
   {
   }
 
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<OnFrameCallbackOpenGL32> const& callback) = 0;
+  virtual std::size_t
+    RegisterOnFrame(std::function<OnFrameOpenGL32Callback> const& callback) = 0;
 
-  virtual void UnregisterOnFrameCallback(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnUnloadCallback(
-    std::function<OnUnloadCallbackOpenGL32> const& callback) = 0;
-
-  virtual void UnregisterOnUnloadCallback(std::size_t id) = 0;
+  virtual void UnregisterOnFrame(std::size_t id) = 0;
 };
 
 OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT;
@@ -45,15 +38,5 @@ void InitializeOpenGL32();
 void DetourOpenGL32(HMODULE base);
 
 void UndetourOpenGL32(bool remove);
-
-std::size_t RegisterOnFrameCallbackOpenGL32(
-  std::function<OnFrameCallbackOpenGL32> const& callback);
-
-void UnregisterOnFrameCallbackOpenGL32(std::size_t id);
-
-std::size_t RegisterOnUnloadCallbackOpenGL32(
-  std::function<OnUnloadCallbackOpenGL32> const& callback);
-
-void UnregisterOnUnloadCallbackOpenGL32(std::size_t id);
 }
 }

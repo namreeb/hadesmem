@@ -33,19 +33,29 @@
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameDXGICallback>&
+  GetOnFrameDXGICallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameDXGICallback>
+    callbacks;
+  return callbacks;
+}
+
 class DXGIImpl : public hadesmem::cerberus::DXGIInterface
 {
 public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackDXGI> const& callback)
+  virtual std::size_t RegisterOnFrame(
+    std::function<hadesmem::cerberus::OnFrameDXGICallback> const& callback)
     final
   {
-    return hadesmem::cerberus::RegisterOnFrameCallbackDXGI(callback);
+    auto& callbacks = GetOnFrameDXGICallbacks();
+    return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnFrameCallback(std::size_t id) final
+  virtual void UnregisterOnFrame(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(id);
+    auto& callbacks = GetOnFrameDXGICallbacks();
+    return callbacks.Unregister(id);
   }
 };
 
@@ -90,14 +100,6 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackDXGI>&
-  GetOnFrameCallbacksDXGI()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackDXGI>
-    callbacks;
-  return callbacks;
-}
-
 extern "C" HRESULT WINAPI
   IDXGISwapChainPresentDetour(IDXGISwapChain* swap_chain,
                               UINT sync_interval,
@@ -111,7 +113,7 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
 
-  auto& callbacks = GetOnFrameCallbacksDXGI();
+  auto& callbacks = GetOnFrameDXGICallbacks();
   callbacks.Run(swap_chain);
 
   auto const present =
@@ -330,19 +332,6 @@ void UndetourDXGI(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
-}
-
-std::size_t RegisterOnFrameCallbackDXGI(
-  std::function<OnFrameCallbackDXGI> const& callback)
-{
-  auto& callbacks = GetOnFrameCallbacksDXGI();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnFrameCallbackDXGI(std::size_t id)
-{
-  auto& callbacks = GetOnFrameCallbacksDXGI();
-  return callbacks.Unregister(id);
 }
 
 void DetourDXGISwapChain(IDXGISwapChain* swap_chain)

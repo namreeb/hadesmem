@@ -31,29 +31,49 @@ namespace winternl = hadesmem::detail::winternl;
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>&
+  GetOnMapCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>&
+  GetOnUnmapCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>
+    callbacks;
+  return callbacks;
+}
+
 class ModuleImpl : public hadesmem::cerberus::ModuleInterface
 {
 public:
-  virtual std::size_t RegisterOnMapCallback(
+  virtual std::size_t RegisterOnMap(
     std::function<hadesmem::cerberus::OnMapCallback> const& callback) final
   {
-    return hadesmem::cerberus::RegisterOnMapCallback(callback);
+    auto& callbacks = GetOnMapCallbacks();
+    return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnMapCallback(std::size_t id) final
+  virtual void UnregisterOnMap(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnMapCallback(id);
+    auto& callbacks = GetOnMapCallbacks();
+    return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnUnmapCallback(
+  virtual std::size_t RegisterOnUnmap(
     std::function<hadesmem::cerberus::OnUnmapCallback> const& callback) final
   {
-    return hadesmem::cerberus::RegisterOnUnmapCallback(callback);
+    auto& callbacks = GetOnUnmapCallbacks();
+    return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnUnmapCallback(std::size_t id) final
+  virtual void UnregisterOnUnmap(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnUnmapCallback(id);
+    auto& callbacks = GetOnUnmapCallbacks();
+    return callbacks.Unregister(id);
   }
 };
 
@@ -69,22 +89,6 @@ std::unique_ptr<hadesmem::PatchDetour>&
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>&
-  GetOnMapCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>&
-  GetOnUnmapCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnmapCallback>
-    callbacks;
-  return callbacks;
 }
 
 extern "C" NTSTATUS WINAPI
@@ -311,31 +315,6 @@ void UndetourNtMapViewOfSection()
 void UndetourNtUnmapViewOfSection()
 {
   UndetourFunc(L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
-}
-
-std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback)
-{
-  auto& callbacks = GetOnMapCallbacks();
-  return callbacks.Register(callback);
-}
-
-std::size_t
-  RegisterOnUnmapCallback(std::function<OnUnmapCallback> const& callback)
-{
-  auto& callbacks = GetOnUnmapCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnMapCallback(std::size_t id)
-{
-  auto& callbacks = GetOnMapCallbacks();
-  return callbacks.Unregister(id);
-}
-
-void UnregisterOnUnmapCallback(std::size_t id)
-{
-  auto& callbacks = GetOnUnmapCallbacks();
-  return callbacks.Unregister(id);
 }
 }
 }

@@ -47,6 +47,13 @@ void UseAllStatics()
 {
   hadesmem::cerberus::GetThisProcess();
 
+  auto& module = hadesmem::cerberus::GetModuleInterface();
+  auto& d3d9 = hadesmem::cerberus::GetD3D9Interface();
+  auto& dxgi = hadesmem::cerberus::GetDXGIInterface();
+  auto& render = hadesmem::cerberus::GetRenderInterface();
+  auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
+  auto& input = hadesmem::cerberus::GetInputInterface();
+
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
   // moment and calling an empty function wrapper throws.
@@ -55,51 +62,82 @@ void UseAllStatics()
     [](HMODULE, std::wstring const&, std::wstring const&)
   {
   };
-  auto const on_map_id =
-    hadesmem::cerberus::RegisterOnMapCallback(on_map_callback);
-  hadesmem::cerberus::UnregisterOnMapCallback(on_map_id);
+  auto const on_map_id = module.RegisterOnMap(on_map_callback);
+  module.UnregisterOnMap(on_map_id);
 
   auto const on_unmap_callback = [](HMODULE)
   {
   };
-  auto const on_unmap_id =
-    hadesmem::cerberus::RegisterOnUnmapCallback(on_unmap_callback);
-  hadesmem::cerberus::UnregisterOnUnmapCallback(on_unmap_id);
+  auto const on_unmap_id = module.RegisterOnUnmap(on_unmap_callback);
+  module.UnregisterOnUnmap(on_unmap_id);
 
   auto const on_frame_callback_d3d9 = [](IDirect3DDevice9*)
   {
   };
-  auto const on_frame_id_d3d9 =
-    hadesmem::cerberus::RegisterOnFrameCallbackD3D9(on_frame_callback_d3d9);
-  hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(on_frame_id_d3d9);
+  auto const on_frame_id_d3d9 = d3d9.RegisterOnFrame(on_frame_callback_d3d9);
+  d3d9.UnregisterOnFrame(on_frame_id_d3d9);
 
   auto const on_frame_callback_dxgi = [](IDXGISwapChain*)
   {
   };
-  auto const on_frame_id_dxgi =
-    hadesmem::cerberus::RegisterOnFrameCallbackDXGI(on_frame_callback_dxgi);
-  hadesmem::cerberus::UnregisterOnFrameCallbackDXGI(on_frame_id_dxgi);
+  auto const on_frame_id_dxgi = dxgi.RegisterOnFrame(on_frame_callback_dxgi);
+  dxgi.UnregisterOnFrame(on_frame_id_dxgi);
 
   auto const on_tw_init = [](hadesmem::cerberus::AntTweakBarInterface*)
   {
   };
-  auto const on_tw_init_id =
-    hadesmem::cerberus::RegisterOnAntTweakBarInitializeCallback(on_tw_init);
-  hadesmem::cerberus::UnregisterOnAntTweakBarInitializeCallback(on_tw_init_id);
+  auto const on_tw_init_id = ant_tweak_bar.RegisterOnInitialize(on_tw_init);
+  ant_tweak_bar.UnregisterOnInitialize(on_tw_init_id);
 
   auto const on_tw_cleanup = [](hadesmem::cerberus::AntTweakBarInterface*)
   {
   };
-  auto const on_tw_cleanup_id =
-    hadesmem::cerberus::RegisterOnAntTweakBarCleanupCallback(on_tw_cleanup);
-  hadesmem::cerberus::UnregisterOnAntTweakBarCleanupCallback(on_tw_cleanup_id);
+  auto const on_tw_cleanup_id = ant_tweak_bar.RegisterOnCleanup(on_tw_cleanup);
+  ant_tweak_bar.UnregisterOnCleanup(on_tw_cleanup_id);
 
-  hadesmem::cerberus::GetModuleInterface();
-  hadesmem::cerberus::GetD3D9Interface();
-  hadesmem::cerberus::GetDXGIInterface();
-  hadesmem::cerberus::GetRenderInterface();
-  hadesmem::cerberus::GetAntTweakBarInterface();
-  hadesmem::cerberus::GetInputInterface();
+  auto const on_frame = []()
+  {
+  };
+  auto const on_frame_id = render.RegisterOnFrame(on_frame);
+  render.UnregisterOnFrame(on_frame_id);
+
+  auto const on_wnd_proc_msg = [](HWND, UINT, WPARAM, LPARAM, bool*)
+  {
+  };
+  auto const on_wnd_proc_msg_id = input.RegisterOnWndProcMsg(on_wnd_proc_msg);
+  input.UnregisterOnWndProcMsg(on_wnd_proc_msg_id);
+
+  auto const on_set_cursor = [](HCURSOR, bool*, HCURSOR*)
+  {
+  };
+  auto const on_set_cursor_id = input.RegisterOnSetCursor(on_set_cursor);
+  input.UnregisterOnSetCursor(on_set_cursor_id);
+
+  auto const on_get_cursor_pos = [](LPPOINT, bool*)
+  {
+  };
+  auto const on_get_cursor_pos_id =
+    input.RegisterOnGetCursorPos(on_get_cursor_pos);
+  input.UnregisterOnGetCursorPos(on_get_cursor_pos_id);
+
+  auto const on_set_cursor_pos = [](int, int, bool*)
+  {
+  };
+  auto const on_set_cursor_pos_id =
+    input.RegisterOnSetCursorPos(on_set_cursor_pos);
+  input.UnregisterOnSetCursorPos(on_set_cursor_pos_id);
+
+  auto const on_direct_input = [](bool*)
+  {
+  };
+  auto const on_direct_input_id = input.RegisterOnDirectInput(on_direct_input);
+  input.UnregisterOnDirectInput(on_direct_input_id);
+
+  auto const on_show_cursor = [](BOOL, bool*, int*)
+  {
+  };
+  auto const on_show_cursor_id = input.RegisterOnShowCursor(on_show_cursor);
+  input.UnregisterOnShowCursor(on_show_cursor_id);
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -244,7 +282,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
     hadesmem::cerberus::UndetourUser32(true);
-    hadesmem::cerberus::UndetourOpenGL32(nullptr);
+    hadesmem::cerberus::UndetourOpenGL32(true);
 
     hadesmem::cerberus::UnloadPlugins();
 

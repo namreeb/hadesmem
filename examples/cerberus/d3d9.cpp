@@ -31,43 +31,51 @@
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameD3D9Callback>&
+  GetOnFrameD3D9Callbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameD3D9Callback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetD3D9Callback>&
+  GetOnResetD3D9Callbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetD3D9Callback>
+    callbacks;
+  return callbacks;
+}
+
 class D3D9Impl : public hadesmem::cerberus::D3D9Interface
 {
 public:
-  virtual std::size_t RegisterOnFrameCallback(
-    std::function<hadesmem::cerberus::OnFrameCallbackD3D9> const& callback)
+  virtual std::size_t RegisterOnFrame(
+    std::function<hadesmem::cerberus::OnFrameD3D9Callback> const& callback)
     final
   {
-    return hadesmem::cerberus::RegisterOnFrameCallbackD3D9(callback);
+    auto& callbacks = GetOnFrameD3D9Callbacks();
+    return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnFrameCallback(std::size_t id) final
+  virtual void UnregisterOnFrame(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnFrameCallbackD3D9(id);
+    auto& callbacks = GetOnFrameD3D9Callbacks();
+    return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnResetCallback(
-    std::function<hadesmem::cerberus::OnResetCallbackD3D9> const& callback)
+  virtual std::size_t RegisterOnReset(
+    std::function<hadesmem::cerberus::OnResetD3D9Callback> const& callback)
     final
   {
-    return hadesmem::cerberus::RegisterOnResetCallbackD3D9(callback);
+    auto& callbacks = GetOnResetD3D9Callbacks();
+    return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnResetCallback(std::size_t id) final
+  virtual void UnregisterOnReset(std::size_t id) final
   {
-    hadesmem::cerberus::UnregisterOnResetCallbackD3D9(id);
-  }
-
-  virtual std::size_t RegisterOnUnloadCallback(
-    std::function<hadesmem::cerberus::OnUnloadCallbackD3D9> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnUnloadCallbackD3D9(callback);
-  }
-
-  virtual void UnregisterOnUnloadCallback(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnUnloadCallbackD3D9(id);
+    auto& callbacks = GetOnResetD3D9Callbacks();
+    return callbacks.Unregister(id);
   }
 };
 
@@ -115,32 +123,8 @@ std::unique_ptr<hadesmem::PatchDetour>&
 
 std::pair<void*, SIZE_T>& GetD3D9Module() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  static std::pair<void*, SIZE_T> module{};
   return module;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>&
-  GetOnFrameCallbacksD3D9()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallbackD3D9>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>&
-  GetOnResetCallbacksD3D9()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResetCallbackD3D9>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D9>&
-  GetOnUnloadCallbacksD3D9()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D9>
-    callbacks;
-  return callbacks;
 }
 
 extern "C" HRESULT WINAPI IDirect3DDevice9ResetDetour(
@@ -154,7 +138,7 @@ extern "C" HRESULT WINAPI IDirect3DDevice9ResetDetour(
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
 
-  auto& callbacks = GetOnResetCallbacksD3D9();
+  auto& callbacks = GetOnResetD3D9Callbacks();
   callbacks.Run(device, presentation_parameters);
 
   auto const reset =
@@ -177,7 +161,7 @@ extern "C" HRESULT WINAPI IDirect3DDevice9EndSceneDetour(
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
 
-  auto& callbacks = GetOnFrameCallbacksD3D9();
+  auto& callbacks = GetOnFrameD3D9Callbacks();
   callbacks.Run(device);
 
   auto const end_scene =
@@ -498,48 +482,6 @@ void UndetourD3D9(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
-
-  auto const& callbacks = GetOnUnloadCallbacksD3D9();
-  callbacks.Run();
-}
-
-std::size_t RegisterOnFrameCallbackD3D9(
-  std::function<OnFrameCallbackD3D9> const& callback)
-{
-  auto& callbacks = GetOnFrameCallbacksD3D9();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnFrameCallbackD3D9(std::size_t id)
-{
-  auto& callbacks = GetOnFrameCallbacksD3D9();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnResetCallbackD3D9(
-  std::function<OnResetCallbackD3D9> const& callback)
-{
-  auto& callbacks = GetOnResetCallbacksD3D9();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnResetCallbackD3D9(std::size_t id)
-{
-  auto& callbacks = GetOnResetCallbacksD3D9();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnUnloadCallbackD3D9(
-  std::function<OnUnloadCallbackD3D9> const& callback)
-{
-  auto& callbacks = GetOnUnloadCallbacksD3D9();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnUnloadCallbackD3D9(std::size_t id)
-{
-  auto& callbacks = GetOnUnloadCallbacksD3D9();
-  return callbacks.Unregister(id);
 }
 }
 }

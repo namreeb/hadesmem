@@ -21,11 +21,11 @@ typedef void OnWndProcMsgCallback(
 typedef void
   OnSetCursorCallback(HCURSOR cursor, bool* handled, HCURSOR* retval);
 
-typedef void OnDirectInputCallback(bool* handled);
-
 typedef void OnGetCursorPosCallback(LPPOINT point, bool* handled);
 
 typedef void OnSetCursorPosCallback(int x, int y, bool* handled);
+
+typedef void OnDirectInputCallback(bool* handled);
 
 typedef void OnShowCursorCallback(BOOL show, bool* handled, int* retval);
 
@@ -78,36 +78,6 @@ void UndetourDirectInput8(bool remove);
 void DetourUser32(HMODULE base);
 
 void UndetourUser32(bool remove);
-
-std::size_t RegisterOnWndProcMsgCallback(
-  std::function<OnWndProcMsgCallback> const& callback);
-
-void UnregisterOnWndProcMsgCallback(std::size_t id);
-
-std::size_t RegisterOnSetCursorCallback(
-  std::function<OnSetCursorCallback> const& callback);
-
-void UnregisterOnSetCursorCallback(std::size_t id);
-
-std::size_t RegisterOnGetCursorPosCallback(
-  std::function<OnGetCursorPosCallback> const& callback);
-
-void UnregisterOnGetCursorPosCallback(std::size_t id);
-
-std::size_t RegisterOnSetCursorPosCallback(
-  std::function<OnSetCursorPosCallback> const& callback);
-
-void UnregisterOnSetCursorPosCallback(std::size_t id);
-
-std::size_t RegisterOnShowCursorCallback(
-  std::function<OnShowCursorCallback> const& callback);
-
-void UnregisterOnShowCursorCallback(std::size_t id);
-
-std::size_t RegisterOnDirectInputCallback(
-  std::function<OnDirectInputCallback> const& callback);
-
-void UnregisterOnDirectInputCallback(std::size_t id);
 
 void HandleWindowChange(HWND wnd);
 

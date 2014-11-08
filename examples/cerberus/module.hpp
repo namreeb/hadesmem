@@ -28,14 +28,14 @@ public:
   }
 
   virtual std::size_t
-    RegisterOnMapCallback(std::function<OnMapCallback> const& callback) = 0;
+    RegisterOnMap(std::function<OnMapCallback> const& callback) = 0;
 
-  virtual void UnregisterOnMapCallback(std::size_t id) = 0;
+  virtual void UnregisterOnMap(std::size_t id) = 0;
 
   virtual std::size_t
-    RegisterOnUnmapCallback(std::function<OnUnmapCallback> const& callback) = 0;
+    RegisterOnUnmap(std::function<OnUnmapCallback> const& callback) = 0;
 
-  virtual void UnregisterOnUnmapCallback(std::size_t id) = 0;
+  virtual void UnregisterOnUnmap(std::size_t id) = 0;
 };
 
 ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -47,14 +47,5 @@ void DetourNtUnmapViewOfSection();
 void UndetourNtMapViewOfSection();
 
 void UndetourNtUnmapViewOfSection();
-
-std::size_t RegisterOnMapCallback(std::function<OnMapCallback> const& callback);
-
-void UnregisterOnMapCallback(std::size_t id);
-
-std::size_t
-  RegisterOnUnmapCallback(std::function<OnUnmapCallback> const& callback);
-
-void UnregisterOnUnmapCallback(std::size_t id);
 }
 }

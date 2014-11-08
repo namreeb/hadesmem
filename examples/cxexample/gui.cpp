@@ -90,31 +90,31 @@ void
 
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
+  auto ant_tweak_bar =
+    cerberus->GetRenderInterface()->GetAntTweakBarInterface();
   g_on_ant_tweak_bar_initialize_callback_id =
-    cerberus->GetRenderInterface()->RegisterOnAntTweakBarInitialize(
-      &OnAntTweakBarInitialize);
+    ant_tweak_bar->RegisterOnInitialize(&OnAntTweakBarInitialize);
   g_on_ant_tweak_bar_cleanup_callback_id =
-    cerberus->GetRenderInterface()->RegisterOnAntTweakBarCleanup(
-      &OnAntTweakBarCleanup);
+    ant_tweak_bar->RegisterOnCleanup(&OnAntTweakBarCleanup);
 
-  OnAntTweakBarInitialize(
-    cerberus->GetRenderInterface()->GetAntTweakBarInterface());
+  OnAntTweakBarInitialize(ant_tweak_bar);
 }
 
 void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
+  auto ant_tweak_bar =
+    cerberus->GetRenderInterface()->GetAntTweakBarInterface();
+
   if (g_on_ant_tweak_bar_initialize_callback_id != static_cast<std::size_t>(-1))
   {
-    cerberus->GetRenderInterface()->UnregisterOnAntTweakBarInitialize(
+    ant_tweak_bar->UnregisterOnInitialize(
       g_on_ant_tweak_bar_initialize_callback_id);
   }
 
   if (g_on_ant_tweak_bar_cleanup_callback_id != static_cast<std::size_t>(-1))
   {
-    cerberus->GetRenderInterface()->UnregisterOnAntTweakBarCleanup(
-      g_on_ant_tweak_bar_cleanup_callback_id);
+    ant_tweak_bar->UnregisterOnCleanup(g_on_ant_tweak_bar_cleanup_callback_id);
   }
 
-  OnAntTweakBarCleanup(
-    cerberus->GetRenderInterface()->GetAntTweakBarInterface());
+  OnAntTweakBarCleanup(ant_tweak_bar);
 }

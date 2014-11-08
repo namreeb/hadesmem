@@ -12,17 +12,12 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnUnloadCallbackD3D11();
+using OnUnloadCallbackD3D11 = void();
 
 void InitializeD3D11();
 
 void DetourD3D11(HMODULE base);
 
 void UndetourD3D11(bool remove);
-
-std::size_t RegisterOnUnloadCallbackD3D11(
-  std::function<OnUnloadCallbackD3D11> const& callback);
-
-void UnregisterOnUnloadCallbackD3D11(std::size_t id);
 }
 }

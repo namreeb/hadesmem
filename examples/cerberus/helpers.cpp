@@ -93,6 +93,8 @@ void InitializeSupportForModule(
   std::function<void(bool)> const& undetour_func,
   std::function<std::pair<void*, SIZE_T>&()> const& get_module_func)
 {
+  auto& module = GetModuleInterface();
+
   HADESMEM_DETAIL_TRACE_FORMAT_W(L"Initializing %s support.",
                                  module_name_upper.c_str());
 
@@ -108,7 +110,7 @@ void InitializeSupportForModule(
       detour_func(module);
     }
   };
-  RegisterOnMapCallback(on_map);
+  module.RegisterOnMap(on_map);
   HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
                                  module_name_upper.c_str());
 
@@ -128,7 +130,7 @@ void InitializeSupportForModule(
       undetour_func(false);
     }
   };
-  RegisterOnUnmapCallback(on_unmap);
+  module.RegisterOnUnmap(on_unmap);
   HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnUnmap for %s.",
                                  module_name_upper.c_str());
 }

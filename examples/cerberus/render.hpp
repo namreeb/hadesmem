@@ -19,12 +19,29 @@ namespace hadesmem
 {
 namespace cerberus
 {
+class AntTweakBarInterface;
+
+typedef void
+  OnAntTweakBarInitializeCallback(AntTweakBarInterface* ant_tweak_bar);
+
+typedef void OnAntTweakBarCleanupCallback(AntTweakBarInterface* ant_tweak_bar);
+
 class AntTweakBarInterface
 {
 public:
   virtual ~AntTweakBarInterface()
   {
   }
+
+  virtual std::size_t RegisterOnInitialize(
+    std::function<OnAntTweakBarInitializeCallback> const& callback) = 0;
+
+  virtual void UnregisterOnInitialize(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnCleanup(
+    std::function<OnAntTweakBarCleanupCallback> const& callback) = 0;
+
+  virtual void UnregisterOnCleanup(std::size_t id) = 0;
 
   virtual bool IsInitialized() = 0;
 
@@ -48,11 +65,6 @@ AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
 
 typedef void OnFrameCallback();
 
-typedef void
-  OnAntTweakBarInitializeCallback(AntTweakBarInterface* ant_tweak_bar);
-
-typedef void OnAntTweakBarCleanupCallback(AntTweakBarInterface* ant_tweak_bar);
-
 class RenderInterface
 {
 public:
@@ -65,36 +77,11 @@ public:
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 
-  virtual std::size_t RegisterOnAntTweakBarInitialize(
-    std::function<OnAntTweakBarInitializeCallback> const& callback) = 0;
-
-  virtual void UnregisterOnAntTweakBarInitialize(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnAntTweakBarCleanup(
-    std::function<OnAntTweakBarCleanupCallback> const& callback) = 0;
-
-  virtual void UnregisterOnAntTweakBarCleanup(std::size_t id) = 0;
-
   virtual AntTweakBarInterface* GetAntTweakBarInterface() = 0;
 };
 
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
 
 void InitializeRender();
-
-std::size_t
-  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback);
-
-void UnregisterOnFrameCallback(std::size_t id);
-
-std::size_t RegisterOnAntTweakBarInitializeCallback(
-  std::function<OnAntTweakBarInitializeCallback> const& callback);
-
-void UnregisterOnAntTweakBarInitializeCallback(std::size_t id);
-
-std::size_t RegisterOnAntTweakBarCleanupCallback(
-  std::function<OnAntTweakBarCleanupCallback> const& callback);
-
-void UnregisterOnAntTweakBarCleanupCallback(std::size_t id);
 }
 }

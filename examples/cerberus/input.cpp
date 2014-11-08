@@ -22,6 +22,156 @@
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
+  GetOnWndProcMsgCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>&
+  GetOnSetCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGetCursorPosCallback>&
+  GetOnGetCursorPosCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnGetCursorPosCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorPosCallback>&
+  GetOnSetCursorPosCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnSetCursorPosCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>&
+  GetOnShowCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnDirectInputCallback>&
+  GetOnDirectInputCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnDirectInputCallback> callbacks;
+  return callbacks;
+}
+
+class InputImpl : public hadesmem::cerberus::InputInterface
+{
+public:
+  ~InputImpl()
+  {
+    try
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+    }
+  }
+
+  virtual std::size_t RegisterOnWndProcMsg(
+    std::function<hadesmem::cerberus::OnWndProcMsgCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnWndProcMsgCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnWndProcMsg(std::size_t id) final
+  {
+    auto& callbacks = GetOnWndProcMsgCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnSetCursor(
+    std::function<hadesmem::cerberus::OnSetCursorCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnSetCursorCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnSetCursor(std::size_t id) final
+  {
+    auto& callbacks = GetOnSetCursorCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnGetCursorPos(
+    std::function<hadesmem::cerberus::OnGetCursorPosCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnGetCursorPosCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnGetCursorPos(std::size_t id) final
+  {
+    auto& callbacks = GetOnGetCursorPosCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnSetCursorPos(
+    std::function<hadesmem::cerberus::OnSetCursorPosCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnSetCursorPosCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnSetCursorPos(std::size_t id) final
+  {
+    auto& callbacks = GetOnSetCursorPosCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnShowCursor(
+    std::function<hadesmem::cerberus::OnShowCursorCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnShowCursorCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnShowCursor(std::size_t id) final
+  {
+    auto& callbacks = GetOnShowCursorCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnDirectInput(
+    std::function<hadesmem::cerberus::OnDirectInputCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnDirectInputCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnDirectInput(std::size_t id) final
+  {
+    auto& callbacks = GetOnDirectInputCallbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 struct WindowInfo
 {
   HWND old_hwnd_{nullptr};
@@ -90,14 +240,6 @@ std::pair<void*, SIZE_T>& GetDirectInput8Module() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
-  GetOnWndProcMsgCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>
-    callbacks;
-  return callbacks;
-}
-
 std::unique_ptr<hadesmem::PatchDetour>&
   GetSetCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -130,46 +272,6 @@ std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>&
-  GetOnSetCursorCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorCallback>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGetCursorPosCallback>&
-  GetOnGetCursorPosCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnGetCursorPosCallback> callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetCursorPosCallback>&
-  GetOnSetCursorPosCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnSetCursorPosCallback> callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>&
-  GetOnShowCursorCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnDirectInputCallback>&
-  GetOnDirectInputCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnDirectInputCallback> callbacks;
-  return callbacks;
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -655,96 +757,6 @@ int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
 
   return ret;
 }
-
-class InputImpl : public hadesmem::cerberus::InputInterface
-{
-public:
-  ~InputImpl()
-  {
-    try
-    {
-      hadesmem::cerberus::HandleWindowChange(nullptr);
-    }
-    catch (...)
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        boost::current_exception_diagnostic_information().c_str());
-      HADESMEM_DETAIL_ASSERT(false);
-    }
-  }
-
-  virtual std::size_t RegisterOnWndProcMsg(
-    std::function<hadesmem::cerberus::OnWndProcMsgCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnWndProcMsgCallback(callback);
-  }
-
-  virtual void UnregisterOnWndProcMsg(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnWndProcMsgCallback(id);
-  }
-
-  virtual std::size_t RegisterOnSetCursor(
-    std::function<hadesmem::cerberus::OnSetCursorCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnSetCursorCallback(callback);
-  }
-
-  virtual void UnregisterOnSetCursor(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnSetCursorCallback(id);
-  }
-
-  virtual std::size_t RegisterOnGetCursorPos(
-    std::function<hadesmem::cerberus::OnGetCursorPosCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnGetCursorPosCallback(callback);
-  }
-
-  virtual void UnregisterOnGetCursorPos(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnGetCursorPosCallback(id);
-  }
-
-  virtual std::size_t RegisterOnSetCursorPos(
-    std::function<hadesmem::cerberus::OnSetCursorPosCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnSetCursorPosCallback(callback);
-  }
-
-  virtual void UnregisterOnSetCursorPos(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnSetCursorPosCallback(id);
-  }
-
-  virtual std::size_t RegisterOnShowCursor(
-    std::function<hadesmem::cerberus::OnShowCursorCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnShowCursorCallback(callback);
-  }
-
-  virtual void UnregisterOnShowCursor(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnShowCursorCallback(id);
-  }
-
-  virtual std::size_t RegisterOnDirectInput(
-    std::function<hadesmem::cerberus::OnDirectInputCallback> const& callback)
-    final
-  {
-    return hadesmem::cerberus::RegisterOnDirectInputCallback(callback);
-  }
-
-  virtual void UnregisterOnDirectInput(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnDirectInputCallback(id);
-  }
-};
 }
 
 namespace hadesmem
@@ -846,84 +858,6 @@ void UndetourUser32(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
-}
-
-std::size_t RegisterOnWndProcMsgCallback(
-  std::function<OnWndProcMsgCallback> const& callback)
-{
-  auto& callbacks = GetOnWndProcMsgCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnWndProcMsgCallback(std::size_t id)
-{
-  auto& callbacks = GetOnWndProcMsgCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnSetCursorCallback(
-  std::function<OnSetCursorCallback> const& callback)
-{
-  auto& callbacks = GetOnSetCursorCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnSetCursorCallback(std::size_t id)
-{
-  auto& callbacks = GetOnSetCursorCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnGetCursorPosCallback(
-  std::function<OnGetCursorPosCallback> const& callback)
-{
-  auto& callbacks = GetOnGetCursorPosCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnGetCursorPosCallback(std::size_t id)
-{
-  auto& callbacks = GetOnGetCursorPosCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnSetCursorPosCallback(
-  std::function<OnSetCursorPosCallback> const& callback)
-{
-  auto& callbacks = GetOnSetCursorPosCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnSetCursorPosCallback(std::size_t id)
-{
-  auto& callbacks = GetOnSetCursorPosCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnShowCursorCallback(
-  std::function<OnShowCursorCallback> const& callback)
-{
-  auto& callbacks = GetOnShowCursorCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnShowCursorCallback(std::size_t id)
-{
-  auto& callbacks = GetOnShowCursorCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnDirectInputCallback(
-  std::function<OnDirectInputCallback> const& callback)
-{
-  auto& callbacks = GetOnDirectInputCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnDirectInputCallback(std::size_t id)
-{
-  auto& callbacks = GetOnDirectInputCallbacks();
-  return callbacks.Unregister(id);
 }
 
 void HandleWindowChange(HWND wnd)

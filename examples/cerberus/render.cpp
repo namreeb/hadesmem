@@ -3,6 +3,7 @@
 
 #include "render.hpp"
 
+#include <algorithm>
 #include <cstdint>
 
 #include <windows.h>
@@ -31,6 +32,54 @@
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+  GetOnFrameCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnAntTweakBarInitializeCallback>&
+  GetOnAntTweakBarInitializeCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnAntTweakBarInitializeCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnAntTweakBarCleanupCallback>&
+  GetOnAntTweakBarCleanupCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnAntTweakBarCleanupCallback> callbacks;
+  return callbacks;
+}
+
+class RenderImpl : public hadesmem::cerberus::RenderInterface
+{
+public:
+  virtual std::size_t RegisterOnFrame(
+    std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
+  {
+    auto& callbacks = GetOnFrameCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnFrame(std::size_t id) final
+  {
+    auto& callbacks = GetOnFrameCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual hadesmem::cerberus::AntTweakBarInterface*
+    GetAntTweakBarInterface() final
+  {
+    return &hadesmem::cerberus::GetAntTweakBarInterface();
+  }
+};
+
 int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static int show_cursor_count{};
@@ -191,14 +240,26 @@ void WindowProcCallback(
   }
 
   auto& visible = GetAntTweakBarVisible();
+  UINT const blocked_msgs[] = {WM_CHAR,
+                               WM_KEYDOWN,
+                               WM_KEYUP,
+                               WM_MOUSEMOVE,
+                               WM_LBUTTONDOWN,
+                               WM_RBUTTONDOWN,
+                               WM_MBUTTONDOWN,
+                               WM_LBUTTONUP,
+                               WM_RBUTTONUP,
+                               WM_MBUTTONUP,
+                               WM_RBUTTONDBLCLK,
+                               WM_LBUTTONDBLCLK,
+                               WM_MBUTTONDBLCLK,
+                               WM_MOUSEWHEEL,
+                               WM_INPUT,
+                               WM_SYSKEYDOWN,
+                               WM_SYSKEYUP};
   bool const blocked_msg =
-    (msg == WM_CHAR || msg == WM_KEYDOWN || msg == WM_KEYUP ||
-     msg == WM_MOUSEMOVE || msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN ||
-     msg == WM_MBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONUP ||
-     msg == WM_MBUTTONUP || msg == WM_RBUTTONDBLCLK ||
-     msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDBLCLK ||
-     msg == WM_MOUSEWHEEL || msg == WM_INPUT || msg == WM_SYSKEYDOWN ||
-     msg == WM_SYSKEYUP);
+    std::find(std::begin(blocked_msgs), std::end(blocked_msgs), msg) !=
+    std::end(blocked_msgs);
   // Window #0 will always exist if TwInit has completed successfully.
   if (visible && ::TwWindowExists(0) && blocked_msg)
   {
@@ -295,31 +356,6 @@ void
   }
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
-  GetOnFrameCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
-    callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<
-  hadesmem::cerberus::OnAntTweakBarInitializeCallback>&
-  GetOnAntTweakBarInitializeCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnAntTweakBarInitializeCallback> callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnAntTweakBarCleanupCallback>&
-  GetOnAntTweakBarCleanupCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnAntTweakBarCleanupCallback> callbacks;
-  return callbacks;
-}
-
 struct RenderInfoDXGI
 {
   bool first_time_{true};
@@ -389,6 +425,32 @@ bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
 {
 public:
+  virtual std::size_t RegisterOnInitialize(std::function<
+    hadesmem::cerberus::OnAntTweakBarInitializeCallback> const& callback) final
+  {
+    auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnInitialize(std::size_t id) final
+  {
+    auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnCleanup(std::function<
+    hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
+  {
+    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnCleanup(std::size_t id) final
+  {
+    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+    return callbacks.Unregister(id);
+  }
+
   virtual bool IsInitialized() final
   {
     return AntTweakBarInitializedAny();
@@ -977,50 +1039,6 @@ void OnFrameGeneric()
                                     << hadesmem::ErrorString{"TwDraw failed."});
   }
 }
-
-class RenderImpl : public hadesmem::cerberus::RenderInterface
-{
-public:
-  virtual std::size_t RegisterOnFrame(
-    std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
-  {
-    return hadesmem::cerberus::RegisterOnFrameCallback(callback);
-  }
-
-  virtual void UnregisterOnFrame(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnFrameCallback(id);
-  }
-
-  virtual std::size_t RegisterOnAntTweakBarInitialize(std::function<
-    hadesmem::cerberus::OnAntTweakBarInitializeCallback> const& callback) final
-  {
-    return hadesmem::cerberus::RegisterOnAntTweakBarInitializeCallback(
-      callback);
-  }
-
-  virtual void UnregisterOnAntTweakBarInitialize(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnAntTweakBarInitializeCallback(id);
-  }
-
-  virtual std::size_t RegisterOnAntTweakBarCleanup(std::function<
-    hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
-  {
-    return hadesmem::cerberus::RegisterOnAntTweakBarCleanupCallback(callback);
-  }
-
-  virtual void UnregisterOnAntTweakBarCleanup(std::size_t id) final
-  {
-    hadesmem::cerberus::UnregisterOnAntTweakBarCleanupCallback(id);
-  }
-
-  virtual hadesmem::cerberus::AntTweakBarInterface*
-    GetAntTweakBarInterface() final
-  {
-    return &hadesmem::cerberus::GetAntTweakBarInterface();
-  }
-};
 }
 
 namespace hadesmem
@@ -1041,66 +1059,26 @@ AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeRender()
 {
-  RegisterOnFrameCallbackDXGI(OnFrameDXGI);
+  auto& dxgi = GetDXGIInterface();
+  dxgi.RegisterOnFrame(OnFrameDXGI);
 
-  RegisterOnFrameCallbackD3D9(OnFrameD3D9);
+  auto& d3d9 = GetD3D9Interface();
+  d3d9.RegisterOnFrame(OnFrameD3D9);
+  d3d9.RegisterOnReset(OnResetD3D9);
 
-  RegisterOnResetCallbackD3D9(OnResetD3D9);
+  auto& opengl32 = GetOpenGL32Interface();
+  opengl32.RegisterOnFrame(OnFrameOpenGL32);
 
-  RegisterOnFrameCallbackOpenGL32(OnFrameOpenGL32);
+  auto& input = GetInputInterface();
+  input.RegisterOnWndProcMsg(WindowProcCallback);
+  input.RegisterOnSetCursor(OnSetCursor);
+  input.RegisterOnGetCursorPos(OnGetCursorPos);
+  input.RegisterOnSetCursorPos(OnSetCursorPos);
+  input.RegisterOnShowCursor(OnShowCursor);
+  input.RegisterOnDirectInput(OnDirectInput);
 
-  RegisterOnFrameCallback(OnFrameGeneric);
-
-  RegisterOnWndProcMsgCallback(WindowProcCallback);
-
-  RegisterOnSetCursorCallback(OnSetCursor);
-
-  RegisterOnGetCursorPosCallback(OnGetCursorPos);
-
-  RegisterOnSetCursorPosCallback(OnSetCursorPos);
-
-  RegisterOnShowCursorCallback(OnShowCursor);
-
-  RegisterOnDirectInputCallback(OnDirectInput);
-}
-
-std::size_t
-  RegisterOnFrameCallback(std::function<OnFrameCallback> const& callback)
-{
-  auto& callbacks = GetOnFrameCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnFrameCallback(std::size_t id)
-{
-  auto& callbacks = GetOnFrameCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnAntTweakBarInitializeCallback(
-  std::function<OnAntTweakBarInitializeCallback> const& callback)
-{
-  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnAntTweakBarInitializeCallback(std::size_t id)
-{
-  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-  return callbacks.Unregister(id);
-}
-
-std::size_t RegisterOnAntTweakBarCleanupCallback(
-  std::function<OnAntTweakBarCleanupCallback> const& callback)
-{
-  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnAntTweakBarCleanupCallback(std::size_t id)
-{
-  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-  return callbacks.Unregister(id);
+  auto& render = GetRenderInterface();
+  render.RegisterOnFrame(OnFrameGeneric);
 }
 }
 }

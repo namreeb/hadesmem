@@ -63,22 +63,14 @@ std::unique_ptr<hadesmem::PatchDetour>&
 
 std::pair<void*, SIZE_T>& GetD3D10Module() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  static std::pair<void*, SIZE_T> module{};
   return module;
 }
 
 std::pair<void*, SIZE_T>& GetD3D101Module() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  static std::pair<void*, SIZE_T> module{};
   return module;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadCallbackD3D10>&
-  GetOnUnloadCallbacksD3D10()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnUnloadCallbackD3D10> callbacks;
-  return callbacks;
 }
 
 extern "C" HRESULT WINAPI
@@ -366,9 +358,6 @@ void UndetourD3D10(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
-
-  auto const& callbacks = GetOnUnloadCallbacksD3D10();
-  callbacks.Run();
 }
 
 void DetourD3D101(HMODULE base)
@@ -402,22 +391,6 @@ void UndetourD3D101(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
-
-  auto const& callbacks = GetOnUnloadCallbacksD3D10();
-  callbacks.Run();
-}
-
-std::size_t RegisterOnUnloadCallbackD3D10(
-  std::function<OnUnloadCallbackD3D10> const& callback)
-{
-  auto& callbacks = GetOnUnloadCallbacksD3D10();
-  return callbacks.Register(callback);
-}
-
-void UnregisterOnUnloadCallbackD3D10(std::size_t id)
-{
-  auto& callbacks = GetOnUnloadCallbacksD3D10();
-  return callbacks.Unregister(id);
 }
 }
 }
