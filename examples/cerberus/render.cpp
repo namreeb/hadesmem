@@ -5,6 +5,8 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <mutex>
+#include <queue>
 
 #include <windows.h>
 #include <winnt.h>
@@ -102,6 +104,26 @@ bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = false;
   return visible;
+}
+
+struct WndProcInputMsg
+{
+  HWND hwnd_;
+  UINT msg_;
+  WPARAM wparam_;
+  LPARAM lparam_;
+};
+
+std::queue<WndProcInputMsg>& GetWndProcInputMsgQueue()
+{
+  static std::queue<WndProcInputMsg> queue;
+  return queue;
+}
+
+std::recursive_mutex& GetWndProcInputMsgQueueMutex()
+{
+  static std::recursive_mutex mutex;
+  return mutex;
 }
 
 void SetAntTweakBarVisible(bool visible, bool old_visible)
@@ -228,25 +250,13 @@ void ToggleAntTweakBarVisible()
   SetAntTweakBarVisible(visible, !visible);
 }
 
-void WindowProcCallback(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
+void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
       ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
   {
     ToggleAntTweakBarVisible();
-    *handled = true;
     return;
-  }
-
-  auto& visible = GetAntTweakBarVisible();
-  bool const blocked_msg = msg == WM_INPUT ||
-                           (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
-                           (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
-  // Window #0 will always exist if TwInit has completed successfully.
-  if (visible && ::TwWindowExists(0) && blocked_msg)
-  {
-    *handled = true;
   }
 
   bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
@@ -269,6 +279,48 @@ void WindowProcCallback(
     hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
 
   ::TwEventWin(hwnd, msg, wparam, lparam);
+}
+
+void HandleInputQueue()
+{
+  auto& queue = GetWndProcInputMsgQueue();
+  auto& mutex = GetWndProcInputMsgQueueMutex();
+  std::lock_guard<std::recursive_mutex> lock(mutex);
+  while (!queue.empty())
+  {
+    WndProcInputMsg msg = queue.back();
+    HandleInputQueueEntry(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_);
+    queue.pop();
+  }
+}
+
+void WindowProcCallback(
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
+{
+  {
+    auto& queue = GetWndProcInputMsgQueue();
+    auto& mutex = GetWndProcInputMsgQueueMutex();
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    queue.push(WndProcInputMsg{hwnd, msg, wparam, lparam});
+  }
+
+  if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
+      ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
+  {
+    *handled = true;
+    return;
+  }
+
+  auto& visible = GetAntTweakBarVisible();
+  bool const blocked_msg = msg == WM_INPUT ||
+                           (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
+                           (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
+  // Window #0 will always exist if TwInit has completed successfully.
+  if (visible && ::TwWindowExists(0) && blocked_msg)
+  {
+    *handled = true;
+    return;
+  }
 }
 
 void OnSetCursor(HCURSOR cursor,
@@ -1016,6 +1068,8 @@ void OnResetD3D9(IDirect3DDevice9* device,
 
 void OnFrameGeneric()
 {
+  HandleInputQueue();
+
   if (!::TwDraw())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
