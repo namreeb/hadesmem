@@ -606,6 +606,7 @@ bool InitializeWndprocHook(RenderInfoOpenGL32& render_info)
     else
     {
       DWORD const last_error = ::GetLastError();
+      (void)last_error;
       HADESMEM_DETAIL_TRACE_FORMAT_A(
         "Failed to get window handle (%ld). Ignoring.", last_error);
     }
