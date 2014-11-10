@@ -268,16 +268,6 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   auto const ensure_reset_set_cursor_hook_flag =
     hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
 
-  bool& disable_get_cursor_pos_hook =
-    hadesmem::cerberus::GetDisableGetCursorPosHook();
-  disable_get_cursor_pos_hook = true;
-  auto reset_get_cursor_pos_hook_flag_fn = [&]()
-  {
-    disable_get_cursor_pos_hook = false;
-  };
-  auto const ensure_reset_get_cursor_pos_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
-
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
