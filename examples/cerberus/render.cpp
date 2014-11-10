@@ -288,7 +288,7 @@ void HandleInputQueue()
   std::lock_guard<std::recursive_mutex> lock(mutex);
   while (!queue.empty())
   {
-    WndProcInputMsg msg = queue.back();
+    WndProcInputMsg msg = queue.front();
     HandleInputQueueEntry(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_);
     queue.pop();
   }

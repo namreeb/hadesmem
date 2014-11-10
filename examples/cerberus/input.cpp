@@ -626,7 +626,7 @@ HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p].", cursor);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", cursor);
 
   if (!hadesmem::cerberus::GetDisableSetCursorHook())
   {
@@ -637,21 +637,23 @@ HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
 
     if (handled)
     {
-      HADESMEM_DETAIL_TRACE_A("SetCursor handled. Not calling trampoline.");
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%p].", retval);
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "SetCursor handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", retval);
       return retval;
     }
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("SetCursor hook disabled, skipping callbacks.");
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "SetCursor hook disabled, skipping callbacks.");
   }
 
   auto const set_cursor = detour->GetTrampoline<decltype(&SetCursorDetour)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor(cursor);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%p].", ret);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", ret);
 
   return ret;
 }
@@ -663,7 +665,7 @@ BOOL WINAPI GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p].", point);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", point);
 
   if (!hadesmem::cerberus::GetDisableGetCursorPosHook())
   {
@@ -673,13 +675,15 @@ BOOL WINAPI GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
 
     if (handled)
     {
-      HADESMEM_DETAIL_TRACE_A("GetCursorPos handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "GetCursorPos handled. Not calling trampoline.");
       return TRUE;
     }
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("GetCursorPos hook disabled, skipping callbacks.");
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "GetCursorPos hook disabled, skipping callbacks.");
   }
 
   auto const get_cursor_pos =
@@ -687,7 +691,7 @@ BOOL WINAPI GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
   last_error_preserver.Revert();
   auto const ret = get_cursor_pos(point);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", ret);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
 
   return ret;
 }
@@ -699,7 +703,7 @@ BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d] [%d].", x, y);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d] [%d].", x, y);
 
   auto const& callbacks = GetOnSetCursorPosCallbacks();
   bool handled = false;
@@ -707,7 +711,8 @@ BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
 
   if (handled)
   {
-    HADESMEM_DETAIL_TRACE_A("SetCursorPos handled. Not calling trampoline.");
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "SetCursorPos handled. Not calling trampoline.");
     return TRUE;
   }
 
@@ -716,7 +721,7 @@ BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
   last_error_preserver.Revert();
   auto const ret = set_cursor_pos(x, y);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", ret);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
 
   return ret;
 }
@@ -728,7 +733,7 @@ int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%d].", show);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d].", show);
 
   if (!hadesmem::cerberus::GetDisableShowCursorHook())
   {
@@ -739,21 +744,23 @@ int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
 
     if (handled)
     {
-      HADESMEM_DETAIL_TRACE_A("ShowCursor handled. Not calling trampoline.");
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", retval);
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "ShowCursor handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", retval);
       return retval;
     }
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("ShowCursor hook disabled, skipping callbacks.");
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "ShowCursor hook disabled, skipping callbacks.");
   }
 
   auto const show_cursor = detour->GetTrampoline<decltype(&ShowCursorDetour)>();
   last_error_preserver.Revert();
   auto const ret = show_cursor(show);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", ret);
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
 
   return ret;
 }
