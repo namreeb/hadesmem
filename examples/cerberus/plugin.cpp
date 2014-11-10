@@ -207,9 +207,20 @@ private:
   bool call_export_{};
 };
 
-std::vector<Plugin>& GetPlugins()
+struct PluginsWrapper
 {
-  static std::vector<Plugin> plugins;
+  ~PluginsWrapper()
+  {
+    auto callbacks = GetOnUnloadPluginsCallbacks();
+    callbacks.Run();
+  }
+
+  std::vector<Plugin> plugins_;
+};
+
+PluginsWrapper& GetPlugins()
+{
+  static PluginsWrapper plugins;
   return plugins;
 }
 
@@ -302,7 +313,7 @@ namespace cerberus
 {
 void LoadPlugin(std::wstring const& path)
 {
-  auto& plugins = GetPlugins();
+  auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin = std::find_if(std::begin(plugins),
                                    std::end(plugins),
@@ -325,7 +336,7 @@ void LoadPlugin(std::wstring const& path)
 
 void UnloadPlugin(std::wstring const& path)
 {
-  auto& plugins = GetPlugins();
+  auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin = std::find_if(std::begin(plugins),
                                    std::end(plugins),
@@ -385,10 +396,7 @@ void UnloadPlugins()
 {
   HADESMEM_DETAIL_TRACE_A("Unloading plugins.");
 
-  auto& callbacks = GetOnUnloadPluginsCallbacks();
-  callbacks.Run();
-
-  auto& plugins = GetPlugins();
+  auto& plugins = GetPlugins().plugins_;
   plugins.clear();
 }
 
