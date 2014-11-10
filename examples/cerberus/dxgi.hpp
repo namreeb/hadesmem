@@ -17,7 +17,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-  typedef void OnFrameDXGICallback(IDXGISwapChain* swap_chain);
+typedef void OnFrameDXGICallback(IDXGISwapChain* swap_chain);
 
 class DXGIInterface
 {
@@ -26,8 +26,8 @@ public:
   {
   }
 
-  virtual std::size_t RegisterOnFrame(
-    std::function<OnFrameDXGICallback> const& callback) = 0;
+  virtual std::size_t
+    RegisterOnFrame(std::function<OnFrameDXGICallback> const& callback) = 0;
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 };

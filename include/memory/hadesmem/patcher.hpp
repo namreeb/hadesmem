@@ -20,13 +20,13 @@
 #include <windows.h>
 
 #include <hadesmem/alloc.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/scope_warden.hpp>
 #include <hadesmem/detail/srw_lock.hpp>
 #include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
-#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>

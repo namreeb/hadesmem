@@ -116,11 +116,11 @@ void InitializeSupportForModule(
 
   auto const on_unmap = [=](HMODULE mod)
   {
-    auto const d3d10_mod = get_module_func();
-    auto const d3d10_mod_beg = d3d10_mod.first;
-    void* const d3d10_mod_end =
-      static_cast<std::uint8_t*>(d3d10_mod.first) + d3d10_mod.second;
-    if (mod >= d3d10_mod_beg && mod < d3d10_mod_end)
+    auto const module = get_module_func();
+    auto const module_beg = module.first;
+    void* const module_end =
+      static_cast<std::uint8_t*>(module.first) + module.second;
+    if (mod >= module_beg && mod < module_end)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
                                      module_name_upper.c_str());

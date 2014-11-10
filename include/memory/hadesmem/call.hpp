@@ -21,13 +21,13 @@
 
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/remote_thread.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
-#include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/flush.hpp>

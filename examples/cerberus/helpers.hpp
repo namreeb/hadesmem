@@ -11,8 +11,8 @@
 
 #include <windows.h>
 
-#include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/alias_cast.hpp>
+#include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
