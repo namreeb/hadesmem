@@ -1033,47 +1033,47 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
   }
 }
 
+void OnFrameGeneric()
+{
+  auto& callbacks = GetOnFrameCallbacks();
+  callbacks.Run();
+
+  HandleInputQueue();
+
+  if (!::TwDraw())
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+    << hadesmem::ErrorString{ "TwDraw failed." });
+  }
+}
+
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
   HandleOnFrameD3D11(swap_chain);
 
   HandleOnFrameD3D10(swap_chain);
 
-  auto& callbacks = GetOnFrameCallbacks();
-  callbacks.Run();
+  OnFrameGeneric();
 }
 
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
   HandleOnFrameD3D9(device);
 
-  auto& callbacks = GetOnFrameCallbacks();
-  callbacks.Run();
+  OnFrameGeneric();
 }
 
 void OnFrameOpenGL32(HDC device)
 {
   HandleOnFrameOpenGL32(device);
 
-  auto& callbacks = GetOnFrameCallbacks();
-  callbacks.Run();
+  OnFrameGeneric();
 }
 
 void OnResetD3D9(IDirect3DDevice9* device,
                  D3DPRESENT_PARAMETERS* presentation_parameters)
 {
   HandleOnResetD3D9(device, presentation_parameters);
-}
-
-void OnFrameGeneric()
-{
-  HandleInputQueue();
-
-  if (!::TwDraw())
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwDraw failed."});
-  }
 }
 
 void OnUnloadPlugins()
@@ -1117,9 +1117,6 @@ void InitializeRender()
   input.RegisterOnSetCursorPos(OnSetCursorPos);
   input.RegisterOnShowCursor(OnShowCursor);
   input.RegisterOnDirectInput(OnDirectInput);
-
-  auto& render = GetRenderInterface();
-  render.RegisterOnFrame(OnFrameGeneric);
 
   RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
