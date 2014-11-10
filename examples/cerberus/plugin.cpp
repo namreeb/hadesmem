@@ -31,6 +31,14 @@
 
 namespace
 {
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadPluginsCallback>&
+  GetOnUnloadPluginsCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnUnloadPluginsCallback> callbacks;
+  return callbacks;
+}
+
 class Plugin : public hadesmem::cerberus::PluginInterface
 {
 public:
@@ -377,8 +385,24 @@ void UnloadPlugins()
 {
   HADESMEM_DETAIL_TRACE_A("Unloading plugins.");
 
+  auto& callbacks = GetOnUnloadPluginsCallbacks();
+  callbacks.Run();
+
   auto& plugins = GetPlugins();
   plugins.clear();
+}
+
+std::size_t RegisterOnUnloadPlugins(
+  std::function<hadesmem::cerberus::OnUnloadPluginsCallback> const& callback)
+{
+  auto& callbacks = GetOnUnloadPluginsCallbacks();
+  return callbacks.Register(callback);
+}
+
+void UnregisterOnUnloadPlugins(std::size_t id)
+{
+  auto& callbacks = GetOnUnloadPluginsCallbacks();
+  return callbacks.Unregister(id);
 }
 }
 }

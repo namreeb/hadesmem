@@ -457,6 +457,14 @@ bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
          GetRenderInfoOpenGL32().tw_initialized_;
 }
 
+void SetAntTweakBarUninitialized() HADESMEM_DETAIL_NOEXCEPT
+{
+  GetRenderInfoD3D9().tw_initialized_ = false;
+  GetRenderInfoD3D10().tw_initialized_ = false;
+  GetRenderInfoD3D11().tw_initialized_ = false;
+  GetRenderInfoOpenGL32().tw_initialized_ = false;
+}
+
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
 {
 public:
@@ -1077,6 +1085,11 @@ void OnFrameGeneric()
                                     << hadesmem::ErrorString{"TwDraw failed."});
   }
 }
+
+void OnUnloadPlugins()
+{
+  SetAntTweakBarUninitialized();
+}
 }
 
 namespace hadesmem
@@ -1117,6 +1130,8 @@ void InitializeRender()
 
   auto& render = GetRenderInterface();
   render.RegisterOnFrame(OnFrameGeneric);
+
+  RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
 }
 }

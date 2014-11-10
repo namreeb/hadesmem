@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include "d3d9.hpp"
@@ -15,13 +16,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-void LoadPlugins();
-
-void UnloadPlugins();
-
-void LoadPlugin(std::wstring const& path);
-
-void UnloadPlugin(std::wstring const& path);
+typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
 {
@@ -40,5 +35,18 @@ public:
 
   virtual InputInterface* GetInputInterface() = 0;
 };
+
+void LoadPlugins();
+
+void UnloadPlugins();
+
+void LoadPlugin(std::wstring const& path);
+
+void UnloadPlugin(std::wstring const& path);
+
+std::size_t RegisterOnUnloadPlugins(
+  std::function<OnUnloadPluginsCallback> const& callback);
+
+void UnregisterOnUnloadPlugins(std::size_t id);
 }
 }
