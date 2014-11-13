@@ -205,6 +205,175 @@ HADESMEM_DETAIL_MAKE_FUNC_ARGS(__vectorcall)
 
 template <typename FuncT> using FuncArgsT = typename FuncArgs<FuncT>::type;
 
+template <typename FuncT, typename DetourT> struct DetourCallback;
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourCallback<R (C::*)(Args...), DetourT>
+{
+  typedef R(type)(DetourT*, C*, Args...);
+};
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourCallback<R (C::*)(Args...) const, DetourT>
+{
+  typedef R(type)(DetourT*, C const*, Args...);
+};
+
+#define HADESMEM_DETAIL_MAKE_DETOUR_CALLBACK(call_conv)                        \
+  \
+template<typename R,                                                           \
+         typename... Args,                                                     \
+         typename DetourT> struct DetourCallback<R(call_conv*)(Args...),       \
+                                                 DetourT>                      \
+  \
+{                                                                         \
+    typedef R(type)(DetourT*, Args...);                                        \
+  \
+};                                                                             \
+  \
+template<typename R,                                                           \
+         typename... Args,                                                     \
+         typename DetourT> struct DetourCallback<R call_conv(Args...),         \
+                                                 DetourT>                      \
+  \
+{                                                                         \
+    typedef R(type)(DetourT*, Args...);                                        \
+  \
+};
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+
+template <typename R, typename... Args, typename DetourT>
+struct DetourCallback<R (*)(Args...), DetourT>
+{
+  typedef R(type)(DetourT*, Args...);
+};
+
+template <typename R, typename... Args, typename DetourT>
+struct DetourCallback<R(Args...), DetourT>
+{
+  typedef R(type)(DetourT*, Args...);
+};
+
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+
+HADESMEM_DETAIL_MAKE_DETOUR_CALLBACK(__cdecl)
+HADESMEM_DETAIL_MAKE_DETOUR_CALLBACK(__stdcall)
+HADESMEM_DETAIL_MAKE_DETOUR_CALLBACK(__fastcall)
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+
+HADESMEM_DETAIL_MAKE_DETOUR_CALLBACK(__vectorcall)
+
+#endif
+
+template <typename FuncT, typename DetourT>
+using DetourCallbackT = typename DetourCallback<FuncT, DetourT>::type;
+
+template <typename FuncT, typename DetourT> struct DetourStub;
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourStub<R (C::*)(Args...), DetourT>
+{
+  static R __thiscall Stub(C* c, Args... args)
+  {
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->Handler<R>(c, args...);
+  }
+};
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourStub<R (C::*)(Args...) const, DetourT>
+{
+  static R __stdcall Stub(C const* c, Args... args)
+  {
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->Handler<R>(c, args...);
+  }
+};
+
+#define HADESMEM_DETAIL_MAKE_DETOUR_STUB(call_conv)                            \
+  \
+template<typename R,                                                           \
+         typename... Args,                                                     \
+         typename DetourT> struct DetourStub<R(call_conv*)(Args...), DetourT>  \
+  \
+{                                                                         \
+    \
+static R call_conv Stub(Args... args)                                          \
+    \
+{                                                                       \
+      auto const detour = reinterpret_cast<DetourT*>(                          \
+        winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                \
+      return detour->Handler<R>(args...);                                      \
+    \
+}                                                                       \
+  \
+};                                                                             \
+  \
+template<typename R,                                                           \
+         typename... Args,                                                     \
+         typename DetourT> struct DetourStub<R call_conv(Args...), DetourT>    \
+  \
+{                                                                         \
+    \
+static R call_conv Stub(Args... args)                                          \
+    \
+{                                                                       \
+      auto const detour = reinterpret_cast<DetourT*>(                          \
+        winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                \
+      return detour->Handler<R>(args...);                                      \
+    \
+}                                                                       \
+  \
+};
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+
+template <typename R, typename... Args, typename DetourT>
+struct DetourStub<R (*)(Args...), DetourT>
+{
+  static R __stdcall Stub(Args... args)
+  {
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->Handler<R>(args...);
+  }
+};
+
+template <typename R, typename... Args, typename DetourT>
+struct DetourStub<R(Args...), DetourT>
+{
+  static R __stdcall Stub(Args... args)
+  {
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->Handler<R>(args...);
+  }
+};
+
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+
+HADESMEM_DETAIL_MAKE_DETOUR_STUB(__cdecl)
+HADESMEM_DETAIL_MAKE_DETOUR_STUB(__stdcall)
+HADESMEM_DETAIL_MAKE_DETOUR_STUB(__fastcall)
+
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+
+HADESMEM_DETAIL_MAKE_DETOUR_STUB(__vectorcall)
+
+#endif
+
 // WARNING! Here be dragons... GCC doesn't properly distinguish between function
 // pointers with different calling conventions. Depending on the ABI version
 // you're using you either get a compiler error or a linker error if you try to

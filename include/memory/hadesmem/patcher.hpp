@@ -6,11 +6,13 @@
 #include <atomic>
 #include <climits>
 #include <cstdint>
+#include <functional>
 #include <locale>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
@@ -27,6 +29,7 @@
 #include <hadesmem/detail/thread_aux.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
+#include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
