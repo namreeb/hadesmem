@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Audiosurf 2\Audiosurf2.exe" --arg "-force-d3d11" --inject --steam-app-id 235800 --export Load --add-path --path-resolution --module cerberus.dll

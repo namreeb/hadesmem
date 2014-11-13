@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\america's army 3\Binaries\AA3Game.exe" --inject --steam-app-id 13140 --export Load --add-path --path-resolution --module cerberus.dll

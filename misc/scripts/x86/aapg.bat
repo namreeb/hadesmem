@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\America's Army\AAPG\Binaries\AALauncher32.exe" --inject --steam-app-id 203290 --export Load --add-path --path-resolution --module cerberus.dll

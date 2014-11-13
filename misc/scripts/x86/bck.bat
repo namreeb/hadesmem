@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\BC Kings\BCKings.exe" --inject --steam-app-id 12460 --export Load --add-path --path-resolution --module cerberus.dll

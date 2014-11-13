@@ -226,10 +226,26 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
     while (show_cursor_count > 0)
     {
       HADESMEM_DETAIL_TRACE_A("Hiding cursor.");
-      ::ShowCursor(FALSE);
       --show_cursor_count;
+      ::ShowCursor(FALSE);
     }
   }
+
+  RECT clip_cursor{};
+  if (!::GetClipCursor(&clip_cursor))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"GetClipCursor failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
+    clip_cursor.left,
+    clip_cursor.top,
+    clip_cursor.right,
+    clip_cursor.bottom);
 
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
@@ -1043,7 +1059,7 @@ void OnFrameGeneric()
   if (!::TwDraw())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-    << hadesmem::ErrorString{ "TwDraw failed." });
+                                    << hadesmem::ErrorString{"TwDraw failed."});
   }
 }
 
