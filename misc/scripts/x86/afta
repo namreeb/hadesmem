@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Awesome\Awesome.exe" --inject --steam-app-id 15560 --export Load --add-path --path-resolution --module cerberus.dll
