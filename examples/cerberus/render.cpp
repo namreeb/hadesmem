@@ -258,12 +258,12 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Saving current clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
-      clip_cursor.left,
-      clip_cursor.top,
-      clip_cursor.right,
-      clip_cursor.bottom);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Saving current clip cursor: Left [%ld] Top "
+                                   "[%ld] Right [%ld] Bottom [%ld]",
+                                   clip_cursor.left,
+                                   clip_cursor.top,
+                                   clip_cursor.right,
+                                   clip_cursor.bottom);
 
     auto& old_clip_cursor = GetOldClipCursor();
     old_clip_cursor = clip_cursor;
@@ -288,6 +288,13 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
     auto const ensure_reset_clip_cursor_hook_flag =
       hadesmem::detail::MakeScopeWarden(reset_clip_cursor_hook_flag_fn);
 
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Setting new clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
+      new_clip_cursor.left,
+      new_clip_cursor.top,
+      new_clip_cursor.right,
+      new_clip_cursor.bottom);
+
     if (!::ClipCursor(&new_clip_cursor))
     {
       DWORD const last_error = ::GetLastError();
@@ -310,19 +317,19 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
 
     auto& clip_cursor = GetOldClipCursor();
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Restoring old clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
-      clip_cursor.left,
-      clip_cursor.top,
-      clip_cursor.right,
-      clip_cursor.bottom);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old clip cursor: Left [%ld] Top "
+                                   "[%ld] Right [%ld] Bottom [%ld]",
+                                   clip_cursor.left,
+                                   clip_cursor.top,
+                                   clip_cursor.right,
+                                   clip_cursor.bottom);
 
     if (!::ClipCursor(&clip_cursor))
     {
       DWORD const last_error = ::GetLastError();
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{ "ClipCursor failed." }
-      << hadesmem::ErrorCodeWinLast{ last_error });
+        hadesmem::Error{} << hadesmem::ErrorString{"ClipCursor failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
     }
   }
 
