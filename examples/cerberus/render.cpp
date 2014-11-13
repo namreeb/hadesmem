@@ -268,13 +268,6 @@ void ToggleAntTweakBarVisible()
 
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-  if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
-      ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
-  {
-    ToggleAntTweakBarVisible();
-    return;
-  }
-
   bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
   disable_set_cursor_hook = true;
   auto reset_set_cursor_hook_flag_fn = [&]()
@@ -313,6 +306,7 @@ void WindowProcCallback(
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
       ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
   {
+    ToggleAntTweakBarVisible();
     *handled = true;
     return;
   }
