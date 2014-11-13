@@ -29,6 +29,11 @@ typedef void OnDirectInputCallback(bool* handled);
 
 typedef void OnShowCursorCallback(BOOL show, bool* handled, int* retval);
 
+typedef void
+  OnClipCursorCallback(RECT const* rect, bool* handled, BOOL* retval);
+
+typedef void OnGetClipCursorCallback(RECT* rect, bool* handled, BOOL* retval);
+
 class InputInterface
 {
 public:
@@ -65,6 +70,16 @@ public:
     std::function<OnShowCursorCallback> const& callback) = 0;
 
   virtual void UnregisterOnShowCursor(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnClipCursor(
+    std::function<OnClipCursorCallback> const& callback) = 0;
+
+  virtual void UnregisterOnClipCursor(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnGetClipCursor(
+    std::function<OnGetClipCursorCallback> const& callback) = 0;
+
+  virtual void UnregisterOnGetClipCursor(std::size_t id) = 0;
 };
 
 InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -90,5 +105,9 @@ bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
 
 bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+
+bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+
+bool& GetDisableGetClipCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

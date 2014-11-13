@@ -62,6 +62,22 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnShowCursorCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnClipCursorCallback>&
+  GetOnClipCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnClipCursorCallback>
+    callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGetClipCursorCallback>&
+  GetOnGetClipCursorCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnGetClipCursorCallback> callbacks;
+  return callbacks;
+}
+
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnDirectInputCallback>&
   GetOnDirectInputCallbacks()
 {
@@ -154,6 +170,34 @@ public:
   virtual void UnregisterOnShowCursor(std::size_t id) final
   {
     auto& callbacks = GetOnShowCursorCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnClipCursor(
+    std::function<hadesmem::cerberus::OnClipCursorCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnClipCursorCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnClipCursor(std::size_t id) final
+  {
+    auto& callbacks = GetOnClipCursorCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnGetClipCursor(
+    std::function<hadesmem::cerberus::OnGetClipCursorCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnGetClipCursorCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnGetClipCursor(std::size_t id) final
+  {
+    auto& callbacks = GetOnGetClipCursorCallbacks();
     return callbacks.Unregister(id);
   }
 
@@ -263,6 +307,20 @@ std::unique_ptr<hadesmem::PatchDetour>&
 
 std::unique_ptr<hadesmem::PatchDetour>&
   GetShowCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetGetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -764,6 +822,85 @@ int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
 
   return ret;
 }
+
+BOOL WINAPI ClipCursorDetour(RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetClipCursorDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", rect);
+
+  if (!hadesmem::cerberus::GetDisableClipCursorHook())
+  {
+    auto const& callbacks = GetOnClipCursorCallbacks();
+    bool handled = false;
+    BOOL retval{};
+    callbacks.Run(rect, &handled, &retval);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "ClipCursor handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", retval);
+      return retval;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "ClipCursor hook disabled, skipping callbacks.");
+  }
+
+  auto const clip_cursor = detour->GetTrampoline<decltype(&ClipCursorDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = clip_cursor(rect);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
+
+BOOL WINAPI GetClipCursorDetour_(RECT* rect) HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetGetClipCursorDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", rect);
+
+  if (!hadesmem::cerberus::GetDisableGetClipCursorHook())
+  {
+    auto const& callbacks = GetOnGetClipCursorCallbacks();
+    bool handled = false;
+    BOOL retval{};
+    callbacks.Run(rect, &handled, &retval);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "GetClipCursor handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", retval);
+      return retval;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "GetClipCursor hook disabled, skipping callbacks.");
+  }
+
+  auto const get_clip_cursor =
+    detour->GetTrampoline<decltype(&GetClipCursorDetour_)>();
+  last_error_preserver.Revert();
+  auto const ret = get_clip_cursor(rect);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
 }
 
 namespace hadesmem
@@ -850,6 +987,13 @@ void DetourUser32(HMODULE base)
                SetCursorPosDetour);
     DetourFunc(
       process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
+    DetourFunc(
+      process, base, "ClipCursor", GetClipCursorDetour(), ClipCursorDetour);
+    DetourFunc(process,
+               base,
+               "GetClipCursor",
+               GetGetClipCursorDetour(),
+               GetClipCursorDetour_);
   }
 }
 
@@ -862,6 +1006,8 @@ void UndetourUser32(bool remove)
     UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
     UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
     UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
+    UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
+    UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
@@ -952,6 +1098,30 @@ bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
 }
 
 bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool disable_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool disable_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return disable_hook;
+}
+
+bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool disable_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool disable_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return disable_hook;
+}
+
+bool& GetDisableGetClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool disable_hook = false;

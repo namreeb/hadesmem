@@ -138,6 +138,19 @@ void UseAllStatics()
   };
   auto const on_show_cursor_id = input.RegisterOnShowCursor(on_show_cursor);
   input.UnregisterOnShowCursor(on_show_cursor_id);
+
+  auto const on_clip_cursor = [](RECT const*, bool*, BOOL*)
+  {
+  };
+  auto const on_clip_cursor_id = input.RegisterOnClipCursor(on_clip_cursor);
+  input.UnregisterOnClipCursor(on_clip_cursor_id);
+
+  auto const on_get_clip_cursor = [](RECT*, bool*, BOOL*)
+  {
+  };
+  auto const on_get_clip_cursor_id =
+    input.RegisterOnGetClipCursor(on_get_clip_cursor);
+  input.UnregisterOnGetClipCursor(on_get_clip_cursor_id);
 }
 
 // Check whether any threads are currently executing code in our module. This

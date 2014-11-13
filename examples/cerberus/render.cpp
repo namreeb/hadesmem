@@ -100,6 +100,12 @@ POINT& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
   return cursor_pos;
 }
 
+RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
+{
+  static RECT old_clip_cursor{};
+  return old_clip_cursor;
+}
+
 bool& GetAntTweakBarVisible() HADESMEM_DETAIL_NOEXCEPT
 {
   static bool visible = false;
@@ -184,7 +190,7 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
     hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
 
   auto& old_cursor_pos = GetOldCursorPos();
-  if (visible)
+  if (visible && visible != old_visible)
   {
     POINT cur_cursor_pos{};
     if (!::GetCursorPos(&cur_cursor_pos))
@@ -231,21 +237,94 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
     }
   }
 
-  RECT clip_cursor{};
-  if (!::GetClipCursor(&clip_cursor))
+  if (visible && visible != old_visible)
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"GetClipCursor failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
-  }
+    bool& disable_get_clip_cursor_hook =
+      hadesmem::cerberus::GetDisableGetClipCursorHook();
+    disable_get_clip_cursor_hook = true;
+    auto reset_get_clip_cursor_hook_flag_fn = [&]()
+    {
+      disable_get_clip_cursor_hook = false;
+    };
+    auto const ensure_reset_get_clip_cursor_hook_flag =
+      hadesmem::detail::MakeScopeWarden(reset_get_clip_cursor_hook_flag_fn);
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
-    clip_cursor.left,
-    clip_cursor.top,
-    clip_cursor.right,
-    clip_cursor.bottom);
+    RECT clip_cursor{};
+    if (!::GetClipCursor(&clip_cursor))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"GetClipCursor failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Saving current clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
+      clip_cursor.left,
+      clip_cursor.top,
+      clip_cursor.right,
+      clip_cursor.bottom);
+
+    auto& old_clip_cursor = GetOldClipCursor();
+    old_clip_cursor = clip_cursor;
+
+    RECT new_clip_cursor{};
+    if (!::GetWindowRect(hadesmem::cerberus::GetCurrentWindow(),
+                         &new_clip_cursor))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"GetWindowRect failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+
+    bool& disable_clip_cursor_hook =
+      hadesmem::cerberus::GetDisableClipCursorHook();
+    disable_clip_cursor_hook = true;
+    auto reset_clip_cursor_hook_flag_fn = [&]()
+    {
+      disable_clip_cursor_hook = false;
+    };
+    auto const ensure_reset_clip_cursor_hook_flag =
+      hadesmem::detail::MakeScopeWarden(reset_clip_cursor_hook_flag_fn);
+
+    if (!::ClipCursor(&new_clip_cursor))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"ClipCursor failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+  }
+  else if (!visible && visible != old_visible)
+  {
+    bool& disable_clip_cursor_hook =
+      hadesmem::cerberus::GetDisableClipCursorHook();
+    disable_clip_cursor_hook = true;
+    auto reset_clip_cursor_hook_flag_fn = [&]()
+    {
+      disable_clip_cursor_hook = false;
+    };
+    auto const ensure_reset_clip_cursor_hook_flag =
+      hadesmem::detail::MakeScopeWarden(reset_clip_cursor_hook_flag_fn);
+
+    auto& clip_cursor = GetOldClipCursor();
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Restoring old clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
+      clip_cursor.left,
+      clip_cursor.top,
+      clip_cursor.right,
+      clip_cursor.bottom);
+
+    if (!::ClipCursor(&clip_cursor))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{ "ClipCursor failed." }
+      << hadesmem::ErrorCodeWinLast{ last_error });
+    }
+  }
 
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
@@ -387,6 +466,32 @@ void
     }
 
     *retval = show_cursor_count;
+    *handled = true;
+  }
+}
+
+void OnClipCursor(RECT const* rect,
+                  bool* handled,
+                  BOOL* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible() && rect)
+  {
+    auto& clip_cursor = GetOldClipCursor();
+    clip_cursor = *rect;
+    *retval = TRUE;
+    *handled = true;
+  }
+}
+
+void OnGetClipCursor(RECT* rect,
+                     bool* handled,
+                     BOOL* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (GetAntTweakBarVisible() && rect)
+  {
+    auto& clip_cursor = GetOldClipCursor();
+    *rect = clip_cursor;
+    *retval = TRUE;
     *handled = true;
   }
 }
@@ -1126,6 +1231,8 @@ void InitializeRender()
   input.RegisterOnGetCursorPos(OnGetCursorPos);
   input.RegisterOnSetCursorPos(OnSetCursorPos);
   input.RegisterOnShowCursor(OnShowCursor);
+  input.RegisterOnClipCursor(OnClipCursor);
+  input.RegisterOnGetClipCursor(OnGetClipCursor);
   input.RegisterOnDirectInput(OnDirectInput);
 
   RegisterOnUnloadPlugins(OnUnloadPlugins);
