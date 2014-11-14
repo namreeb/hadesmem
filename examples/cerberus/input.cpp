@@ -356,6 +356,11 @@ HRESULT WINAPI
                                            DWORD data_len,
                                            LPVOID data) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto& detour = GetIDirectInputDevice8AGetDeviceStateDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto const& callbacks = GetOnDirectInputCallbacks();
   bool handled = false;
   callbacks.Run(&handled);
@@ -364,11 +369,6 @@ HRESULT WINAPI
   {
     return E_FAIL;
   }
-
-  auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
     detour
@@ -385,6 +385,11 @@ HRESULT WINAPI
                                            DWORD data_len,
                                            LPVOID data) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto& detour = GetIDirectInputDevice8WGetDeviceStateDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto const& callbacks = GetOnDirectInputCallbacks();
   bool handled = false;
   callbacks.Run(&handled);
@@ -393,11 +398,6 @@ HRESULT WINAPI
   {
     return E_FAIL;
   }
-
-  auto& detour = GetIDirectInputDevice8WGetDeviceStateDetour();
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
     detour
@@ -416,6 +416,11 @@ HRESULT WINAPI
                                           LPDWORD in_out,
                                           DWORD flags) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto const& callbacks = GetOnDirectInputCallbacks();
   bool handled = false;
   callbacks.Run(&handled);
@@ -424,11 +429,6 @@ HRESULT WINAPI
   {
     return E_FAIL;
   }
-
-  auto& detour = GetIDirectInputDevice8AGetDeviceDataDetour();
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
     detour->GetTrampoline<decltype(&IDirectInputDevice8AGetDeviceDataDetour)>();
@@ -447,6 +447,11 @@ HRESULT WINAPI
                                           LPDWORD in_out,
                                           DWORD flags) HADESMEM_DETAIL_NOEXCEPT
 {
+  auto& detour = GetIDirectInputDevice8WGetDeviceDataDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
   auto const& callbacks = GetOnDirectInputCallbacks();
   bool handled = false;
   callbacks.Run(&handled);
@@ -455,11 +460,6 @@ HRESULT WINAPI
   {
     return E_FAIL;
   }
-
-  auto& detour = GetIDirectInputDevice8WGetDeviceDataDetour();
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const get_device_data =
     detour->GetTrampoline<decltype(&IDirectInputDevice8WGetDeviceDataDetour)>();

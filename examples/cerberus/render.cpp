@@ -402,7 +402,7 @@ void WindowProcCallback(
                            (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
                            (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
   // Window #0 will always exist if TwInit has completed successfully.
-  if (visible && ::TwWindowExists(0) && blocked_msg)
+  if (visible && blocked_msg && ::TwWindowExists(0))
   {
     *handled = true;
     return;
