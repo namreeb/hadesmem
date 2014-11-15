@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/winternl.hpp>
 
 namespace hadesmem
 {
@@ -276,27 +277,57 @@ using DetourCallbackT = typename DetourCallback<FuncT, DetourT>::type;
 
 template <typename FuncT, typename DetourT> struct DetourStub;
 
+#if defined(HADESMEM_INTEL) && defined(HADESMEM_DETAIL_ARCH_X86)
+
 template <typename C, typename R, typename... Args, typename DetourT>
-struct DetourStub<R (C::*)(Args...), DetourT>
+struct DetourStub<R(C::*)(Args...), DetourT>
+{
+  static R __fastcall Stub(C* c, void* dummy, Args... args)
+  {
+    (void)dummy;
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->template Handler<R>(c, args...);
+  }
+};
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourStub<R(C::*)(Args...) const, DetourT>
+{
+  static R __fastcall Stub(C const* c, void* dummy, Args... args)
+  {
+    (void)dummy;
+    auto const detour = reinterpret_cast<DetourT*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return detour->template Handler<R>(c, args...);
+  }
+};
+
+#else // #if defined(HADESMEM_INTEL) && defined(HADESMEM_DETAIL_ARCH_X86)
+
+template <typename C, typename R, typename... Args, typename DetourT>
+struct DetourStub<R(C::*)(Args...), DetourT>
 {
   static R __thiscall Stub(C* c, Args... args)
   {
     auto const detour = reinterpret_cast<DetourT*>(
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
-    return detour->Handler<R>(c, args...);
+    return detour->template Handler<R>(c, args...);
   }
 };
 
 template <typename C, typename R, typename... Args, typename DetourT>
-struct DetourStub<R (C::*)(Args...) const, DetourT>
+struct DetourStub<R(C::*)(Args...) const, DetourT>
 {
-  static R __stdcall Stub(C const* c, Args... args)
+  static R __thiscall Stub(C const* c, Args... args)
   {
     auto const detour = reinterpret_cast<DetourT*>(
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
-    return detour->Handler<R>(c, args...);
+    return detour->template Handler<R>(c, args...);
   }
 };
+
+#endif // #if defined(HADESMEM_INTEL) && defined(HADESMEM_DETAIL_ARCH_X86)
 
 #define HADESMEM_DETAIL_MAKE_DETOUR_STUB(call_conv)                            \
   \
@@ -311,7 +342,7 @@ static R call_conv Stub(Args... args)                                          \
 {                                                                       \
       auto const detour = reinterpret_cast<DetourT*>(                          \
         winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                \
-      return detour->Handler<R>(args...);                                      \
+      return detour->template Handler<R>(args...);                                      \
     \
 }                                                                       \
   \
@@ -328,7 +359,7 @@ static R call_conv Stub(Args... args)                                          \
 {                                                                       \
       auto const detour = reinterpret_cast<DetourT*>(                          \
         winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                \
-      return detour->Handler<R>(args...);                                      \
+      return detour->template Handler<R>(args...);                                      \
     \
 }                                                                       \
   \
@@ -343,7 +374,7 @@ struct DetourStub<R (*)(Args...), DetourT>
   {
     auto const detour = reinterpret_cast<DetourT*>(
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
-    return detour->Handler<R>(args...);
+    return detour->template Handler<R>(args...);
   }
 };
 
@@ -354,7 +385,7 @@ struct DetourStub<R(Args...), DetourT>
   {
     auto const detour = reinterpret_cast<DetourT*>(
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
-    return detour->Handler<R>(args...);
+    return detour->template Handler<R>(args...);
   }
 };
 

@@ -116,10 +116,10 @@ void InitializeSupportForModule(
 
   auto const on_unmap = [=](HMODULE mod)
   {
-    auto const module = get_module_func();
-    auto const module_beg = module.first;
+    auto const module_data = get_module_func();
+    auto const module_beg = module_data.first;
     void* const module_end =
-      static_cast<std::uint8_t*>(module.first) + module.second;
+      static_cast<std::uint8_t*>(module_data.first) + module_data.second;
     if (mod >= module_beg && mod < module_end)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
