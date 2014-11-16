@@ -18,6 +18,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/argv_quote.hpp>
 #include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/environment_variable.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/force_initialize.hpp>
 #include <hadesmem/detail/self_path.hpp>
@@ -32,6 +33,56 @@
 
 namespace hadesmem
 {
+namespace detail
+{
+class SteamEnvironmentVariable
+{
+public:
+  explicit SteamEnvironmentVariable(std::wstring const& name,
+                                    std::uint32_t app_id)
+    : name_(name), app_id_{app_id}
+  {
+    if (!app_id_)
+    {
+      return;
+    }
+
+    old_value_ = ReadEnvironmentVariable(name);
+
+    auto const app_id_str = detail::NumToStr<wchar_t>(app_id_);
+    WriteEnvironmentVariable(name_, app_id_str.c_str());
+  }
+
+  ~SteamEnvironmentVariable()
+  {
+    if (!app_id_)
+    {
+      return;
+    }
+
+    try
+    {
+      WriteEnvironmentVariable(name_,
+                               old_value_.first ? old_value_.second.data() : nullptr);
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+    }
+  }
+
+private:
+  SteamEnvironmentVariable(SteamEnvironmentVariable const&) = delete;
+  SteamEnvironmentVariable& operator=(SteamEnvironmentVariable const&) = delete;
+
+  std::wstring name_{};
+  std::uint32_t app_id_{};
+  std::pair<bool, std::vector<wchar_t>> old_value_{};
+};
+}
+
 struct InjectFlags
 {
   enum : std::uint32_t
@@ -302,53 +353,8 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     return work_dir;
   }();
 
-  auto const read_steam_env_var =
-    [](std::wstring const& name, std::pair<bool, std::vector<wchar_t>>& var)
-  {
-    var.second.resize(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-
-    auto const err = ::GetEnvironmentVariableW(
-      name.c_str(), var.second.data(), static_cast<DWORD>(var.second.size()));
-    if (!err || err > var.second.size())
-    {
-      DWORD const last_error = ::GetLastError();
-      if (last_error != ERROR_ENVVAR_NOT_FOUND)
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error{} << ErrorString{"GetEnvironmentVariable failed."}
-                  << ErrorCodeWinLast{last_error});
-      }
-
-      var.first = false;
-    }
-
-    var.first = true;
-  };
-
-  auto const write_steam_env_var =
-    [](std::wstring const& name, std::uint32_t steam_app_id_)
-  {
-    auto const steam_app_id_str = detail::NumToStr<wchar_t>(steam_app_id_);
-    if (!::SetEnvironmentVariableW(name.c_str(), steam_app_id_str.c_str()))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"SetEnvironmentVariable failed."}
-                << ErrorCodeWinLast{last_error});
-    }
-  };
-
-  std::pair<bool, std::vector<wchar_t>> old_steam_app_id;
-  std::pair<bool, std::vector<wchar_t>> old_steam_game_id;
-
-  if (steam_app_id)
-  {
-    read_steam_env_var(L"SteamAppId", old_steam_app_id);
-    read_steam_env_var(L"SteamGameId", old_steam_game_id);
-
-    write_steam_env_var(L"SteamAppId", steam_app_id);
-    write_steam_env_var(L"SteamGameId", steam_app_id);
-  }
+  detail::SteamEnvironmentVariable app_id(L"SteamAppId", steam_app_id);
+  detail::SteamEnvironmentVariable game_id(L"SteamGameId", steam_app_id);
 
   STARTUPINFO start_info{};
   start_info.cb = static_cast<DWORD>(sizeof(start_info));
@@ -368,25 +374,6 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"CreateProcess failed."}
                                     << ErrorCodeWinLast{last_error});
-  }
-
-  auto const restore_steam_env_var =
-    [](std::wstring const& name, std::pair<bool, std::vector<wchar_t>>& var)
-  {
-    if (!::SetEnvironmentVariableW(name.c_str(),
-                                   var.first ? var.second.data() : nullptr))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                      << ErrorString{"CreateProcess failed."}
-                                      << ErrorCodeWinLast{last_error});
-    }
-  };
-
-  if (steam_app_id)
-  {
-    restore_steam_env_var(L"SteamAppId", old_steam_app_id);
-    restore_steam_env_var(L"SteamGameId", old_steam_game_id);
   }
 
   detail::SmartHandle const proc_handle{proc_info.hProcess};
