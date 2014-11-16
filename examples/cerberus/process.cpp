@@ -118,21 +118,21 @@ extern "C" BOOL WINAPI
   {
     HADESMEM_DETAIL_TRACE_A("Debug flag detected.");
   }
-  auto const nt_create_user_process =
+  auto const create_process_internal_w =
     detour->GetTrampoline<decltype(&CreateProcessInternalWDetour)>();
   last_error_preserver.Revert();
-  auto const ret = nt_create_user_process(token,
-                                          application_name,
-                                          command_line,
-                                          process_attributes,
-                                          thread_attributes,
-                                          inherit_handles,
-                                          creation_flags | CREATE_SUSPENDED,
-                                          environment,
-                                          current_directory,
-                                          startup_info,
-                                          process_info,
-                                          new_token);
+  auto const ret = create_process_internal_w(token,
+                                             application_name,
+                                             command_line,
+                                             process_attributes,
+                                             thread_attributes,
+                                             inherit_handles,
+                                             creation_flags | CREATE_SUSPENDED,
+                                             environment,
+                                             current_directory,
+                                             startup_info,
+                                             process_info,
+                                             new_token);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
@@ -209,7 +209,7 @@ extern "C" BOOL WINAPI
       {
         DWORD const last_error = ::GetLastError();
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          hadesmem::Error{} << hadesmem::ErrorString{"CreateProcess failed."}
+          hadesmem::Error{} << hadesmem::ErrorString{"CreateProcessW failed."}
                             << hadesmem::ErrorCodeWinLast{last_error});
       }
 
