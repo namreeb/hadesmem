@@ -575,30 +575,45 @@ protected:
                : std::unique_ptr<Allocator>();
     };
 
+    // Do two separate passes when looking for trampolines, ensuring to scan
+    // forwards first. This is because there is a bug in Steam's overlay (last
+    // checked and confirmed in SteamOverlayRender64.dll v2.50.25.37) where
+    // negative displacements are not correctly sign-extended when cast to
+    // 64-bits, resulting in a crash when they attempt to resolve the jump.
+
+    // .text:0000000180082956                 cmp     al, 0FFh
+    // .text:0000000180082958                 jnz     short loc_180082971
+    // .text:000000018008295A                 cmp     byte ptr [r13+1], 25h
+    // .text:000000018008295F                 jnz     short loc_180082971
+    // ; Notice how the displacement is not being sign extended.
+    // .text:0000000180082961                 mov     eax, [r13+2]
+    // .text:0000000180082965                 lea     rcx, [rax+r13]
+    // .text:0000000180082969                 mov     r13, [rcx+6]
+
     for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
                        index = 0;
-         base + index < search_end || base - index > search_beg;
+         base + index < search_end && !trampoline;
          index += page_size)
     {
-      std::intptr_t const higher = base + index;
-      if (higher < search_end)
-      {
-        if (trampoline = allocate_tramp(
-              *process_, reinterpret_cast<void*>(higher), page_size))
-        {
-          break;
-        }
-      }
+      trampoline = allocate_tramp(
+        *process_, reinterpret_cast<void*>(base + index), page_size);
+    }
 
-      std::intptr_t const lower = base - index;
-      if (lower > search_beg)
-      {
-        if (trampoline = allocate_tramp(
-              *process_, reinterpret_cast<void*>(lower), page_size))
-        {
-          break;
-        }
-      }
+    if (!trampoline)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "WARNING! Failed to find a viable trampoline "
+        "page in forward scan, falling back to backward scan. This may cause "
+        "incompatibilty with some other overlays.");
+    }
+
+    for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
+                       index = 0;
+         base - index > search_beg && !trampoline;
+         index += page_size)
+    {
+      trampoline = allocate_tramp(
+        *process_, reinterpret_cast<void*>(base - index), page_size);
     }
 
     if (!trampoline)
