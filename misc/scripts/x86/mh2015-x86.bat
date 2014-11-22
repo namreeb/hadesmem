@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Marvel Heroes\UnrealEngine3\Binaries\Win32\MarvelHeroes2015.exe" --arg "-steam" --arg "-nobitraider" --arg "-nosolidstate" --inject --steam-app-id 226320 --export Load --add-path --path-resolution --module cerberus.dll
