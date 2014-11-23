@@ -4,42 +4,22 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-
-BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved);
-
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load();
-
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free();
+#include <hadesmem/detail/trace.hpp>
 
 extern "C" __declspec(dllimport) DWORD_PTR InjectTestDep_Foo();
-
-extern bool g_alloced_console;
-
-bool g_alloced_console = false;
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load()
 {
   InjectTestDep_Foo();
 
-  if (!AllocConsole())
-  {
-    return GetLastError();
-  }
-
-  g_alloced_console = true;
+  HADESMEM_DETAIL_TRACE_A("Called");
 
   return 0;
 }
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free()
 {
-  if (g_alloced_console)
-  {
-    if (!FreeConsole())
-    {
-      return GetLastError();
-    }
-  }
+  HADESMEM_DETAIL_TRACE_A("Called");
 
   return 0;
 }

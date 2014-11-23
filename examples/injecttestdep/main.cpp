@@ -4,13 +4,12 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-
-BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved);
-
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo();
+#include <hadesmem/detail/trace.hpp>
 
 extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
 {
+  HADESMEM_DETAIL_TRACE_A("Called");
+
   return 0;
 }
 
