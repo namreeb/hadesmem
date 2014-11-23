@@ -903,7 +903,7 @@ void CleanupAntTweakBar(bool& initialized)
 {
   if (initialized)
   {
-    HADESMEM_DETAIL_TRACE_A("Cealling AntTweakBar cleanup callbacks.");
+    HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar cleanup callbacks.");
 
     auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
     auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();

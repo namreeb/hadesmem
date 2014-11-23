@@ -195,8 +195,6 @@ alias memory
 
     <library>src/anttweakbar
 
-    <library>src/gwen
-
     <include>"./include/memory"
   ;
 
