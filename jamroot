@@ -36,6 +36,12 @@ use-project /anttweakbar
     src/anttweakbar
   ;
   
+# Use GWEN library. 
+use-project /gwen
+  :
+    src/gwen
+  ;
+  
 # Use HadesMem tests.
 use-project /tests
   :
@@ -52,13 +58,6 @@ project memory
   :
     requirements
     
-    # Tell Boost to use windows.h.
-    <define>BOOST_USE_WINDOWS_H
-    
-    # Disallow use of deprected Boost APIs.
-    <define>BOOST_SYSTEM_NO_DEPRECATED
-    <define>BOOST_FILESYSTEM_NO_DEPRECATED
-    
     # Enforce strict Windows typedefs.
     <define>STRICT
     <define>STRICT_TYPED_ITEMIDS
@@ -72,8 +71,8 @@ project memory
     <define>_SCL_SECURE_NO_WARNINGS
     
     # Minimum supported OS is Windows Vista
-    <define>WINVER=_WIN32_WINNT_VISTA
-    <define>_WIN32_WINNT=_WIN32_WINNT_VISTA
+    <define>WINVER=0x0601
+    <define>_WIN32_WINNT=0x0601
     
     # Disable tracing on release builds
     <variant>release:<define>HADESMEM_NO_TRACE
@@ -195,6 +194,8 @@ alias memory
     <library>src/tclap
 
     <library>src/anttweakbar
+
+    <library>src/gwen
 
     <include>"./include/memory"
   ;

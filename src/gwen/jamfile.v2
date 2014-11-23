@@ -1,0 +1,26 @@
+# src/gwen/jamfile.v2
+
+project 
+  : 
+    requirements 
+
+    <warnings>off
+  ;
+
+lib gwen 
+  : 
+    [ glob gwen/gwen/src/*.cpp ] 
+    [ glob gwen/gwen/src/Controls/*.cpp ] 
+    [ glob gwen/gwen/src/Controls/Dialog/*.cpp ] 
+    [ glob gwen/gwen/src/Platforms/*.cpp ] 
+  : 
+    <include>"gwen/gwen/include/"
+
+    <link>static
+
+    # Static link
+    <define>GWEN_COMPILE_STATIC
+  : 
+  : 
+    <include>"gwen/gwen/include/"
+  ;
