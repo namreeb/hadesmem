@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Metro 2033 Redux\metro.exe" --inject --steam-app-id 286690 --export Load --add-path --path-resolution --module cerberus.dll

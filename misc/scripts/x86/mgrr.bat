@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\METAL GEAR RISING REVENGEANCE\METAL GEAR RISING REVENGEANCE.exe" --inject --steam-app-id 235460 --export Load --add-path --path-resolution --module cerberus.dll

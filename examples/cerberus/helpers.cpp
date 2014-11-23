@@ -23,6 +23,7 @@ void DetourFunc(Process const& process,
   if (!detour)
   {
     void** const vtable = *reinterpret_cast<void***>(interface_ptr);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("VTable: [%p].", vtable);
     auto const target_fn = vtable[index];
     detour =
       std::make_unique<hadesmem::PatchDetour>(process, target_fn, detour_fn);
