@@ -61,7 +61,7 @@ void SetFov(hadesmem::Process const& process, float* third, float* first)
     // .text:00A780C6                 fadd    dword ptr [esi+478h]
     // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
     // .text:00A79620                 fadd    dword ptr [esi+478h]
-    auto const kCameraVertFov3pOffset = 0x478;
+    auto const kCameraVertFov3pOffset = 0x488;
     auto const vert_fov_3p = camera + kCameraVertFov3pOffset;
     std::cout << "Writing 3rd person FoV. [" << static_cast<void*>(vert_fov_3p)
               << "].\n";
@@ -76,7 +76,7 @@ void SetFov(hadesmem::Process const& process, float* third, float* first)
     // .text:00A780B5                 fld     dword ptr [esi+47Ch]
     // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
     // .text:00A794D4                 fld     dword ptr [esi+47Ch]
-    auto const kCameraVertFov1pOffset = 0x47C;
+    auto const kCameraVertFov1pOffset = 0x48C;
     auto const vert_fov_1p = camera + kCameraVertFov1pOffset;
     std::cout << "Writing 1st person FoV. [" << static_cast<void*>(vert_fov_1p)
               << "].\n";
