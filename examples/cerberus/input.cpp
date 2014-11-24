@@ -351,7 +351,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
            : ::DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInputDevice8AGetDeviceStateDetour(IDirectInputDeviceA* device,
                                            DWORD data_len,
                                            LPVOID data) HADESMEM_DETAIL_NOEXCEPT
@@ -380,7 +380,7 @@ HRESULT WINAPI
   return ret;
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInputDevice8WGetDeviceStateDetour(IDirectInputDeviceW* device,
                                            DWORD data_len,
                                            LPVOID data) HADESMEM_DETAIL_NOEXCEPT
@@ -409,7 +409,7 @@ HRESULT WINAPI
   return ret;
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInputDevice8AGetDeviceDataDetour(IDirectInputDeviceA* device,
                                           DWORD cb_object_data,
                                           LPDIDEVICEOBJECTDATA dev_obj_data,
@@ -440,7 +440,7 @@ HRESULT WINAPI
   return ret;
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInputDevice8WGetDeviceDataDetour(IDirectInputDeviceW* device,
                                           DWORD cb_object_data,
                                           LPDIDEVICEOBJECTDATA dev_obj_data,
@@ -529,7 +529,7 @@ void DetourDirectInputDevice8(REFIID riid, void* device)
   }
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInput8ACreateDeviceDetour(IDirectInput8A* input,
                                    REFGUID rguid,
                                    IDirectInputDeviceA** direct_input_device,
@@ -566,7 +566,7 @@ HRESULT WINAPI
   return ret;
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   IDirectInput8WCreateDeviceDetour(IDirectInput8W* input,
                                    REFGUID rguid,
                                    IDirectInputDeviceW** direct_input_device,
@@ -643,7 +643,7 @@ void DetourDirectInput8(REFIID riid, void** direct_input)
   }
 }
 
-HRESULT WINAPI
+extern "C" HRESULT WINAPI
   DirectInput8CreateDetour(HINSTANCE hinst,
                            DWORD version,
                            REFIID riid,
@@ -677,7 +677,8 @@ HRESULT WINAPI
   return ret;
 }
 
-HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
+extern "C" HCURSOR WINAPI
+  SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetSetCursorDetour();
   auto const ref_counter =
@@ -716,7 +717,8 @@ HCURSOR WINAPI SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-BOOL WINAPI GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI
+  GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetGetCursorPosDetour();
   auto const ref_counter =
@@ -754,7 +756,7 @@ BOOL WINAPI GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetSetCursorPosDetour();
   auto const ref_counter =
@@ -784,7 +786,7 @@ BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
+extern "C" int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetShowCursorDetour();
   auto const ref_counter =
@@ -823,7 +825,8 @@ int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-BOOL WINAPI ClipCursorDetour(RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI
+  ClipCursorDetour(RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetClipCursorDetour();
   auto const ref_counter =
@@ -862,7 +865,7 @@ BOOL WINAPI ClipCursorDetour(RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-BOOL WINAPI GetClipCursorDetour_(RECT* rect) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI GetClipCursorDetour_(RECT* rect) HADESMEM_DETAIL_NOEXCEPT
 {
   auto& detour = GetGetClipCursorDetour();
   auto const ref_counter =
