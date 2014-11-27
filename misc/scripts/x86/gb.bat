@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Ghostbusters\ghost_w32.exe" --inject --steam-app-id 9870 --export Load --add-path --path-resolution --module cerberus.dll

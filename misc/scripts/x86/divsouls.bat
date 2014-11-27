@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Divine Souls\Launcher.exe" --inject --steam-app-id 300040 --export Load --add-path --path-resolution --module cerberus.dll

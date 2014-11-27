@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\RIFT\GlyphClient.exe" --inject --steam-app-id 39120 --export Load --add-path --path-resolution --module cerberus.dll

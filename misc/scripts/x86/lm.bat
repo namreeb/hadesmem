@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Larva Mortus\larvamortus.exe" --inject --steam-app-id 11340 --export Load --add-path --path-resolution --module cerberus.dll

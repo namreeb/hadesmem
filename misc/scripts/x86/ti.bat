@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\TacticalIntervention\bin\tacint.exe" --inject --steam-app-id 51100 --export Load --add-path --path-resolution --module cerberus.dll

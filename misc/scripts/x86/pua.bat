@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\planets under attack\game.exe" --inject --steam-app-id 218510 --export Load --add-path --path-resolution --module cerberus.dll

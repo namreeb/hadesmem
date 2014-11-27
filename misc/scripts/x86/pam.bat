@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Post Apocalyptic Mayhem\PAMMainGame.exe" --inject --steam-app-id 91900 --export Load --add-path --path-resolution --module cerberus.dll

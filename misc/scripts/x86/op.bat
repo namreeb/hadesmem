@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Orion Dino Beatdown\Binaries\Win32\DinoHordeGame.exe" --inject --steam-app-id 104900 --export Load --add-path --path-resolution --module cerberus.dll

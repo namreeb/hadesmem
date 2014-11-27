@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\PapersPlease\PapersPlease.exe" --inject --steam-app-id 239030 --export Load --add-path --path-resolution --module cerberus.dll

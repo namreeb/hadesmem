@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\PlanetSide 2\LaunchPad.exe" --inject --steam-app-id 218230 --export Load --add-path --path-resolution --module cerberus.dll

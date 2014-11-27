@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Fireburst\Binaries\Win32\Fireburst.exe" --inject --steam-app-id 207190 --export Load --add-path --path-resolution --module cerberus.dll

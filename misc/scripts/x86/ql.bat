@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Quake Live\quakelive_steam.exe" --inject --steam-app-id 282440 --export Load --add-path --path-resolution --module cerberus.dll

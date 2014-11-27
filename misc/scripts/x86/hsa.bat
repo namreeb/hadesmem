@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Halo Spartan Assault\HaloSpartanAssault.exe" --inject --steam-app-id 277430 --export Load --add-path --path-resolution --module cerberus.dll

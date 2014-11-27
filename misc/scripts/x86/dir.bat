@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\diriptide\DeadIslandGame_x86_rwdi.exe" --inject --steam-app-id 216250 --export Load --add-path --path-resolution --module cerberus.dll

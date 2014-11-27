@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\theHunter\game\theHunter.exe" --inject --steam-app-id 253710 --export Load --add-path --path-resolution --module cerberus.dll

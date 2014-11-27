@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Drunken Robot Pornography\DRP.exe" --inject --steam-app-id 209060 --export Load --add-path --path-resolution --module cerberus.dll

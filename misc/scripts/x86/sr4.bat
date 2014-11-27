@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Saints Row IV\SaintsRowIV.exe" --inject --steam-app-id 206420 --export Load --add-path --path-resolution --module cerberus.dll

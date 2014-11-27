@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Super Hexagon\superhexagon.exe" --inject --steam-app-id 221640 --export Load --add-path --path-resolution --module cerberus.dll

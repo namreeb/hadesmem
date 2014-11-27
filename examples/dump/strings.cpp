@@ -35,7 +35,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
   if (pe_file.GetType() != hadesmem::PeFileType::Data)
   {
     WriteNormal(out,
-                L"WARNING! Skipping string dump (Image file type is curerntly "
+                L"WARNING! Skipping string dump (Image file type is currently "
                 L"unsupported).",
                 2);
     WarnForCurrentFile(WarningType::kUnsupported);
