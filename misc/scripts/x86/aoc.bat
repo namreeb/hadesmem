@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\Age of Conan\ConanPatcher.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
