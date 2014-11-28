@@ -9,6 +9,7 @@
 
 #include <windows.h>
 
+#include <dxgi1_2.h>
 #include <dxgi.h>
 
 #include <hadesmem/config.hpp>
@@ -42,7 +43,11 @@ void UndetourDXGI(bool remove);
 
 void DetourDXGISwapChain(IDXGISwapChain* swap_chain);
 
+void DetourDXGISwapChain(IDXGISwapChain1* swap_chain);
+
 void DetourDXGIFactory(IDXGIFactory* dxgi_factory);
+
+void DetourDXGIFactory(IDXGIFactory2* dxgi_factory);
 
 void DetourDXGIFactoryFromDevice(IUnknown* device);
 }
