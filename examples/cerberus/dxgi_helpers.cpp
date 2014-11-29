@@ -3,9 +3,6 @@
 
 #include "dxgi_helpers.hpp"
 
-#include <dxgi1_2.h>
-#include <dxgi.h>
-
 #include <hadesmem/detail/trace.hpp>
 
 namespace hadesmem
@@ -41,8 +38,10 @@ DXGIFactoryWrapper GetDXGIFactoryFromDevice(IUnknown* device)
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     if (FAILED(dxgi_adapter->GetParent(
           __uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgi_factory))))
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     {
       --factory_revision;
       if (FAILED(dxgi_adapter->GetParent(

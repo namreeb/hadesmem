@@ -9,6 +9,10 @@
 
 #include <hadesmem/config.hpp>
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
+#include <dxgi1_2.h>
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
+
 namespace hadesmem
 {
 namespace cerberus

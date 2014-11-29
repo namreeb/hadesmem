@@ -13,9 +13,6 @@
 #include <winnt.h>
 #include <winternl.h>
 
-#include <dxgi1_2.h>
-#include <dxgi.h>
-
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
@@ -67,12 +64,14 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 std::unique_ptr<hadesmem::PatchDetour>&
-  GetIDXGISwapChain1Present1Detour() HADESMEM_DETAIL_NOEXCEPT
+GetIDXGISwapChain1Present1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 std::unique_ptr<hadesmem::PatchDetour>&
   GetIDXGIFactoryCreateSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
@@ -81,26 +80,32 @@ std::unique_ptr<hadesmem::PatchDetour>&
   return detour;
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 std::unique_ptr<hadesmem::PatchDetour>&
   GetIDXGIFactory2CreateSwapChainForHwndDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 std::unique_ptr<hadesmem::PatchDetour>&
   GetIDXGIFactory2CreateSwapChainForCoreWindowDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 std::unique_ptr<hadesmem::PatchDetour>&
   GetIDXGIFactory2CreateSwapChainForCompositionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 std::unique_ptr<hadesmem::PatchDetour>&
   GetCreateDXGIFactoryDetour() HADESMEM_DETAIL_NOEXCEPT
@@ -174,8 +179,9 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 extern "C" HRESULT WINAPI IDXGISwapChain1Present1Detour(
-  IDXGISwapChain* swap_chain,
+  IDXGISwapChain1* swap_chain,
   UINT sync_interval,
   UINT flags,
   const DXGI_PRESENT_PARAMETERS* present_params) HADESMEM_DETAIL_NOEXCEPT
@@ -208,6 +214,7 @@ extern "C" HRESULT WINAPI IDXGISwapChain1Present1Detour(
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
   return ret;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
   IDXGIFactory* factory,
@@ -250,6 +257,7 @@ extern "C" HRESULT WINAPI IDXGIFactoryCreateSwapChainDetour(
   return ret;
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForHwndDetour(
   IDXGIFactory2* factory,
   IUnknown* device,
@@ -306,7 +314,9 @@ extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForHwndDetour(
 
   return ret;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForCoreWindowDetour(
   IDXGIFactory2* factory,
   IUnknown* device,
@@ -355,7 +365,9 @@ extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForCoreWindowDetour(
 
   return ret;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForCompositionDetour(
   IDXGIFactory2* factory,
   IUnknown* device,
@@ -402,6 +414,7 @@ extern "C" HRESULT WINAPI IDXGIFactory2CreateSwapChainForCompositionDetour(
 
   return ret;
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 void DetourDXGIFactoryByGuid(REFIID riid, void** factory)
 {
@@ -414,11 +427,13 @@ void DetourDXGIFactoryByGuid(REFIID riid, void** factory)
     hadesmem::cerberus::DetourDXGIFactory(
       static_cast<IDXGIFactory1*>(*factory));
   }
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
   else if (riid == __uuidof(IDXGIFactory2))
   {
     hadesmem::cerberus::DetourDXGIFactory(
       static_cast<IDXGIFactory2*>(*factory));
   }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
   else
   {
     HADESMEM_DETAIL_TRACE_A("Unsupported GUID.");
@@ -569,6 +584,7 @@ void UndetourDXGI(bool remove)
     UndetourFunc(L"IDXGIFactory::CreateSwapChain",
                  GetIDXGIFactoryCreateSwapChainDetour(),
                  remove);
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     UndetourFunc(L"IDXGIFactory2::CreateSwapChainForHwnd",
                  GetIDXGIFactory2CreateSwapChainForHwndDetour(),
                  remove);
@@ -578,10 +594,13 @@ void UndetourDXGI(bool remove)
     UndetourFunc(L"IDXGIFactory2::CreateSwapChainForComposition",
                  GetIDXGIFactory2CreateSwapChainForCompositionDetour(),
                  remove);
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     UndetourFunc(
       L"IDXGISwapChain::Present", GetIDXGISwapChainPresentDetour(), remove);
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     UndetourFunc(
       L"IDXGISwapChain1::Present1", GetIDXGISwapChain1Present1Detour(), remove);
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
     module = std::make_pair(nullptr, 0);
   }
@@ -609,6 +628,7 @@ void DetourDXGISwapChain(IDXGISwapChain* swap_chain)
   }
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 void DetourDXGISwapChain(IDXGISwapChain1* swap_chain)
 {
   HADESMEM_DETAIL_TRACE_A("Detouring IDXGISwapChain1.");
@@ -632,6 +652,7 @@ void DetourDXGISwapChain(IDXGISwapChain1* swap_chain)
 
   DetourDXGISwapChain(static_cast<IDXGISwapChain*>(swap_chain));
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
 {
@@ -655,6 +676,7 @@ void DetourDXGIFactory(IDXGIFactory* dxgi_factory)
   }
 }
 
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 void DetourDXGIFactory(IDXGIFactory2* dxgi_factory)
 {
   HADESMEM_DETAIL_TRACE_A("Detouring IDXGIFactory2.");
@@ -693,6 +715,7 @@ void DetourDXGIFactory(IDXGIFactory2* dxgi_factory)
 
   DetourDXGIFactory(static_cast<IDXGIFactory1*>(dxgi_factory));
 }
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 
 void DetourDXGIFactoryFromDevice(IUnknown* device)
 {
@@ -711,10 +734,12 @@ void DetourDXGIFactoryFromDevice(IUnknown* device)
       HADESMEM_DETAIL_TRACE_A("Detected IDXGIFactory1.");
       DetourDXGIFactory(static_cast<IDXGIFactory1*>(factory));
       break;
+#if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     case 2:
       HADESMEM_DETAIL_TRACE_A("Detected IDXGIFactory2.");
       DetourDXGIFactory(static_cast<IDXGIFactory2*>(factory));
       break;
+#endif // #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
     default:
       HADESMEM_DETAIL_TRACE_A("Unknown IDXGIFactory interface.");
       HADESMEM_DETAIL_ASSERT(false);

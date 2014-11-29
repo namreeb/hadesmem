@@ -58,6 +58,10 @@
 #define HADESMEM_DETAIL_NO_CONSTEXPR
 #endif // #if defined(HADESMEM_MSVC)
 
+#if defined(HADESMEM_GCC)
+#define HADESMEM_DETAIL_NO_DXGI1_2
+#endif // #if defined(HADESMEM_GCC)
+
 #if defined(_M_IX86)
 #define HADESMEM_DETAIL_ARCH_X86
 #elif defined(_M_AMD64)
