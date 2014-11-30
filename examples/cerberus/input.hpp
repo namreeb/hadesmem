@@ -104,6 +104,8 @@ bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 
 bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
 
+bool& GetDisableSetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
+
 bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 
 bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT;

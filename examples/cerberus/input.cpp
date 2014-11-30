@@ -765,15 +765,23 @@ extern "C" BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d] [%d].", x, y);
 
-  auto const& callbacks = GetOnSetCursorPosCallbacks();
-  bool handled = false;
-  callbacks.Run(x, y, &handled);
+  if (!hadesmem::cerberus::GetDisableSetCursorPosHook())
+  {
+    auto const& callbacks = GetOnSetCursorPosCallbacks();
+    bool handled = false;
+    callbacks.Run(x, y, &handled);
 
-  if (handled)
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "SetCursorPos handled. Not calling trampoline.");
+      return TRUE;
+    }
+  }
+  else
   {
     HADESMEM_DETAIL_TRACE_NOISY_A(
-      "SetCursorPos handled. Not calling trampoline.");
-    return TRUE;
+      "SetCursorPos hook disabled, skipping callbacks.");
   }
 
   auto const set_cursor_pos =
@@ -1089,6 +1097,18 @@ bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT
 }
 
 bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local bool disable_hook = false;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) bool disable_hook = false;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return disable_hook;
+}
+
+bool& GetDisableSetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
 {
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
   static thread_local bool disable_hook = false;
