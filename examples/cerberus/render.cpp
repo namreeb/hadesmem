@@ -387,39 +387,31 @@ void SetAntTweakBarVisible(bool visible, bool old_visible)
   if (visible != old_visible)
   {
     SetOrRestoreCursor(visible);
-  }
 
-  if (visible && visible != old_visible)
-  {
-    SaveCurrentCursorPos();
-  }
-  else if (!visible && visible != old_visible)
-  {
-    RestoreOldCursorPos();
+    if (visible)
+    {
+      SaveCurrentCursorPos();
+
+      ShowCursor();
+
+      SaveCurrentClipCursor();
+
+      SetNewClipCursor();
+    }
+    else
+    {
+      RestoreOldCursorPos();
+
+      HideCursor();
+
+      RestoreOldClipCursor();
+    }
   }
   else
   {
     ClearOldCursorPos();
-  }
-
-  if (visible && visible != old_visible)
-  {
-    ShowCursor();
-  }
-  else if (!visible && visible != old_visible)
-  {
-    HideCursor();
-  }
-
-  if (visible && visible != old_visible)
-  {
-    SaveCurrentClipCursor();
 
     SetNewClipCursor();
-  }
-  else if (!visible && visible != old_visible)
-  {
-    RestoreOldClipCursor();
   }
 
   HADESMEM_DETAIL_TRACE_A("Finished.");
@@ -429,15 +421,8 @@ void ToggleAntTweakBarVisible()
 {
   auto& visible = GetAntTweakBarVisible();
   visible = !visible;
-  if (visible)
-  {
-    HADESMEM_DETAIL_TRACE_A("Showing all tweak bars.");
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("Hiding all tweak bars.");
-  }
-
+  HADESMEM_DETAIL_TRACE_A(visible ? "Showing all tweak bars."
+                                  : "Hiding all tweak bars.");
   SetAntTweakBarVisible(visible, !visible);
 }
 
