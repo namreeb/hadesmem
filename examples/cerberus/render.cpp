@@ -94,9 +94,9 @@ std::pair<bool, HCURSOR>& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
   return old_cursor;
 }
 
-POINT& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
+std::pair<bool, POINT>& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
 {
-  static POINT cursor_pos{};
+  static std::pair<bool, POINT> cursor_pos{};
   return cursor_pos;
 }
 
@@ -203,12 +203,25 @@ void SaveCurrentCursorPos()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  old_cursor_pos = cur_cursor_pos;
+  old_cursor_pos.first = true;
+  old_cursor_pos.second = cur_cursor_pos;
+}
+
+void ClearOldCursorPos()
+{
+  auto& old_cursor_pos = GetOldCursorPos();
+  old_cursor_pos.first = false;
+  old_cursor_pos.second = POINT{};
 }
 
 void RestoreOldCursorPos()
 {
   auto& old_cursor_pos = GetOldCursorPos();
+
+  if (!old_cursor_pos.first)
+  {
+    return;
+  }
 
   bool& disable_set_cursor_pos_hook =
     hadesmem::cerberus::GetDisableSetCursorPosHook();
@@ -220,7 +233,7 @@ void RestoreOldCursorPos()
   auto const ensure_reset_set_cursor_pos_hook_flag =
     hadesmem::detail::MakeScopeWarden(reset_set_cursor_pos_hook_flag_fn);
 
-  if (!::SetCursorPos(old_cursor_pos.x, old_cursor_pos.y))
+  if (!::SetCursorPos(old_cursor_pos.second.x, old_cursor_pos.second.y))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -228,13 +241,7 @@ void RestoreOldCursorPos()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  old_cursor_pos = POINT{};
-}
-
-void ClearOldCursorPos()
-{
-  auto& old_cursor_pos = GetOldCursorPos();
-  old_cursor_pos = POINT{};
+  ClearOldCursorPos();
 }
 
 void ShowCursor()
@@ -512,8 +519,8 @@ void OnGetCursorPos(LPPOINT point, bool* handled) HADESMEM_DETAIL_NOEXCEPT
   if (GetAntTweakBarVisible() && point)
   {
     auto& old_cursor_pos = GetOldCursorPos();
-    point->x = old_cursor_pos.x;
-    point->y = old_cursor_pos.y;
+    point->x = old_cursor_pos.second.x;
+    point->y = old_cursor_pos.second.y;
 
     *handled = true;
   }
@@ -524,8 +531,9 @@ void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
   if (GetAntTweakBarVisible())
   {
     auto& old_cursor_pos = GetOldCursorPos();
-    old_cursor_pos.x = x;
-    old_cursor_pos.y = y;
+    old_cursor_pos.first = true;
+    old_cursor_pos.second.x = x;
+    old_cursor_pos.second.y = y;
 
     *handled = true;
   }
