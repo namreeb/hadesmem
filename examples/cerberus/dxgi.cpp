@@ -66,7 +66,7 @@ std::unique_ptr<hadesmem::PatchDetour>&
 
 #if !defined(HADESMEM_DETAIL_NO_DXGI1_2)
 std::unique_ptr<hadesmem::PatchDetour>&
-GetIDXGISwapChain1Present1Detour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDXGISwapChain1Present1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::unique_ptr<hadesmem::PatchDetour> detour;
   return detour;
@@ -134,15 +134,16 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-bool& GetInPresentHook() HADESMEM_DETAIL_NOEXCEPT
+std::int32_t& GetInPresentHook() HADESMEM_DETAIL_NOEXCEPT
 {
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool in_hook = false;
+  static thread_local std::int32_t in_hook = 0;
 #elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  static __declspec(thread) bool in_hook = false;
+  static __declspec(thread) std::int32_t in_hook = 0;
 #else
 #error "[HadesMem] Unsupported compiler."
 #endif
+  HADESMEM_DETAIL_ASSERT(in_hook >= 0);
   return in_hook;
 }
 
@@ -195,10 +196,10 @@ extern "C" HRESULT WINAPI IDXGISwapChain1Present1Detour(
     "Args: [%p] [%u] [%u].", swap_chain, sync_interval, flags);
 
   auto& in_hook = GetInPresentHook();
-  in_hook = true;
+  ++in_hook;
   auto reset_in_hook_fn = [&]()
   {
-    in_hook = false;
+    --in_hook;
   };
   auto const ensure_reset_in_hook =
     hadesmem::detail::MakeScopeWarden(reset_in_hook_fn);

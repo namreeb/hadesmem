@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <hadesmem/config.hpp>
 
 namespace hadesmem
@@ -12,9 +14,10 @@ namespace detail
 class RecursionProtector
 {
 public:
-  explicit RecursionProtector(bool* in_hook) HADESMEM_DETAIL_NOEXCEPT
+  explicit RecursionProtector(std::int32_t* in_hook) HADESMEM_DETAIL_NOEXCEPT
     : in_hook_{in_hook}
   {
+    Set();
   }
 
   ~RecursionProtector()
@@ -24,16 +27,16 @@ public:
 
   void Set() HADESMEM_DETAIL_NOEXCEPT
   {
-    *in_hook_ = true;
+    ++*in_hook_;
   }
 
   void Revert() HADESMEM_DETAIL_NOEXCEPT
   {
-    *in_hook_ = false;
+    --*in_hook_;
   }
 
 private:
-  bool* in_hook_;
+  std::int32_t* in_hook_;
 };
 }
 }

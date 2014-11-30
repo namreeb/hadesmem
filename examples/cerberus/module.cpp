@@ -124,9 +124,9 @@ extern "C" NTSTATUS WINAPI
   last_error_preserver.Update();
 
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool in_hook = false;
+  static thread_local std::int32_t in_hook = 0;
 #elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  static __declspec(thread) bool in_hook = false;
+  static __declspec(thread) std::int32_t in_hook = 0;
 #else
 #error "[HadesMem] Unsupported compiler."
 #endif
@@ -138,7 +138,6 @@ extern "C" NTSTATUS WINAPI
   // Need recursion protection because NtMapViewOfSection is eventually called
   // by a lot of APIs, and we can't really avoid them all.
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
-  recursion_protector.Set();
 
   // This has to be after all our recursion checks, rather than before (which
   // would be better) because OutputDebugString calls MapViewOfFile when DBWIN
@@ -233,9 +232,9 @@ extern "C" NTSTATUS WINAPI
   last_error_preserver.Update();
 
 #if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool in_hook = false;
+  static thread_local std::int32_t in_hook = 0;
 #elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  static __declspec(thread) bool in_hook = false;
+  static __declspec(thread) std::int32_t in_hook = 0;
 #else
 #error "[HadesMem] Unsupported compiler."
 #endif
@@ -245,7 +244,6 @@ extern "C" NTSTATUS WINAPI
   }
 
   hadesmem::detail::RecursionProtector recursion_protector{&in_hook};
-  recursion_protector.Set();
 
   // This has to be after all our recursion checks, rather than before (which
   // would be better) because OutputDebugString calls UnmapViewOfFile when DBWIN

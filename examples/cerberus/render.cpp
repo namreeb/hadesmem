@@ -18,7 +18,6 @@
 #include <dxgi.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/scope_warden.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
@@ -27,6 +26,7 @@
 #include "d3d10.hpp"
 #include "d3d11.hpp"
 #include "dxgi.hpp"
+#include "hook_disabler.hpp"
 #include "input.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
@@ -146,14 +146,8 @@ void SetAllTweakBarVisibility(bool visible)
 
 void SetOrRestoreCursor(bool visible)
 {
-  bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
-  disable_set_cursor_hook = true;
-  auto reset_set_cursor_hook_flag_fn = [&]()
-  {
-    disable_set_cursor_hook = false;
-  };
-  auto const ensure_reset_set_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
+    &hadesmem::cerberus::GetDisableSetCursorHook()};
 
   auto& old_cursor = GetOldCursor();
 
@@ -184,15 +178,8 @@ void SaveCurrentCursorPos()
 {
   auto& old_cursor_pos = GetOldCursorPos();
 
-  bool& disable_get_cursor_pos_hook =
-    hadesmem::cerberus::GetDisableGetCursorPosHook();
-  disable_get_cursor_pos_hook = true;
-  auto reset_get_cursor_pos_hook_flag_fn = [&]()
-  {
-    disable_get_cursor_pos_hook = false;
-  };
-  auto const ensure_reset_get_cursor_pos_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_get_cursor_pos_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
+    &hadesmem::cerberus::GetDisableGetCursorPosHook()};
 
   POINT cur_cursor_pos{};
   if (!::GetCursorPos(&cur_cursor_pos))
@@ -223,15 +210,8 @@ void RestoreOldCursorPos()
     return;
   }
 
-  bool& disable_set_cursor_pos_hook =
-    hadesmem::cerberus::GetDisableSetCursorPosHook();
-  disable_set_cursor_pos_hook = true;
-  auto reset_set_cursor_pos_hook_flag_fn = [&]()
-  {
-    disable_set_cursor_pos_hook = false;
-  };
-  auto const ensure_reset_set_cursor_pos_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_set_cursor_pos_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_set_cursor_pos_hook{
+    &hadesmem::cerberus::GetDisableSetCursorPosHook()};
 
   if (!::SetCursorPos(old_cursor_pos.second.x, old_cursor_pos.second.y))
   {
@@ -246,15 +226,8 @@ void RestoreOldCursorPos()
 
 void ShowCursor()
 {
-  bool& disable_show_cursor_hook =
-    hadesmem::cerberus::GetDisableShowCursorHook();
-  disable_show_cursor_hook = true;
-  auto reset_show_cursor_hook_flag_fn = [&]()
-  {
-    disable_show_cursor_hook = false;
-  };
-  auto const ensure_reset_show_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_show_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_show_cursor_hook{
+    &hadesmem::cerberus::GetDisableShowCursorHook()};
 
   auto& show_cursor_count = GetShowCursorCount();
   do
@@ -266,15 +239,8 @@ void ShowCursor()
 
 void HideCursor()
 {
-  bool& disable_show_cursor_hook =
-    hadesmem::cerberus::GetDisableShowCursorHook();
-  disable_show_cursor_hook = true;
-  auto reset_show_cursor_hook_flag_fn = [&]()
-  {
-    disable_show_cursor_hook = false;
-  };
-  auto const ensure_reset_show_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_show_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_show_cursor_hook{
+    &hadesmem::cerberus::GetDisableShowCursorHook()};
 
   auto& show_cursor_count = GetShowCursorCount();
   while (show_cursor_count > 0)
@@ -287,15 +253,8 @@ void HideCursor()
 
 void SaveCurrentClipCursor()
 {
-  bool& disable_get_clip_cursor_hook =
-    hadesmem::cerberus::GetDisableGetClipCursorHook();
-  disable_get_clip_cursor_hook = true;
-  auto reset_get_clip_cursor_hook_flag_fn = [&]()
-  {
-    disable_get_clip_cursor_hook = false;
-  };
-  auto const ensure_reset_get_clip_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_get_clip_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_get_clip_cursor_hook{
+    &hadesmem::cerberus::GetDisableGetClipCursorHook()};
 
   RECT clip_cursor{};
   if (!::GetClipCursor(&clip_cursor))
@@ -329,15 +288,8 @@ void SetNewClipCursor()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  bool& disable_clip_cursor_hook =
-    hadesmem::cerberus::GetDisableClipCursorHook();
-  disable_clip_cursor_hook = true;
-  auto reset_clip_cursor_hook_flag_fn = [&]()
-  {
-    disable_clip_cursor_hook = false;
-  };
-  auto const ensure_reset_clip_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_clip_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_clip_cursor_hook{
+    &hadesmem::cerberus::GetDisableClipCursorHook()};
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Setting new clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
@@ -357,15 +309,8 @@ void SetNewClipCursor()
 
 void RestoreOldClipCursor()
 {
-  bool& disable_clip_cursor_hook =
-    hadesmem::cerberus::GetDisableClipCursorHook();
-  disable_clip_cursor_hook = true;
-  auto reset_clip_cursor_hook_flag_fn = [&]()
-  {
-    disable_clip_cursor_hook = false;
-  };
-  auto const ensure_reset_clip_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_clip_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_clip_cursor_hook{
+    &hadesmem::cerberus::GetDisableClipCursorHook()};
 
   auto& clip_cursor = GetOldClipCursor();
 
@@ -435,14 +380,8 @@ void ToggleAntTweakBarVisible()
 
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-  bool& disable_set_cursor_hook = hadesmem::cerberus::GetDisableSetCursorHook();
-  disable_set_cursor_hook = true;
-  auto reset_set_cursor_hook_flag_fn = [&]()
-  {
-    disable_set_cursor_hook = false;
-  };
-  auto const ensure_reset_set_cursor_hook_flag =
-    hadesmem::detail::MakeScopeWarden(reset_set_cursor_hook_flag_fn);
+  hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
+    &hadesmem::cerberus::GetDisableSetCursorHook()};
 
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
@@ -451,7 +390,7 @@ void HandleInputQueue()
 {
   auto& queue = GetWndProcInputMsgQueue();
   auto& mutex = GetWndProcInputMsgQueueMutex();
-  std::lock_guard<std::recursive_mutex> lock(mutex);
+  std::lock_guard<std::recursive_mutex> lock{mutex};
   while (!queue.empty())
   {
     WndProcInputMsg msg = queue.front();
@@ -466,7 +405,7 @@ void WindowProcCallback(
   {
     auto& queue = GetWndProcInputMsgQueue();
     auto& mutex = GetWndProcInputMsgQueueMutex();
-    std::lock_guard<std::recursive_mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock{mutex};
     queue.push(WndProcInputMsg{hwnd, msg, wparam, lparam});
   }
 
