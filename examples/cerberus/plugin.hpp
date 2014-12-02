@@ -6,16 +6,20 @@
 #include <functional>
 #include <string>
 
-#include "d3d9.hpp"
-#include "dxgi.hpp"
-#include "input.hpp"
-#include "module.hpp"
-#include "render.hpp"
-
 namespace hadesmem
 {
 namespace cerberus
 {
+class ModuleInterface;
+
+class D3D9Interface;
+
+class DXGIInterface;
+
+class RenderInterface;
+
+class InputInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface

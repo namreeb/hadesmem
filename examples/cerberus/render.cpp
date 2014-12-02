@@ -21,6 +21,7 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
+#include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
@@ -39,23 +40,6 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
 {
   static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
     callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<
-  hadesmem::cerberus::OnAntTweakBarInitializeCallback>&
-  GetOnAntTweakBarInitializeCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnAntTweakBarInitializeCallback> callbacks;
-  return callbacks;
-}
-
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnAntTweakBarCleanupCallback>&
-  GetOnAntTweakBarCleanupCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnAntTweakBarCleanupCallback> callbacks;
   return callbacks;
 }
 
@@ -582,14 +566,6 @@ RenderInfoOpenGL32& GetRenderInfoOpenGL32() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
-{
-  return GetRenderInfoD3D9().tw_initialized_ ||
-         GetRenderInfoD3D10().tw_initialized_ ||
-         GetRenderInfoD3D11().tw_initialized_ ||
-         GetRenderInfoOpenGL32().tw_initialized_;
-}
-
 void SetAntTweakBarUninitialized() HADESMEM_DETAIL_NOEXCEPT
 {
   GetRenderInfoD3D9().tw_initialized_ = false;
@@ -597,71 +573,6 @@ void SetAntTweakBarUninitialized() HADESMEM_DETAIL_NOEXCEPT
   GetRenderInfoD3D11().tw_initialized_ = false;
   GetRenderInfoOpenGL32().tw_initialized_ = false;
 }
-
-class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
-{
-public:
-  virtual std::size_t RegisterOnInitialize(std::function<
-    hadesmem::cerberus::OnAntTweakBarInitializeCallback> const& callback) final
-  {
-    auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-    return callbacks.Register(callback);
-  }
-
-  virtual void UnregisterOnInitialize(std::size_t id) final
-  {
-    auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-    return callbacks.Unregister(id);
-  }
-
-  virtual std::size_t RegisterOnCleanup(std::function<
-    hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
-  {
-    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-    return callbacks.Register(callback);
-  }
-
-  virtual void UnregisterOnCleanup(std::size_t id) final
-  {
-    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-    return callbacks.Unregister(id);
-  }
-
-  virtual bool IsInitialized() final
-  {
-    return AntTweakBarInitializedAny();
-  }
-
-  virtual TwBar* TwNewBar(const char* bar_name) final
-  {
-    return ::TwNewBar(bar_name);
-  }
-
-  virtual int TwDeleteBar(TwBar* bar) final
-  {
-    return ::TwDeleteBar(bar);
-  }
-
-  virtual int TwAddButton(TwBar* bar,
-                          const char* name,
-                          TwButtonCallback callback,
-                          void* client_data,
-                          const char* def) final
-  {
-    return ::TwAddButton(bar, name, callback, client_data, def);
-  }
-
-  virtual int TwAddVarRW(
-    TwBar* bar, const char* name, TwType type, void* var, const char* def) final
-  {
-    return ::TwAddVarRW(bar, name, type, var, def);
-  }
-
-  virtual char const* TwGetLastError() final
-  {
-    return ::TwGetLastError();
-  }
-};
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)
 {
@@ -807,7 +718,7 @@ void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
 
 void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 {
-  if (AntTweakBarInitializedAny())
+  if (hadesmem::cerberus::AntTweakBarInitializedAny())
   {
     HADESMEM_DETAIL_TRACE_A(
       "WARNING! AntTweakBar is already initialized. Skipping.");
@@ -909,9 +820,8 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 
   HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
 
-  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-  callbacks.Run(&ant_tweak_bar);
+  ant_tweak_bar.CallOnInitialize();
 
   HADESMEM_DETAIL_TRACE_A("Setting tweak bar visibilty.");
 
@@ -926,9 +836,8 @@ void CleanupAntTweakBar(bool& initialized)
   {
     HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar cleanup callbacks.");
 
-    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
     auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-    callbacks.Run(&ant_tweak_bar);
+    ant_tweak_bar.CallOnCleanup();
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
@@ -1235,10 +1144,12 @@ RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
   return render_impl;
 }
 
-AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT
+bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
-  static AntTweakBarImpl ant_tweak_bar;
-  return ant_tweak_bar;
+  return GetRenderInfoD3D9().tw_initialized_ ||
+         GetRenderInfoD3D10().tw_initialized_ ||
+         GetRenderInfoD3D11().tw_initialized_ ||
+         GetRenderInfoOpenGL32().tw_initialized_;
 }
 
 void InitializeRender()

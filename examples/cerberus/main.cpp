@@ -19,11 +19,13 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/thread_list.hpp>
 
+#include "ant_tweak_bar.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
 #include "d3d11.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
+#include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"

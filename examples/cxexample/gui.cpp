@@ -10,6 +10,9 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
+#include <cerberus/ant_tweak_bar.hpp>
+#include <cerberus/render.hpp>
+
 namespace
 {
 std::size_t g_on_ant_tweak_bar_initialize_callback_id =

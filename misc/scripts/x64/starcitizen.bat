@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\StarCitizen\CitizenClient\Bin64\StarCitizen.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

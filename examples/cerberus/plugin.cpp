@@ -23,6 +23,11 @@
 #include <hadesmem/detail/trace.hpp>
 
 #include "callbacks.hpp"
+#include "d3d9.hpp"
+#include "dxgi.hpp"
+#include "input.hpp"
+#include "module.hpp"
+#include "render.hpp"
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push)
