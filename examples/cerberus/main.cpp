@@ -20,17 +20,19 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
+#include "cursor.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
 #include "d3d11.hpp"
+#include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
-#include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
 #include "render.hpp"
+#include "window.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
 // purposes only.
@@ -54,7 +56,9 @@ void UseAllStatics()
   auto& dxgi = hadesmem::cerberus::GetDXGIInterface();
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-  auto& input = hadesmem::cerberus::GetInputInterface();
+  auto& window = hadesmem::cerberus::GetWindowInterface();
+  auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
+  auto& cursor = hadesmem::cerberus::GetCursorInterface();
 
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
@@ -106,53 +110,54 @@ void UseAllStatics()
   auto const on_wnd_proc_msg = [](HWND, UINT, WPARAM, LPARAM, bool*)
   {
   };
-  auto const on_wnd_proc_msg_id = input.RegisterOnWndProcMsg(on_wnd_proc_msg);
-  input.UnregisterOnWndProcMsg(on_wnd_proc_msg_id);
+  auto const on_wnd_proc_msg_id = window.RegisterOnWndProcMsg(on_wnd_proc_msg);
+  window.UnregisterOnWndProcMsg(on_wnd_proc_msg_id);
 
   auto const on_set_cursor = [](HCURSOR, bool*, HCURSOR*)
   {
   };
-  auto const on_set_cursor_id = input.RegisterOnSetCursor(on_set_cursor);
-  input.UnregisterOnSetCursor(on_set_cursor_id);
+  auto const on_set_cursor_id = cursor.RegisterOnSetCursor(on_set_cursor);
+  cursor.UnregisterOnSetCursor(on_set_cursor_id);
 
   auto const on_get_cursor_pos = [](LPPOINT, bool*)
   {
   };
   auto const on_get_cursor_pos_id =
-    input.RegisterOnGetCursorPos(on_get_cursor_pos);
-  input.UnregisterOnGetCursorPos(on_get_cursor_pos_id);
+    cursor.RegisterOnGetCursorPos(on_get_cursor_pos);
+  cursor.UnregisterOnGetCursorPos(on_get_cursor_pos_id);
 
   auto const on_set_cursor_pos = [](int, int, bool*)
   {
   };
   auto const on_set_cursor_pos_id =
-    input.RegisterOnSetCursorPos(on_set_cursor_pos);
-  input.UnregisterOnSetCursorPos(on_set_cursor_pos_id);
-
-  auto const on_direct_input = [](bool*)
-  {
-  };
-  auto const on_direct_input_id = input.RegisterOnDirectInput(on_direct_input);
-  input.UnregisterOnDirectInput(on_direct_input_id);
+    cursor.RegisterOnSetCursorPos(on_set_cursor_pos);
+  cursor.UnregisterOnSetCursorPos(on_set_cursor_pos_id);
 
   auto const on_show_cursor = [](BOOL, bool*, int*)
   {
   };
-  auto const on_show_cursor_id = input.RegisterOnShowCursor(on_show_cursor);
-  input.UnregisterOnShowCursor(on_show_cursor_id);
+  auto const on_show_cursor_id = cursor.RegisterOnShowCursor(on_show_cursor);
+  cursor.UnregisterOnShowCursor(on_show_cursor_id);
 
   auto const on_clip_cursor = [](RECT const*, bool*, BOOL*)
   {
   };
-  auto const on_clip_cursor_id = input.RegisterOnClipCursor(on_clip_cursor);
-  input.UnregisterOnClipCursor(on_clip_cursor_id);
+  auto const on_clip_cursor_id = cursor.RegisterOnClipCursor(on_clip_cursor);
+  cursor.UnregisterOnClipCursor(on_clip_cursor_id);
 
   auto const on_get_clip_cursor = [](RECT*, bool*, BOOL*)
   {
   };
   auto const on_get_clip_cursor_id =
-    input.RegisterOnGetClipCursor(on_get_clip_cursor);
-  input.UnregisterOnGetClipCursor(on_get_clip_cursor_id);
+    cursor.RegisterOnGetClipCursor(on_get_clip_cursor);
+  cursor.UnregisterOnGetClipCursor(on_get_clip_cursor_id);
+
+  auto const on_direct_input = [](bool*)
+  {
+  };
+  auto const on_direct_input_id =
+    direct_input.RegisterOnDirectInput(on_direct_input);
+  direct_input.UnregisterOnDirectInput(on_direct_input_id);
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -237,7 +242,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeD3D101();
     hadesmem::cerberus::InitializeD3D11();
     hadesmem::cerberus::InitializeDXGI();
-    hadesmem::cerberus::InitializeInput();
+    hadesmem::cerberus::InitializeDirectInput();
+    hadesmem::cerberus::InitializeCursor();
 
     hadesmem::cerberus::DetourCreateProcessInternalW();
     hadesmem::cerberus::DetourNtMapViewOfSection();
@@ -250,7 +256,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
-    hadesmem::cerberus::DetourUser32(nullptr);
+    hadesmem::cerberus::DetourUser32ForCursor(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
     hadesmem::cerberus::InitializeRender();
@@ -296,7 +302,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
-    hadesmem::cerberus::UndetourUser32(true);
+    hadesmem::cerberus::UndetourUser32ForCursor(true);
     hadesmem::cerberus::UndetourOpenGL32(true);
 
     hadesmem::cerberus::UnloadPlugins();

@@ -23,11 +23,13 @@
 #include <hadesmem/detail/trace.hpp>
 
 #include "callbacks.hpp"
+#include "cursor.hpp"
 #include "d3d9.hpp"
+#include "direct_input.hpp"
 #include "dxgi.hpp"
-#include "input.hpp"
 #include "module.hpp"
 #include "render.hpp"
+#include "window.hpp"
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push)
@@ -135,9 +137,20 @@ public:
     return &hadesmem::cerberus::GetRenderInterface();
   }
 
-  virtual hadesmem::cerberus::InputInterface* GetInputInterface() final
+  virtual hadesmem::cerberus::WindowInterface* GetWindowInterface() final
   {
-    return &hadesmem::cerberus::GetInputInterface();
+    return &hadesmem::cerberus::GetWindowInterface();
+  }
+
+  virtual hadesmem::cerberus::DirectInputInterface*
+    GetDirectInputInterface() final
+  {
+    return &hadesmem::cerberus::GetDirectInputInterface();
+  }
+
+  virtual hadesmem::cerberus::CursorInterface* GetCursorInterface() final
+  {
+    return &hadesmem::cerberus::GetCursorInterface();
   }
 
   void Unload()

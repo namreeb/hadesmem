@@ -23,12 +23,14 @@
 
 #include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
+#include "cursor.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
 #include "d3d11.hpp"
+#include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "hook_disabler.hpp"
-#include "input.hpp"
+#include "window.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
 #include "main.hpp"
@@ -260,6 +262,20 @@ void SaveCurrentClipCursor()
   old_clip_cursor = clip_cursor;
 }
 
+void ClipCursorWrap(RECT clip_cursor)
+{
+  hadesmem::cerberus::HookDisabler disable_clip_cursor_hook{
+    &hadesmem::cerberus::GetDisableClipCursorHook()};
+
+  if (!::ClipCursor(&clip_cursor))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"ClipCursor failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+}
+
 void SetNewClipCursor()
 {
   RECT new_clip_cursor{};
@@ -272,9 +288,6 @@ void SetNewClipCursor()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  hadesmem::cerberus::HookDisabler disable_clip_cursor_hook{
-    &hadesmem::cerberus::GetDisableClipCursorHook()};
-
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Setting new clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
     new_clip_cursor.left,
@@ -282,20 +295,11 @@ void SetNewClipCursor()
     new_clip_cursor.right,
     new_clip_cursor.bottom);
 
-  if (!::ClipCursor(&new_clip_cursor))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"ClipCursor failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
-  }
+  ClipCursorWrap(new_clip_cursor);
 }
 
 void RestoreOldClipCursor()
 {
-  hadesmem::cerberus::HookDisabler disable_clip_cursor_hook{
-    &hadesmem::cerberus::GetDisableClipCursorHook()};
-
   auto& clip_cursor = GetOldClipCursor();
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old clip cursor: Left [%ld] Top "
@@ -305,13 +309,7 @@ void RestoreOldClipCursor()
                                  clip_cursor.right,
                                  clip_cursor.bottom);
 
-  if (!::ClipCursor(&clip_cursor))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"ClipCursor failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
-  }
+  ClipCursorWrap(clip_cursor);
 }
 
 void SetAntTweakBarVisible(bool visible, bool old_visible)
@@ -937,8 +935,7 @@ void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
   render_info.first_time_ = false;
 
   auto const get_device_hr = render_info.swap_chain_->GetDevice(
-    __uuidof(render_info.device_),
-    reinterpret_cast<void**>(&render_info.device_));
+    __uuidof(ID3D11Device), reinterpret_cast<void**>(&render_info.device_));
   if (FAILED(get_device_hr))
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -961,8 +958,7 @@ void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
   render_info.first_time_ = false;
 
   auto const get_device_hr = render_info.swap_chain_->GetDevice(
-    __uuidof(render_info.device_),
-    reinterpret_cast<void**>(&render_info.device_));
+    __uuidof(ID3D10Device), reinterpret_cast<void**>(&render_info.device_));
   if (FAILED(get_device_hr))
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -1164,15 +1160,19 @@ void InitializeRender()
   auto& opengl32 = GetOpenGL32Interface();
   opengl32.RegisterOnFrame(OnFrameOpenGL32);
 
-  auto& input = GetInputInterface();
-  input.RegisterOnWndProcMsg(WindowProcCallback);
-  input.RegisterOnSetCursor(OnSetCursor);
-  input.RegisterOnGetCursorPos(OnGetCursorPos);
-  input.RegisterOnSetCursorPos(OnSetCursorPos);
-  input.RegisterOnShowCursor(OnShowCursor);
-  input.RegisterOnClipCursor(OnClipCursor);
-  input.RegisterOnGetClipCursor(OnGetClipCursor);
-  input.RegisterOnDirectInput(OnDirectInput);
+  auto& window = GetWindowInterface();
+  window.RegisterOnWndProcMsg(WindowProcCallback);
+
+  auto& cursor = GetCursorInterface();
+  cursor.RegisterOnSetCursor(OnSetCursor);
+  cursor.RegisterOnGetCursorPos(OnGetCursorPos);
+  cursor.RegisterOnSetCursorPos(OnSetCursorPos);
+  cursor.RegisterOnShowCursor(OnShowCursor);
+  cursor.RegisterOnClipCursor(OnClipCursor);
+  cursor.RegisterOnGetClipCursor(OnGetClipCursor);
+
+  auto& direct_input = GetDirectInputInterface();
+  direct_input.RegisterOnDirectInput(OnDirectInput);
 
   RegisterOnUnloadPlugins(OnUnloadPlugins);
 }

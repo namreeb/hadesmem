@@ -4,7 +4,6 @@
 #pragma once
 
 #include <cstdint>
-#include <utility>
 #include <functional>
 
 #include <windows.h>
@@ -15,17 +14,12 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnWndProcMsgCallback(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled);
-
 typedef void
   OnSetCursorCallback(HCURSOR cursor, bool* handled, HCURSOR* retval);
 
 typedef void OnGetCursorPosCallback(LPPOINT point, bool* handled);
 
 typedef void OnSetCursorPosCallback(int x, int y, bool* handled);
-
-typedef void OnDirectInputCallback(bool* handled);
 
 typedef void OnShowCursorCallback(BOOL show, bool* handled, int* retval);
 
@@ -34,17 +28,12 @@ typedef void
 
 typedef void OnGetClipCursorCallback(RECT* rect, bool* handled, BOOL* retval);
 
-class InputInterface
+class CursorInterface
 {
 public:
-  virtual ~InputInterface()
+  virtual ~CursorInterface()
   {
   }
-
-  virtual std::size_t RegisterOnWndProcMsg(
-    std::function<OnWndProcMsgCallback> const& callback) = 0;
-
-  virtual void UnregisterOnWndProcMsg(std::size_t id) = 0;
 
   virtual std::size_t
     RegisterOnSetCursor(std::function<OnSetCursorCallback> const& callback) = 0;
@@ -60,11 +49,6 @@ public:
     std::function<OnSetCursorPosCallback> const& callback) = 0;
 
   virtual void UnregisterOnSetCursorPos(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnDirectInput(
-    std::function<OnDirectInputCallback> const& callback) = 0;
-
-  virtual void UnregisterOnDirectInput(std::size_t id) = 0;
 
   virtual std::size_t RegisterOnShowCursor(
     std::function<OnShowCursorCallback> const& callback) = 0;
@@ -82,23 +66,13 @@ public:
   virtual void UnregisterOnGetClipCursor(std::size_t id) = 0;
 };
 
-InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
+CursorInterface& GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT;
 
-void InitializeInput();
+void InitializeCursor();
 
-void DetourDirectInput8(HMODULE base);
+void DetourUser32ForCursor(HMODULE base);
 
-void UndetourDirectInput8(bool remove);
-
-void DetourUser32(HMODULE base);
-
-void UndetourUser32(bool remove);
-
-void HandleWindowChange(HWND wnd);
-
-bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
-
-HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT;
+void UndetourUser32ForCursor(bool remove);
 
 bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
 

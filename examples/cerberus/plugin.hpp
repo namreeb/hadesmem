@@ -18,7 +18,11 @@ class DXGIInterface;
 
 class RenderInterface;
 
-class InputInterface;
+class WindowInterface;
+
+class DirectInputInterface;
+
+class CursorInterface;
 
 typedef void OnUnloadPluginsCallback();
 
@@ -37,7 +41,11 @@ public:
 
   virtual RenderInterface* GetRenderInterface() = 0;
 
-  virtual InputInterface* GetInputInterface() = 0;
+  virtual WindowInterface* GetWindowInterface() = 0;
+
+  virtual DirectInputInterface* GetDirectInputInterface() = 0;
+
+  virtual CursorInterface* GetCursorInterface() = 0;
 };
 
 void LoadPlugins();
