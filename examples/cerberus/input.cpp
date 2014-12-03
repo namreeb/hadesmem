@@ -327,7 +327,6 @@ void WindowProcCallback(
   bool const blocked_msg = msg == WM_INPUT ||
                            (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
                            (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
-  // Window #0 will always exist if TwInit has completed successfully.
   if (visible && blocked_msg)
   {
     *handled = true;
