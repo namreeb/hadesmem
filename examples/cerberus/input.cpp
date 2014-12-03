@@ -323,7 +323,7 @@ void WindowProcCallback(
     return;
   }
 
-  auto& visible = hadesmem::cerberus::GetGuiVisible();
+  auto const visible = hadesmem::cerberus::GetGuiVisible();
   bool const blocked_msg = msg == WM_INPUT ||
                            (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) ||
                            (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
