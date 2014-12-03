@@ -27,6 +27,7 @@
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
+#include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
@@ -59,6 +60,7 @@ void UseAllStatics()
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
+  auto& input = hadesmem::cerberus::GetInputInterface();
 
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
@@ -158,6 +160,20 @@ void UseAllStatics()
   auto const on_direct_input_id =
     direct_input.RegisterOnDirectInput(on_direct_input);
   direct_input.UnregisterOnDirectInput(on_direct_input_id);
+
+  auto const on_set_gui_visibility = [](bool, bool)
+  {
+  };
+  auto const on_set_gui_visibility_id =
+    input.RegisterOnSetGuiVisibility(on_set_gui_visibility);
+  input.UnregisterOnSetGuiVisibility(on_set_gui_visibility_id);
+
+  auto const on_input_queue_entry = [](HWND, UINT, WPARAM, LPARAM)
+  {
+  };
+  auto const on_input_queue_entry_id =
+    input.RegisterOnInputQueueEntry(on_input_queue_entry);
+  input.UnregisterOnInputQueueEntry(on_input_queue_entry_id);
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -260,6 +276,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
     hadesmem::cerberus::InitializeRender();
+    hadesmem::cerberus::InitializeInput();
+    hadesmem::cerberus::InitializeAntTweakBar();
 
     hadesmem::cerberus::LoadPlugins();
 
