@@ -173,5 +173,7 @@ public:
 
 AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
 
+void InitializeAntTweakBar();
+
 }
 }

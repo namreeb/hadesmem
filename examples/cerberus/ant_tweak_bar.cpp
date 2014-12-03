@@ -4,6 +4,9 @@
 #include "ant_tweak_bar.hpp"
 
 #include "callbacks.hpp"
+#include "cursor.hpp"
+#include "hook_disabler.hpp"
+#include "input.hpp"
 #include "render.hpp"
 
 namespace
@@ -339,6 +342,26 @@ public:
     return ::TwHandleErrors(error_handler);
   }
 };
+
+void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
+{
+  for (int i = 0; i < ::TwGetBarCount(); ++i)
+  {
+    auto const bar = ::TwGetBarByIndex(i);
+    auto const name = ::TwGetBarName(bar);
+    auto const define = std::string(name) + " visible=" +
+                        (visible ? std::string("true") : std::string("false"));
+    ::TwDefine(define.c_str());
+  }
+}
+
+void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+  hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
+    &hadesmem::cerberus::GetDisableSetCursorHook()};
+
+  ::TwEventWin(hwnd, msg, wparam, lparam);
+}
 }
 
 namespace hadesmem
@@ -349,6 +372,13 @@ AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static AntTweakBarImpl ant_tweak_bar;
   return ant_tweak_bar;
+}
+
+void InitializeAntTweakBar()
+{
+  auto& input = GetInputInterface();
+  input.RegisterOnSetGuiVisibility(SetAllTweakBarVisibility);
+  input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
 }
 }
 }
