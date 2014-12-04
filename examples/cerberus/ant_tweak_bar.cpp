@@ -417,9 +417,9 @@ namespace cerberus
 {
 void InitializeAntTweakBar(RenderApi api, void* device, bool& initialized)
 {
-  TwGraphAPI tw_api = [](hadesmem::cerberus::RenderApi api) -> TwGraphAPI
+  TwGraphAPI tw_api = [](hadesmem::cerberus::RenderApi api_) -> TwGraphAPI
   {
-    switch (api)
+    switch (api_)
     {
     case RenderApi::D3D9:
       return TW_DIRECT3D9;
