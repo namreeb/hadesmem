@@ -109,6 +109,13 @@ void UseAllStatics()
   auto const on_frame_id = render.RegisterOnFrame(on_frame);
   render.UnregisterOnFrame(on_frame_id);
 
+  auto const on_set_gui_visibility = [](bool, bool)
+  {
+  };
+  auto const on_set_gui_visibility_id =
+    render.RegisterOnSetGuiVisibility(on_set_gui_visibility);
+  render.UnregisterOnSetGuiVisibility(on_set_gui_visibility_id);
+
   auto const on_wnd_proc_msg = [](HWND, UINT, WPARAM, LPARAM, bool*)
   {
   };
@@ -160,13 +167,6 @@ void UseAllStatics()
   auto const on_direct_input_id =
     direct_input.RegisterOnDirectInput(on_direct_input);
   direct_input.UnregisterOnDirectInput(on_direct_input_id);
-
-  auto const on_set_gui_visibility = [](bool, bool)
-  {
-  };
-  auto const on_set_gui_visibility_id =
-    input.RegisterOnSetGuiVisibility(on_set_gui_visibility);
-  input.UnregisterOnSetGuiVisibility(on_set_gui_visibility_id);
 
   auto const on_input_queue_entry = [](HWND, UINT, WPARAM, LPARAM)
   {

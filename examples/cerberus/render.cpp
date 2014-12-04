@@ -46,6 +46,14 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>&
+  GetOnSetGuiVisibilityCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>
+    callbacks;
+  return callbacks;
+}
+
 class RenderImpl : public hadesmem::cerberus::RenderInterface
 {
 public:
@@ -62,10 +70,17 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual hadesmem::cerberus::AntTweakBarInterface*
-    GetAntTweakBarInterface() final
+  virtual std::size_t RegisterOnSetGuiVisibility(
+    std::function<hadesmem::cerberus::OnSetGuiVisibility> const& callback) final
   {
-    return &hadesmem::cerberus::GetAntTweakBarInterface();
+    auto& callbacks = GetOnSetGuiVisibilityCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnSetGuiVisibility(std::size_t id) final
+  {
+    auto& callbacks = GetOnSetGuiVisibilityCallbacks();
+    return callbacks.Unregister(id);
   }
 };
 
@@ -232,52 +247,9 @@ bool InitializeWndprocHook(RenderInfoOpenGL32& render_info)
   return false;
 }
 
-std::string& GetPluginPathTw()
-{
-  static std::string path;
-  return path;
-}
-
-void TW_CALL CopyStdStringToClientTw(std::string& dst, const std::string& src)
-{
-  dst = src;
-}
-
-void TW_CALL LoadPluginCallbackTw(void* /*client_data*/)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
-
-  try
-  {
-    hadesmem::cerberus::LoadPlugin(
-      hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A("Failed to load plugin.");
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-  }
-}
-
-void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Path: %s.", GetPluginPathTw().c_str());
-
-  try
-  {
-    hadesmem::cerberus::UnloadPlugin(
-      hadesmem::detail::MultiByteToWideChar(GetPluginPathTw()));
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A("Failed to unload plugin.");
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-  }
-}
-
-void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
+void InitializeGui(hadesmem::cerberus::RenderApi api,
+                   void* device,
+                   bool& initialized)
 {
   if (hadesmem::cerberus::AntTweakBarInitializedAny())
   {
@@ -288,101 +260,14 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
 
   HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar.");
 
-  if (!::TwInit(api, device))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwInit failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
-
-  initialized = true;
-
-  RECT wnd_rect{0, 0, 800, 600};
-  if (auto const window = hadesmem::cerberus::GetCurrentWindow())
-  {
-    HADESMEM_DETAIL_TRACE_A("Have a window.");
-
-    if (!::GetClientRect(window, &wnd_rect) || wnd_rect.right == 0 ||
-        wnd_rect.bottom == 0)
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "GetClientRect failed (or returned an invalid box).");
-
-      wnd_rect = RECT{0, 0, 800, 600};
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Got client rect.");
-    }
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_A("Do not have a window.");
-  }
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Window size is %ldx%ld.", wnd_rect.right, wnd_rect.bottom);
-
-  if (!::TwWindowSize(wnd_rect.right, wnd_rect.bottom))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
-
-  ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
-
-  auto const bar = ::TwNewBar("HadesMem");
-  if (!bar)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
-
-  auto const load_button = ::TwAddButton(bar,
-                                         "LoadPluginBtn",
-                                         &LoadPluginCallbackTw,
-                                         nullptr,
-                                         " label='Load Plugin' ");
-  if (!load_button)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
-
-  auto const unload_button = ::TwAddButton(bar,
-                                           "UnloadPluginBtn",
-                                           &UnloadPluginCallbackTw,
-                                           nullptr,
-                                           " label='Unload Plugin' ");
-  if (!unload_button)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
-
-  auto const plugin_path = ::TwAddVarRW(bar,
-                                        "LoadPluginPath",
-                                        TW_TYPE_STDSTRING,
-                                        &GetPluginPathTw(),
-                                        " label='Plugin Path' ");
-  if (!plugin_path)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
-  }
+  hadesmem::cerberus::InitializeAntTweakBar(api, device, initialized);
 
   HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
 
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   ant_tweak_bar.CallOnInitialize();
 
-  HADESMEM_DETAIL_TRACE_A("Setting tweak bar visibilty.");
+  HADESMEM_DETAIL_TRACE_A("Setting GUI visibilty.");
 
   auto const visible = hadesmem::cerberus::GetGuiVisible();
   hadesmem::cerberus::SetGuiVisible(visible, visible);
@@ -390,7 +275,7 @@ void InitializeAntTweakBar(TwGraphAPI api, void* device, bool& initialized)
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
-void CleanupAntTweakBar(bool& initialized)
+void CleanupGui(bool& initialized)
 {
   if (initialized)
   {
@@ -401,13 +286,7 @@ void CleanupAntTweakBar(bool& initialized)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
-    if (!::TwTerminate())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
-    }
-
-    initialized = false;
+    hadesmem::cerberus::CleanupAntTweakBar(initialized);
   }
 }
 
@@ -423,7 +302,7 @@ void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
 
   render_info.first_time_ = true;
 
-  CleanupAntTweakBar(render_info.tw_initialized_);
+  CleanupGui(render_info.tw_initialized_);
 
   if (render_info.wnd_hooked_)
   {
@@ -443,7 +322,7 @@ void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
 
   render_info.first_time_ = true;
 
-  CleanupAntTweakBar(render_info.tw_initialized_);
+  CleanupGui(render_info.tw_initialized_);
 
   if (render_info.wnd_hooked_)
   {
@@ -462,7 +341,7 @@ void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
 
   render_info.first_time_ = true;
 
-  CleanupAntTweakBar(render_info.tw_initialized_);
+  CleanupGui(render_info.tw_initialized_);
 
   if (render_info.wnd_hooked_)
   {
@@ -480,7 +359,7 @@ void HandleChangedDeviceOpenGL32(HDC device, RenderInfoOpenGL32& render_info)
 
   render_info.first_time_ = true;
 
-  CleanupAntTweakBar(render_info.tw_initialized_);
+  CleanupGui(render_info.tw_initialized_);
 
   if (render_info.wnd_hooked_)
   {
@@ -507,8 +386,9 @@ void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
 
   render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-  InitializeAntTweakBar(
-    TW_DIRECT3D11, render_info.device_, render_info.tw_initialized_);
+  InitializeGui(hadesmem::cerberus::RenderApi::D3D11,
+                render_info.device_,
+                render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -530,8 +410,9 @@ void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
 
   render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-  InitializeAntTweakBar(
-    TW_DIRECT3D10, render_info.device_, render_info.tw_initialized_);
+  InitializeGui(hadesmem::cerberus::RenderApi::D3D10,
+                render_info.device_,
+                render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -544,8 +425,9 @@ void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
 
   render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-  InitializeAntTweakBar(
-    TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
+  InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
+                render_info.device_,
+                render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -558,8 +440,9 @@ void InitializeOpenGL32RenderInfo(RenderInfoOpenGL32& render_info)
 
   render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-  InitializeAntTweakBar(
-    TW_OPENGL, render_info.device_, render_info.tw_initialized_);
+  InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32,
+                render_info.device_,
+                render_info.tw_initialized_);
 
   HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
 }
@@ -629,10 +512,11 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
   {
     HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
-    CleanupAntTweakBar(render_info.tw_initialized_);
+    CleanupGui(render_info.tw_initialized_);
 
-    InitializeAntTweakBar(
-      TW_DIRECT3D9, render_info.device_, render_info.tw_initialized_);
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
+                  render_info.device_,
+                  render_info.tw_initialized_);
   }
   else
   {
@@ -700,6 +584,30 @@ RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static RenderImpl render_impl;
   return render_impl;
+}
+
+bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT
+{
+  static bool visible{false};
+  return visible;
+}
+
+void SetGuiVisible(bool visible, bool old_visible)
+{
+  HADESMEM_DETAIL_TRACE_A("Setting GUI visibility flag.");
+
+  GetGuiVisible() = visible;
+
+  HADESMEM_DETAIL_TRACE_A("Calling GUI visibility callbacks.");
+
+  auto& callbacks = GetOnSetGuiVisibilityCallbacks();
+  callbacks.Run(visible, old_visible);
+
+  HADESMEM_DETAIL_TRACE_A("Performing input related GUI visibility tasks.");
+
+  SetGuiVisibleForInput(visible, old_visible);
+
+  HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
 bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT

@@ -94,7 +94,7 @@ void
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
   auto ant_tweak_bar =
-    cerberus->GetRenderInterface()->GetAntTweakBarInterface();
+    cerberus->GetAntTweakBarInterface();
   g_on_ant_tweak_bar_initialize_callback_id =
     ant_tweak_bar->RegisterOnInitialize(&OnAntTweakBarInitialize);
   g_on_ant_tweak_bar_cleanup_callback_id =
@@ -106,7 +106,7 @@ void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
   auto ant_tweak_bar =
-    cerberus->GetRenderInterface()->GetAntTweakBarInterface();
+    cerberus->GetAntTweakBarInterface();
 
   if (g_on_ant_tweak_bar_initialize_callback_id != static_cast<std::size_t>(-1))
   {

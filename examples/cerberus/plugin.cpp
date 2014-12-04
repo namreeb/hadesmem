@@ -22,6 +22,7 @@
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/trace.hpp>
 
+#include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -151,6 +152,12 @@ public:
   virtual hadesmem::cerberus::CursorInterface* GetCursorInterface() final
   {
     return &hadesmem::cerberus::GetCursorInterface();
+  }
+
+  virtual hadesmem::cerberus::AntTweakBarInterface*
+    GetAntTweakBarInterface() final
+  {
+    return &hadesmem::cerberus::GetAntTweakBarInterface();
   }
 
   void Unload()

@@ -24,6 +24,8 @@ class DirectInputInterface;
 
 class CursorInterface;
 
+class AntTweakBarInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
@@ -46,6 +48,8 @@ public:
   virtual DirectInputInterface* GetDirectInputInterface() = 0;
 
   virtual CursorInterface* GetCursorInterface() = 0;
+
+  virtual AntTweakBarInterface* GetAntTweakBarInterface() = 0;
 };
 
 void LoadPlugins();

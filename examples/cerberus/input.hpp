@@ -12,9 +12,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnSetGuiVisibility(bool visibility, bool old_visibility);
-
-typedef void OnInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+typedef void
+  OnInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 class InputInterface
 {
@@ -23,20 +22,13 @@ public:
   {
   }
 
-  virtual std::size_t RegisterOnSetGuiVisibility(
-    std::function<OnSetGuiVisibility> const& callback) = 0;
-
-  virtual void UnregisterOnSetGuiVisibility(std::size_t id) = 0;
-
   virtual std::size_t RegisterOnInputQueueEntry(
     std::function<OnInputQueueEntry> const& callback) = 0;
 
   virtual void UnregisterOnInputQueueEntry(std::size_t id) = 0;
 };
 
-bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT;
-
-void SetGuiVisible(bool visible, bool old_visible);
+void SetGuiVisibleForInput(bool visible, bool old_visible);
 
 void HandleInputQueue();
 

@@ -26,14 +26,6 @@
 
 namespace
 {
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>&
-  GetOnSetGuiVisibilityCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>
-    callbacks;
-  return callbacks;
-}
-
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInputQueueEntry>&
   GetOnInputQueueEntryCallbacks()
 {
@@ -45,19 +37,6 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInputQueueEntry>&
 class InputImpl : public hadesmem::cerberus::InputInterface
 {
 public:
-  virtual std::size_t RegisterOnSetGuiVisibility(
-    std::function<hadesmem::cerberus::OnSetGuiVisibility> const& callback) final
-  {
-    auto& callbacks = GetOnSetGuiVisibilityCallbacks();
-    return callbacks.Register(callback);
-  }
-
-  virtual void UnregisterOnSetGuiVisibility(std::size_t id) final
-  {
-    auto& callbacks = GetOnSetGuiVisibilityCallbacks();
-    return callbacks.Unregister(id);
-  }
-
   virtual std::size_t RegisterOnInputQueueEntry(
     std::function<hadesmem::cerberus::OnInputQueueEntry> const& callback) final
   {
@@ -434,25 +413,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT
+void SetGuiVisibleForInput(bool visible, bool old_visible)
 {
-  static bool visible{false};
-  return visible;
-}
-
-void SetGuiVisible(bool visible, bool old_visible)
-{
-  HADESMEM_DETAIL_TRACE_A("Setting GUI visibility flag.");
-
-  GetGuiVisible() = visible;
-
-  HADESMEM_DETAIL_TRACE_A("Calling GUI visibility callbacks.");
-
-  auto& callbacks = GetOnSetGuiVisibilityCallbacks();
-  callbacks.Run(visible, old_visible);
-
-  HADESMEM_DETAIL_TRACE_A("Performing generic GUI visibility tasks.");
-
   if (visible != old_visible)
   {
     SetOrRestoreCursor(visible);
@@ -482,8 +444,6 @@ void SetGuiVisible(bool visible, bool old_visible)
 
     SetNewClipCursor();
   }
-
-  HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
 void HandleInputQueue()

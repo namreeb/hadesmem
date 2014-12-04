@@ -12,6 +12,8 @@
 
 #include <hadesmem/config.hpp>
 
+#include "render.hpp"
+
 namespace hadesmem
 {
 namespace cerberus
@@ -171,9 +173,12 @@ public:
   virtual void TwHandleErrors(TwErrorHandler error_handler) = 0;
 };
 
+void InitializeAntTweakBar(RenderApi api, void* device, bool& initialized);
+
+void CleanupAntTweakBar(bool& initialized);
+
 AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
 
 void InitializeAntTweakBar();
-
 }
 }
