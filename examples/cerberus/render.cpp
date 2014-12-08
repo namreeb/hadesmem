@@ -86,7 +86,6 @@ public:
 
 struct RenderInfoDXGI
 {
-  bool first_time_{true};
   bool tw_initialized_{false};
   bool wnd_hooked_{false};
   IDXGISwapChain* swap_chain_{};
@@ -116,7 +115,6 @@ RenderInfoD3D10& GetRenderInfoD3D10() HADESMEM_DETAIL_NOEXCEPT
 
 struct RenderInfoD3D9
 {
-  bool first_time_{true};
   bool tw_initialized_{false};
   bool wnd_hooked_{false};
   IDirect3DDevice9* device_{};
@@ -130,7 +128,6 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
 
 struct RenderInfoOpenGL32
 {
-  bool first_time_{true};
   bool tw_initialized_{false};
   bool wnd_hooked_{false};
   HDC device_{};
@@ -147,104 +144,98 @@ void SetAntTweakBarUninitialized() HADESMEM_DETAIL_NOEXCEPT
   GetRenderInfoD3D9().tw_initialized_ = false;
   GetRenderInfoD3D10().tw_initialized_ = false;
   GetRenderInfoD3D11().tw_initialized_ = false;
+
   GetRenderInfoOpenGL32().tw_initialized_ = false;
 }
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)
 {
-  if (!hadesmem::cerberus::IsWindowHooked())
+  if (hadesmem::cerberus::IsWindowHooked())
   {
-    DXGI_SWAP_CHAIN_DESC desc;
-    auto const get_desc_hr = render_info.swap_chain_->GetDesc(&desc);
-    if (FAILED(get_desc_hr))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"GetDesc failed."}
-                          << hadesmem::ErrorCodeWinHr{get_desc_hr});
-    }
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+    return false;
+  }
 
-    if (desc.OutputWindow)
-    {
-      hadesmem::cerberus::HandleWindowChange(desc.OutputWindow);
+  DXGI_SWAP_CHAIN_DESC desc;
+  auto const get_desc_hr = render_info.swap_chain_->GetDesc(&desc);
+  if (FAILED(get_desc_hr))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
+                                    << hadesmem::ErrorString{"GetDesc failed."}
+                                    << hadesmem::ErrorCodeWinHr{get_desc_hr});
+  }
 
-      return true;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Null swap chain output window. Ignoring.");
-    }
+  if (desc.OutputWindow)
+  {
+    hadesmem::cerberus::HandleWindowChange(desc.OutputWindow);
+    return true;
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+    HADESMEM_DETAIL_TRACE_A("Null swap chain output window. Ignoring.");
+    return false;
   }
-
-  return false;
 }
 
 bool InitializeWndprocHook(RenderInfoD3D9& render_info)
 {
-  if (!hadesmem::cerberus::IsWindowHooked())
+  if (hadesmem::cerberus::IsWindowHooked())
   {
-    IDirect3D9* d3d9 = nullptr;
-    render_info.device_->GetDirect3D(&d3d9);
-    D3DDEVICE_CREATION_PARAMETERS create_params;
-    ::ZeroMemory(&create_params, sizeof(create_params));
-    auto const get_create_params_hr =
-      render_info.device_->GetCreationParameters(&create_params);
-    if (FAILED(get_create_params_hr))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{
-                               "GetCreationParameters failed."}
-                          << hadesmem::ErrorCodeWinHr{get_create_params_hr});
-    }
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+    return false;
+  }
 
-    // Pretty sure we should be doing something with hDeviceWindow from the
-    // presentation params as well, depending on whether or not the game is
-    // windowed...
-    if (create_params.hFocusWindow)
-    {
-      hadesmem::cerberus::HandleWindowChange(create_params.hFocusWindow);
+  IDirect3D9* d3d9 = nullptr;
+  render_info.device_->GetDirect3D(&d3d9);
+  D3DDEVICE_CREATION_PARAMETERS create_params;
+  ::ZeroMemory(&create_params, sizeof(create_params));
+  auto const get_create_params_hr =
+    render_info.device_->GetCreationParameters(&create_params);
+  if (FAILED(get_create_params_hr))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{
+                             "GetCreationParameters failed."}
+                        << hadesmem::ErrorCodeWinHr{get_create_params_hr});
+  }
 
-      return true;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Null device focus window. Ignoring.");
-    }
+  // Pretty sure we should be doing something with hDeviceWindow from the
+  // presentation params as well, depending on whether or not the game is
+  // windowed...
+  if (create_params.hFocusWindow)
+  {
+    hadesmem::cerberus::HandleWindowChange(create_params.hFocusWindow);
+    return true;
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+    HADESMEM_DETAIL_TRACE_A("Null device focus window. Ignoring.");
+    return false;
   }
-
-  return false;
 }
 
 bool InitializeWndprocHook(RenderInfoOpenGL32& render_info)
 {
-  if (!hadesmem::cerberus::IsWindowHooked())
+  if (hadesmem::cerberus::IsWindowHooked())
   {
-    if (HWND wnd = ::WindowFromDC(render_info.device_))
-    {
-      hadesmem::cerberus::HandleWindowChange(wnd);
-      return true;
-    }
-    else
-    {
-      DWORD const last_error = ::GetLastError();
-      (void)last_error;
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "Failed to get window handle (%ld). Ignoring.", last_error);
-    }
+    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+
+    return false;
+  }
+
+  if (HWND wnd = ::WindowFromDC(render_info.device_))
+  {
+    hadesmem::cerberus::HandleWindowChange(wnd);
+    return true;
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Window is already hooked. Skipping hook request.");
+    DWORD const last_error = ::GetLastError();
+    (void)last_error;
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Failed to get window handle (%ld). Ignoring.", last_error);
+    return false;
   }
-
-  return false;
 }
 
 void InitializeGui(hadesmem::cerberus::RenderApi api,
@@ -290,174 +281,46 @@ void CleanupGui(bool& initialized)
   }
 }
 
-void HandleChangedSwapChainD3D11(IDXGISwapChain* swap_chain,
-                                 RenderInfoD3D11& render_info)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
-                                 render_info.swap_chain_,
-                                 swap_chain);
-  render_info.swap_chain_ = swap_chain;
-
-  render_info.device_ = nullptr;
-
-  render_info.first_time_ = true;
-
-  CleanupGui(render_info.tw_initialized_);
-
-  if (render_info.wnd_hooked_)
-  {
-    hadesmem::cerberus::HandleWindowChange(nullptr);
-  }
-}
-
-void HandleChangedSwapChainD3D10(IDXGISwapChain* swap_chain,
-                                 RenderInfoD3D10& render_info)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
-                                 render_info.swap_chain_,
-                                 swap_chain);
-  render_info.swap_chain_ = swap_chain;
-
-  render_info.device_ = nullptr;
-
-  render_info.first_time_ = true;
-
-  CleanupGui(render_info.tw_initialized_);
-
-  if (render_info.wnd_hooked_)
-  {
-    hadesmem::cerberus::HandleWindowChange(nullptr);
-  }
-
-  render_info.wnd_hooked_ = false;
-}
-
-void HandleChangedDeviceD3D9(IDirect3DDevice9* device,
-                             RenderInfoD3D9& render_info)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Got a new device. Old = %p, New = %p.", render_info.device_, device);
-  render_info.device_ = device;
-
-  render_info.first_time_ = true;
-
-  CleanupGui(render_info.tw_initialized_);
-
-  if (render_info.wnd_hooked_)
-  {
-    hadesmem::cerberus::HandleWindowChange(nullptr);
-  }
-
-  render_info.wnd_hooked_ = false;
-}
-
-void HandleChangedDeviceOpenGL32(HDC device, RenderInfoOpenGL32& render_info)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
-    "Got a new device. Old = %p, New = %p.", render_info.device_, device);
-  render_info.device_ = device;
-
-  render_info.first_time_ = true;
-
-  CleanupGui(render_info.tw_initialized_);
-
-  if (render_info.wnd_hooked_)
-  {
-    hadesmem::cerberus::HandleWindowChange(nullptr);
-  }
-
-  render_info.wnd_hooked_ = false;
-}
-
-void InitializeD3D11RenderInfo(RenderInfoD3D11& render_info)
-{
-  HADESMEM_DETAIL_TRACE_A("Initializing.");
-
-  render_info.first_time_ = false;
-
-  auto const get_device_hr = render_info.swap_chain_->GetDevice(
-    __uuidof(ID3D11Device), reinterpret_cast<void**>(&render_info.device_));
-  if (FAILED(get_device_hr))
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-    return;
-  }
-
-  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
-
-  InitializeGui(hadesmem::cerberus::RenderApi::D3D11,
-                render_info.device_,
-                render_info.tw_initialized_);
-
-  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
-}
-
-void InitializeD3D10RenderInfo(RenderInfoD3D10& render_info)
-{
-  HADESMEM_DETAIL_TRACE_A("Initializing.");
-
-  render_info.first_time_ = false;
-
-  auto const get_device_hr = render_info.swap_chain_->GetDevice(
-    __uuidof(ID3D10Device), reinterpret_cast<void**>(&render_info.device_));
-  if (FAILED(get_device_hr))
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-    return;
-  }
-
-  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
-
-  InitializeGui(hadesmem::cerberus::RenderApi::D3D10,
-                render_info.device_,
-                render_info.tw_initialized_);
-
-  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
-}
-
-void InitializeD3D9RenderInfo(RenderInfoD3D9& render_info)
-{
-  HADESMEM_DETAIL_TRACE_A("Initializing.");
-
-  render_info.first_time_ = false;
-
-  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
-
-  InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
-                render_info.device_,
-                render_info.tw_initialized_);
-
-  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
-}
-
-void InitializeOpenGL32RenderInfo(RenderInfoOpenGL32& render_info)
-{
-  HADESMEM_DETAIL_TRACE_A("Initializing.");
-
-  render_info.first_time_ = false;
-
-  render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
-
-  InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32,
-                render_info.device_,
-                render_info.tw_initialized_);
-
-  HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
-}
-
 void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 {
   auto& render_info = GetRenderInfoD3D11();
   if (render_info.swap_chain_ != swap_chain)
   {
-    HandleChangedSwapChainD3D11(swap_chain, render_info);
-  }
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
+                                   render_info.swap_chain_,
+                                   swap_chain);
 
-  if (render_info.first_time_)
-  {
-    InitializeD3D11RenderInfo(render_info);
+    render_info.swap_chain_ = swap_chain;
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    render_info.device_ = nullptr;
+
+    CleanupGui(render_info.tw_initialized_);
+
+    if (render_info.wnd_hooked_)
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+    auto const get_device_hr = render_info.swap_chain_->GetDevice(
+      __uuidof(ID3D11Device), reinterpret_cast<void**>(&render_info.device_));
+    if (FAILED(get_device_hr))
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
+      return;
+    }
+
+    render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D11,
+                  render_info.device_,
+                  render_info.tw_initialized_);
+
+    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
 }
 
@@ -466,12 +329,43 @@ void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
   auto& render_info = GetRenderInfoD3D10();
   if (render_info.swap_chain_ != swap_chain)
   {
-    HandleChangedSwapChainD3D10(swap_chain, render_info);
-  }
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
+                                   render_info.swap_chain_,
+                                   swap_chain);
 
-  if (render_info.first_time_)
-  {
-    InitializeD3D10RenderInfo(render_info);
+    render_info.swap_chain_ = swap_chain;
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    render_info.device_ = nullptr;
+
+    CleanupGui(render_info.tw_initialized_);
+
+    if (render_info.wnd_hooked_)
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+
+    render_info.wnd_hooked_ = false;
+
+    HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+    auto const get_device_hr = render_info.swap_chain_->GetDevice(
+      __uuidof(ID3D10Device), reinterpret_cast<void**>(&render_info.device_));
+    if (FAILED(get_device_hr))
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
+      return;
+    }
+
+    render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D10,
+                  render_info.device_,
+                  render_info.tw_initialized_);
+
+    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
 }
 
@@ -480,12 +374,31 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
   auto& render_info = GetRenderInfoD3D9();
   if (render_info.device_ != device)
   {
-    HandleChangedDeviceD3D9(device, render_info);
-  }
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Got a new device. Old = %p, New = %p.", render_info.device_, device);
 
-  if (render_info.first_time_)
-  {
-    InitializeD3D9RenderInfo(render_info);
+    render_info.device_ = device;
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    CleanupGui(render_info.tw_initialized_);
+
+    if (render_info.wnd_hooked_)
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+
+    render_info.wnd_hooked_ = false;
+
+    HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+    render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
+                  render_info.device_,
+                  render_info.tw_initialized_);
+
+    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
 }
 
@@ -494,12 +407,31 @@ void HandleOnFrameOpenGL32(HDC device)
   auto& render_info = GetRenderInfoOpenGL32();
   if (render_info.device_ != device)
   {
-    HandleChangedDeviceOpenGL32(device, render_info);
-  }
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Got a new device. Old = %p, New = %p.", render_info.device_, device);
 
-  if (render_info.first_time_)
-  {
-    InitializeOpenGL32RenderInfo(render_info);
+    render_info.device_ = device;
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    CleanupGui(render_info.tw_initialized_);
+
+    if (render_info.wnd_hooked_)
+    {
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+    }
+
+    render_info.wnd_hooked_ = false;
+
+    HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+    render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32,
+                  render_info.device_,
+                  render_info.tw_initialized_);
+
+    HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
 }
 
@@ -510,13 +442,21 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
 
   if (device == render_info.device_)
   {
-    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
+    if (render_info.tw_initialized_)
+    {
+      HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
-    CleanupGui(render_info.tw_initialized_);
+      CleanupGui(render_info.tw_initialized_);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
-                  render_info.device_,
-                  render_info.tw_initialized_);
+      InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
+                    render_info.device_,
+                    render_info.tw_initialized_);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "Ignoring D3D9 device reset (AntTweakBar not initialized).");
+    }
   }
   else
   {
