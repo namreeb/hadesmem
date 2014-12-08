@@ -116,6 +116,19 @@ void UseAllStatics()
     render.RegisterOnSetGuiVisibility(on_set_gui_visibility);
   render.UnregisterOnSetGuiVisibility(on_set_gui_visibility_id);
 
+  auto const on_initialize_gui = [](hadesmem::cerberus::RenderApi, void*)
+  {
+  };
+  auto const on_initialize_gui_id =
+    render.RegisterOnInitializeGui(on_initialize_gui);
+  render.UnregisterOnInitializeGui(on_initialize_gui_id);
+
+  auto const on_cleanup_gui = [](hadesmem::cerberus::RenderApi)
+  {
+  };
+  auto const on_cleanup_gui_id = render.RegisterOnCleanupGui(on_cleanup_gui);
+  render.UnregisterOnCleanupGui(on_cleanup_gui_id);
+
   auto const on_wnd_proc_msg = [](HWND, UINT, WPARAM, LPARAM, bool*)
   {
   };

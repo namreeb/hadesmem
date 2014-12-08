@@ -12,18 +12,21 @@ namespace hadesmem
 {
 namespace cerberus
 {
-
-  enum class RenderApi
-  {
-    D3D9,
-    D3D10,
-    D3D11,
-    OpenGL32
-  };
+enum class RenderApi
+{
+  D3D9,
+  D3D10,
+  D3D11,
+  OpenGL32
+};
 
 typedef void OnFrameCallback();
 
-typedef void OnSetGuiVisibility(bool visibility, bool old_visibility);
+typedef void OnSetGuiVisibilityCallback(bool visibility, bool old_visibility);
+
+typedef void OnInitializeGuiCallback(RenderApi api, void* device);
+
+typedef void OnCleanupGuiCallback(RenderApi api);
 
 class RenderInterface
 {
@@ -38,9 +41,19 @@ public:
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 
   virtual std::size_t RegisterOnSetGuiVisibility(
-    std::function<OnSetGuiVisibility> const& callback) = 0;
+    std::function<OnSetGuiVisibilityCallback> const& callback) = 0;
 
   virtual void UnregisterOnSetGuiVisibility(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnInitializeGui(
+    std::function<OnInitializeGuiCallback> const& callback) = 0;
+
+  virtual void UnregisterOnInitializeGui(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnCleanupGui(
+    std::function<OnCleanupGuiCallback> const& callback) = 0;
+
+  virtual void UnregisterOnCleanupGui(std::size_t id) = 0;
 };
 
 RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -48,8 +61,6 @@ RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
 bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT;
 
 void SetGuiVisible(bool visible, bool old_visible);
-
-bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT;
 
 void InitializeRender();
 }

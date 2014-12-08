@@ -21,7 +21,6 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
-#include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -46,10 +45,26 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
   return callbacks;
 }
 
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>&
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibilityCallback>&
   GetOnSetGuiVisibilityCallbacks()
 {
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibility>
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnSetGuiVisibilityCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInitializeGuiCallback>&
+  GetOnInitializeGuiCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnInitializeGuiCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnCleanupGuiCallback>&
+  GetOnCleanupGuiCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnCleanupGuiCallback>
     callbacks;
   return callbacks;
 }
@@ -70,8 +85,8 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnSetGuiVisibility(
-    std::function<hadesmem::cerberus::OnSetGuiVisibility> const& callback) final
+  virtual std::size_t RegisterOnSetGuiVisibility(std::function<
+    hadesmem::cerberus::OnSetGuiVisibilityCallback> const& callback) final
   {
     auto& callbacks = GetOnSetGuiVisibilityCallbacks();
     return callbacks.Register(callback);
@@ -82,12 +97,43 @@ public:
     auto& callbacks = GetOnSetGuiVisibilityCallbacks();
     return callbacks.Unregister(id);
   }
+
+  virtual std::size_t RegisterOnInitializeGui(
+    std::function<hadesmem::cerberus::OnInitializeGuiCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnInitializeGuiCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnInitializeGui(std::size_t id) final
+  {
+    auto& callbacks = GetOnInitializeGuiCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnCleanupGui(
+    std::function<hadesmem::cerberus::OnCleanupGuiCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnCleanupGuiCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnCleanupGui(std::size_t id) final
+  {
+    auto& callbacks = GetOnCleanupGuiCallbacks();
+    return callbacks.Unregister(id);
+  }
 };
 
-struct RenderInfoDXGI
+struct RenderInfoCommon
 {
-  bool tw_initialized_{false};
   bool wnd_hooked_{false};
+};
+
+struct RenderInfoDXGI : RenderInfoCommon
+{
   IDXGISwapChain* swap_chain_{};
 };
 
@@ -113,10 +159,8 @@ RenderInfoD3D10& GetRenderInfoD3D10() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-struct RenderInfoD3D9
+struct RenderInfoD3D9 : RenderInfoCommon
 {
-  bool tw_initialized_{false};
-  bool wnd_hooked_{false};
   IDirect3DDevice9* device_{};
 };
 
@@ -126,10 +170,8 @@ RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
   return render_info;
 }
 
-struct RenderInfoOpenGL32
+struct RenderInfoOpenGL32 : RenderInfoCommon
 {
-  bool tw_initialized_{false};
-  bool wnd_hooked_{false};
   HDC device_{};
 };
 
@@ -137,15 +179,6 @@ RenderInfoOpenGL32& GetRenderInfoOpenGL32() HADESMEM_DETAIL_NOEXCEPT
 {
   static RenderInfoOpenGL32 render_info;
   return render_info;
-}
-
-void SetAntTweakBarUninitialized() HADESMEM_DETAIL_NOEXCEPT
-{
-  GetRenderInfoD3D9().tw_initialized_ = false;
-  GetRenderInfoD3D10().tw_initialized_ = false;
-  GetRenderInfoD3D11().tw_initialized_ = false;
-
-  GetRenderInfoOpenGL32().tw_initialized_ = false;
 }
 
 bool InitializeWndprocHook(RenderInfoDXGI& render_info)
@@ -238,25 +271,12 @@ bool InitializeWndprocHook(RenderInfoOpenGL32& render_info)
   }
 }
 
-void InitializeGui(hadesmem::cerberus::RenderApi api,
-                   void* device,
-                   bool& initialized)
+void InitializeGui(hadesmem::cerberus::RenderApi api, void* device)
 {
-  if (hadesmem::cerberus::AntTweakBarInitializedAny())
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      "WARNING! AntTweakBar is already initialized. Skipping.");
-    return;
-  }
+  HADESMEM_DETAIL_TRACE_A("Calling GUI initialization callbacks.");
 
-  HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar.");
-
-  hadesmem::cerberus::InitializeAntTweakBar(api, device, initialized);
-
-  HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
-
-  auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-  ant_tweak_bar.CallOnInitialize();
+  auto const& callbacks = GetOnInitializeGuiCallbacks();
+  callbacks.Run(api, device);
 
   HADESMEM_DETAIL_TRACE_A("Setting GUI visibilty.");
 
@@ -266,19 +286,12 @@ void InitializeGui(hadesmem::cerberus::RenderApi api,
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
-void CleanupGui(bool& initialized)
+void CleanupGui(hadesmem::cerberus::RenderApi api)
 {
-  if (initialized)
-  {
-    HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar cleanup callbacks.");
+  HADESMEM_DETAIL_TRACE_A("Calling GUI cleanup callbacks.");
 
-    auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-    ant_tweak_bar.CallOnCleanup();
-
-    HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
-
-    hadesmem::cerberus::CleanupAntTweakBar(initialized);
-  }
+  auto const& callbacks = GetOnCleanupGuiCallbacks();
+  callbacks.Run(api);
 }
 
 void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
@@ -296,7 +309,7 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 
     render_info.device_ = nullptr;
 
-    CleanupGui(render_info.tw_initialized_);
+    CleanupGui(hadesmem::cerberus::RenderApi::D3D11);
 
     if (render_info.wnd_hooked_)
     {
@@ -316,9 +329,7 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D11,
-                  render_info.device_,
-                  render_info.tw_initialized_);
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D11, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -339,7 +350,7 @@ void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
 
     render_info.device_ = nullptr;
 
-    CleanupGui(render_info.tw_initialized_);
+    CleanupGui(hadesmem::cerberus::RenderApi::D3D10);
 
     if (render_info.wnd_hooked_)
     {
@@ -361,9 +372,7 @@ void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D10,
-                  render_info.device_,
-                  render_info.tw_initialized_);
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D10, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -381,7 +390,7 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupGui(render_info.tw_initialized_);
+    CleanupGui(hadesmem::cerberus::RenderApi::D3D9);
 
     if (render_info.wnd_hooked_)
     {
@@ -394,9 +403,7 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
-                  render_info.device_,
-                  render_info.tw_initialized_);
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D9, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -414,7 +421,7 @@ void HandleOnFrameOpenGL32(HDC device)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupGui(render_info.tw_initialized_);
+    CleanupGui(hadesmem::cerberus::RenderApi::OpenGL32);
 
     if (render_info.wnd_hooked_)
     {
@@ -427,9 +434,7 @@ void HandleOnFrameOpenGL32(HDC device)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32,
-                  render_info.device_,
-                  render_info.tw_initialized_);
+    InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -439,24 +444,13 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
                        D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {
   auto& render_info = GetRenderInfoD3D9();
-
   if (device == render_info.device_)
   {
-    if (render_info.tw_initialized_)
-    {
-      HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
+    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
-      CleanupGui(render_info.tw_initialized_);
+    CleanupGui(hadesmem::cerberus::RenderApi::D3D9);
 
-      InitializeGui(hadesmem::cerberus::RenderApi::D3D9,
-                    render_info.device_,
-                    render_info.tw_initialized_);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "Ignoring D3D9 device reset (AntTweakBar not initialized).");
-    }
+    InitializeGui(hadesmem::cerberus::RenderApi::D3D9, render_info.device_);
   }
   else
   {
@@ -473,12 +467,6 @@ void OnFrameGeneric()
   callbacks.Run();
 
   hadesmem::cerberus::HandleInputQueue();
-
-  if (!::TwDraw())
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwDraw failed."});
-  }
 }
 
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
@@ -508,11 +496,6 @@ void OnResetD3D9(IDirect3DDevice9* device,
                  D3DPRESENT_PARAMETERS* presentation_parameters)
 {
   HandleOnResetD3D9(device, presentation_parameters);
-}
-
-void OnUnloadPlugins()
-{
-  SetAntTweakBarUninitialized();
 }
 }
 
@@ -550,14 +533,6 @@ void SetGuiVisible(bool visible, bool old_visible)
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
-bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
-{
-  return GetRenderInfoD3D9().tw_initialized_ ||
-         GetRenderInfoD3D10().tw_initialized_ ||
-         GetRenderInfoD3D11().tw_initialized_ ||
-         GetRenderInfoOpenGL32().tw_initialized_;
-}
-
 void InitializeRender()
 {
   auto& dxgi = GetDXGIInterface();
@@ -569,8 +544,6 @@ void InitializeRender()
 
   auto& opengl32 = GetOpenGL32Interface();
   opengl32.RegisterOnFrame(OnFrameOpenGL32);
-
-  RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
 }
 }
