@@ -37,14 +37,10 @@ public:
 
   virtual void UnregisterOnInitialize(std::size_t id) = 0;
 
-  virtual void CallOnInitialize() = 0;
-
   virtual std::size_t RegisterOnCleanup(
     std::function<OnAntTweakBarCleanupCallback> const& callback) = 0;
 
   virtual void UnregisterOnCleanup(std::size_t id) = 0;
-
-  virtual void CallOnCleanup() = 0;
 
   virtual bool IsInitialized() = 0;
 
@@ -172,10 +168,6 @@ public:
 
   virtual void TwHandleErrors(TwErrorHandler error_handler) = 0;
 };
-
-void InitializeAntTweakBar(RenderApi api, void* device, bool& initialized);
-
-void CleanupAntTweakBar(bool& initialized);
 
 AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
 

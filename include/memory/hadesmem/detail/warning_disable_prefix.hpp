@@ -28,13 +28,14 @@
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif // #if defined(HADESMEM_GCC)
 
 #if defined(HADESMEM_INTEL)
 #pragma warning(push, 1)
 #pragma warning(disable : 9 10 66 82 177 280 367 411 504 693 780 809 869)
-#pragma warning(disable : 1879 1885)
+#pragma warning(disable : 1125 1879 1885)
 #pragma warning(disable : 3280 3346)
 #endif // #if defined(HADESMEM_MSVC)
 

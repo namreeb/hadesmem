@@ -28,6 +28,7 @@
 #include "d3d9.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
+#include "gwen.hpp"
 #include "module.hpp"
 #include "render.hpp"
 #include "window.hpp"
@@ -158,6 +159,11 @@ public:
     GetAntTweakBarInterface() final
   {
     return &hadesmem::cerberus::GetAntTweakBarInterface();
+  }
+
+  virtual hadesmem::cerberus::GwenInterface* GetGwenInterface() final
+  {
+    return &hadesmem::cerberus::GetGwenInterface();
   }
 
   void Unload()

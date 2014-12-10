@@ -14,13 +14,14 @@ namespace cerberus
 {
 enum class RenderApi
 {
-  D3D9,
-  D3D10,
-  D3D11,
-  OpenGL32
+  kD3D9,
+  kD3D10,
+  kD3D11,
+  kOpenGL32,
+  kInvalidMaxValue
 };
 
-typedef void OnFrameCallback();
+typedef void OnFrameCallback(RenderApi api, void* device);
 
 typedef void OnSetGuiVisibilityCallback(bool visibility, bool old_visibility);
 

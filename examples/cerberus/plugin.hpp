@@ -26,6 +26,8 @@ class CursorInterface;
 
 class AntTweakBarInterface;
 
+class GwenInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
@@ -50,6 +52,8 @@ public:
   virtual CursorInterface* GetCursorInterface() = 0;
 
   virtual AntTweakBarInterface* GetAntTweakBarInterface() = 0;
+
+  virtual GwenInterface* GetGwenInterface() = 0;
 };
 
 void LoadPlugins();

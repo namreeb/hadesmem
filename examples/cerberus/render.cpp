@@ -294,7 +294,29 @@ void CleanupGui(hadesmem::cerberus::RenderApi api)
   callbacks.Run(api);
 }
 
-void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
+std::pair<hadesmem::cerberus::RenderApi, void*>
+  GetDeviceFromSwapChain(IDXGISwapChain* swap_chain)
+{
+  ID3D11Device* d3d11_device = nullptr;
+  auto const get_device_d3d11_hr = swap_chain->GetDevice(
+    __uuidof(ID3D11Device), reinterpret_cast<void**>(&d3d11_device));
+  if (SUCCEEDED(get_device_d3d11_hr))
+  {
+    return {hadesmem::cerberus::RenderApi::kD3D11, d3d11_device};
+  }
+
+  ID3D10Device* d3d10_device = nullptr;
+  auto const get_device_d3d10_hr = swap_chain->GetDevice(
+    __uuidof(ID3D10Device), reinterpret_cast<void**>(&d3d10_device));
+  if (SUCCEEDED(get_device_d3d10_hr))
+  {
+    return {hadesmem::cerberus::RenderApi::kD3D10, d3d10_device};
+  }
+
+  return {hadesmem::cerberus::RenderApi::kInvalidMaxValue, nullptr};
+}
+
+bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 {
   auto& render_info = GetRenderInfoD3D11();
   if (render_info.swap_chain_ != swap_chain)
@@ -309,7 +331,7 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 
     render_info.device_ = nullptr;
 
-    CleanupGui(hadesmem::cerberus::RenderApi::D3D11);
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
 
     if (render_info.wnd_hooked_)
     {
@@ -324,18 +346,20 @@ void HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A(
         "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-      return;
+      return false;
     }
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D11, render_info.device_);
+    InitializeGui(hadesmem::cerberus::RenderApi::kD3D11, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
+
+  return true;
 }
 
-void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
+bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
 {
   auto& render_info = GetRenderInfoD3D10();
   if (render_info.swap_chain_ != swap_chain)
@@ -350,7 +374,7 @@ void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
 
     render_info.device_ = nullptr;
 
-    CleanupGui(hadesmem::cerberus::RenderApi::D3D10);
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D10);
 
     if (render_info.wnd_hooked_)
     {
@@ -367,15 +391,17 @@ void HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A(
         "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-      return;
+      return false;
     }
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D10, render_info.device_);
+    InitializeGui(hadesmem::cerberus::RenderApi::kD3D10, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
+
+  return true;
 }
 
 void HandleOnFrameD3D9(IDirect3DDevice9* device)
@@ -390,7 +416,7 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupGui(hadesmem::cerberus::RenderApi::D3D9);
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
 
     if (render_info.wnd_hooked_)
     {
@@ -403,7 +429,7 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D9, render_info.device_);
+    InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -421,7 +447,7 @@ void HandleOnFrameOpenGL32(HDC device)
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupGui(hadesmem::cerberus::RenderApi::OpenGL32);
+    CleanupGui(hadesmem::cerberus::RenderApi::kOpenGL32);
 
     if (render_info.wnd_hooked_)
     {
@@ -434,7 +460,8 @@ void HandleOnFrameOpenGL32(HDC device)
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::OpenGL32, render_info.device_);
+    InitializeGui(hadesmem::cerberus::RenderApi::kOpenGL32,
+                  render_info.device_);
 
     HADESMEM_DETAIL_TRACE_A("Initialized successfully.");
   }
@@ -448,9 +475,9 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
   {
     HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
-    CleanupGui(hadesmem::cerberus::RenderApi::D3D9);
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::D3D9, render_info.device_);
+    InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
   }
   else
   {
@@ -461,10 +488,10 @@ void HandleOnResetD3D9(IDirect3DDevice9* device,
   }
 }
 
-void OnFrameGeneric()
+void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 {
   auto& callbacks = GetOnFrameCallbacks();
-  callbacks.Run();
+  callbacks.Run(api, device);
 
   hadesmem::cerberus::HandleInputQueue();
 }
@@ -472,24 +499,23 @@ void OnFrameGeneric()
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
   HandleOnFrameD3D11(swap_chain);
-
   HandleOnFrameD3D10(swap_chain);
-
-  OnFrameGeneric();
+  auto const device = GetDeviceFromSwapChain(swap_chain);
+  OnFrameGeneric(device.first, device.second);
 }
 
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
   HandleOnFrameD3D9(device);
 
-  OnFrameGeneric();
+  OnFrameGeneric(hadesmem::cerberus::RenderApi::kD3D9, device);
 }
 
 void OnFrameOpenGL32(HDC device)
 {
   HandleOnFrameOpenGL32(device);
 
-  OnFrameGeneric();
+  OnFrameGeneric(hadesmem::cerberus::RenderApi::kOpenGL32, device);
 }
 
 void OnResetD3D9(IDirect3DDevice9* device,

@@ -27,6 +27,7 @@
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
+#include "gwen.hpp"
 #include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
@@ -57,6 +58,7 @@ void UseAllStatics()
   auto& dxgi = hadesmem::cerberus::GetDXGIInterface();
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
+  auto& gwen = hadesmem::cerberus::GetGwenInterface();
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
@@ -103,7 +105,19 @@ void UseAllStatics()
   auto const on_tw_cleanup_id = ant_tweak_bar.RegisterOnCleanup(on_tw_cleanup);
   ant_tweak_bar.UnregisterOnCleanup(on_tw_cleanup_id);
 
-  auto const on_frame = []()
+  auto const on_gwen_init = [](hadesmem::cerberus::GwenInterface*)
+  {
+  };
+  auto const on_gwen_init_id = gwen.RegisterOnInitialize(on_gwen_init);
+  gwen.UnregisterOnInitialize(on_gwen_init_id);
+
+  auto const on_gwen_cleanup = [](hadesmem::cerberus::GwenInterface*)
+  {
+  };
+  auto const on_gwen_cleanup_id = gwen.RegisterOnCleanup(on_gwen_cleanup);
+  gwen.UnregisterOnCleanup(on_gwen_cleanup_id);
+
+  auto const on_frame = [](hadesmem::cerberus::RenderApi, void*)
   {
   };
   auto const on_frame_id = render.RegisterOnFrame(on_frame);
@@ -273,6 +287,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeDXGI();
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
+    hadesmem::cerberus::InitializeRender();
+    hadesmem::cerberus::InitializeInput();
 
     hadesmem::cerberus::DetourCreateProcessInternalW();
     hadesmem::cerberus::DetourNtMapViewOfSection();
@@ -288,9 +304,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourUser32ForCursor(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
-    hadesmem::cerberus::InitializeRender();
-    hadesmem::cerberus::InitializeInput();
     hadesmem::cerberus::InitializeAntTweakBar();
+    //hadesmem::cerberus::InitializeGwen();
 
     hadesmem::cerberus::LoadPlugins();
 

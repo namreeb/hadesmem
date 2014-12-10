@@ -32,22 +32,22 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnAntTweakBarCleanupCallback>&
 
 bool& GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi api)
 {
-  if (api == hadesmem::cerberus::RenderApi::D3D9)
+  if (api == hadesmem::cerberus::RenderApi::kD3D9)
   {
     static bool initialized{false};
     return initialized;
   }
-  else if (api == hadesmem::cerberus::RenderApi::D3D10)
+  else if (api == hadesmem::cerberus::RenderApi::kD3D10)
   {
     static bool initialized{false};
     return initialized;
   }
-  else if (api == hadesmem::cerberus::RenderApi::D3D11)
+  else if (api == hadesmem::cerberus::RenderApi::kD3D11)
   {
     static bool initialized{false};
     return initialized;
   }
-  else if (api == hadesmem::cerberus::RenderApi::OpenGL32)
+  else if (api == hadesmem::cerberus::RenderApi::kOpenGL32)
   {
     static bool initialized{false};
     return initialized;
@@ -68,10 +68,10 @@ void SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi api, bool value)
 
 bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
-  return GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D9) ||
-         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D10) ||
-         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D11) ||
-         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::OpenGL32);
+  return GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D9) ||
+         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D10) ||
+         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D11) ||
+         GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kOpenGL32);
 }
 
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
@@ -90,12 +90,6 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual void CallOnInitialize() final
-  {
-    auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
-    callbacks.Run(this);
-  }
-
   virtual std::size_t RegisterOnCleanup(std::function<
     hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
   {
@@ -107,12 +101,6 @@ public:
   {
     auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
     return callbacks.Unregister(id);
-  }
-
-  virtual void CallOnCleanup() final
-  {
-    auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
-    callbacks.Run(this);
   }
 
   virtual bool IsInitialized() final
@@ -434,7 +422,7 @@ void TW_CALL UnloadPluginCallbackTw(void* /*client_data*/)
   }
 }
 
-void OnInitializeGui(hadesmem::cerberus::RenderApi api, void* device)
+void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 {
   if (AntTweakBarInitializedAny())
   {
@@ -449,13 +437,13 @@ void OnInitializeGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     switch (api_)
     {
-    case hadesmem::cerberus::RenderApi::D3D9:
+    case hadesmem::cerberus::RenderApi::kD3D9:
       return TW_DIRECT3D9;
-    case hadesmem::cerberus::RenderApi::D3D10:
+    case hadesmem::cerberus::RenderApi::kD3D10:
       return TW_DIRECT3D10;
-    case hadesmem::cerberus::RenderApi::D3D11:
+    case hadesmem::cerberus::RenderApi::kD3D11:
       return TW_DIRECT3D11;
-    case hadesmem::cerberus::RenderApi::OpenGL32:
+    case hadesmem::cerberus::RenderApi::kOpenGL32:
       return TW_OPENGL;
     default:
       HADESMEM_DETAIL_ASSERT(false);
@@ -555,29 +543,31 @@ void OnInitializeGui(hadesmem::cerberus::RenderApi api, void* device)
 
   HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
 
-  auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-  ant_tweak_bar.CallOnInitialize();
+  auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
+  callbacks.Run(&hadesmem::cerberus::GetAntTweakBarInterface());
 }
 
-void OnCleanupGui(hadesmem::cerberus::RenderApi api)
+void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
 {
-  if (GetAntTweakBarInitialized(api))
+  if (!GetAntTweakBarInitialized(api))
   {
-    HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar cleanup callbacks.");
-
-    auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-    ant_tweak_bar.CallOnCleanup();
-
-    HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
-
-    if (!::TwTerminate())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
-    }
-
-    SetAntTweakBarInitialized(api, false);
+    return;
   }
+
+  HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar cleanup callbacks.");
+
+  auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
+  callbacks.Run(&hadesmem::cerberus::GetAntTweakBarInterface());
+
+  HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
+
+  if (!::TwTerminate())
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{ "TwTerminate failed." });
+  }
+
+  SetAntTweakBarInitialized(api, false);
 }
 
 void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
@@ -600,7 +590,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
 
-void OnFrame()
+void OnFrameAntTweakBar(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
   if (!::TwDraw())
   {
@@ -611,10 +601,10 @@ void OnFrame()
 
 void OnUnloadPlugins()
 {
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D9, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D10, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::D3D11, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::OpenGL32, false);
+  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D9, false);
+  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D10, false);
+  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D11, false);
+  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
 }
 }
 
@@ -634,9 +624,9 @@ void InitializeAntTweakBar()
   input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
 
   auto& render = GetRenderInterface();
-  render.RegisterOnFrame(OnFrame);
-  render.RegisterOnInitializeGui(OnInitializeGui);
-  render.RegisterOnCleanupGui(OnCleanupGui);
+  render.RegisterOnFrame(OnFrameAntTweakBar);
+  render.RegisterOnInitializeGui(OnInitializeAntTweakBarGui);
+  render.RegisterOnCleanupGui(OnCleanupAntTweakBarGui);
   render.RegisterOnSetGuiVisibility(SetAllTweakBarVisibility);
 
   RegisterOnUnloadPlugins(OnUnloadPlugins);

@@ -1,5 +1,8 @@
 # src/gwen/jamfile.v2
 
+import os ;
+local DXSDK_DIR = [ os.environ DXSDK_DIR ] ;
+
 project 
   : 
     requirements 
@@ -10,11 +13,18 @@ project
 lib gwen 
   : 
     [ glob gwen/gwen/src/*.cpp ] 
-    [ glob gwen/gwen/src/Controls/*.cpp ] 
-    [ glob gwen/gwen/src/Controls/Dialog/*.cpp ] 
-    [ glob gwen/gwen/src/Platforms/*.cpp ] 
+    [ glob gwen/gwen/src/controls/*.cpp ] 
+    [ glob gwen/gwen/src/controls/dialog/*.cpp ] 
+    [ glob gwen/gwen/src/platforms/*.cpp ] 
+    [ glob gwen/gwen/renderers/directx9/*.cpp ] 
+    [ glob gwen/gwen/renderers/directx10/*.cpp ] 
+    [ glob gwen/gwen/renderers/directx11/*.cpp ] 
+    [ glob gwen/gwen/renderers/opengl/*.cpp ] 
+    [ glob gwen/gwen/unittest/*.cpp ] 
   : 
     <include>"gwen/gwen/include/"
+	<toolset>msvc:<include>"$(DXSDK_DIR)/include"
+	<toolset>intel:<include>"$(DXSDK_DIR)/include"
 
     <link>static
 
