@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Thief\Binaries\Win32\Shipping-ThiefGame.exe" --steam-app-id 239160 --inject --export Load --add-path --path-resolution --module cerberus.dll

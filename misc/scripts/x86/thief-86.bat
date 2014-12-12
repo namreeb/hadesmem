@@ -1,1 +1,0 @@
-inject.exe --run "E:\Games\Thief\Binaries\Win32\Shipping-ThiefGame.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

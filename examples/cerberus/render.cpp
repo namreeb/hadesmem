@@ -529,9 +529,10 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
     device->GetImmediateContext(&device_context);
     hadesmem::cerberus::D3D11StateBlock state_block{device_context};
 
-    device_context->CSSetShader(0, 0, 0);
-    device_context->DSSetShader(0, 0, 0);
-    device_context->HSSetShader(0, 0, 0);
+    device_context->CSSetShader(nullptr, nullptr, 0);
+    device_context->DSSetShader(nullptr, nullptr, 0);
+    device_context->GSSetShader(nullptr, nullptr, 0);
+    device_context->HSSetShader(nullptr, nullptr, 0);
 
     OnFrameGeneric(typed_device.first, typed_device.second);
 
