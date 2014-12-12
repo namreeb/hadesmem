@@ -497,7 +497,28 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
 
-  auto const bar = ::TwNewBar("HadesMem");
+  std::string render_api_name = [](hadesmem::cerberus::RenderApi api_)
+                                  -> std::string
+  {
+    switch (api_)
+    {
+    case hadesmem::cerberus::RenderApi::kD3D9:
+      return "D3D9";
+    case hadesmem::cerberus::RenderApi::kD3D10:
+      return "D3D10";
+    case hadesmem::cerberus::RenderApi::kD3D11:
+      return "D3D11";
+    case hadesmem::cerberus::RenderApi::kOpenGL32:
+      return "OpenGL";
+    default:
+      HADESMEM_DETAIL_ASSERT(false);
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
+    }
+  }(api);
+
+  auto const bar_name = "Cerberus (" + render_api_name + ")";
+  auto const bar = ::TwNewBar(bar_name.c_str());
   if (!bar)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -580,7 +601,7 @@ void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
   {
     auto const bar = ::TwGetBarByIndex(i);
     auto const name = ::TwGetBarName(bar);
-    auto const define = std::string(name) + " visible=" +
+    auto const define = "\"" + std::string(name) + "\" visible=" +
                         (visible ? std::string("true") : std::string("false"));
     ::TwDefine(define.c_str());
   }
