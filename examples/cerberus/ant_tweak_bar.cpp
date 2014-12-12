@@ -547,6 +547,10 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   callbacks.Run(&hadesmem::cerberus::GetAntTweakBarInterface());
 }
 
+// This is intentionally not called via a static destructor (to handle process
+// exit etc) because we could get called after the DirectX DLLs etc have already
+// unloaded, and we currently have no way to guarantee that we are called before
+// the unload so it's better to just leak than risk a crash.
 void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
 {
   if (!GetAntTweakBarInitialized(api))
@@ -564,7 +568,7 @@ void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
   if (!::TwTerminate())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{ "TwTerminate failed." });
+      hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
   }
 
   SetAntTweakBarInitialized(api, false);

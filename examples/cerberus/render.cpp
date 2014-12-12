@@ -26,6 +26,7 @@
 #include "d3d9.hpp"
 #include "d3d10.hpp"
 #include "d3d11.hpp"
+#include "d3d11_state_block.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "hook_disabler.hpp"
@@ -335,10 +336,12 @@ bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
 
     if (render_info.wnd_hooked_)
     {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
       hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
     }
 
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
+    HADESMEM_DETAIL_TRACE_A("Getting device.");
 
     auto const get_device_hr = render_info.swap_chain_->GetDevice(
       __uuidof(ID3D11Device), reinterpret_cast<void**>(&render_info.device_));
@@ -349,7 +352,11 @@ bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
       return false;
     }
 
+    HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
+
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    HADESMEM_DETAIL_TRACE_A("Initializing GUI.");
 
     InitializeGui(hadesmem::cerberus::RenderApi::kD3D11, render_info.device_);
 
@@ -378,12 +385,12 @@ bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
 
     if (render_info.wnd_hooked_)
     {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
       hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
     }
 
-    render_info.wnd_hooked_ = false;
-
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
+    HADESMEM_DETAIL_TRACE_A("Getting device.");
 
     auto const get_device_hr = render_info.swap_chain_->GetDevice(
       __uuidof(ID3D10Device), reinterpret_cast<void**>(&render_info.device_));
@@ -394,7 +401,11 @@ bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
       return false;
     }
 
+    HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
+
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    HADESMEM_DETAIL_TRACE_A("Initializing GUI.");
 
     InitializeGui(hadesmem::cerberus::RenderApi::kD3D10, render_info.device_);
 
@@ -420,14 +431,16 @@ void HandleOnFrameD3D9(IDirect3DDevice9* device)
 
     if (render_info.wnd_hooked_)
     {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
       hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
     }
 
-    render_info.wnd_hooked_ = false;
-
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
+    HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    HADESMEM_DETAIL_TRACE_A("Initializing GUI.");
 
     InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
 
@@ -451,14 +464,16 @@ void HandleOnFrameOpenGL32(HDC device)
 
     if (render_info.wnd_hooked_)
     {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
       hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
     }
 
-    render_info.wnd_hooked_ = false;
-
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
+    HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
 
     render_info.wnd_hooked_ = InitializeWndprocHook(render_info);
+
+    HADESMEM_DETAIL_TRACE_A("Initializing GUI.");
 
     InitializeGui(hadesmem::cerberus::RenderApi::kOpenGL32,
                   render_info.device_);
@@ -496,19 +511,74 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
   hadesmem::cerberus::HandleInputQueue();
 }
 
+#if defined(HADESMEM_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 6262)
+#endif // #if defined(HADESMEM_MSVC)
+
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
   HandleOnFrameD3D11(swap_chain);
   HandleOnFrameD3D10(swap_chain);
-  auto const device = GetDeviceFromSwapChain(swap_chain);
-  OnFrameGeneric(device.first, device.second);
+
+  auto const typed_device = GetDeviceFromSwapChain(swap_chain);
+  if (typed_device.first == hadesmem::cerberus::RenderApi::kD3D11)
+  {
+    auto const device = static_cast<ID3D11Device*>(typed_device.second);
+    ID3D11DeviceContext* device_context = nullptr;
+    device->GetImmediateContext(&device_context);
+    hadesmem::cerberus::D3D11StateBlock state_block{device_context};
+
+    device_context->CSSetShader(0, 0, 0);
+    device_context->DSSetShader(0, 0, 0);
+    device_context->HSSetShader(0, 0, 0);
+
+    OnFrameGeneric(typed_device.first, typed_device.second);
+
+    state_block.Apply();
+  }
+  else if (typed_device.first == hadesmem::cerberus::RenderApi::kD3D10)
+  {
+    OnFrameGeneric(typed_device.first, typed_device.second);
+  }
+  else
+  {
+    HADESMEM_DETAIL_ASSERT(false);
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
+  }
 }
+
+#if defined(HADESMEM_MSVC)
+#pragma warning(pop)
+#endif // #if defined(HADESMEM_MSVC)
 
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
   HandleOnFrameD3D9(device);
 
+  IDirect3DStateBlock9* state_block = nullptr;
+  if (FAILED(device->CreateStateBlock(D3DSBT_ALL, &state_block)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{
+        "IDirect3DDevice9::CreateStateBlock failed."});
+  }
+  hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
+
+  if (FAILED(state_block->Capture()))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
+                                      "IDirect3DStateBlock9::Capture failed."});
+  }
+
   OnFrameGeneric(hadesmem::cerberus::RenderApi::kD3D9, device);
+
+  if (FAILED(state_block->Apply()))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
+                                      "IDirect3DStateBlock9::Apply failed."});
+  }
 }
 
 void OnFrameOpenGL32(HDC device)

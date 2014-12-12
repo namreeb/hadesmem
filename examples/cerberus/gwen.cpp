@@ -168,18 +168,41 @@ std::unique_ptr<Gwen::Input::Windows>& GetGwenInput()
   return input;
 }
 
+// Intentionally leaking to avoid destructors being called in the case that the
+// process exits, otherwise if the DirectX DLLs (or OpenGL DLLs etc) are
+// unloaded before we are then we would cause an access violation.
+struct LeakGwenData
+{
+public:
+  LeakGwenData()
+  {
+  }
+
+  LeakGwenData(LeakGwenData const&) = delete;
+
+  LeakGwenData& operator=(LeakGwenData const&) = delete;
+
+  ~LeakGwenData()
+  {
+    GetGwenRenderer().release();
+    GetGwenSkin().release();
+    GetGwenCanvas().release();
+    GetGwenUnitTest().release();
+    GetGwenInput().release();
+  }
+};
+
+LeakGwenData& GetLeakGwenData()
+{
+  static LeakGwenData leak_gwen_data;
+  return leak_gwen_data;
+}
+
 void OnInitializeGwenGui(hadesmem::cerberus::RenderApi api, void* device)
 {
   if (GwenInitializedAny())
   {
     HADESMEM_DETAIL_TRACE_A("WARNING! GWEN is already initialized. Skipping.");
-    return;
-  }
-
-  if (api != hadesmem::cerberus::RenderApi::kD3D9)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      "WARNING! GWEN is currently only supported under D3D9.");
     return;
   }
 
@@ -254,6 +277,9 @@ void OnInitializeGwenGui(hadesmem::cerberus::RenderApi api, void* device)
   input.reset(new Gwen::Input::Windows());
   input->Initialize(&*canvas);
 
+  auto& leak = GetLeakGwenData();
+  (void)leak;
+
   HADESMEM_DETAIL_TRACE_A("Calling GWEN initialization callbacks.");
 
   auto& callbacks = GetOnGwenInitializeCallbacks();
@@ -306,6 +332,16 @@ void SetAllGwenVisibility(bool visible, bool /*old_visible*/)
 
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+  if (!GwenInitializedAny())
+  {
+    return;
+  }
+
+  if (!GetAllGwenVisibility())
+  {
+    return;
+  }
+
   hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
     &hadesmem::cerberus::GetDisableSetCursorHook()};
 
@@ -321,34 +357,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   input->ProcessMessage(message);
 }
 
-void OnFrameGwenD3D9(IDirect3DDevice9* device)
-{
-  IDirect3DStateBlock9* state_block = nullptr;
-  if (FAILED(device->CreateStateBlock(D3DSBT_ALL, &state_block)))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{
-        "IDirect3DDevice9::CreateStateBlock failed."});
-  }
-  hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
-
-  if (FAILED(state_block->Capture()))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "IDirect3DStateBlock9::Capture failed."});
-  }
-
-  auto& canvas = GetGwenCanvas();
-  canvas->RenderCanvas();
-
-  if (FAILED(state_block->Apply()))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "IDirect3DStateBlock9::Apply failed."});
-  }
-}
-
-void OnFrameGwen(hadesmem::cerberus::RenderApi api, void* device)
+void OnFrameGwen(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
   if (!GwenInitializedAny())
   {
@@ -360,15 +369,8 @@ void OnFrameGwen(hadesmem::cerberus::RenderApi api, void* device)
     return;
   }
 
-  if (api == hadesmem::cerberus::RenderApi::kD3D9)
-  {
-    OnFrameGwenD3D9(static_cast<IDirect3DDevice9*>(device));
-  }
-  else
-  {
-    auto& canvas = GetGwenCanvas();
-    canvas->RenderCanvas();
-  }
+  auto& canvas = GetGwenCanvas();
+  canvas->RenderCanvas();
 }
 
 void OnUnloadPlugins()
