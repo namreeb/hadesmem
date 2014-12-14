@@ -14,6 +14,17 @@ namespace hadesmem
 {
 namespace cerberus
 {
+enum class DirectInputDeviceType
+{
+  Mouse,
+  Keyboard,
+  Other
+};
+
+DirectInputDeviceType DeviceGuidToEnum(REFGUID rguid);
+
+std::string DeviceGuidToString(REFGUID rguid);
+
 typedef void OnDirectInputCallback(bool* handled);
 
 Callbacks<OnDirectInputCallback>& GetOnDirectInputCallbacks();

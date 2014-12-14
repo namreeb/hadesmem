@@ -17,7 +17,8 @@
 #include <hadesmem/patcher.hpp>
 
 #include "callbacks.hpp"
-#include "direct_input_8_proxy.hpp"
+#include "direct_input_8_a_proxy.hpp"
+#include "direct_input_8_w_proxy.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 
@@ -127,6 +128,38 @@ namespace hadesmem
 {
 namespace cerberus
 {
+DirectInputDeviceType DeviceGuidToEnum(REFGUID rguid)
+{
+  if (rguid == GUID_SysMouse)
+  {
+    return DirectInputDeviceType::Mouse;
+  }
+  else if (rguid == GUID_SysKeyboard)
+  {
+    return DirectInputDeviceType::Keyboard;
+  }
+  else
+  {
+    return DirectInputDeviceType::Other;
+  }
+}
+
+std::string DeviceGuidToString(REFGUID rguid)
+{
+  if (rguid == GUID_SysMouse)
+  {
+    return "Mouse";
+  }
+  else if (rguid == GUID_SysKeyboard)
+  {
+    return "Keyboard";
+  }
+  else
+  {
+    return "Other";
+  }
+}
+
 Callbacks<OnDirectInputCallback>& GetOnDirectInputCallbacks()
 {
   static Callbacks<OnDirectInputCallback> callbacks;
