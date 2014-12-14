@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\LEGO - The Hobbit\LEGOHobbit_DX11.exe" --steam-app-id 285160 --inject --export Load --add-path --path-resolution --module cerberus.dll

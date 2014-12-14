@@ -8,11 +8,15 @@
 
 #include <hadesmem/config.hpp>
 
+#include "callbacks.hpp"
+
 namespace hadesmem
 {
 namespace cerberus
 {
 typedef void OnDirectInputCallback(bool* handled);
+
+Callbacks<OnDirectInputCallback>& GetOnDirectInputCallbacks();
 
 class DirectInputInterface
 {

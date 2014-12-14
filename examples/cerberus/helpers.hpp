@@ -13,6 +13,7 @@
 
 #include <hadesmem/detail/alias_cast.hpp>
 #include <hadesmem/detail/static_assert.hpp>
+#include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
@@ -35,7 +36,7 @@ void DetourFunc(Process const& process,
                 std::unique_ptr<PatchDetour>& detour,
                 Func detour_fn)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
+  HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
                                 std::is_pointer<Func>::value);
 
   return DetourFunc(process,
@@ -43,7 +44,7 @@ void DetourFunc(Process const& process,
                     interface_ptr,
                     index,
                     detour,
-                    detail::AliasCast<void*>(detour_fn));
+                    ::hadesmem::detail::AliasCast<void*>(detour_fn));
 }
 
 void DetourFunc(Process const& process,
@@ -59,11 +60,11 @@ void DetourFunc(Process const& process,
                 std::unique_ptr<PatchDetour>& detour,
                 Func detour_fn)
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<Func>::value ||
+  HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
                                 std::is_pointer<Func>::value);
 
   return DetourFunc(
-    process, base, name, detour, detail::AliasCast<void*>(detour_fn));
+    process, base, name, detour, ::hadesmem::detail::AliasCast<void*>(detour_fn));
 }
 
 void UndetourFunc(std::wstring const& name,
