@@ -37,7 +37,7 @@ HRESULT WINAPI
       HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
       HADESMEM_DETAIL_ASSERT(false);
       static_cast<IUnknown*>(*obj)->Release();
-      return E_FAIL;
+      return E_NOINTERFACE;
     }
   }
   else
@@ -51,7 +51,10 @@ HRESULT WINAPI
 ULONG WINAPI DirectInputDevice8WProxy::AddRef()
 {
   refs_++;
-  return device_->AddRef();
+  auto const ret = device_->AddRef();
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
+  return ret;
 }
 
 ULONG WINAPI DirectInputDevice8WProxy::Release()
@@ -70,7 +73,8 @@ ULONG WINAPI DirectInputDevice8WProxy::Release()
   auto const ret = device_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_ASSERT(ret == refs_);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)
   {

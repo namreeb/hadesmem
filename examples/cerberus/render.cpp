@@ -482,27 +482,6 @@ void HandleOnFrameOpenGL32(HDC device)
   }
 }
 
-void HandleOnResetD3D9(IDirect3DDevice9* device,
-                       D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
-{
-  auto& render_info = GetRenderInfoD3D9();
-  if (device == render_info.device_)
-  {
-    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
-
-    CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
-
-    InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Detected reset on unknown device. Ours = %p, Theirs = %p.",
-      render_info.device_,
-      device);
-  }
-}
-
 void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 {
   auto& callbacks = GetOnFrameCallbacks();
@@ -513,7 +492,7 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 
 #if defined(HADESMEM_MSVC)
 #pragma warning(push)
-#pragma warning(disable: 6262)
+#pragma warning(disable : 6262)
 #endif // #if defined(HADESMEM_MSVC)
 
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
@@ -590,9 +569,42 @@ void OnFrameOpenGL32(HDC device)
 }
 
 void OnResetD3D9(IDirect3DDevice9* device,
-                 D3DPRESENT_PARAMETERS* presentation_parameters)
+                 D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {
-  HandleOnResetD3D9(device, presentation_parameters);
+  auto& render_info = GetRenderInfoD3D9();
+  if (device == render_info.device_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
+
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
+
+    InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected reset on unknown device. Ours = %p, Theirs = %p.",
+      render_info.device_,
+      device);
+  }
+}
+
+void OnReleaseD3D9(IDirect3DDevice9* device)
+{
+  auto& render_info = GetRenderInfoD3D9();
+  if (device == render_info.device_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device release.");
+
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
+      render_info.device_,
+      device);
+  }
 }
 }
 
@@ -638,6 +650,7 @@ void InitializeRender()
   auto& d3d9 = GetD3D9Interface();
   d3d9.RegisterOnFrame(OnFrameD3D9);
   d3d9.RegisterOnReset(OnResetD3D9);
+  d3d9.RegisterOnRelease(OnReleaseD3D9);
 
   auto& opengl32 = GetOpenGL32Interface();
   opengl32.RegisterOnFrame(OnFrameOpenGL32);

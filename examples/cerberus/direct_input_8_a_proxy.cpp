@@ -37,7 +37,7 @@ HRESULT WINAPI DirectInput8AProxy::QueryInterface(REFIID riid, LPVOID* obj)
       HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
       HADESMEM_DETAIL_ASSERT(false);
       static_cast<IUnknown*>(*obj)->Release();
-      return E_FAIL;
+      return E_NOINTERFACE;
     }
   }
   else
@@ -51,7 +51,10 @@ HRESULT WINAPI DirectInput8AProxy::QueryInterface(REFIID riid, LPVOID* obj)
 ULONG WINAPI DirectInput8AProxy::AddRef()
 {
   refs_++;
-  return direct_input_->AddRef();
+  auto const ret = direct_input_->AddRef();
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
+  return ret;
 }
 
 ULONG WINAPI DirectInput8AProxy::Release()
@@ -70,7 +73,8 @@ ULONG WINAPI DirectInput8AProxy::Release()
   auto const ret = direct_input_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_ASSERT(ret == refs_);
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)
   {
@@ -97,7 +101,7 @@ HRESULT WINAPI DirectInput8AProxy::CreateDevice(REFGUID rguid,
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Got new DirectInputDevice8A. Type: [%s].",
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Got new IDirectInputDevice8A. Type: [%s].",
                                    DeviceGuidToString(rguid).c_str());
     *device = new DirectInputDevice8AProxy(*device, DeviceGuidToEnum(rguid));
   }
