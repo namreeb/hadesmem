@@ -16,6 +16,11 @@ namespace hadesmem
 {
 namespace cerberus
 {
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif // #if defined(HADESMEM_GCC)
+
 class Direct3DDevice9Proxy : public IDirect3DDevice9Ex
 {
 public:
@@ -379,5 +384,9 @@ protected:
   std::int64_t refs_{1};
   IDirect3DDevice9* device_{};
 };
+
+#if defined(HADESMEM_GCC)
+#pragma GCC diagnostic pop
+#endif // #if defined(HADESMEM_GCC)
 }
 }

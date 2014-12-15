@@ -151,7 +151,8 @@ extern "C" HRESULT WINAPI
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
     HADESMEM_DETAIL_TRACE_A("Proxying IDirect3D9Ex.");
-    *d3d9_ex = new hadesmem::cerberus::Direct3D9Proxy(*d3d9_ex);
+    *d3d9_ex = static_cast<IDirect3D9Ex*>(
+      static_cast<void*>(new hadesmem::cerberus::Direct3D9Proxy(*d3d9_ex)));
   }
   else
   {
