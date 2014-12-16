@@ -229,7 +229,7 @@ HRESULT WINAPI
     {
       HADESMEM_DETAIL_TRACE_A("Proxying IDirect3DDevice9.");
       *returned_device_interface =
-        new Direct3DDevice9Proxy(*returned_device_interface);
+        new Direct3DDevice9Proxy{*returned_device_interface};
     }
     else
     {
@@ -312,7 +312,7 @@ HRESULT WINAPI
     {
       HADESMEM_DETAIL_TRACE_A("Proxying IDirect3DDevice9Ex.");
       *returned_device_interface =
-        new Direct3DDevice9Proxy(*returned_device_interface);
+        new Direct3DDevice9Proxy{*returned_device_interface};
     }
     else
     {

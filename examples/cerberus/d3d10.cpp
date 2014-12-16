@@ -27,6 +27,7 @@
 
 #include "callbacks.hpp"
 #include "dxgi.hpp"
+#include "dxgi_swap_chain.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 #include "module.hpp"
@@ -115,8 +116,6 @@ extern "C" HRESULT WINAPI
     return ret;
   }
 
-  hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
-
   return ret;
 }
 
@@ -165,20 +164,12 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
 
     if (swap_chain)
     {
-      hadesmem::cerberus::DetourDXGISwapChain(*swap_chain);
+      HADESMEM_DETAIL_TRACE_A("Proxying IDXGISwapChain.");
+      *swap_chain = new hadesmem::cerberus::DXGISwapChainProxy{*swap_chain};
     }
     else
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
-    }
-
-    if (device)
-    {
-      hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
     }
   }
   else
@@ -233,8 +224,6 @@ extern "C" HRESULT WINAPI
     return ret;
   }
 
-  hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
-
   return ret;
 }
 
@@ -286,20 +275,12 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
 
     if (swap_chain)
     {
-      hadesmem::cerberus::DetourDXGISwapChain(*swap_chain);
+      HADESMEM_DETAIL_TRACE_A("Proxying IDXGISwapChain.");
+      *swap_chain = new hadesmem::cerberus::DXGISwapChainProxy{*swap_chain};
     }
     else
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
-    }
-
-    if (device)
-    {
-      hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
     }
   }
   else

@@ -26,6 +26,7 @@
 
 #include "callbacks.hpp"
 #include "dxgi.hpp"
+#include "dxgi_swap_chain.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 #include "module.hpp"
@@ -81,6 +82,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
     device,
     feature_level,
     immediate_context);
+
   auto const d3d11_create_device =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceDetour)>();
   last_error_preserver.Revert();
@@ -95,6 +97,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
                                        feature_level,
                                        immediate_context);
   last_error_preserver.Update();
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (FAILED(ret))
@@ -110,8 +113,6 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
     HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
     return ret;
   }
-
-  hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
 
   return ret;
 }
@@ -149,6 +150,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
     device,
     feature_level,
     immediate_context);
+
   auto const d3d11_create_device_and_swap_chain =
     detour->GetTrampoline<decltype(&D3D11CreateDeviceAndSwapChainDetour)>();
   last_error_preserver.Revert();
@@ -165,6 +167,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
                                                       feature_level,
                                                       immediate_context);
   last_error_preserver.Update();
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   if (SUCCEEDED(ret))
@@ -173,20 +176,12 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 
     if (swap_chain)
     {
-      hadesmem::cerberus::DetourDXGISwapChain(*swap_chain);
+      HADESMEM_DETAIL_TRACE_A("Proxying IDXGISwapChain.");
+      *swap_chain = new hadesmem::cerberus::DXGISwapChainProxy{*swap_chain};
     }
     else
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
-    }
-
-    if (device)
-    {
-      hadesmem::cerberus::DetourDXGIFactoryFromDevice(*device);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
     }
   }
   else
