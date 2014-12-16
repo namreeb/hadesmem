@@ -32,10 +32,18 @@ HRESULT WINAPI DXGIFactoryProxy::QueryInterface(REFIID riid, void** obj)
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
-      HADESMEM_DETAIL_ASSERT(false);
-      static_cast<IUnknown*>(*obj)->Release();
-      return E_NOINTERFACE;
+      // Far Cry 4
+      if (riid == __uuidof(IDXGIDisplayControl))
+      {
+        return ret;
+      }
+      else
+      {
+        HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
+        HADESMEM_DETAIL_ASSERT(false);
+        static_cast<IUnknown*>(*obj)->Release();
+        return E_NOINTERFACE;
+      }
     }
   }
   else

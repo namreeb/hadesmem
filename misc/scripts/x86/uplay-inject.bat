@@ -1,0 +1,1 @@
+inject.exe --name uplay.exe --inject --export Load --add-path --path-resolution --module cerberus.dll
