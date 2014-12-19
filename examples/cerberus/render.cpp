@@ -606,6 +606,33 @@ void OnReleaseD3D9(IDirect3DDevice9* device)
       device);
   }
 }
+
+void OnReleaseDXGI(IDXGISwapChain* swap_chain)
+{
+  auto& render_info_d3d10 = GetRenderInfoD3D10();
+  auto& render_info_d3d11 = GetRenderInfoD3D11();
+  if (swap_chain == render_info_d3d11.swap_chain_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D11 device release.");
+
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
+  }
+  else if (swap_chain == render_info_d3d10.swap_chain_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D10 device release.");
+
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D10);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unknown swap "
+                                   "chain. Ours = %p (D3D11) %p (D3D10), "
+                                   "Theirs = %p.",
+                                   render_info_d3d11.swap_chain_,
+                                   render_info_d3d10.swap_chain_,
+                                   swap_chain);
+  }
+}
 }
 
 namespace hadesmem
@@ -646,6 +673,7 @@ void InitializeRender()
 {
   auto& dxgi = GetDXGIInterface();
   dxgi.RegisterOnFrame(OnFrameDXGI);
+  dxgi.RegisterOnRelease(OnReleaseDXGI);
 
   auto& d3d9 = GetD3D9Interface();
   d3d9.RegisterOnFrame(OnFrameD3D9);

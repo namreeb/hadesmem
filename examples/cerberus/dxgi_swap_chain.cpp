@@ -287,6 +287,9 @@ _Use_decl_annotations_ HRESULT WINAPI
 void DXGISwapChainProxy::Cleanup()
 {
   HADESMEM_DETAIL_TRACE_A("Called.");
+
+  auto& callbacks = GetOnReleaseDXGICallbacks();
+  callbacks.Run(swap_chain_);
 }
 }
 }

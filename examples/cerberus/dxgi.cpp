@@ -47,6 +47,20 @@ public:
     auto& callbacks = hadesmem::cerberus::GetOnFrameDXGICallbacks();
     return callbacks.Unregister(id);
   }
+
+  virtual std::size_t RegisterOnRelease(
+    std::function<hadesmem::cerberus::OnReleaseDXGICallback> const& callback)
+    final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseDXGICallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRelease(std::size_t id) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseDXGICallbacks();
+    return callbacks.Unregister(id);
+  }
 };
 
 std::unique_ptr<hadesmem::PatchDetour>&
@@ -179,6 +193,12 @@ namespace cerberus
 Callbacks<OnFrameDXGICallback>& GetOnFrameDXGICallbacks()
 {
   static Callbacks<OnFrameDXGICallback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnFrameDXGICallback>& GetOnReleaseDXGICallbacks()
+{
+  static Callbacks<OnReleaseDXGICallback> callbacks;
   return callbacks;
 }
 
