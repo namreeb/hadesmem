@@ -21,12 +21,11 @@ namespace cerberus
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif // #if defined(HADESMEM_GCC)
 
-// Inherit from IDirect3D9 because inheriting from IDirect3D9Ex causes a linker
-// error under MinGW-w64.
 class Direct3D9Proxy : public IDirect3D9 /*: public IDirect3D9Ex*/
 {
 public:
-  explicit Direct3D9Proxy(IDirect3D9* d3d9) : d3d9_{d3d9}
+  explicit Direct3D9Proxy(IDirect3D9* d3d9)
+    : d3d9_{static_cast<IDirect3D9Ex*>(d3d9)}
   {
   }
 
@@ -119,7 +118,7 @@ protected:
   void Cleanup();
 
   std::int64_t refs_{1};
-  IDirect3D9* d3d9_{};
+  IDirect3D9Ex* d3d9_{};
 };
 
 #if defined(HADESMEM_GCC)

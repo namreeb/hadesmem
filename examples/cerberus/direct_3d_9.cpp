@@ -248,8 +248,7 @@ UINT WINAPI
   Direct3D9Proxy::GetAdapterModeCountEx(UINT adapter,
                                         CONST D3DDISPLAYMODEFILTER* filter)
 {
-  auto const d3d9_ex = static_cast<IDirect3D9Ex*>(d3d9_);
-  return d3d9_ex->GetAdapterModeCountEx(adapter, filter);
+  return d3d9_->GetAdapterModeCountEx(adapter, filter);
 }
 
 HRESULT WINAPI
@@ -258,8 +257,7 @@ HRESULT WINAPI
                                      UINT mode_index,
                                      D3DDISPLAYMODEEX* mode)
 {
-  auto const d3d9_ex = static_cast<IDirect3D9Ex*>(d3d9_);
-  return d3d9_ex->EnumAdapterModesEx(adapter, filter, mode_index, mode);
+  return d3d9_->EnumAdapterModesEx(adapter, filter, mode_index, mode);
 }
 
 HRESULT WINAPI
@@ -267,8 +265,7 @@ HRESULT WINAPI
                                           D3DDISPLAYMODEEX* mode,
                                           D3DDISPLAYROTATION* rotation)
 {
-  auto const d3d9_ex = static_cast<IDirect3D9Ex*>(d3d9_);
-  return d3d9_ex->GetAdapterDisplayModeEx(adapter, mode, rotation);
+  return d3d9_->GetAdapterDisplayModeEx(adapter, mode, rotation);
 }
 
 HRESULT WINAPI
@@ -292,14 +289,13 @@ HRESULT WINAPI
                                  returned_device_interface);
 
   last_error_preserver.Revert();
-  auto const d3d9_ex = static_cast<IDirect3D9Ex*>(d3d9_);
-  auto const ret = d3d9_ex->CreateDeviceEx(adapter,
-                                           device_type,
-                                           focus_window,
-                                           behavior_flags,
-                                           presentation_parameters,
-                                           fullscreen_display_mode,
-                                           returned_device_interface);
+  auto const ret = d3d9_->CreateDeviceEx(adapter,
+                                         device_type,
+                                         focus_window,
+                                         behavior_flags,
+                                         presentation_parameters,
+                                         fullscreen_display_mode,
+                                         returned_device_interface);
   last_error_preserver.Update();
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
@@ -329,8 +325,7 @@ HRESULT WINAPI
 
 HRESULT WINAPI Direct3D9Proxy::GetAdapterLUID(UINT adapter, LUID* luid)
 {
-  auto const d3d9_ex = static_cast<IDirect3D9Ex*>(d3d9_);
-  return d3d9_ex->GetAdapterLUID(adapter, luid);
+  return d3d9_->GetAdapterLUID(adapter, luid);
 }
 
 void Direct3D9Proxy::Cleanup()
