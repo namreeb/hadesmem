@@ -26,6 +26,7 @@
 #include <hadesmem/region.hpp>
 
 #include "callbacks.hpp"
+#include "d3d10_device.hpp"
 #include "dxgi.hpp"
 #include "dxgi_swap_chain.hpp"
 #include "helpers.hpp"
@@ -34,6 +35,24 @@
 
 namespace
 {
+class D3D10Impl : public hadesmem::cerberus::D3D10Interface
+{
+public:
+  virtual std::size_t RegisterOnRelease(
+    std::function<hadesmem::cerberus::OnReleaseD3D10Callback> const& callback)
+    final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D10Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRelease(std::size_t id) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D10Callbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 std::unique_ptr<hadesmem::PatchDetour>&
   GetD3D10CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -116,6 +135,9 @@ extern "C" HRESULT WINAPI
     return ret;
   }
 
+  HADESMEM_DETAIL_TRACE_A("Proxying ID3D10Device.");
+  *device = new hadesmem::cerberus::D3D10DeviceProxy{*device};
+
   return ret;
 }
 
@@ -171,6 +193,16 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
     }
+
+    if (device)
+    {
+      HADESMEM_DETAIL_TRACE_A("Proxying ID3D10Device.");
+      *device = new hadesmem::cerberus::D3D10DeviceProxy{*device};
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
+    }
   }
   else
   {
@@ -223,6 +255,9 @@ extern "C" HRESULT WINAPI
     HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
     return ret;
   }
+
+  HADESMEM_DETAIL_TRACE_A("Proxying ID3D10Device.");
+  *device = new hadesmem::cerberus::D3D10DeviceProxy{*device};
 
   return ret;
 }
@@ -282,6 +317,16 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
     }
+
+    if (device)
+    {
+      HADESMEM_DETAIL_TRACE_A("Proxying ID3D10Device.");
+      *device = new hadesmem::cerberus::D3D10DeviceProxy{*device};
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
+    }
   }
   else
   {
@@ -296,6 +341,18 @@ namespace hadesmem
 {
 namespace cerberus
 {
+Callbacks<OnReleaseD3D10Callback>& GetOnReleaseD3D10Callbacks()
+{
+  static Callbacks<OnReleaseD3D10Callback> callbacks;
+  return callbacks;
+}
+
+D3D10Interface& GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static D3D10Impl d3d10_impl;
+  return d3d10_impl;
+}
+
 void InitializeD3D10()
 {
   InitializeSupportForModule(

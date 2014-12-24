@@ -25,6 +25,7 @@
 #include <hadesmem/region.hpp>
 
 #include "callbacks.hpp"
+#include "d3d11_device.hpp"
 #include "dxgi.hpp"
 #include "dxgi_swap_chain.hpp"
 #include "helpers.hpp"
@@ -33,6 +34,24 @@
 
 namespace
 {
+class D3D11Impl : public hadesmem::cerberus::D3D11Interface
+{
+public:
+  virtual std::size_t RegisterOnRelease(
+    std::function<hadesmem::cerberus::OnReleaseD3D11Callback> const& callback)
+    final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D11Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRelease(std::size_t id) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D11Callbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 std::unique_ptr<hadesmem::PatchDetour>&
   GetD3D11CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -114,6 +133,9 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
     return ret;
   }
 
+  HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+  *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+
   return ret;
 }
 
@@ -183,6 +205,16 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
     {
       HADESMEM_DETAIL_TRACE_A("Invalid swap chain out param pointer.");
     }
+
+    if (device)
+    {
+      HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+      *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Invalid device out param pointer.");
+    }
   }
   else
   {
@@ -197,6 +229,18 @@ namespace hadesmem
 {
 namespace cerberus
 {
+Callbacks<OnReleaseD3D11Callback>& GetOnReleaseD3D11Callbacks()
+{
+  static Callbacks<OnReleaseD3D11Callback> callbacks;
+  return callbacks;
+}
+
+D3D11Interface& GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static D3D11Impl d3d11_impl;
+  return d3d11_impl;
+}
+
 void InitializeD3D11()
 {
   InitializeSupportForModule(

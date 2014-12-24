@@ -607,17 +607,10 @@ void OnReleaseD3D9(IDirect3DDevice9* device)
   }
 }
 
-void OnReleaseDXGI(IDXGISwapChain* swap_chain)
+void OnReleaseD3D10(ID3D10Device* device)
 {
   auto& render_info_d3d10 = GetRenderInfoD3D10();
-  auto& render_info_d3d11 = GetRenderInfoD3D11();
-  if (swap_chain == render_info_d3d11.swap_chain_)
-  {
-    HADESMEM_DETAIL_TRACE_A("Handling D3D11 device release.");
-
-    CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
-  }
-  else if (swap_chain == render_info_d3d10.swap_chain_)
+  if (device == render_info_d3d10.device_)
   {
     HADESMEM_DETAIL_TRACE_A("Handling D3D10 device release.");
 
@@ -625,12 +618,28 @@ void OnReleaseDXGI(IDXGISwapChain* swap_chain)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unknown swap "
-                                   "chain. Ours = %p (D3D11) %p (D3D10), "
-                                   "Theirs = %p.",
-                                   render_info_d3d11.swap_chain_,
-                                   render_info_d3d10.swap_chain_,
-                                   swap_chain);
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
+      render_info_d3d10.device_,
+      device);
+  }
+}
+
+void OnReleaseD3D11(ID3D11Device* device)
+{
+  auto& render_info_d3d11 = GetRenderInfoD3D11();
+  if (device == render_info_d3d11.device_)
+  {
+    HADESMEM_DETAIL_TRACE_A("Handling D3D11 device release.");
+
+    CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
+      render_info_d3d11.device_,
+      device);
   }
 }
 }
@@ -673,7 +682,12 @@ void InitializeRender()
 {
   auto& dxgi = GetDXGIInterface();
   dxgi.RegisterOnFrame(OnFrameDXGI);
-  dxgi.RegisterOnRelease(OnReleaseDXGI);
+
+  auto& d3d10 = GetD3D10Interface();
+  d3d10.RegisterOnRelease(OnReleaseD3D10);
+
+  auto& d3d11 = GetD3D11Interface();
+  d3d11.RegisterOnRelease(OnReleaseD3D11);
 
   auto& d3d9 = GetD3D9Interface();
   d3d9.RegisterOnFrame(OnFrameD3D9);
