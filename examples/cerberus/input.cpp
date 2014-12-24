@@ -448,7 +448,10 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
   {
     ClearOldCursorPos();
 
-    SetNewClipCursor();
+    if (visible)
+    {
+      SetNewClipCursor();
+    }
   }
 }
 
