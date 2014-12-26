@@ -8,6 +8,7 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/trace.hpp>
 
 #include "callbacks.hpp"
 #include "main.hpp"

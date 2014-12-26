@@ -259,6 +259,14 @@ void SetNewClipCursor()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
+  auto const& old_clip_cursor = GetOldClipCursor();
+  new_clip_cursor.left = (std::min)(old_clip_cursor.left, new_clip_cursor.left);
+  new_clip_cursor.top = (std::min)(old_clip_cursor.top, new_clip_cursor.top);
+  new_clip_cursor.right =
+    (std::max)(old_clip_cursor.right, new_clip_cursor.right);
+  new_clip_cursor.bottom =
+    (std::max)(old_clip_cursor.bottom, new_clip_cursor.bottom);
+
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Setting new clip cursor: Left [%ld] Top [%ld] Right [%ld] Bottom [%ld]",
     new_clip_cursor.left,

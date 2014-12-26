@@ -192,6 +192,7 @@ HRESULT WINAPI
 HRESULT WINAPI
   DirectInputDevice8WProxy::SetCooperativeLevel(HWND hwnd, DWORD flags)
 {
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%lu]", hwnd, flags);
   return device_->SetCooperativeLevel(hwnd, flags);
 }
 
