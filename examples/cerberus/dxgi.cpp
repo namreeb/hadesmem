@@ -175,7 +175,7 @@ extern "C" HRESULT WINAPI
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
     HADESMEM_DETAIL_TRACE_A("Proxying IDXGIFactory2.");
     *factory = new hadesmem::cerberus::DXGIFactoryProxy{
-      static_cast<IDXGIFactory2*>(*factory)};
+      static_cast<IDXGIFactory*>(*factory)};
   }
   else
   {

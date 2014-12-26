@@ -190,6 +190,7 @@ _Use_decl_annotations_ HRESULT WINAPI
   return swap_chain_->GetLastPresentCount(last_present_count);
 }
 
+#if !defined(HADESMEM_GCC)
 _Use_decl_annotations_ HRESULT WINAPI
   DXGISwapChainProxy::GetDesc1(DXGI_SWAP_CHAIN_DESC1* desc)
 {
@@ -283,6 +284,7 @@ _Use_decl_annotations_ HRESULT WINAPI
   auto const swap_chain = static_cast<IDXGISwapChain1*>(swap_chain_);
   return swap_chain->GetRotation(rotation);
 }
+#endif // #if !defined(HADESMEM_GCC)
 
 void DXGISwapChainProxy::Cleanup()
 {

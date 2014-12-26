@@ -13,6 +13,8 @@
 
 #include <hadesmem/config.hpp>
 
+#include "no_sal.hpp"
+
 namespace hadesmem
 {
 namespace cerberus
@@ -22,11 +24,14 @@ namespace cerberus
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif // #if defined(HADESMEM_GCC)
 
+#if defined(HADESMEM_GCC)
+class D3D10DeviceProxy : public ID3D10Device
+#else // #if defined(HADESMEM_GCC)
 class D3D10DeviceProxy : public ID3D10Device1
+#endif // #if defined(HADESMEM_GCC)
 {
 public:
-  explicit D3D10DeviceProxy(ID3D10Device* device)
-    : device_{static_cast<ID3D10Device1*>(device)}
+  explicit D3D10DeviceProxy(ID3D10Device* device) : device_{device}
   {
   }
 
@@ -420,6 +425,7 @@ public:
   virtual void STDMETHODCALLTYPE
     GetTextFilterSize(_Out_opt_ UINT* pWidth, _Out_opt_ UINT* pHeight) override;
 
+#if !defined(HADESMEM_GCC)
   // ID3D10Device1
   virtual HRESULT STDMETHODCALLTYPE CreateShaderResourceView1(
     _In_ ID3D10Resource* pResource,
@@ -429,12 +435,13 @@ public:
     CreateBlendState1(_In_ const D3D10_BLEND_DESC1* pBlendStateDesc,
                       _Out_opt_ ID3D10BlendState1** ppBlendState) override;
   virtual D3D10_FEATURE_LEVEL1 STDMETHODCALLTYPE GetFeatureLevel() override;
+#endif // #if !defined(HADESMEM_GCC)
 
 protected:
   void Cleanup();
 
   std::int64_t refs_{1};
-  ID3D10Device1* device_{};
+  ID3D10Device* device_{};
 };
 
 #if defined(HADESMEM_GCC)

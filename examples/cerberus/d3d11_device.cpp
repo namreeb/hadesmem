@@ -53,6 +53,7 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       refs_++;
       *obj = this;
     }
+#if !defined(HADESMEM_GCC)
     else if (riid == __uuidof(ID3D11Device1))
     {
       *obj = new D3D11DeviceProxy(static_cast<ID3D11Device1*>(*obj));
@@ -69,6 +70,7 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
       return ret;
     }
+#endif // #if !defined(HADESMEM_GCC)
     else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
     {
       // Needs investigation to see if we need to wrap this.
@@ -470,31 +472,36 @@ UINT WINAPI D3D11DeviceProxy::GetExceptionMode(void)
   return device_->GetExceptionMode();
 }
 
+#if !defined(HADESMEM_GCC)
 // ID3D11Device1
 void WINAPI D3D11DeviceProxy::GetImmediateContext1(
   _Out_ ID3D11DeviceContext1** ppImmediateContext)
 {
-  return device_->GetImmediateContext1(ppImmediateContext);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->GetImmediateContext1(ppImmediateContext);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CreateDeferredContext1(
   UINT ContextFlags, _Out_opt_ ID3D11DeviceContext1** ppDeferredContext)
 {
-  return device_->CreateDeferredContext1(ContextFlags, ppDeferredContext);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->CreateDeferredContext1(ContextFlags, ppDeferredContext);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CreateBlendState1(
   _In_ const D3D11_BLEND_DESC1* pBlendStateDesc,
   _Out_opt_ ID3D11BlendState1** ppBlendState)
 {
-  return device_->CreateBlendState1(pBlendStateDesc, ppBlendState);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->CreateBlendState1(pBlendStateDesc, ppBlendState);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CreateRasterizerState1(
   _In_ const D3D11_RASTERIZER_DESC1* pRasterizerDesc,
   _Out_opt_ ID3D11RasterizerState1** ppRasterizerState)
 {
-  return device_->CreateRasterizerState1(pRasterizerDesc, ppRasterizerState);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->CreateRasterizerState1(pRasterizerDesc, ppRasterizerState);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CreateDeviceContextState(
@@ -506,13 +513,14 @@ HRESULT WINAPI D3D11DeviceProxy::CreateDeviceContextState(
   _Out_opt_ D3D_FEATURE_LEVEL* pChosenFeatureLevel,
   _Out_opt_ ID3DDeviceContextState** ppContextState)
 {
-  return device_->CreateDeviceContextState(Flags,
-                                           pFeatureLevels,
-                                           FeatureLevels,
-                                           SDKVersion,
-                                           EmulatedInterface,
-                                           pChosenFeatureLevel,
-                                           ppContextState);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->CreateDeviceContextState(Flags,
+                                          pFeatureLevels,
+                                          FeatureLevels,
+                                          SDKVersion,
+                                          EmulatedInterface,
+                                          pChosenFeatureLevel,
+                                          ppContextState);
 }
 
 HRESULT WINAPI
@@ -520,7 +528,8 @@ HRESULT WINAPI
                                         _In_ REFIID returnedInterface,
                                         _Out_ void** ppResource)
 {
-  return device_->OpenSharedResource1(hResource, returnedInterface, ppResource);
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->OpenSharedResource1(hResource, returnedInterface, ppResource);
 }
 
 HRESULT WINAPI
@@ -529,7 +538,8 @@ HRESULT WINAPI
                                              _In_ REFIID returnedInterface,
                                              _Out_ void** ppResource)
 {
-  return device_->OpenSharedResourceByName(
+  auto const device = static_cast<ID3D11Device1*>(device_);
+  return device->OpenSharedResourceByName(
     lpName, dwDesiredAccess, returnedInterface, ppResource);
 }
 
@@ -537,13 +547,15 @@ HRESULT WINAPI
 void WINAPI D3D11DeviceProxy::GetImmediateContext2(
   _Out_ ID3D11DeviceContext2** ppImmediateContext)
 {
-  return device_->GetImmediateContext2(ppImmediateContext);
+  auto const device = static_cast<ID3D11Device2*>(device_);
+  return device->GetImmediateContext2(ppImmediateContext);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CreateDeferredContext2(
   UINT ContextFlags, _Out_opt_ ID3D11DeviceContext2** ppDeferredContext)
 {
-  return device_->CreateDeferredContext2(ContextFlags, ppDeferredContext);
+  auto const device = static_cast<ID3D11Device2*>(device_);
+  return device->CreateDeferredContext2(ContextFlags, ppDeferredContext);
 }
 
 void WINAPI D3D11DeviceProxy::GetResourceTiling(
@@ -556,13 +568,14 @@ void WINAPI D3D11DeviceProxy::GetResourceTiling(
   _Out_writes_(*pNumSubresourceTilings)
     D3D11_SUBRESOURCE_TILING* pSubresourceTilingsForNonPackedMips)
 {
-  return device_->GetResourceTiling(pTiledResource,
-                                    pNumTilesForEntireResource,
-                                    pPackedMipDesc,
-                                    pStandardTileShapeForNonPackedMips,
-                                    pNumSubresourceTilings,
-                                    FirstSubresourceTilingToGet,
-                                    pSubresourceTilingsForNonPackedMips);
+  auto const device = static_cast<ID3D11Device2*>(device_);
+  return device->GetResourceTiling(pTiledResource,
+                                   pNumTilesForEntireResource,
+                                   pPackedMipDesc,
+                                   pStandardTileShapeForNonPackedMips,
+                                   pNumSubresourceTilings,
+                                   FirstSubresourceTilingToGet,
+                                   pSubresourceTilingsForNonPackedMips);
 }
 
 HRESULT WINAPI D3D11DeviceProxy::CheckMultisampleQualityLevels1(
@@ -571,9 +584,11 @@ HRESULT WINAPI D3D11DeviceProxy::CheckMultisampleQualityLevels1(
   _In_ UINT Flags,
   _Out_ UINT* pNumQualityLevels)
 {
-  return device_->CheckMultisampleQualityLevels1(
+  auto const device = static_cast<ID3D11Device2*>(device_);
+  return device->CheckMultisampleQualityLevels1(
     Format, SampleCount, Flags, pNumQualityLevels);
 }
+#endif // #if !defined(HADESMEM_GCC)
 
 void D3D11DeviceProxy::Cleanup()
 {

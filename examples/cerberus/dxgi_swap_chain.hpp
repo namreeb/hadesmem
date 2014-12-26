@@ -8,10 +8,14 @@
 
 #include <windows.h>
 
+#include <hadesmem/config.hpp>
+
+#if !defined(HADESMEM_GCC)
 #include <dxgi1_2.h>
+#endif // #if !defined(HADESMEM_GCC)
 #include <dxgi.h>
 
-#include <hadesmem/config.hpp>
+#include "no_sal.hpp"
 
 namespace hadesmem
 {
@@ -22,7 +26,11 @@ namespace cerberus
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif // #if defined(HADESMEM_GCC)
 
+#if defined(HADESMEM_GCC)
+class DXGISwapChainProxy : public IDXGISwapChain
+#else  // #if defined(HADESMEM_GCC)
 class DXGISwapChainProxy : public IDXGISwapChain1
+#endif // #if defined(HADESMEM_GCC)
 {
 public:
   explicit DXGISwapChainProxy(IDXGISwapChain* swap_chain)
@@ -78,26 +86,31 @@ public:
   virtual HRESULT WINAPI
     GetLastPresentCount(_Out_ UINT* last_present_count) override;
 
+#if !defined(HADESMEM_GCC)
   // IDXGISwapChain1
-  virtual HRESULT WINAPI GetDesc1(_Out_ DXGI_SWAP_CHAIN_DESC1* desc) override;
+  virtual HRESULT WINAPI
+    GetDesc1(_Out_ DXGI_SWAP_CHAIN_DESC1* desc) override;
   virtual HRESULT WINAPI
     GetFullscreenDesc(_Out_ DXGI_SWAP_CHAIN_FULLSCREEN_DESC* desc) override;
   virtual HRESULT WINAPI GetHwnd(_Out_ HWND* hwnd) override;
   virtual HRESULT WINAPI
     GetCoreWindow(_In_ REFIID refiid, _Out_ void** unk) override;
-  virtual HRESULT WINAPI
-    Present1(UINT sync_interval,
-             UINT present_flags,
-             _In_ const DXGI_PRESENT_PARAMETERS* present_parameters) override;
+  virtual HRESULT WINAPI Present1(
+    UINT sync_interval,
+    UINT present_flags,
+    _In_ const DXGI_PRESENT_PARAMETERS* present_parameters) override;
   virtual BOOL WINAPI IsTemporaryMonoSupported() override;
   virtual HRESULT WINAPI
     GetRestrictToOutput(_Out_ IDXGIOutput** restrict_to_output) override;
   virtual HRESULT WINAPI
     SetBackgroundColor(_In_ const DXGI_RGBA* color) override;
-  virtual HRESULT WINAPI GetBackgroundColor(_Out_ DXGI_RGBA* color) override;
-  virtual HRESULT WINAPI SetRotation(_In_ DXGI_MODE_ROTATION rotation) override;
+  virtual HRESULT WINAPI
+    GetBackgroundColor(_Out_ DXGI_RGBA* color) override;
+  virtual HRESULT WINAPI
+    SetRotation(_In_ DXGI_MODE_ROTATION rotation) override;
   virtual HRESULT WINAPI
     GetRotation(_Out_ DXGI_MODE_ROTATION* rotation) override;
+#endif // #if !defined(HADESMEM_GCC)
 
 protected:
   void Cleanup();

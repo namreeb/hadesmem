@@ -902,26 +902,31 @@ void WINAPI D3D10DeviceProxy::GetTextFilterSize(_Out_opt_ UINT* pWidth,
   return device_->GetTextFilterSize(pWidth, pHeight);
 }
 
+#if !defined(HADESMEM_GCC)
 // ID3D10Device1
 HRESULT WINAPI D3D10DeviceProxy::CreateShaderResourceView1(
   _In_ ID3D10Resource* pResource,
   _In_opt_ const D3D10_SHADER_RESOURCE_VIEW_DESC1* pDesc,
   _Out_opt_ ID3D10ShaderResourceView1** ppSRView)
 {
-  return device_->CreateShaderResourceView1(pResource, pDesc, ppSRView);
+  auto const device = static_cast<ID3D10Device1*>(device_);
+  return device->CreateShaderResourceView1(pResource, pDesc, ppSRView);
 }
 
 HRESULT WINAPI D3D10DeviceProxy::CreateBlendState1(
   _In_ const D3D10_BLEND_DESC1* pBlendStateDesc,
   _Out_opt_ ID3D10BlendState1** ppBlendState)
 {
-  return device_->CreateBlendState1(pBlendStateDesc, ppBlendState);
+  auto const device = static_cast<ID3D10Device1*>(device_);
+  return device->CreateBlendState1(pBlendStateDesc, ppBlendState);
 }
 
 D3D10_FEATURE_LEVEL1 WINAPI D3D10DeviceProxy::GetFeatureLevel()
 {
-  return device_->GetFeatureLevel();
+  auto const device = static_cast<ID3D10Device1*>(device_);
+  return device->GetFeatureLevel();
 }
+#endif // #if !defined(HADESMEM_GCC)
 
 void D3D10DeviceProxy::Cleanup()
 {
