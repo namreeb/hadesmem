@@ -29,6 +29,7 @@
 #include "dxgi.hpp"
 #include "dxgi_swap_chain.hpp"
 #include "helpers.hpp"
+#include "hook_counter.hpp"
 #include "main.hpp"
 #include "module.hpp"
 
@@ -72,6 +73,18 @@ std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
+std::uint32_t& GetD3D11CreateHookCount() HADESMEM_DETAIL_NOEXCEPT
+{
+#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
+  static thread_local std::uint32_t in_hook = 0;
+#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+  static __declspec(thread) std::uint32_t in_hook = 0;
+#else
+#error "[HadesMem] Unsupported compiler."
+#endif
+  return in_hook;
+}
+
 extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
   IDXGIAdapter* adapter,
   D3D_DRIVER_TYPE driver_type,
@@ -88,6 +101,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+  hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p].",
@@ -133,8 +147,13 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
     return ret;
   }
 
-  HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
-  *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+  auto const hook_count = hook_counter.GetCount();
+  HADESMEM_DETAIL_ASSERT(hook_count > 0);
+  if (hook_count == 1)
+  {
+    HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+    *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+  }
 
   return ret;
 }
@@ -157,6 +176,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+  hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%d] [%p] [%u] [%p] [%u] [%u] [%p] [%p] [%p] [%p] [%p].",
@@ -196,10 +216,16 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   {
     HADESMEM_DETAIL_TRACE_A("Succeeded.");
 
+    auto const hook_count = hook_counter.GetCount();
+    HADESMEM_DETAIL_ASSERT(hook_count > 0);
+
     if (swap_chain)
     {
-      HADESMEM_DETAIL_TRACE_A("Proxying IDXGISwapChain.");
-      *swap_chain = new hadesmem::cerberus::DXGISwapChainProxy{*swap_chain};
+      if (hook_count == 1)
+      {
+        HADESMEM_DETAIL_TRACE_A("Proxying IDXGISwapChain.");
+        *swap_chain = new hadesmem::cerberus::DXGISwapChainProxy{*swap_chain};
+      }
     }
     else
     {
@@ -208,8 +234,11 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
 
     if (device)
     {
-      HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
-      *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+      if (hook_count == 1)
+      {
+        HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+        *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
+      }
     }
     else
     {

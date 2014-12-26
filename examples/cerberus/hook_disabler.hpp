@@ -28,6 +28,11 @@ public:
     *flag_ = false;
   }
 
+  bool GetFlag() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return *flag_;
+  }
+
 private:
   bool* flag_;
 };
