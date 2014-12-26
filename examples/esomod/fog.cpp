@@ -15,20 +15,20 @@ void ToggleFog(hadesmem::Process const& process)
 {
   std::cout << "\nPreparing to toggle fog.\n";
 
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:0107623D                 mov     byte ptr [ebp+var_4], 1
-  // .text:01076241                 call    sub_107B390
-  // .text:01076246                 cmp     ds:byte_18BC757, bl
+  // eso.live.1.5.7.1091867 (dumped with module base of 0x00F70000)
+  // .text:019122CF                 lea     ecx, [ebp-0C0h]
+  // .text:019122D5                 call    sub_1919430
+  // .text:019122DA                 cmp     ds:byte_21282AB, bl
   auto const fog_flag_ref = static_cast<std::uint8_t*>(
     hadesmem::Find(process,
                    L"",
-                   L"C6 45 FC 01 E8 ?? ?? ?? ?? 38 1D",
+                   L"8D 8D 40 FF FF FF E8 ?? ?? ?? ?? 38 1D",
                    hadesmem::PatternFlags::kThrowOnUnmatch,
                    0));
   std::cout << "Got fog flag ref. [" << static_cast<void*>(fog_flag_ref)
             << "].\n";
 
-  auto const kFogFlagRefOffset = 0x0B;
+  auto const kFogFlagRefOffset = 0x0D;
   auto const fog_flag_ptr =
     hadesmem::Read<std::uint8_t*>(process, fog_flag_ref + kFogFlagRefOffset);
   std::cout << "Got fog flag ptr. [" << static_cast<void*>(fog_flag_ptr)

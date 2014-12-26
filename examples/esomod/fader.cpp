@@ -15,21 +15,21 @@ void ToggleFader(hadesmem::Process const& process)
 {
   std::cout << "\nPreparing to toggle fader.\n";
 
-  // eso.live.1.1.2.995904 (dumped with module base of 0x00960000)
-  // .text:00AB6A32                 lea     edi, [esi+70h]
-  // .text:00AB6A35                 lea     ebx, [esi+1A4h]
-  // .text:00AB6A3B                 fstp    dword ptr [ebx]
-  // .text:00AB6A3D                 cmp     ds:byte_18BC756, 0
+  // eso.live.1.5.7.1091867 (dumped with module base of 0x00F70000)
+  // .text:011C3915                 lea     edi, [esi+90h]
+  // .text:011C391B                 lea     ebx, [esi+1C8h]
+  // .text:011C3921                 fstp    dword ptr [ebx]
+  // .text:011C3923                 cmp     ds:byte_21282AA, 0
   auto const fader_flag_ref = static_cast<std::uint8_t*>(
     hadesmem::Find(process,
                    L"",
-                   L"8D 7E ?? 8D 9E ?? ?? ?? ?? D9 1B 80 3D",
+                   L"8D BE ?? ?? ?? ?? 8D 9E ?? ?? ?? ?? D9 1B 80 3D",
                    hadesmem::PatternFlags::kThrowOnUnmatch,
                    0));
   std::cout << "Got fader flag ref. [" << static_cast<void*>(fader_flag_ref)
             << "].\n";
 
-  auto const kFaderFlagRefOffset = 0x0D;
+  auto const kFaderFlagRefOffset = 0x10;
   auto const fader_flag_ptr = hadesmem::Read<std::uint8_t*>(
     process, fader_flag_ref + kFaderFlagRefOffset);
   std::cout << "Got fader flag ptr. [" << static_cast<void*>(fader_flag_ptr)
