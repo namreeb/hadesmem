@@ -15,8 +15,11 @@
 *
 ****/
 
-#ifndef _NO_SAL_2_H_
-#define _NO_SAL_2_H_
+#pragma once
+
+#include <hadesmem/config.hpp>
+
+#if defined(HADESMEM_GCC)
 
 #ifdef _When_
 #undef _When_
@@ -1039,4 +1042,4 @@
 #undef _Post_writable_byte_size_
 #define _Post_writable_byte_size_(s) _Post_ _Writable_bytes_(s)
 
-#endif /* _NO_SAL_2_H_ */
+#endif // #if defined(HADESMEM_GCC)
