@@ -55,6 +55,84 @@ struct PatternFlags
 
 namespace detail
 {
+inline void* Add(Process const& /*process*/,
+                 std::uintptr_t /*base*/,
+                 void* address,
+                 std::uint32_t /*flags*/,
+                 std::uintptr_t offset)
+{
+  return static_cast<std::uint8_t*>(address) + offset;
+}
+
+inline void* Sub(Process const& /*process*/,
+                 std::uintptr_t /*base*/,
+                 void* address,
+                 std::uint32_t /*flags*/,
+                 std::uintptr_t offset)
+{
+  return static_cast<std::uint8_t*>(address) - offset;
+}
+
+inline void* Lea(Process const& process,
+                 std::uintptr_t base,
+                 void* address,
+                 std::uint32_t flags)
+{
+  try
+  {
+    bool const is_relative_address = !!(flags & PatternFlags::kRelativeAddress);
+    std::uintptr_t const real_base = is_relative_address ? base : 0;
+    auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
+    std::uint8_t* const result = Read<std::uint8_t*>(process, real_address);
+    return is_relative_address ? result - base : result;
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+
+    return nullptr;
+  }
+}
+
+inline void* And(Process const& /*process*/,
+                 std::uintptr_t /*base*/,
+                 void* address,
+                 std::uint32_t /*flags*/,
+                 std::uintptr_t mask)
+{
+  return reinterpret_cast<void*>(reinterpret_cast<std::uintptr_t>(address) &
+                                 mask);
+}
+
+inline void* Rel(Process const& process,
+                 std::uintptr_t base,
+                 void* address,
+                 std::uint32_t flags,
+                 std::uintptr_t size,
+                 std::uintptr_t offset)
+{
+  try
+  {
+    bool const is_relative_address = !!(flags & PatternFlags::kRelativeAddress);
+    std::uintptr_t const real_base = is_relative_address ? base : 0;
+    auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
+    auto const result = reinterpret_cast<std::uint8_t*>(
+      reinterpret_cast<std::uintptr_t>(real_address) +
+      Read<std::uint32_t>(process, real_address) + size - offset);
+    return is_relative_address ? result - base : result;
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+
+    return nullptr;
+  }
+}
+
 struct PatternDataByte
 {
   std::uint8_t data;
@@ -281,6 +359,36 @@ void* Find(Process const& process,
 
   return nullptr;
 }
+
+template <typename NeedleIterator>
+void* Find(Process const& process,
+           std::pair<std::uint8_t*, std::uint8_t*> const& region,
+           NeedleIterator n_beg,
+           NeedleIterator n_end,
+           std::uint32_t flags,
+           void* start,
+           std::wstring const* name)
+{
+  HADESMEM_DETAIL_ASSERT(n_beg != n_end);
+
+  if (void* const address = Find(process, region, start, n_beg, n_end))
+  {
+    return !!(flags & PatternFlags::kRelativeAddress)
+             ? static_cast<std::uint8_t*>(address) -
+                 reinterpret_cast<std::uintptr_t>(region.first)
+             : address;
+  }
+
+  if (!!(flags & PatternFlags::kThrowOnUnmatch))
+  {
+    auto const name_narrow = name ? WideCharToMultiByte(*name) : std::string();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Could not match pattern."}
+                                    << ErrorStringOther{name_narrow});
+  }
+
+  return nullptr;
+}
 }
 
 inline void* Find(Process const& process,
@@ -301,6 +409,30 @@ inline void* Find(Process const& process,
       : nullptr;
   return detail::Find(process,
                       mod_info,
+                      std::begin(needle),
+                      std::end(needle),
+                      flags,
+                      start_abs,
+                      name);
+}
+
+inline void* Find(Process const& process,
+                  void* base,
+                  std::size_t size,
+                  std::wstring const& data,
+                  std::uint32_t flags,
+                  std::uintptr_t start,
+                  std::wstring const* name = nullptr)
+{
+  HADESMEM_DETAIL_ASSERT(
+    !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
+
+  auto const region = std::make_pair(static_cast<std::uint8_t*>(base),
+                                     static_cast<std::uint8_t*>(base) + size);
+  auto const needle = detail::ConvertData(data);
+  void* const start_abs = start ? region.first + start : nullptr;
+  return detail::Find(process,
+                      region,
                       std::begin(needle),
                       std::end(needle),
                       flags,
@@ -690,79 +822,6 @@ private:
     std::vector<PatternInfoFull> patterns;
   };
 
-  void* Add(std::uintptr_t /*base*/,
-            void* address,
-            std::uint32_t /*flags*/,
-            std::uintptr_t offset) const
-  {
-    return static_cast<std::uint8_t*>(address) + offset;
-  }
-
-  void* Sub(std::uintptr_t /*base*/,
-            void* address,
-            std::uint32_t /*flags*/,
-            std::uintptr_t offset) const
-  {
-    return static_cast<std::uint8_t*>(address) - offset;
-  }
-
-  void* Lea(std::uintptr_t base, void* address, std::uint32_t flags) const
-  {
-    try
-    {
-      bool const is_relative_address =
-        !!(flags & PatternFlags::kRelativeAddress);
-      std::uintptr_t const real_base = is_relative_address ? base : 0;
-      auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
-      std::uint8_t* const result = Read<std::uint8_t*>(*process_, real_address);
-      return is_relative_address ? result - base : result;
-    }
-    catch (...)
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        boost::current_exception_diagnostic_information().c_str());
-      HADESMEM_DETAIL_ASSERT(false);
-
-      return nullptr;
-    }
-  }
-
-  void* And(std::uintptr_t /*base*/,
-            void* address,
-            std::uint32_t /*flags*/,
-            std::uintptr_t mask) const
-  {
-    return reinterpret_cast<void*>(reinterpret_cast<std::uintptr_t>(address) &
-                                   mask);
-  }
-
-  void* Rel(std::uintptr_t base,
-            void* address,
-            std::uint32_t flags,
-            std::uintptr_t size,
-            std::uintptr_t offset) const
-  {
-    try
-    {
-      bool const is_relative_address =
-        !!(flags & PatternFlags::kRelativeAddress);
-      std::uintptr_t const real_base = is_relative_address ? base : 0;
-      auto const real_address = static_cast<std::uint8_t*>(address) + real_base;
-      auto const result = reinterpret_cast<std::uint8_t*>(
-        reinterpret_cast<std::uintptr_t>(real_address) +
-        Read<std::uint32_t>(*process_, real_address) + size - offset);
-      return is_relative_address ? result - base : result;
-    }
-    catch (...)
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        boost::current_exception_diagnostic_information().c_str());
-      HADESMEM_DETAIL_ASSERT(false);
-
-      return nullptr;
-    }
-  }
-
   std::uint32_t ReadFlags(pugi::xml_node const& node) const
   {
     std::uint32_t flags = PatternFlags::kNone;
@@ -922,7 +981,7 @@ private:
             Error{} << ErrorString{"Invalid manipulator operands for 'Add'."});
         }
 
-        address = Add(base, address, flags, m.operand1);
+        address = detail::Add(*process_, base, address, flags, m.operand1);
 
         break;
 
@@ -933,7 +992,7 @@ private:
             Error{} << ErrorString{"Invalid manipulator operands for 'Sub'."});
         }
 
-        address = Sub(base, address, flags, m.operand1);
+        address = detail::Sub(*process_, base, address, flags, m.operand1);
 
         break;
 
@@ -944,7 +1003,8 @@ private:
             Error{} << ErrorString{"Invalid manipulator operands for 'Rel'."});
         }
 
-        address = Rel(base, address, flags, m.operand1, m.operand2);
+        address =
+          detail::Rel(*process_, base, address, flags, m.operand1, m.operand2);
 
         break;
 
@@ -955,7 +1015,7 @@ private:
             Error{} << ErrorString{"Invalid manipulator operands for 'Lea'."});
         }
 
-        address = Lea(base, address, flags);
+        address = detail::Lea(*process_, base, address, flags);
 
         break;
 
@@ -966,7 +1026,7 @@ private:
             Error{} << ErrorString{"Invalid manipulator operands for 'And'."});
         }
 
-        address = And(base, address, flags, m.operand1);
+        address = detail::And(*process_, base, address, flags, m.operand1);
 
         break;
 

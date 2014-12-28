@@ -4,6 +4,7 @@
 #pragma once
 
 #include <windows.h>
+#include <wincrypt.h>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
@@ -279,6 +280,40 @@ struct VectoredExceptionHandlerPolicy
 };
 
 using SmartRemoveVectoredExceptionHandler =
-  SmartHandleImpl<VectoredExceptionHandlerPolicy>;
+SmartHandleImpl<VectoredExceptionHandlerPolicy>;
+
+struct CryptContextPolicy
+{
+  using HandleT = HCRYPTPROV;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return 0;
+  }
+
+    static bool Cleanup(HandleT handle)
+  {
+    return !!::CryptReleaseContext(handle, 0);
+  }
+};
+
+using SmartCryptContextHandle = SmartHandleImpl<CryptContextPolicy>;
+
+struct DestroyHashPolicy
+{
+  using HandleT = HCRYPTPROV;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return 0;
+  }
+
+    static bool Cleanup(HandleT handle)
+  {
+    return !!::CryptDestroyHash(handle);
+  }
+};
+
+using SmartCryptHashHandle = SmartHandleImpl<DestroyHashPolicy>;
 }
 }
