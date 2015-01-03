@@ -1,0 +1,1 @@
+inject.exe --name steamservice.exe --free --export Free --add-path --path-resolution --module cerberus.dll

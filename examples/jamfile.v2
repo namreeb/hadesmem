@@ -65,6 +65,14 @@ lib d3dx11
 	<address-model>64:<search>"$(DXSDK_DIR)/lib/x64"
   ;
 
+lib d3dx9
+  :
+  :
+    <name>d3dx9
+	<address-model>32:<search>"$(DXSDK_DIR)/lib/x86"
+	<address-model>64:<search>"$(DXSDK_DIR)/lib/x64"
+  ;
+
 exe dump
   :
     [ glob dump/*.cpp ]
@@ -114,5 +122,32 @@ lib cxexample
     comctl32
     gdi32
     ole32
+  ;
+  
+lib cxvac
+  :
+    [ glob cxvac/*.cpp ]
+	cerberus
+    comctl32
+    gdi32
+    ole32
+  ;
+
+lib cxcsgo
+  :
+    [ glob cxcsgo/*.cpp ]
+	cerberus
+    comctl32
+    gdi32
+    ole32
+	d3dx9
+  :
+	<toolset>msvc:<include>"$(DXSDK_DIR)/include"
+	<toolset>intel:<include>"$(DXSDK_DIR)/include"
+  ;
+  
+exe vacinfo
+  :
+    [ glob vacinfo/*.cpp ]
   ;
   

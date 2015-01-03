@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\Rust\Rust.exe" --inject --steam-app-id 252490 --export Load --add-path --path-resolution --module cerberus.dll
