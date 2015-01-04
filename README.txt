@@ -1,3 +1,0 @@
-PLEASE READ THE LICENSE AGREEMENTS FOR HADESMEM AND ITS DEPENDENCIES BEFORE CONTINUING.
-
-HadesMem documentation can be found at /html/index.html.
