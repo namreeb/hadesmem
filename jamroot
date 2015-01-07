@@ -249,7 +249,13 @@ install dist
   ;
 
 # Allow easy consumption by 3rd parties.
+
 alias hadesmem
   :
     memory
+  ;
+  
+alias cerberus
+  :
+    /examples//cerberus
   ;

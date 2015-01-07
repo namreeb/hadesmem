@@ -94,6 +94,7 @@ lib injecttest
 lib cerberus
   :
     [ glob cerberus/*.cpp ]
+    comctl32
 	comdlg32
 	d3dx11
     dxguid
@@ -111,8 +112,5 @@ lib cxexample
   :
     [ glob cxexample/*.cpp ]
 	cerberus
-    comctl32
-    gdi32
-    ole32
   ;
   
