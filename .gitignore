@@ -1,0 +1,10 @@
+/dist
+/bin
+/build/full/msvc/*.txt
+/build/full/intel/*.txt
+/build/full/gcc-multilib/*.txt
+/build/full/gcc/*.txt
+/build/full/clang-mingw/*.txt
+/build/full/clang-llvm/*.txt
+/build/boost/*.txt
+/build/anttweakbar/*.txt
