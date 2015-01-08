@@ -355,14 +355,14 @@ inline void BufferToFile(std::wstring const& path,
                          void const* buffer,
                          std::streamsize len)
 {
-  std::ofstream file(path, std::ios::binary);
-  if (!file)
+  auto const file = OpenFile<char>(path, std::ios::binary);
+  if (!*file)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"Failed to create file."});
   }
 
-  if (!file.write(static_cast<char const*>(buffer), len))
+  if (!file->write(static_cast<char const*>(buffer), len))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"Failed to write file."});

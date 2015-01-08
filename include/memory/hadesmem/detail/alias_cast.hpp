@@ -13,6 +13,23 @@ namespace hadesmem
 {
 namespace detail
 {
+// WARNING: Here be dragons. Even more dangerous than its checked equivalent.
+// Use only when you have no other choice.
+template <typename T,
+          typename U,
+          int = FuncCallConv<T>::value,
+          int = FuncCallConv<U>::value>
+inline T AliasCastUnchecked(U const& u)
+{
+  // Use an intermediate buffer to avoid a strict aliasing violation.
+  unsigned char buffer[sizeof(T)];
+  std::memcpy(buffer, &u, sizeof(buffer));
+
+  T t;
+  std::memcpy(&t, buffer, sizeof(T));
+  return t;
+}
+
 // WARNING: Here be dragons. Use sparingly.
 template <typename T,
           typename U,
@@ -30,23 +47,6 @@ inline T AliasCast(U const& u)
   HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) == sizeof(U));
 
   return AliasCastUnchecked<T>(u);
-}
-
-// WARNING: Here be dragons. Even more dangerous than its checked equivalent.
-// Use only when you have no other choice.
-template <typename T,
-          typename U,
-          int = FuncCallConv<T>::value,
-          int = FuncCallConv<U>::value>
-inline T AliasCastUnchecked(U const& u)
-{
-  // Use an intermediate buffer to avoid a strict aliasing violation.
-  unsigned char buffer[sizeof(T)];
-  std::memcpy(buffer, &u, sizeof(buffer));
-
-  T t;
-  std::memcpy(&t, buffer, sizeof(T));
-  return t;
 }
 }
 }
