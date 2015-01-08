@@ -46,6 +46,12 @@ inline bool DoesFileExist(std::wstring const& path)
   return ::GetFileAttributesW(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
+inline bool DoesDirectoryExist(std::wstring const& path)
+{
+  auto const attrs = ::GetFileAttributesW(path.c_str());
+  return attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY);
+}
+
 inline bool IsPathRelative(std::wstring const& path)
 {
   // Relative paths are always limited to a total of MAX_PATH characters
@@ -193,6 +199,29 @@ inline DWORD GetFileAttributesWrapper(std::wstring const& path)
   return attributes;
 }
 
+inline void CreateDirectoryWrapper(std::wstring const& path)
+{
+  if (!CreateDirectoryW(path.c_str(), nullptr))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"CreateDirectory failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+}
+
+inline void CopyFileWrapper(std::wstring const& existing_path,
+                            std::wstring const& new_path,
+                            bool fail_if_exists)
+{
+  if (!CopyFileW(existing_path.c_str(), new_path.c_str(), fail_if_exists))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"CopyFile failed."}
+                                            << ErrorCodeWinLast{last_error});
+  }
+}
+
 inline bool IsDirectory(std::wstring const& path)
 {
   DWORD const attributes =
@@ -223,6 +252,32 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
   }
 
   return full_path.data();
+}
+
+inline std::wstring GetPathBaseName(std::wstring const& path)
+{
+  return std::wstring(std::find_if(path.rbegin(),
+                                   path.rend(),
+                                   [](wchar_t c)
+                                   {
+                                     return c == '\\' || c == '/';
+                                   }).base(),
+                      path.end());
+}
+
+inline std::wstring PathFindFileNameWrapper(std::wstring const& path)
+{
+  std::vector<wchar_t> file_name(MAX_PATH);
+  auto const p = PathFindFileNameW(path.c_str());
+  if (p == path.c_str())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"PathFindFileNameW failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  return file_name.data();
 }
 
 inline std::wstring MakeExtendedPath(std::wstring path)
@@ -293,6 +348,24 @@ inline std::wstring MakeExtendedPath(std::wstring path)
       // \\?\c:\foo\bar
       return path;
     }
+  }
+}
+
+inline void BufferToFile(std::wstring const& path,
+                         void const* buffer,
+                         std::streamsize len)
+{
+  std::ofstream file(path, std::ios::binary);
+  if (!file)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Failed to create file."});
+  }
+
+  if (!file.write(static_cast<char const*>(buffer), len))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Failed to write file."});
   }
 }
 }
