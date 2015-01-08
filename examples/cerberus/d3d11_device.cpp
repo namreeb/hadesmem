@@ -22,7 +22,7 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     // Unknown UUIDs. Observed in Wildstar.
     UUID const unknown_uuid_1 = {0x9b7e4a00,
@@ -87,7 +87,7 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Failed.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   return ret;
@@ -97,7 +97,7 @@ ULONG WINAPI D3D11DeviceProxy::AddRef()
 {
   refs_++;
   auto const ret = device_->AddRef();
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
   return ret;
 }
@@ -118,7 +118,7 @@ ULONG WINAPI D3D11DeviceProxy::Release()
   auto const ret = device_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)

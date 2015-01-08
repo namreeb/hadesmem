@@ -22,7 +22,7 @@ HRESULT WINAPI D3D10DeviceProxy::QueryInterface(REFIID riid, void** obj)
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     if (*obj == device_)
     {
@@ -43,7 +43,7 @@ HRESULT WINAPI D3D10DeviceProxy::QueryInterface(REFIID riid, void** obj)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Failed.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   return ret;
@@ -53,7 +53,7 @@ ULONG WINAPI D3D10DeviceProxy::AddRef()
 {
   refs_++;
   auto const ret = device_->AddRef();
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
   return ret;
 }
@@ -74,7 +74,7 @@ ULONG WINAPI D3D10DeviceProxy::Release()
   auto const ret = device_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)

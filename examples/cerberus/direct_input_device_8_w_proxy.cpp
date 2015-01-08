@@ -25,7 +25,7 @@ HRESULT WINAPI
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     if (*obj == device_)
     {
@@ -42,7 +42,7 @@ HRESULT WINAPI
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Failed.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   return ret;
@@ -52,7 +52,7 @@ ULONG WINAPI DirectInputDevice8WProxy::AddRef()
 {
   refs_++;
   auto const ret = device_->AddRef();
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
   return ret;
 }
@@ -73,7 +73,7 @@ ULONG WINAPI DirectInputDevice8WProxy::Release()
   auto const ret = device_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)

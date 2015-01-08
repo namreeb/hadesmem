@@ -22,7 +22,7 @@ HRESULT WINAPI Direct3D9Proxy::QueryInterface(REFIID riid, void** obj)
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
     if (*obj == d3d9_)
     {
@@ -39,7 +39,7 @@ HRESULT WINAPI Direct3D9Proxy::QueryInterface(REFIID riid, void** obj)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_A("Failed.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
   }
 
   return ret;
@@ -49,7 +49,7 @@ ULONG WINAPI Direct3D9Proxy::AddRef()
 {
   refs_++;
   auto const ret = d3d9_->AddRef();
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
   return ret;
 }
@@ -70,7 +70,7 @@ ULONG WINAPI Direct3D9Proxy::Release()
   auto const ret = d3d9_->Release();
   last_error_preserver.Update();
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Internal refs: [%lu]. External refs: [%lld].", ret, refs_);
 
   if (ret == 0)
