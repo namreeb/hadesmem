@@ -355,7 +355,7 @@ inline void BufferToFile(std::wstring const& path,
                          void const* buffer,
                          std::streamsize len)
 {
-  auto const file = OpenFile<char>(path, std::ios::binary);
+  auto const file = OpenFile<char>(path, std::ios::out | std::ios::binary);
   if (!*file)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
