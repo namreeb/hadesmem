@@ -60,18 +60,20 @@ void DetourRtlAddVectoredExceptionHandler()
 {
   auto const& process = GetThisProcess();
   auto const kernelbase_mod = ::GetModuleHandleW(L"ntdll");
-  DetourFunc(process,
-             kernelbase_mod,
-             "RtlAddVectoredExceptionHandler",
-             GetRtlAddVectoredExceptionHandlerDetour(),
-             RtlAddVectoredExceptionHandlerDetour);
+  auto& helper = GetHelperInterface();
+  helper.DetourFunc(process,
+                    kernelbase_mod,
+                    "RtlAddVectoredExceptionHandler",
+                    GetRtlAddVectoredExceptionHandlerDetour(),
+                    RtlAddVectoredExceptionHandlerDetour);
 }
 
 void UndetourRtlAddVectoredExceptionHandler()
 {
-  UndetourFunc(L"RtlAddVectoredExceptionHandler",
-               GetRtlAddVectoredExceptionHandlerDetour(),
-               true);
+  auto& helper = GetHelperInterface();
+  helper.UndetourFunc(L"RtlAddVectoredExceptionHandler",
+                      GetRtlAddVectoredExceptionHandlerDetour(),
+                      true);
 }
 }
 }

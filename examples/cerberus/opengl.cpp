@@ -104,30 +104,33 @@ OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeOpenGL32()
 {
-  InitializeSupportForModule(
-    L"OpenGL32", DetourOpenGL32, UndetourOpenGL32, GetOpenGL32Module);
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
+    L"OPENGL32", DetourOpenGL32, UndetourOpenGL32, GetOpenGL32Module);
 }
 
 void DetourOpenGL32(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetOpenGL32Module();
-  if (CommonDetourModule(process, L"OpenGL32", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"OpenGL32", base, module))
   {
-    DetourFunc(process,
-               base,
-               "wglSwapBuffers",
-               GetWglSwapBuffersDetour(),
-               WglSwapBuffersDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "wglSwapBuffers",
+                      GetWglSwapBuffersDetour(),
+                      WglSwapBuffersDetour);
   }
 }
 
 void UndetourOpenGL32(bool remove)
 {
   auto& module = GetOpenGL32Module();
-  if (CommonUndetourModule(L"OpenGL32", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"OpenGL32", module))
   {
-    UndetourFunc(L"wglSwapBuffers", GetWglSwapBuffersDetour(), remove);
+    helper.UndetourFunc(L"wglSwapBuffers", GetWglSwapBuffersDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

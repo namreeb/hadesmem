@@ -280,16 +280,18 @@ void DetourCreateProcessInternalW()
 {
   auto const& process = GetThisProcess();
   auto const kernelbase_mod = ::GetModuleHandleW(L"kernelbase");
-  DetourFunc(process,
-             kernelbase_mod,
-             "CreateProcessInternalW",
-             GetCreateProcessInternalWDetour(),
-             CreateProcessInternalWDetour);
+  auto& helper = GetHelperInterface();
+  helper.DetourFunc(process,
+                    kernelbase_mod,
+                    "CreateProcessInternalW",
+                    GetCreateProcessInternalWDetour(),
+                    CreateProcessInternalWDetour);
 }
 
 void UndetourCreateProcessInternalW()
 {
-  UndetourFunc(
+  auto& helper = GetHelperInterface();
+  helper.UndetourFunc(
     L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), true);
 }
 }

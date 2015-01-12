@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <atomic>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -21,68 +21,160 @@ namespace hadesmem
 {
 namespace cerberus
 {
-void DetourFunc(Process const& process,
-                std::wstring const& name,
-                void* interface_ptr,
-                std::size_t index,
-                std::unique_ptr<PatchDetour>& detour,
-                void* detour_fn);
-
-template <typename Func>
-void DetourFunc(Process const& process,
-                std::wstring const& name,
-                void* interface_ptr,
-                std::size_t index,
-                std::unique_ptr<PatchDetour>& detour,
-                Func detour_fn)
+class HelperInterface
 {
-  HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
-                                std::is_pointer<Func>::value);
+public:
+  virtual ~HelperInterface()
+  {
+  }
 
-  return DetourFunc(process,
-                    name,
-                    interface_ptr,
-                    index,
-                    detour,
-                    ::hadesmem::detail::AliasCast<void*>(detour_fn));
-}
+  virtual void DetourFunc(Process const& process,
+                          std::wstring const& name,
+                          void* interface_ptr,
+                          std::size_t index,
+                          std::unique_ptr<PatchDetour>& detour,
+                          void* detour_fn) = 0;
 
-void DetourFunc(Process const& process,
-                HMODULE base,
-                std::string const& name,
-                std::unique_ptr<PatchDetour>& detour,
-                void* detour_fn);
-
-template <typename Func>
-void DetourFunc(Process const& process,
-                HMODULE base,
-                std::string const& name,
-                std::unique_ptr<PatchDetour>& detour,
-                Func detour_fn)
-{
-  HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
-                                std::is_pointer<Func>::value);
-
-  return DetourFunc(
-    process, base, name, detour, ::hadesmem::detail::AliasCast<void*>(detour_fn));
-}
-
-void UndetourFunc(std::wstring const& name,
+  template <typename Func>
+  void DetourFunc(Process const& process,
+                  std::wstring const& name,
+                  void* interface_ptr,
+                  std::size_t index,
                   std::unique_ptr<PatchDetour>& detour,
-                  bool remove);
+                  Func detour_fn)
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
+                                  std::is_pointer<Func>::value);
 
-void InitializeSupportForModule(
-  std::wstring const& module_name_upper,
-  std::function<void(HMODULE)> const& detour_func,
-  std::function<void(bool)> const& undetour_func,
-  std::function<std::pair<void*, SIZE_T>&()> const& get_module_func);
+    return DetourFunc(process,
+                      name,
+                      interface_ptr,
+                      index,
+                      detour,
+                      ::hadesmem::detail::AliasCast<void*>(detour_fn));
+  }
 
-bool CommonDetourModule(Process const& process,
-                        std::wstring const& name,
-                        HMODULE& base,
-                        std::pair<void*, SIZE_T>& detoured_mod);
+  virtual void DetourFunc(Process const& process,
+                          std::wstring const& name,
+                          void* interface_ptr,
+                          std::size_t index,
+                          std::unique_ptr<PatchInt3>& detour,
+                          void* detour_fn) = 0;
 
-bool CommonUndetourModule(std::wstring const& name,
-                          std::pair<void*, SIZE_T>& detoured_mod);
+  template <typename Func>
+  void DetourFunc(Process const& process,
+                  std::wstring const& name,
+                  void* interface_ptr,
+                  std::size_t index,
+                  std::unique_ptr<PatchInt3>& detour,
+                  Func detour_fn)
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
+                                  std::is_pointer<Func>::value);
+
+    return DetourFunc(process,
+                      name,
+                      interface_ptr,
+                      index,
+                      detour,
+                      ::hadesmem::detail::AliasCast<void*>(detour_fn));
+  }
+
+  virtual void DetourFunc(Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<PatchDetour>& detour,
+                          void* detour_fn) = 0;
+
+  template <typename Func>
+  void DetourFunc(Process const& process,
+                  HMODULE base,
+                  std::string const& name,
+                  std::unique_ptr<PatchDetour>& detour,
+                  Func detour_fn)
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
+                                  std::is_pointer<Func>::value);
+
+    return DetourFunc(process,
+                      base,
+                      name,
+                      detour,
+                      ::hadesmem::detail::AliasCast<void*>(detour_fn));
+  }
+
+  virtual void DetourFunc(Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<PatchInt3>& detour,
+                          void* detour_fn) = 0;
+
+  template <typename Func>
+  void DetourFunc(Process const& process,
+                  HMODULE base,
+                  std::string const& name,
+                  std::unique_ptr<PatchInt3>& detour,
+                  Func detour_fn)
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
+                                  std::is_pointer<Func>::value);
+
+    return DetourFunc(process,
+                      base,
+                      name,
+                      detour,
+                      ::hadesmem::detail::AliasCast<void*>(detour_fn));
+  }
+
+  virtual void DetourFunc(Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<PatchInt3>& detour,
+                          void* orig_fn,
+                          void* detour_fn) = 0;
+
+  template <typename OrigFunc, typename DetourFunc>
+  void DetourFunc(Process const& process,
+                  HMODULE base,
+                  std::string const& name,
+                  std::unique_ptr<PatchInt3>& detour,
+                  OrigFunc orig_fn,
+                  DetourFunc detour_fn)
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
+                                  std::is_pointer<Func>::value);
+
+    return DetourFunc(process,
+                      base,
+                      name,
+                      detour,
+                      ::hadesmem::detail::AliasCast<void*>(orig_fn),
+                      ::hadesmem::detail::AliasCast<void*>(detour_fn));
+  }
+
+  virtual void UndetourFunc(std::wstring const& name,
+                            std::unique_ptr<PatchDetour>& detour,
+                            bool remove) = 0;
+
+  virtual void UndetourFunc(std::wstring const& name,
+                            std::unique_ptr<PatchInt3>& detour,
+                            bool remove) = 0;
+
+  virtual std::pair<std::size_t, std::size_t> InitializeSupportForModule(
+    std::wstring const& module_name_upper,
+    std::function<void(HMODULE)> const& detour_func,
+    std::function<void(bool)> const& undetour_func,
+    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func) = 0;
+
+  virtual bool CommonDetourModule(Process const& process,
+                                  std::wstring const& name,
+                                  HMODULE& base,
+                                  std::pair<void*, SIZE_T>& detoured_mod) = 0;
+
+  virtual bool CommonUndetourModule(std::wstring const& name,
+                                    std::pair<void*, SIZE_T>& detoured_mod) = 0;
+};
+
+HelperInterface& GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

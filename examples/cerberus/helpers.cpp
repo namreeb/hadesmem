@@ -8,16 +8,15 @@
 
 #include "module.hpp"
 
-namespace hadesmem
+namespace
 {
-namespace cerberus
-{
-void DetourFunc(Process const& process,
-                std::wstring const& name,
-                void* interface_ptr,
-                std::size_t index,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
-                void* detour_fn)
+template <typename T>
+void DetourFuncGeneric(hadesmem::Process const& process,
+                       std::wstring const& name,
+                       void* interface_ptr,
+                       std::size_t index,
+                       std::unique_ptr<T>& detour,
+                       void* detour_fn)
 {
   (void)name;
   if (!detour)
@@ -25,8 +24,7 @@ void DetourFunc(Process const& process,
     void** const vtable = *reinterpret_cast<void***>(interface_ptr);
     HADESMEM_DETAIL_TRACE_FORMAT_A("VTable: [%p].", vtable);
     auto const target_fn = vtable[index];
-    detour =
-      std::make_unique<hadesmem::PatchDetour>(process, target_fn, detour_fn);
+    detour = std::make_unique<T>(process, target_fn, detour_fn);
     detour->Apply();
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s detoured.", name.c_str());
   }
@@ -36,18 +34,19 @@ void DetourFunc(Process const& process,
   }
 }
 
-void DetourFunc(Process const& process,
-                HMODULE base,
-                std::string const& name,
-                std::unique_ptr<hadesmem::PatchDetour>& detour,
-                void* detour_fn)
+template <typename T>
+void DetourFuncGeneric(hadesmem::Process const& process,
+                       HMODULE base,
+                       std::string const& name,
+                       std::unique_ptr<T>& detour,
+                       void* orig_fn,
+                       void* detour_fn)
 {
   if (!detour)
   {
-    auto const orig_fn = detail::GetProcAddressInternal(process, base, name);
     if (orig_fn)
     {
-      detour.reset(new PatchDetour(process, orig_fn, detour_fn));
+      detour.reset(new T(process, orig_fn, detour_fn));
       detour->Apply();
       HADESMEM_DETAIL_TRACE_FORMAT_A("%s detoured.", name.c_str());
     }
@@ -62,9 +61,22 @@ void DetourFunc(Process const& process,
   }
 }
 
-void UndetourFunc(std::wstring const& name,
-                  std::unique_ptr<hadesmem::PatchDetour>& detour,
-                  bool remove)
+template <typename T>
+void DetourFuncGeneric(hadesmem::Process const& process,
+                       HMODULE base,
+                       std::string const& name,
+                       std::unique_ptr<T>& detour,
+                       void* detour_fn)
+{
+  auto const orig_fn =
+    hadesmem::detail::GetProcAddressInternal(process, base, name);
+  DetourFuncGeneric(process, base, name, detour, orig_fn, detour_fn);
+}
+
+template <typename T>
+void UndetourFuncGeneric(std::wstring const& name,
+                         std::unique_ptr<T>& detour,
+                         bool remove)
 {
   (void)name;
   if (detour)
@@ -88,93 +100,174 @@ void UndetourFunc(std::wstring const& name,
   }
 }
 
-void InitializeSupportForModule(
-  std::wstring const& module_name_upper,
-  std::function<void(HMODULE)> const& detour_func,
-  std::function<void(bool)> const& undetour_func,
-  std::function<std::pair<void*, SIZE_T>&()> const& get_module_func)
+class HelperImpl : public hadesmem::cerberus::HelperInterface
 {
-  auto& module = GetModuleInterface();
-
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Initializing %s support.",
-                                 module_name_upper.c_str());
-
-  std::wstring const module_name_upper_with_ext{module_name_upper + L".DLL"};
-  auto const on_map =
-    [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
+public:
+  virtual void DetourFunc(hadesmem::Process const& process,
+                          std::wstring const& name,
+                          void* interface_ptr,
+                          std::size_t index,
+                          std::unique_ptr<hadesmem::PatchDetour>& detour,
+                          void* detour_fn) final
   {
-    if (name == module_name_upper || name == module_name_upper_with_ext)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s loaded. Applying hooks.",
-                                     module_name_upper.c_str());
-
-      detour_func(mod);
-    }
-  };
-  module.RegisterOnMap(on_map);
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
-                                 module_name_upper.c_str());
-
-  auto const on_unmap = [=](HMODULE mod)
+    DetourFuncGeneric(process, name, interface_ptr, index, detour, detour_fn);
+  }
+  virtual void DetourFunc(hadesmem::Process const& process,
+                          std::wstring const& name,
+                          void* interface_ptr,
+                          std::size_t index,
+                          std::unique_ptr<hadesmem::PatchInt3>& detour,
+                          void* detour_fn) final
   {
-    auto const module_data = get_module_func();
-    auto const module_beg = module_data.first;
-    void* const module_end =
-      static_cast<std::uint8_t*>(module_data.first) + module_data.second;
-    if (mod >= module_beg && mod < module_end)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
-                                     module_name_upper.c_str());
+    DetourFuncGeneric(process, name, interface_ptr, index, detour, detour_fn);
+  }
 
-      // Detach instead of remove hooks because when we get the notification the
-      // memory region is already gone.
-      undetour_func(false);
+  virtual void DetourFunc(hadesmem::Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<hadesmem::PatchDetour>& detour,
+                          void* detour_fn) final
+  {
+    DetourFuncGeneric(process, base, name, detour, detour_fn);
+  }
+
+  virtual void DetourFunc(hadesmem::Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<hadesmem::PatchInt3>& detour,
+                          void* detour_fn) final
+  {
+    DetourFuncGeneric(process, base, name, detour, detour_fn);
+  }
+
+  virtual void DetourFunc(hadesmem::Process const& process,
+                          HMODULE base,
+                          std::string const& name,
+                          std::unique_ptr<hadesmem::PatchInt3>& detour,
+                          void* orig_fn,
+                          void* detour_fn) final
+  {
+    DetourFuncGeneric(process, base, name, detour, orig_fn, detour_fn);
+  }
+
+  virtual void UndetourFunc(std::wstring const& name,
+                            std::unique_ptr<hadesmem::PatchDetour>& detour,
+                            bool remove) final
+  {
+    UndetourFuncGeneric(name, detour, remove);
+  }
+
+  virtual void UndetourFunc(std::wstring const& name,
+                            std::unique_ptr<hadesmem::PatchInt3>& detour,
+                            bool remove) final
+  {
+    UndetourFuncGeneric(name, detour, remove);
+  }
+
+  virtual std::pair<std::size_t, std::size_t> InitializeSupportForModule(
+    std::wstring const& module_name_upper,
+    std::function<void(HMODULE)> const& detour_func,
+    std::function<void(bool)> const& undetour_func,
+    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func) final
+  {
+    auto& module = hadesmem::cerberus::GetModuleInterface();
+
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Initializing %s support.",
+                                   module_name_upper.c_str());
+
+    std::wstring const module_name_upper_with_ext{module_name_upper + L".DLL"};
+    auto const on_map =
+      [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
+    {
+      if (name == module_name_upper || name == module_name_upper_with_ext)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s loaded. Applying hooks.",
+                                       module_name_upper.c_str());
+
+        detour_func(mod);
+      }
+    };
+    auto const on_map_id = module.RegisterOnMap(on_map);
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
+                                   module_name_upper.c_str());
+
+    auto const on_unmap = [=](HMODULE mod)
+    {
+      auto const module_data = get_module_func();
+      auto const module_beg = module_data.first;
+      void* const module_end =
+        static_cast<std::uint8_t*>(module_data.first) + module_data.second;
+      if (mod >= module_beg && mod < module_end)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
+                                       module_name_upper.c_str());
+
+        // Detach instead of remove hooks because when we get the notification
+        // the
+        // memory region is already gone.
+        undetour_func(false);
+      }
+    };
+    auto const on_unmap_id = module.RegisterOnUnmap(on_unmap);
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnUnmap for %s.",
+                                   module_name_upper.c_str());
+
+    return {on_map_id, on_unmap_id};
+  }
+
+  virtual bool CommonDetourModule(hadesmem::Process const& process,
+                                  std::wstring const& name,
+                                  HMODULE& base,
+                                  std::pair<void*, SIZE_T>& detoured_mod) final
+  {
+    if (detoured_mod.first)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s already detoured.", name.c_str());
+      return false;
     }
-  };
-  module.RegisterOnUnmap(on_unmap);
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnUnmap for %s.",
-                                 module_name_upper.c_str());
+
+    if (!base)
+    {
+      base = ::GetModuleHandleW(name.c_str());
+    }
+
+    if (!base)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Failed to find %s module.",
+                                     name.c_str());
+      return false;
+    }
+
+    detoured_mod =
+      std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
+
+    return true;
+  }
+
+  virtual bool
+    CommonUndetourModule(std::wstring const& name,
+                         std::pair<void*, SIZE_T>& detoured_mod) final
+  {
+    (void)name;
+    if (!detoured_mod.first)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s not detoured.", name.c_str());
+      return false;
+    }
+
+    return true;
+  }
+};
 }
 
-bool CommonDetourModule(Process const& process,
-                        std::wstring const& name,
-                        HMODULE& base,
-                        std::pair<void*, SIZE_T>& detoured_mod)
+namespace hadesmem
 {
-  if (detoured_mod.first)
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s already detoured.", name.c_str());
-    return false;
-  }
-
-  if (!base)
-  {
-    base = ::GetModuleHandleW(name.c_str());
-  }
-
-  if (!base)
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Failed to find %s module.", name.c_str());
-    return false;
-  }
-
-  detoured_mod =
-    std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
-
-  return true;
-}
-
-bool CommonUndetourModule(std::wstring const& name,
-                          std::pair<void*, SIZE_T>& detoured_mod)
+namespace cerberus
 {
-  (void)name;
-  if (!detoured_mod.first)
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s not detoured.", name.c_str());
-    return false;
-  }
-
-  return true;
+HelperInterface& GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static HelperImpl helper_impl;
+  return helper_impl;
 }
 }
 }

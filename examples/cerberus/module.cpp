@@ -287,32 +287,38 @@ void DetourNtMapViewOfSection()
 {
   auto const& process = GetThisProcess();
   auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  DetourFunc(process,
-             ntdll_mod,
-             "NtMapViewOfSection",
-             GetNtMapViewOfSectionDetour(),
-             NtMapViewOfSectionDetour);
+  auto& helper = GetHelperInterface();
+  helper.DetourFunc(process,
+                    ntdll_mod,
+                    "NtMapViewOfSection",
+                    GetNtMapViewOfSectionDetour(),
+                    NtMapViewOfSectionDetour);
 }
 
 void DetourNtUnmapViewOfSection()
 {
   auto const& process = GetThisProcess();
   auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  DetourFunc(process,
-             ntdll_mod,
-             "NtUnmapViewOfSection",
-             GetNtUnmapViewOfSectionDetour(),
-             NtUnmapViewOfSectionDetour);
+  auto& helper = GetHelperInterface();
+  helper.DetourFunc(process,
+                    ntdll_mod,
+                    "NtUnmapViewOfSection",
+                    GetNtUnmapViewOfSectionDetour(),
+                    NtUnmapViewOfSectionDetour);
 }
 
 void UndetourNtMapViewOfSection()
 {
-  UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
+  auto& helper = GetHelperInterface();
+  helper.UndetourFunc(
+    L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
 }
 
 void UndetourNtUnmapViewOfSection()
 {
-  UndetourFunc(L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
+  auto& helper = GetHelperInterface();
+  helper.UndetourFunc(
+    L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
 }
 }
 }

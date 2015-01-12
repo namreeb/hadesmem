@@ -28,6 +28,7 @@
 #include "dxgi.hpp"
 #include "exception.hpp"
 #include "gwen.hpp"
+#include "helpers.hpp"
 #include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
@@ -63,6 +64,8 @@ void UseAllStatics()
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
   auto& input = hadesmem::cerberus::GetInputInterface();
+  auto& helper = hadesmem::cerberus::GetHelperInterface();
+  (void)helper;
 
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the

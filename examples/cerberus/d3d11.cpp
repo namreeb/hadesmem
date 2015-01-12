@@ -272,7 +272,8 @@ D3D11Interface& GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeD3D11()
 {
-  InitializeSupportForModule(
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
     L"D3D11", DetourD3D11, UndetourD3D11, GetD3D11Module);
 }
 
@@ -280,30 +281,33 @@ void DetourD3D11(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetD3D11Module();
-  if (CommonDetourModule(process, L"D3D11", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"D3D11", base, module))
   {
-    DetourFunc(process,
-               base,
-               "D3D11CreateDevice",
-               GetD3D11CreateDeviceDetour(),
-               D3D11CreateDeviceDetour);
-    DetourFunc(process,
-               base,
-               "D3D11CreateDeviceAndSwapChain",
-               GetD3D11CreateDeviceAndSwapChainDetour(),
-               D3D11CreateDeviceAndSwapChainDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D11CreateDevice",
+                      GetD3D11CreateDeviceDetour(),
+                      D3D11CreateDeviceDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D11CreateDeviceAndSwapChain",
+                      GetD3D11CreateDeviceAndSwapChainDetour(),
+                      D3D11CreateDeviceAndSwapChainDetour);
   }
 }
 
 void UndetourD3D11(bool remove)
 {
   auto& module = GetD3D11Module();
-  if (CommonUndetourModule(L"D3D11", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"D3D11", module))
   {
-    UndetourFunc(L"D3D11CreateDeviceAndSwapChain",
-                 GetD3D11CreateDeviceAndSwapChainDetour(),
-                 remove);
-    UndetourFunc(L"D3D11CreateDevice", GetD3D11CreateDeviceDetour(), remove);
+    helper.UndetourFunc(L"D3D11CreateDeviceAndSwapChain",
+                        GetD3D11CreateDeviceAndSwapChainDetour(),
+                        remove);
+    helper.UndetourFunc(
+      L"D3D11CreateDevice", GetD3D11CreateDeviceDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

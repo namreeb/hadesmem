@@ -29,6 +29,7 @@
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "gwen.hpp"
+#include "helpers.hpp"
 #include "module.hpp"
 #include "render.hpp"
 #include "window.hpp"
@@ -164,6 +165,11 @@ public:
   virtual hadesmem::cerberus::GwenInterface* GetGwenInterface() final
   {
     return &hadesmem::cerberus::GetGwenInterface();
+  }
+
+  virtual hadesmem::cerberus::HelperInterface* GetHelperInterface() final
+  {
+    return &hadesmem::cerberus::GetHelperInterface();
   }
 
   void Unload()

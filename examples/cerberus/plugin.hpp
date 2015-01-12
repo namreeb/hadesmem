@@ -28,6 +28,8 @@ class AntTweakBarInterface;
 
 class GwenInterface;
 
+class HelperInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
@@ -54,6 +56,8 @@ public:
   virtual AntTweakBarInterface* GetAntTweakBarInterface() = 0;
 
   virtual GwenInterface* GetGwenInterface() = 0;
+
+  virtual HelperInterface* GetHelperInterface() = 0;
 };
 
 void LoadPlugins();

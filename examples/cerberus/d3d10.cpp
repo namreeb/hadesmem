@@ -400,13 +400,15 @@ D3D10Interface& GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeD3D10()
 {
-  InitializeSupportForModule(
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
     L"D3D10", DetourD3D10, UndetourD3D10, GetD3D10Module);
 }
 
 void InitializeD3D101()
 {
-  InitializeSupportForModule(
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
     L"D3D10_1", DetourD3D101, UndetourD3D101, GetD3D101Module);
 }
 
@@ -414,30 +416,33 @@ void DetourD3D10(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetD3D10Module();
-  if (CommonDetourModule(process, L"D3D10", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"D3D10", base, module))
   {
-    DetourFunc(process,
-               base,
-               "D3D10CreateDevice",
-               GetD3D10CreateDeviceDetour(),
-               D3D10CreateDeviceDetour);
-    DetourFunc(process,
-               base,
-               "D3D10CreateDeviceAndSwapChain",
-               GetD3D10CreateDeviceAndSwapChainDetour(),
-               D3D10CreateDeviceAndSwapChainDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D10CreateDevice",
+                      GetD3D10CreateDeviceDetour(),
+                      D3D10CreateDeviceDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D10CreateDeviceAndSwapChain",
+                      GetD3D10CreateDeviceAndSwapChainDetour(),
+                      D3D10CreateDeviceAndSwapChainDetour);
   }
 }
 
 void UndetourD3D10(bool remove)
 {
   auto& module = GetD3D10Module();
-  if (CommonUndetourModule(L"D3D10", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"D3D10", module))
   {
-    UndetourFunc(L"D3D10CreateDeviceAndSwapChain",
-                 GetD3D10CreateDeviceAndSwapChainDetour(),
-                 remove);
-    UndetourFunc(L"D3D10CreateDevice", GetD3D10CreateDeviceDetour(), remove);
+    helper.UndetourFunc(L"D3D10CreateDeviceAndSwapChain",
+                        GetD3D10CreateDeviceAndSwapChainDetour(),
+                        remove);
+    helper.UndetourFunc(
+      L"D3D10CreateDevice", GetD3D10CreateDeviceDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
@@ -447,30 +452,33 @@ void DetourD3D101(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetD3D101Module();
-  if (CommonDetourModule(process, L"D3D10_1", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"D3D10_1", base, module))
   {
-    DetourFunc(process,
-               base,
-               "D3D10CreateDevice1",
-               GetD3D10CreateDevice1Detour(),
-               D3D10CreateDevice1Detour);
-    DetourFunc(process,
-               base,
-               "D3D10CreateDeviceAndSwapChain1",
-               GetD3D10CreateDeviceAndSwapChain1Detour(),
-               D3D10CreateDeviceAndSwapChain1Detour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D10CreateDevice1",
+                      GetD3D10CreateDevice1Detour(),
+                      D3D10CreateDevice1Detour);
+    helper.DetourFunc(process,
+                      base,
+                      "D3D10CreateDeviceAndSwapChain1",
+                      GetD3D10CreateDeviceAndSwapChain1Detour(),
+                      D3D10CreateDeviceAndSwapChain1Detour);
   }
 }
 
 void UndetourD3D101(bool remove)
 {
   auto& module = GetD3D10Module();
-  if (CommonUndetourModule(L"D3D10_1", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"D3D10_1", module))
   {
-    UndetourFunc(L"D3D10CreateDeviceAndSwapChain1",
-                 GetD3D10CreateDeviceAndSwapChain1Detour(),
-                 remove);
-    UndetourFunc(L"D3D10CreateDevice1", GetD3D10CreateDevice1Detour(), remove);
+    helper.UndetourFunc(L"D3D10CreateDeviceAndSwapChain1",
+                        GetD3D10CreateDeviceAndSwapChain1Detour(),
+                        remove);
+    helper.UndetourFunc(
+      L"D3D10CreateDevice1", GetD3D10CreateDevice1Detour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

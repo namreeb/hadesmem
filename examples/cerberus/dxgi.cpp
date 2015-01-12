@@ -210,7 +210,8 @@ DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeDXGI()
 {
-  InitializeSupportForModule(
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
     L"DXGI", &DetourDXGI, &UndetourDXGI, &GetDXGIModule);
 }
 
@@ -218,34 +219,39 @@ void DetourDXGI(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetDXGIModule();
-  if (CommonDetourModule(process, L"DXGI", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"DXGI", base, module))
   {
-    DetourFunc(process,
-               base,
-               "CreateDXGIFactory",
-               GetCreateDXGIFactoryDetour(),
-               CreateDXGIFactoryDetour);
-    DetourFunc(process,
-               base,
-               "CreateDXGIFactory1",
-               GetCreateDXGIFactory1Detour(),
-               CreateDXGIFactory1Detour);
-    DetourFunc(process,
-               base,
-               "CreateDXGIFactory2",
-               GetCreateDXGIFactory2Detour(),
-               CreateDXGIFactory2Detour);
+    helper.DetourFunc(process,
+                      base,
+                      "CreateDXGIFactory",
+                      GetCreateDXGIFactoryDetour(),
+                      CreateDXGIFactoryDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "CreateDXGIFactory1",
+                      GetCreateDXGIFactory1Detour(),
+                      CreateDXGIFactory1Detour);
+    helper.DetourFunc(process,
+                      base,
+                      "CreateDXGIFactory2",
+                      GetCreateDXGIFactory2Detour(),
+                      CreateDXGIFactory2Detour);
   }
 }
 
 void UndetourDXGI(bool remove)
 {
   auto& module = GetDXGIModule();
-  if (CommonUndetourModule(L"DXGI", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"DXGI", module))
   {
-    UndetourFunc(L"CreateDXGIFactory", GetCreateDXGIFactoryDetour(), remove);
-    UndetourFunc(L"CreateDXGIFactory1", GetCreateDXGIFactory1Detour(), remove);
-    UndetourFunc(L"CreateDXGIFactory2", GetCreateDXGIFactory2Detour(), remove);
+    helper.UndetourFunc(
+      L"CreateDXGIFactory", GetCreateDXGIFactoryDetour(), remove);
+    helper.UndetourFunc(
+      L"CreateDXGIFactory1", GetCreateDXGIFactory1Detour(), remove);
+    helper.UndetourFunc(
+      L"CreateDXGIFactory2", GetCreateDXGIFactory2Detour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

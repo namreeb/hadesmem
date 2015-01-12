@@ -174,32 +174,36 @@ DirectInputInterface& GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeDirectInput()
 {
-  InitializeSupportForModule(L"dinput8",
-                             DetourDirectInput8,
-                             UndetourDirectInput8,
-                             GetDirectInput8Module);
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(L"DINPUT8",
+                                    DetourDirectInput8,
+                                    UndetourDirectInput8,
+                                    GetDirectInput8Module);
 }
 
 void DetourDirectInput8(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetDirectInput8Module();
-  if (CommonDetourModule(process, L"dinput8", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"dinput8", base, module))
   {
-    DetourFunc(process,
-               base,
-               "DirectInput8Create",
-               GetDirectInput8CreateDetour(),
-               DirectInput8CreateDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "DirectInput8Create",
+                      GetDirectInput8CreateDetour(),
+                      DirectInput8CreateDetour);
   }
 }
 
 void UndetourDirectInput8(bool remove)
 {
   auto& module = GetDirectInput8Module();
-  if (CommonUndetourModule(L"dinput8", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"dinput8", module))
   {
-    UndetourFunc(L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
+    helper.UndetourFunc(
+      L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

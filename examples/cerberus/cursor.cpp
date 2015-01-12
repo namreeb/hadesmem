@@ -451,51 +451,54 @@ CursorInterface& GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeCursor()
 {
-  InitializeSupportForModule(
-    L"user32", DetourUser32ForCursor, UndetourUser32ForCursor, GetUser32Module);
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
+    L"USER32", DetourUser32ForCursor, UndetourUser32ForCursor, GetUser32Module);
 }
 
 void DetourUser32ForCursor(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetUser32Module();
-  if (CommonDetourModule(process, L"user32", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"user32", base, module))
   {
-    DetourFunc(
+    helper.DetourFunc(
       process, base, "SetCursor", GetSetCursorDetour(), SetCursorDetour);
-    DetourFunc(process,
-               base,
-               "GetCursorPos",
-               GetGetCursorPosDetour(),
-               GetCursorPosDetour);
-    DetourFunc(process,
-               base,
-               "SetCursorPos",
-               GetSetCursorPosDetour(),
-               SetCursorPosDetour);
-    DetourFunc(
+    helper.DetourFunc(process,
+                      base,
+                      "GetCursorPos",
+                      GetGetCursorPosDetour(),
+                      GetCursorPosDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "SetCursorPos",
+                      GetSetCursorPosDetour(),
+                      SetCursorPosDetour);
+    helper.DetourFunc(
       process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
-    DetourFunc(
+    helper.DetourFunc(
       process, base, "ClipCursor", GetClipCursorDetour(), ClipCursorDetour);
-    DetourFunc(process,
-               base,
-               "GetClipCursor",
-               GetGetClipCursorDetour(),
-               GetClipCursorDetour_);
+    helper.DetourFunc(process,
+                      base,
+                      "GetClipCursor",
+                      GetGetClipCursorDetour(),
+                      GetClipCursorDetour_);
   }
 }
 
 void UndetourUser32ForCursor(bool remove)
 {
   auto& module = GetUser32Module();
-  if (CommonUndetourModule(L"user32", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"user32", module))
   {
-    UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
-    UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
-    UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
-    UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
-    UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
-    UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);
+    helper.UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
+    helper.UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
+    helper.UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
+    helper.UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
+    helper.UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
+    helper.UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

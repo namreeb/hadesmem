@@ -193,35 +193,40 @@ D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeD3D9()
 {
-  InitializeSupportForModule(L"D3D9", DetourD3D9, UndetourD3D9, GetD3D9Module);
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
+    L"D3D9", DetourD3D9, UndetourD3D9, GetD3D9Module);
 }
 
 void DetourD3D9(HMODULE base)
 {
   auto const& process = GetThisProcess();
   auto& module = GetD3D9Module();
-  if (CommonDetourModule(process, L"D3D9", base, module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"D3D9", base, module))
   {
-    DetourFunc(process,
-               base,
-               "Direct3DCreate9",
-               GetDirect3DCreate9Detour(),
-               Direct3DCreate9Detour);
-    DetourFunc(process,
-               base,
-               "Direct3DCreate9Ex",
-               GetDirect3DCreate9ExDetour(),
-               Direct3DCreate9ExDetour);
+    helper.DetourFunc(process,
+                      base,
+                      "Direct3DCreate9",
+                      GetDirect3DCreate9Detour(),
+                      Direct3DCreate9Detour);
+    helper.DetourFunc(process,
+                      base,
+                      "Direct3DCreate9Ex",
+                      GetDirect3DCreate9ExDetour(),
+                      Direct3DCreate9ExDetour);
   }
 }
 
 void UndetourD3D9(bool remove)
 {
   auto& module = GetD3D9Module();
-  if (CommonUndetourModule(L"D3D9", module))
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"D3D9", module))
   {
-    UndetourFunc(L"Direct3DCreate9", GetDirect3DCreate9Detour(), remove);
-    UndetourFunc(L"Direct3DCreate9Ex", GetDirect3DCreate9ExDetour(), remove);
+    helper.UndetourFunc(L"Direct3DCreate9", GetDirect3DCreate9Detour(), remove);
+    helper.UndetourFunc(
+      L"Direct3DCreate9Ex", GetDirect3DCreate9ExDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
