@@ -139,8 +139,12 @@ public:
                   OrigFn orig_fn,
                   DetourFn detour_fn)
   {
-    HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
-                                  std::is_pointer<Func>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(
+      ::hadesmem::detail::IsFunction<OrigFn>::value ||
+      std::is_pointer<OrigFn>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(
+      ::hadesmem::detail::IsFunction<DetourFn>::value ||
+      std::is_pointer<DetourFn>::value);
 
     return DetourFunc(process,
                       name,
