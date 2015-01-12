@@ -36,7 +36,6 @@ void DetourFuncGeneric(hadesmem::Process const& process,
 
 template <typename T>
 void DetourFuncGeneric(hadesmem::Process const& process,
-                       HMODULE base,
                        std::string const& name,
                        std::unique_ptr<T>& detour,
                        void* orig_fn,
@@ -70,7 +69,7 @@ void DetourFuncGeneric(hadesmem::Process const& process,
 {
   auto const orig_fn =
     hadesmem::detail::GetProcAddressInternal(process, base, name);
-  DetourFuncGeneric(process, base, name, detour, orig_fn, detour_fn);
+  DetourFuncGeneric(process, name, detour, orig_fn, detour_fn);
 }
 
 template <typename T>
@@ -141,13 +140,12 @@ public:
   }
 
   virtual void DetourFunc(hadesmem::Process const& process,
-                          HMODULE base,
                           std::string const& name,
                           std::unique_ptr<hadesmem::PatchInt3>& detour,
                           void* orig_fn,
                           void* detour_fn) final
   {
-    DetourFuncGeneric(process, base, name, detour, orig_fn, detour_fn);
+    DetourFuncGeneric(process, name, detour, orig_fn, detour_fn);
   }
 
   virtual void UndetourFunc(std::wstring const& name,

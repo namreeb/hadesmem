@@ -127,25 +127,22 @@ public:
   }
 
   virtual void DetourFunc(Process const& process,
-                          HMODULE base,
                           std::string const& name,
                           std::unique_ptr<PatchInt3>& detour,
                           void* orig_fn,
                           void* detour_fn) = 0;
 
-  template <typename OrigFunc, typename DetourFunc>
+  template <typename OrigFn, typename DetourFn>
   void DetourFunc(Process const& process,
-                  HMODULE base,
                   std::string const& name,
                   std::unique_ptr<PatchInt3>& detour,
-                  OrigFunc orig_fn,
-                  DetourFunc detour_fn)
+                  OrigFn orig_fn,
+                  DetourFn detour_fn)
   {
     HADESMEM_DETAIL_STATIC_ASSERT(::hadesmem::detail::IsFunction<Func>::value ||
                                   std::is_pointer<Func>::value);
 
     return DetourFunc(process,
-                      base,
                       name,
                       detour,
                       ::hadesmem::detail::AliasCast<void*>(orig_fn),
