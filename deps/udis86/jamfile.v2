@@ -1,0 +1,18 @@
+# deps/udis86/jamfile.v2
+
+project 
+  : 
+    requirements 
+
+    <warnings>off
+  ;
+
+lib udis86
+  : 
+    [ glob udis86/libudis86/*.c ] 
+  : 
+    <link>static
+  : 
+  : 
+    <include>"udis86/"
+  ;

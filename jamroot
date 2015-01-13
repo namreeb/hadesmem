@@ -9,37 +9,37 @@ boost.use-project
 # Use AsmJit library. 
 use-project /asmjit
   :
-    src/asmjit
+    deps/asmjit
   ;
   
 # Use udis86 library. 
 use-project /udis86
   :
-    src/udis86
+    deps/udis86
   ;
  
 # Use PugiXML library. 
 use-project /pugixml
   :
-    src/pugixml
+    deps/pugixml
   ;
   
 # Use TCLAP library. 
 use-project /tclap
   :
-    src/tclap
+    deps/tclap
   ;
   
 # Use AntTweakBar library. 
 use-project /anttweakbar
   :
-    src/anttweakbar
+    deps/anttweakbar
   ;
   
 # Use GWEN library. 
 use-project /gwen
   :
-    src/gwen
+    deps/gwen
   ;
   
 # Use HadesMem tests.
@@ -185,18 +185,18 @@ alias memory
 	
     <implicit-dependency>/boost//headers
 	
-    <library>src/asmjit
+    <library>deps/asmjit
 
-    <library>src/udis86
+    <library>deps/udis86
 
-    <library>src/pugixml
+    <library>deps/pugixml
 
-    <library>src/tclap
+    <library>deps/tclap
 
-    <library>src/anttweakbar
+    <library>deps/anttweakbar
 
-    <toolset>msvc:<library>src/gwen
-    <toolset>intel:<library>src/gwen
+    <toolset>msvc:<library>deps/gwen
+    <toolset>intel:<library>deps/gwen
 
     <include>"./include/memory"
   ;

@@ -1,0 +1,2544 @@
+stats: 
+  Num tables    = 443
+  Num insnDefs  = 1746
+  Num insns     = 893
+  Packing Ratio = 43%
+--------------------
+    |-<00> add Eb, Gb 00
+    |-<01> add Ev, Gv 01
+    |-<02> add Gb, Eb 02
+    |-<03> add Gv, Ev 03
+    |-<04> add AL, Ib 04
+    |-<05> add rAX, sIz 05
+    |-<06> table-/m
+    |    |-<00> push ES 06 /m=!64
+    |-<07> table-/m
+    |    |-<00> pop ES 07 /m=!64
+    |-<08> or Eb, Gb 08
+    |-<09> or Ev, Gv 09
+    |-<0a> or Gb, Eb 0a
+    |-<0b> or Gv, Ev 0b
+    |-<0c> or AL, Ib 0c
+    |-<0d> or rAX, sIz 0d
+    |-<0e> table-/m
+    |    |-<00> push CS 0e /m=!64
+    |-<0f> table-opctbl
+    |    |-<00> table-/reg
+    |    |    |-<00> sldt MwRv 0f 00 /reg=0 /sse=none
+    |    |    |-<01> str MwRv 0f 00 /reg=1 /sse=none
+    |    |    |-<02> lldt Ew 0f 00 /reg=2 /sse=none
+    |    |    |-<03> ltr Ew 0f 00 /reg=3 /sse=none
+    |    |    |-<04> verr Ew 0f 00 /reg=4 /sse=none
+    |    |    |-<05> verw Ew 0f 00 /reg=5 /sse=none
+    |    |-<01> table-/mod
+    |    |    |-<00> table-/reg
+    |    |    |    |-<00> sgdt M 0f 01 /mod=!11 /reg=0 /sse=none
+    |    |    |    |-<01> sidt M 0f 01 /mod=!11 /reg=1 /sse=none
+    |    |    |    |-<02> lgdt M 0f 01 /mod=!11 /reg=2 /sse=none
+    |    |    |    |-<03> lidt M 0f 01 /mod=!11 /reg=3 /sse=none
+    |    |    |    |-<04> smsw MwRv 0f 01 /mod=!11 /reg=4 /sse=none
+    |    |    |    |-<06> lmsw Ew 0f 01 /mod=!11 /reg=6 /sse=none
+    |    |    |    |-<07> invlpg M 0f 01 /mod=!11 /reg=7 /sse=none
+    |    |    |-<01> table-/reg
+    |    |    |    |-<00> table-/rm
+    |    |    |    |    |-<01> table-/vendor
+    |    |    |    |    |    |-<01> vmcall  0f 01 /mod=11 /reg=0 /rm=1 /sse=none /vendor=intel
+    |    |    |    |    |-<02> table-/vendor
+    |    |    |    |    |    |-<01> vmlaunch  0f 01 /mod=11 /reg=0 /rm=2 /sse=none /vendor=intel
+    |    |    |    |    |-<03> table-/vendor
+    |    |    |    |    |    |-<01> vmresume  0f 01 /mod=11 /reg=0 /rm=3 /sse=none /vendor=intel
+    |    |    |    |    |-<04> table-/vendor
+    |    |    |    |    |    |-<01> vmxoff  0f 01 /mod=11 /reg=0 /rm=4 /sse=none /vendor=intel
+    |    |    |    |-<01> table-/rm
+    |    |    |    |    |-<00> monitor  0f 01 /mod=11 /reg=1 /rm=0 /sse=none
+    |    |    |    |    |-<01> mwait  0f 01 /mod=11 /reg=1 /rm=1 /sse=none
+    |    |    |    |-<02> table-/rm
+    |    |    |    |    |-<00> xgetbv  0f 01 /mod=11 /reg=2 /rm=0 /sse=none
+    |    |    |    |    |-<01> xsetbv  0f 01 /mod=11 /reg=2 /rm=1 /sse=none
+    |    |    |    |-<03> table-/rm
+    |    |    |    |    |-<00> table-/vendor
+    |    |    |    |    |    |-<00> vmrun  0f 01 /mod=11 /reg=3 /rm=0 /sse=none /vendor=amd
+    |    |    |    |    |-<01> table-/vendor
+    |    |    |    |    |    |-<00> vmmcall  0f 01 /mod=11 /reg=3 /rm=1 /sse=none /vendor=amd
+    |    |    |    |    |-<02> table-/vendor
+    |    |    |    |    |    |-<00> vmload  0f 01 /mod=11 /reg=3 /rm=2 /sse=none /vendor=amd
+    |    |    |    |    |-<03> table-/vendor
+    |    |    |    |    |    |-<00> vmsave  0f 01 /mod=11 /reg=3 /rm=3 /sse=none /vendor=amd
+    |    |    |    |    |-<04> table-/vendor
+    |    |    |    |    |    |-<00> stgi  0f 01 /mod=11 /reg=3 /rm=4 /sse=none /vendor=amd
+    |    |    |    |    |-<05> table-/vendor
+    |    |    |    |    |    |-<00> clgi  0f 01 /mod=11 /reg=3 /rm=5 /sse=none /vendor=amd
+    |    |    |    |    |-<06> table-/vendor
+    |    |    |    |    |    |-<00> skinit  0f 01 /mod=11 /reg=3 /rm=6 /sse=none /vendor=amd
+    |    |    |    |    |-<07> table-/vendor
+    |    |    |    |    |    |-<00> invlpga  0f 01 /mod=11 /reg=3 /rm=7 /sse=none /vendor=amd
+    |    |    |    |-<04> smsw MwRv 0f 01 /mod=11 /reg=4 /sse=none
+    |    |    |    |-<06> lmsw Ew 0f 01 /mod=11 /reg=6 /sse=none
+    |    |    |    |-<07> table-/rm
+    |    |    |    |    |-<00> swapgs  0f 01 /mod=11 /reg=7 /rm=0 /sse=none
+    |    |    |    |    |-<01> table-/vendor
+    |    |    |    |    |    |-<00> rdtscp  0f 01 /mod=11 /reg=7 /rm=1 /sse=none /vendor=amd
+    |    |-<02> lar Gv, Ew 0f 02 /sse=none
+    |    |-<03> lsl Gv, Ew 0f 03 /sse=none
+    |    |-<05> syscall  0f 05 /sse=none
+    |    |-<06> clts  0f 06 /sse=none
+    |    |-<07> sysret  0f 07 /sse=none
+    |    |-<08> invd  0f 08 /sse=none
+    |    |-<09> wbinvd  0f 09 /sse=none
+    |    |-<0b> ud2  0f 0b /sse=none
+    |    |-<0d> table-/reg
+    |    |    |-<00> prefetch M 0f 0d /reg=0 /sse=none
+    |    |    |-<01> prefetch M 0f 0d /reg=1 /sse=none
+    |    |    |-<02> prefetch M 0f 0d /reg=2 /sse=none
+    |    |    |-<03> prefetch M 0f 0d /reg=3 /sse=none
+    |    |    |-<04> prefetch M 0f 0d /reg=4 /sse=none
+    |    |    |-<05> prefetch M 0f 0d /reg=5 /sse=none
+    |    |    |-<06> prefetch M 0f 0d /reg=6 /sse=none
+    |    |    |-<07> prefetch M 0f 0d /reg=7 /sse=none
+    |    |-<0e> femms  0f 0e /sse=none
+    |    |-<0f> table-/3dnow
+    |    |    |-<8a> pfnacc P, Q 0f 0f /3dnow=8a
+    |    |    |-<0c> pi2fw P, Q 0f 0f /3dnow=0c
+    |    |    |-<0d> pi2fd P, Q 0f 0f /3dnow=0d
+    |    |    |-<8e> pfpnacc P, Q 0f 0f /3dnow=8e
+    |    |    |-<90> pfcmpge P, Q 0f 0f /3dnow=90
+    |    |    |-<94> pfmin P, Q 0f 0f /3dnow=94
+    |    |    |-<96> pfrcp P, Q 0f 0f /3dnow=96
+    |    |    |-<97> pfrsqrt P, Q 0f 0f /3dnow=97
+    |    |    |-<9a> pfsub P, Q 0f 0f /3dnow=9a
+    |    |    |-<1c> pf2iw P, Q 0f 0f /3dnow=1c
+    |    |    |-<1d> pf2id P, Q 0f 0f /3dnow=1d
+    |    |    |-<9e> pfadd P, Q 0f 0f /3dnow=9e
+    |    |    |-<a0> pfcmpgt P, Q 0f 0f /3dnow=a0
+    |    |    |-<a4> pfmax P, Q 0f 0f /3dnow=a4
+    |    |    |-<a6> pfrcpit1 P, Q 0f 0f /3dnow=a6
+    |    |    |-<a7> pfrsqit1 P, Q 0f 0f /3dnow=a7
+    |    |    |-<aa> pfsubr P, Q 0f 0f /3dnow=aa
+    |    |    |-<ae> pfacc P, Q 0f 0f /3dnow=ae
+    |    |    |-<b0> pfcmpeq P, Q 0f 0f /3dnow=b0
+    |    |    |-<b4> pfmul P, Q 0f 0f /3dnow=b4
+    |    |    |-<b6> pfrcpit2 P, Q 0f 0f /3dnow=b6
+    |    |    |-<b7> pmulhrw P, Q 0f 0f /3dnow=b7
+    |    |    |-<bb> pswapd P, Q 0f 0f /3dnow=bb
+    |    |    |-<bf> pavgusb P, Q 0f 0f /3dnow=bf
+    |    |-<10> table-/sse
+    |    |    |-<00> movups V, W 0f 10 /sse=none
+    |    |    |-<01> movsd V, MqU 0f 10 /sse=f2
+    |    |    |-<02> movss V, MdU 0f 10 /sse=f3
+    |    |    |-<03> movupd V, W 0f 10 /sse=66
+    |    |-<11> table-/sse
+    |    |    |-<00> movups W, V 0f 11 /sse=none
+    |    |    |-<01> movsd W, V 0f 11 /sse=f2
+    |    |    |-<02> movss W, V 0f 11 /sse=f3
+    |    |    |-<03> movupd W, V 0f 11 /sse=66
+    |    |-<12> table-/mod
+    |    |    |-<00> table-/sse
+    |    |    |    |-<00> movlps V, M 0f 12 /mod=!11 /sse=none
+    |    |    |    |-<01> movddup V, W 0f 12 /mod=!11 /sse=f2
+    |    |    |    |-<02> movsldup V, W 0f 12 /mod=!11 /sse=f3
+    |    |    |    |-<03> movlpd V, M 0f 12 /mod=!11 /sse=66
+    |    |    |-<01> table-/sse
+    |    |    |    |-<00> movhlps V, U 0f 12 /mod=11 /sse=none
+    |    |    |    |-<01> movddup V, W 0f 12 /mod=11 /sse=f2
+    |    |    |    |-<02> movsldup V, W 0f 12 /mod=11 /sse=f3
+    |    |-<13> table-/sse
+    |    |    |-<00> movlps M, V 0f 13 /sse=none
+    |    |    |-<03> movlpd M, V 0f 13 /sse=66
+    |    |-<14> table-/sse
+    |    |    |-<00> unpcklps V, W 0f 14 /sse=none
+    |    |    |-<03> unpcklpd V, W 0f 14 /sse=66
+    |    |-<15> table-/sse
+    |    |    |-<00> unpckhps V, W 0f 15 /sse=none
+    |    |    |-<03> unpckhpd V, W 0f 15 /sse=66
+    |    |-<16> table-/mod
+    |    |    |-<00> table-/sse
+    |    |    |    |-<00> movhps V, M 0f 16 /mod=!11 /sse=none
+    |    |    |    |-<02> movshdup V, W 0f 16 /mod=!11 /sse=f3
+    |    |    |    |-<03> movhpd V, M 0f 16 /mod=!11 /sse=66
+    |    |    |-<01> table-/sse
+    |    |    |    |-<00> movlhps V, U 0f 16 /mod=11 /sse=none
+    |    |    |    |-<02> movshdup V, W 0f 16 /mod=11 /sse=f3
+    |    |-<17> table-/sse
+    |    |    |-<00> movhps M, V 0f 17 /sse=none
+    |    |    |-<03> movhpd M, V 0f 17 /sse=66
+    |    |-<18> table-/reg
+    |    |    |-<00> prefetchnta M 0f 18 /reg=0 /sse=none
+    |    |    |-<01> prefetcht0 M 0f 18 /reg=1 /sse=none
+    |    |    |-<02> prefetcht1 M 0f 18 /reg=2 /sse=none
+    |    |    |-<03> prefetcht2 M 0f 18 /reg=3 /sse=none
+    |    |-<19> nop M 0f 19 /sse=none
+    |    |-<1a> nop M 0f 1a /sse=none
+    |    |-<1b> nop M 0f 1b /sse=none
+    |    |-<1c> nop M 0f 1c /sse=none
+    |    |-<1d> nop M 0f 1d /sse=none
+    |    |-<1e> nop M 0f 1e /sse=none
+    |    |-<1f> nop M 0f 1f /sse=none
+    |    |-<20> mov R, C 0f 20 /sse=none
+    |    |-<21> mov R, D 0f 21 /sse=none
+    |    |-<22> mov C, R 0f 22 /sse=none
+    |    |-<23> mov D, R 0f 23 /sse=none
+    |    |-<28> table-/sse
+    |    |    |-<00> movaps V, W 0f 28 /sse=none
+    |    |    |-<03> movapd V, W 0f 28 /sse=66
+    |    |-<29> table-/sse
+    |    |    |-<00> movaps W, V 0f 29 /sse=none
+    |    |    |-<03> movapd W, V 0f 29 /sse=66
+    |    |-<2a> table-/sse
+    |    |    |-<00> cvtpi2ps V, Q 0f 2a /sse=none
+    |    |    |-<01> cvtsi2sd V, Ey 0f 2a /sse=f2
+    |    |    |-<02> cvtsi2ss V, Ey 0f 2a /sse=f3
+    |    |    |-<03> cvtpi2pd V, Q 0f 2a /sse=66
+    |    |-<2b> table-/sse
+    |    |    |-<00> movntps M, V 0f 2b /sse=none
+    |    |    |-<03> movntpd M, V 0f 2b /sse=66
+    |    |-<2c> table-/sse
+    |    |    |-<00> cvttps2pi P, W 0f 2c /sse=none
+    |    |    |-<01> cvttsd2si Gy, MqU 0f 2c /sse=f2
+    |    |    |-<02> cvttss2si Gy, MdU 0f 2c /sse=f3
+    |    |    |-<03> cvttpd2pi P, W 0f 2c /sse=66
+    |    |-<2d> table-/sse
+    |    |    |-<00> cvtps2pi P, MqU 0f 2d /sse=none
+    |    |    |-<01> cvtsd2si Gy, MqU 0f 2d /sse=f2
+    |    |    |-<02> cvtss2si Gy, MdU 0f 2d /sse=f3
+    |    |    |-<03> cvtpd2pi P, W 0f 2d /sse=66
+    |    |-<2e> table-/sse
+    |    |    |-<00> ucomiss V, W 0f 2e /sse=none
+    |    |    |-<03> ucomisd V, W 0f 2e /sse=66
+    |    |-<2f> table-/sse
+    |    |    |-<00> comiss V, W 0f 2f /sse=none
+    |    |    |-<03> comisd Vsd, Wsd 0f 2f /sse=66
+    |    |-<30> wrmsr  0f 30 /sse=none
+    |    |-<31> rdtsc  0f 31 /sse=none
+    |    |-<32> rdmsr  0f 32 /sse=none
+    |    |-<33> rdpmc  0f 33 /sse=none
+    |    |-<34> table-/m
+    |    |    |-<00> sysenter  0f 34 /sse=none /m=!64
+    |    |    |-<01> table-/vendor
+    |    |    |    |-<01> sysenter  0f 34 /sse=none /m=64 /vendor=intel
+    |    |-<35> table-/m
+    |    |    |-<00> sysexit  0f 35 /sse=none /m=!64
+    |    |    |-<01> table-/vendor
+    |    |    |    |-<01> sysexit  0f 35 /sse=none /m=64 /vendor=intel
+    |    |-<37> getsec  0f 37 /sse=none
+    |    |-<38> table-opctbl
+    |    |    |-<80> table-/sse
+    |    |    |    |-<03> table-/m
+    |    |    |    |    |-<00> table-/vendor
+    |    |    |    |    |    |-<01> invept Gd, Mo 0f 38 80 /sse=66 /m=32 /vendor=intel
+    |    |    |    |    |-<01> table-/vendor
+    |    |    |    |    |    |-<01> invept Gq, Mo 0f 38 80 /sse=66 /m=64 /vendor=intel
+    |    |    |-<81> table-/sse
+    |    |    |    |-<03> table-/m
+    |    |    |    |    |-<00> table-/vendor
+    |    |    |    |    |    |-<01> invvpid Gd, Mo 0f 38 81 /sse=66 /m=32 /vendor=intel
+    |    |    |    |    |-<01> table-/vendor
+    |    |    |    |    |    |-<01> invvpid Gq, Mo 0f 38 81 /sse=66 /m=64 /vendor=intel
+    |    |    |-<02> table-/sse
+    |    |    |    |-<00> phaddd P, Q 0f 38 02 /sse=none
+    |    |    |    |-<03> phaddd V, W 0f 38 02 /sse=66
+    |    |    |-<03> table-/sse
+    |    |    |    |-<00> phaddsw P, Q 0f 38 03 /sse=none
+    |    |    |    |-<03> phaddsw V, W 0f 38 03 /sse=66
+    |    |    |-<04> table-/sse
+    |    |    |    |-<00> pmaddubsw P, Q 0f 38 04 /sse=none
+    |    |    |    |-<03> pmaddubsw V, W 0f 38 04 /sse=66
+    |    |    |-<05> table-/sse
+    |    |    |    |-<00> phsubw P, Q 0f 38 05 /sse=none
+    |    |    |    |-<03> phsubw V, W 0f 38 05 /sse=66
+    |    |    |-<00> table-/sse
+    |    |    |    |-<00> pshufb P, Q 0f 38 00 /sse=none
+    |    |    |    |-<03> pshufb V, W 0f 38 00 /sse=66
+    |    |    |-<01> table-/sse
+    |    |    |    |-<00> phaddw P, Q 0f 38 01 /sse=none
+    |    |    |    |-<03> phaddw V, W 0f 38 01 /sse=66
+    |    |    |-<08> table-/sse
+    |    |    |    |-<00> psignb P, Q 0f 38 08 /sse=none
+    |    |    |    |-<03> psignb V, W 0f 38 08 /sse=66
+    |    |    |-<09> table-/sse
+    |    |    |    |-<00> psignw P, Q 0f 38 09 /sse=none
+    |    |    |    |-<03> psignw V, W 0f 38 09 /sse=66
+    |    |    |-<0a> table-/sse
+    |    |    |    |-<00> psignd P, Q 0f 38 0a /sse=none
+    |    |    |    |-<03> psignd V, W 0f 38 0a /sse=66
+    |    |    |-<0b> table-/sse
+    |    |    |    |-<00> pmulhrsw P, Q 0f 38 0b /sse=none
+    |    |    |    |-<03> pmulhrsw V, W 0f 38 0b /sse=66
+    |    |    |-<10> table-/sse
+    |    |    |    |-<03> pblendvb V, W 0f 38 10 /sse=66
+    |    |    |-<2b> table-/sse
+    |    |    |    |-<03> packusdw V, W 0f 38 2b /sse=66
+    |    |    |-<14> table-/sse
+    |    |    |    |-<03> blendvps V, W 0f 38 14 /sse=66
+    |    |    |-<15> table-/sse
+    |    |    |    |-<03> blendvpd V, W 0f 38 15 /sse=66
+    |    |    |-<17> table-/sse
+    |    |    |    |-<03> ptest V, W 0f 38 17 /sse=66
+    |    |    |-<1c> table-/sse
+    |    |    |    |-<00> pabsb P, Q 0f 38 1c /sse=none
+    |    |    |    |-<03> pabsb V, W 0f 38 1c /sse=66
+    |    |    |-<1d> table-/sse
+    |    |    |    |-<00> pabsw P, Q 0f 38 1d /sse=none
+    |    |    |    |-<03> pabsw V, W 0f 38 1d /sse=66
+    |    |    |-<1e> table-/sse
+    |    |    |    |-<00> pabsd P, Q 0f 38 1e /sse=none
+    |    |    |    |-<03> pabsd V, W 0f 38 1e /sse=66
+    |    |    |-<20> table-/sse
+    |    |    |    |-<03> pmovsxbw V, MqU 0f 38 20 /sse=66
+    |    |    |-<21> table-/sse
+    |    |    |    |-<03> pmovsxbd V, MdU 0f 38 21 /sse=66
+    |    |    |-<22> table-/sse
+    |    |    |    |-<03> pmovsxbq V, MwU 0f 38 22 /sse=66
+    |    |    |-<23> table-/sse
+    |    |    |    |-<03> pmovsxwd V, MqU 0f 38 23 /sse=66
+    |    |    |-<24> table-/sse
+    |    |    |    |-<03> pmovsxwq V, MdU 0f 38 24 /sse=66
+    |    |    |-<06> table-/sse
+    |    |    |    |-<00> phsubd P, Q 0f 38 06 /sse=none
+    |    |    |    |-<03> phsubd V, W 0f 38 06 /sse=66
+    |    |    |-<28> table-/sse
+    |    |    |    |-<03> pmuldq V, W 0f 38 28 /sse=66
+    |    |    |-<29> table-/sse
+    |    |    |    |-<03> pcmpeqq V, W 0f 38 29 /sse=66
+    |    |    |-<2a> table-/sse
+    |    |    |    |-<03> movntdqa V, M 0f 38 2a /sse=66
+    |    |    |-<07> table-/sse
+    |    |    |    |-<00> phsubsw P, Q 0f 38 07 /sse=none
+    |    |    |    |-<03> phsubsw V, W 0f 38 07 /sse=66
+    |    |    |-<30> table-/sse
+    |    |    |    |-<03> pmovzxbw V, MqU 0f 38 30 /sse=66
+    |    |    |-<31> table-/sse
+    |    |    |    |-<03> pmovzxbd V, MdU 0f 38 31 /sse=66
+    |    |    |-<32> table-/sse
+    |    |    |    |-<03> pmovzxbq V, MwU 0f 38 32 /sse=66
+    |    |    |-<33> table-/sse
+    |    |    |    |-<03> pmovzxwd V, MqU 0f 38 33 /sse=66
+    |    |    |-<34> table-/sse
+    |    |    |    |-<03> pmovzxwq V, MdU 0f 38 34 /sse=66
+    |    |    |-<35> table-/sse
+    |    |    |    |-<03> pmovzxdq V, MqU 0f 38 35 /sse=66
+    |    |    |-<37> table-/sse
+    |    |    |    |-<03> pcmpgtq V, W 0f 38 37 /sse=66
+    |    |    |-<38> table-/sse
+    |    |    |    |-<03> pminsb V, W 0f 38 38 /sse=66
+    |    |    |-<39> table-/sse
+    |    |    |    |-<03> pminsd V, W 0f 38 39 /sse=66
+    |    |    |-<3a> table-/sse
+    |    |    |    |-<03> pminuw V, W 0f 38 3a /sse=66
+    |    |    |-<3b> table-/sse
+    |    |    |    |-<03> pminud V, W 0f 38 3b /sse=66
+    |    |    |-<3c> table-/sse
+    |    |    |    |-<03> pmaxsb V, W 0f 38 3c /sse=66
+    |    |    |-<3d> table-/sse
+    |    |    |    |-<03> pmaxsd V, W 0f 38 3d /sse=66
+    |    |    |-<3e> table-/sse
+    |    |    |    |-<03> pmaxuw V, W 0f 38 3e /sse=66
+    |    |    |-<3f> table-/sse
+    |    |    |    |-<03> pmaxud V, W 0f 38 3f /sse=66
+    |    |    |-<40> table-/sse
+    |    |    |    |-<03> pmulld V, W 0f 38 40 /sse=66
+    |    |    |-<41> table-/sse
+    |    |    |    |-<03> phminposuw V, W 0f 38 41 /sse=66
+    |    |    |-<25> table-/sse
+    |    |    |    |-<03> pmovsxdq V, MqU 0f 38 25 /sse=66
+    |    |    |-<db> table-/sse
+    |    |    |    |-<03> aesimc V, W 0f 38 db /sse=66
+    |    |    |-<dc> table-/sse
+    |    |    |    |-<03> aesenc V, W 0f 38 dc /sse=66
+    |    |    |-<dd> table-/sse
+    |    |    |    |-<03> aesenclast V, W 0f 38 dd /sse=66
+    |    |    |-<de> table-/sse
+    |    |    |    |-<03> aesdec V, W 0f 38 de /sse=66
+    |    |    |-<df> table-/sse
+    |    |    |    |-<03> aesdeclast V, W 0f 38 df /sse=66
+    |    |    |-<f0> table-/sse
+    |    |    |    |-<00> movbe Gv, Mv 0f 38 f0 /sse=none
+    |    |    |    |-<01> crc32 Gy, Eb 0f 38 f0 /sse=f2
+    |    |    |-<f1> table-/sse
+    |    |    |    |-<00> movbe Mv, Gv 0f 38 f1 /sse=none
+    |    |    |    |-<01> crc32 Gy, Ev 0f 38 f1 /sse=f2
+    |    |-<3a> table-opctbl
+    |    |    |-<08> table-/sse
+    |    |    |    |-<03> roundps V, W, Ib 0f 3a 08 /sse=66
+    |    |    |-<09> table-/sse
+    |    |    |    |-<03> roundpd V, W, Ib 0f 3a 09 /sse=66
+    |    |    |-<0a> table-/sse
+    |    |    |    |-<03> roundss V, W, Ib 0f 3a 0a /sse=66
+    |    |    |-<0b> table-/sse
+    |    |    |    |-<03> roundsd V, W, Ib 0f 3a 0b /sse=66
+    |    |    |-<0c> table-/sse
+    |    |    |    |-<03> blendps V, W, Ib 0f 3a 0c /sse=66
+    |    |    |-<0d> table-/sse
+    |    |    |    |-<03> blendpd V, W, Ib 0f 3a 0d /sse=66
+    |    |    |-<0e> table-/sse
+    |    |    |    |-<03> pblendw V, W, Ib 0f 3a 0e /sse=66
+    |    |    |-<0f> table-/sse
+    |    |    |    |-<00> palignr P, Q, Ib 0f 3a 0f /sse=none
+    |    |    |    |-<03> palignr V, W, Ib 0f 3a 0f /sse=66
+    |    |    |-<14> table-/sse
+    |    |    |    |-<03> pextrb MbRv, V, Ib 0f 3a 14 /sse=66
+    |    |    |-<15> table-/sse
+    |    |    |    |-<03> pextrw MwRv, V, Ib 0f 3a 15 /sse=66
+    |    |    |-<16> table-/sse
+    |    |    |    |-<03> table-/o
+    |    |    |    |    |-<00> pextrd Ed, V, Ib 0f 3a 16 /sse=66 /o=16
+    |    |    |    |    |-<01> pextrd Ed, V, Ib 0f 3a 16 /sse=66 /o=32
+    |    |    |    |    |-<02> pextrq Eq, V, Ib 0f 3a 16 /sse=66 /o=64
+    |    |    |-<17> table-/sse
+    |    |    |    |-<03> extractps MdRy, V, Ib 0f 3a 17 /sse=66
+    |    |    |-<20> table-/sse
+    |    |    |    |-<03> pinsrb V, MbRd, Ib 0f 3a 20 /sse=66
+    |    |    |-<21> table-/sse
+    |    |    |    |-<03> insertps V, Md, Ib 0f 3a 21 /sse=66
+    |    |    |-<22> table-/sse
+    |    |    |    |-<03> table-/o
+    |    |    |    |    |-<00> pinsrd V, Ed, Ib 0f 3a 22 /sse=66 /o=16
+    |    |    |    |    |-<01> pinsrd V, Ed, Ib 0f 3a 22 /sse=66 /o=32
+    |    |    |    |    |-<02> pinsrq V, Eq, Ib 0f 3a 22 /sse=66 /o=64
+    |    |    |-<40> table-/sse
+    |    |    |    |-<03> dpps V, W, Ib 0f 3a 40 /sse=66
+    |    |    |-<41> table-/sse
+    |    |    |    |-<03> dppd V, W, Ib 0f 3a 41 /sse=66
+    |    |    |-<42> table-/sse
+    |    |    |    |-<03> mpsadbw V, W, Ib 0f 3a 42 /sse=66
+    |    |    |-<44> table-/sse
+    |    |    |    |-<03> pclmulqdq V, W, Ib 0f 3a 44 /sse=66
+    |    |    |-<df> table-/sse
+    |    |    |    |-<03> aeskeygenassist V, W, Ib 0f 3a df /sse=66
+    |    |    |-<60> table-/sse
+    |    |    |    |-<03> pcmpestrm V, W, Ib 0f 3a 60 /sse=66
+    |    |    |-<61> table-/sse
+    |    |    |    |-<03> pcmpestri V, W, Ib 0f 3a 61 /sse=66
+    |    |    |-<62> table-/sse
+    |    |    |    |-<03> pcmpistrm V, W, Ib 0f 3a 62 /sse=66
+    |    |    |-<63> table-/sse
+    |    |    |    |-<03> pcmpistri V, W, Ib 0f 3a 63 /sse=66
+    |    |-<40> cmovo Gv, Ev 0f 40 /sse=none
+    |    |-<41> cmovno Gv, Ev 0f 41 /sse=none
+    |    |-<42> cmovb Gv, Ev 0f 42 /sse=none
+    |    |-<43> cmovae Gv, Ev 0f 43 /sse=none
+    |    |-<44> cmovz Gv, Ev 0f 44 /sse=none
+    |    |-<45> cmovnz Gv, Ev 0f 45 /sse=none
+    |    |-<46> cmovbe Gv, Ev 0f 46 /sse=none
+    |    |-<47> cmova Gv, Ev 0f 47 /sse=none
+    |    |-<48> cmovs Gv, Ev 0f 48 /sse=none
+    |    |-<49> cmovns Gv, Ev 0f 49 /sse=none
+    |    |-<4a> cmovp Gv, Ev 0f 4a /sse=none
+    |    |-<4b> cmovnp Gv, Ev 0f 4b /sse=none
+    |    |-<4c> cmovl Gv, Ev 0f 4c /sse=none
+    |    |-<4d> cmovge Gv, Ev 0f 4d /sse=none
+    |    |-<4e> cmovle Gv, Ev 0f 4e /sse=none
+    |    |-<4f> cmovg Gv, Ev 0f 4f /sse=none
+    |    |-<50> table-/sse
+    |    |    |-<00> movmskps Gd, U 0f 50 /sse=none
+    |    |    |-<03> movmskpd Gd, U 0f 50 /sse=66
+    |    |-<51> table-/sse
+    |    |    |-<00> sqrtps V, W 0f 51 /sse=none
+    |    |    |-<01> sqrtsd V, W 0f 51 /sse=f2
+    |    |    |-<02> sqrtss V, W 0f 51 /sse=f3
+    |    |    |-<03> sqrtpd V, W 0f 51 /sse=66
+    |    |-<52> table-/sse
+    |    |    |-<00> rsqrtps V, W 0f 52 /sse=none
+    |    |    |-<02> rsqrtss V, W 0f 52 /sse=f3
+    |    |-<53> table-/sse
+    |    |    |-<00> rcpps V, W 0f 53 /sse=none
+    |    |    |-<02> rcpss V, W 0f 53 /sse=f3
+    |    |-<54> table-/sse
+    |    |    |-<00> andps V, W 0f 54 /sse=none
+    |    |    |-<03> andpd V, W 0f 54 /sse=66
+    |    |-<55> table-/sse
+    |    |    |-<00> andnps V, W 0f 55 /sse=none
+    |    |    |-<03> andnpd V, W 0f 55 /sse=66
+    |    |-<56> table-/sse
+    |    |    |-<00> orps V, W 0f 56 /sse=none
+    |    |    |-<03> orpd V, W 0f 56 /sse=66
+    |    |-<57> table-/sse
+    |    |    |-<00> xorps V, W 0f 57 /sse=none
+    |    |    |-<03> xorpd V, W 0f 57 /sse=66
+    |    |-<58> table-/sse
+    |    |    |-<00> addps V, W 0f 58 /sse=none
+    |    |    |-<01> addsd V, W 0f 58 /sse=f2
+    |    |    |-<02> addss V, W 0f 58 /sse=f3
+    |    |    |-<03> addpd V, W 0f 58 /sse=66
+    |    |-<59> table-/sse
+    |    |    |-<00> mulps V, W 0f 59 /sse=none
+    |    |    |-<01> mulsd V, W 0f 59 /sse=f2
+    |    |    |-<02> mulss V, W 0f 59 /sse=f3
+    |    |    |-<03> mulpd V, W 0f 59 /sse=66
+    |    |-<5a> table-/sse
+    |    |    |-<00> cvtps2pd V, Wdq 0f 5a /sse=none
+    |    |    |-<01> cvtsd2ss V, W 0f 5a /sse=f2
+    |    |    |-<02> cvtss2sd V, W 0f 5a /sse=f3
+    |    |    |-<03> cvtpd2ps Vdq, W 0f 5a /sse=66
+    |    |-<5b> table-/sse
+    |    |    |-<00> cvtdq2ps V, W 0f 5b /sse=none
+    |    |    |-<02> cvttps2dq V, W 0f 5b /sse=f3
+    |    |    |-<03> cvtps2dq V, W 0f 5b /sse=66
+    |    |-<5c> table-/sse
+    |    |    |-<00> subps V, W 0f 5c /sse=none
+    |    |    |-<01> subsd V, W 0f 5c /sse=f2
+    |    |    |-<02> subss V, W 0f 5c /sse=f3
+    |    |    |-<03> subpd V, W 0f 5c /sse=66
+    |    |-<5d> table-/sse
+    |    |    |-<00> minps V, W 0f 5d /sse=none
+    |    |    |-<01> minsd V, MqU 0f 5d /sse=f2
+    |    |    |-<02> minss V, MdU 0f 5d /sse=f3
+    |    |    |-<03> minpd V, W 0f 5d /sse=66
+    |    |-<5e> table-/sse
+    |    |    |-<00> divps V, W 0f 5e /sse=none
+    |    |    |-<01> divsd V, MqU 0f 5e /sse=f2
+    |    |    |-<02> divss V, MdU 0f 5e /sse=f3
+    |    |    |-<03> divpd V, W 0f 5e /sse=66
+    |    |-<5f> table-/sse
+    |    |    |-<00> maxps V, W 0f 5f /sse=none
+    |    |    |-<01> maxsd V, W 0f 5f /sse=f2
+    |    |    |-<02> maxss V, W 0f 5f /sse=f3
+    |    |    |-<03> maxpd V, W 0f 5f /sse=66
+    |    |-<60> table-/sse
+    |    |    |-<00> punpcklbw P, Q 0f 60 /sse=none
+    |    |    |-<03> punpcklbw V, W 0f 60 /sse=66
+    |    |-<61> table-/sse
+    |    |    |-<00> punpcklwd P, Q 0f 61 /sse=none
+    |    |    |-<03> punpcklwd V, W 0f 61 /sse=66
+    |    |-<62> table-/sse
+    |    |    |-<00> punpckldq P, Q 0f 62 /sse=none
+    |    |    |-<03> punpckldq V, W 0f 62 /sse=66
+    |    |-<63> table-/sse
+    |    |    |-<00> packsswb P, Q 0f 63 /sse=none
+    |    |    |-<03> packsswb V, W 0f 63 /sse=66
+    |    |-<64> table-/sse
+    |    |    |-<00> pcmpgtb P, Q 0f 64 /sse=none
+    |    |    |-<03> pcmpgtb V, W 0f 64 /sse=66
+    |    |-<65> table-/sse
+    |    |    |-<00> pcmpgtw P, Q 0f 65 /sse=none
+    |    |    |-<03> pcmpgtw V, W 0f 65 /sse=66
+    |    |-<66> table-/sse
+    |    |    |-<00> pcmpgtd P, Q 0f 66 /sse=none
+    |    |    |-<03> pcmpgtd V, W 0f 66 /sse=66
+    |    |-<67> table-/sse
+    |    |    |-<00> packuswb P, Q 0f 67 /sse=none
+    |    |    |-<03> packuswb V, W 0f 67 /sse=66
+    |    |-<68> table-/sse
+    |    |    |-<00> punpckhbw P, Q 0f 68 /sse=none
+    |    |    |-<03> punpckhbw V, W 0f 68 /sse=66
+    |    |-<69> table-/sse
+    |    |    |-<00> punpckhwd P, Q 0f 69 /sse=none
+    |    |    |-<03> punpckhwd V, W 0f 69 /sse=66
+    |    |-<6a> table-/sse
+    |    |    |-<00> punpckhdq P, Q 0f 6a /sse=none
+    |    |    |-<03> punpckhdq V, W 0f 6a /sse=66
+    |    |-<6b> table-/sse
+    |    |    |-<00> packssdw P, Q 0f 6b /sse=none
+    |    |    |-<03> packssdw V, W 0f 6b /sse=66
+    |    |-<6c> table-/sse
+    |    |    |-<03> punpcklqdq V, W 0f 6c /sse=66
+    |    |-<6d> table-/sse
+    |    |    |-<03> punpckhqdq V, W 0f 6d /sse=66
+    |    |-<6e> table-/sse
+    |    |    |-<00> table-/o
+    |    |    |    |-<00> movd P, Ey 0f 6e /sse=none /o=16
+    |    |    |    |-<01> movd P, Ey 0f 6e /sse=none /o=32
+    |    |    |    |-<02> movq P, Eq 0f 6e /sse=none /o=64
+    |    |    |-<03> table-/o
+    |    |    |    |-<00> movd V, Ey 0f 6e /sse=66 /o=16
+    |    |    |    |-<01> movd V, Ey 0f 6e /sse=66 /o=32
+    |    |    |    |-<02> movq V, Eq 0f 6e /sse=66 /o=64
+    |    |-<6f> table-/sse
+    |    |    |-<00> movq P, Q 0f 6f /sse=none
+    |    |    |-<02> movdqu V, W 0f 6f /sse=f3
+    |    |    |-<03> movdqa V, W 0f 6f /sse=66
+    |    |-<70> table-/sse
+    |    |    |-<00> pshufw P, Q, Ib 0f 70 /sse=none
+    |    |    |-<01> pshuflw V, W, Ib 0f 70 /sse=f2
+    |    |    |-<02> pshufhw V, W, Ib 0f 70 /sse=f3
+    |    |    |-<03> pshufd V, W, Ib 0f 70 /sse=66
+    |    |-<71> table-/reg
+    |    |    |-<02> table-/sse
+    |    |    |    |-<00> psrlw N, Ib 0f 71 /reg=2 /sse=none
+    |    |    |    |-<03> psrlw U, Ib 0f 71 /reg=2 /sse=66
+    |    |    |-<04> table-/sse
+    |    |    |    |-<00> psraw N, Ib 0f 71 /reg=4 /sse=none
+    |    |    |    |-<03> psraw U, Ib 0f 71 /reg=4 /sse=66
+    |    |    |-<06> table-/sse
+    |    |    |    |-<00> psllw N, Ib 0f 71 /reg=6 /sse=none
+    |    |    |    |-<03> psllw U, Ib 0f 71 /reg=6 /sse=66
+    |    |-<72> table-/reg
+    |    |    |-<02> table-/sse
+    |    |    |    |-<00> psrld N, Ib 0f 72 /reg=2 /sse=none
+    |    |    |    |-<03> psrld U, Ib 0f 72 /reg=2 /sse=66
+    |    |    |-<04> table-/sse
+    |    |    |    |-<00> psrad N, Ib 0f 72 /reg=4 /sse=none
+    |    |    |    |-<03> psrad U, Ib 0f 72 /reg=4 /sse=66
+    |    |    |-<06> table-/sse
+    |    |    |    |-<00> pslld N, Ib 0f 72 /reg=6 /sse=none
+    |    |    |    |-<03> pslld U, Ib 0f 72 /reg=6 /sse=66
+    |    |-<73> table-/reg
+    |    |    |-<02> table-/sse
+    |    |    |    |-<00> psrlq N, Ib 0f 73 /reg=2 /sse=none
+    |    |    |    |-<03> psrlq U, Ib 0f 73 /reg=2 /sse=66
+    |    |    |-<03> table-/sse
+    |    |    |    |-<03> psrldq U, Ib 0f 73 /reg=3 /sse=66
+    |    |    |-<06> table-/sse
+    |    |    |    |-<00> psllq N, Ib 0f 73 /reg=6 /sse=none
+    |    |    |    |-<03> psllq U, Ib 0f 73 /reg=6 /sse=66
+    |    |    |-<07> table-/sse
+    |    |    |    |-<03> pslldq U, Ib 0f 73 /reg=7 /sse=66
+    |    |-<74> table-/sse
+    |    |    |-<00> pcmpeqb P, Q 0f 74 /sse=none
+    |    |    |-<03> pcmpeqb V, W 0f 74 /sse=66
+    |    |-<75> table-/sse
+    |    |    |-<00> pcmpeqw P, Q 0f 75 /sse=none
+    |    |    |-<03> pcmpeqw V, W 0f 75 /sse=66
+    |    |-<76> table-/sse
+    |    |    |-<00> pcmpeqd P, Q 0f 76 /sse=none
+    |    |    |-<03> pcmpeqd V, W 0f 76 /sse=66
+    |    |-<77> emms  0f 77 /sse=none
+    |    |-<78> table-/vendor
+    |    |    |-<01> vmread Ey, Gy 0f 78 /sse=none /vendor=intel
+    |    |-<79> table-/vendor
+    |    |    |-<01> vmwrite Gy, Ey 0f 79 /sse=none /vendor=intel
+    |    |-<7c> table-/sse
+    |    |    |-<01> haddps V, W 0f 7c /sse=f2
+    |    |    |-<03> haddpd V, W 0f 7c /sse=66
+    |    |-<7d> table-/sse
+    |    |    |-<01> hsubps V, W 0f 7d /sse=f2
+    |    |    |-<03> hsubpd V, W 0f 7d /sse=66
+    |    |-<7e> table-/sse
+    |    |    |-<00> table-/o
+    |    |    |    |-<00> movd Ey, P 0f 7e /sse=none /o=16
+    |    |    |    |-<01> movd Ey, P 0f 7e /sse=none /o=32
+    |    |    |    |-<02> movq Eq, P 0f 7e /sse=none /o=64
+    |    |    |-<02> movq V, W 0f 7e /sse=f3
+    |    |    |-<03> table-/o
+    |    |    |    |-<00> movd Ey, V 0f 7e /sse=66 /o=16
+    |    |    |    |-<01> movd Ey, V 0f 7e /sse=66 /o=32
+    |    |    |    |-<02> movq Eq, V 0f 7e /sse=66 /o=64
+    |    |-<7f> table-/sse
+    |    |    |-<00> movq Q, P 0f 7f /sse=none
+    |    |    |-<02> movdqu W, V 0f 7f /sse=f3
+    |    |    |-<03> movdqa W, V 0f 7f /sse=66
+    |    |-<80> jo Jz 0f 80 /sse=none
+    |    |-<81> jno Jz 0f 81 /sse=none
+    |    |-<82> jb Jz 0f 82 /sse=none
+    |    |-<83> jae Jz 0f 83 /sse=none
+    |    |-<84> jz Jz 0f 84 /sse=none
+    |    |-<85> jnz Jz 0f 85 /sse=none
+    |    |-<86> jbe Jz 0f 86 /sse=none
+    |    |-<87> ja Jz 0f 87 /sse=none
+    |    |-<88> js Jz 0f 88 /sse=none
+    |    |-<89> jns Jz 0f 89 /sse=none
+    |    |-<8a> jp Jz 0f 8a /sse=none
+    |    |-<8b> jnp Jz 0f 8b /sse=none
+    |    |-<8c> jl Jz 0f 8c /sse=none
+    |    |-<8d> jge Jz 0f 8d /sse=none
+    |    |-<8e> jle Jz 0f 8e /sse=none
+    |    |-<8f> jg Jz 0f 8f /sse=none
+    |    |-<90> seto Eb 0f 90 /sse=none
+    |    |-<91> setno Eb 0f 91 /sse=none
+    |    |-<92> setb Eb 0f 92 /sse=none
+    |    |-<93> setae Eb 0f 93 /sse=none
+    |    |-<94> setz Eb 0f 94 /sse=none
+    |    |-<95> setnz Eb 0f 95 /sse=none
+    |    |-<96> setbe Eb 0f 96 /sse=none
+    |    |-<97> seta Eb 0f 97 /sse=none
+    |    |-<98> sets Eb 0f 98 /sse=none
+    |    |-<99> setns Eb 0f 99 /sse=none
+    |    |-<9a> setp Eb 0f 9a /sse=none
+    |    |-<9b> setnp Eb 0f 9b /sse=none
+    |    |-<9c> setl Eb 0f 9c /sse=none
+    |    |-<9d> setge Eb 0f 9d /sse=none
+    |    |-<9e> setle Eb 0f 9e /sse=none
+    |    |-<9f> setg Eb 0f 9f /sse=none
+    |    |-<a0> push FS 0f a0 /sse=none
+    |    |-<a1> pop FS 0f a1 /sse=none
+    |    |-<a2> cpuid  0f a2 /sse=none
+    |    |-<a3> bt Ev, Gv 0f a3 /sse=none
+    |    |-<a4> shld Ev, Gv, Ib 0f a4 /sse=none
+    |    |-<a5> shld Ev, Gv, CL 0f a5 /sse=none
+    |    |-<a6> table-/mod
+    |    |    |-<01> table-/reg
+    |    |    |    |-<00> table-/rm
+    |    |    |    |    |-<00> montmul  0f a6 /mod=11 /reg=0 /rm=0 /sse=none
+    |    |    |    |-<01> table-/rm
+    |    |    |    |    |-<00> xsha1  0f a6 /mod=11 /reg=1 /rm=0 /sse=none
+    |    |    |    |-<02> table-/rm
+    |    |    |    |    |-<00> xsha256  0f a6 /mod=11 /reg=2 /rm=0 /sse=none
+    |    |-<a7> table-/mod
+    |    |    |-<01> table-/reg
+    |    |    |    |-<00> table-/rm
+    |    |    |    |    |-<00> xstore  0f a7 /mod=11 /reg=0 /rm=0 /sse=none
+    |    |    |    |-<01> table-/rm
+    |    |    |    |    |-<00> xcryptecb  0f a7 /mod=11 /reg=1 /rm=0 /sse=none
+    |    |    |    |-<02> table-/rm
+    |    |    |    |    |-<00> xcryptcbc  0f a7 /mod=11 /reg=2 /rm=0 /sse=none
+    |    |    |    |-<03> table-/rm
+    |    |    |    |    |-<00> xcryptctr  0f a7 /mod=11 /reg=3 /rm=0 /sse=none
+    |    |    |    |-<04> table-/rm
+    |    |    |    |    |-<00> xcryptcfb  0f a7 /mod=11 /reg=4 /rm=0 /sse=none
+    |    |    |    |-<05> table-/rm
+    |    |    |    |    |-<00> xcryptofb  0f a7 /mod=11 /reg=5 /rm=0 /sse=none
+    |    |-<a8> push GS 0f a8 /sse=none
+    |    |-<a9> pop GS 0f a9 /sse=none
+    |    |-<aa> rsm  0f aa /sse=none
+    |    |-<ab> bts Ev, Gv 0f ab /sse=none
+    |    |-<ac> shrd Ev, Gv, Ib 0f ac /sse=none
+    |    |-<ad> shrd Ev, Gv, CL 0f ad /sse=none
+    |    |-<ae> table-/mod
+    |    |    |-<00> table-/reg
+    |    |    |    |-<00> fxsave M 0f ae /mod=!11 /reg=0 /sse=none
+    |    |    |    |-<01> fxrstor M 0f ae /mod=!11 /reg=1 /sse=none
+    |    |    |    |-<02> ldmxcsr Md 0f ae /mod=!11 /reg=2 /sse=none
+    |    |    |    |-<03> stmxcsr Md 0f ae /mod=!11 /reg=3 /sse=none
+    |    |    |    |-<04> xsave M 0f ae /mod=!11 /reg=4 /sse=none
+    |    |    |    |-<05> xrstor M 0f ae /mod=!11 /reg=5 /sse=none
+    |    |    |    |-<07> clflush M 0f ae /mod=!11 /reg=7 /sse=none
+    |    |    |-<01> table-/reg
+    |    |    |    |-<05> table-/rm
+    |    |    |    |    |-<00> lfence  0f ae /mod=11 /reg=5 /rm=0 /sse=none
+    |    |    |    |    |-<01> lfence  0f ae /mod=11 /reg=5 /rm=1 /sse=none
+    |    |    |    |    |-<02> lfence  0f ae /mod=11 /reg=5 /rm=2 /sse=none
+    |    |    |    |    |-<03> lfence  0f ae /mod=11 /reg=5 /rm=3 /sse=none
+    |    |    |    |    |-<04> lfence  0f ae /mod=11 /reg=5 /rm=4 /sse=none
+    |    |    |    |    |-<05> lfence  0f ae /mod=11 /reg=5 /rm=5 /sse=none
+    |    |    |    |    |-<06> lfence  0f ae /mod=11 /reg=5 /rm=6 /sse=none
+    |    |    |    |    |-<07> lfence  0f ae /mod=11 /reg=5 /rm=7 /sse=none
+    |    |    |    |-<06> table-/rm
+    |    |    |    |    |-<00> mfence  0f ae /mod=11 /reg=6 /rm=0 /sse=none
+    |    |    |    |    |-<01> mfence  0f ae /mod=11 /reg=6 /rm=1 /sse=none
+    |    |    |    |    |-<02> mfence  0f ae /mod=11 /reg=6 /rm=2 /sse=none
+    |    |    |    |    |-<03> mfence  0f ae /mod=11 /reg=6 /rm=3 /sse=none
+    |    |    |    |    |-<04> mfence  0f ae /mod=11 /reg=6 /rm=4 /sse=none
+    |    |    |    |    |-<05> mfence  0f ae /mod=11 /reg=6 /rm=5 /sse=none
+    |    |    |    |    |-<06> mfence  0f ae /mod=11 /reg=6 /rm=6 /sse=none
+    |    |    |    |    |-<07> mfence  0f ae /mod=11 /reg=6 /rm=7 /sse=none
+    |    |    |    |-<07> table-/rm
+    |    |    |    |    |-<00> sfence  0f ae /mod=11 /reg=7 /rm=0 /sse=none
+    |    |    |    |    |-<01> sfence  0f ae /mod=11 /reg=7 /rm=1 /sse=none
+    |    |    |    |    |-<02> sfence  0f ae /mod=11 /reg=7 /rm=2 /sse=none
+    |    |    |    |    |-<03> sfence  0f ae /mod=11 /reg=7 /rm=3 /sse=none
+    |    |    |    |    |-<04> sfence  0f ae /mod=11 /reg=7 /rm=4 /sse=none
+    |    |    |    |    |-<05> sfence  0f ae /mod=11 /reg=7 /rm=5 /sse=none
+    |    |    |    |    |-<06> sfence  0f ae /mod=11 /reg=7 /rm=6 /sse=none
+    |    |    |    |    |-<07> sfence  0f ae /mod=11 /reg=7 /rm=7 /sse=none
+    |    |-<af> imul Gv, Ev 0f af /sse=none
+    |    |-<b0> cmpxchg Eb, Gb 0f b0 /sse=none
+    |    |-<b1> cmpxchg Ev, Gv 0f b1 /sse=none
+    |    |-<b2> lss Gv, M 0f b2 /sse=none
+    |    |-<b3> btr Ev, Gv 0f b3 /sse=none
+    |    |-<b4> lfs Gz, M 0f b4 /sse=none
+    |    |-<b5> lgs Gz, M 0f b5 /sse=none
+    |    |-<b6> movzx Gv, Eb 0f b6 /sse=none
+    |    |-<b7> movzx Gy, Ew 0f b7 /sse=none
+    |    |-<b8> table-/sse
+    |    |    |-<02> popcnt Gv, Ev 0f b8 /sse=f3
+    |    |-<ba> table-/reg
+    |    |    |-<04> bt Ev, Ib 0f ba /reg=4 /sse=none
+    |    |    |-<05> bts Ev, Ib 0f ba /reg=5 /sse=none
+    |    |    |-<06> btr Ev, Ib 0f ba /reg=6 /sse=none
+    |    |    |-<07> btc Ev, Ib 0f ba /reg=7 /sse=none
+    |    |-<bb> btc Ev, Gv 0f bb /sse=none
+    |    |-<bc> bsf Gv, Ev 0f bc /sse=none
+    |    |-<bd> bsr Gv, Ev 0f bd /sse=none
+    |    |-<be> movsx Gv, Eb 0f be /sse=none
+    |    |-<bf> movsx Gy, Ew 0f bf /sse=none
+    |    |-<c0> xadd Eb, Gb 0f c0 /sse=none
+    |    |-<c1> xadd Ev, Gv 0f c1 /sse=none
+    |    |-<c2> table-/sse
+    |    |    |-<00> cmpps V, W, Ib 0f c2 /sse=none
+    |    |    |-<01> cmpsd V, W, Ib 0f c2 /sse=f2
+    |    |    |-<02> cmpss V, W, Ib 0f c2 /sse=f3
+    |    |    |-<03> cmppd V, W, Ib 0f c2 /sse=66
+    |    |-<c3> movnti M, Gy 0f c3 /sse=none
+    |    |-<c4> table-/sse
+    |    |    |-<00> pinsrw P, MwRy, Ib 0f c4 /sse=none
+    |    |    |-<03> pinsrw V, MwRy, Ib 0f c4 /sse=66
+    |    |-<c5> table-/sse
+    |    |    |-<00> pextrw Gy, N, Ib 0f c5 /sse=none
+    |    |    |-<03> pextrw Gy, U, Ib 0f c5 /sse=66
+    |    |-<c6> table-/sse
+    |    |    |-<00> shufps V, W, Ib 0f c6 /sse=none
+    |    |    |-<03> shufpd V, W, Ib 0f c6 /sse=66
+    |    |-<c7> table-/reg
+    |    |    |-<01> table-/o
+    |    |    |    |-<00> cmpxchg8b M 0f c7 /reg=1 /sse=none /o=16
+    |    |    |    |-<01> cmpxchg8b M 0f c7 /reg=1 /sse=none /o=32
+    |    |    |    |-<02> cmpxchg16b M 0f c7 /reg=1 /sse=none /o=64
+    |    |    |-<06> table-/sse
+    |    |    |    |-<00> table-/vendor
+    |    |    |    |    |-<01> vmptrld Mq 0f c7 /reg=6 /sse=none /vendor=intel
+    |    |    |    |-<02> table-/vendor
+    |    |    |    |    |-<01> vmxon Mq 0f c7 /reg=6 /sse=f3 /vendor=intel
+    |    |    |    |-<03> table-/vendor
+    |    |    |    |    |-<01> vmclear Mq 0f c7 /reg=6 /sse=66 /vendor=intel
+    |    |    |-<07> table-/vendor
+    |    |    |    |-<01> vmptrst Mq 0f c7 /reg=7 /sse=none /vendor=intel
+    |    |-<c8> bswap R0y 0f c8 /sse=none
+    |    |-<c9> bswap R1y 0f c9 /sse=none
+    |    |-<ca> bswap R2y 0f ca /sse=none
+    |    |-<cb> bswap R3y 0f cb /sse=none
+    |    |-<cc> bswap R4y 0f cc /sse=none
+    |    |-<cd> bswap R5y 0f cd /sse=none
+    |    |-<ce> bswap R6y 0f ce /sse=none
+    |    |-<cf> bswap R7y 0f cf /sse=none
+    |    |-<d0> table-/sse
+    |    |    |-<01> addsubps V, W 0f d0 /sse=f2
+    |    |    |-<03> addsubpd V, W 0f d0 /sse=66
+    |    |-<d1> table-/sse
+    |    |    |-<00> psrlw P, Q 0f d1 /sse=none
+    |    |    |-<03> psrlw V, W 0f d1 /sse=66
+    |    |-<d2> table-/sse
+    |    |    |-<00> psrld P, Q 0f d2 /sse=none
+    |    |    |-<03> psrld V, W 0f d2 /sse=66
+    |    |-<d3> table-/sse
+    |    |    |-<00> psrlq P, Q 0f d3 /sse=none
+    |    |    |-<03> psrlq V, W 0f d3 /sse=66
+    |    |-<d4> table-/sse
+    |    |    |-<00> paddq P, Q 0f d4 /sse=none
+    |    |    |-<03> paddq V, W 0f d4 /sse=66
+    |    |-<d5> table-/sse
+    |    |    |-<00> pmullw P, Q 0f d5 /sse=none
+    |    |    |-<03> pmullw V, W 0f d5 /sse=66
+    |    |-<d6> table-/sse
+    |    |    |-<01> movdq2q P, U 0f d6 /sse=f2
+    |    |    |-<02> movq2dq V, N 0f d6 /sse=f3
+    |    |    |-<03> movq W, V 0f d6 /sse=66
+    |    |-<d7> table-/sse
+    |    |    |-<00> pmovmskb Gd, N 0f d7 /sse=none
+    |    |    |-<03> pmovmskb Gd, U 0f d7 /sse=66
+    |    |-<d8> table-/sse
+    |    |    |-<00> psubusb P, Q 0f d8 /sse=none
+    |    |    |-<03> psubusb V, W 0f d8 /sse=66
+    |    |-<d9> table-/sse
+    |    |    |-<00> psubusw P, Q 0f d9 /sse=none
+    |    |    |-<03> psubusw V, W 0f d9 /sse=66
+    |    |-<da> table-/sse
+    |    |    |-<00> pminub P, Q 0f da /sse=none
+    |    |    |-<03> pminub V, W 0f da /sse=66
+    |    |-<db> table-/sse
+    |    |    |-<00> pand P, Q 0f db /sse=none
+    |    |    |-<03> pand V, W 0f db /sse=66
+    |    |-<dc> table-/sse
+    |    |    |-<00> paddusb P, Q 0f dc /sse=none
+    |    |    |-<03> paddusb V, W 0f dc /sse=66
+    |    |-<dd> table-/sse
+    |    |    |-<00> paddusw P, Q 0f dd /sse=none
+    |    |    |-<03> paddusw V, W 0f dd /sse=66
+    |    |-<de> table-/sse
+    |    |    |-<00> pmaxub P, Q 0f de /sse=none
+    |    |    |-<03> pmaxub V, W 0f de /sse=66
+    |    |-<df> table-/sse
+    |    |    |-<00> pandn P, Q 0f df /sse=none
+    |    |    |-<03> pandn V, W 0f df /sse=66
+    |    |-<e0> table-/sse
+    |    |    |-<00> pavgb P, Q 0f e0 /sse=none
+    |    |    |-<03> pavgb V, W 0f e0 /sse=66
+    |    |-<e1> table-/sse
+    |    |    |-<00> psraw P, Q 0f e1 /sse=none
+    |    |    |-<03> psraw V, W 0f e1 /sse=66
+    |    |-<e2> table-/sse
+    |    |    |-<00> psrad P, Q 0f e2 /sse=none
+    |    |    |-<03> psrad V, W 0f e2 /sse=66
+    |    |-<e3> table-/sse
+    |    |    |-<00> pavgw P, Q 0f e3 /sse=none
+    |    |    |-<03> pavgw V, W 0f e3 /sse=66
+    |    |-<e4> table-/sse
+    |    |    |-<00> pmulhuw P, Q 0f e4 /sse=none
+    |    |    |-<03> pmulhuw V, W 0f e4 /sse=66
+    |    |-<e5> table-/sse
+    |    |    |-<00> pmulhw P, Q 0f e5 /sse=none
+    |    |    |-<03> pmulhw V, W 0f e5 /sse=66
+    |    |-<e6> table-/sse
+    |    |    |-<01> cvtpd2dq Vdq, W 0f e6 /sse=f2
+    |    |    |-<02> cvtdq2pd V, Wdq 0f e6 /sse=f3
+    |    |    |-<03> cvttpd2dq Vdq, W 0f e6 /sse=66
+    |    |-<e7> table-/sse
+    |    |    |-<00> movntq M, P 0f e7 /sse=none
+    |    |    |-<03> movntdq M, V 0f e7 /sse=66
+    |    |-<e8> table-/sse
+    |    |    |-<00> psubsb P, Q 0f e8 /sse=none
+    |    |    |-<03> psubsb V, W 0f e8 /sse=66
+    |    |-<e9> table-/sse
+    |    |    |-<00> psubsw P, Q 0f e9 /sse=none
+    |    |    |-<03> psubsw V, W 0f e9 /sse=66
+    |    |-<ea> table-/sse
+    |    |    |-<00> pminsw P, Q 0f ea /sse=none
+    |    |    |-<03> pminsw V, W 0f ea /sse=66
+    |    |-<eb> table-/sse
+    |    |    |-<00> por P, Q 0f eb /sse=none
+    |    |    |-<03> por V, W 0f eb /sse=66
+    |    |-<ec> table-/sse
+    |    |    |-<00> paddsb P, Q 0f ec /sse=none
+    |    |    |-<03> paddsb V, W 0f ec /sse=66
+    |    |-<ed> table-/sse
+    |    |    |-<00> paddsw P, Q 0f ed /sse=none
+    |    |    |-<03> paddsw V, W 0f ed /sse=66
+    |    |-<ee> table-/sse
+    |    |    |-<00> pmaxsw P, Q 0f ee /sse=none
+    |    |    |-<03> pmaxsw V, W 0f ee /sse=66
+    |    |-<ef> table-/sse
+    |    |    |-<00> pxor P, Q 0f ef /sse=none
+    |    |    |-<03> pxor V, W 0f ef /sse=66
+    |    |-<f0> table-/sse
+    |    |    |-<01> lddqu V, M 0f f0 /sse=f2
+    |    |-<f1> table-/sse
+    |    |    |-<00> psllw P, Q 0f f1 /sse=none
+    |    |    |-<03> psllw V, W 0f f1 /sse=66
+    |    |-<f2> table-/sse
+    |    |    |-<00> pslld P, Q 0f f2 /sse=none
+    |    |    |-<03> pslld V, W 0f f2 /sse=66
+    |    |-<f3> table-/sse
+    |    |    |-<00> psllq P, Q 0f f3 /sse=none
+    |    |    |-<03> psllq V, W 0f f3 /sse=66
+    |    |-<f4> table-/sse
+    |    |    |-<00> pmuludq P, Q 0f f4 /sse=none
+    |    |    |-<03> pmuludq V, W 0f f4 /sse=66
+    |    |-<f5> table-/sse
+    |    |    |-<00> pmaddwd P, Q 0f f5 /sse=none
+    |    |    |-<03> pmaddwd V, W 0f f5 /sse=66
+    |    |-<f6> table-/sse
+    |    |    |-<00> psadbw P, Q 0f f6 /sse=none
+    |    |    |-<03> psadbw V, W 0f f6 /sse=66
+    |    |-<f7> table-/mod
+    |    |    |-<01> table-/sse
+    |    |    |    |-<00> maskmovq P, N 0f f7 /mod=11 /sse=none
+    |    |    |    |-<03> maskmovdqu V, U 0f f7 /mod=11 /sse=66
+    |    |-<f8> table-/sse
+    |    |    |-<00> psubb P, Q 0f f8 /sse=none
+    |    |    |-<03> psubb V, W 0f f8 /sse=66
+    |    |-<f9> table-/sse
+    |    |    |-<00> psubw P, Q 0f f9 /sse=none
+    |    |    |-<03> psubw V, W 0f f9 /sse=66
+    |    |-<fa> table-/sse
+    |    |    |-<00> psubd P, Q 0f fa /sse=none
+    |    |    |-<03> psubd V, W 0f fa /sse=66
+    |    |-<fb> table-/sse
+    |    |    |-<00> psubq P, Q 0f fb /sse=none
+    |    |    |-<03> psubq V, W 0f fb /sse=66
+    |    |-<fc> table-/sse
+    |    |    |-<00> paddb P, Q 0f fc /sse=none
+    |    |    |-<03> paddb V, W 0f fc /sse=66
+    |    |-<fd> table-/sse
+    |    |    |-<00> paddw P, Q 0f fd /sse=none
+    |    |    |-<03> paddw V, W 0f fd /sse=66
+    |    |-<fe> table-/sse
+    |    |    |-<00> paddd P, Q 0f fe /sse=none
+    |    |    |-<03> paddd V, W 0f fe /sse=66
+    |-<10> adc Eb, Gb 10
+    |-<11> adc Ev, Gv 11
+    |-<12> adc Gb, Eb 12
+    |-<13> adc Gv, Ev 13
+    |-<14> adc AL, Ib 14
+    |-<15> adc rAX, sIz 15
+    |-<16> table-/m
+    |    |-<00> push SS 16 /m=!64
+    |-<17> table-/m
+    |    |-<00> pop SS 17 /m=!64
+    |-<18> sbb Eb, Gb 18
+    |-<19> sbb Ev, Gv 19
+    |-<1a> sbb Gb, Eb 1a
+    |-<1b> sbb Gv, Ev 1b
+    |-<1c> sbb AL, Ib 1c
+    |-<1d> sbb rAX, sIz 1d
+    |-<1e> table-/m
+    |    |-<00> push DS 1e /m=!64
+    |-<1f> table-/m
+    |    |-<00> pop DS 1f /m=!64
+    |-<20> and Eb, Gb 20
+    |-<21> and Ev, Gv 21
+    |-<22> and Gb, Eb 22
+    |-<23> and Gv, Ev 23
+    |-<24> and AL, Ib 24
+    |-<25> and rAX, sIz 25
+    |-<27> table-/m
+    |    |-<00> daa  27 /m=!64
+    |-<28> sub Eb, Gb 28
+    |-<29> sub Ev, Gv 29
+    |-<2a> sub Gb, Eb 2a
+    |-<2b> sub Gv, Ev 2b
+    |-<2c> sub AL, Ib 2c
+    |-<2d> sub rAX, sIz 2d
+    |-<2f> table-/m
+    |    |-<00> das  2f /m=!64
+    |-<30> xor Eb, Gb 30
+    |-<31> xor Ev, Gv 31
+    |-<32> xor Gb, Eb 32
+    |-<33> xor Gv, Ev 33
+    |-<34> xor AL, Ib 34
+    |-<35> xor rAX, sIz 35
+    |-<37> table-/m
+    |    |-<00> aaa  37 /m=!64
+    |-<38> cmp Eb, Gb 38
+    |-<39> cmp Ev, Gv 39
+    |-<3a> cmp Gb, Eb 3a
+    |-<3b> cmp Gv, Ev 3b
+    |-<3c> cmp AL, Ib 3c
+    |-<3d> cmp rAX, sIz 3d
+    |-<3f> table-/m
+    |    |-<00> aas  3f /m=!64
+    |-<40> inc R0z 40
+    |-<41> inc R1z 41
+    |-<42> inc R2z 42
+    |-<43> inc R3z 43
+    |-<44> inc R4z 44
+    |-<45> inc R5z 45
+    |-<46> inc R6z 46
+    |-<47> inc R7z 47
+    |-<48> dec R0z 48
+    |-<49> dec R1z 49
+    |-<4a> dec R2z 4a
+    |-<4b> dec R3z 4b
+    |-<4c> dec R4z 4c
+    |-<4d> dec R5z 4d
+    |-<4e> dec R6z 4e
+    |-<4f> dec R7z 4f
+    |-<50> push R0v 50
+    |-<51> push R1v 51
+    |-<52> push R2v 52
+    |-<53> push R3v 53
+    |-<54> push R4v 54
+    |-<55> push R5v 55
+    |-<56> push R6v 56
+    |-<57> push R7v 57
+    |-<58> pop R0v 58
+    |-<59> pop R1v 59
+    |-<5a> pop R2v 5a
+    |-<5b> pop R3v 5b
+    |-<5c> pop R4v 5c
+    |-<5d> pop R5v 5d
+    |-<5e> pop R6v 5e
+    |-<5f> pop R7v 5f
+    |-<60> table-/o
+    |    |-<00> table-/m
+    |    |    |-<00> pusha  60 /o=16 /m=!64
+    |    |-<01> table-/m
+    |    |    |-<00> pushad  60 /o=32 /m=!64
+    |-<61> table-/o
+    |    |-<00> table-/m
+    |    |    |-<00> popa  61 /o=16 /m=!64
+    |    |-<01> table-/m
+    |    |    |-<00> popad  61 /o=32 /m=!64
+    |-<62> table-/m
+    |    |-<00> bound Gv, M 62 /m=!64
+    |-<63> table-/m
+    |    |-<00> arpl Ew, Gw 63 /m=!64
+    |    |-<01> movsxd Gq, Ed 63 /m=64
+    |-<68> push sIz 68
+    |-<69> imul Gv, Ev, Iz 69
+    |-<6a> push sIb 6a
+    |-<6b> imul Gv, Ev, sIb 6b
+    |-<6c> insb  6c
+    |-<6d> table-/o
+    |    |-<00> insw  6d /o=16
+    |    |-<01> insd  6d /o=32
+    |-<6e> outsb  6e
+    |-<6f> table-/o
+    |    |-<00> outsw  6f /o=16
+    |    |-<01> outsd  6f /o=32
+    |-<70> jo Jb 70
+    |-<71> jno Jb 71
+    |-<72> jb Jb 72
+    |-<73> jae Jb 73
+    |-<74> jz Jb 74
+    |-<75> jnz Jb 75
+    |-<76> jbe Jb 76
+    |-<77> ja Jb 77
+    |-<78> js Jb 78
+    |-<79> jns Jb 79
+    |-<7a> jp Jb 7a
+    |-<7b> jnp Jb 7b
+    |-<7c> jl Jb 7c
+    |-<7d> jge Jb 7d
+    |-<7e> jle Jb 7e
+    |-<7f> jg Jb 7f
+    |-<80> table-/reg
+    |    |-<00> add Eb, Ib 80 /reg=0
+    |    |-<01> or Eb, Ib 80 /reg=1
+    |    |-<02> adc Eb, Ib 80 /reg=2
+    |    |-<03> sbb Eb, Ib 80 /reg=3
+    |    |-<04> and Eb, Ib 80 /reg=4
+    |    |-<05> sub Eb, Ib 80 /reg=5
+    |    |-<06> xor Eb, Ib 80 /reg=6
+    |    |-<07> cmp Eb, Ib 80 /reg=7
+    |-<81> table-/reg
+    |    |-<00> add Ev, sIz 81 /reg=0
+    |    |-<01> or Ev, sIz 81 /reg=1
+    |    |-<02> adc Ev, sIz 81 /reg=2
+    |    |-<03> sbb Ev, sIz 81 /reg=3
+    |    |-<04> and Ev, sIz 81 /reg=4
+    |    |-<05> sub Ev, sIz 81 /reg=5
+    |    |-<06> xor Ev, sIz 81 /reg=6
+    |    |-<07> cmp Ev, sIz 81 /reg=7
+    |-<82> table-/reg
+    |    |-<00> table-/m
+    |    |    |-<00> add Eb, Ib 82 /reg=0 /m=!64
+    |    |-<01> table-/m
+    |    |    |-<00> or Eb, Ib 82 /reg=1 /m=!64
+    |    |-<02> table-/m
+    |    |    |-<00> adc Eb, Ib 82 /reg=2 /m=!64
+    |    |-<03> table-/m
+    |    |    |-<00> sbb Eb, Ib 82 /reg=3 /m=!64
+    |    |-<04> table-/m
+    |    |    |-<00> and Eb, Ib 82 /reg=4 /m=!64
+    |    |-<05> table-/m
+    |    |    |-<00> sub Eb, Ib 82 /reg=5 /m=!64
+    |    |-<06> table-/m
+    |    |    |-<00> xor Eb, Ib 82 /reg=6 /m=!64
+    |    |-<07> table-/m
+    |    |    |-<00> cmp Eb, Ib 82 /reg=7 /m=!64
+    |-<83> table-/reg
+    |    |-<00> add Ev, sIb 83 /reg=0
+    |    |-<01> or Ev, sIb 83 /reg=1
+    |    |-<02> adc Ev, sIb 83 /reg=2
+    |    |-<03> sbb Ev, sIb 83 /reg=3
+    |    |-<04> and Ev, sIb 83 /reg=4
+    |    |-<05> sub Ev, sIb 83 /reg=5
+    |    |-<06> xor Ev, sIb 83 /reg=6
+    |    |-<07> cmp Ev, sIb 83 /reg=7
+    |-<84> test Eb, Gb 84
+    |-<85> test Ev, Gv 85
+    |-<86> xchg Eb, Gb 86
+    |-<87> xchg Ev, Gv 87
+    |-<88> mov Eb, Gb 88
+    |-<89> mov Ev, Gv 89
+    |-<8a> mov Gb, Eb 8a
+    |-<8b> mov Gv, Ev 8b
+    |-<8c> mov MwRv, S 8c
+    |-<8d> lea Gv, M 8d
+    |-<8e> mov S, MwRv 8e
+    |-<8f> table-/reg
+    |    |-<00> pop Ev 8f /reg=0
+    |-<90> xchg R0v, rAX 90
+    |-<91> xchg R1v, rAX 91
+    |-<92> xchg R2v, rAX 92
+    |-<93> xchg R3v, rAX 93
+    |-<94> xchg R4v, rAX 94
+    |-<95> xchg R5v, rAX 95
+    |-<96> xchg R6v, rAX 96
+    |-<97> xchg R7v, rAX 97
+    |-<98> table-/o
+    |    |-<00> cbw  98 /o=16
+    |    |-<01> cwde  98 /o=32
+    |    |-<02> cdqe  98 /o=64
+    |-<99> table-/o
+    |    |-<00> cwd  99 /o=16
+    |    |-<01> cdq  99 /o=32
+    |    |-<02> cqo  99 /o=64
+    |-<9a> table-/m
+    |    |-<00> call Av 9a /m=!64
+    |-<9b> wait  9b
+    |-<9c> table-/o
+    |    |-<00> table-/m
+    |    |    |-<00> pushfw  9c /o=16 /m=!64
+    |    |    |-<01> pushfw  9c /o=16 /m=64
+    |    |-<01> table-/m
+    |    |    |-<00> pushfd  9c /o=32 /m=!64
+    |    |    |-<01> pushfq  9c /o=32 /m=64
+    |    |-<02> table-/m
+    |    |    |-<01> pushfq  9c /o=64 /m=64
+    |-<9d> table-/o
+    |    |-<00> table-/m
+    |    |    |-<00> popfw  9d /o=16 /m=!64
+    |    |-<01> table-/m
+    |    |    |-<00> popfd  9d /o=32 /m=!64
+    |    |    |-<01> popfq  9d /o=32 /m=64
+    |    |-<02> table-/m
+    |    |    |-<01> popfq  9d /o=64 /m=64
+    |-<9e> sahf  9e
+    |-<9f> lahf  9f
+    |-<a0> mov AL, Ob a0
+    |-<a1> mov rAX, Ov a1
+    |-<a2> mov Ob, AL a2
+    |-<a3> mov Ov, rAX a3
+    |-<a4> movsb  a4
+    |-<a5> table-/o
+    |    |-<00> movsw  a5 /o=16
+    |    |-<01> movsd  a5 /o=32
+    |    |-<02> movsq  a5 /o=64
+    |-<a6> cmpsb  a6
+    |-<a7> table-/o
+    |    |-<00> cmpsw  a7 /o=16
+    |    |-<01> cmpsd  a7 /o=32
+    |    |-<02> cmpsq  a7 /o=64
+    |-<a8> test AL, Ib a8
+    |-<a9> test rAX, sIz a9
+    |-<aa> stosb  aa
+    |-<ab> table-/o
+    |    |-<00> stosw  ab /o=16
+    |    |-<01> stosd  ab /o=32
+    |    |-<02> stosq  ab /o=64
+    |-<ac> lodsb  ac
+    |-<ad> table-/o
+    |    |-<00> lodsw  ad /o=16
+    |    |-<01> lodsd  ad /o=32
+    |    |-<02> lodsq  ad /o=64
+    |-<ae> scasb  ae
+    |-<af> table-/o
+    |    |-<00> scasw  af /o=16
+    |    |-<01> scasd  af /o=32
+    |    |-<02> scasq  af /o=64
+    |-<b0> mov R0b, Ib b0
+    |-<b1> mov R1b, Ib b1
+    |-<b2> mov R2b, Ib b2
+    |-<b3> mov R3b, Ib b3
+    |-<b4> mov R4b, Ib b4
+    |-<b5> mov R5b, Ib b5
+    |-<b6> mov R6b, Ib b6
+    |-<b7> mov R7b, Ib b7
+    |-<b8> mov R0v, Iv b8
+    |-<b9> mov R1v, Iv b9
+    |-<ba> mov R2v, Iv ba
+    |-<bb> mov R3v, Iv bb
+    |-<bc> mov R4v, Iv bc
+    |-<bd> mov R5v, Iv bd
+    |-<be> mov R6v, Iv be
+    |-<bf> mov R7v, Iv bf
+    |-<c0> table-/reg
+    |    |-<00> rol Eb, Ib c0 /reg=0
+    |    |-<01> ror Eb, Ib c0 /reg=1
+    |    |-<02> rcl Eb, Ib c0 /reg=2
+    |    |-<03> rcr Eb, Ib c0 /reg=3
+    |    |-<04> shl Eb, Ib c0 /reg=4
+    |    |-<05> shr Eb, Ib c0 /reg=5
+    |    |-<06> shl Eb, Ib c0 /reg=6
+    |    |-<07> sar Eb, Ib c0 /reg=7
+    |-<c1> table-/reg
+    |    |-<00> rol Ev, Ib c1 /reg=0
+    |    |-<01> ror Ev, Ib c1 /reg=1
+    |    |-<02> rcl Ev, Ib c1 /reg=2
+    |    |-<03> rcr Ev, Ib c1 /reg=3
+    |    |-<04> shl Ev, Ib c1 /reg=4
+    |    |-<05> shr Ev, Ib c1 /reg=5
+    |    |-<06> shl Ev, Ib c1 /reg=6
+    |    |-<07> sar Ev, Ib c1 /reg=7
+    |-<c2> ret Iw c2
+    |-<c3> ret  c3
+    |-<c4> table-/vex
+    |    |-<00> table-/m
+    |    |    |-<00> les Gv, M c4 /vex=none /m=!64
+    |    |-<01> table-opctbl
+    |    |    |-<10> vmovups Vx, Wx c4 /vex=none_0f 10
+    |    |    |-<11> vmovups Wx, Vx c4 /vex=none_0f 11
+    |    |    |-<12> table-/mod
+    |    |    |    |-<01> vmovhlps Vx, Ux c4 /vex=none_0f 12 /mod=11
+    |    |    |-<14> vunpcklps Vx, Hx, Wx c4 /vex=none_0f 14
+    |    |    |-<2e> vucomiss Vx, Wx c4 /vex=none_0f 2e
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovhps Vx, Hx, M c4 /vex=none_0f 16 /mod=!11
+    |    |    |    |-<01> vmovlhps Vx, Hx, Ux c4 /vex=none_0f 16 /mod=11
+    |    |    |-<17> vmovhps M, Vx c4 /vex=none_0f 17
+    |    |    |-<28> vmovaps Vx, Wx c4 /vex=none_0f 28
+    |    |    |-<29> vmovaps Wx, Vx c4 /vex=none_0f 29
+    |    |    |-<2b> vmovntps M, Vx c4 /vex=none_0f 2b
+    |    |    |-<ae> table-/mod
+    |    |    |    |-<00> table-/reg
+    |    |    |    |    |-<03> vstmxcsr Md c4 /vex=none_0f ae /mod=!11 /reg=3
+    |    |    |-<2f> vcomiss Vx, Wx c4 /vex=none_0f 2f
+    |    |    |-<c2> vcmpps Vx, Hx, Wx, Ib c4 /vex=none_0f c2
+    |    |    |-<c6> vshufps Vx, Hx, Wx, Ib c4 /vex=none_0f c6
+    |    |    |-<50> vmovmskps Gd, Ux c4 /vex=none_0f 50
+    |    |    |-<51> vsqrtps Vx, Wx c4 /vex=none_0f 51
+    |    |    |-<52> vrsqrtps Vx, Wx c4 /vex=none_0f 52
+    |    |    |-<53> vrcpps Vx, Wx c4 /vex=none_0f 53
+    |    |    |-<54> vandps Vx, Hx, Wx c4 /vex=none_0f 54
+    |    |    |-<55> vandnps Vx, Hx, Wx c4 /vex=none_0f 55
+    |    |    |-<56> vorps Vx, Hx, Wx c4 /vex=none_0f 56
+    |    |    |-<57> vxorps Vx, Hx, Wx c4 /vex=none_0f 57
+    |    |    |-<58> vaddps Vx, Hx, Wx c4 /vex=none_0f 58
+    |    |    |-<59> vmulps Vx, Hx, Wx c4 /vex=none_0f 59
+    |    |    |-<5a> vcvtps2pd Vx, Wdq c4 /vex=none_0f 5a
+    |    |    |-<5b> vcvtdq2ps Vx, Wx c4 /vex=none_0f 5b
+    |    |    |-<5c> vsubps Vx, Hx, Wx c4 /vex=none_0f 5c
+    |    |    |-<5d> vminps Vx, Hx, Wx c4 /vex=none_0f 5d
+    |    |    |-<5e> vdivps Vx, Hx, Wx c4 /vex=none_0f 5e
+    |    |    |-<5f> vmaxps Vx, Hx, Wx c4 /vex=none_0f 5f
+    |    |    |-<77> table-/vexl
+    |    |    |    |-<00> vzeroupper  c4 /vex=0f 77 /vexl=0
+    |    |    |    |-<01> vzeroall  c4 /vex=0f 77 /vexl=1
+    |    |    |-<15> vunpckhps Vx, Hx, Wx c4 /vex=none_0f 15
+    |    |-<05> table-opctbl
+    |    |    |-<10> vmovupd Vx, Wx c4 /vex=66_0f 10
+    |    |    |-<11> vmovupd Wx, Vx c4 /vex=66_0f 11
+    |    |    |-<14> vunpcklpd Vx, Hx, Wx c4 /vex=66_0f 14
+    |    |    |-<15> vunpckhpd Vx, Hx, Wx c4 /vex=66_0f 15
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovhpd Vx, Hx, M c4 /vex=66_0f 16 /mod=!11
+    |    |    |-<17> vmovhpd M, Vx c4 /vex=66_0f 17
+    |    |    |-<28> vmovapd Vx, Wx c4 /vex=66_0f 28
+    |    |    |-<29> vmovapd Wx, Vx c4 /vex=66_0f 29
+    |    |    |-<2b> vmovntpd M, Vx c4 /vex=66_0f 2b
+    |    |    |-<2e> vucomisd Vx, Wx c4 /vex=66_0f 2e
+    |    |    |-<2f> vcomisd Vsd, Wsd c4 /vex=66_0f 2f
+    |    |    |-<50> vmovmskpd Gd, Ux c4 /vex=66_0f 50
+    |    |    |-<51> vsqrtpd Vx, Wx c4 /vex=66_0f 51
+    |    |    |-<54> vandpd Vx, Hx, Wx c4 /vex=66_0f 54
+    |    |    |-<55> vandnpd Vx, Hx, Wx c4 /vex=66_0f 55
+    |    |    |-<56> vorpd Vx, Hx, Wx c4 /vex=66_0f 56
+    |    |    |-<57> vxorpd Vx, Hx, Wx c4 /vex=66_0f 57
+    |    |    |-<58> vaddpd Vx, Hx, Wx c4 /vex=66_0f 58
+    |    |    |-<59> vmulpd Vx, Hx, Wx c4 /vex=66_0f 59
+    |    |    |-<5a> vcvtpd2ps Vdq, Wx c4 /vex=66_0f 5a
+    |    |    |-<5b> vcvtps2dq Vx, Wx c4 /vex=66_0f 5b
+    |    |    |-<5c> vsubpd Vx, Hx, Wx c4 /vex=66_0f 5c
+    |    |    |-<5d> vminpd Vx, Hx, Wx c4 /vex=66_0f 5d
+    |    |    |-<5e> vdivpd Vx, Hx, Wx c4 /vex=66_0f 5e
+    |    |    |-<5f> vmaxpd Vx, Hx, Wx c4 /vex=66_0f 5f
+    |    |    |-<60> vpunpcklbw Vx, Hx, Wx c4 /vex=66_0f 60
+    |    |    |-<61> vpunpcklwd Vx, Hx, Wx c4 /vex=66_0f 61
+    |    |    |-<62> vpunpckldq Vx, Hx, Wx c4 /vex=66_0f 62
+    |    |    |-<63> vpacksswb Vx, Hx, Wx c4 /vex=66_0f 63
+    |    |    |-<64> vpcmpgtb Vx, Hx, Wx c4 /vex=66_0f 64
+    |    |    |-<65> vpcmpgtw Vx, Hx, Wx c4 /vex=66_0f 65
+    |    |    |-<66> vpcmpgtd Vx, Hx, Wx c4 /vex=66_0f 66
+    |    |    |-<67> vpackuswb Vx, Hx, Wx c4 /vex=66_0f 67
+    |    |    |-<68> vpunpckhbw Vx, Hx, Wx c4 /vex=66_0f 68
+    |    |    |-<69> vpunpckhwd Vx, Hx, Wx c4 /vex=66_0f 69
+    |    |    |-<6a> vpunpckhdq Vx, Hx, Wx c4 /vex=66_0f 6a
+    |    |    |-<6b> vpackssdw Vx, Hx, Wx c4 /vex=66_0f 6b
+    |    |    |-<6d> vpunpckhqdq Vx, Hx, Wx c4 /vex=66_0f 6d
+    |    |    |-<6e> table-/o
+    |    |    |    |-<00> vmovd Vx, Ey c4 /vex=66_0f 6e /o=16
+    |    |    |    |-<01> vmovd Vx, Ey c4 /vex=66_0f 6e /o=32
+    |    |    |    |-<02> vmovq Vx, Eq c4 /vex=66_0f 6e /o=64
+    |    |    |-<70> vpshufd Vx, Wx, Ib c4 /vex=66_0f 70
+    |    |    |-<71> table-/reg
+    |    |    |    |-<02> vpsrlw Hx, Ux, Ib c4 /vex=66_0f 71 /reg=2
+    |    |    |    |-<04> vpsraw Hx, Ux, Ib c4 /vex=66_0f 71 /reg=4
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpsllw H, V, W c4 /vex=66_0f 71 /reg=6 /vexl=0
+    |    |    |-<72> table-/reg
+    |    |    |    |-<02> vpsrld Hx, Ux, Ib c4 /vex=66_0f 72 /reg=2
+    |    |    |    |-<04> vpsrad Hx, Ux, Ib c4 /vex=66_0f 72 /reg=4
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpslld H, V, W c4 /vex=66_0f 72 /reg=6 /vexl=0
+    |    |    |-<73> table-/reg
+    |    |    |    |-<02> vpsrlq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=2
+    |    |    |    |-<03> vpsrldq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=3
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpsllq H, V, W c4 /vex=66_0f 73 /reg=6 /vexl=0
+    |    |    |    |-<07> vpslldq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=7
+    |    |    |-<74> vpcmpeqb Vx, Hx, Wx c4 /vex=66_0f 74
+    |    |    |-<75> vpcmpeqw Vx, Hx, Wx c4 /vex=66_0f 75
+    |    |    |-<76> vpcmpeqd Vx, Hx, Wx c4 /vex=66_0f 76
+    |    |    |-<7c> vhaddpd Vx, Hx, Wx c4 /vex=66_0f 7c
+    |    |    |-<7d> vhsubpd Vx, Hx, Wx c4 /vex=66_0f 7d
+    |    |    |-<7e> table-/o
+    |    |    |    |-<00> vmovd Ey, Vx c4 /vex=66_0f 7e /o=16
+    |    |    |    |-<01> vmovd Ey, Vx c4 /vex=66_0f 7e /o=32
+    |    |    |    |-<02> vmovq Eq, Vx c4 /vex=66_0f 7e /o=64
+    |    |    |-<c2> vcmppd Vx, Hx, Wx, Ib c4 /vex=66_0f c2
+    |    |    |-<c4> vpinsrw Vx, MwRy, Ib c4 /vex=66_0f c4
+    |    |    |-<c5> vpextrw Gy, Ux, Ib c4 /vex=66_0f c5
+    |    |    |-<c6> vshufpd Vx, Hx, Wx, Ib c4 /vex=66_0f c6
+    |    |    |-<d0> vaddsubpd Vx, Hx, Wx c4 /vex=66_0f d0
+    |    |    |-<d1> vpsrlw Vx, Hx, Wx c4 /vex=66_0f d1
+    |    |    |-<d2> vpsrld Vx, Hx, Wx c4 /vex=66_0f d2
+    |    |    |-<d3> vpsrlq Vx, Hx, Wx c4 /vex=66_0f d3
+    |    |    |-<d4> vpaddq Vx, Hx, Wx c4 /vex=66_0f d4
+    |    |    |-<d5> vpmullw Vx, Hx, Wx c4 /vex=66_0f d5
+    |    |    |-<d6> vmovq Wx, Vx c4 /vex=66_0f d6
+    |    |    |-<d7> table-/vexl
+    |    |    |    |-<00> vpmovmskb Gd, Ux c4 /vex=66_0f d7 /vexl=0
+    |    |    |-<d8> vpsubusb Vx, Hx, Wx c4 /vex=66_0f d8
+    |    |    |-<d9> vpsubusw Vx, Hx, Wx c4 /vex=66_0f d9
+    |    |    |-<da> vpminub Vx, Hx, Wx c4 /vex=66_0f da
+    |    |    |-<db> vpand Vx, Hx, Wx c4 /vex=66_0f db
+    |    |    |-<dc> vpaddusb Vx, Hx, Wx c4 /vex=66_0f dc
+    |    |    |-<dd> vpaddusw Vx, Hx, Wx c4 /vex=66_0f dd
+    |    |    |-<de> vpmaxub Vx, Hx, Wx c4 /vex=66_0f de
+    |    |    |-<df> vpandn Vx, Hx, Wx c4 /vex=66_0f df
+    |    |    |-<e0> vpavgb Vx, Hx, Wx c4 /vex=66_0f e0
+    |    |    |-<e1> vpsraw Vx, Hx, Wx c4 /vex=66_0f e1
+    |    |    |-<e2> vpsrad Vx, Hx, Wx c4 /vex=66_0f e2
+    |    |    |-<e3> vpavgw Vx, Hx, Wx c4 /vex=66_0f e3
+    |    |    |-<e4> vpmulhuw Vx, Hx, Wx c4 /vex=66_0f e4
+    |    |    |-<e5> vpmulhw Vx, Hx, Wx c4 /vex=66_0f e5
+    |    |    |-<e6> vcvttpd2dq Vdq, Wx c4 /vex=66_0f e6
+    |    |    |-<e7> vmovntdq M, Vx c4 /vex=66_0f e7
+    |    |    |-<e8> vpsubsb Vx, Hx, Wx c4 /vex=66_0f e8
+    |    |    |-<e9> vpsubsw Vx, Hx, Wx c4 /vex=66_0f e9
+    |    |    |-<ea> vpminsw Vx, Hx, Wx c4 /vex=66_0f ea
+    |    |    |-<eb> vpor Vx, Hx, Wx c4 /vex=66_0f eb
+    |    |    |-<ec> vpaddsb Vx, Hx, Wx c4 /vex=66_0f ec
+    |    |    |-<ed> vpaddsw Vx, Hx, Wx c4 /vex=66_0f ed
+    |    |    |-<ee> vpmaxsw Vx, Hx, Wx c4 /vex=66_0f ee
+    |    |    |-<ef> vpxor Vx, Hx, Wx c4 /vex=66_0f ef
+    |    |    |-<f1> table-/vexl
+    |    |    |    |-<00> vpsllw V, H, W c4 /vex=66_0f f1 /vexl=0
+    |    |    |-<f2> table-/vexl
+    |    |    |    |-<00> vpslld V, H, W c4 /vex=66_0f f2 /vexl=0
+    |    |    |-<f3> table-/vexl
+    |    |    |    |-<00> vpsllq V, H, W c4 /vex=66_0f f3 /vexl=0
+    |    |    |-<f5> vpmaddwd Vx, Hx, Wx c4 /vex=66_0f f5
+    |    |    |-<f6> vpsadbw Vx, Hx, Wx c4 /vex=66_0f f6
+    |    |    |-<f7> table-/mod
+    |    |    |    |-<01> vmaskmovdqu Vx, Ux c4 /vex=66_0f f7 /mod=11
+    |    |    |-<f8> vpsubb Vx, Hx, Wx c4 /vex=66_0f f8
+    |    |    |-<f9> vpsubw Vx, Hx, Wx c4 /vex=66_0f f9
+    |    |    |-<fa> vpsubd Vx, Hx, Wx c4 /vex=66_0f fa
+    |    |    |-<fb> vpsubq Vx, Hx, Wx c4 /vex=66_0f fb
+    |    |    |-<fc> vpaddb Vx, Hx, Wx c4 /vex=66_0f fc
+    |    |    |-<fd> vpaddw Vx, Hx, Wx c4 /vex=66_0f fd
+    |    |    |-<fe> vpaddd Vx, Hx, Wx c4 /vex=66_0f fe
+    |    |-<06> table-opctbl
+    |    |    |-<00> vpshufb Vx, Hx, Wx c4 /vex=66_0f38 00
+    |    |    |-<01> vphaddw Vx, Hx, Wx c4 /vex=66_0f38 01
+    |    |    |-<02> vphaddd Vx, Hx, Wx c4 /vex=66_0f38 02
+    |    |    |-<03> vphaddsw Vx, Hx, Wx c4 /vex=66_0f38 03
+    |    |    |-<04> vpmaddubsw Vx, Hx, Wx c4 /vex=66_0f38 04
+    |    |    |-<05> vphsubw Vx, Hx, Wx c4 /vex=66_0f38 05
+    |    |    |-<06> vphsubd Vx, Hx, Wx c4 /vex=66_0f38 06
+    |    |    |-<07> vphsubsw Vx, Hx, Wx c4 /vex=66_0f38 07
+    |    |    |-<08> vpsignb Vx, Hx, Wx c4 /vex=66_0f38 08
+    |    |    |-<09> vpsignw Vx, Hx, Wx c4 /vex=66_0f38 09
+    |    |    |-<0a> vpsignd Vx, Hx, Wx c4 /vex=66_0f38 0a
+    |    |    |-<0b> vpmulhrsw Vx, Hx, Wx c4 /vex=66_0f38 0b
+    |    |    |-<0c> table-/vexw
+    |    |    |    |-<00> vpermilps Vx, Hx, Wx c4 /vex=66_0f38 0c /vexw=0
+    |    |    |-<0d> table-/vexw
+    |    |    |    |-<00> vpermilpd Vx, Hx, Wx c4 /vex=66_0f38 0d /vexw=0
+    |    |    |-<0e> table-/vexw
+    |    |    |    |-<00> vtestps Vx, Wx c4 /vex=66_0f38 0e /vexw=0
+    |    |    |-<0f> table-/vexw
+    |    |    |    |-<00> vtestpd Vx, Wx c4 /vex=66_0f38 0f /vexw=0
+    |    |    |-<17> vptest Vx, Wx c4 /vex=66_0f38 17
+    |    |    |-<18> table-/vexw
+    |    |    |    |-<00> vbroadcastss V, Md c4 /vex=66_0f38 18 /vexw=0
+    |    |    |-<19> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vbroadcastsd Vqq, Mq c4 /vex=66_0f38 19 /vexw=0 /vexl=1
+    |    |    |-<1c> vpabsb Vx, Wx c4 /vex=66_0f38 1c
+    |    |    |-<1d> vpabsw Vx, Wx c4 /vex=66_0f38 1d
+    |    |    |-<1e> vpabsd Vx, Wx c4 /vex=66_0f38 1e
+    |    |    |-<20> vpmovsxbw Vx, MqU c4 /vex=66_0f38 20
+    |    |    |-<21> vpmovsxbd Vx, MdU c4 /vex=66_0f38 21
+    |    |    |-<22> vpmovsxbq Vx, MwU c4 /vex=66_0f38 22
+    |    |    |-<23> vpmovsxwd Vx, MqU c4 /vex=66_0f38 23
+    |    |    |-<24> vpmovsxwq Vx, MdU c4 /vex=66_0f38 24
+    |    |    |-<28> vpmuldq Vx, Hx, Wx c4 /vex=66_0f38 28
+    |    |    |-<29> vpcmpeqq Vx, Hx, Wx c4 /vex=66_0f38 29
+    |    |    |-<2a> vmovntdqa Vx, M c4 /vex=66_0f38 2a
+    |    |    |-<2b> vpackusdw Vx, Hx, Wx c4 /vex=66_0f38 2b
+    |    |    |-<2c> table-/vexw
+    |    |    |    |-<00> vmaskmovps V, H, M c4 /vex=66_0f38 2c /vexw=0
+    |    |    |-<2d> table-/vexw
+    |    |    |    |-<00> vmaskmovpd V, H, M c4 /vex=66_0f38 2d /vexw=0
+    |    |    |-<2e> table-/vexw
+    |    |    |    |-<00> vmaskmovps M, H, V c4 /vex=66_0f38 2e /vexw=0
+    |    |    |-<2f> table-/vexw
+    |    |    |    |-<00> vmaskmovpd M, H, V c4 /vex=66_0f38 2f /vexw=0
+    |    |    |-<30> vpmovzxbw Vx, MqU c4 /vex=66_0f38 30
+    |    |    |-<31> vpmovzxbd Vx, MdU c4 /vex=66_0f38 31
+    |    |    |-<32> vpmovzxbq Vx, MwU c4 /vex=66_0f38 32
+    |    |    |-<33> vpmovzxwd Vx, MqU c4 /vex=66_0f38 33
+    |    |    |-<34> vpmovzxwq Vx, MdU c4 /vex=66_0f38 34
+    |    |    |-<35> vpmovzxdq Vx, MqU c4 /vex=66_0f38 35
+    |    |    |-<37> vpcmpgtq Vx, Hx, Wx c4 /vex=66_0f38 37
+    |    |    |-<38> vpminsb Vx, Hx, Wx c4 /vex=66_0f38 38
+    |    |    |-<39> vpminsd Vx, Hx, Wx c4 /vex=66_0f38 39
+    |    |    |-<3a> vpminuw Vx, Hx, Wx c4 /vex=66_0f38 3a
+    |    |    |-<3b> vpminud Vx, Hx, Wx c4 /vex=66_0f38 3b
+    |    |    |-<3c> vpmaxsb Vx, Hx, Wx c4 /vex=66_0f38 3c
+    |    |    |-<3d> vpmaxsd Vx, Hx, Wx c4 /vex=66_0f38 3d
+    |    |    |-<3e> vpmaxuw Vx, Hx, Wx c4 /vex=66_0f38 3e
+    |    |    |-<3f> vpmaxud Vx, Hx, Wx c4 /vex=66_0f38 3f
+    |    |    |-<40> vpmulld Vx, Hx, Wx c4 /vex=66_0f38 40
+    |    |    |-<41> vphminposuw Vx, Wx c4 /vex=66_0f38 41
+    |    |    |-<db> vaesimc Vx, Wx c4 /vex=66_0f38 db
+    |    |    |-<dc> vaesenc Vx, Wx c4 /vex=66_0f38 dc
+    |    |    |-<dd> vaesenclast Vx, Hx, Wx c4 /vex=66_0f38 dd
+    |    |    |-<de> vaesdec Vx, Hx, Wx c4 /vex=66_0f38 de
+    |    |    |-<df> vaesdeclast Vx, Wx c4 /vex=66_0f38 df
+    |    |-<07> table-opctbl
+    |    |    |-<04> table-/vexw
+    |    |    |    |-<00> vpermilps Vx, Wx, Ib c4 /vex=66_0f3a 04 /vexw=0
+    |    |    |-<05> table-/vexw
+    |    |    |    |-<00> vpermilpd V, W, Ib c4 /vex=66_0f3a 05 /vexw=0
+    |    |    |-<06> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vperm2f128 Vqq, Hqq, Wqq, Ib c4 /vex=66_0f3a 06 /vexw=0 /vexl=1
+    |    |    |-<08> vroundps Vx, Wx, Ib c4 /vex=66_0f3a 08
+    |    |    |-<09> vroundpd Vx, Wx, Ib c4 /vex=66_0f3a 09
+    |    |    |-<0a> vroundss Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0a
+    |    |    |-<0b> vroundsd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0b
+    |    |    |-<0c> vblendps Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0c
+    |    |    |-<0d> vblendpd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0d
+    |    |    |-<0e> vpblendw Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0e
+    |    |    |-<0f> vpalignr Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0f
+    |    |    |-<14> table-/vexw
+    |    |    |    |-<00> vpextrb MbRv, Vx, Ib c4 /vex=66_0f3a 14 /vexw=0
+    |    |    |-<15> vpextrw MwRv, Vx, Ib c4 /vex=66_0f3a 15
+    |    |    |-<16> table-/o
+    |    |    |    |-<00> table-/vexw
+    |    |    |    |    |-<00> vpextrd Ed, Vx, Ib c4 /vex=66_0f3a 16 /o=16 /vexw=0
+    |    |    |    |-<01> table-/vexw
+    |    |    |    |    |-<00> vpextrd Ed, Vx, Ib c4 /vex=66_0f3a 16 /o=32 /vexw=0
+    |    |    |    |-<02> table-/vexw
+    |    |    |    |    |-<01> vpextrq Eq, Vx, Ib c4 /vex=66_0f3a 16 /o=64 /vexw=1
+    |    |    |-<17> vextractps MdRy, Vx, Ib c4 /vex=66_0f3a 17
+    |    |    |-<18> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vinsertf128 Vqq, Hqq, Wdq, Ib c4 /vex=66_0f3a 18 /vexw=0 /vexl=1
+    |    |    |-<19> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vextractf128 Wdq, Vqq, Ib c4 /vex=66_0f3a 19 /vexw=0 /vexl=1
+    |    |    |-<20> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<00> vpinsrb V, H, MbRd, Ib c4 /vex=66_0f3a 20 /vexw=0 /vexl=0
+    |    |    |-<21> vinsertps Vx, Hx, Md, Ib c4 /vex=66_0f3a 21
+    |    |    |-<22> table-/m
+    |    |    |    |-<00> table-/vexw
+    |    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrd V, H, Ed, Ib c4 /vex=66_0f3a 22 /m=!64 /vexw=0 /vexl=0
+    |    |    |    |-<01> table-/vexw
+    |    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrd V, H, Ed, Ib c4 /vex=66_0f3a 22 /m=64 /vexw=0 /vexl=0
+    |    |    |    |    |-<01> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrq V, H, Eq, Ib c4 /vex=66_0f3a 22 /m=64 /vexw=1 /vexl=0
+    |    |    |-<40> vdpps Vx, Hx, Wx, Ib c4 /vex=66_0f3a 40
+    |    |    |-<41> vdppd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 41
+    |    |    |-<42> vmpsadbw Vx, Hx, Wx, Ib c4 /vex=66_0f3a 42
+    |    |    |-<44> vpclmulqdq Vx, Hx, Wx, Ib c4 /vex=66_0f3a 44
+    |    |    |-<4a> table-/vexw
+    |    |    |    |-<00> vblendvps Vx, Hx, Wx, Lx c4 /vex=66_0f3a 4a /vexw=0
+    |    |    |-<4b> table-/vexw
+    |    |    |    |-<00> vblendvpd Vx, Hx, Wx, Lx c4 /vex=66_0f3a 4b /vexw=0
+    |    |    |-<4c> table-/vexw
+    |    |    |    |-<00> vpblendvb V, H, W, L c4 /vex=66_0f3a 4c /vexw=0
+    |    |    |-<df> vaeskeygenassist Vx, Wx, Ib c4 /vex=66_0f3a df
+    |    |    |-<60> vpcmpestrm Vx, Wx, Ib c4 /vex=66_0f3a 60
+    |    |    |-<61> vpcmpestri Vx, Wx, Ib c4 /vex=66_0f3a 61
+    |    |    |-<62> vpcmpistrm Vx, Wx, Ib c4 /vex=66_0f3a 62
+    |    |    |-<63> vpcmpistri Vx, Wx, Ib c4 /vex=66_0f3a 63
+    |    |-<09> table-opctbl
+    |    |    |-<10> table-/mod
+    |    |    |    |-<00> vmovss V, Md c4 /vex=f3_0f 10 /mod=!11
+    |    |    |    |-<01> vmovss V, H, U c4 /vex=f3_0f 10 /mod=11
+    |    |    |-<11> table-/mod
+    |    |    |    |-<00> vmovss Md, V c4 /vex=f3_0f 11 /mod=!11
+    |    |    |    |-<01> vmovss U, H, V c4 /vex=f3_0f 11 /mod=11
+    |    |    |-<12> table-/mod
+    |    |    |    |-<00> vmovsldup Vx, Wx c4 /vex=f3_0f 12 /mod=!11
+    |    |    |    |-<01> vmovsldup Vx, Wx c4 /vex=f3_0f 12 /mod=11
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovshdup Vx, Wx c4 /vex=f3_0f 16 /mod=!11
+    |    |    |    |-<01> vmovshdup Vx, Wx c4 /vex=f3_0f 16 /mod=11
+    |    |    |-<2a> vcvtsi2ss Vx, Hx, Ey c4 /vex=f3_0f 2a
+    |    |    |-<2c> vcvttss2si Gy, MdU c4 /vex=f3_0f 2c
+    |    |    |-<2d> vcvtss2si Gy, MdU c4 /vex=f3_0f 2d
+    |    |    |-<c2> vcmpss Vx, Hx, Wx, Ib c4 /vex=f3_0f c2
+    |    |    |-<51> vsqrtss Vx, Hx, Wx c4 /vex=f3_0f 51
+    |    |    |-<52> vrsqrtss Vx, Wx c4 /vex=f3_0f 52
+    |    |    |-<53> vrcpss Vx, Wx c4 /vex=f3_0f 53
+    |    |    |-<58> vaddss Vx, Hx, Wx c4 /vex=f3_0f 58
+    |    |    |-<59> vmulss Vx, Hx, Wx c4 /vex=f3_0f 59
+    |    |    |-<5a> vcvtss2sd Vx, Hx, Wx c4 /vex=f3_0f 5a
+    |    |    |-<5b> vcvttps2dq Vx, Wx c4 /vex=f3_0f 5b
+    |    |    |-<5c> vsubss Vx, Hx, Wx c4 /vex=f3_0f 5c
+    |    |    |-<5d> vminss Vx, Hx, MdU c4 /vex=f3_0f 5d
+    |    |    |-<5e> vdivss Vx, Hx, MdU c4 /vex=f3_0f 5e
+    |    |    |-<5f> vmaxss Vx, Hx, Wx c4 /vex=f3_0f 5f
+    |    |    |-<e6> vcvtdq2pd Vx, Wdq c4 /vex=f3_0f e6
+    |    |    |-<6f> vmovdqu Vx, Wx c4 /vex=f3_0f 6f
+    |    |    |-<70> vpshufhw Vx, Wx, Ib c4 /vex=f3_0f 70
+    |    |    |-<7e> vmovq Vx, Wx c4 /vex=f3_0f 7e
+    |    |-<0d> table-opctbl
+    |    |    |-<70> vpshuflw Vx, Wx, Ib c4 /vex=f2_0f 70
+    |    |    |-<c2> vcmpsd Vx, Hx, Wx, Ib c4 /vex=f2_0f c2
+    |    |    |-<e6> vcvtpd2dq Vdq, Wx c4 /vex=f2_0f e6
+    |    |    |-<11> table-/mod
+    |    |    |    |-<00> vmovsd Mq, V c4 /vex=f2_0f 11 /mod=!11
+    |    |    |    |-<01> vmovsd U, H, V c4 /vex=f2_0f 11 /mod=11
+    |    |    |-<7c> vhaddps Vx, Hx, Wx c4 /vex=f2_0f 7c
+    |    |    |-<2a> vcvtsi2sd Vx, Hx, Ey c4 /vex=f2_0f 2a
+    |    |    |-<f0> vlddqu Vx, M c4 /vex=f2_0f f0
+    |    |    |-<2c> vcvttsd2si Gy, MqU c4 /vex=f2_0f 2c
+    |    |    |-<2d> vcvtsd2si Gy, MqU c4 /vex=f2_0f 2d
+    |    |    |-<7d> vhsubps Vx, Hx, Wx c4 /vex=f2_0f 7d
+    |    |    |-<d0> vaddsubps Vx, Hx, Wx c4 /vex=f2_0f d0
+    |    |    |-<51> vsqrtsd Vx, Hx, Wx c4 /vex=f2_0f 51
+    |    |    |-<10> table-/mod
+    |    |    |    |-<00> vmovsd V, Mq c4 /vex=f2_0f 10 /mod=!11
+    |    |    |    |-<01> vmovsd V, H, U c4 /vex=f2_0f 10 /mod=11
+    |    |    |-<58> vaddsd Vx, Hx, Wx c4 /vex=f2_0f 58
+    |    |    |-<59> vmulsd Vx, Hx, Wx c4 /vex=f2_0f 59
+    |    |    |-<5a> vcvtsd2ss Vx, Hx, Wx c4 /vex=f2_0f 5a
+    |    |    |-<5c> vsubsd Vx, Hx, Wx c4 /vex=f2_0f 5c
+    |    |    |-<5d> vminsd Vx, Hx, MqU c4 /vex=f2_0f 5d
+    |    |    |-<5e> vdivsd Vx, Hx, MqU c4 /vex=f2_0f 5e
+    |    |    |-<5f> vmaxsd Vx, Hx, Wx c4 /vex=f2_0f 5f
+    |-<c5> table-/vex
+    |    |-<00> table-/m
+    |    |    |-<00> lds Gv, M c5 /vex=none /m=!64
+    |    |-<01> table-opctbl
+    |    |    |-<10> vmovups Vx, Wx c4 /vex=none_0f 10
+    |    |    |-<11> vmovups Wx, Vx c4 /vex=none_0f 11
+    |    |    |-<12> table-/mod
+    |    |    |    |-<01> vmovhlps Vx, Ux c4 /vex=none_0f 12 /mod=11
+    |    |    |-<14> vunpcklps Vx, Hx, Wx c4 /vex=none_0f 14
+    |    |    |-<2e> vucomiss Vx, Wx c4 /vex=none_0f 2e
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovhps Vx, Hx, M c4 /vex=none_0f 16 /mod=!11
+    |    |    |    |-<01> vmovlhps Vx, Hx, Ux c4 /vex=none_0f 16 /mod=11
+    |    |    |-<17> vmovhps M, Vx c4 /vex=none_0f 17
+    |    |    |-<28> vmovaps Vx, Wx c4 /vex=none_0f 28
+    |    |    |-<29> vmovaps Wx, Vx c4 /vex=none_0f 29
+    |    |    |-<2b> vmovntps M, Vx c4 /vex=none_0f 2b
+    |    |    |-<ae> table-/mod
+    |    |    |    |-<00> table-/reg
+    |    |    |    |    |-<03> vstmxcsr Md c4 /vex=none_0f ae /mod=!11 /reg=3
+    |    |    |-<2f> vcomiss Vx, Wx c4 /vex=none_0f 2f
+    |    |    |-<c2> vcmpps Vx, Hx, Wx, Ib c4 /vex=none_0f c2
+    |    |    |-<c6> vshufps Vx, Hx, Wx, Ib c4 /vex=none_0f c6
+    |    |    |-<50> vmovmskps Gd, Ux c4 /vex=none_0f 50
+    |    |    |-<51> vsqrtps Vx, Wx c4 /vex=none_0f 51
+    |    |    |-<52> vrsqrtps Vx, Wx c4 /vex=none_0f 52
+    |    |    |-<53> vrcpps Vx, Wx c4 /vex=none_0f 53
+    |    |    |-<54> vandps Vx, Hx, Wx c4 /vex=none_0f 54
+    |    |    |-<55> vandnps Vx, Hx, Wx c4 /vex=none_0f 55
+    |    |    |-<56> vorps Vx, Hx, Wx c4 /vex=none_0f 56
+    |    |    |-<57> vxorps Vx, Hx, Wx c4 /vex=none_0f 57
+    |    |    |-<58> vaddps Vx, Hx, Wx c4 /vex=none_0f 58
+    |    |    |-<59> vmulps Vx, Hx, Wx c4 /vex=none_0f 59
+    |    |    |-<5a> vcvtps2pd Vx, Wdq c4 /vex=none_0f 5a
+    |    |    |-<5b> vcvtdq2ps Vx, Wx c4 /vex=none_0f 5b
+    |    |    |-<5c> vsubps Vx, Hx, Wx c4 /vex=none_0f 5c
+    |    |    |-<5d> vminps Vx, Hx, Wx c4 /vex=none_0f 5d
+    |    |    |-<5e> vdivps Vx, Hx, Wx c4 /vex=none_0f 5e
+    |    |    |-<5f> vmaxps Vx, Hx, Wx c4 /vex=none_0f 5f
+    |    |    |-<77> table-/vexl
+    |    |    |    |-<00> vzeroupper  c4 /vex=0f 77 /vexl=0
+    |    |    |    |-<01> vzeroall  c4 /vex=0f 77 /vexl=1
+    |    |    |-<15> vunpckhps Vx, Hx, Wx c4 /vex=none_0f 15
+    |    |-<05> table-opctbl
+    |    |    |-<10> vmovupd Vx, Wx c4 /vex=66_0f 10
+    |    |    |-<11> vmovupd Wx, Vx c4 /vex=66_0f 11
+    |    |    |-<14> vunpcklpd Vx, Hx, Wx c4 /vex=66_0f 14
+    |    |    |-<15> vunpckhpd Vx, Hx, Wx c4 /vex=66_0f 15
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovhpd Vx, Hx, M c4 /vex=66_0f 16 /mod=!11
+    |    |    |-<17> vmovhpd M, Vx c4 /vex=66_0f 17
+    |    |    |-<28> vmovapd Vx, Wx c4 /vex=66_0f 28
+    |    |    |-<29> vmovapd Wx, Vx c4 /vex=66_0f 29
+    |    |    |-<2b> vmovntpd M, Vx c4 /vex=66_0f 2b
+    |    |    |-<2e> vucomisd Vx, Wx c4 /vex=66_0f 2e
+    |    |    |-<2f> vcomisd Vsd, Wsd c4 /vex=66_0f 2f
+    |    |    |-<50> vmovmskpd Gd, Ux c4 /vex=66_0f 50
+    |    |    |-<51> vsqrtpd Vx, Wx c4 /vex=66_0f 51
+    |    |    |-<54> vandpd Vx, Hx, Wx c4 /vex=66_0f 54
+    |    |    |-<55> vandnpd Vx, Hx, Wx c4 /vex=66_0f 55
+    |    |    |-<56> vorpd Vx, Hx, Wx c4 /vex=66_0f 56
+    |    |    |-<57> vxorpd Vx, Hx, Wx c4 /vex=66_0f 57
+    |    |    |-<58> vaddpd Vx, Hx, Wx c4 /vex=66_0f 58
+    |    |    |-<59> vmulpd Vx, Hx, Wx c4 /vex=66_0f 59
+    |    |    |-<5a> vcvtpd2ps Vdq, Wx c4 /vex=66_0f 5a
+    |    |    |-<5b> vcvtps2dq Vx, Wx c4 /vex=66_0f 5b
+    |    |    |-<5c> vsubpd Vx, Hx, Wx c4 /vex=66_0f 5c
+    |    |    |-<5d> vminpd Vx, Hx, Wx c4 /vex=66_0f 5d
+    |    |    |-<5e> vdivpd Vx, Hx, Wx c4 /vex=66_0f 5e
+    |    |    |-<5f> vmaxpd Vx, Hx, Wx c4 /vex=66_0f 5f
+    |    |    |-<60> vpunpcklbw Vx, Hx, Wx c4 /vex=66_0f 60
+    |    |    |-<61> vpunpcklwd Vx, Hx, Wx c4 /vex=66_0f 61
+    |    |    |-<62> vpunpckldq Vx, Hx, Wx c4 /vex=66_0f 62
+    |    |    |-<63> vpacksswb Vx, Hx, Wx c4 /vex=66_0f 63
+    |    |    |-<64> vpcmpgtb Vx, Hx, Wx c4 /vex=66_0f 64
+    |    |    |-<65> vpcmpgtw Vx, Hx, Wx c4 /vex=66_0f 65
+    |    |    |-<66> vpcmpgtd Vx, Hx, Wx c4 /vex=66_0f 66
+    |    |    |-<67> vpackuswb Vx, Hx, Wx c4 /vex=66_0f 67
+    |    |    |-<68> vpunpckhbw Vx, Hx, Wx c4 /vex=66_0f 68
+    |    |    |-<69> vpunpckhwd Vx, Hx, Wx c4 /vex=66_0f 69
+    |    |    |-<6a> vpunpckhdq Vx, Hx, Wx c4 /vex=66_0f 6a
+    |    |    |-<6b> vpackssdw Vx, Hx, Wx c4 /vex=66_0f 6b
+    |    |    |-<6d> vpunpckhqdq Vx, Hx, Wx c4 /vex=66_0f 6d
+    |    |    |-<6e> table-/o
+    |    |    |    |-<00> vmovd Vx, Ey c4 /vex=66_0f 6e /o=16
+    |    |    |    |-<01> vmovd Vx, Ey c4 /vex=66_0f 6e /o=32
+    |    |    |    |-<02> vmovq Vx, Eq c4 /vex=66_0f 6e /o=64
+    |    |    |-<70> vpshufd Vx, Wx, Ib c4 /vex=66_0f 70
+    |    |    |-<71> table-/reg
+    |    |    |    |-<02> vpsrlw Hx, Ux, Ib c4 /vex=66_0f 71 /reg=2
+    |    |    |    |-<04> vpsraw Hx, Ux, Ib c4 /vex=66_0f 71 /reg=4
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpsllw H, V, W c4 /vex=66_0f 71 /reg=6 /vexl=0
+    |    |    |-<72> table-/reg
+    |    |    |    |-<02> vpsrld Hx, Ux, Ib c4 /vex=66_0f 72 /reg=2
+    |    |    |    |-<04> vpsrad Hx, Ux, Ib c4 /vex=66_0f 72 /reg=4
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpslld H, V, W c4 /vex=66_0f 72 /reg=6 /vexl=0
+    |    |    |-<73> table-/reg
+    |    |    |    |-<02> vpsrlq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=2
+    |    |    |    |-<03> vpsrldq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=3
+    |    |    |    |-<06> table-/vexl
+    |    |    |    |    |-<00> vpsllq H, V, W c4 /vex=66_0f 73 /reg=6 /vexl=0
+    |    |    |    |-<07> vpslldq Hx, Ux, Ib c4 /vex=66_0f 73 /reg=7
+    |    |    |-<74> vpcmpeqb Vx, Hx, Wx c4 /vex=66_0f 74
+    |    |    |-<75> vpcmpeqw Vx, Hx, Wx c4 /vex=66_0f 75
+    |    |    |-<76> vpcmpeqd Vx, Hx, Wx c4 /vex=66_0f 76
+    |    |    |-<7c> vhaddpd Vx, Hx, Wx c4 /vex=66_0f 7c
+    |    |    |-<7d> vhsubpd Vx, Hx, Wx c4 /vex=66_0f 7d
+    |    |    |-<7e> table-/o
+    |    |    |    |-<00> vmovd Ey, Vx c4 /vex=66_0f 7e /o=16
+    |    |    |    |-<01> vmovd Ey, Vx c4 /vex=66_0f 7e /o=32
+    |    |    |    |-<02> vmovq Eq, Vx c4 /vex=66_0f 7e /o=64
+    |    |    |-<c2> vcmppd Vx, Hx, Wx, Ib c4 /vex=66_0f c2
+    |    |    |-<c4> vpinsrw Vx, MwRy, Ib c4 /vex=66_0f c4
+    |    |    |-<c5> vpextrw Gy, Ux, Ib c4 /vex=66_0f c5
+    |    |    |-<c6> vshufpd Vx, Hx, Wx, Ib c4 /vex=66_0f c6
+    |    |    |-<d0> vaddsubpd Vx, Hx, Wx c4 /vex=66_0f d0
+    |    |    |-<d1> vpsrlw Vx, Hx, Wx c4 /vex=66_0f d1
+    |    |    |-<d2> vpsrld Vx, Hx, Wx c4 /vex=66_0f d2
+    |    |    |-<d3> vpsrlq Vx, Hx, Wx c4 /vex=66_0f d3
+    |    |    |-<d4> vpaddq Vx, Hx, Wx c4 /vex=66_0f d4
+    |    |    |-<d5> vpmullw Vx, Hx, Wx c4 /vex=66_0f d5
+    |    |    |-<d6> vmovq Wx, Vx c4 /vex=66_0f d6
+    |    |    |-<d7> table-/vexl
+    |    |    |    |-<00> vpmovmskb Gd, Ux c4 /vex=66_0f d7 /vexl=0
+    |    |    |-<d8> vpsubusb Vx, Hx, Wx c4 /vex=66_0f d8
+    |    |    |-<d9> vpsubusw Vx, Hx, Wx c4 /vex=66_0f d9
+    |    |    |-<da> vpminub Vx, Hx, Wx c4 /vex=66_0f da
+    |    |    |-<db> vpand Vx, Hx, Wx c4 /vex=66_0f db
+    |    |    |-<dc> vpaddusb Vx, Hx, Wx c4 /vex=66_0f dc
+    |    |    |-<dd> vpaddusw Vx, Hx, Wx c4 /vex=66_0f dd
+    |    |    |-<de> vpmaxub Vx, Hx, Wx c4 /vex=66_0f de
+    |    |    |-<df> vpandn Vx, Hx, Wx c4 /vex=66_0f df
+    |    |    |-<e0> vpavgb Vx, Hx, Wx c4 /vex=66_0f e0
+    |    |    |-<e1> vpsraw Vx, Hx, Wx c4 /vex=66_0f e1
+    |    |    |-<e2> vpsrad Vx, Hx, Wx c4 /vex=66_0f e2
+    |    |    |-<e3> vpavgw Vx, Hx, Wx c4 /vex=66_0f e3
+    |    |    |-<e4> vpmulhuw Vx, Hx, Wx c4 /vex=66_0f e4
+    |    |    |-<e5> vpmulhw Vx, Hx, Wx c4 /vex=66_0f e5
+    |    |    |-<e6> vcvttpd2dq Vdq, Wx c4 /vex=66_0f e6
+    |    |    |-<e7> vmovntdq M, Vx c4 /vex=66_0f e7
+    |    |    |-<e8> vpsubsb Vx, Hx, Wx c4 /vex=66_0f e8
+    |    |    |-<e9> vpsubsw Vx, Hx, Wx c4 /vex=66_0f e9
+    |    |    |-<ea> vpminsw Vx, Hx, Wx c4 /vex=66_0f ea
+    |    |    |-<eb> vpor Vx, Hx, Wx c4 /vex=66_0f eb
+    |    |    |-<ec> vpaddsb Vx, Hx, Wx c4 /vex=66_0f ec
+    |    |    |-<ed> vpaddsw Vx, Hx, Wx c4 /vex=66_0f ed
+    |    |    |-<ee> vpmaxsw Vx, Hx, Wx c4 /vex=66_0f ee
+    |    |    |-<ef> vpxor Vx, Hx, Wx c4 /vex=66_0f ef
+    |    |    |-<f1> table-/vexl
+    |    |    |    |-<00> vpsllw V, H, W c4 /vex=66_0f f1 /vexl=0
+    |    |    |-<f2> table-/vexl
+    |    |    |    |-<00> vpslld V, H, W c4 /vex=66_0f f2 /vexl=0
+    |    |    |-<f3> table-/vexl
+    |    |    |    |-<00> vpsllq V, H, W c4 /vex=66_0f f3 /vexl=0
+    |    |    |-<f5> vpmaddwd Vx, Hx, Wx c4 /vex=66_0f f5
+    |    |    |-<f6> vpsadbw Vx, Hx, Wx c4 /vex=66_0f f6
+    |    |    |-<f7> table-/mod
+    |    |    |    |-<01> vmaskmovdqu Vx, Ux c4 /vex=66_0f f7 /mod=11
+    |    |    |-<f8> vpsubb Vx, Hx, Wx c4 /vex=66_0f f8
+    |    |    |-<f9> vpsubw Vx, Hx, Wx c4 /vex=66_0f f9
+    |    |    |-<fa> vpsubd Vx, Hx, Wx c4 /vex=66_0f fa
+    |    |    |-<fb> vpsubq Vx, Hx, Wx c4 /vex=66_0f fb
+    |    |    |-<fc> vpaddb Vx, Hx, Wx c4 /vex=66_0f fc
+    |    |    |-<fd> vpaddw Vx, Hx, Wx c4 /vex=66_0f fd
+    |    |    |-<fe> vpaddd Vx, Hx, Wx c4 /vex=66_0f fe
+    |    |-<06> table-opctbl
+    |    |    |-<00> vpshufb Vx, Hx, Wx c4 /vex=66_0f38 00
+    |    |    |-<01> vphaddw Vx, Hx, Wx c4 /vex=66_0f38 01
+    |    |    |-<02> vphaddd Vx, Hx, Wx c4 /vex=66_0f38 02
+    |    |    |-<03> vphaddsw Vx, Hx, Wx c4 /vex=66_0f38 03
+    |    |    |-<04> vpmaddubsw Vx, Hx, Wx c4 /vex=66_0f38 04
+    |    |    |-<05> vphsubw Vx, Hx, Wx c4 /vex=66_0f38 05
+    |    |    |-<06> vphsubd Vx, Hx, Wx c4 /vex=66_0f38 06
+    |    |    |-<07> vphsubsw Vx, Hx, Wx c4 /vex=66_0f38 07
+    |    |    |-<08> vpsignb Vx, Hx, Wx c4 /vex=66_0f38 08
+    |    |    |-<09> vpsignw Vx, Hx, Wx c4 /vex=66_0f38 09
+    |    |    |-<0a> vpsignd Vx, Hx, Wx c4 /vex=66_0f38 0a
+    |    |    |-<0b> vpmulhrsw Vx, Hx, Wx c4 /vex=66_0f38 0b
+    |    |    |-<0c> table-/vexw
+    |    |    |    |-<00> vpermilps Vx, Hx, Wx c4 /vex=66_0f38 0c /vexw=0
+    |    |    |-<0d> table-/vexw
+    |    |    |    |-<00> vpermilpd Vx, Hx, Wx c4 /vex=66_0f38 0d /vexw=0
+    |    |    |-<0e> table-/vexw
+    |    |    |    |-<00> vtestps Vx, Wx c4 /vex=66_0f38 0e /vexw=0
+    |    |    |-<0f> table-/vexw
+    |    |    |    |-<00> vtestpd Vx, Wx c4 /vex=66_0f38 0f /vexw=0
+    |    |    |-<17> vptest Vx, Wx c4 /vex=66_0f38 17
+    |    |    |-<18> table-/vexw
+    |    |    |    |-<00> vbroadcastss V, Md c4 /vex=66_0f38 18 /vexw=0
+    |    |    |-<19> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vbroadcastsd Vqq, Mq c4 /vex=66_0f38 19 /vexw=0 /vexl=1
+    |    |    |-<1c> vpabsb Vx, Wx c4 /vex=66_0f38 1c
+    |    |    |-<1d> vpabsw Vx, Wx c4 /vex=66_0f38 1d
+    |    |    |-<1e> vpabsd Vx, Wx c4 /vex=66_0f38 1e
+    |    |    |-<20> vpmovsxbw Vx, MqU c4 /vex=66_0f38 20
+    |    |    |-<21> vpmovsxbd Vx, MdU c4 /vex=66_0f38 21
+    |    |    |-<22> vpmovsxbq Vx, MwU c4 /vex=66_0f38 22
+    |    |    |-<23> vpmovsxwd Vx, MqU c4 /vex=66_0f38 23
+    |    |    |-<24> vpmovsxwq Vx, MdU c4 /vex=66_0f38 24
+    |    |    |-<28> vpmuldq Vx, Hx, Wx c4 /vex=66_0f38 28
+    |    |    |-<29> vpcmpeqq Vx, Hx, Wx c4 /vex=66_0f38 29
+    |    |    |-<2a> vmovntdqa Vx, M c4 /vex=66_0f38 2a
+    |    |    |-<2b> vpackusdw Vx, Hx, Wx c4 /vex=66_0f38 2b
+    |    |    |-<2c> table-/vexw
+    |    |    |    |-<00> vmaskmovps V, H, M c4 /vex=66_0f38 2c /vexw=0
+    |    |    |-<2d> table-/vexw
+    |    |    |    |-<00> vmaskmovpd V, H, M c4 /vex=66_0f38 2d /vexw=0
+    |    |    |-<2e> table-/vexw
+    |    |    |    |-<00> vmaskmovps M, H, V c4 /vex=66_0f38 2e /vexw=0
+    |    |    |-<2f> table-/vexw
+    |    |    |    |-<00> vmaskmovpd M, H, V c4 /vex=66_0f38 2f /vexw=0
+    |    |    |-<30> vpmovzxbw Vx, MqU c4 /vex=66_0f38 30
+    |    |    |-<31> vpmovzxbd Vx, MdU c4 /vex=66_0f38 31
+    |    |    |-<32> vpmovzxbq Vx, MwU c4 /vex=66_0f38 32
+    |    |    |-<33> vpmovzxwd Vx, MqU c4 /vex=66_0f38 33
+    |    |    |-<34> vpmovzxwq Vx, MdU c4 /vex=66_0f38 34
+    |    |    |-<35> vpmovzxdq Vx, MqU c4 /vex=66_0f38 35
+    |    |    |-<37> vpcmpgtq Vx, Hx, Wx c4 /vex=66_0f38 37
+    |    |    |-<38> vpminsb Vx, Hx, Wx c4 /vex=66_0f38 38
+    |    |    |-<39> vpminsd Vx, Hx, Wx c4 /vex=66_0f38 39
+    |    |    |-<3a> vpminuw Vx, Hx, Wx c4 /vex=66_0f38 3a
+    |    |    |-<3b> vpminud Vx, Hx, Wx c4 /vex=66_0f38 3b
+    |    |    |-<3c> vpmaxsb Vx, Hx, Wx c4 /vex=66_0f38 3c
+    |    |    |-<3d> vpmaxsd Vx, Hx, Wx c4 /vex=66_0f38 3d
+    |    |    |-<3e> vpmaxuw Vx, Hx, Wx c4 /vex=66_0f38 3e
+    |    |    |-<3f> vpmaxud Vx, Hx, Wx c4 /vex=66_0f38 3f
+    |    |    |-<40> vpmulld Vx, Hx, Wx c4 /vex=66_0f38 40
+    |    |    |-<41> vphminposuw Vx, Wx c4 /vex=66_0f38 41
+    |    |    |-<db> vaesimc Vx, Wx c4 /vex=66_0f38 db
+    |    |    |-<dc> vaesenc Vx, Wx c4 /vex=66_0f38 dc
+    |    |    |-<dd> vaesenclast Vx, Hx, Wx c4 /vex=66_0f38 dd
+    |    |    |-<de> vaesdec Vx, Hx, Wx c4 /vex=66_0f38 de
+    |    |    |-<df> vaesdeclast Vx, Wx c4 /vex=66_0f38 df
+    |    |-<07> table-opctbl
+    |    |    |-<04> table-/vexw
+    |    |    |    |-<00> vpermilps Vx, Wx, Ib c4 /vex=66_0f3a 04 /vexw=0
+    |    |    |-<05> table-/vexw
+    |    |    |    |-<00> vpermilpd V, W, Ib c4 /vex=66_0f3a 05 /vexw=0
+    |    |    |-<06> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vperm2f128 Vqq, Hqq, Wqq, Ib c4 /vex=66_0f3a 06 /vexw=0 /vexl=1
+    |    |    |-<08> vroundps Vx, Wx, Ib c4 /vex=66_0f3a 08
+    |    |    |-<09> vroundpd Vx, Wx, Ib c4 /vex=66_0f3a 09
+    |    |    |-<0a> vroundss Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0a
+    |    |    |-<0b> vroundsd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0b
+    |    |    |-<0c> vblendps Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0c
+    |    |    |-<0d> vblendpd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0d
+    |    |    |-<0e> vpblendw Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0e
+    |    |    |-<0f> vpalignr Vx, Hx, Wx, Ib c4 /vex=66_0f3a 0f
+    |    |    |-<14> table-/vexw
+    |    |    |    |-<00> vpextrb MbRv, Vx, Ib c4 /vex=66_0f3a 14 /vexw=0
+    |    |    |-<15> vpextrw MwRv, Vx, Ib c4 /vex=66_0f3a 15
+    |    |    |-<16> table-/o
+    |    |    |    |-<00> table-/vexw
+    |    |    |    |    |-<00> vpextrd Ed, Vx, Ib c4 /vex=66_0f3a 16 /o=16 /vexw=0
+    |    |    |    |-<01> table-/vexw
+    |    |    |    |    |-<00> vpextrd Ed, Vx, Ib c4 /vex=66_0f3a 16 /o=32 /vexw=0
+    |    |    |    |-<02> table-/vexw
+    |    |    |    |    |-<01> vpextrq Eq, Vx, Ib c4 /vex=66_0f3a 16 /o=64 /vexw=1
+    |    |    |-<17> vextractps MdRy, Vx, Ib c4 /vex=66_0f3a 17
+    |    |    |-<18> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vinsertf128 Vqq, Hqq, Wdq, Ib c4 /vex=66_0f3a 18 /vexw=0 /vexl=1
+    |    |    |-<19> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<01> vextractf128 Wdq, Vqq, Ib c4 /vex=66_0f3a 19 /vexw=0 /vexl=1
+    |    |    |-<20> table-/vexw
+    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |-<00> vpinsrb V, H, MbRd, Ib c4 /vex=66_0f3a 20 /vexw=0 /vexl=0
+    |    |    |-<21> vinsertps Vx, Hx, Md, Ib c4 /vex=66_0f3a 21
+    |    |    |-<22> table-/m
+    |    |    |    |-<00> table-/vexw
+    |    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrd V, H, Ed, Ib c4 /vex=66_0f3a 22 /m=!64 /vexw=0 /vexl=0
+    |    |    |    |-<01> table-/vexw
+    |    |    |    |    |-<00> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrd V, H, Ed, Ib c4 /vex=66_0f3a 22 /m=64 /vexw=0 /vexl=0
+    |    |    |    |    |-<01> table-/vexl
+    |    |    |    |    |    |-<00> vpinsrq V, H, Eq, Ib c4 /vex=66_0f3a 22 /m=64 /vexw=1 /vexl=0
+    |    |    |-<40> vdpps Vx, Hx, Wx, Ib c4 /vex=66_0f3a 40
+    |    |    |-<41> vdppd Vx, Hx, Wx, Ib c4 /vex=66_0f3a 41
+    |    |    |-<42> vmpsadbw Vx, Hx, Wx, Ib c4 /vex=66_0f3a 42
+    |    |    |-<44> vpclmulqdq Vx, Hx, Wx, Ib c4 /vex=66_0f3a 44
+    |    |    |-<4a> table-/vexw
+    |    |    |    |-<00> vblendvps Vx, Hx, Wx, Lx c4 /vex=66_0f3a 4a /vexw=0
+    |    |    |-<4b> table-/vexw
+    |    |    |    |-<00> vblendvpd Vx, Hx, Wx, Lx c4 /vex=66_0f3a 4b /vexw=0
+    |    |    |-<4c> table-/vexw
+    |    |    |    |-<00> vpblendvb V, H, W, L c4 /vex=66_0f3a 4c /vexw=0
+    |    |    |-<df> vaeskeygenassist Vx, Wx, Ib c4 /vex=66_0f3a df
+    |    |    |-<60> vpcmpestrm Vx, Wx, Ib c4 /vex=66_0f3a 60
+    |    |    |-<61> vpcmpestri Vx, Wx, Ib c4 /vex=66_0f3a 61
+    |    |    |-<62> vpcmpistrm Vx, Wx, Ib c4 /vex=66_0f3a 62
+    |    |    |-<63> vpcmpistri Vx, Wx, Ib c4 /vex=66_0f3a 63
+    |    |-<09> table-opctbl
+    |    |    |-<10> table-/mod
+    |    |    |    |-<00> vmovss V, Md c4 /vex=f3_0f 10 /mod=!11
+    |    |    |    |-<01> vmovss V, H, U c4 /vex=f3_0f 10 /mod=11
+    |    |    |-<11> table-/mod
+    |    |    |    |-<00> vmovss Md, V c4 /vex=f3_0f 11 /mod=!11
+    |    |    |    |-<01> vmovss U, H, V c4 /vex=f3_0f 11 /mod=11
+    |    |    |-<12> table-/mod
+    |    |    |    |-<00> vmovsldup Vx, Wx c4 /vex=f3_0f 12 /mod=!11
+    |    |    |    |-<01> vmovsldup Vx, Wx c4 /vex=f3_0f 12 /mod=11
+    |    |    |-<16> table-/mod
+    |    |    |    |-<00> vmovshdup Vx, Wx c4 /vex=f3_0f 16 /mod=!11
+    |    |    |    |-<01> vmovshdup Vx, Wx c4 /vex=f3_0f 16 /mod=11
+    |    |    |-<2a> vcvtsi2ss Vx, Hx, Ey c4 /vex=f3_0f 2a
+    |    |    |-<2c> vcvttss2si Gy, MdU c4 /vex=f3_0f 2c
+    |    |    |-<2d> vcvtss2si Gy, MdU c4 /vex=f3_0f 2d
+    |    |    |-<c2> vcmpss Vx, Hx, Wx, Ib c4 /vex=f3_0f c2
+    |    |    |-<51> vsqrtss Vx, Hx, Wx c4 /vex=f3_0f 51
+    |    |    |-<52> vrsqrtss Vx, Wx c4 /vex=f3_0f 52
+    |    |    |-<53> vrcpss Vx, Wx c4 /vex=f3_0f 53
+    |    |    |-<58> vaddss Vx, Hx, Wx c4 /vex=f3_0f 58
+    |    |    |-<59> vmulss Vx, Hx, Wx c4 /vex=f3_0f 59
+    |    |    |-<5a> vcvtss2sd Vx, Hx, Wx c4 /vex=f3_0f 5a
+    |    |    |-<5b> vcvttps2dq Vx, Wx c4 /vex=f3_0f 5b
+    |    |    |-<5c> vsubss Vx, Hx, Wx c4 /vex=f3_0f 5c
+    |    |    |-<5d> vminss Vx, Hx, MdU c4 /vex=f3_0f 5d
+    |    |    |-<5e> vdivss Vx, Hx, MdU c4 /vex=f3_0f 5e
+    |    |    |-<5f> vmaxss Vx, Hx, Wx c4 /vex=f3_0f 5f
+    |    |    |-<e6> vcvtdq2pd Vx, Wdq c4 /vex=f3_0f e6
+    |    |    |-<6f> vmovdqu Vx, Wx c4 /vex=f3_0f 6f
+    |    |    |-<70> vpshufhw Vx, Wx, Ib c4 /vex=f3_0f 70
+    |    |    |-<7e> vmovq Vx, Wx c4 /vex=f3_0f 7e
+    |    |-<0d> table-opctbl
+    |    |    |-<70> vpshuflw Vx, Wx, Ib c4 /vex=f2_0f 70
+    |    |    |-<c2> vcmpsd Vx, Hx, Wx, Ib c4 /vex=f2_0f c2
+    |    |    |-<e6> vcvtpd2dq Vdq, Wx c4 /vex=f2_0f e6
+    |    |    |-<11> table-/mod
+    |    |    |    |-<00> vmovsd Mq, V c4 /vex=f2_0f 11 /mod=!11
+    |    |    |    |-<01> vmovsd U, H, V c4 /vex=f2_0f 11 /mod=11
+    |    |    |-<7c> vhaddps Vx, Hx, Wx c4 /vex=f2_0f 7c
+    |    |    |-<2a> vcvtsi2sd Vx, Hx, Ey c4 /vex=f2_0f 2a
+    |    |    |-<f0> vlddqu Vx, M c4 /vex=f2_0f f0
+    |    |    |-<2c> vcvttsd2si Gy, MqU c4 /vex=f2_0f 2c
+    |    |    |-<2d> vcvtsd2si Gy, MqU c4 /vex=f2_0f 2d
+    |    |    |-<7d> vhsubps Vx, Hx, Wx c4 /vex=f2_0f 7d
+    |    |    |-<d0> vaddsubps Vx, Hx, Wx c4 /vex=f2_0f d0
+    |    |    |-<51> vsqrtsd Vx, Hx, Wx c4 /vex=f2_0f 51
+    |    |    |-<10> table-/mod
+    |    |    |    |-<00> vmovsd V, Mq c4 /vex=f2_0f 10 /mod=!11
+    |    |    |    |-<01> vmovsd V, H, U c4 /vex=f2_0f 10 /mod=11
+    |    |    |-<58> vaddsd Vx, Hx, Wx c4 /vex=f2_0f 58
+    |    |    |-<59> vmulsd Vx, Hx, Wx c4 /vex=f2_0f 59
+    |    |    |-<5a> vcvtsd2ss Vx, Hx, Wx c4 /vex=f2_0f 5a
+    |    |    |-<5c> vsubsd Vx, Hx, Wx c4 /vex=f2_0f 5c
+    |    |    |-<5d> vminsd Vx, Hx, MqU c4 /vex=f2_0f 5d
+    |    |    |-<5e> vdivsd Vx, Hx, MqU c4 /vex=f2_0f 5e
+    |    |    |-<5f> vmaxsd Vx, Hx, Wx c4 /vex=f2_0f 5f
+    |-<c6> table-/reg
+    |    |-<00> mov Eb, Ib c6 /reg=0
+    |-<c7> table-/reg
+    |    |-<00> mov Ev, sIz c7 /reg=0
+    |-<c8> enter Iw, Ib c8
+    |-<c9> leave  c9
+    |-<ca> retf Iw ca
+    |-<cb> retf  cb
+    |-<cc> int3  cc
+    |-<cd> int Ib cd
+    |-<ce> table-/m
+    |    |-<00> into  ce /m=!64
+    |-<cf> table-/o
+    |    |-<00> iretw  cf /o=16
+    |    |-<01> iretd  cf /o=32
+    |    |-<02> iretq  cf /o=64
+    |-<d0> table-/reg
+    |    |-<00> rol Eb, I1 d0 /reg=0
+    |    |-<01> ror Eb, I1 d0 /reg=1
+    |    |-<02> rcl Eb, I1 d0 /reg=2
+    |    |-<03> rcr Eb, I1 d0 /reg=3
+    |    |-<04> shl Eb, I1 d0 /reg=4
+    |    |-<05> shr Eb, I1 d0 /reg=5
+    |    |-<06> shl Eb, I1 d0 /reg=6
+    |    |-<07> sar Eb, I1 d0 /reg=7
+    |-<d1> table-/reg
+    |    |-<00> rol Ev, I1 d1 /reg=0
+    |    |-<01> ror Ev, I1 d1 /reg=1
+    |    |-<02> rcl Ev, I1 d1 /reg=2
+    |    |-<03> rcr Ev, I1 d1 /reg=3
+    |    |-<04> shl Ev, I1 d1 /reg=4
+    |    |-<05> shr Ev, I1 d1 /reg=5
+    |    |-<06> shl Ev, I1 d1 /reg=6
+    |    |-<07> sar Ev, I1 d1 /reg=7
+    |-<d2> table-/reg
+    |    |-<00> rol Eb, CL d2 /reg=0
+    |    |-<01> ror Eb, CL d2 /reg=1
+    |    |-<02> rcl Eb, CL d2 /reg=2
+    |    |-<03> rcr Eb, CL d2 /reg=3
+    |    |-<04> shl Eb, CL d2 /reg=4
+    |    |-<05> shr Eb, CL d2 /reg=5
+    |    |-<06> shl Eb, CL d2 /reg=6
+    |    |-<07> sar Eb, CL d2 /reg=7
+    |-<d3> table-/reg
+    |    |-<00> rol Ev, CL d3 /reg=0
+    |    |-<01> ror Ev, CL d3 /reg=1
+    |    |-<02> rcl Ev, CL d3 /reg=2
+    |    |-<03> rcr Ev, CL d3 /reg=3
+    |    |-<04> shl Ev, CL d3 /reg=4
+    |    |-<05> shr Ev, CL d3 /reg=5
+    |    |-<06> shl Ev, CL d3 /reg=6
+    |    |-<07> sar Ev, CL d3 /reg=7
+    |-<d4> table-/m
+    |    |-<00> aam Ib d4 /m=!64
+    |-<d5> table-/m
+    |    |-<00> aad Ib d5 /m=!64
+    |-<d6> table-/m
+    |    |-<00> salc  d6 /m=!64
+    |-<d7> xlatb  d7
+    |-<d8> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fadd Md d8 /mod=!11 /reg=0
+    |    |    |-<01> fmul Md d8 /mod=!11 /reg=1
+    |    |    |-<02> fcom Md d8 /mod=!11 /reg=2
+    |    |    |-<03> fcomp Md d8 /mod=!11 /reg=3
+    |    |    |-<04> fsub Md d8 /mod=!11 /reg=4
+    |    |    |-<05> fsubr Md d8 /mod=!11 /reg=5
+    |    |    |-<06> fdiv Md d8 /mod=!11 /reg=6
+    |    |    |-<07> fdivr Md d8 /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> fadd ST0, ST0 d8 /mod=11 /x87=00
+    |    |    |-<01> fadd ST0, ST1 d8 /mod=11 /x87=01
+    |    |    |-<02> fadd ST0, ST2 d8 /mod=11 /x87=02
+    |    |    |-<03> fadd ST0, ST3 d8 /mod=11 /x87=03
+    |    |    |-<04> fadd ST0, ST4 d8 /mod=11 /x87=04
+    |    |    |-<05> fadd ST0, ST5 d8 /mod=11 /x87=05
+    |    |    |-<06> fadd ST0, ST6 d8 /mod=11 /x87=06
+    |    |    |-<07> fadd ST0, ST7 d8 /mod=11 /x87=07
+    |    |    |-<08> fmul ST0, ST0 d8 /mod=11 /x87=08
+    |    |    |-<09> fmul ST0, ST1 d8 /mod=11 /x87=09
+    |    |    |-<0a> fmul ST0, ST2 d8 /mod=11 /x87=0a
+    |    |    |-<0b> fmul ST0, ST3 d8 /mod=11 /x87=0b
+    |    |    |-<0c> fmul ST0, ST4 d8 /mod=11 /x87=0c
+    |    |    |-<0d> fmul ST0, ST5 d8 /mod=11 /x87=0d
+    |    |    |-<0e> fmul ST0, ST6 d8 /mod=11 /x87=0e
+    |    |    |-<0f> fmul ST0, ST7 d8 /mod=11 /x87=0f
+    |    |    |-<10> fcom ST0, ST0 d8 /mod=11 /x87=10
+    |    |    |-<11> fcom ST0, ST1 d8 /mod=11 /x87=11
+    |    |    |-<12> fcom ST0, ST2 d8 /mod=11 /x87=12
+    |    |    |-<13> fcom ST0, ST3 d8 /mod=11 /x87=13
+    |    |    |-<14> fcom ST0, ST4 d8 /mod=11 /x87=14
+    |    |    |-<15> fcom ST0, ST5 d8 /mod=11 /x87=15
+    |    |    |-<16> fcom ST0, ST6 d8 /mod=11 /x87=16
+    |    |    |-<17> fcom ST0, ST7 d8 /mod=11 /x87=17
+    |    |    |-<18> fcomp ST0, ST0 d8 /mod=11 /x87=18
+    |    |    |-<19> fcomp ST0, ST1 d8 /mod=11 /x87=19
+    |    |    |-<1a> fcomp ST0, ST2 d8 /mod=11 /x87=1a
+    |    |    |-<1b> fcomp ST0, ST3 d8 /mod=11 /x87=1b
+    |    |    |-<1c> fcomp ST0, ST4 d8 /mod=11 /x87=1c
+    |    |    |-<1d> fcomp ST0, ST5 d8 /mod=11 /x87=1d
+    |    |    |-<1e> fcomp ST0, ST6 d8 /mod=11 /x87=1e
+    |    |    |-<1f> fcomp ST0, ST7 d8 /mod=11 /x87=1f
+    |    |    |-<20> fsub ST0, ST0 d8 /mod=11 /x87=20
+    |    |    |-<21> fsub ST0, ST1 d8 /mod=11 /x87=21
+    |    |    |-<22> fsub ST0, ST2 d8 /mod=11 /x87=22
+    |    |    |-<23> fsub ST0, ST3 d8 /mod=11 /x87=23
+    |    |    |-<24> fsub ST0, ST4 d8 /mod=11 /x87=24
+    |    |    |-<25> fsub ST0, ST5 d8 /mod=11 /x87=25
+    |    |    |-<26> fsub ST0, ST6 d8 /mod=11 /x87=26
+    |    |    |-<27> fsub ST0, ST7 d8 /mod=11 /x87=27
+    |    |    |-<28> fsubr ST0, ST0 d8 /mod=11 /x87=28
+    |    |    |-<29> fsubr ST0, ST1 d8 /mod=11 /x87=29
+    |    |    |-<2a> fsubr ST0, ST2 d8 /mod=11 /x87=2a
+    |    |    |-<2b> fsubr ST0, ST3 d8 /mod=11 /x87=2b
+    |    |    |-<2c> fsubr ST0, ST4 d8 /mod=11 /x87=2c
+    |    |    |-<2d> fsubr ST0, ST5 d8 /mod=11 /x87=2d
+    |    |    |-<2e> fsubr ST0, ST6 d8 /mod=11 /x87=2e
+    |    |    |-<2f> fsubr ST0, ST7 d8 /mod=11 /x87=2f
+    |    |    |-<30> fdiv ST0, ST0 d8 /mod=11 /x87=30
+    |    |    |-<31> fdiv ST0, ST1 d8 /mod=11 /x87=31
+    |    |    |-<32> fdiv ST0, ST2 d8 /mod=11 /x87=32
+    |    |    |-<33> fdiv ST0, ST3 d8 /mod=11 /x87=33
+    |    |    |-<34> fdiv ST0, ST4 d8 /mod=11 /x87=34
+    |    |    |-<35> fdiv ST0, ST5 d8 /mod=11 /x87=35
+    |    |    |-<36> fdiv ST0, ST6 d8 /mod=11 /x87=36
+    |    |    |-<37> fdiv ST0, ST7 d8 /mod=11 /x87=37
+    |    |    |-<38> fdivr ST0, ST0 d8 /mod=11 /x87=38
+    |    |    |-<39> fdivr ST0, ST1 d8 /mod=11 /x87=39
+    |    |    |-<3a> fdivr ST0, ST2 d8 /mod=11 /x87=3a
+    |    |    |-<3b> fdivr ST0, ST3 d8 /mod=11 /x87=3b
+    |    |    |-<3c> fdivr ST0, ST4 d8 /mod=11 /x87=3c
+    |    |    |-<3d> fdivr ST0, ST5 d8 /mod=11 /x87=3d
+    |    |    |-<3e> fdivr ST0, ST6 d8 /mod=11 /x87=3e
+    |    |    |-<3f> fdivr ST0, ST7 d8 /mod=11 /x87=3f
+    |-<d9> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fld Md d9 /mod=!11 /reg=0
+    |    |    |-<02> fst Md d9 /mod=!11 /reg=2
+    |    |    |-<03> fstp Md d9 /mod=!11 /reg=3
+    |    |    |-<04> fldenv M d9 /mod=!11 /reg=4
+    |    |    |-<05> fldcw Mw d9 /mod=!11 /reg=5
+    |    |    |-<06> fnstenv M d9 /mod=!11 /reg=6
+    |    |    |-<07> fnstcw Mw d9 /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> fld ST0 d9 /mod=11 /x87=00
+    |    |    |-<01> fld ST1 d9 /mod=11 /x87=01
+    |    |    |-<02> fld ST2 d9 /mod=11 /x87=02
+    |    |    |-<03> fld ST3 d9 /mod=11 /x87=03
+    |    |    |-<04> fld ST4 d9 /mod=11 /x87=04
+    |    |    |-<05> fld ST5 d9 /mod=11 /x87=05
+    |    |    |-<06> fld ST6 d9 /mod=11 /x87=06
+    |    |    |-<07> fld ST7 d9 /mod=11 /x87=07
+    |    |    |-<08> fxch ST0, ST0 d9 /mod=11 /x87=08
+    |    |    |-<09> fxch ST0, ST1 d9 /mod=11 /x87=09
+    |    |    |-<0a> fxch ST0, ST2 d9 /mod=11 /x87=0a
+    |    |    |-<0b> fxch ST0, ST3 d9 /mod=11 /x87=0b
+    |    |    |-<0c> fxch ST0, ST4 d9 /mod=11 /x87=0c
+    |    |    |-<0d> fxch ST0, ST5 d9 /mod=11 /x87=0d
+    |    |    |-<0e> fxch ST0, ST6 d9 /mod=11 /x87=0e
+    |    |    |-<0f> fxch ST0, ST7 d9 /mod=11 /x87=0f
+    |    |    |-<10> fnop  d9 /mod=11 /x87=10
+    |    |    |-<18> fstp1 ST0 d9 /mod=11 /x87=18
+    |    |    |-<19> fstp1 ST1 d9 /mod=11 /x87=19
+    |    |    |-<1a> fstp1 ST2 d9 /mod=11 /x87=1a
+    |    |    |-<1b> fstp1 ST3 d9 /mod=11 /x87=1b
+    |    |    |-<1c> fstp1 ST4 d9 /mod=11 /x87=1c
+    |    |    |-<1d> fstp1 ST5 d9 /mod=11 /x87=1d
+    |    |    |-<1e> fstp1 ST6 d9 /mod=11 /x87=1e
+    |    |    |-<1f> fstp1 ST7 d9 /mod=11 /x87=1f
+    |    |    |-<20> fchs  d9 /mod=11 /x87=20
+    |    |    |-<21> fabs  d9 /mod=11 /x87=21
+    |    |    |-<24> ftst  d9 /mod=11 /x87=24
+    |    |    |-<25> fxam  d9 /mod=11 /x87=25
+    |    |    |-<28> fld1  d9 /mod=11 /x87=28
+    |    |    |-<29> fldl2t  d9 /mod=11 /x87=29
+    |    |    |-<2a> fldl2e  d9 /mod=11 /x87=2a
+    |    |    |-<2b> fldpi  d9 /mod=11 /x87=2b
+    |    |    |-<2c> fldlg2  d9 /mod=11 /x87=2c
+    |    |    |-<2d> fldln2  d9 /mod=11 /x87=2d
+    |    |    |-<2e> fldz  d9 /mod=11 /x87=2e
+    |    |    |-<30> f2xm1  d9 /mod=11 /x87=30
+    |    |    |-<31> fyl2x  d9 /mod=11 /x87=31
+    |    |    |-<32> fptan  d9 /mod=11 /x87=32
+    |    |    |-<33> fpatan  d9 /mod=11 /x87=33
+    |    |    |-<34> fxtract  d9 /mod=11 /x87=34
+    |    |    |-<35> fprem1  d9 /mod=11 /x87=35
+    |    |    |-<36> fdecstp  d9 /mod=11 /x87=36
+    |    |    |-<37> fincstp  d9 /mod=11 /x87=37
+    |    |    |-<38> fprem  d9 /mod=11 /x87=38
+    |    |    |-<39> fyl2xp1  d9 /mod=11 /x87=39
+    |    |    |-<3a> fsqrt  d9 /mod=11 /x87=3a
+    |    |    |-<3b> fsincos  d9 /mod=11 /x87=3b
+    |    |    |-<3c> frndint  d9 /mod=11 /x87=3c
+    |    |    |-<3d> fscale  d9 /mod=11 /x87=3d
+    |    |    |-<3e> fsin  d9 /mod=11 /x87=3e
+    |    |    |-<3f> fcos  d9 /mod=11 /x87=3f
+    |-<da> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fiadd Md da /mod=!11 /reg=0
+    |    |    |-<01> fimul Md da /mod=!11 /reg=1
+    |    |    |-<02> ficom Md da /mod=!11 /reg=2
+    |    |    |-<03> ficomp Md da /mod=!11 /reg=3
+    |    |    |-<04> fisub Md da /mod=!11 /reg=4
+    |    |    |-<05> fisubr Md da /mod=!11 /reg=5
+    |    |    |-<06> fidiv Md da /mod=!11 /reg=6
+    |    |    |-<07> fidivr Md da /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> fcmovb ST0, ST0 da /mod=11 /x87=00
+    |    |    |-<01> fcmovb ST0, ST1 da /mod=11 /x87=01
+    |    |    |-<02> fcmovb ST0, ST2 da /mod=11 /x87=02
+    |    |    |-<03> fcmovb ST0, ST3 da /mod=11 /x87=03
+    |    |    |-<04> fcmovb ST0, ST4 da /mod=11 /x87=04
+    |    |    |-<05> fcmovb ST0, ST5 da /mod=11 /x87=05
+    |    |    |-<06> fcmovb ST0, ST6 da /mod=11 /x87=06
+    |    |    |-<07> fcmovb ST0, ST7 da /mod=11 /x87=07
+    |    |    |-<08> fcmove ST0, ST0 da /mod=11 /x87=08
+    |    |    |-<09> fcmove ST0, ST1 da /mod=11 /x87=09
+    |    |    |-<0a> fcmove ST0, ST2 da /mod=11 /x87=0a
+    |    |    |-<0b> fcmove ST0, ST3 da /mod=11 /x87=0b
+    |    |    |-<0c> fcmove ST0, ST4 da /mod=11 /x87=0c
+    |    |    |-<0d> fcmove ST0, ST5 da /mod=11 /x87=0d
+    |    |    |-<0e> fcmove ST0, ST6 da /mod=11 /x87=0e
+    |    |    |-<0f> fcmove ST0, ST7 da /mod=11 /x87=0f
+    |    |    |-<10> fcmovbe ST0, ST0 da /mod=11 /x87=10
+    |    |    |-<11> fcmovbe ST0, ST1 da /mod=11 /x87=11
+    |    |    |-<12> fcmovbe ST0, ST2 da /mod=11 /x87=12
+    |    |    |-<13> fcmovbe ST0, ST3 da /mod=11 /x87=13
+    |    |    |-<14> fcmovbe ST0, ST4 da /mod=11 /x87=14
+    |    |    |-<15> fcmovbe ST0, ST5 da /mod=11 /x87=15
+    |    |    |-<16> fcmovbe ST0, ST6 da /mod=11 /x87=16
+    |    |    |-<17> fcmovbe ST0, ST7 da /mod=11 /x87=17
+    |    |    |-<18> fcmovu ST0, ST0 da /mod=11 /x87=18
+    |    |    |-<19> fcmovu ST0, ST1 da /mod=11 /x87=19
+    |    |    |-<1a> fcmovu ST0, ST2 da /mod=11 /x87=1a
+    |    |    |-<1b> fcmovu ST0, ST3 da /mod=11 /x87=1b
+    |    |    |-<1c> fcmovu ST0, ST4 da /mod=11 /x87=1c
+    |    |    |-<1d> fcmovu ST0, ST5 da /mod=11 /x87=1d
+    |    |    |-<1e> fcmovu ST0, ST6 da /mod=11 /x87=1e
+    |    |    |-<1f> fcmovu ST0, ST7 da /mod=11 /x87=1f
+    |    |    |-<29> fucompp  da /mod=11 /x87=29
+    |-<db> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fild Md db /mod=!11 /reg=0
+    |    |    |-<01> fisttp Md db /mod=!11 /reg=1
+    |    |    |-<02> fist Md db /mod=!11 /reg=2
+    |    |    |-<03> fistp Md db /mod=!11 /reg=3
+    |    |    |-<05> fld Mt db /mod=!11 /reg=5
+    |    |    |-<07> fstp Mt db /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> fcmovnb ST0, ST0 db /mod=11 /x87=00
+    |    |    |-<01> fcmovnb ST0, ST1 db /mod=11 /x87=01
+    |    |    |-<02> fcmovnb ST0, ST2 db /mod=11 /x87=02
+    |    |    |-<03> fcmovnb ST0, ST3 db /mod=11 /x87=03
+    |    |    |-<04> fcmovnb ST0, ST4 db /mod=11 /x87=04
+    |    |    |-<05> fcmovnb ST0, ST5 db /mod=11 /x87=05
+    |    |    |-<06> fcmovnb ST0, ST6 db /mod=11 /x87=06
+    |    |    |-<07> fcmovnb ST0, ST7 db /mod=11 /x87=07
+    |    |    |-<08> fcmovne ST0, ST0 db /mod=11 /x87=08
+    |    |    |-<09> fcmovne ST0, ST1 db /mod=11 /x87=09
+    |    |    |-<0a> fcmovne ST0, ST2 db /mod=11 /x87=0a
+    |    |    |-<0b> fcmovne ST0, ST3 db /mod=11 /x87=0b
+    |    |    |-<0c> fcmovne ST0, ST4 db /mod=11 /x87=0c
+    |    |    |-<0d> fcmovne ST0, ST5 db /mod=11 /x87=0d
+    |    |    |-<0e> fcmovne ST0, ST6 db /mod=11 /x87=0e
+    |    |    |-<0f> fcmovne ST0, ST7 db /mod=11 /x87=0f
+    |    |    |-<10> fcmovnbe ST0, ST0 db /mod=11 /x87=10
+    |    |    |-<11> fcmovnbe ST0, ST1 db /mod=11 /x87=11
+    |    |    |-<12> fcmovnbe ST0, ST2 db /mod=11 /x87=12
+    |    |    |-<13> fcmovnbe ST0, ST3 db /mod=11 /x87=13
+    |    |    |-<14> fcmovnbe ST0, ST4 db /mod=11 /x87=14
+    |    |    |-<15> fcmovnbe ST0, ST5 db /mod=11 /x87=15
+    |    |    |-<16> fcmovnbe ST0, ST6 db /mod=11 /x87=16
+    |    |    |-<17> fcmovnbe ST0, ST7 db /mod=11 /x87=17
+    |    |    |-<18> fcmovnu ST0, ST0 db /mod=11 /x87=18
+    |    |    |-<19> fcmovnu ST0, ST1 db /mod=11 /x87=19
+    |    |    |-<1a> fcmovnu ST0, ST2 db /mod=11 /x87=1a
+    |    |    |-<1b> fcmovnu ST0, ST3 db /mod=11 /x87=1b
+    |    |    |-<1c> fcmovnu ST0, ST4 db /mod=11 /x87=1c
+    |    |    |-<1d> fcmovnu ST0, ST5 db /mod=11 /x87=1d
+    |    |    |-<1e> fcmovnu ST0, ST6 db /mod=11 /x87=1e
+    |    |    |-<1f> fcmovnu ST0, ST7 db /mod=11 /x87=1f
+    |    |    |-<22> fclex  db /mod=11 /x87=22
+    |    |    |-<23> fninit  db /mod=11 /x87=23
+    |    |    |-<28> fucomi ST0, ST0 db /mod=11 /x87=28
+    |    |    |-<29> fucomi ST0, ST1 db /mod=11 /x87=29
+    |    |    |-<2a> fucomi ST0, ST2 db /mod=11 /x87=2a
+    |    |    |-<2b> fucomi ST0, ST3 db /mod=11 /x87=2b
+    |    |    |-<2c> fucomi ST0, ST4 db /mod=11 /x87=2c
+    |    |    |-<2d> fucomi ST0, ST5 db /mod=11 /x87=2d
+    |    |    |-<2e> fucomi ST0, ST6 db /mod=11 /x87=2e
+    |    |    |-<2f> fucomi ST0, ST7 db /mod=11 /x87=2f
+    |    |    |-<30> fcomi ST0, ST0 db /mod=11 /x87=30
+    |    |    |-<31> fcomi ST0, ST1 db /mod=11 /x87=31
+    |    |    |-<32> fcomi ST0, ST2 db /mod=11 /x87=32
+    |    |    |-<33> fcomi ST0, ST3 db /mod=11 /x87=33
+    |    |    |-<34> fcomi ST0, ST4 db /mod=11 /x87=34
+    |    |    |-<35> fcomi ST0, ST5 db /mod=11 /x87=35
+    |    |    |-<36> fcomi ST0, ST6 db /mod=11 /x87=36
+    |    |    |-<37> fcomi ST0, ST7 db /mod=11 /x87=37
+    |-<dc> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fadd Mq dc /mod=!11 /reg=0
+    |    |    |-<01> fmul Mq dc /mod=!11 /reg=1
+    |    |    |-<02> fcom Mq dc /mod=!11 /reg=2
+    |    |    |-<03> fcomp Mq dc /mod=!11 /reg=3
+    |    |    |-<04> fsub Mq dc /mod=!11 /reg=4
+    |    |    |-<05> fsubr Mq dc /mod=!11 /reg=5
+    |    |    |-<06> fdiv Mq dc /mod=!11 /reg=6
+    |    |    |-<07> fdivr Mq dc /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> fadd ST0, ST0 dc /mod=11 /x87=00
+    |    |    |-<01> fadd ST1, ST0 dc /mod=11 /x87=01
+    |    |    |-<02> fadd ST2, ST0 dc /mod=11 /x87=02
+    |    |    |-<03> fadd ST3, ST0 dc /mod=11 /x87=03
+    |    |    |-<04> fadd ST4, ST0 dc /mod=11 /x87=04
+    |    |    |-<05> fadd ST5, ST0 dc /mod=11 /x87=05
+    |    |    |-<06> fadd ST6, ST0 dc /mod=11 /x87=06
+    |    |    |-<07> fadd ST7, ST0 dc /mod=11 /x87=07
+    |    |    |-<08> fmul ST0, ST0 dc /mod=11 /x87=08
+    |    |    |-<09> fmul ST1, ST0 dc /mod=11 /x87=09
+    |    |    |-<0a> fmul ST2, ST0 dc /mod=11 /x87=0a
+    |    |    |-<0b> fmul ST3, ST0 dc /mod=11 /x87=0b
+    |    |    |-<0c> fmul ST4, ST0 dc /mod=11 /x87=0c
+    |    |    |-<0d> fmul ST5, ST0 dc /mod=11 /x87=0d
+    |    |    |-<0e> fmul ST6, ST0 dc /mod=11 /x87=0e
+    |    |    |-<0f> fmul ST7, ST0 dc /mod=11 /x87=0f
+    |    |    |-<10> fcom2 ST0 dc /mod=11 /x87=10
+    |    |    |-<11> fcom2 ST1 dc /mod=11 /x87=11
+    |    |    |-<12> fcom2 ST2 dc /mod=11 /x87=12
+    |    |    |-<13> fcom2 ST3 dc /mod=11 /x87=13
+    |    |    |-<14> fcom2 ST4 dc /mod=11 /x87=14
+    |    |    |-<15> fcom2 ST5 dc /mod=11 /x87=15
+    |    |    |-<16> fcom2 ST6 dc /mod=11 /x87=16
+    |    |    |-<17> fcom2 ST7 dc /mod=11 /x87=17
+    |    |    |-<18> fcomp3 ST0 dc /mod=11 /x87=18
+    |    |    |-<19> fcomp3 ST1 dc /mod=11 /x87=19
+    |    |    |-<1a> fcomp3 ST2 dc /mod=11 /x87=1a
+    |    |    |-<1b> fcomp3 ST3 dc /mod=11 /x87=1b
+    |    |    |-<1c> fcomp3 ST4 dc /mod=11 /x87=1c
+    |    |    |-<1d> fcomp3 ST5 dc /mod=11 /x87=1d
+    |    |    |-<1e> fcomp3 ST6 dc /mod=11 /x87=1e
+    |    |    |-<1f> fcomp3 ST7 dc /mod=11 /x87=1f
+    |    |    |-<20> fsubr ST0, ST0 dc /mod=11 /x87=20
+    |    |    |-<21> fsubr ST1, ST0 dc /mod=11 /x87=21
+    |    |    |-<22> fsubr ST2, ST0 dc /mod=11 /x87=22
+    |    |    |-<23> fsubr ST3, ST0 dc /mod=11 /x87=23
+    |    |    |-<24> fsubr ST4, ST0 dc /mod=11 /x87=24
+    |    |    |-<25> fsubr ST5, ST0 dc /mod=11 /x87=25
+    |    |    |-<26> fsubr ST6, ST0 dc /mod=11 /x87=26
+    |    |    |-<27> fsubr ST7, ST0 dc /mod=11 /x87=27
+    |    |    |-<28> fsub ST0, ST0 dc /mod=11 /x87=28
+    |    |    |-<29> fsub ST1, ST0 dc /mod=11 /x87=29
+    |    |    |-<2a> fsub ST2, ST0 dc /mod=11 /x87=2a
+    |    |    |-<2b> fsub ST3, ST0 dc /mod=11 /x87=2b
+    |    |    |-<2c> fsub ST4, ST0 dc /mod=11 /x87=2c
+    |    |    |-<2d> fsub ST5, ST0 dc /mod=11 /x87=2d
+    |    |    |-<2e> fsub ST6, ST0 dc /mod=11 /x87=2e
+    |    |    |-<2f> fsub ST7, ST0 dc /mod=11 /x87=2f
+    |    |    |-<30> fdivr ST0, ST0 dc /mod=11 /x87=30
+    |    |    |-<31> fdivr ST1, ST0 dc /mod=11 /x87=31
+    |    |    |-<32> fdivr ST2, ST0 dc /mod=11 /x87=32
+    |    |    |-<33> fdivr ST3, ST0 dc /mod=11 /x87=33
+    |    |    |-<34> fdivr ST4, ST0 dc /mod=11 /x87=34
+    |    |    |-<35> fdivr ST5, ST0 dc /mod=11 /x87=35
+    |    |    |-<36> fdivr ST6, ST0 dc /mod=11 /x87=36
+    |    |    |-<37> fdivr ST7, ST0 dc /mod=11 /x87=37
+    |    |    |-<38> fdiv ST0, ST0 dc /mod=11 /x87=38
+    |    |    |-<39> fdiv ST1, ST0 dc /mod=11 /x87=39
+    |    |    |-<3a> fdiv ST2, ST0 dc /mod=11 /x87=3a
+    |    |    |-<3b> fdiv ST3, ST0 dc /mod=11 /x87=3b
+    |    |    |-<3c> fdiv ST4, ST0 dc /mod=11 /x87=3c
+    |    |    |-<3d> fdiv ST5, ST0 dc /mod=11 /x87=3d
+    |    |    |-<3e> fdiv ST6, ST0 dc /mod=11 /x87=3e
+    |    |    |-<3f> fdiv ST7, ST0 dc /mod=11 /x87=3f
+    |-<dd> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fld Mq dd /mod=!11 /reg=0
+    |    |    |-<01> fisttp Mq dd /mod=!11 /reg=1
+    |    |    |-<02> fst Mq dd /mod=!11 /reg=2
+    |    |    |-<03> fstp Mq dd /mod=!11 /reg=3
+    |    |    |-<04> frstor M dd /mod=!11 /reg=4
+    |    |    |-<06> fnsave M dd /mod=!11 /reg=6
+    |    |    |-<07> fnstsw Mw dd /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> ffree ST0 dd /mod=11 /x87=00
+    |    |    |-<01> ffree ST1 dd /mod=11 /x87=01
+    |    |    |-<02> ffree ST2 dd /mod=11 /x87=02
+    |    |    |-<03> ffree ST3 dd /mod=11 /x87=03
+    |    |    |-<04> ffree ST4 dd /mod=11 /x87=04
+    |    |    |-<05> ffree ST5 dd /mod=11 /x87=05
+    |    |    |-<06> ffree ST6 dd /mod=11 /x87=06
+    |    |    |-<07> ffree ST7 dd /mod=11 /x87=07
+    |    |    |-<08> fxch4 ST0 dd /mod=11 /x87=08
+    |    |    |-<09> fxch4 ST1 dd /mod=11 /x87=09
+    |    |    |-<0a> fxch4 ST2 dd /mod=11 /x87=0a
+    |    |    |-<0b> fxch4 ST3 dd /mod=11 /x87=0b
+    |    |    |-<0c> fxch4 ST4 dd /mod=11 /x87=0c
+    |    |    |-<0d> fxch4 ST5 dd /mod=11 /x87=0d
+    |    |    |-<0e> fxch4 ST6 dd /mod=11 /x87=0e
+    |    |    |-<0f> fxch4 ST7 dd /mod=11 /x87=0f
+    |    |    |-<10> fst ST0 dd /mod=11 /x87=10
+    |    |    |-<11> fst ST1 dd /mod=11 /x87=11
+    |    |    |-<12> fst ST2 dd /mod=11 /x87=12
+    |    |    |-<13> fst ST3 dd /mod=11 /x87=13
+    |    |    |-<14> fst ST4 dd /mod=11 /x87=14
+    |    |    |-<15> fst ST5 dd /mod=11 /x87=15
+    |    |    |-<16> fst ST6 dd /mod=11 /x87=16
+    |    |    |-<17> fst ST7 dd /mod=11 /x87=17
+    |    |    |-<18> fstp ST0 dd /mod=11 /x87=18
+    |    |    |-<19> fstp ST1 dd /mod=11 /x87=19
+    |    |    |-<1a> fstp ST2 dd /mod=11 /x87=1a
+    |    |    |-<1b> fstp ST3 dd /mod=11 /x87=1b
+    |    |    |-<1c> fstp ST4 dd /mod=11 /x87=1c
+    |    |    |-<1d> fstp ST5 dd /mod=11 /x87=1d
+    |    |    |-<1e> fstp ST6 dd /mod=11 /x87=1e
+    |    |    |-<1f> fstp ST7 dd /mod=11 /x87=1f
+    |    |    |-<20> fucom ST0 dd /mod=11 /x87=20
+    |    |    |-<21> fucom ST1 dd /mod=11 /x87=21
+    |    |    |-<22> fucom ST2 dd /mod=11 /x87=22
+    |    |    |-<23> fucom ST3 dd /mod=11 /x87=23
+    |    |    |-<24> fucom ST4 dd /mod=11 /x87=24
+    |    |    |-<25> fucom ST5 dd /mod=11 /x87=25
+    |    |    |-<26> fucom ST6 dd /mod=11 /x87=26
+    |    |    |-<27> fucom ST7 dd /mod=11 /x87=27
+    |    |    |-<28> fucomp ST0 dd /mod=11 /x87=28
+    |    |    |-<29> fucomp ST1 dd /mod=11 /x87=29
+    |    |    |-<2a> fucomp ST2 dd /mod=11 /x87=2a
+    |    |    |-<2b> fucomp ST3 dd /mod=11 /x87=2b
+    |    |    |-<2c> fucomp ST4 dd /mod=11 /x87=2c
+    |    |    |-<2d> fucomp ST5 dd /mod=11 /x87=2d
+    |    |    |-<2e> fucomp ST6 dd /mod=11 /x87=2e
+    |    |    |-<2f> fucomp ST7 dd /mod=11 /x87=2f
+    |-<de> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fiadd Mw de /mod=!11 /reg=0
+    |    |    |-<01> fimul Mw de /mod=!11 /reg=1
+    |    |    |-<02> ficom Mw de /mod=!11 /reg=2
+    |    |    |-<03> ficomp Mw de /mod=!11 /reg=3
+    |    |    |-<04> fisub Mw de /mod=!11 /reg=4
+    |    |    |-<05> fisubr Mw de /mod=!11 /reg=5
+    |    |    |-<06> fidiv Mw de /mod=!11 /reg=6
+    |    |    |-<07> fidivr Mw de /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> faddp ST0, ST0 de /mod=11 /x87=00
+    |    |    |-<01> faddp ST1, ST0 de /mod=11 /x87=01
+    |    |    |-<02> faddp ST2, ST0 de /mod=11 /x87=02
+    |    |    |-<03> faddp ST3, ST0 de /mod=11 /x87=03
+    |    |    |-<04> faddp ST4, ST0 de /mod=11 /x87=04
+    |    |    |-<05> faddp ST5, ST0 de /mod=11 /x87=05
+    |    |    |-<06> faddp ST6, ST0 de /mod=11 /x87=06
+    |    |    |-<07> faddp ST7, ST0 de /mod=11 /x87=07
+    |    |    |-<08> fmulp ST0, ST0 de /mod=11 /x87=08
+    |    |    |-<09> fmulp ST1, ST0 de /mod=11 /x87=09
+    |    |    |-<0a> fmulp ST2, ST0 de /mod=11 /x87=0a
+    |    |    |-<0b> fmulp ST3, ST0 de /mod=11 /x87=0b
+    |    |    |-<0c> fmulp ST4, ST0 de /mod=11 /x87=0c
+    |    |    |-<0d> fmulp ST5, ST0 de /mod=11 /x87=0d
+    |    |    |-<0e> fmulp ST6, ST0 de /mod=11 /x87=0e
+    |    |    |-<0f> fmulp ST7, ST0 de /mod=11 /x87=0f
+    |    |    |-<10> fcomp5 ST0 de /mod=11 /x87=10
+    |    |    |-<11> fcomp5 ST1 de /mod=11 /x87=11
+    |    |    |-<12> fcomp5 ST2 de /mod=11 /x87=12
+    |    |    |-<13> fcomp5 ST3 de /mod=11 /x87=13
+    |    |    |-<14> fcomp5 ST4 de /mod=11 /x87=14
+    |    |    |-<15> fcomp5 ST5 de /mod=11 /x87=15
+    |    |    |-<16> fcomp5 ST6 de /mod=11 /x87=16
+    |    |    |-<17> fcomp5 ST7 de /mod=11 /x87=17
+    |    |    |-<19> fcompp  de /mod=11 /x87=19
+    |    |    |-<20> fsubrp ST0, ST0 de /mod=11 /x87=20
+    |    |    |-<21> fsubrp ST1, ST0 de /mod=11 /x87=21
+    |    |    |-<22> fsubrp ST2, ST0 de /mod=11 /x87=22
+    |    |    |-<23> fsubrp ST3, ST0 de /mod=11 /x87=23
+    |    |    |-<24> fsubrp ST4, ST0 de /mod=11 /x87=24
+    |    |    |-<25> fsubrp ST5, ST0 de /mod=11 /x87=25
+    |    |    |-<26> fsubrp ST6, ST0 de /mod=11 /x87=26
+    |    |    |-<27> fsubrp ST7, ST0 de /mod=11 /x87=27
+    |    |    |-<28> fsubp ST0, ST0 de /mod=11 /x87=28
+    |    |    |-<29> fsubp ST1, ST0 de /mod=11 /x87=29
+    |    |    |-<2a> fsubp ST2, ST0 de /mod=11 /x87=2a
+    |    |    |-<2b> fsubp ST3, ST0 de /mod=11 /x87=2b
+    |    |    |-<2c> fsubp ST4, ST0 de /mod=11 /x87=2c
+    |    |    |-<2d> fsubp ST5, ST0 de /mod=11 /x87=2d
+    |    |    |-<2e> fsubp ST6, ST0 de /mod=11 /x87=2e
+    |    |    |-<2f> fsubp ST7, ST0 de /mod=11 /x87=2f
+    |    |    |-<30> fdivrp ST0, ST0 de /mod=11 /x87=30
+    |    |    |-<31> fdivrp ST1, ST0 de /mod=11 /x87=31
+    |    |    |-<32> fdivrp ST2, ST0 de /mod=11 /x87=32
+    |    |    |-<33> fdivrp ST3, ST0 de /mod=11 /x87=33
+    |    |    |-<34> fdivrp ST4, ST0 de /mod=11 /x87=34
+    |    |    |-<35> fdivrp ST5, ST0 de /mod=11 /x87=35
+    |    |    |-<36> fdivrp ST6, ST0 de /mod=11 /x87=36
+    |    |    |-<37> fdivrp ST7, ST0 de /mod=11 /x87=37
+    |    |    |-<38> fdivp ST0, ST0 de /mod=11 /x87=38
+    |    |    |-<39> fdivp ST1, ST0 de /mod=11 /x87=39
+    |    |    |-<3a> fdivp ST2, ST0 de /mod=11 /x87=3a
+    |    |    |-<3b> fdivp ST3, ST0 de /mod=11 /x87=3b
+    |    |    |-<3c> fdivp ST4, ST0 de /mod=11 /x87=3c
+    |    |    |-<3d> fdivp ST5, ST0 de /mod=11 /x87=3d
+    |    |    |-<3e> fdivp ST6, ST0 de /mod=11 /x87=3e
+    |    |    |-<3f> fdivp ST7, ST0 de /mod=11 /x87=3f
+    |-<df> table-/mod
+    |    |-<00> table-/reg
+    |    |    |-<00> fild Mw df /mod=!11 /reg=0
+    |    |    |-<01> fisttp Mw df /mod=!11 /reg=1
+    |    |    |-<02> fist Mw df /mod=!11 /reg=2
+    |    |    |-<03> fistp Mw df /mod=!11 /reg=3
+    |    |    |-<04> fbld Mt df /mod=!11 /reg=4
+    |    |    |-<05> fild Mq df /mod=!11 /reg=5
+    |    |    |-<06> fbstp Mt df /mod=!11 /reg=6
+    |    |    |-<07> fistp Mq df /mod=!11 /reg=7
+    |    |-<01> table-/x87
+    |    |    |-<00> ffreep ST0 df /mod=11 /x87=00
+    |    |    |-<01> ffreep ST1 df /mod=11 /x87=01
+    |    |    |-<02> ffreep ST2 df /mod=11 /x87=02
+    |    |    |-<03> ffreep ST3 df /mod=11 /x87=03
+    |    |    |-<04> ffreep ST4 df /mod=11 /x87=04
+    |    |    |-<05> ffreep ST5 df /mod=11 /x87=05
+    |    |    |-<06> ffreep ST6 df /mod=11 /x87=06
+    |    |    |-<07> ffreep ST7 df /mod=11 /x87=07
+    |    |    |-<08> fxch7 ST0 df /mod=11 /x87=08
+    |    |    |-<09> fxch7 ST1 df /mod=11 /x87=09
+    |    |    |-<0a> fxch7 ST2 df /mod=11 /x87=0a
+    |    |    |-<0b> fxch7 ST3 df /mod=11 /x87=0b
+    |    |    |-<0c> fxch7 ST4 df /mod=11 /x87=0c
+    |    |    |-<0d> fxch7 ST5 df /mod=11 /x87=0d
+    |    |    |-<0e> fxch7 ST6 df /mod=11 /x87=0e
+    |    |    |-<0f> fxch7 ST7 df /mod=11 /x87=0f
+    |    |    |-<10> fstp8 ST0 df /mod=11 /x87=10
+    |    |    |-<11> fstp8 ST1 df /mod=11 /x87=11
+    |    |    |-<12> fstp8 ST2 df /mod=11 /x87=12
+    |    |    |-<13> fstp8 ST3 df /mod=11 /x87=13
+    |    |    |-<14> fstp8 ST4 df /mod=11 /x87=14
+    |    |    |-<15> fstp8 ST5 df /mod=11 /x87=15
+    |    |    |-<16> fstp8 ST6 df /mod=11 /x87=16
+    |    |    |-<17> fstp8 ST7 df /mod=11 /x87=17
+    |    |    |-<18> fstp9 ST0 df /mod=11 /x87=18
+    |    |    |-<19> fstp9 ST1 df /mod=11 /x87=19
+    |    |    |-<1a> fstp9 ST2 df /mod=11 /x87=1a
+    |    |    |-<1b> fstp9 ST3 df /mod=11 /x87=1b
+    |    |    |-<1c> fstp9 ST4 df /mod=11 /x87=1c
+    |    |    |-<1d> fstp9 ST5 df /mod=11 /x87=1d
+    |    |    |-<1e> fstp9 ST6 df /mod=11 /x87=1e
+    |    |    |-<1f> fstp9 ST7 df /mod=11 /x87=1f
+    |    |    |-<20> fnstsw AX df /mod=11 /x87=20
+    |    |    |-<28> fucomip ST0, ST0 df /mod=11 /x87=28
+    |    |    |-<29> fucomip ST0, ST1 df /mod=11 /x87=29
+    |    |    |-<2a> fucomip ST0, ST2 df /mod=11 /x87=2a
+    |    |    |-<2b> fucomip ST0, ST3 df /mod=11 /x87=2b
+    |    |    |-<2c> fucomip ST0, ST4 df /mod=11 /x87=2c
+    |    |    |-<2d> fucomip ST0, ST5 df /mod=11 /x87=2d
+    |    |    |-<2e> fucomip ST0, ST6 df /mod=11 /x87=2e
+    |    |    |-<2f> fucomip ST0, ST7 df /mod=11 /x87=2f
+    |    |    |-<30> fcomip ST0, ST0 df /mod=11 /x87=30
+    |    |    |-<31> fcomip ST0, ST1 df /mod=11 /x87=31
+    |    |    |-<32> fcomip ST0, ST2 df /mod=11 /x87=32
+    |    |    |-<33> fcomip ST0, ST3 df /mod=11 /x87=33
+    |    |    |-<34> fcomip ST0, ST4 df /mod=11 /x87=34
+    |    |    |-<35> fcomip ST0, ST5 df /mod=11 /x87=35
+    |    |    |-<36> fcomip ST0, ST6 df /mod=11 /x87=36
+    |    |    |-<37> fcomip ST0, ST7 df /mod=11 /x87=37
+    |-<e0> loopne Jb e0
+    |-<e1> loope Jb e1
+    |-<e2> loop Jb e2
+    |-<e3> table-/a
+    |    |-<00> jcxz Jb e3 /a=16
+    |    |-<01> jecxz Jb e3 /a=32
+    |    |-<02> jrcxz Jb e3 /a=64
+    |-<e4> in AL, Ib e4
+    |-<e5> in eAX, Ib e5
+    |-<e6> out Ib, AL e6
+    |-<e7> out Ib, eAX e7
+    |-<e8> call Jz e8
+    |-<e9> jmp Jz e9
+    |-<ea> table-/m
+    |    |-<00> jmp Av ea /m=!64
+    |-<eb> jmp Jb eb
+    |-<ec> in AL, DX ec
+    |-<ed> in eAX, DX ed
+    |-<ee> out DX, AL ee
+    |-<ef> out DX, eAX ef
+    |-<f0> lock  f0
+    |-<f1> int1  f1
+    |-<f2> repne  f2
+    |-<f3> rep  f3
+    |-<f4> hlt  f4
+    |-<f5> cmc  f5
+    |-<f6> table-/reg
+    |    |-<00> test Eb, Ib f6 /reg=0
+    |    |-<01> test Eb, Ib f6 /reg=1
+    |    |-<02> not Eb f6 /reg=2
+    |    |-<03> neg Eb f6 /reg=3
+    |    |-<04> mul Eb f6 /reg=4
+    |    |-<05> imul Eb f6 /reg=5
+    |    |-<06> div Eb f6 /reg=6
+    |    |-<07> idiv Eb f6 /reg=7
+    |-<f7> table-/reg
+    |    |-<00> test Ev, sIz f7 /reg=0
+    |    |-<01> test Ev, Iz f7 /reg=1
+    |    |-<02> not Ev f7 /reg=2
+    |    |-<03> neg Ev f7 /reg=3
+    |    |-<04> mul Ev f7 /reg=4
+    |    |-<05> imul Ev f7 /reg=5
+    |    |-<06> div Ev f7 /reg=6
+    |    |-<07> idiv Ev f7 /reg=7
+    |-<f8> clc  f8
+    |-<f9> stc  f9
+    |-<fa> cli  fa
+    |-<fb> sti  fb
+    |-<fc> cld  fc
+    |-<fd> std  fd
+    |-<fe> table-/reg
+    |    |-<00> inc Eb fe /reg=0
+    |    |-<01> dec Eb fe /reg=1
+    |-<ff> table-/reg
+    |    |-<00> inc Ev ff /reg=0
+    |    |-<01> dec Ev ff /reg=1
+    |    |-<02> table-/m
+    |    |    |-<00> call Ev ff /reg=2 /m=!64
+    |    |    |-<01> call Eq ff /reg=2 /m=64
+    |    |-<03> call Fv ff /reg=3
+    |    |-<04> jmp Ev ff /reg=4
+    |    |-<05> jmp Fv ff /reg=5
+    |    |-<06> push Ev ff /reg=6
