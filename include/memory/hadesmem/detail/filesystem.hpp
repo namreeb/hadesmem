@@ -368,5 +368,38 @@ inline void BufferToFile(std::wstring const& path,
       hadesmem::Error{} << hadesmem::ErrorString{"Failed to write file."});
   }
 }
+
+inline std::vector<char> FileToBuffer(std::wstring const& path)
+{
+  auto const file =
+    OpenFile<char>(path, std::ios::in | std::ios::binary | std::ios::ate);
+  if (!*file)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Failed to create file."});
+  }
+
+  std::streampos const size = file->tellg();
+  if (size <= 0)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString("Empty or invalid file."));
+  }
+
+  if (!file->seekg(0, std::ios::beg))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Seeking to beginning of file failed."));
+  }
+
+  std::vector<char> buffer(static_cast<std::size_t>(size));
+  if (!file->read(buffer.data(), size))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Failed to write file."});
+  }
+
+  return buffer;
+}
 }
 }
