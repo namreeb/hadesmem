@@ -393,7 +393,7 @@ inline std::vector<char> FileToBuffer(std::wstring const& path)
   }
 
   std::vector<char> buffer(static_cast<std::size_t>(size));
-  if (!file->read(buffer.data(), size))
+  if (!file->read(buffer.data(), static_cast<std::streamsize>(size)))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"Failed to write file."});
