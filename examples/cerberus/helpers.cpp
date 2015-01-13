@@ -41,6 +41,7 @@ void DetourFuncGeneric(hadesmem::Process const& process,
                        void* orig_fn,
                        void* detour_fn)
 {
+  (void)name;
   if (!detour)
   {
     if (orig_fn)
@@ -67,8 +68,8 @@ void DetourFuncGeneric(hadesmem::Process const& process,
                        std::unique_ptr<T>& detour,
                        void* detour_fn)
 {
-  auto const orig_fn =
-    hadesmem::detail::GetProcAddressInternal(process, base, name);
+  auto const orig_fn = hadesmem::detail::AliasCast<void*>(
+    hadesmem::detail::GetProcAddressInternal(process, base, name));
   DetourFuncGeneric(process, name, detour, orig_fn, detour_fn);
 }
 
