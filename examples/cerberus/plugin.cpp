@@ -34,11 +34,6 @@
 #include "render.hpp"
 #include "window.hpp"
 
-#if defined(HADESMEM_INTEL)
-#pragma warning(push)
-#pragma warning(disable : 1345)
-#endif // #if defined(HADESMEM_INTEL)
-
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadPluginsCallback>&
@@ -406,16 +401,6 @@ void LoadPlugins()
   }
   else
   {
-#if defined(HADESMEM_GCC)
-    std::wstring const config_xml = LR"(
-<?xml version="1.0" encoding="utf-8"?>
-<HadesMem>
-  <Cerberus>
-    <Plugin Path="libcxexample.dll"/>
-  </Cerberus>
-</HadesMem>
-)";
-#else
     std::wstring const config_xml = LR"(
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
@@ -424,7 +409,6 @@ void LoadPlugins()
   </Cerberus>
 </HadesMem>
 )";
-#endif
     LoadPluginsMemory(config_xml);
   }
 }
@@ -451,7 +435,3 @@ void UnregisterOnUnloadPlugins(std::size_t id)
 }
 }
 }
-
-#if defined(HADESMEM_INTEL)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_INTEL)

@@ -12,11 +12,6 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-#if defined(HADESMEM_INTEL)
-#pragma warning(push)
-#pragma warning(disable : 1345)
-#endif // #if defined(HADESMEM_INTEL)
-
 void TestFindPattern()
 {
   hadesmem::Process const process{::GetCurrentProcessId()};
@@ -260,7 +255,3 @@ int main()
   TestFindPattern();
   return boost::report_errors();
 }
-
-#if defined(HADESMEM_INTEL)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_INTEL)

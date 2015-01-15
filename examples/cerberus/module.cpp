@@ -123,13 +123,7 @@ extern "C" NTSTATUS WINAPI
                                           alloc_protect);
   last_error_preserver.Update();
 
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local std::int32_t in_hook = 0;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) std::int32_t in_hook = 0;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   if (in_hook)
   {
     return ret;
@@ -231,13 +225,7 @@ extern "C" NTSTATUS WINAPI
   auto const ret = nt_unmap_view_of_section(process, base);
   last_error_preserver.Update();
 
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local std::int32_t in_hook = 0;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) std::int32_t in_hook = 0;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   if (in_hook)
   {
     return ret;

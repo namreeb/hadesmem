@@ -490,11 +490,7 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
   hadesmem::cerberus::HandleInputQueue();
 }
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable : 6262)
-#endif // #if defined(HADESMEM_MSVC)
-
+#pragma warning(suppress : 6262)
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
   HandleOnFrameD3D11(swap_chain);
@@ -528,10 +524,6 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
       hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
   }
 }
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
 
 void OnFrameD3D9(IDirect3DDevice9* device)
 {

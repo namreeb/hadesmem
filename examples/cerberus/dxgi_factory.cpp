@@ -32,14 +32,12 @@ HRESULT WINAPI DXGIFactoryProxy::QueryInterface(REFIID riid, void** obj)
     }
     else
     {
-#if !defined(HADESMEM_GCC)
       // Far Cry 4
       if (riid == __uuidof(IDXGIDisplayControl))
       {
         return ret;
       }
       else
-#endif // #if !defined(HADESMEM_GCC)
       {
         HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
         HADESMEM_DETAIL_ASSERT(false);
@@ -182,7 +180,6 @@ _Use_decl_annotations_ HRESULT WINAPI
   return factory_->CreateSoftwareAdapter(module, adapter);
 }
 
-#if !defined(HADESMEM_GCC)
 _Use_decl_annotations_ HRESULT WINAPI
   DXGIFactoryProxy::EnumAdapters1(UINT adapter_index, IDXGIAdapter1** adapter)
 {
@@ -399,7 +396,6 @@ _Use_decl_annotations_ HRESULT WINAPI
 
   return ret;
 }
-#endif // #if !defined(HADESMEM_GCC)
 
 void DXGIFactoryProxy::Cleanup()
 {

@@ -4,11 +4,7 @@
 #include "gwen.hpp"
 
 #include <hadesmem/config.hpp>
-
-// GWEN is currently only supported under MSVC and Intel C++ due to use of the
-// D3DX APIs.
-
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
+#include <hadesmem/detail/smart_handle.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <gwen/gwen.h>
@@ -20,10 +16,6 @@
 #include <gwen/renderers/directx10.h>
 #include <gwen/renderers/directx9.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
-
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-
-#include <hadesmem/detail/smart_handle.hpp>
 
 #include "callbacks.hpp"
 #include "cursor.hpp"
@@ -81,15 +73,11 @@ bool& GetGwenInitialized(hadesmem::cerberus::RenderApi api)
   }
 }
 
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-
 void SetGwenInitialized(hadesmem::cerberus::RenderApi api, bool value)
 {
   auto& initialized = GetGwenInitialized(api);
   initialized = value;
 }
-
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 
 bool GwenInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -135,8 +123,6 @@ public:
     return GwenInitializedAny();
   }
 };
-
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 
 std::unique_ptr<Gwen::Renderer::Base>& GetGwenRenderer()
 {
@@ -381,7 +367,6 @@ void OnUnloadPlugins()
   SetGwenInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
 }
 
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 
 namespace hadesmem
@@ -396,7 +381,6 @@ GwenInterface& GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT
 
 void InitializeGwen()
 {
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   auto& input = GetInputInterface();
   input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
 
@@ -407,7 +391,6 @@ void InitializeGwen()
   render.RegisterOnSetGuiVisibility(SetAllGwenVisibility);
 
   RegisterOnUnloadPlugins(OnUnloadPlugins);
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 }
 }

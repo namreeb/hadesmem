@@ -53,7 +53,6 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       refs_++;
       *obj = this;
     }
-#if !defined(HADESMEM_GCC)
     else if (riid == __uuidof(ID3D11Device1))
     {
       *obj = new D3D11DeviceProxy(static_cast<ID3D11Device1*>(*obj));
@@ -70,7 +69,6 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
       return ret;
     }
-#endif // #if !defined(HADESMEM_GCC)
     else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
     {
       // Needs investigation to see if we need to wrap this.
@@ -472,7 +470,6 @@ UINT WINAPI D3D11DeviceProxy::GetExceptionMode(void)
   return device_->GetExceptionMode();
 }
 
-#if !defined(HADESMEM_GCC)
 // ID3D11Device1
 void WINAPI D3D11DeviceProxy::GetImmediateContext1(
   _Out_ ID3D11DeviceContext1** ppImmediateContext)
@@ -588,7 +585,6 @@ HRESULT WINAPI D3D11DeviceProxy::CheckMultisampleQualityLevels1(
   return device->CheckMultisampleQualityLevels1(
     Format, SampleCount, Flags, pNumQualityLevels);
 }
-#endif // #if !defined(HADESMEM_GCC)
 
 void D3D11DeviceProxy::Cleanup()
 {

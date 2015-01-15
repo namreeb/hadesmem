@@ -75,13 +75,7 @@ std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
 
 std::uint32_t& GetD3D11CreateHookCount() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local std::uint32_t in_hook = 0;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) std::uint32_t in_hook = 0;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return in_hook;
 }
 

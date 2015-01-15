@@ -506,73 +506,37 @@ void UndetourUser32ForCursor(bool remove)
 
 bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 
 bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 
 bool& GetDisableSetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 
 bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 
 bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 
 bool& GetDisableGetClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local bool disable_hook = false;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) bool disable_hook = false;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   return disable_hook;
 }
 }

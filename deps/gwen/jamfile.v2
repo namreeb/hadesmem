@@ -23,8 +23,7 @@ lib gwen
     [ glob gwen/gwen/unittest/*.cpp ] 
   : 
     <include>"gwen/gwen/include/"
-	<toolset>msvc:<include>"$(DXSDK_DIR)/include"
-	<toolset>intel:<include>"$(DXSDK_DIR)/include"
+	<include>"$(DXSDK_DIR)/include"
 
     <link>static
 

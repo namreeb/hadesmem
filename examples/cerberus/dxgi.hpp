@@ -11,9 +11,7 @@
 
 #include <hadesmem/config.hpp>
 
-#if !defined(HADESMEM_GCC)
 #include <dxgi1_2.h>
-#endif // #if !defined(HADESMEM_GCC)
 #include <dxgi.h>
 
 #include "callbacks.hpp"

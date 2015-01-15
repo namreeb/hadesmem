@@ -11,28 +11,15 @@
 #include <hadesmem/config.hpp>
 
 #include <d3d11.h>
-#if !defined(HADESMEM_GCC)
 #include <d3d11_2.h>
-#endif // #if !defined(HADESMEM_GCC)
 
 #include <hadesmem/config.hpp>
-
-#include "no_sal.hpp"
 
 namespace hadesmem
 {
 namespace cerberus
 {
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_GCC)
-class D3D11DeviceProxy : public ID3D11Device
-#else // #if defined(HADESMEM_GCC)
 class D3D11DeviceProxy : public ID3D11Device2
-#endif // #if defined(HADESMEM_GCC)
 {
 public:
   explicit D3D11DeviceProxy(ID3D11Device* device) : device_{device}
@@ -199,7 +186,6 @@ public:
   virtual HRESULT WINAPI SetExceptionMode(UINT RaiseFlags) override;
   virtual UINT WINAPI GetExceptionMode(void) override;
 
-#if !defined(HADESMEM_GCC)
   // ID3D11Device1
   virtual void WINAPI GetImmediateContext1(
     _Out_ ID3D11DeviceContext1** ppImmediateContext) override;
@@ -220,10 +206,9 @@ public:
     REFIID EmulatedInterface,
     _Out_opt_ D3D_FEATURE_LEVEL* pChosenFeatureLevel,
     _Out_opt_ ID3DDeviceContextState** ppContextState) override;
-  virtual HRESULT WINAPI
-    OpenSharedResource1(_In_ HANDLE hResource,
-                        _In_ REFIID returnedInterface,
-                        _Out_ void** ppResource) override;
+  virtual HRESULT WINAPI OpenSharedResource1(_In_ HANDLE hResource,
+                                             _In_ REFIID returnedInterface,
+                                             _Out_ void** ppResource) override;
   virtual HRESULT WINAPI
     OpenSharedResourceByName(_In_ LPCWSTR lpName,
                              _In_ DWORD dwDesiredAccess,
@@ -243,14 +228,13 @@ public:
     _Out_opt_ D3D11_TILE_SHAPE* pStandardTileShapeForNonPackedMips,
     _Inout_opt_ UINT* pNumSubresourceTilings,
     _In_ UINT FirstSubresourceTilingToGet,
-    _Out_writes_(*pNumSubresourceTilings) D3D11_SUBRESOURCE_TILING*
-      pSubresourceTilingsForNonPackedMips) override;
+    _Out_writes_(*pNumSubresourceTilings)
+      D3D11_SUBRESOURCE_TILING* pSubresourceTilingsForNonPackedMips) override;
   virtual HRESULT WINAPI
     CheckMultisampleQualityLevels1(_In_ DXGI_FORMAT Format,
                                    _In_ UINT SampleCount,
                                    _In_ UINT Flags,
                                    _Out_ UINT* pNumQualityLevels) override;
-#endif // #if !defined(HADESMEM_GCC)
 
 protected:
   void Cleanup();
@@ -258,9 +242,5 @@ protected:
   std::int64_t refs_{1};
   ID3D11Device* device_{};
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
 }
 }

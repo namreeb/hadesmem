@@ -142,13 +142,7 @@ extern "C" BOOL WINAPI
     resume_thread.reset(new EnsureResumeThread(process_info->hThread));
   }
 
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  static thread_local std::int32_t in_hook = 0;
-#elif defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   static __declspec(thread) std::int32_t in_hook = 0;
-#else
-#error "[HadesMem] Unsupported compiler."
-#endif
   if (in_hook)
   {
     HADESMEM_DETAIL_TRACE_A("Recursion detected.");

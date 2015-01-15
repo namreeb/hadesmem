@@ -23,22 +23,12 @@ namespace hadesmem
 {
 namespace detail
 {
-// libstdc++ doesn't support move operations on file-streams, so we have to
-// return a unique_ptr instead.
 template <typename CharT>
 inline std::unique_ptr<std::basic_fstream<CharT>>
   OpenFile(std::wstring const& path, std::ios_base::openmode mode)
 {
-#if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
   return std::unique_ptr<std::basic_fstream<CharT>>{
     new std::basic_fstream<CharT>{path, mode}};
-#else  // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
-  // libstdc++ doesn't support wide character overloads for ifstream's
-  // construtor.
-  return std::unique_ptr<std::basic_fstream<CharT>>{
-    new std::basic_fstream<CharT>{hadesmem::detail::WideCharToMultiByte(path),
-                                  mode}};
-#endif // #if defined(HADESMEM_MSVC) || defined(HADESMEM_INTEL)
 }
 
 inline bool DoesFileExist(std::wstring const& path)

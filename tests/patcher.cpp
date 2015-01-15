@@ -259,10 +259,6 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
   detour_1 = nullptr;
 }
 
-#if defined(HADESMEM_GCC)
-#pragma GCC visibility push(hidden)
-#endif // #if defined(HADESMEM_GCC)
-
 class AsmJitMemoryReleaser
 {
 public:
@@ -331,10 +327,6 @@ private:
   asmjit::JitRuntime* runtime_;
   void* func_;
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC visibility pop
-#endif // #if defined(HADESMEM_GCC)
 
 using HookPackageData = std::tuple<decltype(&HookMe),
                                    std::function<std::uint32_t()>,

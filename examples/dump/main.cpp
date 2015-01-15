@@ -287,26 +287,16 @@ void HandleLongOrUnprintableString(std::wstring const& name,
 
 bool ConvertTimeStamp(std::time_t time, std::wstring& str)
 {
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  std::tm local_time{};
-  auto const local_time_conv = localtime_r(&time, &local_time);
-#else
   std::tm local_time{};
   auto const local_time_conv = localtime_s(&local_time, &time);
-#endif
   if (local_time_conv)
   {
     str = L"Invalid";
     return false;
   }
 
-#if defined(HADESMEM_GCC) || defined(HADESMEM_CLANG)
-  char local_time_buf[26]{};
-  auto const local_time_fmt = asctime_r(&local_time, local_time_buf);
-#else
   char local_time_buf[26]{};
   auto const local_time_fmt = asctime_s(local_time_buf, &local_time);
-#endif
   if (local_time_fmt)
   {
     str = L"Invalid";

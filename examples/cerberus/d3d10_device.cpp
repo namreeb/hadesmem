@@ -902,7 +902,6 @@ void WINAPI D3D10DeviceProxy::GetTextFilterSize(_Out_opt_ UINT* pWidth,
   return device_->GetTextFilterSize(pWidth, pHeight);
 }
 
-#if !defined(HADESMEM_GCC)
 // ID3D10Device1
 HRESULT WINAPI D3D10DeviceProxy::CreateShaderResourceView1(
   _In_ ID3D10Resource* pResource,
@@ -926,7 +925,6 @@ D3D10_FEATURE_LEVEL1 WINAPI D3D10DeviceProxy::GetFeatureLevel()
   auto const device = static_cast<ID3D10Device1*>(device_);
   return device->GetFeatureLevel();
 }
-#endif // #if !defined(HADESMEM_GCC)
 
 void D3D10DeviceProxy::Cleanup()
 {

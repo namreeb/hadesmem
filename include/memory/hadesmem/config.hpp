@@ -9,30 +9,6 @@
 
 #include <hadesmem/detail/static_assert.hpp>
 
-// Allow the user to override the compiler detection.
-#if !defined(HADESMEM_CLANG) && !defined(HADESMEM_INTEL) &&                    \
-  !defined(HADESMEM_GCC) && !defined(HADESMEM_MSVC)
-
-#if defined(__clang__)
-#define HADESMEM_CLANG
-#elif defined(__INTEL_COMPILER)
-#define HADESMEM_INTEL
-#elif defined(__GNUC__)
-#define HADESMEM_GCC
-#elif defined(_MSC_VER)
-#define HADESMEM_MSVC
-#else
-// I don't like having to do this, but given that some small parts of the
-// code base rely on 'questionable' interpretations of the standard it's
-// safer to verify before continuing.
-#error "[HadesMem] Unsupported compiler."
-#endif
-
-#endif // #if !defined(HADESMEM_CLANG) &&
-// !defined(HADESMEM_INTEL) &&
-// !defined(HADESMEM_GCC) &&
-// !defined(HADESMEM_MSVC)
-
 #define HADESMEM_VERSION_MAJOR 2
 #define HADESMEM_VERSION_MINOR 0
 #define HADESMEM_VERSION_PATCH 0
@@ -46,21 +22,11 @@
   HADESMEM_DETAIL_VERSION_STRING_GEN(                                          \
     HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
-#if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3
-#endif // #if defined(HADESMEM_MSVC)
 
-#if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_NOEXCEPT
-#endif // #if defined(HADESMEM_MSVC)
 
-#if defined(HADESMEM_MSVC)
 #define HADESMEM_DETAIL_NO_CONSTEXPR
-#endif // #if defined(HADESMEM_MSVC)
-
-#if defined(HADESMEM_GCC)
-#define HADESMEM_DETAIL_NO_DXGI1_2
-#endif // #if defined(HADESMEM_GCC)
 
 #if defined(_M_IX86)
 #define HADESMEM_DETAIL_ARCH_X86
@@ -72,10 +38,8 @@
 #endif // #if defined(_M_IX86)
 // #elif defined(_M_AMD64)
 
-#if (defined(HADESMEM_GCC) || defined(HADESMEM_CLANG) ||                       \
-     defined(HADESMEM_INTEL)) ||                                               \
-  !(defined(HADESMEM_DETAIL_ARCH_X64) ||                                       \
-    (defined(HADESMEM_DETAIL_ARCH_X86) && _M_IX86_FP >= 2))
+#if !(defined(HADESMEM_DETAIL_ARCH_X64) ||                                     \
+      (defined(HADESMEM_DETAIL_ARCH_X86) && _M_IX86_FP >= 2))
 #define HADESMEM_DETAIL_NO_VECTORCALL
 #endif // #if (defined(HADESMEM_GCC) || defined(HADESMEM_CLANG) ||
        // defined(HADESMEM_INTEL)) || !(defined(HADESMEM_DETAIL_ARCH_X64) ||

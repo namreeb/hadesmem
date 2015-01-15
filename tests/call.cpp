@@ -399,18 +399,10 @@ void TestCall()
   HMODULE const kernel32_mod = ::GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST(kernel32_mod != nullptr);
 
-#if defined(HADESMEM_MSVC)
-#pragma warning(push)
-#pragma warning(disable : 6387)
-#endif // #if defined(HADESMEM_MSVC)
-
+#pragma warning(suppress : 6387)
   FARPROC const get_proc_address =
     ::GetProcAddress(kernel32_mod, "GetProcAddress");
   BOOST_TEST(get_proc_address != nullptr);
-
-#if defined(HADESMEM_MSVC)
-#pragma warning(pop)
-#endif // #if defined(HADESMEM_MSVC)
 
   auto const call_win = hadesmem::Call(
     process,

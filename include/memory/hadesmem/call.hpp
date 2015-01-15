@@ -379,10 +379,6 @@ inline std::uint32_t GetHigh32(std::uint64_t i)
   return static_cast<std::uint32_t>((i >> 32) & 0xFFFFFFFFUL);
 }
 
-#if defined(HADESMEM_GCC)
-#pragma GCC visibility push(hidden)
-#endif // #if defined(HADESMEM_GCC)
-
 class ArgVisitor32
 {
 public:
@@ -571,10 +567,6 @@ private:
   std::size_t num_args_;
   std::size_t cur_arg_;
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC visibility pop
-#endif // #if defined(HADESMEM_GCC)
 
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
@@ -965,11 +957,7 @@ inline CallResultRaw CallRaw(Process const& process,
 
 namespace detail
 {
-template <typename FuncT,
-          std::int32_t N,
-          typename T,
-          typename OutputIterator,
-          int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, std::int32_t N, typename T, typename OutputIterator>
 inline void AddCallArg(OutputIterator call_args, T&& arg)
 {
   using RealT = typename std::tuple_element<N, FuncArgsT<FuncT>>::type;
@@ -979,10 +967,7 @@ inline void AddCallArg(OutputIterator call_args, T&& arg)
   *call_args = static_cast<CallArg>(static_cast<RealT>(std::forward<T>(arg)));
 }
 
-template <typename FuncT,
-          std::int32_t N,
-          typename OutputIterator,
-          int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, std::int32_t N, typename OutputIterator>
 inline void BuildCallArgs(OutputIterator /*call_args*/) HADESMEM_DETAIL_NOEXCEPT
 {
   return;
@@ -992,8 +977,7 @@ template <typename FuncT,
           std::int32_t N,
           typename T,
           typename OutputIterator,
-          typename... Args,
-          int = detail::FuncCallConv<FuncT>::value>
+          typename... Args>
 inline void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 {
   AddCallArg<FuncT, N>(call_args, std::forward<T>(arg));
@@ -1001,9 +985,7 @@ inline void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 }
 }
 
-template <typename FuncT,
-          typename... Args,
-          int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, typename... Args>
 inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
                                                    void* address,
                                                    CallConv call_conv,
@@ -1025,7 +1007,7 @@ inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
 
 namespace detail
 {
-template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT>
 inline void* FuncToPointerImpl(FuncT func, std::true_type)
 {
   using FuncPtrT = std::add_pointer_t<FuncT>;
@@ -1033,23 +1015,20 @@ inline void* FuncToPointerImpl(FuncT func, std::true_type)
   return detail::AliasCastUnchecked<void*>(func_ptr);
 }
 
-template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT>
 inline void* FuncToPointerImpl(FuncT func, std::false_type)
 {
   auto const func_ptr = static_cast<FuncT>(func);
   return detail::AliasCastUnchecked<void*>(func_ptr);
 }
 
-template <typename FuncT, int = detail::FuncCallConv<FuncT>::value>
-inline void* FuncToPointer(FuncT func)
+template <typename FuncT> inline void* FuncToPointer(FuncT func)
 {
   return FuncToPointerImpl(func, std::is_function<FuncT>());
 }
 }
 
-template <typename FuncT,
-          typename... Args,
-          int = detail::FuncCallConv<FuncT>::value>
+template <typename FuncT, typename... Args>
 inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
                                                    FuncT address,
                                                    CallConv call_conv,

@@ -19,11 +19,6 @@ namespace hadesmem
 {
 namespace cerberus
 {
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif // #if defined(HADESMEM_GCC)
-
 class DirectInputDevice8AProxy : public IDirectInputDevice8A
 {
 public:
@@ -109,9 +104,5 @@ private:
   IDirectInputDevice8A* device_{};
   DirectInputDeviceType type_{DirectInputDeviceType::Other};
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
 }
 }

@@ -10,27 +10,14 @@
 
 #include <hadesmem/config.hpp>
 
-#if !defined(HADESMEM_GCC)
 #include <dxgi1_2.h>
-#endif // #if !defined(HADESMEM_GCC)
 #include <dxgi.h>
-
-#include "no_sal.hpp"
 
 namespace hadesmem
 {
 namespace cerberus
 {
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif // #if defined(HADESMEM_GCC)
-
-#if defined(HADESMEM_GCC)
-class DXGIFactoryProxy : public IDXGIFactory
-#else // #if defined(HADESMEM_GCC)
 class DXGIFactoryProxy : public IDXGIFactory2
-#endif // #if defined(HADESMEM_GCC)
 {
 public:
   explicit DXGIFactoryProxy(IDXGIFactory* factory) : factory_{factory}
@@ -72,7 +59,6 @@ public:
     CreateSoftwareAdapter(HMODULE module,
                           _Out_ IDXGIAdapter** adapter) override;
 
-#if !defined(HADESMEM_GCC)
   // IDXGIFactory1
   virtual HRESULT WINAPI
     EnumAdapters1(UINT adapter_index,
@@ -118,7 +104,6 @@ public:
     _In_ const DXGI_SWAP_CHAIN_DESC1* desc,
     _In_opt_ IDXGIOutput* restrict_to_output,
     _Outptr_ IDXGISwapChain1** swap_chain) /*override*/;
-#endif // #if !defined(HADESMEM_GCC)
 
 protected:
   void Cleanup();
@@ -126,9 +111,5 @@ protected:
   std::int64_t refs_{1};
   IDXGIFactory* factory_{};
 };
-
-#if defined(HADESMEM_GCC)
-#pragma GCC diagnostic pop
-#endif // #if defined(HADESMEM_GCC)
 }
 }
