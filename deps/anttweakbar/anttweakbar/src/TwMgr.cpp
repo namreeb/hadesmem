@@ -2869,9 +2869,9 @@ void ANT_CALL TwGlobalError(const char *_ErrorMessage)  // to be called when g_T
     {
         fprintf(stderr, "ERROR(AntTweakBar) >> %s\n", _ErrorMessage);
     #ifdef ANT_WINDOWS
-        OutputDebugStringA("ERROR(AntTweakBar) >> ");
-        OutputDebugStringA(_ErrorMessage);
-        OutputDebugStringA("\n");
+        OutputDebugString("ERROR(AntTweakBar) >> ");
+        OutputDebugString(_ErrorMessage);
+        OutputDebugString("\n");
     #endif // ANT_WINDOWS
     }
     else
@@ -2902,14 +2902,14 @@ void CTwMgr::SetLastError(const char *_ErrorMessage)    // _ErrorMessage must be
     #ifdef ANT_WINDOWS
         if( m_CurrentDbgFile!=NULL && strlen(m_CurrentDbgFile)>0 && m_CurrentDbgLine>0 )
         {
-            OutputDebugStringA(m_CurrentDbgFile);
+            OutputDebugString(m_CurrentDbgFile);
             char sl[32];
             sprintf(sl, "(%d): ", m_CurrentDbgLine);
-            OutputDebugStringA(sl);
+            OutputDebugString(sl);
         }
-        OutputDebugStringA("ERROR(AntTweakBar) >> ");
-        OutputDebugStringA(m_LastError);
-        OutputDebugStringA("\n");
+        OutputDebugString("ERROR(AntTweakBar) >> ");
+        OutputDebugString(m_LastError);
+        OutputDebugString("\n");
     #endif // ANT_WINDOWS
     }
     else
@@ -5636,7 +5636,7 @@ static int KeyPressed(int _Key, int _Modifiers, bool _TestOnly)
 
     //char s[256];
     //sprintf(s, "twkeypressed k=%d m=%x\n", _Key, _Modifiers);
-    //OutputDebugStringA(s);
+    //OutputDebugString(s);
 
     _Key = TranslateKey(_Key, _Modifiers);
     if( _Key>' ' && _Key<256 ) // don't test SHIFT if _Key is a common key
@@ -5721,7 +5721,7 @@ static int KeyPressed(int _Key, int _Modifiers, bool _TestOnly)
             sprintf(Msg, "Key pressed: %s", Str.c_str());
             g_TwMgr->m_KeyPressedStr = Msg;
             g_TwMgr->m_KeyPressedBuildText = true;
-            // OutputDebugStringA(Msg);
+            // OutputDebugString(Msg);
         }
     }
 
@@ -6220,26 +6220,26 @@ void CTwMgr::CreateCursors()
 {
     if( m_CursorsCreated )
         return;
-    m_CursorArrow = ::LoadCursor(NULL ,IDC_ARROW);
-    m_CursorMove = ::LoadCursor(NULL ,IDC_SIZEALL);
-    m_CursorWE = ::LoadCursor(NULL ,IDC_SIZEWE);
-    m_CursorNS = ::LoadCursor(NULL ,IDC_SIZENS);
-    m_CursorTopRight = ::LoadCursor(NULL ,IDC_SIZENESW);
-    m_CursorTopLeft = ::LoadCursor(NULL ,IDC_SIZENWSE);
-    m_CursorBottomLeft = ::LoadCursor(NULL ,IDC_SIZENESW);
-    m_CursorBottomRight = ::LoadCursor(NULL ,IDC_SIZENWSE);
-    m_CursorHelp = ::LoadCursor(NULL ,IDC_HELP);
-    m_CursorCross = ::LoadCursor(NULL ,IDC_CROSS);
-    m_CursorUpArrow = ::LoadCursor(NULL ,IDC_UPARROW);
-    m_CursorNo = ::LoadCursor(NULL ,IDC_NO);
-    m_CursorIBeam = ::LoadCursor(NULL ,IDC_IBEAM);
+    m_CursorArrow = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_ARROW));
+    m_CursorMove = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZEALL));
+    m_CursorWE = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZEWE));
+    m_CursorNS = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENS));
+    m_CursorTopRight = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENESW));
+    m_CursorTopLeft = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENWSE));
+    m_CursorBottomLeft = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENESW));
+    m_CursorBottomRight = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENWSE));
+    m_CursorHelp = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_HELP));
+    m_CursorCross = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
+    m_CursorUpArrow = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_UPARROW));
+    m_CursorNo = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_NO));
+    m_CursorIBeam = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_IBEAM));
     #ifdef IDC_HAND
-        m_CursorHand = ::LoadCursor(NULL ,IDC_HAND);
+        m_CursorHand = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_HAND));
     #else
-        m_CursorHand = ::LoadCursor(NULL ,IDC_UPARROW);
+        m_CursorHand = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_UPARROW));
     #endif
     int cur;
-    HMODULE hdll = GetModuleHandleA(ANT_TWEAK_BAR_DLL);
+    HMODULE hdll = GetModuleHandle(ANT_TWEAK_BAR_DLL);
     if( hdll==NULL )
         g_UseCurRsc = false;    // force the use of built-in cursors (not using resources)
     if( g_UseCurRsc )
@@ -6247,13 +6247,13 @@ void CTwMgr::CreateCursors()
     else
         m_CursorCenter  = PixmapCursor(0);
     if( m_CursorCenter==NULL )
-        m_CursorCenter = ::LoadCursor(NULL ,IDC_CROSS);
+        m_CursorCenter = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
     if( g_UseCurRsc )
         m_CursorPoint = ::LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+1));
     else
         m_CursorPoint   = PixmapCursor(1);
     if( m_CursorPoint==NULL )
-        m_CursorPoint = ::LoadCursor(NULL ,IDC_CROSS);
+        m_CursorPoint = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
 
     for( cur=0; cur<NB_ROTO_CURSORS; ++cur )
     {
@@ -6262,7 +6262,7 @@ void CTwMgr::CreateCursors()
         else
             m_RotoCursors[cur] = PixmapCursor(cur+2);
         if( m_RotoCursors[cur]==NULL )
-            m_RotoCursors[cur] = ::LoadCursor(NULL ,IDC_CROSS);
+            m_RotoCursors[cur] = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
     }
     
     m_CursorsCreated = true;
@@ -6295,7 +6295,7 @@ CTwMgr::CCursor CTwMgr::PixmapCursor(int _CurIdx)
         xors[y] = pict[y];
     }
 
-    HMODULE hdll = GetModuleHandleA(ANT_TWEAK_BAR_DLL);
+    HMODULE hdll = GetModuleHandle(ANT_TWEAK_BAR_DLL);
     CCursor cursor = ::CreateCursor(hdll, g_CurHot[_CurIdx][0], g_CurHot[_CurIdx][1], 32, 32, ands, xors);
  
     return cursor;

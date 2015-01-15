@@ -43,10 +43,9 @@ class Visitor
 		virtual ~Visitor() { }
 
 		/**
-		 * This method (to implemented by children) will be
-		 * called when the visitor is visited.
+		 * Does nothing. Should be overridden by child.
 		 */
-		virtual void visit() = 0;
+		virtual void visit() { }
 };
 
 }

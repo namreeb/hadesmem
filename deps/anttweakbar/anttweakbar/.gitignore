@@ -26,4 +26,3 @@ lib/*.dll
 lib/*.exp
 lib/*.so
 lib/*.so.*
-/obj
