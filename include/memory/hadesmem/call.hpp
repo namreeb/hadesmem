@@ -382,7 +382,7 @@ inline std::uint32_t GetHigh32(std::uint64_t i)
 class ArgVisitor32
 {
 public:
-  ArgVisitor32(asmjit::x86::Assembler* assembler,
+  ArgVisitor32(asmjit::X86Assembler* assembler,
                std::size_t num_args,
                CallConv call_conv) HADESMEM_DETAIL_NOEXCEPT
     : assembler_{assembler},
@@ -393,7 +393,7 @@ public:
 
   void operator()(std::uint32_t arg) HADESMEM_DETAIL_NOEXCEPT
   {
-    asmjit::x86::GpReg const regs[] = {asmjit::x86::ecx, asmjit::x86::edx};
+    asmjit::GpReg const regs[] = {asmjit::x86::ecx, asmjit::x86::edx};
     auto const num_reg_args =
       (call_conv_ == CallConv::kThisCall || call_conv_ == CallConv::kFastCall)
         ? ((call_conv_ == CallConv::kThisCall) ? 1UL : 2UL)
@@ -452,7 +452,7 @@ public:
   }
 
 private:
-  asmjit::x86::Assembler* assembler_;
+  asmjit::X86Assembler* assembler_;
   std::size_t cur_arg_;
   CallConv call_conv_;
 };
@@ -460,7 +460,7 @@ private:
 class ArgVisitor64
 {
 public:
-  ArgVisitor64(asmjit::x64::Assembler* assembler,
+  ArgVisitor64(asmjit::X86Assembler* assembler,
                std::size_t num_args) HADESMEM_DETAIL_NOEXCEPT
     : assembler_{assembler},
       num_args_{num_args},
@@ -480,15 +480,15 @@ public:
 
     if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-      asmjit::x64::GpReg const regs[] = {
-        asmjit::x64::rcx, asmjit::x64::rdx, asmjit::x64::r8, asmjit::x64::r9};
+      asmjit::GpReg const regs[] = {
+        asmjit::x86::rcx, asmjit::x86::rdx, asmjit::x86::r8, asmjit::x86::r9};
       assembler_->mov(regs[cur_arg_ - 1], asmjit::imm_u(arg));
     }
     else
     {
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, stack_offs),
                       asmjit::imm_u(GetLow32(arg)));
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, stack_offs + 4),
                       asmjit::imm_u(GetHigh32(arg)));
     }
 
@@ -508,18 +508,18 @@ public:
 
     if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0,
-                                          asmjit::x64::xmm1,
-                                          asmjit::x64::xmm2,
-                                          asmjit::x64::xmm3};
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
+      asmjit::XmmReg const regs[] = {asmjit::x86::xmm0,
+                                     asmjit::x86::xmm1,
+                                     asmjit::x86::xmm2,
+                                     asmjit::x86::xmm3};
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, scratch_offs),
                       asmjit::imm_u(arg_conv));
       assembler_->movss(regs[cur_arg_ - 1],
-                        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs));
+                        asmjit::x86::dword_ptr(asmjit::x86::rsp, scratch_offs));
     }
     else
     {
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, stack_offs),
                       asmjit::imm_u(arg_conv));
     }
 
@@ -539,23 +539,23 @@ public:
 
     if (cur_arg_ > 0 && cur_arg_ <= 4)
     {
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, scratch_offs),
                       asmjit::imm_u(GetLow32(arg_conv)));
       assembler_->mov(
-        asmjit::x64::dword_ptr(asmjit::x64::rsp, scratch_offs + 4),
+        asmjit::x86::dword_ptr(asmjit::x86::rsp, scratch_offs + 4),
         asmjit::imm_u(GetHigh32(arg_conv)));
-      asmjit::x64::XmmReg const regs[] = {asmjit::x64::xmm0,
-                                          asmjit::x64::xmm1,
-                                          asmjit::x64::xmm2,
-                                          asmjit::x64::xmm3};
+      asmjit::XmmReg const regs[] = {asmjit::x86::xmm0,
+                                     asmjit::x86::xmm1,
+                                     asmjit::x86::xmm2,
+                                     asmjit::x86::xmm3};
       assembler_->movsd(regs[cur_arg_ - 1],
-                        asmjit::x64::qword_ptr(asmjit::x64::rsp, scratch_offs));
+                        asmjit::x86::qword_ptr(asmjit::x86::rsp, scratch_offs));
     }
     else
     {
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, stack_offs),
                       asmjit::imm_u(GetLow32(arg_conv)));
-      assembler_->mov(asmjit::x64::dword_ptr(asmjit::x64::rsp, stack_offs + 4),
+      assembler_->mov(asmjit::x86::dword_ptr(asmjit::x86::rsp, stack_offs + 4),
                       asmjit::imm_u(GetHigh32(arg_conv)));
     }
 
@@ -563,7 +563,7 @@ public:
   }
 
 private:
-  asmjit::x64::Assembler* assembler_;
+  asmjit::X86Assembler* assembler_;
   std::size_t num_args_;
   std::size_t cur_arg_;
 };
@@ -571,7 +571,7 @@ private:
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
           typename ArgsForwardIterator>
-inline void GenerateCallCode32(asmjit::x86::Assembler* assembler,
+inline void GenerateCallCode32(asmjit::X86Assembler* assembler,
                                AddressesForwardIterator addresses_beg,
                                AddressesForwardIterator addresses_end,
                                ConvForwardIterator call_convs_beg,
@@ -681,7 +681,7 @@ struct ContainerSizeComparer
 template <typename AddressesForwardIterator,
           typename ConvForwardIterator,
           typename ArgsForwardIterator>
-inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
+inline void GenerateCallCode64(asmjit::X86Assembler* assembler,
                                AddressesForwardIterator addresses_beg,
                                AddressesForwardIterator addresses_end,
                                ConvForwardIterator call_convs_beg,
@@ -713,22 +713,22 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
     return stack_offs_tmp;
   }();
 
-  assembler->sub(asmjit::x64::rsp, asmjit::imm_u(stack_offset));
+  assembler->sub(asmjit::x86::rsp, asmjit::imm_u(stack_offset));
 
-  assembler->mov(asmjit::x64::rax, asmjit::imm_u(is_debugger_present));
-  assembler->call(asmjit::x64::rax);
+  assembler->mov(asmjit::x86::rax, asmjit::imm_u(is_debugger_present));
+  assembler->call(asmjit::x86::rax);
 
-  assembler->test(asmjit::x64::rax, asmjit::x64::rax);
+  assembler->test(asmjit::x86::rax, asmjit::x86::rax);
   assembler->jz(label_nodebug);
 
-  assembler->mov(asmjit::x64::rax, asmjit::imm_u(debug_break));
-  assembler->call(asmjit::x64::rax);
+  assembler->mov(asmjit::x86::rax, asmjit::imm_u(debug_break));
+  assembler->call(asmjit::x86::rax);
 
   assembler->bind(label_nodebug);
 
-  assembler->mov(asmjit::x64::rcx, 0);
-  assembler->mov(asmjit::x64::rax, asmjit::imm_u(set_last_error));
-  assembler->call(asmjit::x64::rax);
+  assembler->mov(asmjit::x86::rcx, 0);
+  assembler->mov(asmjit::x86::rax, asmjit::imm_u(set_last_error));
+  assembler->call(asmjit::x86::rax);
 
   for (std::size_t i = 0; addresses_beg != addresses_end;
        ++addresses_beg, ++call_convs_beg, ++args_full_beg, ++i)
@@ -745,45 +745,45 @@ inline void GenerateCallCode64(asmjit::x64::Assembler* assembler,
       arg.Apply(std::ref(arg_visitor));
     });
 
-    assembler->mov(asmjit::x64::rax,
+    assembler->mov(asmjit::x86::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
-    assembler->call(asmjit::x64::rax);
+    assembler->call(asmjit::x86::rax);
 
     DWORD_PTR const current_return_value_remote =
       reinterpret_cast<DWORD_PTR>(return_values_remote) +
       i * sizeof(detail::CallResultRemote);
 
     assembler->mov(
-      asmjit::x64::rcx,
+      asmjit::x86::rcx,
       asmjit::imm_u(current_return_value_remote +
                     offsetof(detail::CallResultRemote, return_i64)));
-    assembler->mov(asmjit::x64::qword_ptr(asmjit::x64::rcx), asmjit::x64::rax);
+    assembler->mov(asmjit::x86::qword_ptr(asmjit::x86::rcx), asmjit::x86::rax);
 
     assembler->mov(
-      asmjit::x64::rcx,
+      asmjit::x86::rcx,
       asmjit::imm_u(current_return_value_remote +
                     offsetof(detail::CallResultRemote, return_float)));
-    assembler->movss(asmjit::x64::dword_ptr(asmjit::x64::rcx),
-                     asmjit::x64::xmm0);
+    assembler->movss(asmjit::x86::dword_ptr(asmjit::x86::rcx),
+                     asmjit::x86::xmm0);
 
     assembler->mov(
-      asmjit::x64::rcx,
+      asmjit::x86::rcx,
       asmjit::imm_u(current_return_value_remote +
                     offsetof(detail::CallResultRemote, return_double)));
-    assembler->movsd(asmjit::x64::qword_ptr(asmjit::x64::rcx),
-                     asmjit::x64::xmm0);
+    assembler->movsd(asmjit::x86::qword_ptr(asmjit::x86::rcx),
+                     asmjit::x86::xmm0);
 
-    assembler->mov(asmjit::x64::rax, asmjit::imm_u(get_last_error));
-    assembler->call(asmjit::x64::rax);
+    assembler->mov(asmjit::x86::rax, asmjit::imm_u(get_last_error));
+    assembler->call(asmjit::x86::rax);
 
     assembler->mov(
-      asmjit::x64::rcx,
+      asmjit::x86::rcx,
       asmjit::imm_u(current_return_value_remote +
                     offsetof(detail::CallResultRemote, last_error)));
-    assembler->mov(asmjit::x64::dword_ptr(asmjit::x64::rcx), asmjit::x64::eax);
+    assembler->mov(asmjit::x86::dword_ptr(asmjit::x86::rcx), asmjit::x86::eax);
   }
 
-  assembler->add(asmjit::x64::rsp, asmjit::imm_u(stack_offset));
+  assembler->add(asmjit::x86::rsp, asmjit::imm_u(stack_offset));
 
   assembler->ret();
 }
@@ -811,11 +811,10 @@ inline Allocator GenerateCallCode(Process const& process,
     reinterpret_cast<DWORD_PTR>(FindProcedure(process, kernel32, "DebugBreak"));
 
   asmjit::JitRuntime runtime;
+  asmjit::X86Assembler assembler{ &runtime };
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  asmjit::x64::Assembler assembler{&runtime};
   GenerateCallCode64(
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  asmjit::x86::Assembler assembler{&runtime};
   GenerateCallCode32(
 #else
 #error "[HadesMem] Unsupported architecture."
@@ -840,8 +839,8 @@ inline Allocator GenerateCallCode(Process const& process,
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
 
   std::vector<BYTE> code_real(stub_size);
-  assembler.relocCode(code_real.data(),
-                      reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
+  assembler.setBaseAddress(reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
+  assembler.relocCode(code_real.data());
 
   HADESMEM_DETAIL_TRACE_A("Writing remote code stub.");
 

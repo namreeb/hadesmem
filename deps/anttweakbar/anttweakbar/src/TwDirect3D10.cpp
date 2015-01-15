@@ -48,7 +48,7 @@ static int LoadDirect3D10()
     if( g_D3D10Module!=NULL )
         return 1; // Direct3D10 library already loaded
 
-    g_D3D10Module = LoadLibrary("D3D10.DLL");
+    g_D3D10Module = LoadLibraryA("D3D10.DLL");
     if( g_D3D10Module )
     {
         int res = 1;

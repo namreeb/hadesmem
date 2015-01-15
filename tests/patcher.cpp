@@ -127,7 +127,7 @@ void TestPatchRaw()
   BOOST_TEST(data == apply);
 }
 
-void GenerateBasicCall(asmjit::host::Compiler& c)
+void GenerateBasicCall(asmjit::X86Compiler& c)
 {
   using HookMeFuncBuilderT = asmjit::FuncBuilder8<std::uint32_t,
                                                   std::int32_t,
@@ -140,38 +140,37 @@ void GenerateBasicCall(asmjit::host::Compiler& c)
                                                   std::int32_t>;
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  auto const call_conv = asmjit::host::kFuncConvHost;
+  auto const call_conv = asmjit::kFuncConvHost;
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  auto const call_conv = asmjit::host::kFuncConvCDecl;
+  auto const call_conv = asmjit::kFuncConvHostCDecl;
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
   c.addFunc(call_conv, HookMeFuncBuilderT());
   c.getFunc()->setHint(asmjit::kFuncHintNaked, true);
 
-  asmjit::host::GpVar a1(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a1(c, asmjit::kVarTypeInt32);
   c.setArg(0, a1);
-  asmjit::host::GpVar a2(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a2(c, asmjit::kVarTypeInt32);
   c.setArg(1, a2);
-  asmjit::host::GpVar a3(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a3(c, asmjit::kVarTypeInt32);
   c.setArg(2, a3);
-  asmjit::host::GpVar a4(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a4(c, asmjit::kVarTypeInt32);
   c.setArg(3, a4);
-  asmjit::host::GpVar a5(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a5(c, asmjit::kVarTypeInt32);
   c.setArg(4, a5);
-  asmjit::host::GpVar a6(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a6(c, asmjit::kVarTypeInt32);
   c.setArg(5, a6);
-  asmjit::host::GpVar a7(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a7(c, asmjit::kVarTypeInt32);
   c.setArg(6, a7);
-  asmjit::host::GpVar a8(c, asmjit::kVarTypeInt32);
+  asmjit::GpVar a8(c, asmjit::kVarTypeInt32);
   c.setArg(7, a8);
 
-  asmjit::host::GpVar address(c.newGpVar());
+  asmjit::GpVar address(c.newGpVar());
   c.mov(address, asmjit::imm_u(reinterpret_cast<std::uintptr_t>(&HookMe)));
 
-  asmjit::host::GpVar var(c.newGpVar());
-  asmjit::host::X86X64CallNode* ctx =
-    c.call(address, call_conv, HookMeFuncBuilderT());
+  asmjit::GpVar var(c.newGpVar());
+  asmjit::X86CallNode* ctx = c.call(address, call_conv, HookMeFuncBuilderT());
   ctx->setArg(0, a1);
   ctx->setArg(1, a2);
   ctx->setArg(2, a3);
@@ -187,9 +186,9 @@ void GenerateBasicCall(asmjit::host::Compiler& c)
   c.endFunc();
 }
 
-void GenerateBasicJmp(asmjit::host::Assembler& a)
+void GenerateBasicJmp(asmjit::X86Assembler& a)
 {
-  a.jmp(reinterpret_cast<void*>(&HookMe));
+  a.jmp(asmjit::imm_ptr(reinterpret_cast<void*>(&HookMe)));
 }
 
 template <typename PatchType, typename WrapperFunc, typename PackagedFunc>
@@ -354,7 +353,7 @@ HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
 template <typename PatchType> void TestPatchDetourCall()
 {
   asmjit::JitRuntime runtime;
-  asmjit::host::Compiler c{&runtime};
+  asmjit::X86Compiler c{&runtime};
   GenerateBasicCall(c);
   auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, c);
   TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
@@ -364,7 +363,7 @@ template <typename PatchType> void TestPatchDetourCall()
 template <typename PatchType> void TestPatchDetourJmp()
 {
   asmjit::JitRuntime runtime;
-  asmjit::host::Assembler a{&runtime};
+  asmjit::X86Assembler a{&runtime};
   GenerateBasicJmp(a);
   auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a);
   TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
