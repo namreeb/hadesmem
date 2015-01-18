@@ -280,7 +280,7 @@ struct VectoredExceptionHandlerPolicy
 };
 
 using SmartRemoveVectoredExceptionHandler =
-SmartHandleImpl<VectoredExceptionHandlerPolicy>;
+  SmartHandleImpl<VectoredExceptionHandlerPolicy>;
 
 struct CryptContextPolicy
 {
@@ -291,7 +291,7 @@ struct CryptContextPolicy
     return 0;
   }
 
-    static bool Cleanup(HandleT handle)
+  static bool Cleanup(HandleT handle)
   {
     return !!::CryptReleaseContext(handle, 0);
   }
@@ -308,12 +308,29 @@ struct DestroyHashPolicy
     return 0;
   }
 
-    static bool Cleanup(HandleT handle)
+  static bool Cleanup(HandleT handle)
   {
     return !!::CryptDestroyHash(handle);
   }
 };
 
 using SmartCryptHashHandle = SmartHandleImpl<DestroyHashPolicy>;
+
+struct UnmapViewOfFilePolicy
+{
+  using HandleT = LPVOID;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return 0;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return !!::UnmapViewOfFile(handle);
+  }
+};
+
+using SmartMappedFileHandle = SmartHandleImpl<UnmapViewOfFilePolicy>;
 }
 }
