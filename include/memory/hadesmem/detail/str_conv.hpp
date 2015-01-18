@@ -47,13 +47,13 @@ inline std::wstring PtrToHexString(void const* const ptr)
 }
 
 template <typename T, typename CharT>
-T StrToNum(std::basic_string<CharT> const& str)
+T StrToNum(std::basic_string<CharT> const& str, bool hex = false)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
   std::basic_istringstream<CharT> converter{str};
   converter.imbue(std::locale::classic());
   T out;
-  if (!converter || !(converter >> out))
+  if (!converter || !(converter >> (hex ? std::hex : std::dec) >> out))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"Conversion failed."});
@@ -61,12 +61,13 @@ T StrToNum(std::basic_string<CharT> const& str)
   return out;
 }
 
-template <typename CharT, typename T> std::basic_string<CharT> NumToStr(T num)
+template <typename CharT, typename T>
+std::basic_string<CharT> NumToStr(T num, bool hex = false)
 {
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
   std::basic_ostringstream<CharT> converter;
   converter.imbue(std::locale::classic());
-  if (!converter || !(converter << num))
+  if (!converter || !(converter << (hex ? std::hex : std::dec) << num))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"Conversion failed."});
