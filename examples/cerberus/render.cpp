@@ -490,6 +490,8 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
   hadesmem::cerberus::HandleInputQueue();
 }
 
+// Stack usage intentional. D3D11StateBlock is large but we don't want to cause
+// an easily avoidable heap allocation every frame.
 #pragma warning(suppress : 6262)
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
