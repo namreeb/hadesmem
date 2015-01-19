@@ -24,6 +24,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/pugixml_helpers.hpp>
+#include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
@@ -438,6 +439,56 @@ inline void* Find(Process const& process,
                       flags,
                       start_abs,
                       name);
+}
+
+inline void* FindInFile(Process const& process,
+                        std::wstring const& path,
+                        std::wstring const& data,
+                        std::uint32_t flags,
+                        std::uintptr_t start,
+                        std::wstring const* name = nullptr)
+{
+  HADESMEM_DETAIL_ASSERT(
+    !(flags & ~(PatternFlags::kInvalidFlagMaxValue - 1UL)));
+
+  detail::SmartFileHandle const file{::CreateFileW(path.c_str(),
+                                                   GENERIC_READ,
+                                                   FILE_SHARE_READ,
+                                                   nullptr,
+                                                   OPEN_EXISTING,
+                                                   0,
+                                                   nullptr)};
+  if (!file.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"CreateFileW failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  detail::SmartHandle const file_mapping{::CreateFileMappingW(
+    file.GetHandle(), nullptr, PAGE_READONLY, 0, 0, nullptr) };
+  if (!file_mapping.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"CreateFileMappingW failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  detail::SmartMappedFileHandle const file_view{
+    ::MapViewOfFile(file_mapping.GetHandle(), FILE_MAP_READ, 0, 0, 0)};
+  if (!file_view.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"MapViewOfFile failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  auto const base = file_view.GetHandle();
+  auto const size = detail::GetRegionAllocSize(process, base);
+  return Find(process, base, size, data, flags, start, name);
 }
 
 class Pattern

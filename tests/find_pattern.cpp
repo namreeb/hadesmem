@@ -9,6 +9,7 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
@@ -23,6 +24,14 @@ void TestFindPattern()
     hadesmem::Find(process, L"", L"90", hadesmem::PatternFlags::kNone, 0U);
   BOOST_TEST_NE(nop, static_cast<void*>(nullptr));
   BOOST_TEST(nop > reinterpret_cast<void*>(process_base));
+
+  void* nop_file =
+    hadesmem::FindInFile(process,
+                         hadesmem::detail::GetSelfPath(),
+                         L"90",
+                         hadesmem::PatternFlags::kRelativeAddress,
+                         0U);
+  BOOST_TEST_NE(nop_file, static_cast<void*>(nullptr));
 
   void* nop_second =
     hadesmem::Find(process,
