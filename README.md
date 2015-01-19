@@ -1,5 +1,5 @@
 #HadesMem
-HadesMem is a C++-based memory hacking library for Windows based applications, with the goal of providing a safe, generic, powerful, and efficient API.
+HadesMem is a C++-based memory editing library for Windows based applications, with the goal of providing a safe, generic, powerful, and efficient API.
 
 #License
 HadesMem is licensed under the MIT License (as of v2.0.0). Dependencies are under their respective (different) licenses. Please respect all license agreements.
