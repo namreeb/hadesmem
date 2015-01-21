@@ -48,6 +48,19 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
                                  0x2d,
                                  0x57};
 
+    // Unknown UUID. Observed in Rift.
+    UUID const unknown_uuid_3 = {0x9b7e4c0f,
+                                 0x342c,
+                                 0x4106,
+                                 0xa1,
+                                 0x9f,
+                                 0x4f,
+                                 0x27,
+                                 0x04,
+                                 0xf6,
+                                 0x89,
+                                 0xf0};
+
     if (*obj == device_)
     {
       refs_++;
@@ -70,6 +83,12 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       return ret;
     }
     else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
+    {
+      // Needs investigation to see if we need to wrap this.
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      return ret;
+    }
+    else if (riid == unknown_uuid_3)
     {
       // Needs investigation to see if we need to wrap this.
       HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
