@@ -28,6 +28,8 @@ public:
     std::function<OnWndProcMsgCallback> const& callback) = 0;
 
   virtual void UnregisterOnWndProcMsg(std::size_t id) = 0;
+
+  virtual HWND GetCurrentWindow() const HADESMEM_DETAIL_NOEXCEPT = 0;
 };
 
 WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT;
@@ -35,7 +37,5 @@ WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT;
 void HandleWindowChange(HWND wnd);
 
 bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
-
-HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

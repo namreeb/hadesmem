@@ -462,7 +462,8 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   SetAntTweakBarInitialized(api, true);
 
   RECT wnd_rect{0, 0, 800, 600};
-  if (auto const window = hadesmem::cerberus::GetCurrentWindow())
+  auto& window_interface = hadesmem::cerberus::GetWindowInterface();
+  if (auto const window = window_interface.GetCurrentWindow())
   {
     HADESMEM_DETAIL_TRACE_A("Have a window.");
 

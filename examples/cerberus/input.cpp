@@ -243,7 +243,8 @@ void ClipCursorWrap(RECT clip_cursor)
 
 void SetNewClipCursor()
 {
-  auto const wnd = hadesmem::cerberus::GetCurrentWindow();
+  auto& window_interface = hadesmem::cerberus::GetWindowInterface();
+  auto const wnd = window_interface.GetCurrentWindow();
   if (!::IsWindow(wnd))
   {
     HADESMEM_DETAIL_TRACE_A("WARNING! Invalid window.");

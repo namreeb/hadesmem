@@ -23,6 +23,19 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
   return callbacks;
 }
 
+struct WindowInfo
+{
+  HWND old_hwnd_{ nullptr };
+  WNDPROC old_wndproc_{ nullptr };
+  bool hooked_{ false };
+};
+
+WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
+{
+  static WindowInfo window_info;
+  return window_info;
+}
+
 class WindowImpl : public hadesmem::cerberus::WindowInterface
 {
 public:
@@ -53,20 +66,12 @@ public:
     auto& callbacks = GetOnWndProcMsgCallbacks();
     return callbacks.Unregister(id);
   }
-};
 
-struct WindowInfo
-{
-  HWND old_hwnd_{nullptr};
-  WNDPROC old_wndproc_{nullptr};
-  bool hooked_{false};
+  virtual HWND GetCurrentWindow() const HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return GetWindowInfo().old_hwnd_;
+  }
 };
-
-WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
-{
-  static WindowInfo window_info;
-  return window_info;
-}
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   HADESMEM_DETAIL_NOEXCEPT
@@ -151,11 +156,6 @@ void HandleWindowChange(HWND wnd)
 bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT
 {
   return GetWindowInfo().hooked_;
-}
-
-HWND GetCurrentWindow() HADESMEM_DETAIL_NOEXCEPT
-{
-  return GetWindowInfo().old_hwnd_;
 }
 }
 }
