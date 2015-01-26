@@ -8,9 +8,13 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/detour_ref_counter.hpp>
+#include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/patcher.hpp>
 
 #include "callbacks.hpp"
+#include "helpers.hpp"
 #include "main.hpp"
 
 namespace
@@ -25,15 +29,21 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
 
 struct WindowInfo
 {
-  HWND old_hwnd_{ nullptr };
-  WNDPROC old_wndproc_{ nullptr };
-  bool hooked_{ false };
+  HWND old_hwnd_{nullptr};
+  WNDPROC old_wndproc_{nullptr};
+  bool hooked_{false};
 };
 
 WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
 {
   static WindowInfo window_info;
   return window_info;
+}
+
+bool& GetEnableForegroundWindowSpoof()
+{
+  static bool enabled_ = false;
+  return enabled_;
 }
 
 class WindowImpl : public hadesmem::cerberus::WindowInterface
@@ -67,11 +77,68 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual HWND GetCurrentWindow() const HADESMEM_DETAIL_NOEXCEPT final
+  virtual HWND GetCurrentWindow() const final
   {
     return GetWindowInfo().old_hwnd_;
   }
+
+  virtual void EnableForegroundWindowSpoof() final
+  {
+    GetEnableForegroundWindowSpoof() = true;
+  }
+
+  virtual void DisableForegroundWindowSpoof() final
+  {
+    GetEnableForegroundWindowSpoof() = false;
+  }
 };
+
+std::unique_ptr<hadesmem::PatchDetour>&
+  GetGetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  return detour;
+}
+
+std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+extern "C" HWND WINAPI GetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  auto& detour = GetGetForegroundWindowDetour();
+  auto const ref_counter =
+    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  if (GetEnableForegroundWindowSpoof())
+  {
+    auto& window = hadesmem::cerberus::GetWindowInterface();
+    auto const hwnd = window.GetCurrentWindow();
+    if (hwnd)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+        "Spoofing foreground window with [%p].", hwnd);
+      return hwnd;
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "WARNING! No current window to use for spoof.");
+    }
+  }
+
+  auto const get_foreground_window =
+    detour->GetTrampoline<decltype(&GetForegroundWindowDetour)>();
+  last_error_preserver.Revert();
+  auto const ret = get_foreground_window();
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", ret);
+
+  return ret;
+}
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   HADESMEM_DETAIL_NOEXCEPT
@@ -101,6 +168,41 @@ WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT
 {
   static WindowImpl input_impl;
   return input_impl;
+}
+
+void InitializeWindow()
+{
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
+    L"USER32", DetourUser32ForWindow, UndetourUser32ForWindow, GetUser32Module);
+}
+
+void DetourUser32ForWindow(HMODULE base)
+{
+  auto const& process = GetThisProcess();
+  auto& module = GetUser32Module();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"user32", base, module))
+  {
+    helper.DetourFunc(process,
+                      base,
+                      "GetForegroundWindow",
+                      GetGetForegroundWindowDetour(),
+                      GetForegroundWindowDetour);
+  }
+}
+
+void UndetourUser32ForWindow(bool remove)
+{
+  auto& module = GetUser32Module();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"user32", module))
+  {
+    helper.UndetourFunc(
+      L"GetForegroundWindow", GetGetForegroundWindowDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
+  }
 }
 
 void HandleWindowChange(HWND wnd)

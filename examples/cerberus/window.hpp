@@ -29,10 +29,20 @@ public:
 
   virtual void UnregisterOnWndProcMsg(std::size_t id) = 0;
 
-  virtual HWND GetCurrentWindow() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual HWND GetCurrentWindow() const = 0;
+
+  virtual void EnableForegroundWindowSpoof() = 0;
+
+  virtual void DisableForegroundWindowSpoof() = 0;
 };
 
 WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT;
+
+void InitializeWindow();
+
+void DetourUser32ForWindow(HMODULE base);
+
+void UndetourUser32ForWindow(bool remove);
 
 void HandleWindowChange(HWND wnd);
 
