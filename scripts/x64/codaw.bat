@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\Call of Duty Advanced Warfare\s1_sp64_ship.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\Call of Duty Advanced Warfare\s1_mp64_ship.exe" --inject --steam-app-id 209660 --export Load --add-path --path-resolution --module cerberus.dll
