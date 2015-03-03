@@ -681,12 +681,47 @@ HRESULT WINAPI
                                              UINT start_index,
                                              UINT prim_count)
 {
-  return device_->DrawIndexedPrimitive(primitive_type,
-                                       base_vertex_index,
-                                       min_vertex_index,
-                                       num_vertices,
-                                       start_index,
-                                       prim_count);
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+    "Args: [%p] [%d] [%d] [%u] [%u] [%u] [%u].",
+    device_,
+    primitive_type, base_vertex_index,
+    min_vertex_index,
+    num_vertices,
+    start_index,
+    prim_count);
+
+  auto& callbacks_pre = GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
+  callbacks_pre.Run(device_,
+                    primitive_type,
+                    base_vertex_index,
+                    min_vertex_index,
+                    num_vertices,
+                    start_index,
+                    prim_count);
+
+  last_error_preserver.Revert();
+  auto const ret = device_->DrawIndexedPrimitive(primitive_type,
+                                                 base_vertex_index,
+                                                 min_vertex_index,
+                                                 num_vertices,
+                                                 start_index,
+                                                 prim_count);
+  last_error_preserver.Update();
+
+  auto& callbacks_post = GetOnPostDrawIndexedPrimitiveD3D9Callbacks();
+  callbacks_post.Run(device_,
+                     primitive_type,
+                     base_vertex_index,
+                     min_vertex_index,
+                     num_vertices,
+                     start_index,
+                     prim_count);
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
 }
 
 HRESULT WINAPI
@@ -840,8 +875,26 @@ HRESULT WINAPI
                                         UINT offset_in_bytes,
                                         UINT stride)
 {
-  return device_->SetStreamSource(
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p] [%u] [%p] [%u] [%u].",
+                                       device_,
+                                       stream_number,
+                                       stream_data,
+                                       offset_in_bytes,
+                                       stride);
+
+  auto& callbacks = GetOnSetStreamSourceD3D9Callbacks();
+  callbacks.Run(device_, stream_number, stream_data, offset_in_bytes, stride);
+
+  last_error_preserver.Revert();
+  auto const ret = device_->SetStreamSource(
     stream_number, stream_data, offset_in_bytes, stride);
+  last_error_preserver.Update();
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
 }
 
 HRESULT WINAPI

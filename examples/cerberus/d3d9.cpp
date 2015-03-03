@@ -76,6 +76,55 @@ public:
     auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D9Callbacks();
     return callbacks.Unregister(id);
   }
+
+  virtual std::size_t RegisterOnSetStreamSourceD3D9Callback(std::function<
+    hadesmem::cerberus::OnSetStreamSourceD3D9Callback> const& callback) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnSetStreamSourceD3D9Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnSetStreamSourceD3D9Callback(std::size_t id) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnSetStreamSourceD3D9Callbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t
+    RegisterOnPreDrawIndexedPrimitiveD3D9Callback(std::function<
+      hadesmem::cerberus::OnPreDrawIndexedPrimitiveD3D9Callback> const&
+                                                    callback) final
+  {
+    auto& callbacks =
+      hadesmem::cerberus::GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void
+    UnregisterOnPreDrawIndexedPrimitiveD3D9Callback(std::size_t id) final
+  {
+    auto& callbacks =
+      hadesmem::cerberus::GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t
+    RegisterOnPostDrawIndexedPrimitiveD3D9Callback(std::function<
+      hadesmem::cerberus::OnPostDrawIndexedPrimitiveD3D9Callback> const&
+                                                     callback) final
+  {
+    auto& callbacks =
+      hadesmem::cerberus::GetOnPostDrawIndexedPrimitiveD3D9Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void
+    UnregisterOnPostDrawIndexedPrimitiveD3D9Callback(std::size_t id) final
+  {
+    auto& callbacks =
+      hadesmem::cerberus::GetOnPostDrawIndexedPrimitiveD3D9Callbacks();
+    return callbacks.Unregister(id);
+  }
 };
 
 std::unique_ptr<hadesmem::PatchDetour>&
@@ -182,6 +231,26 @@ Callbacks<OnResetD3D9Callback>& GetOnResetD3D9Callbacks()
 Callbacks<OnReleaseD3D9Callback>& GetOnReleaseD3D9Callbacks()
 {
   static Callbacks<OnReleaseD3D9Callback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnSetStreamSourceD3D9Callback>& GetOnSetStreamSourceD3D9Callbacks()
+{
+  static Callbacks<OnSetStreamSourceD3D9Callback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnPreDrawIndexedPrimitiveD3D9Callback>&
+  GetOnPreDrawIndexedPrimitiveD3D9Callbacks()
+{
+  static Callbacks<OnPreDrawIndexedPrimitiveD3D9Callback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnPostDrawIndexedPrimitiveD3D9Callback>&
+  GetOnPostDrawIndexedPrimitiveD3D9Callbacks()
+{
+  static Callbacks<OnPostDrawIndexedPrimitiveD3D9Callback> callbacks;
   return callbacks;
 }
 
