@@ -61,6 +61,19 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
                                  0x89,
                                  0xf0};
 
+    // Unknown UUID. Observed in GW2.
+    UUID const unknown_uuid_4 = {0x10ec4d5b,
+                                 0x975a,
+                                 0x4689,
+                                 0xb9,
+                                 0xe4,
+                                 0xd0,
+                                 0xaa,
+                                 0xc3,
+                                 0x0f,
+                                 0xe3,
+                                 0x33};
+
     if (*obj == device_)
     {
       refs_++;
@@ -89,6 +102,12 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
       return ret;
     }
     else if (riid == unknown_uuid_3)
+    {
+      // Needs investigation to see if we need to wrap this.
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      return ret;
+    }
+    else if (riid == unknown_uuid_4)
     {
       // Needs investigation to see if we need to wrap this.
       HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
