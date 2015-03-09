@@ -1,0 +1,191 @@
+// Credits: http://bit.ly/1BZ7rfc
+void DisassembleShaderImpl(IDirect3DDevice9* device)
+{
+  HRESULT hr = S_OK;
+
+  IDirect3DVertexShader9* shader = nullptr;
+  if (FAILED(hr = device->GetVertexShader(&shader)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DDevice9::GetVertexShader failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+  hadesmem::detail::SmartComHandle shader_cleanup{shader};
+
+  UINT size_of_data = 0;
+  if (FAILED(hr = shader->GetFunction(NULL, &size_of_data)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DVertexShader9::GetFunction failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+
+  std::vector<BYTE> function(size_of_data);
+  if (FAILED(hr = shader->GetFunction(function.data(), &size_of_data)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DVertexShader9::GetFunction failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+
+  ID3DXBuffer* disassembly;
+  if (FAILED(hr =
+               D3DXDisassembleShader(reinterpret_cast<DWORD*>(function.data()),
+                                     FALSE,
+                                     nullptr,
+                                     &disassembly)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DVertexShader9::GetFunction failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+  hadesmem::detail::SmartComHandle disassembly_cleanup{disassembly};
+
+  auto const path = hadesmem::detail::CombinePath(
+    hadesmem::detail::GetSelfDirPath(), L"shader_disasm.txt");
+  hadesmem::detail::BufferToFile(
+    path, disassembly->GetBufferPointer(), disassembly->GetBufferSize());
+}
+
+// Credits: http://bit.ly/1BZ7rfc
+void DumpShaderConstantsImpl(IDirect3DDevice9* device)
+{
+  auto const path = hadesmem::detail::CombinePath(
+    hadesmem::detail::GetSelfDirPath(), L"shader_constants.txt");
+
+  std::ofstream log_file(path, std::ios::trunc);
+  if (!log_file)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{"Failed to create file."});
+  }
+
+  HRESULT hr = S_OK;
+
+  IDirect3DVertexShader9* shader = nullptr;
+  if (FAILED(hr = device->GetVertexShader(&shader)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DDevice9::GetVertexShader failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+  hadesmem::detail::SmartComHandle shader_cleanup{shader};
+
+  UINT size_of_data = 0;
+  if (FAILED(hr = shader->GetFunction(NULL, &size_of_data)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DVertexShader9::GetFunction failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+
+  std::vector<BYTE> function(size_of_data);
+  if (FAILED(hr = shader->GetFunction(function.data(), &size_of_data)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString{
+                             "IDirect3DVertexShader9::GetFunction failed."}
+                        << hadesmem::ErrorCodeWinHr{hr});
+  }
+
+  ID3DXConstantTable* constant_table = nullptr;
+  if (FAILED(hr = D3DXGetShaderConstantTable(
+               reinterpret_cast<DWORD*>(function.data()), &constant_table)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
+                                    << hadesmem::ErrorString{
+                                         "D3DXGetShaderConstantTable failed."}
+                                    << hadesmem::ErrorCodeWinHr{hr});
+  }
+  hadesmem::detail::SmartComHandle constant_table_cleanup{constant_table};
+
+  D3DXCONSTANTTABLE_DESC desc;
+  if (FAILED(hr = constant_table->GetDesc(&desc)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
+                                    << hadesmem::ErrorString{
+                                         "ID3DXConstantTable::GetDesc failed."}
+                                    << hadesmem::ErrorCodeWinHr{hr});
+  }
+
+  for (UINT start_register = 0; start_register < desc.Constants;
+       ++start_register)
+  {
+    D3DXHANDLE const handle =
+      constant_table->GetConstant(nullptr, start_register);
+    if (!handle)
+    {
+      continue;
+    }
+
+    D3DXCONSTANT_DESC constant_desc[32];
+    UINT constant_count = _countof(constant_desc);
+    if (FAILED(hr = constant_table->GetConstantDesc(
+                 handle, constant_desc, &constant_count)))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString{
+                               "ID3DXConstantTable::GetConstantDesc failed."}
+                          << hadesmem::ErrorCodeWinHr{hr});
+    }
+
+    for (UINT i = 0; i < constant_count; ++i)
+    {
+      char* class_names[6] = {"D3DXPC_SCALAR",
+                              "D3DXPC_VECTOR",
+                              "D3DXPC_MATRIX_ROWS",
+                              "D3DXPC_MATRIX_COLUMNS",
+                              "D3DXPC_OBJECT",
+                              "D3DXPC_STRUCT"};
+      char* register_set_names[4] = {
+        "D3DXRS_BOOL", "D3DXRS_INT4", "D3DXRS_FLOAT4", "D3DXRS_SAMPLER"};
+      char* type_names[19] = {"D3DXPT_VOID",
+                              "D3DXPT_BOOL",
+                              "D3DXPT_INT",
+                              "D3DXPT_FLOAT",
+                              "D3DXPT_STRING",
+                              "D3DXPT_TEXTURE",
+                              "D3DXPT_TEXTURE1D",
+                              "D3DXPT_TEXTURE2D",
+                              "D3DXPT_TEXTURE3D",
+                              "D3DXPT_TEXTURECUBE",
+                              "D3DXPT_SAMPLER",
+                              "D3DXPT_SAMPLER1D",
+                              "D3DXPT_SAMPLER2D",
+                              "D3DXPT_SAMPLER3D",
+                              "D3DXPT_SAMPLERCUBE",
+                              "D3DXPT_PIXELSHADER",
+                              "D3DXPT_VERTEXSHADER",
+                              "D3DXPT_PIXELFRAGMENT",
+                              "D3DXPT_VERTEXFRAGMENT"};
+
+      std::vector<char> string_buf(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+      sprintf(string_buf.data(),
+              "Name=[%s]\nRegisterSet=[%s]\nRegisterIndex=[%u]\nRegisterCount=["
+              "%u]\nClass=[%s]\nType=[%s]\nRows=[%u]\nColumns=[%u]\nElemets=[%"
+              "u]\nStructMembers=[%u]\nBytes=[%u]\nDefaultValue=[0x%p]"
+              "\nStartRegister=[%u]\nEND\n",
+              constant_desc[i].Name,
+              register_set_names[constant_desc[i].RegisterSet],
+              constant_desc[i].RegisterIndex,
+              constant_desc[i].RegisterCount,
+              class_names[constant_desc[i].Class],
+              type_names[constant_desc[i].Type],
+              constant_desc[i].Rows,
+              constant_desc[i].Columns,
+              constant_desc[i].Elements,
+              constant_desc[i].StructMembers,
+              constant_desc[i].Bytes,
+              constant_desc[i].DefaultValue,
+              start_register);
+
+      log_file << string_buf.data() << std::endl;
+    }
+  }
+}
