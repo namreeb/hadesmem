@@ -178,6 +178,39 @@ enum SYSTEM_INFORMATION_CLASS
   MaxSystemInfoClass = 0x0095
 };
 
+enum THREADINFOCLASS
+{
+  ThreadBasicInformation,
+  ThreadTimes,
+  ThreadPriority,
+  ThreadBasePriority,
+  ThreadAffinityMask,
+  ThreadImpersonationToken,
+  ThreadDescriptorTableEntry,
+  ThreadEnableAlignmentFaultFixup,
+  ThreadEventPair_Reusable,
+  ThreadQuerySetWin32StartAddress,
+  ThreadZeroTlsCell,
+  ThreadPerformanceCount,
+  ThreadAmILastThread,
+  ThreadIdealProcessor,
+  ThreadPriorityBoost,
+  ThreadSetTlsArrayAddress,
+  ThreadIsIoPending,
+  ThreadHideFromDebugger,
+  ThreadBreakOnTermination,
+  ThreadSwitchLegacyState,
+  ThreadIsTerminated,
+  ThreadLastSystemCall,
+  ThreadIoPriority,
+  ThreadCycleTime,
+  ThreadPagePriority,
+  ThreadActualBasePriority,
+  ThreadTebInformation,
+  ThreadCSwitchMon,
+  MaxThreadInfoClass
+};
+
 struct CLIENT_ID
 {
   PVOID UniqueProcess;
