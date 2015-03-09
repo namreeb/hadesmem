@@ -1,25 +1,26 @@
-// Copyright (C) 2010-2014 Joshua Boyce.
+// Copyright (C) 2010-2015 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
 
 #include <algorithm>
-#include <vector>
 #include <set>
 #include <sstream>
+#include <vector>
 
 #include <windows.h>
 #include <winnt.h>
 
-#include <hadesmem/error.hpp>
 #include <hadesmem/config.hpp>
-#include <hadesmem/thread.hpp>
-#include <hadesmem/thread_list.hpp>
-#include <hadesmem/detail/trace.hpp>
-#include <hadesmem/thread_entry.hpp>
 #include <hadesmem/detail/assert.hpp>
-#include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
+#include <hadesmem/detail/trace.hpp>
+#include <hadesmem/detail/winapi.hpp>
+#include <hadesmem/detail/winternl.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/thread.hpp>
+#include <hadesmem/thread_entry.hpp>
+#include <hadesmem/thread_list.hpp>
 
 namespace hadesmem
 {
@@ -88,6 +89,55 @@ inline void SetThreadContext(Thread const& thread, CONTEXT const& context)
                                     << ErrorString("SetThreadContext failed.")
                                     << ErrorCodeWinLast(last_error));
   }
+}
+
+inline void* GetStartAddress(Thread const& thread)
+{
+  HMODULE const ntdll = GetModuleHandleW(L"ntdll");
+  if (!ntdll)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetModuleHandleW failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  FARPROC const nt_query_information_thread_proc =
+    GetProcAddress(ntdll, "NtQueryInformationThread");
+  if (!nt_query_information_thread_proc)
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetProcAddress failed."}
+                                    << ErrorCodeWinLast{last_error});
+  }
+
+  using NtQueryInformationThreadPtr =
+    NTSTATUS(NTAPI*)(HANDLE thread_handle,
+                     detail::winternl::THREADINFOCLASS thread_information_class,
+                     PVOID thread_information,
+                     ULONG thread_information_length,
+                     PULONG return_length);
+
+  auto const nt_query_information_thread =
+    reinterpret_cast<NtQueryInformationThreadPtr>(
+      nt_query_information_thread_proc);
+
+  void* start_address = nullptr;
+  NTSTATUS const status = nt_query_information_thread(
+    thread.GetHandle(),
+    detail::winternl::ThreadQuerySetWin32StartAddress,
+    &start_address,
+    sizeof(start_address),
+    nullptr);
+  if (!NT_SUCCESS(status))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error{} << ErrorString{"NtQueryInformationThread failed."}
+              << ErrorCodeWinStatus{status});
+  }
+
+  return start_address;
 }
 
 class SuspendedThread
