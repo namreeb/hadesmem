@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2015 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #include "main.hpp"
@@ -37,10 +37,8 @@
 #include <hadesmem/process_list.hpp>
 #include <hadesmem/region.hpp>
 #include <hadesmem/region_list.hpp>
-#include <hadesmem/thread.hpp>
 #include <hadesmem/thread_list.hpp>
 #include <hadesmem/thread_entry.hpp>
-#include <hadesmem/thread_helpers.hpp>
 
 #include "bound_imports.hpp"
 #include "exports.hpp"
@@ -120,13 +118,6 @@ void DumpModules(hadesmem::Process const& process)
   }
 }
 
-void DumpThread(hadesmem::Thread const& thread)
-{
-  std::wostream& out = std::wcout;
-
-  WriteNamedHex(out, L"Start Address", hadesmem::GetStartAddress(thread), 1);
-}
-
 void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
 {
   std::wostream& out = std::wcout;
@@ -138,16 +129,6 @@ void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
   WriteNamedHex(out, L"Base Priority", thread_entry.GetBasePriority(), 1);
   WriteNamedHex(out, L"Delta Priority", thread_entry.GetDeltaPriority(), 1);
   WriteNamedHex(out, L"Flags", thread_entry.GetFlags(), 1);
-
-  try
-  {
-    hadesmem::Thread const thread{thread_entry.GetId()};
-    DumpThread(thread);
-  }
-  catch (...)
-  {
-    return;
-  }
 }
 
 void DumpThreads(DWORD pid)

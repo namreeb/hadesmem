@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2015 Joshua Boyce.
+// Copyright (C) 2010-2014 Joshua Boyce.
 // See the file COPYING for copying permission.
 
 #pragma once
@@ -176,39 +176,6 @@ enum SYSTEM_INFORMATION_CLASS
   SystemPortableWorkspaceEfiLauncherInformation = 0x0093,
   SystemFullProcessInformation = 0x0094,
   MaxSystemInfoClass = 0x0095
-};
-
-enum THREADINFOCLASS
-{
-  ThreadBasicInformation,
-  ThreadTimes,
-  ThreadPriority,
-  ThreadBasePriority,
-  ThreadAffinityMask,
-  ThreadImpersonationToken,
-  ThreadDescriptorTableEntry,
-  ThreadEnableAlignmentFaultFixup,
-  ThreadEventPair_Reusable,
-  ThreadQuerySetWin32StartAddress,
-  ThreadZeroTlsCell,
-  ThreadPerformanceCount,
-  ThreadAmILastThread,
-  ThreadIdealProcessor,
-  ThreadPriorityBoost,
-  ThreadSetTlsArrayAddress,
-  ThreadIsIoPending,
-  ThreadHideFromDebugger,
-  ThreadBreakOnTermination,
-  ThreadSwitchLegacyState,
-  ThreadIsTerminated,
-  ThreadLastSystemCall,
-  ThreadIoPriority,
-  ThreadCycleTime,
-  ThreadPagePriority,
-  ThreadActualBasePriority,
-  ThreadTebInformation,
-  ThreadCSwitchMon,
-  MaxThreadInfoClass
 };
 
 struct CLIENT_ID
