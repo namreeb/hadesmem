@@ -90,6 +90,44 @@ void UseAllStatics()
   auto const on_frame_id_d3d9 = d3d9.RegisterOnFrame(on_frame_callback_d3d9);
   d3d9.UnregisterOnFrame(on_frame_id_d3d9);
 
+  auto const on_reset_callback_d3d9 =
+    [](IDirect3DDevice9*, D3DPRESENT_PARAMETERS*)
+  {
+  };
+  auto const on_reset_id_d3d9 = d3d9.RegisterOnReset(on_reset_callback_d3d9);
+  d3d9.UnregisterOnReset(on_reset_id_d3d9);
+
+  auto const on_release_callback_d3d9 = [](IDirect3DDevice9*)
+  {
+  };
+  auto const on_release_id_d3d9 =
+    d3d9.RegisterOnRelease(on_release_callback_d3d9);
+  d3d9.UnregisterOnRelease(on_release_id_d3d9);
+
+  auto const on_set_stream_source_callback_d3d9 =
+    [](IDirect3DDevice9*, UINT, IDirect3DVertexBuffer9*, UINT, UINT)
+  {
+  };
+  auto const on_set_stream_source_id_d3d9 =
+    d3d9.RegisterOnSetStreamSource(on_set_stream_source_callback_d3d9);
+  d3d9.UnregisterOnSetStreamSource(on_set_stream_source_id_d3d9);
+
+  auto const on_pre_dip_callback_d3d9 =
+    [](IDirect3DDevice9*, D3DPRIMITIVETYPE, INT, UINT, UINT, UINT, UINT)
+  {
+  };
+  auto const on_pre_dip_id_d3d9 =
+    d3d9.RegisterOnPreDrawIndexedPrimitive(on_pre_dip_callback_d3d9);
+  d3d9.UnregisterOnPreDrawIndexedPrimitive(on_pre_dip_id_d3d9);
+
+  auto const on_post_dip_callback_d3d9 =
+    [](IDirect3DDevice9*, D3DPRIMITIVETYPE, INT, UINT, UINT, UINT, UINT)
+  {
+  };
+  auto const on_post_dip_id_d3d9 =
+    d3d9.RegisterOnPostDrawIndexedPrimitive(on_post_dip_callback_d3d9);
+  d3d9.UnregisterOnPostDrawIndexedPrimitive(on_post_dip_id_d3d9);
+
   auto const on_frame_callback_dxgi = [](IDXGISwapChain*)
   {
   };
@@ -310,7 +348,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
     hadesmem::cerberus::InitializeAntTweakBar();
-    //hadesmem::cerberus::InitializeGwen();
+    // hadesmem::cerberus::InitializeGwen();
 
     hadesmem::cerberus::LoadPlugins();
 

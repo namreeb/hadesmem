@@ -77,49 +77,45 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnSetStreamSourceD3D9Callback(std::function<
+  virtual std::size_t RegisterOnSetStreamSource(std::function<
     hadesmem::cerberus::OnSetStreamSourceD3D9Callback> const& callback) final
   {
     auto& callbacks = hadesmem::cerberus::GetOnSetStreamSourceD3D9Callbacks();
     return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnSetStreamSourceD3D9Callback(std::size_t id) final
+  virtual void UnregisterOnSetStreamSource(std::size_t id) final
   {
     auto& callbacks = hadesmem::cerberus::GetOnSetStreamSourceD3D9Callbacks();
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t
-    RegisterOnPreDrawIndexedPrimitiveD3D9Callback(std::function<
-      hadesmem::cerberus::OnPreDrawIndexedPrimitiveD3D9Callback> const&
-                                                    callback) final
+  virtual std::size_t RegisterOnPreDrawIndexedPrimitive(std::function<
+    hadesmem::cerberus::OnPreDrawIndexedPrimitiveD3D9Callback> const& callback)
+    final
   {
     auto& callbacks =
       hadesmem::cerberus::GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
     return callbacks.Register(callback);
   }
 
-  virtual void
-    UnregisterOnPreDrawIndexedPrimitiveD3D9Callback(std::size_t id) final
+  virtual void UnregisterOnPreDrawIndexedPrimitive(std::size_t id) final
   {
     auto& callbacks =
       hadesmem::cerberus::GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t
-    RegisterOnPostDrawIndexedPrimitiveD3D9Callback(std::function<
-      hadesmem::cerberus::OnPostDrawIndexedPrimitiveD3D9Callback> const&
-                                                     callback) final
+  virtual std::size_t RegisterOnPostDrawIndexedPrimitive(std::function<
+    hadesmem::cerberus::OnPostDrawIndexedPrimitiveD3D9Callback> const& callback)
+    final
   {
     auto& callbacks =
       hadesmem::cerberus::GetOnPostDrawIndexedPrimitiveD3D9Callbacks();
     return callbacks.Register(callback);
   }
 
-  virtual void
-    UnregisterOnPostDrawIndexedPrimitiveD3D9Callback(std::size_t id) final
+  virtual void UnregisterOnPostDrawIndexedPrimitive(std::size_t id) final
   {
     auto& callbacks =
       hadesmem::cerberus::GetOnPostDrawIndexedPrimitiveD3D9Callbacks();

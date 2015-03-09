@@ -86,22 +86,20 @@ public:
 
   virtual void UnregisterOnRelease(std::size_t id) = 0;
 
-  virtual std::size_t RegisterOnSetStreamSourceD3D9Callback(
+  virtual std::size_t RegisterOnSetStreamSource(
     std::function<OnSetStreamSourceD3D9Callback> const& callback) = 0;
 
-  virtual void UnregisterOnSetStreamSourceD3D9Callback(std::size_t id) = 0;
+  virtual void UnregisterOnSetStreamSource(std::size_t id) = 0;
 
-  virtual std::size_t RegisterOnPreDrawIndexedPrimitiveD3D9Callback(
+  virtual std::size_t RegisterOnPreDrawIndexedPrimitive(
     std::function<OnPreDrawIndexedPrimitiveD3D9Callback> const& callback) = 0;
 
-  virtual void
-    UnregisterOnPreDrawIndexedPrimitiveD3D9Callback(std::size_t id) = 0;
+  virtual void UnregisterOnPreDrawIndexedPrimitive(std::size_t id) = 0;
 
-  virtual std::size_t RegisterOnPostDrawIndexedPrimitiveD3D9Callback(
+  virtual std::size_t RegisterOnPostDrawIndexedPrimitive(
     std::function<OnPostDrawIndexedPrimitiveD3D9Callback> const& callback) = 0;
 
-  virtual void
-    UnregisterOnPostDrawIndexedPrimitiveD3D9Callback(std::size_t id) = 0;
+  virtual void UnregisterOnPostDrawIndexedPrimitive(std::size_t id) = 0;
 };
 
 D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT;
