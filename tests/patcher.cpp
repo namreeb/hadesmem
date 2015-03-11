@@ -48,8 +48,6 @@ std::unique_ptr<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>&
   return detour;
 }
 
-bool g_detour_3_called = false;
-
 hadesmem::Process& GetThisProcess()
 {
   static hadesmem::Process process(::GetCurrentProcessId());
@@ -123,7 +121,6 @@ extern "C" int __cdecl Scratch(int a, float b, void* c)
 
 extern "C" int __cdecl ScratchDetour(void* ctx, int a, float b, void* c)
 {
-  g_detour_3_called = true;
   BOOST_TEST_EQ(ctx, &GetThisProcess());
   auto& detour_3 = GetDetour3();
   BOOST_TEST(detour_3->GetTrampoline() != nullptr);
