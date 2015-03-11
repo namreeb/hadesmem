@@ -208,11 +208,13 @@ template <typename FuncT> using FuncArgsT = typename FuncArgs<FuncT>::type;
 
 template <typename FuncT> struct IsFunction
 {
+#pragma warning(push)
+#pragma warning(disable: 6285)
   static bool const value =
     std::is_member_function_pointer<FuncT>::value ||
     std::is_function<FuncT>::value ||
-    (std::is_pointer<FuncT>::value &&
-     std::is_function<std::remove_pointer_t<FuncT>>::value);
+    std::is_function<std::remove_pointer_t<FuncT>>::value;
+#pragma warning(pop)
 };
 }
 }

@@ -37,6 +37,19 @@ std::unique_ptr<hadesmem::PatchDetour>& GetDetour2()
   return detour;
 }
 
+typedef int(__cdecl* ScratchFn)(int, float, void*);
+typedef int(__cdecl* ScratchDetourFn)(void*, int, float, void*);
+
+std::unique_ptr<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>&
+  GetDetour3()
+{
+  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>
+    detour;
+  return detour;
+}
+
+bool g_detour_3_called = false;
+
 hadesmem::Process& GetThisProcess()
 {
   static hadesmem::Process process(::GetCurrentProcessId());
@@ -98,6 +111,40 @@ extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
   auto const orig = detour_2->GetTrampoline<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1337UL);
   return 0x5678;
+}
+
+extern "C" int __cdecl Scratch(int a, float b, void* c)
+{
+  BOOST_TEST_EQ(a, -42);
+  BOOST_TEST_EQ(b, 2.f);
+  BOOST_TEST_EQ(c, static_cast<void*>(nullptr));
+  return 0x1337;
+}
+
+extern "C" int __cdecl ScratchDetour(void* ctx, int a, float b, void* c)
+{
+  g_detour_3_called = true;
+  BOOST_TEST_EQ(ctx, &GetThisProcess());
+  auto& detour_3 = GetDetour3();
+  BOOST_TEST(detour_3->GetTrampoline() != nullptr);
+  auto const orig = detour_3->GetTrampoline<ScratchFn>();
+  BOOST_TEST_EQ(orig(a, b, c), 0x1337);
+  return 0x42424242;
+}
+
+void TestPatchDetour2()
+{
+  BOOST_TEST_EQ(Scratch(-42, 2.f, nullptr), 0x1337);
+  auto& detour_3 = GetDetour3();
+  detour_3 =
+    std::make_unique<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>(
+      GetThisProcess(), &Scratch, &ScratchDetour, &GetThisProcess());
+  detour_3->Apply();
+  BOOST_TEST_EQ(Scratch(-42, 2.f, nullptr), 0x42424242);
+  detour_3->Remove();
+  BOOST_TEST_EQ(Scratch(-42, 2.f, nullptr), 0x1337);
+  detour_3->Apply();
+  BOOST_TEST_EQ(Scratch(-42, 2.f, nullptr), 0x42424242);
 }
 
 void TestPatchRaw()
@@ -394,5 +441,6 @@ int main()
   TestPatchDetour();
   TestPatchInt3();
   TestPatchDr();
+  TestPatchDetour2();
   return boost::report_errors();
 }
