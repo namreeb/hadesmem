@@ -1008,9 +1008,44 @@ protected:
     return buf;
   }
 
+  std::vector<std::uint8_t> GenStubGate64()
+  {
+    std::vector<std::uint8_t> buf = {
+      // PUSH RAX
+      0x50,
+      // PUSH RDX
+      0x52,
+      // MOV RAX, GS:[0x28]
+      0x65, 0x48, 0x8B, 0x04, 0x25, 0x28, 0x00, 0x00, 0x00,
+      // MOV RDX, 0xDEADBEEFDEADBEEF
+      0x48, 0xBA, 0xEF, 0xBE, 0xAD, 0xDE, 0xEF, 0xBE, 0xAD, 0xDE,
+      // MOV GS:[0x28], RDX
+      0x65, 0x48, 0x89, 0x14, 0x25, 0x28, 0x00, 0x00, 0x00,
+      // MOV RDX, 0xCAFEBABECAFEBABE
+      0x48, 0xBA, 0xBE, 0xBA, 0xFE, 0xCA, 0xBE, 0xBA, 0xFE, 0xCA,
+      // MOV[RDX], RAX
+      0x48, 0x89, 0x02,
+      // POP RDX
+      0x5A,
+      // POP RAX
+      0x58};
+    std::size_t const kStubPtrOfs = 13;
+    std::size_t const kUserPtrOfs = 32;
+    HADESMEM_DETAIL_ASSERT(stub_);
+    *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = &*stub_;
+    *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = &orig_user_ptr_;
+    return buf;
+  }
+
   void WriteStubGate(void* address)
   {
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+    auto const stub_gate = GenStubGate64();
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
     auto const stub_gate = GenStubGate32();
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
     WriteVector(*process_, address, stub_gate);
     WriteJump(static_cast<std::uint8_t*>(address) + stub_gate.size(),
               &StubT::Stub,
