@@ -38,12 +38,15 @@ std::unique_ptr<hadesmem::PatchDetour>& GetDetour2()
 }
 
 typedef int(__cdecl* ScratchFn)(int, float, void*);
-typedef int(__cdecl* ScratchDetourFn)(void*, int, float, void*);
+typedef int(__cdecl* ScratchDetourFn)(hadesmem::PatchDetourBase*,
+                                      int,
+                                      float,
+                                      void*);
 
-std::unique_ptr<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>&
+std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>&
   GetDetour3()
 {
-  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>
+  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>
     detour;
   return detour;
 }
@@ -119,12 +122,14 @@ extern "C" int __cdecl Scratch(int a, float b, void* c)
   return 0x1337;
 }
 
-extern "C" int __cdecl ScratchDetour(void* ctx, int a, float b, void* c)
+extern "C" int __cdecl ScratchDetour(hadesmem::PatchDetourBase* patch,
+                                     int a,
+                                     float b,
+                                     void* c)
 {
-  BOOST_TEST_EQ(ctx, &GetThisProcess());
-  auto& detour_3 = GetDetour3();
-  BOOST_TEST(detour_3->GetTrampoline() != nullptr);
-  auto const orig = detour_3->GetTrampoline<ScratchFn>();
+  BOOST_TEST_EQ(patch->GetContext(), &GetThisProcess());
+  BOOST_TEST(patch->GetTrampoline() != nullptr);
+  auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
   BOOST_TEST_EQ(orig(a, b, c), 0x1337);
   return 0x42424242;
 }
@@ -135,7 +140,7 @@ void TestPatchDetour2()
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
   auto& detour_3 = GetDetour3();
   detour_3 =
-    std::make_unique<hadesmem::PatchDetour2<ScratchFn, ScratchDetourFn>>(
+    std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
       GetThisProcess(), scratch_fn, &ScratchDetour, &GetThisProcess());
   detour_3->Apply();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x42424242);

@@ -205,8 +205,6 @@ private:
   std::vector<std::uint8_t> orig_;
 };
 
-namespace detail
-{
 class PatchDetourBase
 {
 public:
@@ -230,14 +228,26 @@ public:
 
   virtual void*
     GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT = 0;
+
+  template <typename FuncT>
+  FuncT GetTrampolineT() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
+                                  std::is_pointer<FuncT>::value);
+    return detail::AliasCastUnchecked<FuncT>(GetTrampoline());
+  }
 };
 
-template <typename TargetFuncT, typename DetourFuncT> class PatchDetourStub;
+namespace detail
+{
+template <typename TargetFuncT> class PatchDetourStub;
 
-template <typename R, typename... Args, typename DetourFuncT>
-class PatchDetourStub<R(__cdecl*)(Args...), DetourFuncT>
+template <typename R, typename... Args>
+class PatchDetourStub<R(__cdecl*)(Args...)>
 {
 public:
+  using DetourFuncT = R(__cdecl*)(PatchDetourBase*, Args...);
+
   explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}
   {
   }
@@ -256,18 +266,20 @@ private:
     winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
       patch_->GetOriginalArbitraryUserPtr();
     auto const detour = AliasCastUnchecked<DetourFuncT>(patch_->GetDetour());
-    return detour(patch_->GetContext(), std::forward<Args>(args)...);
+    return detour(patch_, std::forward<Args>(args)...);
   }
 
   PatchDetourBase* patch_;
 };
 }
 
-template <typename TargetFuncT, typename DetourFuncT>
-class PatchDetour2 : public detail::PatchDetourBase
+template <typename TargetFuncT> class PatchDetour2 : public PatchDetourBase
 {
 public:
-  using StubT = detail::PatchDetourStub<TargetFuncT, DetourFuncT>;
+  using DetourFuncT =
+    typename detail::PatchDetourStub<TargetFuncT>::DetourFuncT;
+
+  using StubT = detail::PatchDetourStub<TargetFuncT>;
 
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value);
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value);
@@ -303,6 +315,7 @@ public:
       trampolines_(std::move(other.trampolines_)),
       ref_count_{other.ref_count_.load()},
       stub_{other.stub_},
+      orig_user_ptr_{other.orig_user_ptr_},
       context_{other.context_}
   {
     other.process_ = nullptr;
@@ -310,6 +323,7 @@ public:
     other.target_ = nullptr;
     other.detour_ = nullptr;
     other.stub_ = nullptr;
+    other.orig_user_ptr_ = nullptr;
     other.context_ = nullptr;
   }
 
@@ -341,6 +355,9 @@ public:
 
     stub_ = other.stub_;
     other.stub_ = nullptr;
+
+    orig_user_ptr_ = other.orig_user_ptr_;
+    other.orig_user_ptr_ = nullptr;
 
     context_ = other.context_;
     other.context_ = nullptr;
@@ -581,13 +598,6 @@ public:
     GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return orig_user_ptr_;
-  }
-
-  template <typename FuncT> FuncT GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT
-  {
-    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
-                                  std::is_pointer<FuncT>::value);
-    return detail::AliasCastUnchecked<FuncT>(GetTrampoline());
   }
 
 protected:
