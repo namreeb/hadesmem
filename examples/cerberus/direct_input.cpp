@@ -42,10 +42,11 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::DirectInput8Create)>>&
   GetDirectInput8CreateDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DirectInput8Create)>>
+    detour;
   return detour;
 }
 
@@ -88,13 +89,13 @@ void ProxyDirectInput8(REFIID riid, void** direct_input)
 }
 
 extern "C" HRESULT WINAPI
-  DirectInput8CreateDetour(HINSTANCE hinst,
+  DirectInput8CreateDetour(hadesmem::PatchDetourBase* detour,
+                           HINSTANCE hinst,
                            DWORD version,
                            REFIID riid,
                            LPVOID* out,
                            LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetDirectInput8CreateDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -103,7 +104,7 @@ extern "C" HRESULT WINAPI
     "Args: [%p] [%u] [%p] [%p] [%p].", hinst, version, &riid, out, unk_outer);
 
   auto const direct_input_8_create =
-    detour->GetTrampoline<decltype(&DirectInput8CreateDetour)>();
+    detour->GetTrampolineT<decltype(&DirectInput8Create)>();
   last_error_preserver.Revert();
   auto const ret = direct_input_8_create(hinst, version, riid, out, unk_outer);
   last_error_preserver.Update();
@@ -188,11 +189,11 @@ void DetourDirectInput8(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"dinput8", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "DirectInput8Create",
-                      GetDirectInput8CreateDetour(),
-                      DirectInput8CreateDetour);
+    DetourFunc(process,
+               base,
+               "DirectInput8Create",
+               GetDirectInput8CreateDetour(),
+               DirectInput8CreateDetour);
   }
 }
 
@@ -202,8 +203,7 @@ void UndetourDirectInput8(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"dinput8", module))
   {
-    helper.UndetourFunc(
-      L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
+    UndetourFunc(L"DirectInput8Create", GetDirectInput8CreateDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

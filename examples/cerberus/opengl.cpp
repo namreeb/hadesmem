@@ -56,10 +56,10 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>>&
   GetWglSwapBuffersDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>> detour;
   return detour;
 }
 
@@ -69,9 +69,9 @@ std::pair<void*, SIZE_T>& GetOpenGL32Module() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-extern "C" BOOL WINAPI WglSwapBuffersDetour(HDC device) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI WglSwapBuffersDetour(hadesmem::PatchDetourBase* detour,
+                                            HDC device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetWglSwapBuffersDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -81,8 +81,7 @@ extern "C" BOOL WINAPI WglSwapBuffersDetour(HDC device) HADESMEM_DETAIL_NOEXCEPT
   auto& callbacks = GetOnFrameOpenGL32Callbacks();
   callbacks.Run(device);
 
-  auto const end_scene =
-    detour->GetTrampoline<decltype(&WglSwapBuffersDetour)>();
+  auto const end_scene = detour->GetTrampolineT<decltype(&SwapBuffers)>();
   last_error_preserver.Revert();
   auto const ret = end_scene(device);
   last_error_preserver.Update();
@@ -116,11 +115,11 @@ void DetourOpenGL32(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"OpenGL32", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "wglSwapBuffers",
-                      GetWglSwapBuffersDetour(),
-                      WglSwapBuffersDetour);
+    DetourFunc(process,
+               base,
+               "wglSwapBuffers",
+               GetWglSwapBuffersDetour(),
+               WglSwapBuffersDetour);
   }
 }
 
@@ -130,7 +129,7 @@ void UndetourOpenGL32(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"OpenGL32", module))
   {
-    helper.UndetourFunc(L"wglSwapBuffers", GetWglSwapBuffersDetour(), remove);
+    UndetourFunc(L"wglSwapBuffers", GetWglSwapBuffersDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

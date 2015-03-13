@@ -23,25 +23,10 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
-namespace
-{
-std::unique_ptr<hadesmem::PatchDetour>& GetDetour1()
-{
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
-  return detour;
-}
-
-std::unique_ptr<hadesmem::PatchDetour>& GetDetour2()
-{
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
-  return detour;
-}
-
 hadesmem::Process& GetThisProcess()
 {
   static hadesmem::Process process(::GetCurrentProcessId());
   return process;
-}
 }
 
 std::uint32_t __cdecl HookMe(std::int32_t i1,
@@ -68,7 +53,20 @@ std::uint32_t __cdecl HookMe(std::int32_t i1,
   return 0x1234;
 }
 
-extern "C" std::uint32_t __cdecl HookMeHk(std::int32_t i1,
+std::unique_ptr<hadesmem::PatchDetour<decltype(&HookMe)>>& GetDetour1()
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&HookMe)>> detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(&HookMe)>>& GetDetour2()
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&HookMe)>> detour;
+  return detour;
+}
+
+extern "C" std::uint32_t __cdecl HookMeHk(hadesmem::PatchDetourBase* patch,
+                                          std::int32_t i1,
                                           std::int32_t i2,
                                           std::int32_t i3,
                                           std::int32_t i4,
@@ -77,14 +75,14 @@ extern "C" std::uint32_t __cdecl HookMeHk(std::int32_t i1,
                                           std::int32_t i7,
                                           std::int32_t i8)
 {
-  auto& detour_1 = GetDetour1();
-  BOOST_TEST(detour_1->GetTrampoline() != nullptr);
-  auto const orig = detour_1->GetTrampoline<decltype(&HookMe)>();
+  BOOST_TEST(patch->GetTrampoline() != nullptr);
+  auto const orig = patch->GetTrampolineT<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1234UL);
   return 0x1337;
 }
 
-extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
+extern "C" std::uint32_t __cdecl HookMeHk2(hadesmem::PatchDetourBase* patch,
+                                           std::int32_t i1,
                                            std::int32_t i2,
                                            std::int32_t i3,
                                            std::int32_t i4,
@@ -93,19 +91,10 @@ extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
                                            std::int32_t i7,
                                            std::int32_t i8)
 {
-  auto& detour_2 = GetDetour2();
-  BOOST_TEST(detour_2->GetTrampoline() != nullptr);
-  auto const orig = detour_2->GetTrampoline<decltype(&HookMe)>();
+  BOOST_TEST(patch->GetTrampoline() != nullptr);
+  auto const orig = patch->GetTrampolineT<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1337UL);
   return 0x5678;
-}
-
-typedef int(__stdcall* ScratchFn)(int, float, void*);
-
-std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>& GetDetour3()
-{
-  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>> detour;
-  return detour;
 }
 
 extern "C" int __stdcall Scratch(int a, float b, void* c)
@@ -114,6 +103,12 @@ extern "C" int __stdcall Scratch(int a, float b, void* c)
   BOOST_TEST_EQ(b, 2.f);
   BOOST_TEST_EQ(c, static_cast<void*>(nullptr));
   return 0x1337;
+}
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(Scratch)>>& GetDetour3()
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(Scratch)>> detour;
+  return detour;
 }
 
 extern "C" int __cdecl ScratchDetour(hadesmem::PatchDetourBase* patch,
@@ -130,10 +125,10 @@ extern "C" int __cdecl ScratchDetour(hadesmem::PatchDetourBase* patch,
 
 void TestPatchDetour2()
 {
-  volatile ScratchFn scratch_fn = &Scratch;
+  auto volatile const scratch_fn = &Scratch;
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
   auto& detour_3 = GetDetour3();
-  detour_3 = std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
+  detour_3 = std::make_unique<hadesmem::PatchDetour<decltype(Scratch)>>(
     GetThisProcess(), scratch_fn, &ScratchDetour, &GetThisProcess());
   detour_3->Apply();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x42424242);
@@ -147,10 +142,8 @@ void TestPatchDetour2()
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
 
   bool test_var = true;
-  auto const scratch_detour = [&](hadesmem::PatchDetourBase* patch,
-    int a,
-    float b,
-    void* c)
+  auto const scratch_detour =
+    [&](hadesmem::PatchDetourBase* patch, int a, float b, void* c)
   {
     BOOST_TEST_EQ(test_var, true);
     BOOST_TEST_EQ(patch->GetContext(), &test_var);
@@ -159,7 +152,7 @@ void TestPatchDetour2()
     BOOST_TEST_EQ(orig(a, b, c), 0x1337);
     return 0xDEADBEEF;
   };
-  detour_3 = std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
+  detour_3 = std::make_unique<hadesmem::PatchDetour<decltype(Scratch)>>(
     GetThisProcess(), scratch_fn, scratch_detour, &test_var);
   detour_3->Apply();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0xDEADBEEF);
@@ -271,20 +264,15 @@ void TestPatchDetourCommon(WrapperFunc hook_me_wrapper,
   hadesmem::Process const& process = GetThisProcess();
 
   auto& detour_1 = GetDetour1();
-  detour_1 = std::make_unique<PatchType>(
-    process,
-    hadesmem::detail::AliasCast<PVOID>(hook_me_wrapper),
-    hadesmem::detail::AliasCast<PVOID>(&HookMeHk));
+  detour_1 = std::make_unique<PatchType>(process, hook_me_wrapper, &HookMeHk);
 
   bool const can_chain = detour_1->CanHookChain();
 
   auto& detour_2 = GetDetour2();
   if (can_chain)
   {
-    detour_2 = std::make_unique<PatchType>(
-      process,
-      hadesmem::detail::AliasCast<PVOID>(hook_me_wrapper),
-      hadesmem::detail::AliasCast<PVOID>(&HookMeHk2));
+    detour_2 =
+      std::make_unique<PatchType>(process, hook_me_wrapper, &HookMeHk2);
   }
 
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
@@ -445,20 +433,20 @@ template <typename PatchType> void TestPatchDetourJmp()
 
 void TestPatchDetour()
 {
-  TestPatchDetourCall<hadesmem::PatchDetour>();
-  TestPatchDetourJmp<hadesmem::PatchDetour>();
+  TestPatchDetourCall<hadesmem::PatchDetour<decltype(&HookMe)>>();
+  TestPatchDetourJmp<hadesmem::PatchDetour<decltype(&HookMe)>>();
 }
 
 void TestPatchInt3()
 {
-  TestPatchDetourCall<hadesmem::PatchInt3>();
-  TestPatchDetourJmp<hadesmem::PatchInt3>();
+  TestPatchDetourCall<hadesmem::PatchInt3<decltype(&HookMe)>>();
+  TestPatchDetourJmp<hadesmem::PatchInt3<decltype(&HookMe)>>();
 }
 
 void TestPatchDr()
 {
-  TestPatchDetourCall<hadesmem::PatchDr>();
-  TestPatchDetourJmp<hadesmem::PatchDr>();
+  TestPatchDetourCall<hadesmem::PatchDr<decltype(&HookMe)>>();
+  TestPatchDetourJmp<hadesmem::PatchDr<decltype(&HookMe)>>();
 }
 
 int main()

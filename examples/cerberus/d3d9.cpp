@@ -123,17 +123,19 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::Direct3DCreate9)>>&
   GetDirect3DCreate9Detour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::Direct3DCreate9)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::Direct3DCreate9Ex)>>&
   GetDirect3DCreate9ExDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::Direct3DCreate9Ex)>>
+    detour;
   return detour;
 }
 
@@ -144,9 +146,9 @@ std::pair<void*, SIZE_T>& GetD3D9Module() HADESMEM_DETAIL_NOEXCEPT
 }
 
 extern "C" IDirect3D9* WINAPI
-  Direct3DCreate9Detour(UINT sdk_version) HADESMEM_DETAIL_NOEXCEPT
+  Direct3DCreate9Detour(hadesmem::PatchDetourBase* detour,
+                        UINT sdk_version) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetDirect3DCreate9Detour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -154,7 +156,7 @@ extern "C" IDirect3D9* WINAPI
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%u].", sdk_version);
 
   auto const direct3d_create_9 =
-    detour->GetTrampoline<decltype(&Direct3DCreate9Detour)>();
+    detour->GetTrampolineT<decltype(&Direct3DCreate9)>();
   last_error_preserver.Revert();
   auto ret = direct3d_create_9(sdk_version);
   last_error_preserver.Update();
@@ -176,17 +178,17 @@ extern "C" IDirect3D9* WINAPI
 }
 
 extern "C" HRESULT WINAPI
-  Direct3DCreate9ExDetour(UINT sdk_version,
+  Direct3DCreate9ExDetour(hadesmem::PatchDetourBase* detour,
+                          UINT sdk_version,
                           IDirect3D9Ex** d3d9_ex) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetDirect3DCreate9ExDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%u] [%p].", sdk_version, d3d9_ex);
   auto const direct3d_create_9_ex =
-    detour->GetTrampoline<decltype(&Direct3DCreate9ExDetour)>();
+    detour->GetTrampolineT<decltype(&Direct3DCreate9Ex)>();
   last_error_preserver.Revert();
   auto const ret = direct3d_create_9_ex(sdk_version, d3d9_ex);
   last_error_preserver.Update();
@@ -270,16 +272,16 @@ void DetourD3D9(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"D3D9", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "Direct3DCreate9",
-                      GetDirect3DCreate9Detour(),
-                      Direct3DCreate9Detour);
-    helper.DetourFunc(process,
-                      base,
-                      "Direct3DCreate9Ex",
-                      GetDirect3DCreate9ExDetour(),
-                      Direct3DCreate9ExDetour);
+    DetourFunc(process,
+               base,
+               "Direct3DCreate9",
+               GetDirect3DCreate9Detour(),
+               Direct3DCreate9Detour);
+    DetourFunc(process,
+               base,
+               "Direct3DCreate9Ex",
+               GetDirect3DCreate9ExDetour(),
+               Direct3DCreate9ExDetour);
   }
 }
 
@@ -289,9 +291,8 @@ void UndetourD3D9(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"D3D9", module))
   {
-    helper.UndetourFunc(L"Direct3DCreate9", GetDirect3DCreate9Detour(), remove);
-    helper.UndetourFunc(
-      L"Direct3DCreate9Ex", GetDirect3DCreate9ExDetour(), remove);
+    UndetourFunc(L"Direct3DCreate9", GetDirect3DCreate9Detour(), remove);
+    UndetourFunc(L"Direct3DCreate9Ex", GetDirect3DCreate9ExDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

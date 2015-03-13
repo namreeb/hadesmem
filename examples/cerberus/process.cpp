@@ -66,15 +66,31 @@ private:
   HANDLE handle_;
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+extern "C" BOOL WINAPI
+  CreateProcessInternalW(HANDLE token,
+                         LPCWSTR application_name,
+                         LPWSTR command_line,
+                         LPSECURITY_ATTRIBUTES process_attributes,
+                         LPSECURITY_ATTRIBUTES thread_attributes,
+                         BOOL inherit_handles,
+                         DWORD creation_flags,
+                         LPVOID environment,
+                         LPCWSTR current_directory,
+                         LPSTARTUPINFOW startup_info,
+                         LPPROCESS_INFORMATION process_info,
+                         PHANDLE new_token);
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>>&
   GetCreateProcessInternalWDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>> detour;
   return detour;
 }
 
 extern "C" BOOL WINAPI
-  CreateProcessInternalWDetour(HANDLE token,
+  CreateProcessInternalWDetour(hadesmem::PatchDetourBase* detour,
+                               HANDLE token,
                                LPCWSTR application_name,
                                LPWSTR command_line,
                                LPSECURITY_ATTRIBUTES process_attributes,
@@ -87,7 +103,6 @@ extern "C" BOOL WINAPI
                                LPPROCESS_INFORMATION process_info,
                                PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetCreateProcessInternalWDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -119,7 +134,7 @@ extern "C" BOOL WINAPI
     HADESMEM_DETAIL_TRACE_A("Debug flag detected.");
   }
   auto const create_process_internal_w =
-    detour->GetTrampoline<decltype(&CreateProcessInternalWDetour)>();
+    detour->GetTrampolineT<decltype(&CreateProcessInternalW)>();
   last_error_preserver.Revert();
   auto const ret = create_process_internal_w(token,
                                              application_name,
@@ -274,18 +289,16 @@ void DetourCreateProcessInternalW()
 {
   auto const& process = GetThisProcess();
   auto const kernelbase_mod = ::GetModuleHandleW(L"kernelbase");
-  auto& helper = GetHelperInterface();
-  helper.DetourFunc(process,
-                    kernelbase_mod,
-                    "CreateProcessInternalW",
-                    GetCreateProcessInternalWDetour(),
-                    CreateProcessInternalWDetour);
+  DetourFunc(process,
+             kernelbase_mod,
+             "CreateProcessInternalW",
+             GetCreateProcessInternalWDetour(),
+             CreateProcessInternalWDetour);
 }
 
 void UndetourCreateProcessInternalW()
 {
-  auto& helper = GetHelperInterface();
-  helper.UndetourFunc(
+  UndetourFunc(
     L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), true);
 }
 }

@@ -77,22 +77,39 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+extern "C" NTSTATUS WINAPI
+  NtMapViewOfSection(HANDLE section,
+                     HANDLE process,
+                     PVOID* base,
+                     ULONG_PTR zero_bits,
+                     SIZE_T commit_size,
+                     PLARGE_INTEGER section_offset,
+                     PSIZE_T view_size,
+                     winternl::SECTION_INHERIT inherit_disposition,
+                     ULONG alloc_type,
+                     ULONG alloc_protect);
+
+extern "C" NTSTATUS WINAPI NtUnmapViewOfSection(HANDLE process, PVOID base);
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(&NtMapViewOfSection)>>&
   GetNtMapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&NtMapViewOfSection)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&NtUnmapViewOfSection)>>&
   GetNtUnmapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&NtUnmapViewOfSection)>>
+    detour;
   return detour;
 }
 
 extern "C" NTSTATUS WINAPI
-  NtMapViewOfSectionDetour(HANDLE section,
+  NtMapViewOfSectionDetour(hadesmem::PatchDetourBase* detour,
+                           HANDLE section,
                            HANDLE process,
                            PVOID* base,
                            ULONG_PTR zero_bits,
@@ -103,13 +120,12 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetNtMapViewOfSectionDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_map_view_of_section =
-    detour->GetTrampoline<decltype(&NtMapViewOfSectionDetour)>();
+    detour->GetTrampolineT<decltype(&NtMapViewOfSection)>();
   last_error_preserver.Revert();
   auto const ret = nt_map_view_of_section(section,
                                           process,
@@ -211,16 +227,16 @@ extern "C" NTSTATUS WINAPI
 }
 
 extern "C" NTSTATUS WINAPI
-  NtUnmapViewOfSectionDetour(HANDLE process,
+  NtUnmapViewOfSectionDetour(hadesmem::PatchDetourBase* detour,
+                             HANDLE process,
                              PVOID base) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetNtUnmapViewOfSectionDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_unmap_view_of_section =
-    detour->GetTrampoline<decltype(&NtUnmapViewOfSectionDetour)>();
+    detour->GetTrampolineT<decltype(&NtUnmapViewOfSection)>();
   last_error_preserver.Revert();
   auto const ret = nt_unmap_view_of_section(process, base);
   last_error_preserver.Update();
@@ -275,38 +291,32 @@ void DetourNtMapViewOfSection()
 {
   auto const& process = GetThisProcess();
   auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  auto& helper = GetHelperInterface();
-  helper.DetourFunc(process,
-                    ntdll_mod,
-                    "NtMapViewOfSection",
-                    GetNtMapViewOfSectionDetour(),
-                    NtMapViewOfSectionDetour);
+  DetourFunc(process,
+             ntdll_mod,
+             "NtMapViewOfSection",
+             GetNtMapViewOfSectionDetour(),
+             NtMapViewOfSectionDetour);
 }
 
 void DetourNtUnmapViewOfSection()
 {
   auto const& process = GetThisProcess();
   auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  auto& helper = GetHelperInterface();
-  helper.DetourFunc(process,
-                    ntdll_mod,
-                    "NtUnmapViewOfSection",
-                    GetNtUnmapViewOfSectionDetour(),
-                    NtUnmapViewOfSectionDetour);
+  DetourFunc(process,
+             ntdll_mod,
+             "NtUnmapViewOfSection",
+             GetNtUnmapViewOfSectionDetour(),
+             NtUnmapViewOfSectionDetour);
 }
 
 void UndetourNtMapViewOfSection()
 {
-  auto& helper = GetHelperInterface();
-  helper.UndetourFunc(
-    L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
+  UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
 }
 
 void UndetourNtUnmapViewOfSection()
 {
-  auto& helper = GetHelperInterface();
-  helper.UndetourFunc(
-    L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
+  UndetourFunc(L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
 }
 }
 }

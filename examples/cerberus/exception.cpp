@@ -22,18 +22,19 @@
 
 namespace
 {
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::AddVectoredExceptionHandler)>>&
   GetRtlAddVectoredExceptionHandlerDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&::AddVectoredExceptionHandler)>> detour;
   return detour;
 }
 
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
+  hadesmem::PatchDetourBase* detour,
   ULONG first_handler,
   PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetRtlAddVectoredExceptionHandlerDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -41,7 +42,7 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%lu] [%p].", first_handler, vectored_handler);
   auto const rtl_add_vectored_exception_handler =
-    detour->GetTrampoline<decltype(&RtlAddVectoredExceptionHandlerDetour)>();
+    detour->GetTrampolineT<decltype(&AddVectoredExceptionHandler)>();
   last_error_preserver.Revert();
   auto const ret =
     rtl_add_vectored_exception_handler(first_handler, vectored_handler);
@@ -60,20 +61,18 @@ void DetourRtlAddVectoredExceptionHandler()
 {
   auto const& process = GetThisProcess();
   auto const kernelbase_mod = ::GetModuleHandleW(L"ntdll");
-  auto& helper = GetHelperInterface();
-  helper.DetourFunc(process,
-                    kernelbase_mod,
-                    "RtlAddVectoredExceptionHandler",
-                    GetRtlAddVectoredExceptionHandlerDetour(),
-                    RtlAddVectoredExceptionHandlerDetour);
+  DetourFunc(process,
+             kernelbase_mod,
+             "RtlAddVectoredExceptionHandler",
+             GetRtlAddVectoredExceptionHandlerDetour(),
+             RtlAddVectoredExceptionHandlerDetour);
 }
 
 void UndetourRtlAddVectoredExceptionHandler()
 {
-  auto& helper = GetHelperInterface();
-  helper.UndetourFunc(L"RtlAddVectoredExceptionHandler",
-                      GetRtlAddVectoredExceptionHandlerDetour(),
-                      true);
+  UndetourFunc(L"RtlAddVectoredExceptionHandler",
+               GetRtlAddVectoredExceptionHandlerDetour(),
+               true);
 }
 }
 }

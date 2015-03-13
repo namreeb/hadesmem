@@ -155,45 +155,46 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursor)>>&
   GetSetCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursor)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>&
   GetGetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>&
   GetSetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::ShowCursor)>>&
   GetShowCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::ShowCursor)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::ClipCursor)>>&
   GetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::ClipCursor)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetClipCursor)>>&
   GetGetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetClipCursor)>>
+    detour;
   return detour;
 }
 
@@ -204,9 +205,9 @@ std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
 }
 
 extern "C" HCURSOR WINAPI
-  SetCursorDetour(HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
+  SetCursorDetour(hadesmem::PatchDetourBase* detour,
+                  HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetSetCursorDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -234,7 +235,7 @@ extern "C" HCURSOR WINAPI
       "SetCursor hook disabled, skipping callbacks.");
   }
 
-  auto const set_cursor = detour->GetTrampoline<decltype(&SetCursorDetour)>();
+  auto const set_cursor = detour->GetTrampolineT<decltype(&SetCursor)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor(cursor);
   last_error_preserver.Update();
@@ -244,9 +245,9 @@ extern "C" HCURSOR WINAPI
 }
 
 extern "C" BOOL WINAPI
-  GetCursorPosDetour(LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
+  GetCursorPosDetour(hadesmem::PatchDetourBase* detour,
+                     LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetGetCursorPosDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -273,7 +274,7 @@ extern "C" BOOL WINAPI
   }
 
   auto const get_cursor_pos =
-    detour->GetTrampoline<decltype(&GetCursorPosDetour)>();
+    detour->GetTrampolineT<decltype(&GetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = get_cursor_pos(point);
   last_error_preserver.Update();
@@ -282,9 +283,10 @@ extern "C" BOOL WINAPI
   return ret;
 }
 
-extern "C" BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
+                                          int x,
+                                          int y) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetSetCursorPosDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -310,8 +312,7 @@ extern "C" BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
       "SetCursorPos hook disabled, skipping callbacks.");
   }
 
-  auto const set_cursor_pos =
-    detour->GetTrampoline<decltype(&SetCursorPosDetour)>();
+  auto const set_cursor_pos = detour->GetTrampolineT<decltype(&SetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor_pos(x, y);
   last_error_preserver.Update();
@@ -320,9 +321,9 @@ extern "C" BOOL WINAPI SetCursorPosDetour(int x, int y) HADESMEM_DETAIL_NOEXCEPT
   return ret;
 }
 
-extern "C" int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
+extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
+                                       BOOL show) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetShowCursorDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -350,7 +351,7 @@ extern "C" int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
       "ShowCursor hook disabled, skipping callbacks.");
   }
 
-  auto const show_cursor = detour->GetTrampoline<decltype(&ShowCursorDetour)>();
+  auto const show_cursor = detour->GetTrampolineT<decltype(&ShowCursor)>();
   last_error_preserver.Revert();
   auto const ret = show_cursor(show);
   last_error_preserver.Update();
@@ -360,9 +361,9 @@ extern "C" int WINAPI ShowCursorDetour(BOOL show) HADESMEM_DETAIL_NOEXCEPT
 }
 
 extern "C" BOOL WINAPI
-  ClipCursorDetour(RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
+  ClipCursorDetour(hadesmem::PatchDetourBase* detour,
+                   RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetClipCursorDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -390,7 +391,7 @@ extern "C" BOOL WINAPI
       "ClipCursor hook disabled, skipping callbacks.");
   }
 
-  auto const clip_cursor = detour->GetTrampoline<decltype(&ClipCursorDetour)>();
+  auto const clip_cursor = detour->GetTrampolineT<decltype(&ClipCursor)>();
   last_error_preserver.Revert();
   auto const ret = clip_cursor(rect);
   last_error_preserver.Update();
@@ -399,9 +400,9 @@ extern "C" BOOL WINAPI
   return ret;
 }
 
-extern "C" BOOL WINAPI GetClipCursorDetour_(RECT* rect) HADESMEM_DETAIL_NOEXCEPT
+extern "C" BOOL WINAPI GetClipCursorDetour_(hadesmem::PatchDetourBase* detour,
+                                            RECT* rect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetGetClipCursorDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -430,7 +431,7 @@ extern "C" BOOL WINAPI GetClipCursorDetour_(RECT* rect) HADESMEM_DETAIL_NOEXCEPT
   }
 
   auto const get_clip_cursor =
-    detour->GetTrampoline<decltype(&GetClipCursorDetour_)>();
+    detour->GetTrampolineT<decltype(&GetClipCursor)>();
   last_error_preserver.Revert();
   auto const ret = get_clip_cursor(rect);
   last_error_preserver.Update();
@@ -464,27 +465,27 @@ void DetourUser32ForCursor(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"user32", base, module))
   {
-    helper.DetourFunc(
+    DetourFunc(
       process, base, "SetCursor", GetSetCursorDetour(), SetCursorDetour);
-    helper.DetourFunc(process,
-                      base,
-                      "GetCursorPos",
-                      GetGetCursorPosDetour(),
-                      GetCursorPosDetour);
-    helper.DetourFunc(process,
-                      base,
-                      "SetCursorPos",
-                      GetSetCursorPosDetour(),
-                      SetCursorPosDetour);
-    helper.DetourFunc(
+    DetourFunc(process,
+               base,
+               "GetCursorPos",
+               GetGetCursorPosDetour(),
+               GetCursorPosDetour);
+    DetourFunc(process,
+               base,
+               "SetCursorPos",
+               GetSetCursorPosDetour(),
+               SetCursorPosDetour);
+    DetourFunc(
       process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
-    helper.DetourFunc(
+    DetourFunc(
       process, base, "ClipCursor", GetClipCursorDetour(), ClipCursorDetour);
-    helper.DetourFunc(process,
-                      base,
-                      "GetClipCursor",
-                      GetGetClipCursorDetour(),
-                      GetClipCursorDetour_);
+    DetourFunc(process,
+               base,
+               "GetClipCursor",
+               GetGetClipCursorDetour(),
+               GetClipCursorDetour_);
   }
 }
 
@@ -494,12 +495,12 @@ void UndetourUser32ForCursor(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"user32", module))
   {
-    helper.UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
-    helper.UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
-    helper.UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
-    helper.UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
-    helper.UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
-    helper.UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);
+    UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
+    UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
+    UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
+    UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
+    UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
+    UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

@@ -93,10 +93,11 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>&
   GetGetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>
+    detour;
   return detour;
 }
 
@@ -106,9 +107,9 @@ std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
   return module;
 }
 
-extern "C" HWND WINAPI GetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
+extern "C" HWND WINAPI GetForegroundWindowDetour(
+  hadesmem::PatchDetourBase* detour) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetGetForegroundWindowDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -131,7 +132,7 @@ extern "C" HWND WINAPI GetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
   }
 
   auto const get_foreground_window =
-    detour->GetTrampoline<decltype(&GetForegroundWindowDetour)>();
+    detour->GetTrampolineT<decltype(&GetForegroundWindow)>();
   last_error_preserver.Revert();
   auto const ret = get_foreground_window();
   last_error_preserver.Update();
@@ -184,11 +185,11 @@ void DetourUser32ForWindow(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"user32", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "GetForegroundWindow",
-                      GetGetForegroundWindowDetour(),
-                      GetForegroundWindowDetour);
+    DetourFunc(process,
+               base,
+               "GetForegroundWindow",
+               GetGetForegroundWindowDetour(),
+               GetForegroundWindowDetour);
   }
 }
 
@@ -198,7 +199,7 @@ void UndetourUser32ForWindow(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"user32", module))
   {
-    helper.UndetourFunc(
+    UndetourFunc(
       L"GetForegroundWindow", GetGetForegroundWindowDetour(), remove);
 
     module = std::make_pair(nullptr, 0);

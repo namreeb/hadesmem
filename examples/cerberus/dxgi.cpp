@@ -63,24 +63,27 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory)>>&
   GetCreateDXGIFactoryDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory1)>>&
   GetCreateDXGIFactory1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory1)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory2)>>&
   GetCreateDXGIFactory2Detour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory2)>>
+    detour;
   return detour;
 }
 
@@ -91,16 +94,17 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
 }
 
 extern "C" HRESULT WINAPI
-  CreateDXGIFactoryDetour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
+  CreateDXGIFactoryDetour(hadesmem::PatchDetourBase* detour,
+                          REFIID riid,
+                          void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetCreateDXGIFactoryDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
   auto const create_dxgi_factory =
-    detour->GetTrampoline<decltype(&CreateDXGIFactoryDetour)>();
+    detour->GetTrampolineT<decltype(&CreateDXGIFactory)>();
   last_error_preserver.Revert();
   auto const ret = create_dxgi_factory(riid, factory);
   last_error_preserver.Update();
@@ -122,16 +126,17 @@ extern "C" HRESULT WINAPI
 }
 
 extern "C" HRESULT WINAPI
-  CreateDXGIFactory1Detour(REFIID riid, void** factory) HADESMEM_DETAIL_NOEXCEPT
+  CreateDXGIFactory1Detour(hadesmem::PatchDetourBase* detour,
+                           REFIID riid,
+                           void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetCreateDXGIFactory1Detour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
   auto const create_dxgi_factory_1 =
-    detour->GetTrampoline<decltype(&CreateDXGIFactory1Detour)>();
+    detour->GetTrampolineT<decltype(&CreateDXGIFactory1)>();
   last_error_preserver.Revert();
   auto const ret = create_dxgi_factory_1(riid, factory);
   last_error_preserver.Update();
@@ -153,18 +158,18 @@ extern "C" HRESULT WINAPI
 }
 
 extern "C" HRESULT WINAPI
-  CreateDXGIFactory2Detour(UINT flags,
+  CreateDXGIFactory2Detour(hadesmem::PatchDetourBase* detour,
+                           UINT flags,
                            REFIID riid,
                            void** factory) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetCreateDXGIFactory2Detour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%p].", &riid, factory);
   auto const create_dxgi_factory_2 =
-    detour->GetTrampoline<decltype(&CreateDXGIFactory2Detour)>();
+    detour->GetTrampolineT<decltype(&CreateDXGIFactory2)>();
   last_error_preserver.Revert();
   auto const ret = create_dxgi_factory_2(flags, riid, factory);
   last_error_preserver.Update();
@@ -222,21 +227,21 @@ void DetourDXGI(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"DXGI", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "CreateDXGIFactory",
-                      GetCreateDXGIFactoryDetour(),
-                      CreateDXGIFactoryDetour);
-    helper.DetourFunc(process,
-                      base,
-                      "CreateDXGIFactory1",
-                      GetCreateDXGIFactory1Detour(),
-                      CreateDXGIFactory1Detour);
-    helper.DetourFunc(process,
-                      base,
-                      "CreateDXGIFactory2",
-                      GetCreateDXGIFactory2Detour(),
-                      CreateDXGIFactory2Detour);
+    DetourFunc(process,
+               base,
+               "CreateDXGIFactory",
+               GetCreateDXGIFactoryDetour(),
+               CreateDXGIFactoryDetour);
+    DetourFunc(process,
+               base,
+               "CreateDXGIFactory1",
+               GetCreateDXGIFactory1Detour(),
+               CreateDXGIFactory1Detour);
+    DetourFunc(process,
+               base,
+               "CreateDXGIFactory2",
+               GetCreateDXGIFactory2Detour(),
+               CreateDXGIFactory2Detour);
   }
 }
 
@@ -246,12 +251,9 @@ void UndetourDXGI(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"DXGI", module))
   {
-    helper.UndetourFunc(
-      L"CreateDXGIFactory", GetCreateDXGIFactoryDetour(), remove);
-    helper.UndetourFunc(
-      L"CreateDXGIFactory1", GetCreateDXGIFactory1Detour(), remove);
-    helper.UndetourFunc(
-      L"CreateDXGIFactory2", GetCreateDXGIFactory2Detour(), remove);
+    UndetourFunc(L"CreateDXGIFactory", GetCreateDXGIFactoryDetour(), remove);
+    UndetourFunc(L"CreateDXGIFactory1", GetCreateDXGIFactory1Detour(), remove);
+    UndetourFunc(L"CreateDXGIFactory2", GetCreateDXGIFactory2Detour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

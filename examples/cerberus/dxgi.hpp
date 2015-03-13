@@ -11,7 +11,7 @@
 
 #include <hadesmem/config.hpp>
 
-#include <dxgi1_2.h>
+#include <dxgi1_3.h>
 #include <dxgi.h>
 
 #include "callbacks.hpp"

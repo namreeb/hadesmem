@@ -54,31 +54,37 @@ public:
   }
 };
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice)>>&
   GetD3D10CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<
+  hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain)>>&
   GetD3D10CreateDeviceAndSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain)>> detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice1)>>&
   GetD3D10CreateDevice1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice1)>>
+    detour;
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour>&
+std::unique_ptr<
+  hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain1)>>&
   GetD3D10CreateDeviceAndSwapChain1Detour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour> detour;
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain1)>> detour;
   return detour;
 }
 
@@ -101,14 +107,14 @@ std::uint32_t& GetD3D10CreateHookCount() HADESMEM_DETAIL_NOEXCEPT
 }
 
 extern "C" HRESULT WINAPI
-  D3D10CreateDeviceDetour(IDXGIAdapter* adapter,
+  D3D10CreateDeviceDetour(hadesmem::PatchDetourBase* detour,
+                          IDXGIAdapter* adapter,
                           D3D10_DRIVER_TYPE driver_type,
                           HMODULE software,
                           UINT flags,
                           UINT sdk_version,
                           ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetD3D10CreateDeviceDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -122,7 +128,7 @@ extern "C" HRESULT WINAPI
                                  sdk_version,
                                  device);
   auto const d3d10_create_device =
-    detour->GetTrampoline<decltype(&D3D10CreateDeviceDetour)>();
+    detour->GetTrampolineT<decltype(&D3D10CreateDevice)>();
   last_error_preserver.Revert();
   auto const ret = d3d10_create_device(
     adapter, driver_type, software, flags, sdk_version, device);
@@ -155,6 +161,7 @@ extern "C" HRESULT WINAPI
 }
 
 extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
+  hadesmem::PatchDetourBase* detour,
   IDXGIAdapter* adapter,
   D3D10_DRIVER_TYPE driver_type,
   HMODULE software,
@@ -164,7 +171,6 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
   IDXGISwapChain** swap_chain,
   ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetD3D10CreateDeviceAndSwapChainDetour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -181,7 +187,7 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
     swap_chain,
     device);
   auto const d3d10_create_device_and_swap_chain =
-    detour->GetTrampoline<decltype(&D3D10CreateDeviceAndSwapChainDetour)>();
+    detour->GetTrampolineT<decltype(&D3D10CreateDeviceAndSwapChain)>();
   last_error_preserver.Revert();
   auto const ret = d3d10_create_device_and_swap_chain(adapter,
                                                       driver_type,
@@ -236,15 +242,15 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
 }
 
 extern "C" HRESULT WINAPI
-  D3D10CreateDevice1Detour(IDXGIAdapter* adapter,
+  D3D10CreateDevice1Detour(hadesmem::PatchDetourBase* detour,
+                           IDXGIAdapter* adapter,
                            D3D10_DRIVER_TYPE driver_type,
                            HMODULE software,
                            UINT flags,
                            D3D10_FEATURE_LEVEL1 hardware_level,
                            UINT sdk_version,
-                           ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
+                           ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetD3D10CreateDevice1Detour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -259,7 +265,7 @@ extern "C" HRESULT WINAPI
                                  sdk_version,
                                  device);
   auto const d3d10_create_device_1 =
-    detour->GetTrampoline<decltype(&D3D10CreateDevice1Detour)>();
+    detour->GetTrampolineT<decltype(&D3D10CreateDevice1)>();
   last_error_preserver.Revert();
   auto const ret = d3d10_create_device_1(
     adapter, driver_type, software, flags, hardware_level, sdk_version, device);
@@ -292,6 +298,7 @@ extern "C" HRESULT WINAPI
 }
 
 extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
+  hadesmem::PatchDetourBase* detour,
   IDXGIAdapter* adapter,
   D3D10_DRIVER_TYPE driver_type,
   HMODULE software,
@@ -300,9 +307,8 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
   UINT sdk_version,
   DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
   IDXGISwapChain** swap_chain,
-  ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
+  ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto& detour = GetD3D10CreateDeviceAndSwapChain1Detour();
   auto const ref_counter =
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
@@ -320,7 +326,7 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
     swap_chain,
     device);
   auto const d3d10_create_device_and_swap_chain_1 =
-    detour->GetTrampoline<decltype(&D3D10CreateDeviceAndSwapChain1Detour)>();
+    detour->GetTrampolineT<decltype(&D3D10CreateDeviceAndSwapChain1)>();
   last_error_preserver.Revert();
   auto const ret = d3d10_create_device_and_swap_chain_1(adapter,
                                                         driver_type,
@@ -413,16 +419,16 @@ void DetourD3D10(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"D3D10", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "D3D10CreateDevice",
-                      GetD3D10CreateDeviceDetour(),
-                      D3D10CreateDeviceDetour);
-    helper.DetourFunc(process,
-                      base,
-                      "D3D10CreateDeviceAndSwapChain",
-                      GetD3D10CreateDeviceAndSwapChainDetour(),
-                      D3D10CreateDeviceAndSwapChainDetour);
+    DetourFunc(process,
+               base,
+               "D3D10CreateDevice",
+               GetD3D10CreateDeviceDetour(),
+               D3D10CreateDeviceDetour);
+    DetourFunc(process,
+               base,
+               "D3D10CreateDeviceAndSwapChain",
+               GetD3D10CreateDeviceAndSwapChainDetour(),
+               D3D10CreateDeviceAndSwapChainDetour);
   }
 }
 
@@ -432,11 +438,10 @@ void UndetourD3D10(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"D3D10", module))
   {
-    helper.UndetourFunc(L"D3D10CreateDeviceAndSwapChain",
-                        GetD3D10CreateDeviceAndSwapChainDetour(),
-                        remove);
-    helper.UndetourFunc(
-      L"D3D10CreateDevice", GetD3D10CreateDeviceDetour(), remove);
+    UndetourFunc(L"D3D10CreateDeviceAndSwapChain",
+                 GetD3D10CreateDeviceAndSwapChainDetour(),
+                 remove);
+    UndetourFunc(L"D3D10CreateDevice", GetD3D10CreateDeviceDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
@@ -449,16 +454,16 @@ void DetourD3D101(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"D3D10_1", base, module))
   {
-    helper.DetourFunc(process,
-                      base,
-                      "D3D10CreateDevice1",
-                      GetD3D10CreateDevice1Detour(),
-                      D3D10CreateDevice1Detour);
-    helper.DetourFunc(process,
-                      base,
-                      "D3D10CreateDeviceAndSwapChain1",
-                      GetD3D10CreateDeviceAndSwapChain1Detour(),
-                      D3D10CreateDeviceAndSwapChain1Detour);
+    DetourFunc(process,
+               base,
+               "D3D10CreateDevice1",
+               GetD3D10CreateDevice1Detour(),
+               D3D10CreateDevice1Detour);
+    DetourFunc(process,
+               base,
+               "D3D10CreateDeviceAndSwapChain1",
+               GetD3D10CreateDeviceAndSwapChain1Detour(),
+               D3D10CreateDeviceAndSwapChain1Detour);
   }
 }
 
@@ -468,11 +473,10 @@ void UndetourD3D101(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"D3D10_1", module))
   {
-    helper.UndetourFunc(L"D3D10CreateDeviceAndSwapChain1",
-                        GetD3D10CreateDeviceAndSwapChain1Detour(),
-                        remove);
-    helper.UndetourFunc(
-      L"D3D10CreateDevice1", GetD3D10CreateDevice1Detour(), remove);
+    UndetourFunc(L"D3D10CreateDeviceAndSwapChain1",
+                 GetD3D10CreateDeviceAndSwapChain1Detour(),
+                 remove);
+    UndetourFunc(L"D3D10CreateDevice1", GetD3D10CreateDevice1Detour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
