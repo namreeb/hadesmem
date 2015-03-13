@@ -43,11 +43,9 @@ typedef int(__cdecl* ScratchDetourFn)(hadesmem::PatchDetourBase*,
                                       float,
                                       void*);
 
-std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>&
-  GetDetour3()
+std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>& GetDetour3()
 {
-  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>
-    detour;
+  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>> detour;
   return detour;
 }
 
@@ -139,9 +137,8 @@ void TestPatchDetour2()
   volatile ScratchFn scratch_fn = &Scratch;
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
   auto& detour_3 = GetDetour3();
-  detour_3 =
-    std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
-      GetThisProcess(), scratch_fn, &ScratchDetour, &GetThisProcess());
+  detour_3 = std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
+    GetThisProcess(), scratch_fn, &ScratchDetour, &GetThisProcess());
   detour_3->Apply();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x42424242);
   detour_3->Remove();
@@ -444,10 +441,10 @@ void TestPatchDr()
 
 int main()
 {
-  // TestPatchRaw();
-  // TestPatchDetour();
-  // TestPatchInt3();
-  // TestPatchDr();
+  TestPatchRaw();
+  TestPatchDetour();
+  TestPatchInt3();
+  TestPatchDr();
   TestPatchDetour2();
   return boost::report_errors();
 }

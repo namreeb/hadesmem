@@ -222,7 +222,7 @@ public:
 
   virtual bool CanHookChain() const = 0;
 
-  virtual void* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
@@ -246,7 +246,8 @@ template <typename R, typename... Args>
 class PatchDetourStub<R(__cdecl*)(Args...)>
 {
 public:
-  using DetourFuncT = R(__cdecl*)(PatchDetourBase*, Args...);
+  using DetourFuncRawT = R(__cdecl*)(PatchDetourBase*, Args...);
+  using DetourFuncT = std::function<R(PatchDetourBase*, Args...)>;
 
   explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}
   {
@@ -262,11 +263,11 @@ public:
 private:
   R StubImpl(Args... args)
   {
-    HADESMEM_DETAIL_STATIC_ASSERT(IsFunction<DetourFuncT>::value);
+    HADESMEM_DETAIL_STATIC_ASSERT(IsFunction<DetourFuncRawT>::value);
     winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
       patch_->GetOriginalArbitraryUserPtr();
-    auto const detour = AliasCastUnchecked<DetourFuncT>(patch_->GetDetour());
-    return detour(patch_, std::forward<Args>(args)...);
+    auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());
+    return (*detour)(patch_, std::forward<Args>(args)...);
   }
 
   PatchDetourBase* patch_;
@@ -276,17 +277,16 @@ private:
 template <typename TargetFuncT> class PatchDetour2 : public PatchDetourBase
 {
 public:
-  using DetourFuncT =
-    typename detail::PatchDetourStub<TargetFuncT>::DetourFuncT;
-
   using StubT = detail::PatchDetourStub<TargetFuncT>;
+  using DetourFuncRawT = typename StubT::DetourFuncRawT;
+  using DetourFuncT = typename StubT::DetourFuncT;
 
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value);
-  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value);
+  HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncRawT>::value);
 
   explicit PatchDetour2(Process const& process,
                         TargetFuncT target,
-                        DetourFuncT detour,
+                        DetourFuncT const& detour,
                         void* context = nullptr)
     : process_{&process},
       target_{target},
@@ -298,7 +298,7 @@ public:
 
   explicit PatchDetour2(Process&& process,
                         TargetFuncT target,
-                        DetourFuncT detour) = delete;
+                        DetourFuncT const& detour) = delete;
 
   PatchDetour2(PatchDetour2 const& other) = delete;
 
@@ -308,7 +308,7 @@ public:
     : process_{other.process_},
       applied_{other.applied_},
       target_{other.target_},
-      detour_{other.detour_},
+      detour_{std::move(other.detour_)},
       trampoline_{std::move(other.trampoline_)},
       stub_gate_{std::move(other.stub_gate_)},
       orig_(std::move(other.orig_)),
@@ -321,7 +321,6 @@ public:
     other.process_ = nullptr;
     other.applied_ = false;
     other.target_ = nullptr;
-    other.detour_ = nullptr;
     other.stub_ = nullptr;
     other.orig_user_ptr_ = nullptr;
     other.context_ = nullptr;
@@ -340,8 +339,7 @@ public:
     target_ = other.target_;
     other.target_ = nullptr;
 
-    detour_ = other.detour_;
-    other.detour_ = nullptr;
+    detour_ = std::move(other.detour_);
 
     trampoline_ = std::move(other.trampoline_);
 
@@ -395,6 +393,7 @@ public:
     // up jumping to the memory we just free'd!
     trampoline_ = nullptr;
     trampolines_.clear();
+    stub_gate_ = nullptr;
 
     SuspendedProcess const suspended_process{process_->GetId()};
 
@@ -404,10 +403,22 @@ public:
     trampoline_ = std::make_unique<Allocator>(*process_, kTrampSize);
     auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Target = %p, Detour = %p, Trampoline = %p.",
-                                   target_,
-                                   detour_,
-                                   trampoline_->GetBase());
+    auto const detour_raw = detour_.target<DetourFuncRawT>();
+    if (detour_raw || detour_)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Target = %p, Detour = %p, Trampoline = %p.",
+        target_,
+        detour_raw,
+        trampoline_->GetBase());
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Target = %p, Detour = INVALID, Trampoline = %p.",
+        target_,
+        trampoline_->GetBase());
+    }
 
     auto const buffer =
       ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
@@ -424,6 +435,8 @@ public:
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+    stub_gate_ = AllocatePageNear(target_);
 
     std::size_t const patch_size = GetPatchSize();
 
@@ -521,7 +534,6 @@ public:
     FlushInstructionCache(
       *process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    stub_gate_ = AllocatePageNear(target_);
     WriteStubGate(stub_gate_->GetBase());
 
     orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
@@ -584,9 +596,9 @@ public:
     return CanHookChainImpl();
   }
 
-  virtual void* GetDetour() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT override
   {
-    return detail::AliasCastUnchecked<void*>(detour_);
+    return &detour_;
   }
 
   virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
@@ -603,14 +615,14 @@ public:
 protected:
   virtual std::size_t GetPatchSize() const
   {
-    bool detour_near = IsNear(target_, detour_);
-    HADESMEM_DETAIL_TRACE_A(detour_near ? "Detour near." : "Detour far.");
-    return detour_near ? kJmpSize32 : kJmpSize64;
+    bool stub_near = IsNear(target_, stub_gate_->GetBase());
+    HADESMEM_DETAIL_TRACE_A(stub_near ? "Stub near." : "Stub far.");
+    return stub_near ? kJmpSize32 : kJmpSize64;
   }
 
   virtual void WritePatch()
   {
-    HADESMEM_DETAIL_TRACE_A("Writing jump to detour.");
+    HADESMEM_DETAIL_TRACE_A("Writing jump to stub.");
 
     WriteJump(target_, stub_gate_->GetBase(), false);
   }
