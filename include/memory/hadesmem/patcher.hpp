@@ -331,8 +331,6 @@ PatchDetourBase* patch_;                                                       \
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 
-#define HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB_EMPTY
-
 HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(__fastcall)
 
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -350,6 +348,8 @@ HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(__fastcall)
 HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(__vectorcall)
 
 #endif
+
+#undef HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB
 }
 
 template <typename TargetFuncT> class PatchDetour2 : public PatchDetourBase
