@@ -1387,7 +1387,7 @@ public:
   template <typename TargetFuncT, typename DetourFuncT>
   explicit PatchInt3(Process&& process,
                      TargetFuncT target,
-                     DetourFuncT detour) = delete;
+                     DetourFuncT const& detour) = delete;
 
   PatchInt3(PatchInt3 const& other) = delete;
 
