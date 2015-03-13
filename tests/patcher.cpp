@@ -37,18 +37,6 @@ std::unique_ptr<hadesmem::PatchDetour>& GetDetour2()
   return detour;
 }
 
-typedef int(__cdecl* ScratchFn)(int, float, void*);
-typedef int(__cdecl* ScratchDetourFn)(hadesmem::PatchDetourBase*,
-                                      int,
-                                      float,
-                                      void*);
-
-std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>& GetDetour3()
-{
-  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>> detour;
-  return detour;
-}
-
 hadesmem::Process& GetThisProcess()
 {
   static hadesmem::Process process(::GetCurrentProcessId());
@@ -112,7 +100,15 @@ extern "C" std::uint32_t __cdecl HookMeHk2(std::int32_t i1,
   return 0x5678;
 }
 
-extern "C" int __cdecl Scratch(int a, float b, void* c)
+typedef int(__stdcall* ScratchFn)(int, float, void*);
+
+std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>>& GetDetour3()
+{
+  static std::unique_ptr<hadesmem::PatchDetour2<ScratchFn>> detour;
+  return detour;
+}
+
+extern "C" int __stdcall Scratch(int a, float b, void* c)
 {
   BOOST_TEST_EQ(a, -42);
   BOOST_TEST_EQ(b, 2.f);
@@ -145,6 +141,32 @@ void TestPatchDetour2()
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
   detour_3->Apply();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x42424242);
+  detour_3->Remove();
+  BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
+  detour_3 = nullptr;
+  BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
+
+  bool test_var = true;
+  auto const scratch_detour = [&](hadesmem::PatchDetourBase* patch,
+    int a,
+    float b,
+    void* c)
+  {
+    BOOST_TEST_EQ(test_var, true);
+    BOOST_TEST_EQ(patch->GetContext(), &test_var);
+    BOOST_TEST(patch->GetTrampoline() != nullptr);
+    auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
+    BOOST_TEST_EQ(orig(a, b, c), 0x1337);
+    return 0xDEADBEEF;
+  };
+  detour_3 = std::make_unique<hadesmem::PatchDetour2<ScratchFn>>(
+    GetThisProcess(), scratch_fn, scratch_detour, &test_var);
+  detour_3->Apply();
+  BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0xDEADBEEF);
+  detour_3->Remove();
+  BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
+  detour_3->Apply();
+  BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0xDEADBEEF);
   detour_3->Remove();
   BOOST_TEST_EQ(scratch_fn(-42, 2.f, nullptr), 0x1337);
   detour_3 = nullptr;
