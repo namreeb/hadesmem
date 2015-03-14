@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\SteamApps\common\Oddworld New n Tasty\NNT.exe" --inject --steam-app-id 314660 --export Load --add-path --path-resolution --module cerberus.dll
