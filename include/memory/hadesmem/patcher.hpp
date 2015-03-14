@@ -9,3 +9,4 @@
 #include <hadesmem/local/patch_int3.hpp>
 #include <hadesmem/local/patch_veh.hpp>
 #include <hadesmem/patch_raw.hpp>
+#include <hadesmem/patch_vmt.hpp>
