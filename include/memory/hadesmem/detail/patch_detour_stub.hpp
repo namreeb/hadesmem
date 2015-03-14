@@ -15,7 +15,7 @@
 #include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/error.hpp>
-#include <hadesmem/patch_detour_base.hpp>
+#include <hadesmem/local/patch_detour_base.hpp>
 
 namespace hadesmem
 {

@@ -33,8 +33,7 @@
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
-#include <hadesmem/patch_detour.hpp>
-#include <hadesmem/patch_detour_base.hpp>
+#include <hadesmem/local/patch_detour.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 #include <hadesmem/thread.hpp>

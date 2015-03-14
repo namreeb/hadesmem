@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <hadesmem/patch_detour.hpp>
-#include <hadesmem/patch_detour_base.hpp>
-#include <hadesmem/patch_dr.hpp>
-#include <hadesmem/patch_int3.hpp>
+#include <hadesmem/local/patch_detour.hpp>
+#include <hadesmem/local/patch_detour_base.hpp>
+#include <hadesmem/local/patch_dr.hpp>
+#include <hadesmem/local/patch_int3.hpp>
+#include <hadesmem/local/patch_veh.hpp>
 #include <hadesmem/patch_raw.hpp>
-#include <hadesmem/patch_veh.hpp>
