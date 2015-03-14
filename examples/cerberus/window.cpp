@@ -96,8 +96,8 @@ public:
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>&
   GetGetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>
-    detour;
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>> detour;
   return detour;
 }
 

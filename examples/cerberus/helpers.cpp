@@ -7,7 +7,6 @@
 
 namespace
 {
-
 class HelperImpl : public hadesmem::cerberus::HelperInterface
 {
 public:

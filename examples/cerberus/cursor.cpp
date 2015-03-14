@@ -165,14 +165,16 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursor)>>&
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>&
   GetGetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>
+    detour;
   return detour;
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>&
   GetSetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>
+    detour;
   return detour;
 }
 
@@ -273,8 +275,7 @@ extern "C" BOOL WINAPI
       "GetCursorPos hook disabled, skipping callbacks.");
   }
 
-  auto const get_cursor_pos =
-    detour->GetTrampolineT<decltype(&GetCursorPos)>();
+  auto const get_cursor_pos = detour->GetTrampolineT<decltype(&GetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = get_cursor_pos(point);
   last_error_preserver.Update();

@@ -367,7 +367,6 @@ void OnUnloadPlugins()
   SetGwenInitialized(hadesmem::cerberus::RenderApi::kD3D11, false);
   SetGwenInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
 }
-
 }
 
 namespace hadesmem

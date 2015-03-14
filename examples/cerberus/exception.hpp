@@ -3,12 +3,20 @@
 
 #pragma once
 
+#include <windows.h>
+
 namespace hadesmem
 {
 namespace cerberus
 {
-void DetourRtlAddVectoredExceptionHandler();
+void InitializeException();
 
-void UndetourRtlAddVectoredExceptionHandler();
+void DetourNtdllForException(HMODULE base);
+
+void DetourKernelBaseForException(HMODULE base);
+
+void UndetourNtdllForException(bool remove);
+
+void UndetourKernelBaseForException(bool remove);
 }
 }

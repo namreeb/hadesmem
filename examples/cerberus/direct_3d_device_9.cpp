@@ -686,7 +686,8 @@ HRESULT WINAPI
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%d] [%d] [%u] [%u] [%u] [%u].",
     device_,
-    primitive_type, base_vertex_index,
+    primitive_type,
+    base_vertex_index,
     min_vertex_index,
     num_vertices,
     start_index,

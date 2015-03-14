@@ -321,6 +321,9 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     UseAllStatics();
 
     // Support deferred hooking (via module load notifications).
+    hadesmem::cerberus::InitializeModule();
+    hadesmem::cerberus::InitializeException();
+    hadesmem::cerberus::InitializeProcess();
     hadesmem::cerberus::InitializeD3D9();
     hadesmem::cerberus::InitializeD3D10();
     hadesmem::cerberus::InitializeD3D101();
@@ -332,11 +335,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeRender();
     hadesmem::cerberus::InitializeInput();
 
-    hadesmem::cerberus::DetourCreateProcessInternalW();
-    hadesmem::cerberus::DetourNtMapViewOfSection();
-    hadesmem::cerberus::DetourNtUnmapViewOfSection();
-    hadesmem::cerberus::DetourRtlAddVectoredExceptionHandler();
-
+    hadesmem::cerberus::DetourNtdllForModule(nullptr);
+    hadesmem::cerberus::DetourNtdllForException(nullptr);
+    hadesmem::cerberus::DetourKernelBaseForException(nullptr);
+    hadesmem::cerberus::DetourKernelBaseForProcess(nullptr);
     hadesmem::cerberus::DetourD3D9(nullptr);
     hadesmem::cerberus::DetourD3D10(nullptr);
     hadesmem::cerberus::DetourD3D101(nullptr);
@@ -380,11 +382,10 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 
     is_initialized = false;
 
-    hadesmem::cerberus::UndetourCreateProcessInternalW();
-    hadesmem::cerberus::UndetourNtMapViewOfSection();
-    hadesmem::cerberus::UndetourNtUnmapViewOfSection();
-    hadesmem::cerberus::UndetourRtlAddVectoredExceptionHandler();
-
+    hadesmem::cerberus::UndetourNtdllForModule(true);
+    hadesmem::cerberus::UndetourNtdllForException(true);
+    hadesmem::cerberus::UndetourKernelBaseForException(true);
+    hadesmem::cerberus::UndetourKernelBaseForProcess(true);
     hadesmem::cerberus::UndetourDXGI(true);
     hadesmem::cerberus::UndetourD3D11(true);
     hadesmem::cerberus::UndetourD3D101(true);

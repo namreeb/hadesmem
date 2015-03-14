@@ -31,6 +31,12 @@ namespace winternl = hadesmem::detail::winternl;
 
 namespace
 {
+std::pair<void*, SIZE_T>& GetNtdllModule() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnMapCallback>&
   GetOnMapCallbacks()
 {
@@ -287,36 +293,45 @@ ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT
   return module_impl;
 }
 
-void DetourNtMapViewOfSection()
+void InitializeModule()
+{
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(
+    L"NTDLL", DetourNtdllForModule, UndetourNtdllForModule, GetNtdllModule);
+}
+
+void DetourNtdllForModule(HMODULE base)
 {
   auto const& process = GetThisProcess();
-  auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  DetourFunc(process,
-             ntdll_mod,
-             "NtMapViewOfSection",
-             GetNtMapViewOfSectionDetour(),
-             NtMapViewOfSectionDetour);
+  auto& module = GetNtdllModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"kernelbase", base, module))
+  {
+    DetourFunc(process,
+               base,
+               "NtMapViewOfSection",
+               GetNtMapViewOfSectionDetour(),
+               NtMapViewOfSectionDetour);
+    DetourFunc(process,
+               base,
+               "NtUnmapViewOfSection",
+               GetNtUnmapViewOfSectionDetour(),
+               NtUnmapViewOfSectionDetour);
+  }
 }
 
-void DetourNtUnmapViewOfSection()
+void UndetourNtdllForModule(bool remove)
 {
-  auto const& process = GetThisProcess();
-  auto const ntdll_mod = ::GetModuleHandleW(L"ntdll");
-  DetourFunc(process,
-             ntdll_mod,
-             "NtUnmapViewOfSection",
-             GetNtUnmapViewOfSectionDetour(),
-             NtUnmapViewOfSectionDetour);
-}
+  auto& module = GetNtdllModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"kernelbase", module))
+  {
+    UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), remove);
+    UndetourFunc(
+      L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), remove);
 
-void UndetourNtMapViewOfSection()
-{
-  UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), true);
-}
-
-void UndetourNtUnmapViewOfSection()
-{
-  UndetourFunc(L"NtUnmapViewOfSection", GetNtUnmapViewOfSectionDetour(), true);
+    module = std::make_pair(nullptr, 0);
+  }
 }
 }
 }

@@ -3,12 +3,16 @@
 
 #pragma once
 
+#include <windows.h>
+
 namespace hadesmem
 {
 namespace cerberus
 {
-void DetourCreateProcessInternalW();
+void InitializeProcess();
 
-void UndetourCreateProcessInternalW();
+void DetourKernelBaseForProcess(HMODULE base);
+
+void UndetourKernelBaseForProcess(bool remove);
 }
 }

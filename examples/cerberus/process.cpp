@@ -29,6 +29,12 @@
 
 namespace
 {
+std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
 class EnsureResumeThread
 {
 public:
@@ -285,21 +291,41 @@ namespace hadesmem
 {
 namespace cerberus
 {
-void DetourCreateProcessInternalW()
+void InitializeProcess()
 {
-  auto const& process = GetThisProcess();
-  auto const kernelbase_mod = ::GetModuleHandleW(L"kernelbase");
-  DetourFunc(process,
-             kernelbase_mod,
-             "CreateProcessInternalW",
-             GetCreateProcessInternalWDetour(),
-             CreateProcessInternalWDetour);
+  auto& helper = GetHelperInterface();
+  helper.InitializeSupportForModule(L"KERNELBASE",
+                                    DetourKernelBaseForProcess,
+                                    UndetourKernelBaseForProcess,
+                                    GetKernelBaseModule);
 }
 
-void UndetourCreateProcessInternalW()
+void DetourKernelBaseForProcess(HMODULE base)
 {
-  UndetourFunc(
-    L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), true);
+  auto const& process = GetThisProcess();
+  auto& module = GetKernelBaseModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"kernelbase", base, module))
+  {
+    DetourFunc(process,
+               base,
+               "CreateProcessInternalW",
+               GetCreateProcessInternalWDetour(),
+               CreateProcessInternalWDetour);
+  }
+}
+
+void UndetourKernelBaseForProcess(bool remove)
+{
+  auto& module = GetKernelBaseModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"kernelbase", module))
+  {
+    UndetourFunc(
+      L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
+  }
 }
 }
 }

@@ -40,12 +40,10 @@ public:
 
 ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT;
 
-void DetourNtMapViewOfSection();
+void InitializeModule();
 
-void DetourNtUnmapViewOfSection();
+void DetourNtdllForModule(HMODULE base);
 
-void UndetourNtMapViewOfSection();
-
-void UndetourNtUnmapViewOfSection();
+void UndetourNtdllForModule(bool remove);
 }
 }

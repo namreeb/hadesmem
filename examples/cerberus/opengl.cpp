@@ -59,7 +59,8 @@ public:
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>>&
   GetWglSwapBuffersDetour() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>> detour;
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>>
+    detour;
   return detour;
 }
 
