@@ -161,7 +161,7 @@ void UndetourKernelBaseForException(bool remove)
 {
   auto& module = GetKernelBaseModule();
   auto& helper = GetHelperInterface();
-  if (helper.CommonUndetourModule(L"ntdll", module))
+  if (helper.CommonUndetourModule(L"kernelbase", module))
   {
     UndetourFunc(L"SetUnhandledExceptionFilter",
                  GetSetUnhandledExceptionFilterDetour(),
