@@ -305,7 +305,7 @@ void DetourNtdllForModule(HMODULE base)
   auto const& process = GetThisProcess();
   auto& module = GetNtdllModule();
   auto& helper = GetHelperInterface();
-  if (helper.CommonDetourModule(process, L"kernelbase", base, module))
+  if (helper.CommonDetourModule(process, L"ntdll", base, module))
   {
     DetourFunc(process,
                base,
@@ -324,7 +324,7 @@ void UndetourNtdllForModule(bool remove)
 {
   auto& module = GetNtdllModule();
   auto& helper = GetHelperInterface();
-  if (helper.CommonUndetourModule(L"kernelbase", module))
+  if (helper.CommonUndetourModule(L"ntdll", module))
   {
     UndetourFunc(L"NtMapViewOfSection", GetNtMapViewOfSectionDetour(), remove);
     UndetourFunc(
