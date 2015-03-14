@@ -117,7 +117,7 @@ public:
     Write(*process_, class_base_, old_vmt_);
   }
 
-  std::size_t GetSize()
+  std::size_t GetSize() const HADESMEM_DETAIL_NOEXCEPT
   {
     return vmt_size_;
   }
@@ -147,25 +147,24 @@ private:
     }
   }
 
-  std::size_t GetVmtSizeUnsafe(void** vmt)
+    std::size_t GetVmtSizeUnsafe(void** vmt) HADESMEM_DETAIL_NOEXCEPT
   {
     std::size_t i = 0;
-    void* f = Read<void*>(*process_, vmt + i);
-    for (; f; ++i)
+    try
     {
-      try
+      void* f = Read<void*>(*process_, vmt + i);
+      for (; f; ++i)
       {
         if (!hadesmem::CanExecute(*process_, f))
         {
           break;
         }
-      }
-      catch (std::exception const& /*e*/)
-      {
-        break;
-      }
 
-      f = Read<void*>(*process_, vmt + i);
+        f = Read<void*>(*process_, vmt + i);
+      }
+    }
+    catch (...)
+    {
     }
 
     return i;
