@@ -65,6 +65,7 @@ void UseAllStatics()
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
   auto& input = hadesmem::cerberus::GetInputInterface();
   auto& exception = hadesmem::cerberus::GetExceptionInterface();
+  auto& process = hadesmem::cerberus::GetProcessInterface();
   auto& helper = hadesmem::cerberus::GetHelperInterface();
   (void)helper;
 
@@ -270,6 +271,26 @@ void UseAllStatics()
       on_set_unhandled_exception_filter);
   exception.UnregisterOnSetUnhandledExceptionFilter(
     on_set_unhandled_exception_filter_id);
+
+  auto const on_create_process_internal_w = [](HANDLE,
+                                               LPCWSTR,
+                                               LPWSTR,
+                                               LPSECURITY_ATTRIBUTES,
+                                               LPSECURITY_ATTRIBUTES,
+                                               BOOL,
+                                               DWORD,
+                                               LPVOID,
+                                               LPCWSTR,
+                                               LPSTARTUPINFOW,
+                                               LPPROCESS_INFORMATION,
+                                               PHANDLE,
+                                               bool*,
+                                               BOOL*)
+  {
+  };
+  auto const on_create_process_internal_w_id =
+    process.RegisterOnCreateProcessInternalW(on_create_process_internal_w);
+  process.UnregisterOnCreateProcessInternalW(on_create_process_internal_w_id);
 }
 
 // Check whether any threads are currently executing code in our module. This

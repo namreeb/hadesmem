@@ -24,11 +24,38 @@
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
+#include "callbacks.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 
 namespace
 {
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnCreateProcessInternalWCallback>&
+  GetOnCreateProcessInternalWCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnCreateProcessInternalWCallback> callbacks;
+  return callbacks;
+}
+
+class ProcessImpl : public hadesmem::cerberus::ProcessInterface
+{
+public:
+  virtual std::size_t RegisterOnCreateProcessInternalW(std::function<
+    hadesmem::cerberus::OnCreateProcessInternalWCallback> const& callback) final
+  {
+    auto& callbacks = GetOnCreateProcessInternalWCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnCreateProcessInternalW(std::size_t id) final
+  {
+    auto& callbacks = GetOnCreateProcessInternalWCallbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -127,18 +154,47 @@ extern "C" BOOL WINAPI
     startup_info,
     process_info,
     new_token);
+
   if (application_name)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Application Name: [%s]", application_name);
   }
+
   if (command_line)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Command Line: [%s]", command_line);
   }
+
   if (!!(creation_flags & DEBUG_PROCESS))
   {
     HADESMEM_DETAIL_TRACE_A("Debug flag detected.");
   }
+
+  auto const& callbacks = GetOnCreateProcessInternalWCallbacks();
+  bool handled = false;
+  BOOL retval = FALSE;
+  callbacks.Run(token,
+                application_name,
+                command_line,
+                process_attributes,
+                thread_attributes,
+                inherit_handles,
+                creation_flags,
+                environment,
+                current_directory,
+                startup_info,
+                process_info,
+                new_token,
+                &handled,
+                &retval);
+
+  if (handled)
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "CreateProcessInternalW handled. Not calling trampoline.");
+    return retval;
+  }
+
   auto const create_process_internal_w =
     detour->GetTrampolineT<decltype(&CreateProcessInternalW)>();
   last_error_preserver.Revert();
@@ -291,6 +347,12 @@ namespace hadesmem
 {
 namespace cerberus
 {
+ProcessInterface& GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static ProcessImpl exception_impl;
+  return exception_impl;
+}
+
 void InitializeProcess()
 {
   auto& helper = GetHelperInterface();
