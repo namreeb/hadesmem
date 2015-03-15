@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Cities_Skylines\Cities.exe" --inject --steam-app-id 255710 --export Load --add-path --path-resolution --module cerberus.dll
