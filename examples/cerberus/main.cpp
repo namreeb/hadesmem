@@ -64,6 +64,7 @@ void UseAllStatics()
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
   auto& input = hadesmem::cerberus::GetInputInterface();
+  auto& exception = hadesmem::cerberus::GetExceptionInterface();
   auto& helper = hadesmem::cerberus::GetHelperInterface();
   (void)helper;
 
@@ -190,6 +191,13 @@ void UseAllStatics()
   auto const on_wnd_proc_msg_id = window.RegisterOnWndProcMsg(on_wnd_proc_msg);
   window.UnregisterOnWndProcMsg(on_wnd_proc_msg_id);
 
+  auto const on_get_foreground_window = [](bool*, HWND*)
+  {
+  };
+  auto const on_get_foreground_window_id =
+    window.RegisterOnGetForegroundWindow(on_get_foreground_window);
+  window.UnregisterOnGetForegroundWindow(on_get_foreground_window_id);
+
   auto const on_set_cursor = [](HCURSOR, bool*, HCURSOR*)
   {
   };
@@ -242,6 +250,26 @@ void UseAllStatics()
   auto const on_input_queue_entry_id =
     input.RegisterOnInputQueueEntry(on_input_queue_entry);
   input.UnregisterOnInputQueueEntry(on_input_queue_entry_id);
+
+  auto const on_rtl_add_vectored_exception_handler =
+    [](ULONG, PVECTORED_EXCEPTION_HANDLER, bool*)
+  {
+  };
+  auto const on_rtl_add_vectored_exception_handler_id =
+    exception.RegisterOnRtlAddVectoredExceptionHandler(
+      on_rtl_add_vectored_exception_handler);
+  exception.UnregisterOnRtlAddVectoredExceptionHandler(
+    on_rtl_add_vectored_exception_handler_id);
+
+  auto const on_set_unhandled_exception_filter =
+    [](LPTOP_LEVEL_EXCEPTION_FILTER, bool*)
+  {
+  };
+  auto const on_set_unhandled_exception_filter_id =
+    exception.RegisterOnSetUnhandledExceptionFilter(
+      on_set_unhandled_exception_filter);
+  exception.UnregisterOnSetUnhandledExceptionFilter(
+    on_set_unhandled_exception_filter_id);
 }
 
 // Check whether any threads are currently executing code in our module. This

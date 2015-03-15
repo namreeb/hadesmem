@@ -27,6 +27,15 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnGetForegroundWindowCallback>&
+  GetOnGetForegroundWindowCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnGetForegroundWindowCallback> callbacks;
+  return callbacks;
+}
+
 struct WindowInfo
 {
   HWND old_hwnd_{nullptr};
@@ -77,19 +86,22 @@ public:
     return callbacks.Unregister(id);
   }
 
+  virtual std::size_t RegisterOnGetForegroundWindow(std::function<
+    hadesmem::cerberus::OnGetForegroundWindowCallback> const& callback) final
+  {
+    auto& callbacks = GetOnGetForegroundWindowCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnGetForegroundWindow(std::size_t id) final
+  {
+    auto& callbacks = GetOnGetForegroundWindowCallbacks();
+    return callbacks.Unregister(id);
+  }
+
   virtual HWND GetCurrentWindow() const final
   {
     return GetWindowInfo().old_hwnd_;
-  }
-
-  virtual void EnableForegroundWindowSpoof() final
-  {
-    GetEnableForegroundWindowSpoof() = true;
-  }
-
-  virtual void DisableForegroundWindowSpoof() final
-  {
-    GetEnableForegroundWindowSpoof() = false;
   }
 };
 
@@ -114,21 +126,16 @@ extern "C" HWND WINAPI GetForegroundWindowDetour(
     hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  if (GetEnableForegroundWindowSpoof())
+  auto const& callbacks = GetOnGetForegroundWindowCallbacks();
+  bool handled = false;
+  HWND retval = nullptr;
+  callbacks.Run(&handled, &retval);
+
+  if (handled)
   {
-    auto& window = hadesmem::cerberus::GetWindowInterface();
-    auto const hwnd = window.GetCurrentWindow();
-    if (hwnd)
-    {
-      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
-        "Spoofing foreground window with [%p].", hwnd);
-      return hwnd;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_NOISY_A(
-        "WARNING! No current window to use for spoof.");
-    }
+    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+      "Spoofing foreground window with [%p].", retval);
+    return retval;
   }
 
   auto const get_foreground_window =
@@ -167,8 +174,8 @@ namespace cerberus
 {
 WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT
 {
-  static WindowImpl input_impl;
-  return input_impl;
+  static WindowImpl window_impl;
+  return window_impl;
 }
 
 void InitializeWindow()

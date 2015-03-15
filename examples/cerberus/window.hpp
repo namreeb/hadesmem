@@ -17,6 +17,8 @@ namespace cerberus
 typedef void OnWndProcMsgCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled);
 
+typedef void OnGetForegroundWindowCallback(bool* handled, HWND* retval);
+
 class WindowInterface
 {
 public:
@@ -29,11 +31,12 @@ public:
 
   virtual void UnregisterOnWndProcMsg(std::size_t id) = 0;
 
+  virtual std::size_t RegisterOnGetForegroundWindow(
+    std::function<OnGetForegroundWindowCallback> const& callback) = 0;
+
+  virtual void UnregisterOnGetForegroundWindow(std::size_t id) = 0;
+
   virtual HWND GetCurrentWindow() const = 0;
-
-  virtual void EnableForegroundWindowSpoof() = 0;
-
-  virtual void DisableForegroundWindowSpoof() = 0;
 };
 
 WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT;

@@ -12,16 +12,66 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
-#include <hadesmem/find_procedure.hpp>
-#include <hadesmem/module.hpp>
+#include <hadesmem/detail/trace.hpp>
 #include <hadesmem/patcher.hpp>
 #include <hadesmem/process.hpp>
 
+#include "callbacks.hpp"
 #include "main.hpp"
 #include "helpers.hpp"
 
 namespace
 {
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnRtlAddVectoredExceptionHandlerCallback>&
+  GetOnRtlAddVectoredExceptionHandlerCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnRtlAddVectoredExceptionHandlerCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnSetUnhandledExceptionFilterCallback>&
+  GetOnSetUnhandledExceptionFilterCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnSetUnhandledExceptionFilterCallback> callbacks;
+  return callbacks;
+}
+
+class ExceptionImpl : public hadesmem::cerberus::ExceptionInterface
+{
+public:
+  virtual std::size_t RegisterOnRtlAddVectoredExceptionHandler(std::function<
+    hadesmem::cerberus::OnRtlAddVectoredExceptionHandlerCallback> const&
+                                                                 callback) final
+  {
+    auto& callbacks = GetOnRtlAddVectoredExceptionHandlerCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRtlAddVectoredExceptionHandler(std::size_t id) final
+  {
+    auto& callbacks = GetOnRtlAddVectoredExceptionHandlerCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnSetUnhandledExceptionFilter(std::function<
+    hadesmem::cerberus::OnSetUnhandledExceptionFilterCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnSetUnhandledExceptionFilterCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnSetUnhandledExceptionFilter(std::size_t id) final
+  {
+    auto& callbacks = GetOnSetUnhandledExceptionFilterCallbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 std::pair<void*, SIZE_T>& GetNtdllModule() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -63,6 +113,18 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%lu] [%p].", first_handler, vectored_handler);
+
+  auto const& callbacks = GetOnRtlAddVectoredExceptionHandlerCallbacks();
+  bool handled = false;
+  callbacks.Run(first_handler, vectored_handler, &handled);
+
+  if (handled)
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "RtlAddVectoredExceptionHandler handled. Not calling trampoline.");
+    return nullptr;
+  }
+
   auto const rtl_add_vectored_exception_handler =
     detour->GetTrampolineT<decltype(&AddVectoredExceptionHandler)>();
   last_error_preserver.Revert();
@@ -85,6 +147,18 @@ extern "C" LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p].", top_level_exception_filter);
+
+  auto const& callbacks = GetOnSetUnhandledExceptionFilterCallbacks();
+  bool handled = false;
+  callbacks.Run(top_level_exception_filter, &handled);
+
+  if (handled)
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "SetUnhandledExceptionFilter handled. Not calling trampoline.");
+    return nullptr;
+  }
+
   auto const set_unhandled_exception_filter =
     detour->GetTrampolineT<decltype(&SetUnhandledExceptionFilter)>();
   last_error_preserver.Revert();
@@ -100,6 +174,12 @@ namespace hadesmem
 {
 namespace cerberus
 {
+ExceptionInterface& GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT
+{
+  static ExceptionImpl exception_impl;
+  return exception_impl;
+}
+
 void InitializeException()
 {
   auto& helper = GetHelperInterface();
