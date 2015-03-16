@@ -287,20 +287,20 @@ void OnCleanupGwenGui(hadesmem::cerberus::RenderApi api)
 
   HADESMEM_DETAIL_TRACE_A("Cleaning up GWEN.");
 
-  auto& renderer = GetGwenRenderer();
-  renderer.reset();
-
-  auto& skin = GetGwenSkin();
-  skin.reset();
-
-  auto& canvas = GetGwenCanvas();
-  canvas.reset();
+  auto& input = GetGwenInput();
+  input.reset();
 
   auto& unit = GetGwenUnitTest();
   unit.reset();
 
-  auto& input = GetGwenInput();
-  input.reset();
+  auto& canvas = GetGwenCanvas();
+  canvas.reset();
+
+  auto& skin = GetGwenSkin();
+  skin.reset();
+
+  auto& renderer = GetGwenRenderer();
+  renderer.reset();
 
   SetGwenInitialized(api, false);
 }
