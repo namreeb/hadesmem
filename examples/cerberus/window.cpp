@@ -58,6 +58,11 @@ bool& GetEnableForegroundWindowSpoof()
 class WindowImpl : public hadesmem::cerberus::WindowInterface
 {
 public:
+  WindowImpl()
+  {
+    GetWindowInfo();
+  }
+
   ~WindowImpl()
   {
     try

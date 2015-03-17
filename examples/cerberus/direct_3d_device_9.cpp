@@ -24,10 +24,29 @@ HRESULT WINAPI Direct3DDevice9Proxy::QueryInterface(REFIID riid, void** obj)
   {
     HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
+    // Unknown UUID. Observed in DXVA2 (used by GW2).
+    UUID const unknown_uuid_1 = { 0x126d0349,
+      0x4787,
+      0x4aa6,
+      0x8e,
+      0x1b,
+      0x40,
+      0xc1,
+      0x77,
+      0xc6,
+      0x0a,
+      0x01 };
+
     if (*obj == device_)
     {
       refs_++;
       *obj = this;
+    }
+    else if (riid == unknown_uuid_1)
+    {
+      // Needs investigation to see if we need to wrap this.
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      return ret;
     }
     else
     {

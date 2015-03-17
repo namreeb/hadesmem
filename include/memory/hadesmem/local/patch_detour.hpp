@@ -56,7 +56,7 @@ public:
   HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncRawT>::value);
 
   explicit PatchDetour(Process const& process,
-                       TargetFuncT target,
+                       TargetFuncRawT target,
                        DetourFuncT const& detour,
                        void* context = nullptr)
     : process_{&process},
@@ -68,7 +68,7 @@ public:
   }
 
   explicit PatchDetour(Process&& process,
-                       TargetFuncT target,
+                       TargetFuncRawT target,
                        DetourFuncT const& detour) = delete;
 
   PatchDetour(PatchDetour const& other) = delete;

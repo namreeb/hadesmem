@@ -49,8 +49,7 @@ public:
                                        module_name_upper.c_str());
 
         // Detach instead of remove hooks because when we get the notification
-        // the
-        // memory region is already gone.
+        // the memory region is already gone.
         undetour_func(false);
       }
     };

@@ -241,6 +241,11 @@ private:
 
 struct PluginsWrapper
 {
+  PluginsWrapper()
+  {
+    GetOnUnloadPluginsCallbacks();
+  }
+
   ~PluginsWrapper()
   {
     auto callbacks = GetOnUnloadPluginsCallbacks();
