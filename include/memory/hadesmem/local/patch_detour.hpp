@@ -46,7 +46,10 @@ namespace hadesmem
 template <typename TargetFuncT> class PatchDetour : public PatchDetourBase
 {
 public:
-  using TargetFuncRawT = std::add_pointer_t<std::remove_pointer_t<TargetFuncT>>;
+  using TargetFuncRawT =
+    std::conditional_t<std::is_member_function_pointer<TargetFuncT>::value,
+                       TargetFuncT,
+                       std::add_pointer_t<std::remove_pointer_t<TargetFuncT>>>;
   using StubT = detail::PatchDetourStub<TargetFuncT>;
   using DetourFuncRawT = typename StubT::DetourFuncRawT;
   using DetourFuncT = typename StubT::DetourFuncT;
@@ -139,11 +142,6 @@ public:
     RemoveUnchecked();
   }
 
-  virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT override
-  {
-    return applied_;
-  }
-
   virtual void Apply() override
   {
     if (applied_)
@@ -191,14 +189,15 @@ public:
         trampoline_->GetBase());
     }
 
-    auto const buffer =
-      ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
+    auto const target = detail::AliasCastUnchecked<void*>(target_);
+
+    auto const buffer = ReadVector<std::uint8_t>(*process_, target, kTrampSize);
 
     ud_t ud_obj;
     ud_init(&ud_obj);
     ud_set_input_buffer(&ud_obj, buffer.data(), buffer.size());
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-    ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target_));
+    ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target));
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     ud_set_mode(&ud_obj, 64);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -207,7 +206,7 @@ public:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    stub_gate_ = AllocatePageNear(target_);
+    stub_gate_ = AllocatePageNear(target);
 
     std::size_t const patch_size = GetPatchSize();
 
@@ -300,20 +299,20 @@ public:
     HADESMEM_DETAIL_TRACE_A("Writing jump back to original code.");
 
     tramp_cur += WriteJump(
-      tramp_cur, reinterpret_cast<std::uint8_t*>(target_) + instr_size, true);
+      tramp_cur, reinterpret_cast<std::uint8_t*>(target) + instr_size, true);
 
     FlushInstructionCache(
       *process_, trampoline_->GetBase(), trampoline_->GetSize());
 
     WriteStubGate(stub_gate_->GetBase());
 
-    orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
+    orig_ = ReadVector<std::uint8_t>(*process_, target, patch_size);
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+    detail::VerifyPatchThreads(process_->GetId(), target, orig_.size());
 
     WritePatch();
 
-    FlushInstructionCache(*process_, target_, instr_size);
+    FlushInstructionCache(*process_, target, instr_size);
 
     applied_ = true;
   }
@@ -327,7 +326,8 @@ public:
 
     SuspendedProcess const suspended_process{process_->GetId()};
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+    auto const target = detail::AliasCastUnchecked<void*>(target_);
+    detail::VerifyPatchThreads(process_->GetId(), target, orig_.size());
     detail::VerifyPatchThreads(
       process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
@@ -339,14 +339,19 @@ public:
     applied_ = false;
   }
 
-  void Detach()
+  virtual void Detach() HADESMEM_DETAIL_NOEXCEPT override
   {
     applied_ = false;
 
     detached_ = true;
   }
 
-  virtual PVOID GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT override
+  {
+    return applied_;
+  }
+
+  virtual void* GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return trampoline_->GetBase();
   }
@@ -362,7 +367,7 @@ public:
     return ref_count_;
   }
 
-  virtual bool CanHookChain() const override
+  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return CanHookChainImpl();
   }
@@ -386,7 +391,8 @@ public:
 protected:
   virtual std::size_t GetPatchSize() const
   {
-    bool stub_near = IsNear(target_, stub_gate_->GetBase());
+    auto const target = detail::AliasCastUnchecked<void*>(target_);
+    bool stub_near = IsNear(target, stub_gate_->GetBase());
     HADESMEM_DETAIL_TRACE_A(stub_near ? "Stub near." : "Stub far.");
     return stub_near ? kJmpSize32 : kJmpSize64;
   }
@@ -395,17 +401,19 @@ protected:
   {
     HADESMEM_DETAIL_TRACE_A("Writing jump to stub.");
 
-    WriteJump(target_, stub_gate_->GetBase(), false);
+    auto const target = detail::AliasCastUnchecked<void*>(target_);
+    WriteJump(target, stub_gate_->GetBase(), false);
   }
 
   virtual void RemovePatch()
   {
     HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
 
-    WriteVector(*process_, target_, orig_);
+    auto const target = detail::AliasCastUnchecked<void*>(target_);
+    WriteVector(*process_, target, orig_);
   }
 
-  virtual bool CanHookChainImpl() const
+  virtual bool CanHookChainImpl() const HADESMEM_DETAIL_NOEXCEPT
   {
     return true;
   }
@@ -843,6 +851,7 @@ protected:
     WriteJump(static_cast<std::uint8_t*>(address) + stub_gate.size(),
               &StubT::Stub,
               true);
+    FlushInstructionCache(*process_, address, stub_gate.size());
   }
 
   static std::size_t const kJmpSize32 = 5;
@@ -859,17 +868,17 @@ protected:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-  Process const* process_;
+  Process const* process_{};
   bool applied_{false};
   bool detached_{false};
-  TargetFuncRawT target_;
-  DetourFuncT detour_;
-  std::unique_ptr<Allocator> trampoline_;
-  std::unique_ptr<Allocator> stub_gate_;
-  std::vector<BYTE> orig_;
-  std::vector<std::unique_ptr<Allocator>> trampolines_;
-  std::atomic<std::uint32_t> ref_count_;
-  std::unique_ptr<StubT> stub_;
+  TargetFuncRawT target_{};
+  DetourFuncT detour_{};
+  std::unique_ptr<Allocator> trampoline_{};
+  std::unique_ptr<Allocator> stub_gate_{};
+  std::vector<BYTE> orig_{};
+  std::vector<std::unique_ptr<Allocator>> trampolines_{};
+  std::atomic<std::uint32_t> ref_count_{};
+  std::unique_ptr<StubT> stub_{};
   void* orig_user_ptr_{nullptr};
   void* context_{nullptr};
 };

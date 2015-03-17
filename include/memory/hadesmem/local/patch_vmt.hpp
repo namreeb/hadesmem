@@ -11,6 +11,8 @@
 #include <hadesmem/alloc.hpp>
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/local/patch_detour_base.hpp>
+#include <hadesmem/local/patch_func_ptr.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/flush.hpp>
 #include <hadesmem/process.hpp>
@@ -122,13 +124,18 @@ public:
     return vmt_size_;
   }
 
-  void* HookMethod(std::size_t idx, void* new_func)
+  template <typename TargetFuncT>
+  void HookMethod(std::size_t idx,
+                  typename PatchFuncPtr<TargetFuncT>::DetourFuncT detour,
+                  void* context = nullptr)
   {
-    HADESMEM_DETAIL_ASSERT(vmt_size_);
-    HADESMEM_DETAIL_ASSERT(old_vmt_);
-    HADESMEM_DETAIL_ASSERT(new_vmt_.GetBase());
-    Write(*process_, static_cast<void**>(new_vmt_.GetBase()) + idx, new_func);
-    return Read<void*>(*process_, old_vmt_ + idx);
+    auto const target = detail::AliasCastUnchecked<
+      typename PatchFuncPtr<TargetFuncT>::TargetFuncRawT*>(
+      &reinterpret_cast<void**>(new_vmt_.GetBase())[idx]);
+    auto const patch =
+      new PatchFuncPtr<TargetFuncT>(*process_, target, detour, context);
+    hooks_.emplace_back(patch);
+    patch->Apply();
   }
 
 private:
@@ -147,7 +154,7 @@ private:
     }
   }
 
-    std::size_t GetVmtSizeUnsafe(void** vmt) HADESMEM_DETAIL_NOEXCEPT
+  std::size_t GetVmtSizeUnsafe(void** vmt) HADESMEM_DETAIL_NOEXCEPT
   {
     std::size_t i = 0;
     try
@@ -175,5 +182,6 @@ private:
   void** old_vmt_{};
   std::size_t vmt_size_{};
   Allocator new_vmt_;
+  std::vector<std::unique_ptr<PatchDetourBase>> hooks_;
 };
 }

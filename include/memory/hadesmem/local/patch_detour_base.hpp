@@ -24,6 +24,8 @@ public:
 
   virtual void Remove() = 0;
 
+  virtual void Detach() HADESMEM_DETAIL_NOEXCEPT = 0;
+
   virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void* GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT = 0;
@@ -32,7 +34,7 @@ public:
 
   virtual std::atomic<std::uint32_t> const& GetRefCount() const = 0;
 
-  virtual bool CanHookChain() const = 0;
+  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT  = 0;
 
   virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
 

@@ -23,6 +23,78 @@ namespace detail
 {
 template <typename TargetFuncT> class PatchDetourStub;
 
+template <typename C, typename R, typename... Args>
+struct PatchDetourStub<R (C::*)(Args...)>
+{
+  typedef R(/*__thiscall*/ *DetourFuncRawT)(PatchDetourBase*, C*, Args...);
+  using DetourFuncT = std::function<R(PatchDetourBase*, C*, Args...)>;
+
+  explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}
+  {
+  }
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+  static R Stub(C* this_, Args... args)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+  static R __fastcall Stub(C* this_, void* /*edx_*/, Args... args)
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+  {
+    auto const stub = static_cast<PatchDetourStub*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return stub->StubImpl(this_, std::forward<Args>(args)...);
+  }
+
+private:
+  R StubImpl(C* this_, Args... args)
+  {
+    winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
+      patch_->GetOriginalArbitraryUserPtr();
+    auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());
+    return (*detour)(patch_, this_, std::forward<Args>(args)...);
+  }
+
+  PatchDetourBase* patch_;
+};
+
+template <typename C, typename R, typename... Args>
+struct PatchDetourStub<R (C::*)(Args...) const>
+{
+  typedef R(/*__thiscall*/ *DetourFuncRawT)(PatchDetourBase*,
+                                            C const*,
+                                            Args...);
+  using DetourFuncT = std::function<R(PatchDetourBase*, C const*, Args...)>;
+
+  explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}
+  {
+  }
+
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+  static R Stub(C* this_, Args... args)
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+  static R __fastcall Stub(C const* this_, void* /*edx_*/, Args... args)
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
+  {
+    auto const stub = static_cast<PatchDetourStub*>(
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);
+    return stub->StubImpl(this_, std::forward<Args>(args)...);
+  }
+
+private:
+  R StubImpl(C const* this_, Args... args)
+  {
+    winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
+      patch_->GetOriginalArbitraryUserPtr();
+    auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());
+    return (*detour)(patch_, this_, std::forward<Args>(args)...);
+  }
+
+  PatchDetourBase* patch_;
+};
+
 #define HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(call_conv)                      \
   \
 template<typename R, typename... Args> \
