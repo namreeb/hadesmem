@@ -262,8 +262,8 @@ protected:
     }
   }
 
-    // Inspired by EasyHook.
-    std::unique_ptr<Allocator> AllocatePageNear(PVOID address)
+  // Inspired by EasyHook.
+  std::unique_ptr<Allocator> AllocatePageNear(PVOID address)
   {
     SYSTEM_INFO sys_info{};
     GetSystemInfo(&sys_info);
@@ -271,22 +271,22 @@ protected:
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     std::intptr_t const search_beg = (std::max)(
-      reinterpret_cast<std::intptr_t>(address)-0x7FFFFF00LL,
+      reinterpret_cast<std::intptr_t>(address) - 0x7FFFFF00LL,
       reinterpret_cast<std::intptr_t>(sys_info.lpMinimumApplicationAddress));
     std::intptr_t const search_end = (std::min)(
-      reinterpret_cast<std::intptr_t>(address)+0x7FFFFF00LL,
+      reinterpret_cast<std::intptr_t>(address) + 0x7FFFFF00LL,
       reinterpret_cast<std::intptr_t>(sys_info.lpMaximumApplicationAddress));
 
     std::unique_ptr<Allocator> trampoline;
 
     auto const allocate_tramp =
       [](Process const& process, PVOID addr, SIZE_T size)
-      -> std::unique_ptr<Allocator>
+        -> std::unique_ptr<Allocator>
     {
       auto const new_addr = detail::TryAlloc(process, size, addr);
       return new_addr
-        ? std::make_unique<Allocator>(process, size, new_addr, true)
-        : std::unique_ptr<Allocator>();
+               ? std::make_unique<Allocator>(process, size, new_addr, true)
+               : std::unique_ptr<Allocator>();
     };
 
     // Do two separate passes when looking for trampolines, ensuring to scan
@@ -305,9 +305,9 @@ protected:
     // .text:0000000180082969                 mov     r13, [rcx+6]
 
     for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
-      index = 0;
-      base + index < search_end && !trampoline;
-    index += page_size)
+                       index = 0;
+         base + index < search_end && !trampoline;
+         index += page_size)
     {
       trampoline = allocate_tramp(
         *process_, reinterpret_cast<void*>(base + index), page_size);
@@ -322,9 +322,9 @@ protected:
     }
 
     for (std::intptr_t base = reinterpret_cast<std::intptr_t>(address),
-      index = 0;
-      base - index > search_beg && !trampoline;
-    index += page_size)
+                       index = 0;
+         base - index > search_beg && !trampoline;
+         index += page_size)
     {
       trampoline = allocate_tramp(
         *process_, reinterpret_cast<void*>(base - index), page_size);
@@ -333,7 +333,7 @@ protected:
     if (!trampoline)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{ "Failed to find trampoline memory block." });
+        Error{} << ErrorString{"Failed to find trampoline memory block."});
     }
 
     return trampoline;
@@ -343,166 +343,132 @@ protected:
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-    }
+  }
 
-    std::vector<std::uint8_t> GenJmp32(void* address, void* target) const
-    {
-      std::vector<std::uint8_t> buf = { 0xE9, 0xEB, 0xBE, 0xAD, 0xDE };
-      auto const dst_len = sizeof(std::uint32_t);
-      auto const op_len = 1;
-      auto const disp = reinterpret_cast<std::uintptr_t>(target)-
-        reinterpret_cast<std::uintptr_t>(address)-dst_len -
-        op_len;
-      *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
-        static_cast<std::uint32_t>(disp);
-      return buf;
-    }
+  std::vector<std::uint8_t> GenJmp32(void* address, void* target) const
+  {
+    std::vector<std::uint8_t> buf = {0xE9, 0xEB, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 1;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
 
-    std::vector<std::uint8_t> GenJmpTramp64(void* address, void* target) const
-    {
-      std::vector<std::uint8_t> buf = { 0xFF, 0x25, 0xEF, 0xBE, 0xAD, 0xDE };
-      auto const dst_len = sizeof(std::uint32_t);
-      auto const op_len = 2;
-      auto const disp = reinterpret_cast<std::uintptr_t>(target)-
-        reinterpret_cast<std::uintptr_t>(address)-dst_len -
-        op_len;
-      *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
-        static_cast<std::uint32_t>(disp);
-      return buf;
-    }
+  std::vector<std::uint8_t> GenJmpTramp64(void* address, void* target) const
+  {
+    std::vector<std::uint8_t> buf = {0xFF, 0x25, 0xEF, 0xBE, 0xAD, 0xDE};
+    auto const dst_len = sizeof(std::uint32_t);
+    auto const op_len = 2;
+    auto const disp = reinterpret_cast<std::uintptr_t>(target) -
+                      reinterpret_cast<std::uintptr_t>(address) - dst_len -
+                      op_len;
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) =
+      static_cast<std::uint32_t>(disp);
+    return buf;
+  }
 
-    std::vector<std::uint8_t> GenPush32Ret(void* target) const
-    {
-      std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
-        0x68,
-        0xEF,
-        0xBE,
-        0xAD,
-        0xDE,
-        // RET
-        0xC3 };
-      auto const op_len = 1;
-      auto const target_low = static_cast<std::uint32_t>(
-        reinterpret_cast<std::uintptr_t>(target)& 0xFFFFFFFF);
-      *reinterpret_cast<std::uint32_t*>(&buf[op_len]) = target_low;
-      return buf;
-    }
+  std::vector<std::uint8_t> GenPush32Ret(void* target) const
+  {
+    std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
+                                     0x68,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // RET
+                                     0xC3};
+    auto const op_len = 1;
+    auto const target_low = static_cast<std::uint32_t>(
+      reinterpret_cast<std::uintptr_t>(target) & 0xFFFFFFFF);
+    *reinterpret_cast<std::uint32_t*>(&buf[op_len]) = target_low;
+    return buf;
+  }
 
-    std::vector<std::uint8_t> GenPush64Ret(void* target) const
-    {
-      std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
-        0x68,
-        0xEF,
-        0xBE,
-        0xAD,
-        0xDE,
-        // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
-        0xC7,
-        0x44,
-        0x24,
-        0x04,
-        0xEF,
-        0xBE,
-        0xAD,
-        0xDE,
-        // RET
-        0xC3 };
-      auto const low_data_offs = 1;
-      auto const high_data_offs = 9;
-      auto const target_uint = reinterpret_cast<std::uint64_t>(target);
-      auto const target_high =
-        static_cast<std::uint32_t>((target_uint >> 32) & 0xFFFFFFFF);
-      auto const target_low =
-        static_cast<std::uint32_t>(target_uint & 0xFFFFFFFF);
-      *reinterpret_cast<std::uint32_t*>(&buf[low_data_offs]) = target_low;
-      *reinterpret_cast<std::uint32_t*>(&buf[high_data_offs]) = target_high;
-      return buf;
-    }
+  std::vector<std::uint8_t> GenPush64Ret(void* target) const
+  {
+    std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
+                                     0x68,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
+                                     0xC7,
+                                     0x44,
+                                     0x24,
+                                     0x04,
+                                     0xEF,
+                                     0xBE,
+                                     0xAD,
+                                     0xDE,
+                                     // RET
+                                     0xC3};
+    auto const low_data_offs = 1;
+    auto const high_data_offs = 9;
+    auto const target_uint = reinterpret_cast<std::uint64_t>(target);
+    auto const target_high =
+      static_cast<std::uint32_t>((target_uint >> 32) & 0xFFFFFFFF);
+    auto const target_low =
+      static_cast<std::uint32_t>(target_uint & 0xFFFFFFFF);
+    *reinterpret_cast<std::uint32_t*>(&buf[low_data_offs]) = target_low;
+    *reinterpret_cast<std::uint32_t*>(&buf[high_data_offs]) = target_high;
+    return buf;
+  }
 
-    std::size_t WriteJump(void* address, void* target, bool push_ret_fallback)
-    {
-      (void)push_ret_fallback;
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "Address = %p, Target = %p, Push Ret Fallback = %u.",
-        address,
-        target,
-        static_cast<std::uint32_t>(push_ret_fallback));
+  // WARNING: This is different to the PatchDetour implementation because we
+  // don't need to use trampolines to save code size. Need to merge these two as
+  // part of the rewrite.
+  std::size_t WriteJump(void* address, void* target)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Address = %p, Target = %p.",
+      address,
+      target);
 
-      std::vector<std::uint8_t> jump_buf;
+    std::vector<std::uint8_t> jump_buf;
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-      if (IsNear(address, target))
-      {
-        HADESMEM_DETAIL_TRACE_A("Using relative jump.");
-        jump_buf = GenJmp32(address, target);
-        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize32);
-      }
-      else
-      {
-        std::unique_ptr<Allocator> trampoline;
-        try
-        {
-          trampoline = AllocatePageNear(address);
-        }
-        catch (std::exception const& /*e*/)
-        {
-          // Don't need to do anything, we'll fall back to PUSH/RET.
-        }
-
-        if (trampoline)
-        {
-          void* tramp_addr = trampoline->GetBase();
-
-          HADESMEM_DETAIL_TRACE_FORMAT_A(
-            "Using trampoline jump. Trampoline = %p.", tramp_addr);
-
-          Write(*process_, tramp_addr, target);
-
-          trampolines_.emplace_back(std::move(trampoline));
-
-          jump_buf = GenJmpTramp64(address, tramp_addr);
-          HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize64);
-        }
-        else
-        {
-          if (!push_ret_fallback)
-          {
-            // We're out of options...
-            HADESMEM_DETAIL_THROW_EXCEPTION(
-              Error{} << ErrorString{ "Unable to use a relative or trampoline "
-              "jump, and push/ret fallback is disabled." });
-          }
-
-          HADESMEM_DETAIL_TRACE_A("Using push/ret 'jump'.");
-
-          auto const target_high = static_cast<std::uint32_t>(
-            (reinterpret_cast<std::uintptr_t>(target) >> 32) & 0xFFFFFFFF);
-          if (target_high)
-          {
-            HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is big.");
-            jump_buf = GenPush64Ret(target);
-            HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize64);
-          }
-          else
-          {
-            HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is small.");
-            jump_buf = GenPush32Ret(target);
-            HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize32);
-          }
-        }
-      }
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
+    if (IsNear(address, target))
+    {
       HADESMEM_DETAIL_TRACE_A("Using relative jump.");
       jump_buf = GenJmp32(address, target);
       HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize32);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Using push/ret 'jump'.");
+
+      auto const target_high = static_cast<std::uint32_t>(
+        (reinterpret_cast<std::uintptr_t>(target) >> 32) & 0xFFFFFFFF);
+      if (target_high)
+      {
+        HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is big.");
+        jump_buf = GenPush64Ret(target);
+        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize64);
+      }
+      else
+      {
+        HADESMEM_DETAIL_TRACE_A("Push/ret 'jump' is small.");
+        jump_buf = GenPush32Ret(target);
+        HADESMEM_DETAIL_ASSERT(jump_buf.size() == kPushRetSize32);
+      }
+    }
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+    HADESMEM_DETAIL_TRACE_A("Using relative jump.");
+    jump_buf = GenJmp32(address, target);
+    HADESMEM_DETAIL_ASSERT(jump_buf.size() == kJmpSize32);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-      WriteVector(*process_, address, jump_buf);
+    WriteVector(*process_, address, jump_buf);
 
-      return jump_buf.size();
-    }
+    return jump_buf.size();
+  }
 
   std::vector<std::uint8_t> GenStubGate32()
   {
@@ -592,9 +558,24 @@ protected:
 #endif
     WriteVector(*process_, address, stub_gate);
     WriteJump(static_cast<std::uint8_t*>(address) + stub_gate.size(),
-              &StubT::Stub,
-              true);
+              &StubT::Stub);
     FlushInstructionCache(*process_, address, stub_gate.size());
+  }
+
+  bool IsNear(void* address, void* target) const HADESMEM_DETAIL_NOEXCEPT
+  {
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+    auto const rel = reinterpret_cast<std::intptr_t>(target) -
+                     reinterpret_cast<std::intptr_t>(address) - 5;
+    return rel > (std::numeric_limits<std::uint32_t>::min)() &&
+           rel < (std::numeric_limits<std::uint32_t>::max)();
+#elif defined(HADESMEM_DETAIL_ARCH_X86)
+    (void)address;
+    (void)target;
+    return true;
+#else
+#error "[HadesMem] Unsupported architecture."
+#endif
   }
 
   static std::size_t const kJmpSize32 = 5;
