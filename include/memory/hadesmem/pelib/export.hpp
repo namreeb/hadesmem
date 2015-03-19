@@ -81,8 +81,8 @@ public:
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error{} << ErrorString{"AddressOfFunctions invalid."});
     }
-    DWORD const func_rva =
-      Read<DWORD>(process, ptr_functions + ordinal_number_);
+    rva_ptr_ = reinterpret_cast<DWORD*>(ptr_functions + ordinal_number_);
+    DWORD const func_rva = Read<DWORD>(process, rva_ptr_);
 
     NtHeaders const nt_headers{process, pe_file};
 
@@ -140,6 +140,7 @@ public:
     : process_{other.process_},
       pe_file_{other.pe_file_},
       rva_{other.rva_},
+      rva_ptr_{other.rva_ptr_},
       va_{other.va_},
       name_(std::move(other.name_)),
       forwarder_(std::move(other.forwarder_)),
@@ -156,6 +157,7 @@ public:
     process_ = other.process_;
     pe_file_ = other.pe_file_;
     rva_ = other.rva_;
+    rva_ptr_ = other.rva_ptr_;
     va_ = other.va_;
     name_ = std::move(other.name_);
     forwarder_ = std::move(other.forwarder_);
@@ -173,6 +175,11 @@ public:
   DWORD GetRva() const HADESMEM_DETAIL_NOEXCEPT
   {
     return rva_;
+  }
+
+  DWORD* GetRvaPtr() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return rva_ptr_;
   }
 
   PVOID GetVa() const HADESMEM_DETAIL_NOEXCEPT
@@ -254,6 +261,7 @@ private:
   Process const* process_;
   PeFile const* pe_file_;
   DWORD rva_{};
+  DWORD* rva_ptr_{};
   void* va_{};
   std::string name_;
   std::string forwarder_;

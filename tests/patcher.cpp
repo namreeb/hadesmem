@@ -449,6 +449,41 @@ void TestPatchDr()
   TestPatchDetourJmp<hadesmem::PatchDr<decltype(&HookMe)>>();
 }
 
+#include <hadesmem/local/patch_iat.hpp>
+
+void TestPatchIat()
+{
+  hadesmem::Process const& process = GetThisProcess();
+  auto const kernel32_mod = GetModuleHandleW(L"kernel32.dll");
+  BOOST_TEST_NE(kernel32_mod, static_cast<HMODULE>(nullptr));
+  __analysis_assume(kernel32_mod != nullptr);
+  auto const get_last_error_orig = reinterpret_cast<FARPROC>(&::GetLastError);
+  auto const get_last_error_orig_2 =
+    GetProcAddress(kernel32_mod, "GetLastError");
+  BOOST_TEST_EQ(get_last_error_orig, get_last_error_orig_2);
+  ::SetLastError(0x1234);
+  BOOST_TEST_EQ(::GetLastError(), 0x1234);
+  auto const get_last_error_detour = [](hadesmem::PatchDetourBase* patch)
+                                       -> DWORD
+  {
+    (void)patch;
+    return 0x1337UL;
+  };
+  hadesmem::PatchIat<decltype(&::GetLastError)> get_last_error_patch{
+    process, L"kernel32.dll", "GetLastError", get_last_error_detour};
+  get_last_error_patch.Apply();
+  auto const get_last_error_hooked = reinterpret_cast<FARPROC>(&::GetLastError);
+  auto const get_last_error_hooked_2 =
+    GetProcAddress(kernel32_mod, "GetLastError");
+  // TODO: Need a proper implementation that doesn't use multiple stubs in order
+  // for this to work...
+  // BOOST_TEST_EQ(get_last_error_hooked, get_last_error_hooked_2);
+  BOOST_TEST_NE(get_last_error_orig, get_last_error_hooked);
+  BOOST_TEST_NE(get_last_error_orig, get_last_error_hooked_2);
+  ::SetLastError(0x1234);
+  BOOST_TEST_EQ(::GetLastError(), 0x1337UL);
+}
+
 int main()
 {
   TestPatchRaw();
@@ -456,5 +491,6 @@ int main()
   TestPatchInt3();
   TestPatchDr();
   TestPatchDetour2();
+  TestPatchIat();
   return boost::report_errors();
 }

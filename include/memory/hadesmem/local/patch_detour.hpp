@@ -73,7 +73,8 @@ public:
 
   explicit PatchDetour(Process&& process,
                        TargetFuncRawT target,
-                       DetourFuncT const& detour) = delete;
+                       DetourFuncT const& detour,
+                       void* context = nullptr) = delete;
 
   PatchDetour(PatchDetour const& other) = delete;
 

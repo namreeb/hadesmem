@@ -89,6 +89,12 @@ public:
     return data_.u1.Function;
   }
 
+  DWORD_PTR* GetFunctionPtr()
+  {
+    return reinterpret_cast<DWORD_PTR*>(
+      base_ + offsetof(IMAGE_THUNK_DATA, u1.Function));
+  }
+
   WORD GetHint() const
   {
     auto const name_import = static_cast<std::uint8_t*>(
