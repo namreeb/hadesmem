@@ -7,7 +7,7 @@
 #include <hadesmem/local/patch_detour_base.hpp>
 #include <hadesmem/local/patch_dr.hpp>
 #include <hadesmem/local/patch_func_ptr.hpp>
-//#include <hadesmem/local/patch_iat.hpp>
+#include <hadesmem/local/patch_iat.hpp>
 #include <hadesmem/local/patch_int3.hpp>
 #include <hadesmem/local/patch_veh.hpp>
 #include <hadesmem/local/patch_vmt.hpp>

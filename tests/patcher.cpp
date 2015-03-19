@@ -449,8 +449,6 @@ void TestPatchDr()
   TestPatchDetourJmp<hadesmem::PatchDr<decltype(&HookMe)>>();
 }
 
-#include <hadesmem/local/patch_iat.hpp>
-
 void TestPatchIat()
 {
   hadesmem::Process const& process = GetThisProcess();
