@@ -92,6 +92,9 @@ public:
       hadesmem::ImportDirList const import_dirs{process, pe_file};
       for (auto const& id : import_dirs)
       {
+        // TODO: Handle forwarded exports here also? i.e. Hook both things that
+        // import via the forwarder and also hook the real implementation.
+
         auto const imp_mod_name =
           detail::ToUpperOrdinal(detail::MultiByteToWideChar(id.GetName()));
         if (imp_mod_name != module_)

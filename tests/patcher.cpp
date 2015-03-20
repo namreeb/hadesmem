@@ -455,8 +455,8 @@ void TestPatchIat()
   auto const kernel32_mod = GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST_NE(kernel32_mod, static_cast<HMODULE>(nullptr));
   __analysis_assume(kernel32_mod != nullptr);
-  auto const get_last_error_orig = reinterpret_cast<FARPROC>(&::GetLastError);
-  auto const get_last_error_orig_2 =
+  auto volatile const get_last_error_orig = reinterpret_cast<FARPROC>(&::GetLastError);
+  auto volatile const get_last_error_orig_2 =
     GetProcAddress(kernel32_mod, "GetLastError");
   BOOST_TEST_EQ(get_last_error_orig, get_last_error_orig_2);
   ::SetLastError(0x1234);
@@ -470,8 +470,8 @@ void TestPatchIat()
   hadesmem::PatchIat<decltype(&::GetLastError)> get_last_error_patch{
     process, L"kernel32.dll", "GetLastError", get_last_error_detour};
   get_last_error_patch.Apply();
-  auto const get_last_error_hooked = reinterpret_cast<FARPROC>(&::GetLastError);
-  auto const get_last_error_hooked_2 =
+  auto volatile const get_last_error_hooked = reinterpret_cast<FARPROC>(&::GetLastError);
+  auto volatile const get_last_error_hooked_2 =
     GetProcAddress(kernel32_mod, "GetLastError");
   // TODO: Need a proper implementation that doesn't use multiple stubs in order
   // for this to work...
