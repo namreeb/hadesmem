@@ -17,7 +17,6 @@
 #include <d3d10.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -115,8 +114,6 @@ extern "C" HRESULT WINAPI
                           UINT sdk_version,
                           ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
 
@@ -171,8 +168,6 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
   IDXGISwapChain** swap_chain,
   ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
 
@@ -251,8 +246,6 @@ extern "C" HRESULT WINAPI
                            UINT sdk_version,
                            ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
 
@@ -309,8 +302,6 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
   IDXGISwapChain** swap_chain,
   ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
 

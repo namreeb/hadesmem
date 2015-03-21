@@ -16,7 +16,6 @@
 #include <d3d11.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -95,8 +94,6 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
   D3D_FEATURE_LEVEL* feature_level,
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
 
@@ -170,8 +167,6 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   D3D_FEATURE_LEVEL* feature_level,
   ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
 

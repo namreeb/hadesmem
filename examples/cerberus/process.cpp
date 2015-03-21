@@ -14,7 +14,6 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/recursion_protector.hpp>
 #include <hadesmem/detail/self_path.hpp>
@@ -136,8 +135,6 @@ extern "C" BOOL WINAPI
                                LPPROCESS_INFORMATION process_info,
                                PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

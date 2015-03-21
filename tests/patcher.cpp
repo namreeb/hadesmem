@@ -29,14 +29,14 @@ hadesmem::Process& GetThisProcess()
   return process;
 }
 
-std::uint32_t __cdecl HookMe(std::int32_t i1,
-                             std::int32_t i2,
-                             std::int32_t i3,
-                             std::int32_t i4,
-                             std::int32_t i5,
-                             std::int32_t i6,
-                             std::int32_t i7,
-                             std::int32_t i8)
+__declspec(noinline) std::uint32_t __cdecl HookMe(std::int32_t i1,
+                                                  std::int32_t i2,
+                                                  std::int32_t i3,
+                                                  std::int32_t i4,
+                                                  std::int32_t i5,
+                                                  std::int32_t i6,
+                                                  std::int32_t i7,
+                                                  std::int32_t i8)
 {
   std::string const foo("Foo");
   BOOST_TEST_EQ(foo, "Foo");
@@ -97,7 +97,7 @@ extern "C" std::uint32_t __cdecl HookMeHk2(hadesmem::PatchDetourBase* patch,
   return 0x5678;
 }
 
-extern "C" int __stdcall Scratch(int a, float b, void* c)
+extern "C" __declspec(noinline) int __stdcall Scratch(int a, float b, void* c)
 {
   BOOST_TEST_EQ(a, -42);
   BOOST_TEST_EQ(b, 2.f);
@@ -470,8 +470,8 @@ void TestPatchIat()
   TestGetLastErrorOrig();
   auto volatile const get_last_error_orig =
     GetProcAddress(kernel32_mod, "GetLastError");
-  auto const get_last_error_detour = [](hadesmem::PatchDetourBase* patch)
-                                       -> DWORD
+  auto const get_last_error_detour =
+    [](hadesmem::PatchDetourBase* patch) -> DWORD
   {
     (void)patch;
     return 0x1337UL;

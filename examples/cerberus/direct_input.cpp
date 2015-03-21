@@ -12,7 +12,6 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/patcher.hpp>
 
@@ -96,8 +95,6 @@ extern "C" HRESULT WINAPI
                            LPVOID* out,
                            LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(

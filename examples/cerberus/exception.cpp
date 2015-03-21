@@ -10,7 +10,6 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/patcher.hpp>
@@ -107,8 +106,6 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   ULONG first_handler,
   PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -142,8 +139,6 @@ extern "C" LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
     LPTOP_LEVEL_EXCEPTION_FILTER top_level_exception_filter)
     HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p].", top_level_exception_filter);

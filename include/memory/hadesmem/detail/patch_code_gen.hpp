@@ -64,9 +64,9 @@ inline std::unique_ptr<Allocator> AllocatePageNear(Process const& process,
 
   std::unique_ptr<Allocator> trampoline;
 
-  auto const allocate_tramp =
-    [](Process const& process, PVOID addr, SIZE_T size)
-      -> std::unique_ptr<Allocator>
+  auto const allocate_tramp = [](Process const& process,
+                                 PVOID addr,
+                                 SIZE_T size) -> std::unique_ptr<Allocator>
   {
     auto const new_addr = detail::TryAlloc(process, size, addr);
     return new_addr ? std::make_unique<Allocator>(process, size, new_addr, true)
@@ -378,83 +378,123 @@ inline std::size_t
 }
 
 inline std::vector<std::uint8_t> GenStubGate32(void* stub,
-                                               void** orig_user_ptr_ptr)
+                                               void* get_orig_user_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
-  HADESMEM_DETAIL_ASSERT(orig_user_ptr_ptr);
-  std::vector<std::uint8_t> buf = {// PUSH EAX
-                                   0x50,
-                                   // PUSH EDX
-                                   0x52,
-                                   // MOV EAX, FS:[0x14]
-                                   0x64,
-                                   0xA1,
-                                   0x14,
-                                   0x00,
-                                   0x00,
-                                   0x00,
-                                   // MOV EDX, 0xDEADBEEF
-                                   0xBA,
-                                   0xEF,
-                                   0xBE,
-                                   0xAD,
-                                   0xDE,
-                                   // MOV FS:[0x14], EDX
-                                   0x64,
-                                   0x89,
-                                   0x15,
-                                   0x14,
-                                   0x00,
-                                   0x00,
-                                   0x00,
-                                   // MOV EDX, 0xCAFEBABE
-                                   0xBA,
-                                   0xBE,
-                                   0xBA,
-                                   0xFE,
-                                   0xCA,
-                                   // MOV [EDX], EAX
-                                   0x89,
-                                   0x02,
-                                   // POP EDX
-                                   0x5A,
-                                   // POP EAX
-                                   0x58};
+  HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
+  std::vector<std::uint8_t> buf = {// PUSHAD
+                                   0x60,
+                                   // MOV ECX, FS:[0x14]
+                                   0x64, 0x8B, 0x0D, 0x14, 0x00, 0x00, 0x00,
+                                   // MOV EAX, 0xDEADBEEF
+                                   0xB8, 0xEF, 0xBE, 0xAD, 0xDE,
+                                   // MOV FS:[0x14], EAX
+                                   0x64, 0xA3, 0x14, 0x00, 0x00, 0x00,
+                                   // MOV EAX, 0xCAFEBABE
+                                   0xB8, 0xBE, 0xBA, 0xFE, 0xCA,
+                                   // PUSH ECX
+                                   0x51,
+                                   // CALL EAX
+                                   0xFF, 0xD0,
+                                   // POP ECX
+                                   0x59,
+                                   // MOV [EAX], ECX
+                                   0x89, 0x08,
+                                   // POPAD
+                                   0x61};
   std::size_t const kStubPtrOfs = 9;
-  std::size_t const kUserPtrOfs = 21;
+  std::size_t const kUserPtrOfs = 20;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
-  *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = orig_user_ptr_ptr;
+  *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = get_orig_user_ptr_ptr_fn;
   return buf;
 }
 
 inline std::vector<std::uint8_t> GenStubGate64(void* stub,
-                                               void** orig_user_ptr_ptr)
+                                               void* get_orig_user_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
-  HADESMEM_DETAIL_ASSERT(orig_user_ptr_ptr);
+  HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
   std::vector<std::uint8_t> buf = {
     // PUSH RAX
     0x50,
+    // PUSH RCX
+    0x51,
     // PUSH RDX
     0x52,
-    // MOV RAX, GS:[0x28]
-    0x65, 0x48, 0x8B, 0x04, 0x25, 0x28, 0x00, 0x00, 0x00,
-    // MOV RDX, 0xDEADBEEFDEADBEEF
-    0x48, 0xBA, 0xEF, 0xBE, 0xAD, 0xDE, 0xEF, 0xBE, 0xAD, 0xDE,
-    // MOV GS:[0x28], RDX
-    0x65, 0x48, 0x89, 0x14, 0x25, 0x28, 0x00, 0x00, 0x00,
-    // MOV RDX, 0xCAFEBABECAFEBABE
-    0x48, 0xBA, 0xBE, 0xBA, 0xFE, 0xCA, 0xBE, 0xBA, 0xFE, 0xCA,
-    // MOV[RDX], RAX
-    0x48, 0x89, 0x02,
+    // PUSH RBX
+    0x53,
+    // PUSH RBP
+    0x55,
+    // PUSH RSI
+    0x56,
+    // PUSH RDI
+    0x57,
+    // PUSH R8
+    0x41, 0x50,
+    // PUSH R9
+    0x41, 0x51,
+    // PUSH R10
+    0x41, 0x52,
+    // PUSH R11
+    0x41, 0x53,
+    // PUSH R12
+    0x41, 0x54,
+    // PUSH R13
+    0x41, 0x55,
+    // PUSH R14
+    0x41, 0x56,
+    // PUSH R15
+    0x41, 0x57,
+    // MOV RCX, GS:[0x28]
+    0x65, 0x48, 0x8B, 0x0C, 0x25, 0x28, 0x00, 0x00, 0x00,
+    // MOV RAX, 0xDEADBEEFDEADBEEF
+    0x48, 0xB8, 0xEF, 0xBE, 0xAD, 0xDE, 0xEF, 0xBE, 0xAD, 0xDE,
+    // MOV GS:[0x28], RAX
+    0x65, 0x48, 0x89, 0x04, 0x25, 0x28, 0x00, 0x00, 0x00,
+    // MOV RAX, 0xCAFEBABECAFEBABE
+    0x48, 0xB8, 0xBE, 0xBA, 0xFE, 0xCA, 0xBE, 0xBA, 0xFE, 0xCA,
+    // PUSH RCX
+    0x51,
+    // CALL RAX
+    0xFF, 0xD0,
+    // POP RCX
+    0x59,
+    // MOV [RAX], RCX
+    0x48, 0x89, 0x08,
+    // POP R15
+    0x41, 0x5F,
+    // POP R14
+    0x41, 0x5E,
+    // POP R13
+    0x41, 0x5D,
+    // POP R12
+    0x41, 0x5C,
+    // POP R11
+    0x41, 0x5B,
+    // POP R10
+    0x41, 0x5A,
+    // POP R9
+    0x41, 0x59,
+    // POP R8
+    0x41, 0x58,
+    // POP RDI
+    0x5F,
+    // POP RSI
+    0x5E,
+    // POP RBP
+    0x5D,
+    // POP RBX
+    0x5B,
     // POP RDX
     0x5A,
+    // POP RCX
+    0x59,
     // POP RAX
     0x58};
-  std::size_t const kStubPtrOfs = 13;
-  std::size_t const kUserPtrOfs = 32;
+  std::size_t const kStubPtrOfs = 34;
+  std::size_t const kUserPtrOfs = 53;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
-  *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = orig_user_ptr_ptr;
+  *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = get_orig_user_ptr_ptr_fn;
   return buf;
 }
 
@@ -462,13 +502,13 @@ template <typename TargetFuncT>
 inline void WriteStubGate(Process const& process,
                           void* address,
                           void* stub,
-                          void** orig_user_ptr_ptr)
+                          void* get_orig_user_ptr_ptr_fn)
 {
   using StubT = typename PatchDetourStub<TargetFuncT>;
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  auto const stub_gate = GenStubGate64(stub, orig_user_ptr_ptr);
+  auto const stub_gate = GenStubGate64(stub, get_orig_user_ptr_ptr_fn);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  auto const stub_gate = GenStubGate32(stub, orig_user_ptr_ptr);
+  auto const stub_gate = GenStubGate32(stub, get_orig_user_ptr_ptr_fn);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif

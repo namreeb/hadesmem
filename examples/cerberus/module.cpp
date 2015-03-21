@@ -14,7 +14,6 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/recursion_protector.hpp>
 #include <hadesmem/detail/winternl.hpp>
@@ -126,8 +125,6 @@ extern "C" NTSTATUS WINAPI
                            ULONG alloc_type,
                            ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_map_view_of_section =
@@ -237,8 +234,6 @@ extern "C" NTSTATUS WINAPI
                              HANDLE process,
                              PVOID base) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const nt_unmap_view_of_section =

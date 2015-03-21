@@ -16,7 +16,6 @@
 #include <d3d9.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -149,8 +148,6 @@ extern "C" IDirect3D9* WINAPI
   Direct3DCreate9Detour(hadesmem::PatchDetourBase* detour,
                         UINT sdk_version) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%u].", sdk_version);
@@ -182,8 +179,6 @@ extern "C" HRESULT WINAPI
                           UINT sdk_version,
                           IDirect3D9Ex** d3d9_ex) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%u] [%p].", sdk_version, d3d9_ex);

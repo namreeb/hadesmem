@@ -8,7 +8,6 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/patcher.hpp>
@@ -210,8 +209,6 @@ extern "C" HCURSOR WINAPI
   SetCursorDetour(hadesmem::PatchDetourBase* detour,
                   HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", cursor);
@@ -250,8 +247,6 @@ extern "C" BOOL WINAPI
   GetCursorPosDetour(hadesmem::PatchDetourBase* detour,
                      LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", point);
@@ -288,8 +283,6 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
                                           int x,
                                           int y) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d] [%d].", x, y);
@@ -325,8 +318,6 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
 extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
                                        BOOL show) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d].", show);
@@ -404,8 +395,6 @@ extern "C" BOOL WINAPI
 extern "C" BOOL WINAPI GetClipCursorDetour_(hadesmem::PatchDetourBase* detour,
                                             RECT* rect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", rect);

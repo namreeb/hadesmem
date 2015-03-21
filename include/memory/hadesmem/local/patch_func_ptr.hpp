@@ -63,17 +63,16 @@ public:
       target_{other.target_},
       detour_{std::move(other.detour_)},
       stub_gate_{std::move(other.stub_gate_)},
-      orig_(std::move(other.orig_)),
+      orig_(other.orig_),
       ref_count_{other.ref_count_.load()},
       stub_{other.stub_},
-      orig_user_ptr_{other.orig_user_ptr_},
       context_{other.context_}
   {
     other.process_ = nullptr;
     other.applied_ = false;
     other.target_ = nullptr;
     other.stub_ = nullptr;
-    other.orig_user_ptr_ = nullptr;
+    other.orig_ = nullptr;
     other.context_ = nullptr;
   }
 
@@ -94,15 +93,13 @@ public:
 
     stub_gate_ = std::move(other.stub_gate_);
 
-    orig_ = std::move(other.orig_);
+    orig_ = other.orig_;
+    other.orig_ = nullptr;
 
     ref_count_ = other.ref_count_.load();
 
     stub_ = other.stub_;
     other.stub_ = nullptr;
-
-    orig_user_ptr_ = other.orig_user_ptr_;
-    other.orig_user_ptr_ = nullptr;
 
     context_ = other.context_;
     other.context_ = nullptr;
@@ -141,12 +138,14 @@ public:
       HADESMEM_DETAIL_TRACE_FORMAT_A("Target = %p, Detour = INVALID.", target_);
     }
 
-    stub_gate_ = detail::AllocatePageNear(*process_, target_);
+    stub_gate_ = std::make_unique<Allocator>(*process_, sizeof(void*));
 
-    detail::WriteStubGate<TargetFuncT>(
-      *process_, stub_gate_->GetBase(), &*stub_, &orig_user_ptr_);
+    detail::WriteStubGate<TargetFuncT>(*process_,
+                                       stub_gate_->GetBase(),
+                                       &*stub_,
+                                       &GetOriginalArbitraryUserPtrPtr);
 
-    orig_ = Read<TargetFuncRawT>(*process_, target_);
+    orig_ = Read<void*>(*process_, target_);
 
     WritePatch();
 
@@ -182,10 +181,9 @@ public:
 
   virtual void* GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT override
   {
-    return detail::AliasCastUnchecked<void*>(orig_);
+    return orig_;
   }
 
-  // Ref count is user-managed and only here for convenience purposes.
   virtual std::atomic<std::uint32_t>& GetRefCount() override
   {
     return ref_count_;
@@ -209,12 +207,6 @@ public:
   virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return context_;
-  }
-
-  virtual void*
-    GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT override
-  {
-    return orig_user_ptr_;
   }
 
 protected:
@@ -271,10 +263,9 @@ private:
   TargetFuncRawT* target_{};
   DetourFuncT detour_{};
   std::unique_ptr<Allocator> stub_gate_{};
-  TargetFuncRawT orig_{};
+  void* orig_{};
   std::atomic<std::uint32_t> ref_count_{};
   std::unique_ptr<StubT> stub_{};
-  void* orig_user_ptr_{nullptr};
   void* context_{nullptr};
 };
 }

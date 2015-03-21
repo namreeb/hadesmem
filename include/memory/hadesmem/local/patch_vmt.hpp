@@ -129,8 +129,8 @@ public:
                   typename PatchFuncPtr<TargetFuncT>::DetourFuncT detour,
                   void* context = nullptr)
   {
-    auto const target = detail::AliasCastUnchecked<
-      typename PatchFuncPtr<TargetFuncT>::TargetFuncRawT*>(
+    using TargetFuncRawT = typename PatchFuncPtr<TargetFuncT>::TargetFuncRawT;
+    auto const target = reinterpret_cast<TargetFuncRawT*>(
       &reinterpret_cast<void**>(new_vmt_.GetBase())[idx]);
     auto const patch =
       new PatchFuncPtr<TargetFuncT>(*process_, target, detour, context);

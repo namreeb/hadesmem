@@ -64,7 +64,7 @@ public:
                        DetourFuncT const& detour,
                        void* context = nullptr)
     : process_{&process},
-      target_{target},
+      target_{detail::AliasCast<void*>(target)},
       detour_{detour},
       context_{context},
       stub_{std::make_unique<StubT>(this)}
@@ -91,14 +91,12 @@ public:
       trampolines_(std::move(other.trampolines_)),
       ref_count_{other.ref_count_.load()},
       stub_{other.stub_},
-      orig_user_ptr_{other.orig_user_ptr_},
       context_{other.context_}
   {
     other.process_ = nullptr;
     other.applied_ = false;
     other.target_ = nullptr;
     other.stub_ = nullptr;
-    other.orig_user_ptr_ = nullptr;
     other.context_ = nullptr;
   }
 
@@ -129,9 +127,6 @@ public:
 
     stub_ = other.stub_;
     other.stub_ = nullptr;
-
-    orig_user_ptr_ = other.orig_user_ptr_;
-    other.orig_user_ptr_ = nullptr;
 
     context_ = other.context_;
     other.context_ = nullptr;
@@ -191,15 +186,14 @@ public:
         trampoline_->GetBase());
     }
 
-    auto const target = detail::AliasCastUnchecked<void*>(target_);
-
-    auto const buffer = ReadVector<std::uint8_t>(*process_, target, kTrampSize);
+    auto const buffer =
+      ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
 
     ud_t ud_obj;
     ud_init(&ud_obj);
     ud_set_input_buffer(&ud_obj, buffer.data(), buffer.size());
     ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-    ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target));
+    ud_set_pc(&ud_obj, reinterpret_cast<std::uint64_t>(target_));
 #if defined(HADESMEM_DETAIL_ARCH_X64)
     ud_set_mode(&ud_obj, 64);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -208,7 +202,7 @@ public:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    stub_gate_ = detail::AllocatePageNear(*process_, target);
+    stub_gate_ = detail::AllocatePageNear(*process_, target_);
 
     std::size_t const patch_size = GetPatchSize();
 
@@ -305,23 +299,25 @@ public:
     tramp_cur +=
       detail::WriteJump(*process_,
                         tramp_cur,
-                        reinterpret_cast<std::uint8_t*>(target) + instr_size,
+                        reinterpret_cast<std::uint8_t*>(target_) + instr_size,
                         true,
                         &trampolines_);
 
     FlushInstructionCache(
       *process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    detail::WriteStubGate<TargetFuncT>(
-      *process_, stub_gate_->GetBase(), &*stub_, &orig_user_ptr_);
+    detail::WriteStubGate<TargetFuncT>(*process_,
+                                       stub_gate_->GetBase(),
+                                       &*stub_,
+                                       &GetOriginalArbitraryUserPtrPtr);
 
-    orig_ = ReadVector<std::uint8_t>(*process_, target, patch_size);
+    orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
 
-    detail::VerifyPatchThreads(process_->GetId(), target, orig_.size());
+    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
 
     WritePatch();
 
-    FlushInstructionCache(*process_, target, instr_size);
+    FlushInstructionCache(*process_, target_, instr_size);
 
     applied_ = true;
   }
@@ -335,8 +331,7 @@ public:
 
     SuspendedProcess const suspended_process{process_->GetId()};
 
-    auto const target = detail::AliasCastUnchecked<void*>(target_);
-    detail::VerifyPatchThreads(process_->GetId(), target, orig_.size());
+    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
     detail::VerifyPatchThreads(
       process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
@@ -365,7 +360,6 @@ public:
     return trampoline_->GetBase();
   }
 
-  // Ref count is user-managed and only here for convenience purposes.
   virtual std::atomic<std::uint32_t>& GetRefCount() override
   {
     return ref_count_;
@@ -391,17 +385,10 @@ public:
     return context_;
   }
 
-  virtual void*
-    GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT override
-  {
-    return orig_user_ptr_;
-  }
-
 protected:
   virtual std::size_t GetPatchSize() const
   {
-    auto const target = detail::AliasCastUnchecked<void*>(target_);
-    bool stub_near = detail::IsNear(target, stub_gate_->GetBase());
+    bool stub_near = detail::IsNear(target_, stub_gate_->GetBase());
     HADESMEM_DETAIL_TRACE_A(stub_near ? "Stub near." : "Stub far.");
     return stub_near ? detail::PatchConstants::kJmpSize32
                      : detail::PatchConstants::kJmpSize64;
@@ -411,17 +398,15 @@ protected:
   {
     HADESMEM_DETAIL_TRACE_A("Writing jump to stub.");
 
-    auto const target = detail::AliasCastUnchecked<void*>(target_);
     detail::WriteJump(
-      *process_, target, stub_gate_->GetBase(), false, &trampolines_);
+      *process_, target_, stub_gate_->GetBase(), false, &trampolines_);
   }
 
   virtual void RemovePatch()
   {
     HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
 
-    auto const target = detail::AliasCastUnchecked<void*>(target_);
-    WriteVector(*process_, target, orig_);
+    WriteVector(*process_, target_, orig_);
   }
 
   virtual bool CanHookChainImpl() const HADESMEM_DETAIL_NOEXCEPT
@@ -457,7 +442,7 @@ protected:
   Process const* process_{};
   bool applied_{false};
   bool detached_{false};
-  TargetFuncRawT target_{};
+  void* target_{};
   DetourFuncT detour_{};
   std::unique_ptr<Allocator> trampoline_{};
   std::unique_ptr<Allocator> stub_gate_{};
@@ -465,7 +450,6 @@ protected:
   std::vector<std::unique_ptr<Allocator>> trampolines_{};
   std::atomic<std::uint32_t> ref_count_{};
   std::unique_ptr<StubT> stub_{};
-  void* orig_user_ptr_{nullptr};
   void* context_{nullptr};
 };
 }

@@ -15,7 +15,6 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/winternl.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -73,8 +72,6 @@ std::pair<void*, SIZE_T>& GetOpenGL32Module() HADESMEM_DETAIL_NOEXCEPT
 extern "C" BOOL WINAPI WglSwapBuffersDetour(hadesmem::PatchDetourBase* detour,
                                             HDC device) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);

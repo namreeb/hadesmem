@@ -66,7 +66,6 @@ public:
       orig_(other.orig_),
       ref_count_{other.ref_count_.load()},
       stub_{other.stub_},
-      orig_user_ptr_{other.orig_user_ptr_},
       context_{other.context_}
   {
     other.process_ = nullptr;
@@ -75,7 +74,6 @@ public:
     other.target_ = nullptr;
     other.orig_ = 0;
     other.stub_ = nullptr;
-    other.orig_user_ptr_ = nullptr;
     other.context_ = nullptr;
   }
 
@@ -106,9 +104,6 @@ public:
 
     stub_ = other.stub_;
     other.stub_ = nullptr;
-
-    orig_user_ptr_ = other.orig_user_ptr_;
-    other.orig_user_ptr_ = nullptr;
 
     context_ = other.context_;
     other.context_ = nullptr;
@@ -149,8 +144,10 @@ public:
 
     stub_gate_ = detail::AllocatePageNear(*process_, base_);
 
-    detail::WriteStubGate<TargetFuncT>(
-      *process_, stub_gate_->GetBase(), &*stub_, &orig_user_ptr_);
+    detail::WriteStubGate<TargetFuncT>(*process_,
+                                       stub_gate_->GetBase(),
+                                       &*stub_,
+                                       &GetOriginalArbitraryUserPtrPtr);
 
     orig_ = Read<DWORD>(*process_, target_);
 
@@ -191,7 +188,6 @@ public:
     return static_cast<std::uint8_t*>(base_) + orig_;
   }
 
-  // Ref count is user-managed and only here for convenience purposes.
   virtual std::atomic<std::uint32_t>& GetRefCount() override
   {
     return ref_count_;
@@ -215,12 +211,6 @@ public:
   virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return context_;
-  }
-
-  virtual void*
-    GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT override
-  {
-    return orig_user_ptr_;
   }
 
 protected:
@@ -287,7 +277,6 @@ private:
   DWORD orig_{};
   std::atomic<std::uint32_t> ref_count_{};
   std::unique_ptr<StubT> stub_{};
-  void* orig_user_ptr_{nullptr};
   void* context_{nullptr};
 };
 }

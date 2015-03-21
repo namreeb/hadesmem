@@ -11,6 +11,7 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/type_traits.hpp>
 #include <hadesmem/detail/winternl.hpp>
@@ -49,6 +50,7 @@ struct PatchDetourStub<R (C::*)(Args...)>
 private:
   R StubImpl(C* this_, Args... args)
   {
+    auto const ref_counter = MakeDetourRefCounter(patch_->GetRefCount());
     winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
       patch_->GetOriginalArbitraryUserPtr();
     auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());
@@ -86,6 +88,7 @@ struct PatchDetourStub<R (C::*)(Args...) const>
 private:
   R StubImpl(C const* this_, Args... args)
   {
+    auto const ref_counter = MakeDetourRefCounter(patch_->GetRefCount());
     winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =
       patch_->GetOriginalArbitraryUserPtr();
     auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());
@@ -121,6 +124,7 @@ private:                                                                       \
     R StubImpl(Args... args)                                                   \
     {                                                                          \
       HADESMEM_DETAIL_STATIC_ASSERT(IsFunction<DetourFuncRawT>::value);        \
+      auto const ref_counter = MakeDetourRefCounter(patch_->GetRefCount());    \
       winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =                  \
         patch_->GetOriginalArbitraryUserPtr();                                 \
       auto const detour =                                                      \
@@ -132,7 +136,6 @@ private:                                                                       \
   \
 };                                                                             \
   \
-\
 template<typename R, typename... Args> \
 class PatchDetourStub<R call_conv(Args...)>                                    \
   \
@@ -143,41 +146,28 @@ public:                                                                        \
     using DetourFuncT = std::function<R(PatchDetourBase*, Args...)>;           \
                                                                                \
     explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}           \
-    \
-{                                                                       \
-    \
-}                                                                       \
-    \
-\
-static R call_conv Stub(Args... args)                                          \
-    \
-{                                                                       \
-      \
-auto const stub = static_cast<PatchDetourStub*>(\
-winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                        \
-      \
-return stub->StubImpl(std::forward<Args>(args)...);                            \
-    \
-}                                                                       \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    static R call_conv Stub(Args... args)                                      \
+    {                                                                          \
+      auto const stub = static_cast<PatchDetourStub*>(                         \
+        winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer);                \
+      return stub->StubImpl(std::forward<Args>(args)...);                      \
+    }                                                                          \
   \
-\
 private:                                                                       \
     R StubImpl(Args... args)                                                   \
+    {                                                                          \
+      HADESMEM_DETAIL_STATIC_ASSERT(IsFunction<DetourFuncRawT>::value);        \
+      auto const ref_counter = MakeDetourRefCounter(patch_->GetRefCount());    \
+      winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer =                  \
+        patch_->GetOriginalArbitraryUserPtr();                                 \
+      auto const detour =                                                      \
+        static_cast<DetourFuncT const*>(patch_->GetDetour());                  \
+      return (*detour)(patch_, std::forward<Args>(args)...);                   \
+    }                                                                          \
     \
-{                                                                       \
-      \
-HADESMEM_DETAIL_STATIC_ASSERT(IsFunction<DetourFuncRawT>::value);              \
-      \
-winternl::GetCurrentTeb()->NtTib.ArbitraryUserPointer = \
-patch_->GetOriginalArbitraryUserPtr();                                         \
-      \
-auto const detour = static_cast<DetourFuncT const*>(patch_->GetDetour());      \
-      \
-return (*detour)(patch_, std::forward<Args>(args)...);                         \
-    \
-}                                                                       \
-    \
-\
 PatchDetourBase* patch_;                                                       \
   \
 };

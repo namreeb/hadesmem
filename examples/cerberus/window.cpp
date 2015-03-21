@@ -8,7 +8,6 @@
 #include <windows.h>
 
 #include <hadesmem/config.hpp>
-#include <hadesmem/detail/detour_ref_counter.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/patcher.hpp>
@@ -127,8 +126,6 @@ std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
 extern "C" HWND WINAPI GetForegroundWindowDetour(
   hadesmem::PatchDetourBase* detour) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   auto const& callbacks = GetOnGetForegroundWindowCallbacks();

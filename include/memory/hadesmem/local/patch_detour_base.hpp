@@ -34,14 +34,16 @@ public:
 
   virtual std::atomic<std::uint32_t> const& GetRefCount() const = 0;
 
-  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT  = 0;
+  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
-  virtual void*
-    GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void* GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return *GetOriginalArbitraryUserPtrPtr();
+  }
 
   template <typename FuncT>
   FuncT GetTrampolineT() const HADESMEM_DETAIL_NOEXCEPT
@@ -49,6 +51,13 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
                                   std::is_pointer<FuncT>::value);
     return detail::AliasCastUnchecked<FuncT>(GetTrampoline());
+  }
+
+protected:
+  static void** GetOriginalArbitraryUserPtrPtr() HADESMEM_DETAIL_NOEXCEPT
+  {
+    static __declspec(thread) std::uintptr_t orig_user_ptr = 0;
+    return &reinterpret_cast<void*&>(orig_user_ptr);
   }
 };
 }
