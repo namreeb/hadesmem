@@ -449,18 +449,27 @@ void TestPatchDr()
   TestPatchDetourJmp<hadesmem::PatchDr<decltype(&HookMe)>>();
 }
 
+__declspec(noinline) void TestGetLastErrorOrig()
+{
+  ::SetLastError(0x1234);
+  BOOST_TEST_EQ(::GetLastError(), 0x1234);
+}
+
+__declspec(noinline) void TestGetLastErrorHooked()
+{
+  ::SetLastError(0x1234);
+  BOOST_TEST_EQ(::GetLastError(), 0x1337UL);
+}
+
 void TestPatchIat()
 {
   hadesmem::Process const& process = GetThisProcess();
   auto const kernel32_mod = GetModuleHandleW(L"kernel32.dll");
   BOOST_TEST_NE(kernel32_mod, static_cast<HMODULE>(nullptr));
   __analysis_assume(kernel32_mod != nullptr);
-  auto volatile const get_last_error_orig = reinterpret_cast<FARPROC>(&::GetLastError);
-  auto volatile const get_last_error_orig_2 =
+  TestGetLastErrorOrig();
+  auto volatile const get_last_error_orig =
     GetProcAddress(kernel32_mod, "GetLastError");
-  BOOST_TEST_EQ(get_last_error_orig, get_last_error_orig_2);
-  ::SetLastError(0x1234);
-  BOOST_TEST_EQ(::GetLastError(), 0x1234);
   auto const get_last_error_detour = [](hadesmem::PatchDetourBase* patch)
                                        -> DWORD
   {
@@ -470,16 +479,15 @@ void TestPatchIat()
   hadesmem::PatchIat<decltype(&::GetLastError)> get_last_error_patch{
     process, L"kernel32.dll", "GetLastError", get_last_error_detour};
   get_last_error_patch.Apply();
-  auto volatile const get_last_error_hooked = reinterpret_cast<FARPROC>(&::GetLastError);
-  auto volatile const get_last_error_hooked_2 =
+  auto volatile const get_last_error_hooked =
     GetProcAddress(kernel32_mod, "GetLastError");
   // TODO: Need a proper implementation that doesn't use multiple stubs in order
   // for this to work...
   // BOOST_TEST_EQ(get_last_error_hooked, get_last_error_hooked_2);
   BOOST_TEST_NE(get_last_error_orig, get_last_error_hooked);
-  BOOST_TEST_NE(get_last_error_orig, get_last_error_hooked_2);
-  ::SetLastError(0x1234);
-  BOOST_TEST_EQ(::GetLastError(), 0x1337UL);
+  TestGetLastErrorHooked();
+  get_last_error_patch.Remove();
+  TestGetLastErrorOrig();
 }
 
 int main()
