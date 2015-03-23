@@ -56,8 +56,8 @@ public:
 protected:
   static void** GetOriginalArbitraryUserPtrPtr() HADESMEM_DETAIL_NOEXCEPT
   {
-    static __declspec(thread) std::uintptr_t orig_user_ptr = 0;
-    return &reinterpret_cast<void*&>(orig_user_ptr);
+    static __declspec(thread) void* orig_user_ptr = 0;
+    return &orig_user_ptr;
   }
 };
 }
