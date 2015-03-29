@@ -3,7 +3,13 @@
 
 #pragma once
 
-#include <cerberus/plugin.hpp>
+namespace hadesmem
+{
+namespace cerberus
+{
+class PluginInterface;
+}
+}
 
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus);
 

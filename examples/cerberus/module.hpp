@@ -16,9 +16,17 @@ namespace cerberus
 {
 typedef void OnMapCallback(HMODULE module,
                            std::wstring const& path,
-                           std::wstring const& name);
+                           std::wstring const& module_name_upper);
 
 typedef void OnUnmapCallback(HMODULE module);
+
+typedef void OnLoadCallback(HMODULE handle,
+                            PCWSTR path,
+                            PULONG flags,
+                            std::wstring const& full_name,
+                            std::wstring const& module_name_upper);
+
+typedef void OnUnloadCallback(HMODULE module);
 
 class ModuleInterface
 {
@@ -36,6 +44,16 @@ public:
     RegisterOnUnmap(std::function<OnUnmapCallback> const& callback) = 0;
 
   virtual void UnregisterOnUnmap(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnLoad(std::function<OnLoadCallback> const& callback) = 0;
+
+  virtual void UnregisterOnLoad(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnUnload(std::function<OnUnloadCallback> const& callback) = 0;
+
+  virtual void UnregisterOnUnload(std::size_t id) = 0;
 };
 
 ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT;

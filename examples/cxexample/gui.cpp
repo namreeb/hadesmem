@@ -11,6 +11,7 @@
 #include <hadesmem/error.hpp>
 
 #include <cerberus/ant_tweak_bar.hpp>
+#include <cerberus/plugin.hpp>
 #include <cerberus/render.hpp>
 
 namespace
