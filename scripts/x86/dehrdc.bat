@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Deus Ex Human Revolution Director's Cut\DXHRDC.exe" --inject --steam-app-id 238010 --export Load --add-path --path-resolution --module cerberus.dll

@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Alice in Wonderland\Alice.exe" --inject --steam-app-id 316030 --export Load --add-path --path-resolution --module cerberus.dll

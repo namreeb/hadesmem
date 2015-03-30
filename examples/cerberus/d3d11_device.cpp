@@ -24,7 +24,8 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
   {
     HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-    // Unknown UUIDs. Observed in Wildstar.
+    // DXGI internal GUIDs. Observed in Wildstar, Cities: Skylines, and probably
+    // others.
     UUID const unknown_uuid_1 = {0x9b7e4a00,
                                  0x342c,
                                  0x4106,
@@ -48,32 +49,6 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
                                  0x2d,
                                  0x57};
 
-    // Unknown UUID. Observed in Rift.
-    UUID const unknown_uuid_3 = {0x9b7e4c0f,
-                                 0x342c,
-                                 0x4106,
-                                 0xa1,
-                                 0x9f,
-                                 0x4f,
-                                 0x27,
-                                 0x04,
-                                 0xf6,
-                                 0x89,
-                                 0xf0};
-
-    // Unknown UUID. Observed in GW2.
-    UUID const unknown_uuid_4 = {0x10ec4d5b,
-                                 0x975a,
-                                 0x4689,
-                                 0xb9,
-                                 0xe4,
-                                 0xd0,
-                                 0xaa,
-                                 0xc3,
-                                 0x0f,
-                                 0xe3,
-                                 0x33};
-
     if (*obj == device_)
     {
       refs_++;
@@ -92,25 +67,34 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
     {
       // Needs investigation to see if we need to wrap this (probably do if it's
       // possible to get the 'real' ID3D11DeviceN pointer back out.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
       return ret;
     }
     else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
     {
       // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (2).");
       return ret;
     }
-    else if (riid == unknown_uuid_3)
+    // Observed in Rift.
+    else if (riid == __uuidof(ID3D10Device))
     {
       // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (3).");
       return ret;
     }
-    else if (riid == unknown_uuid_4)
+    // Observed in GW2.
+    else if (riid == __uuidof(ID3D11VideoDevice))
     {
       // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface.");
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (4).");
+      return ret;
+    }
+    // Observed in MSHTML (used by America's Army 3 Loader).
+    else if (riid == __uuidof(IDXGIDevice3))
+    {
+      // Needs investigation to see if we need to wrap this.
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (5).");
       return ret;
     }
     else

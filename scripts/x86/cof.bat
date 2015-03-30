@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Cry of Fear\CoFLaunchApp.exe" --inject --steam-app-id 223710 --export Load --add-path --path-resolution --module cerberus.dll

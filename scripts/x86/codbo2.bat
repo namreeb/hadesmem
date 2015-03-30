@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\Call of Duty Black Ops II\t6sp.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Call of Duty Black Ops II\t6mp.exe" --inject --steam-app-id 202990 --export Load --add-path --path-resolution --module cerberus.dll

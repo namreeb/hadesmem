@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Counter-Strike Source\hl2.exe" --arg "-steam" --arg "-game cstrike" --inject --steam-app-id 240 --export Load --add-path --path-resolution --module cerberus.dll

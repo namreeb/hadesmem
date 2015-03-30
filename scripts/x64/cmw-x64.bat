@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\chivalrymedievalwarfare\Binaries\Win64\CMW.exe" --inject --steam-app-id 219640 --export Load --add-path --path-resolution --module cerberus.dll

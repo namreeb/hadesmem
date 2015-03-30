@@ -33,6 +33,7 @@
 
 namespace hadesmem
 {
+// WARNING! Don't use this, still under development.
 template <typename TargetFuncT> class PatchIat
 {
 public:
@@ -171,7 +172,7 @@ private:
     hadesmem::ImportThunkList import_thunks{
       *process_, pe_file, id.GetFirstThunk()};
     hadesmem::ImportThunkList orig_import_thunks{
-      *process_, pe_file, id.GetOriginalFirstThunk() };
+      *process_, pe_file, id.GetOriginalFirstThunk()};
     for (auto it = std::begin(import_thunks),
               oit = std::begin(orig_import_thunks);
          it != std::end(import_thunks) && oit != std::end(orig_import_thunks);

@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Borderlands 2\Binaries\Win32\Launcher.exe" --inject --steam-app-id 49520 --export Load --add-path --path-resolution --module cerberus.dll

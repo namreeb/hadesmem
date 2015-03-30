@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\Influent\Influent.exe" --inject --steam-app-id 274980 --export Load --add-path --path-resolution --module cerberus.dll

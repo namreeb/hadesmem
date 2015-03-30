@@ -394,10 +394,10 @@ extern "C" NTSTATUS WINAPI
   }
 
   std::wstring const full_name = UnicodeStringToStdString(name);
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Full Name: [%s].", full_name.c_str());
-
   std::wstring const module_name = GetFileNameFromPath(full_name);
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module Name: [%s].", module_name.c_str());
+  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Full Name: [%s]. Module Name: [%s].",
+                                 full_name.c_str(),
+                                 module_name.c_str());
   std::wstring const module_name_upper =
     hadesmem::detail::ToUpperOrdinal(module_name);
 

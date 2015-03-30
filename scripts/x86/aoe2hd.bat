@@ -1,0 +1,1 @@
+inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Age2HD\AoK HD.exe" --inject --steam-app-id 221380 --export Load --add-path --path-resolution --module cerberus.dll
