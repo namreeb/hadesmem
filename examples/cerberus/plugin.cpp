@@ -26,11 +26,16 @@
 #include "callbacks.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
+#include "d3d10.hpp"
+#include "d3d11.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
+#include "exception.hpp"
 #include "gwen.hpp"
 #include "helpers.hpp"
 #include "module.hpp"
+#include "opengl.hpp"
+#include "process.hpp"
 #include "render.hpp"
 #include "window.hpp"
 
@@ -115,56 +120,94 @@ public:
     UnloadUnchecked();
   }
 
-  virtual hadesmem::cerberus::ModuleInterface* GetModuleInterface() final
+  virtual hadesmem::cerberus::ModuleInterface*
+    GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetModuleInterface();
   }
 
-  virtual hadesmem::cerberus::D3D9Interface* GetD3D9Interface() final
+  virtual hadesmem::cerberus::D3D9Interface*
+    GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetD3D9Interface();
   }
 
-  virtual hadesmem::cerberus::DXGIInterface* GetDXGIInterface() final
+  virtual hadesmem::cerberus::DXGIInterface*
+    GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetDXGIInterface();
   }
 
-  virtual hadesmem::cerberus::RenderInterface* GetRenderInterface() final
+  virtual hadesmem::cerberus::RenderInterface*
+    GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetRenderInterface();
   }
 
-  virtual hadesmem::cerberus::WindowInterface* GetWindowInterface() final
+  virtual hadesmem::cerberus::WindowInterface*
+    GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetWindowInterface();
   }
 
   virtual hadesmem::cerberus::DirectInputInterface*
-    GetDirectInputInterface() final
+    GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetDirectInputInterface();
   }
 
-  virtual hadesmem::cerberus::CursorInterface* GetCursorInterface() final
+  virtual hadesmem::cerberus::CursorInterface*
+    GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetCursorInterface();
   }
 
   virtual hadesmem::cerberus::AntTweakBarInterface*
-    GetAntTweakBarInterface() final
+    GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetAntTweakBarInterface();
   }
 
-  virtual hadesmem::cerberus::GwenInterface* GetGwenInterface() final
+  virtual hadesmem::cerberus::GwenInterface*
+    GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetGwenInterface();
   }
 
-  virtual hadesmem::cerberus::HelperInterface* GetHelperInterface() final
+  virtual hadesmem::cerberus::HelperInterface*
+    GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetHelperInterface();
+  }
+
+  virtual hadesmem::cerberus::ExceptionInterface*
+    GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetExceptionInterface();
+  }
+
+  virtual hadesmem::cerberus::ProcessInterface*
+    GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetProcessInterface();
+  }
+
+  virtual hadesmem::cerberus::OpenGL32Interface*
+    GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetOpenGL32Interface();
+  }
+
+  virtual hadesmem::cerberus::D3D10Interface*
+    GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetD3D10Interface();
+  }
+
+  virtual hadesmem::cerberus::D3D11Interface*
+    GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetD3D11Interface();
   }
 
   void Unload()
@@ -352,13 +395,14 @@ void LoadPlugin(std::wstring const& path)
 {
   auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
-  auto const plugin = std::find_if(std::begin(plugins),
-                                   std::end(plugins),
-                                   [&](Plugin const& p)
-                                   {
-    return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
-           hadesmem::detail::ToUpperOrdinal(path_real);
-  });
+  auto const plugin =
+    std::find_if(std::begin(plugins),
+                 std::end(plugins),
+                 [&](Plugin const& p)
+                 {
+                   return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
+                          hadesmem::detail::ToUpperOrdinal(path_real);
+                 });
   if (plugin == std::end(plugins))
   {
     plugins.emplace_back(path_real);
@@ -375,13 +419,14 @@ void UnloadPlugin(std::wstring const& path)
 {
   auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
-  auto const plugin = std::find_if(std::begin(plugins),
-                                   std::end(plugins),
-                                   [&](Plugin const& p)
-                                   {
-    return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
-           hadesmem::detail::ToUpperOrdinal(path_real);
-  });
+  auto const plugin =
+    std::find_if(std::begin(plugins),
+                 std::end(plugins),
+                 [&](Plugin const& p)
+                 {
+                   return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
+                          hadesmem::detail::ToUpperOrdinal(path_real);
+                 });
   if (plugin == std::end(plugins))
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(
