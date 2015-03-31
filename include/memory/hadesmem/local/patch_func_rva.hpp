@@ -22,7 +22,8 @@
 
 namespace hadesmem
 {
-template <typename TargetFuncT> class PatchFuncRva : public PatchDetourBase
+template <typename TargetFuncT, typename ContextT = void*>
+class PatchFuncRva : public PatchDetourBase
 {
 public:
   using StubT = detail::PatchDetourStub<TargetFuncT>;
@@ -36,12 +37,12 @@ public:
                         void* base,
                         DWORD* target,
                         DetourFuncT const& detour,
-                        void* context = nullptr)
+                        ContextT context = ContextT())
     : process_{&process},
       base_{base},
       target_{target},
       detour_{detour},
-      context_{context},
+      context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
   {
   }
@@ -50,7 +51,7 @@ public:
                         void* base,
                         DWORD* target,
                         DetourFuncT const& detour,
-                        void* context = nullptr) = delete;
+                        ContextT context = ContextT()) = delete;
 
   PatchFuncRva(PatchFuncRva const& other) = delete;
 
@@ -66,7 +67,7 @@ public:
       orig_(other.orig_),
       ref_count_{other.ref_count_.load()},
       stub_{other.stub_},
-      context_{other.context_}
+      context_(std::move(other.context_))
   {
     other.process_ = nullptr;
     other.applied_ = false;
@@ -74,7 +75,6 @@ public:
     other.target_ = nullptr;
     other.orig_ = 0;
     other.stub_ = nullptr;
-    other.context_ = nullptr;
   }
 
   PatchFuncRva& operator=(PatchFuncRva&& other)
@@ -105,8 +105,7 @@ public:
     stub_ = other.stub_;
     other.stub_ = nullptr;
 
-    context_ = other.context_;
-    other.context_ = nullptr;
+    context_ = std::move(other.context_);
 
     return *this;
   }
@@ -171,6 +170,28 @@ public:
     applied_ = false;
   }
 
+  virtual void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT override
+  {
+    try
+    {
+      Remove();
+    }
+    catch (...)
+    {
+      // WARNING: Patch may not be removed if Remove fails.
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+
+      process_ = nullptr;
+      applied_ = false;
+
+      target_ = nullptr;
+      detour_ = nullptr;
+      orig_ = 0;
+    }
+  }
+
   virtual void Detach() HADESMEM_DETAIL_NOEXCEPT override
   {
     applied_ = false;
@@ -208,9 +229,14 @@ public:
     return &detour_;
   }
 
-  virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void* GetContext() HADESMEM_DETAIL_NOEXCEPT override
   {
-    return context_;
+    return &context_;
+  }
+
+  virtual void const* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
+  {
+    return &context_;
   }
 
 protected:
@@ -244,28 +270,6 @@ protected:
     return true;
   }
 
-  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
-  {
-    try
-    {
-      Remove();
-    }
-    catch (...)
-    {
-      // WARNING: Patch may not be removed if Remove fails.
-      HADESMEM_DETAIL_TRACE_A(
-        boost::current_exception_diagnostic_information().c_str());
-      HADESMEM_DETAIL_ASSERT(false);
-
-      process_ = nullptr;
-      applied_ = false;
-
-      target_ = nullptr;
-      detour_ = nullptr;
-      orig_ = 0;
-    }
-  }
-
 private:
   Process const* process_{};
   bool applied_{false};
@@ -277,6 +281,6 @@ private:
   DWORD orig_{};
   std::atomic<std::uint32_t> ref_count_{};
   std::unique_ptr<StubT> stub_{};
-  void* context_{nullptr};
+  ContextT context_;
 };
 }

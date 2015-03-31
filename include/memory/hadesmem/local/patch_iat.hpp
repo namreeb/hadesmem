@@ -34,7 +34,7 @@
 namespace hadesmem
 {
 // WARNING! Don't use this, still under development.
-template <typename TargetFuncT> class PatchIat
+template <typename TargetFuncT, typename ContextT = void*> class PatchIat
 {
 public:
   using TargetFuncRawT =
@@ -53,18 +53,62 @@ public:
            std::wstring const& module,
            std::string const& function,
            DetourFuncT const& detour,
-           void* context = nullptr)
+           ContextT context = ContextT())
     : process_{&process},
       module_(detail::ToUpperOrdinal(module)),
       function_(function),
       detour_{detour},
-      context_{context}
+      context_(std::move(context))
   {
     hadesmem::ModuleList const modules{process};
     for (auto const& m : modules)
     {
       HookModule(m);
     }
+  }
+
+  explicit PatchIat(Process&& process,
+                    std::wstring const& module,
+                    std::string const& function,
+                    DetourFuncT const& detour,
+                    ContextT context = ContextT()) = delete;
+
+  PatchIat(PatchIat const& other) = delete;
+
+  PatchIat& operator=(PatchIat const& other) = delete;
+
+  PatchIat(PatchIat&& other)
+    : process_{other.process_},
+      module_{std::move(other.module_)},
+      function_{std::move(other.function_)},
+      detour_{std::move(other.detour_)},
+      context_(std::move(other.context_)),
+      eat_hook_{std::move(other.eat_hook_)},
+      iat_hooks_{std::move(other.iat_hooks_)},
+  {
+    other.process_ = nullptr;
+  }
+
+  PatchIat& operator=(PatchIat&& other)
+  {
+    RemoveUnchecked();
+
+    process_ = other.process_;
+    other.process_ = nullptr;
+
+    module_ = std::move(other.module_);
+
+    function_ = std::move(other.function_);
+
+    detour_ = std::move(other.detour_);
+
+    context_ = std::move(other.context_);
+
+    eat_hook_ = std::move(other.eat_hook_);
+
+    iat_hooks_ = std::move(other.iat_hooks_);
+
+    return *this;
   }
 
   ~PatchIat()
@@ -100,6 +144,19 @@ public:
       if (iat_hook.second)
       {
         iat_hook.second->Remove();
+      }
+    }
+  }
+
+  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  {
+    eat_hook_->RemoveUnchecked();
+
+    for (auto& iat_hook : iat_hooks_)
+    {
+      if (iat_hook.second)
+      {
+        iat_hook.second->RemoveUnchecked();
       }
     }
   }
@@ -143,7 +200,7 @@ private:
       HADESMEM_DETAIL_TRACE_FORMAT_A(
         "Got export at [%p] with value [%p].", e.GetRvaPtr(), e.GetVa());
 
-      eat_hook_ = std::make_unique<PatchFuncRva<TargetFuncT>>(
+      eat_hook_ = std::make_unique<PatchFuncRva<TargetFuncT, ContextT>>(
         *process_, pe_file.GetBase(), e.GetRvaPtr(), detour_, context_);
     }
   }
@@ -192,44 +249,8 @@ private:
       HADESMEM_DETAIL_ASSERT(!iat_hook);
       auto const func_ptr =
         reinterpret_cast<TargetFuncRawT*>(it->GetFunctionPtr());
-      iat_hook = std::make_unique<PatchFuncPtr<TargetFuncT>>(
+      iat_hook = std::make_unique<PatchFuncPtr<TargetFuncT, ContextT>>(
         *process_, func_ptr, detour_, context_);
-    }
-  }
-
-  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
-  {
-    if (eat_hook_)
-    {
-      try
-      {
-        eat_hook_->Remove();
-      }
-      catch (...)
-      {
-        // WARNING: Patch may not be removed if Remove fails.
-        HADESMEM_DETAIL_TRACE_A(
-          boost::current_exception_diagnostic_information().c_str());
-        HADESMEM_DETAIL_ASSERT(false);
-      }
-    }
-
-    for (auto& iat_hook : iat_hooks_)
-    {
-      if (iat_hook.second)
-      {
-        try
-        {
-          iat_hook.second->Remove();
-        }
-        catch (...)
-        {
-          // WARNING: Patch may not be removed if Remove fails.
-          HADESMEM_DETAIL_TRACE_A(
-            boost::current_exception_diagnostic_information().c_str());
-          HADESMEM_DETAIL_ASSERT(false);
-        }
-      }
     }
   }
 
@@ -237,7 +258,7 @@ private:
   std::wstring module_{};
   std::string function_{};
   DetourFuncT detour_{};
-  void* context_{};
+  ContextT context_;
   std::unique_ptr<PatchDetourBase> eat_hook_;
   std::map<void*, std::unique_ptr<PatchDetourBase>> iat_hooks_{};
 };

@@ -116,7 +116,7 @@ extern "C" int __cdecl ScratchDetour(hadesmem::PatchDetourBase* patch,
                                      float b,
                                      void* c)
 {
-  BOOST_TEST_EQ(patch->GetContext(), &GetThisProcess());
+  BOOST_TEST_EQ(*static_cast<void**>(patch->GetContext()), &GetThisProcess());
   BOOST_TEST(patch->GetTrampoline() != nullptr);
   auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
   BOOST_TEST_EQ(orig(a, b, c), 0x1337);
@@ -146,7 +146,7 @@ void TestPatchDetour2()
     [&](hadesmem::PatchDetourBase* patch, int a, float b, void* c)
   {
     BOOST_TEST_EQ(test_var, true);
-    BOOST_TEST_EQ(patch->GetContext(), &test_var);
+    BOOST_TEST_EQ(*static_cast<void**>(patch->GetContext()), &test_var);
     BOOST_TEST(patch->GetTrampoline() != nullptr);
     auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
     BOOST_TEST_EQ(orig(a, b, c), 0x1337);

@@ -24,6 +24,8 @@ public:
 
   virtual void Remove() = 0;
 
+  virtual void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT = 0;
+
   virtual void Detach() HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT = 0;
@@ -38,7 +40,9 @@ public:
 
   virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
-  virtual void* GetContext() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void* GetContext() HADESMEM_DETAIL_NOEXCEPT = 0;
+
+  virtual void const* GetContext() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void* GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT
   {
