@@ -189,11 +189,16 @@ inline DWORD GetFileAttributesWrapper(std::wstring const& path)
   return attributes;
 }
 
-inline void CreateDirectoryWrapper(std::wstring const& path)
+inline void CreateDirectoryWrapper(std::wstring const& path,
+                                   bool fail_if_already_exists = true)
 {
   if (!CreateDirectoryW(path.c_str(), nullptr))
   {
     DWORD const last_error = ::GetLastError();
+    if (!fail_if_already_exists && last_error == ERROR_ALREADY_EXISTS)
+    {
+      return;
+    }
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"CreateDirectory failed."}
                                     << ErrorCodeWinLast{last_error});
