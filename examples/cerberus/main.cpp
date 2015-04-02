@@ -86,6 +86,19 @@ void UseAllStatics()
   auto const on_unmap_id = module.RegisterOnUnmap(on_unmap_callback);
   module.UnregisterOnUnmap(on_unmap_id);
 
+  auto const on_load_callback =
+    [](HMODULE, PCWSTR, PULONG, std::wstring const&, std::wstring const&)
+  {
+  };
+  auto const on_load_id = module.RegisterOnLoad(on_load_callback);
+  module.UnregisterOnLoad(on_load_id);
+
+  auto const on_unload_callback = [](HMODULE)
+  {
+  };
+  auto const on_unload_id = module.RegisterOnUnload(on_unload_callback);
+  module.UnregisterOnUnload(on_unload_id);
+
   auto const on_frame_callback_d3d9 = [](IDirect3DDevice9*)
   {
   };
