@@ -65,6 +65,8 @@ public:
                                   HMODULE& base,
                                   std::pair<void*, SIZE_T>& detoured_mod) final
   {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module: [%s].", name.c_str());
+
     if (detoured_mod.first)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s already detoured.", name.c_str());
@@ -86,6 +88,9 @@ public:
     detoured_mod =
       std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
 
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Base: [%p]. Size: [%IX].", detoured_mod.first, detoured_mod.second);
+
     return true;
   }
 
@@ -93,6 +98,8 @@ public:
     CommonUndetourModule(std::wstring const& name,
                          std::pair<void*, SIZE_T>& detoured_mod) final
   {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module: [%s].", name.c_str());
+
     (void)name;
     if (!detoured_mod.first)
     {

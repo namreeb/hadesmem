@@ -391,6 +391,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeD3D101();
     hadesmem::cerberus::InitializeD3D11();
     hadesmem::cerberus::InitializeDXGI();
+    hadesmem::cerberus::InitializeOpenGL32();
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
     hadesmem::cerberus::InitializeWindow();
