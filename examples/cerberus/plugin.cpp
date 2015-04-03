@@ -36,6 +36,7 @@
 #include "module.hpp"
 #include "opengl.hpp"
 #include "process.hpp"
+#include "raw_input.hpp"
 #include "render.hpp"
 #include "window.hpp"
 
@@ -208,6 +209,12 @@ public:
     GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT final
   {
     return &hadesmem::cerberus::GetD3D11Interface();
+  }
+
+  virtual hadesmem::cerberus::RawInputInterface*
+    GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT final
+  {
+    return &hadesmem::cerberus::GetRawInputInterface();
   }
 
   void Unload()

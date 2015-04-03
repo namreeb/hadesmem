@@ -42,6 +42,8 @@ class D3D10Interface;
 
 class D3D11Interface;
 
+class RawInputInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
@@ -84,6 +86,9 @@ public:
   virtual D3D10Interface* GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual D3D11Interface* GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
+
+  virtual RawInputInterface*
+    GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
 };
 
 void LoadPlugins();

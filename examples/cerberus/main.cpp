@@ -34,6 +34,7 @@
 #include "opengl.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
+#include "raw_input.hpp"
 #include "render.hpp"
 #include "window.hpp"
 
@@ -66,6 +67,7 @@ void UseAllStatics()
   auto& input = hadesmem::cerberus::GetInputInterface();
   auto& exception = hadesmem::cerberus::GetExceptionInterface();
   auto& process = hadesmem::cerberus::GetProcessInterface();
+  auto& raw_input = hadesmem::cerberus::GetRawInputInterface();
   auto& helper = hadesmem::cerberus::GetHelperInterface();
   (void)helper;
 
@@ -304,6 +306,21 @@ void UseAllStatics()
   auto const on_create_process_internal_w_id =
     process.RegisterOnCreateProcessInternalW(on_create_process_internal_w);
   process.UnregisterOnCreateProcessInternalW(on_create_process_internal_w_id);
+
+  auto const on_get_raw_input_buffer = [](PRAWINPUT, PUINT, UINT, bool*, UINT*)
+  {
+  };
+  auto const on_get_raw_input_buffer_id =
+    raw_input.RegisterOnGetRawInputBuffer(on_get_raw_input_buffer);
+  raw_input.UnregisterOnGetRawInputBuffer(on_get_raw_input_buffer_id);
+
+  auto const on_get_raw_input_data =
+    [](HRAWINPUT, UINT, LPVOID, PUINT, UINT, bool*, UINT*)
+  {
+  };
+  auto const on_get_raw_input_data_id =
+    raw_input.RegisterOnGetRawInputData(on_get_raw_input_data);
+  raw_input.UnregisterOnGetRawInputData(on_get_raw_input_data_id);
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -394,6 +411,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::InitializeOpenGL32();
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
+    hadesmem::cerberus::InitializeRawInput();
     hadesmem::cerberus::InitializeWindow();
     hadesmem::cerberus::InitializeRender();
     hadesmem::cerberus::InitializeInput();
@@ -409,6 +427,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
     hadesmem::cerberus::DetourUser32ForCursor(nullptr);
+    hadesmem::cerberus::DetourUser32ForRawInput(nullptr);
     hadesmem::cerberus::DetourUser32ForWindow(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
@@ -456,6 +475,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
     hadesmem::cerberus::UndetourUser32ForCursor(true);
+    hadesmem::cerberus::UndetourUser32ForRawInput(true);
     hadesmem::cerberus::UndetourUser32ForWindow(true);
     hadesmem::cerberus::UndetourOpenGL32(true);
 

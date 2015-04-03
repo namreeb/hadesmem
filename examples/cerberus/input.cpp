@@ -20,8 +20,9 @@
 #include "cursor.hpp"
 #include "direct_input.hpp"
 #include "hook_disabler.hpp"
-#include "render.hpp"
 #include "main.hpp"
+#include "raw_input.hpp"
+#include "render.hpp"
 #include "window.hpp"
 
 namespace
@@ -462,6 +463,35 @@ void OnGetClipCursor(RECT* rect,
     *handled = true;
   }
 }
+
+void OnGetRawInputBuffer(PRAWINPUT /*data*/,
+                         PUINT /*size*/,
+                         UINT /*size_header*/,
+                         bool* handled,
+                         UINT* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (hadesmem::cerberus::GetGuiVisible())
+  {
+    *retval = static_cast<UINT>(-1);
+    *handled = true;
+  }
+}
+
+void OnGetRawInputData(HRAWINPUT /*raw_input*/,
+                       UINT /*command*/,
+                       LPVOID data,
+                       PUINT size,
+                       UINT /*size_header*/,
+                       bool* handled,
+                       UINT* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (hadesmem::cerberus::GetGuiVisible() && data && size)
+  {
+    ::ZeroMemory(data, *size);
+    *retval = static_cast<UINT>(-1);
+    *handled = true;
+  }
+}
 }
 
 namespace hadesmem
@@ -583,6 +613,10 @@ void InitializeInput()
 
   auto& direct_input = GetDirectInputInterface();
   direct_input.RegisterOnDirectInput(OnDirectInput);
+
+  auto& raw_input = GetRawInputInterface();
+  raw_input.RegisterOnGetRawInputBuffer(OnGetRawInputBuffer);
+  raw_input.RegisterOnGetRawInputData(OnGetRawInputData);
 }
 }
 }
