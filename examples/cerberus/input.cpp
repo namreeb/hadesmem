@@ -626,7 +626,7 @@ void HandleInputQueue()
     hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
       &hadesmem::cerberus::GetDisableGetCursorPosHook()};
 
-    hadesmem::cerberus::LazyAttachThreadInput(msg.tid_);
+    LazyAttachThreadInput(msg.tid_);
 
     auto& callbacks = GetOnInputQueueEntryCallbacks();
     callbacks.Run(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_);

@@ -28,8 +28,6 @@ public:
   virtual void UnregisterOnInputQueueEntry(std::size_t id) = 0;
 };
 
-void LazyAttachThreadInput(DWORD tid);
-
 void SetGuiVisibleForInput(bool visible, bool old_visible);
 
 void HandleInputQueue();
