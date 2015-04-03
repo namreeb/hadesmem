@@ -12,8 +12,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnInputQueueEntry(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid);
+typedef void
+  OnInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 class InputInterface
 {

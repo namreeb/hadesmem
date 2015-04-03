@@ -608,21 +608,12 @@ void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
   }
 }
 
-void HandleInputQueueEntry(
-  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid)
+void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
   if (!AntTweakBarInitializedAny())
   {
     return;
   }
-
-  hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
-    &hadesmem::cerberus::GetDisableSetCursorHook()};
-
-  hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
-    &hadesmem::cerberus::GetDisableGetCursorPosHook()};
-
-  hadesmem::cerberus::LazyAttachThreadInput(tid);
 
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }

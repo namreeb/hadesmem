@@ -492,12 +492,40 @@ void OnGetRawInputData(HRAWINPUT /*raw_input*/,
     *handled = true;
   }
 }
+
+void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
+                               UINT num_devices,
+                               UINT /*size*/)
+{
+  auto r = const_cast<RAWINPUTDEVICE*>(raw_input_devices);
+  if (!r)
+  {
+    return;
+  }
+
+  for (UINT i = 0; i < num_devices; ++i)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Device: [%u]. UsagePage: [%u]. Usage: [%u]. Flags: [%08X].",
+      i,
+      r[i].usUsagePage,
+      r[i].usUsage,
+      r[i].dwFlags);
+
+    if (!!(r[i].dwFlags & RIDEV_NOLEGACY))
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Raw input device %u registered with RIDEV_NOLEGACY.", i);
+      // r[i].dwFlags &= ~(RIDEV_NOLEGACY | RIDEV_APPKEYS);
+    }
+
+    if (!!(r[i].dwFlags & RIDEV_REMOVE))
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Raw input device %u removed.", i);
+    }
+  }
 }
 
-namespace hadesmem
-{
-namespace cerberus
-{
 void LazyAttachThreadInput(DWORD tid)
 {
   static __declspec(thread) DWORD last_attached_tid = 0;
@@ -541,7 +569,12 @@ void LazyAttachThreadInput(DWORD tid)
     last_attached_thread = thread;
   }
 }
+}
 
+namespace hadesmem
+{
+namespace cerberus
+{
 void SetGuiVisibleForInput(bool visible, bool old_visible)
 {
   if (visible != old_visible)
@@ -586,8 +619,17 @@ void HandleInputQueue()
   while (!queue.empty())
   {
     WndProcInputMsg& msg = queue.front();
+
+    hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
+      &hadesmem::cerberus::GetDisableSetCursorHook()};
+
+    hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
+      &hadesmem::cerberus::GetDisableGetCursorPosHook()};
+
+    hadesmem::cerberus::LazyAttachThreadInput(msg.tid_);
+
     auto& callbacks = GetOnInputQueueEntryCallbacks();
-    callbacks.Run(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_, msg.tid_);
+    callbacks.Run(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_);
     queue.pop();
   }
 }
@@ -617,6 +659,7 @@ void InitializeInput()
   auto& raw_input = GetRawInputInterface();
   raw_input.RegisterOnGetRawInputBuffer(OnGetRawInputBuffer);
   raw_input.RegisterOnGetRawInputData(OnGetRawInputData);
+  raw_input.RegisterOnRegisterRawInputDevices(OnRegisterRawInputDevices);
 }
 }
 }

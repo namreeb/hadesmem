@@ -317,25 +317,12 @@ void SetAllGwenVisibility(bool visible, bool /*old_visible*/)
   GetAllGwenVisibility() = visible;
 }
 
-void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid)
+void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-  if (!GwenInitializedAny())
+  if (!GwenInitializedAny() || !GetAllGwenVisibility())
   {
     return;
   }
-
-  if (!GetAllGwenVisibility())
-  {
-    return;
-  }
-
-  hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
-    &hadesmem::cerberus::GetDisableSetCursorHook()};
-
-  hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
-    &hadesmem::cerberus::GetDisableGetCursorPosHook() };
-
-  hadesmem::cerberus::LazyAttachThreadInput(tid);
 
   // GWEN doesn't use the entire structure, it only needs what we've
   // initialized.
@@ -351,12 +338,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DW
 
 void OnFrameGwen(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
-  if (!GwenInitializedAny())
-  {
-    return;
-  }
-
-  if (!GetAllGwenVisibility())
+  if (!GwenInitializedAny() || !GetAllGwenVisibility())
   {
     return;
   }
