@@ -258,7 +258,7 @@ void UseAllStatics()
     direct_input.RegisterOnDirectInput(on_direct_input);
   direct_input.UnregisterOnDirectInput(on_direct_input_id);
 
-  auto const on_input_queue_entry = [](HWND, UINT, WPARAM, LPARAM)
+  auto const on_input_queue_entry = [](HWND, UINT, WPARAM, LPARAM, DWORD)
   {
   };
   auto const on_input_queue_entry_id =

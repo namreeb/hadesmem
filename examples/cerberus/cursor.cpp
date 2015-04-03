@@ -234,7 +234,7 @@ extern "C" HCURSOR WINAPI
       "SetCursor hook disabled, skipping callbacks.");
   }
 
-  auto const set_cursor = detour->GetTrampolineT<decltype(&SetCursor)>();
+  auto const set_cursor = detour->GetTrampolineT<decltype(&::SetCursor)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor(cursor);
   last_error_preserver.Update();
@@ -270,7 +270,8 @@ extern "C" BOOL WINAPI
       "GetCursorPos hook disabled, skipping callbacks.");
   }
 
-  auto const get_cursor_pos = detour->GetTrampolineT<decltype(&GetCursorPos)>();
+  auto const get_cursor_pos =
+    detour->GetTrampolineT<decltype(&::GetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = get_cursor_pos(point);
   last_error_preserver.Update();
@@ -306,7 +307,8 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
       "SetCursorPos hook disabled, skipping callbacks.");
   }
 
-  auto const set_cursor_pos = detour->GetTrampolineT<decltype(&SetCursorPos)>();
+  auto const set_cursor_pos =
+    detour->GetTrampolineT<decltype(&::SetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor_pos(x, y);
   last_error_preserver.Update();
@@ -343,7 +345,7 @@ extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
       "ShowCursor hook disabled, skipping callbacks.");
   }
 
-  auto const show_cursor = detour->GetTrampolineT<decltype(&ShowCursor)>();
+  auto const show_cursor = detour->GetTrampolineT<decltype(&::ShowCursor)>();
   last_error_preserver.Revert();
   auto const ret = show_cursor(show);
   last_error_preserver.Update();
@@ -356,8 +358,6 @@ extern "C" BOOL WINAPI
   ClipCursorDetour(hadesmem::PatchDetourBase* detour,
                    RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
 {
-  auto const ref_counter =
-    hadesmem::detail::MakeDetourRefCounter(detour->GetRefCount());
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", rect);
@@ -383,7 +383,7 @@ extern "C" BOOL WINAPI
       "ClipCursor hook disabled, skipping callbacks.");
   }
 
-  auto const clip_cursor = detour->GetTrampolineT<decltype(&ClipCursor)>();
+  auto const clip_cursor = detour->GetTrampolineT<decltype(&::ClipCursor)>();
   last_error_preserver.Revert();
   auto const ret = clip_cursor(rect);
   last_error_preserver.Update();
@@ -421,7 +421,7 @@ extern "C" BOOL WINAPI GetClipCursorDetour_(hadesmem::PatchDetourBase* detour,
   }
 
   auto const get_clip_cursor =
-    detour->GetTrampolineT<decltype(&GetClipCursor)>();
+    detour->GetTrampolineT<decltype(&::GetClipCursor)>();
   last_error_preserver.Revert();
   auto const ret = get_clip_cursor(rect);
   last_error_preserver.Update();

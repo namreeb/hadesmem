@@ -12,8 +12,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void
-  OnInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+typedef void OnInputQueueEntry(
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid);
 
 class InputInterface
 {
@@ -27,6 +27,8 @@ public:
 
   virtual void UnregisterOnInputQueueEntry(std::size_t id) = 0;
 };
+
+void LazyAttachThreadInput(DWORD tid);
 
 void SetGuiVisibleForInput(bool visible, bool old_visible);
 

@@ -77,10 +77,48 @@ RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
 
 struct WndProcInputMsg
 {
+  WndProcInputMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid)
+    : hwnd_{hwnd}, msg_{msg}, wparam_{wparam}, lparam_{lparam}, tid_{tid}
+  {
+    thread_ = ::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid);
+    if (!thread_.IsValid())
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"OpenThread failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+  }
+
+  WndProcInputMsg(WndProcInputMsg const&) = delete;
+  WndProcInputMsg& operator=(WndProcInputMsg const&) = delete;
+
+  WndProcInputMsg(WndProcInputMsg&& other)
+    : hwnd_{other.hwnd_},
+      msg_{other.msg_},
+      wparam_{other.wparam_},
+      lparam_{other.lparam_},
+      tid_{other.tid_},
+      thread_{std::move(other.thread_)}
+  {
+  }
+
+  WndProcInputMsg& operator=(WndProcInputMsg&& other)
+  {
+    hwnd_ = other.hwnd_;
+    msg_ = other.msg_;
+    wparam_ = other.wparam_;
+    lparam_ = other.lparam_;
+    tid_ = other.tid_;
+    thread_ = std::move(other.thread_);
+  }
+
   HWND hwnd_;
   UINT msg_;
   WPARAM wparam_;
   LPARAM lparam_;
+  DWORD tid_;
+  hadesmem::detail::SmartHandle thread_;
 };
 
 std::queue<WndProcInputMsg>& GetWndProcInputMsgQueue()
@@ -306,7 +344,8 @@ void WindowProcCallback(
     auto& queue = GetWndProcInputMsgQueue();
     auto& mutex = GetWndProcInputMsgQueueMutex();
     std::lock_guard<std::recursive_mutex> lock{mutex};
-    queue.push(WndProcInputMsg{hwnd, msg, wparam, lparam});
+    queue.push(
+      WndProcInputMsg{hwnd, msg, wparam, lparam, ::GetCurrentThreadId()});
   }
 
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
@@ -377,8 +416,9 @@ void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
   }
 }
 
-void
-  OnShowCursor(BOOL show, bool* handled, int* retval) HADESMEM_DETAIL_NOEXCEPT
+void OnShowCursor(BOOL show,
+                  bool* handled,
+                  int* retval) HADESMEM_DETAIL_NOEXCEPT
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
@@ -428,6 +468,50 @@ namespace hadesmem
 {
 namespace cerberus
 {
+void LazyAttachThreadInput(DWORD tid)
+{
+  static __declspec(thread) DWORD last_attached_tid = 0;
+  static __declspec(thread) HANDLE last_attached_thread = nullptr;
+
+  DWORD const current_tid = ::GetCurrentThreadId();
+  if (current_tid != tid && last_attached_tid != tid)
+  {
+    if (last_attached_tid)
+    {
+      if (!::AttachThreadInput(current_tid, last_attached_tid, FALSE))
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error{}
+          << hadesmem::ErrorString{"AttachThreadInput failed."}
+          << hadesmem::ErrorCodeWinLast{last_error});
+      }
+
+      ::CloseHandle(last_attached_thread);
+    }
+
+    if (!::AttachThreadInput(current_tid, tid, TRUE))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"AttachThreadInput failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+
+    last_attached_tid = tid;
+    HANDLE const thread =
+      ::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid);
+    if (!thread)
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"OpenThread failed."}
+                          << hadesmem::ErrorCodeWinLast{last_error});
+    }
+    last_attached_thread = thread;
+  }
+}
+
 void SetGuiVisibleForInput(bool visible, bool old_visible)
 {
   if (visible != old_visible)
@@ -471,9 +555,9 @@ void HandleInputQueue()
   std::lock_guard<std::recursive_mutex> lock{mutex};
   while (!queue.empty())
   {
-    WndProcInputMsg msg = queue.front();
+    WndProcInputMsg& msg = queue.front();
     auto& callbacks = GetOnInputQueueEntryCallbacks();
-    callbacks.Run(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_);
+    callbacks.Run(msg.hwnd_, msg.msg_, msg.wparam_, msg.lparam_, msg.tid_);
     queue.pop();
   }
 }

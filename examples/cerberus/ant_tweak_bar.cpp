@@ -498,8 +498,8 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
 
-  std::string render_api_name = [](hadesmem::cerberus::RenderApi api_)
-                                  -> std::string
+  std::string render_api_name =
+    [](hadesmem::cerberus::RenderApi api_) -> std::string
   {
     switch (api_)
     {
@@ -608,10 +608,21 @@ void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
   }
 }
 
-void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+void HandleInputQueueEntry(
+  HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid)
 {
+  if (!AntTweakBarInitializedAny())
+  {
+    return;
+  }
+
   hadesmem::cerberus::HookDisabler disable_set_cursor_hook{
     &hadesmem::cerberus::GetDisableSetCursorHook()};
+
+  hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
+    &hadesmem::cerberus::GetDisableGetCursorPosHook()};
+
+  hadesmem::cerberus::LazyAttachThreadInput(tid);
 
   ::TwEventWin(hwnd, msg, wparam, lparam);
 }
