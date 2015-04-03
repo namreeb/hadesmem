@@ -120,35 +120,152 @@ extern "C" HRESULT WINAPI
 
   return ret;
 }
+
+struct DeviceEnumInfo
+{
+  GUID guid_{};
+  hadesmem::cerberus::DirectInputDeviceType type_{
+    hadesmem::cerberus::DirectInputDeviceType::Other};
+};
 }
 
 namespace hadesmem
 {
 namespace cerberus
 {
-DirectInputDeviceType DeviceGuidToEnum(REFGUID rguid)
+DirectInputDeviceType DeviceGuidToEnum(IDirectInput8A* direct_input,
+                                       REFGUID rguid)
 {
-  if (rguid == GUID_SysMouse)
+  auto enum_callback =
+    [](LPCDIDEVICEINSTANCEA device_instance, LPVOID ref) -> BOOL
   {
-    return DirectInputDeviceType::Mouse;
-  }
-  else if (rguid == GUID_SysKeyboard)
+    auto const enum_info = static_cast<DeviceEnumInfo*>(ref);
+    if (device_instance->guidInstance == enum_info->guid_ ||
+        device_instance->guidProduct == enum_info->guid_)
+    {
+      auto const type = GET_DIDEVICE_TYPE(device_instance->dwDevType);
+      switch (type)
+      {
+      case DI8DEVTYPE_KEYBOARD:
+        enum_info->type_ = DirectInputDeviceType::Mouse;
+        break;
+      case DI8DEVTYPE_MOUSE:
+        enum_info->type_ = DirectInputDeviceType::Keyboard;
+        break;
+      default:
+        enum_info->type_ = DirectInputDeviceType::Other;
+        break;
+      }
+
+      auto const& rguid = enum_info->guid_;
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Got match. Type: [%lu]. GUID: "
+                                     "[%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%"
+                                     "02hhX%02hhX%02hhX%02hhX%02hhX]",
+                                     type,
+                                     rguid.Data1,
+                                     rguid.Data2,
+                                     rguid.Data3,
+                                     rguid.Data4[0],
+                                     rguid.Data4[1],
+                                     rguid.Data4[2],
+                                     rguid.Data4[3],
+                                     rguid.Data4[4],
+                                     rguid.Data4[5],
+                                     rguid.Data4[6],
+                                     rguid.Data4[7]);
+
+      return DIENUM_STOP;
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("No match for current GUID.");
+
+    return DIENUM_CONTINUE;
+  };
+
+  DeviceEnumInfo device_enum_info;
+  device_enum_info.guid_ = rguid;
+  auto const hr = direct_input->EnumDevices(
+    DI8DEVCLASS_ALL, enum_callback, &device_enum_info, DIEDFL_ALLDEVICES);
+  if (FAILED(hr))
   {
-    return DirectInputDeviceType::Keyboard;
-  }
-  else
-  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "EnumDevices failed. Defaulting to 'Other' device type. HR: [%08X]", hr);
     return DirectInputDeviceType::Other;
   }
+
+  return device_enum_info.type_;
 }
 
-std::string DeviceGuidToString(REFGUID rguid)
+DirectInputDeviceType DeviceGuidToEnum(IDirectInput8W* direct_input,
+                                       REFGUID rguid)
 {
-  if (rguid == GUID_SysMouse)
+  auto enum_callback =
+    [](LPCDIDEVICEINSTANCEW device_instance, LPVOID ref) -> BOOL
+  {
+    auto const enum_info = static_cast<DeviceEnumInfo*>(ref);
+    if (device_instance->guidInstance == enum_info->guid_ ||
+        device_instance->guidProduct == enum_info->guid_)
+    {
+      auto const type = GET_DIDEVICE_TYPE(device_instance->dwDevType);
+      switch (type)
+      {
+      case DI8DEVTYPE_KEYBOARD:
+        enum_info->type_ = DirectInputDeviceType::Mouse;
+        break;
+      case DI8DEVTYPE_MOUSE:
+        enum_info->type_ = DirectInputDeviceType::Keyboard;
+        break;
+      default:
+        enum_info->type_ = DirectInputDeviceType::Other;
+        break;
+      }
+
+      auto const& rguid = enum_info->guid_;
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Got match. Type: [%lu]. GUID: "
+                                     "[%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%"
+                                     "02hhX%02hhX%02hhX%02hhX%02hhX]",
+                                     type,
+                                     rguid.Data1,
+                                     rguid.Data2,
+                                     rguid.Data3,
+                                     rguid.Data4[0],
+                                     rguid.Data4[1],
+                                     rguid.Data4[2],
+                                     rguid.Data4[3],
+                                     rguid.Data4[4],
+                                     rguid.Data4[5],
+                                     rguid.Data4[6],
+                                     rguid.Data4[7]);
+
+      return DIENUM_STOP;
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("No match for current GUID.");
+
+    return DIENUM_CONTINUE;
+  };
+
+  DeviceEnumInfo device_enum_info;
+  device_enum_info.guid_ = rguid;
+  auto const hr = direct_input->EnumDevices(
+    DI8DEVCLASS_ALL, enum_callback, &device_enum_info, DIEDFL_ALLDEVICES);
+  if (FAILED(hr))
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "EnumDevices failed. Defaulting to 'Other' device type. HR: [%08X]", hr);
+    return DirectInputDeviceType::Other;
+  }
+
+  return device_enum_info.type_;
+}
+
+std::string DeviceTypeToString(DirectInputDeviceType type)
+{
+  if (type == DirectInputDeviceType::Mouse)
   {
     return "Mouse";
   }
-  else if (rguid == GUID_SysKeyboard)
+  else if (type == DirectInputDeviceType::Keyboard)
   {
     return "Keyboard";
   }

@@ -101,9 +101,10 @@ HRESULT WINAPI DirectInput8WProxy::CreateDevice(REFGUID rguid,
 
   if (SUCCEEDED(ret))
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Got new DirectInputDevice8W. Type: [%s].",
-                                   DeviceGuidToString(rguid).c_str());
-    *device = new DirectInputDevice8WProxy(*device, DeviceGuidToEnum(rguid));
+    auto const device_type = DeviceGuidToEnum(direct_input_, rguid);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Got new IDirectInputDevice8W. Type: [%s].",
+                                   DeviceTypeToString(device_type).c_str());
+    *device = new DirectInputDevice8WProxy(*device, device_type);
   }
   else
   {

@@ -6,6 +6,12 @@
 #include <cstdint>
 #include <functional>
 
+#include <windows.h>
+#include <hadesmem/detail/warning_disable_prefix.hpp>
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#include <hadesmem/detail/warning_disable_suffix.hpp>
+
 #include <hadesmem/config.hpp>
 
 #include "callbacks.hpp"
@@ -21,9 +27,13 @@ enum class DirectInputDeviceType
   Other
 };
 
-DirectInputDeviceType DeviceGuidToEnum(REFGUID rguid);
+DirectInputDeviceType DeviceGuidToEnum(IDirectInput8A* direct_input,
+                                       REFGUID rguid);
 
-std::string DeviceGuidToString(REFGUID rguid);
+DirectInputDeviceType DeviceGuidToEnum(IDirectInput8W* direct_input,
+                                       REFGUID rguid);
+
+std::string DeviceTypeToString(DirectInputDeviceType type);
 
 typedef void OnDirectInputCallback(bool* handled);
 
