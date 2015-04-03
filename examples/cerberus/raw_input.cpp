@@ -183,7 +183,7 @@ BOOL WINAPI RegisterRawInputDevicesDetour(hadesmem::PatchDetourBase* detour,
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%u] [%u].", raw_input_devices, num_devices, size);
 
   auto const& callbacks = GetOnRegisterRawInputDevicesCallbacks();
@@ -195,7 +195,7 @@ BOOL WINAPI RegisterRawInputDevicesDetour(hadesmem::PatchDetourBase* detour,
   auto const ret =
     register_raw_input_devices(raw_input_devices, num_devices, size);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", ret);
 
   return ret;
 }
