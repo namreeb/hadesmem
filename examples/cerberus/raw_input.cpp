@@ -109,15 +109,7 @@ extern "C" UINT WINAPI
   UINT retval{ret};
   callbacks.Run(data, size, size_header, &handled, &retval);
 
-  if (handled)
-  {
-    HADESMEM_DETAIL_TRACE_NOISY_A(
-      "GetRawInputBuffer handled. Not calling trampoline.");
-    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%u].", retval);
-    return retval;
-  }
-
-  return ret;
+  return retval;
 }
 
 extern "C" UINT WINAPI
@@ -150,15 +142,7 @@ extern "C" UINT WINAPI
   UINT retval{ret};
   callbacks.Run(raw_input, command, data, size, size_header, &handled, &retval);
 
-  if (handled)
-  {
-    HADESMEM_DETAIL_TRACE_NOISY_A(
-      "GetRawInputData handled. Not calling trampoline.");
-    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%u].", retval);
-    return retval;
-  }
-
-  return ret;
+  return retval;
 }
 }
 
