@@ -321,6 +321,14 @@ void UseAllStatics()
   auto const on_get_raw_input_data_id =
     raw_input.RegisterOnGetRawInputData(on_get_raw_input_data);
   raw_input.UnregisterOnGetRawInputData(on_get_raw_input_data_id);
+
+  auto const on_register_raw_input_devices = [](PCRAWINPUTDEVICE, UINT, UINT)
+  {
+  };
+  auto const on_register_raw_input_devices_id =
+    raw_input.RegisterOnRegisterRawInputDevices(on_register_raw_input_devices);
+  raw_input.UnregisterOnRegisterRawInputDevices(
+    on_register_raw_input_devices_id);
 }
 
 // Check whether any threads are currently executing code in our module. This

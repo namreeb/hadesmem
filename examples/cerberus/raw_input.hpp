@@ -14,11 +14,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-typedef void OnGetRawInputBufferCallback(PRAWINPUT data,
-                                         PUINT size,
-                                         UINT size_header,
-                                         bool* handled,
-                                         UINT* retval);
+typedef void OnGetRawInputBufferCallback(
+  PRAWINPUT data, PUINT size, UINT size_header, bool* handled, UINT* retval);
 
 typedef void OnGetRawInputDataCallback(HRAWINPUT raw_input,
                                        UINT command,
@@ -27,6 +24,9 @@ typedef void OnGetRawInputDataCallback(HRAWINPUT raw_input,
                                        UINT size_header,
                                        bool* handled,
                                        UINT* retval);
+
+typedef void OnRegisterRawInputDevicesCallback(
+  PCRAWINPUTDEVICE raw_input_devices, UINT num_devices, UINT size);
 
 class RawInputInterface
 {
@@ -44,6 +44,11 @@ public:
     std::function<OnGetRawInputDataCallback> const& callback) = 0;
 
   virtual void UnregisterOnGetRawInputData(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnRegisterRawInputDevices(
+    std::function<OnRegisterRawInputDevicesCallback> const& callback) = 0;
+
+  virtual void UnregisterOnRegisterRawInputDevices(std::size_t id) = 0;
 };
 
 RawInputInterface& GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT;

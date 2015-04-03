@@ -34,6 +34,15 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGetRawInputDataCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnRegisterRawInputDevicesCallback>&
+  GetOnRegisterRawInputDevicesCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnRegisterRawInputDevicesCallback> callbacks;
+  return callbacks;
+}
+
 class RawInputImpl : public hadesmem::cerberus::RawInputInterface
 {
 public:
@@ -62,6 +71,20 @@ public:
     auto& callbacks = GetOnGetRawInputDataCallbacks();
     return callbacks.Unregister(id);
   }
+
+  virtual std::size_t RegisterOnRegisterRawInputDevices(
+    std::function<hadesmem::cerberus::OnRegisterRawInputDevicesCallback> const&
+      callback) final
+  {
+    auto& callbacks = GetOnRegisterRawInputDevicesCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRegisterRawInputDevices(std::size_t id) final
+  {
+    auto& callbacks = GetOnRegisterRawInputDevicesCallbacks();
+    return callbacks.Unregister(id);
+  }
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputBuffer)>>&
@@ -77,6 +100,14 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputData)>>&
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputData)>>
     detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::RegisterRawInputDevices)>>&
+  GetRegisterRawInputDevicesDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<
+    hadesmem::PatchDetour<decltype(&::RegisterRawInputDevices)>> detour;
   return detour;
 }
 
@@ -144,6 +175,30 @@ extern "C" UINT WINAPI
 
   return retval;
 }
+
+BOOL WINAPI RegisterRawInputDevicesDetour(hadesmem::PatchDetourBase* detour,
+                                          PCRAWINPUTDEVICE raw_input_devices,
+                                          UINT num_devices,
+                                          UINT size)
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+    "Args: [%p] [%u] [%u].", raw_input_devices, num_devices, size);
+
+  auto const& callbacks = GetOnRegisterRawInputDevicesCallbacks();
+  callbacks.Run(raw_input_devices, num_devices, size);
+
+  auto const register_raw_input_devices =
+    detour->GetTrampolineT<decltype(&::RegisterRawInputDevices)>();
+  last_error_preserver.Revert();
+  auto const ret =
+    register_raw_input_devices(raw_input_devices, num_devices, size);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
 }
 
 namespace hadesmem
@@ -182,6 +237,11 @@ void DetourUser32ForRawInput(HMODULE base)
                "GetRawInputData",
                GetGetRawInputDataDetour(),
                GetRawInputDataDetour);
+    DetourFunc(process,
+               base,
+               "RegisterRawInputDevices",
+               GetRegisterRawInputDevicesDetour(),
+               RegisterRawInputDevicesDetour);
   }
 }
 
@@ -193,6 +253,8 @@ void UndetourUser32ForRawInput(bool remove)
   {
     UndetourFunc(L"GetRawInputBuffer", GetGetRawInputBufferDetour(), remove);
     UndetourFunc(L"GetRawInputData", GetGetRawInputDataDetour(), remove);
+    UndetourFunc(
+      L"RegisterRawInputDevices", GetRegisterRawInputDevicesDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
