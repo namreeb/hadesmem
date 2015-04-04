@@ -552,14 +552,14 @@ void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
                                      i);
     }
 
-    if (!!(r[i].dwFlags & RIDEV_NOLEGACY))
+    if ((r[i].dwFlags & RIDEV_NOLEGACY) == RIDEV_NOLEGACY)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A(
         "Raw input device %u registered with RIDEV_NOLEGACY.", i);
       // r[i].dwFlags &= ~(RIDEV_NOLEGACY | RIDEV_APPKEYS);
     }
 
-    if (!!(r[i].dwFlags & RIDEV_REMOVE))
+    if ((r[i].dwFlags & RIDEV_REMOVE) == RIDEV_REMOVE)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A("Raw input device %u removed.", i);
     }
@@ -638,6 +638,17 @@ void RegisterRawInputDevicesWrapper(PCRAWINPUTDEVICE raw_input_devices,
   }
 }
 
+void LogRawInputDevice(RAWINPUTDEVICE const& device)
+{
+  (void)device;
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "UsagePage: [%u]. Usage: [%u]. Flags: [%08X]. Target: [%p].",
+    device.usUsagePage,
+    device.usUsage,
+    device.dwFlags,
+    device.hwndTarget);
+}
+
 void SetRawInputDevices()
 {
   hadesmem::cerberus::HookDisabler disable_register_raw_input_devices_hook{
@@ -648,45 +659,66 @@ void SetRawInputDevices()
   auto const& mouse_device = GetOldRawInputMouseDevice();
   if (mouse_device.first)
   {
+    RAWINPUTDEVICE new_device = mouse_device.second;
+
     HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new mouse device.");
 
-    RAWINPUTDEVICE new_device = mouse_device.second;
+    LogRawInputDevice(new_device);
+
     new_device.hwndTarget = 0;
     new_device.dwFlags = 0;
+
+    LogRawInputDevice(new_device);
+
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 
   auto const& keyboard_device = GetOldRawInputKeyboardDevice();
   if (keyboard_device.first)
   {
+    RAWINPUTDEVICE new_device = keyboard_device.second;
+
     HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new keyboard device.");
 
-    RAWINPUTDEVICE new_device = keyboard_device.second;
+    LogRawInputDevice(new_device);
+
     new_device.hwndTarget = 0;
     new_device.dwFlags = 0;
+
+    LogRawInputDevice(new_device);
+
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 }
 
 void RestoreRawInputDevices()
 {
+  hadesmem::cerberus::HookDisabler disable_register_raw_input_devices_hook{
+    &hadesmem::cerberus::GetDisableRegisterRawInputDevicesHook()};
+
   HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old raw input devices.");
 
   auto const& mouse_device = GetOldRawInputMouseDevice();
   if (mouse_device.first)
   {
+    RAWINPUTDEVICE const new_device = mouse_device.second;
+
     HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old mouse device.");
 
-    RAWINPUTDEVICE const new_device = mouse_device.second;
+    LogRawInputDevice(new_device);
+
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 
   auto const& keyboard_device = GetOldRawInputKeyboardDevice();
   if (keyboard_device.first)
   {
+    RAWINPUTDEVICE const new_device = keyboard_device.second;
+
     HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old keyboard device.");
 
-    RAWINPUTDEVICE const new_device = keyboard_device.second;
+    LogRawInputDevice(new_device);
+
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 }

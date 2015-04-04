@@ -158,6 +158,7 @@ DirectInputDeviceType DeviceGuidToEnum(IDirectInput8A* direct_input,
       }
 
       auto const& rguid = enum_info->guid_;
+      (void)rguid;
       HADESMEM_DETAIL_TRACE_FORMAT_A("Got match. Type: [%lu]. GUID: "
                                      "[%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%"
                                      "02hhX%02hhX%02hhX%02hhX%02hhX]",
@@ -221,6 +222,7 @@ DirectInputDeviceType DeviceGuidToEnum(IDirectInput8W* direct_input,
       }
 
       auto const& rguid = enum_info->guid_;
+      (void)rguid;
       HADESMEM_DETAIL_TRACE_FORMAT_A("Got match. Type: [%lu]. GUID: "
                                      "[%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%"
                                      "02hhX%02hhX%02hhX%02hhX%02hhX]",
