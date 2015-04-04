@@ -186,8 +186,26 @@ BOOL WINAPI RegisterRawInputDevicesDetour(hadesmem::PatchDetourBase* detour,
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Args: [%p] [%u] [%u].", raw_input_devices, num_devices, size);
 
-  auto const& callbacks = GetOnRegisterRawInputDevicesCallbacks();
-  callbacks.Run(raw_input_devices, num_devices, size);
+  if (!hadesmem::cerberus::GetDisableRegisterRawInputDevicesHook())
+  {
+    auto const& callbacks = GetOnRegisterRawInputDevicesCallbacks();
+    bool handled = false;
+    BOOL retval = FALSE;
+    callbacks.Run(raw_input_devices, num_devices, size, &handled, &retval);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "RegisterRawInputDevices handled. Not calling trampoline.");
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%d].", retval);
+      return retval;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "RegisterRawInputDevices hook disabled, skipping callbacks.");
+  }
 
   auto const register_raw_input_devices =
     detour->GetTrampolineT<decltype(&::RegisterRawInputDevices)>();
@@ -258,6 +276,12 @@ void UndetourUser32ForRawInput(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
+}
+
+bool& GetDisableRegisterRawInputDevicesHook() HADESMEM_DETAIL_NOEXCEPT
+{
+  static __declspec(thread) bool disable_hook = false;
+  return disable_hook;
 }
 }
 }

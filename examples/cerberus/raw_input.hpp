@@ -25,8 +25,12 @@ typedef void OnGetRawInputDataCallback(HRAWINPUT raw_input,
                                        bool* handled,
                                        UINT* retval);
 
-typedef void OnRegisterRawInputDevicesCallback(
-  PCRAWINPUTDEVICE raw_input_devices, UINT num_devices, UINT size);
+typedef void
+  OnRegisterRawInputDevicesCallback(PCRAWINPUTDEVICE raw_input_devices,
+                                    UINT num_devices,
+                                    UINT size,
+                                    bool* handled,
+                                    BOOL* retval);
 
 class RawInputInterface
 {
@@ -58,5 +62,7 @@ void InitializeRawInput();
 void DetourUser32ForRawInput(HMODULE base);
 
 void UndetourUser32ForRawInput(bool remove);
+
+bool& GetDisableRegisterRawInputDevicesHook() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

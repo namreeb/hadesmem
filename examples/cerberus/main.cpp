@@ -322,7 +322,8 @@ void UseAllStatics()
     raw_input.RegisterOnGetRawInputData(on_get_raw_input_data);
   raw_input.UnregisterOnGetRawInputData(on_get_raw_input_data_id);
 
-  auto const on_register_raw_input_devices = [](PCRAWINPUTDEVICE, UINT, UINT)
+  auto const on_register_raw_input_devices =
+    [](PCRAWINPUTDEVICE, UINT, UINT, bool*, BOOL*)
   {
   };
   auto const on_register_raw_input_devices_id =

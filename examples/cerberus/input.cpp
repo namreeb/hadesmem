@@ -76,6 +76,20 @@ RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
   return old_clip_cursor;
 }
 
+std::pair<bool, RAWINPUTDEVICE>&
+  GetOldRawInputMouseDevice() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<bool, RAWINPUTDEVICE> old_device{};
+  return old_device;
+}
+
+std::pair<bool, RAWINPUTDEVICE>&
+  GetOldRawInputKeyboardDevice() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<bool, RAWINPUTDEVICE> old_device{};
+  return old_device;
+}
+
 struct WndProcInputMsg
 {
   WndProcInputMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, DWORD tid)
@@ -472,6 +486,9 @@ void OnGetRawInputBuffer(PRAWINPUT /*data*/,
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
+    // If you see this being spammed, please let me know along with the name of
+    // the game you've observed it in.
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Fix me.");
     *retval = static_cast<UINT>(-1);
     *handled = true;
   }
@@ -495,7 +512,9 @@ void OnGetRawInputData(HRAWINPUT /*raw_input*/,
 
 void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
                                UINT num_devices,
-                               UINT /*size*/)
+                               UINT /*size*/,
+                               bool* handled,
+                               BOOL* retval)
 {
   auto r = const_cast<RAWINPUTDEVICE*>(raw_input_devices);
   if (!r)
@@ -505,12 +524,33 @@ void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
 
   for (UINT i = 0; i < num_devices; ++i)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Device: [%u]. UsagePage: [%u]. Usage: [%u]. Flags: [%08X].",
-      i,
-      r[i].usUsagePage,
-      r[i].usUsage,
-      r[i].dwFlags);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Device: [%u]. UsagePage: [%u]. Usage: "
+                                   "[%u]. Flags: [%08X]. Target: [%p].",
+                                   i,
+                                   r[i].usUsagePage,
+                                   r[i].usUsage,
+                                   r[i].dwFlags,
+                                   r[i].hwndTarget);
+
+    USHORT const kDesktopPage = 0x1;
+    USHORT const kMouseUsage = 0x2;
+    USHORT const kKeyboardUsage = 0x6;
+    if (r[i].usUsagePage == kDesktopPage && r[i].usUsage == kMouseUsage)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Saving mouse device. Device: [%u].", i);
+      GetOldRawInputMouseDevice() = std::make_pair(true, r[i]);
+    }
+    else if (r[i].usUsagePage == kDesktopPage && r[i].usUsage == kKeyboardUsage)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Saving keyboard device. Device: [%u].",
+                                     i);
+      GetOldRawInputKeyboardDevice() = std::make_pair(true, r[i]);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Skipping unknown device. Device: [%u].",
+                                     i);
+    }
 
     if (!!(r[i].dwFlags & RIDEV_NOLEGACY))
     {
@@ -523,6 +563,13 @@ void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A("Raw input device %u removed.", i);
     }
+  }
+
+  if (hadesmem::cerberus::GetGuiVisible())
+  {
+    *handled = true;
+    *retval = FALSE;
+    return;
   }
 }
 
@@ -569,6 +616,73 @@ void LazyAttachThreadInput(DWORD tid)
     last_attached_thread = thread;
   }
 }
+
+void RegisterRawInputDevicesWrapper(PCRAWINPUTDEVICE raw_input_devices,
+                                    UINT num_devices,
+                                    UINT size)
+{
+  if (!::RegisterRawInputDevices(raw_input_devices, num_devices, size))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"RegisterRawInputDevices failed."}
+      << hadesmem::ErrorCodeWinLast{last_error});
+  }
+}
+
+void SetRawInputDevices()
+{
+  hadesmem::cerberus::HookDisabler disable_register_raw_input_devices_hook{
+    &hadesmem::cerberus::GetDisableRegisterRawInputDevicesHook()};
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new raw input devices.");
+
+  auto const& mouse_device = GetOldRawInputMouseDevice();
+  if (mouse_device.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new mouse device.");
+
+    RAWINPUTDEVICE new_device = mouse_device.second;
+    new_device.hwndTarget = 0;
+    new_device.dwFlags = 0;
+    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
+  }
+
+  auto const& keyboard_device = GetOldRawInputKeyboardDevice();
+  if (keyboard_device.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new keyboard device.");
+
+    RAWINPUTDEVICE new_device = keyboard_device.second;
+    new_device.hwndTarget = 0;
+    new_device.dwFlags = 0;
+    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
+  }
+}
+
+void RestoreRawInputDevices()
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old raw input devices.");
+
+  auto const& mouse_device = GetOldRawInputMouseDevice();
+  if (mouse_device.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old mouse device.");
+
+    RAWINPUTDEVICE const new_device = mouse_device.second;
+    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
+  }
+
+  auto const& keyboard_device = GetOldRawInputKeyboardDevice();
+  if (keyboard_device.first)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old keyboard device.");
+
+    RAWINPUTDEVICE const new_device = keyboard_device.second;
+    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
+  }
+}
 }
 
 namespace hadesmem
@@ -590,6 +704,8 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
       SaveCurrentClipCursor();
 
       SetNewClipCursor();
+
+      SetRawInputDevices();
     }
     else
     {
@@ -598,6 +714,8 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
       HideCursor();
 
       RestoreOldClipCursor();
+
+      RestoreRawInputDevices();
     }
   }
   else
