@@ -595,6 +595,8 @@ void LazyAttachThreadInput(DWORD tid)
       ::CloseHandle(last_attached_thread);
     }
 
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Attaching thread input. TID: [%u].", tid);
+
     if (!::AttachThreadInput(current_tid, tid, TRUE))
     {
       DWORD const last_error = ::GetLastError();
