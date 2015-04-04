@@ -591,8 +591,13 @@ void LazyAttachThreadInput(DWORD tid)
           << hadesmem::ErrorString{"AttachThreadInput failed."}
           << hadesmem::ErrorCodeWinLast{last_error});
       }
+      last_attached_tid = 0;
 
-      ::CloseHandle(last_attached_thread);
+      if (last_attached_thread)
+      {
+        ::CloseHandle(last_attached_thread);
+        last_attached_thread = nullptr;
+      }
     }
 
     HADESMEM_DETAIL_TRACE_FORMAT_A("Attaching thread input. TID: [%u].", tid);
@@ -604,8 +609,8 @@ void LazyAttachThreadInput(DWORD tid)
         hadesmem::Error{} << hadesmem::ErrorString{"AttachThreadInput failed."}
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
-
     last_attached_tid = tid;
+
     HANDLE const thread =
       ::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid);
     if (!thread)
