@@ -76,18 +76,10 @@ RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
   return old_clip_cursor;
 }
 
-std::pair<bool, RAWINPUTDEVICE>&
-  GetOldRawInputMouseDevice() HADESMEM_DETAIL_NOEXCEPT
+std::vector<RAWINPUTDEVICE>& GetOldRawInputDevices() HADESMEM_DETAIL_NOEXCEPT
 {
-  static std::pair<bool, RAWINPUTDEVICE> old_device{};
-  return old_device;
-}
-
-std::pair<bool, RAWINPUTDEVICE>&
-  GetOldRawInputKeyboardDevice() HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::pair<bool, RAWINPUTDEVICE> old_device{};
-  return old_device;
+  static std::vector<RAWINPUTDEVICE> old_devices;
+  return old_devices;
 }
 
 struct WndProcInputMsg
@@ -532,26 +524,6 @@ void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
                                    r[i].dwFlags,
                                    r[i].hwndTarget);
 
-    USHORT const kDesktopPage = 0x1;
-    USHORT const kMouseUsage = 0x2;
-    USHORT const kKeyboardUsage = 0x6;
-    if (r[i].usUsagePage == kDesktopPage && r[i].usUsage == kMouseUsage)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Saving mouse device. Device: [%u].", i);
-      GetOldRawInputMouseDevice() = std::make_pair(true, r[i]);
-    }
-    else if (r[i].usUsagePage == kDesktopPage && r[i].usUsage == kKeyboardUsage)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Saving keyboard device. Device: [%u].",
-                                     i);
-      GetOldRawInputKeyboardDevice() = std::make_pair(true, r[i]);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Skipping unknown device. Device: [%u].",
-                                     i);
-    }
-
     if ((r[i].dwFlags & RIDEV_NOLEGACY) == RIDEV_NOLEGACY)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -656,37 +628,82 @@ void SetRawInputDevices()
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new raw input devices.");
 
-  auto const& mouse_device = GetOldRawInputMouseDevice();
-  if (mouse_device.first)
+  UINT num_devices = 0;
+   ::GetRegisteredRawInputDevices(nullptr, &num_devices, sizeof(RAWINPUTDEVICE));
+
+  if (!num_devices)
   {
-    RAWINPUTDEVICE new_device = mouse_device.second;
+    HADESMEM_DETAIL_TRACE_A("No registered raw input devices.");
+    return;
+  }
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new mouse device.");
+  std::vector<RAWINPUTDEVICE> old_devices(num_devices);
+  UINT const num_devices_written = ::GetRegisteredRawInputDevices(
+    old_devices.data(), &num_devices, sizeof(RAWINPUTDEVICE));
+  if (num_devices_written == static_cast<UINT>(-1))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"GetRegisteredRawInputDevices failed."}
+      << hadesmem::ErrorCodeWinLast{last_error});
+  }
 
-    LogRawInputDevice(new_device);
+  old_devices.resize(num_devices_written);
 
-    new_device.hwndTarget = 0;
-    new_device.dwFlags = 0;
+  GetOldRawInputDevices() = old_devices;
 
-    LogRawInputDevice(new_device);
+  auto const mouse_iter =
+    std::find_if(std::begin(old_devices),
+                 std::end(old_devices),
+                 [](RAWINPUTDEVICE const& device)
+                 {
+                   USHORT const kDesktopPage = 0x1;
+                   USHORT const kMouseUsage = 0x2;
+                   return device.usUsagePage == kDesktopPage &&
+                          device.usUsage == kMouseUsage;
+                 });
 
+  auto const keyboard_iter =
+    std::find_if(std::begin(old_devices),
+                 std::end(old_devices),
+                 [](RAWINPUTDEVICE const& device)
+                 {
+                   USHORT const kDesktopPage = 0x1;
+                   USHORT const kKeyboardUsage = 0x6;
+                   return device.usUsagePage == kDesktopPage &&
+                          device.usUsage == kKeyboardUsage;
+                 });
+
+  if (mouse_iter == std::end(old_devices) &&
+      keyboard_iter == std::end(old_devices))
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "No registered mouse or keyboard raw input devices.");
+    return;
+  }
+
+  auto const& window_interface = hadesmem::cerberus::GetWindowInterface();
+
+  USHORT const kDesktopPage = 0x1;
+  USHORT const kMouseUsage = 0x2;
+  USHORT const kKeyboardUsage = 0x6;
+
+  if (mouse_iter != std::end(old_devices))
+  {
+    HADESMEM_DETAIL_TRACE_A("Setting new mouse device.");
+
+    RAWINPUTDEVICE new_device = {
+      kDesktopPage, kMouseUsage, 0, window_interface.GetCurrentWindow()};
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 
-  auto const& keyboard_device = GetOldRawInputKeyboardDevice();
-  if (keyboard_device.first)
+  if (keyboard_iter != std::end(old_devices))
   {
-    RAWINPUTDEVICE new_device = keyboard_device.second;
+    HADESMEM_DETAIL_TRACE_A("Setting new keyboard device.");
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Setting new keyboard device.");
-
-    LogRawInputDevice(new_device);
-
-    new_device.hwndTarget = 0;
-    new_device.dwFlags = 0;
-
-    LogRawInputDevice(new_device);
-
+    RAWINPUTDEVICE new_device = {
+      kDesktopPage, kKeyboardUsage, 0, window_interface.GetCurrentWindow()};
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 }
@@ -696,30 +713,32 @@ void RestoreRawInputDevices()
   hadesmem::cerberus::HookDisabler disable_register_raw_input_devices_hook{
     &hadesmem::cerberus::GetDisableRegisterRawInputDevicesHook()};
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old raw input devices.");
+  HADESMEM_DETAIL_TRACE_A("Restoring old raw input devices.");
 
-  auto const& mouse_device = GetOldRawInputMouseDevice();
-  if (mouse_device.first)
+  auto const& old_devices = GetOldRawInputDevices();
+  for (auto const& device : old_devices)
   {
-    RAWINPUTDEVICE const new_device = mouse_device.second;
+    LogRawInputDevice(device);
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old mouse device.");
+    USHORT const kDesktopPage = 0x1;
+    USHORT const kMouseUsage = 0x2;
+    USHORT const kKeyboardUsage = 0x6;
 
-    LogRawInputDevice(new_device);
-
-    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
-  }
-
-  auto const& keyboard_device = GetOldRawInputKeyboardDevice();
-  if (keyboard_device.first)
-  {
-    RAWINPUTDEVICE const new_device = keyboard_device.second;
-
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Restoring old keyboard device.");
-
-    LogRawInputDevice(new_device);
-
-    RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
+    if (device.usUsagePage == kDesktopPage && device.usUsage == kMouseUsage)
+    {
+      HADESMEM_DETAIL_TRACE_A("Restoring old mouse device.");
+      RegisterRawInputDevicesWrapper(&device, 1, sizeof(device));
+    }
+    else if (device.usUsagePage == kDesktopPage &&
+             device.usUsage == kKeyboardUsage)
+    {
+      HADESMEM_DETAIL_TRACE_A("Restoring old keyboard device.");
+      RegisterRawInputDevicesWrapper(&device, 1, sizeof(device));
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("Skipping unknown device.");
+    }
   }
 }
 }
