@@ -20,37 +20,35 @@ HRESULT WINAPI D3D10DeviceProxy::QueryInterface(REFIID riid, void** obj)
   auto const ret = device_->QueryInterface(riid, obj);
   last_error_preserver.Update();
 
-  if (SUCCEEDED(ret))
+  if (FAILED(ret))
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    return ret;
+  }
 
-    if (*obj == device_)
-    {
-      refs_++;
-      *obj = this;
-    }
-    else if (riid == __uuidof(ID3D10Device1))
-    {
-      *obj = new D3D10DeviceProxy(static_cast<ID3D10Device1*>(*obj));
-    }
-    // Observed in Rift.
-    else if (riid == __uuidof(IDXGIDevice))
-    {
-      // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
-      return ret;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
-      HADESMEM_DETAIL_ASSERT(false);
-      static_cast<IUnknown*>(*obj)->Release();
-      return E_NOINTERFACE;
-    }
+  HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+
+  if (*obj == device_)
+  {
+    refs_++;
+    *obj = this;
+  }
+  else if (riid == __uuidof(ID3D10Device1))
+  {
+    *obj = new D3D10DeviceProxy(static_cast<ID3D10Device1*>(*obj));
+  }
+  // Observed in Rift.
+  else if (riid == __uuidof(IDXGIDevice))
+  {
+    // Needs investigation to see if we need to wrap this.
+    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
+    HADESMEM_DETAIL_ASSERT(false);
+    static_cast<IUnknown*>(*obj)->Release();
+    return E_NOINTERFACE;
   }
 
   return ret;

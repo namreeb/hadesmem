@@ -126,18 +126,11 @@ HRESULT WINAPI
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   last_error_preserver.Revert();
-  auto const ret = device_->GetDeviceState(len_data, data);
+  auto ret = device_->GetDeviceState(len_data, data);
   last_error_preserver.Update();
 
-  auto const& callbacks = GetOnDirectInputCallbacks();
-  bool handled = false;
-  callbacks.Run(&handled);
-
-  if (handled && SUCCEEDED(ret))
-  {
-    std::memset(data, 0, len_data);
-    return E_FAIL;
-  }
+  auto const& callbacks = GetOnGetDeviceStateCallbacks();
+  callbacks.Run(len_data, data, &ret);
 
   return ret;
 }
@@ -151,28 +144,11 @@ HRESULT WINAPI
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
   last_error_preserver.Revert();
-  auto const ret =
-    device_->GetDeviceData(len_object_data, rgdod, in_out, flags);
+  auto ret = device_->GetDeviceData(len_object_data, rgdod, in_out, flags);
   last_error_preserver.Update();
 
-  auto const& callbacks = GetOnDirectInputCallbacks();
-  bool handled = false;
-  callbacks.Run(&handled);
-
-  if (handled && SUCCEEDED(ret))
-  {
-    // Flush direct input buffer
-    DWORD items = INFINITE;
-    device_->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), nullptr, &items, 0);
-
-    // Zero application buffer
-    if (rgdod)
-    {
-      std::memset(rgdod, 0, len_object_data * *in_out);
-    }
-
-    return E_FAIL;
-  }
+  auto const& callbacks = GetOnGetDeviceDataCallbacks();
+  callbacks.Run(len_object_data, rgdod, in_out, flags, &ret, device_, false);
 
   return ret;
 }
@@ -192,7 +168,6 @@ HRESULT WINAPI
 HRESULT WINAPI
   DirectInputDevice8AProxy::SetCooperativeLevel(HWND hwnd, DWORD flags)
 {
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%lu]", hwnd, flags);
   return device_->SetCooperativeLevel(hwnd, flags);
 }
 

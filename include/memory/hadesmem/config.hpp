@@ -41,8 +41,7 @@
 #if !(defined(HADESMEM_DETAIL_ARCH_X64) ||                                     \
       (defined(HADESMEM_DETAIL_ARCH_X86) && _M_IX86_FP >= 2))
 #define HADESMEM_DETAIL_NO_VECTORCALL
-#endif // #if (defined(HADESMEM_GCC) || defined(HADESMEM_CLANG) ||
-       // defined(HADESMEM_INTEL)) || !(defined(HADESMEM_DETAIL_ARCH_X64) ||
+#endif // !(defined(HADESMEM_DETAIL_ARCH_X64) ||
        // (defined(HADESMEM_DETAIL_ARCH_X86) && _M_IX86_FP >= 2))
 
 #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)

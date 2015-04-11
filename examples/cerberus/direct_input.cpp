@@ -26,17 +26,31 @@ namespace
 class DirectInputImpl : public hadesmem::cerberus::DirectInputInterface
 {
 public:
-  virtual std::size_t RegisterOnDirectInput(
-    std::function<hadesmem::cerberus::OnDirectInputCallback> const& callback)
+  virtual std::size_t RegisterOnGetDeviceData(
+    std::function<hadesmem::cerberus::OnGetDeviceDataCallback> const& callback)
     final
   {
-    auto& callbacks = hadesmem::cerberus::GetOnDirectInputCallbacks();
+    auto& callbacks = hadesmem::cerberus::GetOnGetDeviceDataCallbacks();
     return callbacks.Register(callback);
   }
 
-  virtual void UnregisterOnDirectInput(std::size_t id) final
+  virtual void UnregisterOnGetDeviceData(std::size_t id) final
   {
-    auto& callbacks = hadesmem::cerberus::GetOnDirectInputCallbacks();
+    auto& callbacks = hadesmem::cerberus::GetOnGetDeviceDataCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnGetDeviceState(
+    std::function<hadesmem::cerberus::OnGetDeviceStateCallback> const& callback)
+    final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnGetDeviceStateCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnGetDeviceState(std::size_t id) final
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnGetDeviceStateCallbacks();
     return callbacks.Unregister(id);
   }
 };
@@ -277,9 +291,15 @@ std::string DeviceTypeToString(DirectInputDeviceType type)
   }
 }
 
-Callbacks<OnDirectInputCallback>& GetOnDirectInputCallbacks()
+Callbacks<OnGetDeviceDataCallback>& GetOnGetDeviceDataCallbacks()
 {
-  static Callbacks<OnDirectInputCallback> callbacks;
+  static Callbacks<OnGetDeviceDataCallback> callbacks;
+  return callbacks;
+}
+
+Callbacks<OnGetDeviceStateCallback>& GetOnGetDeviceStateCallbacks()
+{
+  static Callbacks<OnGetDeviceStateCallback> callbacks;
   return callbacks;
 }
 

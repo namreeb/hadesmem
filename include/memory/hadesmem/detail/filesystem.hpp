@@ -53,7 +53,7 @@ inline std::wstring CombinePath(std::wstring const& base,
 {
   // Use newer and better PathCchCombineEx if it's available.
   detail::SmartModuleHandle const path_mod{
-    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
+    ::LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
   if (path_mod.IsValid())
   {
     using PathCchCombineExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
@@ -192,7 +192,7 @@ inline DWORD GetFileAttributesWrapper(std::wstring const& path)
 inline void CreateDirectoryWrapper(std::wstring const& path,
                                    bool fail_if_already_exists = true)
 {
-  if (!CreateDirectoryW(path.c_str(), nullptr))
+  if (!::CreateDirectoryW(path.c_str(), nullptr))
   {
     DWORD const last_error = ::GetLastError();
     if (!fail_if_already_exists && last_error == ERROR_ALREADY_EXISTS)
@@ -209,11 +209,48 @@ inline void CopyFileWrapper(std::wstring const& existing_path,
                             std::wstring const& new_path,
                             bool fail_if_exists)
 {
-  if (!CopyFileW(existing_path.c_str(), new_path.c_str(), fail_if_exists))
+  if (!::CopyFileW(existing_path.c_str(), new_path.c_str(), fail_if_exists))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"CopyFile failed."}
                                             << ErrorCodeWinLast{last_error});
+  }
+}
+
+inline void CopyDirectory(std::wstring const& src, std::wstring const& dst)
+{
+  if (src.empty() || dst.empty())
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Invalid argument(s)."});
+  }
+
+  std::wstring const src_wildcard = src + (src.back() == L'\\' ? L"*" : L"\\*");
+  std::vector<wchar_t> src_zz(std::begin(src_wildcard), std::end(src_wildcard));
+  src_zz.push_back(L'\0');
+  src_zz.push_back(L'\0');
+
+  std::vector<wchar_t> dst_zz(std::begin(dst), std::end(dst));
+  dst_zz.push_back(L'\0');
+  dst_zz.push_back(L'\0');
+
+  SHFILEOPSTRUCT file_op{};
+  file_op.wFunc = FO_COPY;
+  file_op.pFrom = src_zz.data();
+  file_op.pTo = dst_zz.data();
+  file_op.fFlags = FOF_NO_UI;
+  auto const result = ::SHFileOperationW(&file_op);
+  if (result)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error{} << ErrorString{"SHFileOperationW failed."}
+              << ErrorCodeWinOther{static_cast<DWORD_PTR>(result)});
+  }
+
+  if (file_op.fAnyOperationsAborted)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error{} << ErrorString{"SHFileOperationW aborted."});
   }
 }
 
@@ -231,13 +268,14 @@ inline bool IsSymlink(std::wstring const& path)
   return !!(attributes & FILE_ATTRIBUTE_REPARSE_POINT);
 }
 
+// Avoid using this where possible as it is sensitive to the CWD.
 inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
 {
   std::vector<wchar_t> full_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  DWORD len = GetFullPathNameW(path.c_str(),
-                               static_cast<DWORD>(full_path.size()),
-                               full_path.data(),
-                               nullptr);
+  DWORD len = ::GetFullPathNameW(path.c_str(),
+                                 static_cast<DWORD>(full_path.size()),
+                                 full_path.data(),
+                                 nullptr);
   if (!len || full_path.size() < len)
   {
     DWORD const last_error = ::GetLastError();
@@ -260,10 +298,47 @@ inline std::wstring GetPathBaseName(std::wstring const& path)
                       path.end());
 }
 
+inline std::wstring PathRemoveFileSpecWrapper(std::wstring path)
+{
+  // Use newer and better PathCchRemoveFileSpec if it's available, otherwise use
+  // PathRemoveFileSpec.
+  detail::SmartModuleHandle const path_mod{
+    ::LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
+  if (path_mod.IsValid())
+  {
+    using PathCchRemoveFileSpecFn =
+      HRESULT(WINAPI*)(PWSTR pszPath, size_t cchPath);
+    auto const path_cch_remove_file_spec =
+      reinterpret_cast<PathCchRemoveFileSpecFn>(
+        GetProcAddress(path_mod.GetHandle(), "PathCchRemoveFileSpec"));
+    if (path_cch_remove_file_spec)
+    {
+      HRESULT const hr = path_cch_remove_file_spec(&path[0], path.size());
+      if (FAILED(hr))
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error{} << ErrorString{"PathCchCanonicalizeEx failed."}
+                  << ErrorCodeWinHr{hr});
+      }
+    }
+  }
+  else
+  {
+    if (!::PathRemoveFileSpecW(&path[0]))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"PathRemoveFileSpecW failed."}
+                << ErrorCodeWinLast{last_error});
+    }
+  }
+
+  return path;
+}
+
 inline std::wstring PathFindFileNameWrapper(std::wstring const& path)
 {
-  std::vector<wchar_t> file_name(MAX_PATH);
-  auto const p = PathFindFileNameW(path.c_str());
+  auto const p = ::PathFindFileNameW(path.c_str());
   if (p == path.c_str())
   {
     DWORD const last_error = ::GetLastError();
@@ -272,7 +347,7 @@ inline std::wstring PathFindFileNameWrapper(std::wstring const& path)
                                     << ErrorCodeWinLast{last_error});
   }
 
-  return file_name.data();
+  return p;
 }
 
 inline std::wstring MakeExtendedPath(std::wstring path)
@@ -281,7 +356,7 @@ inline std::wstring MakeExtendedPath(std::wstring path)
   // through to the custom implementation to ensure we always get an extended
   // path back out, rather than just when it's longer than MAX_PATH.
   detail::SmartModuleHandle const path_mod{
-    LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
+    ::LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
   if (path_mod.IsValid())
   {
     using PathCchCanonicalizeExFn = HRESULT(WINAPI*)(PWSTR pszPathOut,
@@ -297,7 +372,7 @@ inline std::wstring MakeExtendedPath(std::wstring path)
                                              buffer.size(),
                                              path.c_str(),
                                              HADESMEM_PATHCCH_ALLOW_LONG_PATHS);
-      if (!SUCCEEDED(hr))
+      if (FAILED(hr))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
           Error{} << ErrorString{"PathCchCanonicalizeEx failed."}
@@ -314,8 +389,7 @@ inline std::wstring MakeExtendedPath(std::wstring path)
     if (hadesmem::detail::IsPathRelative(path))
     {
       // ..\foo\bar
-      return MakeExtendedPath(hadesmem::detail::CombinePath(
-        hadesmem::detail::GetSelfDirPath(), path));
+      return MakeExtendedPath(CombinePath(GetSelfDirPath(), path));
     }
     else
     {
@@ -327,7 +401,8 @@ inline std::wstring MakeExtendedPath(std::wstring path)
       else
       {
         // \foo\bar
-        return MakeExtendedPath(hadesmem::detail::GetFullPathNameWrapper(path));
+        // Forced to use GetFullPathName here.
+        return MakeExtendedPath(GetFullPathNameWrapper(path));
       }
     }
   }

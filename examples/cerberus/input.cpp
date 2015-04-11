@@ -345,6 +345,18 @@ void ToggleGuiVisible()
   hadesmem::cerberus::SetGuiVisible(visible, !visible);
 }
 
+void CallDefWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+  if (::IsWindowUnicode(hwnd))
+  {
+    ::DefWindowProcW(hwnd, msg, wparam, lparam);
+  }
+  else
+  {
+    ::DefWindowProcA(hwnd, msg, wparam, lparam);
+  }
+}
+
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
 {
@@ -356,8 +368,12 @@ void WindowProcCallback(
       WndProcInputMsg{hwnd, msg, wparam, lparam, ::GetCurrentThreadId()});
   }
 
+  bool const shift_down = !!(::GetAsyncKeyState(VK_SHIFT) & 0x8000);
+
+  // TODO: Also support raw input keyboard messages for cases where
+  // RIDEV_NOLEGACY is used.
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
-      ::GetAsyncKeyState(VK_SHIFT) & 0x8000)
+      shift_down)
   {
     ToggleGuiVisible();
     *handled = true;
@@ -370,6 +386,11 @@ void WindowProcCallback(
                            (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST);
   if (visible && blocked_msg)
   {
+    if (msg == WM_INPUT)
+    {
+      CallDefWindowProc(hwnd, msg, wparam, lparam);
+    }
+
     *handled = true;
     return;
   }
@@ -391,12 +412,55 @@ void OnSetCursor(HCURSOR cursor,
   }
 }
 
-void OnDirectInput(bool* handled) HADESMEM_DETAIL_NOEXCEPT
+void OnGetDeviceData(DWORD len_object_data,
+                     LPDIDEVICEOBJECTDATA rgdod,
+                     LPDWORD in_out,
+                     DWORD flags,
+                     HRESULT* retval,
+                     void* device,
+                     bool wide) HADESMEM_DETAIL_NOEXCEPT
 {
-  if (hadesmem::cerberus::GetGuiVisible())
+  if (FAILED(*retval) || !hadesmem::cerberus::GetGuiVisible())
   {
-    *handled = true;
+    return;
   }
+
+  if (!(flags & DIGDD_PEEK))
+  {
+    // Flush direct input buffer
+    DWORD items = INFINITE;
+    if (wide)
+    {
+      static_cast<IDirectInputDeviceW*>(device)
+        ->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), nullptr, &items, 0);
+    }
+    else
+    {
+      static_cast<IDirectInputDeviceA*>(device)
+        ->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), nullptr, &items, 0);
+    }
+  }
+
+  // Zero application buffer
+  if (rgdod)
+  {
+    std::memset(rgdod, 0, len_object_data * *in_out);
+  }
+
+  *retval = E_FAIL;
+}
+
+void OnGetDeviceState(DWORD len_data,
+                      LPVOID data,
+                      HRESULT* retval) HADESMEM_DETAIL_NOEXCEPT
+{
+  if (FAILED(*retval) || !hadesmem::cerberus::GetGuiVisible())
+  {
+    return;
+  }
+
+  std::memset(data, 0, len_data);
+  *retval = E_FAIL;
 }
 
 void OnGetCursorPos(LPPOINT point, bool* handled) HADESMEM_DETAIL_NOEXCEPT
@@ -477,7 +541,7 @@ void OnGetRawInputBuffer(PRAWINPUT /*data*/,
                          bool* handled,
                          UINT* retval) HADESMEM_DETAIL_NOEXCEPT
 {
-  if (hadesmem::cerberus::GetGuiVisible())
+  if (SUCCEEDED(*retval) && hadesmem::cerberus::GetGuiVisible())
   {
     // If you see this being spammed, please let me know along with the name of
     // the game you've observed it in.
@@ -495,7 +559,7 @@ void OnGetRawInputData(HRAWINPUT /*raw_input*/,
                        bool* handled,
                        UINT* retval) HADESMEM_DETAIL_NOEXCEPT
 {
-  if (hadesmem::cerberus::GetGuiVisible() && data && size)
+  if (SUCCEEDED(*retval) && hadesmem::cerberus::GetGuiVisible() && data && size)
   {
     ::ZeroMemory(data, *size);
     *retval = static_cast<UINT>(-1);
@@ -676,7 +740,7 @@ void SetRawInputDevices()
       << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  old_devices.resize(num_devices_written);
+  HADESMEM_DETAIL_ASSERT(num_devices_written == num_devices);
 
   GetOldRawInputDevices() = old_devices;
 
@@ -692,27 +756,25 @@ void SetRawInputDevices()
     return;
   }
 
-  auto const& window_interface = hadesmem::cerberus::GetWindowInterface();
-
   if (has_mouse_device)
   {
-    HADESMEM_DETAIL_TRACE_A("Setting new mouse device.");
+    HADESMEM_DETAIL_TRACE_A("Removing mouse device.");
 
     RAWINPUTDEVICE new_device = {HADESMEM_DETAIL_HID_USAGE_PAGE_GENERIC,
                                  HADESMEM_DETAIL_HID_USAGE_GENERIC_MOUSE,
-                                 0,
-                                 window_interface.GetCurrentWindow()};
+                                 RIDEV_REMOVE,
+                                 0};
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 
   if (has_keyboard_device)
   {
-    HADESMEM_DETAIL_TRACE_A("Setting new keyboard device.");
+    HADESMEM_DETAIL_TRACE_A("Removing keyboard device.");
 
     RAWINPUTDEVICE new_device = {HADESMEM_DETAIL_HID_USAGE_PAGE_GENERIC,
                                  HADESMEM_DETAIL_HID_USAGE_GENERIC_KEYBOARD,
-                                 0,
-                                 window_interface.GetCurrentWindow()};
+                                 RIDEV_REMOVE,
+                                 0};
     RegisterRawInputDevicesWrapper(&new_device, 1, sizeof(RAWINPUTDEVICE));
   }
 }
@@ -835,8 +897,14 @@ void InitializeInput()
   cursor.RegisterOnClipCursor(OnClipCursor);
   cursor.RegisterOnGetClipCursor(OnGetClipCursor);
 
-  auto& direct_input = GetDirectInputInterface();
-  direct_input.RegisterOnDirectInput(OnDirectInput);
+  // TODO: Fix the compatibility issues this is causing. Most notably the
+  // GetDeviceState callback breaks input in Dark Souls II. However it appears
+  // that because DI uses RI under the hood we can get away without specific DI
+  // hooks for now... Need to investigate whether we actually need these at all,
+  // still many more games to test to figure that out though.
+  // auto& direct_input = GetDirectInputInterface();
+  // direct_input.RegisterOnGetDeviceData(OnGetDeviceData);
+  // direct_input.RegisterOnGetDeviceState(OnGetDeviceState);
 
   auto& raw_input = GetRawInputInterface();
   raw_input.RegisterOnGetRawInputBuffer(OnGetRawInputBuffer);

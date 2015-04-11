@@ -35,9 +35,20 @@ DirectInputDeviceType DeviceGuidToEnum(IDirectInput8W* direct_input,
 
 std::string DeviceTypeToString(DirectInputDeviceType type);
 
-typedef void OnDirectInputCallback(bool* handled);
+typedef void OnGetDeviceDataCallback(DWORD len_object_data,
+                                     LPDIDEVICEOBJECTDATA rgdod,
+                                     LPDWORD in_out,
+                                     DWORD flags,
+                                     HRESULT* retval,
+                                     void* device,
+                                     bool wide);
 
-Callbacks<OnDirectInputCallback>& GetOnDirectInputCallbacks();
+typedef void
+  OnGetDeviceStateCallback(DWORD len_data, LPVOID data, HRESULT* retval);
+
+Callbacks<OnGetDeviceDataCallback>& GetOnGetDeviceDataCallbacks();
+
+Callbacks<OnGetDeviceStateCallback>& GetOnGetDeviceStateCallbacks();
 
 class DirectInputInterface
 {
@@ -46,10 +57,15 @@ public:
   {
   }
 
-  virtual std::size_t RegisterOnDirectInput(
-    std::function<OnDirectInputCallback> const& callback) = 0;
+  virtual std::size_t RegisterOnGetDeviceData(
+    std::function<OnGetDeviceDataCallback> const& callback) = 0;
 
-  virtual void UnregisterOnDirectInput(std::size_t id) = 0;
+  virtual void UnregisterOnGetDeviceData(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnGetDeviceState(
+    std::function<OnGetDeviceStateCallback> const& callback) = 0;
+
+  virtual void UnregisterOnGetDeviceState(std::size_t id) = 0;
 };
 
 DirectInputInterface& GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT;

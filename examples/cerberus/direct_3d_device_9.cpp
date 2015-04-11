@@ -22,64 +22,43 @@ HRESULT WINAPI Direct3DDevice9Proxy::QueryInterface(REFIID riid, void** obj)
   auto const ret = device_->QueryInterface(riid, obj);
   last_error_preserver.Update();
 
-  if (SUCCEEDED(ret))
+  if (FAILED(ret))
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    return ret;
+  }
 
-    // Unknown UUID. Observed in DXVA2 (used by GW2).
-    UUID const unknown_uuid_1 = {0x126d0349,
-                                 0x4787,
-                                 0x4aa6,
-                                 0x8e,
-                                 0x1b,
-                                 0x40,
-                                 0xc1,
-                                 0x77,
-                                 0xc6,
-                                 0x0a,
-                                 0x01};
+  HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-    // IDirect3DVideoDevice9. Observed in Age of Empires II: HD Edition.
-    UUID const unknown_uuid_2 = {0x694036ac,
-                                 0x542a,
-                                 0x4a3a,
-                                 0x9a,
-                                 0x32,
-                                 0x53,
-                                 0xbc,
-                                 0x20,
-                                 0x00,
-                                 0x2c,
-                                 0x1b};
+  // Unknown UUID. Observed in DXVA2 (used by Guild Wars 2).
+  UUID const unknown_uuid_1 = {
+    0x126d0349, 0x4787, 0x4aa6, 0x8e, 0x1b, 0x40, 0xc1, 0x77, 0xc6, 0x0a, 0x01};
 
-    if (*obj == device_)
-    {
-      refs_++;
-      *obj = this;
-    }
-    else if (riid == unknown_uuid_1)
-    {
-      // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
-      return ret;
-    }
-    else if (riid == unknown_uuid_2)
-    {
-      // Needs investigation to see if we need to wrap this.
-      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (2).");
-      return ret;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
-      HADESMEM_DETAIL_ASSERT(false);
-      static_cast<IUnknown*>(*obj)->Release();
-      return E_NOINTERFACE;
-    }
+  // IDirect3DVideoDevice9. Observed in Age of Empires II: HD Edition.
+  UUID const unknown_uuid_2 = {
+    0x694036ac, 0x542a, 0x4a3a, 0x9a, 0x32, 0x53, 0xbc, 0x20, 0x00, 0x2c, 0x1b};
+
+  if (*obj == device_)
+  {
+    refs_++;
+    *obj = this;
+  }
+  else if (riid == unknown_uuid_1)
+  {
+    // Needs investigation to see if we need to wrap this.
+    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
+  }
+  else if (riid == unknown_uuid_2)
+  {
+    // Needs investigation to see if we need to wrap this.
+    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (2).");
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
+    HADESMEM_DETAIL_ASSERT(false);
+    static_cast<IUnknown*>(*obj)->Release();
+    return E_NOINTERFACE;
   }
 
   return ret;

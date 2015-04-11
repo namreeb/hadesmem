@@ -21,34 +21,33 @@ HRESULT WINAPI DXGIFactoryProxy::QueryInterface(REFIID riid, void** obj)
   auto const ret = factory_->QueryInterface(riid, obj);
   last_error_preserver.Update();
 
-  if (SUCCEEDED(ret))
+  if (FAILED(ret))
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    return ret;
+  }
 
-    if (*obj == factory_)
-    {
-      refs_++;
-      *obj = this;
-    }
-    else
-    {
-      // Far Cry 4
-      if (riid == __uuidof(IDXGIDisplayControl))
-      {
-        return ret;
-      }
-      else
-      {
-        HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
-        HADESMEM_DETAIL_ASSERT(false);
-        static_cast<IUnknown*>(*obj)->Release();
-        return E_NOINTERFACE;
-      }
-    }
+  HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+
+  if (*obj == factory_)
+  {
+    refs_++;
+    *obj = this;
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    // Observed in Far Cry 4.
+    if (riid == __uuidof(IDXGIDisplayControl))
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
+      HADESMEM_DETAIL_ASSERT(false);
+      static_cast<IUnknown*>(*obj)->Release();
+      return E_NOINTERFACE;
+    }
   }
 
   return ret;

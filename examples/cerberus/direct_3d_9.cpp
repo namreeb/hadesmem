@@ -20,26 +20,25 @@ HRESULT WINAPI Direct3D9Proxy::QueryInterface(REFIID riid, void** obj)
   auto const ret = d3d9_->QueryInterface(riid, obj);
   last_error_preserver.Update();
 
-  if (SUCCEEDED(ret))
+  if (FAILED(ret))
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    return ret;
+  }
 
-    if (*obj == d3d9_)
-    {
-      refs_++;
-      *obj = this;
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
-      HADESMEM_DETAIL_ASSERT(false);
-      static_cast<IUnknown*>(*obj)->Release();
-      return E_NOINTERFACE;
-    }
+  HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
+
+  if (*obj == d3d9_)
+  {
+    refs_++;
+    *obj = this;
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A("Failed.");
+    HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");
+    HADESMEM_DETAIL_ASSERT(false);
+    static_cast<IUnknown*>(*obj)->Release();
+    return E_NOINTERFACE;
   }
 
   return ret;

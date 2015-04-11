@@ -45,11 +45,39 @@ while((void)0, 0)
 
 #define HADESMEM_DETAIL_TRACE_RAW(x) ::hadesmem::detail::OutputDebugString(x)
 
+inline void TraceFormatImpl(char const* function,
+                            std::string const& trace_buffer_formatted)
+{
+  auto const tid = ::GetCurrentThreadId();
+  std::int32_t const num_char_formatted =
+    _snprintf(nullptr,
+              0,
+              "[%lu] %s: %s\n",
+              tid,
+              function,
+              trace_buffer_formatted.c_str());
+  if (num_char_formatted > 0)
+  {
+    std::vector<char> formatted_buffer(
+      static_cast<std::size_t>(num_char_formatted + 1));
+    std::int32_t const num_char_formatted_actual =
+      _snprintf(formatted_buffer.data(),
+                static_cast<std::size_t>(num_char_formatted),
+                "[%lu] %s: %s\n",
+                tid,
+                function,
+                trace_buffer_formatted.c_str());
+    HADESMEM_DETAIL_ASSERT(num_char_formatted_actual > 0);
+    (void)num_char_formatted_actual;
+    HADESMEM_DETAIL_TRACE_RAW(formatted_buffer.data());
+  }
+}
+
 template <typename CharT, typename FuncT, typename FormatT, typename... Args>
-void TraceFormatImpl(char const* function,
-                     FuncT func,
-                     FormatT format,
-                     Args&&... args)
+void TraceFormatT(char const* function,
+                  FuncT func,
+                  FormatT format,
+                  Args&&... args)
 {
   std::int32_t const num_char =
     func(nullptr, 0, format, std::forward<Args>(args)...);
@@ -64,24 +92,11 @@ void TraceFormatImpl(char const* function,
            std::forward<Args>(args)...);
     HADESMEM_DETAIL_ASSERT(num_char_actual > 0);
     (void)num_char_actual;
+    // TODO: Add wide char support for the cases where we want to swap out
+    // OutputDebugString for something that actually supports unicode.
     auto const trace_buffer_formatted =
       ::hadesmem::detail::WideCharToMultiByte(trace_buffer.data());
-    std::int32_t const num_char_formatted = _snprintf(
-      nullptr, 0, "%s: %s\n", function, trace_buffer_formatted.c_str());
-    if (num_char_formatted > 0)
-    {
-      std::vector<char> formatted_buffer(
-        static_cast<std::size_t>(num_char_formatted + 1));
-      std::int32_t const num_char_formatted_actual =
-        _snprintf(formatted_buffer.data(),
-                  static_cast<std::size_t>(num_char_formatted),
-                  "%s: %s\n",
-                  function,
-                  trace_buffer_formatted.c_str());
-      HADESMEM_DETAIL_ASSERT(num_char_formatted_actual > 0);
-      (void)num_char_formatted_actual;
-      HADESMEM_DETAIL_TRACE_RAW(formatted_buffer.data());
-    }
+    TraceFormatImpl(function, trace_buffer_formatted);
   }
 }
 
@@ -89,8 +104,8 @@ void TraceFormatImpl(char const* function,
   detail_char_type, detail_format_func, detail_format, ...)                    \
                                                                                \
   HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_BEGIN                                 \
-    TraceFormatImpl<detail_char_type>(                                         \
-      __FUNCTION__, detail_format_func, detail_format, __VA_ARGS__);           \
+  TraceFormatT<detail_char_type>(                                              \
+    __FUNCTION__, detail_format_func, detail_format, __VA_ARGS__);             \
   HADESMEM_DETAIL_TRACE_MULTI_LINE_MACRO_END
 
 #define HADESMEM_DETAIL_TRACE_FORMAT_A(format, ...)                            \

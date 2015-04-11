@@ -253,12 +253,20 @@ void UseAllStatics()
     cursor.RegisterOnGetClipCursor(on_get_clip_cursor);
   cursor.UnregisterOnGetClipCursor(on_get_clip_cursor_id);
 
-  auto const on_direct_input = [](bool*)
+  auto const on_get_device_data =
+    [](DWORD, LPDIDEVICEOBJECTDATA, LPDWORD, DWORD, HRESULT*, void*, bool)
   {
   };
-  auto const on_direct_input_id =
-    direct_input.RegisterOnDirectInput(on_direct_input);
-  direct_input.UnregisterOnDirectInput(on_direct_input_id);
+  auto const on_get_device_data_id =
+    direct_input.RegisterOnGetDeviceData(on_get_device_data);
+  direct_input.UnregisterOnGetDeviceData(on_get_device_data_id);
+
+  auto const on_get_device_state = [](DWORD, LPVOID, HRESULT*)
+  {
+  };
+  auto const on_get_device_state_id =
+    direct_input.RegisterOnGetDeviceState(on_get_device_state);
+  direct_input.UnregisterOnGetDeviceState(on_get_device_state_id);
 
   auto const on_input_queue_entry = [](HWND, UINT, WPARAM, LPARAM)
   {
@@ -395,7 +403,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
   try
   {
     std::mutex& mutex = GetInitializeMutex();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock{mutex};
 
     bool& is_initialized = GetInititalizeFlag();
     if (is_initialized)
@@ -462,7 +470,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
   try
   {
     std::mutex& mutex = GetInitializeMutex();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock{mutex};
 
     bool& is_initialized = GetInititalizeFlag();
     if (!is_initialized)

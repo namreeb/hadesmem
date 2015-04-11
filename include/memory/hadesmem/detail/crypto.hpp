@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string>
-#include <vector>
 
 #include <windows.h>
 
@@ -49,13 +49,14 @@ std::wstring GetSha1Hash(void* base, std::uint32_t size)
   }
 
   std::uint32_t const kSha1Len = 20;
-  std::vector<BYTE> sha1(kSha1Len);
+  std::array<BYTE, kSha1Len> sha1 = {};
   DWORD sha1_len = kSha1Len;
-  if (!::CryptGetHashParam(hash, HP_HASHVAL, sha1.data(), &sha1_len, 0))
+  if (!::CryptGetHashParam(hash, HP_HASHVAL, sha1.data(), &sha1_len, 0) ||
+      sha1_len != kSha1Len)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"CryptHashData failed."}
+      hadesmem::Error{} << hadesmem::ErrorString{"CryptGetHashParam failed."}
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
