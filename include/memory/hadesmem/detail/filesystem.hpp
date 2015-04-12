@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <array>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -470,6 +471,63 @@ inline std::vector<char> FileToBuffer(std::wstring const& path)
   }
 
   return buffer;
+}
+
+inline std::vector<char> PeFileToBuffer(std::wstring const& path)
+{
+  auto const file =
+    OpenFile<char>(path, std::ios::in | std::ios::binary | std::ios::ate);
+  if (!*file)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Failed to create file."});
+  }
+
+  std::streampos const size = file->tellg();
+  if (size <= 0)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString("Empty or invalid file."));
+  }
+
+  if (!file->seekg(0, std::ios::beg))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString(
+        "Seeking to beginning of file failed (1)."));
+  }
+
+  // Peek for the MZ header before reading the whole file.
+  std::array<char, 2> mz_buf{};
+  if (!file->read(mz_buf.data(), static_cast<std::streamsize>(mz_buf.size())))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Failed to read header signature."));
+  }
+
+  // Check for MZ signature
+  if (mz_buf[0] != 'M' || mz_buf[1] != 'Z')
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString("Missing DOS header."));
+  }
+
+  if (!file->seekg(0, std::ios::beg))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString(
+        "Seeking to beginning of file failed (2)."));
+  }
+
+  std::vector<char> buf(static_cast<std::size_t>(size));
+
+  if (!file->read(buf.data(), static_cast<std::streamsize>(size)))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString("Failed to read file data."));
+  }
+
+  return buf;
 }
 }
 }
