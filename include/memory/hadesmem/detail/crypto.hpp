@@ -17,7 +17,7 @@ namespace hadesmem
 {
 namespace detail
 {
-std::array<std::uint8_t, 20> GetSha1Hash(void* base, std::uint32_t size)
+inline std::array<std::uint8_t, 20> GetSha1Hash(void* base, std::uint32_t size)
 {
   HCRYPTPROV provider = 0;
   if (!::CryptAcquireContextW(
@@ -63,7 +63,7 @@ std::array<std::uint8_t, 20> GetSha1Hash(void* base, std::uint32_t size)
   return sha1;
 }
 
-std::wstring Sha1HashToString(std::array<std::uint8_t, 20> const& sha1)
+inline std::wstring Sha1HashToString(std::array<std::uint8_t, 20> const& sha1)
 {
   std::wstring sha1_str;
   wchar_t const digits[] = L"0123456789abcdef";

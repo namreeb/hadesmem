@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -218,27 +219,37 @@ inline void CopyFileWrapper(std::wstring const& existing_path,
   }
 }
 
-inline void CopyDirectory(std::wstring const& src, std::wstring const& dst)
+inline void CopyDirectory(std::wstring src, std::wstring dst)
 {
+  // This is a nasty hack because SHFileOperation does not support the extended
+  // path syntax or paths beyond MAX_PATH.
+  // TODO: Rewrite this to use the Win32 API instead of the Shell API so we can
+  // support extended paths.
+  auto const strip_prefix = [](std::wstring& s)
+  {
+    if (s.find(L"\\\\?\\") == 0)
+    {
+      s.erase(0, _countof(L"\\\\?\\") - 1);
+    }
+  };
+  strip_prefix(src);
+  strip_prefix(dst);
+
   if (src.empty() || dst.empty())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                     << ErrorString{"Invalid argument(s)."});
   }
 
-  std::wstring const src_wildcard = src + (src.back() == L'\\' ? L"*" : L"\\*");
-  std::vector<wchar_t> src_zz(std::begin(src_wildcard), std::end(src_wildcard));
-  src_zz.push_back(L'\0');
-  src_zz.push_back(L'\0');
+  std::wstring src_wildcard = src + (src.back() == L'\\' ? L"*" : L"\\*");
+  src_wildcard.push_back(L'\0');
 
-  std::vector<wchar_t> dst_zz(std::begin(dst), std::end(dst));
-  dst_zz.push_back(L'\0');
-  dst_zz.push_back(L'\0');
+  dst.push_back(L'\0');
 
   SHFILEOPSTRUCT file_op{};
   file_op.wFunc = FO_COPY;
-  file_op.pFrom = src_zz.data();
-  file_op.pTo = dst_zz.data();
+  file_op.pFrom = src_wildcard.data();
+  file_op.pTo = dst.data();
   file_op.fFlags = FOF_NO_UI;
   auto const result = ::SHFileOperationW(&file_op);
   if (result)
@@ -528,6 +539,51 @@ inline std::vector<char> PeFileToBuffer(std::wstring const& path)
   }
 
   return buf;
+}
+
+inline void
+  EnumDir(std::wstring dir_path,
+          std::function<void(std::wstring const& path)> const& callback)
+{
+  HADESMEM_DETAIL_ASSERT(!dir_path.empty());
+  HADESMEM_DETAIL_ASSERT(callback);
+
+  while (!dir_path.empty() && dir_path.back() == L'\\')
+  {
+    dir_path.pop_back();
+  }
+
+  HADESMEM_DETAIL_ASSERT(!dir_path.empty());
+
+  WIN32_FIND_DATA find_data{};
+  hadesmem::detail::SmartFindHandle const handle{
+    ::FindFirstFileW((dir_path + L"\\*").c_str(), &find_data)};
+  if (!handle.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"FindFirstFile failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  do
+  {
+    std::wstring const cur_file = find_data.cFileName;
+    if (cur_file == L"." || cur_file == L"..")
+    {
+      continue;
+    }
+
+    callback(MakeExtendedPath(CombinePath(dir_path, cur_file)));
+  } while (::FindNextFileW(handle.GetHandle(), &find_data));
+
+  DWORD const last_error = ::GetLastError();
+  if (last_error != ERROR_NO_MORE_FILES)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"FindNextFile failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
 }
 }
 }

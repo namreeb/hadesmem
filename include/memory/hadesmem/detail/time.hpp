@@ -27,7 +27,7 @@ inline std::wstring TimestampToStringUtc(std::time_t time)
       hadesmem::Error() << hadesmem::ErrorString("Invalid timestamp."));
   }
 
-  std::array<wchar_t, _countof(L"YYYYMMDD-HHMMSS") + 1> fmt_buf{};
+  std::array<wchar_t, _countof(L"YYYYMMDD-HHMMSS")> fmt_buf{};
   if (!std::wcsftime(
         fmt_buf.data(), fmt_buf.size(), L"%Y%m%d-%H%M%S", &utc_time))
   {
