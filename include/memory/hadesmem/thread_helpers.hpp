@@ -247,8 +247,14 @@ public:
               // and we've verified it exists in the correct process.
               threads_.emplace_back(thread_entry.GetId());
             }
-            catch (std::exception const& /*e*/)
+            catch (std::exception const& e)
             {
+              (void)e;
+              HADESMEM_DETAIL_TRACE_FORMAT_A(
+                "WARNING! Error while suspending thread. TID: [%lu]. Error: "
+                "[%s].",
+                thread_entry.GetId(),
+                boost::current_exception_diagnostic_information().c_str());
               tids.erase(inserted.first);
               continue;
             }

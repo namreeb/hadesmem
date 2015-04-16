@@ -141,7 +141,7 @@ extern "C" HWND WINAPI GetForegroundWindowDetour(
   }
 
   auto const get_foreground_window =
-    detour->GetTrampolineT<decltype(&GetForegroundWindow)>();
+    detour->GetTrampolineT<decltype(&::GetForegroundWindow)>();
   last_error_preserver.Revert();
   auto const ret = get_foreground_window();
   last_error_preserver.Update();
