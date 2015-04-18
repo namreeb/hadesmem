@@ -36,15 +36,14 @@ void OnAntTweakBarInitialize(
 
   if (g_tweak_bar)
   {
-    HADESMEM_DETAIL_TRACE_A(
-      "WARNING! AntTweakBar is already initialized. Skipping.");
+    HADESMEM_DETAIL_TRACE_A("AntTweakBar is already initialized. Skipping.");
     return;
   }
 
   if (!ant_tweak_bar->IsInitialized())
   {
     HADESMEM_DETAIL_TRACE_A(
-      "WARNING! AntTweakBar is not initialized by Cerberus. Skipping.");
+      "AntTweakBar is not initialized by Cerberus. Skipping.");
     return;
   }
 
@@ -72,15 +71,15 @@ void OnAntTweakBarInitialize(
   }
 }
 
-void
-  OnAntTweakBarCleanup(hadesmem::cerberus::AntTweakBarInterface* ant_tweak_bar)
+void OnAntTweakBarCleanup(
+  hadesmem::cerberus::AntTweakBarInterface* ant_tweak_bar)
 {
   HADESMEM_DETAIL_TRACE_A("Cleaning up AntTweakBar.");
 
   if (!ant_tweak_bar->IsInitialized())
   {
     HADESMEM_DETAIL_TRACE_A(
-      "WARNING! AntTweakBar is not initialized by Cerberus. Skipping.");
+      "AntTweakBar is not initialized by Cerberus. Skipping.");
     return;
   }
 
@@ -94,8 +93,7 @@ void
 
 void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
-  auto ant_tweak_bar =
-    cerberus->GetAntTweakBarInterface();
+  auto ant_tweak_bar = cerberus->GetAntTweakBarInterface();
   g_on_ant_tweak_bar_initialize_callback_id =
     ant_tweak_bar->RegisterOnInitialize(&OnAntTweakBarInitialize);
   g_on_ant_tweak_bar_cleanup_callback_id =
@@ -106,8 +104,7 @@ void InitializeGui(hadesmem::cerberus::PluginInterface* cerberus)
 
 void CleanupGui(hadesmem::cerberus::PluginInterface* cerberus)
 {
-  auto ant_tweak_bar =
-    cerberus->GetAntTweakBarInterface();
+  auto ant_tweak_bar = cerberus->GetAntTweakBarInterface();
 
   if (g_on_ant_tweak_bar_initialize_callback_id != static_cast<std::size_t>(-1))
   {
