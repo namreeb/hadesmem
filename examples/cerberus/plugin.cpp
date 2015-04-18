@@ -55,32 +55,46 @@ class Plugin : public hadesmem::cerberus::PluginInterface
 public:
   explicit Plugin(std::wstring const& path) : path_(path)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Loading plugin. [%s]", path.c_str());
-
-    base_ = ::LoadLibraryW(path.c_str());
-    if (!base_)
+    try
     {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"LoadLibraryW failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Loading plugin. [%s]", path.c_str());
+
+      base_ = ::LoadLibraryW(path.c_str());
+      if (!base_)
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error{} << hadesmem::ErrorString{"LoadLibraryW failed."}
+                            << hadesmem::ErrorCodeWinLast{last_error});
+      }
+      unload_ = true;
+
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Loaded plugin. [%p]", base_);
+
+      using LoadFn = void (*)(hadesmem::cerberus::PluginInterface*);
+      auto const load_export =
+        reinterpret_cast<LoadFn>(::GetProcAddress(base_, "LoadPlugin"));
+      if (!load_export)
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error{} << hadesmem::ErrorString{"GetProcAddress failed."}
+                            << hadesmem::ErrorCodeWinLast{last_error});
+      }
+
+      call_export_ = true;
+      load_export(this);
     }
-    unload_ = true;
-
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Loaded plugin. [%p]", base_);
-
-    using LoadFn = void (*)(hadesmem::cerberus::PluginInterface*);
-    auto const load_export =
-      reinterpret_cast<LoadFn>(::GetProcAddress(base_, "LoadPlugin"));
-    if (!load_export)
+    catch (...)
     {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"GetProcAddress failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      HADESMEM_DETAIL_ASSERT(false);
+
+      UnloadUnchecked();
+
+      throw;
     }
-    load_export(this);
-    call_export_ = true;
 
     HADESMEM_DETAIL_TRACE_A("Called LoadPlugin export.");
   }

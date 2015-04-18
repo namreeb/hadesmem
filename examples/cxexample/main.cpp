@@ -11,46 +11,20 @@
 
 #include "gui.hpp"
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR LoadPlugin(
+extern "C" HADESMEM_DETAIL_DLLEXPORT void LoadPlugin(
   hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
 {
-  try
-  {
-    HADESMEM_DETAIL_TRACE_A("Initializing.");
+  HADESMEM_DETAIL_TRACE_A("Initializing.");
 
-    InitializeGui(cerberus);
-
-    return 0;
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
-
-    return 1;
-  }
+  InitializeGui(cerberus);
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR UnloadPlugin(
+extern "C" HADESMEM_DETAIL_DLLEXPORT void UnloadPlugin(
   hadesmem::cerberus::PluginInterface* cerberus) HADESMEM_DETAIL_NOEXCEPT
 {
-  try
-  {
-    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+  HADESMEM_DETAIL_TRACE_A("Cleaning up.");
 
-    CleanupGui(cerberus);
-
-    return 0;
-  }
-  catch (...)
-  {
-    HADESMEM_DETAIL_TRACE_A(
-      boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
-
-    return 1;
-  }
+  CleanupGui(cerberus);
 }
 
 BOOL WINAPI DllMain(HINSTANCE /*instance*/,
