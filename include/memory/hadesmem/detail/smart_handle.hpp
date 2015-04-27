@@ -4,6 +4,7 @@
 #pragma once
 
 #include <windows.h>
+#include <setupapi.h>
 #include <wincrypt.h>
 
 #include <hadesmem/config.hpp>
@@ -332,5 +333,23 @@ struct UnmapViewOfFilePolicy
 };
 
 using SmartMappedFileHandle = SmartHandleImpl<UnmapViewOfFilePolicy>;
+
+struct SetupDiDestroyDeviceInfoListPolicy
+{
+  using HandleT = HDEVINFO;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return INVALID_HANDLE_VALUE;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return !!::SetupDiDestroyDeviceInfoList(handle);
+  }
+};
+
+using SmartDeviceInfoListHandle =
+  SmartHandleImpl<SetupDiDestroyDeviceInfoListPolicy>;
 }
 }

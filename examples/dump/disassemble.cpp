@@ -47,8 +47,6 @@ void DisassembleEp(hadesmem::Process const& process,
 
   std::wostream& out = std::wcout;
 
-  ud_t ud_obj;
-  ud_init(&ud_obj);
   // Get the number of bytes from the EP to the end of the file.
   std::size_t max_buffer_size = GetBytesToEndOfFile(pe_file, ep_va);
   // Clamp the amount of data read to the theoretical maximum.
@@ -59,17 +57,14 @@ void DisassembleEp(hadesmem::Process const& process,
   max_buffer_size = (std::min)(max_buffer_size, kMaxInstructionsBytes);
   auto const disasm_buf =
     hadesmem::ReadVector<std::uint8_t>(process, ep_va, max_buffer_size);
+  std::uint64_t const ip = hadesmem::GetRuntimeBase(process, pe_file) + ep_rva;
+
+  ud_t ud_obj;
+  ud_init(&ud_obj);
   ud_set_input_buffer(&ud_obj, disasm_buf.data(), max_buffer_size);
   ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-  std::uintptr_t const ip = hadesmem::GetRuntimeBase(process, pe_file) + ep_rva;
   ud_set_pc(&ud_obj, ip);
-#if defined(HADESMEM_DETAIL_ARCH_X64)
-  ud_set_mode(&ud_obj, 64);
-#elif defined(HADESMEM_DETAIL_ARCH_X86)
-  ud_set_mode(&ud_obj, 32);
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
+  ud_set_mode(&ud_obj, pe_file.Is64() ? 64 : 32);
 
   // Be pessimistic. Use the minimum theoretical amount of instrutions we could
   // fit in our buffer.

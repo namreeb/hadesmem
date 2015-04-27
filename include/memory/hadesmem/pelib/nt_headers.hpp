@@ -72,25 +72,42 @@ public:
 
   void UpdateRead()
   {
-    data_ = Read<IMAGE_NT_HEADERS>(*process_, base_);
+    if (pe_file_->Is64())
+    {
+      data_64_ = Read<IMAGE_NT_HEADERS64>(*process_, base_);
+    }
+    else
+    {
+      data_32_ = Read<IMAGE_NT_HEADERS32>(*process_, base_);
+    }
   }
 
   void UpdateWrite()
   {
-    Write(*process_, base_, data_);
+    if (pe_file_->Is64())
+    {
+      Write(*process_, base_, data_64_);
+    }
+    else
+    {
+      Write(*process_, base_, data_32_);
+    }
   }
 
   bool IsValid() const
   {
-    return IMAGE_NT_SIGNATURE == GetSignature() &&
-           IMAGE_NT_OPTIONAL_HDR_MAGIC == GetMagic() &&
-#if defined(HADESMEM_DETAIL_ARCH_X86)
-           IMAGE_FILE_MACHINE_I386 == GetMachine();
-#elif defined(HADESMEM_DETAIL_ARCH_X64)
-           IMAGE_FILE_MACHINE_AMD64 == GetMachine();
-#else
-#error "[HadesMem] Unsupported architecture."
-#endif
+    if (pe_file_->Is64())
+    {
+      return IMAGE_NT_SIGNATURE == GetSignature() &&
+             IMAGE_NT_OPTIONAL_HDR64_MAGIC == GetMagic() &&
+             IMAGE_FILE_MACHINE_AMD64 == GetMachine();
+    }
+    else
+    {
+      return IMAGE_NT_SIGNATURE == GetSignature() &&
+             IMAGE_NT_OPTIONAL_HDR32_MAGIC == GetMagic() &&
+             IMAGE_FILE_MACHINE_I386 == GetMachine();
+    }
   }
 
   void EnsureValid() const
@@ -104,194 +121,459 @@ public:
 
   DWORD GetSignature() const
   {
-    return data_.Signature;
+    if (pe_file_->Is64())
+    {
+      return data_64_.Signature;
+    }
+    else
+    {
+      return data_32_.Signature;
+    }
   }
 
   WORD GetMachine() const
   {
-    return data_.FileHeader.Machine;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.Machine;
+    }
+    else
+    {
+      return data_32_.FileHeader.Machine;
+    }
   }
 
   WORD GetNumberOfSections() const
   {
-    return data_.FileHeader.NumberOfSections;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.NumberOfSections;
+    }
+    else
+    {
+      return data_32_.FileHeader.NumberOfSections;
+    }
   }
 
   DWORD GetTimeDateStamp() const
   {
-    return data_.FileHeader.TimeDateStamp;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.TimeDateStamp;
+    }
+    else
+    {
+      return data_32_.FileHeader.TimeDateStamp;
+    }
   }
 
   DWORD GetPointerToSymbolTable() const
   {
-    return data_.FileHeader.PointerToSymbolTable;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.PointerToSymbolTable;
+    }
+    else
+    {
+      return data_32_.FileHeader.PointerToSymbolTable;
+    }
   }
 
   DWORD GetNumberOfSymbols() const
   {
-    return data_.FileHeader.NumberOfSymbols;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.NumberOfSymbols;
+    }
+    else
+    {
+      return data_32_.FileHeader.NumberOfSymbols;
+    }
   }
 
   WORD GetSizeOfOptionalHeader() const
   {
-    return data_.FileHeader.SizeOfOptionalHeader;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.SizeOfOptionalHeader;
+    }
+    else
+    {
+      return data_32_.FileHeader.SizeOfOptionalHeader;
+    }
   }
 
   WORD GetCharacteristics() const
   {
-    return data_.FileHeader.Characteristics;
+    if (pe_file_->Is64())
+    {
+      return data_64_.FileHeader.Characteristics;
+    }
+    else
+    {
+      return data_32_.FileHeader.Characteristics;
+    }
   }
 
   WORD GetMagic() const
   {
-    return data_.OptionalHeader.Magic;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.Magic;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.Magic;
+    }
   }
 
   BYTE GetMajorLinkerVersion() const
   {
-    return data_.OptionalHeader.MajorLinkerVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MajorLinkerVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MajorLinkerVersion;
+    }
   }
 
   BYTE GetMinorLinkerVersion() const
   {
-    return data_.OptionalHeader.MinorLinkerVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MinorLinkerVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MinorLinkerVersion;
+    }
   }
 
   DWORD GetSizeOfCode() const
   {
-    return data_.OptionalHeader.SizeOfCode;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfCode;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfCode;
+    }
   }
 
   DWORD GetSizeOfInitializedData() const
   {
-    return data_.OptionalHeader.SizeOfInitializedData;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfInitializedData;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfInitializedData;
+    }
   }
 
   DWORD GetSizeOfUninitializedData() const
   {
-    return data_.OptionalHeader.SizeOfUninitializedData;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfUninitializedData;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfUninitializedData;
+    }
   }
 
   DWORD GetAddressOfEntryPoint() const
   {
-    return data_.OptionalHeader.AddressOfEntryPoint;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.AddressOfEntryPoint;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.AddressOfEntryPoint;
+    }
   }
 
   DWORD GetBaseOfCode() const
   {
-    return data_.OptionalHeader.BaseOfCode;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.BaseOfCode;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.BaseOfCode;
+    }
   }
 
-#if defined(HADESMEM_DETAIL_ARCH_X86)
   DWORD GetBaseOfData() const
   {
-    return data_.OptionalHeader.BaseOfData;
+    if (pe_file_->Is64())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"Invalid field for architecture."});
+    }
+    else
+    {
+      return data_32_.OptionalHeader.BaseOfData;
+    }
   }
-#endif
 
-  ULONG_PTR GetImageBase() const
+  ULONGLONG GetImageBase() const
   {
-    return data_.OptionalHeader.ImageBase;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.ImageBase;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.ImageBase;
+    }
   }
 
   DWORD GetSectionAlignment() const
   {
-    return data_.OptionalHeader.SectionAlignment;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SectionAlignment;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SectionAlignment;
+    }
   }
 
   DWORD GetFileAlignment() const
   {
-    return data_.OptionalHeader.FileAlignment;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.FileAlignment;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.FileAlignment;
+    }
   }
 
   WORD GetMajorOperatingSystemVersion() const
   {
-    return data_.OptionalHeader.MajorOperatingSystemVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MajorOperatingSystemVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MajorOperatingSystemVersion;
+    }
   }
 
   WORD GetMinorOperatingSystemVersion() const
   {
-    return data_.OptionalHeader.MinorOperatingSystemVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MinorOperatingSystemVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MinorOperatingSystemVersion;
+    }
   }
 
   WORD GetMajorImageVersion() const
   {
-    return data_.OptionalHeader.MajorImageVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MajorImageVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MajorImageVersion;
+    }
   }
 
   WORD GetMinorImageVersion() const
   {
-    return data_.OptionalHeader.MinorImageVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MinorImageVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MinorImageVersion;
+    }
   }
 
   WORD GetMajorSubsystemVersion() const
   {
-    return data_.OptionalHeader.MajorSubsystemVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MajorSubsystemVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MajorSubsystemVersion;
+    }
   }
 
   WORD GetMinorSubsystemVersion() const
   {
-    return data_.OptionalHeader.MinorSubsystemVersion;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.MinorSubsystemVersion;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.MinorSubsystemVersion;
+    }
   }
 
   DWORD GetWin32VersionValue() const
   {
-    return data_.OptionalHeader.Win32VersionValue;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.Win32VersionValue;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.Win32VersionValue;
+    }
   }
 
   DWORD GetSizeOfImage() const
   {
-    return data_.OptionalHeader.SizeOfImage;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfImage;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfImage;
+    }
   }
 
   DWORD GetSizeOfHeaders() const
   {
-    return data_.OptionalHeader.SizeOfHeaders;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfHeaders;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfHeaders;
+    }
   }
 
   DWORD GetCheckSum() const
   {
-    return data_.OptionalHeader.CheckSum;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.CheckSum;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.CheckSum;
+    }
   }
 
   WORD GetSubsystem() const
   {
-    return data_.OptionalHeader.Subsystem;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.Subsystem;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.Subsystem;
+    }
   }
 
   WORD GetDllCharacteristics() const
   {
-    return data_.OptionalHeader.DllCharacteristics;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.DllCharacteristics;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.DllCharacteristics;
+    }
   }
 
-  ULONG_PTR GetSizeOfStackReserve() const
+  ULONGLONG GetSizeOfStackReserve() const
   {
-    return data_.OptionalHeader.SizeOfStackReserve;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfStackReserve;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfStackReserve;
+    }
   }
 
-  ULONG_PTR GetSizeOfStackCommit() const
+  ULONGLONG GetSizeOfStackCommit() const
   {
-    return data_.OptionalHeader.SizeOfStackCommit;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfStackCommit;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfStackCommit;
+    }
   }
 
-  ULONG_PTR GetSizeOfHeapReserve() const
+  ULONGLONG GetSizeOfHeapReserve() const
   {
-    return data_.OptionalHeader.SizeOfHeapReserve;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfHeapReserve;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfHeapReserve;
+    }
   }
 
-  ULONG_PTR GetSizeOfHeapCommit() const
+  ULONGLONG GetSizeOfHeapCommit() const
   {
-    return data_.OptionalHeader.SizeOfHeapCommit;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.SizeOfHeapCommit;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.SizeOfHeapCommit;
+    }
   }
 
   DWORD GetLoaderFlags() const
   {
-    return data_.OptionalHeader.LoaderFlags;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.LoaderFlags;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.LoaderFlags;
+    }
   }
 
   DWORD GetNumberOfRvaAndSizes() const
   {
-    return data_.OptionalHeader.NumberOfRvaAndSizes;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.NumberOfRvaAndSizes;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.NumberOfRvaAndSizes;
+    }
   }
 
   DWORD GetNumberOfRvaAndSizesClamped() const
@@ -308,8 +590,16 @@ public:
                                       << ErrorString{"Invalid data dir."});
     }
 
-    return data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                data_dir)].VirtualAddress;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                     data_dir)].VirtualAddress;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                     data_dir)].VirtualAddress;
+    }
   }
 
   DWORD GetDataDirectorySize(PeDataDir data_dir) const
@@ -320,202 +610,483 @@ public:
                                       << ErrorString{"Invalid data dir."});
     }
 
-    return data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                data_dir)].Size;
+    if (pe_file_->Is64())
+    {
+      return data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                     data_dir)].Size;
+    }
+    else
+    {
+      return data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                                     data_dir)].Size;
+    }
   }
 
   void SetSignature(DWORD signature)
   {
-    data_.Signature = signature;
+    if (pe_file_->Is64())
+    {
+      data_64_.Signature = signature;
+    }
+    else
+    {
+      data_32_.Signature = signature;
+    }
   }
 
   void SetMachine(WORD machine)
   {
-    data_.FileHeader.Machine = machine;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.Machine = machine;
+    }
+    else
+    {
+      data_32_.FileHeader.Machine = machine;
+    }
   }
 
   void SetNumberOfSections(WORD number_of_sections)
   {
-    data_.FileHeader.NumberOfSections = number_of_sections;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.NumberOfSections = number_of_sections;
+    }
+    else
+    {
+      data_32_.FileHeader.NumberOfSections = number_of_sections;
+    }
   }
 
   void SetTimeDateStamp(DWORD time_date_stamp)
   {
-    data_.FileHeader.TimeDateStamp = time_date_stamp;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.TimeDateStamp = time_date_stamp;
+    }
+    else
+    {
+      data_32_.FileHeader.TimeDateStamp = time_date_stamp;
+    }
   }
 
   void SetPointerToSymbolTable(DWORD pointer_to_symbol_table)
   {
-    data_.FileHeader.PointerToSymbolTable = pointer_to_symbol_table;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.PointerToSymbolTable = pointer_to_symbol_table;
+    }
+    else
+    {
+      data_32_.FileHeader.PointerToSymbolTable = pointer_to_symbol_table;
+    }
   }
 
   void SetNumberOfSymbols(DWORD number_of_symbols)
   {
-    data_.FileHeader.NumberOfSymbols = number_of_symbols;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.NumberOfSymbols = number_of_symbols;
+    }
+    else
+    {
+      data_32_.FileHeader.NumberOfSymbols = number_of_symbols;
+    }
   }
 
   void SetSizeOfOptionalHeader(WORD size_of_optional_header)
   {
-    data_.FileHeader.SizeOfOptionalHeader = size_of_optional_header;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.SizeOfOptionalHeader = size_of_optional_header;
+    }
+    else
+    {
+      data_32_.FileHeader.SizeOfOptionalHeader = size_of_optional_header;
+    }
   }
 
   void SetCharacteristics(WORD characteristics)
   {
-    data_.FileHeader.Characteristics = characteristics;
+    if (pe_file_->Is64())
+    {
+      data_64_.FileHeader.Characteristics = characteristics;
+    }
+    else
+    {
+      data_32_.FileHeader.Characteristics = characteristics;
+    }
   }
 
   void SetMagic(WORD magic)
   {
-    data_.OptionalHeader.Magic = magic;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.Magic = magic;
+    }
+    else
+    {
+      data_32_.OptionalHeader.Magic = magic;
+    }
   }
 
   void SetMajorLinkerVersion(BYTE major_linker_version)
   {
-    data_.OptionalHeader.MajorLinkerVersion = major_linker_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MajorLinkerVersion = major_linker_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MajorLinkerVersion = major_linker_version;
+    }
   }
 
   void SetMinorLinkerVersion(BYTE minor_linker_version)
   {
-    data_.OptionalHeader.MinorLinkerVersion = minor_linker_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MinorLinkerVersion = minor_linker_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MinorLinkerVersion = minor_linker_version;
+    }
   }
 
   void SetSizeOfCode(DWORD size_of_code)
   {
-    data_.OptionalHeader.SizeOfCode = size_of_code;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfCode = size_of_code;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfCode = size_of_code;
+    }
   }
 
   void SetSizeOfInitializedData(DWORD size_of_initialized_data)
   {
-    data_.OptionalHeader.SizeOfInitializedData = size_of_initialized_data;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfInitializedData = size_of_initialized_data;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfInitializedData = size_of_initialized_data;
+    }
   }
 
   void SetSizeOfUninitializedData(DWORD size_of_uninitialized_data)
   {
-    data_.OptionalHeader.SizeOfUninitializedData = size_of_uninitialized_data;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfUninitializedData =
+        size_of_uninitialized_data;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfUninitializedData =
+        size_of_uninitialized_data;
+    }
   }
 
   void SetAddressOfEntryPoint(DWORD address_of_entry_point)
   {
-    data_.OptionalHeader.AddressOfEntryPoint = address_of_entry_point;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.AddressOfEntryPoint = address_of_entry_point;
+    }
+    else
+    {
+      data_32_.OptionalHeader.AddressOfEntryPoint = address_of_entry_point;
+    }
   }
 
   void SetBaseOfCode(DWORD base_of_code)
   {
-    data_.OptionalHeader.BaseOfCode = base_of_code;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.BaseOfCode = base_of_code;
+    }
+    else
+    {
+      data_32_.OptionalHeader.BaseOfCode = base_of_code;
+    }
   }
 
-#if defined(HADESMEM_DETAIL_ARCH_X86)
   void SetBaseOfData(DWORD base_of_data)
   {
-    data_.OptionalHeader.BaseOfData = base_of_data;
+    if (pe_file_->Is64())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"Invalid field for architecture."});
+    }
+    else
+    {
+      data_32_.OptionalHeader.BaseOfData = base_of_data;
+    }
   }
-#endif
 
-  void SetImageBase(ULONG_PTR image_base)
+  void SetImageBase(ULONGLONG image_base)
   {
-    data_.OptionalHeader.ImageBase = image_base;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.ImageBase = image_base;
+    }
+    else
+    {
+      data_32_.OptionalHeader.ImageBase = static_cast<ULONG>(image_base);
+    }
   }
 
   void SetSectionAlignment(DWORD section_alignment)
   {
-    data_.OptionalHeader.SectionAlignment = section_alignment;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SectionAlignment = section_alignment;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SectionAlignment = section_alignment;
+    }
   }
 
   void SetFileAlignment(DWORD file_alignment)
   {
-    data_.OptionalHeader.FileAlignment = file_alignment;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.FileAlignment = file_alignment;
+    }
+    else
+    {
+      data_32_.OptionalHeader.FileAlignment = file_alignment;
+    }
   }
 
   void SetMajorOperatingSystemVersion(WORD major_operating_system_version)
   {
-    data_.OptionalHeader.MajorOperatingSystemVersion =
-      major_operating_system_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MajorOperatingSystemVersion =
+        major_operating_system_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MajorOperatingSystemVersion =
+        major_operating_system_version;
+    }
   }
 
   void SetMinorOperatingSystemVersion(WORD minor_operating_system_version)
   {
-    data_.OptionalHeader.MinorOperatingSystemVersion =
-      minor_operating_system_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MinorOperatingSystemVersion =
+        minor_operating_system_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MinorOperatingSystemVersion =
+        minor_operating_system_version;
+    }
   }
 
   void SetMajorImageVersion(WORD major_image_version)
   {
-    data_.OptionalHeader.MajorImageVersion = major_image_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MajorImageVersion = major_image_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MajorImageVersion = major_image_version;
+    }
   }
 
   void SetMinorImageVersion(WORD minor_image_version)
   {
-    data_.OptionalHeader.MinorImageVersion = minor_image_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MinorImageVersion = minor_image_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MinorImageVersion = minor_image_version;
+    }
   }
 
   void SetMajorSubsystemVersion(WORD major_subsystem_version)
   {
-    data_.OptionalHeader.MajorSubsystemVersion = major_subsystem_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MajorSubsystemVersion = major_subsystem_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MajorSubsystemVersion = major_subsystem_version;
+    }
   }
 
   void SetMinorSubsystemVersion(WORD minor_subsystem_version)
   {
-    data_.OptionalHeader.MinorSubsystemVersion = minor_subsystem_version;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.MinorSubsystemVersion = minor_subsystem_version;
+    }
+    else
+    {
+      data_32_.OptionalHeader.MinorSubsystemVersion = minor_subsystem_version;
+    }
   }
 
   void SetWin32VersionValue(DWORD win32_version_value)
   {
-    data_.OptionalHeader.Win32VersionValue = win32_version_value;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.Win32VersionValue = win32_version_value;
+    }
+    else
+    {
+      data_32_.OptionalHeader.Win32VersionValue = win32_version_value;
+    }
   }
 
   void SetSizeOfImage(DWORD size_of_image)
   {
-    data_.OptionalHeader.SizeOfImage = size_of_image;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfImage = size_of_image;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfImage = size_of_image;
+    }
   }
 
   void SetSizeOfHeaders(DWORD size_of_headers)
   {
-    data_.OptionalHeader.SizeOfHeaders = size_of_headers;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfHeaders = size_of_headers;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfHeaders = size_of_headers;
+    }
   }
 
   void SetCheckSum(DWORD checksum)
   {
-    data_.OptionalHeader.CheckSum = checksum;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.CheckSum = checksum;
+    }
+    else
+    {
+      data_32_.OptionalHeader.CheckSum = checksum;
+    }
   }
 
   void SetSubsystem(WORD subsystem)
   {
-    data_.OptionalHeader.Subsystem = subsystem;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.Subsystem = subsystem;
+    }
+    else
+    {
+      data_32_.OptionalHeader.Subsystem = subsystem;
+    }
   }
 
   void SetDllCharacteristics(WORD dll_characteristics)
   {
-    data_.OptionalHeader.DllCharacteristics = dll_characteristics;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.DllCharacteristics = dll_characteristics;
+    }
+    else
+    {
+      data_32_.OptionalHeader.DllCharacteristics = dll_characteristics;
+    }
   }
 
-  void SetSizeOfStackReserve(ULONG_PTR size_of_stack_reserve)
+  void SetSizeOfStackReserve(ULONGLONG size_of_stack_reserve)
   {
-    data_.OptionalHeader.SizeOfStackReserve = size_of_stack_reserve;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfStackReserve = size_of_stack_reserve;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfStackReserve =
+        static_cast<ULONG>(size_of_stack_reserve);
+    }
   }
 
-  void SetSizeOfStackCommit(ULONG_PTR size_of_stack_commit)
+  void SetSizeOfStackCommit(ULONGLONG size_of_stack_commit)
   {
-    data_.OptionalHeader.SizeOfStackCommit = size_of_stack_commit;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfStackCommit = size_of_stack_commit;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfStackCommit =
+        static_cast<ULONG>(size_of_stack_commit);
+    }
   }
 
-  void SetSizeOfHeapReserve(ULONG_PTR size_of_heap_reserve)
+  void SetSizeOfHeapReserve(ULONGLONG size_of_heap_reserve)
   {
-    data_.OptionalHeader.SizeOfHeapReserve = size_of_heap_reserve;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfHeapReserve = size_of_heap_reserve;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfHeapReserve =
+        static_cast<ULONG>(size_of_heap_reserve);
+    }
   }
 
-  void SetSizeOfHeapCommit(ULONG_PTR size_of_heap_commit)
+  void SetSizeOfHeapCommit(ULONGLONG size_of_heap_commit)
   {
-    data_.OptionalHeader.SizeOfHeapCommit = size_of_heap_commit;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.SizeOfHeapCommit = size_of_heap_commit;
+    }
+    else
+    {
+      data_32_.OptionalHeader.SizeOfHeapCommit =
+        static_cast<ULONG>(size_of_heap_commit);
+    }
   }
 
   void SetLoaderFlags(DWORD loader_flags)
   {
-    data_.OptionalHeader.LoaderFlags = loader_flags;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.LoaderFlags = loader_flags;
+    }
+    else
+    {
+      data_32_.OptionalHeader.LoaderFlags = loader_flags;
+    }
   }
 
   void SetNumberOfRvaAndSizes(DWORD number_of_rva_and_sizes)
   {
-    data_.OptionalHeader.NumberOfRvaAndSizes = number_of_rva_and_sizes;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.NumberOfRvaAndSizes = number_of_rva_and_sizes;
+    }
+    else
+    {
+      data_32_.OptionalHeader.NumberOfRvaAndSizes = number_of_rva_and_sizes;
+    }
   }
 
   void SetDataDirectoryVirtualAddress(PeDataDir data_dir,
@@ -527,8 +1098,18 @@ public:
                                       << ErrorString{"Invalid data dir."});
     }
 
-    data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(data_dir)]
-      .VirtualAddress = data_directory_virtual_address;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                              data_dir)].VirtualAddress =
+        data_directory_virtual_address;
+    }
+    else
+    {
+      data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                              data_dir)].VirtualAddress =
+        data_directory_virtual_address;
+    }
   }
 
   void SetDataDirectorySize(PeDataDir data_dir, DWORD data_directory_size)
@@ -539,8 +1120,18 @@ public:
                                       << ErrorString{"Invalid data dir."});
     }
 
-    data_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(data_dir)]
-      .Size = data_directory_size;
+    if (pe_file_->Is64())
+    {
+      data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                              data_dir)].Size =
+        data_directory_size;
+    }
+    else
+    {
+      data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
+                                              data_dir)].Size =
+        data_directory_size;
+    }
   }
 
 private:
@@ -554,7 +1145,8 @@ private:
   Process const* process_;
   PeFile const* pe_file_;
   std::uint8_t* base_;
-  IMAGE_NT_HEADERS data_ = IMAGE_NT_HEADERS{};
+  IMAGE_NT_HEADERS32 data_32_ = IMAGE_NT_HEADERS32{};
+  IMAGE_NT_HEADERS64 data_64_ = IMAGE_NT_HEADERS64{};
 };
 
 inline bool operator==(NtHeaders const& lhs,
@@ -609,12 +1201,12 @@ inline std::wostream& operator<<(std::wostream& lhs, NtHeaders const& rhs)
   return lhs;
 }
 
-inline ULONG_PTR GetRuntimeBase(Process const& process, PeFile const& pe_file)
+inline ULONGLONG GetRuntimeBase(Process const& process, PeFile const& pe_file)
 {
   switch (pe_file.GetType())
   {
   case PeFileType::Image:
-    return reinterpret_cast<ULONG_PTR>(pe_file.GetBase());
+    return reinterpret_cast<ULONGLONG>(pe_file.GetBase());
   case PeFileType::Data:
     return NtHeaders(process, pe_file).GetImageBase();
   }

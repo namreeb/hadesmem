@@ -54,8 +54,8 @@ void DumpDosHeader(hadesmem::Process const& process,
                    std::end(reserved_words_1),
                    [](WORD w)
                    {
-        return !!w;
-      }) != std::end(reserved_words_1))
+                     return !!w;
+                   }) != std::end(reserved_words_1))
   {
     WriteNormal(out, L"WARNING! Detected non-zero data in ReservedWords1.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
@@ -222,7 +222,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
-  ULONG_PTR const image_base = nt_hdrs.GetImageBase();
+  auto const image_base = nt_hdrs.GetImageBase();
   if (image_base + addr_of_ep < image_base)
   {
     WriteNormal(out, L"WARNING! EP is at a negative offset.", 2);
@@ -230,10 +230,10 @@ void DumpNtHeaders(hadesmem::Process const& process,
   }
   DisassembleEp(process, pe_file, addr_of_ep, ep_va, 3);
   WriteNamedHex(out, L"BaseOfCode", nt_hdrs.GetBaseOfCode(), 2);
-#if defined(HADESMEM_DETAIL_ARCH_X86)
-  WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);
-#endif
-  std::uint64_t const image_base_64 = image_base;
+  if (!pe_file.Is64())
+  {
+    WriteNamedHex(out, L"BaseOfData", nt_hdrs.GetBaseOfData(), 2);
+  }
   WriteNamedHex(out, L"ImageBase", image_base, 2);
   // ImageBase can be null under XP. In this case the binary is relocated to
   // 0x10000.
@@ -253,7 +253,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   }
   // Not sure if this is actually possible under x64.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
-           image_base_64 >= (0xFFFFULL << 48))
+           image_base >= (0xFFFFULL << 48))
   {
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF

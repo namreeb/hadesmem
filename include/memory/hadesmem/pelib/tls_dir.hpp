@@ -60,32 +60,74 @@ public:
 
   void UpdateRead()
   {
-    data_ = Read<IMAGE_TLS_DIRECTORY>(*process_, base_);
+    if (pe_file_->Is64())
+    {
+      data_64_ = Read<IMAGE_TLS_DIRECTORY64>(*process_, base_);
+    }
+    else
+    {
+      data_32_ = Read<IMAGE_TLS_DIRECTORY32>(*process_, base_);
+    }
   }
 
   void UpdateWrite()
   {
-    Write(*process_, base_, data_);
+    if (pe_file_->Is64())
+    {
+      Write(*process_, base_, data_64_);
+    }
+    else
+    {
+      Write(*process_, base_, data_32_);
+    }
   }
 
-  DWORD_PTR GetStartAddressOfRawData() const
+  ULONGLONG GetStartAddressOfRawData() const
   {
-    return data_.StartAddressOfRawData;
+    if (pe_file_->Is64())
+    {
+      return data_64_.StartAddressOfRawData;
+    }
+    else
+    {
+      return data_32_.StartAddressOfRawData;
+    }
   }
 
-  DWORD_PTR GetEndAddressOfRawData() const
+  ULONGLONG GetEndAddressOfRawData() const
   {
-    return data_.EndAddressOfRawData;
+    if (pe_file_->Is64())
+    {
+      return data_64_.EndAddressOfRawData;
+    }
+    else
+    {
+      return data_32_.EndAddressOfRawData;
+    }
   }
 
-  DWORD_PTR GetAddressOfIndex() const
+  ULONGLONG GetAddressOfIndex() const
   {
-    return data_.AddressOfIndex;
+    if (pe_file_->Is64())
+    {
+      return data_64_.AddressOfIndex;
+    }
+    else
+    {
+      return data_32_.AddressOfIndex;
+    }
   }
 
-  DWORD_PTR GetAddressOfCallBacks() const
+  ULONGLONG GetAddressOfCallBacks() const
   {
-    return data_.AddressOfCallBacks;
+    if (pe_file_->Is64())
+    {
+      return data_64_.AddressOfCallBacks;
+    }
+    else
+    {
+      return data_32_.AddressOfCallBacks;
+    }
   }
 
   template <typename OutputIterator>
@@ -96,7 +138,7 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(
       std::is_base_of<std::output_iterator_tag, OutputIteratorCategory>::value);
 
-    ULONG_PTR image_base = GetRuntimeBase(*process_, *pe_file_);
+    auto const image_base = GetRuntimeBase(*process_, *pe_file_);
     auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(
       RvaToVa(*process_,
               *pe_file_,
@@ -111,58 +153,118 @@ public:
          callback;
          callback = Read<PIMAGE_TLS_CALLBACK>(*process_, ++callbacks_raw))
     {
-      DWORD_PTR const callback_offset =
-        reinterpret_cast<DWORD_PTR>(callback) - image_base;
-      *callbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK>(callback_offset);
+      auto const callback_offset =
+        reinterpret_cast<ULONGLONG>(callback) - image_base;
+      *callbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK>(
+        static_cast<ULONG_PTR>(callback_offset));
       ++callbacks;
     }
   }
 
   DWORD GetSizeOfZeroFill() const
   {
-    return data_.SizeOfZeroFill;
+    if (pe_file_->Is64())
+    {
+      return data_64_.SizeOfZeroFill;
+    }
+    else
+    {
+      return data_32_.SizeOfZeroFill;
+    }
   }
 
   DWORD GetCharacteristics() const
   {
-    return data_.Characteristics;
+    if (pe_file_->Is64())
+    {
+      return data_64_.Characteristics;
+    }
+    else
+    {
+      return data_32_.Characteristics;
+    }
   }
 
-  void SetStartAddressOfRawData(DWORD_PTR start_address_of_raw_data)
+  void SetStartAddressOfRawData(ULONGLONG start_address_of_raw_data)
   {
-    data_.StartAddressOfRawData = start_address_of_raw_data;
+    if (pe_file_->Is64())
+    {
+      data_64_.StartAddressOfRawData = start_address_of_raw_data;
+    }
+    else
+    {
+      data_32_.StartAddressOfRawData =
+        static_cast<DWORD>(start_address_of_raw_data);
+    }
   }
 
-  void SetEndAddressOfRawData(DWORD_PTR end_address_of_raw_data)
+  void SetEndAddressOfRawData(ULONGLONG end_address_of_raw_data)
   {
-    data_.EndAddressOfRawData = end_address_of_raw_data;
+    if (pe_file_->Is64())
+    {
+      data_64_.EndAddressOfRawData = end_address_of_raw_data;
+    }
+    else
+    {
+      data_32_.EndAddressOfRawData =
+        static_cast<DWORD>(end_address_of_raw_data);
+    }
   }
 
-  void SetAddressOfIndex(DWORD_PTR address_of_index)
+  void SetAddressOfIndex(ULONGLONG address_of_index)
   {
-    data_.AddressOfIndex = address_of_index;
+    if (pe_file_->Is64())
+    {
+      data_64_.AddressOfIndex = address_of_index;
+    }
+    else
+    {
+      data_32_.AddressOfIndex = static_cast<DWORD>(address_of_index);
+    }
   }
 
-  void SetAddressOfCallBacks(DWORD_PTR address_of_callbacks)
+  void SetAddressOfCallBacks(ULONGLONG address_of_callbacks)
   {
-    data_.AddressOfCallBacks = address_of_callbacks;
+    if (pe_file_->Is64())
+    {
+      data_64_.AddressOfCallBacks = address_of_callbacks;
+    }
+    else
+    {
+      data_32_.AddressOfCallBacks = static_cast<DWORD>(address_of_callbacks);
+    }
   }
 
   void SetSizeOfZeroFill(DWORD size_of_zero_fill)
   {
-    data_.SizeOfZeroFill = size_of_zero_fill;
+    if (pe_file_->Is64())
+    {
+      data_64_.SizeOfZeroFill = size_of_zero_fill;
+    }
+    else
+    {
+      data_32_.SizeOfZeroFill = size_of_zero_fill;
+    }
   }
 
   void SetCharacteristics(DWORD characteristics)
   {
-    data_.Characteristics = characteristics;
+    if (pe_file_->Is64())
+    {
+      data_64_.Characteristics = characteristics;
+    }
+    else
+    {
+      data_32_.Characteristics = characteristics;
+    }
   }
 
 private:
   Process const* process_;
   PeFile const* pe_file_;
   std::uint8_t* base_{};
-  IMAGE_TLS_DIRECTORY data_ = IMAGE_TLS_DIRECTORY{};
+  IMAGE_TLS_DIRECTORY32 data_32_ = IMAGE_TLS_DIRECTORY32{};
+  IMAGE_TLS_DIRECTORY64 data_64_ = IMAGE_TLS_DIRECTORY64{};
 };
 
 inline bool operator==(TlsDir const& lhs,

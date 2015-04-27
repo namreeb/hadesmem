@@ -146,7 +146,7 @@ public:
     try
     {
       TlsDir tls_dir{*process_, *pe_file_};
-      ULONG_PTR const image_base = GetRuntimeBase(*process_, *pe_file_);
+      auto const image_base = GetRuntimeBase(*process_, *pe_file_);
       auto const address_of_index_raw =
         RvaToVa(*process_,
                 *pe_file_,

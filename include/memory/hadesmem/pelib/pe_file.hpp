@@ -66,6 +66,30 @@ public:
         size_ = static_cast<DWORD>(region_alloc_size);
       }
     }
+
+    // Not erroring out anywhere here in order to retain back-compat.
+    // TODO: Do this properly as part of the rewrite.
+    try
+    {
+      if (size_ > sizeof(IMAGE_DOS_HEADER))
+      {
+        auto const nt_hdrs_ofs =
+          Read<IMAGE_DOS_HEADER>(process, address).e_lfanew;
+        if (size_ >= nt_hdrs_ofs + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER))
+        {
+          auto const nt_hdrs = Read<IMAGE_NT_HEADERS>(
+            process, static_cast<std::uint8_t*>(address) + nt_hdrs_ofs);
+          if (nt_hdrs.Signature == IMAGE_NT_SIGNATURE &&
+              nt_hdrs.FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64)
+          {
+            is_64_ = true;
+          }
+        }
+      }
+    }
+    catch (...)
+    {
+    }
   }
 
   explicit PeFile(Process&& process,
@@ -88,11 +112,17 @@ public:
     return size_;
   }
 
+  bool Is64() const HADESMEM_DETAIL_NOEXCEPT
+  {
+    return is_64_;
+  }
+
 private:
   Process const* process_;
   PBYTE base_;
   PeFileType type_;
   DWORD size_;
+  bool is_64_{false};
 };
 
 inline bool operator==(PeFile const& lhs,
@@ -167,16 +197,35 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     }
 
     BYTE* ptr_nt_headers = base + dos_header.e_lfanew;
-    IMAGE_NT_HEADERS nt_headers =
-      Read<IMAGE_NT_HEADERS>(process, ptr_nt_headers);
-    if (nt_headers.Signature != IMAGE_NT_SIGNATURE)
+    if (Read<DWORD>(process, ptr_nt_headers) != IMAGE_NT_SIGNATURE)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                       << ErrorString{"Invalid NT headers."});
     }
 
+    auto const file_header =
+      Read<IMAGE_FILE_HEADER>(process, ptr_nt_headers + sizeof(DWORD));
+
+    // TODO: Add proper size checking etc because there's the change for some
+    // really esoteric PE files that we will over-read some data here (e.g. for
+    // a really tiny x86 binary we may over-read when reading the 64-bit
+    // optional header). Haven't confirmed, but needs looking into.
+    auto const optional_header_32 = Read<IMAGE_OPTIONAL_HEADER32>(
+      process, ptr_nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER));
+    auto const optional_header_64 = Read<IMAGE_OPTIONAL_HEADER64>(
+      process, ptr_nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER));
+
+    DWORD const size_of_headers = pe_file.Is64()
+                                    ? optional_header_64.SizeOfHeaders
+                                    : optional_header_32.SizeOfHeaders;
+    DWORD const file_alignment = pe_file.Is64()
+                                   ? optional_header_64.FileAlignment
+                                   : optional_header_32.FileAlignment;
+    DWORD const size_of_image = pe_file.Is64() ? optional_header_64.SizeOfImage
+                                               : optional_header_32.SizeOfImage;
+
     // Windows will load specially crafted images with no sections.
-    WORD num_sections = nt_headers.FileHeader.NumberOfSections;
+    WORD num_sections = file_header.NumberOfSections;
     if (!num_sections)
     {
       // In cases where the PE file has no sections it can apparently also have
@@ -196,15 +245,15 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     // SizeOfHeaders can be arbitrarily large, including the size of the
     // entire file. RVAs inside the headers are treated as an offset from
     // zero, rather than finding the 'true' location in a section.
-    if (rva < nt_headers.OptionalHeader.SizeOfHeaders)
+    if (rva < size_of_headers)
     {
       // Only applies in low alignment, otherwise it's invalid?
-      if (nt_headers.OptionalHeader.FileAlignment < 200)
+      if (file_alignment < 200)
       {
         return base + rva;
       }
       // Also only applies if the RVA is smaller than file alignment?
-      else if (rva < nt_headers.OptionalHeader.FileAlignment)
+      else if (rva < file_alignment)
       {
         return base + rva;
       }
@@ -214,14 +263,14 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
       }
     }
 
-    if (rva > nt_headers.OptionalHeader.SizeOfImage)
+    if (rva > size_of_image)
     {
       return nullptr;
     }
 
     auto ptr_section_header = reinterpret_cast<PIMAGE_SECTION_HEADER>(
       ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-      nt_headers.FileHeader.SizeOfOptionalHeader);
+      file_header.SizeOfOptionalHeader);
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     // Virtual section table.
@@ -305,12 +354,12 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     if (in_header && rva < pe_file.GetSize())
     {
       // Only applies in low alignment, otherwise it's invalid?
-      if (nt_headers.OptionalHeader.FileAlignment < 200)
+      if (file_alignment < 200)
       {
         return base + rva;
       }
       // Also only applies if the RVA is smaller than file alignment?
-      else if (rva < nt_headers.OptionalHeader.FileAlignment)
+      else if (rva < file_alignment)
       {
         return base + rva;
       }
@@ -321,7 +370,7 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
     }
 
     // Sample: nullSOH-XP (Corkami PE Corpus)
-    if (rva < nt_headers.OptionalHeader.SizeOfImage && rva < pe_file.GetSize())
+    if (rva < size_of_image && rva < pe_file.GetSize())
     {
       return base + rva;
     }

@@ -84,19 +84,18 @@ public:
 
       call_export_ = true;
       load_export(this);
+
+      HADESMEM_DETAIL_TRACE_A("Called LoadPlugin export.");
     }
     catch (...)
     {
       HADESMEM_DETAIL_TRACE_A(
         boost::current_exception_diagnostic_information().c_str());
-      HADESMEM_DETAIL_ASSERT(false);
 
       UnloadUnchecked();
 
       throw;
     }
-
-    HADESMEM_DETAIL_TRACE_A("Called LoadPlugin export.");
   }
 
   Plugin(Plugin const& other) = delete;

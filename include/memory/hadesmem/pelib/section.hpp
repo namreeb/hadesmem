@@ -42,9 +42,18 @@ public:
           Error{} << ErrorString{"Image nas no sections."});
       }
 
-      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
-              offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-              nt_headers.GetSizeOfOptionalHeader();
+      if (pe_file_->Is64())
+      {
+        base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
+                offsetof(IMAGE_NT_HEADERS64, OptionalHeader) +
+                nt_headers.GetSizeOfOptionalHeader();
+      }
+      else
+      {
+        base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
+                offsetof(IMAGE_NT_HEADERS32, OptionalHeader) +
+                nt_headers.GetSizeOfOptionalHeader();
+      }
     }
 
     void const* const file_end =
