@@ -44,8 +44,7 @@ public:
   {
     try
     {
-      auto const thunk_ptr = reinterpret_cast<PIMAGE_THUNK_DATA>(
-        RvaToVa(process, pe_file, first_thunk));
+      auto const thunk_ptr = RvaToVa(process, pe_file, first_thunk);
       if (!thunk_ptr)
       {
         return;
@@ -117,9 +116,12 @@ public:
       HADESMEM_DETAIL_ASSERT(impl_.get());
 
       auto const cur_base =
-        reinterpret_cast<PIMAGE_THUNK_DATA>(impl_->import_thunk_->GetBase());
+        static_cast<std::uint8_t*>(impl_->import_thunk_->GetBase());
+      void* const next = impl_->pe_file_->Is64()
+                           ? cur_base + sizeof(IMAGE_THUNK_DATA64)
+                           : cur_base + sizeof(IMAGE_THUNK_DATA32);
       impl_->import_thunk_ =
-        ImportThunk{*impl_->process_, *impl_->pe_file_, cur_base + 1};
+        ImportThunk{*impl_->process_, *impl_->pe_file_, next};
 
       if (!impl_->import_thunk_->GetAddressOfData())
       {

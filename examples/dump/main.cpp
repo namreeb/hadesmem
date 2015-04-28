@@ -219,6 +219,11 @@ void DumpPeFile(hadesmem::Process const& process,
 
   ClearWarnForCurrentFile();
 
+  WriteNewline(out);
+  std::wstring const architecture_str{pe_file.Is64() ? L"64-Bit File: Yes"
+                                                     : L"64-Bit File: No"};
+  WriteNormal(out, architecture_str, 1);
+
   std::uint32_t const k1MB = (1U << 20);
   std::uint32_t const k100MB = k1MB * 100;
   if (pe_file.GetSize() > k100MB)
@@ -405,8 +410,8 @@ int main(int argc, char* argv[])
                      std::end(processes),
                      [pid](hadesmem::ProcessEntry const& process_entry)
                      {
-          return process_entry.GetId() == pid;
-        });
+                       return process_entry.GetId() == pid;
+                     });
       if (iter != std::end(processes))
       {
         DumpProcessEntry(*iter);

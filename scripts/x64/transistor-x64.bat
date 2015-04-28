@@ -1,0 +1,1 @@
+inject.exe --run "F:\Games\SteamLibrary\steamapps\common\Transistor\x64\Transistor.exe" --inject --steam-app-id 237930 --export Load --add-path --path-resolution --module cerberus.dll

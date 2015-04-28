@@ -29,70 +29,127 @@ class ImportThunk
 public:
   explicit ImportThunk(Process const& process,
                        PeFile const& pe_file,
-                       PIMAGE_THUNK_DATA thunk)
+                       void* thunk)
     : process_{&process},
       pe_file_{&pe_file},
-      base_{reinterpret_cast<std::uint8_t*>(thunk)}
+      base_{static_cast<std::uint8_t*>(thunk)}
   {
     UpdateRead();
   }
 
   explicit ImportThunk(Process&& process,
                        PeFile const& pe_file,
-                       PIMAGE_THUNK_DATA thunk) = delete;
+                       void* thunk) = delete;
 
   explicit ImportThunk(Process const& process,
                        PeFile&& pe_file,
-                       PIMAGE_THUNK_DATA thunk) = delete;
+                       void* thunk) = delete;
 
   explicit ImportThunk(Process&& process,
                        PeFile&& pe_file,
-                       PIMAGE_THUNK_DATA thunk) = delete;
+                       void* thunk) = delete;
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
   {
     return base_;
   }
 
   void UpdateRead()
   {
-    data_ = Read<IMAGE_THUNK_DATA>(*process_, base_);
+    if (pe_file_->Is64())
+    {
+      data_64_ = Read<IMAGE_THUNK_DATA64>(*process_, base_);
+    }
+    else
+    {
+      data_32_ = Read<IMAGE_THUNK_DATA32>(*process_, base_);
+    }
   }
 
   void UpdateWrite()
   {
-    Write(*process_, base_, data_);
+    if (pe_file_->Is64())
+    {
+      Write(*process_, base_, data_64_);
+    }
+    else
+    {
+      Write(*process_, base_, data_32_);
+    }
   }
 
-  DWORD_PTR GetAddressOfData() const
+  ULONGLONG GetAddressOfData() const
   {
-    return data_.u1.AddressOfData;
+    if (pe_file_->Is64())
+    {
+      return data_64_.u1.AddressOfData;
+    }
+    else
+    {
+      return data_32_.u1.AddressOfData;
+    }
   }
 
-  DWORD_PTR GetOrdinalRaw() const
+  ULONGLONG GetOrdinalRaw() const
   {
-    return data_.u1.Ordinal;
+    if (pe_file_->Is64())
+    {
+      return data_64_.u1.Ordinal;
+    }
+    else
+    {
+      return data_32_.u1.Ordinal;
+    }
   }
 
   bool ByOrdinal() const
   {
-    return IMAGE_SNAP_BY_ORDINAL(GetOrdinalRaw());
+    if (pe_file_->Is64())
+    {
+      return IMAGE_SNAP_BY_ORDINAL64(GetOrdinalRaw());
+    }
+    else
+    {
+      return IMAGE_SNAP_BY_ORDINAL32(GetOrdinalRaw());
+    }
   }
 
   WORD GetOrdinal() const
   {
-    return IMAGE_ORDINAL(GetOrdinalRaw());
+    if (pe_file_->Is64())
+    {
+      return IMAGE_ORDINAL64(GetOrdinalRaw());
+    }
+    else
+    {
+      return IMAGE_ORDINAL32(GetOrdinalRaw());
+    }
   }
 
-  DWORD_PTR GetFunction() const
+  ULONGLONG GetFunction() const
   {
-    return data_.u1.Function;
+    if (pe_file_->Is64())
+    {
+      return data_64_.u1.Function;
+    }
+    else
+    {
+      return data_32_.u1.Function;
+    }
   }
 
-  DWORD_PTR* GetFunctionPtr()
+  ULONGLONG* GetFunctionPtr()
   {
-    return reinterpret_cast<DWORD_PTR*>(
-      base_ + offsetof(IMAGE_THUNK_DATA, u1.Function));
+    if (pe_file_->Is64())
+    {
+      return reinterpret_cast<ULONGLONG*>(
+        base_ + offsetof(IMAGE_THUNK_DATA64, u1.Function));
+    }
+    else
+    {
+      return reinterpret_cast<ULONGLONG*>(
+        base_ + offsetof(IMAGE_THUNK_DATA32, u1.Function));
+    }
   }
 
   WORD GetHint() const
@@ -121,19 +178,40 @@ public:
       *process_, *pe_file_, name_import + offsetof(IMAGE_IMPORT_BY_NAME, Name));
   }
 
-  void SetAddressOfData(DWORD_PTR address_of_data)
+  void SetAddressOfData(ULONGLONG address_of_data)
   {
-    data_.u1.AddressOfData = address_of_data;
+    if (pe_file_->Is64())
+    {
+      data_64_.u1.AddressOfData = address_of_data;
+    }
+    else
+    {
+      data_32_.u1.AddressOfData = static_cast<DWORD>(address_of_data);
+    }
   }
 
-  void SetOrdinalRaw(DWORD_PTR ordinal_raw)
+  void SetOrdinalRaw(ULONGLONG ordinal_raw)
   {
-    data_.u1.Ordinal = ordinal_raw;
+    if (pe_file_->Is64())
+    {
+      data_64_.u1.Ordinal = ordinal_raw;
+    }
+    else
+    {
+      data_32_.u1.Ordinal = static_cast<DWORD>(ordinal_raw);
+    }
   }
 
-  void SetFunction(DWORD_PTR function)
+  void SetFunction(ULONGLONG function)
   {
-    data_.u1.Function = function;
+    if (pe_file_->Is64())
+    {
+      data_64_.u1.Function = function;
+    }
+    else
+    {
+      data_32_.u1.Function = static_cast<DWORD>(function);
+    }
   }
 
   void SetHint(WORD hint)
@@ -148,7 +226,8 @@ private:
   Process const* process_;
   PeFile const* pe_file_;
   PBYTE base_;
-  IMAGE_THUNK_DATA data_ = IMAGE_THUNK_DATA{};
+  IMAGE_THUNK_DATA32 data_32_ = IMAGE_THUNK_DATA32{};
+  IMAGE_THUNK_DATA64 data_64_ = IMAGE_THUNK_DATA64{};
 };
 
 inline bool operator==(ImportThunk const& lhs,
