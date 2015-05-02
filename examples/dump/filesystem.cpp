@@ -73,7 +73,19 @@ void DumpFile(std::wstring const& path)
     return;
   }
 
-  std::vector<char> buf(static_cast<std::size_t>(size));
+  std::vector<char> buf;
+
+  try
+  {
+    buf.resize(static_cast<std::size_t>(size));
+  }
+  catch (std::bad_alloc const&)
+  {
+    WriteNewline(out);
+    WriteNormal(out, L"WARNING! File too large.", 0);
+    WarnForCurrentFile(WarningType::kUnsupported);
+    return;
+  }
 
   if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
   {
