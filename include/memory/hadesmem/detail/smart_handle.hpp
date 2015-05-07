@@ -351,5 +351,22 @@ struct SetupDiDestroyDeviceInfoListPolicy
 
 using SmartDeviceInfoListHandle =
   SmartHandleImpl<SetupDiDestroyDeviceInfoListPolicy>;
+
+struct RegKeyPolicy
+{
+  using HandleT = HKEY;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::RegCloseKey(handle) == ERROR_SUCCESS;
+  }
+};
+
+using SmartRegKeyHandle = SmartHandleImpl<RegKeyPolicy>;
 }
 }
