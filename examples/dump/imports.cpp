@@ -82,12 +82,21 @@ void DumpImports(hadesmem::Process const& process,
   }
   else
   {
-    // This is probably a good thing to use to quickly identify files with
-    // broken RVA resolution (because broken RVA resolution is far more
-    // common than actual files with no imports).
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
-    WarnForCurrentFile(WarningType::kSuspicious);
+    hadesmem::NtHeaders const nt_headers{process, pe_file};
+    // Only warn if the file actually has an import directory RVA (and hence it
+    // appears that the RVA resolution fails).
+    // Don't check size because Windows ignores it.
+    if (nt_headers.GetNumberOfRvaAndSizesClamped() >
+          static_cast<DWORD>(hadesmem::PeDataDir::Import) &&
+        nt_headers.GetDataDirectoryVirtualAddress(hadesmem::PeDataDir::Import))
+    {
+      // This is probably a good thing to use to quickly identify files with
+      // broken RVA resolution (because broken RVA resolution is far more
+      // common than actual files with no imports).
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
   }
 
   std::uint32_t num_import_dirs = 0U;
@@ -220,7 +229,7 @@ void DumpImports(hadesmem::Process const& process,
                     L"WARNING! Detected new style forwarder chain with "
                     L"old style bound imports.",
                     2);
-        WarnForCurrentFile(WarningType::kSuspicious);
+        WarnForCurrentFile(WarningType::kUnsupported);
       }
 
       if (!time_date_stamp)
@@ -231,7 +240,7 @@ void DumpImports(hadesmem::Process const& process,
                     L"WARNING! Detected new style forwarder chain "
                     L"with no bound imports.",
                     2);
-        WarnForCurrentFile(WarningType::kSuspicious);
+        WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
 
@@ -326,13 +335,16 @@ void DumpImports(hadesmem::Process const& process,
     std::size_t count = 0U;
     for (auto const& thunk : ilt_thunks)
     {
-      if (count++ == 1000)
+      // Some legitimate PE files have well over 1000 imports from a single
+      // module (e.g. idaq64.exe importing QtGui4.dll).
+      if (count++ == 10000)
       {
         WriteNewline(out);
-        WriteNormal(out,
-                    L"WARNING! Processed 1000 import thunks. Stopping early to "
-                    L"avoid resource exhaustion attacks.",
-                    2);
+        WriteNormal(
+          out,
+          L"WARNING! Processed 10000 import thunks. Stopping early to "
+          L"avoid resource exhaustion attacks.",
+          2);
         WarnForCurrentFile(WarningType::kSuspicious);
         break;
       }
@@ -367,7 +379,17 @@ void DumpImports(hadesmem::Process const& process,
                       L"WARNING! IAT size does not match ILT size. Stopping "
                       L"IAT enumeration early.",
                       2);
-          WarnForCurrentFile(WarningType::kSuspicious);
+          // Apparently some legitimate (but strange) files do this. Probably in
+          // order to save some space because you seemingly don't need the null
+          // padding in practice as the Windows loader enumerates both
+          // directories in parallel and will stop when it reaches the end of
+          // the ILT, it doesn't actually care if the IAT is terminated or not.
+          // Sample: pdfinfo.exe (from Git)
+          // TODO: Investigate further and double-check the above assumption,
+          // and also figure out whether there's some way we can narrow the
+          // scope of the warning to let through legitimate file while still
+          // warning on suspicious ones.
+          // WarnForCurrentFile(WarningType::kSuspicious);
           break;
         }
 

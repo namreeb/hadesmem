@@ -177,8 +177,16 @@ inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
   return lhs;
 }
 
-inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
+inline PVOID RvaToVa(Process const& process,
+                     PeFile const& pe_file,
+                     DWORD rva,
+                     bool* virtual_va = nullptr)
 {
+  if (virtual_va)
+  {
+    *virtual_va = false;
+  }
+
   PeFileType const type = pe_file.GetType();
   PBYTE base = static_cast<PBYTE>(pe_file.GetBase());
 
@@ -319,13 +327,27 @@ inline PVOID RvaToVa(Process const& process, PeFile const& pe_file, DWORD rva)
         // scenario and then use PeFileType::Image.
         if (rva > raw_size)
         {
+          // It's useful to be able to detect this case as a user for things
+          // like exports, where typically a failure to resolve an RVA would be
+          // an error/suspicious, but not in the case of a data export where it
+          // is normal for the RVA to be in the zero fill of a data segment.
+          // TODO: Find other places in this function where we need to set this
+          // flag.
+          if (rva < virtual_size && virtual_va)
+          {
+            *virtual_va = true;
+          }
+
           return nullptr;
         }
 
         // If PointerToRawData is less than 0x200 it is rounded
-        // down to 0. Safe to mask it off unconditionally because
-        // it must be a multiple of FileAlignment.
-        rva += section_header.PointerToRawData & ~(0x1FFUL);
+        // down to 0.
+        if (section_header.PointerToRawData >= 0x200)
+        {
+          // TODO: Check whether we actually need/want to force alignment here.
+          rva += section_header.PointerToRawData & ~(file_alignment - 1);
+        }
 
         // If the RVA now lies outside the actual file just return nullptr
         // because it's invalid.

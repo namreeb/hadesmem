@@ -84,9 +84,14 @@ void DumpExports(hadesmem::Process const& process,
   }
   else
   {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Empty or invalid export list.", 2);
-    WarnForCurrentFile(WarningType::kSuspicious);
+    // Legitimate DLLs have an export dir with no exports for some reason (e.g.
+    // visintl.dll from Office 15).
+    if (export_dir->GetNumberOfFunctions() != 0)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Invalid export list.", 2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
   }
 
   std::uint32_t num_exports = 0U;
@@ -94,12 +99,13 @@ void DumpExports(hadesmem::Process const& process,
   {
     WriteNewline(out);
 
-    // Some legitimate DLLs have well over 1000 exports (e.g. ntdll.dll).
-    if (num_exports++ == 10000)
+    // Some legitimate PE files have well over 10000 exports (e.g.
+    // libgnat-4.9.dll).
+    if (num_exports++ == 100000)
     {
       WriteNormal(
         out,
-        L"WARNING! Processed 10000 exports. Stopping early to avoid resource "
+        L"WARNING! Processed 100000 exports. Stopping early to avoid resource "
         L"exhaustion attacks.",
         2);
       WarnForCurrentFile(WarningType::kSuspicious);
@@ -161,7 +167,7 @@ void DumpExports(hadesmem::Process const& process,
       {
         DisassembleEp(process, pe_file, ep_rva, ep_va, 4);
       }
-      else
+      else if (!e.IsVirtualVa())
       {
         WriteNormal(out, L"WARNING! Export VA is invalid.", 3);
         WarnForCurrentFile(WarningType::kSuspicious);

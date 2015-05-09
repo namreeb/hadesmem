@@ -114,7 +114,7 @@ public:
     else
     {
       rva_ = func_rva;
-      va_ = RvaToVa(process, pe_file, func_rva);
+      va_ = RvaToVa(process, pe_file, func_rva, &virtual_va_);
     }
   }
 
@@ -148,7 +148,8 @@ public:
       procedure_number_{other.procedure_number_},
       ordinal_number_{other.ordinal_number_},
       by_name_{other.by_name_},
-      forwarded_{other.forwarded_}
+      forwarded_{other.forwarded_},
+      virtual_va_{other.virtual_va_}
   {
   }
 
@@ -166,6 +167,7 @@ public:
     ordinal_number_ = other.ordinal_number_;
     by_name_ = other.by_name_;
     forwarded_ = other.forwarded_;
+    virtual_va_ = other.virtual_va_;
 
     return *this;
   }
@@ -257,6 +259,11 @@ public:
     }
   }
 
+  bool IsVirtualVa() const
+  {
+    return virtual_va_;
+  }
+
 private:
   Process const* process_;
   PeFile const* pe_file_;
@@ -270,6 +277,7 @@ private:
   WORD ordinal_number_{};
   bool by_name_{};
   bool forwarded_{};
+  bool virtual_va_{};
 };
 
 inline bool operator==(Export const& lhs,

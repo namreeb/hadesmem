@@ -214,7 +214,11 @@ void DumpNtHeaders(hadesmem::Process const& process,
   if (!addr_of_ep && !(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))
   {
     WriteNormal(out, L"WARNING! Detected zero EP in non-DLL PE.", 2);
-    WarnForCurrentFile(WarningType::kSuspicious);
+    // It seems it can be null for some .NET assemblies. This needs to be
+    // investigated further however as I'm not yet sure how it works...
+    // TODO: Investigate null EP RVA for .NET assemblies and re-add the warning
+    // if appropriate.
+    // WarnForCurrentFile(WarningType::kSuspicious);
   }
   auto const ep_va = RvaToVa(process, pe_file, addr_of_ep);
   if (addr_of_ep && !ep_va)
@@ -271,15 +275,26 @@ void DumpNtHeaders(hadesmem::Process const& process,
   }
   DWORD const section_alignment = nt_hdrs.GetSectionAlignment();
   WriteNamedHex(out, L"SectionAlignment", section_alignment, 2);
+  // Some system DLLs (and normal .NET PE files) have large section alignment
+  // (e.g. WoW64 kernel32.dll on Windows 8.1 has section alignment of 0x10000).
+  // Instead of simply flagging all large alignments, look simply for ones which
+  // are not a multiple of the page size.
+  SYSTEM_INFO system_info{};
+  ::GetNativeSystemInfo(&system_info);
+  bool const is_page_size_multiple =
+    !(section_alignment % system_info.dwPageSize);
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
-  if (section_alignment < 0x200 || section_alignment > 0x1000)
+  if (section_alignment < 0x200 ||
+      (section_alignment > 0x1000 && !is_page_size_multiple))
   {
     WriteNormal(out, L"WARNING! Unusual section alignment.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   DWORD const file_alignment = nt_hdrs.GetFileAlignment();
   WriteNamedHex(out, L"FileAlignment", file_alignment, 2);
+  // TODO: Better file alignment checks. Should always be a power of 2 between
+  // 512 and 65535?
   // Sample: bigalign.exe (Corkami PE corpus).
   // Sample: nosection*.exe (Corkami PE corpus).
   if (file_alignment < 0x200 || file_alignment > 0x1000)
@@ -366,6 +381,14 @@ void DumpNtHeaders(hadesmem::Process const& process,
                   L"WARNING! " + data_dir_name +
                     L" data directory is unsupported.",
                   2);
+      WarnForCurrentFile(WarningType::kUnsupported);
+    }
+    // Used by packers etc for scratch storage.
+    if (static_cast<hadesmem::PeDataDir>(i) == hadesmem::PeDataDir::Reserved &&
+        (data_dir_va || data_dir_size))
+    {
+      WriteNormal(
+        out, L"WARNING! Detected usage of reserved data directory.", 2);
       WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
