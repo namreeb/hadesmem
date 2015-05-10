@@ -161,7 +161,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   std::wostream& out = std::wcout;
 
   WriteNewline(out);
-  WriteNormal(out, L"DOS Header:", 1);
+  WriteNormal(out, L"NT Headers:", 1);
 
   hadesmem::NtHeaders const nt_hdrs(process, pe_file);
   WriteNewline(out);
