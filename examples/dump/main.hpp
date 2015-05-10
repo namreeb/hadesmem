@@ -24,6 +24,8 @@ void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path);
 
+std::wstring GetCurrentFilePath();
+
 void SetCurrentFilePath(std::wstring const& path);
 
 void HandleLongOrUnprintableString(std::wstring const& name,

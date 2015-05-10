@@ -114,13 +114,16 @@ public:
       DWORD const num_funcs = export_dir.GetNumberOfFunctions();
 
       for (; ((ordinal_number + ordinal_base) >= ordinal_base) &&
-               !Read<DWORD>(*impl_->process_, ptr_functions + ordinal_number) &&
-               ordinal_number < num_funcs;
+             !Read<DWORD>(*impl_->process_, ptr_functions + ordinal_number) &&
+             ordinal_number < num_funcs;
            ++ordinal_number)
       {
       }
 
-      if ((ordinal_number + ordinal_base) < ordinal_base)
+      WORD const new_procedure_number =
+        static_cast<WORD>(ordinal_number + ordinal_base);
+
+      if (new_procedure_number < ordinal_base)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
           Error{} << ErrorString{"Ordinal number overflow."});
@@ -131,9 +134,6 @@ public:
         HADESMEM_DETAIL_THROW_EXCEPTION(
           Error{} << ErrorString{"Invalid export number."});
       }
-
-      WORD const new_procedure_number =
-        static_cast<WORD>(ordinal_number + ordinal_base);
 
       impl_->export_ =
         Export{*impl_->process_, *impl_->pe_file_, new_procedure_number};

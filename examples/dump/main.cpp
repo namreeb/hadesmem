@@ -254,6 +254,11 @@ void DumpPeFile(hadesmem::Process const& process,
   HandleWarnings(path);
 }
 
+std::wstring GetCurrentFilePath()
+{
+  return g_current_file_path;
+}
+
 void SetCurrentFilePath(std::wstring const& path)
 {
   g_current_file_path = path;
@@ -347,6 +352,11 @@ int main(int argc, char* argv[])
       "warned-file-dynamic",
       "Dump warnings to file on the fly rather than at the end",
       cmd);
+    TCLAP::SwitchArg continue_arg(
+      "",
+      "continue",
+      "Continue on error when dumping a file during a directory dump",
+      cmd);
     TCLAP::ValueArg<int> warned_type_arg("",
                                          "warned-type",
                                          "Filter warned file using warned type",
@@ -436,7 +446,7 @@ int main(int argc, char* argv[])
         hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
       if (hadesmem::detail::IsDirectory(path))
       {
-        DumpDir(path);
+        DumpDir(path, continue_arg.isSet());
       }
       else
       {
@@ -453,7 +463,7 @@ int main(int argc, char* argv[])
 
       std::wstring const self_path = hadesmem::detail::GetSelfPath();
       std::wstring const root_path = hadesmem::detail::GetRootPath(self_path);
-      DumpDir(root_path);
+      DumpDir(root_path, continue_arg.isSet());
     }
 
     if (GetWarningsEnabled())

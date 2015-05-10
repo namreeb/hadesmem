@@ -115,7 +115,7 @@ void DumpFile(std::wstring const& path)
   DumpPeFile(process, pe_file, path);
 }
 
-void DumpDir(std::wstring const& path)
+void DumpDir(std::wstring const& path, bool continue_on_error)
 {
   std::wostream& out = std::wcout;
 
@@ -176,12 +176,34 @@ void DumpDir(std::wstring const& path)
         }
         else
         {
-          DumpDir(cur_path);
+          DumpDir(cur_path, continue_on_error);
         }
       }
       else
       {
-        DumpFile(cur_path);
+        try
+        {
+          DumpFile(cur_path);
+        }
+        catch (...)
+        {
+          if (continue_on_error)
+          {
+            std::cerr << "\nError!\n"
+                      << boost::current_exception_diagnostic_information()
+                      << '\n';
+
+            auto const current_file_path = GetCurrentFilePath();
+            if (!current_file_path.empty())
+            {
+              std::wcerr << "\nCurrent file: " << current_file_path << "\n";
+            }
+          }
+          else
+          {
+            throw;
+          }
+        }
       }
     }
     catch (hadesmem::Error const& e)

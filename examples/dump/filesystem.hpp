@@ -7,4 +7,4 @@
 
 void DumpFile(std::wstring const& path);
 
-void DumpDir(std::wstring const& path);
+void DumpDir(std::wstring const& path, bool continue_on_error);
