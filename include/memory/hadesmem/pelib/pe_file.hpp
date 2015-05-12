@@ -214,14 +214,17 @@ inline PVOID RvaToVa(Process const& process,
     auto const file_header =
       Read<IMAGE_FILE_HEADER>(process, ptr_nt_headers + sizeof(DWORD));
 
-    // TODO: Add proper size checking etc because there's the change for some
-    // really esoteric PE files that we will over-read some data here (e.g. for
-    // a really tiny x86 binary we may over-read when reading the 64-bit
-    // optional header). Haven't confirmed, but needs looking into.
-    auto const optional_header_32 = Read<IMAGE_OPTIONAL_HEADER32>(
-      process, ptr_nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER));
-    auto const optional_header_64 = Read<IMAGE_OPTIONAL_HEADER64>(
-      process, ptr_nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER));
+    auto const optional_header_32 =
+      pe_file.Is64()
+        ? IMAGE_OPTIONAL_HEADER32{}
+        : Read<IMAGE_OPTIONAL_HEADER32>(process,
+                                        ptr_nt_headers + sizeof(DWORD) +
+                                          sizeof(IMAGE_FILE_HEADER));
+    auto const optional_header_64 =
+      pe_file.Is64()
+        ? Read<IMAGE_OPTIONAL_HEADER64>(
+            process, ptr_nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER))
+        : IMAGE_OPTIONAL_HEADER64{};
 
     DWORD const size_of_headers = pe_file.Is64()
                                     ? optional_header_64.SizeOfHeaders

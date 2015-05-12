@@ -123,6 +123,10 @@ public:
       WORD const new_procedure_number =
         static_cast<WORD>(ordinal_number + ordinal_base);
 
+      // TODO: Investigate whether it's entirely correct to error out here. In
+      // some cases I think it's possible to craft a file which will cause an
+      // overflow within the Windows PE loader but still be loaded and run
+      // correctly...
       if (new_procedure_number < ordinal_base)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(

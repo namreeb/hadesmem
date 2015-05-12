@@ -368,5 +368,22 @@ struct RegKeyPolicy
 };
 
 using SmartRegKeyHandle = SmartHandleImpl<RegKeyPolicy>;
+
+struct VirtualMemPolicy
+{
+  using HandleT = PVOID;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return !!::VirtualFree(handle, 0, MEM_RELEASE);
+  }
+};
+
+using SmartVirtualMemHandle = SmartHandleImpl<VirtualMemPolicy>;
 }
 }
