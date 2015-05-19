@@ -14,6 +14,8 @@
 #include <cerberus/plugin.hpp>
 #include <cerberus/render.hpp>
 
+#include "dump.hpp"
+
 namespace
 {
 std::size_t g_on_ant_tweak_bar_initialize_callback_id =
@@ -24,9 +26,18 @@ std::size_t g_on_ant_tweak_bar_cleanup_callback_id =
 
 TwBar* g_tweak_bar = nullptr;
 
-void TW_CALL PlaceholderCallbackTw(void* /*client_data*/)
+void TW_CALL DumpCallbackTw(void* /*client_data*/)
 {
-  HADESMEM_DETAIL_TRACE_A("Called.");
+  try
+  {
+    DumpMemory();
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    HADESMEM_DETAIL_ASSERT(false);
+  }
 }
 
 void OnAntTweakBarInitialize(
@@ -56,13 +67,12 @@ void OnAntTweakBarInitialize(
                                          ant_tweak_bar->TwGetLastError()});
   }
 
-  auto const placeholder_button =
-    ant_tweak_bar->TwAddButton(g_tweak_bar,
-                               "CXExample_PlaceholderBtn",
-                               &PlaceholderCallbackTw,
-                               nullptr,
-                               " label='Placeholder' ");
-  if (!placeholder_button)
+  auto const dump_button = ant_tweak_bar->TwAddButton(g_tweak_bar,
+                                                      "CXExample_DumpBtn",
+                                                      &DumpCallbackTw,
+                                                      nullptr,
+                                                      " label='Dump' ");
+  if (!dump_button)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}

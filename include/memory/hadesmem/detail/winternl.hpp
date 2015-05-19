@@ -15,11 +15,28 @@
 #define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
   (static_cast<NTSTATUS>(0x80000006L))
 #define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH                            \
-  (static_cast<NTSTATUS>(0xC0000004L)
+  (static_cast<NTSTATUS>(0xC0000004L))
+#define HADESMEM_DETAIL_STATUS_NO_MORE_ENTRIES                                 \
+  (static_cast<NTSTATUS>(0x8000001AL))
+#define HADESMEM_DETAIL_STATUS_BUFFER_TOO_SMALL                                \
+  (static_cast<NTSTATUS>(0xC0000023L))
+
 #define HADESMEM_DETAIL_RTL_USER_PROC_PARAMS_NORMALIZED 0x00000001
+#define HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS 32
+#define HADESMEM_DETAIL_RTL_DRIVE_LETTER_VALID(USHORT) 0x0001
+
 #define HADESMEM_DETAIL_HID_USAGE_PAGE_GENERIC (static_cast<USHORT>(0x01))
 #define HADESMEM_DETAIL_HID_USAGE_GENERIC_MOUSE (static_cast<USHORT>(0x02))
 #define HADESMEM_DETAIL_HID_USAGE_GENERIC_KEYBOARD (static_cast<USHORT>(0x06))
+
+#define HADESMEM_DETAIL_DIRECTORY_QUERY (static_cast<ACCESS_MASK>(0x0001))
+#define HADESMEM_DETAIL_DIRECTORY_TRAVERSE (static_cast<ACCESS_MASK>(0x0002))
+#define HADESMEM_DETAIL_DIRECTORY_CREATE_OBJECT                                \
+  (static_cast<ACCESS_MASK>(0x0004))
+#define HADESMEM_DETAIL_DIRECTORY_CREATE_SUBDIRECTORY                          \
+  (static_cast<ACCESS_MASK>(0x0008))
+#define HADESMEM_DETAIL_DIRECTORY_ALL_ACCESS                                   \
+  (static_cast<ACCESS_MASK>(STANDARD_RIGHTS_REQUIRED | 0xF))
 
 namespace hadesmem
 {
@@ -592,6 +609,69 @@ struct TEB_ACTIVE_FRAME
   PTEB_ACTIVE_FRAME_CONTEXT Context;
 };
 
+struct CURDIR
+{
+  UNICODE_STRING DosPath;
+  VOID* Handle;
+};
+
+typedef CURDIR* PCURDIR;
+
+struct RTL_DRIVE_LETTER_CURDIR
+{
+  UINT16 Flags;
+  UINT16 Length;
+  ULONG32 TimeStamp;
+  STRING DosPath;
+};
+
+typedef RTL_DRIVE_LETTER_CURDIR* PRTL_DRIVE_LETTER_CURDIR;
+
+typedef struct _RTL_USER_PROCESS_PARAMETERS
+{
+  ULONG MaximumLength;
+  ULONG Length;
+
+  ULONG Flags;
+  ULONG DebugFlags;
+
+  HANDLE ConsoleHandle;
+  ULONG ConsoleFlags;
+  HANDLE StandardInput;
+  HANDLE StandardOutput;
+  HANDLE StandardError;
+
+  CURDIR CurrentDirectory;
+  UNICODE_STRING DllPath;
+  UNICODE_STRING ImagePathName;
+  UNICODE_STRING CommandLine;
+  PVOID Environment;
+
+  ULONG StartingX;
+  ULONG StartingY;
+  ULONG CountX;
+  ULONG CountY;
+  ULONG CountCharsX;
+  ULONG CountCharsY;
+  ULONG FillAttribute;
+
+  ULONG WindowFlags;
+  ULONG ShowWindowFlags;
+  UNICODE_STRING WindowTitle;
+  UNICODE_STRING DesktopInfo;
+  UNICODE_STRING ShellInfo;
+  UNICODE_STRING RuntimeData;
+  RTL_DRIVE_LETTER_CURDIR
+  CurrentDirectories[HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS];
+
+  ULONG EnvironmentSize;
+  ULONG EnvironmentVersion;
+  PVOID PackageDependencyData;
+  ULONG ProcessGroupId;
+} RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;
+
+typedef RTL_USER_PROCESS_PARAMETERS* PRTL_USER_PROCESS_PARAMETERS;
+
 struct PEB
 {
   UCHAR InheritedAddressSpace;
@@ -789,62 +869,6 @@ inline TEB* GetCurrentTeb()
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-struct CURDIR
-{
-  UNICODE_STRING DosPath;
-  VOID* Handle;
-};
-
-typedef CURDIR* PCURDIR;
-
-struct RTL_DRIVE_LETTER_CURDIR
-{
-  UINT16 Flags;
-  UINT16 Length;
-  ULONG32 TimeStamp;
-  STRING DosPath;
-};
-
-typedef RTL_DRIVE_LETTER_CURDIR* PRTL_DRIVE_LETTER_CURDIR;
-
-struct RTL_USER_PROCESS_PARAMETERS
-{
-  ULONG32 MaximumLength;
-  ULONG32 Length;
-  ULONG32 Flags;
-  ULONG32 DebugFlags;
-  VOID* ConsoleHandle;
-  ULONG32 ConsoleFlags;
-  UINT8 _PADDING0_[0x4];
-  VOID* StandardInput;
-  VOID* StandardOutput;
-  VOID* StandardError;
-  CURDIR CurrentDirectory;
-  UNICODE_STRING DllPath;
-  UNICODE_STRING ImagePathName;
-  UNICODE_STRING CommandLine;
-  VOID* Environment;
-  ULONG32 StartingX;
-  ULONG32 StartingY;
-  ULONG32 CountX;
-  ULONG32 CountY;
-  ULONG32 CountCharsX;
-  ULONG32 CountCharsY;
-  ULONG32 FillAttribute;
-  ULONG32 WindowFlags;
-  ULONG32 ShowWindowFlags;
-  UINT8 _PADDING1_[0x4];
-  UNICODE_STRING WindowTitle;
-  UNICODE_STRING DesktopInfo;
-  UNICODE_STRING ShellInfo;
-  UNICODE_STRING RuntimeData;
-  RTL_DRIVE_LETTER_CURDIR CurrentDirectores[32];
-  UINT64 EnvironmentSize;
-  UINT64 EnvironmentVersion;
-};
-
-typedef RTL_USER_PROCESS_PARAMETERS* PRTL_USER_PROCESS_PARAMETERS;
-
 typedef struct _SYSTEM_TIMEOFDAY_INFORMATION
 {
   LARGE_INTEGER BootTime;
@@ -884,6 +908,12 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
   FIRMWARE_TYPE FirmwareType;
   ULONGLONG Reserved;
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION, PSYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+
+typedef struct _OBJECT_DIRECTORY_INFORMATION
+{
+  UNICODE_STRING Name;
+  UNICODE_STRING TypeName;
+} OBJECT_DIRECTORY_INFORMATION, *POBJECT_DIRECTORY_INFORMATION;
 }
 }
 }
