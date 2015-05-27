@@ -58,3 +58,6 @@
 /build/vs/dump/dump.vcxproj.user
 /build/vs/cerberus/cerberus.vcxproj.user
 /build/vs/anttweakbar/anttweakbar.vcxproj.user
+/build/vs/postbuild/postbuild.vcxproj.user
+/build/vs/postbuild/Debug
+/build/vs/postbuild/Release
