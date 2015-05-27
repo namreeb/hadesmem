@@ -385,5 +385,22 @@ struct VirtualMemPolicy
 };
 
 using SmartVirtualMemHandle = SmartHandleImpl<VirtualMemPolicy>;
+
+struct EventLogPolicy
+{
+  using HandleT = HANDLE;
+
+  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return !!::CloseEventLog(handle);
+  }
+};
+
+using SmartEventLogHandle = SmartHandleImpl<EventLogPolicy>;
 }
 }
