@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\detail">
+      <UniqueIdentifier>{3ba08d51-c669-43e5-a9db-70764b075b98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\local">
+      <UniqueIdentifier>{c998d6be-8d67-497c-8f7f-240b559f8204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pelib">
+      <UniqueIdentifier>{daee2dda-a9c4-4f09-b193-f4739b6bbcd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\alias_cast.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\argv_quote.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\assert.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\crypto.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\detour_ref_counter.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\environment_variable.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\filesystem.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\find_procedure.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\force_initialize.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\last_error_preserver.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\optional.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patcher_aux.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_code_gen.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_detour_stub.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_guard.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_region.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\pugixml_helpers.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\query_region.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\read_impl.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\recursion_protector.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\region_alloc_size.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\remote_thread.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\scope_warden.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\self_path.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\smart_handle.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\srw_lock.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\static_assert.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\static_assert_x86.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\str_conv.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\thread_aux.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\time.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\toolhelp.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\to_upper_ordinal.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\trace.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\type_traits.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_prefix.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_suffix.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winapi.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winternl.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\write_impl.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_detour.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_detour_base.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_dr.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_func_ptr.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_func_rva.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_iat.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_int3.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_veh.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_vmt.hpp">
+      <Filter>Header Files\local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_desc.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_desc_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_fwd_ref.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_fwd_ref_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\dos_header.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export_dir.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_dir.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_dir_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\nt_headers.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\pe_file.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_block.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_block_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\section.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\section_list.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\tls_dir.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\alloc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\call.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\config.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\debug_privilege.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\error.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\find_pattern.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\find_procedure.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\flush.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\injector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\module.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\module_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\patch_raw.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\patcher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_entry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\protect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\read.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\region.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\region_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_entry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\write.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

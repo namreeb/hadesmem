@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DF3AF197-C047-4C60-8342-6FEFE550126A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>cerberus</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\..\include\memory;%BOOST_ROOT%;..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86</AdditionalIncludeDirectories>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\..\include\memory;%BOOST_ROOT%;..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\..\include\memory;%BOOST_ROOT%;..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86</AdditionalIncludeDirectories>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso /Gw /Gy /d2Zi+ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\..\..\include\memory;%BOOST_ROOT%;..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\cursor.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\d3d10.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\d3d10_device.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\d3d11.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\d3d11_device.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\d3d9.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_9.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_device_9.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_input.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_a_proxy.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\dxgi.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\dxgi_factory.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\dxgi_swap_chain.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\input.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\main.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\module.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\opengl.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\plugin.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\process.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\raw_input.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\render.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\callbacks.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\cursor.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d10.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d10_device.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d11.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d11_defs.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d11_device.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d11_state_block.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\d3d9.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_9.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_device_9.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_input.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_input_8_a_proxy.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\dxgi_factory.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\dxgi_swap_chain.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\gwen.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\hook_counter.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\hook_disabler.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\input.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\main.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\module.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\opengl.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\plugin.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\process.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\raw_input.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\render.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\anttweakbar\anttweakbar.vcxproj">
+      <Project>{275f9872-5523-4b96-801e-f2c40e5d2071}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\asmjit\asmjit.vcxproj">
+      <Project>{0c721345-2478-4288-b9be-d1235c6a8f87}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\gwen\gwen.vcxproj">
+      <Project>{5772ae06-8667-440f-8006-c34c79a50a75}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\pugixml\pugixml.vcxproj">
+      <Project>{c206d7b5-dd0b-41c1-aa12-cb977762d762}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\udis86\udis86.vcxproj">
+      <Project>{8ed308b0-d0c4-4bb6-93d8-a4b3a8085dab}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

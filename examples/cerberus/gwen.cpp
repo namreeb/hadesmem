@@ -256,9 +256,11 @@ void OnInitializeGwenGui(hadesmem::cerberus::RenderApi api, void* device)
   canvas->SetSize(wnd_rect.right, wnd_rect.bottom);
   canvas->SetDrawBackground(false);
 
-  auto& unit = GetGwenUnitTest();
-  unit.reset(new UnitTest(&*canvas));
-  unit->SetPos(10, 10);
+  // TODO: Reenable this once the linker problems are fixed. (Or preferably,
+  // just do our own basic GUI.)
+  // auto& unit = GetGwenUnitTest();
+  // unit.reset(new UnitTest(&*canvas));
+  // unit->SetPos(10, 10);
 
   auto& input = GetGwenInput();
   input.reset(new Gwen::Input::Windows());

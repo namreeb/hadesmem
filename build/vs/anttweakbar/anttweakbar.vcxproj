@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\LoadOGL.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\LoadOGLCore.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwBar.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwColors.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D10.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D9.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwEventSFML.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwEventWin.c" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwFonts.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwMgr.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwOpenGL.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwOpenGLCore.cpp" />
+    <ClCompile Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwPrecomp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\include\AntTweakBar.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\AntPerfTimer.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\d3d10vs2003.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\LoadOGL.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\LoadOGLCore.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\MiniGLFW.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\MiniGLUT.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\MiniSDL12.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\MiniSDL13.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\MiniSFML16.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\resource.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwBar.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwColors.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D10.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D9.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwFonts.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwGraph.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwMgr.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwOpenGL.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwOpenGLCore.h" />
+    <ClInclude Include="..\..\..\deps\anttweakbar\anttweakbar\src\TwPrecomp.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{275F9872-5523-4B96-801E-F2C40E5D2071}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>anttweakbar</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;TW_STATIC;TW_NO_LIB_PRAGMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>md ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32
+fxc /Od /Zi /T vs_4_0_level_9_1 /E LineRectVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_LineRectVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E LineRectCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_LineRectCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T ps_4_0_level_9_1 /E LineRectPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_LineRectPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E TextVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_TextVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E TextCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_TextCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug32\TwDirect3D11_TextPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;TW_STATIC;TW_NO_LIB_PRAGMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>md ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64
+fxc /Od /Zi /T vs_4_0_level_9_1 /E LineRectVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_LineRectVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E LineRectCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_LineRectCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T ps_4_0_level_9_1 /E LineRectPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_LineRectPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E TextVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_TextVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T vs_4_0_level_9_1 /E TextCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_TextCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /Od /Zi /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\debug64\TwDirect3D11_TextPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;TW_STATIC;TW_NO_LIB_PRAGMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso /Gw /Gy /d2Zi+ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>md ..\..\..\deps\anttweakbar\anttweakbar\obj\release32
+fxc /T vs_4_0_level_9_1 /E LineRectVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_LineRectVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E LineRectCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_LineRectCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T ps_4_0_level_9_1 /E LineRectPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_LineRectPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E TextVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_TextVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E TextCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_TextCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release32\TwDirect3D11_TextPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;TW_STATIC;TW_NO_LIB_PRAGMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso /Gw /Gy /d2Zi+ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>md ..\..\..\deps\anttweakbar\anttweakbar\obj\release64
+fxc /T vs_4_0_level_9_1 /E LineRectVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_LineRectVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E LineRectCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_LineRectCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T ps_4_0_level_9_1 /E LineRectPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_LineRectPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E TextVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_TextVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T vs_4_0_level_9_1 /E TextCstColorVS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_TextCstColorVS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+fxc /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\release64\TwDirect3D11_TextPS.h ..\..\..\deps\anttweakbar\anttweakbar\src\TwDirect3D11.hlsl
+</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

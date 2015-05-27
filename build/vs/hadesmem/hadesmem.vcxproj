@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\alloc.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\call.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\config.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\debug_privilege.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\alias_cast.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\argv_quote.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\assert.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\crypto.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\detour_ref_counter.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\environment_variable.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\filesystem.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\find_procedure.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\force_initialize.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\last_error_preserver.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\optional.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patcher_aux.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_code_gen.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_detour_stub.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_guard.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_region.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\pugixml_helpers.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\query_region.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\read_impl.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\recursion_protector.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\region_alloc_size.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\remote_thread.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\scope_warden.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\self_path.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\smart_handle.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\srw_lock.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\static_assert.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\static_assert_x86.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\str_conv.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\thread_aux.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\time.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\toolhelp.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\to_upper_ordinal.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\trace.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\type_traits.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_prefix.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_suffix.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winapi.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winternl.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\write_impl.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\error.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\find_pattern.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\find_procedure.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\flush.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\injector.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_detour.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_detour_base.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_dr.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_func_ptr.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_func_rva.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_iat.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_int3.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_veh.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\local\patch_vmt.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\module.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\module_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\patcher.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\patch_raw.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_desc.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_desc_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_fwd_ref.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\bound_import_fwd_ref_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\dos_header.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export_dir.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\export_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_dir.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_dir_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\nt_headers.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\pe_file.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_block.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_block_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\section.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\section_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\tls_dir.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_entry.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_helpers.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\process_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\protect.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\read.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\region.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\region_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_entry.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_helpers.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\thread_list.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\write.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F4A13F46-F555-4851-9172-B50F59336973}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>hadesmem</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
