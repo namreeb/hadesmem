@@ -96,9 +96,20 @@
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x86\ md $(SolutionDir)..\..\dist\debug\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.exe $(SolutionDir)..\..\dist\debug\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.dll $(SolutionDir)..\..\dist\debug\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\debug\x86\</Command>
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.exe $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.dll $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.dll $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(SolutionDir)..\..\dist\debug\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,9 +126,20 @@ xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x64\ md $(SolutionDir)..\..\dist\debug\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.exe $(SolutionDir)..\..\dist\debug\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.dll $(SolutionDir)..\..\dist\debug\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\debug\x64\</Command>
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.exe $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.dll $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.dll $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(SolutionDir)..\..\dist\debug\x64\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,9 +160,20 @@ xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\release\x86\ md $(SolutionDir)..\..\dist\release\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.exe $(SolutionDir)..\..\dist\release\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.dll $(SolutionDir)..\..\dist\release\x86\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\release\x86\</Command>
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.exe $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.dll $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.dll $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(SolutionDir)..\..\dist\release\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,10 +193,21 @@ xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist $(SolutionDir)..\..\dist\release\x64\md $(SolutionDir)..\..\dist\release\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.exe $(SolutionDir)..\..\dist\release\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.dll $(SolutionDir)..\..\dist\release\x64\
-xcopy $(SolutionDir)$(Configuration)\$(Platform)\*.pdb $(SolutionDir)..\..\dist\release\x64\</Command>
+      <Command>if not exist $(SolutionDir)..\..\dist\release\x64\ md $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.exe $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\inject.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.dll $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttest.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.dll $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(SolutionDir)..\..\dist\release\x64\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
