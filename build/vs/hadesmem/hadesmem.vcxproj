@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patcher_aux.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_code_gen.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_detour_stub.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\privilege.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_guard.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_region.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\pugixml_helpers.hpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winapi.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winternl.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\write_impl.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\driver.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\error.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\find_pattern.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\find_procedure.hpp" />

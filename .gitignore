@@ -136,3 +136,6 @@
 /build/vs/write/write.vcxproj.user
 /build/vs/write/Debug
 /build/vs/write/Release
+/build/vs/driver/driver.vcxproj.user
+/build/vs/driver/Debug
+/build/vs/driver/Release

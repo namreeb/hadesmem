@@ -100,6 +100,8 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir).
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\debug\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\debug\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.exe $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.pdb $(SolutionDir)..\..\dist\debug\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\debug\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\debug\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\debug\x86\
@@ -130,6 +132,8 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir).
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\debug\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\debug\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.exe $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.pdb $(SolutionDir)..\..\dist\debug\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\debug\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\debug\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\debug\x64\
@@ -164,6 +168,8 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir).
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\release\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\release\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.exe $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.pdb $(SolutionDir)..\..\dist\release\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\release\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\release\x86\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\release\x86\
@@ -198,6 +204,8 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.dll $(SolutionDir).
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cerberus.pdb $(SolutionDir)..\..\dist\release\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.dll $(SolutionDir)..\..\dist\release\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\cxexample.pdb $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.exe $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\driver.pdb $(SolutionDir)..\..\dist\release\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.exe $(SolutionDir)..\..\dist\release\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\dump.pdb $(SolutionDir)..\..\dist\release\x64\
 xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\esomod.exe $(SolutionDir)..\..\dist\release\x64\
