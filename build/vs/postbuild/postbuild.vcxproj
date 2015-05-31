@@ -119,7 +119,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x86\ md $(SolutionDir)..\..\dist\debug\x86\
@@ -143,6 +142,9 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <Lib>
+      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -155,7 +157,6 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x64\ md $(SolutionDir)..\..\dist\debug\x64\
@@ -179,6 +180,9 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <Lib>
+      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -195,7 +199,6 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\release\x86\ md $(SolutionDir)..\..\dist\release\x86\
@@ -219,6 +222,9 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <Lib>
+      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -235,7 +241,6 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\release\x64\ md $(SolutionDir)..\..\dist\release\x64\
@@ -259,6 +264,9 @@ xcopy /y $(SolutionDir)$(Configuration)\$(Platform)\injecttestdep.pdb $(Solution
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <Lib>
+      <AdditionalOptions>/ignore:4006,4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
