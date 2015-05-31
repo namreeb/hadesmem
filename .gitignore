@@ -139,3 +139,16 @@
 /build/vs/driver/driver.vcxproj.user
 /build/vs/driver/Debug
 /build/vs/driver/Release
+/build/vs/Win8 Release
+/build/vs/Win8.1 Debug
+/build/vs/Win8.1 Release
+/build/vs/Win7 Debug
+/build/vs/Win7 Release
+/build/vs/Win8 Debug
+/build/vs/chimera/Win8 Release
+/build/vs/chimera/Win8.1 Debug
+/build/vs/chimera/Win8.1 Release
+/build/vs/chimera/chimera.vcxproj.user
+/build/vs/chimera/Win7 Debug
+/build/vs/chimera/Win7 Release
+/build/vs/chimera/Win8 Debug
