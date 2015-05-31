@@ -104,6 +104,11 @@
       <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist $(SolutionDir)..\..\dist\debug\x86\ md $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(TargetDir)$(TargetFileName) $(SolutionDir)..\..\dist\debug\x86\
+xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -122,6 +127,11 @@
       <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist $(SolutionDir)..\..\dist\debug\x64\ md $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(TargetDir)$(TargetFileName) $(SolutionDir)..\..\dist\debug\x64\
+xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -145,6 +155,11 @@
       <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist $(SolutionDir)..\..\dist\release\x86\ md $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(TargetDir)$(TargetFileName) $(SolutionDir)..\..\dist\release\x86\
+xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -167,6 +182,11 @@
       <AdditionalLibraryDirectories>%DXSDK_DIR%\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist $(SolutionDir)..\..\dist\release\x64\ md $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(TargetDir)$(TargetFileName) $(SolutionDir)..\..\dist\release\x64\
+xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
