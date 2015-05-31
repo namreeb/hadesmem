@@ -34,12 +34,11 @@ DriverEntry(__in PDRIVER_OBJECT pDriverObject,
   if (NULL == ChimeraData)
   {
     KdPrint(
-      ("[Chimera] [%s] [0x%p]: ExAllocatePoolWithTag failed. Status: [%ld].\n",
+      ("[Chimera] [%s] [0x%p]: ExAllocatePoolWithTag failed.\n",
        __FUNCTION__,
-       KeGetCurrentThread(),
-       Status));
+       KeGetCurrentThread()));
     Status = STATUS_INSUFFICIENT_RESOURCES;
-    goto exit;
+    goto Exit;
   }
 
   RtlZeroMemory(ChimeraData, sizeof(ChimeraData));
@@ -59,7 +58,7 @@ DriverEntry(__in PDRIVER_OBJECT pDriverObject,
              __FUNCTION__,
              KeGetCurrentThread(),
              Status));
-    goto cleanup_1;
+    goto Cleanup_1;
   }
 
   for (i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; ++i)
@@ -82,7 +81,7 @@ DriverEntry(__in PDRIVER_OBJECT pDriverObject,
              __FUNCTION__,
              KeGetCurrentThread(),
              Status));
-    goto cleanup_2;
+    goto Cleanup_2;
   }
 
   RtlUnicodeStringInit(&DosDeviceName, CHIMERA_DOS_DEVICE_NAME_U);
@@ -94,21 +93,21 @@ DriverEntry(__in PDRIVER_OBJECT pDriverObject,
        __FUNCTION__,
        KeGetCurrentThread(),
        Status));
-    goto cleanup_3;
+    goto Cleanup_3;
   }
 
-  goto exit;
+  goto Exit;
 
-cleanup_3:
+Cleanup_3:
   IoUnregisterShutdownNotification(pDeviceObject);
 
-cleanup_2:
+Cleanup_2:
   IoDeleteDevice(pDeviceObject);
 
-cleanup_1:
+Cleanup_1:
   ExFreePoolWithTag(ChimeraData, CHIMERA_POOL_TAG);
 
-exit:
+Exit:
   return Status;
 }
 
