@@ -200,12 +200,18 @@ ChimeraDispatchUnsupported(IN PDEVICE_OBJECT pDeviceObject, IN PIRP pIrp)
 void DriverUnload(__in PDRIVER_OBJECT pDriverObject)
 {
   PDEVICE_OBJECT pDeviceObject = pDriverObject->DeviceObject;
+  UNICODE_STRING DosDeviceName = { 0 };
 
   FUNCTION_ENTRY;
 
   IoUnregisterShutdownNotification(pDeviceObject);
 
   ExFreePoolWithTag(ChimeraData, CHIMERA_POOL_TAG);
+
+  RtlUnicodeStringInit(&DosDeviceName, CHIMERA_DOS_DEVICE_NAME_U);
+  IoDeleteSymbolicLink(&DosDeviceName);
+
+  IoDeleteDevice(pDeviceObject);
 
   return;
 }
