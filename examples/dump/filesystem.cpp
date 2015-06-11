@@ -20,7 +20,7 @@
 
 void DumpFile(std::wstring const& path)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   SetCurrentFilePath(path);
 
@@ -117,7 +117,7 @@ void DumpFile(std::wstring const& path)
 
 void DumpDir(std::wstring const& path, bool continue_on_error)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Entering dir: \"" + path + L"\".", 0);

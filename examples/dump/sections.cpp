@@ -21,7 +21,7 @@ void DumpSections(hadesmem::Process const& process,
 {
   hadesmem::SectionList sections(process, pe_file);
 
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   if (std::begin(sections) != std::end(sections))
   {

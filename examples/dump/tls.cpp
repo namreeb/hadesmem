@@ -28,7 +28,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     return;
   }
 
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"TLS:", 1);

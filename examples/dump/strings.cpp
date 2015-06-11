@@ -30,7 +30,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
                      void* end,
                      bool wide)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   if (pe_file.GetType() != hadesmem::PeFileType::Data)
   {
@@ -74,7 +74,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
 void DumpStrings(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   std::uint8_t* const file_beg = static_cast<std::uint8_t*>(pe_file.GetBase());
   void* const file_end = file_beg + pe_file.GetSize();

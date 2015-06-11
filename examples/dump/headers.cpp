@@ -22,7 +22,7 @@ namespace
 void DumpDosHeader(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"DOS Header:", 1);
@@ -158,7 +158,7 @@ bool IsSupportedDataDir(DWORD num)
 void DumpNtHeaders(hadesmem::Process const& process,
                    hadesmem::PeFile const& pe_file)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"NT Headers:", 1);

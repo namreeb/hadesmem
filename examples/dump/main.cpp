@@ -57,9 +57,29 @@ namespace
 {
 std::wstring g_current_file_path;
 
+bool g_quiet = false;
+
+class QuietStringBufA : public std::stringbuf
+{
+public:
+  virtual int sync()
+  {
+    return 0;
+  }
+};
+
+class QuietStringBufW : public std::wstringbuf
+{
+public:
+  virtual int sync()
+  {
+    return 0;
+  }
+};
+
 void DumpRegions(hadesmem::Process const& process)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Regions:", 0);
@@ -84,7 +104,7 @@ void DumpRegions(hadesmem::Process const& process)
 
 void DumpModules(hadesmem::Process const& process)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Modules:", 0);
@@ -120,7 +140,7 @@ void DumpModules(hadesmem::Process const& process)
 
 void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNamedHex(out, L"Usage", thread_entry.GetUsage(), 1);
@@ -133,7 +153,7 @@ void DumpThreadEntry(hadesmem::ThreadEntry const& thread_entry)
 
 void DumpThreads(DWORD pid)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Threads:", 0);
@@ -147,7 +167,7 @@ void DumpThreads(DWORD pid)
 
 void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNamedHex(out, L"ID", process_entry.GetId(), 0);
@@ -198,7 +218,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 
 void DumpProcesses()
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Processes:", 0);
@@ -211,11 +231,49 @@ void DumpProcesses()
 }
 }
 
+std::wstring GetCurrentFilePath()
+{
+  return g_current_file_path;
+}
+
+void SetCurrentFilePath(std::wstring const& path)
+{
+  g_current_file_path = path;
+}
+
+std::ostream& GetOutputStreamA()
+{
+  if (g_quiet)
+  {
+    static QuietStringBufA buf;
+    static std::ostream str{&buf};
+    return str;
+  }
+  else
+  {
+    return std::cout;
+  }
+}
+
+std::wostream& GetOutputStreamW()
+{
+  if (g_quiet)
+  {
+    static QuietStringBufW buf;
+    static std::wostream str{&buf};
+    return str;
+  }
+  else
+  {
+    return std::wcout;
+  }
+}
+
 void DumpPeFile(hadesmem::Process const& process,
                 hadesmem::PeFile const& pe_file,
                 std::wstring const& path)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   ClearWarnForCurrentFile();
 
@@ -254,23 +312,13 @@ void DumpPeFile(hadesmem::Process const& process,
   HandleWarnings(path);
 }
 
-std::wstring GetCurrentFilePath()
-{
-  return g_current_file_path;
-}
-
-void SetCurrentFilePath(std::wstring const& path)
-{
-  g_current_file_path = path;
-}
-
 void HandleLongOrUnprintableString(std::wstring const& name,
                                    std::wstring const& description,
                                    std::size_t tabs,
                                    WarningType warning_type,
                                    std::string value)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   auto const unprintable = FindFirstUnprintableClassicLocale(value);
   std::size_t const kMaxNameLength = 1024;
@@ -357,6 +405,8 @@ int main(int argc, char* argv[])
       "continue",
       "Continue on error when dumping a file during a directory dump",
       cmd);
+    TCLAP::SwitchArg quiet_arg(
+      "", "quiet", "Only output status messages (no dumping)", cmd);
     TCLAP::ValueArg<int> warned_type_arg("",
                                          "warned-type",
                                          "Filter warned file using warned type",
@@ -365,6 +415,8 @@ int main(int argc, char* argv[])
                                          "int",
                                          cmd);
     cmd.parse(argc, argv);
+
+    g_quiet = quiet_arg.isSet();
 
     SetWarningsEnabled(warned_arg.getValue());
     SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());

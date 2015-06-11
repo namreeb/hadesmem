@@ -50,7 +50,7 @@ std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 
 void DumpMemory(hadesmem::Process const& process)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, "Dumping image memory to disk.", 0);

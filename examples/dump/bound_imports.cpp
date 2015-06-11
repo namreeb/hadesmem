@@ -38,7 +38,7 @@ void DumpBoundImports(hadesmem::Process const& process,
                       hadesmem::PeFile const& pe_file,
                       bool has_new_bound_imports_any)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   if (!HasBoundImportDir(process, pe_file))
   {

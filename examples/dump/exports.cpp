@@ -32,7 +32,7 @@ void DumpExports(hadesmem::Process const& process,
     return;
   }
 
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
   WriteNormal(out, L"Export Dir:", 1);

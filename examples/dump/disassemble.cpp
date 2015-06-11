@@ -45,7 +45,7 @@ void DisassembleEp(hadesmem::Process const& process,
     return;
   }
 
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   // Get the number of bytes from the EP to the end of the file.
   std::size_t max_buffer_size = GetBytesToEndOfFile(pe_file, ep_va);

@@ -30,7 +30,7 @@ bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,
 
 void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   WriteNewline(out);
 
@@ -71,7 +71,7 @@ void DumpImports(hadesmem::Process const& process,
                  hadesmem::PeFile const& pe_file,
                  bool& has_new_bound_imports_any)
 {
-  std::wostream& out = std::wcout;
+  std::wostream& out = GetOutputStreamW();
 
   hadesmem::ImportDirList const import_dirs(process, pe_file);
 
