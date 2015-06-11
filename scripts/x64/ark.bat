@@ -1,0 +1,1 @@
+inject.exe --run "F:\Games\SteamLibrary\steamapps\common\ARK\ShooterGame\Binaries\Win64\ShooterGame.exe" --inject --steam-app-id 346110 --export Load --add-path --path-resolution --module cerberus.dll
