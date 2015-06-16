@@ -86,8 +86,9 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnSetGuiVisibility(std::function<
-    hadesmem::cerberus::OnSetGuiVisibilityCallback> const& callback) final
+  virtual std::size_t RegisterOnSetGuiVisibility(
+    std::function<hadesmem::cerberus::OnSetGuiVisibilityCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnSetGuiVisibilityCallbacks();
     return callbacks.Register(callback);
@@ -228,9 +229,9 @@ bool InitializeWndprocHook(RenderInfoD3D9& render_info)
   if (FAILED(get_create_params_hr))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{
-                             "GetCreationParameters failed."}
-                        << hadesmem::ErrorCodeWinHr{get_create_params_hr});
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"GetCreationParameters failed."}
+      << hadesmem::ErrorCodeWinHr{get_create_params_hr});
   }
 
   // Pretty sure we should be doing something with hDeviceWindow from the
@@ -511,6 +512,67 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
     device_context->GSSetShader(nullptr, nullptr, 0);
     device_context->HSSetShader(nullptr, nullptr, 0);
 
+    hadesmem::detail::SmartComHandle back_buffer_cleanup;
+    hadesmem::detail::SmartComHandle rtv_cleanup;
+
+    ID3D11Texture2D* back_buffer = nullptr;
+    HRESULT hr = swap_chain->GetBuffer(
+      0, __uuidof(*back_buffer), reinterpret_cast<void**>(&back_buffer));
+    if (SUCCEEDED(hr))
+    {
+      back_buffer_cleanup = back_buffer;
+
+      D3D11_TEXTURE2D_DESC bb_surf_desc = {};
+      back_buffer->GetDesc(&bb_surf_desc);
+
+      D3D11_VIEWPORT viewport = {};
+      viewport.Width = static_cast<float>(bb_surf_desc.Width);
+      viewport.Height = static_cast<float>(bb_surf_desc.Height);
+      viewport.MaxDepth = 1;
+      device_context->RSSetViewports(1, &viewport);
+
+      ID3D11RenderTargetView* rtv = nullptr;
+      hr = device->CreateRenderTargetView(back_buffer, nullptr, &rtv);
+      if (SUCCEEDED(hr))
+      {
+        rtv_cleanup = rtv;
+        device_context->OMSetRenderTargets(1, &rtv, nullptr);
+      }
+      else
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "WARNING! ID3D11Device::CreateRenderTargetView failed. HR: [%ld].",
+          hr);
+      }
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! IDXGISwapChain::GetBuffer failed. HR: [%ld].", hr);
+    }
+
+    D3D11_BLEND_DESC blend = {};
+    blend.RenderTarget[0].BlendEnable = TRUE;
+    blend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+    blend.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+    blend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    ID3D11BlendState* blend_state = nullptr;
+    hr = device->CreateBlendState(&blend, &blend_state);
+    if (SUCCEEDED(hr))
+    {
+      device_context->OMSetBlendState(blend_state, nullptr, 0xFFFFFFFF);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! ID3D11Device::CreateBlendState failed. HR: [%ld].", hr);
+    }
+
     OnFrameGeneric(typed_device.first, typed_device.second);
 
     state_block.Apply();
@@ -576,10 +638,10 @@ void OnResetD3D9(IDirect3DDevice9* device,
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Detected reset on unknown device. Ours = %p, Theirs = %p.",
-      render_info.device_,
-      device);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
+                                   "device. Ours: [%p]. Theirs: [%p].",
+                                   render_info.device_,
+                                   device);
   }
 }
 
@@ -594,10 +656,10 @@ void OnReleaseD3D9(IDirect3DDevice9* device)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
-      render_info.device_,
-      device);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
+                                   "device. Ours: [%p]. Theirs: [%p].",
+                                   render_info.device_,
+                                   device);
   }
 }
 
@@ -612,10 +674,10 @@ void OnReleaseD3D10(ID3D10Device* device)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
-      render_info_d3d10.device_,
-      device);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
+                                   "device. Ours: [%p]. Theirs: [%p].",
+                                   render_info_d3d10.device_,
+                                   device);
   }
 }
 
@@ -630,10 +692,10 @@ void OnReleaseD3D11(ID3D11Device* device)
   }
   else
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Detected release on unknown device. Ours = %p, Theirs = %p.",
-      render_info_d3d11.device_,
-      device);
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
+                                   "device. Ours: [%p]. Theirs: [%p].",
+                                   render_info_d3d11.device_,
+                                   device);
   }
 }
 }

@@ -145,7 +145,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Proxying ID3D11Device. Device: [%p].",
+                                   *device);
     *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
   }
 
@@ -228,7 +229,8 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
     {
       if (hook_count == 1)
       {
-        HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device.");
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Proxying ID3D11Device. Device: [%p].",
+                                       *device);
         *device = new hadesmem::cerberus::D3D11DeviceProxy{*device};
       }
     }

@@ -48,6 +48,7 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
   {
     *obj = new D3D11DeviceProxy(static_cast<ID3D11Device2*>(*obj));
   }
+  // Observed in ARK.
   else if (riid == __uuidof(IDXGIDevice2) || riid == __uuidof(IDXGIDevice1) ||
            riid == __uuidof(IDXGIDevice))
   {
