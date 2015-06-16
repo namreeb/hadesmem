@@ -275,10 +275,11 @@ extern "C" NTSTATUS WINAPI
     }
 
     std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Path: [%s].", path.c_str());
+    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Path: [%s].", path.c_str());
 
     std::wstring const module_name = GetFileNameFromPath(path);
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Module name: [%s].", module_name.c_str());
+    HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Module name: [%s].",
+                                         module_name.c_str());
     std::wstring const module_name_upper =
       hadesmem::detail::ToUpperOrdinal(module_name);
 
@@ -395,9 +396,9 @@ extern "C" NTSTATUS WINAPI
 
   std::wstring const full_name = UnicodeStringToStdString(name);
   std::wstring const module_name = GetFileNameFromPath(full_name);
-  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Full Name: [%s]. Module Name: [%s].",
-                                 full_name.c_str(),
-                                 module_name.c_str());
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Full Name: [%s]. Module Name: [%s].",
+                                       full_name.c_str(),
+                                       module_name.c_str());
   std::wstring const module_name_upper =
     hadesmem::detail::ToUpperOrdinal(module_name);
 
