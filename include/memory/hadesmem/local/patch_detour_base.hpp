@@ -38,6 +38,8 @@ public:
 
   virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
+  virtual void* GetTarget() const HADESMEM_DETAIL_NOEXCEPT = 0;
+
   virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
 
   virtual void* GetContext() HADESMEM_DETAIL_NOEXCEPT = 0;

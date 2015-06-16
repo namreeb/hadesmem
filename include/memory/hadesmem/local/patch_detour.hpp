@@ -399,6 +399,11 @@ public:
     return CanHookChainImpl();
   }
 
+  virtual void* GetTarget() const HADESMEM_DETAIL_NOEXCEPT override
+  {
+    return target_;
+  }
+
   virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT override
   {
     return &detour_;
