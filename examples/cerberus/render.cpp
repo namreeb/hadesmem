@@ -318,20 +318,26 @@ std::pair<hadesmem::cerberus::RenderApi, void*>
   return {hadesmem::cerberus::RenderApi::kInvalidMaxValue, nullptr};
 }
 
-bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
+bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain, ID3D11Device* device)
 {
   auto& render_info = GetRenderInfoD3D11();
-  if (render_info.swap_chain_ != swap_chain)
+  if (render_info.swap_chain_ != swap_chain || render_info.device_ != device)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
-                                   render_info.swap_chain_,
-                                   swap_chain);
+    if (render_info.swap_chain_ != swap_chain)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Got a new swap chain. Old = %p, New = %p.",
+        render_info.swap_chain_,
+        swap_chain);
+    }
 
-    render_info.swap_chain_ = swap_chain;
+    if (render_info.device_ != device)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Got a new device. Old = %p, New = %p.", render_info.device_, device);
+    }
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
-
-    render_info.device_ = nullptr;
 
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
 
@@ -342,16 +348,10 @@ bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
       render_info.wnd_hooked_ = false;
     }
 
-    HADESMEM_DETAIL_TRACE_A("Getting device.");
+    HADESMEM_DETAIL_TRACE_A("Setting new swap chain and/or device.");
 
-    auto const get_device_hr = render_info.swap_chain_->GetDevice(
-      __uuidof(ID3D11Device), reinterpret_cast<void**>(&render_info.device_));
-    if (FAILED(get_device_hr))
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-      return false;
-    }
+    render_info.swap_chain_ = swap_chain;
+    render_info.device_ = device;
 
     HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
 
@@ -367,20 +367,26 @@ bool HandleOnFrameD3D11(IDXGISwapChain* swap_chain)
   return true;
 }
 
-bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
+bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain, ID3D10Device* device)
 {
   auto& render_info = GetRenderInfoD3D10();
-  if (render_info.swap_chain_ != swap_chain)
+  if (render_info.swap_chain_ != swap_chain || render_info.device_ != device)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Got a new swap chain. Old = %p, New = %p.",
-                                   render_info.swap_chain_,
-                                   swap_chain);
+    if (render_info.swap_chain_ != swap_chain)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Got a new swap chain. Old = %p, New = %p.",
+        render_info.swap_chain_,
+        swap_chain);
+    }
 
-    render_info.swap_chain_ = swap_chain;
+    if (render_info.device_ != device)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Got a new device. Old = %p, New = %p.", render_info.device_, device);
+    }
 
     HADESMEM_DETAIL_TRACE_A("Cleaning up.");
-
-    render_info.device_ = nullptr;
 
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D10);
 
@@ -391,16 +397,10 @@ bool HandleOnFrameD3D10(IDXGISwapChain* swap_chain)
       render_info.wnd_hooked_ = false;
     }
 
-    HADESMEM_DETAIL_TRACE_A("Getting device.");
+    HADESMEM_DETAIL_TRACE_A("Setting new swap chain and/or device.");
 
-    auto const get_device_hr = render_info.swap_chain_->GetDevice(
-      __uuidof(ID3D10Device), reinterpret_cast<void**>(&render_info.device_));
-    if (FAILED(get_device_hr))
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "WARNING! IDXGISwapChain::GetDevice failed. HR = %08X.", get_device_hr);
-      return false;
-    }
+    render_info.swap_chain_ = swap_chain;
+    render_info.device_ = device;
 
     HADESMEM_DETAIL_TRACE_A("Initializing wndproc hook.");
 
@@ -496,13 +496,13 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 #pragma warning(suppress : 6262)
 void OnFrameDXGI(IDXGISwapChain* swap_chain)
 {
-  HandleOnFrameD3D11(swap_chain);
-  HandleOnFrameD3D10(swap_chain);
-
   auto const typed_device = GetDeviceFromSwapChain(swap_chain);
   if (typed_device.first == hadesmem::cerberus::RenderApi::kD3D11)
   {
     auto const device = static_cast<ID3D11Device*>(typed_device.second);
+
+    HandleOnFrameD3D11(swap_chain, device);
+
     ID3D11DeviceContext* device_context = nullptr;
     device->GetImmediateContext(&device_context);
     hadesmem::cerberus::D3D11StateBlock state_block{device_context};
@@ -579,6 +579,10 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   }
   else if (typed_device.first == hadesmem::cerberus::RenderApi::kD3D10)
   {
+    auto const device = static_cast<ID3D10Device*>(typed_device.second);
+
+    HandleOnFrameD3D10(swap_chain, device);
+
     OnFrameGeneric(typed_device.first, typed_device.second);
   }
   else

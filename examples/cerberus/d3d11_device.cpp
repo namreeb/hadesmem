@@ -7,6 +7,7 @@
 #include <hadesmem/detail/trace.hpp>
 
 #include "d3d11.hpp"
+#include "dxgi_device.hpp"
 
 namespace hadesmem
 {
@@ -28,10 +29,12 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-  // DXGI internal GUIDs. Observed in Wildstar, Cities: Skylines, and probably
-  // others.
+  // DXGI internal GUIDs. Observed in Wildstar, Cities: Skylines, ESO, and
+  // probably others.
+  // ILockOwner
   UUID const unknown_uuid_1 = {
     0x9b7e4a00, 0x342c, 0x4106, 0xa1, 0x9f, 0x4f, 0x27, 0x04, 0xf6, 0x89, 0xf0};
+  // IDXGIDeviceInternal3
   UUID const unknown_uuid_2 = {
     0xf74ee86f, 0x7270, 0x48e8, 0x9d, 0x63, 0x38, 0xaf, 0x75, 0xf2, 0x2d, 0x57};
 
@@ -42,19 +45,20 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
   }
   else if (riid == __uuidof(ID3D11Device1))
   {
+    HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device1.");
     *obj = new D3D11DeviceProxy(static_cast<ID3D11Device1*>(*obj));
   }
   else if (riid == __uuidof(ID3D11Device2))
   {
+    HADESMEM_DETAIL_TRACE_A("Proxying ID3D11Device2.");
     *obj = new D3D11DeviceProxy(static_cast<ID3D11Device2*>(*obj));
   }
-  // Observed in ARK.
+  // Observed in ARK, ESO, and others.
   else if (riid == __uuidof(IDXGIDevice2) || riid == __uuidof(IDXGIDevice1) ||
            riid == __uuidof(IDXGIDevice))
   {
-    // Needs investigation to see if we need to wrap this (probably do if it's
-    // possible to get the 'real' ID3D11DeviceN pointer back out.
-    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
+    HADESMEM_DETAIL_TRACE_A("Proxying IDXGIDevice.");
+    *obj = new DXGIDeviceProxy(static_cast<IDXGIDevice*>(*obj), device_);
   }
   else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
   {

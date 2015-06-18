@@ -204,6 +204,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\dxgi_device.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi_factory.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi_swap_chain.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
@@ -238,6 +239,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\dxgi_device.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi_factory.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi_swap_chain.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
