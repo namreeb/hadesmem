@@ -31,12 +31,16 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
 
   // DXGI internal GUIDs. Observed in Wildstar, Cities: Skylines, ESO, and
   // probably others.
-  // ILockOwner
   UUID const unknown_uuid_1 = {
     0x9b7e4a00, 0x342c, 0x4106, 0xa1, 0x9f, 0x4f, 0x27, 0x04, 0xf6, 0x89, 0xf0};
-  // IDXGIDeviceInternal3
   UUID const unknown_uuid_2 = {
     0xf74ee86f, 0x7270, 0x48e8, 0x9d, 0x63, 0x38, 0xaf, 0x75, 0xf2, 0x2d, 0x57};
+  UUID const unknown_uuid_3 = {
+    0x07f857e7, 0x077f, 0x4119, 0x86, 0xb9, 0xe7, 0xae, 0x71, 0x04, 0xCf, 0x33};
+  UUID const unknown_uuid_4 = {
+    0xf13ebcd1, 0x672c, 0x4f8b, 0xa6, 0x31, 0x95, 0x39, 0xca, 0x74, 0x8d, 0x71};
+  UUID const unknown_uuid_5 = {
+    0xb79cc8da, 0x337f, 0x400f, 0xb0, 0x9d, 0xb2, 0xed, 0xf8, 0xa8, 0x4e, 0x47};
 
   if (*obj == device_)
   {
@@ -60,7 +64,9 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
     HADESMEM_DETAIL_TRACE_A("Proxying IDXGIDevice.");
     *obj = new DXGIDeviceProxy(static_cast<IDXGIDevice*>(*obj), device_);
   }
-  else if (riid == unknown_uuid_1 || riid == unknown_uuid_2)
+  else if (riid == unknown_uuid_1 || riid == unknown_uuid_2 ||
+           riid == unknown_uuid_3 || riid == unknown_uuid_4 ||
+           riid == unknown_uuid_5)
   {
     // Needs investigation to see if we need to wrap this.
     HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (2).");

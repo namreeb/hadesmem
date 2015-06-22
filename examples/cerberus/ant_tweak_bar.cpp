@@ -77,8 +77,9 @@ bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
 class AntTweakBarImpl : public hadesmem::cerberus::AntTweakBarInterface
 {
 public:
-  virtual std::size_t RegisterOnInitialize(std::function<
-    hadesmem::cerberus::OnAntTweakBarInitializeCallback> const& callback) final
+  virtual std::size_t RegisterOnInitialize(
+    std::function<hadesmem::cerberus::OnAntTweakBarInitializeCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnAntTweakBarInitializeCallbacks();
     return callbacks.Register(callback);
@@ -90,8 +91,9 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnCleanup(std::function<
-    hadesmem::cerberus::OnAntTweakBarCleanupCallback> const& callback) final
+  virtual std::size_t RegisterOnCleanup(
+    std::function<hadesmem::cerberus::OnAntTweakBarCleanupCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnAntTweakBarCleanupCallbacks();
     return callbacks.Register(callback);
@@ -456,7 +458,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwInit failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   SetAntTweakBarInitialized(api, true);
@@ -493,7 +495,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."}
                         << hadesmem::ErrorCodeWinLast{last_error}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
@@ -524,7 +526,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwNewBar failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   auto const load_button = ::TwAddButton(bar,
@@ -536,7 +538,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   auto const unload_button = ::TwAddButton(bar,
@@ -548,7 +550,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddButton failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   auto const plugin_path = ::TwAddVarRW(bar,
@@ -560,7 +562,7 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"TwAddVarRW failed."}
-                        << hadesmem::ErrorStringOther{TwGetLastError()});
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 
   HADESMEM_DETAIL_TRACE_A("Calling AntTweakBar initialization callbacks.");
@@ -622,8 +624,27 @@ void OnFrameAntTweakBar(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
   if (!::TwDraw())
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"TwDraw failed."});
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwDraw failed."}
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
+  }
+}
+
+void OnResizeAntTweakBar(hadesmem::cerberus::RenderApi /*api*/,
+                         void* /*device*/,
+                         UINT width,
+                         UINT height)
+{
+  if (!AntTweakBarInitializedAny())
+  {
+    return;
+  }
+
+  if (!::TwWindowSize(width, height))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"TwWindowSize failed."}
+                        << hadesmem::ErrorStringOther{::TwGetLastError()});
   }
 }
 
@@ -653,6 +674,7 @@ void InitializeAntTweakBar()
 
   auto& render = GetRenderInterface();
   render.RegisterOnFrame(OnFrameAntTweakBar);
+  render.RegisterOnResize(OnResizeAntTweakBar);
   render.RegisterOnInitializeGui(OnInitializeAntTweakBarGui);
   render.RegisterOnCleanupGui(OnCleanupAntTweakBarGui);
   render.RegisterOnSetGuiVisibility(SetAllTweakBarVisibility);

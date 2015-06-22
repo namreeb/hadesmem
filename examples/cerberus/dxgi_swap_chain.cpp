@@ -162,8 +162,21 @@ HRESULT WINAPI DXGISwapChainProxy::ResizeBuffers(UINT buffer_count,
                                                  DXGI_FORMAT new_format,
                                                  UINT swap_chain_flags)
 {
-  return swap_chain_->ResizeBuffers(
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%p] [%u] [%u] [%u] [%d] [%u].",
+                                 this,
+                                 buffer_count,
+                                 width,
+                                 height,
+                                 new_format,
+                                 swap_chain_flags);
+
+  auto const ret = swap_chain_->ResizeBuffers(
     buffer_count, width, height, new_format, swap_chain_flags);
+
+  auto& callbacks = GetOnResizeDXGICallbacks();
+  callbacks.Run(swap_chain_, width, height);
+
+  return ret;
 }
 
 _Use_decl_annotations_ HRESULT WINAPI

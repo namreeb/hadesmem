@@ -33,8 +33,7 @@ HRESULT WINAPI DXGIDeviceProxy::QueryInterface(REFIID riid, void** obj)
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
 
-  // DXGI internal GUID. Observed in ARK.
-  // ILockOwner
+  // DXGI internal GUID. Observed in ARK and probably others.
   UUID const unknown_uuid_1 = {
     0x9b7e4a00, 0x342c, 0x4106, 0xa1, 0x9f, 0x4f, 0x27, 0x04, 0xf6, 0x89, 0xf0};
 
@@ -46,9 +45,6 @@ HRESULT WINAPI DXGIDeviceProxy::QueryInterface(REFIID riid, void** obj)
   else if (riid == __uuidof(ID3D11Device) || riid == __uuidof(ID3D11Device1) ||
            riid == __uuidof(ID3D11Device2))
   {
-    // TODO: Find a game that exercises this code path, then remove the
-    // 'ATTENTION!'.
-    HADESMEM_DETAIL_TRACE_A("ATTENTION! Proxying ID3D11Device.");
     *obj = new D3D11DeviceProxy(static_cast<ID3D11Device*>(*obj));
   }
   else if (riid == unknown_uuid_1)

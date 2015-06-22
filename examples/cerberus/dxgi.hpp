@@ -24,9 +24,14 @@ typedef void OnFrameDXGICallback(IDXGISwapChain* swap_chain);
 
 typedef void OnReleaseDXGICallback(IDXGISwapChain* swap_chain);
 
+typedef void
+  OnResizeDXGICallback(IDXGISwapChain* swap_chain, UINT width, UINT height);
+
 Callbacks<OnFrameDXGICallback>& GetOnFrameDXGICallbacks();
 
 Callbacks<OnReleaseDXGICallback>& GetOnReleaseDXGICallbacks();
+
+Callbacks<OnResizeDXGICallback>& GetOnResizeDXGICallbacks();
 
 class DXGIInterface
 {
@@ -40,10 +45,17 @@ public:
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 
-  virtual std::size_t RegisterOnRelease(std::function<
-    hadesmem::cerberus::OnReleaseDXGICallback> const& callback) = 0;
+  virtual std::size_t RegisterOnRelease(
+    std::function<hadesmem::cerberus::OnReleaseDXGICallback> const&
+      callback) = 0;
 
   virtual void UnregisterOnRelease(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnResize(
+    std::function<hadesmem::cerberus::OnResizeDXGICallback> const&
+      callback) = 0;
+
+  virtual void UnregisterOnResize(std::size_t id) = 0;
 };
 
 DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT;

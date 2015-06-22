@@ -46,6 +46,14 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
   return callbacks;
 }
 
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResizeCallback>&
+  GetOnResizeCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResizeCallback>
+    callbacks;
+  return callbacks;
+}
+
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibilityCallback>&
   GetOnSetGuiVisibilityCallbacks()
 {
@@ -83,6 +91,19 @@ public:
   virtual void UnregisterOnFrame(std::size_t id) final
   {
     auto& callbacks = GetOnFrameCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnResize(
+    std::function<hadesmem::cerberus::OnResizeCallback> const& callback) final
+  {
+    auto& callbacks = GetOnResizeCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnResize(std::size_t id) final
+  {
+    auto& callbacks = GetOnResizeCallbacks();
     return callbacks.Unregister(id);
   }
 
@@ -491,6 +512,15 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
   hadesmem::cerberus::HandleInputQueue();
 }
 
+void OnResizeGeneric(hadesmem::cerberus::RenderApi api,
+                     void* device,
+                     UINT width,
+                     UINT height)
+{
+  auto& callbacks = GetOnResizeCallbacks();
+  callbacks.Run(api, device, width, height);
+}
+
 // Stack usage intentional. D3D11StateBlock is large but we don't want to cause
 // an easily avoidable heap allocation every frame.
 #pragma warning(suppress : 6262)
@@ -591,6 +621,14 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
   }
+}
+
+void OnResizeDXGI(IDXGISwapChain* swap_chain, UINT width, UINT height)
+{
+  // TODO: Is this correct? Do we also need to invalidate our swap chain/device
+  // and re-initialize the GUIs?
+  auto const typed_device = GetDeviceFromSwapChain(swap_chain);
+  OnResizeGeneric(typed_device.first, typed_device.second, width, height);
 }
 
 void OnFrameD3D9(IDirect3DDevice9* device)
@@ -742,6 +780,8 @@ void InitializeRender()
 {
   auto& dxgi = GetDXGIInterface();
   dxgi.RegisterOnFrame(OnFrameDXGI);
+  dxgi.RegisterOnResize(OnResizeDXGI);
+  // TODO: Do we need to do anything with OnRelease here?
 
   auto& d3d10 = GetD3D10Interface();
   d3d10.RegisterOnRelease(OnReleaseD3D10);

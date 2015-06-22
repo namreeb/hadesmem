@@ -23,6 +23,9 @@ enum class RenderApi
 
 typedef void OnFrameCallback(RenderApi api, void* device);
 
+typedef void
+  OnResizeCallback(RenderApi api, void* device, UINT width, UINT height);
+
 typedef void OnSetGuiVisibilityCallback(bool visibility, bool old_visibility);
 
 typedef void OnInitializeGuiCallback(RenderApi api, void* device);
@@ -40,6 +43,11 @@ public:
     RegisterOnFrame(std::function<OnFrameCallback> const& callback) = 0;
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnResize(std::function<OnResizeCallback> const& callback) = 0;
+
+  virtual void UnregisterOnResize(std::size_t id) = 0;
 
   virtual std::size_t RegisterOnSetGuiVisibility(
     std::function<OnSetGuiVisibilityCallback> const& callback) = 0;
