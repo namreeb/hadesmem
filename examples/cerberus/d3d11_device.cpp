@@ -7,7 +7,6 @@
 #include <hadesmem/detail/trace.hpp>
 
 #include "d3d11.hpp"
-#include "dxgi_device.hpp"
 
 namespace hadesmem
 {
@@ -61,8 +60,8 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
   else if (riid == __uuidof(IDXGIDevice2) || riid == __uuidof(IDXGIDevice1) ||
            riid == __uuidof(IDXGIDevice))
   {
-    HADESMEM_DETAIL_TRACE_A("Proxying IDXGIDevice.");
-    *obj = new DXGIDeviceProxy(static_cast<IDXGIDevice*>(*obj), device_);
+    // Needs investigation to see if we need to wrap this.
+    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
   }
   else if (riid == unknown_uuid_1 || riid == unknown_uuid_2 ||
            riid == unknown_uuid_3 || riid == unknown_uuid_4 ||

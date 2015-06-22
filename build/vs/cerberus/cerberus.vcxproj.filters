@@ -102,9 +102,6 @@
     <ClCompile Include="..\..\..\examples\cerberus\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\dxgi_device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp">
@@ -207,9 +204,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\examples\cerberus\dxgi_device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
