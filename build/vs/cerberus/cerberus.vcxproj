@@ -190,6 +190,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\config.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\cursor.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d10.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d10_device.cpp" />
@@ -208,6 +209,31 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\dxgi_swap_chain.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\gwen.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Button.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Checkbox.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\CollapsibleList.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ColorPicker.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ComboBox.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\CrossSplitter.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\GroupBox.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ImagePanel.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Label.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\LabelMultiline.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ListBox.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\MenuStrip.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Numeric.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\PageControl.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ProgressBar.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Properties.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\RadioButton.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\ScrollControl.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Slider.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\StatusBar.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\TabControl.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\TextBox.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\TreeControl.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\UnitTest.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\gwen\Window_.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\main.cpp" />
@@ -222,6 +248,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\callbacks.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\config.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\cursor.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d10.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d10_device.hpp" />

@@ -4,6 +4,8 @@
 #include "gwen.hpp"
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/filesystem.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
@@ -192,7 +194,7 @@ void OnInitializeGwenGui(hadesmem::cerberus::RenderApi api, void* device)
     return;
   }
 
-  HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar.");
+  HADESMEM_DETAIL_TRACE_A("Initializing GWEN.");
 
   auto& renderer = GetGwenRenderer();
   switch (api)
@@ -249,18 +251,20 @@ void OnInitializeGwenGui(hadesmem::cerberus::RenderApi api, void* device)
 
   auto& skin = GetGwenSkin();
   skin.reset(new Gwen::Skin::TexturedBase(&*renderer));
-  skin->Init("DefaultSkin.png");
+  auto const skin_path = hadesmem::detail::CombinePath(
+    hadesmem::detail::GetSelfDirPath(), L"DefaultSkin.png");
+  skin->Init(skin_path);
 
   auto& canvas = GetGwenCanvas();
   canvas.reset(new Gwen::Controls::Canvas(&*skin));
   canvas->SetSize(wnd_rect.right, wnd_rect.bottom);
   canvas->SetDrawBackground(false);
 
-  // TODO: Reenable this once the linker problems are fixed. (Or preferably,
-  // just do our own basic GUI.)
-  // auto& unit = GetGwenUnitTest();
-  // unit.reset(new UnitTest(&*canvas));
-  // unit->SetPos(10, 10);
+  // TODO: Write our own basic test GUI (perhaps a console?) instead of hacking
+  // the GWEN unit test in...
+  auto& unit = GetGwenUnitTest();
+  unit.reset(new UnitTest(&*canvas));
+  unit->SetPos(10, 10);
 
   auto& input = GetGwenInput();
   input.reset(new Gwen::Input::Windows());
@@ -349,6 +353,20 @@ void OnFrameGwen(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
   canvas->RenderCanvas();
 }
 
+void OnResizeGwen(hadesmem::cerberus::RenderApi /*api*/,
+                  void* /*device*/,
+                  UINT width,
+                  UINT height)
+{
+  if (!GwenInitializedAny())
+  {
+    return;
+  }
+
+  auto& canvas = GetGwenCanvas();
+  canvas->SetSize(width, height);
+}
+
 void OnUnloadPlugins()
 {
   SetGwenInitialized(hadesmem::cerberus::RenderApi::kD3D9, false);
@@ -375,6 +393,7 @@ void InitializeGwen()
 
   auto& render = GetRenderInterface();
   render.RegisterOnFrame(OnFrameGwen);
+  render.RegisterOnResize(OnResizeGwen);
   render.RegisterOnInitializeGui(OnInitializeGwenGui);
   render.RegisterOnCleanupGui(OnCleanupGwenGui);
   render.RegisterOnSetGuiVisibility(SetAllGwenVisibility);

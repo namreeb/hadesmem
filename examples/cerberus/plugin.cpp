@@ -8,22 +8,17 @@
 
 #include <windows.h>
 
-#include <hadesmem/detail/warning_disable_prefix.hpp>
-#include <pugixml.hpp>
-#include <pugixml.cpp>
-#include <hadesmem/detail/warning_disable_suffix.hpp>
-
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
 #include <hadesmem/detail/filesystem.hpp>
-#include <hadesmem/detail/pugixml_helpers.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/trace.hpp>
 
 #include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
+#include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
@@ -334,77 +329,6 @@ std::wstring CanonicalizePluginPath(std::wstring path)
   path = hadesmem::detail::MakeExtendedPath(path);
   return path;
 }
-
-void LoadPluginsFileImpl(pugi::xml_document const& doc)
-{
-  auto const hadesmem_root = doc.child(L"HadesMem");
-  if (!hadesmem_root)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Failed to find 'HadesMem' root node."});
-  }
-
-  auto const cerberus_node = hadesmem_root.child(L"Cerberus");
-  if (!cerberus_node)
-  {
-    return;
-  }
-
-  for (auto const& plugin_node : cerberus_node.children(L"Plugin"))
-  {
-    auto const process_name =
-      hadesmem::detail::pugixml::GetOptionalAttributeValue(plugin_node,
-                                                           L"Process");
-    if (!process_name.empty())
-    {
-      hadesmem::Process const this_process(::GetCurrentProcessId());
-      auto const this_process_path = hadesmem::GetPath(this_process);
-      auto const this_process_name =
-        this_process_path.substr(this_process_path.rfind(L'\\') + 1);
-      if (hadesmem::detail::ToUpperOrdinal(this_process_name) !=
-          hadesmem::detail::ToUpperOrdinal(process_name))
-      {
-        continue;
-      }
-    }
-
-    auto path =
-      hadesmem::detail::pugixml::GetAttributeValue(plugin_node, L"Path");
-    hadesmem::cerberus::LoadPlugin(path);
-  }
-}
-
-void LoadPluginsFile(std::wstring const& path)
-{
-  pugi::xml_document doc;
-  auto const load_result = doc.load_file(path.c_str());
-  if (!load_result)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{}
-      << hadesmem::ErrorString{"Loading XML file failed."}
-      << hadesmem::ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
-      << hadesmem::ErrorStringOther{load_result.description()});
-  }
-
-  LoadPluginsFileImpl(doc);
-}
-
-void LoadPluginsMemory(std::wstring const& data)
-{
-  pugi::xml_document doc;
-  auto const load_result = doc.load(data.c_str());
-  if (!load_result)
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{}
-      << hadesmem::ErrorString{"Loading XML file failed."}
-      << hadesmem::ErrorCodeOther{static_cast<DWORD_PTR>(load_result.status)}
-      << hadesmem::ErrorStringOther{load_result.description()});
-  }
-
-  LoadPluginsFileImpl(doc);
-}
 }
 
 namespace hadesmem
@@ -463,23 +387,23 @@ void LoadPlugins()
 {
   HADESMEM_DETAIL_TRACE_A("Loading plugins.");
 
-  auto const config_path = hadesmem::detail::CombinePath(
-    hadesmem::detail::GetSelfDirPath(), L"hadesmem.xml");
-  if (hadesmem::detail::DoesFileExist(config_path))
+  auto const& config = GetConfig();
+  for (auto const& plugin : config.GetPlugins())
   {
-    LoadPluginsFile(config_path);
-  }
-  else
-  {
-    std::wstring const config_xml = LR"(
-<?xml version="1.0" encoding="utf-8"?>
-<HadesMem>
-  <Cerberus>
-    <Plugin Path="cxexample.dll"/>
-  </Cerberus>
-</HadesMem>
-)";
-    LoadPluginsMemory(config_xml);
+    if (!plugin.process_.empty())
+    {
+      hadesmem::Process const this_process(::GetCurrentProcessId());
+      auto const this_process_path = hadesmem::GetPath(this_process);
+      auto const this_process_name =
+        this_process_path.substr(this_process_path.rfind(L'\\') + 1);
+      if (hadesmem::detail::ToUpperOrdinal(this_process_name) !=
+          hadesmem::detail::ToUpperOrdinal(plugin.process_))
+      {
+        continue;
+      }
+    }
+
+    hadesmem::cerberus::LoadPlugin(plugin.path_);
   }
 }
 

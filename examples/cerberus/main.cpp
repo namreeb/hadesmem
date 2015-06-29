@@ -20,6 +20,7 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
+#include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "d3d10.hpp"
@@ -414,6 +415,8 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 
     is_initialized = true;
 
+    auto const& config = hadesmem::cerberus::GetConfig();
+
     UseAllStatics();
 
     // Support deferred hooking (via module load notifications).
@@ -448,8 +451,15 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourUser32ForWindow(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
-    hadesmem::cerberus::InitializeAntTweakBar();
-    // hadesmem::cerberus::InitializeGwen();
+    if (config.IsAntTweakBarEnabled())
+    {
+      hadesmem::cerberus::InitializeAntTweakBar();
+    }
+
+    if (config.IsGwenEnabled())
+    {
+      hadesmem::cerberus::InitializeGwen();
+    }
 
     hadesmem::cerberus::LoadPlugins();
 

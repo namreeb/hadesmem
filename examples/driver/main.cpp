@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 {
   try
   {
-    std::cout << "HadesMem Injector [" << HADESMEM_VERSION_STRING << "]\n";
+    std::cout << "HadesMem Driver Loader [" << HADESMEM_VERSION_STRING << "]\n";
 
     TCLAP::CmdLine cmd{"Driver loader", ' ', HADESMEM_VERSION_STRING};
     TCLAP::ValueArg<std::string> name_arg{
@@ -44,6 +44,8 @@ int main(int argc, char* argv[])
 
     hadesmem::Driver driver{driver_name, driver_path};
     load_arg.isSet() ? driver.Load() : driver.Unload();
+
+    std::cout << "\nDone.\n";
 
     return 0;
   }
