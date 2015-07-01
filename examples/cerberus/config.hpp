@@ -51,7 +51,7 @@ private:
   void LoadImpl(pugi::xml_document const& doc);
 
   std::vector<Plugin> plugins_;
-  bool ant_tweak_bar_enabled_{};
+  bool ant_tweak_bar_enabled_{true};
   bool gwen_enabled_{};
 };
 
