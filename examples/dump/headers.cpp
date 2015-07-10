@@ -220,7 +220,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     // if appropriate.
     // WarnForCurrentFile(WarningType::kSuspicious);
   }
-  auto const ep_va = RvaToVa(process, pe_file, addr_of_ep);
+  auto const ep_va = hadesmem::RvaToVa(process, pe_file, addr_of_ep);
   if (addr_of_ep && !ep_va)
   {
     WriteNormal(out, L"WARNING! Unable to resolve EP to file offset.", 2);

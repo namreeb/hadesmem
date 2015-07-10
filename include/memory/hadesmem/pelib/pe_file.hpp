@@ -413,6 +413,70 @@ inline PVOID RvaToVa(Process const& process,
   }
 }
 
+// TODO: 'Harden' this function against malicious/malformed PE files like is
+// done for RvaToVa.
+inline DWORD FileOffsetToRva(Process const& process,
+                             PeFile const& pe_file,
+                             DWORD file_offset)
+{
+  PeFileType const type = pe_file.GetType();
+  PBYTE base = static_cast<PBYTE>(pe_file.GetBase());
+
+  if (type == PeFileType::Data)
+  {
+    IMAGE_DOS_HEADER dos_header = Read<IMAGE_DOS_HEADER>(process, base);
+    if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid DOS header."});
+    }
+
+    BYTE* ptr_nt_headers = base + dos_header.e_lfanew;
+    if (Read<DWORD>(process, ptr_nt_headers) != IMAGE_NT_SIGNATURE)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid NT headers."});
+    }
+
+    auto const file_header =
+      Read<IMAGE_FILE_HEADER>(process, ptr_nt_headers + sizeof(DWORD));
+
+    auto ptr_section_header = reinterpret_cast<PIMAGE_SECTION_HEADER>(
+      ptr_nt_headers + offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
+      file_header.SizeOfOptionalHeader);
+
+    WORD num_sections = file_header.NumberOfSections;
+    for (WORD i = 0; i < num_sections; ++i)
+    {
+      auto const section_header =
+        Read<IMAGE_SECTION_HEADER>(process, ptr_section_header);
+
+      DWORD const raw_beg = section_header.PointerToRawData;
+      DWORD const raw_size = section_header.SizeOfRawData;
+      DWORD const raw_end = raw_beg + raw_size;
+      if (raw_beg <= file_offset && file_offset < raw_end)
+      {
+        file_offset -= raw_beg;
+        file_offset += section_header.VirtualAddress;
+        return file_offset;
+      }
+
+      ++ptr_section_header;
+    }
+
+    return 0;
+  }
+  else if (type == PeFileType::Image)
+  {
+    return file_offset;
+  }
+  else
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"Unhandled file type."});
+  }
+}
+
 namespace detail
 {
 template <typename CharT>

@@ -1,0 +1,1 @@
+inject.exe --run "F:\Games\SteamLibrary\steamapps\common\Clicker Heroes\Clicker Heroes.exe" --inject --steam-app-id 363970 --export Load --add-path --path-resolution --module cerberus.dll
