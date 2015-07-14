@@ -8,4 +8,4 @@ namespace hadesmem
 class Process;
 }
 
-void DumpMemory(hadesmem::Process const& process);
+void DumpMemory(hadesmem::Process const& process, bool continue_on_error);

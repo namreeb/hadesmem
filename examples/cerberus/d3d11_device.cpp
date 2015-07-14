@@ -88,6 +88,12 @@ HRESULT WINAPI D3D11DeviceProxy::QueryInterface(REFIID riid, void** obj)
     // Needs investigation to see if we need to wrap this.
     HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (5).");
   }
+  // Observed in Anno 2070 Activator
+  else if (riid == __uuidof(ID3D10Multithread))
+  {
+    // Needs investigation to see if we need to wrap this.
+    HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (6).");
+  }
   else
   {
     HADESMEM_DETAIL_TRACE_A("WARNING! Unhandled interface.");

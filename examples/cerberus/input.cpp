@@ -71,6 +71,12 @@ std::pair<bool, POINT>& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
   return cursor_pos;
 }
 
+std::pair<bool, POINT>& GetOldPhysicalCursorPos() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::pair<bool, POINT> cursor_pos{};
+  return cursor_pos;
+}
+
 RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
 {
   static RECT old_clip_cursor{};
@@ -171,37 +177,42 @@ void SetOrRestoreCursor(bool visible)
   old_cursor.first = true;
 }
 
-void SaveCurrentCursorPos()
+void SaveCurrentCursorPos(bool physical)
 {
-  auto& old_cursor_pos = GetOldCursorPos();
+  auto& old_cursor_pos =
+    physical ? GetOldPhysicalCursorPos() : GetOldCursorPos();
 
   hadesmem::cerberus::HookDisabler disable_get_cursor_pos_hook{
     &hadesmem::cerberus::GetDisableGetCursorPosHook()};
 
   POINT cur_cursor_pos{};
-  if (!::GetCursorPos(&cur_cursor_pos))
+  auto const get_cursor_pos = physical ? &GetPhysicalCursorPos : &GetCursorPos;
+  if (!get_cursor_pos(&cur_cursor_pos))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"GetCursorPos failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
+      hadesmem::Error{}
+      << hadesmem::ErrorString{physical ? "GetPhysicalCursorPos failed."
+                                        : "GetCursorPos failed."}
+      << hadesmem::ErrorCodeWinLast{last_error});
   }
 
   old_cursor_pos.first = true;
   old_cursor_pos.second = cur_cursor_pos;
 }
 
-void ClearOldCursorPos()
+void ClearOldCursorPos(bool physical)
 {
-  auto& old_cursor_pos = GetOldCursorPos();
+  auto& old_cursor_pos =
+    physical ? GetOldPhysicalCursorPos() : GetOldCursorPos();
   old_cursor_pos.first = false;
   old_cursor_pos.second = POINT{};
 }
 
-void RestoreOldCursorPos()
+void RestoreOldCursorPos(bool physical)
 {
-  auto& old_cursor_pos = GetOldCursorPos();
-
+  auto& old_cursor_pos =
+    physical ? GetOldPhysicalCursorPos() : GetOldCursorPos();
   if (!old_cursor_pos.first)
   {
     return;
@@ -210,15 +221,18 @@ void RestoreOldCursorPos()
   hadesmem::cerberus::HookDisabler disable_set_cursor_pos_hook{
     &hadesmem::cerberus::GetDisableSetCursorPosHook()};
 
-  if (!::SetCursorPos(old_cursor_pos.second.x, old_cursor_pos.second.y))
+  auto const set_cursor_pos = physical ? &SetPhysicalCursorPos : &SetCursorPos;
+  if (!set_cursor_pos(old_cursor_pos.second.x, old_cursor_pos.second.y))
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"SetCursorPos failed."}
-                        << hadesmem::ErrorCodeWinLast{last_error});
+      hadesmem::Error{}
+      << hadesmem::ErrorString{physical ? "SetPhysicalCursorPos failed."
+                                        : "SetCursorPos failed."}
+      << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  ClearOldCursorPos();
+  ClearOldCursorPos(physical);
 }
 
 void ShowCursor()
@@ -463,11 +477,14 @@ void OnGetDeviceState(DWORD len_data,
   *retval = E_FAIL;
 }
 
-void OnGetCursorPos(LPPOINT point, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+void OnGetCursorPos(LPPOINT point,
+                    bool physical,
+                    bool* handled) HADESMEM_DETAIL_NOEXCEPT
 {
   if (hadesmem::cerberus::GetGuiVisible() && point)
   {
-    auto& old_cursor_pos = GetOldCursorPos();
+    auto& old_cursor_pos =
+      physical ? GetOldPhysicalCursorPos() : GetOldCursorPos();
     point->x = old_cursor_pos.second.x;
     point->y = old_cursor_pos.second.y;
 
@@ -475,11 +492,13 @@ void OnGetCursorPos(LPPOINT point, bool* handled) HADESMEM_DETAIL_NOEXCEPT
   }
 }
 
-void OnSetCursorPos(int x, int y, bool* handled) HADESMEM_DETAIL_NOEXCEPT
+void OnSetCursorPos(int x, int y, bool physical, bool* handled)
+  HADESMEM_DETAIL_NOEXCEPT
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
-    auto& old_cursor_pos = GetOldCursorPos();
+    auto& old_cursor_pos =
+      physical ? GetOldPhysicalCursorPos() : GetOldCursorPos();
     old_cursor_pos.first = true;
     old_cursor_pos.second.x = x;
     old_cursor_pos.second.y = y;
@@ -823,7 +842,8 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
 
     if (visible)
     {
-      SaveCurrentCursorPos();
+      SaveCurrentCursorPos(true);
+      SaveCurrentCursorPos(false);
 
       ShowCursor();
 
@@ -835,7 +855,8 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
     }
     else
     {
-      RestoreOldCursorPos();
+      RestoreOldCursorPos(true);
+      RestoreOldCursorPos(false);
 
       HideCursor();
 
@@ -846,7 +867,8 @@ void SetGuiVisibleForInput(bool visible, bool old_visible)
   }
   else
   {
-    ClearOldCursorPos();
+    ClearOldCursorPos(true);
+    ClearOldCursorPos(false);
 
     if (visible)
     {

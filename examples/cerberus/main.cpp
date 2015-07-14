@@ -221,14 +221,14 @@ void UseAllStatics()
   auto const on_set_cursor_id = cursor.RegisterOnSetCursor(on_set_cursor);
   cursor.UnregisterOnSetCursor(on_set_cursor_id);
 
-  auto const on_get_cursor_pos = [](LPPOINT, bool*)
+  auto const on_get_cursor_pos = [](LPPOINT, bool, bool*)
   {
   };
   auto const on_get_cursor_pos_id =
     cursor.RegisterOnGetCursorPos(on_get_cursor_pos);
   cursor.UnregisterOnGetCursorPos(on_get_cursor_pos_id);
 
-  auto const on_set_cursor_pos = [](int, int, bool*)
+  auto const on_set_cursor_pos = [](int, int, bool, bool*)
   {
   };
   auto const on_set_cursor_pos_id =

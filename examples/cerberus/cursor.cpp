@@ -177,6 +177,22 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>&
   return detour;
 }
 
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetPhysicalCursorPos)>>&
+  GetGetPhysicalCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>
+    detour;
+  return detour;
+}
+
+std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetPhysicalCursorPos)>>&
+  GetSetPhysicalCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>
+    detour;
+  return detour;
+}
+
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::ShowCursor)>>&
   GetShowCursorDetour() HADESMEM_DETAIL_NOEXCEPT
 {
@@ -255,7 +271,7 @@ extern "C" BOOL WINAPI
   {
     auto const& callbacks = GetOnGetCursorPosCallbacks();
     bool handled = false;
-    callbacks.Run(point, &handled);
+    callbacks.Run(point, false, &handled);
 
     if (handled)
     {
@@ -292,7 +308,7 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
   {
     auto const& callbacks = GetOnSetCursorPosCallbacks();
     bool handled = false;
-    callbacks.Run(x, y, &handled);
+    callbacks.Run(x, y, false, &handled);
 
     if (handled)
     {
@@ -311,6 +327,81 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
     detour->GetTrampolineT<decltype(&::SetCursorPos)>();
   last_error_preserver.Revert();
   auto const ret = set_cursor_pos(x, y);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
+
+extern "C" BOOL WINAPI
+  GetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
+                             LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", point);
+
+  if (!hadesmem::cerberus::GetDisableGetCursorPosHook())
+  {
+    auto const& callbacks = GetOnGetCursorPosCallbacks();
+    bool handled = false;
+    callbacks.Run(point, true, &handled);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "GetPhysicalCursorPos handled. Not calling trampoline.");
+      return TRUE;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "GetPhysicalCursorPos hook disabled, skipping callbacks.");
+  }
+
+  auto const get_physical_cursor_pos =
+    detour->GetTrampolineT<decltype(&::GetPhysicalCursorPos)>();
+  last_error_preserver.Revert();
+  auto const ret = get_physical_cursor_pos(point);
+  last_error_preserver.Update();
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
+
+  return ret;
+}
+
+extern "C" BOOL WINAPI
+  SetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
+                             int x,
+                             int y) HADESMEM_DETAIL_NOEXCEPT
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%d] [%d].", x, y);
+
+  if (!hadesmem::cerberus::GetDisableSetCursorPosHook())
+  {
+    auto const& callbacks = GetOnSetCursorPosCallbacks();
+    bool handled = false;
+    callbacks.Run(x, y, true, &handled);
+
+    if (handled)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_A(
+        "SetPhysicalCursorPos handled. Not calling trampoline.");
+      return TRUE;
+    }
+  }
+  else
+  {
+    HADESMEM_DETAIL_TRACE_NOISY_A(
+      "SetPhysicalCursorPos hook disabled, skipping callbacks.");
+  }
+
+  auto const set_physical_cursor_pos =
+    detour->GetTrampolineT<decltype(&::SetCursorPos)>();
+  last_error_preserver.Revert();
+  auto const ret = set_physical_cursor_pos(x, y);
   last_error_preserver.Update();
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%d].", ret);
 
@@ -467,6 +558,16 @@ void DetourUser32ForCursor(HMODULE base)
                "SetCursorPos",
                GetSetCursorPosDetour(),
                SetCursorPosDetour);
+    DetourFunc(process,
+               base,
+               "GetPhysicalCursorPos",
+               GetGetPhysicalCursorPosDetour(),
+               GetPhysicalCursorPosDetour);
+    DetourFunc(process,
+               base,
+               "SetPhysicalCursorPos",
+               GetSetPhysicalCursorPosDetour(),
+               SetPhysicalCursorPosDetour);
     DetourFunc(
       process, base, "ShowCursor", GetShowCursorDetour(), ShowCursorDetour);
     DetourFunc(
@@ -488,6 +589,10 @@ void UndetourUser32ForCursor(bool remove)
     UndetourFunc(L"SetCursor", GetSetCursorDetour(), remove);
     UndetourFunc(L"GetCursorPos", GetGetCursorPosDetour(), remove);
     UndetourFunc(L"SetCursorPos", GetSetCursorPosDetour(), remove);
+    UndetourFunc(
+      L"GetPhysicalCursorPos", GetGetPhysicalCursorPosDetour(), remove);
+    UndetourFunc(
+      L"SetPhysicalCursorPos", GetSetPhysicalCursorPosDetour(), remove);
     UndetourFunc(L"ShowCursor", GetShowCursorDetour(), remove);
     UndetourFunc(L"ClipCursor", GetClipCursorDetour(), remove);
     UndetourFunc(L"GetClipCursor", GetGetClipCursorDetour(), remove);

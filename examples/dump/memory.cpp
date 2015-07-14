@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
-#include "headers.hpp"
+#include "memory.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -48,7 +48,7 @@ std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 }
 }
 
-void DumpMemory(hadesmem::Process const& process)
+void DumpMemory(hadesmem::Process const& process, bool continue_on_error)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -194,18 +194,36 @@ void DumpMemory(hadesmem::Process const& process)
                                         "Unable to write to dump file."));
     }
 
-    if (dir_mismatch)
+    try
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                      << hadesmem::ErrorString(
-                                        "Mismatch in import dir processing."));
-    }
+      if (dir_mismatch)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error()
+          << hadesmem::ErrorString("Mismatch in import dir processing."));
+      }
 
-    if (thunk_mismatch)
+      if (thunk_mismatch)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error()
+          << hadesmem::ErrorString("Mismatch in import thunk processing."));
+      }
+    }
+    catch (...)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error() << hadesmem::ErrorString(
-          "Mismatch in import thunk processing."));
+      if (continue_on_error)
+      {
+        std::cerr << "\nError!\n"
+                  << boost::current_exception_diagnostic_information() << '\n';
+
+        std::wcerr << "\nCurrent process: " << hadesmem::GetPathNative(process)
+                   << "\nCurrent module: " << module.GetName() << "\n";
+      }
+      else
+      {
+        throw;
+      }
     }
   }
 }

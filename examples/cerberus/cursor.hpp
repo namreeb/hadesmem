@@ -17,9 +17,10 @@ namespace cerberus
 typedef void
   OnSetCursorCallback(HCURSOR cursor, bool* handled, HCURSOR* retval);
 
-typedef void OnGetCursorPosCallback(LPPOINT point, bool* handled);
+typedef void
+  OnGetCursorPosCallback(LPPOINT point, bool physical, bool* handled);
 
-typedef void OnSetCursorPosCallback(int x, int y, bool* handled);
+typedef void OnSetCursorPosCallback(int x, int y, bool physical, bool* handled);
 
 typedef void OnShowCursorCallback(BOOL show, bool* handled, int* retval);
 

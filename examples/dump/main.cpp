@@ -165,7 +165,8 @@ void DumpThreads(DWORD pid)
   }
 }
 
-void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
+void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
+                      bool continue_on_error = false)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -213,7 +214,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry)
 
   DumpRegions(*process);
 
-  DumpMemory(*process);
+  DumpMemory(*process, continue_on_error);
 }
 
 void DumpProcesses()
@@ -400,11 +401,7 @@ int main(int argc, char* argv[])
       "warned-file-dynamic",
       "Dump warnings to file on the fly rather than at the end",
       cmd);
-    TCLAP::SwitchArg continue_arg(
-      "",
-      "continue",
-      "Continue on error when dumping a file during a directory dump",
-      cmd);
+    TCLAP::SwitchArg continue_arg("", "continue", "Continue on error", cmd);
     TCLAP::SwitchArg quiet_arg(
       "", "quiet", "Only output status messages (no dumping)", cmd);
     TCLAP::ValueArg<int> warned_type_arg("",
@@ -476,7 +473,7 @@ int main(int argc, char* argv[])
                      });
       if (iter != std::end(processes))
       {
-        DumpProcessEntry(*iter);
+        DumpProcessEntry(*iter, continue_arg.isSet());
       }
       else
       {
@@ -490,7 +487,7 @@ int main(int argc, char* argv[])
       auto const proc_name =
         hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
       auto const proc_entry = hadesmem::GetProcessEntryByName(proc_name, false);
-      DumpProcessEntry(proc_entry);
+      DumpProcessEntry(proc_entry, continue_arg.isSet());
     }
     else if (path_arg.isSet())
     {

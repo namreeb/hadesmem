@@ -23,6 +23,10 @@ HRESULT WINAPI DirectInput8AProxy::QueryInterface(REFIID riid, LPVOID* obj)
   auto const ret = direct_input_->QueryInterface(riid, obj);
   last_error_preserver.Update();
 
+  // IDirectInputJoyConfig8
+  UUID const direct_input_joy_config_8_uuid = {
+    0xEB0D7DFA, 0x1990, 0x4F27, 0xB4, 0xD6, 0xED, 0xF2, 0xEE, 0xC4, 0xA4, 0x4C};
+
   if (SUCCEEDED(ret))
   {
     HADESMEM_DETAIL_TRACE_NOISY_A("Succeeded.");
@@ -31,6 +35,11 @@ HRESULT WINAPI DirectInput8AProxy::QueryInterface(REFIID riid, LPVOID* obj)
     {
       refs_++;
       *obj = this;
+    }
+    // Observed in Anomaly Korea
+    else if (riid == direct_input_joy_config_8_uuid)
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Potentially unhandled interface (1).");
     }
     else
     {
