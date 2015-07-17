@@ -58,6 +58,8 @@ void DumpMemory(hadesmem::Process const& process, bool continue_on_error)
   hadesmem::ModuleList modules(process);
   for (auto const& module : modules)
   {
+    WriteNamedNormal(out, L"Name", module.GetName(), 0);
+
     WriteNormal(out, "Checking for valid headers.", 0);
     try
     {
@@ -165,7 +167,7 @@ void DumpMemory(hadesmem::Process const& process, bool continue_on_error)
                                           (b != std::end(import_thunks_new)));
     }
     bool const dir_mismatch =
-      (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
+      (i != std::end(import_dirs)) ^ (j != std::end(import_dirs_new));
 
     WriteNormal(out, L"Writing file.", 1);
     auto const proc_path = hadesmem::GetPath(process);
