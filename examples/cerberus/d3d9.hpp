@@ -14,10 +14,26 @@
 
 #include "callbacks.hpp"
 
+// TODO: Clean this up. Use a function to generate and return the full name
+// including the PID?
+#define CERBERUS_HELPER_D3D9_MAP_NAME L"Local\\CerberusHelper_D3D9_"
+
 namespace hadesmem
 {
 namespace cerberus
 {
+struct D3D9Offsets
+{
+  std::uintptr_t add_ref_;
+  std::uintptr_t release_;
+  std::uintptr_t present_;
+  std::uintptr_t reset_;
+  std::uintptr_t end_scene_;
+  std::uintptr_t present_ex_;
+  std::uintptr_t reset_ex_;
+  std::uintptr_t swap_chain_present_;
+};
+
 typedef void OnFrameD3D9Callback(IDirect3DDevice9* device);
 
 typedef void
@@ -26,43 +42,11 @@ typedef void
 
 typedef void OnReleaseD3D9Callback(IDirect3DDevice9* device);
 
-typedef void OnSetStreamSourceD3D9Callback(IDirect3DDevice9* device,
-                                           UINT stream_number,
-                                           IDirect3DVertexBuffer9* stream_data,
-                                           UINT offset_in_bytes,
-                                           UINT stride);
-
-typedef void
-  OnPreDrawIndexedPrimitiveD3D9Callback(IDirect3DDevice9* device,
-                                        D3DPRIMITIVETYPE primitive_type,
-                                        INT base_vertex_index,
-                                        UINT min_vertex_index,
-                                        UINT num_vertices,
-                                        UINT start_index,
-                                        UINT prim_count);
-
-typedef void
-  OnPostDrawIndexedPrimitiveD3D9Callback(IDirect3DDevice9* device,
-                                         D3DPRIMITIVETYPE primitive_type,
-                                         INT base_vertex_index,
-                                         UINT min_vertex_index,
-                                         UINT num_vertices,
-                                         UINT start_index,
-                                         UINT prim_count);
-
 Callbacks<OnFrameD3D9Callback>& GetOnFrameD3D9Callbacks();
 
 Callbacks<OnResetD3D9Callback>& GetOnResetD3D9Callbacks();
 
 Callbacks<OnReleaseD3D9Callback>& GetOnReleaseD3D9Callbacks();
-
-Callbacks<OnSetStreamSourceD3D9Callback>& GetOnSetStreamSourceD3D9Callbacks();
-
-Callbacks<OnPreDrawIndexedPrimitiveD3D9Callback>&
-  GetOnPreDrawIndexedPrimitiveD3D9Callbacks();
-
-Callbacks<OnPostDrawIndexedPrimitiveD3D9Callback>&
-  GetOnPostDrawIndexedPrimitiveD3D9Callbacks();
 
 class D3D9Interface
 {
@@ -85,21 +69,6 @@ public:
     RegisterOnRelease(std::function<OnReleaseD3D9Callback> const& callback) = 0;
 
   virtual void UnregisterOnRelease(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnSetStreamSource(
-    std::function<OnSetStreamSourceD3D9Callback> const& callback) = 0;
-
-  virtual void UnregisterOnSetStreamSource(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnPreDrawIndexedPrimitive(
-    std::function<OnPreDrawIndexedPrimitiveD3D9Callback> const& callback) = 0;
-
-  virtual void UnregisterOnPreDrawIndexedPrimitive(std::size_t id) = 0;
-
-  virtual std::size_t RegisterOnPostDrawIndexedPrimitive(
-    std::function<OnPostDrawIndexedPrimitiveD3D9Callback> const& callback) = 0;
-
-  virtual void UnregisterOnPostDrawIndexedPrimitive(std::size_t id) = 0;
 };
 
 D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT;

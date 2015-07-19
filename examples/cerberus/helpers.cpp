@@ -14,30 +14,59 @@ public:
     std::wstring const& module_name_upper,
     std::function<void(HMODULE)> const& detour_func,
     std::function<void(bool)> const& undetour_func,
-    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func) final
+    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func,
+    bool on_map) final
   {
     auto& module = hadesmem::cerberus::GetModuleInterface();
 
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Initializing %s support.",
                                    module_name_upper.c_str());
 
-    std::wstring const module_name_upper_with_ext{module_name_upper + L".DLL"};
-    auto const on_map =
-      [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
+    std::size_t on_map_id = 0;
+
+    if (on_map)
     {
-      if (name == module_name_upper || name == module_name_upper_with_ext)
+      std::wstring const module_name_upper_with_ext{module_name_upper +
+                                                    L".DLL"};
+      auto const on_map_fn =
+        [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
       {
-        HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s loaded. Applying hooks.",
-                                       module_name_upper.c_str());
+        if (name == module_name_upper || name == module_name_upper_with_ext)
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s mapped. Applying hooks.",
+                                         module_name_upper.c_str());
 
-        detour_func(mod);
-      }
-    };
-    auto const on_map_id = module.RegisterOnMap(on_map);
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
-                                   module_name_upper.c_str());
+          detour_func(mod);
+        }
+      };
+      on_map_id = module.RegisterOnMap(on_map_fn);
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnMap for %s.",
+                                     module_name_upper.c_str());
+    }
+    else
+    {
+      std::wstring const module_name_upper_with_ext{module_name_upper +
+                                                    L".DLL"};
+      auto const on_load_fn = [=](HMODULE mod,
+                                  PCWSTR /*path*/,
+                                  PULONG /*flags*/,
+                                  std::wstring const& /*full_name*/,
+                                  std::wstring const& name)
+      {
+        if (name == module_name_upper || name == module_name_upper_with_ext)
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s loaded. Applying hooks.",
+                                         module_name_upper.c_str());
 
-    auto const on_unmap = [=](HMODULE mod)
+          detour_func(mod);
+        }
+      };
+      on_map_id = module.RegisterOnLoad(on_load_fn);
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnLoad for %s.",
+                                     module_name_upper.c_str());
+    }
+
+    auto const on_unmap_fn = [=](HMODULE mod)
     {
       auto const module_data = get_module_func();
       auto const module_beg = module_data.first;
@@ -45,7 +74,7 @@ public:
         static_cast<std::uint8_t*>(module_data.first) + module_data.second;
       if (mod >= module_beg && mod < module_end)
       {
-        HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unloaded. Removing hooks.",
+        HADESMEM_DETAIL_TRACE_FORMAT_W(L"%s unmapped. Removing hooks.",
                                        module_name_upper.c_str());
 
         // Detach instead of remove hooks because when we get the notification
@@ -53,7 +82,7 @@ public:
         undetour_func(false);
       }
     };
-    auto const on_unmap_id = module.RegisterOnUnmap(on_unmap);
+    auto const on_unmap_id = module.RegisterOnUnmap(on_unmap_fn);
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Registered OnUnmap for %s.",
                                    module_name_upper.c_str());
 

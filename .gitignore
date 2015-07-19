@@ -152,3 +152,6 @@
 /build/vs/chimera/Win7 Debug
 /build/vs/chimera/Win7 Release
 /build/vs/chimera/Win8 Debug
+/build/vs/cerberus_helper/Debug
+/build/vs/cerberus_helper/Release
+/build/vs/cerberus_helper/cerberus_helper.vcxproj.user

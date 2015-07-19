@@ -50,5 +50,7 @@ void InitializeProcess();
 void DetourKernelBaseForProcess(HMODULE base);
 
 void UndetourKernelBaseForProcess(bool remove);
+
+bool& GetDisableCreateProcessInternalWHook() HADESMEM_DETAIL_NOEXCEPT;
 }
 }

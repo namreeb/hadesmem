@@ -122,30 +122,6 @@ void UseAllStatics()
     d3d9.RegisterOnRelease(on_release_callback_d3d9);
   d3d9.UnregisterOnRelease(on_release_id_d3d9);
 
-  auto const on_set_stream_source_callback_d3d9 =
-    [](IDirect3DDevice9*, UINT, IDirect3DVertexBuffer9*, UINT, UINT)
-  {
-  };
-  auto const on_set_stream_source_id_d3d9 =
-    d3d9.RegisterOnSetStreamSource(on_set_stream_source_callback_d3d9);
-  d3d9.UnregisterOnSetStreamSource(on_set_stream_source_id_d3d9);
-
-  auto const on_pre_dip_callback_d3d9 =
-    [](IDirect3DDevice9*, D3DPRIMITIVETYPE, INT, UINT, UINT, UINT, UINT)
-  {
-  };
-  auto const on_pre_dip_id_d3d9 =
-    d3d9.RegisterOnPreDrawIndexedPrimitive(on_pre_dip_callback_d3d9);
-  d3d9.UnregisterOnPreDrawIndexedPrimitive(on_pre_dip_id_d3d9);
-
-  auto const on_post_dip_callback_d3d9 =
-    [](IDirect3DDevice9*, D3DPRIMITIVETYPE, INT, UINT, UINT, UINT, UINT)
-  {
-  };
-  auto const on_post_dip_id_d3d9 =
-    d3d9.RegisterOnPostDrawIndexedPrimitive(on_post_dip_callback_d3d9);
-  d3d9.UnregisterOnPostDrawIndexedPrimitive(on_post_dip_id_d3d9);
-
   auto const on_frame_callback_dxgi = [](IDXGISwapChain*)
   {
   };
@@ -419,22 +395,49 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
 
     UseAllStatics();
 
-    // Support deferred hooking (via module load notifications).
+    hadesmem::cerberus::LoadPlugins();
+
+    if (config.IsAntTweakBarEnabled())
+    {
+      hadesmem::cerberus::InitializeAntTweakBar();
+    }
+
+    if (config.IsGwenEnabled())
+    {
+      hadesmem::cerberus::InitializeGwen();
+    }
+
+    // NOTE: The order of some of these calls is important. E.g. The GUI libs
+    // are initialized before the renderer, and the renderer is initialized
+    // before the actual rendering API hooks. This is to avoid race conditions
+    // that would otherwise be caused if we initialized the renderer before the
+    // GUI lib, which means the initialization callback would never be called
+    // and then we would attempt to draw when in an uninitialized state.
+    // We also load plugins first so they can register all their callbacks
+    // because otherwise things like GUI visibility callbacks might be missed.
+    // Obviously all of this only applies for injection at run-time rather than
+    // launch-time, so it's not a big deal yet because support for that is not
+    // complete anyway.
+    // TODO: Solve this by suspending the process in this function instead of
+    // relying on the constant suspend/resumes in the patcher? The
+    // suspend/resumes in the patcher works fine for hooking safety, but simply
+    // suspending in this function would allow us to avoid all the race
+    // conditions and initialize everything in whatever order we want.
     hadesmem::cerberus::InitializeModule();
     hadesmem::cerberus::InitializeException();
     hadesmem::cerberus::InitializeProcess();
+    hadesmem::cerberus::InitializeRender();
     hadesmem::cerberus::InitializeD3D9();
     hadesmem::cerberus::InitializeD3D10();
     hadesmem::cerberus::InitializeD3D101();
     hadesmem::cerberus::InitializeD3D11();
     hadesmem::cerberus::InitializeDXGI();
     hadesmem::cerberus::InitializeOpenGL32();
+    hadesmem::cerberus::InitializeInput();
+    hadesmem::cerberus::InitializeWindow();
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
     hadesmem::cerberus::InitializeRawInput();
-    hadesmem::cerberus::InitializeWindow();
-    hadesmem::cerberus::InitializeRender();
-    hadesmem::cerberus::InitializeInput();
 
     hadesmem::cerberus::DetourNtdllForModule(nullptr);
     hadesmem::cerberus::DetourNtdllForException(nullptr);
@@ -450,18 +453,6 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
     hadesmem::cerberus::DetourUser32ForRawInput(nullptr);
     hadesmem::cerberus::DetourUser32ForWindow(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
-
-    if (config.IsAntTweakBarEnabled())
-    {
-      hadesmem::cerberus::InitializeAntTweakBar();
-    }
-
-    if (config.IsGwenEnabled())
-    {
-      hadesmem::cerberus::InitializeGwen();
-    }
-
-    hadesmem::cerberus::LoadPlugins();
 
     return 0;
   }

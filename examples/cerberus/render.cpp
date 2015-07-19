@@ -666,6 +666,10 @@ void OnFrameOpenGL32(HDC device)
   OnFrameGeneric(hadesmem::cerberus::RenderApi::kOpenGL32, device);
 }
 
+// TODO: Is this wrong? We are currently getting called pre-reset. We should
+// probably clean up here but not initialize until after? Should we just rely on
+// an OnFrame event to reinitialize us? Or should we add a post-reset callback?
+// Need to investigate more...
 void OnResetD3D9(IDirect3DDevice9* device,
                  D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {

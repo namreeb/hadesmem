@@ -39,12 +39,6 @@
     <ClCompile Include="..\..\..\examples\cerberus\d3d9.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_9.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_device_9.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\examples\cerberus\direct_input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -213,12 +207,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\d3d9.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_9.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_device_9.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\direct_input.hpp">

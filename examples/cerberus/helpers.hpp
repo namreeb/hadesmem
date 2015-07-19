@@ -125,7 +125,8 @@ public:
     std::wstring const& module_name_upper,
     std::function<void(HMODULE)> const& detour_func,
     std::function<void(bool)> const& undetour_func,
-    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func) = 0;
+    std::function<std::pair<void*, SIZE_T>&()> const& get_module_func,
+    bool on_map = true) = 0;
 
   virtual bool CommonDetourModule(Process const& process,
                                   std::wstring const& name,

@@ -41,8 +41,9 @@ hadesmem::cerberus::Callbacks<
 class ProcessImpl : public hadesmem::cerberus::ProcessInterface
 {
 public:
-  virtual std::size_t RegisterOnCreateProcessInternalW(std::function<
-    hadesmem::cerberus::OnCreateProcessInternalWCallback> const& callback) final
+  virtual std::size_t RegisterOnCreateProcessInternalW(
+    std::function<hadesmem::cerberus::OnCreateProcessInternalWCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnCreateProcessInternalWCallbacks();
     return callbacks.Register(callback);
@@ -216,6 +217,12 @@ extern "C" BOOL WINAPI
     resume_thread.reset(new EnsureResumeThread(process_info->hThread));
   }
 
+  if (hadesmem::cerberus::GetDisableCreateProcessInternalWHook())
+  {
+    HADESMEM_DETAIL_TRACE_A("Hook disabled.");
+    return ret;
+  }
+
   static __declspec(thread) std::int32_t in_hook = 0;
   if (in_hook)
   {
@@ -385,6 +392,12 @@ void UndetourKernelBaseForProcess(bool remove)
 
     module = std::make_pair(nullptr, 0);
   }
+}
+
+bool& GetDisableCreateProcessInternalWHook() HADESMEM_DETAIL_NOEXCEPT
+{
+  static __declspec(thread) bool disable_hook = false;
+  return disable_hook;
 }
 }
 }

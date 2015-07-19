@@ -197,8 +197,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\d3d11.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d11_device.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d9.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_9.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\direct_3d_device_9.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_a_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.cpp" />
@@ -257,8 +255,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\d3d11_device.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d11_state_block.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d9.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_9.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\direct_3d_device_9.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_8_a_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.hpp" />

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "anttweakbar", "anttweakbar\anttweakbar.vcxproj", "{275F9872-5523-4B96-801E-F2C40E5D2071}"
 EndProject
@@ -204,6 +204,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "driver", "driver\driver.vcxproj", "{CA1F395E-3259-43F2-B4CA-AF8955A3598C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chimera", "chimera\chimera.vcxproj", "{43B3316F-B5C2-4287-AF50-AAA32D789828}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cerberus_helper", "cerberus_helper\cerberus_helper.vcxproj", "{CD297298-66C8-4A8E-A5F4-671A08C2BE37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1541,6 +1543,38 @@ Global
 		{43B3316F-B5C2-4287-AF50-AAA32D789828}.Win8.1 Release|Win32.Build.0 = Win8.1 Release|Win32
 		{43B3316F-B5C2-4287-AF50-AAA32D789828}.Win8.1 Release|x64.ActiveCfg = Win8.1 Release|x64
 		{43B3316F-B5C2-4287-AF50-AAA32D789828}.Win8.1 Release|x64.Build.0 = Win8.1 Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Debug|Win32.Build.0 = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Debug|x64.ActiveCfg = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Debug|x64.Build.0 = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Release|Win32.ActiveCfg = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Release|Win32.Build.0 = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Release|x64.ActiveCfg = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Release|x64.Build.0 = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Debug|Win32.ActiveCfg = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Debug|Win32.Build.0 = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Debug|x64.ActiveCfg = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Debug|x64.Build.0 = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Release|Win32.ActiveCfg = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Release|Win32.Build.0 = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Release|x64.ActiveCfg = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win7 Release|x64.Build.0 = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Debug|Win32.ActiveCfg = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Debug|Win32.Build.0 = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Debug|x64.ActiveCfg = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Debug|x64.Build.0 = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Release|Win32.ActiveCfg = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Release|Win32.Build.0 = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Release|x64.ActiveCfg = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8 Release|x64.Build.0 = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Debug|Win32.ActiveCfg = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Debug|Win32.Build.0 = Debug|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Debug|x64.ActiveCfg = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Debug|x64.Build.0 = Debug|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Release|Win32.ActiveCfg = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Release|Win32.Build.0 = Release|Win32
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Release|x64.ActiveCfg = Release|x64
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37}.Win8.1 Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1587,5 +1621,6 @@ Global
 		{679A9BCF-4C40-44AB-8F0F-D7C1994EF6CB} = {9740F192-881F-41C2-9611-37562857B5D0}
 		{CA1F395E-3259-43F2-B4CA-AF8955A3598C} = {7EBA51FA-6118-42FE-9167-83972815EFC3}
 		{43B3316F-B5C2-4287-AF50-AAA32D789828} = {7EBA51FA-6118-42FE-9167-83972815EFC3}
+		{CD297298-66C8-4A8E-A5F4-671A08C2BE37} = {7EBA51FA-6118-42FE-9167-83972815EFC3}
 	EndGlobalSection
 EndGlobal

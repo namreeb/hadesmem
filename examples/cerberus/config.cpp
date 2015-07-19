@@ -83,7 +83,7 @@ void Config::LoadImpl(pugi::xml_document const& doc)
 
   // TODO: Find a better way to do this.
   auto const gui =
-    hadesmem::detail::pugixml::GetAttributeValue(cerberus_node, L"GUI");
+    hadesmem::detail::pugixml::GetOptionalAttributeValue(cerberus_node, L"GUI");
   if (hadesmem::detail::ToUpperOrdinal(gui) == L"ANTTWEAKBAR")
   {
     ant_tweak_bar_enabled_ = true;
@@ -91,6 +91,10 @@ void Config::LoadImpl(pugi::xml_document const& doc)
   else if (hadesmem::detail::ToUpperOrdinal(gui) == L"GWEN")
   {
     gwen_enabled_ = true;
+  }
+  else
+  {
+    ant_tweak_bar_enabled_ = false;
   }
 }
 }
