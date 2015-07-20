@@ -120,10 +120,36 @@ std::map<IDirect3DDevice9*, DeviceData>& GetDeviceMap()
   return device_map;
 }
 
-std::mutex& GetDeviceMapMutex()
+std::recursive_mutex& GetDeviceMapMutex()
 {
-  static std::mutex mutex;
+  static std::recursive_mutex mutex;
   return mutex;
+}
+
+IDirect3DDevice9*& GetCurrentThreadDevice()
+{
+  static IDirect3DDevice9* device;
+  return device;
+}
+
+void AddDeviceToMap(IDirect3DDevice9* device)
+{
+  if (!device)
+  {
+    return;
+  }
+
+  auto& mutex = GetDeviceMapMutex();
+  std::lock_guard<std::recursive_mutex> lock{mutex};
+
+  auto& device_map = GetDeviceMap();
+  auto const iter = device_map.find(device);
+  if (iter == std::end(device_map))
+  {
+    DeviceData data = {};
+    data.ref_count_ = 1;
+    device_map[device] = data;
+  }
 }
 
 typedef ULONG(WINAPI* IDirect3DDevice9_AddRef_Fn)(IDirect3DDevice9* device);
@@ -203,22 +229,27 @@ extern "C" HRESULT WINAPI
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
 
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
+    device_ref = device;
+  }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    auto& mutex = GetDeviceMapMutex();
-    std::lock_guard<std::mutex> lock{mutex};
-
-    auto& device_map = GetDeviceMap();
-    auto const iter = device_map.find(device);
-    if (iter == std::end(device_map))
-    {
-      DeviceData data = {};
-      data.ref_count_ = 1;
-      device_map[device] = data;
-    }
-
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -266,22 +297,27 @@ extern "C" HRESULT WINAPI
                                        dest_window_override,
                                        dirty_region);
 
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
+    device_ref = device;
+  }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    auto& mutex = GetDeviceMapMutex();
-    std::lock_guard<std::mutex> lock{mutex};
-
-    auto& device_map = GetDeviceMap();
-    auto const iter = device_map.find(device);
-    if (iter == std::end(device_map))
-    {
-      DeviceData data = {};
-      data.ref_count_ = 1;
-      device_map[device] = data;
-    }
-
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -333,22 +369,27 @@ extern "C" HRESULT WINAPI
                                        dirty_region,
                                        flags);
 
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
+    device_ref = device;
+  }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    auto& mutex = GetDeviceMapMutex();
-    std::lock_guard<std::mutex> lock{mutex};
-
-    auto& device_map = GetDeviceMap();
-    auto const iter = device_map.find(device);
-    if (iter == std::end(device_map))
-    {
-      DeviceData data = {};
-      data.ref_count_ = 1;
-      device_map[device] = data;
-    }
-
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -401,37 +442,43 @@ extern "C" HRESULT WINAPI
                                        dirty_region,
                                        flags);
 
+  IDirect3DDevice9* device = nullptr;
+  auto const get_device_hr = swap_chain->GetDevice(&device);
+  if (FAILED(get_device_hr))
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! IDirect3DSwapChain9::GetDevice failed. HR: [%lX].",
+      get_device_hr);
+  }
+  hadesmem::detail::SmartComHandle smart_device{device};
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
-  if (hook_count == 1)
+  if (hook_count == 1 && SUCCEEDED(get_device_hr))
   {
-    IDirect3DDevice9* device = nullptr;
-    auto const get_device_hr = swap_chain->GetDevice(&device);
+    auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
+    callbacks.Run(device);
+  }
+
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
     if (SUCCEEDED(get_device_hr))
     {
-      auto& mutex = GetDeviceMapMutex();
-      std::lock_guard<std::mutex> lock{mutex};
-
-      auto& device_map = GetDeviceMap();
-      auto const iter = device_map.find(device);
-      if (iter == std::end(device_map))
-      {
-        DeviceData data = {};
-        data.ref_count_ = 1;
-        device_map[device] = data;
-      }
-
-      hadesmem::detail::SmartComHandle smart_device{device};
-      auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
-      callbacks.Run(device);
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "WARNING! IDirect3DSwapChain9::GetDevice failed. HR: [%lX].",
-        get_device_hr);
+      device_ref = device;
     }
   }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
 
   auto const present = detour->GetTrampolineT<IDirect3DSwapChain9_Present_Fn>();
   last_error_preserver.Revert();
@@ -470,22 +517,27 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%p].", device, presentation_params);
 
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
+    device_ref = device;
+  }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    auto& mutex = GetDeviceMapMutex();
-    std::lock_guard<std::mutex> lock{mutex};
-
-    auto& device_map = GetDeviceMap();
-    auto const iter = device_map.find(device);
-    if (iter == std::end(device_map))
-    {
-      DeviceData data = {};
-      data.ref_count_ = 1;
-      device_map[device] = data;
-    }
-
     auto& callbacks = hadesmem::cerberus::GetOnResetD3D9Callbacks();
     callbacks.Run(device, presentation_params);
   }
@@ -527,22 +579,27 @@ extern "C" HRESULT WINAPI
                                        presentation_params,
                                        fullscreen_display_mode);
 
+  auto& device_ref = GetCurrentThreadDevice();
+  auto const old_device_ref = device_ref;
+  if (device_ref == nullptr)
+  {
+    device_ref = device;
+  }
+
+  auto const reset_device_ref = [&]()
+  {
+    device_ref = old_device_ref;
+  };
+
+  auto ensure_reset_device_ref =
+    hadesmem::detail::MakeScopeWarden(reset_device_ref);
+
+  AddDeviceToMap(device);
+
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
-    auto& mutex = GetDeviceMapMutex();
-    std::lock_guard<std::mutex> lock{mutex};
-
-    auto& device_map = GetDeviceMap();
-    auto const iter = device_map.find(device);
-    if (iter == std::end(device_map))
-    {
-      DeviceData data = {};
-      data.ref_count_ = 1;
-      device_map[device] = data;
-    }
-
     auto& callbacks = hadesmem::cerberus::GetOnResetD3D9Callbacks();
     callbacks.Run(device, presentation_params);
   }
@@ -561,13 +618,6 @@ std::pair<void*, SIZE_T>& GetD3D9Module() HADESMEM_DETAIL_NOEXCEPT
 {
   static std::pair<void*, SIZE_T> module{};
   return module;
-}
-
-LRESULT
-CALLBACK
-WrapDefWindowProcW(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-  return DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 }
 
@@ -707,7 +757,6 @@ void DetourD3D9(HMODULE base)
       static_cast<D3D9Offsets*>(mapping_view.GetHandle());
     auto const offset_base = reinterpret_cast<std::uint8_t*>(base);
 
-#if 0
     auto const add_ref_fn = offset_base + d3d9_offsets->add_ref_;
     DetourFunc(process,
                "IDirect3DDevice9::AddRef",
@@ -721,7 +770,6 @@ void DetourD3D9(HMODULE base)
                GetIDirect3DDevice9ReleaseDetour(),
                reinterpret_cast<IDirect3DDevice9_Release_Fn>(release_fn),
                IDirect3DDevice9_Release_Detour);
-#endif
 
     auto const present_fn = offset_base + d3d9_offsets->present_;
     DetourFunc(process,
