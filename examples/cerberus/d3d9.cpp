@@ -91,12 +91,6 @@ public:
   }
 };
 
-std::uint32_t& GetReleaseHookCount() HADESMEM_DETAIL_NOEXCEPT
-{
-  static __declspec(thread) std::uint32_t in_hook = 0;
-  return in_hook;
-}
-
 std::uint32_t& GetPresentHookCount() HADESMEM_DETAIL_NOEXCEPT
 {
   static __declspec(thread) std::uint32_t in_hook = 0;
@@ -109,105 +103,10 @@ std::uint32_t& GetResetHookCount() HADESMEM_DETAIL_NOEXCEPT
   return in_hook;
 }
 
-struct DeviceData
-{
-  std::uint64_t ref_count_;
-};
-
-std::map<IDirect3DDevice9*, DeviceData>& GetDeviceMap()
-{
-  static std::map<IDirect3DDevice9*, DeviceData> device_map;
-  return device_map;
-}
-
 std::recursive_mutex& GetDeviceMapMutex()
 {
   static std::recursive_mutex mutex;
   return mutex;
-}
-
-IDirect3DDevice9*& GetCurrentThreadDevice()
-{
-  static IDirect3DDevice9* device;
-  return device;
-}
-
-void AddDeviceToMap(IDirect3DDevice9* device)
-{
-  if (!device)
-  {
-    return;
-  }
-
-  auto& mutex = GetDeviceMapMutex();
-  std::lock_guard<std::recursive_mutex> lock{mutex};
-
-  auto& device_map = GetDeviceMap();
-  auto const iter = device_map.find(device);
-  if (iter == std::end(device_map))
-  {
-    DeviceData data = {};
-    data.ref_count_ = 1;
-    device_map[device] = data;
-  }
-}
-
-typedef ULONG(WINAPI* IDirect3DDevice9_AddRef_Fn)(IDirect3DDevice9* device);
-
-std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>&
-  GetIDirect3DDevice9AddRefDetour() HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>
-    detour;
-  return detour;
-}
-
-extern "C" ULONG WINAPI
-  IDirect3DDevice9_AddRef_Detour(hadesmem::PatchDetourBase* detour,
-                                 IDirect3DDevice9* device)
-{
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
-  hadesmem::cerberus::HookCounter hook_counter{&GetReleaseHookCount()};
-
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
-
-  auto const add_ref = detour->GetTrampolineT<IDirect3DDevice9_AddRef_Fn>();
-  last_error_preserver.Revert();
-  auto ret = add_ref(device);
-  last_error_preserver.Update();
-
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%lu].", ret);
-
-  return ret;
-}
-
-typedef ULONG(WINAPI* IDirect3DDevice9_Release_Fn)(IDirect3DDevice9* device);
-
-std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>&
-  GetIDirect3DDevice9ReleaseDetour() HADESMEM_DETAIL_NOEXCEPT
-{
-  static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>
-    detour;
-  return detour;
-}
-
-extern "C" ULONG WINAPI
-  IDirect3DDevice9_Release_Detour(hadesmem::PatchDetourBase* detour,
-                                  IDirect3DDevice9* device)
-{
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
-  hadesmem::cerberus::HookCounter hook_counter{&GetReleaseHookCount()};
-
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
-
-  auto const release = detour->GetTrampolineT<IDirect3DDevice9_Release_Fn>();
-  last_error_preserver.Revert();
-  auto ret = release(device);
-  last_error_preserver.Update();
-
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%lu].", ret);
-
-  return ret;
 }
 
 typedef HRESULT(WINAPI* IDirect3DDevice9_EndScene_Fn)(IDirect3DDevice9* device);
@@ -228,23 +127,6 @@ extern "C" HRESULT WINAPI
   hadesmem::cerberus::HookCounter hook_counter{&GetPresentHookCount()};
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    device_ref = device;
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
@@ -296,23 +178,6 @@ extern "C" HRESULT WINAPI
                                        dest_rect,
                                        dest_window_override,
                                        dirty_region);
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    device_ref = device;
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
@@ -368,23 +233,6 @@ extern "C" HRESULT WINAPI
                                        dest_window_override,
                                        dirty_region,
                                        flags);
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    device_ref = device;
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
@@ -442,6 +290,8 @@ extern "C" HRESULT WINAPI
                                        dirty_region,
                                        flags);
 
+  HADESMEM_DETAIL_TRACE_A("ATTENTION! Untested function called.");
+
   IDirect3DDevice9* device = nullptr;
   auto const get_device_hr = swap_chain->GetDevice(&device);
   if (FAILED(get_device_hr))
@@ -459,26 +309,6 @@ extern "C" HRESULT WINAPI
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    if (SUCCEEDED(get_device_hr))
-    {
-      device_ref = device;
-    }
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const present = detour->GetTrampolineT<IDirect3DSwapChain9_Present_Fn>();
   last_error_preserver.Revert();
@@ -516,23 +346,6 @@ extern "C" HRESULT WINAPI
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%p] [%p].", device, presentation_params);
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    device_ref = device;
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
@@ -578,23 +391,6 @@ extern "C" HRESULT WINAPI
                                        device,
                                        presentation_params,
                                        fullscreen_display_mode);
-
-  auto& device_ref = GetCurrentThreadDevice();
-  auto const old_device_ref = device_ref;
-  if (device_ref == nullptr)
-  {
-    device_ref = device;
-  }
-
-  auto const reset_device_ref = [&]()
-  {
-    device_ref = old_device_ref;
-  };
-
-  auto ensure_reset_device_ref =
-    hadesmem::detail::MakeScopeWarden(reset_device_ref);
-
-  AddDeviceToMap(device);
 
   auto const hook_count = hook_counter.GetCount();
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
@@ -711,7 +507,7 @@ void DetourD3D9(HMODULE base)
                           nullptr,
                           nullptr,
                           FALSE,
-                          0,
+                          CREATE_NO_WINDOW,
                           nullptr,
                           nullptr,
                           &start_info,
@@ -756,20 +552,6 @@ void DetourD3D9(HMODULE base)
     auto const d3d9_offsets =
       static_cast<D3D9Offsets*>(mapping_view.GetHandle());
     auto const offset_base = reinterpret_cast<std::uint8_t*>(base);
-
-    auto const add_ref_fn = offset_base + d3d9_offsets->add_ref_;
-    DetourFunc(process,
-               "IDirect3DDevice9::AddRef",
-               GetIDirect3DDevice9AddRefDetour(),
-               reinterpret_cast<IDirect3DDevice9_AddRef_Fn>(add_ref_fn),
-               IDirect3DDevice9_AddRef_Detour);
-
-    auto const release_fn = offset_base + d3d9_offsets->release_;
-    DetourFunc(process,
-               "IDirect3DDevice9::Release",
-               GetIDirect3DDevice9ReleaseDetour(),
-               reinterpret_cast<IDirect3DDevice9_Release_Fn>(release_fn),
-               IDirect3DDevice9_Release_Detour);
 
     auto const present_fn = offset_base + d3d9_offsets->present_;
     DetourFunc(process,
@@ -823,10 +605,6 @@ void UndetourD3D9(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"D3D9", module))
   {
-    UndetourFunc(
-      L"IDirect3DDevice9::AddRef", GetIDirect3DDevice9AddRefDetour(), remove);
-    UndetourFunc(
-      L"IDirect3DDevice9::Release", GetIDirect3DDevice9ReleaseDetour(), remove);
     UndetourFunc(
       L"IDirect3DDevice9::Present", GetIDirect3DDevice9PresentDetour(), remove);
     UndetourFunc(

@@ -330,16 +330,20 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return;
   }
 
-  // GWEN doesn't use the entire structure, it only needs what we've
-  // initialized.
-  MSG message{};
-  message.hwnd = hwnd;
-  message.message = msg;
-  message.wParam = wparam;
-  message.lParam = lparam;
+  auto& window_interface = hadesmem::cerberus::GetWindowInterface();
+  if (auto const window = window_interface.GetCurrentWindow())
+  {
+    // GWEN doesn't use the entire structure, it only needs what we've
+    // initialized.
+    MSG message{};
+    message.hwnd = hwnd;
+    message.message = msg;
+    message.wParam = wparam;
+    message.lParam = lparam;
 
-  auto& input = GetGwenInput();
-  input->ProcessMessage(message);
+    auto& input = GetGwenInput();
+    input->ProcessMessage(message);
+  }
 }
 
 void OnFrameGwen(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)

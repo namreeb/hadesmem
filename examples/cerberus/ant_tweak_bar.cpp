@@ -595,6 +595,8 @@ void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
       hadesmem::Error{} << hadesmem::ErrorString{"TwTerminate failed."});
   }
 
+  HADESMEM_DETAIL_TRACE_A("Clearing AntTweakBar initialization state.");
+
   SetAntTweakBarInitialized(api, false);
 }
 
@@ -617,7 +619,11 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return;
   }
 
-  ::TwEventWin(hwnd, msg, wparam, lparam);
+  auto& window_interface = hadesmem::cerberus::GetWindowInterface();
+  if (auto const window = window_interface.GetCurrentWindow())
+  {
+    ::TwEventWin(hwnd, msg, wparam, lparam);
+  }
 }
 
 void OnFrameAntTweakBar(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
