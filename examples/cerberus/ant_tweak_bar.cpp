@@ -620,7 +620,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   }
 
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
-  if (auto const window = window_interface.GetCurrentWindow())
+  if (hwnd == window_interface.GetCurrentWindow())
   {
     ::TwEventWin(hwnd, msg, wparam, lparam);
   }

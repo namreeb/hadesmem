@@ -506,10 +506,16 @@ void HandleOnFrameOpenGL32(HDC device)
 
 void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 {
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling OnFrame callbacks.");
+
   auto& callbacks = GetOnFrameCallbacks();
   callbacks.Run(api, device);
 
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleInputQueue callbacks.");
+
   hadesmem::cerberus::HandleInputQueue();
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Done.");
 }
 
 void OnResizeGeneric(hadesmem::cerberus::RenderApi api,
@@ -633,7 +639,11 @@ void OnResizeDXGI(IDXGISwapChain* swap_chain, UINT width, UINT height)
 
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleOnFrameD3D9.");
+
   HandleOnFrameD3D9(device);
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DDevice9::CreateStateBlock.");
 
   IDirect3DStateBlock9* state_block = nullptr;
   if (FAILED(device->CreateStateBlock(D3DSBT_ALL, &state_block)))
@@ -644,19 +654,27 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   }
   hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
 
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DStateBlock9::Capture.");
+
   if (FAILED(state_block->Capture()))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
                                       "IDirect3DStateBlock9::Capture failed."});
   }
 
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling OnFrameGeneric.");
+
   OnFrameGeneric(hadesmem::cerberus::RenderApi::kD3D9, device);
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DStateBlock9::Apply.");
 
   if (FAILED(state_block->Apply()))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
                                       "IDirect3DStateBlock9::Apply failed."});
   }
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Done.");
 }
 
 void OnFrameOpenGL32(HDC device)
@@ -696,9 +714,22 @@ void OnReleaseD3D9(IDirect3DDevice9* device)
   auto& render_info = GetRenderInfoD3D9();
   if (device == render_info.device_)
   {
-    HADESMEM_DETAIL_TRACE_A("Handling D3D9 device release.");
+    HADESMEM_DETAIL_TRACE_A("Calling CleanupGui.");
 
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
+
+    if (render_info.wnd_hooked_)
+    {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Clearing device pointer.");
+
+    render_info.device_ = nullptr;
+
+    HADESMEM_DETAIL_TRACE_A("Finished handling D3D9 device release.");
   }
   else
   {

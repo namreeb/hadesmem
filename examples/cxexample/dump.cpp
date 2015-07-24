@@ -24,6 +24,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
 
+// TODO: Fix code duplication between this and the Dump project.
+
 namespace
 {
 std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)

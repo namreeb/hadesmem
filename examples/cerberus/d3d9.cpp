@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -40,6 +41,8 @@
 
 // TODO: Fix up the ref counting, reentrancy issues, etc. Everything is a major
 // hack right now...
+
+// TODO: Fix various race conditions in our hooks.
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
@@ -103,10 +106,171 @@ std::uint32_t& GetResetHookCount() HADESMEM_DETAIL_NOEXCEPT
   return in_hook;
 }
 
+struct DeviceData
+{
+  std::int64_t ref_count_;
+};
+
+std::map<IDirect3DDevice9*, DeviceData>& GetDeviceMap()
+{
+  static std::map<IDirect3DDevice9*, DeviceData> device_map;
+  return device_map;
+}
+
 std::recursive_mutex& GetDeviceMapMutex()
 {
   static std::recursive_mutex mutex;
   return mutex;
+}
+
+void AddDeviceToMap(IDirect3DDevice9* device)
+{
+  auto& mutex = GetDeviceMapMutex();
+  std::lock_guard<std::recursive_mutex> lock{mutex};
+
+  auto& map = GetDeviceMap();
+  auto const iter = map.find(device);
+  if (iter == std::end(map))
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Adding new device. Device: [%p].", device);
+
+    DeviceData data = {};
+    data.ref_count_ = 1;
+    map[device] = data;
+  }
+}
+
+std::pair<bool, DeviceData> GetDeviceDataCopy(IDirect3DDevice9* device)
+{
+  auto& mutex = GetDeviceMapMutex();
+  std::lock_guard<std::recursive_mutex> lock{mutex};
+
+  auto& map = GetDeviceMap();
+  auto const iter = map.find(device);
+  if (iter != std::end(map))
+  {
+    return {true, iter->second};
+  }
+
+  return {};
+}
+
+void EraseDeviceData(IDirect3DDevice9* device)
+{
+  auto& mutex = GetDeviceMapMutex();
+  std::lock_guard<std::recursive_mutex> lock{mutex};
+
+  auto& map = GetDeviceMap();
+  auto const iter = map.find(device);
+  if (iter != std::end(map))
+  {
+    map.erase(iter);
+  }
+}
+
+typedef ULONG(WINAPI* IDirect3DDevice9_AddRef_Fn)(IDirect3DDevice9* device);
+
+std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>&
+  GetIDirect3DDevice9AddRefDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>
+    detour;
+  return detour;
+}
+
+extern "C" ULONG WINAPI
+  IDirect3DDevice9_AddRef_Detour(hadesmem::PatchDetourBase* detour,
+                                 IDirect3DDevice9* device)
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
+
+  if (GetPresentHookCount() == 0)
+  {
+    auto& mutex = GetDeviceMapMutex();
+    std::lock_guard<std::recursive_mutex> lock{mutex};
+
+    auto& map = GetDeviceMap();
+    auto const iter = map.find(device);
+    if (iter != std::end(map))
+    {
+      auto const ref_count = ++iter->second.ref_count_;
+      (void)ref_count;
+      HADESMEM_DETAIL_ASSERT(ref_count > 0);
+    }
+  }
+
+  auto const add_ref = detour->GetTrampolineT<IDirect3DDevice9_AddRef_Fn>();
+  last_error_preserver.Revert();
+  auto ret = add_ref(device);
+  last_error_preserver.Update();
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
+}
+
+typedef ULONG(WINAPI* IDirect3DDevice9_Release_Fn)(IDirect3DDevice9* device);
+
+std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>&
+  GetIDirect3DDevice9ReleaseDetour() HADESMEM_DETAIL_NOEXCEPT
+{
+  static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>
+    detour;
+  return detour;
+}
+
+extern "C" ULONG WINAPI
+  IDirect3DDevice9_Release_Detour(hadesmem::PatchDetourBase* detour,
+                                  IDirect3DDevice9* device)
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", device);
+
+  auto device_data = GetDeviceDataCopy(device);
+  if (device_data.first && GetPresentHookCount() == 0)
+  {
+    if (device_data.second.ref_count_ == 1)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Detected device release. Device: [%p].",
+                                     device);
+
+      EraseDeviceData(device);
+
+      // TODO: Fix ref count mismatch causing this to be spammed on certain
+      // games.
+      // auto& callbacks = hadesmem::cerberus::GetOnReleaseD3D9Callbacks();
+      // callbacks.Run(device);
+
+      HADESMEM_DETAIL_TRACE_A("Finished running OnRelease callbacks.");
+    }
+    else
+    {
+      auto& mutex = GetDeviceMapMutex();
+      std::lock_guard<std::recursive_mutex> lock{mutex};
+
+      auto& map = GetDeviceMap();
+      auto const iter = map.find(device);
+      if (iter != std::end(map))
+      {
+        // TODO: Race condition here if being AddRef'd from a different thread?
+        auto const ref_count = --iter->second.ref_count_;
+        (void)ref_count;
+        HADESMEM_DETAIL_ASSERT(ref_count > 0);
+      }
+    }
+  }
+
+  auto const release = detour->GetTrampolineT<IDirect3DDevice9_Release_Fn>();
+  last_error_preserver.Revert();
+  auto ret = release(device);
+  last_error_preserver.Update();
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+
+  return ret;
 }
 
 typedef HRESULT(WINAPI* IDirect3DDevice9_EndScene_Fn)(IDirect3DDevice9* device);
@@ -132,6 +296,8 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
+    AddDeviceToMap(device);
+
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -183,6 +349,8 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
+    AddDeviceToMap(device);
+
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -238,6 +406,8 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1)
   {
+    AddDeviceToMap(device);
+
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -290,8 +460,6 @@ extern "C" HRESULT WINAPI
                                        dirty_region,
                                        flags);
 
-  HADESMEM_DETAIL_TRACE_A("ATTENTION! Untested function called.");
-
   IDirect3DDevice9* device = nullptr;
   auto const get_device_hr = swap_chain->GetDevice(&device);
   if (FAILED(get_device_hr))
@@ -306,6 +474,8 @@ extern "C" HRESULT WINAPI
   HADESMEM_DETAIL_ASSERT(hook_count > 0);
   if (hook_count == 1 && SUCCEEDED(get_device_hr))
   {
+    AddDeviceToMap(device);
+
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
   }
@@ -553,6 +723,20 @@ void DetourD3D9(HMODULE base)
       static_cast<D3D9Offsets*>(mapping_view.GetHandle());
     auto const offset_base = reinterpret_cast<std::uint8_t*>(base);
 
+    auto const add_ref_fn = offset_base + d3d9_offsets->add_ref_;
+    DetourFunc(process,
+               "IDirect3DDevice9::AddRef",
+               GetIDirect3DDevice9AddRefDetour(),
+               reinterpret_cast<IDirect3DDevice9_AddRef_Fn>(add_ref_fn),
+               IDirect3DDevice9_AddRef_Detour);
+
+    auto const release_fn = offset_base + d3d9_offsets->release_;
+    DetourFunc(process,
+               "IDirect3DDevice9::Release",
+               GetIDirect3DDevice9ReleaseDetour(),
+               reinterpret_cast<IDirect3DDevice9_Release_Fn>(release_fn),
+               IDirect3DDevice9_Release_Detour);
+
     auto const present_fn = offset_base + d3d9_offsets->present_;
     DetourFunc(process,
                "IDirect3DDevice9::Present",
@@ -605,6 +789,10 @@ void UndetourD3D9(bool remove)
   auto& helper = GetHelperInterface();
   if (helper.CommonUndetourModule(L"D3D9", module))
   {
+    UndetourFunc(
+      L"IDirect3DDevice9::AddRef", GetIDirect3DDevice9AddRefDetour(), remove);
+    UndetourFunc(
+      L"IDirect3DDevice9::Release", GetIDirect3DDevice9ReleaseDetour(), remove);
     UndetourFunc(
       L"IDirect3DDevice9::Present", GetIDirect3DDevice9PresentDetour(), remove);
     UndetourFunc(

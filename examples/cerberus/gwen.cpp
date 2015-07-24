@@ -331,7 +331,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   }
 
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
-  if (auto const window = window_interface.GetCurrentWindow())
+  if (hwnd == window_interface.GetCurrentWindow())
   {
     // GWEN doesn't use the entire structure, it only needs what we've
     // initialized.
