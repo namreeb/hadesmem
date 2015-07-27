@@ -224,67 +224,27 @@ public:
                                DWORD export_last_error,
                                detail::SmartHandle&& thread_handle) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  CreateAndInjectData(CreateAndInjectData const&) = delete;
-
-  CreateAndInjectData& operator=(CreateAndInjectData const&) = delete;
-
-  CreateAndInjectData(CreateAndInjectData&& other)
-    : process_{std::move(other.process_)},
-      module_{other.module_},
-      export_ret_{other.export_ret_},
-      export_last_error_{other.export_last_error_},
-      thread_handle_{std::move(other.thread_handle_)}
-  {
-  }
-
-  CreateAndInjectData& operator=(CreateAndInjectData&& other)
-  {
-    process_ = std::move(other.process_);
-    module_ = other.module_;
-    export_ret_ = other.export_ret_;
-    export_last_error_ = other.export_last_error_;
-    thread_handle_ = std::move(other.thread_handle_);
-
-    return *this;
-  }
-
-#else
-
-  // Workaround for Intel C++ compile error (Intel C++ 2013 SP1 Updaate 1).
-
-  CreateAndInjectData(CreateAndInjectData const&) = delete;
-
-  CreateAndInjectData& operator=(CreateAndInjectData const&) = delete;
-
-  CreateAndInjectData(CreateAndInjectData&&) = default;
-
-  CreateAndInjectData& operator=(CreateAndInjectData&&) = default;
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
   Process GetProcess() const
   {
     return process_;
   }
 
-  HMODULE GetModule() const HADESMEM_DETAIL_NOEXCEPT
+  HMODULE GetModule() const noexcept
   {
     return module_;
   }
 
-  DWORD_PTR GetExportRet() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD_PTR GetExportRet() const noexcept
   {
     return export_ret_;
   }
 
-  DWORD GetExportLastError() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetExportLastError() const noexcept
   {
     return export_last_error_;
   }
 
-  HANDLE GetThreadHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HANDLE GetThreadHandle() const noexcept
   {
     return thread_handle_.GetHandle();
   }

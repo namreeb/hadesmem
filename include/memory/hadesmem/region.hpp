@@ -25,37 +25,37 @@ public:
   {
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return mbi_.BaseAddress;
   }
 
-  PVOID GetAllocBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetAllocBase() const noexcept
   {
     return mbi_.AllocationBase;
   }
 
-  DWORD GetAllocProtect() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetAllocProtect() const noexcept
   {
     return mbi_.AllocationProtect;
   }
 
-  SIZE_T GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  SIZE_T GetSize() const noexcept
   {
     return mbi_.RegionSize;
   }
 
-  DWORD GetState() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetState() const noexcept
   {
     return mbi_.State;
   }
 
-  DWORD GetProtect() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetProtect() const noexcept
   {
     return mbi_.Protect;
   }
 
-  DWORD GetType() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetType() const noexcept
   {
     return mbi_.Type;
   }
@@ -64,7 +64,7 @@ private:
   template <typename RegionT> friend class RegionIterator;
 
   explicit Region(Process const& process,
-                  MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+                  MEMORY_BASIC_INFORMATION const& mbi) noexcept
     : process_(&process),
       mbi_(mbi)
   {
@@ -75,37 +75,37 @@ private:
 };
 
 inline bool operator==(Region const& lhs,
-                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Region const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Region const& lhs,
-                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Region const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Region const& lhs,
-                      Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Region const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Region const& lhs,
-                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Region const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Region const& lhs,
-                      Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Region const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Region const& lhs,
-                       Region const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Region const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -34,7 +34,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ImportDirIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr ImportDirIterator() noexcept
   {
   }
 
@@ -60,34 +60,13 @@ public:
 
   explicit ImportDirIterator(Process&& process, PeFile&& pe_file) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ImportDirIterator(ImportDirIterator const&) = default;
-
-  ImportDirIterator& operator=(ImportDirIterator const&) = default;
-
-  ImportDirIterator(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_{std::move(other.impl_)}
-  {
-  }
-
-  ImportDirIterator&
-    operator=(ImportDirIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->import_dir_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->import_dir_;
@@ -125,12 +104,12 @@ public:
     return iter;
   }
 
-  bool operator==(ImportDirIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator==(ImportDirIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(ImportDirIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator!=(ImportDirIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -150,7 +129,7 @@ private:
   {
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
-                  ImportDir const& import_dir) HADESMEM_DETAIL_NOEXCEPT
+                  ImportDir const& import_dir) noexcept
       : process_{&process},
         pe_file_{&pe_file},
         import_dir_{import_dir}
@@ -199,17 +178,17 @@ public:
     return const_iterator{*process_, *pe_file_};
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator{};
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator{};
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator{};
   }

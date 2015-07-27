@@ -19,7 +19,7 @@ template <typename T> class DetourRefCounter
 public:
   HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
 
-  DetourRefCounter(std::atomic<T>& ref_count) HADESMEM_DETAIL_NOEXCEPT
+  DetourRefCounter(std::atomic<T>& ref_count) noexcept
     : ref_count_{&ref_count}
   {
     ++(*ref_count_);
@@ -29,13 +29,13 @@ public:
 
   DetourRefCounter& operator=(DetourRefCounter const&) = delete;
 
-  DetourRefCounter(DetourRefCounter&& other) HADESMEM_DETAIL_NOEXCEPT
+  DetourRefCounter(DetourRefCounter&& other) noexcept
     : ref_count_(other.ref_count_)
   {
     other.ref_count_ = nullptr;
   }
 
-  DetourRefCounter& operator=(DetourRefCounter&& other) HADESMEM_DETAIL_NOEXCEPT
+  DetourRefCounter& operator=(DetourRefCounter&& other) noexcept
   {
     ref_count_ = other.ref_count_;
     other.ref_count_ = nullptr;

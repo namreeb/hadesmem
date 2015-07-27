@@ -95,7 +95,7 @@ protected:
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }
 
-  virtual bool CanHookChainImpl() const override
+  virtual bool CanHookChainImpl() const noexcept override
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{} << ErrorString{"Unimplemented."});
   }

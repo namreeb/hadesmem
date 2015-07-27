@@ -375,7 +375,7 @@ Process& GetThisProcess()
 }
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
+extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 {
   try
   {
@@ -466,7 +466,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load() HADESMEM_DETAIL_NOEXCEPT
   }
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
+extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
 {
   try
   {
@@ -518,7 +518,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free() HADESMEM_DETAIL_NOEXCEPT
 
 BOOL WINAPI DllMain(HINSTANCE /*instance*/,
                     DWORD /*reason*/,
-                    LPVOID /*reserved*/) HADESMEM_DETAIL_NOEXCEPT
+                    LPVOID /*reserved*/) noexcept
 {
   return TRUE;
 }

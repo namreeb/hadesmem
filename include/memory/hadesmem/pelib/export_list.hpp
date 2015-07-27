@@ -34,7 +34,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ExportIterator() HADESMEM_DETAIL_NOEXCEPT : impl_()
+  constexpr ExportIterator() noexcept : impl_()
   {
   }
 
@@ -59,33 +59,13 @@ public:
 
   explicit ExportIterator(Process&& process, PeFile&& pe_file) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ExportIterator(ExportIterator const&) = default;
-
-  ExportIterator& operator=(ExportIterator const&) = default;
-
-  ExportIterator(ExportIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_{std::move(other.impl_)}
-  {
-  }
-
-  ExportIterator& operator=(ExportIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->export_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->export_;
@@ -157,12 +137,12 @@ public:
     return iter;
   }
 
-  bool operator==(ExportIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator==(ExportIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(ExportIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator!=(ExportIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -172,7 +152,7 @@ private:
   {
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
-                  Export const& exp) HADESMEM_DETAIL_NOEXCEPT
+                  Export const& exp) noexcept
       : process_{&process},
         pe_file_{&pe_file},
         export_(exp)
@@ -221,17 +201,17 @@ public:
     return const_iterator{*process_, *pe_file_};
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator{};
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator{};
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator{};
   }

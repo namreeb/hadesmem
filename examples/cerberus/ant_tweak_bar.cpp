@@ -66,7 +66,7 @@ void SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi api, bool value)
   initialized = value;
 }
 
-bool AntTweakBarInitializedAny() HADESMEM_DETAIL_NOEXCEPT
+bool AntTweakBarInitializedAny() noexcept
 {
   return GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D9) ||
          GetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D10) ||
@@ -667,7 +667,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT
+AntTweakBarInterface& GetAntTweakBarInterface() noexcept
 {
   static AntTweakBarImpl ant_tweak_bar;
   return ant_tweak_bar;

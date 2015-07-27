@@ -56,21 +56,21 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>>&
-  GetWglSwapBuffersDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetWglSwapBuffersDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SwapBuffers)>>
     detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetOpenGL32Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetOpenGL32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
 extern "C" BOOL WINAPI WglSwapBuffersDetour(hadesmem::PatchDetourBase* detour,
-                                            HDC device) HADESMEM_DETAIL_NOEXCEPT
+                                            HDC device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -93,7 +93,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT
+OpenGL32Interface& GetOpenGL32Interface() noexcept
 {
   static OpenGL32Impl impl;
   return impl;

@@ -53,7 +53,7 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D11CreateDevice)>>&
-  GetD3D11CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D11CreateDeviceDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D11CreateDevice)>>
     detour;
@@ -62,20 +62,20 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D11CreateDevice)>>&
 
 std::unique_ptr<
   hadesmem::PatchDetour<decltype(&::D3D11CreateDeviceAndSwapChain)>>&
-  GetD3D11CreateDeviceAndSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D11CreateDeviceAndSwapChainDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::D3D11CreateDeviceAndSwapChain)>> detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetD3D11Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetD3D11Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
-std::uint32_t& GetD3D11CreateHookCount() HADESMEM_DETAIL_NOEXCEPT
+std::uint32_t& GetD3D11CreateHookCount() noexcept
 {
   static __declspec(thread) std::uint32_t in_hook = 0;
   return in_hook;
@@ -92,7 +92,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
   UINT sdk_version,
   ID3D11Device** device,
   D3D_FEATURE_LEVEL* feature_level,
-  ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
+  ID3D11DeviceContext** immediate_context) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
@@ -166,7 +166,7 @@ extern "C" HRESULT WINAPI D3D11CreateDeviceAndSwapChainDetour(
   IDXGISwapChain** swap_chain,
   ID3D11Device** device,
   D3D_FEATURE_LEVEL* feature_level,
-  ID3D11DeviceContext** immediate_context) HADESMEM_DETAIL_NOEXCEPT
+  ID3D11DeviceContext** immediate_context) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};
@@ -258,7 +258,7 @@ Callbacks<OnReleaseD3D11Callback>& GetOnReleaseD3D11Callbacks()
   return callbacks;
 }
 
-D3D11Interface& GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT
+D3D11Interface& GetD3D11Interface() noexcept
 {
   static D3D11Impl d3d11_impl;
   return d3d11_impl;

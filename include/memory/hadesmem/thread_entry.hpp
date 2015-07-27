@@ -13,8 +13,8 @@ namespace hadesmem
 class ThreadEntry
 {
 public:
-  HADESMEM_DETAIL_CONSTEXPR explicit ThreadEntry(THREADENTRY32 const& entry)
-    HADESMEM_DETAIL_NOEXCEPT : usage_{entry.cntUsage},
+  constexpr explicit ThreadEntry(THREADENTRY32 const& entry)
+    noexcept : usage_{entry.cntUsage},
                                thread_id_{entry.th32ThreadID},
                                owner_process_id_{entry.th32OwnerProcessID},
                                base_priority_{entry.tpBasePri},
@@ -23,34 +23,34 @@ public:
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR DWORD GetUsage() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr DWORD GetUsage() const noexcept
   {
     return usage_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr DWORD GetId() const noexcept
   {
     return thread_id_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR DWORD GetOwnerId() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr DWORD GetOwnerId() const noexcept
   {
     return owner_process_id_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR LONG
-    GetBasePriority() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr LONG
+    GetBasePriority() const noexcept
   {
     return base_priority_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR LONG
-    GetDeltaPriority() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr LONG
+    GetDeltaPriority() const noexcept
   {
     return delta_priority_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR DWORD GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr DWORD GetFlags() const noexcept
   {
     return flags_;
   }

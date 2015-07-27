@@ -65,7 +65,7 @@ public:
 
   explicit NtHeaders(Process&& process, PeFile&& pe_file) = delete;
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return base_;
   }
@@ -1150,37 +1150,37 @@ private:
 };
 
 inline bool operator==(NtHeaders const& lhs,
-                       NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       NtHeaders const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(NtHeaders const& lhs,
-                      NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(NtHeaders const& lhs,
-                      NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -37,40 +37,12 @@ public:
     Initialize(path);
   }
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  Module(Module const&) = default;
-
-  Module& operator=(Module const&) = default;
-
-  Module(Module&& other)
-    : process_{other.process_},
-      handle_{other.handle_},
-      size_{other.size_},
-      name_(std::move(other.name_)),
-      path_(std::move(other.path_))
-  {
-  }
-
-  Module& operator=(Module&& other)
-  {
-    process_ = other.process_;
-    handle_ = other.handle_;
-    size_ = other.size_;
-    name_ = std::move(other.name_);
-    path_ = std::move(other.path_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  HMODULE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HMODULE GetHandle() const noexcept
   {
     return handle_;
   }
 
-  DWORD GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetSize() const noexcept
   {
     return size_;
   }
@@ -157,37 +129,37 @@ private:
 };
 
 inline bool operator==(Module const& lhs,
-                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Module const& rhs) noexcept
 {
   return lhs.GetHandle() == rhs.GetHandle();
 }
 
 inline bool operator!=(Module const& lhs,
-                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Module const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Module const& lhs,
-                      Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Module const& rhs) noexcept
 {
   return lhs.GetHandle() < rhs.GetHandle();
 }
 
 inline bool operator<=(Module const& lhs,
-                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Module const& rhs) noexcept
 {
   return lhs.GetHandle() <= rhs.GetHandle();
 }
 
 inline bool operator>(Module const& lhs,
-                      Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Module const& rhs) noexcept
 {
   return lhs.GetHandle() > rhs.GetHandle();
 }
 
 inline bool operator>=(Module const& lhs,
-                       Module const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Module const& rhs) noexcept
 {
   return lhs.GetHandle() >= rhs.GetHandle();
 }

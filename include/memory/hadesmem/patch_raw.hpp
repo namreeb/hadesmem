@@ -76,7 +76,7 @@ public:
     RemoveUnchecked();
   }
 
-  bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsApplied() const noexcept
   {
     return applied_;
   }
@@ -133,7 +133,7 @@ public:
   }
 
 private:
-  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void RemoveUnchecked() noexcept
   {
     try
     {

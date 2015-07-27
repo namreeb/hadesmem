@@ -34,7 +34,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ModuleIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr ModuleIterator() noexcept
   {
   }
 
@@ -71,33 +71,13 @@ public:
 
   explicit ModuleIterator(Process&& process) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ModuleIterator(ModuleIterator const&) = default;
-
-  ModuleIterator& operator=(ModuleIterator const&) = default;
-
-  ModuleIterator(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_{std::move(other.impl_)}
-  {
-  }
-
-  ModuleIterator& operator=(ModuleIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->module_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->module_;
@@ -127,12 +107,12 @@ public:
     return iter;
   }
 
-  bool operator==(ModuleIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator==(ModuleIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(ModuleIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator!=(ModuleIterator const& other) const noexcept
   {
     return impl_ != other.impl_;
   }
@@ -156,13 +136,13 @@ public:
   using iterator = ModuleIterator<Module>;
   using const_iterator = ModuleIterator<Module const>;
 
-  HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process const& process)
-    HADESMEM_DETAIL_NOEXCEPT : process_{&process}
+  constexpr explicit ModuleList(Process const& process)
+    noexcept : process_{&process}
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR explicit ModuleList(Process&& process)
-    HADESMEM_DETAIL_NOEXCEPT = delete;
+  constexpr explicit ModuleList(Process&& process)
+    noexcept = delete;
 
   iterator begin()
   {
@@ -179,17 +159,17 @@ public:
     return const_iterator(*process_);
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator();
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator();
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator();
   }

@@ -121,7 +121,7 @@ public:
     Write(*process_, class_base_, old_vmt_);
   }
 
-  std::size_t GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  std::size_t GetSize() const noexcept
   {
     return vmt_size_;
   }
@@ -160,7 +160,7 @@ private:
     WriteVector(*process_, new_vmt_base_, old_vmt_contents);
   }
 
-  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void RemoveUnchecked() noexcept
   {
     try
     {
@@ -175,7 +175,7 @@ private:
     }
   }
 
-  std::size_t GetVmtSizeUnsafe(void** vmt) HADESMEM_DETAIL_NOEXCEPT
+  std::size_t GetVmtSizeUnsafe(void** vmt) noexcept
   {
     std::size_t i = 0;
     try

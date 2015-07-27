@@ -56,7 +56,7 @@ public:
   }
 };
 
-std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetKernelBaseModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -65,7 +65,7 @@ std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
 class EnsureResumeThread
 {
 public:
-  explicit EnsureResumeThread(HANDLE handle) HADESMEM_DETAIL_NOEXCEPT
+  explicit EnsureResumeThread(HANDLE handle) noexcept
     : handle_(handle)
   {
   }
@@ -114,7 +114,7 @@ extern "C" BOOL WINAPI
                          PHANDLE new_token);
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>>&
-  GetCreateProcessInternalWDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetCreateProcessInternalWDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>> detour;
@@ -134,7 +134,7 @@ extern "C" BOOL WINAPI
                                LPCWSTR current_directory,
                                LPSTARTUPINFOW startup_info,
                                LPPROCESS_INFORMATION process_info,
-                               PHANDLE new_token) HADESMEM_DETAIL_NOEXCEPT
+                               PHANDLE new_token) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -351,7 +351,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-ProcessInterface& GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT
+ProcessInterface& GetProcessInterface() noexcept
 {
   static ProcessImpl exception_impl;
   return exception_impl;
@@ -394,7 +394,7 @@ void UndetourKernelBaseForProcess(bool remove)
   }
 }
 
-bool& GetDisableCreateProcessInternalWHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableCreateProcessInternalWHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;

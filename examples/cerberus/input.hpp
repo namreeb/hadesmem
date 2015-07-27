@@ -32,7 +32,7 @@ void SetGuiVisibleForInput(bool visible, bool old_visible);
 
 void HandleInputQueue();
 
-InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT;
+InputInterface& GetInputInterface() noexcept;
 
 void InitializeInput();
 }

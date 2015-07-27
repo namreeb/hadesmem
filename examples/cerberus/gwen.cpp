@@ -81,7 +81,7 @@ void SetGwenInitialized(hadesmem::cerberus::RenderApi api, bool value)
   initialized = value;
 }
 
-bool GwenInitializedAny() HADESMEM_DETAIL_NOEXCEPT
+bool GwenInitializedAny() noexcept
 {
   return GetGwenInitialized(hadesmem::cerberus::RenderApi::kD3D9) ||
          GetGwenInitialized(hadesmem::cerberus::RenderApi::kD3D10) ||
@@ -311,7 +311,7 @@ void OnCleanupGwenGui(hadesmem::cerberus::RenderApi api)
   SetGwenInitialized(api, false);
 }
 
-bool& GetAllGwenVisibility() HADESMEM_DETAIL_NOEXCEPT
+bool& GetAllGwenVisibility() noexcept
 {
   static bool visible{false};
   return visible;
@@ -384,7 +384,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-GwenInterface& GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT
+GwenInterface& GetGwenInterface() noexcept
 {
   static GwenImpl gwen;
   return gwen;

@@ -8,7 +8,7 @@
 
 extern "C" __declspec(dllimport) DWORD_PTR InjectTestDep_Foo();
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load()
+extern "C" __declspec(dllexport) DWORD_PTR Load()
 {
   InjectTestDep_Foo();
 
@@ -17,7 +17,7 @@ extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Load()
   return 0;
 }
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR Free()
+extern "C" __declspec(dllexport) DWORD_PTR Free()
 {
   HADESMEM_DETAIL_TRACE_A("Called");
 

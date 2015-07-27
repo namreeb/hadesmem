@@ -35,8 +35,8 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR
-  BoundImportDescriptorIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr
+  BoundImportDescriptorIterator() noexcept
   {
   }
 
@@ -67,35 +67,13 @@ public:
   explicit BoundImportDescriptorIterator(Process&& process,
                                          PeFile&& pe_file) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  BoundImportDescriptorIterator(BoundImportDescriptorIterator const&) = default;
-
-  BoundImportDescriptorIterator&
-    operator=(BoundImportDescriptorIterator const&) = default;
-
-  BoundImportDescriptorIterator(BoundImportDescriptorIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT : impl_(std::move(other.impl_))
-  {
-  }
-
-  BoundImportDescriptorIterator&
-    operator=(BoundImportDescriptorIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->bound_import_desc_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->bound_import_desc_;
@@ -139,13 +117,13 @@ public:
   }
 
   bool operator==(BoundImportDescriptorIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+    noexcept
   {
     return impl_ == other.impl_;
   }
 
   bool operator!=(BoundImportDescriptorIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+    noexcept
   {
     return !(*this == other);
   }
@@ -164,7 +142,7 @@ private:
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
                   BoundImportDescriptor const& bound_import_desc)
-      HADESMEM_DETAIL_NOEXCEPT : process_{&process},
+      noexcept : process_{&process},
                                  pe_file_{&pe_file},
                                  bound_import_desc_{bound_import_desc}
     {
@@ -217,17 +195,17 @@ public:
     return const_iterator{*process_, *pe_file_};
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator{};
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator{};
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator{};
   }

@@ -22,12 +22,6 @@
   HADESMEM_DETAIL_VERSION_STRING_GEN(                                          \
     HADESMEM_VERSION_MAJOR, HADESMEM_VERSION_MINOR, HADESMEM_VERSION_PATCH)
 
-#define HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3
-
-#define HADESMEM_DETAIL_NO_NOEXCEPT
-
-#define HADESMEM_DETAIL_NO_CONSTEXPR
-
 #if defined(_M_IX86)
 #define HADESMEM_DETAIL_ARCH_X86
 #elif defined(_M_AMD64)
@@ -43,24 +37,6 @@
 #define HADESMEM_DETAIL_NO_VECTORCALL
 #endif // !(defined(HADESMEM_DETAIL_ARCH_X64) ||
        // (defined(HADESMEM_DETAIL_ARCH_X86) && _M_IX86_FP >= 2))
-
-#if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
-#define HADESMEM_DETAIL_NOEXCEPT throw()
-#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred)
-#define HADESMEM_DETAIL_NOEXCEPT_EXPR(Expr) false
-#else // #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
-#define HADESMEM_DETAIL_NOEXCEPT noexcept
-#define HADESMEM_DETAIL_NOEXCEPT_IF(Pred) noexcept((Pred))
-#define HADESMEM_DETAIL_NOEXCEPT_EXPR(Expr) noexcept((Expr))
-#endif // #if defined(HADESMEM_DETAIL_NO_NOEXCEPT)
-
-#if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
-#define HADESMEM_DETAIL_CONSTEXPR
-#else // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
-#define HADESMEM_DETAIL_CONSTEXPR constexpr
-#endif // #if defined(HADESMEM_DETAIL_NO_CONSTEXPR)
-
-#define HADESMEM_DETAIL_DLLEXPORT __declspec(dllexport)
 
 // Approximate equivalent of MAX_PATH for Unicode APIs.
 // See: http://bit.ly/17CCZFX

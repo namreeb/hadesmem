@@ -6,7 +6,7 @@
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/trace.hpp>
 
-extern "C" HADESMEM_DETAIL_DLLEXPORT DWORD_PTR InjectTestDep_Foo()
+extern "C" __declspec(dllexport) DWORD_PTR InjectTestDep_Foo()
 {
   HADESMEM_DETAIL_TRACE_A("Called");
 

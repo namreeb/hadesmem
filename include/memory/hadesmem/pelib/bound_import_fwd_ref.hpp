@@ -55,7 +55,7 @@ public:
                                    PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                    PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -120,42 +120,42 @@ private:
 
 inline bool
   operator==(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool
   operator!=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportForwarderRef const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool
   operator<(BoundImportForwarderRef const& lhs,
-            BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+            BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool
   operator<=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool
   operator>(BoundImportForwarderRef const& lhs,
-            BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+            BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool
   operator>=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

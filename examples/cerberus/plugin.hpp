@@ -53,42 +53,42 @@ public:
   {
   }
 
-  virtual ModuleInterface* GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual ModuleInterface* GetModuleInterface() noexcept = 0;
 
-  virtual D3D9Interface* GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual D3D9Interface* GetD3D9Interface() noexcept = 0;
 
-  virtual DXGIInterface* GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual DXGIInterface* GetDXGIInterface() noexcept = 0;
 
-  virtual RenderInterface* GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual RenderInterface* GetRenderInterface() noexcept = 0;
 
-  virtual WindowInterface* GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual WindowInterface* GetWindowInterface() noexcept = 0;
 
   virtual DirectInputInterface*
-    GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+    GetDirectInputInterface() noexcept = 0;
 
-  virtual CursorInterface* GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual CursorInterface* GetCursorInterface() noexcept = 0;
 
   virtual AntTweakBarInterface*
-    GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+    GetAntTweakBarInterface() noexcept = 0;
 
-  virtual GwenInterface* GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual GwenInterface* GetGwenInterface() noexcept = 0;
 
-  virtual HelperInterface* GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual HelperInterface* GetHelperInterface() noexcept = 0;
 
   virtual ExceptionInterface*
-    GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+    GetExceptionInterface() noexcept = 0;
 
-  virtual ProcessInterface* GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual ProcessInterface* GetProcessInterface() noexcept = 0;
 
   virtual OpenGL32Interface*
-    GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
+    GetOpenGL32Interface() noexcept = 0;
 
-  virtual D3D10Interface* GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual D3D10Interface* GetD3D10Interface() noexcept = 0;
 
-  virtual D3D11Interface* GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual D3D11Interface* GetD3D11Interface() noexcept = 0;
 
   virtual RawInputInterface*
-    GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT = 0;
+    GetRawInputInterface() noexcept = 0;
 };
 
 void LoadPlugins();

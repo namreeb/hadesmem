@@ -65,9 +65,9 @@ public:
   virtual void UnregisterOnCleanupGui(std::size_t id) = 0;
 };
 
-RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT;
+RenderInterface& GetRenderInterface() noexcept;
 
-bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetGuiVisible() noexcept;
 
 void SetGuiVisible(bool visible, bool old_visible);
 

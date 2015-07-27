@@ -169,7 +169,7 @@ public:
   virtual void TwHandleErrors(TwErrorHandler error_handler) = 0;
 };
 
-AntTweakBarInterface& GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT;
+AntTweakBarInterface& GetAntTweakBarInterface() noexcept;
 
 void InitializeAntTweakBar();
 }

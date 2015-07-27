@@ -15,7 +15,7 @@ namespace detail
 template <typename T> class Optional
 {
 public:
-  HADESMEM_DETAIL_CONSTEXPR Optional() HADESMEM_DETAIL_NOEXCEPT
+  constexpr Optional() noexcept
   {
   }
 
@@ -90,47 +90,47 @@ public:
     Destroy();
   }
 
-  explicit operator bool() const HADESMEM_DETAIL_NOEXCEPT
+  explicit operator bool() const noexcept
   {
     return valid_;
   }
 
-  T& Get() HADESMEM_DETAIL_NOEXCEPT
+  T& Get() noexcept
   {
     return *GetPtr();
   }
 
-  T const& Get() const HADESMEM_DETAIL_NOEXCEPT
+  T const& Get() const noexcept
   {
     return *GetPtr();
   }
 
-  T& operator*() HADESMEM_DETAIL_NOEXCEPT
+  T& operator*() noexcept
   {
     return Get();
   }
 
-  T const& operator*() const HADESMEM_DETAIL_NOEXCEPT
+  T const& operator*() const noexcept
   {
     return Get();
   }
 
-  T* GetPtr() HADESMEM_DETAIL_NOEXCEPT
+  T* GetPtr() noexcept
   {
     return static_cast<T*>(static_cast<void*>(&t_));
   }
 
-  T const* GetPtr() const HADESMEM_DETAIL_NOEXCEPT
+  T const* GetPtr() const noexcept
   {
     return static_cast<T const*>(static_cast<void const*>(&t_));
   }
 
-  T* operator->() HADESMEM_DETAIL_NOEXCEPT
+  T* operator->() noexcept
   {
     return GetPtr();
   }
 
-  T const* operator->() const HADESMEM_DETAIL_NOEXCEPT
+  T const* operator->() const noexcept
   {
     return GetPtr();
   }
@@ -148,7 +148,7 @@ private:
     valid_ = true;
   }
 
-  void Destroy() HADESMEM_DETAIL_NOEXCEPT
+  void Destroy() noexcept
   {
     if (valid_)
     {

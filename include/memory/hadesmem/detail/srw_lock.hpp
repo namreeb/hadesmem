@@ -22,7 +22,7 @@ class AcquireSRWLock
 {
 public:
   explicit AcquireSRWLock(SRWLOCK* lock,
-                          SRWLockType type) HADESMEM_DETAIL_NOEXCEPT
+                          SRWLockType type) noexcept
     : lock_{lock},
       type_{type}
   {
@@ -38,14 +38,14 @@ public:
     }
   }
 
-  AcquireSRWLock(AcquireSRWLock&& other) HADESMEM_DETAIL_NOEXCEPT
+  AcquireSRWLock(AcquireSRWLock&& other) noexcept
     : lock_{other.lock_},
       type_{other.type_}
   {
     other.lock_ = nullptr;
   }
 
-  AcquireSRWLock& operator=(AcquireSRWLock&& other) HADESMEM_DETAIL_NOEXCEPT
+  AcquireSRWLock& operator=(AcquireSRWLock&& other) noexcept
   {
     Cleanup();
 
@@ -62,7 +62,7 @@ public:
     Cleanup();
   }
 
-  void Cleanup() HADESMEM_DETAIL_NOEXCEPT
+  void Cleanup() noexcept
   {
     if (!lock_)
     {

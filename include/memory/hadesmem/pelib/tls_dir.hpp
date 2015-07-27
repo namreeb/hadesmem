@@ -53,7 +53,7 @@ public:
     UpdateRead();
   }
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -268,37 +268,37 @@ private:
 };
 
 inline bool operator==(TlsDir const& lhs,
-                       TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(TlsDir const& lhs,
-                       TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       TlsDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(TlsDir const& lhs,
-                      TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(TlsDir const& lhs,
-                       TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(TlsDir const& lhs,
-                      TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(TlsDir const& lhs,
-                       TlsDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

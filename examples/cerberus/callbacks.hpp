@@ -44,7 +44,7 @@ public:
   }
 
   template <typename... Args>
-  void Run(Args&&... args) const HADESMEM_DETAIL_NOEXCEPT
+  void Run(Args&&... args) const noexcept
   {
     hadesmem::detail::AcquireSRWLock lock(
       &srw_lock_, hadesmem::detail::SRWLockType::Shared);

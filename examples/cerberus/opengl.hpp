@@ -31,7 +31,7 @@ public:
   virtual void UnregisterOnFrame(std::size_t id) = 0;
 };
 
-OpenGL32Interface& GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT;
+OpenGL32Interface& GetOpenGL32Interface() noexcept;
 
 void InitializeOpenGL32();
 

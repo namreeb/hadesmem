@@ -42,14 +42,14 @@ public:
     return *this;
   }
 
-  Process(Process&& other) HADESMEM_DETAIL_NOEXCEPT
+  Process(Process&& other) noexcept
     : handle_{std::move(other.handle_)},
       id_{other.id_}
   {
     other.id_ = 0;
   }
 
-  Process& operator=(Process&& other) HADESMEM_DETAIL_NOEXCEPT
+  Process& operator=(Process&& other) noexcept
   {
     CleanupUnchecked();
 
@@ -66,12 +66,12 @@ public:
     CleanupUnchecked();
   }
 
-  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetId() const noexcept
   {
     return id_;
   }
 
-  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HANDLE GetHandle() const noexcept
   {
     return handle_.GetHandle();
   }
@@ -102,7 +102,7 @@ private:
     }
   }
 
-  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void CleanupUnchecked() noexcept
   {
     try
     {
@@ -139,37 +139,37 @@ private:
 };
 
 inline bool operator==(Process const& lhs,
-                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Process const& rhs) noexcept
 {
   return lhs.GetId() == rhs.GetId();
 }
 
 inline bool operator!=(Process const& lhs,
-                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Process const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Process const& lhs,
-                      Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Process const& rhs) noexcept
 {
   return lhs.GetId() < rhs.GetId();
 }
 
 inline bool operator<=(Process const& lhs,
-                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Process const& rhs) noexcept
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
 inline bool operator>(Process const& lhs,
-                      Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Process const& rhs) noexcept
 {
   return lhs.GetId() > rhs.GetId();
 }
 
 inline bool operator>=(Process const& lhs,
-                       Process const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Process const& rhs) noexcept
 {
   return lhs.GetId() >= rhs.GetId();
 }

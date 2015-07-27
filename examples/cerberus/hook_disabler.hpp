@@ -14,7 +14,7 @@ namespace cerberus
 class HookDisabler
 {
 public:
-  explicit HookDisabler(bool* flag) HADESMEM_DETAIL_NOEXCEPT : flag_{flag}
+  explicit HookDisabler(bool* flag) noexcept : flag_{flag}
   {
     *flag_ = true;
   }
@@ -28,7 +28,7 @@ public:
     *flag_ = false;
   }
 
-  bool GetFlag() const HADESMEM_DETAIL_NOEXCEPT
+  bool GetFlag() const noexcept
   {
     return *flag_;
   }

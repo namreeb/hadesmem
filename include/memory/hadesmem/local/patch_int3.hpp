@@ -120,7 +120,7 @@ protected:
     }
   }
 
-  virtual bool CanHookChainImpl() const override
+  virtual bool CanHookChainImpl() const noexcept override
   {
     return false;
   }

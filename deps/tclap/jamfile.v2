@@ -1,9 +1,0 @@
-# deps/tclap/jamfile.v2
-
-alias tclap
-  :
-  :
-  :
-  :
-    <include>"tclap/include/"
-  ;

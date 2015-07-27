@@ -68,7 +68,7 @@ public:
   virtual void UnregisterOnGetDeviceState(std::size_t id) = 0;
 };
 
-DirectInputInterface& GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT;
+DirectInputInterface& GetDirectInputInterface() noexcept;
 
 void InitializeDirectInput();
 

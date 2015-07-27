@@ -71,7 +71,7 @@ public:
   virtual void UnregisterOnRelease(std::size_t id) = 0;
 };
 
-D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT;
+D3D9Interface& GetD3D9Interface() noexcept;
 
 void InitializeD3D9();
 

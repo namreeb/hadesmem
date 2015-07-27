@@ -77,12 +77,12 @@ public:
 
   explicit Section(Process&& process, PeFile&& pe_file, void* base);
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
 
-  bool IsVirtual() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsVirtual() const noexcept
   {
     return is_virtual_;
   }
@@ -226,37 +226,37 @@ private:
 };
 
 inline bool operator==(Section const& lhs,
-                       Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Section const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Section const& lhs,
-                       Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Section const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Section const& lhs,
-                      Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Section const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Section const& lhs,
-                       Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Section const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Section const& lhs,
-                      Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Section const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Section const& lhs,
-                       Section const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Section const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

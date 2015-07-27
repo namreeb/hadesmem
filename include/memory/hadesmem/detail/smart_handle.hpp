@@ -21,12 +21,12 @@ template <typename Policy> class SmartHandleImpl
 public:
   using HandleT = typename Policy::HandleT;
 
-  HADESMEM_DETAIL_CONSTEXPR SmartHandleImpl() HADESMEM_DETAIL_NOEXCEPT
+  constexpr SmartHandleImpl() noexcept
   {
   }
 
-  explicit HADESMEM_DETAIL_CONSTEXPR
-    SmartHandleImpl(HandleT handle) HADESMEM_DETAIL_NOEXCEPT : handle_{handle}
+  explicit constexpr
+    SmartHandleImpl(HandleT handle) noexcept : handle_{handle}
   {
   }
 
@@ -34,7 +34,7 @@ public:
 
   SmartHandleImpl& operator=(SmartHandleImpl const& other) = delete;
 
-  SmartHandleImpl& operator=(HandleT handle) HADESMEM_DETAIL_NOEXCEPT
+  SmartHandleImpl& operator=(HandleT handle) noexcept
   {
     CleanupUnchecked();
 
@@ -43,13 +43,13 @@ public:
     return *this;
   }
 
-  SmartHandleImpl(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
+  SmartHandleImpl(SmartHandleImpl&& other) noexcept
     : handle_{other.handle_}
   {
     other.handle_ = GetInvalid();
   }
 
-  SmartHandleImpl& operator=(SmartHandleImpl&& other) HADESMEM_DETAIL_NOEXCEPT
+  SmartHandleImpl& operator=(SmartHandleImpl&& other) noexcept
   {
     CleanupUnchecked();
 
@@ -64,17 +64,17 @@ public:
     CleanupUnchecked();
   }
 
-  HandleT GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HandleT GetHandle() const noexcept
   {
     return handle_;
   }
 
-  HandleT GetInvalid() const HADESMEM_DETAIL_NOEXCEPT
+  HandleT GetInvalid() const noexcept
   {
     return Policy::GetInvalid();
   }
 
-  bool IsValid() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsValid() const noexcept
   {
     return GetHandle() != GetInvalid();
   }
@@ -108,7 +108,7 @@ public:
   }
 
 private:
-  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void CleanupUnchecked() noexcept
   {
     try
     {
@@ -132,7 +132,7 @@ struct HandlePolicy
 {
   using HandleT = HANDLE;
 
-  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static constexpr HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -149,7 +149,7 @@ struct SnapPolicy
 {
   using HandleT = HANDLE;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -166,7 +166,7 @@ struct LibraryPolicy
 {
   using HandleT = HMODULE;
 
-  static HADESMEM_DETAIL_CONSTEXPR HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static constexpr HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -183,7 +183,7 @@ struct FilePolicy
 {
   using HandleT = HANDLE;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -200,7 +200,7 @@ struct FindPolicy
 {
   using HandleT = HANDLE;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -217,7 +217,7 @@ struct ComPolicy
 {
   using HandleT = IUnknown*;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -235,7 +235,7 @@ struct GdiObjectPolicy
 {
   using HandleT = HGDIOBJ;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -252,7 +252,7 @@ struct DeleteDcPolicy
 {
   using HandleT = HDC;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -269,7 +269,7 @@ struct VectoredExceptionHandlerPolicy
 {
   using HandleT = PVOID;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -287,7 +287,7 @@ struct CryptContextPolicy
 {
   using HandleT = HCRYPTPROV;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return 0;
   }
@@ -304,7 +304,7 @@ struct DestroyHashPolicy
 {
   using HandleT = HCRYPTPROV;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return 0;
   }
@@ -321,7 +321,7 @@ struct UnmapViewOfFilePolicy
 {
   using HandleT = LPVOID;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return 0;
   }
@@ -338,7 +338,7 @@ struct SetupDiDestroyDeviceInfoListPolicy
 {
   using HandleT = HDEVINFO;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return INVALID_HANDLE_VALUE;
   }
@@ -356,7 +356,7 @@ struct RegKeyPolicy
 {
   using HandleT = HKEY;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -373,7 +373,7 @@ struct VirtualMemPolicy
 {
   using HandleT = PVOID;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }
@@ -390,7 +390,7 @@ struct EventLogPolicy
 {
   using HandleT = HANDLE;
 
-  static HandleT GetInvalid() HADESMEM_DETAIL_NOEXCEPT
+  static HandleT GetInvalid() noexcept
   {
     return nullptr;
   }

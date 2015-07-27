@@ -36,7 +36,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR RelocationBlockIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr RelocationBlockIterator() noexcept
   {
   }
 
@@ -102,34 +102,13 @@ public:
   explicit RelocationBlockIterator(Process&& process,
                                    PeFile&& pe_file) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  RelocationBlockIterator(RelocationBlockIterator const&) = default;
-
-  RelocationBlockIterator& operator=(RelocationBlockIterator const&) = default;
-
-  RelocationBlockIterator(RelocationBlockIterator&& other)
-    HADESMEM_DETAIL_NOEXCEPT : impl_{std::move(other.impl_)}
-  {
-  }
-
-  RelocationBlockIterator&
-    operator=(RelocationBlockIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->relocation_block_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->relocation_block_;
@@ -175,13 +154,13 @@ public:
   }
 
   bool operator==(RelocationBlockIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+    noexcept
   {
     return impl_ == other.impl_;
   }
 
   bool operator!=(RelocationBlockIterator const& other) const
-    HADESMEM_DETAIL_NOEXCEPT
+    noexcept
   {
     return !(*this == other);
   }
@@ -192,7 +171,7 @@ private:
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
                   RelocationBlock const& relocation_block,
-                  void const* reloc_dir_end) HADESMEM_DETAIL_NOEXCEPT
+                  void const* reloc_dir_end) noexcept
       : process_(&process),
         pe_file_(&pe_file),
         relocation_block_(relocation_block),
@@ -245,17 +224,17 @@ public:
     return const_iterator{*process_, *pe_file_};
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator{};
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator{};
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator{};
   }

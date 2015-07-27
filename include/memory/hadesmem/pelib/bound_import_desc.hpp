@@ -89,12 +89,12 @@ public:
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
     delete;
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return base_;
   }
 
-  PVOID GetStart() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetStart() const noexcept
   {
     return start_;
   }
@@ -155,40 +155,40 @@ private:
 
 inline bool
   operator==(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool
   operator!=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportDescriptor const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(BoundImportDescriptor const& lhs,
-                      BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool
   operator<=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(BoundImportDescriptor const& lhs,
-                      BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool
   operator>=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) HADESMEM_DETAIL_NOEXCEPT
+             BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

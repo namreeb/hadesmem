@@ -127,7 +127,7 @@ inline std::unique_ptr<Allocator> AllocatePageNear(Process const& process,
 #endif
 }
 
-inline bool IsNear(void* address, void* target) HADESMEM_DETAIL_NOEXCEPT
+inline bool IsNear(void* address, void* target) noexcept
 {
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   auto const rel = reinterpret_cast<std::intptr_t>(target) -

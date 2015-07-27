@@ -50,7 +50,7 @@ public:
                   PIMAGE_BASE_RELOCATION base,
                   void const* reloc_dir_end) = delete;
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -65,27 +65,27 @@ public:
     Write(*process_, base_, data_);
   }
 
-  DWORD GetVirtualAddress() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetVirtualAddress() const noexcept
   {
     return data_.VirtualAddress;
   }
 
-  void SetVirtualAddress(DWORD virtual_address) HADESMEM_DETAIL_NOEXCEPT
+  void SetVirtualAddress(DWORD virtual_address) noexcept
   {
     data_.VirtualAddress = virtual_address;
   }
 
-  DWORD GetSizeOfBlock() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetSizeOfBlock() const noexcept
   {
     return data_.SizeOfBlock;
   }
 
-  void SetSizeOfBlock(DWORD size_of_block) HADESMEM_DETAIL_NOEXCEPT
+  void SetSizeOfBlock(DWORD size_of_block) noexcept
   {
     data_.SizeOfBlock = size_of_block;
   }
 
-  DWORD GetNumberOfRelocations() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetNumberOfRelocations() const noexcept
   {
     DWORD const size_of_block = GetSizeOfBlock();
     if (!size_of_block)
@@ -97,13 +97,13 @@ public:
                               sizeof(WORD));
   }
 
-  PWORD GetRelocationDataStart() const HADESMEM_DETAIL_NOEXCEPT
+  PWORD GetRelocationDataStart() const noexcept
   {
     return reinterpret_cast<PWORD>(reinterpret_cast<std::uintptr_t>(base_) +
                                    sizeof(IMAGE_BASE_RELOCATION));
   }
 
-  bool IsInvalid() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsInvalid() const noexcept
   {
     auto const reloc_data = GetRelocationDataStart();
     void const* const reloc_data_end = reinterpret_cast<void const*>(
@@ -121,37 +121,37 @@ private:
 };
 
 inline bool operator==(RelocationBlock const& lhs,
-                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       RelocationBlock const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(RelocationBlock const& lhs,
-                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       RelocationBlock const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(RelocationBlock const& lhs,
-                      RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      RelocationBlock const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(RelocationBlock const& lhs,
-                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       RelocationBlock const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(RelocationBlock const& lhs,
-                      RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      RelocationBlock const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(RelocationBlock const& lhs,
-                       RelocationBlock const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       RelocationBlock const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

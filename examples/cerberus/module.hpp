@@ -56,7 +56,7 @@ public:
   virtual void UnregisterOnUnload(std::size_t id) = 0;
 };
 
-ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT;
+ModuleInterface& GetModuleInterface() noexcept;
 
 void InitializeModule();
 

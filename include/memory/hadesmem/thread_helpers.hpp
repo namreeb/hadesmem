@@ -152,12 +152,12 @@ public:
 
   SuspendedThread& operator=(SuspendedThread const& other) = delete;
 
-  SuspendedThread(SuspendedThread&& other) HADESMEM_DETAIL_NOEXCEPT
+  SuspendedThread(SuspendedThread&& other) noexcept
     : thread_(std::move(other.thread_))
   {
   }
 
-  SuspendedThread& operator=(SuspendedThread&& other) HADESMEM_DETAIL_NOEXCEPT
+  SuspendedThread& operator=(SuspendedThread&& other) noexcept
   {
     ResumeUnchecked();
 
@@ -166,7 +166,7 @@ public:
     return *this;
   }
 
-  ~SuspendedThread() HADESMEM_DETAIL_NOEXCEPT
+  ~SuspendedThread() noexcept
   {
     ResumeUnchecked();
   }
@@ -179,12 +179,12 @@ public:
     }
   }
 
-  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetId() const noexcept
   {
     return thread_.GetId();
   }
 
-  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HANDLE GetHandle() const noexcept
   {
     return thread_.GetHandle();
   }
@@ -275,12 +275,12 @@ public:
 
   SuspendedProcess& operator=(SuspendedProcess const& other) = delete;
 
-  SuspendedProcess(SuspendedProcess&& other) HADESMEM_DETAIL_NOEXCEPT
+  SuspendedProcess(SuspendedProcess&& other) noexcept
     : threads_(std::move(other.threads_))
   {
   }
 
-  SuspendedProcess& operator=(SuspendedProcess&& other) HADESMEM_DETAIL_NOEXCEPT
+  SuspendedProcess& operator=(SuspendedProcess&& other) noexcept
   {
     threads_ = std::move(other.threads_);
 

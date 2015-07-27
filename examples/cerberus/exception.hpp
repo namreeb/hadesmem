@@ -40,7 +40,7 @@ public:
   virtual void UnregisterOnSetUnhandledExceptionFilter(std::size_t id) = 0;
 };
 
-ExceptionInterface& GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT;
+ExceptionInterface& GetExceptionInterface() noexcept;
 
 void InitializeException();
 

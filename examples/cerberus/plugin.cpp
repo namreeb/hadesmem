@@ -97,7 +97,7 @@ public:
 
   Plugin& operator=(Plugin const& other) = delete;
 
-  Plugin(Plugin&& other) HADESMEM_DETAIL_NOEXCEPT
+  Plugin(Plugin&& other) noexcept
     : path_(std::move(other.path_)),
       base_{other.base_},
       unload_{other.unload_},
@@ -108,7 +108,7 @@ public:
     other.call_export_ = false;
   }
 
-  Plugin& operator=(Plugin&& other) HADESMEM_DETAIL_NOEXCEPT
+  Plugin& operator=(Plugin&& other) noexcept
   {
     UnloadUnchecked();
 
@@ -130,97 +130,97 @@ public:
   }
 
   virtual hadesmem::cerberus::ModuleInterface*
-    GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetModuleInterface() noexcept final
   {
     return &hadesmem::cerberus::GetModuleInterface();
   }
 
   virtual hadesmem::cerberus::D3D9Interface*
-    GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT final
+    GetD3D9Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D9Interface();
   }
 
   virtual hadesmem::cerberus::DXGIInterface*
-    GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetDXGIInterface() noexcept final
   {
     return &hadesmem::cerberus::GetDXGIInterface();
   }
 
   virtual hadesmem::cerberus::RenderInterface*
-    GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetRenderInterface() noexcept final
   {
     return &hadesmem::cerberus::GetRenderInterface();
   }
 
   virtual hadesmem::cerberus::WindowInterface*
-    GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetWindowInterface() noexcept final
   {
     return &hadesmem::cerberus::GetWindowInterface();
   }
 
   virtual hadesmem::cerberus::DirectInputInterface*
-    GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetDirectInputInterface() noexcept final
   {
     return &hadesmem::cerberus::GetDirectInputInterface();
   }
 
   virtual hadesmem::cerberus::CursorInterface*
-    GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetCursorInterface() noexcept final
   {
     return &hadesmem::cerberus::GetCursorInterface();
   }
 
   virtual hadesmem::cerberus::AntTweakBarInterface*
-    GetAntTweakBarInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetAntTweakBarInterface() noexcept final
   {
     return &hadesmem::cerberus::GetAntTweakBarInterface();
   }
 
   virtual hadesmem::cerberus::GwenInterface*
-    GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetGwenInterface() noexcept final
   {
     return &hadesmem::cerberus::GetGwenInterface();
   }
 
   virtual hadesmem::cerberus::HelperInterface*
-    GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetHelperInterface() noexcept final
   {
     return &hadesmem::cerberus::GetHelperInterface();
   }
 
   virtual hadesmem::cerberus::ExceptionInterface*
-    GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetExceptionInterface() noexcept final
   {
     return &hadesmem::cerberus::GetExceptionInterface();
   }
 
   virtual hadesmem::cerberus::ProcessInterface*
-    GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetProcessInterface() noexcept final
   {
     return &hadesmem::cerberus::GetProcessInterface();
   }
 
   virtual hadesmem::cerberus::OpenGL32Interface*
-    GetOpenGL32Interface() HADESMEM_DETAIL_NOEXCEPT final
+    GetOpenGL32Interface() noexcept final
   {
     return &hadesmem::cerberus::GetOpenGL32Interface();
   }
 
   virtual hadesmem::cerberus::D3D10Interface*
-    GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT final
+    GetD3D10Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D10Interface();
   }
 
   virtual hadesmem::cerberus::D3D11Interface*
-    GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT final
+    GetD3D11Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D11Interface();
   }
 
   virtual hadesmem::cerberus::RawInputInterface*
-    GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT final
+    GetRawInputInterface() noexcept final
   {
     return &hadesmem::cerberus::GetRawInputInterface();
   }
@@ -277,7 +277,7 @@ public:
   }
 
 private:
-  void UnloadUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void UnloadUnchecked() noexcept
   {
     try
     {

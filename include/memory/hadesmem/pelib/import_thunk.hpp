@@ -49,7 +49,7 @@ public:
                        PeFile&& pe_file,
                        void* thunk) = delete;
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -231,37 +231,37 @@ private:
 };
 
 inline bool operator==(ImportThunk const& lhs,
-                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportThunk const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(ImportThunk const& lhs,
-                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportThunk const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(ImportThunk const& lhs,
-                      ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ImportThunk const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(ImportThunk const& lhs,
-                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportThunk const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(ImportThunk const& lhs,
-                      ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ImportThunk const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(ImportThunk const& lhs,
-                       ImportThunk const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportThunk const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

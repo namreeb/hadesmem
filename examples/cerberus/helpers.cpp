@@ -145,7 +145,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-HelperInterface& GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT
+HelperInterface& GetHelperInterface() noexcept
 {
   static HelperImpl helper_impl;
   return helper_impl;

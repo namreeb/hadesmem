@@ -33,7 +33,7 @@ public:
   virtual void UnregisterOnRelease(std::size_t id) = 0;
 };
 
-D3D11Interface& GetD3D11Interface() HADESMEM_DETAIL_NOEXCEPT;
+D3D11Interface& GetD3D11Interface() noexcept;
 
 void InitializeD3D11();
 

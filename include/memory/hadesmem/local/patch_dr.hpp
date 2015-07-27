@@ -211,7 +211,7 @@ protected:
     HADESMEM_DETAIL_ASSERT(veh_hooks_removed);
   }
 
-  virtual bool CanHookChainImpl() const override
+  virtual bool CanHookChainImpl() const noexcept override
   {
     return false;
   }

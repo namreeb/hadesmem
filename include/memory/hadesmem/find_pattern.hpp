@@ -494,23 +494,23 @@ inline void* FindInFile(Process const& process,
 class Pattern
 {
 public:
-  HADESMEM_DETAIL_CONSTEXPR Pattern() HADESMEM_DETAIL_NOEXCEPT
+  constexpr Pattern() noexcept
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR explicit Pattern(void* address, std::uint32_t flags)
-    HADESMEM_DETAIL_NOEXCEPT : address_{address},
+  constexpr explicit Pattern(void* address, std::uint32_t flags)
+    noexcept : address_{address},
                                flags_{flags}
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR void* GetAddress() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr void* GetAddress() const noexcept
   {
     return address_;
   }
 
-  HADESMEM_DETAIL_CONSTEXPR std::uint32_t
-    GetFlags() const HADESMEM_DETAIL_NOEXCEPT
+  constexpr std::uint32_t
+    GetFlags() const noexcept
   {
     return flags_;
   }
@@ -521,38 +521,38 @@ private:
 };
 
 inline bool operator==(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() == rhs.GetAddress() &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
 inline bool operator!=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Pattern const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Pattern const& lhs,
-                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() < rhs.GetAddress();
 }
 
 inline bool operator<=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() <= rhs.GetAddress();
 }
 
 inline bool operator>(Pattern const& lhs,
-                      Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() > rhs.GetAddress();
 }
 
 inline bool operator>=(Pattern const& lhs,
-                       Pattern const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() >= rhs.GetAddress();
 }
@@ -605,13 +605,13 @@ public:
   }
 
   friend bool operator==(PatternMap const& lhs,
-                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                         PatternMap const& rhs) noexcept
   {
     return lhs.map_ == rhs.map_;
   }
 
   friend bool operator!=(PatternMap const& lhs,
-                         PatternMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                         PatternMap const& rhs) noexcept
   {
     return !(lhs == rhs);
   }
@@ -682,13 +682,13 @@ public:
   }
 
   friend bool operator==(ModuleMap const& lhs,
-                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                         ModuleMap const& rhs) noexcept
   {
     return lhs.map_ == rhs.map_;
   }
 
   friend bool operator!=(ModuleMap const& lhs,
-                         ModuleMap const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                         ModuleMap const& rhs) noexcept
   {
     return !(lhs == rhs);
   }
@@ -729,32 +729,7 @@ public:
                        std::wstring const& pattern,
                        bool in_memory_file) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  FindPattern(FindPattern const&) = default;
-
-  FindPattern& operator=(FindPattern const&) = default;
-
-  FindPattern(FindPattern&& other)
-    : process_{other.process_},
-      find_pattern_datas_{std::move(other.find_pattern_datas_)}
-  {
-    other.process_ = nullptr;
-  }
-
-  FindPattern& operator=(FindPattern&& other)
-  {
-    process_ = other.process_;
-    other.process_ = nullptr;
-
-    find_pattern_datas_ = std::move(other.find_pattern_datas_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ModuleMap const& GetModuleMap() const HADESMEM_DETAIL_NOEXCEPT
+  ModuleMap const& GetModuleMap() const noexcept
   {
     return find_pattern_datas_;
   }

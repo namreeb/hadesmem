@@ -67,7 +67,7 @@ public:
   virtual void UnregisterOnGetClipCursor(std::size_t id) = 0;
 };
 
-CursorInterface& GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT;
+CursorInterface& GetCursorInterface() noexcept;
 
 void InitializeCursor();
 
@@ -75,16 +75,16 @@ void DetourUser32ForCursor(HMODULE base);
 
 void UndetourUser32ForCursor(bool remove);
 
-bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableSetCursorHook() noexcept;
 
-bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableGetCursorPosHook() noexcept;
 
-bool& GetDisableSetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableSetCursorPosHook() noexcept;
 
-bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableShowCursorHook() noexcept;
 
-bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableClipCursorHook() noexcept;
 
-bool& GetDisableGetClipCursorHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableGetClipCursorHook() noexcept;
 }
 }

@@ -24,35 +24,35 @@ public:
 
   virtual void Remove() = 0;
 
-  virtual void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void RemoveUnchecked() noexcept = 0;
 
-  virtual void Detach() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void Detach() noexcept = 0;
 
-  virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual bool IsApplied() const noexcept = 0;
 
-  virtual void* GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void* GetTrampoline() const noexcept = 0;
 
   virtual std::atomic<std::uint32_t>& GetRefCount() = 0;
 
   virtual std::atomic<std::uint32_t> const& GetRefCount() const = 0;
 
-  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual bool CanHookChain() const noexcept = 0;
 
-  virtual void* GetTarget() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void* GetTarget() const noexcept = 0;
 
-  virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void const* GetDetour() const noexcept = 0;
 
-  virtual void* GetContext() HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void* GetContext() noexcept = 0;
 
-  virtual void const* GetContext() const HADESMEM_DETAIL_NOEXCEPT = 0;
+  virtual void const* GetContext() const noexcept = 0;
 
-  virtual void* GetOriginalArbitraryUserPtr() const HADESMEM_DETAIL_NOEXCEPT
+  virtual void* GetOriginalArbitraryUserPtr() const noexcept
   {
     return *GetOriginalArbitraryUserPtrPtr();
   }
 
   template <typename FuncT>
-  FuncT GetTrampolineT() const HADESMEM_DETAIL_NOEXCEPT
+  FuncT GetTrampolineT() const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
                                   std::is_pointer<FuncT>::value);
@@ -60,7 +60,7 @@ public:
   }
 
 protected:
-  static void** GetOriginalArbitraryUserPtrPtr() HADESMEM_DETAIL_NOEXCEPT
+  static void** GetOriginalArbitraryUserPtrPtr() noexcept
   {
     static __declspec(thread) void* orig_user_ptr = 0;
     return &orig_user_ptr;

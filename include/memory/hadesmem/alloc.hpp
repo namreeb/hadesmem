@@ -81,7 +81,7 @@ public:
 
   Allocator& operator=(Allocator const& other) = delete;
 
-  Allocator(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
+  Allocator(Allocator&& other) noexcept
     : process_{other.process_},
       base_{other.base_},
       size_{other.size_}
@@ -91,7 +91,7 @@ public:
     other.size_ = 0;
   }
 
-  Allocator& operator=(Allocator&& other) HADESMEM_DETAIL_NOEXCEPT
+  Allocator& operator=(Allocator&& other) noexcept
   {
     FreeUnchecked();
 
@@ -129,18 +129,18 @@ public:
     size_ = 0;
   }
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return base_;
   }
 
-  SIZE_T GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  SIZE_T GetSize() const noexcept
   {
     return size_;
   }
 
 private:
-  void FreeUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void FreeUnchecked() noexcept
   {
     try
     {
@@ -166,37 +166,37 @@ private:
 };
 
 inline bool operator==(Allocator const& lhs,
-                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Allocator const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Allocator const& lhs,
-                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Allocator const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Allocator const& lhs,
-                      Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Allocator const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Allocator const& lhs,
-                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Allocator const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Allocator const& lhs,
-                      Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Allocator const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Allocator const& lhs,
-                       Allocator const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Allocator const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

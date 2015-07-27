@@ -167,7 +167,7 @@ public:
     applied_ = false;
   }
 
-  virtual void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT override
+  virtual void RemoveUnchecked() noexcept override
   {
     try
     {
@@ -189,19 +189,19 @@ public:
     }
   }
 
-  virtual void Detach() HADESMEM_DETAIL_NOEXCEPT override
+  virtual void Detach() noexcept override
   {
     applied_ = false;
 
     detached_ = true;
   }
 
-  virtual bool IsApplied() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual bool IsApplied() const noexcept override
   {
     return applied_;
   }
 
-  virtual void* GetTrampoline() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void* GetTrampoline() const noexcept override
   {
     return orig_;
   }
@@ -216,27 +216,27 @@ public:
     return ref_count_;
   }
 
-  virtual bool CanHookChain() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual bool CanHookChain() const noexcept override
   {
     return CanHookChainImpl();
   }
 
-  virtual void* GetTarget() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void* GetTarget() const noexcept override
   {
     return target_;
   }
 
-  virtual void const* GetDetour() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void const* GetDetour() const noexcept override
   {
     return &detour_;
   }
 
-  virtual void* GetContext() HADESMEM_DETAIL_NOEXCEPT override
+  virtual void* GetContext() noexcept override
   {
     return &context_;
   }
 
-  virtual void const* GetContext() const HADESMEM_DETAIL_NOEXCEPT override
+  virtual void const* GetContext() const noexcept override
   {
     return &context_;
   }
@@ -261,7 +261,7 @@ protected:
     Write(*process_, target_, orig_);
   }
 
-  virtual bool CanHookChainImpl() const HADESMEM_DETAIL_NOEXCEPT
+  virtual bool CanHookChainImpl() const noexcept
   {
     return true;
   }

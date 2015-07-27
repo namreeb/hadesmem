@@ -71,13 +71,13 @@ public:
   }
 };
 
-std::pair<void*, SIZE_T>& GetNtdllModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetNtdllModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
-std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetKernelBaseModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -85,7 +85,7 @@ std::pair<void*, SIZE_T>& GetKernelBaseModule() HADESMEM_DETAIL_NOEXCEPT
 
 std::unique_ptr<
   hadesmem::PatchDetour<decltype(&::AddVectoredExceptionHandler)>>&
-  GetRtlAddVectoredExceptionHandlerDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetRtlAddVectoredExceptionHandlerDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::AddVectoredExceptionHandler)>> detour;
@@ -94,7 +94,7 @@ std::unique_ptr<
 
 std::unique_ptr<
   hadesmem::PatchDetour<decltype(&::SetUnhandledExceptionFilter)>>&
-  GetSetUnhandledExceptionFilterDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetSetUnhandledExceptionFilterDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::SetUnhandledExceptionFilter)>> detour;
@@ -104,7 +104,7 @@ std::unique_ptr<
 extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   hadesmem::PatchDetourBase* detour,
   ULONG first_handler,
-  PVECTORED_EXCEPTION_HANDLER vectored_handler) HADESMEM_DETAIL_NOEXCEPT
+  PVECTORED_EXCEPTION_HANDLER vectored_handler) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -137,7 +137,7 @@ extern "C" LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
   SetUnhandledExceptionFilterDetour(
     hadesmem::PatchDetourBase* detour,
     LPTOP_LEVEL_EXCEPTION_FILTER top_level_exception_filter)
-    HADESMEM_DETAIL_NOEXCEPT
+    noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -169,7 +169,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-ExceptionInterface& GetExceptionInterface() HADESMEM_DETAIL_NOEXCEPT
+ExceptionInterface& GetExceptionInterface() noexcept
 {
   static ExceptionImpl exception_impl;
   return exception_impl;

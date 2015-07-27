@@ -77,7 +77,7 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory)>>&
-  GetCreateDXGIFactoryDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetCreateDXGIFactoryDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory)>>
     detour;
@@ -85,7 +85,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory1)>>&
-  GetCreateDXGIFactory1Detour() HADESMEM_DETAIL_NOEXCEPT
+  GetCreateDXGIFactory1Detour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory1)>>
     detour;
@@ -93,14 +93,14 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory1)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory2)>>&
-  GetCreateDXGIFactory2Detour() HADESMEM_DETAIL_NOEXCEPT
+  GetCreateDXGIFactory2Detour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::CreateDXGIFactory2)>>
     detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetDXGIModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -109,7 +109,7 @@ std::pair<void*, SIZE_T>& GetDXGIModule() HADESMEM_DETAIL_NOEXCEPT
 extern "C" HRESULT WINAPI
   CreateDXGIFactoryDetour(hadesmem::PatchDetourBase* detour,
                           REFIID riid,
-                          void** factory) HADESMEM_DETAIL_NOEXCEPT
+                          void** factory) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -139,7 +139,7 @@ extern "C" HRESULT WINAPI
 extern "C" HRESULT WINAPI
   CreateDXGIFactory1Detour(hadesmem::PatchDetourBase* detour,
                            REFIID riid,
-                           void** factory) HADESMEM_DETAIL_NOEXCEPT
+                           void** factory) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -170,7 +170,7 @@ extern "C" HRESULT WINAPI
   CreateDXGIFactory2Detour(hadesmem::PatchDetourBase* detour,
                            UINT flags,
                            REFIID riid,
-                           void** factory) HADESMEM_DETAIL_NOEXCEPT
+                           void** factory) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -220,7 +220,7 @@ Callbacks<OnResizeDXGICallback>& GetOnResizeDXGICallbacks()
   return callbacks;
 }
 
-DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT
+DXGIInterface& GetDXGIInterface() noexcept
 {
   static DXGIImpl dxgi_impl;
   return dxgi_impl;

@@ -43,7 +43,7 @@ public:
   virtual void UnregisterOnCreateProcessInternalW(std::size_t id) = 0;
 };
 
-ProcessInterface& GetProcessInterface() HADESMEM_DETAIL_NOEXCEPT;
+ProcessInterface& GetProcessInterface() noexcept;
 
 void InitializeProcess();
 
@@ -51,6 +51,6 @@ void DetourKernelBaseForProcess(HMODULE base);
 
 void UndetourKernelBaseForProcess(bool remove);
 
-bool& GetDisableCreateProcessInternalWHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableCreateProcessInternalWHook() noexcept;
 }
 }

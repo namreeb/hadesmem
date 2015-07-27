@@ -97,22 +97,22 @@ public:
                   PeFileType type,
                   DWORD size) = delete;
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return base_;
   }
 
-  PeFileType GetType() const HADESMEM_DETAIL_NOEXCEPT
+  PeFileType GetType() const noexcept
   {
     return type_;
   }
 
-  DWORD GetSize() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetSize() const noexcept
   {
     return size_;
   }
 
-  bool Is64() const HADESMEM_DETAIL_NOEXCEPT
+  bool Is64() const noexcept
   {
     return is_64_;
   }
@@ -126,37 +126,37 @@ private:
 };
 
 inline bool operator==(PeFile const& lhs,
-                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       PeFile const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(PeFile const& lhs,
-                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       PeFile const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(PeFile const& lhs,
-                      PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      PeFile const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(PeFile const& lhs,
-                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       PeFile const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(PeFile const& lhs,
-                      PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      PeFile const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(PeFile const& lhs,
-                       PeFile const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       PeFile const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

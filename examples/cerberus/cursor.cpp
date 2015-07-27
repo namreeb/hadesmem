@@ -155,14 +155,14 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursor)>>&
-  GetSetCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetSetCursorDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursor)>> detour;
   return detour;
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>&
-  GetGetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetCursorPosDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>
     detour;
@@ -170,7 +170,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>&
-  GetSetCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetSetCursorPosDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>
     detour;
@@ -178,7 +178,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetPhysicalCursorPos)>>&
-  GetGetPhysicalCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetPhysicalCursorPosDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetCursorPos)>>
     detour;
@@ -186,7 +186,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetPhysicalCursorPos)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetPhysicalCursorPos)>>&
-  GetSetPhysicalCursorPosDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetSetPhysicalCursorPosDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetCursorPos)>>
     detour;
@@ -194,28 +194,28 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::SetPhysicalCursorPos)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::ShowCursor)>>&
-  GetShowCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetShowCursorDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::ShowCursor)>> detour;
   return detour;
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::ClipCursor)>>&
-  GetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetClipCursorDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::ClipCursor)>> detour;
   return detour;
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetClipCursor)>>&
-  GetGetClipCursorDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetClipCursorDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetClipCursor)>>
     detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetUser32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -223,7 +223,7 @@ std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
 
 extern "C" HCURSOR WINAPI
   SetCursorDetour(hadesmem::PatchDetourBase* detour,
-                  HCURSOR cursor) HADESMEM_DETAIL_NOEXCEPT
+                  HCURSOR cursor) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -261,7 +261,7 @@ extern "C" HCURSOR WINAPI
 
 extern "C" BOOL WINAPI
   GetCursorPosDetour(hadesmem::PatchDetourBase* detour,
-                     LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
+                     LPPOINT point) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -298,7 +298,7 @@ extern "C" BOOL WINAPI
 
 extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
                                           int x,
-                                          int y) HADESMEM_DETAIL_NOEXCEPT
+                                          int y) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -335,7 +335,7 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
 
 extern "C" BOOL WINAPI
   GetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
-                             LPPOINT point) HADESMEM_DETAIL_NOEXCEPT
+                             LPPOINT point) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -373,7 +373,7 @@ extern "C" BOOL WINAPI
 extern "C" BOOL WINAPI
   SetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
                              int x,
-                             int y) HADESMEM_DETAIL_NOEXCEPT
+                             int y) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -409,7 +409,7 @@ extern "C" BOOL WINAPI
 }
 
 extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
-                                       BOOL show) HADESMEM_DETAIL_NOEXCEPT
+                                       BOOL show) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -447,7 +447,7 @@ extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
 
 extern "C" BOOL WINAPI
   ClipCursorDetour(hadesmem::PatchDetourBase* detour,
-                   RECT const* rect) HADESMEM_DETAIL_NOEXCEPT
+                   RECT const* rect) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -484,7 +484,7 @@ extern "C" BOOL WINAPI
 }
 
 extern "C" BOOL WINAPI GetClipCursorDetour_(hadesmem::PatchDetourBase* detour,
-                                            RECT* rect) HADESMEM_DETAIL_NOEXCEPT
+                                            RECT* rect) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -526,7 +526,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-CursorInterface& GetCursorInterface() HADESMEM_DETAIL_NOEXCEPT
+CursorInterface& GetCursorInterface() noexcept
 {
   static CursorImpl cursor_impl;
   return cursor_impl;
@@ -601,37 +601,37 @@ void UndetourUser32ForCursor(bool remove)
   }
 }
 
-bool& GetDisableSetCursorHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableSetCursorHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;
 }
 
-bool& GetDisableGetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableGetCursorPosHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;
 }
 
-bool& GetDisableSetCursorPosHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableSetCursorPosHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;
 }
 
-bool& GetDisableShowCursorHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableShowCursorHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;
 }
 
-bool& GetDisableClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableClipCursorHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;
 }
 
-bool& GetDisableGetClipCursorHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableGetClipCursorHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;

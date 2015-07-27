@@ -55,7 +55,7 @@ public:
   virtual void UnregisterOnRegisterRawInputDevices(std::size_t id) = 0;
 };
 
-RawInputInterface& GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT;
+RawInputInterface& GetRawInputInterface() noexcept;
 
 void InitializeRawInput();
 
@@ -63,6 +63,6 @@ void DetourUser32ForRawInput(HMODULE base);
 
 void UndetourUser32ForRawInput(bool remove);
 
-bool& GetDisableRegisterRawInputDevicesHook() HADESMEM_DETAIL_NOEXCEPT;
+bool& GetDisableRegisterRawInputDevicesHook() noexcept;
 }
 }

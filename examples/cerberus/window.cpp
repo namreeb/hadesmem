@@ -42,7 +42,7 @@ struct WindowInfo
   bool hooked_{false};
 };
 
-WindowInfo& GetWindowInfo() HADESMEM_DETAIL_NOEXCEPT
+WindowInfo& GetWindowInfo() noexcept
 {
   static WindowInfo window_info;
   return window_info;
@@ -111,7 +111,7 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>&
-  GetGetForegroundWindowDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetForegroundWindowDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>> detour;
@@ -119,7 +119,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageA)>>&
-  GetDispatchMessageADetour() HADESMEM_DETAIL_NOEXCEPT
+  GetDispatchMessageADetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageA)>>
     detour;
@@ -127,21 +127,21 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageA)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageW)>>&
-  GetDispatchMessageWDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetDispatchMessageWDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageW)>>
     detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetUser32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
 extern "C" HWND WINAPI GetForegroundWindowDetour(
-  hadesmem::PatchDetourBase* detour) HADESMEM_DETAIL_NOEXCEPT
+  hadesmem::PatchDetourBase* detour) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -169,7 +169,7 @@ extern "C" HWND WINAPI GetForegroundWindowDetour(
 
 extern "C" LRESULT WINAPI
   DispatchMessageADetour(hadesmem::PatchDetourBase* detour,
-                         MSG const* msg) HADESMEM_DETAIL_NOEXCEPT
+                         MSG const* msg) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -196,7 +196,7 @@ extern "C" LRESULT WINAPI
 
 extern "C" LRESULT WINAPI
   DispatchMessageWDetour(hadesmem::PatchDetourBase* detour,
-                         MSG const* msg) HADESMEM_DETAIL_NOEXCEPT
+                         MSG const* msg) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -226,7 +226,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT
+WindowInterface& GetWindowInterface() noexcept
 {
   static WindowImpl window_impl;
   return window_impl;
@@ -305,7 +305,7 @@ void HandleWindowChange(HWND wnd)
   }
 }
 
-bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT
+bool IsWindowHooked() noexcept
 {
   return GetWindowInfo().hooked_;
 }

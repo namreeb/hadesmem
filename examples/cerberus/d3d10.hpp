@@ -34,7 +34,7 @@ public:
   virtual void UnregisterOnRelease(std::size_t id) = 0;
 };
 
-D3D10Interface& GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT;
+D3D10Interface& GetD3D10Interface() noexcept;
 
 void InitializeD3D10();
 

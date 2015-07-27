@@ -148,7 +148,7 @@ public:
     }
   }
 
-  void RemoveUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void RemoveUnchecked() noexcept
   {
     eat_hook_->RemoveUnchecked();
 

@@ -165,7 +165,7 @@ struct RenderInfoD3D11 : RenderInfoDXGI
   ID3D11Device* device_{};
 };
 
-RenderInfoD3D11& GetRenderInfoD3D11() HADESMEM_DETAIL_NOEXCEPT
+RenderInfoD3D11& GetRenderInfoD3D11() noexcept
 {
   static RenderInfoD3D11 render_info;
   return render_info;
@@ -176,7 +176,7 @@ struct RenderInfoD3D10 : RenderInfoDXGI
   ID3D10Device* device_{};
 };
 
-RenderInfoD3D10& GetRenderInfoD3D10() HADESMEM_DETAIL_NOEXCEPT
+RenderInfoD3D10& GetRenderInfoD3D10() noexcept
 {
   static RenderInfoD3D10 render_info;
   return render_info;
@@ -187,7 +187,7 @@ struct RenderInfoD3D9 : RenderInfoCommon
   IDirect3DDevice9* device_{};
 };
 
-RenderInfoD3D9& GetRenderInfoD3D9() HADESMEM_DETAIL_NOEXCEPT
+RenderInfoD3D9& GetRenderInfoD3D9() noexcept
 {
   static RenderInfoD3D9 render_info;
   return render_info;
@@ -198,7 +198,7 @@ struct RenderInfoOpenGL32 : RenderInfoCommon
   HDC device_{};
 };
 
-RenderInfoOpenGL32& GetRenderInfoOpenGL32() HADESMEM_DETAIL_NOEXCEPT
+RenderInfoOpenGL32& GetRenderInfoOpenGL32() noexcept
 {
   static RenderInfoOpenGL32 render_info;
   return render_info;
@@ -781,13 +781,13 @@ namespace hadesmem
 {
 namespace cerberus
 {
-RenderInterface& GetRenderInterface() HADESMEM_DETAIL_NOEXCEPT
+RenderInterface& GetRenderInterface() noexcept
 {
   static RenderImpl render_impl;
   return render_impl;
 }
 
-bool& GetGuiVisible() HADESMEM_DETAIL_NOEXCEPT
+bool& GetGuiVisible() noexcept
 {
   static bool visible{false};
   return visible;

@@ -40,7 +40,7 @@ public:
   virtual bool IsInitialized() = 0;
 };
 
-GwenInterface& GetGwenInterface() HADESMEM_DETAIL_NOEXCEPT;
+GwenInterface& GetGwenInterface() noexcept;
 
 void InitializeGwen();
 }

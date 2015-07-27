@@ -16,7 +16,7 @@ namespace cerberus
 class HookCounter
 {
 public:
-  explicit HookCounter(std::uint32_t* counter) HADESMEM_DETAIL_NOEXCEPT
+  explicit HookCounter(std::uint32_t* counter) noexcept
     : counter_{counter}
   {
     ++*counter_;
@@ -31,7 +31,7 @@ public:
     --*counter_;
   }
 
-  std::uint32_t GetCount() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint32_t GetCount() const noexcept
   {
     return *counter_;
   }

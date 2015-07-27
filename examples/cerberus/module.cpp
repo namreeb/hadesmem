@@ -30,7 +30,7 @@ namespace winternl = hadesmem::detail::winternl;
 
 namespace
 {
-std::pair<void*, SIZE_T>& GetNtdllModule() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetNtdllModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -143,7 +143,7 @@ extern "C" NTSTATUS WINAPI
 extern "C" NTSTATUS WINAPI LdrUnloadDll(PVOID handle);
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&NtMapViewOfSection)>>&
-  GetNtMapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetNtMapViewOfSectionDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&NtMapViewOfSection)>>
     detour;
@@ -151,7 +151,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&NtMapViewOfSection)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&NtUnmapViewOfSection)>>&
-  GetNtUnmapViewOfSectionDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetNtUnmapViewOfSectionDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&NtUnmapViewOfSection)>>
     detour;
@@ -159,14 +159,14 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&NtUnmapViewOfSection)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&LdrLoadDll)>>&
-  GetLdrLoadDllDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetLdrLoadDllDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&LdrLoadDll)>> detour;
   return detour;
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&LdrUnloadDll)>>&
-  GetLdrUnloadDllDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetLdrUnloadDllDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&LdrUnloadDll)>> detour;
   return detour;
@@ -191,7 +191,7 @@ extern "C" NTSTATUS WINAPI
                            PSIZE_T view_size,
                            winternl::SECTION_INHERIT inherit_disposition,
                            ULONG alloc_type,
-                           ULONG alloc_protect) HADESMEM_DETAIL_NOEXCEPT
+                           ULONG alloc_protect) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -299,7 +299,7 @@ extern "C" NTSTATUS WINAPI
 extern "C" NTSTATUS WINAPI
   NtUnmapViewOfSectionDetour(hadesmem::PatchDetourBase* detour,
                              HANDLE process,
-                             PVOID base) HADESMEM_DETAIL_NOEXCEPT
+                             PVOID base) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -360,7 +360,7 @@ extern "C" NTSTATUS WINAPI
                    PCWSTR path,
                    PULONG flags,
                    PCUNICODE_STRING name,
-                   PVOID* handle) HADESMEM_DETAIL_NOEXCEPT
+                   PVOID* handle) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -422,7 +422,7 @@ extern "C" NTSTATUS WINAPI
 
 extern "C" NTSTATUS WINAPI
   LdrUnloadDllDetour(hadesmem::PatchDetourBase* detour,
-                     PVOID handle) HADESMEM_DETAIL_NOEXCEPT
+                     PVOID handle) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -463,7 +463,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-ModuleInterface& GetModuleInterface() HADESMEM_DETAIL_NOEXCEPT
+ModuleInterface& GetModuleInterface() noexcept
 {
   static ModuleImpl module_impl;
   return module_impl;

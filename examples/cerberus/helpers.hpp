@@ -137,6 +137,6 @@ public:
                                     std::pair<void*, SIZE_T>& detoured_mod) = 0;
 };
 
-HelperInterface& GetHelperInterface() HADESMEM_DETAIL_NOEXCEPT;
+HelperInterface& GetHelperInterface() noexcept;
 }
 }

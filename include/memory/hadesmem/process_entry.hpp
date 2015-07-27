@@ -26,50 +26,22 @@ public:
   {
   }
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ProcessEntry(ProcessEntry const&) = default;
-
-  ProcessEntry& operator=(ProcessEntry const&) = default;
-
-  ProcessEntry(ProcessEntry&& other)
-    : id_{other.id_},
-      threads_{other.threads_},
-      parent_{other.parent_},
-      priority_{other.priority_},
-      name_(std::move(other.name_))
-  {
-  }
-
-  ProcessEntry& operator=(ProcessEntry&& other)
-  {
-    id_ = other.id_;
-    threads_ = other.threads_;
-    parent_ = other.parent_;
-    priority_ = other.priority_;
-    name_ = std::move(other.name_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetId() const noexcept
   {
     return id_;
   }
 
-  DWORD GetThreads() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetThreads() const noexcept
   {
     return threads_;
   }
 
-  DWORD GetParentId() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetParentId() const noexcept
   {
     return parent_;
   }
 
-  LONG GetPriority() const HADESMEM_DETAIL_NOEXCEPT
+  LONG GetPriority() const noexcept
   {
     return priority_;
   }

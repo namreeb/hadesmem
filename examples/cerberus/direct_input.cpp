@@ -56,14 +56,14 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::DirectInput8Create)>>&
-  GetDirectInput8CreateDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetDirectInput8CreateDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DirectInput8Create)>>
     detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetDirectInput8Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetDirectInput8Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -107,7 +107,7 @@ extern "C" HRESULT WINAPI
                            DWORD version,
                            REFIID riid,
                            LPVOID* out,
-                           LPUNKNOWN unk_outer) HADESMEM_DETAIL_NOEXCEPT
+                           LPUNKNOWN unk_outer) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -303,7 +303,7 @@ Callbacks<OnGetDeviceStateCallback>& GetOnGetDeviceStateCallbacks()
   return callbacks;
 }
 
-DirectInputInterface& GetDirectInputInterface() HADESMEM_DETAIL_NOEXCEPT
+DirectInputInterface& GetDirectInputInterface() noexcept
 {
   static DirectInputImpl input_impl;
   return input_impl;

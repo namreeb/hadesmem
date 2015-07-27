@@ -130,61 +130,17 @@ public:
                   PeFile&& pe_file,
                   WORD procedure_number) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  Export(Export const&) = default;
-
-  Export& operator=(Export const&) = default;
-
-  Export(Export&& other)
-    : process_{other.process_},
-      pe_file_{other.pe_file_},
-      rva_{other.rva_},
-      rva_ptr_{other.rva_ptr_},
-      va_{other.va_},
-      name_(std::move(other.name_)),
-      forwarder_(std::move(other.forwarder_)),
-      forwarder_split_{std::move(other.forwarder_split_)},
-      procedure_number_{other.procedure_number_},
-      ordinal_number_{other.ordinal_number_},
-      by_name_{other.by_name_},
-      forwarded_{other.forwarded_},
-      virtual_va_{other.virtual_va_}
-  {
-  }
-
-  Export& operator=(Export&& other)
-  {
-    process_ = other.process_;
-    pe_file_ = other.pe_file_;
-    rva_ = other.rva_;
-    rva_ptr_ = other.rva_ptr_;
-    va_ = other.va_;
-    name_ = std::move(other.name_);
-    forwarder_ = std::move(other.forwarder_);
-    forwarder_split_ = std::move(other.forwarder_split_);
-    procedure_number_ = other.procedure_number_;
-    ordinal_number_ = other.ordinal_number_;
-    by_name_ = other.by_name_;
-    forwarded_ = other.forwarded_;
-    virtual_va_ = other.virtual_va_;
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  DWORD GetRva() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetRva() const noexcept
   {
     return rva_;
   }
 
-  DWORD* GetRvaPtr() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD* GetRvaPtr() const noexcept
   {
     return rva_ptr_;
   }
 
-  PVOID GetVa() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetVa() const noexcept
   {
     return va_;
   }
@@ -194,27 +150,27 @@ public:
     return name_;
   }
 
-  WORD GetProcedureNumber() const HADESMEM_DETAIL_NOEXCEPT
+  WORD GetProcedureNumber() const noexcept
   {
     return procedure_number_;
   }
 
-  WORD GetOrdinalNumber() const HADESMEM_DETAIL_NOEXCEPT
+  WORD GetOrdinalNumber() const noexcept
   {
     return ordinal_number_;
   }
 
-  bool ByName() const HADESMEM_DETAIL_NOEXCEPT
+  bool ByName() const noexcept
   {
     return by_name_;
   }
 
-  bool ByOrdinal() const HADESMEM_DETAIL_NOEXCEPT
+  bool ByOrdinal() const noexcept
   {
     return !by_name_;
   }
 
-  bool IsForwarded() const HADESMEM_DETAIL_NOEXCEPT
+  bool IsForwarded() const noexcept
   {
     return forwarded_;
   }
@@ -281,37 +237,37 @@ private:
 };
 
 inline bool operator==(Export const& lhs,
-                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() == rhs.GetProcedureNumber();
 }
 
 inline bool operator!=(Export const& lhs,
-                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Export const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Export const& lhs,
-                      Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() < rhs.GetProcedureNumber();
 }
 
 inline bool operator<=(Export const& lhs,
-                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() <= rhs.GetProcedureNumber();
 }
 
 inline bool operator>(Export const& lhs,
-                      Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() > rhs.GetProcedureNumber();
 }
 
 inline bool operator>=(Export const& lhs,
-                       Export const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() >= rhs.GetProcedureNumber();
 }

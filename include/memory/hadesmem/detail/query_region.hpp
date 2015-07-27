@@ -29,7 +29,7 @@ inline MEMORY_BASIC_INFORMATION Query(Process const& process, LPCVOID address)
 }
 
 inline bool
-  CanRead(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  CanRead(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   DWORD const read_prot = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY |
                           PAGE_EXECUTE | PAGE_EXECUTE_READ |
@@ -38,7 +38,7 @@ inline bool
 }
 
 inline bool
-  CanWrite(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  CanWrite(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   DWORD const write_prot = PAGE_READWRITE | PAGE_WRITECOPY |
                            PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
@@ -46,7 +46,7 @@ inline bool
 }
 
 inline bool
-  CanExecute(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  CanExecute(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   DWORD const exec_prot = PAGE_EXECUTE | PAGE_EXECUTE_READ |
                           PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
@@ -54,25 +54,25 @@ inline bool
 }
 
 inline bool
-  IsBadProtect(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  IsBadProtect(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   return !!(mbi.Protect & (PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE));
 }
 
 inline bool
-  IsGuard(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  IsGuard(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   return !!(mbi.Protect & PAGE_GUARD);
 }
 
 inline bool
-  IsNoCache(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  IsNoCache(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   return !!(mbi.Protect & PAGE_NOCACHE);
 }
 
 inline bool
-  IsWriteCombine(MEMORY_BASIC_INFORMATION const& mbi) HADESMEM_DETAIL_NOEXCEPT
+  IsWriteCombine(MEMORY_BASIC_INFORMATION const& mbi) noexcept
 {
   return !!(mbi.Protect & PAGE_WRITECOMBINE);
 }

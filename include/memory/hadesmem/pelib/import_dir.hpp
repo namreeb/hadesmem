@@ -107,7 +107,7 @@ public:
                      PeFile&& pe_file,
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -272,37 +272,37 @@ private:
 };
 
 inline bool operator==(ImportDir const& lhs,
-                       ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(ImportDir const& lhs,
-                       ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(ImportDir const& lhs,
-                      ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(ImportDir const& lhs,
-                       ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(ImportDir const& lhs,
-                      ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(ImportDir const& lhs,
-                       ImportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

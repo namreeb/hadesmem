@@ -46,7 +46,7 @@ public:
                       PeFile&& pe_file,
                       std::uint16_t* base) = delete;
 
-  void* GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  void* GetBase() const noexcept
   {
     return base_;
   }
@@ -66,22 +66,22 @@ public:
     Write(*process_, base_, data_tmp);
   }
 
-  std::uint8_t GetType() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint8_t GetType() const noexcept
   {
     return type_;
   }
 
-  void SetType(std::uint8_t type) HADESMEM_DETAIL_NOEXCEPT
+  void SetType(std::uint8_t type) noexcept
   {
     type_ = type;
   }
 
-  std::uint16_t GetOffset() const HADESMEM_DETAIL_NOEXCEPT
+  std::uint16_t GetOffset() const noexcept
   {
     return offset_;
   }
 
-  void SetOffset(std::uint16_t offset) HADESMEM_DETAIL_NOEXCEPT
+  void SetOffset(std::uint16_t offset) noexcept
   {
     offset_ = offset;
   }
@@ -95,37 +95,37 @@ private:
 };
 
 inline bool operator==(Relocation const& lhs,
-                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Relocation const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(Relocation const& lhs,
-                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Relocation const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Relocation const& lhs,
-                      Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Relocation const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(Relocation const& lhs,
-                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Relocation const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(Relocation const& lhs,
-                      Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Relocation const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(Relocation const& lhs,
-                       Relocation const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Relocation const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

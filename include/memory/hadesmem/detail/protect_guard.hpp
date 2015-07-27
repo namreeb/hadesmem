@@ -83,7 +83,7 @@ public:
 
   ProtectGuard& operator=(ProtectGuard const& other) = delete;
 
-  ProtectGuard(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
+  ProtectGuard(ProtectGuard&& other) noexcept
     : process_{other.process_},
       type_{other.type_},
       can_read_or_write_{other.can_read_or_write_},
@@ -93,7 +93,7 @@ public:
     other.old_protect_ = 0;
   }
 
-  ProtectGuard& operator=(ProtectGuard&& other) HADESMEM_DETAIL_NOEXCEPT
+  ProtectGuard& operator=(ProtectGuard&& other) noexcept
   {
     process_ = other.process_;
     type_ = other.type_;
@@ -126,7 +126,7 @@ public:
     old_protect_ = 0;
   }
 
-  void RestoreUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void RestoreUnchecked() noexcept
   {
     try
     {

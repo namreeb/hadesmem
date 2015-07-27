@@ -54,7 +54,7 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice)>>&
-  GetD3D10CreateDeviceDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D10CreateDeviceDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice)>>
     detour;
@@ -63,7 +63,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice)>>&
 
 std::unique_ptr<
   hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain)>>&
-  GetD3D10CreateDeviceAndSwapChainDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D10CreateDeviceAndSwapChainDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain)>> detour;
@@ -71,7 +71,7 @@ std::unique_ptr<
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice1)>>&
-  GetD3D10CreateDevice1Detour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D10CreateDevice1Detour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice1)>>
     detour;
@@ -80,26 +80,26 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::D3D10CreateDevice1)>>&
 
 std::unique_ptr<
   hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain1)>>&
-  GetD3D10CreateDeviceAndSwapChain1Detour() HADESMEM_DETAIL_NOEXCEPT
+  GetD3D10CreateDeviceAndSwapChain1Detour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::D3D10CreateDeviceAndSwapChain1)>> detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetD3D10Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetD3D10Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{};
   return module;
 }
 
-std::pair<void*, SIZE_T>& GetD3D101Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetD3D101Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{};
   return module;
 }
 
-std::uint32_t& GetD3D10CreateHookCount() HADESMEM_DETAIL_NOEXCEPT
+std::uint32_t& GetD3D10CreateHookCount() noexcept
 {
   static __declspec(thread) std::uint32_t in_hook = 0;
   return in_hook;
@@ -112,7 +112,7 @@ extern "C" HRESULT WINAPI
                           HMODULE software,
                           UINT flags,
                           UINT sdk_version,
-                          ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
+                          ID3D10Device** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
@@ -166,7 +166,7 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
   UINT sdk_version,
   DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
   IDXGISwapChain** swap_chain,
-  ID3D10Device** device) HADESMEM_DETAIL_NOEXCEPT
+  ID3D10Device** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
@@ -244,7 +244,7 @@ extern "C" HRESULT WINAPI
                            UINT flags,
                            D3D10_FEATURE_LEVEL1 hardware_level,
                            UINT sdk_version,
-                           ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
+                           ID3D10Device1** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
@@ -300,7 +300,7 @@ extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
   UINT sdk_version,
   DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
   IDXGISwapChain** swap_chain,
-  ID3D10Device1** device) HADESMEM_DETAIL_NOEXCEPT
+  ID3D10Device1** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
@@ -383,7 +383,7 @@ Callbacks<OnReleaseD3D10Callback>& GetOnReleaseD3D10Callbacks()
   return callbacks;
 }
 
-D3D10Interface& GetD3D10Interface() HADESMEM_DETAIL_NOEXCEPT
+D3D10Interface& GetD3D10Interface() noexcept
 {
   static D3D10Impl d3d10_impl;
   return d3d10_impl;

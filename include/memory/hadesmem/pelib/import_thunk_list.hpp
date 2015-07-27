@@ -34,7 +34,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ImportThunkIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr ImportThunkIterator() noexcept
   {
   }
 
@@ -76,34 +76,13 @@ public:
                                PeFile&& pe_file,
                                DWORD first_thunk) = delete;
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ImportThunkIterator(ImportThunkIterator const&) = default;
-
-  ImportThunkIterator& operator=(ImportThunkIterator const&) = default;
-
-  ImportThunkIterator(ImportThunkIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_{std::move(other.impl_)}
-  {
-  }
-
-  ImportThunkIterator&
-    operator=(ImportThunkIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->import_thunk_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->import_thunk_;
@@ -145,13 +124,13 @@ public:
   }
 
   bool
-    operator==(ImportThunkIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+    operator==(ImportThunkIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
   bool
-    operator!=(ImportThunkIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+    operator!=(ImportThunkIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -161,7 +140,7 @@ private:
   {
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
-                  ImportThunk const& thunk) HADESMEM_DETAIL_NOEXCEPT
+                  ImportThunk const& thunk) noexcept
       : process_{&process},
         pe_file_{&pe_file},
         import_thunk_{thunk}
@@ -218,17 +197,17 @@ public:
     return const_iterator{*process_, *pe_file_, first_thunk_};
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator{};
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator{};
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator{};
   }

@@ -14,7 +14,7 @@ namespace detail
 class RecursionProtector
 {
 public:
-  explicit RecursionProtector(std::int32_t* in_hook) HADESMEM_DETAIL_NOEXCEPT
+  explicit RecursionProtector(std::int32_t* in_hook) noexcept
     : in_hook_{in_hook}
   {
     Set();
@@ -25,12 +25,12 @@ public:
     Revert();
   }
 
-  void Set() HADESMEM_DETAIL_NOEXCEPT
+  void Set() noexcept
   {
     ++*in_hook_;
   }
 
-  void Revert() HADESMEM_DETAIL_NOEXCEPT
+  void Revert() noexcept
   {
     --*in_hook_;
   }

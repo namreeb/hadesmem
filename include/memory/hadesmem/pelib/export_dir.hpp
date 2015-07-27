@@ -58,7 +58,7 @@ public:
 
   explicit ExportDir(Process&& process, PeFile&& pe_file) = delete;
 
-  PVOID GetBase() const HADESMEM_DETAIL_NOEXCEPT
+  PVOID GetBase() const noexcept
   {
     return base_;
   }
@@ -226,37 +226,37 @@ private:
 };
 
 inline bool operator==(ExportDir const& lhs,
-                       ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
 inline bool operator!=(ExportDir const& lhs,
-                       ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ExportDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(ExportDir const& lhs,
-                      ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
 inline bool operator<=(ExportDir const& lhs,
-                       ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
 inline bool operator>(ExportDir const& lhs,
-                      ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
 inline bool operator>=(ExportDir const& lhs,
-                       ExportDir const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

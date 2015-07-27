@@ -94,13 +94,13 @@ public:
   }
 };
 
-std::uint32_t& GetPresentHookCount() HADESMEM_DETAIL_NOEXCEPT
+std::uint32_t& GetPresentHookCount() noexcept
 {
   static __declspec(thread) std::uint32_t in_hook = 0;
   return in_hook;
 }
 
-std::uint32_t& GetResetHookCount() HADESMEM_DETAIL_NOEXCEPT
+std::uint32_t& GetResetHookCount() noexcept
 {
   static __declspec(thread) std::uint32_t in_hook = 0;
   return in_hook;
@@ -171,7 +171,7 @@ void EraseDeviceData(IDirect3DDevice9* device)
 typedef ULONG(WINAPI* IDirect3DDevice9_AddRef_Fn)(IDirect3DDevice9* device);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>&
-  GetIDirect3DDevice9AddRefDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9AddRefDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>
     detour;
@@ -214,7 +214,7 @@ extern "C" ULONG WINAPI
 typedef ULONG(WINAPI* IDirect3DDevice9_Release_Fn)(IDirect3DDevice9* device);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>&
-  GetIDirect3DDevice9ReleaseDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9ReleaseDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>
     detour;
@@ -276,7 +276,7 @@ extern "C" ULONG WINAPI
 typedef HRESULT(WINAPI* IDirect3DDevice9_EndScene_Fn)(IDirect3DDevice9* device);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_EndScene_Fn>>&
-  GetIDirect3DDevice9EndSceneDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9EndSceneDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_EndScene_Fn>>
     detour;
@@ -320,7 +320,7 @@ typedef HRESULT(WINAPI* IDirect3DDevice9_Present_Fn)(
   const RGNDATA* pDirtyRegion);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Present_Fn>>&
-  GetIDirect3DDevice9PresentDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9PresentDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Present_Fn>>
     detour;
@@ -375,7 +375,7 @@ typedef HRESULT(WINAPI* IDirect3DDevice9Ex_PresentEx_Fn)(
   DWORD dwFlags);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9Ex_PresentEx_Fn>>&
-  GetIDirect3DDevice9ExPresentExDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9ExPresentExDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9Ex_PresentEx_Fn>>
     detour;
@@ -433,7 +433,7 @@ typedef HRESULT(WINAPI* IDirect3DSwapChain9_Present_Fn)(
   DWORD dwFlags);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DSwapChain9_Present_Fn>>&
-  GetIDirect3DSwapChain9PresentDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DSwapChain9PresentDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DSwapChain9_Present_Fn>>
     detour;
@@ -499,7 +499,7 @@ typedef HRESULT(WINAPI* IDirect3DDevice9_Reset_Fn)(
   IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Reset_Fn>>&
-  GetIDirect3DDevice9ResetDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9ResetDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Reset_Fn>>
     detour;
@@ -541,7 +541,7 @@ typedef HRESULT(WINAPI* IDirect3DDevice9Ex_ResetEx_Fn)(
   D3DDISPLAYMODEEX* pFullscreenDisplayMode);
 
 std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9Ex_ResetEx_Fn>>&
-  GetIDirect3DDevice9ExResetExDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetIDirect3DDevice9ExResetExDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9Ex_ResetEx_Fn>>
     detour;
@@ -580,7 +580,7 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-std::pair<void*, SIZE_T>& GetD3D9Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetD3D9Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{};
   return module;
@@ -609,7 +609,7 @@ Callbacks<OnReleaseD3D9Callback>& GetOnReleaseD3D9Callbacks()
   return callbacks;
 }
 
-D3D9Interface& GetD3D9Interface() HADESMEM_DETAIL_NOEXCEPT
+D3D9Interface& GetD3D9Interface() noexcept
 {
   static D3D9Impl d3d9_impl;
   return d3d9_impl;

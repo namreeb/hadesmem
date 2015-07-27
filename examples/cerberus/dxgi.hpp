@@ -58,7 +58,7 @@ public:
   virtual void UnregisterOnResize(std::size_t id) = 0;
 };
 
-DXGIInterface& GetDXGIInterface() HADESMEM_DETAIL_NOEXCEPT;
+DXGIInterface& GetDXGIInterface() noexcept;
 
 void InitializeDXGI();
 

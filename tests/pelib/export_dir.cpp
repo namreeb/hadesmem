@@ -20,8 +20,8 @@
 #include <hadesmem/read.hpp>
 
 // Export something to ensure tests pass...
-extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy();
-extern "C" HADESMEM_DETAIL_DLLEXPORT void Dummy()
+extern "C" __declspec(dllexport) void Dummy();
+extern "C" __declspec(dllexport) void Dummy()
 {
 }
 

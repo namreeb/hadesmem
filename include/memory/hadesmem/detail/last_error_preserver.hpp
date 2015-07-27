@@ -14,7 +14,7 @@ namespace detail
 class LastErrorPreserver
 {
 public:
-  LastErrorPreserver() HADESMEM_DETAIL_NOEXCEPT : last_error_(::GetLastError())
+  LastErrorPreserver() noexcept : last_error_(::GetLastError())
   {
   }
 
@@ -27,12 +27,12 @@ public:
     Revert();
   }
 
-  void Update() HADESMEM_DETAIL_NOEXCEPT
+  void Update() noexcept
   {
     last_error_ = ::GetLastError();
   }
 
-  void Revert() HADESMEM_DETAIL_NOEXCEPT
+  void Revert() noexcept
   {
     SetLastError(last_error_);
   }

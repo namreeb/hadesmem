@@ -34,11 +34,11 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  HADESMEM_DETAIL_CONSTEXPR ThreadIterator() HADESMEM_DETAIL_NOEXCEPT
+  constexpr ThreadIterator() noexcept
   {
   }
 
-  ThreadIterator(DWORD pid) HADESMEM_DETAIL_NOEXCEPT
+  ThreadIterator(DWORD pid) noexcept
     : impl_(std::make_shared<Impl>()),
       pid_(pid)
   {
@@ -64,35 +64,13 @@ public:
     }
   }
 
-#if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  ThreadIterator(ThreadIterator const&) = default;
-
-  ThreadIterator& operator=(ThreadIterator const&) = default;
-
-  ThreadIterator(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-    : impl_{std::move(other.impl_)},
-      pid_{other.pid_}
-  {
-  }
-
-  ThreadIterator& operator=(ThreadIterator&& other) HADESMEM_DETAIL_NOEXCEPT
-  {
-    impl_ = std::move(other.impl_);
-    pid_ = other.pid_;
-
-    return *this;
-  }
-
-#endif // #if defined(HADESMEM_DETAIL_NO_RVALUE_REFERENCES_V3)
-
-  reference operator*() const HADESMEM_DETAIL_NOEXCEPT
+  reference operator*() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return *impl_->thread_;
   }
 
-  pointer operator->() const HADESMEM_DETAIL_NOEXCEPT
+  pointer operator->() const noexcept
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
     return &*impl_->thread_;
@@ -114,12 +92,12 @@ public:
     return iter;
   }
 
-  bool operator==(ThreadIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator==(ThreadIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(ThreadIterator const& other) const HADESMEM_DETAIL_NOEXCEPT
+  bool operator!=(ThreadIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -145,7 +123,7 @@ private:
     }
   }
 
-  bool IsTargetThread(DWORD owner_id) HADESMEM_DETAIL_NOEXCEPT
+  bool IsTargetThread(DWORD owner_id) noexcept
   {
     return pid_ == static_cast<DWORD>(-1) || pid_ == owner_id;
   }
@@ -168,11 +146,11 @@ public:
   using iterator = ThreadIterator<ThreadEntry>;
   using const_iterator = ThreadIterator<ThreadEntry const>;
 
-  HADESMEM_DETAIL_CONSTEXPR ThreadList() HADESMEM_DETAIL_NOEXCEPT
+  constexpr ThreadList() noexcept
   {
   }
 
-  HADESMEM_DETAIL_CONSTEXPR ThreadList(DWORD pid) HADESMEM_DETAIL_NOEXCEPT
+  constexpr ThreadList(DWORD pid) noexcept
     : pid_(pid)
   {
   }
@@ -192,17 +170,17 @@ public:
     return const_iterator(pid_);
   }
 
-  iterator end() HADESMEM_DETAIL_NOEXCEPT
+  iterator end() noexcept
   {
     return iterator();
   }
 
-  const_iterator end() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator end() const noexcept
   {
     return const_iterator();
   }
 
-  const_iterator cend() const HADESMEM_DETAIL_NOEXCEPT
+  const_iterator cend() const noexcept
   {
     return const_iterator();
   }

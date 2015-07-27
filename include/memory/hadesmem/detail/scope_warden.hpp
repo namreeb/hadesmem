@@ -16,11 +16,11 @@ namespace detail
 template <typename F> class ScopeWarden
 {
 public:
-  explicit ScopeWarden(F& f) HADESMEM_DETAIL_NOEXCEPT : f_(std::addressof(f))
+  explicit ScopeWarden(F& f) noexcept : f_(std::addressof(f))
   {
   }
 
-  void Dismiss() HADESMEM_DETAIL_NOEXCEPT
+  void Dismiss() noexcept
   {
     f_ = nullptr;
   }
@@ -31,12 +31,12 @@ public:
 
   ScopeWarden& operator=(ScopeWarden const&) = delete;
 
-  ScopeWarden(ScopeWarden&& other) HADESMEM_DETAIL_NOEXCEPT : f_(other.f_)
+  ScopeWarden(ScopeWarden&& other) noexcept : f_(other.f_)
   {
     other.f_ = nullptr;
   }
 
-  ScopeWarden& operator=(ScopeWarden&& other) HADESMEM_DETAIL_NOEXCEPT
+  ScopeWarden& operator=(ScopeWarden&& other) noexcept
   {
     Cleanup();
     std::swap(f_, other.f_);
@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  void Cleanup() HADESMEM_DETAIL_NOEXCEPT
+  void Cleanup() noexcept
   {
     if (f_)
     {

@@ -41,14 +41,14 @@ public:
     return *this;
   }
 
-  Thread(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
+  Thread(Thread&& other) noexcept
     : handle_{std::move(other.handle_)},
       id_{other.id_}
   {
     other.id_ = 0;
   }
 
-  Thread& operator=(Thread&& other) HADESMEM_DETAIL_NOEXCEPT
+  Thread& operator=(Thread&& other) noexcept
   {
     CleanupUnchecked();
 
@@ -65,12 +65,12 @@ public:
     CleanupUnchecked();
   }
 
-  DWORD GetId() const HADESMEM_DETAIL_NOEXCEPT
+  DWORD GetId() const noexcept
   {
     return id_;
   }
 
-  HANDLE GetHandle() const HADESMEM_DETAIL_NOEXCEPT
+  HANDLE GetHandle() const noexcept
   {
     return handle_.GetHandle();
   }
@@ -90,7 +90,7 @@ public:
   }
 
 private:
-  void CleanupUnchecked() HADESMEM_DETAIL_NOEXCEPT
+  void CleanupUnchecked() noexcept
   {
     try
     {
@@ -127,37 +127,37 @@ private:
 };
 
 inline bool operator==(Thread const& lhs,
-                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Thread const& rhs) noexcept
 {
   return lhs.GetId() == rhs.GetId();
 }
 
 inline bool operator!=(Thread const& lhs,
-                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Thread const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
 inline bool operator<(Thread const& lhs,
-                      Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Thread const& rhs) noexcept
 {
   return lhs.GetId() < rhs.GetId();
 }
 
 inline bool operator<=(Thread const& lhs,
-                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Thread const& rhs) noexcept
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
 inline bool operator>(Thread const& lhs,
-                      Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                      Thread const& rhs) noexcept
 {
   return lhs.GetId() > rhs.GetId();
 }
 
 inline bool operator>=(Thread const& lhs,
-                       Thread const& rhs) HADESMEM_DETAIL_NOEXCEPT
+                       Thread const& rhs) noexcept
 {
   return lhs.GetId() >= rhs.GetId();
 }

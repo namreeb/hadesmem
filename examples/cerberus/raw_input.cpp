@@ -88,7 +88,7 @@ public:
 };
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputBuffer)>>&
-  GetGetRawInputBufferDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetRawInputBufferDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputBuffer)>>
     detour;
@@ -96,7 +96,7 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputBuffer)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputData)>>&
-  GetGetRawInputDataDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetGetRawInputDataDetour() noexcept
 {
   static std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputData)>>
     detour;
@@ -104,14 +104,14 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetRawInputData)>>&
 }
 
 std::unique_ptr<hadesmem::PatchDetour<decltype(&::RegisterRawInputDevices)>>&
-  GetRegisterRawInputDevicesDetour() HADESMEM_DETAIL_NOEXCEPT
+  GetRegisterRawInputDevicesDetour() noexcept
 {
   static std::unique_ptr<
     hadesmem::PatchDetour<decltype(&::RegisterRawInputDevices)>> detour;
   return detour;
 }
 
-std::pair<void*, SIZE_T>& GetUser32Module() HADESMEM_DETAIL_NOEXCEPT
+std::pair<void*, SIZE_T>& GetUser32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -121,7 +121,7 @@ extern "C" UINT WINAPI
   GetRawInputBufferDetour(hadesmem::PatchDetourBase* detour,
                           PRAWINPUT data,
                           PUINT size,
-                          UINT size_header) HADESMEM_DETAIL_NOEXCEPT
+                          UINT size_header) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -149,7 +149,7 @@ extern "C" UINT WINAPI
                         UINT command,
                         LPVOID data,
                         PUINT size,
-                        UINT size_header) HADESMEM_DETAIL_NOEXCEPT
+                        UINT size_header) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -223,7 +223,7 @@ namespace hadesmem
 {
 namespace cerberus
 {
-RawInputInterface& GetRawInputInterface() HADESMEM_DETAIL_NOEXCEPT
+RawInputInterface& GetRawInputInterface() noexcept
 {
   static RawInputImpl raw_input_impl;
   return raw_input_impl;
@@ -278,7 +278,7 @@ void UndetourUser32ForRawInput(bool remove)
   }
 }
 
-bool& GetDisableRegisterRawInputDevicesHook() HADESMEM_DETAIL_NOEXCEPT
+bool& GetDisableRegisterRawInputDevicesHook() noexcept
 {
   static __declspec(thread) bool disable_hook = false;
   return disable_hook;

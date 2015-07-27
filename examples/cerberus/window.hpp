@@ -39,7 +39,7 @@ public:
   virtual HWND GetCurrentWindow() const = 0;
 };
 
-WindowInterface& GetWindowInterface() HADESMEM_DETAIL_NOEXCEPT;
+WindowInterface& GetWindowInterface() noexcept;
 
 void InitializeWindow();
 
@@ -49,6 +49,6 @@ void UndetourUser32ForWindow(bool remove);
 
 void HandleWindowChange(HWND wnd);
 
-bool IsWindowHooked() HADESMEM_DETAIL_NOEXCEPT;
+bool IsWindowHooked() noexcept;
 }
 }

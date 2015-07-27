@@ -53,37 +53,37 @@ public:
   }
 };
 
-int& GetShowCursorCount() HADESMEM_DETAIL_NOEXCEPT
+int& GetShowCursorCount() noexcept
 {
   static int show_cursor_count{};
   return show_cursor_count;
 }
 
-std::pair<bool, HCURSOR>& GetOldCursor() HADESMEM_DETAIL_NOEXCEPT
+std::pair<bool, HCURSOR>& GetOldCursor() noexcept
 {
   static std::pair<bool, HCURSOR> old_cursor{};
   return old_cursor;
 }
 
-std::pair<bool, POINT>& GetOldCursorPos() HADESMEM_DETAIL_NOEXCEPT
+std::pair<bool, POINT>& GetOldCursorPos() noexcept
 {
   static std::pair<bool, POINT> cursor_pos{};
   return cursor_pos;
 }
 
-std::pair<bool, POINT>& GetOldPhysicalCursorPos() HADESMEM_DETAIL_NOEXCEPT
+std::pair<bool, POINT>& GetOldPhysicalCursorPos() noexcept
 {
   static std::pair<bool, POINT> cursor_pos{};
   return cursor_pos;
 }
 
-RECT& GetOldClipCursor() HADESMEM_DETAIL_NOEXCEPT
+RECT& GetOldClipCursor() noexcept
 {
   static RECT old_clip_cursor{};
   return old_clip_cursor;
 }
 
-std::vector<RAWINPUTDEVICE>& GetOldRawInputDevices() HADESMEM_DETAIL_NOEXCEPT
+std::vector<RAWINPUTDEVICE>& GetOldRawInputDevices() noexcept
 {
   static std::vector<RAWINPUTDEVICE> old_devices;
   return old_devices;
@@ -412,7 +412,7 @@ void WindowProcCallback(
 
 void OnSetCursor(HCURSOR cursor,
                  bool* handled,
-                 HCURSOR* retval) HADESMEM_DETAIL_NOEXCEPT
+                 HCURSOR* retval) noexcept
 {
   auto& old_cursor = GetOldCursor();
   HCURSOR const old_cursor_raw = old_cursor.second;
@@ -432,7 +432,7 @@ void OnGetDeviceData(DWORD len_object_data,
                      DWORD flags,
                      HRESULT* retval,
                      void* device,
-                     bool wide) HADESMEM_DETAIL_NOEXCEPT
+                     bool wide) noexcept
 {
   if (FAILED(*retval) || !hadesmem::cerberus::GetGuiVisible())
   {
@@ -466,7 +466,7 @@ void OnGetDeviceData(DWORD len_object_data,
 
 void OnGetDeviceState(DWORD len_data,
                       LPVOID data,
-                      HRESULT* retval) HADESMEM_DETAIL_NOEXCEPT
+                      HRESULT* retval) noexcept
 {
   if (FAILED(*retval) || !hadesmem::cerberus::GetGuiVisible())
   {
@@ -479,7 +479,7 @@ void OnGetDeviceState(DWORD len_data,
 
 void OnGetCursorPos(LPPOINT point,
                     bool physical,
-                    bool* handled) HADESMEM_DETAIL_NOEXCEPT
+                    bool* handled) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && point)
   {
@@ -493,7 +493,7 @@ void OnGetCursorPos(LPPOINT point,
 }
 
 void OnSetCursorPos(int x, int y, bool physical, bool* handled)
-  HADESMEM_DETAIL_NOEXCEPT
+  noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
@@ -509,7 +509,7 @@ void OnSetCursorPos(int x, int y, bool physical, bool* handled)
 
 void OnShowCursor(BOOL show,
                   bool* handled,
-                  int* retval) HADESMEM_DETAIL_NOEXCEPT
+                  int* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
@@ -530,7 +530,7 @@ void OnShowCursor(BOOL show,
 
 void OnClipCursor(RECT const* rect,
                   bool* handled,
-                  BOOL* retval) HADESMEM_DETAIL_NOEXCEPT
+                  BOOL* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && rect)
   {
@@ -543,7 +543,7 @@ void OnClipCursor(RECT const* rect,
 
 void OnGetClipCursor(RECT* rect,
                      bool* handled,
-                     BOOL* retval) HADESMEM_DETAIL_NOEXCEPT
+                     BOOL* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && rect)
   {
@@ -558,7 +558,7 @@ void OnGetRawInputBuffer(PRAWINPUT /*data*/,
                          PUINT /*size*/,
                          UINT /*size_header*/,
                          bool* handled,
-                         UINT* retval) HADESMEM_DETAIL_NOEXCEPT
+                         UINT* retval) noexcept
 {
   if (SUCCEEDED(*retval) && hadesmem::cerberus::GetGuiVisible())
   {
@@ -576,7 +576,7 @@ void OnGetRawInputData(HRAWINPUT /*raw_input*/,
                        PUINT size,
                        UINT /*size_header*/,
                        bool* handled,
-                       UINT* retval) HADESMEM_DETAIL_NOEXCEPT
+                       UINT* retval) noexcept
 {
   if (SUCCEEDED(*retval) && hadesmem::cerberus::GetGuiVisible() && data && size)
   {
@@ -900,7 +900,7 @@ void HandleInputQueue()
   }
 }
 
-InputInterface& GetInputInterface() HADESMEM_DETAIL_NOEXCEPT
+InputInterface& GetInputInterface() noexcept
 {
   static InputImpl input_impl;
   return input_impl;
