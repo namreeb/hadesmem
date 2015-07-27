@@ -27,10 +27,15 @@ Config& GetConfig()
 
 Config::Config()
 {
+  HADESMEM_DETAIL_TRACE_A("Initializing Config.");
+
   auto const config_path = hadesmem::detail::CombinePath(
     hadesmem::detail::GetSelfDirPath(), L"hadesmem.xml");
+  HADESMEM_DETAIL_TRACE_FORMAT_W(L"Looking for config file. Path: [%s].",
+                                 config_path.c_str());
   if (hadesmem::detail::DoesFileExist(config_path))
   {
+    HADESMEM_DETAIL_TRACE_A("Got config file.");
     LoadFile(config_path);
   }
 }
@@ -69,6 +74,7 @@ void Config::LoadImpl(pugi::xml_document const& doc)
   auto const cerberus_node = hadesmem_root.child(L"Cerberus");
   if (!cerberus_node)
   {
+    HADESMEM_DETAIL_TRACE_A("No Cerberus node.");
     return;
   }
 
@@ -78,6 +84,10 @@ void Config::LoadImpl(pugi::xml_document const& doc)
       hadesmem::detail::pugixml::GetAttributeValue(plugin_node, L"Path");
     auto const process = hadesmem::detail::pugixml::GetOptionalAttributeValue(
       plugin_node, L"Process");
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Got Plugin entry. Path: [%s]. Process: [%s].",
+      path.c_str(),
+      process.c_str());
     plugins_.emplace_back(Plugin{path, process});
   }
 
@@ -86,10 +96,12 @@ void Config::LoadImpl(pugi::xml_document const& doc)
     hadesmem::detail::pugixml::GetOptionalAttributeValue(cerberus_node, L"GUI");
   if (hadesmem::detail::ToUpperOrdinal(gui) == L"ANTTWEAKBAR")
   {
+    HADESMEM_DETAIL_TRACE_A("AntTweakBar enabled.");
     ant_tweak_bar_enabled_ = true;
   }
   else if (hadesmem::detail::ToUpperOrdinal(gui) == L"GWEN")
   {
+    HADESMEM_DETAIL_TRACE_A("GWEN enabled.");
     gwen_enabled_ = true;
   }
   else

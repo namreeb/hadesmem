@@ -169,6 +169,8 @@ int main(int argc, char* argv[])
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
 
+    // TODO: Ensure we're not being shimmed/hooked/etc or the offsets might not
+    // be valid in the target process.
     auto const d3d9_offsets =
       static_cast<hadesmem::cerberus::D3D9Offsets*>(mapping_view.GetHandle());
     auto const base = reinterpret_cast<std::uintptr_t>(d3d9_mod);

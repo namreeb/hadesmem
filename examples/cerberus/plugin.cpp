@@ -390,6 +390,11 @@ void LoadPlugins()
   auto const& config = GetConfig();
   for (auto const& plugin : config.GetPlugins())
   {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Processing config Plugin entry. Path: [%s]. Process: [%s].",
+      plugin.path_.c_str(),
+      plugin.process_.c_str());
+
     if (!plugin.process_.empty())
     {
       hadesmem::Process const this_process(::GetCurrentProcessId());
@@ -399,6 +404,7 @@ void LoadPlugins()
       if (hadesmem::detail::ToUpperOrdinal(this_process_name) !=
           hadesmem::detail::ToUpperOrdinal(plugin.process_))
       {
+        HADESMEM_DETAIL_TRACE_A("Skipping due to process mismatch.");
         continue;
       }
     }
