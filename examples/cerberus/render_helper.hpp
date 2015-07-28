@@ -28,9 +28,17 @@ struct D3D9Offsets
   std::uintptr_t swap_chain_present_;
 };
 
+struct DXGIOffsets
+{
+  std::uintptr_t present_;
+  std::uintptr_t resize_buffers_;
+  std::uintptr_t present_1_;
+};
+
 struct RenderOffsets
 {
   D3D9Offsets d3d9_offsets_;
+  DXGIOffsets dxgi_offsets_;
 };
 
 inline std::wstring GenerateRenderHelperMapName(DWORD pid)
