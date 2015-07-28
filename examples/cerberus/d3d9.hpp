@@ -14,26 +14,10 @@
 
 #include "callbacks.hpp"
 
-// TODO: Clean this up. Use a function to generate and return the full name
-// including the PID?
-#define CERBERUS_HELPER_D3D9_MAP_NAME L"Local\\CerberusHelper_D3D9_"
-
 namespace hadesmem
 {
 namespace cerberus
 {
-struct D3D9Offsets
-{
-  std::uintptr_t add_ref_;
-  std::uintptr_t release_;
-  std::uintptr_t present_;
-  std::uintptr_t reset_;
-  std::uintptr_t end_scene_;
-  std::uintptr_t present_ex_;
-  std::uintptr_t reset_ex_;
-  std::uintptr_t swap_chain_present_;
-};
-
 typedef void OnFrameD3D9Callback(IDirect3DDevice9* device);
 
 typedef void

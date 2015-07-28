@@ -177,6 +177,9 @@
     <ClCompile Include="..\..\..\examples\cerberus\gwen\Window_.cpp">
       <Filter>Source Files\gwen</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\examples\cerberus\render_helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp">
@@ -276,6 +279,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\config.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\examples\cerberus\render_helper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

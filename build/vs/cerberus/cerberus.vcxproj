@@ -241,6 +241,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\process.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\raw_input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\render.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\render_helper.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -276,6 +277,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\process.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\raw_input.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\render.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\render_helper.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\window.hpp" />
   </ItemGroup>
   <ItemGroup>

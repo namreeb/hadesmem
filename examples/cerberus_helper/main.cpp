@@ -14,7 +14,7 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
-#include <cerberus/d3d9.hpp>
+#include <cerberus/render_helper.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -145,8 +145,8 @@ int main(int argc, char* argv[])
       (*reinterpret_cast<void***>(swap_chain))[3];
 
     auto const file_mapping_name =
-      CERBERUS_HELPER_D3D9_MAP_NAME +
-      hadesmem::detail::MultiByteToWideChar(argv[1]);
+      hadesmem::cerberus::GenerateRenderHelperMapName(
+        hadesmem::detail::MultiByteToWideChar(argv[1]));
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Helper mapping name: [%s].",
                                    file_mapping_name.c_str());
     hadesmem::detail::SmartHandle file_mapping{
@@ -171,8 +171,9 @@ int main(int argc, char* argv[])
 
     // TODO: Ensure we're not being shimmed/hooked/etc or the offsets might not
     // be valid in the target process.
-    auto const d3d9_offsets =
-      static_cast<hadesmem::cerberus::D3D9Offsets*>(mapping_view.GetHandle());
+    auto const render_offsets =
+      static_cast<hadesmem::cerberus::RenderOffsets*>(mapping_view.GetHandle());
+    auto const d3d9_offsets = &render_offsets->d3d9_offsets_;
     auto const base = reinterpret_cast<std::uintptr_t>(d3d9_mod);
     d3d9_offsets->add_ref_ =
       reinterpret_cast<std::uintptr_t>(add_ref_fn) - base;

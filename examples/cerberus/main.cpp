@@ -37,6 +37,7 @@
 #include "process.hpp"
 #include "raw_input.hpp"
 #include "render.hpp"
+#include "render_helper.hpp"
 #include "window.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
@@ -71,6 +72,8 @@ void UseAllStatics()
   auto& raw_input = hadesmem::cerberus::GetRawInputInterface();
   auto& helper = hadesmem::cerberus::GetHelperInterface();
   (void)helper;
+  auto& render_helper = hadesmem::cerberus::GetRenderHelperInterface();
+  (void)render_helper;
 
   // Have to use 'real' callbacks rather than just passing in an empty
   // std::function object because we might not be the only thread running at the
@@ -423,6 +426,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // suspend/resumes in the patcher works fine for hooking safety, but simply
     // suspending in this function would allow us to avoid all the race
     // conditions and initialize everything in whatever order we want.
+    hadesmem::cerberus::InitializeRenderHelper();
     hadesmem::cerberus::InitializeModule();
     hadesmem::cerberus::InitializeException();
     hadesmem::cerberus::InitializeProcess();

@@ -33,6 +33,7 @@
 #include "main.hpp"
 #include "module.hpp"
 #include "process.hpp"
+#include "render_helper.hpp"
 
 // TODO: Clean up code duplication caused by adding device to the map in all
 // funcs. (Use a helper func instead.)
@@ -626,98 +627,9 @@ void DetourD3D9(HMODULE base)
   auto& helper = GetHelperInterface();
   if (helper.CommonDetourModule(process, L"D3D9", base, module))
   {
-    auto const pid_str = std::to_wstring(::GetCurrentProcessId());
-
-    auto const file_mapping_name = CERBERUS_HELPER_D3D9_MAP_NAME + pid_str;
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Helper mapping name: [%s].",
-                                   file_mapping_name.c_str());
-    hadesmem::detail::SmartHandle file_mapping{
-      ::CreateFileMappingW(INVALID_HANDLE_VALUE,
-                           nullptr,
-                           PAGE_READWRITE,
-                           0,
-                           sizeof(hadesmem::cerberus::D3D9Offsets),
-                           file_mapping_name.c_str())};
-    if (!file_mapping.IsValid())
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"CreateFileMappingW failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    hadesmem::detail::SmartMappedFileHandle mapping_view{::MapViewOfFileEx(
-      file_mapping.GetHandle(), FILE_MAP_READ, 0, 0, 0, nullptr)};
-    if (!mapping_view.IsValid())
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"MapViewOfFileEx failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    hadesmem::cerberus::HookDisabler disable_create_process_hook{
-      &hadesmem::cerberus::GetDisableCreateProcessInternalWHook()};
-
-    auto const self_dir_path = hadesmem::detail::GetSelfDirPath();
-    std::wstring const helper_path =
-      hadesmem::detail::CombinePath(self_dir_path, L"cerberus_helper.exe");
-    auto const helper_command_line = L"\"" + helper_path + L"\" " + pid_str;
-    std::vector<wchar_t> command_line_buf(std::begin(helper_command_line),
-                                          std::end(helper_command_line));
-    command_line_buf.push_back(L'\0');
-
-    STARTUPINFO start_info{};
-    PROCESS_INFORMATION proc_info{};
-    if (!::CreateProcessW(nullptr,
-                          command_line_buf.data(),
-                          nullptr,
-                          nullptr,
-                          FALSE,
-                          CREATE_NO_WINDOW,
-                          nullptr,
-                          nullptr,
-                          &start_info,
-                          &proc_info))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"CreateProcessW failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    hadesmem::detail::SmartHandle const helper_process_handle{
-      proc_info.hProcess};
-    hadesmem::detail::SmartHandle const helper_thread_handle{proc_info.hThread};
-
-    DWORD const wait_res =
-      ::WaitForSingleObject(helper_process_handle.GetHandle(), INFINITE);
-    if (wait_res != WAIT_OBJECT_0)
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{}
-        << hadesmem::ErrorString{"WaitForSingleObject failed."}
-        << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    DWORD exit_code = 0;
-    if (!::GetExitCodeProcess(helper_process_handle.GetHandle(), &exit_code))
-    {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"GetExitCodeProcess failed."}
-                          << hadesmem::ErrorCodeWinLast{last_error});
-    }
-
-    if (exit_code != 0)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"Helper failed."});
-    }
-
-    auto const d3d9_offsets =
-      static_cast<D3D9Offsets*>(mapping_view.GetHandle());
+    auto& render_helper = GetRenderHelperInterface();
+    auto const render_offsets = render_helper.GetRenderOffsets();
+    auto const d3d9_offsets = &render_offsets->d3d9_offsets_;
     auto const offset_base = reinterpret_cast<std::uint8_t*>(base);
 
     auto const add_ref_fn = offset_base + d3d9_offsets->add_ref_;
