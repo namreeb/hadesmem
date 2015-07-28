@@ -46,8 +46,9 @@ hadesmem::cerberus::Callbacks<
 class RawInputImpl : public hadesmem::cerberus::RawInputInterface
 {
 public:
-  virtual std::size_t RegisterOnGetRawInputBuffer(std::function<
-    hadesmem::cerberus::OnGetRawInputBufferCallback> const& callback) final
+  virtual std::size_t RegisterOnGetRawInputBuffer(
+    std::function<hadesmem::cerberus::OnGetRawInputBufferCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnGetRawInputBufferCallbacks();
     return callbacks.Register(callback);
@@ -59,8 +60,9 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnGetRawInputData(std::function<
-    hadesmem::cerberus::OnGetRawInputDataCallback> const& callback) final
+  virtual std::size_t RegisterOnGetRawInputData(
+    std::function<hadesmem::cerberus::OnGetRawInputDataCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnGetRawInputDataCallbacks();
     return callbacks.Register(callback);
@@ -143,13 +145,12 @@ extern "C" UINT WINAPI
   return retval;
 }
 
-extern "C" UINT WINAPI
-  GetRawInputDataDetour(hadesmem::PatchDetourBase* detour,
-                        HRAWINPUT raw_input,
-                        UINT command,
-                        LPVOID data,
-                        PUINT size,
-                        UINT size_header) noexcept
+extern "C" UINT WINAPI GetRawInputDataDetour(hadesmem::PatchDetourBase* detour,
+                                             HRAWINPUT raw_input,
+                                             UINT command,
+                                             LPVOID data,
+                                             PUINT size,
+                                             UINT size_header) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

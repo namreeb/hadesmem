@@ -178,9 +178,8 @@ std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_AddRef_Fn>>&
   return detour;
 }
 
-extern "C" ULONG WINAPI
-  IDirect3DDevice9_AddRef_Detour(hadesmem::PatchDetourBase* detour,
-                                 IDirect3DDevice9* device)
+extern "C" ULONG WINAPI IDirect3DDevice9_AddRef_Detour(
+  hadesmem::PatchDetourBase* detour, IDirect3DDevice9* device)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -221,9 +220,8 @@ std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_Release_Fn>>&
   return detour;
 }
 
-extern "C" ULONG WINAPI
-  IDirect3DDevice9_Release_Detour(hadesmem::PatchDetourBase* detour,
-                                  IDirect3DDevice9* device)
+extern "C" ULONG WINAPI IDirect3DDevice9_Release_Detour(
+  hadesmem::PatchDetourBase* detour, IDirect3DDevice9* device)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -283,9 +281,8 @@ std::unique_ptr<hadesmem::PatchDetour<IDirect3DDevice9_EndScene_Fn>>&
   return detour;
 }
 
-extern "C" HRESULT WINAPI
-  IDirect3DDevice9_EndScene_Detour(hadesmem::PatchDetourBase* detour,
-                                   IDirect3DDevice9* device)
+extern "C" HRESULT WINAPI IDirect3DDevice9_EndScene_Detour(
+  hadesmem::PatchDetourBase* detour, IDirect3DDevice9* device)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetPresentHookCount()};

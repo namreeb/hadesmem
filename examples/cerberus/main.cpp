@@ -108,8 +108,8 @@ void UseAllStatics()
   auto const on_frame_id_d3d9 = d3d9.RegisterOnFrame(on_frame_callback_d3d9);
   d3d9.UnregisterOnFrame(on_frame_id_d3d9);
 
-  auto const on_reset_callback_d3d9 =
-    [](IDirect3DDevice9*, D3DPRESENT_PARAMETERS*)
+  auto const on_reset_callback_d3d9 = [](IDirect3DDevice9*,
+                                         D3DPRESENT_PARAMETERS*)
   {
   };
   auto const on_reset_id_d3d9 = d3d9.RegisterOnReset(on_reset_callback_d3d9);

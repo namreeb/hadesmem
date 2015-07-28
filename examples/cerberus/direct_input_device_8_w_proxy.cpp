@@ -14,8 +14,8 @@ namespace hadesmem
 {
 namespace cerberus
 {
-HRESULT WINAPI
-  DirectInputDevice8WProxy::QueryInterface(REFIID riid, LPVOID* obj)
+HRESULT WINAPI DirectInputDevice8WProxy::QueryInterface(REFIID riid,
+                                                        LPVOID* obj)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -89,10 +89,8 @@ HRESULT WINAPI DirectInputDevice8WProxy::GetCapabilities(LPDIDEVCAPS dev_caps)
   return device_->GetCapabilities(dev_caps);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::EnumObjects(LPDIENUMDEVICEOBJECTSCALLBACKW callback,
-                                        LPVOID ref,
-                                        DWORD flags)
+HRESULT WINAPI DirectInputDevice8WProxy::EnumObjects(
+  LPDIENUMDEVICEOBJECTSCALLBACKW callback, LPVOID ref, DWORD flags)
 {
   return device_->EnumObjects(callback, ref, flags);
 }
@@ -103,9 +101,8 @@ HRESULT WINAPI DirectInputDevice8WProxy::GetProperty(REFGUID guid_prop,
   return device_->GetProperty(guid_prop, prop_header);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::SetProperty(REFGUID guid_prop,
-                                        LPCDIPROPHEADER prop_header)
+HRESULT WINAPI DirectInputDevice8WProxy::SetProperty(
+  REFGUID guid_prop, LPCDIPROPHEADER prop_header)
 {
   return device_->SetProperty(guid_prop, prop_header);
 }
@@ -120,8 +117,8 @@ HRESULT WINAPI DirectInputDevice8WProxy::Unacquire()
   return device_->Unacquire();
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::GetDeviceState(DWORD len_data, LPVOID data)
+HRESULT WINAPI DirectInputDevice8WProxy::GetDeviceState(DWORD len_data,
+                                                        LPVOID data)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -165,8 +162,8 @@ HRESULT WINAPI
   return device_->SetEventNotification(event_handle);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::SetCooperativeLevel(HWND hwnd, DWORD flags)
+HRESULT WINAPI DirectInputDevice8WProxy::SetCooperativeLevel(HWND hwnd,
+                                                             DWORD flags)
 {
   return device_->SetCooperativeLevel(hwnd, flags);
 }
@@ -183,8 +180,8 @@ HRESULT WINAPI
   return device_->GetDeviceInfo(device_instance);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::RunControlPanel(HWND owner, DWORD flags)
+HRESULT WINAPI DirectInputDevice8WProxy::RunControlPanel(HWND owner,
+                                                         DWORD flags)
 {
   return device_->RunControlPanel(owner, flags);
 }
@@ -205,17 +202,14 @@ HRESULT WINAPI
   return device_->CreateEffect(guid, effect, effect_interface, outer);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::EnumEffects(LPDIENUMEFFECTSCALLBACKW callback,
-                                        LPVOID ref,
-                                        DWORD eff_type)
+HRESULT WINAPI DirectInputDevice8WProxy::EnumEffects(
+  LPDIENUMEFFECTSCALLBACKW callback, LPVOID ref, DWORD eff_type)
 {
   return device_->EnumEffects(callback, ref, eff_type);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::GetEffectInfo(LPDIEFFECTINFOW effect_info,
-                                          REFGUID guid)
+HRESULT WINAPI DirectInputDevice8WProxy::GetEffectInfo(
+  LPDIEFFECTINFOW effect_info, REFGUID guid)
 {
   return device_->GetEffectInfo(effect_info, guid);
 }
@@ -267,18 +261,14 @@ HRESULT WINAPI DirectInputDevice8WProxy::WriteEffectToFile(
   return device_->WriteEffectToFile(file_name, entries, file_effect, flags);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::BuildActionMap(LPDIACTIONFORMATW action_format,
-                                           LPCWSTR user_name,
-                                           DWORD flags)
+HRESULT WINAPI DirectInputDevice8WProxy::BuildActionMap(
+  LPDIACTIONFORMATW action_format, LPCWSTR user_name, DWORD flags)
 {
   return device_->BuildActionMap(action_format, user_name, flags);
 }
 
-HRESULT WINAPI
-  DirectInputDevice8WProxy::SetActionMap(LPDIACTIONFORMATW action_format,
-                                         LPCWSTR user_name,
-                                         DWORD flags)
+HRESULT WINAPI DirectInputDevice8WProxy::SetActionMap(
+  LPDIACTIONFORMATW action_format, LPCWSTR user_name, DWORD flags)
 {
   return device_->SetActionMap(action_format, user_name, flags);
 }

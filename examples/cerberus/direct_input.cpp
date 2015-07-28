@@ -150,8 +150,8 @@ namespace cerberus
 DirectInputDeviceType DeviceGuidToEnum(IDirectInput8A* direct_input,
                                        REFGUID rguid)
 {
-  auto enum_callback =
-    [](LPCDIDEVICEINSTANCEA device_instance, LPVOID ref) -> BOOL
+  auto enum_callback = [](LPCDIDEVICEINSTANCEA device_instance,
+                          LPVOID ref) -> BOOL
   {
     auto const enum_info = static_cast<DeviceEnumInfo*>(ref);
     if (device_instance->guidInstance == enum_info->guid_ ||
@@ -214,8 +214,8 @@ DirectInputDeviceType DeviceGuidToEnum(IDirectInput8A* direct_input,
 DirectInputDeviceType DeviceGuidToEnum(IDirectInput8W* direct_input,
                                        REFGUID rguid)
 {
-  auto enum_callback =
-    [](LPCDIDEVICEINSTANCEW device_instance, LPVOID ref) -> BOOL
+  auto enum_callback = [](LPCDIDEVICEINSTANCEW device_instance,
+                          LPVOID ref) -> BOOL
   {
     auto const enum_info = static_cast<DeviceEnumInfo*>(ref);
     if (device_instance->guidInstance == enum_info->guid_ ||

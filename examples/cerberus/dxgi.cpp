@@ -106,10 +106,8 @@ std::pair<void*, SIZE_T>& GetDXGIModule() noexcept
   return module;
 }
 
-extern "C" HRESULT WINAPI
-  CreateDXGIFactoryDetour(hadesmem::PatchDetourBase* detour,
-                          REFIID riid,
-                          void** factory) noexcept
+extern "C" HRESULT WINAPI CreateDXGIFactoryDetour(
+  hadesmem::PatchDetourBase* detour, REFIID riid, void** factory) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -136,10 +134,8 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-extern "C" HRESULT WINAPI
-  CreateDXGIFactory1Detour(hadesmem::PatchDetourBase* detour,
-                           REFIID riid,
-                           void** factory) noexcept
+extern "C" HRESULT WINAPI CreateDXGIFactory1Detour(
+  hadesmem::PatchDetourBase* detour, REFIID riid, void** factory) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

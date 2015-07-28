@@ -276,12 +276,11 @@ HRESULT WINAPI D3D11DeviceProxy::CreatePixelShader(
     pShaderBytecode, BytecodeLength, pClassLinkage, ppPixelShader);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::CreateHullShader(_In_reads_(BytecodeLength)
-                                       const void* pShaderBytecode,
-                                     _In_ SIZE_T BytecodeLength,
-                                     _In_opt_ ID3D11ClassLinkage* pClassLinkage,
-                                     _Out_opt_ ID3D11HullShader** ppHullShader)
+HRESULT WINAPI D3D11DeviceProxy::CreateHullShader(
+  _In_reads_(BytecodeLength) const void* pShaderBytecode,
+  _In_ SIZE_T BytecodeLength,
+  _In_opt_ ID3D11ClassLinkage* pClassLinkage,
+  _Out_opt_ ID3D11HullShader** ppHullShader)
 {
   return device_->CreateHullShader(
     pShaderBytecode, BytecodeLength, pClassLinkage, ppHullShader);
@@ -342,9 +341,8 @@ HRESULT WINAPI D3D11DeviceProxy::CreateSamplerState(
   return device_->CreateSamplerState(pSamplerDesc, ppSamplerState);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::CreateQuery(_In_ const D3D11_QUERY_DESC* pQueryDesc,
-                                _Out_opt_ ID3D11Query** ppQuery)
+HRESULT WINAPI D3D11DeviceProxy::CreateQuery(
+  _In_ const D3D11_QUERY_DESC* pQueryDesc, _Out_opt_ ID3D11Query** ppQuery)
 {
   return device_->CreateQuery(pQueryDesc, ppQuery);
 }
@@ -383,10 +381,8 @@ HRESULT WINAPI D3D11DeviceProxy::CheckFormatSupport(_In_ DXGI_FORMAT Format,
   return device_->CheckFormatSupport(Format, pFormatSupport);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::CheckMultisampleQualityLevels(_In_ DXGI_FORMAT Format,
-                                                  _In_ UINT SampleCount,
-                                                  _Out_ UINT* pNumQualityLevels)
+HRESULT WINAPI D3D11DeviceProxy::CheckMultisampleQualityLevels(
+  _In_ DXGI_FORMAT Format, _In_ UINT SampleCount, _Out_ UINT* pNumQualityLevels)
 {
   return device_->CheckMultisampleQualityLevels(
     Format, SampleCount, pNumQualityLevels);
@@ -398,17 +394,16 @@ void WINAPI
   return device_->CheckCounterInfo(pCounterInfo);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::CheckCounter(_In_ const D3D11_COUNTER_DESC* pDesc,
-                                 _Out_ D3D11_COUNTER_TYPE* pType,
-                                 _Out_ UINT* pActiveCounters,
-                                 _Out_writes_opt_(*pNameLength) LPSTR szName,
-                                 _Inout_opt_ UINT* pNameLength,
-                                 _Out_writes_opt_(*pUnitsLength) LPSTR szUnits,
-                                 _Inout_opt_ UINT* pUnitsLength,
-                                 _Out_writes_opt_(*pDescriptionLength)
-                                   LPSTR szDescription,
-                                 _Inout_opt_ UINT* pDescriptionLength)
+HRESULT WINAPI D3D11DeviceProxy::CheckCounter(
+  _In_ const D3D11_COUNTER_DESC* pDesc,
+  _Out_ D3D11_COUNTER_TYPE* pType,
+  _Out_ UINT* pActiveCounters,
+  _Out_writes_opt_(*pNameLength) LPSTR szName,
+  _Inout_opt_ UINT* pNameLength,
+  _Out_writes_opt_(*pUnitsLength) LPSTR szUnits,
+  _Inout_opt_ UINT* pUnitsLength,
+  _Out_writes_opt_(*pDescriptionLength) LPSTR szDescription,
+  _Inout_opt_ UINT* pDescriptionLength)
 {
   return device_->CheckCounter(pDesc,
                                pType,
@@ -446,9 +441,8 @@ HRESULT WINAPI D3D11DeviceProxy::SetPrivateData(_In_ REFGUID guid,
   return device_->SetPrivateData(guid, DataSize, pData);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::SetPrivateDataInterface(_In_ REFGUID guid,
-                                            _In_opt_ const IUnknown* pData)
+HRESULT WINAPI D3D11DeviceProxy::SetPrivateDataInterface(
+  _In_ REFGUID guid, _In_opt_ const IUnknown* pData)
 {
   return device_->SetPrivateDataInterface(guid, pData);
 }
@@ -534,10 +528,8 @@ HRESULT WINAPI D3D11DeviceProxy::CreateDeviceContextState(
                                           ppContextState);
 }
 
-HRESULT WINAPI
-  D3D11DeviceProxy::OpenSharedResource1(_In_ HANDLE hResource,
-                                        _In_ REFIID returnedInterface,
-                                        _Out_ void** ppResource)
+HRESULT WINAPI D3D11DeviceProxy::OpenSharedResource1(
+  _In_ HANDLE hResource, _In_ REFIID returnedInterface, _Out_ void** ppResource)
 {
   auto const device = static_cast<ID3D11Device1*>(device_);
   return device->OpenSharedResource1(hResource, returnedInterface, ppResource);

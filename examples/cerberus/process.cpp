@@ -65,8 +65,7 @@ std::pair<void*, SIZE_T>& GetKernelBaseModule() noexcept
 class EnsureResumeThread
 {
 public:
-  explicit EnsureResumeThread(HANDLE handle) noexcept
-    : handle_(handle)
+  explicit EnsureResumeThread(HANDLE handle) noexcept : handle_(handle)
   {
   }
 

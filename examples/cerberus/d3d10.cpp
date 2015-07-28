@@ -157,16 +157,16 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChainDetour(
-  hadesmem::PatchDetourBase* detour,
-  IDXGIAdapter* adapter,
-  D3D10_DRIVER_TYPE driver_type,
-  HMODULE software,
-  UINT flags,
-  UINT sdk_version,
-  DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
-  IDXGISwapChain** swap_chain,
-  ID3D10Device** device) noexcept
+extern "C" HRESULT WINAPI
+  D3D10CreateDeviceAndSwapChainDetour(hadesmem::PatchDetourBase* detour,
+                                      IDXGIAdapter* adapter,
+                                      D3D10_DRIVER_TYPE driver_type,
+                                      HMODULE software,
+                                      UINT flags,
+                                      UINT sdk_version,
+                                      DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
+                                      IDXGISwapChain** swap_chain,
+                                      ID3D10Device** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};
@@ -290,17 +290,17 @@ extern "C" HRESULT WINAPI
   return ret;
 }
 
-extern "C" HRESULT WINAPI D3D10CreateDeviceAndSwapChain1Detour(
-  hadesmem::PatchDetourBase* detour,
-  IDXGIAdapter* adapter,
-  D3D10_DRIVER_TYPE driver_type,
-  HMODULE software,
-  UINT flags,
-  D3D10_FEATURE_LEVEL1 hardware_level,
-  UINT sdk_version,
-  DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
-  IDXGISwapChain** swap_chain,
-  ID3D10Device1** device) noexcept
+extern "C" HRESULT WINAPI
+  D3D10CreateDeviceAndSwapChain1Detour(hadesmem::PatchDetourBase* detour,
+                                       IDXGIAdapter* adapter,
+                                       D3D10_DRIVER_TYPE driver_type,
+                                       HMODULE software,
+                                       UINT flags,
+                                       D3D10_FEATURE_LEVEL1 hardware_level,
+                                       UINT sdk_version,
+                                       DXGI_SWAP_CHAIN_DESC* swap_chain_desc,
+                                       IDXGISwapChain** swap_chain,
+                                       ID3D10Device1** device) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D10CreateHookCount()};

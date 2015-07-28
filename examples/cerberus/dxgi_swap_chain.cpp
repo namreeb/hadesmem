@@ -81,10 +81,8 @@ ULONG WINAPI DXGISwapChainProxy::Release()
   return ret;
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGISwapChainProxy::SetPrivateData(REFGUID name,
-                                     UINT data_size,
-                                     const void* data)
+_Use_decl_annotations_ HRESULT WINAPI DXGISwapChainProxy::SetPrivateData(
+  REFGUID name, UINT data_size, const void* data)
 {
   return swap_chain_->SetPrivateData(name, data_size, data);
 }

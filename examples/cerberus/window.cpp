@@ -14,6 +14,7 @@
 
 #include "callbacks.hpp"
 #include "helpers.hpp"
+#include "hook_counter.hpp"
 #include "main.hpp"
 
 namespace
@@ -134,14 +135,20 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageW)>>&
   return detour;
 }
 
+std::uint32_t& GetDispatchMessageHookCount() noexcept
+{
+  static __declspec(thread) std::uint32_t in_hook = 0;
+  return in_hook;
+}
+
 std::pair<void*, SIZE_T>& GetUser32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
 }
 
-extern "C" HWND WINAPI GetForegroundWindowDetour(
-  hadesmem::PatchDetourBase* detour) noexcept
+extern "C" HWND WINAPI
+  GetForegroundWindowDetour(hadesmem::PatchDetourBase* detour) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -167,21 +174,24 @@ extern "C" HWND WINAPI GetForegroundWindowDetour(
   return ret;
 }
 
-extern "C" LRESULT WINAPI
-  DispatchMessageADetour(hadesmem::PatchDetourBase* detour,
-                         MSG const* msg) noexcept
+extern "C" LRESULT WINAPI DispatchMessageADetour(
+  hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+  hadesmem::cerberus::HookCounter hook_counter{&GetDispatchMessageHookCount()};
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", msg);
 
-  auto const& callbacks = GetOnWndProcMsgCallbacks();
-  bool handled = false;
-  callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
-
-  if (handled)
+  if (hook_counter.GetCount() == 1)
   {
-    return 0;
+    auto const& callbacks = GetOnWndProcMsgCallbacks();
+    bool handled = false;
+    callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
+
+    if (handled)
+    {
+      return 0;
+    }
   }
 
   auto const dispatch_message_a =
@@ -194,21 +204,24 @@ extern "C" LRESULT WINAPI
   return ret;
 }
 
-extern "C" LRESULT WINAPI
-  DispatchMessageWDetour(hadesmem::PatchDetourBase* detour,
-                         MSG const* msg) noexcept
+extern "C" LRESULT WINAPI DispatchMessageWDetour(
+  hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
+  hadesmem::cerberus::HookCounter hook_counter{&GetDispatchMessageHookCount()};
 
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", msg);
 
-  auto const& callbacks = GetOnWndProcMsgCallbacks();
-  bool handled = false;
-  callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
-
-  if (handled)
+  if (hook_counter.GetCount() == 1)
   {
-    return 0;
+    auto const& callbacks = GetOnWndProcMsgCallbacks();
+    bool handled = false;
+    callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
+
+    if (handled)
+    {
+      return 0;
+    }
   }
 
   auto const dispatch_message_w =

@@ -221,9 +221,8 @@ std::pair<void*, SIZE_T>& GetUser32Module() noexcept
   return module;
 }
 
-extern "C" HCURSOR WINAPI
-  SetCursorDetour(hadesmem::PatchDetourBase* detour,
-                  HCURSOR cursor) noexcept
+extern "C" HCURSOR WINAPI SetCursorDetour(hadesmem::PatchDetourBase* detour,
+                                          HCURSOR cursor) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -259,9 +258,8 @@ extern "C" HCURSOR WINAPI
   return ret;
 }
 
-extern "C" BOOL WINAPI
-  GetCursorPosDetour(hadesmem::PatchDetourBase* detour,
-                     LPPOINT point) noexcept
+extern "C" BOOL WINAPI GetCursorPosDetour(hadesmem::PatchDetourBase* detour,
+                                          LPPOINT point) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -333,9 +331,8 @@ extern "C" BOOL WINAPI SetCursorPosDetour(hadesmem::PatchDetourBase* detour,
   return ret;
 }
 
-extern "C" BOOL WINAPI
-  GetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
-                             LPPOINT point) noexcept
+extern "C" BOOL WINAPI GetPhysicalCursorPosDetour(
+  hadesmem::PatchDetourBase* detour, LPPOINT point) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -370,10 +367,8 @@ extern "C" BOOL WINAPI
   return ret;
 }
 
-extern "C" BOOL WINAPI
-  SetPhysicalCursorPosDetour(hadesmem::PatchDetourBase* detour,
-                             int x,
-                             int y) noexcept
+extern "C" BOOL WINAPI SetPhysicalCursorPosDetour(
+  hadesmem::PatchDetourBase* detour, int x, int y) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -445,9 +440,8 @@ extern "C" int WINAPI ShowCursorDetour(hadesmem::PatchDetourBase* detour,
   return ret;
 }
 
-extern "C" BOOL WINAPI
-  ClipCursorDetour(hadesmem::PatchDetourBase* detour,
-                   RECT const* rect) noexcept
+extern "C" BOOL WINAPI ClipCursorDetour(hadesmem::PatchDetourBase* detour,
+                                        RECT const* rect) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

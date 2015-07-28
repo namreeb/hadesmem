@@ -143,8 +143,8 @@ void WINAPI D3D10DeviceProxy::DrawIndexed(_In_ UINT IndexCount,
     IndexCount, StartIndexLocation, BaseVertexLocation);
 }
 
-void WINAPI
-  D3D10DeviceProxy::Draw(_In_ UINT VertexCount, _In_ UINT StartVertexLocation)
+void WINAPI D3D10DeviceProxy::Draw(_In_ UINT VertexCount,
+                                   _In_ UINT StartVertexLocation)
 {
   return device_->Draw(VertexCount, StartVertexLocation);
 }
@@ -228,9 +228,8 @@ void WINAPI
   return device_->GSSetShader(pShader);
 }
 
-void WINAPI
-  D3D10DeviceProxy::IASetPrimitiveTopology(_In_ D3D10_PRIMITIVE_TOPOLOGY
-                                             Topology)
+void WINAPI D3D10DeviceProxy::IASetPrimitiveTopology(
+  _In_ D3D10_PRIMITIVE_TOPOLOGY Topology)
 {
   return device_->IASetPrimitiveTopology(Topology);
 }
@@ -256,9 +255,8 @@ void WINAPI D3D10DeviceProxy::VSSetSamplers(
   return device_->VSSetSamplers(StartSlot, NumSamplers, ppSamplers);
 }
 
-void WINAPI
-  D3D10DeviceProxy::SetPredication(_In_opt_ ID3D10Predicate* pPredicate,
-                                   _In_ BOOL PredicateValue)
+void WINAPI D3D10DeviceProxy::SetPredication(
+  _In_opt_ ID3D10Predicate* pPredicate, _In_ BOOL PredicateValue)
 {
   return device_->SetPredication(pPredicate, PredicateValue);
 }
@@ -540,9 +538,8 @@ void WINAPI D3D10DeviceProxy::VSGetSamplers(
   return device_->VSGetSamplers(StartSlot, NumSamplers, ppSamplers);
 }
 
-void WINAPI
-  D3D10DeviceProxy::GetPredication(_Out_opt_ ID3D10Predicate** ppPredicate,
-                                   _Out_opt_ BOOL* pPredicateValue)
+void WINAPI D3D10DeviceProxy::GetPredication(
+  _Out_opt_ ID3D10Predicate** ppPredicate, _Out_opt_ BOOL* pPredicateValue)
 {
   return device_->GetPredication(ppPredicate, pPredicateValue);
 }
@@ -591,12 +588,10 @@ void WINAPI D3D10DeviceProxy::OMGetDepthStencilState(
   return device_->OMGetDepthStencilState(ppDepthStencilState, pStencilRef);
 }
 
-void WINAPI
-  D3D10DeviceProxy::SOGetTargets(_In_range_(0, D3D10_SO_BUFFER_SLOT_COUNT)
-                                   UINT NumBuffers,
-                                 _Out_writes_opt_(NumBuffers)
-                                   ID3D10Buffer** ppSOTargets,
-                                 _Out_writes_opt_(NumBuffers) UINT* pOffsets)
+void WINAPI D3D10DeviceProxy::SOGetTargets(
+  _In_range_(0, D3D10_SO_BUFFER_SLOT_COUNT) UINT NumBuffers,
+  _Out_writes_opt_(NumBuffers) ID3D10Buffer** ppSOTargets,
+  _Out_writes_opt_(NumBuffers) UINT* pOffsets)
 {
   return device_->SOGetTargets(NumBuffers, ppSOTargets, pOffsets);
 }
@@ -654,9 +649,8 @@ HRESULT WINAPI D3D10DeviceProxy::SetPrivateData(_In_ REFGUID guid,
   return device_->SetPrivateData(guid, DataSize, pData);
 }
 
-HRESULT WINAPI
-  D3D10DeviceProxy::SetPrivateDataInterface(_In_ REFGUID guid,
-                                            _In_opt_ const IUnknown* pData)
+HRESULT WINAPI D3D10DeviceProxy::SetPrivateDataInterface(
+  _In_ REFGUID guid, _In_opt_ const IUnknown* pData)
 {
   return device_->SetPrivateDataInterface(guid, pData);
 }
@@ -817,9 +811,8 @@ HRESULT WINAPI D3D10DeviceProxy::CreateSamplerState(
   return device_->CreateSamplerState(pSamplerDesc, ppSamplerState);
 }
 
-HRESULT WINAPI
-  D3D10DeviceProxy::CreateQuery(_In_ const D3D10_QUERY_DESC* pQueryDesc,
-                                _Out_opt_ ID3D10Query** ppQuery)
+HRESULT WINAPI D3D10DeviceProxy::CreateQuery(
+  _In_ const D3D10_QUERY_DESC* pQueryDesc, _Out_opt_ ID3D10Query** ppQuery)
 {
   return device_->CreateQuery(pQueryDesc, ppQuery);
 }
@@ -844,10 +837,8 @@ HRESULT WINAPI D3D10DeviceProxy::CheckFormatSupport(_In_ DXGI_FORMAT Format,
   return device_->CheckFormatSupport(Format, pFormatSupport);
 }
 
-HRESULT WINAPI
-  D3D10DeviceProxy::CheckMultisampleQualityLevels(_In_ DXGI_FORMAT Format,
-                                                  _In_ UINT SampleCount,
-                                                  _Out_ UINT* pNumQualityLevels)
+HRESULT WINAPI D3D10DeviceProxy::CheckMultisampleQualityLevels(
+  _In_ DXGI_FORMAT Format, _In_ UINT SampleCount, _Out_ UINT* pNumQualityLevels)
 {
   return device_->CheckMultisampleQualityLevels(
     Format, SampleCount, pNumQualityLevels);
@@ -859,17 +850,16 @@ void WINAPI
   return device_->CheckCounterInfo(pCounterInfo);
 }
 
-HRESULT WINAPI
-  D3D10DeviceProxy::CheckCounter(_In_ const D3D10_COUNTER_DESC* pDesc,
-                                 _Out_ D3D10_COUNTER_TYPE* pType,
-                                 _Out_ UINT* pActiveCounters,
-                                 _Out_writes_opt_(*pNameLength) LPSTR szName,
-                                 _Inout_opt_ UINT* pNameLength,
-                                 _Out_writes_opt_(*pUnitsLength) LPSTR szUnits,
-                                 _Inout_opt_ UINT* pUnitsLength,
-                                 _Out_writes_opt_(*pDescriptionLength)
-                                   LPSTR szDescription,
-                                 _Inout_opt_ UINT* pDescriptionLength)
+HRESULT WINAPI D3D10DeviceProxy::CheckCounter(
+  _In_ const D3D10_COUNTER_DESC* pDesc,
+  _Out_ D3D10_COUNTER_TYPE* pType,
+  _Out_ UINT* pActiveCounters,
+  _Out_writes_opt_(*pNameLength) LPSTR szName,
+  _Inout_opt_ UINT* pNameLength,
+  _Out_writes_opt_(*pUnitsLength) LPSTR szUnits,
+  _Inout_opt_ UINT* pUnitsLength,
+  _Out_writes_opt_(*pDescriptionLength) LPSTR szDescription,
+  _Inout_opt_ UINT* pDescriptionLength)
 {
   return device_->CheckCounter(pDesc,
                                pType,
@@ -895,8 +885,8 @@ HRESULT WINAPI
   return device_->OpenSharedResource(hResource, ReturnedInterface, ppResource);
 }
 
-void WINAPI
-  D3D10DeviceProxy::SetTextFilterSize(_In_ UINT Width, _In_ UINT Height)
+void WINAPI D3D10DeviceProxy::SetTextFilterSize(_In_ UINT Width,
+                                                _In_ UINT Height)
 {
   return device_->SetTextFilterSize(Width, Height);
 }

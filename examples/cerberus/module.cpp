@@ -137,8 +137,10 @@ extern "C" NTSTATUS WINAPI
 
 extern "C" NTSTATUS WINAPI NtUnmapViewOfSection(HANDLE process, PVOID base);
 
-extern "C" NTSTATUS WINAPI
-  LdrLoadDll(PCWSTR path, PULONG flags, PCUNICODE_STRING name, PVOID* handle);
+extern "C" NTSTATUS WINAPI LdrLoadDll(PCWSTR path,
+                                      PULONG flags,
+                                      PCUNICODE_STRING name,
+                                      PVOID* handle);
 
 extern "C" NTSTATUS WINAPI LdrUnloadDll(PVOID handle);
 
@@ -296,10 +298,8 @@ extern "C" NTSTATUS WINAPI
   return ret;
 }
 
-extern "C" NTSTATUS WINAPI
-  NtUnmapViewOfSectionDetour(hadesmem::PatchDetourBase* detour,
-                             HANDLE process,
-                             PVOID base) noexcept
+extern "C" NTSTATUS WINAPI NtUnmapViewOfSectionDetour(
+  hadesmem::PatchDetourBase* detour, HANDLE process, PVOID base) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -355,12 +355,11 @@ std::wstring UnicodeStringToStdString(PCUNICODE_STRING in)
   return std::wstring(in->Buffer, in->Length / sizeof(wchar_t));
 }
 
-extern "C" NTSTATUS WINAPI
-  LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
-                   PCWSTR path,
-                   PULONG flags,
-                   PCUNICODE_STRING name,
-                   PVOID* handle) noexcept
+extern "C" NTSTATUS WINAPI LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
+                                            PCWSTR path,
+                                            PULONG flags,
+                                            PCUNICODE_STRING name,
+                                            PVOID* handle) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -420,9 +419,8 @@ extern "C" NTSTATUS WINAPI
   return ret;
 }
 
-extern "C" NTSTATUS WINAPI
-  LdrUnloadDllDetour(hadesmem::PatchDetourBase* detour,
-                     PVOID handle) noexcept
+extern "C" NTSTATUS WINAPI LdrUnloadDllDetour(hadesmem::PatchDetourBase* detour,
+                                              PVOID handle) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

@@ -42,9 +42,10 @@ hadesmem::cerberus::Callbacks<
 class ExceptionImpl : public hadesmem::cerberus::ExceptionInterface
 {
 public:
-  virtual std::size_t RegisterOnRtlAddVectoredExceptionHandler(std::function<
-    hadesmem::cerberus::OnRtlAddVectoredExceptionHandlerCallback> const&
-                                                                 callback) final
+  virtual std::size_t RegisterOnRtlAddVectoredExceptionHandler(
+    std::function<
+      hadesmem::cerberus::OnRtlAddVectoredExceptionHandlerCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnRtlAddVectoredExceptionHandlerCallbacks();
     return callbacks.Register(callback);
@@ -56,9 +57,10 @@ public:
     return callbacks.Unregister(id);
   }
 
-  virtual std::size_t RegisterOnSetUnhandledExceptionFilter(std::function<
-    hadesmem::cerberus::OnSetUnhandledExceptionFilterCallback> const& callback)
-    final
+  virtual std::size_t RegisterOnSetUnhandledExceptionFilter(
+    std::function<
+      hadesmem::cerberus::OnSetUnhandledExceptionFilterCallback> const&
+      callback) final
   {
     auto& callbacks = GetOnSetUnhandledExceptionFilterCallbacks();
     return callbacks.Register(callback);
@@ -136,8 +138,7 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
 extern "C" LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
   SetUnhandledExceptionFilterDetour(
     hadesmem::PatchDetourBase* detour,
-    LPTOP_LEVEL_EXCEPTION_FILTER top_level_exception_filter)
-    noexcept
+    LPTOP_LEVEL_EXCEPTION_FILTER top_level_exception_filter) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 

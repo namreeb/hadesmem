@@ -410,9 +410,7 @@ void WindowProcCallback(
   }
 }
 
-void OnSetCursor(HCURSOR cursor,
-                 bool* handled,
-                 HCURSOR* retval) noexcept
+void OnSetCursor(HCURSOR cursor, bool* handled, HCURSOR* retval) noexcept
 {
   auto& old_cursor = GetOldCursor();
   HCURSOR const old_cursor_raw = old_cursor.second;
@@ -464,9 +462,7 @@ void OnGetDeviceData(DWORD len_object_data,
   *retval = E_FAIL;
 }
 
-void OnGetDeviceState(DWORD len_data,
-                      LPVOID data,
-                      HRESULT* retval) noexcept
+void OnGetDeviceState(DWORD len_data, LPVOID data, HRESULT* retval) noexcept
 {
   if (FAILED(*retval) || !hadesmem::cerberus::GetGuiVisible())
   {
@@ -477,9 +473,7 @@ void OnGetDeviceState(DWORD len_data,
   *retval = E_FAIL;
 }
 
-void OnGetCursorPos(LPPOINT point,
-                    bool physical,
-                    bool* handled) noexcept
+void OnGetCursorPos(LPPOINT point, bool physical, bool* handled) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && point)
   {
@@ -492,8 +486,7 @@ void OnGetCursorPos(LPPOINT point,
   }
 }
 
-void OnSetCursorPos(int x, int y, bool physical, bool* handled)
-  noexcept
+void OnSetCursorPos(int x, int y, bool physical, bool* handled) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
@@ -507,9 +500,7 @@ void OnSetCursorPos(int x, int y, bool physical, bool* handled)
   }
 }
 
-void OnShowCursor(BOOL show,
-                  bool* handled,
-                  int* retval) noexcept
+void OnShowCursor(BOOL show, bool* handled, int* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible())
   {
@@ -528,9 +519,7 @@ void OnShowCursor(BOOL show,
   }
 }
 
-void OnClipCursor(RECT const* rect,
-                  bool* handled,
-                  BOOL* retval) noexcept
+void OnClipCursor(RECT const* rect, bool* handled, BOOL* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && rect)
   {
@@ -541,9 +530,7 @@ void OnClipCursor(RECT const* rect,
   }
 }
 
-void OnGetClipCursor(RECT* rect,
-                     bool* handled,
-                     BOOL* retval) noexcept
+void OnGetClipCursor(RECT* rect, bool* handled, BOOL* retval) noexcept
 {
   if (hadesmem::cerberus::GetGuiVisible() && rect)
   {

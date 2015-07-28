@@ -89,17 +89,14 @@ ULONG WINAPI DXGIFactoryProxy::Release()
   return ret;
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGIFactoryProxy::SetPrivateData(REFGUID name,
-                                   UINT data_size,
-                                   const void* data)
+_Use_decl_annotations_ HRESULT WINAPI DXGIFactoryProxy::SetPrivateData(
+  REFGUID name, UINT data_size, const void* data)
 {
   return factory_->SetPrivateData(name, data_size, data);
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGIFactoryProxy::SetPrivateDataInterface(REFGUID name,
-                                            const IUnknown* unknown)
+_Use_decl_annotations_ HRESULT WINAPI DXGIFactoryProxy::SetPrivateDataInterface(
+  REFGUID name, const IUnknown* unknown)
 {
   return factory_->SetPrivateDataInterface(name, unknown);
 }
@@ -110,8 +107,8 @@ _Use_decl_annotations_ HRESULT WINAPI
   return factory_->GetPrivateData(name, data_size, data);
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGIFactoryProxy::GetParent(REFIID riid, void** parent)
+_Use_decl_annotations_ HRESULT WINAPI DXGIFactoryProxy::GetParent(REFIID riid,
+                                                                  void** parent)
 {
   return factory_->GetParent(riid, parent);
 }
@@ -122,8 +119,8 @@ _Use_decl_annotations_ HRESULT WINAPI
   return factory_->EnumAdapters(adapter_index, adapter);
 }
 
-HRESULT WINAPI
-  DXGIFactoryProxy::MakeWindowAssociation(HWND window_handle, UINT flags)
+HRESULT WINAPI DXGIFactoryProxy::MakeWindowAssociation(HWND window_handle,
+                                                       UINT flags)
 {
   return factory_->MakeWindowAssociation(window_handle, flags);
 }
@@ -134,10 +131,8 @@ _Use_decl_annotations_ HRESULT WINAPI
   return factory_->GetWindowAssociation(window_handle);
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGIFactoryProxy::CreateSwapChain(IUnknown* device,
-                                    DXGI_SWAP_CHAIN_DESC* desc,
-                                    IDXGISwapChain** swap_chain)
+_Use_decl_annotations_ HRESULT WINAPI DXGIFactoryProxy::CreateSwapChain(
+  IUnknown* device, DXGI_SWAP_CHAIN_DESC* desc, IDXGISwapChain** swap_chain)
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
@@ -172,9 +167,8 @@ _Use_decl_annotations_ HRESULT WINAPI
   return ret;
 }
 
-_Use_decl_annotations_ HRESULT WINAPI
-  DXGIFactoryProxy::CreateSoftwareAdapter(HMODULE module,
-                                          IDXGIAdapter** adapter)
+_Use_decl_annotations_ HRESULT WINAPI DXGIFactoryProxy::CreateSoftwareAdapter(
+  HMODULE module, IDXGIAdapter** adapter)
 {
   return factory_->CreateSoftwareAdapter(module, adapter);
 }

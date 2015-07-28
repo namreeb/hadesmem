@@ -81,18 +81,18 @@ std::uint32_t& GetD3D11CreateHookCount() noexcept
   return in_hook;
 }
 
-extern "C" HRESULT WINAPI D3D11CreateDeviceDetour(
-  hadesmem::PatchDetourBase* detour,
-  IDXGIAdapter* adapter,
-  D3D_DRIVER_TYPE driver_type,
-  HMODULE software,
-  UINT flags,
-  const D3D_FEATURE_LEVEL* ptr_feature_levels,
-  UINT feature_levels,
-  UINT sdk_version,
-  ID3D11Device** device,
-  D3D_FEATURE_LEVEL* feature_level,
-  ID3D11DeviceContext** immediate_context) noexcept
+extern "C" HRESULT WINAPI
+  D3D11CreateDeviceDetour(hadesmem::PatchDetourBase* detour,
+                          IDXGIAdapter* adapter,
+                          D3D_DRIVER_TYPE driver_type,
+                          HMODULE software,
+                          UINT flags,
+                          const D3D_FEATURE_LEVEL* ptr_feature_levels,
+                          UINT feature_levels,
+                          UINT sdk_version,
+                          ID3D11Device** device,
+                          D3D_FEATURE_LEVEL* feature_level,
+                          ID3D11DeviceContext** immediate_context) noexcept
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
   hadesmem::cerberus::HookCounter hook_counter{&GetD3D11CreateHookCount()};

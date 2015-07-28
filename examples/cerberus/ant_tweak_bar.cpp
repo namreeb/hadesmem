@@ -500,8 +500,8 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
 
-  std::string render_api_name =
-    [](hadesmem::cerberus::RenderApi api_) -> std::string
+  std::string render_api_name = [](
+    hadesmem::cerberus::RenderApi api_) -> std::string
   {
     switch (api_)
     {

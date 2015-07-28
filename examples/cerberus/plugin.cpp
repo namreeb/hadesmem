@@ -97,11 +97,10 @@ public:
 
   Plugin& operator=(Plugin const& other) = delete;
 
-  Plugin(Plugin&& other) noexcept
-    : path_(std::move(other.path_)),
-      base_{other.base_},
-      unload_{other.unload_},
-      call_export_{other.call_export_}
+  Plugin(Plugin&& other) noexcept : path_(std::move(other.path_)),
+                                    base_{other.base_},
+                                    unload_{other.unload_},
+                                    call_export_{other.call_export_}
   {
     other.base_ = nullptr;
     other.unload_ = false;
@@ -135,14 +134,12 @@ public:
     return &hadesmem::cerberus::GetModuleInterface();
   }
 
-  virtual hadesmem::cerberus::D3D9Interface*
-    GetD3D9Interface() noexcept final
+  virtual hadesmem::cerberus::D3D9Interface* GetD3D9Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D9Interface();
   }
 
-  virtual hadesmem::cerberus::DXGIInterface*
-    GetDXGIInterface() noexcept final
+  virtual hadesmem::cerberus::DXGIInterface* GetDXGIInterface() noexcept final
   {
     return &hadesmem::cerberus::GetDXGIInterface();
   }
@@ -177,8 +174,7 @@ public:
     return &hadesmem::cerberus::GetAntTweakBarInterface();
   }
 
-  virtual hadesmem::cerberus::GwenInterface*
-    GetGwenInterface() noexcept final
+  virtual hadesmem::cerberus::GwenInterface* GetGwenInterface() noexcept final
   {
     return &hadesmem::cerberus::GetGwenInterface();
   }
@@ -207,14 +203,12 @@ public:
     return &hadesmem::cerberus::GetOpenGL32Interface();
   }
 
-  virtual hadesmem::cerberus::D3D10Interface*
-    GetD3D10Interface() noexcept final
+  virtual hadesmem::cerberus::D3D10Interface* GetD3D10Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D10Interface();
   }
 
-  virtual hadesmem::cerberus::D3D11Interface*
-    GetD3D11Interface() noexcept final
+  virtual hadesmem::cerberus::D3D11Interface* GetD3D11Interface() noexcept final
   {
     return &hadesmem::cerberus::GetD3D11Interface();
   }
