@@ -32,18 +32,18 @@ hadesmem::cerberus::D3D9Offsets GetD3D9Offsets()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  auto const wnd = CreateWindowExW(0,
-                                   L"STATIC",
-                                   L"Cerberus D3D9 Window",
-                                   WS_POPUP,
-                                   0,
-                                   0,
-                                   1,
-                                   1,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr);
+  auto const wnd = ::CreateWindowExW(0,
+                                     L"STATIC",
+                                     L"Cerberus D3D9 Window",
+                                     WS_POPUP,
+                                     0,
+                                     0,
+                                     1,
+                                     1,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr);
   if (!wnd)
   {
     DWORD const last_error = ::GetLastError();
@@ -189,18 +189,18 @@ hadesmem::cerberus::DXGIOffsets GetDXGIOffsets()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  auto const wnd = CreateWindowExW(0,
-                                   L"STATIC",
-                                   L"Cerberus DXGI Window",
-                                   WS_POPUP,
-                                   0,
-                                   0,
-                                   1,
-                                   1,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr);
+  auto const wnd = ::CreateWindowExW(0,
+                                     L"STATIC",
+                                     L"Cerberus DXGI Window",
+                                     WS_POPUP,
+                                     0,
+                                     0,
+                                     1,
+                                     1,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr);
   if (!wnd)
   {
     DWORD const last_error = ::GetLastError();
