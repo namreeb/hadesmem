@@ -223,6 +223,7 @@
     <ProjectGuid>{5772AE06-8667-440F-8006-C34C79A50A75}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>gwen</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
