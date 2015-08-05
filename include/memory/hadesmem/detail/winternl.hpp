@@ -11,13 +11,15 @@
 // http://bit.ly/1cxEVDJ, http://bit.ly/1cm5xnC, http://bit.ly/1bXTstU,
 // http://bit.ly/1nuwpd6, etc.
 
-#define HADESMEM_DETAIL_STATUS_NO_SUCH_FILE (static_cast<NTSTATUS>(0xC000000FL))
-#define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
-  (static_cast<NTSTATUS>(0x80000006L))
 #define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH                            \
   (static_cast<NTSTATUS>(0xC0000004L))
+#define HADESMEM_DETAIL_STATUS_NO_MORE_FILES                                   \
+  (static_cast<NTSTATUS>(0x80000006L))
+#define HADESMEM_DETAIL_STATUS_NO_SUCH_FILE (static_cast<NTSTATUS>(0xC000000FL))
 #define HADESMEM_DETAIL_STATUS_NO_MORE_ENTRIES                                 \
   (static_cast<NTSTATUS>(0x8000001AL))
+#define HADESMEM_DETAIL_STATUS_ACCESS_DENIED                                   \
+  (static_cast<NTSTATUS>(0xC0000022L))
 #define HADESMEM_DETAIL_STATUS_BUFFER_TOO_SMALL                                \
   (static_cast<NTSTATUS>(0xC0000023L))
 
@@ -914,6 +916,23 @@ typedef struct _OBJECT_DIRECTORY_INFORMATION
   UNICODE_STRING Name;
   UNICODE_STRING TypeName;
 } OBJECT_DIRECTORY_INFORMATION, *POBJECT_DIRECTORY_INFORMATION;
+
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
+{
+  USHORT UniqueProcessId;
+  USHORT CreatorBackTraceIndex;
+  UCHAR ObjectTypeIndex;
+  UCHAR HandleAttributes;
+  USHORT HandleValue;
+  PVOID Object;
+  ULONG GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION
+{
+  ULONG NumberOfHandles;
+  SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
 }
 }
 }

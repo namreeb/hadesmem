@@ -381,7 +381,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
                   L"WARNING! " + data_dir_name +
                     L" data directory is unsupported.",
                   2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      // TODO: Re-enable this once we support all of the more common data dirs.
+      // WarnForCurrentFile(WarningType::kUnsupported);
     }
     // Used by packers etc for scratch storage.
     if (static_cast<hadesmem::PeDataDir>(i) == hadesmem::PeDataDir::Reserved &&
@@ -389,7 +390,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     {
       WriteNormal(
         out, L"WARNING! Detected usage of reserved data directory.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
   }
 }

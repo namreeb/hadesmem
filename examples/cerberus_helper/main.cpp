@@ -238,7 +238,7 @@ hadesmem::cerberus::DXGIOffsets GetDXGIOffsets()
     d3d11_create_device(nullptr,
                         D3D_DRIVER_TYPE_HARDWARE,
                         nullptr,
-                        D3D11_CREATE_DEVICE_DEBUG, // TODO: Remove this.
+                        0,
                         nullptr,
                         0,
                         D3D11_SDK_VERSION,

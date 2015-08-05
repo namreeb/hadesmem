@@ -166,7 +166,8 @@ void DumpThreads(DWORD pid)
 }
 
 void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
-                      bool continue_on_error = false)
+                      bool continue_on_error = false,
+                      bool memonly = false)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -177,7 +178,10 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
   WriteNamedHex(out, L"Priority", process_entry.GetPriority(), 0);
   WriteNamedNormal(out, L"Name", process_entry.GetName(), 0);
 
-  DumpThreads(process_entry.GetId());
+  if (!memonly)
+  {
+    DumpThreads(process_entry.GetId());
+  }
 
   std::unique_ptr<hadesmem::Process> process;
   try
@@ -192,32 +196,35 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
     return;
   }
 
-  // Using the Win32 API to get a processes path can fail for 'zombie'
-  // processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
-  try
+  if (!memonly)
   {
-    WriteNewline(out);
-    WriteNormal(out, L"Path (Win32): " + hadesmem::GetPath(*process), 0);
-  }
-  catch (std::exception const& /*e*/)
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Could not get Win32 path to process.", 0);
-  }
-  WriteNormal(out, L"Path (NT): " + hadesmem::GetPathNative(*process), 0);
-  WriteNormal(out,
-              L"WoW64: " +
-                std::wstring(hadesmem::IsWoW64(*process) ? L"Yes" : L"No"),
-              0);
+    // Using the Win32 API to get a processes path can fail for 'zombie'
+    // processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
+    try
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"Path (Win32): " + hadesmem::GetPath(*process), 0);
+    }
+    catch (std::exception const& /*e*/)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Could not get Win32 path to process.", 0);
+    }
+    WriteNormal(out, L"Path (NT): " + hadesmem::GetPathNative(*process), 0);
+    WriteNormal(out,
+                L"WoW64: " +
+                  std::wstring(hadesmem::IsWoW64(*process) ? L"Yes" : L"No"),
+                0);
 
-  DumpModules(*process);
+    DumpModules(*process);
 
-  DumpRegions(*process);
+    DumpRegions(*process);
+  }
 
   DumpMemory(*process, continue_on_error);
 }
 
-void DumpProcesses()
+void DumpProcesses(bool continue_on_error = false, bool memonly = false)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -227,7 +234,7 @@ void DumpProcesses()
   hadesmem::ProcessList const processes;
   for (auto const& process_entry : processes)
   {
-    DumpProcessEntry(process_entry);
+    DumpProcessEntry(process_entry, continue_on_error, memonly);
   }
 }
 }
@@ -405,6 +412,7 @@ int main(int argc, char* argv[])
     TCLAP::SwitchArg continue_arg("", "continue", "Continue on error", cmd);
     TCLAP::SwitchArg quiet_arg(
       "", "quiet", "Only output status messages (no dumping)", cmd);
+    TCLAP::SwitchArg memonly_arg("", "memonly", "Only do PE memory dumps", cmd);
     TCLAP::ValueArg<int> warned_type_arg("",
                                          "warned-type",
                                          "Filter warned file using warned type",
@@ -474,7 +482,7 @@ int main(int argc, char* argv[])
                      });
       if (iter != std::end(processes))
       {
-        DumpProcessEntry(*iter, continue_arg.isSet());
+        DumpProcessEntry(*iter, continue_arg.isSet(), memonly_arg.isSet());
       }
       else
       {
@@ -488,7 +496,7 @@ int main(int argc, char* argv[])
       auto const proc_name =
         hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
       auto const proc_entry = hadesmem::GetProcessEntryByName(proc_name, false);
-      DumpProcessEntry(proc_entry, continue_arg.isSet());
+      DumpProcessEntry(proc_entry, continue_arg.isSet(), memonly_arg.isSet());
     }
     else if (path_arg.isSet())
     {
@@ -507,7 +515,7 @@ int main(int argc, char* argv[])
     {
       DumpThreads(static_cast<DWORD>(-1));
 
-      DumpProcesses();
+      DumpProcesses(continue_arg.isSet(), memonly_arg.isSet());
 
       std::wcout << "\nFiles:\n";
 
