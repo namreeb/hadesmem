@@ -54,6 +54,7 @@ inline std::wstring CombinePath(std::wstring const& base,
                                 std::wstring const& append)
 {
   // Use newer and better PathCchCombineEx if it's available.
+  // TODO: Confirm this is the correct module to be looking for/in.
   detail::SmartModuleHandle const path_mod{
     ::LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll")};
   if (path_mod.IsValid())

@@ -316,7 +316,10 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpRelocations(process, pe_file);
 
-  DumpStrings(process, pe_file);
+  if (!g_quiet)
+  {
+    DumpStrings(process, pe_file);
+  }
 
   HandleWarnings(path);
 }
@@ -519,6 +522,7 @@ int main(int argc, char* argv[])
 
       std::wcout << "\nFiles:\n";
 
+      // TODO: Enumerate all volumes.
       std::wstring const self_path = hadesmem::detail::GetSelfPath();
       std::wstring const root_path = hadesmem::detail::GetRootPath(self_path);
       DumpDir(root_path, continue_arg.isSet());

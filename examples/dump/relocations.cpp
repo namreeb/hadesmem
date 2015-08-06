@@ -69,15 +69,14 @@ void DumpRelocations(hadesmem::Process const& process,
 
     WriteNewline(out);
 
-    if (size)
-    {
-      WriteNormal(out, L"Relocations:", 2);
-    }
-    else
+    if (!size)
     {
       WriteNormal(out, L"WARNING! Detected zero sized relocation block.", 2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
+      continue;
     }
+
+    WriteNormal(out, L"Relocations:", 2);
 
     hadesmem::RelocationList const relocs(process,
                                           pe_file,

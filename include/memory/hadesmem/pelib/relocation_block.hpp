@@ -88,13 +88,10 @@ public:
   DWORD GetNumberOfRelocations() const noexcept
   {
     DWORD const size_of_block = GetSizeOfBlock();
-    if (!size_of_block)
-    {
-      return 0;
-    }
-
-    return static_cast<DWORD>((size_of_block - sizeof(IMAGE_BASE_RELOCATION)) /
-                              sizeof(WORD));
+    return size_of_block ? (static_cast<DWORD>(
+                             (size_of_block - sizeof(IMAGE_BASE_RELOCATION)) /
+                             sizeof(WORD)))
+                         : 0;
   }
 
   PWORD GetRelocationDataStart() const noexcept

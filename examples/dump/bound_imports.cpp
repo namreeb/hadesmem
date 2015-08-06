@@ -72,17 +72,16 @@ void DumpBoundImports(hadesmem::Process const& process,
   hadesmem::BoundImportDescriptorList const bound_import_descs(process,
                                                                pe_file);
 
-  if (std::begin(bound_import_descs) != std::end(bound_import_descs))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Bound Import Descriptors:", 1);
-  }
-  else
+  if (std::begin(bound_import_descs) == std::end(bound_import_descs))
   {
     WriteNewline(out);
     WriteNormal(out, L"WARNING! Empty or invalid bound import directory.", 1);
     WarnForCurrentFile(WarningType::kSuspicious);
+    return;
   }
+
+  WriteNewline(out);
+  WriteNormal(out, L"Bound Import Descriptors:", 1);
 
   std::uint32_t num_descs = 0U;
   for (auto const& desc : bound_import_descs)

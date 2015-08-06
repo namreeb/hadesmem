@@ -34,6 +34,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
 
   if (pe_file.GetType() != hadesmem::PeFileType::Data)
   {
+    // TODO: Fix this.
     WriteNormal(out,
                 L"WARNING! Skipping string dump (Image file type is currently "
                 L"unsupported).",
@@ -42,7 +43,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
     return;
   }
 
-  std::size_t const kMinStringLen = 3;
+  std::size_t const kMinStringLen = 5;
 
   std::string buf;
   std::locale const& loc = std::locale::classic();

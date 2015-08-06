@@ -125,38 +125,32 @@ private:
   bool is_64_{false};
 };
 
-inline bool operator==(PeFile const& lhs,
-                       PeFile const& rhs) noexcept
+inline bool operator==(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(PeFile const& lhs,
-                       PeFile const& rhs) noexcept
+inline bool operator!=(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(PeFile const& lhs,
-                      PeFile const& rhs) noexcept
+inline bool operator<(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(PeFile const& lhs,
-                       PeFile const& rhs) noexcept
+inline bool operator<=(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(PeFile const& lhs,
-                      PeFile const& rhs) noexcept
+inline bool operator>(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(PeFile const& lhs,
-                       PeFile const& rhs) noexcept
+inline bool operator>=(PeFile const& lhs, PeFile const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
@@ -253,24 +247,21 @@ inline PVOID RvaToVa(Process const& process,
       }
     }
 
-    // SizeOfHeaders can be arbitrarily large, including the size of the
-    // entire file. RVAs inside the headers are treated as an offset from
-    // zero, rather than finding the 'true' location in a section.
+    // SizeOfHeaders can be arbitrarily large, including the size of the entire.
+    // RVAs inside the headers are treated as an offset from zero, rather than
+    // finding the 'true' location in a section.
     if (rva < size_of_headers)
     {
-      // Only applies in low alignment, otherwise it's invalid?
-      if (file_alignment < 200)
+      // TODO: This probably needs some extra checks as some cases are probably
+      // invalid, but I don't know what the checks should be. Need to
+      // investigate to see what is allowed and what is not.
+      if (rva > pe_file.GetSize() || rva > size_of_image)
       {
-        return base + rva;
-      }
-      // Also only applies if the RVA is smaller than file alignment?
-      else if (rva < file_alignment)
-      {
-        return base + rva;
+        return nullptr;
       }
       else
       {
-        return nullptr;
+        return base + rva;
       }
     }
 

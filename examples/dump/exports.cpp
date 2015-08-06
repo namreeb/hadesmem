@@ -90,7 +90,7 @@ void DumpExports(hadesmem::Process const& process,
     {
       WriteNewline(out);
       WriteNormal(out, L"WARNING! Invalid export list.", 2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
 
@@ -108,7 +108,7 @@ void DumpExports(hadesmem::Process const& process,
         L"WARNING! Processed 100000 exports. Stopping early to avoid resource "
         L"exhaustion attacks.",
         2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
 

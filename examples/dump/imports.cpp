@@ -61,7 +61,7 @@ void DumpImportThunk(hadesmem::ImportThunk const& thunk, bool is_bound)
     catch (std::exception const& /*e*/)
     {
       WriteNormal(out, L"WARNING! Invalid import thunk name data.", 3);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
 }
@@ -95,7 +95,7 @@ void DumpImports(hadesmem::Process const& process,
       // common than actual files with no imports).
       WriteNewline(out);
       WriteNormal(out, L"WARNING! Empty or invalid import directory.", 1);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
   }
 
@@ -138,7 +138,7 @@ void DumpImports(hadesmem::Process const& process,
         L"WARNING! Processed 1000 import dirs. Stopping early to avoid "
         L"resource exhaustion attacks.",
         2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
 
@@ -158,7 +158,7 @@ void DumpImports(hadesmem::Process const& process,
                       std::wstring(iat_valid ? L"empty" : L"invalid") +
                       L". Skipping directory.",
                     2);
-        WarnForCurrentFile(WarningType::kSuspicious);
+        WarnForCurrentFile(iat_valid ? WarningType::kSuspicious : WarningType::kUnsupported);
         continue;
       }
     }
@@ -180,7 +180,7 @@ void DumpImports(hadesmem::Process const& process,
     {
       WriteNormal(
         out, L"WARNING! ILT is extra invalid. Stopping enumeration.", 2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
       break;
     }
 
@@ -292,7 +292,7 @@ void DumpImports(hadesmem::Process const& process,
     catch (std::exception const& /*e*/)
     {
       WriteNormal(out, L"WARNING! Failed to read import dir name.", 2);
-      WarnForCurrentFile(WarningType::kSuspicious);
+      WarnForCurrentFile(WarningType::kUnsupported);
     }
 
     WriteNamedHex(out, L"FirstThunk", dir.GetFirstThunk(), 2);
@@ -345,7 +345,7 @@ void DumpImports(hadesmem::Process const& process,
           L"WARNING! Processed 10000 import thunks. Stopping early to "
           L"avoid resource exhaustion attacks.",
           2);
-        WarnForCurrentFile(WarningType::kSuspicious);
+        WarnForCurrentFile(WarningType::kUnsupported);
         break;
       }
 
@@ -387,9 +387,9 @@ void DumpImports(hadesmem::Process const& process,
           // Sample: pdfinfo.exe (from Git)
           // TODO: Investigate further and double-check the above assumption,
           // and also figure out whether there's some way we can narrow the
-          // scope of the warning to let through legitimate file while still
+          // scope of the warning to let through legitimate files while still
           // warning on suspicious ones.
-          // WarnForCurrentFile(WarningType::kSuspicious);
+          WarnForCurrentFile(WarningType::kSuspicious);
           break;
         }
 
