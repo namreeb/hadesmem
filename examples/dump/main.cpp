@@ -392,8 +392,8 @@ int main(int argc, char* argv[])
       "", "pid", "Target process id", false, 0, "DWORD");
     TCLAP::ValueArg<std::string> name_arg(
       "", "name", "Target process name", false, "", "string");
-    TCLAP::ValueArg<std::string> path_arg(
-      "", "path", "Target path (file or directory)", false, "", "string");
+    TCLAP::MultiArg<std::string> path_arg(
+      "", "path", "Target path (file or directory)", false, "string");
     TCLAP::SwitchArg all_arg("", "all", "No target, dump everything");
     std::vector<TCLAP::Arg*> xor_args{&pid_arg, &name_arg, &path_arg, &all_arg};
     cmd.xorAdd(xor_args);
@@ -503,15 +503,18 @@ int main(int argc, char* argv[])
     }
     else if (path_arg.isSet())
     {
-      auto const path =
-        hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
-      if (hadesmem::detail::IsDirectory(path))
+      auto const path_args = path_arg.getValue();
+      for (auto const& path : path_args)
       {
-        DumpDir(path, continue_arg.isSet());
-      }
-      else
-      {
-        DumpFile(path);
+        auto const path_wide = hadesmem::detail::MultiByteToWideChar(path);
+        if (hadesmem::detail::IsDirectory(path_wide))
+        {
+          DumpDir(path_wide, continue_arg.isSet());
+        }
+        else
+        {
+          DumpFile(path_wide);
+        }
       }
     }
     else

@@ -158,7 +158,8 @@ void DumpImports(hadesmem::Process const& process,
                       std::wstring(iat_valid ? L"empty" : L"invalid") +
                       L". Skipping directory.",
                     2);
-        WarnForCurrentFile(iat_valid ? WarningType::kSuspicious : WarningType::kUnsupported);
+        WarnForCurrentFile(iat_valid ? WarningType::kSuspicious
+                                     : WarningType::kUnsupported);
         continue;
       }
     }
@@ -198,8 +199,6 @@ void DumpImports(hadesmem::Process const& process,
     bool const has_new_bound_imports =
       (time_date_stamp == static_cast<DWORD>(-1));
     has_new_bound_imports_any = has_new_bound_imports;
-    bool const has_old_bound_imports =
-      (!has_new_bound_imports && time_date_stamp);
     if (has_new_bound_imports)
     {
       // Don't just check whether the ILT is invalid, but also ensure that
@@ -209,74 +208,17 @@ void DumpImports(hadesmem::Process const& process,
       // ILT, and no bound import dir.
       if (!ilt_valid && HasValidNonEmptyBoundImportDescList(process, pe_file))
       {
-        WriteNormal(out,
-                    L"WARNING! Detected new style bound imports "
-                    L"with an invalid ILT. Currently unhandled.",
-                    2);
+        WriteNormal(
+          out,
+          L"WARNING! Detected new style bound imports with an invalid ILT.",
+          2);
         WarnForCurrentFile(WarningType::kUnsupported);
       }
     }
 
-    DWORD const forwarder_chain = dir.GetForwarderChain();
-    WriteNamedHex(out, L"ForwarderChain", forwarder_chain, 2);
-    if (forwarder_chain == static_cast<DWORD>(-1))
-    {
-      if (has_old_bound_imports)
-      {
-        // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader.
-        WriteNormal(out,
-                    L"WARNING! Detected new style forwarder chain with "
-                    L"old style bound imports.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-      }
+    // TODO: Add support for dumping old style bound imports.
 
-      if (!time_date_stamp)
-      {
-        // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader.
-        WriteNormal(out,
-                    L"WARNING! Detected new style forwarder chain "
-                    L"with no bound imports.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-      }
-    }
-
-    if (forwarder_chain != 0 && forwarder_chain != static_cast<DWORD>(-1))
-    {
-      if (has_new_bound_imports)
-      {
-        // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader, but mark as unsupported to
-        // identify potential samples just in case.
-        WriteNormal(out,
-                    L"WARNING! Detected old style forwarder chain "
-                    L"with new bound imports.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-      }
-      else if (has_old_bound_imports)
-      {
-        WriteNormal(out,
-                    L"WARNING! Detected old style forwarder chain "
-                    L"with old bound imports. Currently unhandled.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-      }
-      else
-      {
-        // Not sure how common this is or if it's even allowed. I think it
-        // probably just gets ignored by the loader, but mark as unsupported to
-        // identify potential samples just in case.
-        WriteNormal(out,
-                    L"WARNING! Detected old style forwarder chain "
-                    L"with no bound imports. Currently unhandled.",
-                    2);
-        WarnForCurrentFile(WarningType::kUnsupported);
-      }
-    }
+    WriteNamedHex(out, L"ForwarderChain", dir.GetForwarderChain(), 2);
 
     WriteNamedHex(out, L"Name (Raw)", dir.GetNameRaw(), 2);
 
