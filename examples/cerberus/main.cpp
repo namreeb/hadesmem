@@ -426,6 +426,11 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // suspend/resumes in the patcher works fine for hooking safety, but simply
     // suspending in this function would allow us to avoid all the race
     // conditions and initialize everything in whatever order we want.
+    // We still need the auto-suspension in the patcher even if we suspend here
+    // though, because the same hooking code is used during OnModuleLoad etc
+    // events where the process is not frozen. We could work around that by
+    // manually adding suspend code everywhere that is appropriate... Needs more
+    // investigation though.
     hadesmem::cerberus::InitializeRenderHelper();
     hadesmem::cerberus::InitializeModule();
     hadesmem::cerberus::InitializeException();
@@ -464,7 +469,11 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
   {
     HADESMEM_DETAIL_TRACE_A(
       boost::current_exception_diagnostic_information().c_str());
-    HADESMEM_DETAIL_ASSERT(false);
+    // Don't assert here because if we do then the process will start to
+    // terminate, and plugins will have their DllMain called for unload before
+    // we have a chance to clean them up properly. This will result in crashes
+    // and other nastiness due to use-after-free, double-free, etc.
+    // HADESMEM_DETAIL_ASSERT(false);
 
     return 1;
   }

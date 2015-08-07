@@ -276,7 +276,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
     WriteNormal(out, L"WARNING! Detected kernel space ImageBase.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   // ImageBase must be a multiple of 0x10000
   if (!!(image_base & 0xFFFF))
@@ -329,12 +329,12 @@ void DumpNtHeaders(hadesmem::Process const& process,
   if (section_alignment < 0x800 && section_alignment != file_alignment)
   {
     WriteNormal(out, L"WARNING! Unusual alignment.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   if (file_alignment > section_alignment)
   {
     WriteNormal(out, L"WARNING! Invalid alignment.", 2);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    WarnForCurrentFile(WarningType::kSuspicious);
   }
   WriteNamedHex(out,
                 L"MajorOperatingSystemVersion",

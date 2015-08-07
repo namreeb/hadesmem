@@ -129,10 +129,34 @@ void InitializeRenderHelper()
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 
-  if (exit_code != 0)
+  DWORD session_id = 0;
+  if (!::ProcessIdToSessionId(proc_info.dwProcessId, &session_id))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
-                                    << hadesmem::ErrorString{"Helper failed."});
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"ProcessIdToSessionId failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  try
+  {
+    if (exit_code != 0)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error{} << hadesmem::ErrorString{"Helper failed."});
+    }
+  }
+  catch (...)
+  {
+    if (session_id)
+    {
+      throw;
+    }
+
+    HADESMEM_DETAIL_TRACE_A(
+      "WARNING! Helper failed. Ignoring due to helper running in session 0.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
   }
 
   auto& render_offsets = GetRenderOffsetsImpl();

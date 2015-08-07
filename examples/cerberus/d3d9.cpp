@@ -632,6 +632,13 @@ void DetourD3D9(HMODULE base)
     auto const d3d9_offsets = &render_offsets->d3d9_offsets_;
     auto const offset_base = reinterpret_cast<std::uint8_t*>(base);
 
+    if (!d3d9_offsets->add_ref_)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! No D3D9 offsets. Skipping hooks.");
+      return;
+    }
+
     auto const add_ref_fn = offset_base + d3d9_offsets->add_ref_;
     DetourFunc(process,
                "IDirect3DDevice9::AddRef",

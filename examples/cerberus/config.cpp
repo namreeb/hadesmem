@@ -84,8 +84,8 @@ void Config::LoadImpl(pugi::xml_document const& doc)
       hadesmem::detail::pugixml::GetAttributeValue(plugin_node, L"Path");
     auto const process = hadesmem::detail::pugixml::GetOptionalAttributeValue(
       plugin_node, L"Process");
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Got Plugin entry. Path: [%s]. Process: [%s].",
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Got Plugin entry. Path: [%s]. Process: [%s].",
       path.c_str(),
       process.c_str());
     plugins_.emplace_back(Plugin{path, process});
