@@ -21,8 +21,6 @@
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
-#include "d3d10.hpp"
-#include "d3d11.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
@@ -201,16 +199,6 @@ public:
     GetOpenGL32Interface() noexcept final
   {
     return &hadesmem::cerberus::GetOpenGL32Interface();
-  }
-
-  virtual hadesmem::cerberus::D3D10Interface* GetD3D10Interface() noexcept final
-  {
-    return &hadesmem::cerberus::GetD3D10Interface();
-  }
-
-  virtual hadesmem::cerberus::D3D11Interface* GetD3D11Interface() noexcept final
-  {
-    return &hadesmem::cerberus::GetD3D11Interface();
   }
 
   virtual hadesmem::cerberus::RawInputInterface*

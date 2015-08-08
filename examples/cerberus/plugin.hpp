@@ -38,10 +38,6 @@ class ProcessInterface;
 
 class OpenGL32Interface;
 
-class D3D10Interface;
-
-class D3D11Interface;
-
 class RawInputInterface;
 
 typedef void OnUnloadPluginsCallback();
@@ -63,32 +59,23 @@ public:
 
   virtual WindowInterface* GetWindowInterface() noexcept = 0;
 
-  virtual DirectInputInterface*
-    GetDirectInputInterface() noexcept = 0;
+  virtual DirectInputInterface* GetDirectInputInterface() noexcept = 0;
 
   virtual CursorInterface* GetCursorInterface() noexcept = 0;
 
-  virtual AntTweakBarInterface*
-    GetAntTweakBarInterface() noexcept = 0;
+  virtual AntTweakBarInterface* GetAntTweakBarInterface() noexcept = 0;
 
   virtual GwenInterface* GetGwenInterface() noexcept = 0;
 
   virtual HelperInterface* GetHelperInterface() noexcept = 0;
 
-  virtual ExceptionInterface*
-    GetExceptionInterface() noexcept = 0;
+  virtual ExceptionInterface* GetExceptionInterface() noexcept = 0;
 
   virtual ProcessInterface* GetProcessInterface() noexcept = 0;
 
-  virtual OpenGL32Interface*
-    GetOpenGL32Interface() noexcept = 0;
+  virtual OpenGL32Interface* GetOpenGL32Interface() noexcept = 0;
 
-  virtual D3D10Interface* GetD3D10Interface() noexcept = 0;
-
-  virtual D3D11Interface* GetD3D11Interface() noexcept = 0;
-
-  virtual RawInputInterface*
-    GetRawInputInterface() noexcept = 0;
+  virtual RawInputInterface* GetRawInputInterface() noexcept = 0;
 };
 
 void LoadPlugins();

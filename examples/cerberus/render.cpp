@@ -24,8 +24,6 @@
 #include "callbacks.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
-#include "d3d10.hpp"
-#include "d3d11.hpp"
 #include "d3d11_state_block.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
@@ -740,39 +738,38 @@ void OnReleaseD3D9(IDirect3DDevice9* device)
   }
 }
 
-void OnReleaseD3D10(ID3D10Device* device)
+void OnReleaseDXGI(IDXGISwapChain* swap_chain)
 {
+  bool cleaned = false;
+
   auto& render_info_d3d10 = GetRenderInfoD3D10();
-  if (device == render_info_d3d10.device_)
+  if (swap_chain == render_info_d3d10.swap_chain_)
   {
     HADESMEM_DETAIL_TRACE_A("Handling D3D10 device release.");
 
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D10);
-  }
-  else
-  {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
-                                   "device. Ours: [%p]. Theirs: [%p].",
-                                   render_info_d3d10.device_,
-                                   device);
-  }
-}
 
-void OnReleaseD3D11(ID3D11Device* device)
-{
+    cleaned = true;
+  }
+
   auto& render_info_d3d11 = GetRenderInfoD3D11();
-  if (device == render_info_d3d11.device_)
+  if (swap_chain == render_info_d3d11.swap_chain_)
   {
-    HADESMEM_DETAIL_TRACE_A("Handling D3D11 device release.");
+    HADESMEM_DETAIL_TRACE_A("Handling D3D10 device release.");
 
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D11);
+
+    cleaned = true;
   }
-  else
+
+  if (!cleaned)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Detected release on unhandled "
-                                   "device. Ours: [%p]. Theirs: [%p].",
-                                   render_info_d3d11.device_,
-                                   device);
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! Detected release on unhandled "
+      "device. Ours (D3D10): [%p]. Ours (D3D11): [%p]. Theirs: [%p].",
+      render_info_d3d10.swap_chain_,
+      render_info_d3d11.swap_chain_,
+      swap_chain);
   }
 }
 }
@@ -816,13 +813,7 @@ void InitializeRender()
   auto& dxgi = GetDXGIInterface();
   dxgi.RegisterOnFrame(OnFrameDXGI);
   dxgi.RegisterOnResize(OnResizeDXGI);
-  // TODO: Do we need to do anything with OnRelease here?
-
-  auto& d3d10 = GetD3D10Interface();
-  d3d10.RegisterOnRelease(OnReleaseD3D10);
-
-  auto& d3d11 = GetD3D11Interface();
-  d3d11.RegisterOnRelease(OnReleaseD3D11);
+  dxgi.RegisterOnRelease(OnReleaseDXGI);
 
   auto& d3d9 = GetD3D9Interface();
   d3d9.RegisterOnFrame(OnFrameD3D9);

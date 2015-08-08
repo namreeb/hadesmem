@@ -193,10 +193,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\config.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\cursor.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\d3d10.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\d3d10_device.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\d3d11.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\d3d11_device.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d9.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_a_proxy.cpp" />
@@ -204,8 +200,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\dxgi_factory.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\dxgi_swap_chain.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\gwen.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\gwen\Button.cpp" />
@@ -250,11 +244,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\callbacks.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\config.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\cursor.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\d3d10.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\d3d10_device.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\d3d11.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d11_defs.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\d3d11_device.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d11_state_block.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d9.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input.hpp" />
@@ -263,8 +253,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\dxgi_factory.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\dxgi_swap_chain.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\gwen.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />

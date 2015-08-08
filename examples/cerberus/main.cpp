@@ -23,8 +23,6 @@
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
-#include "d3d10.hpp"
-#include "d3d11.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
@@ -394,6 +392,13 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 
     is_initialized = true;
 
+    // Suspend process before doing anything for safety reasons when doing
+    // runtime injection (less important when done at process creation as
+    // there's only one thread and it's already suspended, and new threads are
+    // unlikely to be created/injected except for ours).
+    auto const& process = hadesmem::cerberus::GetThisProcess();
+    hadesmem::SuspendedProcess suspend{process.GetId()};
+
     auto const& config = hadesmem::cerberus::GetConfig();
 
     UseAllStatics();
@@ -437,9 +442,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::InitializeProcess();
     hadesmem::cerberus::InitializeRender();
     hadesmem::cerberus::InitializeD3D9();
-    hadesmem::cerberus::InitializeD3D10();
-    hadesmem::cerberus::InitializeD3D101();
-    hadesmem::cerberus::InitializeD3D11();
     hadesmem::cerberus::InitializeDXGI();
     hadesmem::cerberus::InitializeOpenGL32();
     hadesmem::cerberus::InitializeInput();
@@ -453,9 +455,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::DetourKernelBaseForException(nullptr);
     hadesmem::cerberus::DetourKernelBaseForProcess(nullptr);
     hadesmem::cerberus::DetourD3D9(nullptr);
-    hadesmem::cerberus::DetourD3D10(nullptr);
-    hadesmem::cerberus::DetourD3D101(nullptr);
-    hadesmem::cerberus::DetourD3D11(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
     hadesmem::cerberus::DetourUser32ForCursor(nullptr);
@@ -500,9 +499,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     hadesmem::cerberus::UndetourKernelBaseForException(true);
     hadesmem::cerberus::UndetourKernelBaseForProcess(true);
     hadesmem::cerberus::UndetourDXGI(true);
-    hadesmem::cerberus::UndetourD3D11(true);
-    hadesmem::cerberus::UndetourD3D101(true);
-    hadesmem::cerberus::UndetourD3D10(true);
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
     hadesmem::cerberus::UndetourUser32ForCursor(true);

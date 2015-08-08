@@ -29,16 +29,14 @@
 #include "callbacks.hpp"
 #include "helpers.hpp"
 #include "hook_counter.hpp"
-#include "hook_disabler.hpp"
 #include "main.hpp"
 #include "module.hpp"
-#include "process.hpp"
 #include "render_helper.hpp"
 
 // TODO: Clean up code duplication caused by adding device to the map in all
 // funcs. (Use a helper func instead.)
 
-// TODO: Implement the AddRef/Release support.
+// TODO: Implement AddRef/Release support.
 
 // TODO: Fix up the ref counting, reentrancy issues, etc. Everything is a major
 // hack right now...
