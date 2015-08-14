@@ -462,6 +462,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::DetourUser32ForWindow(nullptr);
     hadesmem::cerberus::DetourOpenGL32(nullptr);
 
+    HADESMEM_DETAIL_TRACE_A("Finished initialization.");
+
     return 0;
   }
   catch (...)
@@ -472,6 +474,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // terminate, and plugins will have their DllMain called for unload before
     // we have a chance to clean them up properly. This will result in crashes
     // and other nastiness due to use-after-free, double-free, etc.
+    // TODO: Confirm this is actually what was happening.
     // HADESMEM_DETAIL_ASSERT(false);
 
     return 1;
