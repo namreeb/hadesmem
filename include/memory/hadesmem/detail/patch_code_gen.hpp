@@ -382,28 +382,33 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
-  std::vector<std::uint8_t> buf = {// PUSHAD
-                                   0x60,
-                                   // MOV ECX, FS:[0x14]
-                                   0x64, 0x8B, 0x0D, 0x14, 0x00, 0x00, 0x00,
-                                   // MOV EAX, 0xDEADBEEF
-                                   0xB8, 0xEF, 0xBE, 0xAD, 0xDE,
-                                   // MOV FS:[0x14], EAX
-                                   0x64, 0xA3, 0x14, 0x00, 0x00, 0x00,
-                                   // MOV EAX, 0xCAFEBABE
-                                   0xB8, 0xBE, 0xBA, 0xFE, 0xCA,
-                                   // PUSH ECX
-                                   0x51,
-                                   // CALL EAX
-                                   0xFF, 0xD0,
-                                   // POP ECX
-                                   0x59,
-                                   // MOV [EAX], ECX
-                                   0x89, 0x08,
-                                   // POPAD
-                                   0x61};
-  std::size_t const kStubPtrOfs = 9;
-  std::size_t const kUserPtrOfs = 20;
+  // Add NOPs so Steam overlay works. It follows our hook, and it does not 
+  // recognize the opcode sequence otherwise.
+  std::vector<std::uint8_t> buf = {
+    // NOP (x 5)
+    0x90, 0x90, 0x90, 0x90, 0x90, 
+    // PUSHAD
+    0x60,
+    // MOV ECX, FS:[0x14]
+    0x64, 0x8B, 0x0D, 0x14, 0x00, 0x00, 0x00,
+    // MOV EAX, 0xDEADBEEF
+    0xB8, 0xEF, 0xBE, 0xAD, 0xDE,
+    // MOV FS:[0x14], EAX
+    0x64, 0xA3, 0x14, 0x00, 0x00, 0x00,
+    // MOV EAX, 0xCAFEBABE
+    0xB8, 0xBE, 0xBA, 0xFE, 0xCA,
+    // PUSH ECX
+    0x51,
+    // CALL EAX
+    0xFF, 0xD0,
+    // POP ECX
+    0x59,
+    // MOV [EAX], ECX
+    0x89, 0x08,
+    // POPAD
+    0x61};
+  std::size_t const kStubPtrOfs = 9 + 5;
+  std::size_t const kUserPtrOfs = 20 + 5;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
   *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = get_orig_user_ptr_ptr_fn;
   return buf;
