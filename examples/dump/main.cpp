@@ -46,6 +46,7 @@
 #include "headers.hpp"
 #include "imports.hpp"
 #include "memory.hpp"
+#include "overlay.hpp"
 #include "print.hpp"
 #include "relocations.hpp"
 #include "sections.hpp"
@@ -304,6 +305,8 @@ void DumpPeFile(hadesmem::Process const& process,
   DumpHeaders(process, pe_file);
 
   DumpSections(process, pe_file);
+
+  DumpOverlay(process, pe_file);
 
   DumpTls(process, pe_file);
 

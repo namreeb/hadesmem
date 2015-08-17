@@ -174,6 +174,8 @@ extern "C" HWND WINAPI
   return ret;
 }
 
+// TODO: Fix this. We're screwing up input for a lot of games with this. Need to
+// hook GetMessage, PeekMessage, etc. and implement this properly.
 extern "C" LRESULT WINAPI DispatchMessageADetour(
   hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
 {
@@ -204,6 +206,8 @@ extern "C" LRESULT WINAPI DispatchMessageADetour(
   return ret;
 }
 
+// TODO: Fix this. We're screwing up input for a lot of games with this. Need to
+// hook GetMessage, PeekMessage, etc. and implement this properly.
 extern "C" LRESULT WINAPI DispatchMessageWDetour(
   hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
 {

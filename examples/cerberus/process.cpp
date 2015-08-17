@@ -187,9 +187,29 @@ extern "C" BOOL WINAPI
 
   if (handled)
   {
-    HADESMEM_DETAIL_TRACE_NOISY_A(
+    HADESMEM_DETAIL_TRACE_A(
       "CreateProcessInternalW handled. Not calling trampoline.");
     return retval;
+  }
+
+  // TODO: Put this somewhere else. At the very least it belongs in a callback
+  // with a config flag to control it.
+  // TODO: Actually parse the command line and implement this properly.
+  if (application_name || command_line)
+  {
+    std::wstring const application_name_str(
+      application_name ? hadesmem::detail::ToUpperOrdinal(application_name)
+                       : L"");
+    std::wstring const command_line_str(
+      command_line ? hadesmem::detail::ToUpperOrdinal(command_line) : L"");
+    if (application_name_str.find(L"STEAMERRORREPORTER.EXE") !=
+          std::wstring::npos ||
+        command_line_str.find(L"STEAMERRORREPORTER.EXE") != std::wstring::npos)
+    {
+      HADESMEM_DETAIL_TRACE_A("Blocking launch of steamerrorreporter.exe.");
+      ::SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
   }
 
   auto const create_process_internal_w =

@@ -96,6 +96,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\import_thunk_list.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\nt_headers.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\overlay.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\pe_file.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\relocation_block.hpp" />

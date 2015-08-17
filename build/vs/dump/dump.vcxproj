@@ -194,6 +194,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\dump\imports.cpp" />
     <ClCompile Include="..\..\..\examples\dump\main.cpp" />
     <ClCompile Include="..\..\..\examples\dump\memory.cpp" />
+    <ClCompile Include="..\..\..\examples\dump\overlay.cpp" />
     <ClCompile Include="..\..\..\examples\dump\relocations.cpp" />
     <ClCompile Include="..\..\..\examples\dump\sections.cpp" />
     <ClCompile Include="..\..\..\examples\dump\strings.cpp" />
@@ -209,6 +210,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\dump\imports.hpp" />
     <ClInclude Include="..\..\..\examples\dump\main.hpp" />
     <ClInclude Include="..\..\..\examples\dump\memory.hpp" />
+    <ClInclude Include="..\..\..\examples\dump\overlay.hpp" />
     <ClInclude Include="..\..\..\examples\dump\print.hpp" />
     <ClInclude Include="..\..\..\examples\dump\relocations.hpp" />
     <ClInclude Include="..\..\..\examples\dump\sections.hpp" />

@@ -41,6 +41,10 @@
 // WARNING! Most of this is untested, it's for expository and testing
 // purposes only.
 
+// TODO: In API hooks where we allow callbacks to block calling the trampoline
+// and fail the call, also ensure we use SetLastError to set a reasonable error
+// code (or request one from the blocking callback).
+
 namespace
 {
 // This is a nasty hack to call any APIs which may be called from a static

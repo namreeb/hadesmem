@@ -19,7 +19,7 @@
 void DumpSections(hadesmem::Process const& process,
                   hadesmem::PeFile const& pe_file)
 {
-  hadesmem::SectionList sections(process, pe_file);
+  hadesmem::SectionList const sections(process, pe_file);
 
   std::wostream& out = GetOutputStreamW();
 

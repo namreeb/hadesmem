@@ -318,5 +318,8 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\privilege.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\overlay.hpp">
+      <Filter>Header Files\pelib</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
