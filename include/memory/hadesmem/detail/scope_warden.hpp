@@ -25,7 +25,7 @@ public:
     f_ = nullptr;
   }
 
-  explicit ScopeWarden(F&&) = delete;
+  explicit ScopeWarden(F const&&) = delete;
 
   ScopeWarden(ScopeWarden const&) = delete;
 
