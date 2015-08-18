@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\Zenimax Online\The Elder Scrolls Online\game\client\eso.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "G:\Zenimax Online\The Elder Scrolls Online\game\client\eso.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
