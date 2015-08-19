@@ -119,28 +119,6 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&::GetForegroundWindow)>>&
   return detour;
 }
 
-std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageA)>>&
-  GetDispatchMessageADetour() noexcept
-{
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageA)>>
-    detour;
-  return detour;
-}
-
-std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageW)>>&
-  GetDispatchMessageWDetour() noexcept
-{
-  static std::unique_ptr<hadesmem::PatchDetour<decltype(&::DispatchMessageW)>>
-    detour;
-  return detour;
-}
-
-std::uint32_t& GetDispatchMessageHookCount() noexcept
-{
-  static __declspec(thread) std::uint32_t in_hook = 0;
-  return in_hook;
-}
-
 std::pair<void*, SIZE_T>& GetUser32Module() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
@@ -174,68 +152,25 @@ extern "C" HWND WINAPI
   return ret;
 }
 
-// TODO: Fix this. We're screwing up input for a lot of games with this. Need to
-// hook GetMessage, PeekMessage, etc. and implement this properly.
-extern "C" LRESULT WINAPI DispatchMessageADetour(
-  hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
+LRESULT CALLBACK WindowProc(HWND hwnd,
+                            UINT msg,
+                            WPARAM wparam,
+                            LPARAM lparam) noexcept
 {
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
-  hadesmem::cerberus::HookCounter hook_counter{&GetDispatchMessageHookCount()};
+  auto const& callbacks = GetOnWndProcMsgCallbacks();
+  bool handled = false;
+  callbacks.Run(hwnd, msg, wparam, lparam, &handled);
 
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", msg);
-
-  if (hook_counter.GetCount() == 1)
+  if (handled)
   {
-    auto const& callbacks = GetOnWndProcMsgCallbacks();
-    bool handled = false;
-    callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
-
-    if (handled)
-    {
-      return 0;
-    }
+    return 0;
   }
 
-  auto const dispatch_message_a =
-    detour->GetTrampolineT<decltype(&::DispatchMessageA)>();
-  last_error_preserver.Revert();
-  auto const ret = dispatch_message_a(msg);
-  last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", ret);
-
-  return ret;
-}
-
-// TODO: Fix this. We're screwing up input for a lot of games with this. Need to
-// hook GetMessage, PeekMessage, etc. and implement this properly.
-extern "C" LRESULT WINAPI DispatchMessageWDetour(
-  hadesmem::PatchDetourBase* detour, MSG const* msg) noexcept
-{
-  hadesmem::detail::LastErrorPreserver last_error_preserver;
-  hadesmem::cerberus::HookCounter hook_counter{&GetDispatchMessageHookCount()};
-
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Args: [%p].", msg);
-
-  if (hook_counter.GetCount() == 1)
-  {
-    auto const& callbacks = GetOnWndProcMsgCallbacks();
-    bool handled = false;
-    callbacks.Run(msg->hwnd, msg->message, msg->wParam, msg->lParam, &handled);
-
-    if (handled)
-    {
-      return 0;
-    }
-  }
-
-  auto const dispatch_message_w =
-    detour->GetTrampolineT<decltype(&::DispatchMessageW)>();
-  last_error_preserver.Revert();
-  auto const ret = dispatch_message_w(msg);
-  last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", ret);
-
-  return ret;
+  WindowInfo& window_info = GetWindowInfo();
+  return window_info.old_wndproc_
+           ? ::CallWindowProcW(
+               window_info.old_wndproc_, hwnd, msg, wparam, lparam)
+           : ::DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 }
 
@@ -268,16 +203,6 @@ void DetourUser32ForWindow(HMODULE base)
                "GetForegroundWindow",
                GetGetForegroundWindowDetour(),
                GetForegroundWindowDetour);
-    DetourFunc(process,
-               base,
-               "DispatchMessageA",
-               GetDispatchMessageADetour(),
-               DispatchMessageADetour);
-    DetourFunc(process,
-               base,
-               "DispatchMessageW",
-               GetDispatchMessageWDetour(),
-               DispatchMessageWDetour);
   }
 }
 
@@ -289,23 +214,30 @@ void UndetourUser32ForWindow(bool remove)
   {
     UndetourFunc(
       L"GetForegroundWindow", GetGetForegroundWindowDetour(), remove);
-    UndetourFunc(L"DispatchMessageA", GetDispatchMessageADetour(), remove);
-    UndetourFunc(L"DispatchMessageW", GetDispatchMessageWDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }
 }
 
-// TODO: Fix all this now that we're using a DispatchMessage hook instead of
-// subclassing windows.
 void HandleWindowChange(HWND wnd)
 {
   WindowInfo& window_info = GetWindowInfo();
 
   if (wnd == nullptr)
   {
+    if (window_info.hooked_ && window_info.old_wndproc_ != nullptr)
+    {
+      ::SetWindowLongPtrW(window_info.old_hwnd_,
+                          GWLP_WNDPROC,
+                          reinterpret_cast<LONG_PTR>(window_info.old_wndproc_));
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Reset window procedure located at %p.",
+                                     window_info.old_wndproc_);
+    }
+
     HADESMEM_DETAIL_TRACE_A("Clearing window hook data.");
+
     window_info.old_hwnd_ = nullptr;
+    window_info.old_wndproc_ = nullptr;
     window_info.hooked_ = false;
 
     return;
@@ -314,7 +246,22 @@ void HandleWindowChange(HWND wnd)
   if (!window_info.hooked_)
   {
     window_info.old_hwnd_ = wnd;
+    ::SetLastError(0);
+    window_info.old_wndproc_ = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(
+      wnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&WindowProc)));
+    if (!window_info.old_wndproc_)
+    {
+      DWORD const last_error = ::GetLastError();
+      if (last_error)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error{} << ErrorString{"SetWindowLongPtrW failed."}
+                  << ErrorCodeWinLast{last_error});
+      }
+    }
     window_info.hooked_ = true;
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Replaced window procedure located at %p.",
+                                   window_info.old_wndproc_);
   }
   else
   {
