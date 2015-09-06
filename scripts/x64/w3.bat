@@ -1,0 +1,1 @@
+inject.exe --run "G:\SteamLibrary\steamapps\common\The Witcher 3\bin\x64\witcher3.exe" --inject --steam-app-id 292030 --export Load --add-path --path-resolution --module cerberus.dll

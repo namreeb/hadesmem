@@ -53,3 +53,5 @@ typename std::basic_string<CharT>::size_type
   return i == std::end(s) ? std::basic_string<CharT>::npos
                           : std::distance(std::begin(s), i);
 }
+
+bool IsQuiet() noexcept;

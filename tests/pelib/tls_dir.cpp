@@ -22,7 +22,7 @@
 void TestTlsDir()
 {
   // Use TLS to ensure that at least one module has a TLS dir
-  static __declspec(thread) std::int32_t tls_dummy = 0;
+  thread_local static std::int32_t tls_dummy = 0;
 
   hadesmem::Process const process(::GetCurrentProcessId());
 

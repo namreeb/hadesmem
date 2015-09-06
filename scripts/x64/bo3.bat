@@ -1,0 +1,1 @@
+inject.exe --run "D:\SteamLibrary\steamapps\common\Call of Duty Black Ops III Beta\BlackOps3.exe" --inject --steam-app-id 388520 --export Load --add-path --path-resolution --module cerberus.dll

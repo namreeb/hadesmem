@@ -17,6 +17,9 @@
 #include "hook_counter.hpp"
 #include "main.hpp"
 
+// TODO: Hook DispatchMessage, PeekMessage, GetMessage, etc. instead of using
+// window procedure hooks.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&

@@ -95,13 +95,13 @@ public:
 
 std::uint32_t& GetPresentHookCount() noexcept
 {
-  static __declspec(thread) std::uint32_t in_hook = 0;
+  thread_local static std::uint32_t in_hook = 0;
   return in_hook;
 }
 
 std::uint32_t& GetResetHookCount() noexcept
 {
-  static __declspec(thread) std::uint32_t in_hook = 0;
+  thread_local static std::uint32_t in_hook = 0;
   return in_hook;
 }
 

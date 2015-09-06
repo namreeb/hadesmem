@@ -321,5 +321,8 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\pelib\overlay.hpp">
       <Filter>Header Files\pelib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\thread_pool.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

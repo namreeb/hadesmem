@@ -281,7 +281,7 @@ void UndetourUser32ForRawInput(bool remove)
 
 bool& GetDisableRegisterRawInputDevicesHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 }

@@ -62,7 +62,7 @@ public:
 protected:
   static void** GetOriginalArbitraryUserPtrPtr() noexcept
   {
-    static __declspec(thread) void* orig_user_ptr = 0;
+    thread_local static void* orig_user_ptr = 0;
     return &orig_user_ptr;
   }
 };

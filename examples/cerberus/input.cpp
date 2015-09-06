@@ -618,8 +618,8 @@ void OnRegisterRawInputDevices(PCRAWINPUTDEVICE raw_input_devices,
 
 void LazyAttachThreadInput(DWORD tid)
 {
-  static __declspec(thread) DWORD last_attached_tid = 0;
-  static __declspec(thread) HANDLE last_attached_thread = nullptr;
+  thread_local static DWORD last_attached_tid = 0;
+  thread_local static HANDLE last_attached_thread = nullptr;
 
   DWORD const current_tid = ::GetCurrentThreadId();
   if (current_tid != tid && last_attached_tid != tid)

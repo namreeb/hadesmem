@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -17,9 +18,10 @@ namespace
 {
 // Record all modules (on disk) which cause a warning when dumped, to make it
 // easier to isolate files which require further investigation.
-bool g_warned = false;
+thread_local bool g_warned = false;
 bool g_warned_enabled = false;
 bool g_warned_dynamic = false;
+std::mutex g_all_warned_mutex;
 std::vector<std::wstring> g_all_warned;
 std::wstring g_warned_file_path;
 WarningType g_warned_type = WarningType::kAll;
@@ -42,6 +44,8 @@ void HandleWarnings(std::wstring const& path)
 {
   if (g_warned_enabled && g_warned)
   {
+    std::lock_guard<std::mutex> lock(g_all_warned_mutex);
+
     if (g_warned_dynamic)
     {
       std::unique_ptr<std::wfstream> warned_file_ptr(

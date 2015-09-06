@@ -35,5 +35,8 @@ void DumpOverlay(hadesmem::Process const& process,
   WriteNamedHex(out, L"Overlay Offset", overlay_offset, 1);
   // TODO: Support dumping overlay to file.
   auto const overlay_buffer = overlay->Get();
-  WriteNamedHexContainer(out, L"Overlay", overlay_buffer, 1);
+  if (!IsQuiet())
+  {
+    WriteNamedHexContainer(out, L"Overlay", overlay_buffer, 1);
+  }
 }

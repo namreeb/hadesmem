@@ -212,7 +212,7 @@ extern "C" NTSTATUS WINAPI
                                           alloc_protect);
   last_error_preserver.Update();
 
-  static __declspec(thread) std::int32_t in_hook = 0;
+  thread_local static std::int32_t in_hook = 0;
   if (in_hook)
   {
     return ret;
@@ -309,7 +309,7 @@ extern "C" NTSTATUS WINAPI NtUnmapViewOfSectionDetour(
   auto const ret = nt_unmap_view_of_section(process, base);
   last_error_preserver.Update();
 
-  static __declspec(thread) std::int32_t in_hook = 0;
+  thread_local static std::int32_t in_hook = 0;
   if (in_hook)
   {
     return ret;
@@ -368,7 +368,7 @@ extern "C" NTSTATUS WINAPI LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
   auto const ret = ldr_load_dll(path, flags, name, handle);
   last_error_preserver.Update();
 
-  static __declspec(thread) std::int32_t in_hook = 0;
+  thread_local static std::int32_t in_hook = 0;
   if (in_hook)
   {
     return ret;
@@ -429,7 +429,7 @@ extern "C" NTSTATUS WINAPI LdrUnloadDllDetour(hadesmem::PatchDetourBase* detour,
   auto const ret = ldr_unload_dll(handle);
   last_error_preserver.Update();
 
-  static __declspec(thread) std::int32_t in_hook = 0;
+  thread_local static std::int32_t in_hook = 0;
   if (in_hook)
   {
     return ret;

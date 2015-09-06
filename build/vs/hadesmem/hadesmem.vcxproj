@@ -54,6 +54,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\static_assert_x86.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\str_conv.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\thread_aux.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\thread_pool.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\time.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\toolhelp.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\to_upper_ordinal.hpp" />

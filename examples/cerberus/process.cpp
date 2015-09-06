@@ -242,7 +242,7 @@ extern "C" BOOL WINAPI
     return ret;
   }
 
-  static __declspec(thread) std::int32_t in_hook = 0;
+  thread_local static std::int32_t in_hook = 0;
   if (in_hook)
   {
     HADESMEM_DETAIL_TRACE_A("Recursion detected.");
@@ -415,7 +415,7 @@ void UndetourKernelBaseForProcess(bool remove)
 
 bool& GetDisableCreateProcessInternalWHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 }

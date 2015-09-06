@@ -48,7 +48,7 @@ std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 }
 }
 
-void DumpMemory(hadesmem::Process const& process, bool continue_on_error)
+void DumpMemory(hadesmem::Process const& process)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -214,18 +214,11 @@ void DumpMemory(hadesmem::Process const& process, bool continue_on_error)
     }
     catch (...)
     {
-      if (continue_on_error)
-      {
-        std::cerr << "\nError!\n"
-                  << boost::current_exception_diagnostic_information() << '\n';
+      std::cerr << "\nError!\n"
+                << boost::current_exception_diagnostic_information() << '\n';
 
-        std::wcerr << "\nCurrent process: " << hadesmem::GetPathNative(process)
-                   << "\nCurrent module: " << module.GetName() << "\n";
-      }
-      else
-      {
-        throw;
-      }
+      std::wcerr << "\nCurrent process: " << hadesmem::GetPathNative(process)
+                 << "\nCurrent module: " << module.GetName() << "\n";
     }
   }
 }

@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <hadesmem/detail/thread_pool.hpp>
+
 void DumpFile(std::wstring const& path);
 
-void DumpDir(std::wstring const& path, bool continue_on_error);
+void DumpDir(std::wstring const& path, hadesmem::detail::ThreadPool& pool);

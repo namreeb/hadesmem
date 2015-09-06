@@ -25,6 +25,7 @@
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/str_conv.hpp>
+#include <hadesmem/detail/thread_pool.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/module.hpp>
 #include <hadesmem/module_list.hpp>
@@ -56,25 +57,22 @@
 
 namespace
 {
-std::wstring g_current_file_path;
+thread_local std::wstring g_current_file_path;
 
 bool g_quiet = false;
 
-class QuietStringBufA : public std::stringbuf
+template <typename CharT>
+class QuietStreamBuf : public std::basic_streambuf<CharT>
 {
 public:
-  virtual int sync()
+  std::streamsize xsputn(const char_type* /*s*/, std::streamsize n) override
   {
-    return 0;
+    return n;
   }
-};
 
-class QuietStringBufW : public std::wstringbuf
-{
-public:
-  virtual int sync()
+  int_type overflow(int_type /*c*/) override
   {
-    return 0;
+    return 1;
   }
 };
 
@@ -167,7 +165,6 @@ void DumpThreads(DWORD pid)
 }
 
 void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
-                      bool continue_on_error = false,
                       bool memonly = false)
 {
   std::wostream& out = GetOutputStreamW();
@@ -222,10 +219,10 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
     DumpRegions(*process);
   }
 
-  DumpMemory(*process, continue_on_error);
+  DumpMemory(*process);
 }
 
-void DumpProcesses(bool continue_on_error = false, bool memonly = false)
+void DumpProcesses(bool memonly = false)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -235,7 +232,7 @@ void DumpProcesses(bool continue_on_error = false, bool memonly = false)
   hadesmem::ProcessList const processes;
   for (auto const& process_entry : processes)
   {
-    DumpProcessEntry(process_entry, continue_on_error, memonly);
+    DumpProcessEntry(process_entry, memonly);
   }
 }
 }
@@ -254,8 +251,8 @@ std::ostream& GetOutputStreamA()
 {
   if (g_quiet)
   {
-    static QuietStringBufA buf;
-    static std::ostream str{&buf};
+    thread_local static QuietStreamBuf<char> buf;
+    thread_local static std::ostream str{&buf};
     return str;
   }
   else
@@ -268,8 +265,8 @@ std::wostream& GetOutputStreamW()
 {
   if (g_quiet)
   {
-    static QuietStringBufW buf;
-    static std::wostream str{&buf};
+    thread_local static QuietStreamBuf<wchar_t> buf;
+    thread_local static std::wostream str{&buf};
     return str;
   }
   else
@@ -384,6 +381,11 @@ bool ConvertTimeStamp(std::time_t time, std::wstring& str)
   return true;
 }
 
+bool IsQuiet() noexcept
+{
+  return g_quiet;
+}
+
 int main(int argc, char* argv[])
 {
   try
@@ -415,7 +417,6 @@ int main(int argc, char* argv[])
       "warned-file-dynamic",
       "Dump warnings to file on the fly rather than at the end",
       cmd);
-    TCLAP::SwitchArg continue_arg("", "continue", "Continue on error", cmd);
     TCLAP::SwitchArg quiet_arg(
       "", "quiet", "Only output status messages (no dumping)", cmd);
     TCLAP::SwitchArg memonly_arg("", "memonly", "Only do PE memory dumps", cmd);
@@ -426,6 +427,10 @@ int main(int argc, char* argv[])
                                          -1,
                                          "int",
                                          cmd);
+    TCLAP::ValueArg<DWORD> threads_arg(
+      "", "threads", "Number of threads", false, 0, "size_t", cmd);
+    TCLAP::ValueArg<DWORD> queue_factor_arg(
+      "", "queue-factor", "Thread queue factor", false, 0, "size_t", cmd);
     cmd.parse(argc, argv);
 
     g_quiet = quiet_arg.isSet();
@@ -474,6 +479,11 @@ int main(int argc, char* argv[])
       std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
     }
 
+    auto const threads = threads_arg.isSet() ? threads_arg.getValue() : 1;
+    auto const queue_factor =
+      queue_factor_arg.isSet() ? queue_factor_arg.getValue() : 1;
+    hadesmem::detail::ThreadPool thread_pool{threads, queue_factor};
+
     if (pid_arg.isSet())
     {
       DWORD const pid = pid_arg.getValue();
@@ -488,7 +498,7 @@ int main(int argc, char* argv[])
                      });
       if (iter != std::end(processes))
       {
-        DumpProcessEntry(*iter, continue_arg.isSet(), memonly_arg.isSet());
+        DumpProcessEntry(*iter, memonly_arg.isSet());
       }
       else
       {
@@ -502,7 +512,7 @@ int main(int argc, char* argv[])
       auto const proc_name =
         hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
       auto const proc_entry = hadesmem::GetProcessEntryByName(proc_name, false);
-      DumpProcessEntry(proc_entry, continue_arg.isSet(), memonly_arg.isSet());
+      DumpProcessEntry(proc_entry, memonly_arg.isSet());
     }
     else if (path_arg.isSet())
     {
@@ -512,7 +522,7 @@ int main(int argc, char* argv[])
         auto const path_wide = hadesmem::detail::MultiByteToWideChar(path);
         if (hadesmem::detail::IsDirectory(path_wide))
         {
-          DumpDir(path_wide, continue_arg.isSet());
+          DumpDir(path_wide, thread_pool);
         }
         else
         {
@@ -524,14 +534,14 @@ int main(int argc, char* argv[])
     {
       DumpThreads(static_cast<DWORD>(-1));
 
-      DumpProcesses(continue_arg.isSet(), memonly_arg.isSet());
+      DumpProcesses(memonly_arg.isSet());
 
       std::wcout << "\nFiles:\n";
 
       // TODO: Enumerate all volumes.
       std::wstring const self_path = hadesmem::detail::GetSelfPath();
       std::wstring const root_path = hadesmem::detail::GetRootPath(self_path);
-      DumpDir(root_path, continue_arg.isSet());
+      DumpDir(root_path, thread_pool);
     }
 
     if (GetWarningsEnabled())
@@ -563,11 +573,6 @@ int main(int argc, char* argv[])
   {
     std::cerr << "\nError!\n"
               << boost::current_exception_diagnostic_information() << '\n';
-
-    if (!g_current_file_path.empty())
-    {
-      std::wcerr << "\nCurrent file: " << g_current_file_path << "\n";
-    }
 
     return 1;
   }

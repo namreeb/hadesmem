@@ -597,37 +597,37 @@ void UndetourUser32ForCursor(bool remove)
 
 bool& GetDisableSetCursorHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 
 bool& GetDisableGetCursorPosHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 
 bool& GetDisableSetCursorPosHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 
 bool& GetDisableShowCursorHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 
 bool& GetDisableClipCursorHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 
 bool& GetDisableGetClipCursorHook() noexcept
 {
-  static __declspec(thread) bool disable_hook = false;
+  thread_local static bool disable_hook = false;
   return disable_hook;
 }
 }

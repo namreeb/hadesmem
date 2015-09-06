@@ -20,102 +20,116 @@
 
 void DumpFile(std::wstring const& path)
 {
-  std::wostream& out = GetOutputStreamW();
-
-  SetCurrentFilePath(path);
-
-  std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFile<char>(
-    path, std::ios::in | std::ios::binary | std::ios::ate));
-  std::fstream& file = *file_ptr;
-  if (!file)
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Failed to open file.", 0);
-    return;
-  }
-
-  std::streampos const size = file.tellg();
-  if (size <= 0)
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Empty or invalid file.", 0);
-    return;
-  }
-
-  if (!file.seekg(0, std::ios::beg))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Seeking to beginning of file failed (1).", 0);
-    return;
-  }
-
-  // Peek for the MZ header before reading the whole file.
-  std::vector<char> mz_buf(2);
-  if (!file.read(mz_buf.data(), 2))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Failed to read header signature.", 0);
-    return;
-  }
-
-  // Check for MZ signature
-  if (mz_buf[0] != 'M' || mz_buf[1] != 'Z')
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Not a PE file (Pass 1).", 0);
-    return;
-  }
-
-  if (!file.seekg(0, std::ios::beg))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Seeking to beginning of file failed (2).", 0);
-    return;
-  }
-
-  std::vector<char> buf;
-
   try
   {
-    buf.resize(static_cast<std::size_t>(size));
+    std::wostream& out = GetOutputStreamW();
+
+    SetCurrentFilePath(path);
+
+    std::unique_ptr<std::fstream> file_ptr(hadesmem::detail::OpenFile<char>(
+      path, std::ios::in | std::ios::binary | std::ios::ate));
+    std::fstream& file = *file_ptr;
+    if (!file)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"Failed to open file.", 0);
+      return;
+    }
+
+    std::streampos const size = file.tellg();
+    if (size <= 0)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"Empty or invalid file.", 0);
+      return;
+    }
+
+    if (!file.seekg(0, std::ios::beg))
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Seeking to beginning of file failed (1).", 0);
+      return;
+    }
+
+    // Peek for the MZ header before reading the whole file.
+    std::vector<char> mz_buf(2);
+    if (!file.read(mz_buf.data(), 2))
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Failed to read header signature.", 0);
+      return;
+    }
+
+    // Check for MZ signature
+    if (mz_buf[0] != 'M' || mz_buf[1] != 'Z')
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"Not a PE file (Pass 1).", 0);
+      return;
+    }
+
+    if (!file.seekg(0, std::ios::beg))
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Seeking to beginning of file failed (2).", 0);
+      return;
+    }
+
+    std::vector<char> buf;
+
+    try
+    {
+      buf.resize(static_cast<std::size_t>(size));
+    }
+    catch (std::bad_alloc const&)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! File too large.", 0);
+      WarnForCurrentFile(WarningType::kUnsupported);
+      return;
+    }
+
+    if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Failed to read file data.", 0);
+      return;
+    }
+
+    hadesmem::Process const process(GetCurrentProcessId());
+
+    hadesmem::PeFile const pe_file(process,
+                                   buf.data(),
+                                   hadesmem::PeFileType::Data,
+                                   static_cast<DWORD>(buf.size()));
+
+    try
+    {
+      hadesmem::NtHeaders const nt_hdr(process, pe_file);
+    }
+    catch (std::exception const& /*e*/)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"Not a PE file or wrong architecture (Pass 2).", 0);
+      return;
+    }
+
+    DumpPeFile(process, pe_file, path);
   }
-  catch (std::bad_alloc const&)
+  catch (...)
   {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! File too large.", 0);
-    WarnForCurrentFile(WarningType::kUnsupported);
-    return;
+    std::cerr << "\nError!\n"
+              << boost::current_exception_diagnostic_information() << '\n';
+
+    auto const current_file_path = GetCurrentFilePath();
+    if (!current_file_path.empty())
+    {
+      std::wcerr << "\nCurrent file: " << current_file_path << "\n";
+    }
   }
-
-  if (!file.read(buf.data(), static_cast<std::streamsize>(size)))
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"WARNING! Failed to read file data.", 0);
-    return;
-  }
-
-  hadesmem::Process const process(GetCurrentProcessId());
-
-  hadesmem::PeFile const pe_file(process,
-                                 buf.data(),
-                                 hadesmem::PeFileType::Data,
-                                 static_cast<DWORD>(buf.size()));
-
-  try
-  {
-    hadesmem::NtHeaders const nt_hdr(process, pe_file);
-  }
-  catch (std::exception const& /*e*/)
-  {
-    WriteNewline(out);
-    WriteNormal(out, L"Not a PE file or wrong architecture (Pass 2).", 0);
-    return;
-  }
-
-  DumpPeFile(process, pe_file, path);
 }
 
-void DumpDir(std::wstring const& path, bool continue_on_error)
+void DumpDir(std::wstring const& path, hadesmem::detail::ThreadPool& pool)
 {
   std::wostream& out = GetOutputStreamW();
 
@@ -176,34 +190,20 @@ void DumpDir(std::wstring const& path, bool continue_on_error)
         }
         else
         {
-          DumpDir(cur_path, continue_on_error);
+          DumpDir(cur_path, pool);
         }
       }
       else
       {
-        try
+        auto const task = [cur_path]()
         {
           DumpFile(cur_path);
-        }
-        catch (...)
-        {
-          if (continue_on_error)
-          {
-            std::cerr << "\nError!\n"
-                      << boost::current_exception_diagnostic_information()
-                      << '\n';
+        };
 
-            auto const current_file_path = GetCurrentFilePath();
-            if (!current_file_path.empty())
-            {
-              std::wcerr << "\nCurrent file: " << current_file_path << "\n";
-            }
-          }
-          else
-          {
-            throw;
-          }
-        }
+        do
+        {
+          pool.WaitForSlot();
+        } while (!pool.QueueTask(task));
       }
     }
     catch (hadesmem::Error const& e)
