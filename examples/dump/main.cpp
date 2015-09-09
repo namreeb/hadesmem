@@ -61,6 +61,8 @@ thread_local std::wstring g_current_file_path;
 
 bool g_quiet = false;
 
+bool g_strings = false;
+
 template <typename CharT>
 class QuietStreamBuf : public std::basic_streambuf<CharT>
 {
@@ -296,7 +298,7 @@ void DumpPeFile(hadesmem::Process const& process,
     // testing.
     WriteNewline(out);
     WriteNormal(out, L"WARNING! File is over 100MB.", 0);
-    WarnForCurrentFile(WarningType::kUnsupported);
+    // WarnForCurrentFile(WarningType::kUnsupported);
   }
 
   DumpHeaders(process, pe_file);
@@ -316,7 +318,7 @@ void DumpPeFile(hadesmem::Process const& process,
 
   DumpRelocations(process, pe_file);
 
-  if (!g_quiet)
+  if (!g_quiet && g_strings)
   {
     DumpStrings(process, pe_file);
   }
@@ -431,9 +433,12 @@ int main(int argc, char* argv[])
       "", "threads", "Number of threads", false, 0, "size_t", cmd);
     TCLAP::ValueArg<DWORD> queue_factor_arg(
       "", "queue-factor", "Thread queue factor", false, 0, "size_t", cmd);
+    TCLAP::SwitchArg strings_arg("", "strings", "Dump strings", cmd);
     cmd.parse(argc, argv);
 
     g_quiet = quiet_arg.isSet();
+
+    g_strings = strings_arg.isSet();
 
     SetWarningsEnabled(warned_arg.getValue());
     SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());

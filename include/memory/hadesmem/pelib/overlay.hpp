@@ -98,6 +98,17 @@ public:
     return base_;
   }
 
+  std::size_t GetSize() const noexcept
+  {
+    return data_.size();
+  }
+
+  std::uintptr_t GetOffset() const noexcept
+  {
+    return reinterpret_cast<std::uintptr_t>(base_) -
+           reinterpret_cast<std::uintptr_t>(pe_file_->GetBase());
+  }
+
   void UpdateRead()
   {
     data_ = ReadVector<std::uint8_t>(*process_, base_, size_);
@@ -115,6 +126,15 @@ public:
 
   void Set(std::vector<std::uint8_t> const& data)
   {
+    // TODO: Support this. Especially important when crafting new files from
+    // scratch or rebuilding packed files.
+    if (data.size() != data_.size())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{
+          "Modifying overlay size currently unsupported."});
+    }
+
     data_ = data;
   }
 

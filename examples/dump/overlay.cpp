@@ -29,14 +29,8 @@ void DumpOverlay(hadesmem::Process const& process,
     return;
   }
 
-  auto const overlay_offset = reinterpret_cast<ULONG_PTR>(overlay->GetBase()) -
-                              reinterpret_cast<ULONG_PTR>(pe_file.GetBase());
   WriteNewline(out);
-  WriteNamedHex(out, L"Overlay Offset", overlay_offset, 1);
+  WriteNamedHex(out, L"Overlay Offset", overlay->GetOffset(), 1);
+  WriteNamedHex(out, L"Overlay Size", overlay->GetSize(), 1);
   // TODO: Support dumping overlay to file.
-  auto const overlay_buffer = overlay->Get();
-  if (!IsQuiet())
-  {
-    WriteNamedHexContainer(out, L"Overlay", overlay_buffer, 1);
-  }
 }
