@@ -25,8 +25,7 @@ public:
   {
   }
 
-  explicit constexpr
-    SmartHandleImpl(HandleT handle) noexcept : handle_{handle}
+  explicit constexpr SmartHandleImpl(HandleT handle) noexcept : handle_{handle}
   {
   }
 
@@ -43,8 +42,7 @@ public:
     return *this;
   }
 
-  SmartHandleImpl(SmartHandleImpl&& other) noexcept
-    : handle_{other.handle_}
+  SmartHandleImpl(SmartHandleImpl&& other) noexcept : handle_{other.handle_}
   {
     other.handle_ = GetInvalid();
   }
@@ -212,6 +210,23 @@ struct FindPolicy
 };
 
 using SmartFindHandle = SmartHandleImpl<FindPolicy>;
+
+struct FindVolumePolicy
+{
+  using HandleT = HANDLE;
+
+  static HandleT GetInvalid() noexcept
+  {
+    return INVALID_HANDLE_VALUE;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    return ::FindVolumeClose(handle) != 0;
+  }
+};
+
+using SmartFindVolumeHandle = SmartHandleImpl<FindVolumePolicy>;
 
 struct ComPolicy
 {

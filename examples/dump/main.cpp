@@ -55,6 +55,10 @@
 #include "tls.hpp"
 #include "warning.hpp"
 
+// TODO: Add support for detecting the most expensive to process files in a
+// batch. Time how long it takes to fully dump each file, and record the top N
+// entries.
+
 namespace
 {
 thread_local std::wstring g_current_file_path;

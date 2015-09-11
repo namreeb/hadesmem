@@ -86,11 +86,21 @@ void DumpExports(hadesmem::Process const& process,
   {
     // Legitimate DLLs have an export dir with no exports for some reason (e.g.
     // visintl.dll from Office 15).
-    if (export_dir->GetNumberOfFunctions() != 0)
+    if (export_dir->GetNumberOfFunctions() == 0)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Empty export list.", 2);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
+    // Legitimate DLLs have an export dir with seemingly garbage values (e.g.
+    // Xvid-1.3.2-20110601.exe from Helldorado, efte.exe from Exodus from the
+    // Earth). Not yet sure why they do this, but it's allowed because the
+    // export directory isn't used by the PE loader.
+    else
     {
       WriteNewline(out);
       WriteNormal(out, L"WARNING! Invalid export list.", 2);
-      WarnForCurrentFile(WarningType::kUnsupported);
+      WarnForCurrentFile(WarningType::kSuspicious);
     }
   }
 

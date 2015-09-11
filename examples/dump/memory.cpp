@@ -196,6 +196,10 @@ void DumpMemory(hadesmem::Process const& process)
                                         "Unable to write to dump file."));
     }
 
+    // TODO: In the case of an empty ILT we should only warn here instead of
+    // erroring. We should also provide an option to use the on-disk IAT (which
+    // acts as the ILT until the image is loaded) if it appears to match.
+    // TODO: Also update the implementation in CXExample.
     try
     {
       if (dir_mismatch)
