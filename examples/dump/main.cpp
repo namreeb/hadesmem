@@ -57,7 +57,8 @@
 
 // TODO: Add support for detecting the most expensive to process files in a
 // batch. Time how long it takes to fully dump each file, and record the top N
-// entries.
+// entries. Be careful not to factor in IO however (i.e. only time once the file
+// is copied into our buffer).
 
 namespace
 {

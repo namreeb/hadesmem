@@ -55,7 +55,7 @@ public:
       return false;
     }
 
-    tasks_.push(std::function<void()>(task));
+    tasks_.emplace(task);
     queued_condition_.notify_one();
 
     return true;

@@ -400,8 +400,11 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // runtime injection (less important when done at process creation as
     // there's only one thread and it's already suspended, and new threads are
     // unlikely to be created/injected except for ours).
-    auto const& process = hadesmem::cerberus::GetThisProcess();
-    hadesmem::SuspendedProcess suspend{process.GetId()};
+    // TODO: Identify the problems that were solved by this hack and fix them
+    // properly. We can't do this because another thread might currently hold a
+    // lock we need (loader lock, heap lock, etc.).
+    // auto const& process = hadesmem::cerberus::GetThisProcess();
+    // hadesmem::SuspendedProcess suspend{process.GetId()};
 
     auto const& config = hadesmem::cerberus::GetConfig();
 
