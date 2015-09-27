@@ -4,6 +4,7 @@
 #pragma once
 
 #include <condition_variable>
+#include <cstddef>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -65,6 +66,15 @@ public:
   {
     std::unique_lock<std::mutex> lock(mutex_);
     while (tasks_.size() >= threads_.size() * queue_factor_ && running_)
+    {
+      consumed_condition_.wait(lock);
+    }
+  }
+
+  void WaitForEmpty()
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    while (tasks_.size() && running_)
     {
       consumed_condition_.wait(lock);
     }

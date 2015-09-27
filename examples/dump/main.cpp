@@ -554,6 +554,8 @@ int main(int argc, char* argv[])
       DumpDir(root_path, thread_pool);
     }
 
+    thread_pool.WaitForEmpty();
+
     if (GetWarningsEnabled())
     {
       if (!GetWarnedFilePath().empty() && !GetDynamicWarningsEnabled())
