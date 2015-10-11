@@ -18,6 +18,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 class RelocationBlock

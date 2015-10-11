@@ -15,6 +15,8 @@
 
 #include <hadesmem/config.hpp>
 
+// TODO: Remove Boost.Exception dependency.
+
 namespace hadesmem
 {
 class Error : public virtual std::exception, public virtual boost::exception

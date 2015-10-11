@@ -18,6 +18,40 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+// TODO: For the case where an image has new style bound imports, but an invalid
+// ILT… Is this allowed? I guess this is legal in the case where you bind a DLL
+// that doesn't have an ILT to begin wtih, at which point it won't load if the
+// bindings don't match, but we need to confirm this. Warn so we can find
+// samples for further investigation.
+
+// TODO: Check whether a new style forwarder chain with old style bound imports
+// is actually allowed/loaded.
+
+// TODO: Check whether a new style forwarder chain with no bound imports is
+// actually allowed/loaded.
+
+// TODO: Check whether a new style forwarder chain with no bound imports is
+// actually allowed/loaded.
+
+// TODO: Parse the IAT and ILT in parallel, in order to easily detect when
+// imports are bound in-memory. This will also mean we no longer need to count
+// the length of the ILT in order to terminate the IAT pass early.
+
+// TODO: Should probably revert to using 'is_ilt_bound' instead of hardcoding
+// false for the initial DumpImportThunk loop, but is it even legal to have a
+// module that uses old style bindings with no ILT? Need to investigate, because
+// it seems you're allowed to have modules like that when they're not actually
+// bound, and the loader simply detects that the TimeDateStamp doesn't match and
+// so treats the IAT as unbound? Investigate this further.
+
+// TODO: For the case where we detect an invalid ILT RVA and stop enumeration
+// entirely, verify this is correct. Probably easiest just to hot-patch the
+// Corkami samples to give them a random invalid RVA and see if they still run.
+// (I believe that they do, so our code is wrong!)
+
+// TODO: Check that the logic for the second DumpImportThunk loop is correct.
+// ("(is_iat_bound && ilt_valid) || !ilt_empty")
+
 namespace
 {
 bool HasValidNonEmptyBoundImportDescList(hadesmem::Process const& process,

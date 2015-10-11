@@ -36,6 +36,30 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Rewrite to use a static binary blob insted of a JIT. The design will
+// need to change to pull data from an external source instead of being
+// regenerated for every call.
+
+// TODO: Consolidate memory allocations where possible.
+
+// TODO: Add support for 'custom' calling conventions (e.g. in PGO-generated
+// code, 'private' functions, obfuscated code, etc).
+
+// TODO: Support varargs.
+
+// TODO: Add support for more 'complex' argument and return types, including
+// struct/class/union, long double, SIMD types, cv qualifiers, ref qualifiers,
+// etc. A good reference for calling conventions is available at
+// http://bit.ly/3CvgMV.
+
+// TODO: Improve safety via EH. Both x86 and x64 (though they will require
+// different techniques).
+
+// TODO: Add unwind info etc including prologue/epilogue info.
+// (RtlAddFunctionTable?)
+
+// TODO: Support __vectorcall.
+
 namespace hadesmem
 {
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
@@ -58,9 +82,9 @@ public:
     std::is_same<float, std::remove_cv_t<T>>::value ||
     std::is_same<double, std::remove_cv_t<T>>::value);
 
-  constexpr explicit CallResult(T result, DWORD last_error)
-    noexcept : result_{result},
-                               last_error_{last_error}
+  constexpr explicit CallResult(T result, DWORD last_error) noexcept
+    : result_{result},
+      last_error_{last_error}
   {
   }
 
@@ -82,8 +106,8 @@ private:
 template <> class CallResult<void>
 {
 public:
-  constexpr explicit CallResult(DWORD last_error)
-    noexcept : last_error_{last_error}
+  constexpr explicit CallResult(DWORD last_error) noexcept
+    : last_error_{last_error}
   {
   }
 
@@ -124,8 +148,8 @@ public:
   {
   }
 
-  explicit CallResultRaw(detail::CallResultRemote const& result)
-    noexcept : result_(result)
+  explicit CallResultRaw(detail::CallResultRemote const& result) noexcept
+    : result_(result)
   {
   }
 
@@ -134,8 +158,7 @@ public:
     return result_.last_error;
   }
 
-  template <typename T>
-  std::decay_t<T> GetReturnValue() const noexcept
+  template <typename T> std::decay_t<T> GetReturnValue() const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value ||
                                   std::is_pointer<T>::value ||
@@ -147,30 +170,26 @@ public:
   }
 
 private:
-  template <typename T>
-  T GetReturnValueIntImpl(std::true_type) const noexcept
+  template <typename T> T GetReturnValueIntImpl(std::true_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt64());
   }
 
-  template <typename T>
-  T GetReturnValueIntImpl(std::false_type) const noexcept
+  template <typename T> T GetReturnValueIntImpl(std::false_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(sizeof(T) <= sizeof(DWORD32));
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value);
     return static_cast<T>(GetReturnValueInt32());
   }
 
-  template <typename T>
-  T GetReturnValuePtrImpl(std::true_type) const noexcept
+  template <typename T> T GetReturnValuePtrImpl(std::true_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt64());
   }
 
-  template <typename T>
-  T GetReturnValuePtrImpl(std::false_type) const noexcept
+  template <typename T> T GetReturnValuePtrImpl(std::false_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return reinterpret_cast<T>(GetReturnValueInt32());
@@ -201,16 +220,14 @@ private:
       std::integral_constant<bool, (sizeof(T) == sizeof(DWORD64))>());
   }
 
-  template <typename T>
-  T GetReturnValueImpl(std::true_type) const noexcept
+  template <typename T> T GetReturnValueImpl(std::true_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_pointer<T>::value);
     return GetReturnValuePtrImpl<T>(
       std::integral_constant<bool, (sizeof(void*) == sizeof(DWORD64))>());
   }
 
-  template <typename T>
-  T GetReturnValueImpl(std::false_type) const noexcept
+  template <typename T> T GetReturnValueImpl(std::false_type) const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(std::is_integral<T>::value ||
                                   std::is_floating_point<T>::value);
@@ -251,15 +268,14 @@ private:
 namespace detail
 {
 template <typename T>
-CallResult<T> CallResultRawToCallResult(CallResultRaw const& result)
-  noexcept
+CallResult<T> CallResultRawToCallResult(CallResultRaw const& result) noexcept
 {
   return CallResult<T>(result.GetReturnValue<T>(), result.GetLastError());
 }
 
 template <>
-inline CallResult<void> CallResultRawToCallResult(CallResultRaw const& result)
-  noexcept
+inline CallResult<void>
+  CallResultRawToCallResult(CallResultRaw const& result) noexcept
 {
   return CallResult<void>(result.GetLastError());
 }
@@ -384,10 +400,9 @@ class ArgVisitor32
 public:
   ArgVisitor32(asmjit::X86Assembler* assembler,
                std::size_t num_args,
-               CallConv call_conv) noexcept
-    : assembler_{assembler},
-      cur_arg_{num_args},
-      call_conv_{call_conv}
+               CallConv call_conv) noexcept : assembler_{assembler},
+                                              cur_arg_{num_args},
+                                              call_conv_{call_conv}
   {
   }
 
@@ -460,8 +475,7 @@ private:
 class ArgVisitor64
 {
 public:
-  ArgVisitor64(asmjit::X86Assembler* assembler,
-               std::size_t num_args) noexcept
+  ArgVisitor64(asmjit::X86Assembler* assembler, std::size_t num_args) noexcept
     : assembler_{assembler},
       num_args_{num_args},
       cur_arg_{num_args}
@@ -609,6 +623,10 @@ inline void GenerateCallCode32(asmjit::X86Assembler* assembler,
   {
     void* const address = *addresses_beg;
     CallConv const call_conv = *call_convs_beg;
+    // TODO: Remove dependency on ArgsForwardIterator being an iterator with
+    // value_type of std::vector<CallArg> (or rather, any container supporting
+    // size() and rbegin()/rend(), but there's no good reason to use anything
+    // but vector even if it's technically supported).
     auto const& args = *args_full_beg;
     std::size_t const num_args = args.size();
 
@@ -617,8 +635,8 @@ inline void GenerateCallCode32(asmjit::X86Assembler* assembler,
                   args.rend(),
                   [&](CallArg const& arg)
                   {
-      arg.Apply(std::ref(arg_visitor));
-    });
+                    arg.Apply(std::ref(arg_visitor));
+                  });
 
     assembler->mov(asmjit::x86::eax,
                    asmjit::imm_u(reinterpret_cast<std::uintptr_t>(address)));
@@ -742,8 +760,8 @@ inline void GenerateCallCode64(asmjit::X86Assembler* assembler,
                   args.rend(),
                   [&](CallArg const& arg)
                   {
-      arg.Apply(std::ref(arg_visitor));
-    });
+                    arg.Apply(std::ref(arg_visitor));
+                  });
 
     assembler->mov(asmjit::x86::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
@@ -811,7 +829,7 @@ inline Allocator GenerateCallCode(Process const& process,
     reinterpret_cast<DWORD_PTR>(FindProcedure(process, kernel32, "DebugBreak"));
 
   asmjit::JitRuntime runtime;
-  asmjit::X86Assembler assembler{ &runtime };
+  asmjit::X86Assembler assembler{&runtime};
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   GenerateCallCode64(
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
@@ -839,7 +857,8 @@ inline Allocator GenerateCallCode(Process const& process,
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
 
   std::vector<BYTE> code_real(stub_size);
-  assembler.setBaseAddress(reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
+  assembler.setBaseAddress(
+    reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
   assembler.relocCode(code_real.data());
 
   HADESMEM_DETAIL_TRACE_A("Writing remote code stub.");
@@ -928,8 +947,8 @@ inline void CallMulti(Process const& process,
                  results,
                  [](detail::CallResultRemote const& r)
                  {
-    return static_cast<CallResultRaw>(r);
-  });
+                   return static_cast<CallResultRaw>(r);
+                 });
 }
 
 template <typename ArgsForwardIterator>
@@ -984,6 +1003,12 @@ inline void BuildCallArgs(OutputIterator call_args, T&& arg, Args&&... args)
 }
 }
 
+// TODO: Configurable timeout. This will complicate resource management however,
+// as we will need to extend the lifetime of the remote memory in case it
+// executes after we time out. Also, if it times out there is no way to try
+// again in the future... Should we just leak the memory on timeout? Return a
+// 'future' object? Some sort of combination? Requires more investigation...
+// TODO: Fix enum params and enum return values. Currently fails static asserts.
 template <typename FuncT, typename... Args>
 inline CallResult<detail::FuncResultT<FuncT>> Call(Process const& process,
                                                    void* address,

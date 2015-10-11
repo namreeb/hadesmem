@@ -1,6 +1,15 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
+// TODO: Move this to its own solution when we start working on this again, and
+// clean up our hadesmem solution (split into multiple(?), use props files,
+// generate with cmake(?), etc). It's okay to use CMake for everything else and
+// still have only a VS project for this, we can't make this compiler-portable
+// anyway.
+
+// TODO: Fix build configuration to get rid of the OS-specific configurations.
+// http://insider.osr.com/2015/ntinsider_2015_02.pdf
+
 #include "main.h"
 
 #include <ntddk.h>
@@ -33,15 +42,14 @@ DriverEntry(__in PDRIVER_OBJECT pDriverObject,
     ExAllocatePoolWithTag(NonPagedPool, sizeof(CHIMERA_DATA), CHIMERA_POOL_TAG);
   if (NULL == ChimeraData)
   {
-    KdPrint(
-      ("[Chimera] [%s] [0x%p]: ExAllocatePoolWithTag failed.\n",
-       __FUNCTION__,
-       KeGetCurrentThread()));
+    KdPrint(("[Chimera] [%s] [0x%p]: ExAllocatePoolWithTag failed.\n",
+             __FUNCTION__,
+             KeGetCurrentThread()));
     Status = STATUS_INSUFFICIENT_RESOURCES;
     goto Exit;
   }
 
-  RtlZeroMemory(ChimeraData, sizeof(ChimeraData));
+  RtlZeroMemory(ChimeraData, sizeof(*ChimeraData));
 
   RtlUnicodeStringInit(&DeviceName, CHIMERA_DEVICE_NAME_U);
 
@@ -200,7 +208,7 @@ ChimeraDispatchUnsupported(IN PDEVICE_OBJECT pDeviceObject, IN PIRP pIrp)
 void DriverUnload(__in PDRIVER_OBJECT pDriverObject)
 {
   PDEVICE_OBJECT pDeviceObject = pDriverObject->DeviceObject;
-  UNICODE_STRING DosDeviceName = { 0 };
+  UNICODE_STRING DosDeviceName = {0};
 
   FUNCTION_ENTRY;
 

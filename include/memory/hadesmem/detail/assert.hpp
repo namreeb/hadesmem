@@ -5,4 +5,7 @@
 
 #include <cassert>
 
+// TODO: Actually use this everywhere! Especially for cases like overflow,
+// underflow, preconditions, postconditions, etc.
+
 #define HADESMEM_DETAIL_ASSERT(...) assert(__VA_ARGS__)

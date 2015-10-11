@@ -55,13 +55,88 @@
 #include "tls.hpp"
 #include "warning.hpp"
 
+// TODO: Re-add unicode command line support to this and all other apps. TCLAP
+// will likely have to be replaced as it only supports narrow strings.
+// Powershell ISE is a good way to test this I think. http://goo.gl/zMzyjS
+
 // TODO: Add support for detecting the most expensive to process files in a
 // batch. Time how long it takes to fully dump each file, and record the top N
 // entries. Be careful not to factor in IO however (i.e. only time once the file
 // is copied into our buffer).
 
+// TODO: Add PEID DB support.
+
+// TODO: Implement resources dumping support.
+// 	http://www.brokenthorn.com/Resources/OSDevPE.html
+// 	http://blogs.msdn.com/b/oldnewthing/archive/2012/07/20/10331787.aspx
+
+// TODO: Implement debug dumping support.
+
+// TODO: Implement .NET dumping support.
+
+// TODO: Move all special cases into main PELib API.
+
+// TODO: Detect/handle all tricks from 'Undocumented PECOFF' whitepaper.
+
+// TODO: Detect/handle all tricks from 'Corkami'.
+
+// TODO: Instead of hardcoding lots of special logic in this tool (especially
+// for warnings etc.), we should move to an attribute based system where the
+// library sets attributes which can be queried by consumers like this tool.
+
+// TODO: Add a GUI (but continue to support CLI).
+
+// TODO: Add sample files for all the corner cases we're handling, and ensure it
+// is correct, so we can add regression tests. This includes logic in PeLib as
+// well.
+
+// TODO: Add warnings for cases like that are currently being detected and
+// swallowed entirely in PeLib.
+
+// TODO: Dump string representation of data where possible, such as bitmasks
+// (Charateristics etc.), data dir names, etc.
+
+// TODO: Add helper functions such as "HasExportDir" etc. to avoid the
+// unnecessary memory allocations and exception handling.
+
+// TODO: Check and use the value of the data directory sizes? e.g. To limit
+// enumeration of imports and exports. Need to check the loader behaviour to see
+// what we're allowed to do though. Size is probably ignored in most cases.
+
+// TODO: Investigate places where we have a try/catch because it's probably a
+// hack rather then the 'correct' solution. Fix or document all cases.
+
+// TODO: Fix the app/library so the "has_bound_imports_any" out-param is no
+// longer necessary... Should the bound import dumper simply perform an extra
+// validation pass on the import dir? What about perf? Needs more investigation.
+
+// TODO: Add a new 'hostile' warning type for things that are not just
+// suspicious, but are actively hostile and never found in 'legitimate' modules,
+// like the AOI trick.
+
+// TODO: Clean up this tool. It's a disaster of spaghetti code (spaghetti is
+// delicious, but we should clean this up anyway...).
+
+// TODO: Add HookShark-style replacement/alternative.
+
+// TODO: Memory-editor, debugger, etc.
+
+// TODO: Add functionality to make this tool more useful for reversing, such as
+// basic heuristics to detect suspicious files, packer/container detection,
+// diassembling the EP, compiler detection, dumping more of the file format
+// (requires PeLib work), .NET/VB6/etc detection, hashing, etc.
+
+// TODO: Fix files where we're currently getting an empty or invalid import
+// directory, but we're actually wrong! (Sample: Lab10-01.sys - Practical
+// Malware Analysis)
+
+// TODO: Move this and other complex examples to its own repro and solution. The
+// examples included with the library should be minimal and designed for
+// expository purposes.
+
 namespace
 {
+// TODO: Clean up this hack (and other global state).
 thread_local std::wstring g_current_file_path;
 
 bool g_quiet = false;
@@ -205,6 +280,8 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
   {
     // Using the Win32 API to get a processes path can fail for 'zombie'
     // processes. (QueryFullProcessImageName fails with ERROR_GEN_FAILURE.)
+    // TODO: Implement this in terms of the native API (GetPathNative), but
+    // translate the path to a Win32 path.
     try
     {
       WriteNewline(out);
@@ -339,6 +416,9 @@ void HandleLongOrUnprintableString(std::wstring const& name,
 {
   std::wostream& out = GetOutputStreamW();
 
+  // TODO: Fix perf for extremely long names. Instead of reading indefinitely
+  // and then checking the size after the fact, we should perform a bounded
+  // read.
   auto const unprintable = FindFirstUnprintableClassicLocale(value);
   std::size_t const kMaxNameLength = 1024;
   if (unprintable != std::string::npos)
@@ -526,6 +606,8 @@ int main(int argc, char* argv[])
     }
     else if (path_arg.isSet())
     {
+      // TODO: Use backup semantics flags and try to get backup privilege in
+      // order to make directory enumeration find more files.
       auto const path_args = path_arg.getValue();
       for (auto const& path : path_args)
       {

@@ -27,6 +27,10 @@
 #include "render.hpp"
 #include "window.hpp"
 
+// TODO: Fix this to actually support multiple devices etc.
+
+// TODO: Fix to load skins etc from correct full path rather than game dir.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGwenInitializeCallback>&

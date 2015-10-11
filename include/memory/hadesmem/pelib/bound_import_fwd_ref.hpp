@@ -20,6 +20,12 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add tests.
+
+// TODO: Fix the parsing of files where we end up parsing an invalid forwarder
+// ref, and so we have something nonsensical like '0' for OFfsetModuleName. See
+// GetModuleName for details.
+
 namespace hadesmem
 {
 class BoundImportForwarderRef
@@ -110,6 +116,8 @@ public:
     data_.Reserved = reserved;
   }
 
+  // TODO: Implement SetModuleName.
+
 private:
   Process const* process_;
   PeFile const* pe_file_;
@@ -118,44 +126,38 @@ private:
   IMAGE_BOUND_FORWARDER_REF data_;
 };
 
-inline bool
-  operator==(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) noexcept
+inline bool operator==(BoundImportForwarderRef const& lhs,
+                       BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool
-  operator!=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) noexcept
+inline bool operator!=(BoundImportForwarderRef const& lhs,
+                       BoundImportForwarderRef const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool
-  operator<(BoundImportForwarderRef const& lhs,
-            BoundImportForwarderRef const& rhs) noexcept
+inline bool operator<(BoundImportForwarderRef const& lhs,
+                      BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool
-  operator<=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) noexcept
+inline bool operator<=(BoundImportForwarderRef const& lhs,
+                       BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool
-  operator>(BoundImportForwarderRef const& lhs,
-            BoundImportForwarderRef const& rhs) noexcept
+inline bool operator>(BoundImportForwarderRef const& lhs,
+                      BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool
-  operator>=(BoundImportForwarderRef const& lhs,
-             BoundImportForwarderRef const& rhs) noexcept
+inline bool operator>=(BoundImportForwarderRef const& lhs,
+                       BoundImportForwarderRef const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

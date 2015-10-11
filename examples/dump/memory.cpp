@@ -99,6 +99,11 @@ void DumpMemory(hadesmem::Process const& process)
     std::vector<std::pair<DWORD, DWORD>> raw_datas;
     for (auto const& section : sections)
     {
+      // TODO: Make dumping raw size vs virtual size a flag, as it will be
+      // different depending on the target. e.g. For most files we would only
+      // want raw size when doing a 'clean' dump, as it matches the format on
+      // disk, but occasionally we may want virtual size if code is unpacked
+      // there.
       auto const section_size =
         (std::max)(section.GetVirtualSize(), section.GetSizeOfRawData());
       auto const ptr_raw_data_new =
@@ -198,7 +203,9 @@ void DumpMemory(hadesmem::Process const& process)
 
     // TODO: In the case of an empty ILT we should only warn here instead of
     // erroring. We should also provide an option to use the on-disk IAT (which
-    // acts as the ILT until the image is loaded) if it appears to match.
+    // acts as the ILT until the image is loaded) if it appears to match,
+    // otherwise we will get dumps with a useless IAT for lots of packed apps
+    // (e.g. Skyforge, Titanfall, Dragon Age: Inquisition, etc.).
     // TODO: Also update the implementation in CXExample.
     try
     {

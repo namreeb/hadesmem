@@ -18,6 +18,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 // RelocationIterator satisfies the requirements of an input iterator
@@ -118,14 +120,12 @@ public:
     return iter;
   }
 
-  bool
-    operator==(RelocationIterator const& other) const noexcept
+  bool operator==(RelocationIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool
-    operator!=(RelocationIterator const& other) const noexcept
+  bool operator!=(RelocationIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -136,11 +136,10 @@ private:
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
                   Relocation const& relocation,
-                  DWORD count) noexcept
-      : process_{&process},
-        pe_file_{&pe_file},
-        relocation_{relocation},
-        count_{count}
+                  DWORD count) noexcept : process_{&process},
+                                          pe_file_{&pe_file},
+                                          relocation_{relocation},
+                                          count_{count}
     {
     }
 

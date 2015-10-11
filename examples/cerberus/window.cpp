@@ -20,6 +20,8 @@
 // TODO: Hook DispatchMessage, PeekMessage, GetMessage, etc. instead of using
 // window procedure hooks.
 
+// TODO: Support multiple windows.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnWndProcMsgCallback>&

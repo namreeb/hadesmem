@@ -40,6 +40,18 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Standalone app/example for FindPattern. For dumping results,
+// experimenting with patterns, automatically generating new patterns, etc.
+
+// TODO: Support nibble wildcards. (e.g. FF D? EB)
+
+// TODO: Handle the case where after resolving a pattern, the result lives
+// outside the module (the heap, a different module, etc) and we want to use
+// that result as the starting address for a different pattern. Example: Using a
+// pattern which finds the address of some dynamically allocated shellcode, and
+// then using that address as the start for a further search inside the
+// shellcode.
+
 namespace hadesmem
 {
 struct PatternFlags
@@ -209,8 +221,8 @@ void* FindRaw(Process const& process,
                 n_end,
                 [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
                 {
-      return n_cur.wildcard || h_cur == n_cur.data;
-    });
+                  return n_cur.wildcard || h_cur == n_cur.data;
+                });
 
   if (iter != h_end)
   {
@@ -467,7 +479,7 @@ inline void* FindInFile(Process const& process,
   }
 
   detail::SmartHandle const file_mapping{::CreateFileMappingW(
-    file.GetHandle(), nullptr, PAGE_READONLY, 0, 0, nullptr) };
+    file.GetHandle(), nullptr, PAGE_READONLY, 0, 0, nullptr)};
   if (!file_mapping.IsValid())
   {
     DWORD const last_error = ::GetLastError();
@@ -498,9 +510,9 @@ public:
   {
   }
 
-  constexpr explicit Pattern(void* address, std::uint32_t flags)
-    noexcept : address_{address},
-                               flags_{flags}
+  constexpr explicit Pattern(void* address, std::uint32_t flags) noexcept
+    : address_{address},
+      flags_{flags}
   {
   }
 
@@ -509,8 +521,7 @@ public:
     return address_;
   }
 
-  constexpr std::uint32_t
-    GetFlags() const noexcept
+  constexpr std::uint32_t GetFlags() const noexcept
   {
     return flags_;
   }
@@ -520,39 +531,33 @@ private:
   std::uint32_t flags_{PatternFlags::kNone};
 };
 
-inline bool operator==(Pattern const& lhs,
-                       Pattern const& rhs) noexcept
+inline bool operator==(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() == rhs.GetAddress() &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
-inline bool operator!=(Pattern const& lhs,
-                       Pattern const& rhs) noexcept
+inline bool operator!=(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Pattern const& lhs,
-                      Pattern const& rhs) noexcept
+inline bool operator<(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() < rhs.GetAddress();
 }
 
-inline bool operator<=(Pattern const& lhs,
-                       Pattern const& rhs) noexcept
+inline bool operator<=(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() <= rhs.GetAddress();
 }
 
-inline bool operator>(Pattern const& lhs,
-                      Pattern const& rhs) noexcept
+inline bool operator>(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() > rhs.GetAddress();
 }
 
-inline bool operator>=(Pattern const& lhs,
-                       Pattern const& rhs) noexcept
+inline bool operator>=(Pattern const& lhs, Pattern const& rhs) noexcept
 {
   return lhs.GetAddress() >= rhs.GetAddress();
 }
@@ -604,14 +609,12 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(PatternMap const& lhs,
-                         PatternMap const& rhs) noexcept
+  friend bool operator==(PatternMap const& lhs, PatternMap const& rhs) noexcept
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(PatternMap const& lhs,
-                         PatternMap const& rhs) noexcept
+  friend bool operator!=(PatternMap const& lhs, PatternMap const& rhs) noexcept
   {
     return !(lhs == rhs);
   }
@@ -681,14 +684,12 @@ public:
     return map_.cend();
   }
 
-  friend bool operator==(ModuleMap const& lhs,
-                         ModuleMap const& rhs) noexcept
+  friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs) noexcept
   {
     return lhs.map_ == rhs.map_;
   }
 
-  friend bool operator!=(ModuleMap const& lhs,
-                         ModuleMap const& rhs) noexcept
+  friend bool operator!=(ModuleMap const& lhs, ModuleMap const& rhs) noexcept
   {
     return !(lhs == rhs);
   }

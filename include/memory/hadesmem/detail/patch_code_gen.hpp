@@ -349,6 +349,7 @@ inline std::size_t
 
   std::vector<std::uint8_t> call_buf;
 
+  // TODO: Avoid using a trampoline where possible.
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   std::unique_ptr<Allocator> trampoline = AllocatePageNear(process, address);
 

@@ -19,12 +19,17 @@ template <typename T, typename U = std::remove_cv_t<T>> struct IsCharType
     std::is_same<U, unsigned char>::value || std::is_same<U, wchar_t>::value;
 };
 
+// TODO: Remove this now that we're using Dev14.
 template <typename T> struct IsTriviallyCopyable
 {
   // std::is_trivially_copyable is broken for arrays with Dev12.
   // https://connect.microsoft.com/VisualStudio/feedback/details/806233
   static bool const value = std::is_trivial<T>::value;
 };
+
+// TODO: Add support to traits for varargs functions (call conv is ignored on
+// varargs). Remember though that you can have args before the elipsis, so you
+// will need something like: struct FuncResult<R(C::*)(Args......)>
 
 template <typename FuncT> struct FuncResult;
 
@@ -209,7 +214,7 @@ template <typename FuncT> using FuncArgsT = typename FuncArgs<FuncT>::type;
 template <typename FuncT> struct IsFunction
 {
 #pragma warning(push)
-#pragma warning(disable: 6285)
+#pragma warning(disable : 6285)
   static bool const value =
     std::is_member_function_pointer<FuncT>::value ||
     std::is_function<FuncT>::value ||

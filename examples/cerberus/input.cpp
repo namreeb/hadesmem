@@ -26,6 +26,17 @@
 #include "render.hpp"
 #include "window.hpp"
 
+// TODO: Fix input bugs caused by window resizing (e.g. Worms: Clan Wars when
+// changing from fullscreen to windowed). Not sure if this is already fixed,
+// need to re-test to confirm.
+
+// TODO: Fix input bugs caused by moving the mouse when alt-tabbing (e.g. Worms
+// Clan Wars in windowed mode). Not sure if this is already fixed, need to
+// re-test to confirm.
+
+// TODO: Fix blocking of Home key in GTA 5. Perhaps it's using hotkey apis? Or
+// is it implemented using a hook because it's an overlay?
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInputQueueEntry>&

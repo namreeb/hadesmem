@@ -34,6 +34,35 @@
 #include "main.hpp"
 #include "window.hpp"
 
+// TODO: Test against games like CoD: Ghosts which apparently have both a D3D10
+// and D3D11 device at the same time (only on Nvidia GPUs?).
+
+// TODO: Render something on startup like the Steam overlay does so we can
+// confirm that rendering is working even that cases that input isn't.
+
+// TODO: Ensure that everything works correctly when we set default GUI
+// visibility on (currently it is off by default and toggled on).
+
+// TODO: Hook the device window not the focus window?
+
+// TODO: Replace AntTweakBar with CEGUI? Need something with proper multi-device
+// support, a roadmap for DX12, etc. CEGUI is a pretty gigantic dependency (with
+// many of its own dependencies), but it seems to be the only real contender.
+
+// TODO: DirectDraw rendering support (e.g. Abe's Oddysee).
+
+// TODO: Investigate Chromium Embedded Framework backed GUI.
+
+// TODO: Add a forced-windowed option. (Belongs in CXExample?)
+
+// TODO: Add a generic crosshair. (Belongs in CXExample?)
+
+// TODO: Add basic framework for drawing shapes, text, etc. for use in
+// extensions.
+
+// TODO: Suport using both GWEN and AntTweakBar at the same time, with different
+// keys bound to them.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&

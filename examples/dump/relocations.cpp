@@ -18,6 +18,15 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+// TODO: Add extra sanity checking (e.g. whether VirtualAddress is valid,
+// whether SizeOfBlock is valid, etc.).
+
+// TODO: The "Unknown relocation type" warning is being incorrectly flagged on
+// files which use IMAGE_REL_BASED_HIGHADJ with an invalid parameter (because it
+// is ignored until W8). When we detect this reloc type we should skip over the
+// parameter (or log it) rather than treating it as another reloc. Sample:
+// reloc4.exe (Corkami).
+
 namespace
 {
 bool HasRelocationsDir(hadesmem::Process const& process,

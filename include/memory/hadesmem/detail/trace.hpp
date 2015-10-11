@@ -14,6 +14,10 @@
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
+// TODO: Improve tracing to be a more useful debugging aid (e.g. add line
+// number, break on line number, component filters, max log size, different log
+// levels, etc.).
+
 namespace hadesmem
 {
 namespace detail

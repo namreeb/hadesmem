@@ -51,8 +51,7 @@ public:
     return *GetOriginalArbitraryUserPtrPtr();
   }
 
-  template <typename FuncT>
-  FuncT GetTrampolineT() const noexcept
+  template <typename FuncT> FuncT GetTrampolineT() const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
                                   std::is_pointer<FuncT>::value);
@@ -60,6 +59,9 @@ public:
   }
 
 protected:
+  // WARNING! This will not work if TLS has not yet been initialized for the
+  // thread.
+  // TODO: Find a better way to implement this without the dependency on tLS.
   static void** GetOriginalArbitraryUserPtrPtr() noexcept
   {
     thread_local static void* orig_user_ptr = 0;

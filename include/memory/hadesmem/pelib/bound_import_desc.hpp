@@ -24,6 +24,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 class BoundImportDescriptor
@@ -145,6 +147,10 @@ public:
     data_.NumberOfModuleForwarderRefs = number_of_module_forwarder_refs;
   }
 
+  // TODO: Implement SetModuleName.
+
+  // TODO: Implement SetModuleForwarderRefs.
+
 private:
   Process const* process_;
   PeFile const* pe_file_;
@@ -153,16 +159,14 @@ private:
   IMAGE_BOUND_IMPORT_DESCRIPTOR data_;
 };
 
-inline bool
-  operator==(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) noexcept
+inline bool operator==(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool
-  operator!=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) noexcept
+inline bool operator!=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
@@ -173,9 +177,8 @@ inline bool operator<(BoundImportDescriptor const& lhs,
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool
-  operator<=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) noexcept
+inline bool operator<=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
@@ -186,9 +189,8 @@ inline bool operator>(BoundImportDescriptor const& lhs,
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool
-  operator>=(BoundImportDescriptor const& lhs,
-             BoundImportDescriptor const& rhs) noexcept
+inline bool operator>=(BoundImportDescriptor const& lhs,
+                       BoundImportDescriptor const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

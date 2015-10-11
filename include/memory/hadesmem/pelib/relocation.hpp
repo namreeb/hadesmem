@@ -19,6 +19,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 class Relocation
@@ -94,38 +96,32 @@ private:
   std::uint16_t offset_{};
 };
 
-inline bool operator==(Relocation const& lhs,
-                       Relocation const& rhs) noexcept
+inline bool operator==(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Relocation const& lhs,
-                       Relocation const& rhs) noexcept
+inline bool operator!=(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Relocation const& lhs,
-                      Relocation const& rhs) noexcept
+inline bool operator<(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Relocation const& lhs,
-                       Relocation const& rhs) noexcept
+inline bool operator<=(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Relocation const& lhs,
-                      Relocation const& rhs) noexcept
+inline bool operator>(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Relocation const& lhs,
-                       Relocation const& rhs) noexcept
+inline bool operator>=(Relocation const& lhs, Relocation const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

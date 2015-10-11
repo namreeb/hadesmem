@@ -19,6 +19,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 // RelocationBlockIterator satisfies the requirements of an input iterator
@@ -153,14 +155,12 @@ public:
     return iter;
   }
 
-  bool operator==(RelocationBlockIterator const& other) const
-    noexcept
+  bool operator==(RelocationBlockIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(RelocationBlockIterator const& other) const
-    noexcept
+  bool operator!=(RelocationBlockIterator const& other) const noexcept
   {
     return !(*this == other);
   }

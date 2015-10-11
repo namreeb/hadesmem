@@ -34,6 +34,7 @@
 namespace hadesmem
 {
 // WARNING! Don't use this, still under development.
+// TODO: Implement this properly.
 template <typename TargetFuncT, typename ContextT = void*> class PatchIat
 {
 public:

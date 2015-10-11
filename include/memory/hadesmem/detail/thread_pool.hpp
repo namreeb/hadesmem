@@ -80,6 +80,11 @@ public:
     }
   }
 
+  void Stop()
+  {
+    running_ = false;
+  }
+
 private:
   void Main()
   {

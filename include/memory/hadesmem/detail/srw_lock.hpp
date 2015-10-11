@@ -21,10 +21,9 @@ enum class SRWLockType
 class AcquireSRWLock
 {
 public:
-  explicit AcquireSRWLock(SRWLOCK* lock,
-                          SRWLockType type) noexcept
-    : lock_{lock},
-      type_{type}
+  _When_(lock_, _Acquires_lock_(lock_)) explicit AcquireSRWLock(
+    SRWLOCK* lock, SRWLockType type) noexcept : lock_{lock},
+                                                type_{type}
   {
     HADESMEM_DETAIL_ASSERT(lock_);
 
@@ -38,14 +37,14 @@ public:
     }
   }
 
-  AcquireSRWLock(AcquireSRWLock&& other) noexcept
-    : lock_{other.lock_},
-      type_{other.type_}
+  AcquireSRWLock(AcquireSRWLock&& other) noexcept : lock_{other.lock_},
+                                                    type_{other.type_}
   {
     other.lock_ = nullptr;
   }
 
-  AcquireSRWLock& operator=(AcquireSRWLock&& other) noexcept
+  _When_(lock_, _Requires_lock_held_(lock_)) AcquireSRWLock&
+    operator=(AcquireSRWLock&& other) noexcept
   {
     Cleanup();
 
@@ -62,7 +61,7 @@ public:
     Cleanup();
   }
 
-  void Cleanup() noexcept
+  _When_(lock_, _Releases_lock_(lock_)) void Cleanup() noexcept
   {
     if (!lock_)
     {

@@ -41,6 +41,9 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Support multiple exception types instead of just INT3 (e.g. invalid
+// instruction).
+
 namespace hadesmem
 {
 template <typename TargetFuncT> class PatchInt3 : public PatchVeh<TargetFuncT>

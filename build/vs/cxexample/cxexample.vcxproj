@@ -71,21 +71,29 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,6 +106,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,6 +129,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -145,6 +155,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Comm
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:rvalueCast /volatile:iso /Gw /Gy /d2Zi+ %(AdditionalOptions)</AdditionalOptions>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -171,6 +182,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Co
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

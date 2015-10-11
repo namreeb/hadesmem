@@ -42,6 +42,17 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Make hooking a transactional operation (i.e. fix exception guarantees
+// etc.).
+
+// TODO: Consolidate all memory allocations where possible. Using a minimum of
+// one page (and potentially multiple pages) for each detour is extremely
+// wasteful and could be causing memory pressure in some applications. Perhaps
+// some sort of remote heap that we can share across all detour types.
+
+// TODO: Add new Symbol class (or something along those lines) for looking up
+// function addresses in system DLLs that we want to hook.
+
 namespace hadesmem
 {
 template <typename TargetFuncT, typename ContextT = void*>
@@ -188,6 +199,11 @@ public:
     auto const buffer =
       ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
 
+    // TODO: Port to use Capstone instead.
+    // TODO: Add a disassembler module to abstract away the actual disassembly
+    // library being used (so later it can be replaced with a custom one, or
+    // support multiple backends, etc). Also useful when writing other tools
+    // like a standalone debugger/disassembler, memory editor, etc.
     ud_t ud_obj;
     ud_init(&ud_obj);
     ud_set_input_buffer(&ud_obj, buffer.data(), buffer.size());
@@ -205,6 +221,7 @@ public:
 
     std::size_t const patch_size = GetPatchSize();
 
+    // TODO: Detect backward jumps into the detour and fail/notify/etc.
     std::uint32_t instr_size = 0;
     do
     {
@@ -224,6 +241,8 @@ public:
         (asm_bytes_str ? asm_bytes_str : "Invalid."));
 #endif
 
+      // TODO: Improve support for rebuilding relative instructions, especially
+      // on x64.
       ud_operand_t const* const op = ud_insn_opr(&ud_obj, 0);
       bool is_jimm = op && op->type == UD_OP_JIMM;
       // Handle JMP QWORD PTR [RIP+Rel32]. Necessary for hook chain support.

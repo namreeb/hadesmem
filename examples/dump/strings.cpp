@@ -47,11 +47,14 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
 
   std::string buf;
   std::locale const& loc = std::locale::classic();
+  // TODO: Support actual wide strings, not just those with only ASCII
+  // characters.
   auto const step = wide ? 2 : 1;
   for (std::uint8_t* current = static_cast<std::uint8_t*>(beg);
        (current + step - 1) < end;
        current += (wide ? 2 : 1))
   {
+    // TODO: Detect and truncate extremely long strings (with a warning).
     bool const is_print = (wide ? *(current + 1) == 0 : true) &&
                           std::isprint(static_cast<char>(*current), loc);
     if (is_print)
@@ -63,6 +66,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
     {
       if (buf.size() >= kMinStringLen)
       {
+        // TODO: Option to log file offset (and rva?) of string.
         WriteNamedNormal(out, L"String", buf.c_str(), 2);
       }
 
@@ -79,6 +83,8 @@ void DumpStrings(hadesmem::Process const& process,
 
   std::uint8_t* const file_beg = static_cast<std::uint8_t*>(pe_file.GetBase());
   void* const file_end = file_beg + pe_file.GetSize();
+
+  // TODO: Fix to not require multiple passes.
 
   WriteNewline(out);
   WriteNormal(out, L"Narrow Strings:", 1);

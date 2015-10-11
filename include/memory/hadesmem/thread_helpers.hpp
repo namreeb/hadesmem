@@ -140,6 +140,14 @@ inline void* GetStartAddress(Thread const& thread)
   return start_address;
 }
 
+// TODO: Fix the case where an exception could be thrown due to a thread already
+// being in the process of terminating. This would cause ERROR_INVALID_PARAMETER
+// for OpenThread or ERROR_ACCESS_DENIED for SuspendThread (which we should then
+// double - check with WaitForSingleObject to confirm that the thread is
+// signaled). In these cases we should simply ignore the error and continue
+// (because the thread is as good as suspended anyway). All other errors should
+// cause a retry(but add trace logging of the exception details for debugging
+// purposes).
 class SuspendedThread
 {
 public:

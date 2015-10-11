@@ -19,6 +19,8 @@
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 
+// TODO: Port to use std::filesystem where possible.
+
 #define HADESMEM_PATHCCH_ALLOW_LONG_PATHS 0x00000001
 
 namespace hadesmem

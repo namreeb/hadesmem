@@ -19,6 +19,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 // BoundImportForwarderRefIterator satisfies the requirements of an input
@@ -36,8 +38,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  constexpr
-  BoundImportForwarderRefIterator() noexcept
+  constexpr BoundImportForwarderRefIterator() noexcept
   {
   }
 
@@ -141,14 +142,12 @@ public:
     return iter;
   }
 
-  bool operator==(BoundImportForwarderRefIterator const& other) const
-    noexcept
+  bool operator==(BoundImportForwarderRefIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(BoundImportForwarderRefIterator const& other) const
-    noexcept
+  bool operator!=(BoundImportForwarderRefIterator const& other) const noexcept
   {
     return !(*this == other);
   }
@@ -159,11 +158,11 @@ private:
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
                   BoundImportDescriptor const& desc,
-                  BoundImportForwarderRef const& forwarder)
-      noexcept : process_{&process},
-                                 pe_file_{&pe_file},
-                                 bound_import_desc_{&desc},
-                                 bound_import_forwarder_{forwarder}
+                  BoundImportForwarderRef const& forwarder) noexcept
+      : process_{&process},
+        pe_file_{&pe_file},
+        bound_import_desc_{&desc},
+        bound_import_forwarder_{forwarder}
     {
     }
 

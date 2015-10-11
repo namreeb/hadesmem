@@ -18,6 +18,19 @@
 #include <hadesmem/detail/winapi.hpp>
 #include <hadesmem/error.hpp>
 
+// TODO: Process should keep track of its access mask (beginning with the least
+// amount of access possible - i.e. PROCESS_QUERY_LIMITED_INFORMATION). When a
+// components wants to perform an operation on a process (e.g. read memory) it
+// should first call a function with the required access mask to ensure that it
+// is available, and reopen the handle if not. This way we can keep privs as
+// limited as possible, which will be useful when we can only get limited access
+// to a process.
+
+// TODO: Support cross architecture process manipulation (opening an x86 WoW64
+// process as native x64). Includes removing dependency of non-ntdll in injected
+// code and DLL loader, and adding cross architecture support for pelib, thread,
+// etc.
+
 namespace hadesmem
 {
 class Process
@@ -42,9 +55,8 @@ public:
     return *this;
   }
 
-  Process(Process&& other) noexcept
-    : handle_{std::move(other.handle_)},
-      id_{other.id_}
+  Process(Process&& other) noexcept : handle_{std::move(other.handle_)},
+                                      id_{other.id_}
   {
     other.id_ = 0;
   }
@@ -138,38 +150,32 @@ private:
   DWORD id_;
 };
 
-inline bool operator==(Process const& lhs,
-                       Process const& rhs) noexcept
+inline bool operator==(Process const& lhs, Process const& rhs) noexcept
 {
   return lhs.GetId() == rhs.GetId();
 }
 
-inline bool operator!=(Process const& lhs,
-                       Process const& rhs) noexcept
+inline bool operator!=(Process const& lhs, Process const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Process const& lhs,
-                      Process const& rhs) noexcept
+inline bool operator<(Process const& lhs, Process const& rhs) noexcept
 {
   return lhs.GetId() < rhs.GetId();
 }
 
-inline bool operator<=(Process const& lhs,
-                       Process const& rhs) noexcept
+inline bool operator<=(Process const& lhs, Process const& rhs) noexcept
 {
   return lhs.GetId() <= rhs.GetId();
 }
 
-inline bool operator>(Process const& lhs,
-                      Process const& rhs) noexcept
+inline bool operator>(Process const& lhs, Process const& rhs) noexcept
 {
   return lhs.GetId() > rhs.GetId();
 }
 
-inline bool operator>=(Process const& lhs,
-                       Process const& rhs) noexcept
+inline bool operator>=(Process const& lhs, Process const& rhs) noexcept
 {
   return lhs.GetId() >= rhs.GetId();
 }

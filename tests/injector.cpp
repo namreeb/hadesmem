@@ -14,6 +14,11 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Fix all tests so they are actually run and checked on build.
+
+// TODO: Write scripts to enable/disable appverif for all test binaries for use
+// during test passes.
+
 void TestInjector()
 {
   // Don't cause a fork bomb when we later re-launch ourselves to test injection

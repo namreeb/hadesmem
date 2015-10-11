@@ -289,6 +289,7 @@ extern "C" BOOL WINAPI
       command_line_buf.push_back(L'\0');
       STARTUPINFO start_info{};
       PROCESS_INFORMATION proc_info{};
+      // TODO: Capture stdout and debug trace it.
       if (!::CreateProcessW(nullptr,
                             command_line_buf.data(),
                             nullptr,
@@ -378,6 +379,8 @@ ProcessInterface& GetProcessInterface() noexcept
 
 void InitializeProcess()
 {
+  // TODO: Hook CreateProcessInternalW in Kernel32 on W7 because it's not in
+  // KernelBase.
   auto& helper = GetHelperInterface();
   helper.InitializeSupportForModule(L"KERNELBASE",
                                     DetourKernelBaseForProcess,

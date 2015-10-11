@@ -17,6 +17,9 @@
 #include <hadesmem/region.hpp>
 #include <hadesmem/region_list.hpp>
 
+// TODO: Test hadesmem under large page mode. Especially getting module bases
+// using VirtualQueryEx etc.
+
 namespace hadesmem
 {
 namespace detail
@@ -79,8 +82,8 @@ inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
                            std::end(regions),
                            [&](Region const& region)
                            {
-    return region.GetAllocBase() == base;
-  });
+                             return region.GetAllocBase() == base;
+                           });
   SIZE_T size{};
   while (iter != std::end(regions) && iter->GetAllocBase() == base)
   {

@@ -41,9 +41,70 @@
 // WARNING! Most of this is untested, it's for expository and testing
 // purposes only.
 
+// TODO: Clean up this entire project.
+
 // TODO: In API hooks where we allow callbacks to block calling the trampoline
 // and fail the call, also ensure we use SetLastError to set a reasonable error
 // code (or request one from the blocking callback).
+
+// TODO: Investigate Uplay, Origin, Overwolf, etc. compatibility issues (both
+// client and overlay).
+
+// TODO: Add networking hooks and callbacks.
+
+// TODO: All API hook callbacks should have a "retval" arg to compliment the
+// "handled" arg. Ensure it has a sensible default because it will be unused in
+// a lot of cases.
+
+// TODO: Review the restrictions on DllMain and ensure that none of the static
+// constructors or destructors are in violation.
+
+// TODO: Split up hooking code from implementation logic. e.g. The generic
+// process detour logic should be separated from the code which is reacting to
+// the hook (injecting into the new proc etc.).
+
+// TODO: Create a WineDB style spreadsheet to track game/app compatibility.
+// Ensure we test in-game properly, not just at the menu, and that we test
+// everything properly (basic rendering, basic input, fullscreen and windowed,
+// changing resolution, changing input modes, etc.).
+
+// TODO: Hook NTDLL instead of USER32 where possible.
+
+// Write a bunch of test apps to test our hooks and make sure we're properly
+// cleaning up after ourselves etc.
+
+// TODO: In the case where we're injecting at creation time instead of run-time
+// we should be skipping the extra suspends/resumes being done by the detour
+// lib.
+
+// TODO: Properly implement and test runtime injection and ejection support.
+
+// TODO: Hook FlushInstructionCache as a lame way to detect dynamically
+// allocated code (won't always be called, e.g. VAC3 doesn't use it when
+// manually mapping its modules).
+
+// TODO: Write a test app which is 100% 'clean' so we can use AppVerifier on it
+// in order to test Cerberus properly.
+
+// TODO: Use RAII for unregistering callbacks. We have too much messy code
+// duplication with potential for error (and it does happen more regularly than
+// it should!).
+
+// TODO: Support sandboxing games like SWTOR and D3.
+
+// TODO: Anti-anti-debug plugin.
+
+// TODO: VEH debugger.
+
+// TODO: Add anti-stack-trace support to work around some of the more aggressive
+// anti-cheats (e.g. clear stack and return to INT3, or create manual stack
+// frame which matches the whitelist and single step the whole way then redirect
+// control flow at the end).
+
+// TODO: Add an API logger (Module32First, Process32First,
+// CreateVectoredExceptionHandler, NtSetInformationThread,
+// NtQuerySystemInformation, ReadProcessMemory, recv, send, 
+// FlushInstructionCache, etc.).
 
 namespace
 {
@@ -499,7 +560,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     if (!is_initialized)
     {
       HADESMEM_DETAIL_TRACE_A("Already cleaned up. Bailing.");
-      return 1;
+      return 0;
     }
 
     is_initialized = false;
@@ -518,9 +579,11 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
 
     hadesmem::cerberus::UnloadPlugins();
 
+    // TODO: Actually check this return value in the injector and don't call
+    // FreeLibrary?
     if (!IsSafeToUnload())
     {
-      return 2;
+      return 1;
     }
 
     return 0;

@@ -46,6 +46,8 @@ public:
       old_protect_{0},
       mbi_(mbi)
   {
+    // TODO: Add a 'forced' mode to allow bypassing 'bad' protection detection
+    // for the rare cases where it may be necessary.
     if (IsBadProtect(mbi_))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(

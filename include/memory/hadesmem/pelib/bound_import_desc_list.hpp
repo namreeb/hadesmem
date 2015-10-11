@@ -18,6 +18,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Add tests.
+
 namespace hadesmem
 {
 // BoundImportDescriptorIterator satisfies the requirements of an input iterator
@@ -35,8 +37,7 @@ public:
   using reference = typename BaseIteratorT::reference;
   using iterator_category = typename BaseIteratorT::iterator_category;
 
-  constexpr
-  BoundImportDescriptorIterator() noexcept
+  constexpr BoundImportDescriptorIterator() noexcept
   {
   }
 
@@ -116,19 +117,18 @@ public:
     return iter;
   }
 
-  bool operator==(BoundImportDescriptorIterator const& other) const
-    noexcept
+  bool operator==(BoundImportDescriptorIterator const& other) const noexcept
   {
     return impl_ == other.impl_;
   }
 
-  bool operator!=(BoundImportDescriptorIterator const& other) const
-    noexcept
+  bool operator!=(BoundImportDescriptorIterator const& other) const noexcept
   {
     return !(*this == other);
   }
 
 private:
+  // TODO: Verify this.
   bool IsTerminator(BoundImportDescriptor const& bound_import_desc) const
   {
     // Apparently all three fields are supposed to be zero, but it seems that
@@ -141,10 +141,10 @@ private:
   {
     explicit Impl(Process const& process,
                   PeFile const& pe_file,
-                  BoundImportDescriptor const& bound_import_desc)
-      noexcept : process_{&process},
-                                 pe_file_{&pe_file},
-                                 bound_import_desc_{bound_import_desc}
+                  BoundImportDescriptor const& bound_import_desc) noexcept
+      : process_{&process},
+        pe_file_{&pe_file},
+        bound_import_desc_{bound_import_desc}
     {
     }
 

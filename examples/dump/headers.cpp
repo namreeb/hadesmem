@@ -17,6 +17,8 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+// TODO: Dump rich header.
+
 namespace
 {
 void DumpDosHeader(hadesmem::Process const& process,
@@ -193,6 +195,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WriteNormal(out, L"WARNING! More than 96 sections.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
+  // TODO: Warn for unusual time stamps (very old, in the future, etc.). Both
+  // here and elsewehre (e.g. export dir, import dir, etc.).
   DWORD const time_date_stamp = nt_hdrs.GetTimeDateStamp();
   std::wstring time_date_stamp_str;
   if (!ConvertTimeStamp(time_date_stamp, time_date_stamp_str))
@@ -205,6 +209,8 @@ void DumpNtHeaders(hadesmem::Process const& process,
   WriteNamedHex(
     out, L"PointerToSymbolTable", nt_hdrs.GetPointerToSymbolTable(), 2);
   WriteNamedHex(out, L"NumberOfSymbols", nt_hdrs.GetNumberOfSymbols(), 2);
+  // TODO: Detect when SizeOfOptionalHeader has been set to put the section
+  // table in unmapped space (e.g. the overlay).
   WriteNamedHex(
     out, L"SizeOfOptionalHeader", nt_hdrs.GetSizeOfOptionalHeader(), 2);
   WriteNamedHex(out, L"Characteristics", nt_hdrs.GetCharacteristics(), 2);
@@ -216,6 +222,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
     out, L"SizeOfInitializedData", nt_hdrs.GetSizeOfInitializedData(), 2);
   WriteNamedHex(
     out, L"SizeOfUninitializedData", nt_hdrs.GetSizeOfUninitializedData(), 2);
+  // TODO: For valid EPs inside the file, dump the section that it is in.
   DWORD const addr_of_ep = nt_hdrs.GetAddressOfEntryPoint();
   WriteNamedHex(out, L"AddressOfEntryPoint", addr_of_ep, 2);
   // Entry point can be null. For DLLs this is fine, because it simply means the
@@ -270,11 +277,13 @@ void DumpNtHeaders(hadesmem::Process const& process,
     WarnForCurrentFile(WarningType::kSuspicious);
   }
   // Not sure if this is actually possible under x64.
+  // TODO: Check if this is allowed.
   else if (nt_hdrs.GetMachine() == IMAGE_FILE_MACHINE_AMD64 &&
            image_base >= (0xFFFFULL << 48))
   {
     // User space is 0x00000000`00000000 - 0x0000FFFF`FFFFFFFF
     // Kernel space is 0xFFFF0000`00000000 - 0xFFFFFFFF`FFFFFFFF
+    // TODO: What about the gap?
     WriteNormal(out, L"WARNING! Detected kernel space ImageBase.", 2);
     WarnForCurrentFile(WarningType::kSuspicious);
   }
@@ -318,9 +327,14 @@ void DumpNtHeaders(hadesmem::Process const& process,
 
     if (file_alignment < 0x200 && num_sections != 0)
     {
-      /// Sample: maxsecXP.exe.
-      /// Sample: maxsec_lowaligW7.exe.
-      /// Sample: nullSOH-XP.exe.
+      // TODO: Find out if it's legal to have a file alignment < 0x200, but
+      // still have sections. This may impact whether or not part of RvaToVa is
+      // correct (explicitly using ~0x1FF instead of taking the min of 0x200 and
+      // the FileAlignment). Need to reverse what the loader does in this
+      // situations.
+      // Sample: maxsecXP.exe.
+      // Sample: maxsec_lowaligW7.exe.
+      // Sample: nullSOH-XP.exe.
       WriteNormal(
         out, L"WARNING! Low file alignment with non-zero section count.", 2);
       WarnForCurrentFile(WarningType::kSuspicious);

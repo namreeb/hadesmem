@@ -23,6 +23,8 @@
 #include <hadesmem/region_list.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Add proper regression tests for PeLib.
+
 namespace hadesmem
 {
 enum class PeFileType
@@ -171,6 +173,8 @@ inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
   return lhs;
 }
 
+// TODO: Add sample files for all the corner cases we're handling, and ensure it
+// is correct, so we can add regression tests.
 inline PVOID RvaToVa(Process const& process,
                      PeFile const& pe_file,
                      DWORD rva,

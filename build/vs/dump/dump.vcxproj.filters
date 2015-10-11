@@ -54,6 +54,9 @@
     <ClCompile Include="..\..\..\examples\dump\warning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\examples\dump\overlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\dump\bound_imports.hpp">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\dump\warning.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\examples\dump\overlay.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

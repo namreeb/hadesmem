@@ -31,6 +31,15 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: IAT based injection. Required to allow injection before DllMain etc. of
+// other moudles are executed. Include support for .NET target processes.
+// Important because some obfuscated games have anti-debug etc. tricks hidden in
+// the DllMain of a static import.
+
+// TODO: .NET injection (without DLL dependency if possible).
+
+// TODO: Add manual mapping support again.
+
 namespace hadesmem
 {
 namespace detail
@@ -62,8 +71,8 @@ public:
 
     try
     {
-      WriteEnvironmentVariable(name_,
-                               old_value_.first ? old_value_.second.data() : nullptr);
+      WriteEnvironmentVariable(
+        name_, old_value_.first ? old_value_.second.data() : nullptr);
     }
     catch (...)
     {
@@ -191,6 +200,7 @@ inline void FreeDll(Process const& process, HMODULE module)
   }
 }
 
+// TODO: Support passing an arg to the export (e.g. a string).
 inline CallResult<DWORD_PTR> CallExport(Process const& process,
                                         HMODULE module,
                                         std::string const& export_name)
@@ -268,6 +278,9 @@ private:
   detail::SmartHandle thread_handle_;
 };
 
+// TODO: Improve argument passing suppport for programs with complex command
+// lines. E.g. Aion (from NCWest) requires a command line with embedded
+// quotation marks which we don't correctly handle.
 template <typename ArgsIter>
 inline CreateAndInjectData CreateAndInject(std::wstring const& path,
                                            std::wstring const& work_dir,
@@ -313,6 +326,9 @@ inline CreateAndInjectData CreateAndInject(std::wstring const& path,
     return work_dir;
   }();
 
+  // TODO: Make this thread-safe. If multiple injections occur simultaneously
+  // from different threads the environment variables may trample each other
+  // etc.
   detail::SteamEnvironmentVariable app_id(L"SteamAppId", steam_app_id);
   detail::SteamEnvironmentVariable game_id(L"SteamGameId", steam_app_id);
 

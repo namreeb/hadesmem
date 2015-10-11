@@ -104,6 +104,7 @@ void DumpExports(hadesmem::Process const& process,
     }
   }
 
+  // TODO: Detect and warn when export names are not lexicographically ordered.
   std::uint32_t num_exports = 0U;
   for (auto const& e : exports)
   {
@@ -175,6 +176,9 @@ void DumpExports(hadesmem::Process const& process,
 
       if (ep_va)
       {
+        // TODO: Fix case where we're disassembling an image, which may have its
+        // EAT hooked, so our calculations on the number of bytes to read until
+        // the end of file is actually wrong.
         DisassembleEp(process, pe_file, ep_rva, ep_va, 4);
       }
       else if (!e.IsVirtualVa())

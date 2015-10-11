@@ -145,6 +145,9 @@ inline std::wstring GetPathNative(Process const& process)
   return {buffer.data(), buffer.data() + process_id_info.ImageName.Length / 2};
 }
 
+// TODO: Use GetPathNative and convert the result to a Win32 path, because it
+// bypasses access restrictions and also works for 'zombie' processes, where
+// QueryFullProcessImageNameW fails with ERROR_GEN_FAILURE.
 inline std::wstring GetPath(Process const& process)
 {
   return detail::QueryFullProcessImageNameW(process.GetHandle());
