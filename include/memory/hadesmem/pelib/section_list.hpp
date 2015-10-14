@@ -48,11 +48,11 @@ public:
     }
   }
 
-  explicit SectionIterator(Process&& process, PeFile const& pe_file) = delete;
+  explicit SectionIterator(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit SectionIterator(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit SectionIterator(Process&& process, PeFile&& pe_file) = delete;
+  explicit SectionIterator(Process const&& process, PeFile&& pe_file) = delete;
 
   reference operator*() const noexcept
   {
@@ -137,11 +137,11 @@ public:
   {
   }
 
-  explicit SectionList(Process&& process, PeFile const& pe_file) = delete;
+  explicit SectionList(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit SectionList(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit SectionList(Process&& process, PeFile&& pe_file) = delete;
+  explicit SectionList(Process const&& process, PeFile&& pe_file) = delete;
 
   iterator begin()
   {

@@ -43,7 +43,7 @@
 
 // TODO: Fix various race conditions in our hooks.
 
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+// TODO: Add resize detection/support for D3D9.
 
 namespace
 {

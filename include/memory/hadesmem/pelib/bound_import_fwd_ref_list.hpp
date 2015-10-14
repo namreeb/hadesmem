@@ -66,7 +66,7 @@ public:
     }
   }
 
-  explicit BoundImportForwarderRefIterator(Process&& process,
+  explicit BoundImportForwarderRefIterator(Process const&& process,
                                            PeFile const& pe_file,
                                            BoundImportDescriptor const& desc) =
     delete;
@@ -81,12 +81,12 @@ public:
                                            BoundImportDescriptor&& desc) =
     delete;
 
-  explicit BoundImportForwarderRefIterator(Process&& process,
+  explicit BoundImportForwarderRefIterator(Process const&& process,
                                            PeFile&& pe_file,
                                            BoundImportDescriptor const& desc) =
     delete;
 
-  explicit BoundImportForwarderRefIterator(Process&& process,
+  explicit BoundImportForwarderRefIterator(Process const&& process,
                                            PeFile const& pe_file,
                                            BoundImportDescriptor&& desc) =
     delete;
@@ -192,7 +192,7 @@ public:
   {
   }
 
-  explicit BoundImportForwarderRefList(Process&& process,
+  explicit BoundImportForwarderRefList(Process const&& process,
                                        PeFile const& pe_file,
                                        BoundImportDescriptor const& desc) =
     delete;
@@ -206,16 +206,16 @@ public:
                                        PeFile const& pe_file,
                                        BoundImportDescriptor&& desc) = delete;
 
-  explicit BoundImportForwarderRefList(Process&& process,
+  explicit BoundImportForwarderRefList(Process const&& process,
                                        PeFile&& pe_file,
                                        BoundImportDescriptor const& desc) =
     delete;
 
-  explicit BoundImportForwarderRefList(Process&& process,
+  explicit BoundImportForwarderRefList(Process const&& process,
                                        PeFile const& pe_file,
                                        BoundImportDescriptor&& desc) = delete;
 
-  explicit BoundImportForwarderRefList(Process&& process,
+  explicit BoundImportForwarderRefList(Process const&& process,
                                        PeFile&& pe_file,
                                        BoundImportDescriptor&& desc) = delete;
 

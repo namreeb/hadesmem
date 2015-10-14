@@ -442,6 +442,7 @@ void HandleLongOrUnprintableString(std::wstring const& name,
   WriteNamedNormal(out, name, value.c_str(), tabs);
 }
 
+// TODO: Use hadesmem::detail::TimestampToStringUtc instead.
 bool ConvertTimeStamp(std::time_t time, std::wstring& str)
 {
   std::tm local_time{};

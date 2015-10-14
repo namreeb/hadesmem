@@ -25,6 +25,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Ensure we properly support data exports. http://bit.ly/1Lu548u
+
 namespace hadesmem
 {
 class Export
@@ -118,7 +120,7 @@ public:
     }
   }
 
-  explicit Export(Process&& process,
+  explicit Export(Process const&& process,
                   PeFile const& pe_file,
                   WORD procedure_number) = delete;
 
@@ -126,7 +128,7 @@ public:
                   PeFile&& pe_file,
                   WORD procedure_number) = delete;
 
-  explicit Export(Process&& process,
+  explicit Export(Process const&& process,
                   PeFile&& pe_file,
                   WORD procedure_number) = delete;
 
@@ -236,38 +238,32 @@ private:
   bool virtual_va_{};
 };
 
-inline bool operator==(Export const& lhs,
-                       Export const& rhs) noexcept
+inline bool operator==(Export const& lhs, Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() == rhs.GetProcedureNumber();
 }
 
-inline bool operator!=(Export const& lhs,
-                       Export const& rhs) noexcept
+inline bool operator!=(Export const& lhs, Export const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Export const& lhs,
-                      Export const& rhs) noexcept
+inline bool operator<(Export const& lhs, Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() < rhs.GetProcedureNumber();
 }
 
-inline bool operator<=(Export const& lhs,
-                       Export const& rhs) noexcept
+inline bool operator<=(Export const& lhs, Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() <= rhs.GetProcedureNumber();
 }
 
-inline bool operator>(Export const& lhs,
-                      Export const& rhs) noexcept
+inline bool operator>(Export const& lhs, Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() > rhs.GetProcedureNumber();
 }
 
-inline bool operator>=(Export const& lhs,
-                       Export const& rhs) noexcept
+inline bool operator>=(Export const& lhs, Export const& rhs) noexcept
 {
   return lhs.GetProcedureNumber() >= rhs.GetProcedureNumber();
 }

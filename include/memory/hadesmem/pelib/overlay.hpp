@@ -87,11 +87,11 @@ public:
     UpdateRead();
   }
 
-  explicit Overlay(Process&& process, PeFile const& pe_file, void* base);
+  explicit Overlay(Process const&& process, PeFile const& pe_file, void* base);
 
   explicit Overlay(Process const& process, PeFile&& pe_file, void* base);
 
-  explicit Overlay(Process&& process, PeFile&& pe_file, void* base);
+  explicit Overlay(Process const&& process, PeFile&& pe_file, void* base);
 
   void* GetBase() const noexcept
   {

@@ -37,7 +37,7 @@ public:
     UpdateRead();
   }
 
-  explicit ImportThunk(Process&& process,
+  explicit ImportThunk(Process const&& process,
                        PeFile const& pe_file,
                        void* thunk) = delete;
 
@@ -45,7 +45,7 @@ public:
                        PeFile&& pe_file,
                        void* thunk) = delete;
 
-  explicit ImportThunk(Process&& process,
+  explicit ImportThunk(Process const&& process,
                        PeFile&& pe_file,
                        void* thunk) = delete;
 

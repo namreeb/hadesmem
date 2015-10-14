@@ -54,11 +54,11 @@ public:
     }
   }
 
-  explicit ImportDirIterator(Process&& process, PeFile const& pe_file) = delete;
+  explicit ImportDirIterator(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit ImportDirIterator(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit ImportDirIterator(Process&& process, PeFile&& pe_file) = delete;
+  explicit ImportDirIterator(Process const&& process, PeFile&& pe_file) = delete;
 
   reference operator*() const noexcept
   {
@@ -157,11 +157,11 @@ public:
   {
   }
 
-  explicit ImportDirList(Process&& process, PeFile const& pe_file) = delete;
+  explicit ImportDirList(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit ImportDirList(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit ImportDirList(Process&& process, PeFile&& pe_file) = delete;
+  explicit ImportDirList(Process const&& process, PeFile&& pe_file) = delete;
 
   iterator begin()
   {

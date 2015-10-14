@@ -37,6 +37,30 @@
 // TODO: Fix blocking of Home key in GTA 5. Perhaps it's using hotkey apis? Or
 // is it implemented using a hook because it's an overlay?
 
+// TODO: Ensure cursor clipping works even when the window is moved/resize, or
+// we Alt-Tab then back in, etc.
+
+// TODO: Make mouse locking optional. Some games may be better without it (e.g.
+// MMOs).
+
+// TODO: Add generic input interface so plugins can register for
+// mouse/keyboard/etc input for use in game-specific hacks. E.g. Hotkeys for
+// features, mouse input for click-to-teleport, etc.
+
+// TODO: Test input blocking etc. with gamepad control in CoD: AW, CoD: Ghosts,
+// etc. Confirmed not working in Oddworld: NNT.
+
+// TODO: Make use of asynchronous input optional. It has to be enabled for
+// AntTweakBar due to it making rendering calls in input callbacks, but can we
+// disable it for GWEN and other renderers? Would probably make a lot of weird
+// input related issues magically go away.
+
+// TODO: Test more DirectInput based games. Need one that uses GetRawInputBuffer
+// especially. Arma 3 uses GetRawInputData but the way it uses it seems weird,
+// so we should test more.
+
+// TODO: Add XInput support. http://bit.ly/1jzNt43
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInputQueueEntry>&
@@ -382,6 +406,8 @@ void CallDefWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   }
 }
 
+// TODO: Add support for translating WM_INPUT style input into games which don't
+// get 'normal' input sent to their window? e.g. NFSR?
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
 {
@@ -397,6 +423,9 @@ void WindowProcCallback(
 
   // TODO: Also support raw input keyboard messages for cases where
   // RIDEV_NOLEGACY is used.
+  // TODO: Make GUI toggle hotkey configurable.
+  // TODO: Use RegisterHotKey in order to allow toggling the GUI even in cases
+  // where we don't get game input (useful for render testing).
   if (msg == WM_KEYDOWN && !((lparam >> 30) & 1) && wparam == VK_F9 &&
       shift_down)
   {

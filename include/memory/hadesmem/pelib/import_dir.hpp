@@ -95,7 +95,7 @@ public:
     UpdateRead();
   }
 
-  explicit ImportDir(Process&& process,
+  explicit ImportDir(Process const&& process,
                      PeFile const& pe_file,
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
 
@@ -103,7 +103,7 @@ public:
                      PeFile&& pe_file,
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
 
-  explicit ImportDir(Process&& process,
+  explicit ImportDir(Process const&& process,
                      PeFile&& pe_file,
                      PIMAGE_IMPORT_DESCRIPTOR imp_desc) = delete;
 

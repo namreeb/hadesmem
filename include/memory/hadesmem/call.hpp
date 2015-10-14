@@ -1074,7 +1074,7 @@ public:
   {
   }
 
-  explicit MultiCall(Process&& process) = delete;
+  explicit MultiCall(Process const&& process) = delete;
 
   template <typename FuncT, typename... Args>
   inline void Add(void* address, CallConv call_conv, Args&&... args)

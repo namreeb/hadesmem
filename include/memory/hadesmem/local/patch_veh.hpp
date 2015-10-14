@@ -41,6 +41,10 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add context support.
+
+// TODO: Add page breakpoint hooks (PAGE_GUARD, PAGE_NOACCESS, etc.).
+
 namespace hadesmem
 {
 template <typename TargetFuncT> class PatchVeh : public PatchDetour<TargetFuncT>
@@ -61,7 +65,7 @@ public:
     Initialize();
   }
 
-  explicit PatchVeh(Process&& process,
+  explicit PatchVeh(Process const&& process,
                     TargetFuncT target,
                     DetourFuncT const& detour) = delete;
 

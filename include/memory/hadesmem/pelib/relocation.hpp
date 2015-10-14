@@ -36,7 +36,7 @@ public:
     UpdateRead();
   }
 
-  explicit Relocation(Process&& process,
+  explicit Relocation(Process const&& process,
                       PeFile const& pe_file,
                       std::uint16_t* base) = delete;
 
@@ -44,7 +44,7 @@ public:
                       PeFile&& pe_file,
                       std::uint16_t* base) = delete;
 
-  explicit Relocation(Process&& process,
+  explicit Relocation(Process const&& process,
                       PeFile&& pe_file,
                       std::uint16_t* base) = delete;
 

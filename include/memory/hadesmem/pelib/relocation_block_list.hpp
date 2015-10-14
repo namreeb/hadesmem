@@ -95,13 +95,13 @@ public:
     }
   }
 
-  explicit RelocationBlockIterator(Process&& process,
+  explicit RelocationBlockIterator(Process const&& process,
                                    PeFile const& pe_file) = delete;
 
   explicit RelocationBlockIterator(Process const& process,
                                    PeFile&& pe_file) = delete;
 
-  explicit RelocationBlockIterator(Process&& process,
+  explicit RelocationBlockIterator(Process const&& process,
                                    PeFile&& pe_file) = delete;
 
   reference operator*() const noexcept
@@ -201,13 +201,13 @@ public:
   {
   }
 
-  explicit RelocationBlockList(Process&& process,
+  explicit RelocationBlockList(Process const&& process,
                                PeFile const& pe_file) = delete;
 
   explicit RelocationBlockList(Process const& process,
                                PeFile&& pe_file) = delete;
 
-  explicit RelocationBlockList(Process&& process, PeFile&& pe_file) = delete;
+  explicit RelocationBlockList(Process const&& process, PeFile&& pe_file) = delete;
 
   iterator begin()
   {

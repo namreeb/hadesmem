@@ -726,7 +726,7 @@ public:
     }
   }
 
-  explicit FindPattern(Process&& process,
+  explicit FindPattern(Process const&& process,
                        std::wstring const& pattern,
                        bool in_memory_file) = delete;
 

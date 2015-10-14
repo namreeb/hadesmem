@@ -94,7 +94,7 @@ public:
     }
   }
 
-  explicit PeFile(Process&& process,
+  explicit PeFile(Process const&& process,
                   void* address,
                   PeFileType type,
                   DWORD size) = delete;
@@ -175,6 +175,8 @@ inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 
 // TODO: Add sample files for all the corner cases we're handling, and ensure it
 // is correct, so we can add regression tests.
+// TODO: Consider if RvaToVa should be RvaToFilePtr, and RvaToVa should return
+// the VA if the file were to be mapped.
 inline PVOID RvaToVa(Process const& process,
                      PeFile const& pe_file,
                      DWORD rva,
@@ -331,6 +333,7 @@ inline PVOID RvaToVa(Process const& process,
           // is normal for the RVA to be in the zero fill of a data segment.
           // TODO: Find other places in this function where we need to set this
           // flag.
+          // TODO: Also check section characteristics?
           if (rva < virtual_size && virtual_va)
           {
             *virtual_va = true;

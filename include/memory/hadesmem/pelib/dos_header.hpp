@@ -34,11 +34,11 @@ public:
     EnsureValid();
   }
 
-  explicit DosHeader(Process&& process, PeFile const& pe_file) = delete;
+  explicit DosHeader(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit DosHeader(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit DosHeader(Process&& process, PeFile&& pe_file) = delete;
+  explicit DosHeader(Process const&& process, PeFile&& pe_file) = delete;
 
   PVOID GetBase() const noexcept
   {

@@ -19,6 +19,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add context support.
+
 namespace hadesmem
 {
 class PatchVmt
@@ -50,11 +52,11 @@ public:
     Initialize();
   }
 
-  explicit PatchVmt(Process&& process,
+  explicit PatchVmt(Process const&& process,
                     void* target_class,
                     std::size_t vmt_size) = delete;
 
-  explicit PatchVmt(Process&& process, void* target_class, TagUnsafe) = delete;
+  explicit PatchVmt(Process const&& process, void* target_class, TagUnsafe) = delete;
 
   PatchVmt(PatchVmt const& other) = delete;
 

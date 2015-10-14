@@ -61,7 +61,9 @@ public:
 protected:
   // WARNING! This will not work if TLS has not yet been initialized for the
   // thread.
-  // TODO: Find a better way to implement this without the dependency on tLS.
+  // TODO: Find a better way to implement this without the dependency on TLS.
+  // Required for hooking APIs which are called very early on in the thread
+  // initialization phase. E.g. RtlAllocateHeap.
   static void** GetOriginalArbitraryUserPtrPtr() noexcept
   {
     thread_local static void* orig_user_ptr = 0;

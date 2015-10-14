@@ -73,11 +73,11 @@ public:
     }
   }
 
-  explicit ProtectGuard(Process&& process,
+  explicit ProtectGuard(Process const&& process,
                         PVOID address,
                         ProtectGuardType type) = delete;
 
-  explicit ProtectGuard(Process&& process,
+  explicit ProtectGuard(Process const&& process,
                         MEMORY_BASIC_INFORMATION const& mbi,
                         ProtectGuardType type) = delete;
 

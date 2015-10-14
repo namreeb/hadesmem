@@ -29,6 +29,10 @@
 #include "print.hpp"
 #include "warning.hpp"
 
+// TODO: Support dumping manually specified modules/regions, so we can dump
+// those modules which have erased PE headers, unlinked from PEB, are manually
+// mapped, etc.
+
 namespace
 {
 std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)

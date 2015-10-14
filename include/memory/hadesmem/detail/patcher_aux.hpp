@@ -16,6 +16,10 @@ namespace hadesmem
 {
 namespace detail
 {
+// TODO: When detouring, instead of simply bailing in the case that
+// VerifyPatchThreads fails, we should instead redirect the IP to the equivalent
+// spot in our trampoline. Ditto for the reverse case when unhooking, we should
+// redirect from our trampoline back to the target.
 inline void VerifyPatchThreads(DWORD pid, void* target, std::size_t len)
 {
   ThreadList threads{pid};

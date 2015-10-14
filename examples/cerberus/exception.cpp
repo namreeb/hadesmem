@@ -19,6 +19,9 @@
 #include "main.hpp"
 #include "helpers.hpp"
 
+// TODO: Add built-in exception handler registration blocking via a default-off
+// config flag.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<

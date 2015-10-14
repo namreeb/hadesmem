@@ -18,6 +18,8 @@
 // number, break on line number, component filters, max log size, different log
 // levels, etc.).
 
+// TODO: Add more debug tracing everywhere.
+
 namespace hadesmem
 {
 namespace detail

@@ -10,6 +10,10 @@
 // TODO: Fix build configuration to get rid of the OS-specific configurations.
 // http://insider.osr.com/2015/ntinsider_2015_02.pdf
 
+// TODO: Actually start implementing this! e.g. Custom OpenProcess,
+// ReadProcessMemory, etc. APIs to work around ACs like EAC.
+// http://bit.ly/1RHDW6Y
+
 #include "main.h"
 
 #include <ntddk.h>

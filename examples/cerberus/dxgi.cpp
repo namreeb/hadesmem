@@ -33,6 +33,8 @@
 
 // TODO: Reimplement D3D10/D3D11 device OnRelease support.
 
+// TODO: Hook IDXGISwapChain::ResizeBuffers. Also IDXGISwapChain::ResizeTarget?
+
 namespace
 {
 class DXGIImpl : public hadesmem::cerberus::DXGIInterface

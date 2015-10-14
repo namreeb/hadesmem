@@ -40,6 +40,8 @@
 
 // TODO: Add manual mapping support again.
 
+// TODO: IME injection. https://github.com/dwendt/UniversalInject
+
 namespace hadesmem
 {
 namespace detail
@@ -228,7 +230,7 @@ public:
   {
   }
 
-  explicit CreateAndInjectData(Process&& process,
+  explicit CreateAndInjectData(Process const&& process,
                                HMODULE module,
                                DWORD_PTR export_ret,
                                DWORD export_last_error,

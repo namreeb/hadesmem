@@ -70,8 +70,8 @@
 
 // TODO: Hook NTDLL instead of USER32 where possible.
 
-// Write a bunch of test apps to test our hooks and make sure we're properly
-// cleaning up after ourselves etc.
+// TODO: Write a test app which is AppVerifier clean, exercises all major
+// functionality, etc. so we can test properly.
 
 // TODO: In the case where we're injecting at creation time instead of run-time
 // we should be skipping the extra suspends/resumes being done by the detour
@@ -83,12 +83,14 @@
 // allocated code (won't always be called, e.g. VAC3 doesn't use it when
 // manually mapping its modules).
 
-// TODO: Write a test app which is 100% 'clean' so we can use AppVerifier on it
-// in order to test Cerberus properly.
-
 // TODO: Use RAII for unregistering callbacks. We have too much messy code
 // duplication with potential for error (and it does happen more regularly than
 // it should!).
+
+// TODO: All detours should have reentrance guards. For example, if someone else
+// is detouring WriteFile, and upon first call calls CreateFile to open its log
+// file on demand, and guards against its own reentrance, and if they detour
+// first, then you would be reentered.
 
 // TODO: Support sandboxing games like SWTOR and D3.
 
@@ -103,8 +105,31 @@
 
 // TODO: Add an API logger (Module32First, Process32First,
 // CreateVectoredExceptionHandler, NtSetInformationThread,
-// NtQuerySystemInformation, ReadProcessMemory, recv, send, 
+// NtQuerySystemInformation, ReadProcessMemory, recv, send,
 // FlushInstructionCache, etc.).
+
+// TODO: Add generic utility classes which would be useful during both reversing
+// and development. Especially those which are game or rendering related.
+// E.g. Shader disassembling/dumping code. Matrix dumping code. Drawing
+// primitives and text. Mathematical types like vectors and matricies, and
+// helper functions like WorldToScreen.
+
+// TODO: Add a useful generic example plugin like a Teamspeak or VLC controller.
+
+// TODO: Add HWID-bypassing extension (e.g. Win32_BaseBoard.SerialNumber,
+// Win32_BIOS.SerialNumber, Win32_BaseBoard.Manufacturer,
+// Win32_BIOS.Manufacturer, Win32_OperatingSystem.InstallDate,
+// Win32_OperatingSystem.SerialNumber, IOCTL_STORAGE_QUERY_PROPERTY,
+// SMART_RCV_DRIVE_DATA, Windows serial, MAC address, etc.).
+
+// TODO: Don't use so many TLS slots. Have a function which returns a pointer to
+// a structure which has all the flags for disabling the hooks etc.
+
+// TODO: Configurable hooking method. (E.g. Inline, IAT, INT3, PAGE_GUARD, etc.)
+
+// TODO: Wrap the detour, callbacks, hook flag, etc all into one struct.
+
+// TODO: Add scripting support. Lua? ChaiScript?
 
 namespace
 {
@@ -464,6 +489,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // TODO: Identify the problems that were solved by this hack and fix them
     // properly. We can't do this because another thread might currently hold a
     // lock we need (loader lock, heap lock, etc.).
+    // Alternatively, we could acquire the locks ourselves before suspending
+    // other threads, but that's not really viable/possible in all scenarios...
     // auto const& process = hadesmem::cerberus::GetThisProcess();
     // hadesmem::SuspendedProcess suspend{process.GetId()};
 

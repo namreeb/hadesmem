@@ -20,6 +20,9 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Support 'stealth' hooking similar to IAT todo where we redirect to code
+// inside the module which will raise an exception.
+
 namespace hadesmem
 {
 template <typename TargetFuncT, typename ContextT = void*>
@@ -50,7 +53,7 @@ public:
   {
   }
 
-  explicit PatchFuncPtr(Process&& process,
+  explicit PatchFuncPtr(Process const&& process,
                         TargetFuncRawT* target,
                         DetourFuncT const& detour,
                         ContextT context = ContextT()) = delete;

@@ -31,7 +31,7 @@ public:
   {
   }
 
-  explicit PatchRaw(Process&& process,
+  explicit PatchRaw(Process const&& process,
                     PVOID target,
                     std::vector<std::uint8_t> const& data) = delete;
 

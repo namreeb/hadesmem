@@ -27,6 +27,13 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
 
+// TODO: Add --cerberus flag to autmatically use the right flags/settings for
+// injecting Cerberus.
+
+// TODO: Add --game flag which automatically reads the game path, Steam appid,
+// etc. Will require adding either a Games section to hadesmem.xml, or adding a
+// new XML file.
+
 int main(int argc, char* argv[])
 {
   try
@@ -175,8 +182,8 @@ int main(int argc, char* argv[])
         module = hadesmem::InjectDll(*process, module_path, flags);
 
         std::wcout << "\nSuccessfully injected module at base "
-                      "address " << hadesmem::detail::PtrToHexString(module)
-                   << ".\n";
+                      "address "
+                   << hadesmem::detail::PtrToHexString(module) << ".\n";
       }
       else
       {
@@ -221,8 +228,8 @@ int main(int argc, char* argv[])
                      std::back_inserter(exe_args),
                      [](std::string const& s)
                      {
-        return hadesmem::detail::MultiByteToWideChar(s);
-      });
+                       return hadesmem::detail::MultiByteToWideChar(s);
+                     });
       auto const export_name = export_arg.getValue();
       auto const work_dir =
         hadesmem::detail::MultiByteToWideChar(work_dir_arg.getValue());
@@ -238,8 +245,9 @@ int main(int argc, char* argv[])
 
       std::wcout << "\nSuccessfully created target.\n";
       std::wcout << "Process ID: " << inject_data.GetProcess() << ".\n";
-      std::wcout << "Module Base: " << hadesmem::detail::PtrToHexString(
-                                         inject_data.GetModule()) << ".\n";
+      std::wcout << "Module Base: "
+                 << hadesmem::detail::PtrToHexString(inject_data.GetModule())
+                 << ".\n";
       std::wcout << "Export Return: " << inject_data.GetExportRet() << ".\n";
       std::wcout << "Export LastError: " << inject_data.GetExportLastError()
                  << ".\n";

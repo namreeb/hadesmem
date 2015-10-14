@@ -18,7 +18,9 @@
 #include <hadesmem/region_list.hpp>
 
 // TODO: Test hadesmem under large page mode. Especially getting module bases
-// using VirtualQueryEx etc.
+// using VirtualQueryEx etc. Also see things like NtMapViewOfSection hook,
+// IsSafeToUnload, PeFile, etc. Disassemble RtlPcToFileHeader to see what it
+// does?
 
 namespace hadesmem
 {

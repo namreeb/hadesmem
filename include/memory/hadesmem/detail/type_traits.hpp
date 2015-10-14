@@ -31,6 +31,8 @@ template <typename T> struct IsTriviallyCopyable
 // varargs). Remember though that you can have args before the elipsis, so you
 // will need something like: struct FuncResult<R(C::*)(Args......)>
 
+// TODO: Fix to support references properly etc.
+
 template <typename FuncT> struct FuncResult;
 
 template <typename C, typename R, typename... Args>

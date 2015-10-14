@@ -108,6 +108,7 @@ private:
     if (detail::IsWoW64Process(::GetCurrentProcess()) !=
         detail::IsWoW64Process(handle_.GetHandle()))
     {
+      // TODO: Lift this restriction.
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error{} << ErrorString{"Cross-architecture process manipulation is "
                                "currently unsupported."});

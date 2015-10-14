@@ -44,6 +44,8 @@
 // TODO: Support multiple exception types instead of just INT3 (e.g. invalid
 // instruction).
 
+// TODO: Add context support.
+
 namespace hadesmem
 {
 template <typename TargetFuncT> class PatchInt3 : public PatchVeh<TargetFuncT>
@@ -57,7 +59,7 @@ public:
   }
 
   template <typename TargetFuncT, typename DetourFuncT>
-  explicit PatchInt3(Process&& process,
+  explicit PatchInt3(Process const&& process,
                      TargetFuncT target,
                      DetourFuncT const& detour) = delete;
 

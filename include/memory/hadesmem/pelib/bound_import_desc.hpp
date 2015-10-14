@@ -73,7 +73,7 @@ public:
     UpdateRead();
   }
 
-  explicit BoundImportDescriptor(Process&& process,
+  explicit BoundImportDescriptor(Process const&& process,
                                  PeFile const& pe_file,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
@@ -85,7 +85,7 @@ public:
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =
     delete;
 
-  explicit BoundImportDescriptor(Process&& process,
+  explicit BoundImportDescriptor(Process const&& process,
                                  PeFile&& pe_file,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                  PIMAGE_BOUND_IMPORT_DESCRIPTOR imp_desc) =

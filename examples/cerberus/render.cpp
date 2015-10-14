@@ -54,6 +54,7 @@
 // TODO: Investigate Chromium Embedded Framework backed GUI.
 
 // TODO: Add a forced-windowed option. (Belongs in CXExample?)
+// http://bit.ly/1LMqsS8
 
 // TODO: Add a generic crosshair. (Belongs in CXExample?)
 
@@ -62,6 +63,20 @@
 
 // TODO: Suport using both GWEN and AntTweakBar at the same time, with different
 // keys bound to them.
+
+// TODO: Add proper multi-device, and multi-swapchain support. Sample:
+// http://bit.ly/1Nd4jzT http://bit.ly/1VSmgLy http://bit.ly/1Lb13nV
+
+// TODO: Add proper multi-window support. Sample:
+// http://bit.ly/1Nd4jzT
+
+// TODO: Fix Steam overlay for games we have injected Cerberus into. E.g.
+// Oddworld New and Tasty?
+
+// TODO: When testing game support, double check that we're detecting the
+// resolution correctly for AntTweakBar and that GUI elements are minimized to
+// the bottom left corner, as previously we sometimes had issues where we were
+// detecting the resolution as smaller than it actually was.
 
 namespace
 {

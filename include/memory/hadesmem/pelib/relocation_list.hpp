@@ -61,7 +61,7 @@ public:
     }
   }
 
-  explicit RelocationIterator(Process&& process,
+  explicit RelocationIterator(Process const&& process,
                               PeFile const& pe_file,
                               PWORD start,
                               DWORD count) = delete;
@@ -71,7 +71,7 @@ public:
                               PWORD start,
                               DWORD count) = delete;
 
-  explicit RelocationIterator(Process&& process,
+  explicit RelocationIterator(Process const&& process,
                               PeFile&& pe_file,
                               PWORD start,
                               DWORD count) = delete;
@@ -169,7 +169,7 @@ public:
   {
   }
 
-  explicit RelocationList(Process&& process,
+  explicit RelocationList(Process const&& process,
                           PeFile const& pe_file,
                           PWORD start,
                           DWORD count) = delete;
@@ -179,7 +179,7 @@ public:
                           PWORD start,
                           DWORD count) = delete;
 
-  explicit RelocationList(Process&& process,
+  explicit RelocationList(Process const&& process,
                           PeFile&& pe_file,
                           PWORD start,
                           DWORD count) = delete;

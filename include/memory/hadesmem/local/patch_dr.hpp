@@ -41,6 +41,15 @@
 #include <hadesmem/thread_helpers.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Actually implement this properly.
+
+// TODO: Add context support.
+
+// TODO: Add R/W BP support.
+
+// TODO: Similar to IAT hook todo, add some sort of 'Update' or 'Rehook'
+// function for use on thread create/exit.
+
 namespace hadesmem
 {
 // DANGER DANGER WILL ROBINSON
@@ -71,7 +80,7 @@ public:
   }
 
   template <typename TargetFuncT, typename DetourFuncT>
-  explicit PatchDr(Process&& process,
+  explicit PatchDr(Process const&& process,
                    TargetFuncT target,
                    DetourFuncT detour) = delete;
 

@@ -37,7 +37,7 @@ public:
     UpdateRead();
   }
 
-  RelocationBlock(Process&& process,
+  RelocationBlock(Process const&& process,
                   PeFile const& pe_file,
                   PIMAGE_BASE_RELOCATION base,
                   void const* reloc_dir_end) = delete;
@@ -47,7 +47,7 @@ public:
                   PIMAGE_BASE_RELOCATION base,
                   void const* reloc_dir_end) = delete;
 
-  RelocationBlock(Process&& process,
+  RelocationBlock(Process const&& process,
                   PeFile&& pe_file,
                   PIMAGE_BASE_RELOCATION base,
                   void const* reloc_dir_end) = delete;

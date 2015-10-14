@@ -193,7 +193,8 @@ extern "C" BOOL WINAPI
   }
 
   // TODO: Put this somewhere else. At the very least it belongs in a callback
-  // with a config flag to control it.
+  // with a config flag to control it. Also add other common error-reporting
+  // processes (e.g. rifterrorhandler.exe).
   // TODO: Actually parse the command line and implement this properly.
   if (application_name || command_line)
   {
@@ -381,6 +382,9 @@ void InitializeProcess()
 {
   // TODO: Hook CreateProcessInternalW in Kernel32 on W7 because it's not in
   // KernelBase.
+  // TODO: Investigate hooking the NTDLL process creation APIs instead. May
+  // cause issues due to process not being a Win32 process at time we attempt to
+  // inject.
   auto& helper = GetHelperInterface();
   helper.InitializeSupportForModule(L"KERNELBASE",
                                     DetourKernelBaseForProcess,

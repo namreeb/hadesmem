@@ -53,6 +53,22 @@
 // TODO: Add new Symbol class (or something along those lines) for looking up
 // function addresses in system DLLs that we want to hook.
 
+// TODO: Avoid some allocations when generating a trampoline by scanning for
+// code caves which we can use to store the trampoline.
+
+// TODO: Add proper tests for this (and other patchers). Especially important
+// for edge cases trying to be handled (thread suspension, thread redirection,
+// instruction resolution, no free trampoline blocks near a target address,
+// short and far jumps, etc.).
+
+// TODO: Redesign and rewrite the Patcher collection of APIs.
+
+// TODO: Detect cases where hooking may overflow past the end of a function, and
+// fail. (Provide policy or flag to allow overriding this behaviour.) Examples
+// may be instructions such as int 3, ret, jmp, etc.
+
+// TODO: Test references, pointers, const, volatile, perfect forwarding, etc.
+
 namespace hadesmem
 {
 template <typename TargetFuncT, typename ContextT = void*>
@@ -83,7 +99,7 @@ public:
   {
   }
 
-  explicit PatchDetour(Process&& process,
+  explicit PatchDetour(Process const&& process,
                        TargetFuncRawT target,
                        DetourFuncT const& detour,
                        ContextT context = ContextT()) = delete;

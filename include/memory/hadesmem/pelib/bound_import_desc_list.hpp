@@ -59,13 +59,13 @@ public:
     }
   }
 
-  explicit BoundImportDescriptorIterator(Process&& process,
+  explicit BoundImportDescriptorIterator(Process const&& process,
                                          PeFile const& pe_file) = delete;
 
   explicit BoundImportDescriptorIterator(Process const& process,
                                          PeFile&& pe_file) = delete;
 
-  explicit BoundImportDescriptorIterator(Process&& process,
+  explicit BoundImportDescriptorIterator(Process const&& process,
                                          PeFile&& pe_file) = delete;
 
   reference operator*() const noexcept
@@ -171,13 +171,13 @@ public:
   {
   }
 
-  explicit BoundImportDescriptorList(Process&& process,
+  explicit BoundImportDescriptorList(Process const&& process,
                                      PeFile const& pe_file) = delete;
 
   explicit BoundImportDescriptorList(Process const& process,
                                      PeFile&& pe_file) = delete;
 
-  explicit BoundImportDescriptorList(Process&& process,
+  explicit BoundImportDescriptorList(Process const&& process,
                                      PeFile&& pe_file) = delete;
 
   iterator begin()

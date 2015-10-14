@@ -38,9 +38,8 @@ public:
   {
   }
 
-  ThreadIterator(DWORD pid) noexcept
-    : impl_(std::make_shared<Impl>()),
-      pid_(pid)
+  ThreadIterator(DWORD pid) noexcept : impl_(std::make_shared<Impl>()),
+                                       pid_(pid)
   {
     HADESMEM_DETAIL_ASSERT(impl_.get());
 
@@ -150,8 +149,10 @@ public:
   {
   }
 
-  constexpr ThreadList(DWORD pid) noexcept
-    : pid_(pid)
+  // TODO: Change this to take a Process object once we use dynamic access
+  // rights. Ensure we won't lose any functionality though in the case of
+  // special system processes etc. which may be difficult to get a handle to.
+  constexpr ThreadList(DWORD pid) noexcept : pid_(pid)
   {
   }
 

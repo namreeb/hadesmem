@@ -22,8 +22,12 @@
 #include <hadesmem/thread_entry.hpp>
 #include <hadesmem/thread_list.hpp>
 
+// TODO: Add helper function to get main thread ID. http://bit.ly/1LtTudr
+// http://bit.ly/1MAKiEV
+
 namespace hadesmem
 {
+// TODO: Ensure thread is actually suspended. http://bit.ly/1GdorSJ
 inline DWORD SuspendThread(Thread const& thread)
 {
   HADESMEM_DETAIL_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.",

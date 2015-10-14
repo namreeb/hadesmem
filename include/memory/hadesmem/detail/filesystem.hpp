@@ -21,6 +21,9 @@
 
 // TODO: Port to use std::filesystem where possible.
 
+// TODO: Move these and other generally useful APIs out of 'detail' (into
+// something like 'aux', 'util', etc?).
+
 #define HADESMEM_PATHCCH_ALLOW_LONG_PATHS 0x00000001
 
 namespace hadesmem
@@ -294,9 +297,10 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
   if (!len || full_path.size() < len)
   {
     DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error{} << ErrorString{"GetFullPathNameW failed."}
-              << ErrorCodeWinLast{last_error} << ErrorCodeWinOther{len});
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                    << ErrorString{"GetFullPathNameW failed."}
+                                    << ErrorCodeWinLast{last_error}
+                                    << ErrorCodeWinOther{len});
   }
 
   return full_path.data();
@@ -309,7 +313,8 @@ inline std::wstring GetPathBaseName(std::wstring const& path)
                                    [](wchar_t c)
                                    {
                                      return c == '\\' || c == '/';
-                                   }).base(),
+                                   })
+                        .base(),
                       path.end());
 }
 

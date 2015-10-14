@@ -73,7 +73,7 @@ public:
     HADESMEM_DETAIL_ASSERT(size_ != 0);
   }
 
-  explicit Allocator(Process&& process,
+  explicit Allocator(Process const&& process,
                      SIZE_T size,
                      PVOID base = nullptr) = delete;
 
@@ -81,10 +81,9 @@ public:
 
   Allocator& operator=(Allocator const& other) = delete;
 
-  Allocator(Allocator&& other) noexcept
-    : process_{other.process_},
-      base_{other.base_},
-      size_{other.size_}
+  Allocator(Allocator&& other) noexcept : process_{other.process_},
+                                          base_{other.base_},
+                                          size_{other.size_}
   {
     other.process_ = nullptr;
     other.base_ = nullptr;
@@ -165,38 +164,32 @@ private:
   SIZE_T size_;
 };
 
-inline bool operator==(Allocator const& lhs,
-                       Allocator const& rhs) noexcept
+inline bool operator==(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Allocator const& lhs,
-                       Allocator const& rhs) noexcept
+inline bool operator!=(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Allocator const& lhs,
-                      Allocator const& rhs) noexcept
+inline bool operator<(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Allocator const& lhs,
-                       Allocator const& rhs) noexcept
+inline bool operator<=(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Allocator const& lhs,
-                      Allocator const& rhs) noexcept
+inline bool operator>(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Allocator const& lhs,
-                       Allocator const& rhs) noexcept
+inline bool operator>=(Allocator const& lhs, Allocator const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

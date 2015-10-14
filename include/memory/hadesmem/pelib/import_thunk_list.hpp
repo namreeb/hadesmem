@@ -64,7 +64,7 @@ public:
     }
   }
 
-  explicit ImportThunkIterator(Process&& process,
+  explicit ImportThunkIterator(Process const&& process,
                                PeFile const& pe_file,
                                DWORD first_thunk) = delete;
 
@@ -72,7 +72,7 @@ public:
                                PeFile&& pe_file,
                                DWORD first_thunk) = delete;
 
-  explicit ImportThunkIterator(Process&& process,
+  explicit ImportThunkIterator(Process const&& process,
                                PeFile&& pe_file,
                                DWORD first_thunk) = delete;
 
@@ -170,7 +170,7 @@ public:
   {
   }
 
-  explicit ImportThunkList(Process&& process,
+  explicit ImportThunkList(Process const&& process,
                            PeFile const& pe_file,
                            DWORD first_thunk) = delete;
 
@@ -178,7 +178,7 @@ public:
                            PeFile&& pe_file,
                            DWORD first_thunk) = delete;
 
-  explicit ImportThunkList(Process&& process,
+  explicit ImportThunkList(Process const&& process,
                            PeFile&& pe_file,
                            DWORD first_thunk) = delete;
 

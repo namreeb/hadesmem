@@ -71,11 +71,11 @@ public:
     }
   }
 
-  explicit Section(Process&& process, PeFile const& pe_file, void* base);
+  explicit Section(Process const&& process, PeFile const& pe_file, void* base);
 
   explicit Section(Process const& process, PeFile&& pe_file, void* base);
 
-  explicit Section(Process&& process, PeFile&& pe_file, void* base);
+  explicit Section(Process const&& process, PeFile&& pe_file, void* base);
 
   void* GetBase() const noexcept
   {

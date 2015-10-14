@@ -46,7 +46,7 @@ public:
     UpdateRead();
   }
 
-  explicit BoundImportForwarderRef(Process&& process,
+  explicit BoundImportForwarderRef(Process const&& process,
                                    PeFile const& pe_file,
                                    PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                    PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
@@ -56,7 +56,7 @@ public:
                                    PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                    PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;
 
-  explicit BoundImportForwarderRef(Process&& process,
+  explicit BoundImportForwarderRef(Process const&& process,
                                    PeFile&& pe_file,
                                    PIMAGE_BOUND_IMPORT_DESCRIPTOR start,
                                    PIMAGE_BOUND_FORWARDER_REF fwd_ref) = delete;

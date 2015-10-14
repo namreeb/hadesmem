@@ -52,11 +52,11 @@ public:
     UpdateRead();
   }
 
-  explicit ExportDir(Process&& process, PeFile const& pe_file) = delete;
+  explicit ExportDir(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit ExportDir(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit ExportDir(Process&& process, PeFile&& pe_file) = delete;
+  explicit ExportDir(Process const&& process, PeFile&& pe_file) = delete;
 
   PVOID GetBase() const noexcept
   {

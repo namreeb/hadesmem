@@ -27,9 +27,13 @@
 #include "render.hpp"
 #include "window.hpp"
 
-// TODO: Fix this to actually support multiple devices etc.
+// TODO: Fix this to actually support multiple devices, OpenGL, expose to
+// plugins, multiple simultaneous renderers (e.g. D3D10 and D3D11 at the same
+// time), multiple windows, etc.
 
 // TODO: Fix to load skins etc from correct full path rather than game dir.
+
+// TODO: Add a basic console.
 
 namespace
 {

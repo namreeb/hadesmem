@@ -53,11 +53,11 @@ public:
     }
   }
 
-  explicit ExportIterator(Process&& process, PeFile const& pe_file) = delete;
+  explicit ExportIterator(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit ExportIterator(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit ExportIterator(Process&& process, PeFile&& pe_file) = delete;
+  explicit ExportIterator(Process const&& process, PeFile&& pe_file) = delete;
 
   reference operator*() const noexcept
   {
@@ -180,11 +180,11 @@ public:
   {
   }
 
-  explicit ExportList(Process&& process, PeFile const& pe_file) = delete;
+  explicit ExportList(Process const&& process, PeFile const& pe_file) = delete;
 
   explicit ExportList(Process const& process, PeFile&& pe_file) = delete;
 
-  explicit ExportList(Process&& process, PeFile&& pe_file) = delete;
+  explicit ExportList(Process const&& process, PeFile&& pe_file) = delete;
 
   iterator begin()
   {

@@ -31,6 +31,18 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Add some sort of 'Update' or 'Rehook' function for use on module
+// load/unload.
+
+// TODO: Support 'stealth' IAT hooking where we redirect to code inside the
+// module which will raise an exception.
+
+// TODO: We should not patch our own module (or also plugins etc in the case of
+// Cerberus, so we need some way to provide a whitelist).
+
+// TODO: Add API set schema support? E.g. We want to avoid something like this:
+// http://bit.ly/1Lu4asC
+
 namespace hadesmem
 {
 // WARNING! Don't use this, still under development.
@@ -68,7 +80,7 @@ public:
     }
   }
 
-  explicit PatchIat(Process&& process,
+  explicit PatchIat(Process const&& process,
                     std::wstring const& module,
                     std::string const& function,
                     DetourFuncT const& detour,

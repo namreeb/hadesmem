@@ -47,7 +47,7 @@ public:
   {
   }
 
-  explicit PatchFuncRva(Process&& process,
+  explicit PatchFuncRva(Process const&& process,
                         void* base,
                         DWORD* target,
                         DetourFuncT const& detour,
