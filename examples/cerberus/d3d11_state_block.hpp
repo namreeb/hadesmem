@@ -10,6 +10,10 @@
 
 #include "d3d11_defs.hpp"
 
+// http://cegui.org.uk/forum/viewtopic.php?f=10&t=5464
+
+// TODO: Clean this up.
+
 namespace hadesmem
 {
 namespace cerberus

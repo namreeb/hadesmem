@@ -45,6 +45,8 @@
 
 // TODO: Add resize detection/support for D3D9.
 
+// TODO: Ensure we set up the D3D9 SDK correctly. http://bit.ly/1KaVNwO
+
 namespace
 {
 class D3D9Impl : public hadesmem::cerberus::D3D9Interface

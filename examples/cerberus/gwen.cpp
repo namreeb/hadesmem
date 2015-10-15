@@ -35,6 +35,8 @@
 
 // TODO: Add a basic console.
 
+// TODO: Fix thread safety of initialization etc.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnGwenInitializeCallback>&

@@ -131,6 +131,10 @@
 
 // TODO: Add scripting support. Lua? ChaiScript?
 
+// TODO: Fix all the cases where we were previously using exceptions to control
+// the order in which things occur, but now we're using callbacks which may
+// swallow some exceptions.
+
 namespace
 {
 // This is a nasty hack to call any APIs which may be called from a static

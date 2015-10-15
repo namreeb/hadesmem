@@ -11,6 +11,8 @@
 #include "render.hpp"
 #include "window.hpp"
 
+// TODO: Fix thread safety of initialization etc.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<
@@ -463,9 +465,9 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   SetAntTweakBarInitialized(api, true);
 
-  // TODO: Should we be using viewport size instead of window size? How would we
-  // track changes to that though? Need to think about it more... (Same applies
-  // to other renderers.)
+  // TODO: Should we be using viewport size or backbuffer size instead of window
+  // size? How would we track changes to that though? Need to think about it
+  // more... (Same applies to other renderers.)
   RECT wnd_rect{0, 0, 800, 600};
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
   if (auto const window = window_interface.GetCurrentWindow())

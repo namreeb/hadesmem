@@ -408,6 +408,9 @@ void CallDefWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 // TODO: Add support for translating WM_INPUT style input into games which don't
 // get 'normal' input sent to their window? e.g. NFSR?
+// TODO: Ensure that our usage of GetAsyncKeyState (and also the usage in
+// TwEventWin) will not cause issues getting the right result in multi-threaded
+// games.
 void WindowProcCallback(
   HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, bool* handled)
 {

@@ -14,6 +14,8 @@
 // ReadProcessMemory, etc. APIs to work around ACs like EAC.
 // http://bit.ly/1RHDW6Y
 
+// TODO: Remove LLKHF_INJECTED from injected input. http://bit.ly/1VTFDUw
+
 #include "main.h"
 
 #include <ntddk.h>
