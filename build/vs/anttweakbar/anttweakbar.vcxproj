@@ -194,6 +194,7 @@ fxc /Od /Zi /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweak
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -225,6 +226,7 @@ fxc /T ps_4_0_level_9_1 /E TextPS /Fh ..\..\..\deps\anttweakbar\anttweakbar\obj\
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

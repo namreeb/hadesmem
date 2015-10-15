@@ -138,6 +138,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,6 +159,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
