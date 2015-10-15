@@ -8,13 +8,26 @@
 #include <hadesmem/error.hpp>
 
 #include <cerberus/plugin.hpp>
+#include <cerberus/render.hpp>
 
 #include "gui.hpp"
+
+namespace
+{
+std::size_t g_on_frame_callback_id = static_cast<std::size_t>(-1);
+
+void OnFrameCallback(hadesmem::cerberus::RenderApi api, void* device)
+{
+}
+}
 
 extern "C" __declspec(dllexport) void LoadPlugin(
   hadesmem::cerberus::PluginInterface* cerberus) noexcept
 {
   HADESMEM_DETAIL_TRACE_A("Initializing.");
+
+  g_on_frame_callback_id =
+    cerberus->GetRenderInterface()->RegisterOnFrame(&OnFrameCallback);
 
   InitializeGui(cerberus);
 }
@@ -23,6 +36,8 @@ extern "C" __declspec(dllexport) void UnloadPlugin(
   hadesmem::cerberus::PluginInterface* cerberus) noexcept
 {
   HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+  cerberus->GetRenderInterface()->UnregisterOnFrame(g_on_frame_callback_id);
 
   CleanupGui(cerberus);
 }
