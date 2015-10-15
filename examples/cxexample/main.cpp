@@ -16,7 +16,7 @@ namespace
 {
 std::size_t g_on_frame_callback_id = static_cast<std::size_t>(-1);
 
-void OnFrameCallback(hadesmem::cerberus::RenderApi api, void* device)
+void OnFrameCallback(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
 }
 }
