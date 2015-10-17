@@ -7,6 +7,8 @@
 #include <winnt.h>
 #include <winternl.h>
 
+// TODO: Clean up this file.
+
 // Structures/enums/macros/etc. shamelessly taken from
 // http://bit.ly/1cxEVDJ, http://bit.ly/1cm5xnC, http://bit.ly/1bXTstU,
 // http://bit.ly/1nuwpd6, etc.
@@ -566,6 +568,18 @@ enum SECTION_INHERIT
   ViewUnmap = 2
 };
 
+typedef LONG KPRIORITY;
+
+typedef struct _PROCESS_BASIC_INFORMATION
+{
+  NTSTATUS ExitStatus;
+  PPEB PebBaseAddress;
+  ULONG_PTR AffinityMask;
+  KPRIORITY BasePriority;
+  HANDLE UniqueProcessId;
+  HANDLE InheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
+
 typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME*
   PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
 
@@ -933,6 +947,22 @@ typedef struct _SYSTEM_HANDLE_INFORMATION
   ULONG NumberOfHandles;
   SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
 } SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+typedef enum _OBJECT_INFORMATION_CLASS
+{
+  ObjectBasicInformation,
+  ObjectNameInformation,
+  ObjectTypeInformation,
+  ObjectTypesInformation,
+  ObjectHandleFlagInformation,
+  ObjectSessionInformation,
+  MaxObjectInfoClass
+} OBJECT_INFORMATION_CLASS;
+
+typedef struct _OBJECT_NAME_INFORMATION
+{
+  UNICODE_STRING Name;
+} OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
 }
 }
 }
