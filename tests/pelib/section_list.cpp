@@ -21,6 +21,12 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Better tests. (In reference to assuming every module has at least one
+// section, and that being the only constraint.)
+
+// TODO: Better tests. (In reference to assuming every module has a .data
+// section and that being the only constraint.
+
 void TestSectionList()
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -105,13 +111,13 @@ void TestSectionList()
     }
     BOOST_TEST(section_count == num_sections);
 
-    // Assume every module has a '.text' section.
+    // Assume every module has a '.data' section.
     auto text_iter = std::find_if(std::begin(sections),
                                   std::end(sections),
                                   [](hadesmem::Section const& section)
                                   {
-      return section.GetName() == ".data";
-    });
+                                    return section.GetName() == ".data";
+                                  });
     BOOST_TEST(text_iter != std::end(sections));
   }
 }

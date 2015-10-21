@@ -627,6 +627,8 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
   if (hwnd == window_interface.GetCurrentWindow())
   {
+    // TODO: TwEventWin uses SetCapture and other thread-specific APIs. How does
+    // this work when the render thread differs from the message pumping thread?
     ::TwEventWin(hwnd, msg, wparam, lparam);
   }
 }

@@ -19,6 +19,9 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Ensure that base address is different across modules (similar to other
+// tests)
+
 void TestTlsDir()
 {
   // Use TLS to ensure that at least one module has a TLS dir

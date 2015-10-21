@@ -308,8 +308,8 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
 
 inline std::wstring GetPathBaseName(std::wstring const& path)
 {
-  return std::wstring(std::find_if(path.rbegin(),
-                                   path.rend(),
+  return std::wstring(std::find_if(std::crbegin(path),
+                                   std::crend(path),
                                    [](wchar_t c)
                                    {
                                      return c == '\\' || c == '/';

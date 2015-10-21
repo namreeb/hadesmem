@@ -18,6 +18,8 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process_helpers.hpp>
 
+// TODO: Test that the native path is actually valid.
+
 void TestThisProcess()
 {
   hadesmem::Process process(::GetCurrentProcessId());

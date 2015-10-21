@@ -202,6 +202,10 @@ public:
     }
   }
 
+  // TODO: Add SetOrdinal.
+
+  // TODO: Add SetName.
+
   void SetFunction(ULONGLONG function)
   {
     if (pe_file_->Is64())

@@ -234,6 +234,7 @@ void DumpNtHeaders(hadesmem::Process const& process,
   // that seems correct).
   // It seems it can be null for some .NET assemblies. This needs to be
   // investigated further however as I'm not yet sure how it works...
+  // http://bit.ly/1M95tzh
   // TODO: Investigate null EP RVA for .NET assemblies and re-add the warning
   // if appropriate.
   if (!addr_of_ep && !(nt_hdrs.GetCharacteristics() & IMAGE_FILE_DLL))

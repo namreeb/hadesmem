@@ -108,7 +108,11 @@ private:
     if (detail::IsWoW64Process(::GetCurrentProcess()) !=
         detail::IsWoW64Process(handle_.GetHandle()))
     {
-      // TODO: Lift this restriction.
+      // TODO: Lift this restriction. x64 operating on x86 process should be
+      // relatively straightforward. We can use NtWow64ReadVirtualMemory64 (and
+      // similar APIs for thread context, process information query, etc.) to
+      // make it work for x86 operating on x64 also, but we will need to
+      // implement more APIs manually (e.g. module enumeration?).
       HADESMEM_DETAIL_THROW_EXCEPTION(
         Error{} << ErrorString{"Cross-architecture process manipulation is "
                                "currently unsupported."});

@@ -23,6 +23,19 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Patcher constructor tests
+
+// TODO: Address tests.
+
+// TODO: Stream overload tests.
+
+// TODO: Fix the code so the Clang warning disabling hack can be removed.
+
+// TODO: Generate different kinds of code to test all instruction resolution
+// code and ensure we're covering all the important cases.
+
+// TODO: Test different calling conventions etc.
+
 hadesmem::Process& GetThisProcess()
 {
   static hadesmem::Process process(::GetCurrentProcessId());
@@ -470,8 +483,8 @@ void TestPatchIat()
   TestGetLastErrorOrig();
   auto volatile const get_last_error_orig =
     GetProcAddress(kernel32_mod, "GetLastError");
-  auto const get_last_error_detour =
-    [](hadesmem::PatchDetourBase* patch) -> DWORD
+  auto const get_last_error_detour = [](
+    hadesmem::PatchDetourBase* patch) -> DWORD
   {
     (void)patch;
     return 0x1337UL;

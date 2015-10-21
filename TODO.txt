@@ -1,0 +1,36 @@
+* All the TODOs in the code.
+* Documentation! Both external, and also better commenting in the code (but don't 'comment the code', comment the decisions instead).
+* Move to CMake.
+* Add manifest to all binaries with supportedOS etc. set.
+* Add an optional /analyze build config.
+* Set up build server (and reduce compile times to make it cheaper to run).
+* Performance optimization.
+* Remove unnecessary 'nulling' from move operations, destructors, etc.
+* Return low level objects over high level ones where possible (or offer a choice). Speed comes first. (e.g. When returning a module, prefer a HMODULE over a hadesmem::Module.) The obvious exception to this is when we've already created the high level object and returning the low level one would just be throwing away information. However in that case we should reconsider the API design and ensure it's not doing unnecessary work to generate the higher level object…
+* Ensure contracts are not artificially wide, but add debug asserts where appropriate to ensure preconditions/postconditions are still properly validated. See here for more discussion: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3818.pdf
+* Fix noexcept usage. See page "noexcept guidelines" in private notes.
+* Fix consistency of initialization syntax.
+* Fix NSDMI usage now that Dev12 bug is fixed. (i.e. T t = T{} -> T t{})
+* Add conditional noexcept where possible.
+* Add helper functionality for reversing. e.g. Dumping VEH chains, dumping SEH chains, call stack, breakpoints using various instructions, disassembler, assembler, memory dump, etc.
+* Add functions for getting PEB/TEB/etc.
+* Add back ManualMap, Scanner, Disassembler, Symbols, etc.
+* Write memory editing tool (similer to Cheat Engine, CrySearch, MHS, etc.).
+* Assert all preconditions, postconditions, and invariants.
+* Add remote code emulator.
+* Fix all strict aliasing violations.
+* Ensure all usages of our iterators are correct. E.g. Make sure our input iterators aren't being used in algorithms which require forward iterators etc. Ideally this shouldn't even compile, but double check because it's probably not enforced.
+* Add proper overflow checking in all relevant places.
+* Add asserts everywhere we're casting to a smaller integer type (e.g. vector<T>::size_type -> DWORD on x64).
+* Fix all undefined behaviour where possible (such as function pointer to data pointer conversions, member-fn conversion hacks, etc). Won't always be possible due to real-world considerations, but we should do our best, and document where it's not possible. Also consider wrapping UB in a helper function so we can easily identify all usage instances in the code.
+* Add option to suspend target in all tools which doing a Read/Write/Enum/etc.
+* Improve and measure/verify code coverage of tests.
+* Adopt a proper testing philosophy. e.g. https://www.sqlite.org/testing.html
+* Add fuzzing tests.
+* Add tests for 'detail' components.
+* Do proper performance testing, instead of the current ad-hoc manual tests.
+* Make postbuild fail on a sharing violation.
+* Use property sheets instead of hardcoding everything into proj/sln files.
+* Quote paths in postbuild scripts.
+* Run boost bootstrap and headers building scripts in prebuild?
+* Mark move operations explicitly noexcept (where appropriate)?

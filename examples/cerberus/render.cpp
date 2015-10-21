@@ -70,6 +70,10 @@
 // TODO: Add proper multi-window support. Sample:
 // http://bit.ly/1Nd4jzT
 
+// TODO: Ensure we work as well as possible in the case of multiple games which
+// 'fight' over control of the mouse (because we save/restore state, we need to
+// ensure we do it properly). http://bit.ly/1XkDFKc
+
 // TODO: Fix Steam overlay for games we have injected Cerberus into. E.g.
 // Oddworld New and Tasty?
 
@@ -77,6 +81,11 @@
 // resolution correctly for AntTweakBar and that GUI elements are minimized to
 // the bottom left corner, as previously we sometimes had issues where we were
 // detecting the resolution as smaller than it actually was.
+
+// TODO: Fix all our leaks on game shutdown.
+
+// TODO: Simplify and genericize rendering code, especially the stuff related to
+// the window hooking etc.
 
 namespace
 {

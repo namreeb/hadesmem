@@ -60,6 +60,9 @@
 
 // TODO: Support __vectorcall.
 
+// TODO: Use flags where appropriate, both here and also in other types. (e.g.
+// In Call for thread creation method, debug options, etc).
+
 namespace hadesmem
 {
 HADESMEM_DETAIL_STATIC_ASSERT(sizeof(void (*)()) == sizeof(void*));
@@ -756,8 +759,8 @@ inline void GenerateCallCode64(asmjit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     ArgVisitor64 arg_visitor{assembler, num_args};
-    std::for_each(args.rbegin(),
-                  args.rend(),
+    std::for_each(std::crbegin(args),
+                  std::crend(args),
                   [&](CallArg const& arg)
                   {
                     arg.Apply(std::ref(arg_visitor));

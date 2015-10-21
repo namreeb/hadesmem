@@ -19,6 +19,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Support using forward iterators via binary search.
+
 namespace hadesmem
 {
 // ExportIterator satisfies the requirements of an input iterator
@@ -107,6 +109,7 @@ public:
       // some cases I think it's possible to craft a file which will cause an
       // overflow within the Windows PE loader but still be loaded and run
       // correctly...
+      // TODO: Dump should warn for this.
       if (new_procedure_number < ordinal_base)
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(

@@ -20,6 +20,9 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Better tests. (In reference to assuming every module has at least one
+// section, and that being the only constraint.)
+
 void TestSection()
 {
   hadesmem::Process const process(::GetCurrentProcessId());

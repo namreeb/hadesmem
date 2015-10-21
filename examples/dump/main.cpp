@@ -134,6 +134,35 @@
 // examples included with the library should be minimal and designed for
 // expository purposes.
 
+// TODO: When logging VAs, adjust them to use ImageBase for a consistent faux-VA
+// rather than just printing a pointer to wherever the file happens to lie in
+// memory at the time of dumping.
+
+// TODO: Remove all the parts of the constructors for BoundImportDescriptor,
+// ImportDescriptor, etc that take a null pointer as the base and figure it out.
+// This should be done in the list class instead! The constructor of the actual
+// descriptor should just take what it's given and roll with it… Needs more
+// thought for corner cases though like the virtual termination, virtual
+// overlap, etc.
+
+// TODO: Fix all the hacks where we're currently checking for unnecessary data
+// in the constructors. e.g. Bound import descriptor constructor currently
+// checks for the presence of an import dir. Should we really be doing that
+// there?
+
+// TODO: Detect and dump code caves (similar to PeStudio).
+
+// TODO: Add entropy dumping (sections, EP section, resources, overall file,
+// etc.).
+
+// TODO: Add support for a timeout. Especially important when doing a batch
+// analysis (e.g. running on an entire drive) so we can ensure it doesn't take
+// forever, and quickly identify those files which are (probably) being
+// mishandled.
+
+// TODO: Warn on files without a DOS stub as it probably means they're
+// hand-crafted?
+
 namespace
 {
 // TODO: Clean up this hack (and other global state).

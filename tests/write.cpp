@@ -18,6 +18,17 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Test reads against all page protection combination (including
+// PAGE_NOCACHE and PAGE_WRITECOMBINE).
+
+// TODO: Improve tests by doing checks both before and after writes.
+
+// TODO: Don't read/write data on the stack.
+
+// TODO: Test page protections before and after read/write.
+
+// TODO: Test page boundary reads/writes.
+
 void TestWritePod()
 {
   hadesmem::Process const process(::GetCurrentProcessId());
@@ -114,7 +125,7 @@ void TestWriteString()
   std::string const test_string_str(test_string_buf.data());
   BOOST_TEST(test_string == test_string_str);
   auto const test_string_rev =
-    std::string(test_string.rbegin(), test_string.rend());
+    std::string(std::crbegin(test_string), std::crend(test_string));
   hadesmem::WriteString(process, test_string_buf.data(), test_string_rev);
   auto const new_test_string_rev = std::string(test_string_buf.data());
   BOOST_TEST(new_test_string_rev == test_string_rev);
@@ -150,7 +161,7 @@ void TestWriteVector()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   std::vector<int> int_list = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<int> int_list_rev(int_list.crbegin(), int_list.crend());
+  std::vector<int> int_list_rev(std::crbegin(int_list), std::crend(int_list));
   hadesmem::WriteVector(process, &int_list[0], int_list_rev);
   BOOST_TEST(int_list == int_list_rev);
 }

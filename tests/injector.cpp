@@ -19,6 +19,21 @@
 // TODO: Write scripts to enable/disable appverif for all test binaries for use
 // during test passes.
 
+// TODO: Find a less stupid way of testing this.Relying on some random module
+// not being present when there's no actual guarantee of this is ridiculous
+// (what if some overlay software is injected globally etc).
+
+// TODO: Test kPathResolution flag.
+
+// TODO: Test export calling in CreateAndInject.
+
+// TODO: Test work dir, args, etc in CreateAndInject.
+
+// TODO: Test kAddToSearchOrder flag.
+
+// TODO: Enumerate module list and ensure the target module has actually been
+// loaded.
+
 void TestInjector()
 {
   // Don't cause a fork bomb when we later re-launch ourselves to test injection

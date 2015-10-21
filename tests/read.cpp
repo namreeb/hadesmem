@@ -19,6 +19,16 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Run tests against ‘known’ data (e.g. Read tests should be done against
+// a memory mapped file with known values).
+
+// TODO: Test reads against all page protection combination (including
+// PAGE_NOCACHE and PAGE_WRITECOMBINE).
+
+// TODO: Test page protections before and after read/write.
+
+// TODO: Test page boundary reads/writes.
+
 void TestReadPod()
 {
   hadesmem::Process const process(::GetCurrentProcessId());

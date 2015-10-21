@@ -54,6 +54,7 @@
 
 namespace hadesmem
 {
+// TODO: Type safety.
 struct PatternFlags
 {
   enum : std::uint32_t
@@ -591,22 +592,22 @@ public:
 
   const_iterator begin() const
   {
-    return map_.cbegin();
+    return std::cbegin(map_);
   }
 
   const_iterator cbegin() const
   {
-    return map_.cbegin();
+    return std::cbegin(map_);
   }
 
   const_iterator end() const
   {
-    return map_.end();
+    return std::cend(map_);
   }
 
   const_iterator cend() const
   {
-    return map_.cend();
+    return std::cend(map_);
   }
 
   friend bool operator==(PatternMap const& lhs, PatternMap const& rhs) noexcept
@@ -666,22 +667,22 @@ public:
 
   const_iterator begin() const
   {
-    return map_.cbegin();
+    return std::cbegin(map_);
   }
 
   const_iterator cbegin() const
   {
-    return map_.cbegin();
+    return std::cbegin(map_);
   }
 
   const_iterator end() const
   {
-    return map_.end();
+    return std::cend(map_);
   }
 
   const_iterator cend() const
   {
-    return map_.cend();
+    return std::cend(map_);
   }
 
   friend bool operator==(ModuleMap const& lhs, ModuleMap const& rhs) noexcept

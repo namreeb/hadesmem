@@ -33,6 +33,10 @@
 #include "render.hpp"
 #include "window.hpp"
 
+// TODO: Rethink the design of this. It's sort-of weird for each plugin to get
+// its own copy of PluginInterface when all we're doing in the virtual functions
+// is returning static data anyway...
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadPluginsCallback>&

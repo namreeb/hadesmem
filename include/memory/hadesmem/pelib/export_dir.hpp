@@ -22,6 +22,8 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Support adding new exports.
+
 namespace hadesmem
 {
 class ExportDir
@@ -166,6 +168,8 @@ public:
     data_.MinorVersion = minor_version;
   }
 
+  // TODO: Support allocating space for a new name rather than just overwriting
+  // the existing one.
   void SetName(std::string const& name)
   {
     DWORD const name_rva = GetNameRaw();
@@ -225,38 +229,32 @@ private:
   IMAGE_EXPORT_DIRECTORY data_ = IMAGE_EXPORT_DIRECTORY{};
 };
 
-inline bool operator==(ExportDir const& lhs,
-                       ExportDir const& rhs) noexcept
+inline bool operator==(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(ExportDir const& lhs,
-                       ExportDir const& rhs) noexcept
+inline bool operator!=(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(ExportDir const& lhs,
-                      ExportDir const& rhs) noexcept
+inline bool operator<(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(ExportDir const& lhs,
-                       ExportDir const& rhs) noexcept
+inline bool operator<=(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(ExportDir const& lhs,
-                      ExportDir const& rhs) noexcept
+inline bool operator>(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(ExportDir const& lhs,
-                       ExportDir const& rhs) noexcept
+inline bool operator>=(ExportDir const& lhs, ExportDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

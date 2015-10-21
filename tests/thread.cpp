@@ -17,6 +17,8 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/thread_helpers.hpp>
 
+// TODO: Clean up this mess and write a proper scope exit wrapper for use in the
+// library.
 template <typename Func> class ScopeExit
 {
 public:

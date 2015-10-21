@@ -56,12 +56,15 @@ public:
       }
     }
 
+    // TODO: Does GetBase need to be adjusted for virtual sections?
     void const* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
     void const* const section_hdr_next =
       reinterpret_cast<PIMAGE_SECTION_HEADER>(base_) + 1;
     if (pe_file.GetType() == PeFileType::Data && section_hdr_next > file_end)
     {
+      // TODO: Support partial overlap by actually reading as much as we can,
+      // rather than just setting everything to zero.
       is_virtual_ = true;
       ::ZeroMemory(&data_, sizeof(data_));
     }
@@ -82,11 +85,14 @@ public:
     return base_;
   }
 
+  // TODO: Fix this hack.
   bool IsVirtual() const noexcept
   {
     return is_virtual_;
   }
 
+  // TODO: Support virtual sections (incl. partial) properly. Currently we're
+  // reading garbage.
   void UpdateRead()
   {
     data_ = Read<IMAGE_SECTION_HEADER>(*process_, base_);
@@ -225,38 +231,32 @@ private:
   bool is_virtual_{};
 };
 
-inline bool operator==(Section const& lhs,
-                       Section const& rhs) noexcept
+inline bool operator==(Section const& lhs, Section const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(Section const& lhs,
-                       Section const& rhs) noexcept
+inline bool operator!=(Section const& lhs, Section const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Section const& lhs,
-                      Section const& rhs) noexcept
+inline bool operator<(Section const& lhs, Section const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(Section const& lhs,
-                       Section const& rhs) noexcept
+inline bool operator<=(Section const& lhs, Section const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(Section const& lhs,
-                      Section const& rhs) noexcept
+inline bool operator>(Section const& lhs, Section const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(Section const& lhs,
-                       Section const& rhs) noexcept
+inline bool operator>=(Section const& lhs, Section const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

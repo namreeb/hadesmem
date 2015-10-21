@@ -27,41 +27,6 @@
 
 namespace hadesmem
 {
-// TODO: Ensure thread is actually suspended. http://bit.ly/1GdorSJ
-inline DWORD SuspendThread(Thread const& thread)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.",
-                                 thread.GetId());
-
-  DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
-  if (suspend_count == static_cast<DWORD>(-1))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("SuspendThread failed.")
-                                    << ErrorCodeWinLast(last_error));
-  }
-
-  return suspend_count;
-}
-
-inline DWORD ResumeThread(Thread const& thread)
-{
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.",
-                                 thread.GetId());
-
-  DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
-  if (suspend_count == static_cast<DWORD>(-1))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                    << ErrorString("ResumeThread failed.")
-                                    << ErrorCodeWinLast(last_error));
-  }
-
-  return suspend_count;
-}
-
 inline CONTEXT GetThreadContext(Thread const& thread, DWORD context_flags)
 {
   if (::GetCurrentThreadId() == thread.GetId() &&
@@ -93,6 +58,50 @@ inline void SetThreadContext(Thread const& thread, CONTEXT const& context)
                                     << ErrorString("SetThreadContext failed.")
                                     << ErrorCodeWinLast(last_error));
   }
+}
+
+inline DWORD SuspendThread(Thread const& thread)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.",
+                                 thread.GetId());
+
+  DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
+  if (suspend_count == static_cast<DWORD>(-1))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("SuspendThread failed.")
+                                    << ErrorCodeWinLast(last_error));
+  }
+
+  // Ensure thread is actually suspended. http://bit.ly/1GdorSJ
+  try
+  {
+    GetThreadContext(thread, CONTEXT_CONTROL);
+  }
+  catch (...)
+  {
+    // Best effort.
+  }
+
+  return suspend_count;
+}
+
+inline DWORD ResumeThread(Thread const& thread)
+{
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.",
+                                 thread.GetId());
+
+  DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
+  if (suspend_count == static_cast<DWORD>(-1))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(Error()
+                                    << ErrorString("ResumeThread failed.")
+                                    << ErrorCodeWinLast(last_error));
+  }
+
+  return suspend_count;
 }
 
 inline void* GetStartAddress(Thread const& thread)

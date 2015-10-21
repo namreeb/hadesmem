@@ -69,6 +69,8 @@
 
 // TODO: Test references, pointers, const, volatile, perfect forwarding, etc.
 
+// TODO: Fix code duplication throughout patcher codebase.
+
 namespace hadesmem
 {
 template <typename TargetFuncT, typename ContextT = void*>

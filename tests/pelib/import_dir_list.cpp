@@ -22,6 +22,8 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Split up and improve these import tests.
+
 // Export something to ensure tests pass...
 extern "C" __declspec(dllexport) void Dummy();
 extern "C" __declspec(dllexport) void Dummy()

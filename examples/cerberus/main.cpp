@@ -103,6 +103,11 @@
 // frame which matches the whitelist and single step the whole way then redirect
 // control flow at the end).
 
+// TODO: Investigate if it's possible to add specialized anti-stack-trace
+// support for cases like using TLS (i.e. game sets flag in TLS before calling
+// present (and resets it after), and uses it in order to detect unknown code
+// calling engine functions in a Present hook).
+
 // TODO: Add an API logger (Module32First, Process32First,
 // CreateVectoredExceptionHandler, NtSetInformationThread,
 // NtQuerySystemInformation, ReadProcessMemory, recv, send,
@@ -134,6 +139,28 @@
 // TODO: Fix all the cases where we were previously using exceptions to control
 // the order in which things occur, but now we're using callbacks which may
 // swallow some exceptions.
+
+// TODO: Ensure we're not missing locking on any global structures which may be
+// accessed concurrently.
+
+// TODO: Have two sets of OnFrame (and other?) callbacks. One for Cerberus and
+// one for plugins. This will fix the unregister problem, among others.
+
+// TODO: Fix naming of APIs. Some registration funcs are "RegisterOnFooCallback"
+// while some are "RegisterOnFoo". Also, do we really need both a free and a
+// member func if one just calls the other? Why the unnecessary complexity?
+
+// TODO: To handle abstracting away GUI library perhaps have two sets of
+// callbacks. A public set and an 'internal' set, that way we can control the
+// order they are called. Ensure it's still possible to intentionally 'leak'
+// them though, as that is sometimes desirable.
+
+// TODO: Fix/normalize detour names. e.g. SomeFunc_Detour or
+// SomeClass_SomeFunc_Detour.
+
+// TODO: Add Pre and Post callbacks for cases like the CreateProcess hook. In
+// the Pre callback hook we want to modify the args to suspend the process. In
+// the Post callback hook we want to inject and then resume the process.
 
 namespace
 {
@@ -514,7 +541,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
       hadesmem::cerberus::InitializeGwen();
     }
 
-    // NOTE: The order of some of these calls is important. E.g. The GUI libs
+    // The order of some of these calls is important. E.g. The GUI libs
     // are initialized before the renderer, and the renderer is initialized
     // before the actual rendering API hooks. This is to avoid race conditions
     // that would otherwise be caused if we initialized the renderer before the

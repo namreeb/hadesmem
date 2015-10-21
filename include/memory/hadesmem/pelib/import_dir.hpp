@@ -23,8 +23,15 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: Support adding new import descriptors and import thunks.
+
+// TODO: Handle forwarded imports.
+
+// TODO: Handle bound imports (both old way and new way).
+
 namespace hadesmem
 {
+// TODO: This should be called ImportDescriptor.
 class ImportDir
 {
 public:
@@ -112,6 +119,8 @@ public:
     return base_;
   }
 
+  // TODO: Support virtual termination and virtual overlap properly. Currently
+  // we're reading garbage.
   void UpdateRead()
   {
     data_ = Read<IMAGE_IMPORT_DESCRIPTOR>(*process_, base_);
@@ -123,12 +132,16 @@ public:
   }
 
   // Check for virtual descriptor overlap trick.
+  // TODO: Find a better way to handle this than forcing the user to deal with
+  // it.
   bool IsVirtualBegin() const
   {
     return is_virtual_beg_;
   }
 
   // Check for virtual termination trick.
+  // TODO: Find a better way to handle this than forcing the user to deal with
+  // it.
   bool IsVirtualTerminated() const
   {
     // It's possible for the last entry to be in virtual space, because it only
@@ -141,6 +154,8 @@ public:
 
   // Check for TLS AOI trick.
   // Sample: manyimportsW7.exe (Corkami PE Corpus)
+  // TODO: Find a better way to handle this than forcing the user to deal with
+  // it.
   bool IsTlsAoiTerminated() const
   {
     try
@@ -196,6 +211,7 @@ public:
     // It's possible for the RVA to be invalid on disk because it's fixed by
     // relocations.
     // Sample: imports_relocW7.exe
+    // TODO: Handle this.
     if (!name_va)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
@@ -230,6 +246,8 @@ public:
     data_.Name = name;
   }
 
+  // TODO: Support allocating space for a new name rather than just overwriting
+  // the existing one.
   void SetName(std::string const& name)
   {
     DWORD name_rva =
@@ -271,38 +289,32 @@ private:
   bool is_virtual_beg_{};
 };
 
-inline bool operator==(ImportDir const& lhs,
-                       ImportDir const& rhs) noexcept
+inline bool operator==(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(ImportDir const& lhs,
-                       ImportDir const& rhs) noexcept
+inline bool operator!=(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(ImportDir const& lhs,
-                      ImportDir const& rhs) noexcept
+inline bool operator<(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(ImportDir const& lhs,
-                       ImportDir const& rhs) noexcept
+inline bool operator<=(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(ImportDir const& lhs,
-                      ImportDir const& rhs) noexcept
+inline bool operator>(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(ImportDir const& lhs,
-                       ImportDir const& rhs) noexcept
+inline bool operator>=(ImportDir const& lhs, ImportDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

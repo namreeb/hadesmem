@@ -44,6 +44,13 @@ void DumpFile(std::wstring const& path)
       return;
     }
 
+    if (static_cast<std::uint32_t>(size) != size)
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"File too large to be a valid PE.", 0);
+      return;
+    }
+
     if (!file.seekg(0, std::ios::beg))
     {
       WriteNewline(out);

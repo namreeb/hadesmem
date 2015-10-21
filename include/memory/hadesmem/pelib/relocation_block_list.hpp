@@ -76,6 +76,7 @@ public:
         return;
       }
 
+      // TODO: Dump should warn for this.
       RelocationBlock const relocation_block{
         process,
         pe_file,
@@ -126,14 +127,18 @@ public:
         reinterpret_cast<std::uintptr_t>(
           impl_->relocation_block_->GetRelocationDataStart()) +
         (impl_->relocation_block_->GetNumberOfRelocations() * sizeof(WORD)));
+      // TODO: Dump should warn for integer overflow or mis-aligned off-the-end
+      // data.
       if (next_base < impl_->relocation_block_->GetBase() ||
           next_base >= impl_->reloc_dir_end_)
       {
         impl_.reset();
         return *this;
       }
+
       impl_->relocation_block_ = RelocationBlock{
         *impl_->process_, *impl_->pe_file_, next_base, impl_->reloc_dir_end_};
+      // TODO: Dump should warn for this.
       if (impl_->relocation_block_->IsInvalid())
       {
         impl_.reset();
@@ -207,7 +212,8 @@ public:
   explicit RelocationBlockList(Process const& process,
                                PeFile&& pe_file) = delete;
 
-  explicit RelocationBlockList(Process const&& process, PeFile&& pe_file) = delete;
+  explicit RelocationBlockList(Process const&& process,
+                               PeFile&& pe_file) = delete;
 
   iterator begin()
   {

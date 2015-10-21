@@ -73,12 +73,13 @@ inline std::unique_ptr<Allocator> AllocatePageNear(Process const& process,
                     : std::unique_ptr<Allocator>();
   };
 
+  // TODO: Remove this now that it appears to be fixed (the mov is now a
+  // movsxd).
   // Do two separate passes when looking for trampolines, ensuring to scan
   // forwards first. This is because there is a bug in Steam's overlay (last
   // checked and confirmed in SteamOverlayRender64.dll v2.50.25.37) where
   // negative displacements are not correctly sign-extended when cast to
   // 64-bits, resulting in a crash when they attempt to resolve the jump.
-
   // .text:0000000180082956                 cmp     al, 0FFh
   // .text:0000000180082958                 jnz     short loc_180082971
   // .text:000000018008295A                 cmp     byte ptr [r13+1], 25h

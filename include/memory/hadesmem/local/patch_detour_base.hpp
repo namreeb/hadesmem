@@ -15,6 +15,8 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Move all 'local' code to 'local' namespace.
+
 namespace hadesmem
 {
 class PatchDetourBase

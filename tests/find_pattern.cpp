@@ -13,6 +13,19 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Clean up, expand, fix, etc these tests.
+
+// TODO: Add more tests.
+
+// TODO: Add LEA test.
+
+// TODO: Actually validate that the results are correct…
+
+// TODO: Fix the test to ensure we get the error we're expecting, rather than
+// just any error.
+
+// TODO: LoadFile test.
+
 void TestFindPattern()
 {
   hadesmem::Process const process{::GetCurrentProcessId()};

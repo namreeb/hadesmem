@@ -161,6 +161,8 @@ public:
     }
   }
 
+  // TODO: Add SetCallbacks.
+
   DWORD GetSizeOfZeroFill() const
   {
     if (pe_file_->Is64())

@@ -19,6 +19,15 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/read.hpp>
 
+// TODO: Ensure that base address is different across modules (similar to other
+// tests).
+
+// TODO: Ensure Export::ByName works.
+
+// TODO: Ensure Export::Forwarded works.
+
+// TODO: Ensure that output differs across exports.
+
 // Export something to ensure tests pass...
 extern "C" __declspec(dllexport) void Dummy();
 extern "C" __declspec(dllexport) void Dummy()

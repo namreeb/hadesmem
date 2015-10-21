@@ -16,6 +16,13 @@
 #include <hadesmem/module.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: More comprehensive PE file testing.
+
+// TODO: Add PeFile tests for modules mapped as data (currently only testing
+// images).
+
+// TODO: Run tests on ‘worst case scenario’ targets like Corkami for PE files.
+
 void TestPeFile()
 {
   hadesmem::Process const process(::GetCurrentProcessId());

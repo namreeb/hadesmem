@@ -40,6 +40,7 @@ void DumpSections(hadesmem::Process const& process,
     }
   }
 
+  // TODO: Add entropy dumping here and elsewhere.
   for (auto const& s : sections)
   {
     WriteNewline(out);
@@ -49,7 +50,7 @@ void DumpSections(hadesmem::Process const& process,
       WarnForCurrentFile(WarningType::kSuspicious);
     }
     HandleLongOrUnprintableString(
-      L"name", L"section name", 2, WarningType::kSuspicious, s.GetName());
+      L"Name", L"section name", 2, WarningType::kSuspicious, s.GetName());
     WriteNamedHex(out, L"VirtualAddress", s.GetVirtualAddress(), 2);
     WriteNamedHex(out, L"VirtualSize", s.GetVirtualSize(), 2);
     WriteNamedHex(out, L"PointerToRawData", s.GetPointerToRawData(), 2);

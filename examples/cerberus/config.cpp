@@ -15,6 +15,20 @@
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/trace.hpp>
 
+// TODO: Rethink how this is designed. e.g. Instead of relying completely on the
+// config to handle whether plugins should be loaded, perhaps plugins should
+// expose an 'IsMine' style method so they can nominate themselves (and then we
+// can have an optional override in the config to disbale them). Furthermore,
+// should we be able to change the GUI lib on a per-process or per-plugin level?
+// What else?
+
+// TODO: Add config options to change hooking type (e.g. to use VEH hooks) and
+// other useful options for testing.
+
+// TODO: Support enabling/disabling/forcing input methods, rendering APIs, etc.
+
+// TODO: Regex support.
+
 namespace hadesmem
 {
 namespace cerberus

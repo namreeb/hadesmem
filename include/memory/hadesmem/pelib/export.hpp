@@ -27,6 +27,12 @@
 
 // TODO: Ensure we properly support data exports. http://bit.ly/1Lu548u
 
+// TODO: Add constructor to look up Export by name, optimized by using binary
+// search.
+
+// TODO: Is our naming of ordinal number vs procedure number correct/orthodox?
+// Look into what other people/tools/documents call things.
+
 namespace hadesmem
 {
 class Export
@@ -216,6 +222,8 @@ public:
         Error{} << ErrorString{"Invalid forwarder ordinal detected."});
     }
   }
+
+  // TODO: Add setters for all fields.
 
   bool IsVirtualVa() const
   {

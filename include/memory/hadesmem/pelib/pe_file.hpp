@@ -23,10 +23,87 @@
 #include <hadesmem/region_list.hpp>
 #include <hadesmem/read.hpp>
 
-// TODO: Add proper regression tests for PeLib.
+// TODO: Add proper regression tests for PeLib. This will require running
+// against a known sample set with reference data to compare to.
+
+// TODO: Add better checking to all types that we're not reading outside the
+// file/buffer. We usually check the RVA/VA, but we don't always validate the
+// size. Also need to check for overflow etc. when using size.
+
+// TODO: Add option to manually map data files, so we can apply fixups etc which
+// in turn means we can basically just treat it as an Image in memory. It also
+// means we can handle weird loader differences with different mapping flags for
+// XP vs 7 vs 8 etc.
+
+// TODO: Investigate what the point of IMAGE_DIRECTORY_ENTRY_IAT is. Used by
+// virtsectblXP.exe. Does it actually have to be the IAT (i.e. FirstThunk)? I'm
+// pretty sure it's different in some cases... Add warning in Dump for this and
+// run a full scan.
+
+// TODO: Decouple PeLib from Process so we can operate directly on
+// files/memory/etc. Need some sort of abstraction to replace Process (and the
+// accompanying calls to Read/Write/etc.). Dependency on hadesmem APIs in
+// general should be removed, as ideally we could make the PeFile code
+// OS-independent as all we're doing is parsing files.
+
+// TODO: Move to an attribute based system for warning on malformed or
+// suspicious files. Also important for testing, so we can ensure certain
+// branches are hit.
+
+// TODO: Return correctly typed pointers from GetBase, GetStart, etc. (Adjust
+// ostream overloads to cast to void*).
+
+// TODO: Add noexcept to all functions which are now using cached data and can
+// no longer throw.
+
+// TODO: Helper functions such as FindExport, FindImport, HasDataDir,
+// GetArchitecture, IsDotNet, GetPDB, etc.
+
+// TODO: Move to 'pelib' namespace.
+
+// TODO: Rewrite PeLib to allow writes from scratch (building new PE file
+// sections, data, etc. or even an entire mew PE file). This includes full
+// support for writing back to existing PE files also, including automatically
+// performing adjustments where required to fit in new data or remove
+// unnecessary space.
+
+// TODO: Support more of the PE file format. (Overlay data. Resource directory.
+// Exception directory. Relocation directory. Security directory. Debug
+// directory. Load config directory. Delay import directory. Bound import
+// directory. IAT(as opposed to Import) directory. CLR runtime directory
+// support. DOS stub. Rich header. Checksum. etc.)
+
+// TODO: Reduce dependencies various components have on each other (e.g.
+// ImportDir depends on TlsDir for detecting AOI trick, BoundImportDir depends
+// on ImportDir to ensure that we have imports before accessing bound imports,
+// etc.).
+
+// TODO: We should be far more defensive than we are currently being. Validate
+// things such as whether offsets are within the file, within the expected data
+// dir, higher than an expected address (e.g. NameOffset for bound imports),
+// etc.
+
+// TODO: Where possible, document the SHA1 of example files which prompted the
+// addition of corner cases, and add them to online repository.
+
+// TODO: Proper overflow checking everywhere.
+
+// TODO: In some cases we're doing checks in list types, in others we're doing
+// it in the underlying type. Make this more consistent. Also think about how
+// this interacts with the proposed move to an attribute based system.
+
+// TODO: Write and use synthetic files similar to Corkami as part of unit tests.
+// One sample per trick/feature/etc.
+
+// TODO: Stop hard-swallowing warnings/errors in PeLib types, they should be
+// exposed to the tools (e.g. so Dump can warn). This should probably be fixed
+// with the aformentioned attributes suggestion.
 
 namespace hadesmem
 {
+// TODO: 'k' prefix.
+// TODO: Investigate if there is a better way to implement PeLib rather than
+// branching on PeFileType everywhere.
 enum class PeFileType
 {
   Image,
@@ -175,8 +252,11 @@ inline std::wostream& operator<<(std::wostream& lhs, PeFile const& rhs)
 
 // TODO: Add sample files for all the corner cases we're handling, and ensure it
 // is correct, so we can add regression tests.
-// TODO: Consider if RvaToVa should be RvaToFilePtr, and RvaToVa should return
-// the VA if the file were to be mapped.
+// TODO: Find a better name for this functions? It's slightly confusing...
+// TODO: Measure code coverage of this and other critical functions when writing
+// tests to ensure full coverage. Then add attributes and regression tests.
+// TODO: Consider if there is a better way to handle virtual VAs other than an
+// out param. Attributes?
 inline PVOID RvaToVa(Process const& process,
                      PeFile const& pe_file,
                      DWORD rva,
@@ -235,7 +315,10 @@ inline PVOID RvaToVa(Process const& process,
     DWORD const size_of_image = pe_file.Is64() ? optional_header_64.SizeOfImage
                                                : optional_header_32.SizeOfImage;
 
-    // Windows will load specially crafted images with no sections.
+    // A PE file can legally have zero sections, in which case the entire file
+    // is executable as though it were a single section whose size is equal to
+    // the SizeOfHeaders value rounded up to the nearest page.
+    // TODO: Confirm that the comment on rounding is correct, then implement it.
     WORD num_sections = file_header.NumberOfSections;
     if (!num_sections)
     {
@@ -477,6 +560,9 @@ inline DWORD FileOffsetToRva(Process const& process,
 
 namespace detail
 {
+// TODO: Handle virtual termination.
+// TODO: Warn in tools when EOF/Virtual/etc. termination is detected.
+// TODO: Move this somewhere more appropriate.
 template <typename CharT>
 std::basic_string<CharT> CheckedReadString(Process const& process,
                                            PeFile const& pe_file,
@@ -484,6 +570,9 @@ std::basic_string<CharT> CheckedReadString(Process const& process,
 {
   if (pe_file.GetType() == PeFileType::Image)
   {
+    // TODO: Extra bounds checking to ensure we don't read outside the image in
+    // the case that we're reading a string at the end of the file which is not
+    // null terminated, and we're on a region boundary.
     return ReadString<CharT>(process, address);
   }
   else if (pe_file.GetType() == PeFileType::Data)

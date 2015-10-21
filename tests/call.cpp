@@ -15,6 +15,22 @@
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
+// TODO: Test argument combinations more thoroughly.
+
+// TODO: Improve multi - call testing.
+
+// TODO: Test all possible Call overloads.
+
+// TODO: Compile - fail tests.
+
+// TODO: Test all combinations of calling convention, pointer vs non - ptr, etc.
+
+// TODO: Add compile - fail tests to ensure that rvalue reference function
+// called with an lvalue will fail.
+
+// TODO: Add reference tests(both compile fail, and also normal, once references
+// are enabled again).
+
 struct DummyType
 {
 };
@@ -22,27 +38,30 @@ DummyType dummy_glob;
 
 using IntRetFuncT = std::int32_t (*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
-  std::is_same<decltype(hadesmem::Call<IntRetFuncT>(
-                          std::declval<hadesmem::Process>(),
-                          nullptr,
-                          hadesmem::CallConv::kDefault).GetReturnValue()),
-               std::int32_t>::value);
+  std::is_same<
+    decltype(hadesmem::Call<IntRetFuncT>(std::declval<hadesmem::Process>(),
+                                         nullptr,
+                                         hadesmem::CallConv::kDefault)
+               .GetReturnValue()),
+    std::int32_t>::value);
 
 using DoubleRetFuncT = double (*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
-  std::is_same<decltype(hadesmem::Call<DoubleRetFuncT>(
-                          std::declval<hadesmem::Process>(),
-                          nullptr,
-                          hadesmem::CallConv::kDefault).GetReturnValue()),
-               double>::value);
+  std::is_same<
+    decltype(hadesmem::Call<DoubleRetFuncT>(std::declval<hadesmem::Process>(),
+                                            nullptr,
+                                            hadesmem::CallConv::kDefault)
+               .GetReturnValue()),
+    double>::value);
 
 using PtrRetFuncT = DummyType* (*)();
 HADESMEM_DETAIL_STATIC_ASSERT(
-  std::is_same<decltype(hadesmem::Call<PtrRetFuncT>(
-                          std::declval<hadesmem::Process>(),
-                          nullptr,
-                          hadesmem::CallConv::kDefault).GetReturnValue()),
-               DummyType*>::value);
+  std::is_same<
+    decltype(hadesmem::Call<PtrRetFuncT>(std::declval<hadesmem::Process>(),
+                                         nullptr,
+                                         hadesmem::CallConv::kDefault)
+               .GetReturnValue()),
+    DummyType*>::value);
 
 DWORD_PTR TestInteger(std::uint32_t a,
                       std::uint32_t b,

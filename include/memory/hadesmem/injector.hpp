@@ -94,6 +94,7 @@ private:
 };
 }
 
+// TODO: Type safety.
 struct InjectFlags
 {
   enum : std::uint32_t
