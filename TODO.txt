@@ -34,3 +34,4 @@
 * Quote paths in postbuild scripts.
 * Run boost bootstrap and headers building scripts in prebuild?
 * Mark move operations explicitly noexcept (where appropriate)?
+* Move external dependencies to different solutions.
