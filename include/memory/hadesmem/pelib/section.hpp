@@ -23,6 +23,12 @@
 #include <hadesmem/read.hpp>
 #include <hadesmem/write.hpp>
 
+// TODO: In the case that PointerToRawData lies outside the file, the Windows PE
+// loader considers both it and SizeOfRawData to be zero (which will result in
+// the section being zero-filled). The exception to this is the last section,
+// which apparently can't be incorrect like this. Find all cases which may be
+// affected by this and handle them (e.g. imports, exports, resources, etc.).
+
 namespace hadesmem
 {
 class Section

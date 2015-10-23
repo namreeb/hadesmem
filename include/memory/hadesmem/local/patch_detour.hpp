@@ -189,6 +189,11 @@ public:
     trampolines_.clear();
     stub_gate_ = nullptr;
 
+    // TODO: Narrow the scope of the suspension to only the point where we
+    // actually do the hook, because a thread might hold a lock we need (e.g.
+    // heap lock).
+    // TODO: Make suspension optional, as in some cases we know that all the
+    // threads are suspended already (e.g. creation-time injection).
     SuspendedProcess const suspended_process{process_->GetId()};
 
     std::uint32_t const kMaxInstructionLen = 15;
