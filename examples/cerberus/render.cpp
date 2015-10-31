@@ -48,6 +48,11 @@
 // TODO: Replace AntTweakBar with CEGUI? Need something with proper multi-device
 // support, a roadmap for DX12, etc. CEGUI is a pretty gigantic dependency (with
 // many of its own dependencies), but it seems to be the only real contender.
+// AntTweakBar is abandoned, and seemingly so is GWEN.
+// At the very least we should replace AntTweakBar with GWEN for the time being,
+// so we can rip out all the cross-thread input nonsense which is causing
+// various input handling issues in some games. Need to confirm GWEN is
+// thread-safe and not doing rendering from its input injection APIs.
 
 // TODO: DirectDraw rendering support (e.g. Abe's Oddysee).
 

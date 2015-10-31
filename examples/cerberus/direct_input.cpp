@@ -21,6 +21,8 @@
 #include "helpers.hpp"
 #include "main.hpp"
 
+// TODO: Replace device proxies with inline hooks like what was done for D3D.
+
 namespace
 {
 class DirectInputImpl : public hadesmem::cerberus::DirectInputInterface

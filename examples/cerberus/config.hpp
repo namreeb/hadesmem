@@ -46,8 +46,6 @@ public:
 private:
   void LoadFile(std::wstring const& path);
 
-  void LoadMemory(std::wstring const& data);
-
   void LoadImpl(pugi::xml_document const& doc);
 
   std::vector<Plugin> plugins_;

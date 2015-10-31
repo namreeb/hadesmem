@@ -1,6 +1,7 @@
 * All the TODOs in the code.
 * Documentation! Both external, and also better commenting in the code (but don't 'comment the code', comment the decisions instead).
 * Move to CMake.
+* Investigate re-adding Intel C++ and Clang support. GCC probably not worth the time investment at this point.
 * Add manifest to all binaries with supportedOS etc. set.
 * Add an optional /analyze build config.
 * Set up build server (and reduce compile times to make it cheaper to run).
@@ -35,3 +36,4 @@
 * Run boost bootstrap and headers building scripts in prebuild?
 * Mark move operations explicitly noexcept (where appropriate)?
 * Move external dependencies to different solutions.
+* Set /D_HAS_AUTO_PTR_ETC=0
