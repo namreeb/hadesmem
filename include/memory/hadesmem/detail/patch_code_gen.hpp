@@ -379,6 +379,7 @@ inline std::size_t
   return call_buf.size();
 }
 
+// TODO: Add frame pointer so we can unwind the stack while debugging?
 inline std::vector<std::uint8_t> GenStubGate32(void* stub,
                                                void* get_orig_user_ptr_ptr_fn)
 {
