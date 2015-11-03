@@ -593,5 +593,94 @@ inline void
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
 }
+
+hadesmem::detail::SmartFileHandle OpenVolume(std::wstring const& path)
+{
+  hadesmem::detail::SmartFileHandle volume_handle{
+    ::CreateFileW(path.c_str(),
+                  GENERIC_READ,
+                  FILE_SHARE_READ | FILE_SHARE_WRITE,
+                  0,
+                  OPEN_EXISTING,
+                  0,
+                  0)};
+  if (!volume_handle.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"CreateFileW failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  return volume_handle;
+}
+
+hadesmem::detail::SmartFileHandle OpenVolume(DWORD vsn)
+{
+  std::vector<wchar_t> buffer(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  hadesmem::detail::SmartFindVolumeHandle const find_handle{
+    ::FindFirstVolumeW(buffer.data(), static_cast<DWORD>(buffer.size()))};
+  if (!find_handle.IsValid())
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"FindFirstVolumeW failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  do
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Current Volume: [%s].", buffer.data());
+
+    DWORD current_vsn = 0;
+    if (!::GetVolumeInformationW(buffer.data(),
+                                 nullptr,
+                                 0,
+                                 &current_vsn,
+                                 nullptr,
+                                 nullptr,
+                                 nullptr,
+                                 0))
+    {
+      DWORD const last_error = ::GetLastError();
+      (void)last_error;
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! GetVolumeInformationW failed. LastError: [%lu].", last_error);
+      continue;
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Current VSN: [0x%lX].", current_vsn);
+
+    if (current_vsn != vsn)
+    {
+      continue;
+    }
+
+    std::wstring volume_path{buffer.data()};
+    if (volume_path.size() > 1)
+    {
+      // Remove trailing backslash.
+      volume_path.pop_back();
+    }
+
+    return OpenVolume(volume_path);
+  } while (::FindNextVolumeW(
+    find_handle.GetHandle(), buffer.data(), static_cast<DWORD>(buffer.size())));
+
+  DWORD const last_error = ::GetLastError();
+  if (last_error != ERROR_NO_MORE_FILES)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"FindNextVolumeW failed."}
+                        << hadesmem::ErrorCodeWinLast{last_error});
+  }
+
+  else
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{
+        "Failed to find volume matching specified VSN."});
+  }
+}
 }
 }
