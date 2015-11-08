@@ -594,7 +594,7 @@ inline void
   }
 }
 
-hadesmem::detail::SmartFileHandle OpenVolume(std::wstring const& path)
+inline hadesmem::detail::SmartFileHandle OpenVolume(std::wstring const& path)
 {
   hadesmem::detail::SmartFileHandle volume_handle{
     ::CreateFileW(path.c_str(),
@@ -615,7 +615,7 @@ hadesmem::detail::SmartFileHandle OpenVolume(std::wstring const& path)
   return volume_handle;
 }
 
-hadesmem::detail::SmartFileHandle OpenVolume(DWORD vsn)
+inline hadesmem::detail::SmartFileHandle OpenVolume(DWORD vsn)
 {
   std::vector<wchar_t> buffer(HADESMEM_DETAIL_MAX_PATH_UNICODE);
   hadesmem::detail::SmartFindVolumeHandle const find_handle{

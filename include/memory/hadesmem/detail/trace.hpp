@@ -20,6 +20,9 @@
 
 // TODO: Add more debug tracing everywhere.
 
+// TODO: Support wide strings properly now that OutputDebugString has been
+// 'fixed'. See MSDN documentation for details.  http://bit.ly/1NWRpq4
+
 namespace hadesmem
 {
 namespace detail

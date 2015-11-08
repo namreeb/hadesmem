@@ -1,0 +1,1 @@
+inject.exe --run "F:\SteamLibrary\steamapps\common\Euro Truck Simulator 2\bin\win_x64\eurotrucks2.exe" --inject --steam-app-id 227300 --export Load --add-path --path-resolution --module cerberus.dll
