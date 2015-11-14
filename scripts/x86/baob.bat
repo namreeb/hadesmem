@@ -1,0 +1,1 @@
+inject.exe --run "F:\SteamLibrary\steamapps\common\Batman Arkham Origins Blackgate HD\Bin\Game.exe" --inject --steam-app-id 267490 --export Load --add-path --path-resolution --module cerberus.dll

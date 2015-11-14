@@ -108,6 +108,7 @@
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,6 +135,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

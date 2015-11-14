@@ -108,6 +108,7 @@
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,6 +129,7 @@
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
