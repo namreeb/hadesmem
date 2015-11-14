@@ -377,6 +377,39 @@ void OnResizeGwen(hadesmem::cerberus::RenderApi /*api*/,
     return;
   }
 
+  // TODO: Reduce code duplication between this and other renderers.
+  if (!width || !height)
+  {
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Size is zero, attempting to use client "
+                                   "area of window. Width: [%u]. Height: [%u].",
+                                   width,
+                                   height);
+
+    // TODO: Ensure we're using the right window.
+    auto& window_interface = hadesmem::cerberus::GetWindowInterface();
+    RECT rect{};
+    if (::GetClientRect(window_interface.GetCurrentWindow(), &rect))
+    {
+      width = width ? width : rect.right;
+      height = height ? height : rect.bottom;
+
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "Got client rect. Width: [%u]. Height: [%u].", width, height);
+    }
+    else
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_TRACE_FORMAT_A("GetClientRect failed. LastError: [%lu].",
+                                     last_error);
+    }
+  }
+
+  if (!width || !height)
+  {
+    HADESMEM_DETAIL_TRACE_A("Skipping resize due to unknown size.");
+    return;
+  }
+
   auto& canvas = GetGwenCanvas();
   canvas->SetSize(width, height);
 }
