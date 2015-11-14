@@ -24,6 +24,7 @@
 #include <hadesmem/process.hpp>
 
 #include "callbacks.hpp"
+#include "config.hpp"
 #include "helpers.hpp"
 #include "main.hpp"
 
@@ -192,22 +193,25 @@ extern "C" BOOL WINAPI
     return retval;
   }
 
-  // TODO: Put this somewhere else. At the very least it belongs in a callback
-  // with a config flag to control it. Also add other common error-reporting
-  // processes (e.g. rifterrorhandler.exe).
-  // TODO: Actually parse the command line and implement this properly.
-  if (application_name || command_line)
+  std::wstring const application_name_str(
+    application_name ? hadesmem::detail::ToUpperOrdinal(application_name)
+                     : L"");
+  std::wstring const command_line_str(
+    command_line ? hadesmem::detail::ToUpperOrdinal(command_line) : L"");
+
+  auto const& config = hadesmem::cerberus::GetConfig();
+  auto const blocked_processes = config.GetBlockedProcesses();
+  for (auto const& blocked_name : blocked_processes)
   {
-    std::wstring const application_name_str(
-      application_name ? hadesmem::detail::ToUpperOrdinal(application_name)
-                       : L"");
-    std::wstring const command_line_str(
-      command_line ? hadesmem::detail::ToUpperOrdinal(command_line) : L"");
-    if (application_name_str.find(L"STEAMERRORREPORTER.EXE") !=
-          std::wstring::npos ||
-        command_line_str.find(L"STEAMERRORREPORTER.EXE") != std::wstring::npos)
+    auto const blocked_name_upper =
+      hadesmem::detail::ToUpperOrdinal(blocked_name);
+
+    // TODO: Actually parse the command line and implement this properly.
+    if (application_name_str.find(blocked_name_upper) != std::wstring::npos ||
+        command_line_str.find(blocked_name_upper) != std::wstring::npos)
     {
-      HADESMEM_DETAIL_TRACE_A("Blocking launch of steamerrorreporter.exe.");
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Blocking launch of process. Name: [%s].",
+                                     blocked_name.c_str());
       ::SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
     }

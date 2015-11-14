@@ -549,19 +549,16 @@ inline std::vector<char> PeFileToBuffer(std::wstring const& path)
   return buf;
 }
 
-inline void
-  EnumDir(std::wstring dir_path,
-          std::function<void(std::wstring const& path)> const& callback)
+template <typename F>
+inline bool EnumDir(std::wstring dir_path,
+                    F const& f,
+                    bool* empty = nullptr,
+                    bool* access_denied = nullptr)
 {
-  HADESMEM_DETAIL_ASSERT(!dir_path.empty());
-  HADESMEM_DETAIL_ASSERT(callback);
-
   while (!dir_path.empty() && dir_path.back() == L'\\')
   {
     dir_path.pop_back();
   }
-
-  HADESMEM_DETAIL_ASSERT(!dir_path.empty());
 
   WIN32_FIND_DATA find_data{};
   hadesmem::detail::SmartFindHandle const handle{
@@ -569,6 +566,16 @@ inline void
   if (!handle.IsValid())
   {
     DWORD const last_error = ::GetLastError();
+    if (empty && last_error == ERROR_FILE_NOT_FOUND)
+    {
+      *empty = true;
+      return true;
+    }
+    if (access_denied && last_error == ERROR_ACCESS_DENIED)
+    {
+      *access_denied = true;
+      return true;
+    }
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"FindFirstFile failed."}
                         << hadesmem::ErrorCodeWinLast{last_error});
@@ -582,7 +589,10 @@ inline void
       continue;
     }
 
-    callback(MakeExtendedPath(CombinePath(dir_path, cur_file)));
+    if (!f(cur_file))
+    {
+      return false;
+    }
   } while (::FindNextFileW(handle.GetHandle(), &find_data));
 
   DWORD const last_error = ::GetLastError();
@@ -592,6 +602,8 @@ inline void
       hadesmem::Error{} << hadesmem::ErrorString{"FindNextFile failed."}
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
+  
+  return true;
 }
 
 inline hadesmem::detail::SmartFileHandle OpenVolume(std::wstring const& path)

@@ -20,10 +20,10 @@ namespace hadesmem
 {
 namespace detail
 {
-// String must be hex.
-inline std::uintptr_t HexStrToPtr(std::wstring const& str)
+template <typename CharT>
+inline std::uintptr_t HexStrToPtrT(std::basic_string<CharT> const& str)
 {
-  std::wstringstream ss{str};
+  std::basic_stringstream<CharT> ss{str};
   ss.imbue(std::locale::classic());
   std::uintptr_t ptr = 0;
   if (!(ss >> std::hex >> ptr))
@@ -34,9 +34,20 @@ inline std::uintptr_t HexStrToPtr(std::wstring const& str)
   return ptr;
 }
 
-inline std::wstring PtrToHexString(void const* const ptr)
+inline std::uintptr_t HexStrToPtr(std::string const& str)
 {
-  std::wostringstream ss;
+  return HexStrToPtrT<char>(str);
+}
+
+inline std::uintptr_t HexStrToPtr(std::wstring const& str)
+{
+  return HexStrToPtrT<wchar_t>(str);
+}
+
+template <typename CharT = wchar_t>
+inline std::basic_string<CharT> PtrToHexString(void const* const ptr)
+{
+  std::basic_ostringstream<CharT> ss;
   ss.imbue(std::locale::classic());
   if (!(ss << std::hex << reinterpret_cast<std::uintptr_t>(ptr)))
   {

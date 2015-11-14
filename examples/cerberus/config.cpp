@@ -92,6 +92,22 @@ void Config::LoadImpl(pugi::xml_document const& doc)
     return;
   }
 
+  auto const blocked_processes_nodes = cerberus_node.children(L"BlockedProcess");
+  if (std::begin(blocked_processes_nodes) != std::end(blocked_processes_nodes))
+  {
+    blocked_processes_.clear();
+  }
+
+  for (auto const& blocked_node : blocked_processes_nodes)
+  {
+    auto name =
+      hadesmem::detail::pugixml::GetAttributeValue(blocked_node, L"Name");
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Got BlockedProcess entry. Name: [%s].",
+      name.c_str());
+    blocked_processes_.emplace_back(std::move(name));
+  }
+
   for (auto const& plugin_node : cerberus_node.children(L"Plugin"))
   {
     auto const path =

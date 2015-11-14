@@ -43,6 +43,11 @@ public:
     return gwen_enabled_;
   }
 
+  std::vector<std::wstring> GetBlockedProcesses() const
+  {
+    return blocked_processes_;
+  }
+
 private:
   void LoadFile(std::wstring const& path);
 
@@ -51,6 +56,7 @@ private:
   std::vector<Plugin> plugins_;
   bool ant_tweak_bar_enabled_{true};
   bool gwen_enabled_{};
+  std::vector<std::wstring> blocked_processes_;
 };
 
 Config& GetConfig();
