@@ -31,6 +31,7 @@
 #include "input.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
+#include "process.hpp"
 #include "main.hpp"
 #include "window.hpp"
 
@@ -830,6 +831,19 @@ void OnReleaseDXGI(IDXGISwapChain* swap_chain)
       swap_chain);
   }
 }
+
+void OnRtlExitUserProcess(NTSTATUS /*exit_code*/)
+{
+  hadesmem::cerberus::RenderApi const apis[] = {
+    hadesmem::cerberus::RenderApi::kD3D9,
+    hadesmem::cerberus::RenderApi::kD3D10,
+    hadesmem::cerberus::RenderApi::kD3D11,
+    hadesmem::cerberus::RenderApi::kOpenGL32};
+  for (auto const& api : apis)
+  {
+    CleanupGui(api);
+  }
+}
 }
 
 namespace hadesmem
@@ -877,6 +891,9 @@ void InitializeRender()
   d3d9.RegisterOnFrame(OnFrameD3D9);
   d3d9.RegisterOnReset(OnResetD3D9);
   d3d9.RegisterOnRelease(OnReleaseD3D9);
+
+  auto& process = GetProcessInterface();
+  process.RegisterOnRtlExitUserProcess(OnRtlExitUserProcess);
 
   auto& opengl32 = GetOpenGL32Interface();
   opengl32.RegisterOnFrame(OnFrameOpenGL32);

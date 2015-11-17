@@ -30,12 +30,17 @@
 
 namespace
 {
-hadesmem::cerberus::Callbacks<
-  hadesmem::cerberus::OnCreateProcessInternalWCallback>&
-  GetOnCreateProcessInternalWCallbacks()
+auto& GetOnCreateProcessInternalWCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
     hadesmem::cerberus::OnCreateProcessInternalWCallback> callbacks;
+  return callbacks;
+}
+
+auto& GetOnRtlExitUserProcessCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnRtlExitUserProcessCallback> callbacks;
   return callbacks;
 }
 
@@ -55,9 +60,29 @@ public:
     auto& callbacks = GetOnCreateProcessInternalWCallbacks();
     return callbacks.Unregister(id);
   }
+
+  virtual std::size_t RegisterOnRtlExitUserProcess(
+    std::function<hadesmem::cerberus::OnRtlExitUserProcessCallback> const&
+      callback) final
+  {
+    auto& callbacks = GetOnRtlExitUserProcessCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnRtlExitUserProcess(std::size_t id) final
+  {
+    auto& callbacks = GetOnRtlExitUserProcessCallbacks();
+    return callbacks.Unregister(id);
+  }
 };
 
 std::pair<void*, SIZE_T>& GetKernelBaseModule() noexcept
+{
+  static std::pair<void*, SIZE_T> module{nullptr, 0};
+  return module;
+}
+
+std::pair<void*, SIZE_T>& GetNtdllModule() noexcept
 {
   static std::pair<void*, SIZE_T> module{nullptr, 0};
   return module;
@@ -370,6 +395,32 @@ extern "C" BOOL WINAPI
 
   return ret;
 }
+
+extern "C" void WINAPI RtlExitUserProcess(NTSTATUS exit_status);
+
+auto& GetRtlExitUserProcessDetour() noexcept
+{
+  static std::unique_ptr<hadesmem::PatchDetour<decltype(&RtlExitUserProcess)>>
+    detour;
+  return detour;
+}
+
+extern "C" void WINAPI RtlExitUserProcessDetour(
+  hadesmem::PatchDetourBase* detour, NTSTATUS exit_status) noexcept
+{
+  hadesmem::detail::LastErrorPreserver last_error_preserver;
+
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%ld].", exit_status);
+
+  auto const& callbacks = GetOnRtlExitUserProcessCallbacks();
+  callbacks.Run(exit_status);
+
+  auto const rtl_exit_user_process =
+    detour->GetTrampolineT<decltype(&RtlExitUserProcess)>();
+  last_error_preserver.Revert();
+  rtl_exit_user_process(exit_status);
+  last_error_preserver.Update();
+}
 }
 
 namespace hadesmem
@@ -394,6 +445,8 @@ void InitializeProcess()
                                     DetourKernelBaseForProcess,
                                     UndetourKernelBaseForProcess,
                                     GetKernelBaseModule);
+  helper.InitializeSupportForModule(
+    L"NTDLL", DetourNtdllForProcess, UndetourNtdllForProcess, GetNtdllModule);
 }
 
 void DetourKernelBaseForProcess(HMODULE base)
@@ -419,6 +472,33 @@ void UndetourKernelBaseForProcess(bool remove)
   {
     UndetourFunc(
       L"CreateProcessInternalW", GetCreateProcessInternalWDetour(), remove);
+
+    module = std::make_pair(nullptr, 0);
+  }
+}
+
+void DetourNtdllForProcess(HMODULE base)
+{
+  auto const& process = GetThisProcess();
+  auto& module = GetNtdllModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonDetourModule(process, L"ntdll", base, module))
+  {
+    DetourFunc(process,
+               base,
+               "RtlExitUserProcess",
+               GetRtlExitUserProcessDetour(),
+               RtlExitUserProcessDetour);
+  }
+}
+
+void UndetourNtdllForProcess(bool remove)
+{
+  auto& module = GetNtdllModule();
+  auto& helper = GetHelperInterface();
+  if (helper.CommonUndetourModule(L"ntdll", module))
+  {
+    UndetourFunc(L"RtlExitUserProcess", GetRtlExitUserProcessDetour(), remove);
 
     module = std::make_pair(nullptr, 0);
   }

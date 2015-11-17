@@ -414,6 +414,13 @@ void UseAllStatics()
     process.RegisterOnCreateProcessInternalW(on_create_process_internal_w);
   process.UnregisterOnCreateProcessInternalW(on_create_process_internal_w_id);
 
+  auto const on_rtl_exit_user_process = [](NTSTATUS)
+  {
+  };
+  auto const on_rtl_exit_user_process_id =
+    process.RegisterOnRtlExitUserProcess(on_rtl_exit_user_process);
+  process.UnregisterOnRtlExitUserProcess(on_rtl_exit_user_process_id);
+
   auto const on_get_raw_input_buffer = [](PRAWINPUT, PUINT, UINT, bool*, UINT*)
   {
   };
@@ -576,10 +583,12 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::InitializeCursor();
     hadesmem::cerberus::InitializeRawInput();
 
+    // TODO: Move this to the initialization functions?
     hadesmem::cerberus::DetourNtdllForModule(nullptr);
     hadesmem::cerberus::DetourNtdllForException(nullptr);
     hadesmem::cerberus::DetourKernelBaseForException(nullptr);
     hadesmem::cerberus::DetourKernelBaseForProcess(nullptr);
+    hadesmem::cerberus::DetourNtdllForProcess(nullptr);
     hadesmem::cerberus::DetourD3D9(nullptr);
     hadesmem::cerberus::DetourDXGI(nullptr);
     hadesmem::cerberus::DetourDirectInput8(nullptr);
@@ -627,6 +636,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     hadesmem::cerberus::UndetourNtdllForException(true);
     hadesmem::cerberus::UndetourKernelBaseForException(true);
     hadesmem::cerberus::UndetourKernelBaseForProcess(true);
+    hadesmem::cerberus::UndetourNtdllForProcess(true);
     hadesmem::cerberus::UndetourDXGI(true);
     hadesmem::cerberus::UndetourD3D9(true);
     hadesmem::cerberus::UndetourDirectInput8(true);
@@ -634,6 +644,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     hadesmem::cerberus::UndetourUser32ForRawInput(true);
     hadesmem::cerberus::UndetourUser32ForWindow(true);
     hadesmem::cerberus::UndetourOpenGL32(true);
+
+    // TODO: Cleanup GUI.
 
     hadesmem::cerberus::UnloadPlugins();
 

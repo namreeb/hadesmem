@@ -580,6 +580,9 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 // exit etc) because we could get called after the DirectX DLLs etc have already
 // unloaded, and we currently have no way to guarantee that we are called before
 // the unload so it's better to just leak than risk a crash.
+// TODO: We have a different solution for process exit, but what about module
+// unload? Now that we support dynamic injection, we need to support dynamic
+// free too, and that includes not leaking.
 void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
 {
   if (!GetAntTweakBarInitialized(api))
@@ -725,6 +728,9 @@ void InitializeAntTweakBar()
   render.RegisterOnCleanupGui(OnCleanupAntTweakBarGui);
   render.RegisterOnSetGuiVisibility(SetAllTweakBarVisibility);
 
+  // TODO: Is this really the right thing to do here? Should we be cleaning up
+  // the renderers instead? Does this belong in the renderer file along with the
+  // ExitProcess callback? etc.
   RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
 }

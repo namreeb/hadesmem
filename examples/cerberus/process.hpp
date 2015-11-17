@@ -30,6 +30,8 @@ typedef void
                                    bool* handled,
                                    BOOL* retval);
 
+typedef void OnRtlExitUserProcessCallback(NTSTATUS exit_code);
+
 class ProcessInterface
 {
 public:
@@ -41,6 +43,11 @@ public:
     std::function<OnCreateProcessInternalWCallback> const& callback) = 0;
 
   virtual void UnregisterOnCreateProcessInternalW(std::size_t id) = 0;
+
+  virtual std::size_t RegisterOnRtlExitUserProcess(
+    std::function<OnRtlExitUserProcessCallback> const& callback) = 0;
+
+  virtual void UnregisterOnRtlExitUserProcess(std::size_t id) = 0;
 };
 
 ProcessInterface& GetProcessInterface() noexcept;
@@ -50,6 +57,10 @@ void InitializeProcess();
 void DetourKernelBaseForProcess(HMODULE base);
 
 void UndetourKernelBaseForProcess(bool remove);
+
+void DetourNtdllForProcess(HMODULE base);
+
+void UndetourNtdllForProcess(bool remove);
 
 bool& GetDisableCreateProcessInternalWHook() noexcept;
 }
