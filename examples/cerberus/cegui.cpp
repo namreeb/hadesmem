@@ -13,6 +13,9 @@
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/Direct3D9/Renderer.h>
+#include <CEGUI/RendererModules/Direct3D10/Renderer.h>
+#include <CEGUI/RendererModules/Direct3D11/Renderer.h>
+#include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include "callbacks.hpp"
@@ -29,9 +32,14 @@
 
 // TODO: Fix to load skins etc from correct full path rather than game dir.
 
-// TODO: Add a basic console.
+// TODO: Add a basic console which exposes at the very least plugin load/unload
+// functionality and memory dumping.
 
 // TODO: Fix thread safety of initialization etc.
+
+// TODO: Support putting all the CEGUI DLLs and their dependencies in a
+// different DLL. Will require special support in the injector. Probably good to
+// build it in to the proposed --cerberus flag.
 
 namespace
 {
@@ -92,8 +100,8 @@ void GameConsoleWindow::RegisterHandlers()
 
 bool GameConsoleWindow::HandleTextSubmitted(CEGUI::EventArgs const& e)
 {
-  CEGUI::String Msg = console_wnd_->getChild("Editbox")->getText();
-  ParseText(Msg);
+  CEGUI::String const msg = console_wnd_->getChild("Editbox")->getText();
+  ParseText(msg);
   CEGUI::Window* edit_box = console_wnd_->getChild("Editbox");
   edit_box->setText("");
   edit_box->activate();
@@ -113,23 +121,23 @@ bool GameConsoleWindow::HandleSendButtonPressed(CEGUI::EventArgs const& e)
 
 void GameConsoleWindow::ParseText(CEGUI::String const& msg)
 {
-  std::string inString = msg.c_str();
-  if (inString.length() >= 1)
+  std::string msg_str = msg.c_str();
+  if (msg_str.length() >= 1)
   {
-    if (inString.at(0) == '/')
+    if (msg_str.at(0) == '/')
     {
-      std::string::size_type commandEnd = inString.find(" ", 1);
-      std::string command = inString.substr(1, commandEnd - 1);
-      std::string commandArgs =
-        inString.substr(commandEnd + 1, inString.length() - (commandEnd + 1));
-      for (std::string::size_type i = 0; i < command.length(); i++)
+      std::string::size_type command_end = msg_str.find(" ", 1);
+      std::string command = msg_str.substr(1, command_end - 1);
+      std::string command_args =
+        msg_str.substr(command_end + 1, msg_str.size() - (command_end + 1));
+      for (std::string::size_type i = 0; i < command.size(); i++)
       {
         command[i] = tolower(command[i]);
       }
 
       if (command == "say")
       {
-        std::string outString = "You:" + inString;
+        std::string outString = "You:" + msg_str;
         OutputText(outString);
       }
       else if (command == "quit")
@@ -142,14 +150,14 @@ void GameConsoleWindow::ParseText(CEGUI::String const& msg)
       }
       else
       {
-        std::string outString = "<" + inString + "> is an invalid command.";
+        std::string outString = "<" + msg_str + "> is an invalid command.";
         auto const red = CEGUI::Colour(1.0f, 0.0f, 0.0f);
         OutputText(outString, red);
       }
     }
     else
     {
-      OutputText(inString);
+      OutputText(msg_str);
     }
   }
 }
@@ -299,6 +307,8 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
 
   HADESMEM_DETAIL_TRACE_A("Initializing Cegui.");
 
+  ID3D11DeviceContext* device_context = nullptr;
+
   switch (api)
   {
   case hadesmem::cerberus::RenderApi::kD3D9:
@@ -306,16 +316,16 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
       static_cast<IDirect3DDevice9*>(device));
     break;
   case hadesmem::cerberus::RenderApi::kD3D10:
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Temporarily unsupported render API."});
+    CEGUI::Direct3D10Renderer::bootstrapSystem(
+      static_cast<ID3D10Device*>(device));
     break;
   case hadesmem::cerberus::RenderApi::kD3D11:
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Temporarily unsupported render API."});
+    static_cast<ID3D11Device*>(device)->GetImmediateContext(&device_context);
+    CEGUI::Direct3D11Renderer::bootstrapSystem(
+      static_cast<ID3D11Device*>(device), device_context);
     break;
   case hadesmem::cerberus::RenderApi::kOpenGL32:
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Temporarily unsupported render API."});
+    CEGUI::OpenGLRenderer::bootstrapSystem().enableExtraStateSettings(true);
     break;
   default:
     HADESMEM_DETAIL_ASSERT(false);
@@ -372,10 +382,10 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
   CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
 
   CEGUI::SchemeManager::getSingletonPtr()->createFromFile("TaharezLook.scheme");
-  CEGUI::Font& defaultFont =
+  CEGUI::Font& default_font =
     CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
   CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont(
-    &defaultFont);
+    &default_font);
 
   CEGUI::System::getSingleton().notifyDisplaySizeChanged(
     CEGUI::Sizef(wnd_rect.right, wnd_rect.bottom));
@@ -414,6 +424,19 @@ void SetAllCeguiVisibility(bool visible, bool /*old_visible*/)
   console->SetVisible(visible);
 }
 
+UINT VirtualKeyToScanCode(WPARAM wParam, LPARAM lParam)
+{
+  if (HIWORD(lParam) & 0x0F00)
+  {
+    UINT scancode = MapVirtualKeyW(wParam, 0);
+    return scancode | 0x80;
+  }
+  else
+  {
+    return HIWORD(lParam) & 0x00FF;
+  }
+}
+
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
   if (!CeguiInitializedAny())
@@ -429,6 +452,16 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_CHAR:
       CEGUI::System::getSingleton().getDefaultGUIContext().injectChar(
         (CEGUI::utf32)wparam);
+      break;
+
+    case WM_KEYDOWN:
+      CEGUI::System::getSingleton().getDefaultGUIContext().injectKeyDown(
+        (CEGUI::Key::Scan)VirtualKeyToScanCode(wparam, lparam));
+      break;
+
+    case WM_KEYUP:
+      CEGUI::System::getSingleton().getDefaultGUIContext().injectKeyUp(
+        (CEGUI::Key::Scan)VirtualKeyToScanCode(wparam, lparam));
       break;
 
     case WM_MOUSEMOVE:

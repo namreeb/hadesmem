@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\SteamLibrary\SteamApps\common\Worms Clan Wars\WormsClanWars.exe" --inject --steam-app-id 233840 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "G:\SteamLibrary\steamapps\common\Worms Clan Wars\WormsClanWars.exe" --inject --steam-app-id 233840 --export Load --add-path --path-resolution --module cerberus.dll
