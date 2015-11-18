@@ -38,8 +38,8 @@
 // TODO: Fix thread safety of initialization etc.
 
 // TODO: Support putting all the CEGUI DLLs and their dependencies in a
-// different DLL. Will require special support in the injector. Probably good to
-// build it in to the proposed --cerberus flag.
+// different directory (e.g. deps). Will require special support in the
+// injector. Probably good to build it in to the proposed --cerberus flag.
 
 namespace
 {
