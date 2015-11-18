@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<HadesMem>
-  <Cerberus GUI="AntTweakBar">
-    <Plugin Path="cxexample.dll"/>
-  </Cerberus>
-</HadesMem>
