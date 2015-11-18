@@ -594,11 +594,11 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   {
     auto const device = static_cast<ID3D11Device*>(typed_device.second);
 
-    HandleOnFrameD3D11(swap_chain, device);
-
     ID3D11DeviceContext* device_context = nullptr;
     device->GetImmediateContext(&device_context);
     hadesmem::cerberus::D3D11StateBlock state_block{device_context};
+
+    HandleOnFrameD3D11(swap_chain, device);
 
     device_context->CSSetShader(nullptr, nullptr, 0);
     device_context->DSSetShader(nullptr, nullptr, 0);
@@ -676,6 +676,10 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
 
     HandleOnFrameD3D10(swap_chain, device);
 
+    // TODO: Add state block.
+
+    // TODO: Set correct render state.
+
     OnFrameGeneric(typed_device.first, typed_device.second);
   }
   else
@@ -694,11 +698,62 @@ void OnResizeDXGI(IDXGISwapChain* swap_chain, UINT width, UINT height)
   OnResizeGeneric(typed_device.first, typed_device.second, width, height);
 }
 
+void SetDefaultRenderStateD3D9(IDirect3DDevice9* device)
+{
+  device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+  device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+  device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+  device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+  device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+  device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+  device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+  device->SetRenderState(D3DRS_CLIPPLANEENABLE, 0);
+  device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+  device->SetRenderState(D3DRS_LASTPIXEL, TRUE);
+  device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+  device->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+  device->SetRenderState(D3DRS_COLORWRITEENABLE, 0x0000000F);
+  device->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+  device->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
+  device->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, FALSE);
+
+  device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+  device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+  device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+  device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+  device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+  device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+  device->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+  device->SetTextureStageState(
+    0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+
+  device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+  device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+  device->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+  device->SetSamplerState(0, D3DSAMP_BORDERCOLOR, 0);
+  device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+  device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+  device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+  device->SetSamplerState(0, D3DSAMP_MIPMAPLODBIAS, 0);
+  device->SetSamplerState(0, D3DSAMP_MAXMIPLEVEL, 0);
+  device->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
+  device->SetSamplerState(0, D3DSAMP_SRGBTEXTURE, 0);
+  device->SetSamplerState(0, D3DSAMP_ELEMENTINDEX, 0);
+  device->SetSamplerState(0, D3DSAMP_DMAPOFFSET, 0);
+
+  device->SetVertexShader(nullptr);
+  device->SetPixelShader(nullptr);
+}
+
 void OnFrameD3D9(IDirect3DDevice9* device)
 {
-  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleOnFrameD3D9.");
-
-  HandleOnFrameD3D9(device);
+  auto const coop_level = device->TestCooperativeLevel();
+  if (FAILED(coop_level))
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      "TestCooperativeLevel failed. Skipping rendering for this frame.");
+    return;
+  }
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DDevice9::CreateStateBlock.");
 
@@ -711,13 +766,13 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   }
   hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
 
-  HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DStateBlock9::Capture.");
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleOnFrameD3D9.");
 
-  if (FAILED(state_block->Capture()))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "IDirect3DStateBlock9::Capture failed."});
-  }
+  HandleOnFrameD3D9(device);
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling SetDefaultRenderStateD3D9.");
+
+  SetDefaultRenderStateD3D9(device);
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Calling OnFrameGeneric.");
 
@@ -741,10 +796,8 @@ void OnFrameOpenGL32(HDC device)
   OnFrameGeneric(hadesmem::cerberus::RenderApi::kOpenGL32, device);
 }
 
-// TODO: Is this wrong? We are currently getting called pre-reset. We should
-// probably clean up here but not initialize until after? Should we just rely on
-// an OnFrame event to reinitialize us? Or should we add a post-reset callback?
-// Need to investigate more...
+// TODO: Actually handle pre-reset and post-reset properly. Right now we're
+// getting called pre-reset and relying on an OnFrame event to reinitalize us.
 void OnResetD3D9(IDirect3DDevice9* device,
                  D3DPRESENT_PARAMETERS* /*presentation_parameters*/)
 {
@@ -753,9 +806,20 @@ void OnResetD3D9(IDirect3DDevice9* device,
   {
     HADESMEM_DETAIL_TRACE_A("Handling D3D9 device reset.");
 
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
     CleanupGui(hadesmem::cerberus::RenderApi::kD3D9);
 
-    InitializeGui(hadesmem::cerberus::RenderApi::kD3D9, render_info.device_);
+    if (render_info.wnd_hooked_)
+    {
+      HADESMEM_DETAIL_TRACE_A("Unhooking window.");
+      hadesmem::cerberus::HandleWindowChange(nullptr);
+      render_info.wnd_hooked_ = false;
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Clearing current device.");
+
+    render_info.device_ = nullptr;
   }
   else
   {

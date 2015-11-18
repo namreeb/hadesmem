@@ -134,9 +134,10 @@ void Config::LoadImpl(pugi::xml_document const& doc)
     HADESMEM_DETAIL_TRACE_A("GWEN enabled.");
     gwen_enabled_ = true;
   }
-  else
+  else if (hadesmem::detail::ToUpperOrdinal(gui) == L"CEGUI")
   {
-    ant_tweak_bar_enabled_ = false;
+    HADESMEM_DETAIL_TRACE_A("CEGUI enabled.");
+    cegui_enabled_ = true;
   }
 }
 }

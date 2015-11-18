@@ -20,6 +20,7 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
+#include "cegui.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -182,6 +183,7 @@ void UseAllStatics()
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   auto& gwen = hadesmem::cerberus::GetGwenInterface();
+  auto& cegui = hadesmem::cerberus::GetCeguiInterface();
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
@@ -273,6 +275,18 @@ void UseAllStatics()
   };
   auto const on_gwen_cleanup_id = gwen.RegisterOnCleanup(on_gwen_cleanup);
   gwen.UnregisterOnCleanup(on_gwen_cleanup_id);
+
+  auto const on_cegui_init = [](hadesmem::cerberus::CeguiInterface*)
+  {
+  };
+  auto const on_cegui_init_id = cegui.RegisterOnInitialize(on_cegui_init);
+  cegui.UnregisterOnInitialize(on_cegui_init_id);
+
+  auto const on_cegui_cleanup = [](hadesmem::cerberus::CeguiInterface*)
+  {
+  };
+  auto const on_cegui_cleanup_id = cegui.RegisterOnCleanup(on_cegui_cleanup);
+  cegui.UnregisterOnCleanup(on_cegui_cleanup_id);
 
   auto const on_frame = [](hadesmem::cerberus::RenderApi, void*)
   {
@@ -546,6 +560,11 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     if (config.IsGwenEnabled())
     {
       hadesmem::cerberus::InitializeGwen();
+    }
+
+    if (config.IsCeguiEnabled())
+    {
+      hadesmem::cerberus::InitializeCegui();
     }
 
     // The order of some of these calls is important. E.g. The GUI libs

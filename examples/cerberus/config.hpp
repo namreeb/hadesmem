@@ -43,6 +43,11 @@ public:
     return gwen_enabled_;
   }
 
+  bool IsCeguiEnabled() const
+  {
+    return cegui_enabled_;
+  }
+
   std::vector<std::wstring> GetBlockedProcesses() const
   {
     return blocked_processes_;
@@ -54,8 +59,9 @@ private:
   void LoadImpl(pugi::xml_document const& doc);
 
   std::vector<Plugin> plugins_;
-  bool ant_tweak_bar_enabled_{true};
+  bool ant_tweak_bar_enabled_{};
   bool gwen_enabled_{};
+  bool cegui_enabled_{};
   std::vector<std::wstring> blocked_processes_;
 };
 

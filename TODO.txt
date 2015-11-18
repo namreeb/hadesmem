@@ -1,5 +1,6 @@
 * All the TODOs in the code.
 * Documentation! Both external, and also better commenting in the code (but don't 'comment the code', comment the decisions instead).
+* Support both header-only and compiled modes. Requires splitting hpp into hpp and ipp (and the hpp includes the ipp in header only mode), and then an optional cpp which just includes the hpp and ipp.
 * Move to CMake.
 * Investigate re-adding Intel C++ and Clang support. GCC probably not worth the time investment at this point.
 * Add manifest to all binaries with supportedOS etc. set.
