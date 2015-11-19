@@ -114,7 +114,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86;$(CEGUI_ROOT_X86)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>shlwapi.lib;dxguid.lib;CEGUIBase-0_d.lib;CEGUICommonDialogs-0_d.lib;CEGUICoreWindowRendererSet_d.lib;CEGUIDirect3D9Renderer-0_d.lib;CEGUIDirect3D10Renderer-0_d.lib;CEGUIDirect3D11Renderer-0_d.lib;CEGUIExpatParser_d.lib;CEGUILuaScriptModule-0_d.lib;CEGUIOpenGLRenderer-0_d.lib;CEGUISILLYImageCodec_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x86\ md $(SolutionDir)..\..\dist\debug\x86\
@@ -141,7 +141,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64;$(CEGUI_ROOT_X64)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>shlwapi.lib;dxguid.lib;CEGUIBase-0_d.lib;CEGUICommonDialogs-0_d.lib;CEGUICoreWindowRendererSet_d.lib;CEGUIDirect3D9Renderer-0_d.lib;CEGUIDirect3D10Renderer-0_d.lib;CEGUIDirect3D11Renderer-0_d.lib;CEGUIExpatParser_d.lib;CEGUILuaScriptModule-0_d.lib;CEGUIOpenGLRenderer-0_d.lib;CEGUISILLYImageCodec_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)..\..\dist\debug\x64\ md $(SolutionDir)..\..\dist\debug\x64\

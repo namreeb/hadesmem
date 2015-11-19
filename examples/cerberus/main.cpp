@@ -184,7 +184,9 @@ void UseAllStatics()
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   auto& gwen = hadesmem::cerberus::GetGwenInterface();
+#if 0
   auto& cegui = hadesmem::cerberus::GetCeguiInterface();
+#endif
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
@@ -277,6 +279,7 @@ void UseAllStatics()
   auto const on_gwen_cleanup_id = gwen.RegisterOnCleanup(on_gwen_cleanup);
   gwen.UnregisterOnCleanup(on_gwen_cleanup_id);
 
+#if 0
   auto const on_cegui_init = [](hadesmem::cerberus::CeguiInterface*)
   {
   };
@@ -288,6 +291,7 @@ void UseAllStatics()
   };
   auto const on_cegui_cleanup_id = cegui.RegisterOnCleanup(on_cegui_cleanup);
   cegui.UnregisterOnCleanup(on_cegui_cleanup_id);
+#endif
 
   auto const on_frame = [](hadesmem::cerberus::RenderApi, void*)
   {
@@ -565,11 +569,15 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
       hadesmem::cerberus::InitializeGwen();
     }
 
+// TODO: Re-enable this once we fix the loading of dependencies. Dumping
+// everything in the root dist dir is nasty...
+#if 0
     if (config.IsCeguiEnabled())
     {
       HADESMEM_DETAIL_TRACE_A("Initializing CEGUI support.");
       hadesmem::cerberus::InitializeCegui();
     }
+#endif
 
     // The order of some of these calls is important. E.g. The GUI libs
     // are initialized before the renderer, and the renderer is initialized

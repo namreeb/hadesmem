@@ -1,6 +1,8 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
+#if 0
+
 #include "cegui.hpp"
 
 #include <memory>
@@ -30,6 +32,30 @@
 #include "plugin.hpp"
 #include "render.hpp"
 #include "window.hpp"
+
+#if defined(NDEBUG)
+#pragma comment(lib, "CEGUIBase-0.lib")
+#pragma comment(lib, "CEGUICommonDialogs-0.lib")
+#pragma comment(lib, "CEGUICoreWindowRendererSet.lib")
+#pragma comment(lib, "CEGUIDirect3D9Renderer-0.lib")
+#pragma comment(lib, "CEGUIDirect3D10Renderer-0.lib")
+#pragma comment(lib, "CEGUIDirect3D11Renderer-0.lib")
+#pragma comment(lib, "CEGUIExpatParser.lib")
+#pragma comment(lib, "CEGUILuaScriptModule-0.lib")
+#pragma comment(lib, "CEGUIOpenGLRenderer-0.lib")
+#pragma comment(lib, "CEGUISILLYImageCodec.lib")
+#else
+#pragma comment(lib, "CEGUIBase-0_d.lib")
+#pragma comment(lib, "CEGUICommonDialogs-0_d.lib")
+#pragma comment(lib, "CEGUICoreWindowRendererSet_d.lib")
+#pragma comment(lib, "CEGUIDirect3D9Renderer-0_d.lib")
+#pragma comment(lib, "CEGUIDirect3D10Renderer-0_d.lib")
+#pragma comment(lib, "CEGUIDirect3D11Renderer-0_d.lib")
+#pragma comment(lib, "CEGUIExpatParser_d.lib")
+#pragma comment(lib, "CEGUILuaScriptModule-0_d.lib")
+#pragma comment(lib, "CEGUIOpenGLRenderer-0_d.lib")
+#pragma comment(lib, "CEGUISILLYImageCodec_d.lib")
+#endif
 
 // TODO: Fix this to actually support multiple devices, OpenGL, expose to
 // plugins, multiple simultaneous renderers (e.g. D3D10 and D3D11 at the same
@@ -392,6 +418,8 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
     CEGUI::DefaultResourceProvider* rp =
       static_cast<CEGUI::DefaultResourceProvider*>(
         CEGUI::System::getSingleton().getResourceProvider());
+    // TODO: Don't do this. Use the default directory layout including 
+    // subdirectories...
     auto const cegui_path =
       hadesmem::detail::WideCharToMultiByte(hadesmem::detail::CombinePath(
         hadesmem::detail::GetSelfDirPath(), L"cegui"));
@@ -635,3 +663,5 @@ void InitializeCegui()
 }
 }
 }
+
+#endif
