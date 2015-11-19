@@ -5,11 +5,16 @@
 
 #include <memory>
 
+#include <windows.h>
+#include <windowsx.h>
+
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/smart_handle.hpp>
 
+// TODO: Define NOMINMAX in project settings. CEGUI undefines it and warns.
+// Caused by Windows headers.
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/Direct3D9/Renderer.h>
@@ -43,6 +48,7 @@
 
 namespace
 {
+// TODO: Put renderer name in console title.
 class GameConsoleWindow
 {
 public:
@@ -297,6 +303,25 @@ public:
   }
 };
 
+void OnCleanupCeguiGui(hadesmem::cerberus::RenderApi api)
+{
+  if (!GetCeguiInitialized(api))
+  {
+    return;
+  }
+
+  HADESMEM_DETAIL_TRACE_A("Calling Cegui cleanup callbacks.");
+
+  auto& callbacks = GetOnCeguiCleanupCallbacks();
+  callbacks.Run(&hadesmem::cerberus::GetCeguiInterface());
+
+  HADESMEM_DETAIL_TRACE_A("Cleaning up Cegui.");
+
+  CEGUI::System::getSingleton().destroy();
+
+  SetCeguiInitialized(api, false);
+}
+
 void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
 {
   if (CeguiInitializedAny())
@@ -306,8 +331,6 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
   }
 
   HADESMEM_DETAIL_TRACE_A("Initializing Cegui.");
-
-  ID3D11DeviceContext* device_context = nullptr;
 
   switch (api)
   {
@@ -320,10 +343,13 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
       static_cast<ID3D10Device*>(device));
     break;
   case hadesmem::cerberus::RenderApi::kD3D11:
+  {
+    ID3D11DeviceContext* device_context = nullptr;
     static_cast<ID3D11Device*>(device)->GetImmediateContext(&device_context);
     CEGUI::Direct3D11Renderer::bootstrapSystem(
       static_cast<ID3D11Device*>(device), device_context);
     break;
+  }
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     CEGUI::OpenGLRenderer::bootstrapSystem().enableExtraStateSettings(true);
     break;
@@ -361,37 +387,47 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Window size is %ldx%ld.", wnd_rect.right, wnd_rect.bottom);
 
-  CEGUI::DefaultResourceProvider* rp =
-    static_cast<CEGUI::DefaultResourceProvider*>(
-      CEGUI::System::getSingleton().getResourceProvider());
-  auto const cegui_path =
-    hadesmem::detail::WideCharToMultiByte(hadesmem::detail::CombinePath(
-      hadesmem::detail::GetSelfDirPath(), L"cegui"));
-  rp->setResourceGroupDirectory("schemes", cegui_path);
-  rp->setResourceGroupDirectory("imagesets", cegui_path);
-  rp->setResourceGroupDirectory("fonts", cegui_path);
-  rp->setResourceGroupDirectory("layouts", cegui_path);
-  rp->setResourceGroupDirectory("looknfeels", cegui_path);
-  rp->setResourceGroupDirectory("lua_scripts", cegui_path);
+  try
+  {
+    CEGUI::DefaultResourceProvider* rp =
+      static_cast<CEGUI::DefaultResourceProvider*>(
+        CEGUI::System::getSingleton().getResourceProvider());
+    auto const cegui_path =
+      hadesmem::detail::WideCharToMultiByte(hadesmem::detail::CombinePath(
+        hadesmem::detail::GetSelfDirPath(), L"cegui"));
+    rp->setResourceGroupDirectory("schemes", cegui_path);
+    rp->setResourceGroupDirectory("imagesets", cegui_path);
+    rp->setResourceGroupDirectory("fonts", cegui_path);
+    rp->setResourceGroupDirectory("layouts", cegui_path);
+    rp->setResourceGroupDirectory("looknfeels", cegui_path);
+    rp->setResourceGroupDirectory("lua_scripts", cegui_path);
 
-  CEGUI::ImageManager::setImagesetDefaultResourceGroup("imagesets");
-  CEGUI::Font::setDefaultResourceGroup("fonts");
-  CEGUI::Scheme::setDefaultResourceGroup("schemes");
-  CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
-  CEGUI::WindowManager::setDefaultResourceGroup("layouts");
-  CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
+    CEGUI::ImageManager::setImagesetDefaultResourceGroup("imagesets");
+    CEGUI::Font::setDefaultResourceGroup("fonts");
+    CEGUI::Scheme::setDefaultResourceGroup("schemes");
+    CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
+    CEGUI::WindowManager::setDefaultResourceGroup("layouts");
+    CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
 
-  CEGUI::SchemeManager::getSingletonPtr()->createFromFile("TaharezLook.scheme");
-  CEGUI::Font& default_font =
-    CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
-  CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont(
-    &default_font);
+    CEGUI::SchemeManager::getSingletonPtr()->createFromFile(
+      "TaharezLook.scheme");
+    CEGUI::Font& default_font =
+      CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
+    CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont(
+      &default_font);
 
-  CEGUI::System::getSingleton().notifyDisplaySizeChanged(
-    CEGUI::Sizef(wnd_rect.right, wnd_rect.bottom));
+    CEGUI::System::getSingleton().notifyDisplaySizeChanged(
+      CEGUI::Sizef(wnd_rect.right, wnd_rect.bottom));
 
-  auto& console = GetGameConsoleWindow();
-  console = std::make_unique<GameConsoleWindow>();
+    auto& console = GetGameConsoleWindow();
+    console = std::make_unique<GameConsoleWindow>();
+  }
+  catch (...)
+  {
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
+    OnCleanupCeguiGui(api);
+  }
 
   HADESMEM_DETAIL_TRACE_A("Calling Cegui initialization callbacks.");
 
@@ -399,29 +435,12 @@ void OnInitializeCeguiGui(hadesmem::cerberus::RenderApi api, void* device)
   callbacks.Run(&hadesmem::cerberus::GetCeguiInterface());
 }
 
-void OnCleanupCeguiGui(hadesmem::cerberus::RenderApi api)
-{
-  if (!GetCeguiInitialized(api))
-  {
-    return;
-  }
-
-  HADESMEM_DETAIL_TRACE_A("Calling Cegui cleanup callbacks.");
-
-  auto& callbacks = GetOnCeguiCleanupCallbacks();
-  callbacks.Run(&hadesmem::cerberus::GetCeguiInterface());
-
-  HADESMEM_DETAIL_TRACE_A("Cleaning up Cegui.");
-
-  CEGUI::System::getSingleton().destroy();
-
-  SetCeguiInitialized(api, false);
-}
-
 void SetAllCeguiVisibility(bool visible, bool /*old_visible*/)
 {
-  auto& console = GetGameConsoleWindow();
-  console->SetVisible(visible);
+  if (auto& console = GetGameConsoleWindow())
+  {
+    console->SetVisible(visible);
+  }
 }
 
 UINT VirtualKeyToScanCode(WPARAM wParam, LPARAM lParam)
@@ -447,6 +466,13 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
   if (hwnd == window_interface.GetCurrentWindow())
   {
+    static auto last_input_time = ::GetTickCount64();
+
+    float const elapsed = ::GetTickCount64() - last_input_time;
+    CEGUI::System::getSingleton().injectTimePulse(elapsed);
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectTimePulse(
+      elapsed);
+
     switch (msg)
     {
     case WM_CHAR:
@@ -466,7 +492,7 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
     case WM_MOUSEMOVE:
       CEGUI::System::getSingleton().getDefaultGUIContext().injectMousePosition(
-        (float)(LOWORD(lparam)), (float)(HIWORD(lparam)));
+        GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
       break;
 
     case WM_LBUTTONDOWN:
@@ -505,8 +531,13 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_MOUSEWHEEL:
       CEGUI::System::getSingleton()
         .getDefaultGUIContext()
-        .injectMouseWheelChange(static_cast<float>((short)HIWORD(wparam)) /
-                                static_cast<float>(120));
+        .injectMouseWheelChange(GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA);
+      break;
+
+    // TODO: Should probably be using the viewport instead?
+    case WM_SIZE:
+      CEGUI::System::getSingleton().notifyDisplaySizeChanged(
+        CEGUI::Sizef(LOWORD(lparam), HIWORD(lparam)));
       break;
     }
   }

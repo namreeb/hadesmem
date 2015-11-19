@@ -22,6 +22,7 @@
 #include <hadesmem/detail/str_conv.hpp>
 
 #include "callbacks.hpp"
+#include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "d3d11_state_block.hpp"
@@ -568,7 +569,7 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
   auto& callbacks = GetOnFrameCallbacks();
   callbacks.Run(api, device);
 
-  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleInputQueue callbacks.");
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleInputQueue.");
 
   hadesmem::cerberus::HandleInputQueue();
 

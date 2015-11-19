@@ -1,11 +1,10 @@
 <?xml version="1.0" ?>
- 
 <GUILayout version="4">
     <Window name="Console" type="TaharezLook/FrameWindow">
         <Property name="AlwaysOnTop" value="True" />
         <Property name="MinSize" value="{{0.2,0},{0.2,0}}" />
         <Property name="MaxSize" value="{{0.8,0},{0.8,0}}" />
-        <Property name="Position" value="{{0.5,0},{0.5,0}}" />
+        <Property name="Position" value="{{0.01,0},{0.01,0}}" />
         <Property name="Size" value="{{0.5,0},{0.45,0}}" />
         <Property name="Text" value="Console" />
         <Property name="CloseButtonEnabled" value="False" />

@@ -113,7 +113,7 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
 {
   hadesmem::detail::LastErrorPreserver last_error_preserver;
 
-  HADESMEM_DETAIL_TRACE_FORMAT_A(
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
     "Args: [%lu] [%p].", first_handler, vectored_handler);
 
   auto const& callbacks = GetOnRtlAddVectoredExceptionHandlerCallbacks();
@@ -133,7 +133,8 @@ extern "C" PVOID WINAPI RtlAddVectoredExceptionHandlerDetour(
   auto const ret =
     rtl_add_vectored_exception_handler(first_handler, vectored_handler);
   last_error_preserver.Update();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%p].", ret);
+
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%p].", ret);
 
   return ret;
 }

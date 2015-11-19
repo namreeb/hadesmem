@@ -190,10 +190,13 @@ HRESULT WINAPI
     swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
   last_error_preserver.Update();
 
-  auto& callbacks = hadesmem::cerberus::GetOnResizeDXGICallbacks();
-  callbacks.Run(swap_chain, width, height);
+  HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
-  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Ret: [%ld].", ret);
+  if (SUCCEEDED(ret))
+  {
+    auto& callbacks = hadesmem::cerberus::GetOnResizeDXGICallbacks();
+    callbacks.Run(swap_chain, width, height);
+  }
 
   return ret;
 }

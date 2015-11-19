@@ -67,7 +67,8 @@
 // TODO: Create a WineDB style spreadsheet to track game/app compatibility.
 // Ensure we test in-game properly, not just at the menu, and that we test
 // everything properly (basic rendering, basic input, fullscreen and windowed,
-// changing resolution, changing input modes, etc.).
+// changing resolution, changing input modes, tabbing out and back in when GUI
+// is visible, etc.).
 
 // TODO: Hook NTDLL instead of USER32 where possible.
 
@@ -554,16 +555,19 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 
     if (config.IsAntTweakBarEnabled())
     {
+      HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar support.");
       hadesmem::cerberus::InitializeAntTweakBar();
     }
 
     if (config.IsGwenEnabled())
     {
+      HADESMEM_DETAIL_TRACE_A("Initializing GWEN support.");
       hadesmem::cerberus::InitializeGwen();
     }
 
     if (config.IsCeguiEnabled())
     {
+      HADESMEM_DETAIL_TRACE_A("Initializing CEGUI support.");
       hadesmem::cerberus::InitializeCegui();
     }
 
