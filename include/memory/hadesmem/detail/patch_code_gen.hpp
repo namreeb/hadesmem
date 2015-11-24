@@ -380,6 +380,8 @@ inline std::size_t
 }
 
 // TODO: Add frame pointer so we can unwind the stack while debugging?
+// TODO: Ensure we're correcty saving all registers/state. Currently 
+// we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate32(void* stub,
                                                void* get_orig_user_ptr_ptr_fn)
 {
@@ -417,6 +419,8 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
   return buf;
 }
 
+// TODO: Ensure we're correcty saving all registers/state. Currently 
+// we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate64(void* stub,
                                                void* get_orig_user_ptr_ptr_fn)
 {
