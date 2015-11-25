@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
-#if 0
+#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
 
 #include "cegui.hpp"
 

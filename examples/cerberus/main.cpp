@@ -184,7 +184,7 @@ void UseAllStatics()
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
   auto& gwen = hadesmem::cerberus::GetGwenInterface();
-#if 0
+#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
   auto& cegui = hadesmem::cerberus::GetCeguiInterface();
 #endif
   auto& window = hadesmem::cerberus::GetWindowInterface();
@@ -279,7 +279,7 @@ void UseAllStatics()
   auto const on_gwen_cleanup_id = gwen.RegisterOnCleanup(on_gwen_cleanup);
   gwen.UnregisterOnCleanup(on_gwen_cleanup_id);
 
-#if 0
+#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
   auto const on_cegui_init = [](hadesmem::cerberus::CeguiInterface*)
   {
   };
@@ -571,7 +571,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 
 // TODO: Re-enable this once we fix the loading of dependencies. Dumping
 // everything in the root dist dir is nasty...
-#if 0
+#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
     if (config.IsCeguiEnabled())
     {
       HADESMEM_DETAIL_TRACE_A("Initializing CEGUI support.");
