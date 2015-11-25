@@ -699,6 +699,7 @@ void OnResizeDXGI(IDXGISwapChain* swap_chain, UINT width, UINT height)
   OnResizeGeneric(typed_device.first, typed_device.second, width, height);
 }
 
+// TODO: Do something similar for DX11.
 void SetDefaultRenderStateD3D9(IDirect3DDevice9* device)
 {
   device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
