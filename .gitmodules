@@ -10,3 +10,6 @@
 [submodule "deps/udis86/udis86"]
 	path = deps/udis86/udis86
 	url = https://github.com/RaptorFactor/udis86
+[submodule "deps/imgui/imgui"]
+	path = deps/imgui/imgui
+	url = https://github.com/RaptorFactor/imgui

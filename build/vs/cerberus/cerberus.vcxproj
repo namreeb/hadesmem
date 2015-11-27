@@ -104,7 +104,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -131,7 +131,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
@@ -160,7 +160,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Comm
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -191,7 +191,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Co
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
@@ -251,6 +251,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\gwen\UnitTest.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\gwen\Window_.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\imgui.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\main.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\module.cpp" />
@@ -282,6 +283,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\hook_counter.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\hook_disabler.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\imgui.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\input.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\main.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\module.hpp" />
@@ -302,6 +304,9 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     </ProjectReference>
     <ProjectReference Include="..\gwen\gwen.vcxproj">
       <Project>{5772ae06-8667-440f-8006-c34c79a50a75}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\imgui\imgui.vcxproj">
+      <Project>{ef8ed613-b239-4362-9361-f7d7b018e269}</Project>
     </ProjectReference>
     <ProjectReference Include="..\pugixml\pugixml.vcxproj">
       <Project>{c206d7b5-dd0b-41c1-aa12-cb977762d762}</Project>

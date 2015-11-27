@@ -29,6 +29,7 @@
 #include "exception.hpp"
 #include "gwen.hpp"
 #include "helpers.hpp"
+#include "imgui.hpp"
 #include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
@@ -187,6 +188,7 @@ void UseAllStatics()
 #if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
   auto& cegui = hadesmem::cerberus::GetCeguiInterface();
 #endif
+  auto& imgui = hadesmem::cerberus::GetImguiInterface();
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
@@ -292,6 +294,18 @@ void UseAllStatics()
   auto const on_cegui_cleanup_id = cegui.RegisterOnCleanup(on_cegui_cleanup);
   cegui.UnregisterOnCleanup(on_cegui_cleanup_id);
 #endif
+
+  auto const on_imgui_init = [](hadesmem::cerberus::ImguiInterface*)
+  {
+  };
+  auto const on_imgui_init_id = imgui.RegisterOnInitialize(on_imgui_init);
+  imgui.UnregisterOnInitialize(on_imgui_init_id);
+
+  auto const on_imgui_cleanup = [](hadesmem::cerberus::ImguiInterface*)
+  {
+  };
+  auto const on_imgui_cleanup_id = imgui.RegisterOnCleanup(on_imgui_cleanup);
+  imgui.UnregisterOnCleanup(on_imgui_cleanup_id);
 
   auto const on_frame = [](hadesmem::cerberus::RenderApi, void*)
   {
@@ -578,6 +592,12 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
       hadesmem::cerberus::InitializeCegui();
     }
 #endif
+
+    if (config.IsImguiEnabled())
+    {
+      HADESMEM_DETAIL_TRACE_A("Initializing Imgui support.");
+      hadesmem::cerberus::InitializeImgui();
+    }
 
     // The order of some of these calls is important. E.g. The GUI libs
     // are initialized before the renderer, and the renderer is initialized

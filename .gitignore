@@ -156,3 +156,5 @@
 /build/vs/cerberus_helper/Release
 /build/vs/cerberus_helper/cerberus_helper.vcxproj.user
 /build/vs/.vs/hadesmem/v14/.suo
+/build/vs/imgui/Debug
+/build/vs/imgui/Release
