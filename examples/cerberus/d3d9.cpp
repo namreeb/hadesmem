@@ -617,7 +617,7 @@ void InitializeD3D9()
 {
   auto& helper = GetHelperInterface();
   helper.InitializeSupportForModule(
-    L"D3D9", DetourD3D9, UndetourD3D9, GetD3D9Module, false);
+    L"D3D9", DetourD3D9, UndetourD3D9, GetD3D9Module);
 }
 
 void DetourD3D9(HMODULE base)

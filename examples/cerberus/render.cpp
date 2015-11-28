@@ -94,6 +94,10 @@
 // TODO: Simplify and genericize rendering code, especially the stuff related to
 // the window hooking etc.
 
+// TODO: Rewrite this to utilize the assumption that there is only ever one
+// active 'device', because all GUI libs make that assumption anyway and it
+// would vastly simplifiy our code.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
