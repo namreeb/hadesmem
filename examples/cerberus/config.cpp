@@ -122,22 +122,15 @@ void Config::LoadImpl(pugi::xml_document const& doc)
   }
 
   // TODO: Find a better way to do this.
+  // TODO: Allow multiple GUIs to be enabled at the same time, bound to
+  // different hotkeys. Makes testing easier, and also allows people to develop
+  // for different GUI systems more easily.
   auto const gui =
     hadesmem::detail::pugixml::GetOptionalAttributeValue(cerberus_node, L"GUI");
   if (hadesmem::detail::ToUpperOrdinal(gui) == L"ANTTWEAKBAR")
   {
     HADESMEM_DETAIL_TRACE_A("AntTweakBar enabled.");
     ant_tweak_bar_enabled_ = true;
-  }
-  else if (hadesmem::detail::ToUpperOrdinal(gui) == L"GWEN")
-  {
-    HADESMEM_DETAIL_TRACE_A("GWEN enabled.");
-    gwen_enabled_ = true;
-  }
-  else if (hadesmem::detail::ToUpperOrdinal(gui) == L"CEGUI")
-  {
-    HADESMEM_DETAIL_TRACE_A("CEGUI enabled.");
-    cegui_enabled_ = true;
   }
   else if (hadesmem::detail::ToUpperOrdinal(gui) == L"IMGUI")
   {

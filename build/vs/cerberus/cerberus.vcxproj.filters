@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\gwen">
-      <UniqueIdentifier>{907e5cfa-7c73-4dcb-9a6c-e46ff3c43d1c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp">
@@ -46,9 +43,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp">
@@ -84,85 +78,7 @@
     <ClCompile Include="..\..\..\examples\cerberus\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ListBox.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\MenuStrip.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Numeric.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\PageControl.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ProgressBar.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Properties.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\RadioButton.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ScrollControl.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Slider.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\StatusBar.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TabControl.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TextBox.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TreeControl.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\UnitTest.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Button.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Checkbox.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\CollapsibleList.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ColorPicker.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ComboBox.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\CrossSplitter.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\GroupBox.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ImagePanel.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Label.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\LabelMultiline.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Window_.cpp">
-      <Filter>Source Files\gwen</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\examples\cerberus\render_helper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\cegui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\examples\cerberus\imgui.cpp">
@@ -209,9 +125,6 @@
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\examples\cerberus\gwen.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -252,9 +165,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\render_helper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\examples\cerberus\cegui.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\imgui.hpp">

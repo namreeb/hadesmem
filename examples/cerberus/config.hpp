@@ -38,16 +38,6 @@ public:
     return ant_tweak_bar_enabled_;
   }
 
-  bool IsGwenEnabled() const
-  {
-    return gwen_enabled_;
-  }
-
-  bool IsCeguiEnabled() const
-  {
-    return cegui_enabled_;
-  }
-
   bool IsImguiEnabled() const
   {
     return imgui_enabled_;
@@ -65,8 +55,6 @@ private:
 
   std::vector<Plugin> plugins_;
   bool ant_tweak_bar_enabled_{};
-  bool gwen_enabled_{};
-  bool cegui_enabled_{};
   bool imgui_enabled_{};
   std::vector<std::wstring> blocked_processes_;
 };

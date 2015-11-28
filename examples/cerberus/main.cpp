@@ -20,14 +20,12 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
-#include "cegui.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
-#include "gwen.hpp"
 #include "helpers.hpp"
 #include "imgui.hpp"
 #include "input.hpp"
@@ -184,10 +182,6 @@ void UseAllStatics()
   auto& dxgi = hadesmem::cerberus::GetDXGIInterface();
   auto& render = hadesmem::cerberus::GetRenderInterface();
   auto& ant_tweak_bar = hadesmem::cerberus::GetAntTweakBarInterface();
-  auto& gwen = hadesmem::cerberus::GetGwenInterface();
-#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
-  auto& cegui = hadesmem::cerberus::GetCeguiInterface();
-#endif
   auto& imgui = hadesmem::cerberus::GetImguiInterface();
   auto& window = hadesmem::cerberus::GetWindowInterface();
   auto& direct_input = hadesmem::cerberus::GetDirectInputInterface();
@@ -268,32 +262,6 @@ void UseAllStatics()
   };
   auto const on_tw_cleanup_id = ant_tweak_bar.RegisterOnCleanup(on_tw_cleanup);
   ant_tweak_bar.UnregisterOnCleanup(on_tw_cleanup_id);
-
-  auto const on_gwen_init = [](hadesmem::cerberus::GwenInterface*)
-  {
-  };
-  auto const on_gwen_init_id = gwen.RegisterOnInitialize(on_gwen_init);
-  gwen.UnregisterOnInitialize(on_gwen_init_id);
-
-  auto const on_gwen_cleanup = [](hadesmem::cerberus::GwenInterface*)
-  {
-  };
-  auto const on_gwen_cleanup_id = gwen.RegisterOnCleanup(on_gwen_cleanup);
-  gwen.UnregisterOnCleanup(on_gwen_cleanup_id);
-
-#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
-  auto const on_cegui_init = [](hadesmem::cerberus::CeguiInterface*)
-  {
-  };
-  auto const on_cegui_init_id = cegui.RegisterOnInitialize(on_cegui_init);
-  cegui.UnregisterOnInitialize(on_cegui_init_id);
-
-  auto const on_cegui_cleanup = [](hadesmem::cerberus::CeguiInterface*)
-  {
-  };
-  auto const on_cegui_cleanup_id = cegui.RegisterOnCleanup(on_cegui_cleanup);
-  cegui.UnregisterOnCleanup(on_cegui_cleanup_id);
-#endif
 
   auto const on_imgui_init = [](hadesmem::cerberus::ImguiInterface*)
   {
@@ -576,22 +544,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
       HADESMEM_DETAIL_TRACE_A("Initializing AntTweakBar support.");
       hadesmem::cerberus::InitializeAntTweakBar();
     }
-
-    if (config.IsGwenEnabled())
-    {
-      HADESMEM_DETAIL_TRACE_A("Initializing GWEN support.");
-      hadesmem::cerberus::InitializeGwen();
-    }
-
-// TODO: Re-enable this once we fix the loading of dependencies. Dumping
-// everything in the root dist dir is nasty...
-#if defined(HADESMEM_DETAIL_ENABLE_CEGUI)
-    if (config.IsCeguiEnabled())
-    {
-      HADESMEM_DETAIL_TRACE_A("Initializing CEGUI support.");
-      hadesmem::cerberus::InitializeCegui();
-    }
-#endif
 
     if (config.IsImguiEnabled())
     {

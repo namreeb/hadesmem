@@ -104,7 +104,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -113,7 +113,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86;$(CEGUI_ROOT_X86)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -131,7 +131,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
@@ -140,7 +140,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64;$(CEGUI_ROOT_X64)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -160,7 +160,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Comm
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -171,7 +171,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Comm
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86;$(CEGUI_ROOT_X86)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -191,7 +191,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Co
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CERBERUS_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;$(CEGUI_ROOT_X86)\include\cegui-0;$(DXSDK_DIR)\include;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
@@ -202,7 +202,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Co
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64;$(CEGUI_ROOT_X64)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -213,7 +213,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\cegui.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\config.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\cursor.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\d3d9.cpp" />
@@ -224,32 +223,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Button.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Checkbox.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\CollapsibleList.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ColorPicker.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ComboBox.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\CrossSplitter.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\GroupBox.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ImagePanel.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Label.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\LabelMultiline.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ListBox.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\MenuStrip.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Numeric.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\PageControl.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ProgressBar.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Properties.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\RadioButton.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\ScrollControl.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Slider.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\StatusBar.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TabControl.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TextBox.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\TreeControl.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\UnitTest.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\gwen\Window_.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\imgui.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\input.cpp" />
@@ -266,7 +239,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\callbacks.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\cegui.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\config.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\cursor.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\d3d11_defs.hpp" />
@@ -279,7 +251,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
-    <ClInclude Include="..\..\..\examples\cerberus\gwen.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\hook_counter.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\hook_disabler.hpp" />
@@ -301,9 +272,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     </ProjectReference>
     <ProjectReference Include="..\asmjit\asmjit.vcxproj">
       <Project>{0c721345-2478-4288-b9be-d1235c6a8f87}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\gwen\gwen.vcxproj">
-      <Project>{5772ae06-8667-440f-8006-c34c79a50a75}</Project>
     </ProjectReference>
     <ProjectReference Include="..\imgui\imgui.vcxproj">
       <Project>{ef8ed613-b239-4362-9361-f7d7b018e269}</Project>

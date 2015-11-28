@@ -24,7 +24,6 @@
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
-#include "gwen.hpp"
 #include "helpers.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
@@ -174,11 +173,6 @@ public:
     GetAntTweakBarInterface() noexcept final
   {
     return &hadesmem::cerberus::GetAntTweakBarInterface();
-  }
-
-  virtual hadesmem::cerberus::GwenInterface* GetGwenInterface() noexcept final
-  {
-    return &hadesmem::cerberus::GetGwenInterface();
   }
 
   virtual hadesmem::cerberus::HelperInterface*

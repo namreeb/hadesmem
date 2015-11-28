@@ -28,8 +28,6 @@ class CursorInterface;
 
 class AntTweakBarInterface;
 
-class GwenInterface;
-
 class HelperInterface;
 
 class ExceptionInterface;
@@ -64,8 +62,6 @@ public:
   virtual CursorInterface* GetCursorInterface() noexcept = 0;
 
   virtual AntTweakBarInterface* GetAntTweakBarInterface() noexcept = 0;
-
-  virtual GwenInterface* GetGwenInterface() noexcept = 0;
 
   virtual HelperInterface* GetHelperInterface() noexcept = 0;
 
