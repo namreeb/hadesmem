@@ -329,7 +329,7 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
   auto const window_name = "Cerberus (" + render_api_name + ")";
 
   ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
-  ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiSetCond_FirstUseEver);
   ImGui::Begin(window_name.c_str());
   ImGui::Text("Hello");
   ImGui::End();

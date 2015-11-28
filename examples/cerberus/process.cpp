@@ -412,9 +412,8 @@ extern "C" void WINAPI RtlExitUserProcessDetour(
 
   HADESMEM_DETAIL_TRACE_FORMAT_A("Args: [%ld].", exit_status);
 
-  // TODO: Fix this. Causing crashes on shutdown in CSGO (and others?).
-  //auto const& callbacks = GetOnRtlExitUserProcessCallbacks();
-  //callbacks.Run(exit_status);
+  auto const& callbacks = GetOnRtlExitUserProcessCallbacks();
+  callbacks.Run(exit_status);
 
   auto const rtl_exit_user_process =
     detour->GetTrampolineT<decltype(&RtlExitUserProcess)>();
