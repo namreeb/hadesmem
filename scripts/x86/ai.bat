@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Alien Isolation\AI.exe" --inject --steam-app-id 214490 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "F:\SteamLibrary\steamapps\common\Alien Isolation\AI.exe" --inject --steam-app-id 214490 --export Load --add-path --path-resolution --module cerberus.dll

@@ -221,6 +221,7 @@ void OnCleanupImguiGui(hadesmem::cerberus::RenderApi api)
   switch (api)
   {
   case hadesmem::cerberus::RenderApi::kD3D9:
+    HADESMEM_DETAIL_TRACE_A("Cleaning up for D3D9.");
     ImGui_ImplDX9_Shutdown();
     break;
 
@@ -230,6 +231,7 @@ void OnCleanupImguiGui(hadesmem::cerberus::RenderApi api)
     break;
 
   case hadesmem::cerberus::RenderApi::kD3D11:
+    HADESMEM_DETAIL_TRACE_A("Cleaning up for D3D11.");
     ImGui_ImplDX11_Shutdown();
     break;
 

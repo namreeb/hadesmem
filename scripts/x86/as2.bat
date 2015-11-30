@@ -1,1 +1,1 @@
-inject.exe --run "E:\Games\SteamLibrary\steamapps\common\Audiosurf 2\Audiosurf2.exe" --inject --steam-app-id 235800 --export Load --add-path --path-resolution --module cerberus.dll
+inject.exe --run "F:\SteamLibrary\steamapps\common\Audiosurf 2\Audiosurf2.exe" --inject --steam-app-id 235800 --export Load --add-path --path-resolution --module cerberus.dll
