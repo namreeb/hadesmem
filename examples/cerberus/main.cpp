@@ -526,7 +526,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     if (is_initialized)
     {
       HADESMEM_DETAIL_TRACE_A("Already initialized. Bailing.");
-      return 1;
+      return 2;
     }
 
     is_initialized = true;
