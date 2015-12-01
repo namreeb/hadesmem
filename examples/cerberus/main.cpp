@@ -163,6 +163,16 @@
 // the Pre callback hook we want to modify the args to suspend the process. In
 // the Post callback hook we want to inject and then resume the process.
 
+// TODO: Fix our dependency on undefined behaviour in regards to the order of
+// static destruction of objects across translation units. Specifically, we're
+// relying on this for OnUnloadPlugins in order to allow other translation units
+// to get a callback early on in the static destruction 'phase', but this is
+// incorrect and there is no guarantee that just because the plugin TU is
+// initialized first that it will be destructed first. MSVC documents its
+// behaviour in this area so it's okay to rely on it for now, but it's not a
+// sustainable solution in any case.
+// https://msdn.microsoft.com/en-us/library/xwec471e.aspx
+
 namespace
 {
 // This is a nasty hack to call any APIs which may be called from a static
@@ -619,6 +629,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
   }
 }
 
+// TODO: Properly handle the case where we are free'd while the GUI is visible.
+// Right now we don't do things like restoring cursor state etc.
 extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
 {
   try
@@ -635,6 +647,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
 
     is_initialized = false;
 
+    HADESMEM_DETAIL_TRACE_A("Removing detours.");
+
     hadesmem::cerberus::UndetourNtdllForModule(true);
     hadesmem::cerberus::UndetourNtdllForException(true);
     hadesmem::cerberus::UndetourKernelBaseForException(true);
@@ -648,16 +662,24 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     hadesmem::cerberus::UndetourUser32ForWindow(true);
     hadesmem::cerberus::UndetourOpenGL32(true);
 
-    // TODO: Cleanup GUI.
+    HADESMEM_DETAIL_TRACE_A("Unloading plugins.");
 
     hadesmem::cerberus::UnloadPlugins();
+
+    HADESMEM_DETAIL_TRACE_A("Cleaning up.");
+
+    hadesmem::cerberus::CleanupRender();
+
+    HADESMEM_DETAIL_TRACE_A("Doing saninty checks.");
 
     // TODO: Actually check this return value in the injector and don't call
     // FreeLibrary?
     if (!IsSafeToUnload())
     {
-      return 1;
+      return 2;
     }
+
+    HADESMEM_DETAIL_TRACE_A("Done.");
 
     return 0;
   }

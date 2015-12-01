@@ -22,8 +22,6 @@
 #include "render.hpp"
 #include "window.hpp"
 
-#pragma comment(lib, "d3dcompiler.lib")
-
 extern LRESULT ImGui_ImplDX9_WndProcHandler(HWND hWnd,
                                             UINT msg,
                                             WPARAM wParam,
@@ -106,6 +104,14 @@ bool ImguiInitializedAny() noexcept
 class ImguiImpl : public hadesmem::cerberus::ImguiInterface
 {
 public:
+  ~ImguiImpl()
+  {
+    SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D9, false);
+    SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D10, false);
+    SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D11, false);
+    SetImguiInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
+  }
+
   virtual std::size_t RegisterOnInitialize(
     std::function<hadesmem::cerberus::OnImguiInitializeCallback> const&
       callback) final
@@ -197,13 +203,6 @@ void OnInitializeImguiGui(hadesmem::cerberus::RenderApi api, void* device)
   callbacks.Run(&hadesmem::cerberus::GetImguiInterface());
 }
 
-// This is intentionally not called via a static destructor (to handle process
-// exit etc) because we could get called after the DirectX DLLs etc have already
-// unloaded, and we currently have no way to guarantee that we are called before
-// the unload so it's better to just leak than risk a crash.
-// TODO: We have a different solution for process exit, but what about module
-// unload? Now that we support dynamic injection, we need to support dynamic
-// free too, and that includes not leaking.
 void OnCleanupImguiGui(hadesmem::cerberus::RenderApi api)
 {
   if (!GetImguiInitialized(api))
@@ -225,25 +224,19 @@ void OnCleanupImguiGui(hadesmem::cerberus::RenderApi api)
     ImGui_ImplDX9_Shutdown();
     break;
 
-  case hadesmem::cerberus::RenderApi::kD3D10:
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Cleanup called for GUI which was "
-                                   "never initialized (unsupported).");
-    break;
-
   case hadesmem::cerberus::RenderApi::kD3D11:
     HADESMEM_DETAIL_TRACE_A("Cleaning up for D3D11.");
     ImGui_ImplDX11_Shutdown();
     break;
 
+  case hadesmem::cerberus::RenderApi::kD3D10:
   case hadesmem::cerberus::RenderApi::kOpenGL32:
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Cleanup called for GUI which was "
-                                   "never initialized (unsupported).");
     break;
 
   default:
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! Cleanup called for GUI which was never initialized (unknown).");
-    break;
+    HADESMEM_DETAIL_ASSERT(false);
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
   }
 
   HADESMEM_DETAIL_TRACE_A("Clearing Imgui initialization state.");
@@ -272,14 +265,9 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
   if (hwnd == window_interface.GetCurrentWindow())
   {
-    if (GetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D9))
-    {
-      ImGui_ImplDX9_WndProcHandler(hwnd, msg, wparam, lparam);
-    }
-    else if (GetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D11))
-    {
-      ImGui_ImplDX11_WndProcHandler(hwnd, msg, wparam, lparam);
-    }
+    // Simply calling the DX11 implementation unconditionally because it's
+    // identical to the DX9 one.
+    ImGui_ImplDX11_WndProcHandler(hwnd, msg, wparam, lparam);
   }
 }
 
@@ -295,40 +283,23 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
   case hadesmem::cerberus::RenderApi::kD3D9:
     ImGui_ImplDX9_NewFrame();
     break;
-  case hadesmem::cerberus::RenderApi::kD3D10:
-    break;
+
   case hadesmem::cerberus::RenderApi::kD3D11:
     ImGui_ImplDX11_NewFrame();
     break;
+
+  case hadesmem::cerberus::RenderApi::kD3D10:
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     break;
+
   default:
     HADESMEM_DETAIL_ASSERT(false);
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
   }
 
-  std::string render_api_name = [](
-    hadesmem::cerberus::RenderApi api_) -> std::string
-  {
-    switch (api_)
-    {
-    case hadesmem::cerberus::RenderApi::kD3D9:
-      return "D3D9";
-    case hadesmem::cerberus::RenderApi::kD3D10:
-      return "D3D10";
-    case hadesmem::cerberus::RenderApi::kD3D11:
-      return "D3D11";
-    case hadesmem::cerberus::RenderApi::kOpenGL32:
-      return "OpenGL";
-    default:
-      HADESMEM_DETAIL_ASSERT(false);
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
-    }
-  }(api);
-
-  auto const window_name = "Cerberus (" + render_api_name + ")";
+  auto const window_name =
+    "Cerberus (" + hadesmem::cerberus::GetRenderApiName(api) + ")";
 
   ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiSetCond_FirstUseEver);
@@ -339,25 +310,12 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
   ImGui::Render();
 }
 
-void OnResizeImgui(hadesmem::cerberus::RenderApi /*api*/,
-                   void* /*device*/,
-                   UINT /*width*/,
-                   UINT /*height*/)
-{
-  if (!ImguiInitializedAny())
-  {
-    return;
-  }
-
-  // TODO: Implement this.
-}
-
 void OnUnloadPlugins()
 {
-  SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D9, false);
-  SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D10, false);
-  SetImguiInitialized(hadesmem::cerberus::RenderApi::kD3D11, false);
-  SetImguiInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
+  OnCleanupImguiGui(hadesmem::cerberus::RenderApi::kD3D9);
+  OnCleanupImguiGui(hadesmem::cerberus::RenderApi::kD3D10);
+  OnCleanupImguiGui(hadesmem::cerberus::RenderApi::kD3D11);
+  OnCleanupImguiGui(hadesmem::cerberus::RenderApi::kOpenGL32);
 }
 }
 
@@ -376,16 +334,14 @@ void InitializeImgui()
   auto& input = GetInputInterface();
   input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
 
+  // No OnResize handler necessary because ImGui calls GetClientRect every
+  // frame.
   auto& render = GetRenderInterface();
   render.RegisterOnFrame(OnFrameImgui);
-  render.RegisterOnResize(OnResizeImgui);
   render.RegisterOnInitializeGui(OnInitializeImguiGui);
   render.RegisterOnCleanupGui(OnCleanupImguiGui);
   render.RegisterOnSetGuiVisibility(SetAllImguiVisibility);
 
-  // TODO: Is this really the right thing to do here? Should we be cleaning up
-  // the renderers instead? Does this belong in the renderer file along with the
-  // ExitProcess callback? etc.
   RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
 }

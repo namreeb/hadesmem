@@ -67,9 +67,13 @@ public:
 
 RenderInterface& GetRenderInterface() noexcept;
 
+std::string GetRenderApiName(hadesmem::cerberus::RenderApi api);
+
 bool& GetGuiVisible() noexcept;
 
 void SetGuiVisible(bool visible, bool old_visible);
+
+void CleanupRender();
 
 void InitializeRender();
 }

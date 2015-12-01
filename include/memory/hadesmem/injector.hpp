@@ -42,6 +42,9 @@
 
 // TODO: IME injection. https://github.com/dwendt/UniversalInject
 
+// TODO: SetWindowsHookEx based injction. Useful for bypassing
+// ObRegistercallbacks based protections?
+
 namespace hadesmem
 {
 namespace detail

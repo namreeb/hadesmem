@@ -62,8 +62,8 @@ inline void SetThreadContext(Thread const& thread, CONTEXT const& context)
 
 inline DWORD SuspendThread(Thread const& thread)
 {
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Suspending thread with ID 0n%lu.",
-                                 thread.GetId());
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Suspending thread with ID 0n%lu.",
+                                       thread.GetId());
 
   DWORD const suspend_count = ::SuspendThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))
@@ -89,8 +89,8 @@ inline DWORD SuspendThread(Thread const& thread)
 
 inline DWORD ResumeThread(Thread const& thread)
 {
-  HADESMEM_DETAIL_TRACE_FORMAT_A("Resuming thread with ID 0n%lu.",
-                                 thread.GetId());
+  HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Resuming thread with ID 0n%lu.",
+                                       thread.GetId());
 
   DWORD const suspend_count = ::ResumeThread(thread.GetHandle());
   if (suspend_count == static_cast<DWORD>(-1))

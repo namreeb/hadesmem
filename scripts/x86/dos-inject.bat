@@ -1,0 +1,1 @@
+inject.exe --name EoCApp.exe --inject --steam-app-id 230230 --export Load --add-path --path-resolution --module cerberus.dll

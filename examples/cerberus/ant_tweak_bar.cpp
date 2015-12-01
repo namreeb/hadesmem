@@ -443,12 +443,16 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
     {
     case hadesmem::cerberus::RenderApi::kD3D9:
       return TW_DIRECT3D9;
+
     case hadesmem::cerberus::RenderApi::kD3D10:
       return TW_DIRECT3D10;
+
     case hadesmem::cerberus::RenderApi::kD3D11:
       return TW_DIRECT3D11;
+
     case hadesmem::cerberus::RenderApi::kOpenGL32:
       return TW_OPENGL;
+
     default:
       HADESMEM_DETAIL_ASSERT(false);
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -465,9 +469,6 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   SetAntTweakBarInitialized(api, true);
 
-  // TODO: Should we be using viewport size or backbuffer size instead of window
-  // size? How would we track changes to that though? Need to think about it
-  // more... (Same applies to other renderers.)
   RECT wnd_rect{0, 0, 800, 600};
   auto& window_interface = hadesmem::cerberus::GetWindowInterface();
   if (auto const window = window_interface.GetCurrentWindow())
@@ -505,27 +506,8 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
 
   ::TwCopyStdStringToClientFunc(CopyStdStringToClientTw);
 
-  std::string render_api_name = [](
-    hadesmem::cerberus::RenderApi api_) -> std::string
-  {
-    switch (api_)
-    {
-    case hadesmem::cerberus::RenderApi::kD3D9:
-      return "D3D9";
-    case hadesmem::cerberus::RenderApi::kD3D10:
-      return "D3D10";
-    case hadesmem::cerberus::RenderApi::kD3D11:
-      return "D3D11";
-    case hadesmem::cerberus::RenderApi::kOpenGL32:
-      return "OpenGL";
-    default:
-      HADESMEM_DETAIL_ASSERT(false);
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
-    }
-  }(api);
-
-  auto const bar_name = "Cerberus (" + render_api_name + ")";
+  auto const bar_name =
+    "Cerberus (" + hadesmem::cerberus::GetRenderApiName(api) + ")";
   auto const bar = ::TwNewBar(bar_name.c_str());
   if (!bar)
   {
@@ -576,13 +558,6 @@ void OnInitializeAntTweakBarGui(hadesmem::cerberus::RenderApi api, void* device)
   callbacks.Run(&hadesmem::cerberus::GetAntTweakBarInterface());
 }
 
-// This is intentionally not called via a static destructor (to handle process
-// exit etc) because we could get called after the DirectX DLLs etc have already
-// unloaded, and we currently have no way to guarantee that we are called before
-// the unload so it's better to just leak than risk a crash.
-// TODO: We have a different solution for process exit, but what about module
-// unload? Now that we support dynamic injection, we need to support dynamic
-// free too, and that includes not leaking.
 void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
 {
   if (!GetAntTweakBarInitialized(api))
@@ -608,21 +583,20 @@ void OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi api)
   SetAntTweakBarInitialized(api, false);
 }
 
+bool& GetAllTweakBarVisibility() noexcept
+{
+  static bool visible{ false };
+  return visible;
+}
+
 void SetAllTweakBarVisibility(bool visible, bool /*old_visible*/)
 {
-  for (int i = 0; i < ::TwGetBarCount(); ++i)
-  {
-    auto const bar = ::TwGetBarByIndex(i);
-    auto const name = ::TwGetBarName(bar);
-    auto const define = "\"" + std::string(name) + "\" visible=" +
-                        (visible ? std::string("true") : std::string("false"));
-    ::TwDefine(define.c_str());
-  }
+  GetAllTweakBarVisibility() = visible;
 }
 
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-  if (!AntTweakBarInitializedAny())
+  if (!AntTweakBarInitializedAny() || !GetAllTweakBarVisibility())
   {
     return;
   }
@@ -638,6 +612,11 @@ void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void OnFrameAntTweakBar(hadesmem::cerberus::RenderApi /*api*/, void* /*device*/)
 {
+  if (!AntTweakBarInitializedAny() || !GetAllTweakBarVisibility())
+  {
+    return;
+  }
+
   if (!::TwDraw())
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -656,7 +635,6 @@ void OnResizeAntTweakBar(hadesmem::cerberus::RenderApi /*api*/,
     return;
   }
 
-  // TODO: Reduce code duplication between this and other renderers.
   if (!width || !height)
   {
     HADESMEM_DETAIL_TRACE_FORMAT_A("Size is zero, attempting to use client "
@@ -664,7 +642,6 @@ void OnResizeAntTweakBar(hadesmem::cerberus::RenderApi /*api*/,
                                    width,
                                    height);
 
-    // TODO: Ensure we're using the right window.
     auto& window_interface = hadesmem::cerberus::GetWindowInterface();
     RECT rect{};
     if (::GetClientRect(window_interface.GetCurrentWindow(), &rect))
@@ -699,10 +676,10 @@ void OnResizeAntTweakBar(hadesmem::cerberus::RenderApi /*api*/,
 
 void OnUnloadPlugins()
 {
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D9, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D10, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kD3D11, false);
-  SetAntTweakBarInitialized(hadesmem::cerberus::RenderApi::kOpenGL32, false);
+  OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi::kD3D9);
+  OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi::kD3D10);
+  OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi::kD3D11);
+  OnCleanupAntTweakBarGui(hadesmem::cerberus::RenderApi::kOpenGL32);
 }
 }
 
@@ -728,9 +705,6 @@ void InitializeAntTweakBar()
   render.RegisterOnCleanupGui(OnCleanupAntTweakBarGui);
   render.RegisterOnSetGuiVisibility(SetAllTweakBarVisibility);
 
-  // TODO: Is this really the right thing to do here? Should we be cleaning up
-  // the renderers instead? Does this belong in the renderer file along with the
-  // ExitProcess callback? etc.
   RegisterOnUnloadPlugins(OnUnloadPlugins);
 }
 }

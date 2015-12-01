@@ -904,15 +904,7 @@ void OnReleaseDXGI(IDXGISwapChain* swap_chain)
 
 void OnRtlExitUserProcess(NTSTATUS /*exit_code*/)
 {
-  hadesmem::cerberus::RenderApi const apis[] = {
-    hadesmem::cerberus::RenderApi::kD3D9,
-    hadesmem::cerberus::RenderApi::kD3D10,
-    hadesmem::cerberus::RenderApi::kD3D11,
-    hadesmem::cerberus::RenderApi::kOpenGL32};
-  for (auto const& api : apis)
-  {
-    CleanupGui(api);
-  }
+  hadesmem::cerberus::CleanupRender();
 }
 }
 
@@ -924,6 +916,25 @@ RenderInterface& GetRenderInterface() noexcept
 {
   static RenderImpl render_impl;
   return render_impl;
+}
+
+std::string GetRenderApiName(hadesmem::cerberus::RenderApi api)
+{
+  switch (api)
+  {
+  case hadesmem::cerberus::RenderApi::kD3D9:
+    return "D3D9";
+  case hadesmem::cerberus::RenderApi::kD3D10:
+    return "D3D10";
+  case hadesmem::cerberus::RenderApi::kD3D11:
+    return "D3D11";
+  case hadesmem::cerberus::RenderApi::kOpenGL32:
+    return "OpenGL";
+  default:
+    HADESMEM_DETAIL_ASSERT(false);
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
+  }
 }
 
 bool& GetGuiVisible() noexcept
@@ -950,6 +961,19 @@ void SetGuiVisible(bool visible, bool old_visible)
   HADESMEM_DETAIL_TRACE_A("Finished.");
 }
 
+void CleanupRender()
+{
+  hadesmem::cerberus::RenderApi const apis[] = {
+    hadesmem::cerberus::RenderApi::kD3D9,
+    hadesmem::cerberus::RenderApi::kD3D10,
+    hadesmem::cerberus::RenderApi::kD3D11,
+    hadesmem::cerberus::RenderApi::kOpenGL32};
+  for (auto const& api : apis)
+  {
+    CleanupGui(api);
+  }
+}
+
 void InitializeRender()
 {
   auto& dxgi = GetDXGIInterface();
@@ -962,8 +986,11 @@ void InitializeRender()
   d3d9.RegisterOnReset(OnResetD3D9);
   d3d9.RegisterOnRelease(OnReleaseD3D9);
 
-  auto& process = GetProcessInterface();
-  process.RegisterOnRtlExitUserProcess(OnRtlExitUserProcess);
+  // TODO: Re-enable this once we have a proper fix for cleaning up during
+  // process shutdown in the case where the DX libs or other dependencies have
+  // already been unloaded before ExitProcess is called. E.g. CSGO.
+  // auto& process = GetProcessInterface();
+  // process.RegisterOnRtlExitUserProcess(OnRtlExitUserProcess);
 
   auto& opengl32 = GetOpenGL32Interface();
   opengl32.RegisterOnFrame(OnFrameOpenGL32);
