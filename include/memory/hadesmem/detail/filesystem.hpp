@@ -92,6 +92,7 @@ inline std::wstring CombinePath(std::wstring const& base,
 
   // Fall back to older API with MAX_PATH limit.
   std::vector<wchar_t> buffer(MAX_PATH);
+#pragma warning(suppress : 4995)
   if (!::PathCombineW(buffer.data(), base.c_str(), append.c_str()))
   {
     DWORD const last_error = ::GetLastError();
@@ -602,7 +603,7 @@ inline bool EnumDir(std::wstring dir_path,
       hadesmem::Error{} << hadesmem::ErrorString{"FindNextFile failed."}
                         << hadesmem::ErrorCodeWinLast{last_error});
   }
-  
+
   return true;
 }
 
