@@ -382,10 +382,13 @@ void CleanupGui(hadesmem::cerberus::RenderApi api)
 std::pair<hadesmem::cerberus::RenderApi, void*>
   GetDeviceFromSwapChain(IDXGISwapChain* swap_chain)
 {
+  // TODO: DirectX 12 support.
+
   ID3D11Device* d3d11_device = nullptr;
   auto const get_device_d3d11_hr = swap_chain->GetDevice(
     __uuidof(ID3D11Device), reinterpret_cast<void**>(&d3d11_device));
-  if (SUCCEEDED(get_device_d3d11_hr))
+  if (SUCCEEDED(get_device_d3d11_hr) &&
+      d3d11_device->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0)
   {
     return {hadesmem::cerberus::RenderApi::kD3D11, d3d11_device};
   }
