@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\..\deps\imgui\imgui\examples\directx9_example\imgui_impl_dx9.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\deps\imgui\imgui\examples\directx10_example\imgui_impl_dx10.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\deps\imgui\imgui\imconfig.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\deps\imgui\imgui\examples\directx9_example\imgui_impl_dx9.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\deps\imgui\imgui\examples\directx10_example\imgui_impl_dx10.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

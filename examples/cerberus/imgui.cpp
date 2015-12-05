@@ -11,6 +11,7 @@
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <imgui/imgui.h>
 #include <imgui/examples/directx9_example/imgui_impl_dx9.h>
+#include <imgui/examples/directx10_example/imgui_impl_dx10.h>
 #include <imgui/examples/directx11_example/imgui_impl_dx11.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -21,11 +22,6 @@
 #include "plugin.hpp"
 #include "render.hpp"
 #include "window.hpp"
-
-extern LRESULT ImGui_ImplDX9_WndProcHandler(HWND hWnd,
-                                            UINT msg,
-                                            WPARAM wParam,
-                                            LPARAM lParam);
 
 extern LRESULT ImGui_ImplDX11_WndProcHandler(HWND hWnd,
                                              UINT msg,
@@ -172,9 +168,11 @@ void OnInitializeImguiGui(hadesmem::cerberus::RenderApi api, void* device)
     break;
 
   case hadesmem::cerberus::RenderApi::kD3D10:
-    // TODO: Add this. Shouldn't be too hard to port.
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Currently unsupported render API."});
+  {
+    ImGui_ImplDX10_Init(window.GetCurrentWindow(),
+                        static_cast<ID3D10Device*>(device));
+    break;
+  }
 
   case hadesmem::cerberus::RenderApi::kD3D11:
   {
@@ -186,7 +184,8 @@ void OnInitializeImguiGui(hadesmem::cerberus::RenderApi api, void* device)
   }
 
   case hadesmem::cerberus::RenderApi::kOpenGL32:
-    // TODO: Add this. Imgui supports it.
+    // TODO: Add this. Imgui supports it, but uses GLFW unfortunately so we will
+    // need to re-write it without the dependencies.
     HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
                                       "Currently unsupported render API."});
   default:
@@ -224,12 +223,16 @@ void OnCleanupImguiGui(hadesmem::cerberus::RenderApi api)
     ImGui_ImplDX9_Shutdown();
     break;
 
+  case hadesmem::cerberus::RenderApi::kD3D10:
+    HADESMEM_DETAIL_TRACE_A("Cleaning up for D3D10.");
+    ImGui_ImplDX10_Shutdown();
+    break;
+
   case hadesmem::cerberus::RenderApi::kD3D11:
     HADESMEM_DETAIL_TRACE_A("Cleaning up for D3D11.");
     ImGui_ImplDX11_Shutdown();
     break;
 
-  case hadesmem::cerberus::RenderApi::kD3D10:
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     break;
 
@@ -284,11 +287,14 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
     ImGui_ImplDX9_NewFrame();
     break;
 
+  case hadesmem::cerberus::RenderApi::kD3D10:
+    ImGui_ImplDX10_NewFrame();
+    break;
+
   case hadesmem::cerberus::RenderApi::kD3D11:
     ImGui_ImplDX11_NewFrame();
     break;
 
-  case hadesmem::cerberus::RenderApi::kD3D10:
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     break;
 

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\deps\imgui\imgui\examples\directx10_example\imgui_impl_dx10.cpp" />
     <ClCompile Include="..\..\..\deps\imgui\imgui\examples\directx11_example\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\..\..\deps\imgui\imgui\examples\directx9_example\imgui_impl_dx9.cpp" />
     <ClCompile Include="..\..\..\deps\imgui\imgui\imgui.cpp" />
@@ -26,6 +27,7 @@
     <ClCompile Include="..\..\..\deps\imgui\imgui\imgui_draw.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\deps\imgui\imgui\examples\directx10_example\imgui_impl_dx10.h" />
     <ClInclude Include="..\..\..\deps\imgui\imgui\examples\directx11_example\imgui_impl_dx11.h" />
     <ClInclude Include="..\..\..\deps\imgui\imgui\examples\directx9_example\imgui_impl_dx9.h" />
     <ClInclude Include="..\..\..\deps\imgui\imgui\imconfig.h" />
@@ -124,8 +126,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3dx9.lib;d3dcompiler.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,8 +150,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3dx9.lib;d3dcompiler.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -172,8 +178,10 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3dx9.lib;d3dcompiler.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -198,8 +206,10 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3dx9.lib;d3dcompiler.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
