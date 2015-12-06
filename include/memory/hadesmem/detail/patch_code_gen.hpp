@@ -198,14 +198,15 @@ inline std::vector<std::uint8_t> GenCallTramp64(void* address, void* target)
 
 inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 {
-  std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
-                                   0x68,
-                                   0xEF,
-                                   0xBE,
-                                   0xAD,
-                                   0xDE,
-                                   // RET
-                                   0xC3};
+  // clang-format off
+  std::vector<std::uint8_t> buf = 
+  {
+    // PUSH 0xDEADBEEF
+    0x68, 0xEF, 0xBE, 0xAD, 0xDE,
+    // RET
+    0xC3
+  };
+  // clang-format on
   auto const op_len = 1;
   auto const target_low = static_cast<std::uint32_t>(
     reinterpret_cast<std::uintptr_t>(target) & 0xFFFFFFFF);
@@ -215,23 +216,17 @@ inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 
 inline std::vector<std::uint8_t> GenPush64Ret(void* target)
 {
-  std::vector<std::uint8_t> buf = {// PUSH 0xDEADBEEF
-                                   0x68,
-                                   0xEF,
-                                   0xBE,
-                                   0xAD,
-                                   0xDE,
-                                   // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
-                                   0xC7,
-                                   0x44,
-                                   0x24,
-                                   0x04,
-                                   0xEF,
-                                   0xBE,
-                                   0xAD,
-                                   0xDE,
-                                   // RET
-                                   0xC3};
+  // clang-format off
+  std::vector<std::uint8_t> buf =
+  {
+    // PUSH 0xDEADBEEF
+    0x68, 0xEF, 0xBE, 0xAD, 0xDE, 
+    // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
+    0xC7, 0x44, 0x24, 0x04, 0xEF, 0xBE, 0xAD, 0xDE,
+    // RET
+    0xC3
+  };
+  // clang-format on
   auto const low_data_offs = 1;
   auto const high_data_offs = 9;
   auto const target_uint = reinterpret_cast<std::uint64_t>(target);
@@ -350,7 +345,7 @@ inline std::size_t
 
   std::vector<std::uint8_t> call_buf;
 
-  // TODO: Avoid using a trampoline where possible.
+// TODO: Avoid using a trampoline where possible.
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   std::unique_ptr<Allocator> trampoline = AllocatePageNear(process, address);
 
@@ -380,16 +375,18 @@ inline std::size_t
 }
 
 // TODO: Add frame pointer so we can unwind the stack while debugging?
-// TODO: Ensure we're correcty saving all registers/state. Currently 
+// TODO: Ensure we're correcty saving all registers/state. Currently
 // we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate32(void* stub,
                                                void* get_orig_user_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
-  // Add NOPs so Steam overlay works. It follows our hook, and it does not 
+  // Add NOPs so Steam overlay works. It follows our hook, and it does not
   // recognize the opcode sequence otherwise.
-  std::vector<std::uint8_t> buf = {
+  // clang-format off
+  std::vector<std::uint8_t> buf = 
+  {
     // NOP (x 5)
     0x90, 0x90, 0x90, 0x90, 0x90, 
     // PUSHAD
@@ -411,7 +408,9 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
     // MOV [EAX], ECX
     0x89, 0x08,
     // POPAD
-    0x61};
+    0x61
+  };
+  // clang-format on
   std::size_t const kStubPtrOfs = 9 + 5;
   std::size_t const kUserPtrOfs = 20 + 5;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
@@ -419,14 +418,16 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
   return buf;
 }
 
-// TODO: Ensure we're correcty saving all registers/state. Currently 
+// TODO: Ensure we're correcty saving all registers/state. Currently
 // we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate64(void* stub,
                                                void* get_orig_user_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
-  std::vector<std::uint8_t> buf = {
+  // clang-format off
+  std::vector<std::uint8_t> buf = 
+  {
     // PUSH RAX
     0x50,
     // PUSH RCX
@@ -502,7 +503,9 @@ inline std::vector<std::uint8_t> GenStubGate64(void* stub,
     // POP RCX
     0x59,
     // POP RAX
-    0x58};
+    0x58
+  };
+  // clang-format on
   std::size_t const kStubPtrOfs = 34;
   std::size_t const kUserPtrOfs = 53;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
