@@ -12,9 +12,9 @@
 #include <winnt.h>
 #include <winternl.h>
 
-#include <d3d9.h>
 #include <d3d11.h>
 #include <d3d10.h>
+#include <d3d9.h>
 #include <dxgi.h>
 
 #include <hadesmem/config.hpp>
@@ -24,16 +24,16 @@
 #include "callbacks.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
-#include "d3d9.hpp"
 #include "d3d11_state_block.hpp"
+#include "d3d9.hpp"
 #include "direct_input.hpp"
 #include "dxgi.hpp"
 #include "hook_disabler.hpp"
 #include "input.hpp"
+#include "main.hpp"
 #include "opengl.hpp"
 #include "plugin.hpp"
 #include "process.hpp"
-#include "main.hpp"
 #include "window.hpp"
 
 // TODO: Test against games like CoD: Ghosts which apparently have both a D3D10
@@ -120,7 +120,8 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibilityCallback>&
   GetOnSetGuiVisibilityCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnSetGuiVisibilityCallback> callbacks;
+    hadesmem::cerberus::OnSetGuiVisibilityCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -128,7 +129,8 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInitializeGuiCallback>&
   GetOnInitializeGuiCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnInitializeGuiCallback> callbacks;
+    hadesmem::cerberus::OnInitializeGuiCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -662,10 +664,16 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
     blend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
     blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
+    // TODO: Can we make this more efficient by only re-creating the blend state
+    // when the device changes? What about the other objects we create like
+    // render target views?
+    hadesmem::detail::SmartComHandle blend_state_cleanup;
     ID3D11BlendState* blend_state = nullptr;
     hr = device->CreateBlendState(&blend, &blend_state);
     if (SUCCEEDED(hr))
     {
+      // TODO: Double check that this change hasn't broken anything.
+      blend_state_cleanup = blend_state;
       device_context->OMSetBlendState(blend_state, nullptr, 0xFFFFFFFF);
     }
     else
@@ -770,8 +778,8 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   if (FAILED(device->CreateStateBlock(D3DSBT_ALL, &state_block)))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{
-        "IDirect3DDevice9::CreateStateBlock failed."});
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"IDirect3DDevice9::CreateStateBlock failed."});
   }
   hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
 
@@ -791,8 +799,9 @@ void OnFrameD3D9(IDirect3DDevice9* device)
 
   if (FAILED(state_block->Apply()))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "IDirect3DStateBlock9::Apply failed."});
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error{}
+      << hadesmem::ErrorString{"IDirect3DStateBlock9::Apply failed."});
   }
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Done.");

@@ -158,3 +158,5 @@
 /build/vs/.vs/hadesmem/v14/.suo
 /build/vs/imgui/Debug
 /build/vs/imgui/Release
+/build/vs/hadesmem.VC.opendb
+/build/vs/imgui/imgui.vcxproj.user
