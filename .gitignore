@@ -160,3 +160,5 @@
 /build/vs/imgui/Release
 /build/vs/hadesmem.VC.opendb
 /build/vs/imgui/imgui.vcxproj.user
+/build/vs/hadesmem.VC.VC.opendb
+/build/vs/hadesmem.VC.db
