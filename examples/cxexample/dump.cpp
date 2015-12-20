@@ -10,6 +10,8 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/str_conv.hpp>
+#include <hadesmem/module.hpp>
+#include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/import_dir.hpp>
 #include <hadesmem/pelib/import_dir_list.hpp>
@@ -19,8 +21,6 @@
 #include <hadesmem/pelib/pe_file.hpp>
 #include <hadesmem/pelib/section.hpp>
 #include <hadesmem/pelib/section_list.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/module_list.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
 
@@ -55,6 +55,7 @@ void DumpMemory()
   for (auto const& module : modules)
   {
     HADESMEM_DETAIL_TRACE_A("Checking for valid headers.");
+
     try
     {
       hadesmem::PeFile const pe_file(process,
@@ -70,6 +71,7 @@ void DumpMemory()
     }
 
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
+
     auto raw = hadesmem::ReadVectorEx<std::uint8_t>(
       process,
       module.GetHandle(),
@@ -83,12 +85,14 @@ void DumpMemory()
     hadesmem::NtHeaders nt_headers(local_process, pe_file);
 
     HADESMEM_DETAIL_TRACE_A("Copying headers.");
+
     std::vector<std::uint8_t> raw_new;
     std::copy(std::begin(raw),
               std::begin(raw) + nt_headers.GetSizeOfHeaders(),
               std::back_inserter(raw_new));
 
     HADESMEM_DETAIL_TRACE_A("Copying section data.");
+
     hadesmem::SectionList const sections(local_process, pe_file);
     std::vector<std::pair<DWORD, DWORD>> raw_datas;
     for (auto const& section : sections)
@@ -121,12 +125,14 @@ void DumpMemory()
                                        static_cast<DWORD>(raw_new.size()));
 
     HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
+
     hadesmem::NtHeaders nt_headers_new(local_process, pe_file_new);
     nt_headers_new.SetImageBase(
       reinterpret_cast<ULONG_PTR>(module.GetHandle()));
     nt_headers_new.UpdateWrite();
 
     HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
+
     hadesmem::SectionList sections_new(local_process, pe_file_new);
     std::size_t n = 0;
     for (auto& section : sections_new)
@@ -138,6 +144,7 @@ void DumpMemory()
     }
 
     HADESMEM_DETAIL_TRACE_A("Fixing imports.");
+
     hadesmem::ImportDirList const import_dirs(local_process, pe_file);
     hadesmem::ImportDirList const import_dirs_new(local_process, pe_file_new);
     auto i = std::begin(import_dirs), j = std::begin(import_dirs_new);
@@ -164,16 +171,30 @@ void DumpMemory()
       (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
 
     HADESMEM_DETAIL_TRACE_A("Writing file.");
+
     auto const proc_path = hadesmem::GetPath(process);
     auto const proc_name = proc_path.substr(proc_path.rfind(L'\\') + 1);
     auto const proc_pid_str = std::to_wstring(process.GetId());
+    // TODO: Update 'dump' tool with these changes (and vice-versa).
+    auto const dumps_dir = hadesmem::detail::CombinePath(
+      hadesmem::detail::GetSelfDirPath(), L"dumps");
     std::wstring dump_path;
     std::uint32_t c = 0;
     do
     {
-      dump_path = proc_name + L"_" + proc_pid_str + L"_" + module.GetName() +
-                  L"_" + std::to_wstring(c++) + L".dmp";
+      auto const file_name = proc_name + L"_" + proc_pid_str + L"_" +
+                             module.GetName() + L"_" + std::to_wstring(c++) +
+                             L".dmp";
+      dump_path = hadesmem::detail::CombinePath(dumps_dir, file_name);
     } while (hadesmem::detail::DoesFileExist(dump_path) && c < 10);
+
+    if (c > 10)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString(
+          "Found more than 10 conflicting file names. Aborting."));
+    }
+
     auto const dump_file = hadesmem::detail::OpenFile<char>(
       dump_path, std::ios::out | std::ios::binary);
     if (!*dump_file)
@@ -182,6 +203,7 @@ void DumpMemory()
                                       << hadesmem::ErrorString(
                                         "Unable to open dump file."));
     }
+
     if (!dump_file->write(reinterpret_cast<char const*>(raw_new.data()),
                           raw_new.size()))
     {

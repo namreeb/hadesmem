@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\BlackDesertOnlineCBT1\Black Desert Online Launcher.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
