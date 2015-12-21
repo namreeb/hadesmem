@@ -71,6 +71,8 @@
 
 // TODO: Fix code duplication throughout patcher codebase.
 
+// TODO: Support unwinding through hooks (needs RtlAddFunctionTable for x64?)?
+
 namespace hadesmem
 {
 template <typename TargetFuncT, typename ContextT = void*>
