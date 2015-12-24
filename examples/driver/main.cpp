@@ -28,12 +28,18 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<std::string> name_arg{
       "", "name", "Driver name", true, "", "string", cmd};
     TCLAP::ValueArg<std::string> path_arg{
-      "", "path", "Driver path", true, "", "string", cmd};
+      "", "path", "Driver path", false, "", "string", cmd};
     TCLAP::SwitchArg load_arg{"", "load", "Load driver"};
     TCLAP::SwitchArg unload_arg{"", "unload", "Unload driver"};
     std::vector<TCLAP::Arg*> xor_args{&load_arg, &unload_arg};
     cmd.xorAdd(xor_args);
     cmd.parse(argc, argv);
+
+    if (load_arg.isSet() && !path_arg.isSet())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Path to driver required."));
+    }
 
     hadesmem::GetSeLoadDriverPrivilege();
 
@@ -42,8 +48,14 @@ int main(int argc, char* argv[])
     auto const driver_path =
       hadesmem::detail::MultiByteToWideChar(path_arg.getValue());
 
-    hadesmem::Driver driver{driver_name, driver_path};
-    load_arg.isSet() ? driver.Load() : driver.Unload();
+    if (load_arg.isSet())
+    {
+      hadesmem::LoadDriver(driver_name, driver_path);
+    }
+    else
+    {
+      hadesmem::UnloadDriver(driver_name);
+    }
 
     std::cout << "\nDone.\n";
 

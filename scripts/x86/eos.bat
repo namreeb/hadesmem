@@ -1,0 +1,1 @@
+inject.exe --run "F:\SteamLibrary\steamapps\common\Echo of Soul\EOSLauncher.exe" --inject --steam-app-id 290140 --export Load --add-path --path-resolution --module cerberus.dll

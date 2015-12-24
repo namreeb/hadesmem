@@ -1,0 +1,1 @@
+inject.exe --name "Battle.net.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

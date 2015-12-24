@@ -345,16 +345,6 @@ extern "C" NTSTATUS WINAPI NtUnmapViewOfSectionDetour(
   return ret;
 }
 
-std::wstring UnicodeStringToStdString(PCUNICODE_STRING in)
-{
-  if (!in->Length || !in->Buffer)
-  {
-    return {};
-  }
-
-  return std::wstring(in->Buffer, in->Length / sizeof(wchar_t));
-}
-
 extern "C" NTSTATUS WINAPI LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
                                             PCWSTR path,
                                             PULONG flags,
@@ -393,7 +383,7 @@ extern "C" NTSTATUS WINAPI LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
     HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A("Flags: [%lu]", *flags);
   }
 
-  std::wstring const full_name = UnicodeStringToStdString(name);
+  std::wstring const full_name = hadesmem::detail::UnicodeStringToStdString(name);
   std::wstring const module_name = GetFileNameFromPath(full_name);
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Full Name: [%s]. Module Name: [%s].",
                                        full_name.c_str(),

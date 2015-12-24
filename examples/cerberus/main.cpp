@@ -24,6 +24,7 @@
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "direct_input.hpp"
+#include "driver.hpp"
 #include "dxgi.hpp"
 #include "exception.hpp"
 #include "helpers.hpp"
@@ -36,6 +37,7 @@
 #include "raw_input.hpp"
 #include "render.hpp"
 #include "render_helper.hpp"
+#include "service.hpp"
 #include "window.hpp"
 
 // WARNING! Most of this is untested, it's for expository and testing
@@ -198,6 +200,8 @@ void UseAllStatics()
   auto& cursor = hadesmem::cerberus::GetCursorInterface();
   auto& input = hadesmem::cerberus::GetInputInterface();
   auto& exception = hadesmem::cerberus::GetExceptionInterface();
+  auto& driver = hadesmem::cerberus::GetDriverInterface();
+  auto& service = hadesmem::cerberus::GetServiceInterface();
   auto& process = hadesmem::cerberus::GetProcessInterface();
   auto& raw_input = hadesmem::cerberus::GetRawInputInterface();
   auto& helper = hadesmem::cerberus::GetHelperInterface();
@@ -405,6 +409,73 @@ void UseAllStatics()
   exception.UnregisterOnSetUnhandledExceptionFilter(
     on_set_unhandled_exception_filter_id);
 
+  auto const on_nt_load_driver = [](PUNICODE_STRING, bool*)
+  {
+  };
+  auto const on_nt_load_driver_id =
+    driver.RegisterOnNtLoadDriver(on_nt_load_driver);
+  driver.UnregisterOnNtLoadDriver(on_nt_load_driver_id);
+
+  auto const on_create_service_a = [](SC_HANDLE,
+                                      LPCSTR,
+                                      LPCSTR,
+                                      DWORD,
+                                      DWORD,
+                                      DWORD,
+                                      DWORD,
+                                      LPCSTR,
+                                      LPCSTR,
+                                      LPDWORD,
+                                      LPCSTR,
+                                      LPCSTR,
+                                      LPCSTR,
+                                      bool*)
+  {
+  };
+  auto const on_create_service_a_id =
+    service.RegisterOnCreateServiceA(on_create_service_a);
+  service.UnregisterOnCreateServiceA(on_create_service_a_id);
+
+  auto const on_create_service_w = [](SC_HANDLE,
+                                      LPCWSTR,
+                                      LPCWSTR,
+                                      DWORD,
+                                      DWORD,
+                                      DWORD,
+                                      DWORD,
+                                      LPCWSTR,
+                                      LPCWSTR,
+                                      LPDWORD,
+                                      LPCWSTR,
+                                      LPCWSTR,
+                                      LPCWSTR,
+                                      bool*)
+  {
+  };
+  auto const on_create_service_w_id =
+    service.RegisterOnCreateServiceW(on_create_service_w);
+  service.UnregisterOnCreateServiceW(on_create_service_w_id);
+
+  auto const on_open_service_a = [](SC_HANDLE sc_manager,
+                                    LPCSTR service_name,
+                                    DWORD desired_access,
+                                    bool* handled)
+  {
+  };
+  auto const on_open_service_a_id =
+    service.RegisterOnOpenServiceA(on_open_service_a);
+  service.UnregisterOnOpenServiceA(on_open_service_a_id);
+
+  auto const on_open_service_w = [](SC_HANDLE sc_manager,
+                                    LPCWSTR service_name,
+                                    DWORD desired_access,
+                                    bool* handled)
+  {
+  };
+  auto const on_open_service_w_id =
+    service.RegisterOnOpenServiceW(on_open_service_w);
+  service.UnregisterOnOpenServiceW(on_open_service_w_id);
+
   auto const on_create_process_internal_w = [](HANDLE,
                                                LPCWSTR,
                                                LPWSTR,
@@ -585,6 +656,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::InitializeRenderHelper();
     hadesmem::cerberus::InitializeModule();
     hadesmem::cerberus::InitializeException();
+    hadesmem::cerberus::InitializeDriver();
+    hadesmem::cerberus::InitializeService();
     hadesmem::cerberus::InitializeProcess();
     hadesmem::cerberus::InitializeRender();
     hadesmem::cerberus::InitializeD3D9();
@@ -600,6 +673,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::DetourNtdllForModule(nullptr);
     hadesmem::cerberus::DetourNtdllForException(nullptr);
     hadesmem::cerberus::DetourKernelBaseForException(nullptr);
+    hadesmem::cerberus::DetourNtdllForDriver(nullptr);
+    hadesmem::cerberus::DetourSechostForService(nullptr);
     hadesmem::cerberus::DetourKernelBaseForProcess(nullptr);
     hadesmem::cerberus::DetourNtdllForProcess(nullptr);
     hadesmem::cerberus::DetourD3D9(nullptr);
@@ -652,6 +727,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept
     hadesmem::cerberus::UndetourNtdllForModule(true);
     hadesmem::cerberus::UndetourNtdllForException(true);
     hadesmem::cerberus::UndetourKernelBaseForException(true);
+    hadesmem::cerberus::UndetourNtdllForDriver(true);
+    hadesmem::cerberus::UndetourSechostForService(true);
     hadesmem::cerberus::UndetourKernelBaseForProcess(true);
     hadesmem::cerberus::UndetourNtdllForProcess(true);
     hadesmem::cerberus::UndetourDXGI(true);

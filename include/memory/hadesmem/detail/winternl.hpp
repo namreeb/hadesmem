@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
@@ -12,6 +14,22 @@
 // Structures/enums/macros/etc. shamelessly taken from
 // http://bit.ly/1cxEVDJ, http://bit.ly/1cm5xnC, http://bit.ly/1bXTstU,
 // http://bit.ly/1nuwpd6, etc.
+
+namespace hadesmem
+{
+namespace detail
+{
+inline std::wstring UnicodeStringToStdString(PCUNICODE_STRING in)
+{
+  if (!in->Length || !in->Buffer)
+  {
+    return {};
+  }
+
+  return std::wstring(in->Buffer, in->Length / sizeof(wchar_t));
+}
+}
+}
 
 #define HADESMEM_DETAIL_STATUS_INFO_LENGTH_MISMATCH                            \
   (static_cast<NTSTATUS>(0xC0000004L))

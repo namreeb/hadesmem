@@ -221,6 +221,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\driver.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\dxgi.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\exception.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\helpers.cpp" />
@@ -234,6 +235,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\cerberus\raw_input.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\render.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\render_helper.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\service.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +251,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_8_w_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_a_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\driver.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />
@@ -264,6 +267,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\raw_input.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\render.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\render_helper.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\service.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\window.hpp" />
   </ItemGroup>
   <ItemGroup>
