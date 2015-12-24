@@ -456,20 +456,14 @@ void UseAllStatics()
     service.RegisterOnCreateServiceW(on_create_service_w);
   service.UnregisterOnCreateServiceW(on_create_service_w_id);
 
-  auto const on_open_service_a = [](SC_HANDLE sc_manager,
-                                    LPCSTR service_name,
-                                    DWORD desired_access,
-                                    bool* handled)
+  auto const on_open_service_a = [](SC_HANDLE, LPCSTR, DWORD, bool*)
   {
   };
   auto const on_open_service_a_id =
     service.RegisterOnOpenServiceA(on_open_service_a);
   service.UnregisterOnOpenServiceA(on_open_service_a_id);
 
-  auto const on_open_service_w = [](SC_HANDLE sc_manager,
-                                    LPCWSTR service_name,
-                                    DWORD desired_access,
-                                    bool* handled)
+  auto const on_open_service_w = [](SC_HANDLE, LPCWSTR, DWORD, bool*)
   {
   };
   auto const on_open_service_w_id =

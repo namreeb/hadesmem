@@ -1,0 +1,1 @@
+inject.exe --run "C:\World of Warcraft Classic\WoW.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
