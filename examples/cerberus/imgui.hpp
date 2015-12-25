@@ -18,6 +18,7 @@ typedef void OnImguiInitializeCallback(ImguiInterface* imgui);
 
 typedef void OnImguiCleanupCallback(ImguiInterface* imgui);
 
+// TODO: Actually expose the ImGui API.
 class ImguiInterface
 {
 public:

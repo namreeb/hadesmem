@@ -38,3 +38,4 @@
 * Mark move operations explicitly noexcept (where appropriate)?
 * Move external dependencies to different solutions.
 * Set /D_HAS_AUTO_PTR_ETC=0
+* Use props file in hadesmem solutions instead of manual duplication everywhere.

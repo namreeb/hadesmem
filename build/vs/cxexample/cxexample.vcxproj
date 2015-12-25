@@ -22,7 +22,7 @@
     <ProjectGuid>{794366D5-303F-48D9-96EF-C989D5F88245}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cxexample</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -208,12 +208,10 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\examples\cxexample\dump.cpp" />
     <ClCompile Include="..\..\..\examples\cxexample\gui.cpp" />
     <ClCompile Include="..\..\..\examples\cxexample\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\examples\cxexample\dump.hpp" />
     <ClInclude Include="..\..\..\examples\cxexample\gui.hpp" />
   </ItemGroup>
   <ItemGroup>

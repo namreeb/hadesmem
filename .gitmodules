@@ -10,3 +10,6 @@
 [submodule "deps/imgui/imgui"]
 	path = deps/imgui/imgui
 	url = https://github.com/RaptorFactor/imgui
+[submodule "deps/chaiscript/chaiscript"]
+	path = deps/chaiscript/chaiscript
+	url = https://github.com/RaptorFactor/ChaiScript.git

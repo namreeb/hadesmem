@@ -1,7 +1,7 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
-#include "dump.hpp"
+#pragma once
 
 #include <cstdint>
 #include <fstream>
@@ -24,9 +24,9 @@
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
 
-// TODO: Fix code duplication between this and the Dump project.
-
-namespace
+namespace hadesmem
+{
+namespace detail
 {
 std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 {
@@ -43,13 +43,14 @@ std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 
   return n + m - r;
 }
-}
 
-void DumpMemory()
+// TODO: Support dumping manually specified modules/regions, so we can dump
+// those modules which have erased PE headers, unlinked from PEB, are manually
+// mapped, etc.
+void DumpMemory(
+  hadesmem::Process const& process = hadesmem::Process(::GetCurrentProcessId()))
 {
-  HADESMEM_DETAIL_TRACE_A("Dumping image memory to disk.");
-
-  hadesmem::Process const process{::GetCurrentProcessId()};
+  HADESMEM_DETAIL_TRACE_A("Starting module enumeration.");
 
   hadesmem::ModuleList modules(process);
   for (auto const& module : modules)
@@ -175,9 +176,9 @@ void DumpMemory()
     auto const proc_path = hadesmem::GetPath(process);
     auto const proc_name = proc_path.substr(proc_path.rfind(L'\\') + 1);
     auto const proc_pid_str = std::to_wstring(process.GetId());
-    // TODO: Update 'dump' tool with these changes (and vice-versa).
     auto const dumps_dir = hadesmem::detail::CombinePath(
       hadesmem::detail::GetSelfDirPath(), L"dumps");
+    hadesmem::detail::CreateDirectoryWrapper(dumps_dir, false);
     std::wstring dump_path;
     std::uint32_t c = 0;
     do
@@ -212,18 +213,23 @@ void DumpMemory()
                                         "Unable to write to dump file."));
     }
 
+    // TODO: In the case of an empty ILT we should only warn here instead of
+    // erroring. We should also provide an option to use the on-disk IAT (which
+    // acts as the ILT until the image is loaded) if it appears to match,
+    // otherwise we will get dumps with a useless IAT for lots of packed apps
+    // (e.g. Skyforge, Titanfall, Dragon Age: Inquisition, etc.).
+    // TODO: Also update the implementation in CXExample.
+
     if (dir_mismatch)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                      << hadesmem::ErrorString(
-                                        "Mismatch in import dir processing."));
+      HADESMEM_DETAIL_TRACE_A("Mismatch in import dir processing.");
     }
 
     if (thunk_mismatch)
     {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error() << hadesmem::ErrorString(
-          "Mismatch in import thunk processing."));
+      HADESMEM_DETAIL_TRACE_A("Mismatch in import thunk processing.");
     }
   }
+}
+}
 }

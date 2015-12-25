@@ -7,14 +7,13 @@
 #include <cstdint>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/dump.hpp>
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/error.hpp>
 
 #include <cerberus/ant_tweak_bar.hpp>
 #include <cerberus/plugin.hpp>
 #include <cerberus/render.hpp>
-
-#include "dump.hpp"
 
 namespace
 {
@@ -30,7 +29,7 @@ void TW_CALL DumpCallbackTw(void* /*client_data*/)
 {
   try
   {
-    DumpMemory();
+    hadesmem::detail::DumpMemory();
   }
   catch (...)
   {

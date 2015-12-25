@@ -5,13 +5,13 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -19,45 +19,52 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\Arg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\ArgException.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\ArgTraits.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\CmdLine.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\CmdLineInterface.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\CmdLineOutput.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\Constraint.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\DocBookOutput.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\HelpVisitor.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\IgnoreRestVisitor.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\MultiArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\MultiSwitchArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\OptionalUnlabeledTracker.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\StandardTraits.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\StdOutput.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\SwitchArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\UnlabeledMultiArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\UnlabeledValueArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\ValueArg.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\ValuesConstraint.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\VersionVisitor.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\Visitor.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\XorHandler.h" />
-    <ClInclude Include="..\..\..\deps\tclap\tclap\include\tclap\ZshCompletionOutput.h" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\chaiscript.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\chaiscript_defines.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\chaiscript_stdlib.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\chaiscript_threading.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\any.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\bad_boxed_cast.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\bind_first.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\bootstrap.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\bootstrap_stl.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\boxed_cast.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\boxed_cast_helper.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\boxed_number.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\boxed_value.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\callable_traits.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\dispatchkit.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\dynamic_object.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\dynamic_object_detail.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\exception_specification.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\function_call.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\function_call_detail.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\handle_return.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\operators.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\proxy_constructors.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\proxy_functions.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\proxy_functions_detail.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\register_function.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\type_conversions.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\dispatchkit\type_info.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_algebraic.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_common.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_engine.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_eval.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_parser.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\language\chaiscript_prelude_docs.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\utility\json.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\utility\json_wrap.hpp" />
+    <ClInclude Include="..\..\..\deps\chaiscript\chaiscript\include\chaiscript\utility\utility.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D874AFBA-0DBC-469D-A5FE-CCBD9F8A8B70}</ProjectGuid>
+    <ProjectGuid>{21F0AFF0-E148-47CB-8EA2-6C503A0F2EB1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>tclap</RootNamespace>
+    <RootNamespace>chaiscript</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -70,6 +77,12 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -80,38 +93,36 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
-    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
-    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
-    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
-    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,7 +134,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,11 +142,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -151,7 +160,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -164,11 +172,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

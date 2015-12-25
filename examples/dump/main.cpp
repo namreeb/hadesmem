@@ -22,6 +22,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
+#include <hadesmem/detail/dump.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/str_conv.hpp>
@@ -46,7 +47,6 @@
 #include "filesystem.hpp"
 #include "headers.hpp"
 #include "imports.hpp"
-#include "memory.hpp"
 #include "overlay.hpp"
 #include "print.hpp"
 #include "relocations.hpp"
@@ -332,7 +332,9 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
     DumpRegions(*process);
   }
 
-  DumpMemory(*process);
+  // TODO: Put back the useful console output we used to get when we had this
+  // implemented specifically for this tool.
+  hadesmem::detail::DumpMemory(*process);
 }
 
 void DumpProcesses(bool memonly = false)

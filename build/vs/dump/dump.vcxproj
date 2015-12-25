@@ -22,7 +22,7 @@
     <ProjectGuid>{87218503-29B5-4AE4-AED6-6CE4784E7063}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dump</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -215,7 +215,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClCompile Include="..\..\..\examples\dump\headers.cpp" />
     <ClCompile Include="..\..\..\examples\dump\imports.cpp" />
     <ClCompile Include="..\..\..\examples\dump\main.cpp" />
-    <ClCompile Include="..\..\..\examples\dump\memory.cpp" />
     <ClCompile Include="..\..\..\examples\dump\overlay.cpp" />
     <ClCompile Include="..\..\..\examples\dump\relocations.cpp" />
     <ClCompile Include="..\..\..\examples\dump\sections.cpp" />
@@ -231,7 +230,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\dump\headers.hpp" />
     <ClInclude Include="..\..\..\examples\dump\imports.hpp" />
     <ClInclude Include="..\..\..\examples\dump\main.hpp" />
-    <ClInclude Include="..\..\..\examples\dump\memory.hpp" />
     <ClInclude Include="..\..\..\examples\dump\overlay.hpp" />
     <ClInclude Include="..\..\..\examples\dump\print.hpp" />
     <ClInclude Include="..\..\..\examples\dump\relocations.hpp" />

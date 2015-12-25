@@ -162,3 +162,7 @@
 /build/vs/imgui/imgui.vcxproj.user
 /build/vs/hadesmem.VC.VC.opendb
 /build/vs/hadesmem.VC.db
+/build/vs/chaiscript/Debug
+/build/vs/chaiscript/Release
+/build/vs/imgui_sandbox/Debug
+/build/vs/imgui_sandbox/Release

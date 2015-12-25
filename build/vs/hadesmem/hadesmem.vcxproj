@@ -28,6 +28,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\assert.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\crypto.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\detour_ref_counter.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\dump.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\environment_variable.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\filesystem.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\find_procedure.hpp" />
@@ -124,7 +125,7 @@
     <ProjectGuid>{F4A13F46-F555-4851-9172-B50F59336973}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>hadesmem</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

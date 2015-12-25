@@ -13,7 +13,10 @@
 #define HADESMEM_VERSION_MINOR 0
 #define HADESMEM_VERSION_PATCH 0
 
-#define HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z) "v" #x "." #y "." #z
+// TODO: Support different versioning modes once we 'hit' v2.0.0. For now just
+// hardcode in 'Dev' mode.
+#define HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z)                        \
+  "v" #x "." #y "." #z "-Dev"
 
 #define HADESMEM_DETAIL_VERSION_STRING_GEN(x, y, z)                            \
   HADESMEM_DETAIL_VERSION_STRING_GEN_EXP(x, y, z)
