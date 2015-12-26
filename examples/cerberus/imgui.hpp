@@ -22,6 +22,8 @@ typedef void OnImguiInitializeCallback(ImguiInterface* imgui);
 
 typedef void OnImguiCleanupCallback(ImguiInterface* imgui);
 
+typedef void OnImguiFrameCallback();
+
 // TODO: Actually expose the ImGui API.
 class ImguiInterface
 {
@@ -39,6 +41,11 @@ public:
     std::function<OnImguiCleanupCallback> const& callback) = 0;
 
   virtual void UnregisterOnCleanup(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnFrame(std::function<OnImguiFrameCallback> const& callback) = 0;
+
+  virtual void UnregisterOnFrame(std::size_t id) = 0;
 
   virtual bool IsInitialized() = 0;
 

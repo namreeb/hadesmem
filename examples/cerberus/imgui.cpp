@@ -16,10 +16,16 @@
 #include <imgui/examples/directx11_example/imgui_impl_dx11.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <hadesmem/detail/dump.hpp>
+
 #include "callbacks.hpp"
+#include "chaiscript.hpp"
 #include "cursor.hpp"
 #include "hook_disabler.hpp"
+#include "imgui_log.hpp"
+#include "imgui_console.hpp"
 #include "input.hpp"
+#include "main.hpp"
 #include "plugin.hpp"
 #include "render.hpp"
 #include "window.hpp"
@@ -55,6 +61,14 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnImguiCleanupCallback>&
 {
   static hadesmem::cerberus::Callbacks<
     hadesmem::cerberus::OnImguiCleanupCallback> callbacks;
+  return callbacks;
+}
+
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnImguiFrameCallback>&
+  GetOnImguiFrameCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnImguiFrameCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -138,6 +152,20 @@ public:
   virtual void UnregisterOnCleanup(std::size_t id) final
   {
     auto& callbacks = GetOnImguiCleanupCallbacks();
+    return callbacks.Unregister(id);
+  }
+
+  virtual std::size_t RegisterOnFrame(
+    std::function<hadesmem::cerberus::OnImguiFrameCallback> const& callback)
+    final
+  {
+    auto& callbacks = GetOnImguiFrameCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnFrame(std::size_t id) final
+  {
+    auto& callbacks = GetOnImguiFrameCallbacks();
     return callbacks.Unregister(id);
   }
 
@@ -1802,6 +1830,21 @@ void SetAllImguiVisibility(bool visible, bool /*old_visible*/)
   GetAllImguiVisibility() = visible;
 }
 
+// TODO: Remove duplication between this and CanonicalizePluginPath
+// TODO: Handle casing and canonicalization issues manually, we can't rely on
+// the FS here (or can we? perhaps the map key should be a FileID instead of a
+// path?).
+std::wstring CanonicalizeScriptPath(std::wstring path)
+{
+  if (hadesmem::detail::IsPathRelative(path))
+  {
+    path =
+      hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), path);
+  }
+  path = hadesmem::detail::MakeExtendedPath(path);
+  return path;
+}
+
 void HandleInputQueueEntry(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
   if (!ImguiInitializedAny() || !GetAllImguiVisibility())
@@ -1848,14 +1891,189 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
   }
 
-  auto const window_name =
-    "Cerberus (" + hadesmem::cerberus::GetRenderApiName(api) + ")";
+  // Move this state somwhere we can properly manage its lifetime.
+  static bool show_log_window = false;
+  static bool show_console_window = false;
+  static std::map<std::string, hadesmem::cerberus::ChaiScriptScript> scripts;
 
-  ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
-  ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiSetCond_FirstUseEver);
-  ImGui::Begin(window_name.c_str());
-  ImGui::Text("Hello");
+  ImGui::SetNextWindowSize(ImVec2(320, 250), ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(15, 15), ImGuiSetCond_FirstUseEver);
+  if (ImGui::Begin("Cerberus"))
+  {
+    ImGui::Text("Cerberus Version: %s", HADESMEM_VERSION_STRING);
+    ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
+    ImGui::Text("Renderer: %s",
+                hadesmem::cerberus::GetRenderApiName(api).c_str());
+    // TODO: Figure out why this differs from the steam overlay.
+    ImGui::Text("Performance: %.3f ms/frame (%.1f FPS)",
+                1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
+
+    ImGui::Separator();
+
+    auto& log = hadesmem::cerberus::GetImGuiLogWindow();
+
+    static char plugin_buf[MAX_PATH + 1] = "";
+    ImGui::InputText("Plugin", plugin_buf, sizeof(plugin_buf));
+    if (ImGui::Button("Load"))
+    {
+      log.AddLog("[Info]: Loading plugin %s.\n", plugin_buf);
+
+      try
+      {
+        hadesmem::cerberus::LoadPlugin(
+          hadesmem::detail::MultiByteToWideChar(plugin_buf));
+      }
+      catch (...)
+      {
+        log.AddLog("[Error]: %s\n",
+                   boost::current_exception_diagnostic_information().c_str());
+      }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Unload"))
+    {
+      log.AddLog("[Info]: Unloading plugin %s.\n", plugin_buf);
+
+      try
+      {
+        hadesmem::cerberus::UnloadPlugin(
+          hadesmem::detail::MultiByteToWideChar(plugin_buf));
+      }
+      catch (...)
+      {
+        log.AddLog("[Error]: %s\n",
+                   boost::current_exception_diagnostic_information().c_str());
+      }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Unload All"))
+    {
+      log.AddLog("[Info]: Unloading all plugins.\n");
+
+      try
+      {
+        hadesmem::cerberus::UnloadPlugins();
+      }
+      catch (...)
+      {
+        log.AddLog("[Error]: %s\n",
+                   boost::current_exception_diagnostic_information().c_str());
+      }
+    }
+
+    ImGui::Separator();
+
+    static char script_buf[MAX_PATH + 1] = "";
+    ImGui::InputText("Script", script_buf, sizeof(script_buf));
+    if (ImGui::Button("Start"))
+    {
+      auto const script_path = hadesmem::detail::ToUpperOrdinal(
+        hadesmem::detail::WideCharToMultiByte(CanonicalizeScriptPath(
+          hadesmem::detail::MultiByteToWideChar(script_buf))));
+      if (scripts.find(script_path) == std::end(scripts))
+      {
+        log.AddLog(
+          "[Info]: Running script %s (%s).\n", script_buf, script_path.c_str());
+        scripts.emplace(script_path,
+                        hadesmem::cerberus::ChaiScriptScript(script_path));
+      }
+      else
+      {
+        log.AddLog("[Error]: Failed to start already running script %s (%s).\n",
+                   script_buf,
+                   script_path.c_str());
+      }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Stop"))
+    {
+      auto const script_path = hadesmem::detail::ToUpperOrdinal(
+        hadesmem::detail::WideCharToMultiByte(CanonicalizeScriptPath(
+          hadesmem::detail::MultiByteToWideChar(script_buf))));
+      auto const script_iter = scripts.find(script_path);
+      if (script_iter != std::end(scripts))
+      {
+        log.AddLog("[Info]: Stopping script %s (%s).\n",
+                   script_buf,
+                   script_path.c_str());
+        scripts.erase(script_iter);
+      }
+      else
+      {
+        log.AddLog("[Error]: Failed to find script %s (%s).\n",
+                   script_buf,
+                   script_path.c_str());
+      }
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Dump PE"))
+    {
+      try
+      {
+        log.AddLog("[Info]: Dumping PE files.\n");
+        hadesmem::detail::DumpMemory();
+      }
+      catch (...)
+      {
+        log.AddLog("[Error]: %s",
+                   boost::current_exception_diagnostic_information().c_str());
+      }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Debug Break"))
+    {
+      log.AddLog("[Info]: Performing debug break.\n");
+      __debugbreak();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Eject"))
+    {
+      log.AddLog("[Info]: Ejecting.\n");
+      auto const eject = [](LPVOID /*arg*/) -> DWORD
+      {
+        Free();
+        FreeLibraryAndExitThread(hadesmem::detail::GetHandleToSelf(), 0);
+      };
+      ::CreateThread(nullptr, 0, eject, nullptr, 0, nullptr);
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Console"))
+    {
+      show_console_window ^= 1;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Log"))
+    {
+      show_log_window ^= 1;
+    }
+  }
   ImGui::End();
+
+  if (show_console_window)
+  {
+    auto& console = hadesmem::cerberus::GetImGuiConsoleWindow();
+    console.Draw("Console", &show_console_window);
+  }
+
+  if (show_log_window)
+  {
+    auto& log = hadesmem::cerberus::GetImGuiLogWindow();
+    log.Draw("Log", &show_log_window);
+  }
+
+  auto const& callbacks = GetOnImguiFrameCallbacks();
+  callbacks.Run();
 
   ImGui::Render();
 }
@@ -1875,8 +2093,8 @@ namespace cerberus
 {
 ImguiInterface& GetImguiInterface() noexcept
 {
-  static ImguiImpl ant_tweak_bar;
-  return ant_tweak_bar;
+  static ImguiImpl imgui;
+  return imgui;
 }
 
 void InitializeImgui()

@@ -12,3 +12,7 @@ namespace cerberus
 hadesmem::Process& GetThisProcess();
 }
 }
+
+extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept;
+
+extern "C" __declspec(dllexport) DWORD_PTR Free() noexcept;

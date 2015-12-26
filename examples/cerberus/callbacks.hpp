@@ -11,6 +11,10 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/srw_lock.hpp>
 
+// TODO: Fix the problem of registering/unregistring a callback from the context
+// of a callback (deadlock in current implementation, iterator invalidation if
+// recursive mutex is used).
+
 namespace hadesmem
 {
 namespace cerberus
@@ -43,8 +47,7 @@ public:
     (void)num_removed;
   }
 
-  template <typename... Args>
-  void Run(Args&&... args) const noexcept
+  template <typename... Args> void Run(Args&&... args) const noexcept
   {
     hadesmem::detail::AcquireSRWLock lock(
       &srw_lock_, hadesmem::detail::SRWLockType::Shared);
@@ -67,6 +70,7 @@ private:
   mutable SRWLOCK srw_lock_;
   std::size_t next_id_ = std::size_t{};
   std::map<std::size_t, Callback> callbacks_;
+  std::map<std::size_t, Callback> pending_;
 };
 }
 }

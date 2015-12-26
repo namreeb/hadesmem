@@ -20,6 +20,7 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
+#include "chaiscript.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -288,6 +289,12 @@ void UseAllStatics()
   };
   auto const on_imgui_cleanup_id = imgui.RegisterOnCleanup(on_imgui_cleanup);
   imgui.UnregisterOnCleanup(on_imgui_cleanup_id);
+
+  auto const on_imgui_frame = []()
+  {
+  };
+  auto const on_imgui_frame_id = imgui.RegisterOnFrame(on_imgui_frame);
+  imgui.UnregisterOnFrame(on_imgui_frame_id);
 
   auto const on_frame = [](hadesmem::cerberus::RenderApi, void*)
   {
@@ -663,6 +670,7 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
     hadesmem::cerberus::InitializeRawInput();
+    hadesmem::cerberus::InitializeChaiScript();
 
     // TODO: Move this to the initialization functions?
     hadesmem::cerberus::DetourNtdllForModule(nullptr);
