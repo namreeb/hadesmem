@@ -26,10 +26,6 @@ ImGuiConsoleWindow::ImGuiConsoleWindow()
   commands_.push_back("/HISTORY");
   commands_.push_back("/CLEAR");
   commands_.push_back("/TERMINATE");
-  commands_.push_back("/LOG");
-  // "classify" is here to provide an example of "C"+[tab] completing to "CL"
-  // and displaying matches.
-  commands_.push_back("/CLASSIFY");
 }
 
 ImGuiConsoleWindow::~ImGuiConsoleWindow()
@@ -270,12 +266,6 @@ void ImGuiConsoleWindow::ExecCommand(const char* command_line)
   else if (Stricmp(command_line, "/TERMINATE") == 0)
   {
     std::terminate();
-  }
-  else if (Stricmp(command_line, "/LOG") == 0)
-  {
-    auto& log = GetImGuiLogWindow();
-    log.AddLog("[Info] Console command called. Time: %.1f.\n",
-               ImGui::GetTime());
   }
   else
   {
