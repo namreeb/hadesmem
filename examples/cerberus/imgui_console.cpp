@@ -20,12 +20,6 @@ namespace cerberus
 {
 ImGuiConsoleWindow::ImGuiConsoleWindow()
 {
-  ClearLog();
-  history_pos_ = -1;
-  commands_.push_back("/HELP");
-  commands_.push_back("/HISTORY");
-  commands_.push_back("/CLEAR");
-  commands_.push_back("/TERMINATE");
 }
 
 ImGuiConsoleWindow::~ImGuiConsoleWindow()

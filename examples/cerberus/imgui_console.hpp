@@ -35,13 +35,15 @@ public:
   int TextEditCallback(ImGuiTextEditCallbackData* data);
 
 private:
-  char input_buf_[256];
+  char input_buf_[256] = {};
   std::vector<std::string> items_;
-  bool scroll_to_bottom_;
+  bool scroll_to_bottom_ = true;
   std::vector<std::string> history_;
   // -1: new line, 0..history_.size()-1 browsing history.
-  int history_pos_;
-  std::vector<std::string> commands_;
+  int history_pos_ = -1;
+  // TODO: Don't duplicate command list between here and in the exec func.
+  std::vector<std::string> commands_{
+    "/HELP", "/HISTORY", "/CLEAR", "/TERMINATE"};
 };
 
 ImGuiConsoleWindow& GetImGuiConsoleWindow();
