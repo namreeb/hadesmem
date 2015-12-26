@@ -28,7 +28,8 @@ typedef void
                                    LPPROCESS_INFORMATION process_info,
                                    PHANDLE new_token,
                                    bool* handled,
-                                   BOOL* retval);
+                                   BOOL* retval,
+                                   bool* suspend);
 
 typedef void OnRtlExitUserProcessCallback(NTSTATUS exit_code);
 

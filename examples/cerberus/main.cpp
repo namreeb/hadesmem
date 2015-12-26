@@ -483,7 +483,8 @@ void UseAllStatics()
                                                LPPROCESS_INFORMATION,
                                                PHANDLE,
                                                bool*,
-                                               BOOL*)
+                                               BOOL*,
+                                               bool*)
   {
   };
   auto const on_create_process_internal_w_id =

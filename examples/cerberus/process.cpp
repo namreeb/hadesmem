@@ -196,6 +196,7 @@ extern "C" BOOL WINAPI
   auto const& callbacks = GetOnCreateProcessInternalWCallbacks();
   bool handled = false;
   BOOL retval = FALSE;
+  bool suspend = false;
   callbacks.Run(token,
                 application_name,
                 command_line,
@@ -209,7 +210,8 @@ extern "C" BOOL WINAPI
                 process_info,
                 new_token,
                 &handled,
-                &retval);
+                &retval,
+                &suspend);
 
   if (handled)
   {
@@ -261,7 +263,7 @@ extern "C" BOOL WINAPI
   HADESMEM_DETAIL_TRACE_FORMAT_A("Ret: [%ld].", ret);
 
   std::unique_ptr<EnsureResumeThread> resume_thread;
-  if (ret && !(creation_flags & CREATE_SUSPENDED))
+  if (ret && !(creation_flags & CREATE_SUSPENDED) && !suspend)
   {
     resume_thread.reset(new EnsureResumeThread(process_info->hThread));
   }

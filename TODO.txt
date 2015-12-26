@@ -39,3 +39,4 @@
 * Move external dependencies to different solutions.
 * Set /D_HAS_AUTO_PTR_ETC=0
 * Use props file in hadesmem solutions instead of manual duplication everywhere.
+* Add things like scripting support, improved ImGui support, navigation apis, logging apis, math apis, etc. to Cerberus.
