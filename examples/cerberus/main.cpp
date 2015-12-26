@@ -20,7 +20,6 @@
 #include <hadesmem/thread_list.hpp>
 
 #include "ant_tweak_bar.hpp"
-#include "chaiscript.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -670,7 +669,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     hadesmem::cerberus::InitializeDirectInput();
     hadesmem::cerberus::InitializeCursor();
     hadesmem::cerberus::InitializeRawInput();
-    hadesmem::cerberus::InitializeChaiScript();
 
     // TODO: Move this to the initialization functions?
     hadesmem::cerberus::DetourNtdllForModule(nullptr);

@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <functional>
 
+#include <windows.h>
+
 #include <hadesmem/config.hpp>
 
 namespace hadesmem
@@ -43,6 +45,11 @@ public:
     RegisterOnFrame(std::function<OnFrameCallback> const& callback) = 0;
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
+
+  virtual std::size_t
+    RegisterOnFrame2(std::function<OnFrameCallback> const& callback) = 0;
+
+  virtual void UnregisterOnFrame2(std::size_t id) = 0;
 
   virtual std::size_t
     RegisterOnResize(std::function<OnResizeCallback> const& callback) = 0;

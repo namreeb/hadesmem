@@ -1,0 +1,32 @@
+def OnFrameImgui()
+{
+  ImGui_SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_FirstUseEver)
+  ImGui_Begin("Hello From A ChaiScript Script!")
+  ImGui_End()
+}
+
+def OnFrame(api, device)
+{
+  Log("OnFrame")
+}
+
+GLOBAL on_frame_id = -1
+GLOBAL on_frame_imgui_id = -1
+
+def CerberusScriptStart()
+{
+  var render := GetRenderInterface()
+  on_frame_id = render.RegisterOnFrame(OnFrame)
+
+  var imgui := GetImguiInterface()
+  on_frame_imgui_id = imgui.RegisterOnFrame(OnFrameImgui)
+}
+
+def CerberusScriptStop()
+{
+  var render := GetRenderInterface()
+  render.UnregisterOnFrame(on_frame_id)
+
+  var imgui := GetImguiInterface()
+  imgui.UnregisterOnFrame(on_frame_imgui_id)
+}

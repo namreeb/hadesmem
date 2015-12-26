@@ -30,10 +30,6 @@ private:
   std::unique_ptr<chaiscript::ChaiScript> chai_;
 };
 
-chaiscript::ModulePtr GetCerberusModule();
-
 chaiscript::ChaiScript& GetGlobalChaiScriptContext();
-
-void InitializeChaiScript();
 }
 }

@@ -100,13 +100,21 @@
 
 namespace
 {
-hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
-  GetOnFrameCallbacks()
-{
-  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
-    callbacks;
-  return callbacks;
-}
+  hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+    GetOnFrameCallbacks()
+  {
+    static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+      callbacks;
+    return callbacks;
+  }
+
+  hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+    GetOnFrame2Callbacks()
+  {
+    static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+      callbacks;
+    return callbacks;
+  }
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResizeCallback>&
   GetOnResizeCallbacks()
@@ -155,6 +163,18 @@ public:
   virtual void UnregisterOnFrame(std::size_t id) final
   {
     auto& callbacks = GetOnFrameCallbacks();
+    return callbacks.Unregister(id);
+  }
+  virtual std::size_t RegisterOnFrame2(
+    std::function<hadesmem::cerberus::OnFrameCallback> const& callback) final
+  {
+    auto& callbacks = GetOnFrame2Callbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnFrame2(std::size_t id) final
+  {
+    auto& callbacks = GetOnFrame2Callbacks();
     return callbacks.Unregister(id);
   }
 
@@ -577,6 +597,11 @@ void OnFrameGeneric(hadesmem::cerberus::RenderApi api, void* device)
 
   auto& callbacks = GetOnFrameCallbacks();
   callbacks.Run(api, device);
+
+  HADESMEM_DETAIL_TRACE_NOISY_A("Calling OnFrame2 callbacks.");
+
+  auto& callbacks2 = GetOnFrame2Callbacks();
+  callbacks2.Run(api, device);
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Calling HandleInputQueue.");
 
