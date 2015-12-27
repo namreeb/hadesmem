@@ -723,9 +723,11 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   }
   else
   {
-    HADESMEM_DETAIL_ASSERT(false);
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
+    // TODO: Trove is causing this. Figure out why.
+    //HADESMEM_DETAIL_ASSERT(false);
+    //HADESMEM_DETAIL_THROW_EXCEPTION(
+    //  hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
+    HADESMEM_DETAIL_TRACE_A("Unknown render API.");
   }
 }
 

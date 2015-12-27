@@ -21,6 +21,12 @@
 
 // TODO: Decouple ChaiScript and ImGui components.
 
+// TODO: Add support for automatically running a script at game startup (perhaps
+// two modes, normal and fatal - noraml simply logs errors, fatal will call
+// std::terminate).
+
+// TODO: Expose the entire Cerberus and HadesMem APIs.
+
 namespace
 {
 void InitializeChaiScriptContext(chaiscript::ChaiScript& chai)

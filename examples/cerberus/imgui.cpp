@@ -1758,8 +1758,9 @@ void OnInitializeImguiGui(hadesmem::cerberus::RenderApi api, void* device)
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     // TODO: Add this. Imgui supports it, but uses GLFW unfortunately so we will
     // need to re-write it without the dependencies.
-    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
-                                      "Currently unsupported render API."});
+    HADESMEM_DETAIL_TRACE_A("WARNING! Currently unsupported render API (OpenGL32).");
+    return;
+
   default:
     HADESMEM_DETAIL_ASSERT(false);
     HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -2078,6 +2079,8 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
   ImGui::Render();
 }
 
+// TODO: Remove the need for this. It's awful and causes just as many problems
+// as it solves.
 void OnUnloadPlugins()
 {
   OnCleanupImguiGui(hadesmem::cerberus::RenderApi::kD3D9);

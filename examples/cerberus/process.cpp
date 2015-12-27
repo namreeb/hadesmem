@@ -220,6 +220,7 @@ extern "C" BOOL WINAPI
     return retval;
   }
 
+  // TODO: Add support for this in the config, similar to blocked processes.
   if (suspend)
   {
     HADESMEM_DETAIL_TRACE_A("Process will be created suspended.");
@@ -412,6 +413,8 @@ auto& GetRtlExitUserProcessDetour() noexcept
   return detour;
 }
 
+// TODO: Remove the need for this. It's awful and causes just as many problems
+// as it solves.
 extern "C" void WINAPI RtlExitUserProcessDetour(
   hadesmem::PatchDetourBase* detour, NTSTATUS exit_status) noexcept
 {

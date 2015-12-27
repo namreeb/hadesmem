@@ -1,0 +1,1 @@
+inject.exe --run "G:\SteamLibrary\steamapps\common\Trove\GlyphClient.exe" --inject --steam-app-id 304050 --export Load --add-path --path-resolution --module cerberus.dll

@@ -401,6 +401,8 @@ void UnloadPlugins()
   plugins.clear();
 }
 
+// TODO: Remove the need for this. It's awful and causes just as many problems
+// as it solves.
 std::size_t RegisterOnUnloadPlugins(
   std::function<hadesmem::cerberus::OnUnloadPluginsCallback> const& callback)
 {

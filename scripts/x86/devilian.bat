@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\Devilian\GlyphClient.exe" --inject --steam-app-id 407510 --export Load --add-path --path-resolution --module cerberus.dll

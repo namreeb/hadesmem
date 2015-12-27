@@ -175,6 +175,28 @@
 // sustainable solution in any case.
 // https://msdn.microsoft.com/en-us/library/xwec471e.aspx
 
+// TODO: Add optional support for game 'sandboxing'. Useful for multi-boxing
+// etc.
+
+// TODO: Natively support macro keyboard/mouse buttons etc. Useful for binding
+// script toggles (or other functionality) to the macro keys.
+
+// TODO: Add builtin navigation support (separate library?).
+
+// TODO: Add builtin AI logic framework (FSM, BT, etc.)?
+
+// TODO: Add builtin settings (both for extensions and scripts) support.
+
+// TODO: Add builtin logging support.
+
+// TODO: Add builtin event support.
+
+// TODO: Fix rendering for Dragon's Prophet (D3D10, flickering), Trove (OpenGL,
+// DXGI swap chain being used and no OpenGL hooks called), Marvel Heroes 2015
+// (rendering to multiple viewports or something when in-game - GUI is
+// double-rendered to minimap), Devilian (D3D9, no rendering or input - issue
+// unknown).
+
 namespace
 {
 // This is a nasty hack to call any APIs which may be called from a static
