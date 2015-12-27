@@ -27,6 +27,12 @@ void InitializeChaiScriptContext(chaiscript::ChaiScript& chai)
 {
   chai.add(hadesmem::cerberus::GetCerberusModule());
   chai.add(hadesmem::cerberus::GetImGuiChaiScriptModule());
+
+  // TODO: Add support for extensions registering their own functions/types/etc.
+  // here. Probably some sort of OnInitializeChaiScriptContext callback. Need to
+  // figure out what happens on extension unload... Does ChaiScript support
+  // unregistering functions? Do we need to reset the context at that point and
+  // restart it? How does that affect currently running scripts?
 }
 }
 

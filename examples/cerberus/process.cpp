@@ -220,6 +220,11 @@ extern "C" BOOL WINAPI
     return retval;
   }
 
+  if (suspend)
+  {
+    HADESMEM_DETAIL_TRACE_A("Process will be created suspended.");
+  }
+
   std::wstring const application_name_str(
     application_name ? hadesmem::detail::ToUpperOrdinal(application_name)
                      : L"");

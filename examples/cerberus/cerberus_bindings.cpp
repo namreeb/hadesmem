@@ -9,6 +9,10 @@
 #include "imgui.hpp"
 #include "imgui_log.hpp"
 
+// TODO: Also expose hadesmem API. Try and replace a basic cerberus extension
+// with a script (as much as possible) and prioritize exporting the most
+// important APIs first.
+
 namespace hadesmem
 {
 namespace cerberus
@@ -19,26 +23,27 @@ chaiscript::ModulePtr GetCerberusModule()
 
   chai_mod->add(chaiscript::fun([](std::string const& s)
                                 {
+                                  HADESMEM_DETAIL_TRACE_A(s.c_str());
+
                                   auto& log = GetImGuiLogWindow();
                                   log.AddLog("%s\n", s.c_str());
-
-                                  HADESMEM_DETAIL_TRACE_A(s.c_str());
                                 }),
-                "Log");
+                "Cerberus_Log");
 
-  chai_mod->add(chaiscript::user_type<RenderApi>(), "RenderApi");
+  chai_mod->add(chaiscript::user_type<RenderApi>(), "Cerberus_RenderApi");
   chai_mod->add_global_const(chaiscript::const_var(RenderApi::kD3D9),
-                             "RenderApi_kD3D9");
+                             "Cerberus_RenderApi_kD3D9");
   chai_mod->add_global_const(chaiscript::const_var(RenderApi::kD3D10),
-                             "RenderApi_kD3D10");
+                             "Cerberus_RenderApi_kD3D10");
   chai_mod->add_global_const(chaiscript::const_var(RenderApi::kD3D11),
-                             "RenderApi_kD3D11");
+                             "Cerberus_RenderApi_kD3D11");
   chai_mod->add_global_const(chaiscript::const_var(RenderApi::kOpenGL32),
-                             "RenderApi_kOpenGL32");
+                             "Cerberus_RenderApi_kOpenGL32");
   chai_mod->add_global_const(chaiscript::const_var(RenderApi::kInvalidMaxValue),
-                             "RenderApi_kInvalidMaxValue");
+                             "Cerberus_RenderApi_kInvalidMaxValue");
 
-  chai_mod->add(chaiscript::user_type<RenderInterface>(), "RenderInterface");
+  chai_mod->add(chaiscript::user_type<RenderInterface>(),
+                "Cerberus_RenderInterface");
   auto const register_on_frame = [](
     RenderInterface* render,
     std::function<void(RenderApi, std::uintptr_t)> const& callback)
@@ -95,12 +100,14 @@ chaiscript::ModulePtr GetCerberusModule()
   chai_mod->add(chaiscript::fun(&RenderInterface::UnregisterOnCleanupGui),
                 "UnregisterOnCleanupGui");
 
-  chai_mod->add(chaiscript::fun(&GetRenderInterface), "GetRenderInterface");
+  chai_mod->add(chaiscript::fun(&GetRenderInterface),
+                "Cerberus_GetRenderInterface");
 
-  chai_mod->add(chaiscript::fun(&GetGuiVisible), "GetGuiVisible");
-  chai_mod->add(chaiscript::fun(&SetGuiVisible), "SetGuiVisible");
+  chai_mod->add(chaiscript::fun(&GetGuiVisible), "Cerberus_GetGuiVisible");
+  chai_mod->add(chaiscript::fun(&SetGuiVisible), "Cerberus_SetGuiVisible");
 
-  chai_mod->add(chaiscript::user_type<ImguiInterface>(), "ImguiInterface");
+  chai_mod->add(chaiscript::user_type<ImguiInterface>(),
+                "Cerberus_ImguiInterface");
   chai_mod->add(chaiscript::fun(&ImguiInterface::RegisterOnInitialize),
                 "RegisterOnInitialize");
   chai_mod->add(chaiscript::fun(&ImguiInterface::UnregisterOnInitialize),
@@ -116,7 +123,8 @@ chaiscript::ModulePtr GetCerberusModule()
   chai_mod->add(chaiscript::fun(&ImguiInterface::IsInitialized),
                 "IsInitialized");
 
-  chai_mod->add(chaiscript::fun(&GetImguiInterface), "GetImguiInterface");
+  chai_mod->add(chaiscript::fun(&GetImguiInterface),
+                "Cerberus_GetImguiInterface");
 
   return chai_mod;
 }

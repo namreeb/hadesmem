@@ -7,7 +7,7 @@ def OnFrameImgui()
 
 def OnFrame(api, device)
 {
-  Log("OnFrame")
+  Cerberus_Log("OnFrame")
 }
 
 GLOBAL on_frame_id = -1
@@ -15,18 +15,18 @@ GLOBAL on_frame_imgui_id = -1
 
 def CerberusScriptStart()
 {
-  var render := GetRenderInterface()
+  var render := Cerberus_GetRenderInterface()
   on_frame_id = render.RegisterOnFrame(OnFrame)
 
-  var imgui := GetImguiInterface()
+  var imgui := Cerberus_GetImguiInterface()
   on_frame_imgui_id = imgui.RegisterOnFrame(OnFrameImgui)
 }
 
 def CerberusScriptStop()
 {
-  var render := GetRenderInterface()
+  var render := Cerberus_GetRenderInterface()
   render.UnregisterOnFrame(on_frame_id)
 
-  var imgui := GetImguiInterface()
+  var imgui := Cerberus_GetImguiInterface()
   imgui.UnregisterOnFrame(on_frame_imgui_id)
 }
