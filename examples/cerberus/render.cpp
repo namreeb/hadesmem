@@ -100,21 +100,21 @@
 
 namespace
 {
-  hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
-    GetOnFrameCallbacks()
-  {
-    static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
-      callbacks;
-    return callbacks;
-  }
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+  GetOnFrameCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+    callbacks;
+  return callbacks;
+}
 
-  hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
-    GetOnFrame2Callbacks()
-  {
-    static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
-      callbacks;
-    return callbacks;
-  }
+hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&
+  GetOnFrame2Callbacks()
+{
+  static hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>
+    callbacks;
+  return callbacks;
+}
 
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnResizeCallback>&
   GetOnResizeCallbacks()
@@ -128,8 +128,7 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnSetGuiVisibilityCallback>&
   GetOnSetGuiVisibilityCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnSetGuiVisibilityCallback>
-    callbacks;
+    hadesmem::cerberus::OnSetGuiVisibilityCallback> callbacks;
   return callbacks;
 }
 
@@ -137,8 +136,7 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnInitializeGuiCallback>&
   GetOnInitializeGuiCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnInitializeGuiCallback>
-    callbacks;
+    hadesmem::cerberus::OnInitializeGuiCallback> callbacks;
   return callbacks;
 }
 
@@ -785,6 +783,18 @@ void SetDefaultRenderStateD3D9(IDirect3DDevice9* device)
 
   device->SetVertexShader(nullptr);
   device->SetPixelShader(nullptr);
+
+  auto& window = hadesmem::cerberus::GetWindowInterface();
+  auto const hwnd = window.GetCurrentWindow();
+
+  RECT rect = {};
+  ::GetClientRect(hwnd, &rect);
+
+  D3DVIEWPORT9 vp = {};
+  vp.Width = rect.right - rect.left;
+  vp.Height = rect.bottom - rect.top;
+  vp.MaxZ = 1;
+  device->SetViewport(&vp);
 }
 
 void OnFrameD3D9(IDirect3DDevice9* device)
@@ -803,8 +813,8 @@ void OnFrameD3D9(IDirect3DDevice9* device)
   if (FAILED(device->CreateStateBlock(D3DSBT_ALL, &state_block)))
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{}
-      << hadesmem::ErrorString{"IDirect3DDevice9::CreateStateBlock failed."});
+      hadesmem::Error{} << hadesmem::ErrorString{
+        "IDirect3DDevice9::CreateStateBlock failed."});
   }
   hadesmem::detail::SmartComHandle state_block_cleanup{state_block};
 
@@ -824,9 +834,8 @@ void OnFrameD3D9(IDirect3DDevice9* device)
 
   if (FAILED(state_block->Apply()))
   {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      hadesmem::Error{}
-      << hadesmem::ErrorString{"IDirect3DStateBlock9::Apply failed."});
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{} << hadesmem::ErrorString{
+                                      "IDirect3DStateBlock9::Apply failed."});
   }
 
   HADESMEM_DETAIL_TRACE_NOISY_A("Done.");
