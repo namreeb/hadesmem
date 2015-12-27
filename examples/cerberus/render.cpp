@@ -806,7 +806,7 @@ void OnFrameD3D9(IDirect3DDevice9* device)
       "TestCooperativeLevel failed. Skipping rendering for this frame.");
     return;
   }
-
+  
   HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DDevice9::CreateStateBlock.");
 
   IDirect3DStateBlock9* state_block = nullptr;
