@@ -38,6 +38,10 @@ class OpenGL32Interface;
 
 class RawInputInterface;
 
+class ImguiInterface;
+
+class ChaiScriptInterface;
+
 typedef void OnUnloadPluginsCallback();
 
 class PluginInterface
@@ -72,6 +76,10 @@ public:
   virtual OpenGL32Interface* GetOpenGL32Interface() noexcept = 0;
 
   virtual RawInputInterface* GetRawInputInterface() noexcept = 0;
+
+  virtual ImguiInterface* GetImguiInterface() noexcept = 0;
+
+  virtual ChaiScriptInterface* GetChaiScriptInterface() noexcept = 0;
 };
 
 void LoadPlugins();

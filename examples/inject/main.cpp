@@ -34,6 +34,9 @@
 // etc. Will require adding either a Games section to hadesmem.xml, or adding a
 // new XML file.
 
+// TODO: Add proper support for modifying ACLs on processes like WoW so we can
+// access them without needing to elevate.
+
 int main(int argc, char* argv[])
 {
   try

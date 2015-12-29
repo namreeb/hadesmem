@@ -18,6 +18,7 @@
 
 #include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
+#include "chaiscript.hpp"
 #include "config.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
@@ -25,6 +26,7 @@
 #include "dxgi.hpp"
 #include "exception.hpp"
 #include "helpers.hpp"
+#include "imgui.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
 #include "process.hpp"
@@ -203,6 +205,18 @@ public:
     GetRawInputInterface() noexcept final
   {
     return &hadesmem::cerberus::GetRawInputInterface();
+  }
+
+  virtual hadesmem::cerberus::ImguiInterface*
+    GetImguiInterface() noexcept final
+  {
+    return &hadesmem::cerberus::GetImguiInterface();
+  }
+
+  virtual hadesmem::cerberus::ChaiScriptInterface*
+    GetChaiScriptInterface() noexcept final
+  {
+    return &hadesmem::cerberus::GetChaiScriptInterface();
   }
 
   void Unload()

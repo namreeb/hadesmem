@@ -14,6 +14,7 @@
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/trace.hpp>
 
+#include "callbacks.hpp"
 #include "cerberus_bindings.hpp"
 #include "imgui.hpp"
 #include "imgui_log.hpp"
@@ -27,21 +28,48 @@
 
 // TODO: Expose the entire Cerberus and HadesMem APIs.
 
+// TODO: Figure out what to do on extension unload (now that we support
+// extensions adding their own ChaiScript bindings). Probably stop all running
+// scripts and reset all contexts. What about on extension load though? Probably
+// just reset the default contexts?
+
 namespace
 {
+hadesmem::cerberus::Callbacks<
+  hadesmem::cerberus::OnInitializeChaiScriptContextCallback>&
+  GetOnInitializeChaiScriptContextCallbacks()
+{
+  static hadesmem::cerberus::Callbacks<
+    hadesmem::cerberus::OnInitializeChaiScriptContextCallback> callbacks;
+  return callbacks;
+}
+
+class ChaiScriptImpl : public hadesmem::cerberus::ChaiScriptInterface
+{
+public:
+  virtual std::size_t RegisterOnInitializeChaiScriptContext(
+    std::function<
+      hadesmem::cerberus::OnInitializeChaiScriptContextCallback> const&
+      callback) final
+  {
+    auto& callbacks = GetOnInitializeChaiScriptContextCallbacks();
+    return callbacks.Register(callback);
+  }
+
+  virtual void UnregisterOnInitializeChaiScriptContext(std::size_t id) final
+  {
+    auto& callbacks = GetOnInitializeChaiScriptContextCallbacks();
+    return callbacks.Unregister(id);
+  }
+};
+
 void InitializeChaiScriptContext(chaiscript::ChaiScript& chai)
 {
   chai.add(hadesmem::cerberus::GetCerberusModule());
   chai.add(hadesmem::cerberus::GetImGuiChaiScriptModule());
 
-  // TODO: Add support for extensions registering their own functions/types/etc.
-  // here. Probably some sort of OnInitializeChaiScriptContext callback. Need to
-  // figure out what happens on extension unload... Does ChaiScript support
-  // unregistering functions? Do we need to reset the context at that point and
-  // restart it? How does that affect currently running scripts? Also need to
-  // consider waht to do on extension load... Ideally we shouldn't need to reset
-  // anything, but it might be useful to have the new bindings available at the
-  // default console, so perhaps reset only that and leave all running scripts.
+  auto const& callbacks = GetOnInitializeChaiScriptContextCallbacks();
+  callbacks.Run(chai);
 }
 }
 
@@ -135,6 +163,12 @@ chaiscript::ChaiScript& GetGlobalChaiScriptContext()
                  {
                    InitializeChaiScriptContext(chai);
                  });
+  return chai;
+}
+
+ChaiScriptInterface& GetChaiScriptInterface() noexcept
+{
+  static ChaiScriptImpl chai;
   return chai;
 }
 }

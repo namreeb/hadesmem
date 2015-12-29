@@ -169,6 +169,14 @@ public:
     return callbacks.Unregister(id);
   }
 
+  virtual void Log(std::string const& s) final
+  {
+    HADESMEM_DETAIL_TRACE_A(s.c_str());
+
+    auto& log = hadesmem::cerberus::GetImGuiLogWindow();
+    log.AddLog("%s", s.c_str());
+  }
+
   virtual bool IsInitialized() final
   {
     return ImguiInitializedAny();
@@ -1758,7 +1766,8 @@ void OnInitializeImguiGui(hadesmem::cerberus::RenderApi api, void* device)
   case hadesmem::cerberus::RenderApi::kOpenGL32:
     // TODO: Add this. Imgui supports it, but uses GLFW unfortunately so we will
     // need to re-write it without the dependencies.
-    HADESMEM_DETAIL_TRACE_A("WARNING! Currently unsupported render API (OpenGL32).");
+    HADESMEM_DETAIL_TRACE_A(
+      "WARNING! Currently unsupported render API (OpenGL32).");
     return;
 
   default:

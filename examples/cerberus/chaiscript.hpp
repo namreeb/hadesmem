@@ -3,15 +3,38 @@
 
 #pragma once
 
+#include <cstdint>
+#include <functional>
+
+#include <windows.h>
+
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <chaiscript/chaiscript.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
+
+#include <hadesmem/config.hpp>
 
 namespace hadesmem
 {
 namespace cerberus
 {
-struct ChaiScriptScript
+typedef void
+  OnInitializeChaiScriptContextCallback(chaiscript::ChaiScript& chai);
+
+class ChaiScriptInterface
+{
+public:
+  virtual ~ChaiScriptInterface()
+  {
+  }
+
+  virtual std::size_t RegisterOnInitializeChaiScriptContext(
+    std::function<OnInitializeChaiScriptContextCallback> const& callback) = 0;
+
+  virtual void UnregisterOnInitializeChaiScriptContext(std::size_t id) = 0;
+};
+
+class ChaiScriptScript
 {
 public:
   explicit ChaiScriptScript(std::string const& path);
@@ -31,5 +54,7 @@ private:
 };
 
 chaiscript::ChaiScript& GetGlobalChaiScriptContext();
+
+ChaiScriptInterface& GetChaiScriptInterface() noexcept;
 }
 }

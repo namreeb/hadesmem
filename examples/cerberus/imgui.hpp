@@ -42,10 +42,19 @@ public:
 
   virtual void UnregisterOnCleanup(std::size_t id) = 0;
 
+  // TODO: Ensure these events are fired after the regular OnFrame events,
+  // because in the case of writing a script for a bot or similar, you would
+  // want to use regular OnFrame actions to gather your data and run your bot
+  // logic, and then run your GUI OnFrame afterwards so you can draw relevant
+  // player information, what action was taken, etc...
   virtual std::size_t
     RegisterOnFrame(std::function<OnImguiFrameCallback> const& callback) = 0;
 
   virtual void UnregisterOnFrame(std::size_t id) = 0;
+
+  // TODO: Replace this with something that can work with any GUI lib. Also add
+  // printf-style wrappers.
+  virtual void Log(std::string const& s) = 0;
 
   virtual bool IsInitialized() = 0;
 
