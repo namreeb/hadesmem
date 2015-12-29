@@ -174,7 +174,7 @@ public:
     HADESMEM_DETAIL_TRACE_A(s.c_str());
 
     auto& log = hadesmem::cerberus::GetImGuiLogWindow();
-    log.AddLog("%s", s.c_str());
+    log.AddLog("%s\n", s.c_str());
   }
 
   virtual bool IsInitialized() final
@@ -2031,7 +2031,7 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       }
       catch (...)
       {
-        log.AddLog("[Error]: %s",
+        log.AddLog("[Error]: %s\n",
                    boost::current_exception_diagnostic_information().c_str());
       }
     }
