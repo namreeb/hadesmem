@@ -38,7 +38,10 @@ void InitializeChaiScriptContext(chaiscript::ChaiScript& chai)
   // here. Probably some sort of OnInitializeChaiScriptContext callback. Need to
   // figure out what happens on extension unload... Does ChaiScript support
   // unregistering functions? Do we need to reset the context at that point and
-  // restart it? How does that affect currently running scripts?
+  // restart it? How does that affect currently running scripts? Also need to
+  // consider waht to do on extension load... Ideally we shouldn't need to reset
+  // anything, but it might be useful to have the new bindings available at the
+  // default console, so perhaps reset only that and leave all running scripts.
 }
 }
 
