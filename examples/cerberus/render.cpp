@@ -421,6 +421,11 @@ std::pair<hadesmem::cerberus::RenderApi, void*>
     return {hadesmem::cerberus::RenderApi::kD3D10, d3d10_device};
   }
 
+  if (d3d11_device)
+  {
+    return {hadesmem::cerberus::RenderApi::kD3D11, d3d11_device};
+  }
+
   return {hadesmem::cerberus::RenderApi::kInvalidMaxValue, nullptr};
 }
 
@@ -629,6 +634,7 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
 
     ID3D11DeviceContext* device_context = nullptr;
     device->GetImmediateContext(&device_context);
+
     hadesmem::cerberus::D3D11StateBlock state_block{device_context};
 
     HandleOnFrameD3D11(swap_chain, device);
@@ -713,19 +719,91 @@ void OnFrameDXGI(IDXGISwapChain* swap_chain)
   {
     auto const device = static_cast<ID3D10Device*>(typed_device.second);
 
+    // TODO: Implement state block.
+    // hadesmem::cerberus::D3D10StateBlock state_block{ device };
+
     HandleOnFrameD3D10(swap_chain, device);
 
-    // TODO: Add state block.
+    device->PSSetShader(nullptr);
+    device->VSSetShader(nullptr);
+    device->GSSetShader(nullptr);
 
-    // TODO: Set correct render state.
+    hadesmem::detail::SmartComHandle back_buffer_cleanup;
+    hadesmem::detail::SmartComHandle rtv_cleanup;
+
+    ID3D10Texture2D* back_buffer = nullptr;
+    HRESULT hr = swap_chain->GetBuffer(
+      0, __uuidof(*back_buffer), reinterpret_cast<void**>(&back_buffer));
+    if (SUCCEEDED(hr))
+    {
+      back_buffer_cleanup = back_buffer;
+
+      D3D10_TEXTURE2D_DESC bb_surf_desc = {};
+      back_buffer->GetDesc(&bb_surf_desc);
+
+      D3D10_VIEWPORT viewport = {};
+      viewport.Width = bb_surf_desc.Width;
+      viewport.Height = bb_surf_desc.Height;
+      viewport.MaxDepth = 1;
+      device->RSSetViewports(1, &viewport);
+
+      ID3D10RenderTargetView* rtv = nullptr;
+      hr = device->CreateRenderTargetView(back_buffer, nullptr, &rtv);
+      if (SUCCEEDED(hr))
+      {
+        rtv_cleanup = rtv;
+        device->OMSetRenderTargets(1, &rtv, nullptr);
+      }
+      else
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "WARNING! ID3D10Device::CreateRenderTargetView failed. HR: [%ld].",
+          hr);
+      }
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! IDXGISwapChain::GetBuffer failed. HR: [%ld].", hr);
+    }
+
+    D3D10_BLEND_DESC blend = {};
+    blend.BlendEnable[0] = TRUE;
+    blend.SrcBlend = D3D10_BLEND_ONE;
+    blend.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+    blend.BlendOp = D3D10_BLEND_OP_ADD;
+    blend.SrcBlendAlpha = D3D10_BLEND_ONE;
+    blend.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
+    blend.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+    blend.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+    // TODO: Can we make this more efficient by only re-creating the blend state
+    // when the device changes? What about the other objects we create like
+    // render target views?
+    hadesmem::detail::SmartComHandle blend_state_cleanup;
+    ID3D10BlendState* blend_state = nullptr;
+    hr = device->CreateBlendState(&blend, &blend_state);
+    if (SUCCEEDED(hr))
+    {
+      // TODO: Double check that this change hasn't broken anything.
+      blend_state_cleanup = blend_state;
+      device->OMSetBlendState(blend_state, nullptr, 0xFFFFFFFF);
+    }
+    else
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! ID3D10Device::CreateBlendState failed. HR: [%ld].", hr);
+    }
 
     OnFrameGeneric(typed_device.first, typed_device.second);
+
+    // state_block.Apply();
   }
   else
   {
     // TODO: Trove is causing this. Figure out why.
-    //HADESMEM_DETAIL_ASSERT(false);
-    //HADESMEM_DETAIL_THROW_EXCEPTION(
+    // HADESMEM_DETAIL_ASSERT(false);
+    // HADESMEM_DETAIL_THROW_EXCEPTION(
     //  hadesmem::Error{} << hadesmem::ErrorString{"Unknown render API."});
     HADESMEM_DETAIL_TRACE_A("Unknown render API.");
   }
@@ -808,7 +886,7 @@ void OnFrameD3D9(IDirect3DDevice9* device)
       "TestCooperativeLevel failed. Skipping rendering for this frame.");
     return;
   }
-  
+
   HADESMEM_DETAIL_TRACE_NOISY_A("Calling IDirect3DDevice9::CreateStateBlock.");
 
   IDirect3DStateBlock9* state_block = nullptr;

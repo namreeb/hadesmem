@@ -191,8 +191,7 @@
 
 // TODO: Add builtin event support.
 
-// TODO: Fix rendering for Dragon's Prophet (D3D10, flickering), Trove (OpenGL,
-// DXGI swap chain being used and no OpenGL hooks called), Marvel Heroes 2015
+// TODO: Fix rendering for Trove (OpenGL, issue unknown), Marvel Heroes 2015
 // (rendering to multiple viewports or something when in-game - GUI is
 // double-rendered to minimap), Devilian (D3D9, no rendering or input - issue
 // unknown).
