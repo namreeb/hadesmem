@@ -11,7 +11,7 @@ class HelperImpl : public hadesmem::cerberus::HelperInterface
 {
 public:
   virtual std::pair<std::size_t, std::size_t> InitializeSupportForModule(
-    std::wstring const& module_name_upper,
+    std::wstring const& module_name,
     std::function<void(HMODULE)> const& detour_func,
     std::function<void(bool)> const& undetour_func,
     std::function<std::pair<void*, SIZE_T>&()> const& get_module_func,
@@ -20,14 +20,16 @@ public:
     auto& module = hadesmem::cerberus::GetModuleInterface();
 
     HADESMEM_DETAIL_TRACE_FORMAT_W(L"Initializing %s support.",
-                                   module_name_upper.c_str());
+                                   module_name.c_str());
 
     std::size_t on_map_id = 0;
 
+    auto const module_name_upper =
+      hadesmem::detail::ToUpperOrdinal(module_name);
+    auto const module_name_upper_with_ext = module_name_upper + L".DLL";
+
     if (on_map)
     {
-      std::wstring const module_name_upper_with_ext{module_name_upper +
-                                                    L".DLL"};
       auto const on_map_fn =
         [=](HMODULE mod, std::wstring const& /*path*/, std::wstring const& name)
       {
@@ -45,8 +47,6 @@ public:
     }
     else
     {
-      std::wstring const module_name_upper_with_ext{module_name_upper +
-                                                    L".DLL"};
       auto const on_load_fn = [=](HMODULE mod,
                                   PCWSTR /*path*/,
                                   PULONG /*flags*/,

@@ -210,6 +210,8 @@ void UseAllStatics()
 {
   hadesmem::cerberus::GetThisProcess();
 
+  hadesmem::PatchDr<void()>::InitializeStatics();
+
   auto& module = hadesmem::cerberus::GetModuleInterface();
   auto& d3d9 = hadesmem::cerberus::GetD3D9Interface();
   auto& dxgi = hadesmem::cerberus::GetDXGIInterface();

@@ -83,6 +83,14 @@ public:
     return *this;
   }
 
+  static void InitializeStatics()
+  {
+    GetInitialized();
+    GetSrwLock();
+    GetVehHooks();
+    GetDrHooks();
+  }
+
 protected:
   virtual std::size_t GetPatchSize() const override
   {
