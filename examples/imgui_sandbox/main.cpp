@@ -192,7 +192,7 @@ int WINAPI wWinMain(HINSTANCE /*instance*/,
   wc.lpfnWndProc = WndProc;
   wc.hInstance = GetModuleHandleW(nullptr);
   wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-  wc.lpszClassName = L"ImGui Example";
+  wc.lpszClassName = L"ImGui Sandbox";
   ::RegisterClassExW(&wc);
   HWND hwnd = ::CreateWindowExW(0,
                                 L"ImGui Sandbox",
