@@ -71,6 +71,19 @@ void InitializeChaiScriptContext(chaiscript::ChaiScript& chai)
   auto const& callbacks = GetOnInitializeChaiScriptContextCallbacks();
   callbacks.Run(chai);
 }
+
+std::unique_ptr<chaiscript::ChaiScript>& GetGlobalChaiScriptContextPtr()
+{
+  static auto chai =
+    std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());
+  static std::once_flag once;
+  std::call_once(once,
+                 [&]()
+                 {
+                   InitializeChaiScriptContext(*chai);
+                 });
+  return chai;
+}
 }
 
 namespace hadesmem
@@ -156,20 +169,21 @@ ChaiScriptScript::~ChaiScriptScript()
 
 chaiscript::ChaiScript& GetGlobalChaiScriptContext()
 {
-  static chaiscript::ChaiScript chai(chaiscript::Std_Lib::library());
-  static std::once_flag once;
-  std::call_once(once,
-                 [&]()
-                 {
-                   InitializeChaiScriptContext(chai);
-                 });
-  return chai;
+  return *GetGlobalChaiScriptContextPtr();
 }
 
 ChaiScriptInterface& GetChaiScriptInterface() noexcept
 {
   static ChaiScriptImpl chai;
   return chai;
+}
+
+void ReloadDefaultChaiScriptContext()
+{
+  auto& chai = GetGlobalChaiScriptContextPtr();
+  chai =
+    std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());
+  InitializeChaiScriptContext(*chai);
 }
 }
 }

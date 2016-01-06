@@ -207,8 +207,7 @@ public:
     return &hadesmem::cerberus::GetRawInputInterface();
   }
 
-  virtual hadesmem::cerberus::ImguiInterface*
-    GetImguiInterface() noexcept final
+  virtual hadesmem::cerberus::ImguiInterface* GetImguiInterface() noexcept final
   {
     return &hadesmem::cerberus::GetImguiInterface();
   }
@@ -262,6 +261,12 @@ public:
     }
     unload_ = false;
 
+    // TODO: Stop all scripts. See chaiscript bindings todos.
+
+    HADESMEM_DETAIL_TRACE_A("Resetting default ChaiScript context.");
+
+    hadesmem::cerberus::ReloadDefaultChaiScriptContext();
+
     HADESMEM_DETAIL_TRACE_A("Unloaded plugin.");
   }
 
@@ -300,8 +305,11 @@ struct PluginsWrapper
 
   ~PluginsWrapper()
   {
+// TODO: Re-enable this. By disabling this we're leaking on unload/reload.
+#if 0
     auto callbacks = GetOnUnloadPluginsCallbacks();
     callbacks.Run();
+#endif
   }
 
   std::vector<Plugin> plugins_;

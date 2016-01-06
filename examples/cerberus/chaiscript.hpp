@@ -56,5 +56,7 @@ private:
 chaiscript::ChaiScript& GetGlobalChaiScriptContext();
 
 ChaiScriptInterface& GetChaiScriptInterface() noexcept;
+
+void ReloadDefaultChaiScriptContext();
 }
 }
