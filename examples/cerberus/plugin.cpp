@@ -84,6 +84,14 @@ public:
       load_export(this);
 
       HADESMEM_DETAIL_TRACE_A("Called LoadPlugin export.");
+
+      // TODO: This is a hack. Fix it. We should not need to reset contexts on
+      // load. Extensions should be able to have their OnInitializeChaiScript
+      // callback called to simply extend all existing contexts (or just the
+      // default one?).
+      HADESMEM_DETAIL_TRACE_A("Resetting default ChaiScript context.");
+
+      hadesmem::cerberus::ReloadDefaultChaiScriptContext(true);
     }
     catch (...)
     {
@@ -220,6 +228,12 @@ public:
 
   void Unload()
   {
+    // TODO: Stop all scripts. See chaiscript bindings todos.
+
+    HADESMEM_DETAIL_TRACE_A("Resetting default ChaiScript context.");
+
+    hadesmem::cerberus::ReloadDefaultChaiScriptContext(false);
+
     HADESMEM_DETAIL_TRACE_FORMAT_A("Unloading plugin. [%p]", base_);
 
     if (!unload_)
@@ -260,12 +274,6 @@ public:
                           << hadesmem::ErrorCodeWinLast{last_error});
     }
     unload_ = false;
-
-    // TODO: Stop all scripts. See chaiscript bindings todos.
-
-    HADESMEM_DETAIL_TRACE_A("Resetting default ChaiScript context.");
-
-    hadesmem::cerberus::ReloadDefaultChaiScriptContext();
 
     HADESMEM_DETAIL_TRACE_A("Unloaded plugin.");
   }

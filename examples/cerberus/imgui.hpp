@@ -3,8 +3,12 @@
 
 #pragma once
 
+#include <cstdio>
 #include <cstdint>
 #include <functional>
+#include <vector>
+
+#include <windows.h>
 
 #include <hadesmem/config.hpp>
 
@@ -661,6 +665,51 @@ public:
   virtual void* GetInternalState() = 0;
   virtual size_t GetInternalStateSize() = 0;
   virtual void SetInternalState(void* state, bool construct = false) = 0;
+
+  // TODO: Fix code duplication between Log variants.
+
+  template <typename... Args> void LogFormat(const char* format, Args&&... args)
+  {
+    std::int32_t const num_char =
+      _snprintf(nullptr, 0, format, std::forward<Args>(args)...);
+    HADESMEM_DETAIL_ASSERT(num_char > 0);
+    if (num_char > 0)
+    {
+      std::vector<char> trace_buffer(static_cast<std::size_t>(num_char + 1));
+      std::int32_t const num_char_actual =
+        _snprintf(trace_buffer.data(),
+                  static_cast<std::size_t>(num_char),
+                  format,
+                  std::forward<Args>(args)...);
+      HADESMEM_DETAIL_ASSERT(num_char_actual > 0);
+      (void)num_char_actual;
+      auto const trace_buffer_formatted =
+        ::hadesmem::detail::WideCharToMultiByte(trace_buffer.data());
+      Log(trace_buffer_formatted);
+    }
+  }
+
+  template <typename... Args>
+  void LogFormat(wchar_t const* format, Args&&... args)
+  {
+    std::int32_t const num_char =
+      _snwprintf(nullptr, 0, format, std::forward<Args>(args)...);
+    HADESMEM_DETAIL_ASSERT(num_char > 0);
+    if (num_char > 0)
+    {
+      std::vector<char> trace_buffer(static_cast<std::size_t>(num_char + 1));
+      std::int32_t const num_char_actual =
+        _snwprintf(trace_buffer.data(),
+                   static_cast<std::size_t>(num_char),
+                   format,
+                   std::forward<Args>(args)...);
+      HADESMEM_DETAIL_ASSERT(num_char_actual > 0);
+      (void)num_char_actual;
+      auto const trace_buffer_formatted =
+        ::hadesmem::detail::WideCharToMultiByte(trace_buffer.data());
+      Log(trace_buffer_formatted);
+    }
+  }
 };
 
 ImguiInterface& GetImguiInterface() noexcept;

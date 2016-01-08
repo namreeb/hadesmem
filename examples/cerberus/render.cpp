@@ -98,6 +98,9 @@
 // active 'device', because all GUI libs make that assumption anyway and it
 // would vastly simplifiy our code.
 
+// TODO: Fix problem where D3D9 games crash when a device reset happens (e.g.
+// pop a UAC window with WoW in borderless windowed).
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnFrameCallback>&

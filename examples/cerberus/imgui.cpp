@@ -1931,6 +1931,7 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
 
       try
       {
+        // TODO: Make this fail on an empty string.
         hadesmem::cerberus::LoadPlugin(
           hadesmem::detail::MultiByteToWideChar(plugin_buf));
       }
@@ -1941,6 +1942,7 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       }
     }
 
+    // TODO: Add an easier way to unload individual plugins (dropdown list?).
     ImGui::SameLine();
     if (ImGui::Button("Unload"))
     {
@@ -1948,6 +1950,7 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
 
       try
       {
+        // TODO: Make this actually error out when we can't find the module.
         hadesmem::cerberus::UnloadPlugin(
           hadesmem::detail::MultiByteToWideChar(plugin_buf));
       }
@@ -2113,7 +2116,7 @@ void InitializeImgui()
 {
   auto& input = GetInputInterface();
   input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
-
+  
   // No OnResize handler necessary because ImGui calls GetClientRect every
   // frame.
   auto& render = GetRenderInterface();

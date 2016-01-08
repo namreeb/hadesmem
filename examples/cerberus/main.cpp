@@ -21,6 +21,7 @@
 
 #include "ant_tweak_bar.hpp"
 #include "config.hpp"
+#include "chaiscript.hpp"
 #include "cursor.hpp"
 #include "d3d9.hpp"
 #include "direct_input.hpp"
@@ -212,6 +213,7 @@ void UseAllStatics()
 
   hadesmem::PatchDr<void()>::InitializeStatics();
 
+  // TODO: Add chaiscript.
   auto& module = hadesmem::cerberus::GetModuleInterface();
   auto& d3d9 = hadesmem::cerberus::GetD3D9Interface();
   auto& dxgi = hadesmem::cerberus::GetDXGIInterface();
@@ -639,6 +641,8 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // hadesmem::SuspendedProcess suspend{process.GetId()};
 
     auto const& config = hadesmem::cerberus::GetConfig();
+
+    hadesmem::cerberus::GetGlobalChaiScriptContext();
 
     UseAllStatics();
 
