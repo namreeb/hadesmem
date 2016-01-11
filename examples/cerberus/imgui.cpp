@@ -171,7 +171,7 @@ public:
 
   virtual void Log(std::string const& s) final
   {
-    HADESMEM_DETAIL_TRACE_A(s.c_str());
+    HADESMEM_DETAIL_TRACE_FORMAT_A("%s", s.c_str());
 
     auto& log = hadesmem::cerberus::GetImGuiLogWindow();
     log.AddLog("%s\n", s.c_str());
@@ -2116,7 +2116,7 @@ void InitializeImgui()
 {
   auto& input = GetInputInterface();
   input.RegisterOnInputQueueEntry(HandleInputQueueEntry);
-  
+
   // No OnResize handler necessary because ImGui calls GetClientRect every
   // frame.
   auto& render = GetRenderInterface();

@@ -47,6 +47,9 @@
 
 // TODO: Ensure we set up the D3D9 SDK correctly. http://bit.ly/1KaVNwO
 
+// TODO: Add a mechanism to select EndScene OR Present OR PresentEx so we're not
+// double/triple processing frames!
+
 namespace
 {
 class D3D9Impl : public hadesmem::cerberus::D3D9Interface
@@ -349,8 +352,12 @@ extern "C" HRESULT WINAPI
   {
     AddDeviceToMap(device);
 
+// Disabled until we stop processing the same frame multiple times. (See TODO at
+// top of file.)
+#if 0
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
+#endif
   }
 
   auto const present = detour->GetTrampolineT<IDirect3DDevice9_Present_Fn>();
@@ -406,8 +413,12 @@ extern "C" HRESULT WINAPI
   {
     AddDeviceToMap(device);
 
+// Disabled until we stop processing the same frame multiple times. (See TODO at
+// top of file.)
+#if 0
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
+#endif
   }
 
   auto const present =
@@ -474,8 +485,12 @@ extern "C" HRESULT WINAPI
   {
     AddDeviceToMap(device);
 
+// Disabled until we stop processing the same frame multiple times. (See TODO at
+// top of file.)
+#if 0
     auto& callbacks = hadesmem::cerberus::GetOnFrameD3D9Callbacks();
     callbacks.Run(device);
+#endif
   }
 
   auto const present = detour->GetTrampolineT<IDirect3DSwapChain9_Present_Fn>();
