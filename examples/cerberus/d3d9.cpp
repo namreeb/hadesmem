@@ -48,7 +48,10 @@
 // TODO: Ensure we set up the D3D9 SDK correctly. http://bit.ly/1KaVNwO
 
 // TODO: Add a mechanism to select EndScene OR Present OR PresentEx so we're not
-// double/triple processing frames!
+// double/triple processing frames! Perhaps as soon as we get a frame one one of
+// them, we 'disable' the rest. There should also be an override mechanism in
+// the config as well as one to reset the state at runtime (for testing
+// purposes).
 
 namespace
 {
