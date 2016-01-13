@@ -1,5 +1,5 @@
-// Copyright (C) 2010-2015 Joshua Boyce
-// See the file COPYING for copying permission.
+// Copyright (C) 2015 JuJuBoSc.
+// https://github.com/JuJuBoSc/imgui-chaiscript/blob/master/ImGui__ChaiScript.h
 
 #include "imgui_bindings.hpp"
 

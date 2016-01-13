@@ -26,12 +26,6 @@ typedef void
 
 typedef void OnReleaseD3D9Callback(IDirect3DDevice9* device);
 
-Callbacks<OnFrameD3D9Callback>& GetOnFrameD3D9Callbacks();
-
-Callbacks<OnResetD3D9Callback>& GetOnResetD3D9Callbacks();
-
-Callbacks<OnReleaseD3D9Callback>& GetOnReleaseD3D9Callbacks();
-
 class D3D9Interface
 {
 public:
