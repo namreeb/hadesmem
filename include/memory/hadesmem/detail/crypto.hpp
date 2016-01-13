@@ -63,33 +63,18 @@ inline std::array<std::uint8_t, 20> GetSha1Hash(void* base, std::uint32_t size)
   return sha1;
 }
 
-// TODO: Make a generic function for converting a byte array into a string
-// instead of this hardcoded crap.
-
-inline std::wstring Sha1HashToString(std::array<std::uint8_t, 20> const& sha1)
+template <std::size_t Size>
+std::wstring ByteArrayToString(std::array<std::uint8_t, Size> const& arr)
 {
-  std::wstring sha1_str;
+  std::wstring str;
   wchar_t const digits[] = L"0123456789abcdef";
-  for (auto const& byte : sha1)
+  for (auto const& byte : arr)
   {
-    sha1_str += digits[byte >> 4];
-    sha1_str += digits[byte & 0xf];
+    str += digits[byte >> 4];
+    str += digits[byte & 0xf];
   }
 
-  return sha1_str;
-}
-
-inline std::wstring Md5HashToString(std::array<std::uint8_t, 16> const& md5)
-{
-  std::wstring md5_str;
-  wchar_t const digits[] = L"0123456789abcdef";
-  for (auto const& byte : md5)
-  {
-    md5_str += digits[byte >> 4];
-    md5_str += digits[byte & 0xf];
-  }
-
-  return md5_str;
+  return str;
 }
 }
 }

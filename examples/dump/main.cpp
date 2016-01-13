@@ -163,6 +163,9 @@
 // TODO: Warn on files without a DOS stub as it probably means they're
 // hand-crafted?
 
+// TODO: Add support for dumping arbitrary memory blobs using updated DumpMemory
+// API in detail/dump.hpp.
+
 namespace
 {
 // TODO: Clean up this hack (and other global state).

@@ -28,7 +28,7 @@ namespace hadesmem
 {
 namespace detail
 {
-std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
+inline std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
 {
   if (!m)
   {
@@ -44,11 +44,52 @@ std::uint64_t RoundUp(std::uint64_t n, std::uint64_t m)
   return n + m - r;
 }
 
-// TODO: Support dumping manually specified modules/regions, so we can dump
-// those modules which have erased PE headers, unlinked from PEB, are manually
-// mapped, etc.
-void DumpMemory(
-  hadesmem::Process const& process = hadesmem::Process(::GetCurrentProcessId()))
+inline void WriteDumpFile(hadesmem::Process const& process,
+                          std::wstring const& region_name,
+                          void const* buffer,
+                          std::size_t size,
+                          std::wstring const& dir_name = L"dumps")
+{
+  HADESMEM_DETAIL_TRACE_A("Writing file.");
+
+  auto const proc_path = hadesmem::GetPath(process);
+  auto const proc_name = proc_path.substr(proc_path.rfind(L'\\') + 1);
+  auto const proc_pid_str = std::to_wstring(process.GetId());
+  auto const dumps_dir =
+    hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), dir_name);
+  hadesmem::detail::CreateDirectoryWrapper(dumps_dir, false);
+  std::wstring dump_path;
+  std::uint32_t c = 0;
+  do
+  {
+    auto const file_name = proc_name + L"_" + proc_pid_str + L"_" +
+                           region_name + L"_" + std::to_wstring(c++) + L".bin";
+    dump_path = hadesmem::detail::CombinePath(dumps_dir, file_name);
+  } while (hadesmem::detail::DoesFileExist(dump_path) && c < 10);
+
+  if (c > 10)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString(
+        "Found more than 10 conflicting file names. Aborting."));
+  }
+
+  auto const dump_file = hadesmem::detail::OpenFile<char>(
+    dump_path, std::ios::out | std::ios::binary);
+  if (!*dump_file)
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      hadesmem::Error() << hadesmem::ErrorString("Unable to open dump file."));
+  }
+
+  if (!dump_file->write(static_cast<char const*>(buffer), size))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error() << hadesmem::ErrorString(
+                                      "Unable to write to dump file."));
+  }
+}
+
+inline void DumpAllModules(hadesmem::Process const& process)
 {
   HADESMEM_DETAIL_TRACE_A("Starting module enumeration.");
 
@@ -171,47 +212,8 @@ void DumpMemory(
     bool const dir_mismatch =
       (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
 
-    HADESMEM_DETAIL_TRACE_A("Writing file.");
-
-    auto const proc_path = hadesmem::GetPath(process);
-    auto const proc_name = proc_path.substr(proc_path.rfind(L'\\') + 1);
-    auto const proc_pid_str = std::to_wstring(process.GetId());
-    auto const dumps_dir = hadesmem::detail::CombinePath(
-      hadesmem::detail::GetSelfDirPath(), L"dumps");
-    hadesmem::detail::CreateDirectoryWrapper(dumps_dir, false);
-    std::wstring dump_path;
-    std::uint32_t c = 0;
-    do
-    {
-      auto const file_name = proc_name + L"_" + proc_pid_str + L"_" +
-                             module.GetName() + L"_" + std::to_wstring(c++) +
-                             L".dmp";
-      dump_path = hadesmem::detail::CombinePath(dumps_dir, file_name);
-    } while (hadesmem::detail::DoesFileExist(dump_path) && c < 10);
-
-    if (c > 10)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        hadesmem::Error() << hadesmem::ErrorString(
-          "Found more than 10 conflicting file names. Aborting."));
-    }
-
-    auto const dump_file = hadesmem::detail::OpenFile<char>(
-      dump_path, std::ios::out | std::ios::binary);
-    if (!*dump_file)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                      << hadesmem::ErrorString(
-                                        "Unable to open dump file."));
-    }
-
-    if (!dump_file->write(reinterpret_cast<char const*>(raw_new.data()),
-                          raw_new.size()))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error()
-                                      << hadesmem::ErrorString(
-                                        "Unable to write to dump file."));
-    }
+    WriteDumpFile(
+      process, module.GetName(), raw_new.data(), raw_new.size(), L"pe_dumps");
 
     // TODO: In the case of an empty ILT we should only warn here instead of
     // erroring. We should also provide an option to use the on-disk IAT (which
@@ -229,6 +231,33 @@ void DumpMemory(
     {
       HADESMEM_DETAIL_TRACE_A("Mismatch in import thunk processing.");
     }
+  }
+}
+
+inline void DumpMemoryRegionRaw(hadesmem::Process const& process,
+                                void* base,
+                                std::size_t size)
+{
+  HADESMEM_DETAIL_TRACE_A("Reading memory.");
+
+  auto raw = hadesmem::ReadVector<std::uint8_t>(process, base, size);
+
+  WriteDumpFile(
+    process, PtrToHexString(base), raw.data(), raw.size(), L"raw_dumps");
+}
+
+inline void DumpMemory(
+  hadesmem::Process const& process = hadesmem::Process(::GetCurrentProcessId()),
+  void* base = nullptr,
+  std::size_t size = 0)
+{
+  if (!base && !size)
+  {
+    DumpAllModules(process);
+  }
+  else
+  {
+    DumpMemoryRegionRaw(process, base, size);
   }
 }
 }
