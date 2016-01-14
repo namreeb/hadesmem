@@ -3,6 +3,12 @@
 
 // Modified version of ImGui example and test code.
 
+// TODO: Move our Cerberus GUI and scripting stuff into a lib if possible so we
+// can test it here easily. Alternatively, we could just turn this into a basic
+// D3D app which we can inject into and use for testing that way.
+
+// TODO: Support other renderers (DX9, DX10, DX12, OpenGL).
+
 #include <cctype>
 #include <functional>
 
