@@ -5,7 +5,7 @@
 
 #include <functional>
 #include <map>
-#include <mutex>
+#include <string>
 
 #include <hadesmem/detail/assert.hpp>
 #include <hadesmem/detail/trace.hpp>
@@ -19,6 +19,11 @@ namespace hadesmem
 {
 namespace cerberus
 {
+namespace detail
+{
+void LogWrapper(std::string const& s);
+}
+
 template <typename Func> class Callbacks
 {
 public:
@@ -59,8 +64,7 @@ public:
       }
       catch (...)
       {
-        HADESMEM_DETAIL_TRACE_FORMAT_A(
-          "%s", boost::current_exception_diagnostic_information().c_str());
+        detail::LogWrapper(boost::current_exception_diagnostic_information());
       }
     }
   }
