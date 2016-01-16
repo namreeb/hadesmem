@@ -5,6 +5,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <map>
+#include <string>
 
 #include <windows.h>
 
@@ -52,8 +54,11 @@ public:
   ~ChaiScriptScript();
 
 private:
+  std::string path_;
   std::unique_ptr<chaiscript::ChaiScript> chai_;
 };
+
+std::map<std::string, ChaiScriptScript>& GetChaiScriptScripts();
 
 chaiscript::ChaiScript& GetGlobalChaiScriptContext();
 

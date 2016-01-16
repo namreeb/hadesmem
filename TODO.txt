@@ -40,3 +40,5 @@
 * Set /D_HAS_AUTO_PTR_ETC=0
 * Use props file in hadesmem solutions instead of manual duplication everywhere.
 * Add things like scripting support, improved ImGui support, navigation apis, logging apis, math apis, etc. to Cerberus.
+* Fix all places we're passing potentially unsanitized strings to tracers. Use the formatting overload instead.
+* Do perf testing to see if it's worth changing to optimizing for size.

@@ -642,11 +642,15 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 
     auto const& config = hadesmem::cerberus::GetConfig();
 
+    // TODO: Move this somewhere appropriate.
     hadesmem::cerberus::GetGlobalChaiScriptContext();
 
     UseAllStatics();
 
     hadesmem::cerberus::LoadPlugins();
+
+    // TODO: Move this somewhere appropriate.
+    hadesmem::cerberus::GetChaiScriptScripts();
 
     if (config.IsAntTweakBarEnabled())
     {

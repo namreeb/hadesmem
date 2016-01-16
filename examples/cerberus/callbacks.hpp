@@ -51,17 +51,16 @@ public:
   {
     hadesmem::detail::AcquireSRWLock lock(
       &srw_lock_, hadesmem::detail::SRWLockType::Shared);
-    for (auto const& callback : callbacks_)
+    for (auto const& c : callbacks_)
     {
       try
       {
-        callback.second(std::forward<Args&&>(args)...);
+        c.second(std::forward<Args>(args)...);
       }
       catch (...)
       {
-        HADESMEM_DETAIL_TRACE_A(
-          boost::current_exception_diagnostic_information().c_str());
-        HADESMEM_DETAIL_ASSERT(false);
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "%s", boost::current_exception_diagnostic_information().c_str());
       }
     }
   }

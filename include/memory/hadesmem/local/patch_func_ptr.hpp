@@ -115,7 +115,7 @@ public:
     RemoveUnchecked();
   }
 
-  virtual void Apply()
+  virtual void Apply() override
   {
     if (applied_)
     {

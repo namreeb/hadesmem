@@ -10,6 +10,8 @@
 
 #include <windows.h>
 
+#include <hadesmem/detail/assert.hpp>
+#include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/config.hpp>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>

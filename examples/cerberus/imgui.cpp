@@ -17,13 +17,14 @@
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/detail/dump.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 
 #include "callbacks.hpp"
 #include "chaiscript.hpp"
 #include "cursor.hpp"
 #include "hook_disabler.hpp"
-#include "imgui_log.hpp"
 #include "imgui_console.hpp"
+#include "imgui_log.hpp"
 #include "input.hpp"
 #include "main.hpp"
 #include "plugin.hpp"
@@ -1904,7 +1905,8 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
   // Move this state somwhere we can properly manage its lifetime.
   static bool show_log_window = false;
   static bool show_console_window = false;
-  static std::map<std::string, hadesmem::cerberus::ChaiScriptScript> scripts;
+
+  auto& imgui = hadesmem::cerberus::GetImguiInterface();
 
   ImGui::SetNextWindowSize(ImVec2(320, 250), ImGuiSetCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(15, 15), ImGuiSetCond_FirstUseEver);
@@ -1915,19 +1917,15 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
     ImGui::Text("Renderer: %s",
                 hadesmem::cerberus::GetRenderApiName(api).c_str());
     // TODO: Figure out why this differs from the steam overlay.
-    ImGui::Text("Performance: %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
     ImGui::Separator();
-
-    auto& log = hadesmem::cerberus::GetImGuiLogWindow();
 
     static char plugin_buf[MAX_PATH + 1] = "";
     ImGui::InputText("Plugin", plugin_buf, sizeof(plugin_buf));
     if (ImGui::Button("Load"))
     {
-      log.AddLog("[Info]: Loading plugin %s.\n", plugin_buf);
+      imgui.LogFormat("[Info]: Loading plugin. Name: [%s].", plugin_buf);
 
       try
       {
@@ -1937,8 +1935,9 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       }
       catch (...)
       {
-        log.AddLog("[Error]: %s\n",
-                   boost::current_exception_diagnostic_information().c_str());
+        imgui.LogFormat(
+          "[Error]: %s",
+          boost::current_exception_diagnostic_information().c_str());
       }
     }
 
@@ -1946,8 +1945,8 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
     ImGui::SameLine();
     if (ImGui::Button("Unload"))
     {
-      log.AddLog("[Info]: Unloading plugin %s.\n", plugin_buf);
-
+      imgui.LogFormat("[Info]: Unloading plugin. Name: [%s].", plugin_buf);
+      
       try
       {
         // TODO: Make this actually error out when we can't find the module.
@@ -1956,15 +1955,16 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       }
       catch (...)
       {
-        log.AddLog("[Error]: %s\n",
-                   boost::current_exception_diagnostic_information().c_str());
+        imgui.LogFormat(
+          "[Error]: %s",
+          boost::current_exception_diagnostic_information().c_str());
       }
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Unload All"))
     {
-      log.AddLog("[Info]: Unloading all plugins.\n");
+      imgui.Log("[Info]: Unloading all plugins.");
 
       try
       {
@@ -1972,54 +1972,56 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
       }
       catch (...)
       {
-        log.AddLog("[Error]: %s\n",
-                   boost::current_exception_diagnostic_information().c_str());
+        imgui.LogFormat(
+          "[Error]: %s",
+          boost::current_exception_diagnostic_information().c_str());
       }
     }
 
     ImGui::Separator();
 
+    auto& scripts = hadesmem::cerberus::GetChaiScriptScripts();
+
     static char script_buf[MAX_PATH + 1] = "";
     ImGui::InputText("Script", script_buf, sizeof(script_buf));
     if (ImGui::Button("Start"))
     {
-      auto const script_path = hadesmem::detail::ToUpperOrdinal(
+      auto const script_path =
         hadesmem::detail::WideCharToMultiByte(CanonicalizeScriptPath(
-          hadesmem::detail::MultiByteToWideChar(script_buf))));
-      if (scripts.find(script_path) == std::end(scripts))
+          hadesmem::detail::MultiByteToWideChar(script_buf)));
+      if (scripts.find(hadesmem::detail::ToUpperOrdinal(script_path)) ==
+          std::end(scripts))
       {
-        log.AddLog(
-          "[Info]: Running script %s (%s).\n", script_buf, script_path.c_str());
-        scripts.emplace(script_path,
+        scripts.emplace(hadesmem::detail::ToUpperOrdinal(script_path),
                         hadesmem::cerberus::ChaiScriptScript(script_path));
       }
       else
       {
-        log.AddLog("[Error]: Failed to start already running script %s (%s).\n",
-                   script_buf,
-                   script_path.c_str());
+        imgui.LogFormat("[Error]: Failed to start already running script. "
+                        "Name: [%s]. Path: [%s].",
+                        script_buf,
+                        script_path.c_str());
       }
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Stop"))
     {
-      auto const script_path = hadesmem::detail::ToUpperOrdinal(
+      auto const script_path =
         hadesmem::detail::WideCharToMultiByte(CanonicalizeScriptPath(
-          hadesmem::detail::MultiByteToWideChar(script_buf))));
-      auto const script_iter = scripts.find(script_path);
+          hadesmem::detail::MultiByteToWideChar(script_buf)));
+      auto const script_iter =
+        scripts.find(hadesmem::detail::ToUpperOrdinal(script_path));
       if (script_iter != std::end(scripts))
       {
-        log.AddLog("[Info]: Stopping script %s (%s).\n",
-                   script_buf,
-                   script_path.c_str());
         scripts.erase(script_iter);
       }
       else
       {
-        log.AddLog("[Error]: Failed to find script %s (%s).\n",
-                   script_buf,
-                   script_path.c_str());
+        imgui.LogFormat(
+          "[Error]: Failed to find script. Name: [%s]. Path: [%s].",
+          script_buf,
+          script_path.c_str());
       }
     }
 
@@ -2029,27 +2031,28 @@ void OnFrameImgui(hadesmem::cerberus::RenderApi api, void* /*device*/)
     {
       try
       {
-        log.AddLog("[Info]: Dumping PE files.\n");
+        imgui.Log("[Info]: Dumping PE files.");
         hadesmem::detail::DumpMemory();
       }
       catch (...)
       {
-        log.AddLog("[Error]: %s\n",
-                   boost::current_exception_diagnostic_information().c_str());
+        imgui.LogFormat(
+          "[Error]: %s",
+          boost::current_exception_diagnostic_information().c_str());
       }
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Debug Break"))
     {
-      log.AddLog("[Info]: Performing debug break.\n");
+      imgui.Log("[Info]: Performing debug break.");
       __debugbreak();
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Eject"))
     {
-      log.AddLog("[Info]: Ejecting.\n");
+      imgui.Log("[Info]: Ejecting.");
       auto const eject = [](LPVOID /*arg*/) -> DWORD
       {
         Free();

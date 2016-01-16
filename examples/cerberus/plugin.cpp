@@ -228,7 +228,12 @@ public:
 
   void Unload()
   {
-    // TODO: Stop all scripts. See chaiscript bindings todos.
+    HADESMEM_DETAIL_TRACE_A("Stopping all ChaiScript scripts.");
+
+    // TODO: Does there need to be synchronization here for callbacks etc
+    // running in a different thread? (Also below.)
+    auto& scripts = hadesmem::cerberus::GetChaiScriptScripts();
+    scripts.clear();
 
     HADESMEM_DETAIL_TRACE_A("Resetting default ChaiScript context.");
 

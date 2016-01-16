@@ -14,6 +14,7 @@
 #include <winternl.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/last_error_preserver.hpp>
 #include <hadesmem/detail/recursion_protector.hpp>
 #include <hadesmem/detail/winternl.hpp>
@@ -174,14 +175,6 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&LdrUnloadDll)>>&
   return detour;
 }
 
-std::wstring GetFileNameFromPath(std::wstring const& path)
-{
-  auto const backslash = path.find_last_of(L'\\');
-  std::size_t const name_beg =
-    (backslash != std::wstring::npos ? backslash + 1 : 0);
-  return {std::begin(path) + name_beg, std::end(path)};
-}
-
 extern "C" NTSTATUS WINAPI
   NtMapViewOfSectionDetour(hadesmem::PatchDetourBase* detour,
                            HANDLE section,
@@ -279,7 +272,7 @@ extern "C" NTSTATUS WINAPI
     std::wstring const path{static_cast<PCWSTR>(arbitrary_user_pointer)};
     HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Path: [%s].", path.c_str());
 
-    std::wstring const module_name = GetFileNameFromPath(path);
+    std::wstring const module_name = hadesmem::detail::GetPathBaseName(path);
     HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Module name: [%s].",
                                          module_name.c_str());
     std::wstring const module_name_upper =
@@ -384,7 +377,7 @@ extern "C" NTSTATUS WINAPI LdrLoadDllDetour(hadesmem::PatchDetourBase* detour,
   }
 
   std::wstring const full_name = hadesmem::detail::UnicodeStringToStdString(name);
-  std::wstring const module_name = GetFileNameFromPath(full_name);
+  std::wstring const module_name = hadesmem::detail::GetPathBaseName(full_name);
   HADESMEM_DETAIL_TRACE_NOISY_FORMAT_W(L"Full Name: [%s]. Module Name: [%s].",
                                        full_name.c_str(),
                                        module_name.c_str());

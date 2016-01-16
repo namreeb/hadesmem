@@ -11,13 +11,13 @@
 #include <chaiscript/chaiscript_stdlib.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/detail/trace.hpp>
 
 #include "callbacks.hpp"
 #include "cerberus_bindings.hpp"
 #include "imgui.hpp"
-#include "imgui_log.hpp"
 #include "imgui_bindings.hpp"
 
 // TODO: Decouple ChaiScript and ImGui components.
@@ -93,6 +93,31 @@ std::unique_ptr<chaiscript::ChaiScript>& GetGlobalChaiScriptContextPtr()
                  });
   return chai;
 }
+
+void LogBoxedValue(chaiscript::ChaiScript& chai,
+                   chaiscript::Boxed_Value const& val,
+                   std::string const& name)
+{
+  if (!val.get_type_info().bare_equal(chaiscript::user_type<void>()))
+  {
+    try
+    {
+      using ToStringFn =
+        std::function<std::string(const chaiscript::Boxed_Value& bv)>;
+      auto const str = chai.eval<ToStringFn>("to_string")(val);
+
+      HADESMEM_DETAIL_TRACE_FORMAT_A("[Info]: %s.", str.c_str());
+
+      auto& imgui = hadesmem::cerberus::GetImguiInterface();
+      imgui.LogFormat("[Info]: %s: %s", name.c_str(), str.c_str());
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_NOISY_FORMAT_A(
+        "%s", boost::current_exception_diagnostic_information().c_str());
+    }
+  }
+}
 }
 
 namespace hadesmem
@@ -100,63 +125,48 @@ namespace hadesmem
 namespace cerberus
 {
 ChaiScriptScript::ChaiScriptScript(std::string const& path)
-  : chai_(
+  : path_(path), chai_(
       std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library()))
 {
   InitializeChaiScriptContext(*chai_, true);
 
-  auto& log = GetImGuiLogWindow();
+  auto& imgui = GetImguiInterface();
+  imgui.LogFormat("[Info]: Loading script. Name: [%s]. Path: [%s].",
+    hadesmem::detail::GetPathBaseName(path_).c_str(),
+    path_.c_str());
 
   try
   {
-    auto const val = chai_->eval_file(path.c_str());
-    if (!val.get_type_info().bare_equal(chaiscript::user_type<void>()))
-    {
-      try
-      {
-        auto const str = chai_->eval<
-          std::function<std::string(const chaiscript::Boxed_Value& bv)>>(
-          "to_string")(val);
-        HADESMEM_DETAIL_TRACE_FORMAT_A("[Info]: %s.", str.c_str());
-        log.AddLog("[Info]: %s\n", str.c_str());
-      }
-      catch (...)
-      {
-      }
-    }
-
-    chai_->eval("CerberusScriptStart()");
+    LogBoxedValue(*chai_, chai_->eval_file(path.c_str()), "Load Result");
+    LogBoxedValue(*chai_, chai_->eval("CerberusScriptStart()"), "Start Result");
   }
-  catch (const chaiscript::exception::eval_error& ee)
+  catch (chaiscript::exception::eval_error const& e)
   {
-    if (ee.call_stack.size() > 0)
+    if (e.call_stack.size() > 0)
     {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "[Error]: %s during evaluation at (%d,%d).",
-        boost::current_exception_diagnostic_information().c_str(),
-        ee.call_stack[0]->start().line,
-        ee.call_stack[0]->start().column);
-      log.AddLog("[Error]: %s during evaluation at (%d,%d)\n",
-                 boost::current_exception_diagnostic_information().c_str(),
-                 ee.call_stack[0]->start().line,
-                 ee.call_stack[0]->start().column);
+      imgui.LogFormat("[Error]: Message: [%s]. Line: [%d]. Column: [%d].",
+                      boost::current_exception_diagnostic_information().c_str(),
+                      e.call_stack[0]->start().line,
+                      e.call_stack[0]->start().column);
+      for (std::size_t i = 1; i < e.call_stack.size(); ++i)
+      {
+        imgui.LogFormat("[Error]: Frame: [%Iu]. Line: [%d]. Column: [%d].",
+                        i,
+                        e.call_stack[i]->start().line,
+                        e.call_stack[i]->start().column);
+      }
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
+      imgui.LogFormat(
         "[Error]: %s.",
         boost::current_exception_diagnostic_information().c_str());
-      log.AddLog("[Error]: %s\n",
-                 boost::current_exception_diagnostic_information().c_str());
     }
   }
   catch (...)
   {
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "[Error]: %s.",
-      boost::current_exception_diagnostic_information().c_str());
-    log.AddLog("[Error]: %s\n",
-               boost::current_exception_diagnostic_information().c_str());
+    imgui.LogFormat("[Error]: %s.",
+                    boost::current_exception_diagnostic_information().c_str());
   }
 }
 
@@ -164,9 +174,15 @@ ChaiScriptScript::~ChaiScriptScript()
 {
   try
   {
+    // Don't try and do anything if we've been moved from.
     if (chai_)
     {
-      chai_->eval("CerberusScriptStop()");
+      auto& imgui = GetImguiInterface();
+      imgui.LogFormat("[Info]: Unloading script. Name: [%s]. Path: [%s].",
+        hadesmem::detail::GetPathBaseName(path_).c_str(),
+        path_.c_str());
+
+      LogBoxedValue(*chai_, chai_->eval("CerberusScriptStop()"), "Stop Result");
     }
   }
   catch (...)
@@ -174,6 +190,12 @@ ChaiScriptScript::~ChaiScriptScript()
     HADESMEM_DETAIL_TRACE_A(
       boost::current_exception_diagnostic_information().c_str());
   }
+}
+
+std::map<std::string, ChaiScriptScript>& GetChaiScriptScripts()
+{
+  static std::map<std::string, hadesmem::cerberus::ChaiScriptScript> scripts;
+  return scripts;
 }
 
 chaiscript::ChaiScript& GetGlobalChaiScriptContext()

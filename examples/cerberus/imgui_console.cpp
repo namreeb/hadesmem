@@ -10,7 +10,6 @@
 #include <hadesmem/error.hpp>
 
 #include "chaiscript.hpp"
-#include "imgui_log.hpp"
 
 // TODO: Clean this up.
 

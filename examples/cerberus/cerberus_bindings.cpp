@@ -47,7 +47,16 @@ chaiscript::ModulePtr GetRenderModule()
     return render->RegisterOnFrame2(
       [callback](hadesmem::cerberus::RenderApi api, void* device)
       {
-        return callback(api, reinterpret_cast<std::uintptr_t>(device));
+        try
+        {
+          return callback(api, reinterpret_cast<std::uintptr_t>(device));
+        }
+        catch (...)
+        {
+          // TODO: Add this to all other callback registration functions.
+          auto& imgui = hadesmem::cerberus::GetImguiInterface();
+          imgui.Log(boost::current_exception_diagnostic_information());
+        }
       });
     ;
   };
@@ -162,10 +171,8 @@ chaiscript::ModulePtr GetCerberusModule()
 
   chai_mod->add(chaiscript::fun([](std::string const& s)
                                 {
-                                  HADESMEM_DETAIL_TRACE_A(s.c_str());
-
-                                  auto& log = GetImGuiLogWindow();
-                                  log.AddLog("%s\n", s.c_str());
+                                  auto& imgui = GetImguiInterface();
+                                  imgui.Log(s);
                                 }),
                 "Cerberus_Log");
 

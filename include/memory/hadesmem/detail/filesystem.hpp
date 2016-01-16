@@ -307,16 +307,18 @@ inline std::wstring GetFullPathNameWrapper(std::wstring const& path)
   return full_path.data();
 }
 
-inline std::wstring GetPathBaseName(std::wstring const& path)
+template <typename CharT>
+inline std::basic_string<CharT>
+  GetPathBaseName(std::basic_string<CharT> const& path)
 {
-  return std::wstring(std::find_if(std::crbegin(path),
-                                   std::crend(path),
-                                   [](wchar_t c)
-                                   {
-                                     return c == '\\' || c == '/';
-                                   })
-                        .base(),
-                      path.end());
+  return std::basic_string<CharT>(std::find_if(std::crbegin(path),
+                                               std::crend(path),
+                                               [](CharT c)
+                                               {
+                                                 return c == '\\' || c == '/';
+                                               })
+                                    .base(),
+                                  path.end());
 }
 
 inline std::wstring PathRemoveFileSpecWrapper(std::wstring path)
