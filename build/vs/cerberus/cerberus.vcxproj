@@ -213,6 +213,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
+    <ClCompile Include="..\..\..\examples\cerberus\callbacks.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\cerberus_bindings.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\chaiscript.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\config.cpp" />

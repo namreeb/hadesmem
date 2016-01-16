@@ -30,6 +30,7 @@
 #include "exception.hpp"
 #include "helpers.hpp"
 #include "imgui.hpp"
+#include "imgui_log.hpp"
 #include "input.hpp"
 #include "module.hpp"
 #include "opengl.hpp"
@@ -641,6 +642,10 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     // hadesmem::SuspendedProcess suspend{process.GetId()};
 
     auto const& config = hadesmem::cerberus::GetConfig();
+
+    // TODO: Move this somewhere appropriate.
+    hadesmem::cerberus::GetImGuiLogWindow();
+    hadesmem::cerberus::GetImguiInterface();
 
     // TODO: Move this somewhere appropriate.
     hadesmem::cerberus::GetGlobalChaiScriptContext();

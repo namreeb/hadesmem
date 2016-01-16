@@ -31,6 +31,7 @@ typedef void OnImguiCleanupCallback(ImguiInterface* imgui);
 typedef void OnImguiFrameCallback();
 
 // TODO: Actually expose the ImGui API.
+// TODO: Fix casing of this and all other types. (Imgui -> ImGui)
 class ImguiInterface
 {
 public:

@@ -30,6 +30,27 @@ void ImGuiLogWindow::AddLog(const char* fmt, ...) IM_PRINTFARGS(2)
     }
   }
 
+  // Ensure the buffer doesn't get too large.
+  // TODO: This is gross... Fix it!
+  if (buf_.size() > 0x1000 || line_offsets_.size() > 0x80)
+  {
+    decltype(buf_) new_buf;
+    for (int i = 200; i < buf_.size(); ++i)
+    {
+      new_buf.append("%c", buf_[i]);
+    }
+    buf_ = new_buf;
+
+    line_offsets_.clear();
+    for (int i = 0; i < buf_.size(); ++i)
+    {
+      if (buf_[i] == '\n')
+      {
+        line_offsets_.push_back(old_size);
+      }
+    }
+  }
+
   scroll_to_bottom_ = true;
 }
 
