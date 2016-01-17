@@ -239,7 +239,10 @@ int WINAPI wWinMain(HINSTANCE /*instance*/,
 
     ImGui::SetNextWindowSize(ImVec2(320, 250), ImGuiSetCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(15, 15), ImGuiSetCond_FirstUseEver);
-    ImGui::Begin("Cerberus");
+    if (ImGui::Begin("Sandbox"))
+    {
+      ImGui::Text("Test");
+    }
     ImGui::End();
 
     ImVec4 clear_col = ImColor(114, 144, 154);
