@@ -3,51 +3,40 @@
 
 #include "imgui_log.hpp"
 
+#include <hadesmem/detail/trace.hpp>
+
 // TODO: Clean this up.
 
 namespace hadesmem
 {
 namespace cerberus
 {
-void ImGuiLogWindow::Clear()
-{
-  buf_.clear();
-  line_offsets_.clear();
-}
-
 void ImGuiLogWindow::AddLog(const char* fmt, ...) IM_PRINTFARGS(2)
 {
   int old_size = buf_.size();
+
+  // Ensure the buffer doesn't get too large.
+  // TODO: Fix this properly so we don't lose data unnecessarily. We should
+  // remove a line at a time from the top or something similar. A circular
+  // buffer may also be useful?
+  if (old_size > kDefaultBufferSize)
+  {
+    HADESMEM_DETAIL_TRACE_A("Clearing log.");
+    old_size = 0;
+    buf_.clear();
+    buf_.append("[Warning]: Log cleared.\n");
+  }
+
   va_list args;
   va_start(args, fmt);
   buf_.appendv(fmt, args);
   va_end(args);
+
   for (int new_size = buf_.size(); old_size < new_size; old_size++)
   {
     if (buf_[old_size] == '\n')
     {
       line_offsets_.push_back(old_size);
-    }
-  }
-
-  // Ensure the buffer doesn't get too large.
-  // TODO: This is gross... Fix it!
-  if (buf_.size() > 0x1000 || line_offsets_.size() > 0x80)
-  {
-    decltype(buf_) new_buf;
-    for (int i = 200; i < buf_.size(); ++i)
-    {
-      new_buf.append("%c", buf_[i]);
-    }
-    buf_ = new_buf;
-
-    line_offsets_.clear();
-    for (int i = 0; i < buf_.size(); ++i)
-    {
-      if (buf_[i] == '\n')
-      {
-        line_offsets_.push_back(old_size);
-      }
     }
   }
 

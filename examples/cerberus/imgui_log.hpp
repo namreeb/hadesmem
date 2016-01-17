@@ -13,14 +13,29 @@ namespace hadesmem
 {
 namespace cerberus
 {
+// TODO: Add colours for tags like Info, Warning, Error, etc.
+// TODO: Add timestamps to output.
 class ImGuiLogWindow
 {
 public:
-  void Clear();
+  static int const kDefaultBufferSize = 1 * 1024 * 1024;
+
+  ImGuiLogWindow()
+  {
+    auto const kReserveSize = kDefaultBufferSize + kDefaultBufferSize / 10;
+    buf_.Buf.reserve(kReserveSize);
+    line_offsets_.reserve(kReserveSize / 20);
+  }
+
+  void Clear()
+  {
+    buf_.clear();
+    line_offsets_.clear();
+  }
 
   void AddLog(const char* fmt, ...) IM_PRINTFARGS(2);
 
-  void Draw(const char* title, bool* p_opened = NULL);
+  void Draw(char const* title, bool* opened = nullptr);
 
 private:
   ImGuiTextBuffer buf_{};

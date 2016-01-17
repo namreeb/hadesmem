@@ -242,6 +242,7 @@ int WINAPI wWinMain(HINSTANCE /*instance*/,
     if (ImGui::Begin("Sandbox"))
     {
       ImGui::Text("Test");
+      ImGui::Text("FPS: %.1f.", ImGui::GetIO().Framerate);
     }
     ImGui::End();
 

@@ -214,6 +214,10 @@ void UseAllStatics()
 
   hadesmem::PatchDr<void()>::InitializeStatics();
 
+  // TODO: Move this somewhere appropriate.
+  hadesmem::cerberus::GetImGuiLogWindow();
+  hadesmem::cerberus::GetImguiInterface();
+
   // TODO: Add chaiscript.
   auto& module = hadesmem::cerberus::GetModuleInterface();
   auto& d3d9 = hadesmem::cerberus::GetD3D9Interface();
@@ -326,6 +330,12 @@ void UseAllStatics()
   };
   auto const on_frame_id = render.RegisterOnFrame(on_frame);
   render.UnregisterOnFrame(on_frame_id);
+
+  auto const on_frame_2 = [](hadesmem::cerberus::RenderApi, void*)
+  {
+  };
+  auto const on_frame_2_id = render.RegisterOnFrame2(on_frame_2);
+  render.UnregisterOnFrame2(on_frame_2_id);
 
   auto const on_set_gui_visibility = [](bool, bool)
   {
@@ -643,19 +653,14 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
 
     auto const& config = hadesmem::cerberus::GetConfig();
 
-    // TODO: Move this somewhere appropriate.
-    hadesmem::cerberus::GetImGuiLogWindow();
-    hadesmem::cerberus::GetImguiInterface();
-
-    // TODO: Move this somewhere appropriate.
-    hadesmem::cerberus::GetGlobalChaiScriptContext();
-
     UseAllStatics();
 
-    hadesmem::cerberus::LoadPlugins();
-
+    // Must be before plugins, because they attempt to reset scripts on unload.
     // TODO: Move this somewhere appropriate.
     hadesmem::cerberus::GetChaiScriptScripts();
+    hadesmem::cerberus::GetGlobalChaiScriptContext();
+
+    hadesmem::cerberus::LoadPlugins();
 
     if (config.IsAntTweakBarEnabled())
     {
