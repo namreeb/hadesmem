@@ -18,7 +18,7 @@ void ImGuiLogWindow::AddLog(const char* fmt, ...) IM_PRINTFARGS(2)
   // Ensure the buffer doesn't get too large.
   // TODO: Fix this properly so we don't lose data unnecessarily. We should
   // remove a line at a time from the top or something similar. A circular
-  // buffer may also be useful?
+  // buffer may also be useful? What if we also log to file?
   if (old_size > kDefaultBufferSize)
   {
     HADESMEM_DETAIL_TRACE_A("Clearing log.");
