@@ -198,6 +198,12 @@
 // double-rendered to minimap), Devilian (D3D9, no rendering or input - issue
 // unknown).
 
+// TODO: Re-architect this entire project so we're not as dependent on the
+// initialization order of global statics. Perhaps use of a shared_pointer to
+// manage the lifetime of components would help (assuming that components own a
+// pointer to their dependencies, and we don't run into problems with cyclic
+// references).
+
 namespace
 {
 // This is a nasty hack to call any APIs which may be called from a static
@@ -563,6 +569,17 @@ void UseAllStatics()
     raw_input.RegisterOnRegisterRawInputDevices(on_register_raw_input_devices);
   raw_input.UnregisterOnRegisterRawInputDevices(
     on_register_raw_input_devices_id);
+
+  // Must be before plugins, because they attempt to reset scripts on unload.
+  // TODO: Move this somewhere appropriate.
+  auto& chai = hadesmem::cerberus::GetChaiScriptInterface();
+  chai.GetGlobalContext();
+  auto const on_init_chai_id = chai.RegisterOnInitializeChaiScriptContext(
+    [](chaiscript::ChaiScript& /*chai*/)
+    {
+    });
+  chai.UnregisterOnInitializeChaiScriptContext(on_init_chai_id);
+  hadesmem::cerberus::GetChaiScriptScripts();
 }
 
 // Check whether any threads are currently executing code in our module. This
@@ -654,11 +671,6 @@ extern "C" __declspec(dllexport) DWORD_PTR Load() noexcept
     auto const& config = hadesmem::cerberus::GetConfig();
 
     UseAllStatics();
-
-    // Must be before plugins, because they attempt to reset scripts on unload.
-    // TODO: Move this somewhere appropriate.
-    hadesmem::cerberus::GetChaiScriptScripts();
-    hadesmem::cerberus::GetGlobalChaiScriptContext();
 
     hadesmem::cerberus::LoadPlugins();
 
