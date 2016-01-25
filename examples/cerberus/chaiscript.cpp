@@ -125,15 +125,16 @@ namespace hadesmem
 namespace cerberus
 {
 ChaiScriptScript::ChaiScriptScript(std::string const& path)
-  : path_(path), chai_(
+  : path_(path),
+    chai_(
       std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library()))
 {
   InitializeChaiScriptContext(*chai_, true);
 
   auto& imgui = GetImguiInterface();
   imgui.LogFormat("[Info]: Loading script. Name: [%s]. Path: [%s].",
-    hadesmem::detail::GetPathBaseName(path_).c_str(),
-    path_.c_str());
+                  hadesmem::detail::GetPathBaseName(path_).c_str(),
+                  path_.c_str());
 
   try
   {
@@ -179,8 +180,8 @@ ChaiScriptScript::~ChaiScriptScript()
     {
       auto& imgui = GetImguiInterface();
       imgui.LogFormat("[Info]: Unloading script. Name: [%s]. Path: [%s].",
-        hadesmem::detail::GetPathBaseName(path_).c_str(),
-        path_.c_str());
+                      hadesmem::detail::GetPathBaseName(path_).c_str(),
+                      path_.c_str());
 
       LogBoxedValue(*chai_, chai_->eval("CerberusScriptStop()"), "Stop Result");
     }
@@ -216,6 +217,9 @@ void ReloadDefaultChaiScriptContext(bool run_callbacks)
   chai =
     std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());
   InitializeChaiScriptContext(*chai, run_callbacks);
+
+  auto& imgui = GetImguiInterface();
+  imgui.Log("Reloaded defauled ChaiScript context.");
 }
 }
 }
