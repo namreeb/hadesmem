@@ -23,6 +23,9 @@
 // TODO: Support wide strings properly now that OutputDebugString has been
 // 'fixed'. See MSDN documentation for details.  http://bit.ly/1NWRpq4
 
+// TODO: Add a cache of the last N lines of debug output for cases where we only
+// have a dump file and no logs (the issue may be difficult to repro).
+
 namespace hadesmem
 {
 namespace detail
