@@ -11,6 +11,8 @@ namespace cerberus
 {
 namespace detail
 {
+// TODO: Move this somewhere more appropriate. Should probably be abstracted
+// away from ImGui and moved to a generic overlay logging layer.
 void LogWrapper(std::string const& s)
 {
   auto& imgui = GetImguiInterface();
