@@ -5,28 +5,35 @@ def OnFrameImgui()
   ImGui_End()
 }
 
+GLOBAL g_num_frames = 0
+
 def OnFrame(api, device)
 {
-  Cerberus_Log("OnFrame")
+  if (g_num_frames == 0 || (g_num_frames % 30) == 0)
+  {
+    Cerberus_Log("OnFrame from ChaiScript. Frame: " + to_string(g_num_frames) + ".")
+  }
+
+  g_num_frames = g_num_frames + 1
 }
 
-GLOBAL on_frame_id = -1
-GLOBAL on_frame_imgui_id = -1
+GLOBAL g_on_frame_id = -1
+GLOBAL g_on_frame_imgui_id = -1
 
 def CerberusScriptStart()
 {
   var render := Cerberus_GetRenderInterface()
-  on_frame_id = render.RegisterOnFrame(OnFrame)
+  g_on_frame_id = render.RegisterOnFrame(OnFrame)
 
   var imgui := Cerberus_GetImguiInterface()
-  on_frame_imgui_id = imgui.RegisterOnFrame(OnFrameImgui)
+  g_on_frame_imgui_id = imgui.RegisterOnFrame(OnFrameImgui)
 }
 
 def CerberusScriptStop()
 {
   var render := Cerberus_GetRenderInterface()
-  render.UnregisterOnFrame(on_frame_id)
+  render.UnregisterOnFrame(g_on_frame_id)
 
   var imgui := Cerberus_GetImguiInterface()
-  imgui.UnregisterOnFrame(on_frame_imgui_id)
+  imgui.UnregisterOnFrame(g_on_frame_imgui_id)
 }
