@@ -179,12 +179,13 @@ ChaiScriptScript::ChaiScriptScript(std::string const& path)
 
 ChaiScriptScript::~ChaiScriptScript()
 {
+  auto& imgui = GetImguiInterface();
+
   try
   {
     // Don't try and do anything if we've been moved from.
     if (chai_)
     {
-      auto& imgui = GetImguiInterface();
       imgui.LogFormat("[Info]: Unloading script. Name: [%s]. Path: [%s].",
                       hadesmem::detail::GetPathBaseName(path_).c_str(),
                       path_.c_str());
@@ -194,7 +195,7 @@ ChaiScriptScript::~ChaiScriptScript()
   }
   catch (...)
   {
-    HADESMEM_DETAIL_TRACE_A(
+    imgui.LogFormat("[Error]: %s.",
       boost::current_exception_diagnostic_information().c_str());
   }
 }

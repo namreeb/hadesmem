@@ -65,6 +65,11 @@ public:
     named_callback_ = named_callback;
   }
 
+  void UnregisterAllEvents()
+  {
+    named_callback_ = nullptr;
+  }
+
 private:
   std::map<std::wstring, EventCallbacks> events_;
   NamedEventCallbackFn named_callback_;
