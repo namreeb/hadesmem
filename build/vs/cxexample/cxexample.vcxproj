@@ -104,7 +104,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CXEXAMPLE_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui;..\..\..\deps\chaiscript\chaiscript\include;..\..\..\examples</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -130,7 +130,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x86\</Comm
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CXEXAMPLE_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui;..\..\..\deps\chaiscript\chaiscript\include;..\..\..\examples</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso %(AdditionalOptions)</AdditionalOptions>
@@ -158,7 +158,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\debug\x64\</Comm
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CXEXAMPLE_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui;..\..\..\deps\chaiscript\chaiscript\include;..\..\..\examples</AdditionalIncludeDirectories>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -188,7 +188,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x86\</Co
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CXEXAMPLE_EXPORTS;STRICT;STRICT_TYPED_ITEMIDS;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WINVER=0x0601;_WIN32_WINNT=0x0601;HADESMEM_NO_TRACE;ASMJIT_BUILD_X86;ASMJIT_BUILD_X64;ASMJIT_STATIC;LIBUDIS86_STATIC;PUGIXML_HEADER_ONLY;PUGIXML_WCHAR_MODE;TW_NO_LIB_PRAGMA;TW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\examples</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IncludePath);..\..\..\include\memory;$(BOOST_ROOT);..\..\..\deps\anttweakbar\anttweakbar\include;..\..\..\deps\anttweakbar\anttweakbar\obj;..\..\..\deps\asmjit\asmjit\src;..\..\..\deps\gwen\gwen\gwen\include;..\..\..\deps\pugixml\pugixml\src;..\..\..\deps\tclap\tclap\include;..\..\..\deps\udis86\udis86;..\..\..\deps\imgui;..\..\..\deps\imgui\imgui;..\..\..\deps\chaiscript\chaiscript\include;..\..\..\examples</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <AdditionalOptions>/wd4503 /wd4345 /Zc:strictStrings /volatile:iso /Gw /Gy %(AdditionalOptions)</AdditionalOptions>

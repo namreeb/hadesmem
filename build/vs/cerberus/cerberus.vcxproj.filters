@@ -105,9 +105,6 @@
     <ClCompile Include="..\..\..\examples\cerberus\cerberus_bindings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\examples\cerberus\callbacks.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\examples\cerberus\ant_tweak_bar.hpp">
@@ -213,6 +210,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\examples\cerberus\cerberus_bindings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\examples\cerberus\events.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

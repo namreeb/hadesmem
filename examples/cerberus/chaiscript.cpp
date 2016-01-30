@@ -9,6 +9,9 @@
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <chaiscript/chaiscript_stdlib.hpp>
+#include <chaiscript/dispatchkit/bootstrap.hpp>
+#include <chaiscript/dispatchkit/bootstrap_stl.hpp>
+#include <chaiscript/dispatchkit/dispatchkit.hpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
 #include <hadesmem/detail/filesystem.hpp>
@@ -71,6 +74,9 @@ public:
 void InitializeChaiScriptContext(chaiscript::ChaiScript& chai,
                                  bool run_callbacks)
 {
+  chai.add(chaiscript::bootstrap::standard_library::string_type<std::wstring>(
+    "wstring"));
+
   chai.add(hadesmem::cerberus::GetCerberusModule());
   chai.add(hadesmem::cerberus::GetImGuiChaiScriptModule());
 

@@ -213,7 +213,6 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\examples\cerberus\ant_tweak_bar.cpp" />
-    <ClCompile Include="..\..\..\examples\cerberus\callbacks.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\cerberus_bindings.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\chaiscript.cpp" />
     <ClCompile Include="..\..\..\examples\cerberus\config.cpp" />
@@ -261,6 +260,7 @@ xcopy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)..\..\dist\release\x64\</Co
     <ClInclude Include="..\..\..\examples\cerberus\direct_input_device_8_w_proxy.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\driver.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\dxgi.hpp" />
+    <ClInclude Include="..\..\..\examples\cerberus\events.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\exception.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\helpers.hpp" />
     <ClInclude Include="..\..\..\examples\cerberus\hook_counter.hpp" />

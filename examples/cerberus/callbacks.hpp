@@ -11,6 +11,8 @@
 #include <hadesmem/detail/trace.hpp>
 #include <hadesmem/detail/srw_lock.hpp>
 
+#include "imgui.hpp"
+
 // TODO: Fix the problem of registering/unregistring a callback from the context
 // of a callback (deadlock in current implementation, iterator invalidation if
 // recursive mutex is used).
@@ -21,7 +23,15 @@ namespace cerberus
 {
 namespace detail
 {
-void LogWrapper(std::string const& s);
+#if 0
+// TODO: Move this somewhere more appropriate. Should probably be abstracted
+// away from ImGui and moved to a generic overlay logging layer.
+inline void LogWrapper(std::string const& s)
+{
+  auto& imgui = GetImguiInterface();
+  imgui.Log(s);
+}
+#endif
 }
 
 template <typename Func> class Callbacks
@@ -64,7 +74,10 @@ public:
       }
       catch (...)
       {
-        detail::LogWrapper(boost::current_exception_diagnostic_information());
+        // TODO: Re-enable this once we can implement it properly.
+        // detail::LogWrapper(boost::current_exception_diagnostic_information());
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information());
       }
     }
   }
