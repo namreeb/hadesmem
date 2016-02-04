@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\BDOTomePatcher\BDOTome English Patch.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll

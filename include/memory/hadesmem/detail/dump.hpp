@@ -114,10 +114,14 @@ inline void DumpAllModules(hadesmem::Process const& process)
 
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
 
+    // We can't use the module size returned by Module32First/Module32Next
+    // because it can be too large.
+    auto const module_size =
+      hadesmem::detail::GetRegionAllocSize(process, module.GetHandle());
     auto raw = hadesmem::ReadVectorEx<std::uint8_t>(
       process,
       module.GetHandle(),
-      module.GetSize(),
+      module_size,
       hadesmem::ReadFlags::kZeroFillReserved);
     hadesmem::Process const local_process(::GetCurrentProcessId());
     hadesmem::PeFile const pe_file(local_process,
