@@ -147,20 +147,10 @@ inline void DumpAllModules(hadesmem::Process const& process,
     std::unique_ptr<hadesmem::PeFile> pe_file_disk;
     if (use_disk_headers)
     {
-      // TODO: Add an API for this.
-      std::vector<wchar_t> file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-      if (!GetMappedFileNameW(local_process.GetHandle(),
-                              pe_file.GetBase(),
-                              file_name.data(),
-                              static_cast<DWORD>(file_name.size())))
-      {
-        DWORD const last_error = ::GetLastError();
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error{} << ErrorString{"GetMappedFileNameW failed."}
-                  << ErrorCodeWinLast{last_error});
-      }
+      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Using disk headers. Path: [%s].",
+                                     module.GetPath().c_str());
 
-      pe_file_disk_data = hadesmem::detail::PeFileToBuffer(file_name.data());
+      pe_file_disk_data = hadesmem::detail::PeFileToBuffer(module.GetPath());
       pe_file_disk =
         std::make_unique<hadesmem::PeFile>(process,
                                            pe_file_disk_data.data(),
