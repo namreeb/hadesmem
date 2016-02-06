@@ -50,18 +50,25 @@ inline void WriteDumpFile(hadesmem::Process const& process,
                           std::size_t size,
                           std::wstring const& dir_name = L"dumps")
 {
-  HADESMEM_DETAIL_TRACE_A("Writing file.");
+  HADESMEM_DETAIL_TRACE_A("Creating dump dir.");
+
+  auto const dumps_dir =
+    hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), dir_name);
+  hadesmem::detail::CreateDirectoryWrapper(dumps_dir, false);
+
+  HADESMEM_DETAIL_TRACE_A("Generating file name.");
 
   auto const proc_path = hadesmem::GetPath(process);
   auto const proc_name = proc_path.substr(proc_path.rfind(L'\\') + 1);
   auto const proc_pid_str = std::to_wstring(process.GetId());
-  auto const dumps_dir =
-    hadesmem::detail::CombinePath(hadesmem::detail::GetSelfDirPath(), dir_name);
-  hadesmem::detail::CreateDirectoryWrapper(dumps_dir, false);
   std::wstring dump_path;
   std::uint32_t c = 0;
   do
   {
+    // TODO: Make a smarter extension selection (either use what the module
+    // already has, or in the case of manually mapped modules we should try and
+    // detect which extension to use based on the headers - for exe, dll, sys at
+    // least).
     auto const file_name = proc_name + L"_" + proc_pid_str + L"_" +
                            region_name + L"_" + std::to_wstring(c++) + L".bin";
     dump_path = hadesmem::detail::CombinePath(dumps_dir, file_name);
@@ -74,6 +81,8 @@ inline void WriteDumpFile(hadesmem::Process const& process,
         "Found more than 10 conflicting file names. Aborting."));
   }
 
+  HADESMEM_DETAIL_TRACE_A("Opening file.");
+
   auto const dump_file = hadesmem::detail::OpenFile<char>(
     dump_path, std::ios::out | std::ios::binary);
   if (!*dump_file)
@@ -81,6 +90,8 @@ inline void WriteDumpFile(hadesmem::Process const& process,
     HADESMEM_DETAIL_THROW_EXCEPTION(
       hadesmem::Error() << hadesmem::ErrorString("Unable to open dump file."));
   }
+
+  HADESMEM_DETAIL_TRACE_A("Writing file.");
 
   if (!dump_file->write(static_cast<char const*>(buffer), size))
   {

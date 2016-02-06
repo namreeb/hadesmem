@@ -178,6 +178,8 @@ void DumpImports(hadesmem::Process const& process,
 
     DWORD const iat = dir.GetFirstThunk();
     bool const iat_valid = !!hadesmem::RvaToVa(process, pe_file, iat);
+    DWORD const ilt = dir.GetOriginalFirstThunk();
+    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
     {
       // If the IAT is empty then the descriptor is skipped, and the name can
@@ -187,23 +189,36 @@ void DumpImports(hadesmem::Process const& process,
       hadesmem::ImportThunkList const iat_thunks(process, pe_file, iat);
       if (std::begin(iat_thunks) == std::end(iat_thunks))
       {
+        if (!ilt_valid)
+        {
+          WriteNormal(out,
+                      L"WARNING! IAT is " +
+                        std::wstring(iat_valid ? L"empty" : L"invalid") +
+                        L". Skipping directory.",
+                      2);
+          WarnForCurrentFile(iat_valid ? WarningType::kSuspicious
+                                       : WarningType::kUnsupported);
+          continue;
+        }
+
+        // Scylla generates files like this (xcoronahost.exe for 64-bit XignCode
+        // used on BDO KR) and IDA is able to parse them correctly. Although
+        // files like this won't run (I think??) we should still support reading
+        // them for the purpose of reverse-engineering dump files which may
+        // contain malformed data.
+        // TODO: Figure out the correct way to fix this.
         WriteNormal(out,
                     L"WARNING! IAT is " +
                       std::wstring(iat_valid ? L"empty" : L"invalid") +
-                      L". Skipping directory.",
+                      L". Proceeding due to seemingly valid ILT.",
                     2);
-        WarnForCurrentFile(iat_valid ? WarningType::kSuspicious
-                                     : WarningType::kUnsupported);
-        continue;
       }
     }
 
-    DWORD const ilt = dir.GetOriginalFirstThunk();
     bool const use_ilt = !!ilt && ilt != iat;
     hadesmem::ImportThunkList const ilt_thunks(
       process, pe_file, use_ilt ? ilt : iat);
     bool const ilt_empty = std::begin(ilt_thunks) == std::end(ilt_thunks);
-    bool const ilt_valid = !!hadesmem::RvaToVa(process, pe_file, ilt);
 
     // Apparently it's okay for the ILT to be invalid and 0xFFFFFFFF or 0. This
     // is handled below in our ILT valid/empty checks (after dumping the dir
