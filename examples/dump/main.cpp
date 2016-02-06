@@ -175,6 +175,8 @@ bool g_quiet = false;
 
 bool g_strings = false;
 
+bool g_use_disk_headers = false;
+
 template <typename CharT>
 class QuietStreamBuf : public std::basic_streambuf<CharT>
 {
@@ -337,7 +339,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
 
   // TODO: Put back the useful console output we used to get when we had this
   // implemented specifically for this tool.
-  hadesmem::detail::DumpMemory(*process);
+  hadesmem::detail::DumpMemory(*process, g_use_disk_headers);
 }
 
 void DumpProcesses(bool memonly = false)
@@ -554,11 +556,18 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<DWORD> queue_factor_arg(
       "", "queue-factor", "Thread queue factor", false, 0, "size_t", cmd);
     TCLAP::SwitchArg strings_arg("", "strings", "Dump strings", cmd);
+    TCLAP::SwitchArg use_disk_headers_arg(
+      "",
+      "use-disk-headers",
+      "Use on-disk PE header for section layout when performing memory dumps",
+      cmd);
     cmd.parse(argc, argv);
 
     g_quiet = quiet_arg.isSet();
 
     g_strings = strings_arg.isSet();
+
+    g_use_disk_headers = use_disk_headers_arg.isSet();
 
     SetWarningsEnabled(warned_arg.getValue());
     SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());

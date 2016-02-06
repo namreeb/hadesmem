@@ -8,6 +8,8 @@
 #include <iostream>
 #include <limits>
 
+#include <psapi.h>
+
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/module.hpp>
@@ -100,7 +102,8 @@ inline void WriteDumpFile(hadesmem::Process const& process,
   }
 }
 
-inline void DumpAllModules(hadesmem::Process const& process)
+inline void DumpAllModules(hadesmem::Process const& process,
+                           bool use_disk_headers)
 {
   HADESMEM_DETAIL_TRACE_A("Starting module enumeration.");
 
@@ -139,7 +142,35 @@ inline void DumpAllModules(hadesmem::Process const& process)
                                    raw.data(),
                                    hadesmem::PeFileType::Image,
                                    static_cast<DWORD>(raw.size()));
-    hadesmem::NtHeaders nt_headers(local_process, pe_file);
+
+    std::vector<char> pe_file_disk_data;
+    std::unique_ptr<hadesmem::PeFile> pe_file_disk;
+    if (use_disk_headers)
+    {
+      // TODO: Add an API for this.
+      std::vector<wchar_t> file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+      if (!GetMappedFileNameW(local_process.GetHandle(),
+                              pe_file.GetBase(),
+                              file_name.data(),
+                              static_cast<DWORD>(file_name.size())))
+      {
+        DWORD const last_error = ::GetLastError();
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          Error{} << ErrorString{"GetMappedFileNameW failed."}
+                  << ErrorCodeWinLast{last_error});
+      }
+
+      pe_file_disk_data = hadesmem::detail::PeFileToBuffer(file_name.data());
+      pe_file_disk =
+        std::make_unique<hadesmem::PeFile>(process,
+                                           pe_file_disk_data.data(),
+                                           hadesmem::PeFileType::Data,
+                                           pe_file_disk_data.size());
+    }
+
+    hadesmem::PeFile const& pe_file_headers =
+      use_disk_headers ? *pe_file_disk : pe_file;
+    hadesmem::NtHeaders nt_headers(local_process, pe_file_headers);
 
     HADESMEM_DETAIL_TRACE_A("Copying headers.");
 
@@ -150,10 +181,14 @@ inline void DumpAllModules(hadesmem::Process const& process)
 
     HADESMEM_DETAIL_TRACE_A("Copying section data.");
 
-    hadesmem::SectionList const sections(local_process, pe_file);
+    hadesmem::SectionList const sections(local_process, pe_file_headers);
     std::vector<std::pair<DWORD, DWORD>> raw_datas;
     for (auto const& section : sections)
     {
+      // TODO: When rounding up from raw to virtual, we should check for
+      // zero-fill pages at the end and then drop as many as possible in order
+      // to reduce file size.
+      // TODO: Validate section virtual sizes against the VA region sizes?
       auto const section_size =
         (std::max)(section.GetVirtualSize(), section.GetSizeOfRawData());
       auto const ptr_raw_data_new =
@@ -209,6 +244,10 @@ inline void DumpAllModules(hadesmem::Process const& process)
     for (; i != std::end(import_dirs) && j != std::end(import_dirs_new);
          ++i, ++j)
     {
+      // TODO: If we have an empty/invalid ILT we should enumerate the EAT of
+      // all loaded modules and try to match exports to addresses in the IAT.
+      // TODO: Add the option of using the on-disk ILT in the case we can't find
+      // anything else?
       hadesmem::ImportThunkList const import_thunks(
         local_process, pe_file, i->GetOriginalFirstThunk());
       hadesmem::ImportThunkList import_thunks_new(
@@ -263,15 +302,17 @@ inline void DumpMemoryRegionRaw(hadesmem::Process const& process,
 
 inline void DumpMemory(
   hadesmem::Process const& process = hadesmem::Process(::GetCurrentProcessId()),
+  bool use_disk_headers = false,
   void* base = nullptr,
   std::size_t size = 0)
 {
   if (!base && !size)
   {
-    DumpAllModules(process);
+    DumpAllModules(process, use_disk_headers);
   }
   else
   {
+    // TODO: Actually implement support for utilizing this in Dump tool.
     DumpMemoryRegionRaw(process, base, size);
   }
 }
