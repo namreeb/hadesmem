@@ -603,6 +603,13 @@ inline void DumpAllModules(Process const& process,
                 std::end(import_directories_buf),
                 std::back_inserter(raw_new));
 
+      // TODO: Why is this necessary? IDA was complaining about truncated
+      // sections and this fixed it, but it seems like it's just masking a
+      // different issue...
+      auto const new_raw_size =
+        last_section.GetPointerToRawData() + last_section.GetSizeOfRawData();
+      raw_new.resize(new_raw_size);
+
       // TODO: Before we were fixing section sizes correctly above, the last
       // section data was truncated and we didn't appear to detect it properly
       // in the dump tool. Add support for this somewhere.
