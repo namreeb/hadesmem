@@ -397,8 +397,6 @@ inline void DumpAllModules(Process const& process,
       HADESMEM_DETAIL_TRACE_A("Performing memory scan.");
 
       // Get list of required fixups.
-      // TODO: Manually insert the on-disk and/or in-memory entries at the
-      // start (and ensure we don't double them up during our scan).
       std::vector<VaReconstructInfo> va_reconstruct_list;
       bool fixup_adjacent = false;
       for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
@@ -429,9 +427,24 @@ inline void DumpAllModules(Process const& process,
         v.rva_ = FileOffsetToRva(
           local_process, pe_file_new, static_cast<DWORD>(offset));
 
+        // TODO: Use module base/size instead of name.
+        if (v.module_name_ ==
+            hadesmem::detail::WideCharToMultiByte(module.GetName()))
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "WARNING! Skipping VA in current module. "
+            "VA: [%p]. Offset: [%08lX]. RVA: [%08lX].",
+            e->first,
+            offset,
+            v.rva_);
+          continue;
+        }
+
         // Only fixup page aligned VAs if they are adjacent to another fixup,
         // because it would be too risky to reconstruct them otherwise (high
         // chance of false positives when scanning for references).
+        // TODO: Also check the next fixup, not just the previous one. We could
+        // be adjacent in either direction and it still counts.
         // TODO: Add a 'skip list' and log any matches we find later for
         // debugging purposes (or cases where advanced users may want to
         // manually apply some fixes).
@@ -469,17 +482,48 @@ inline void DumpAllModules(Process const& process,
 
       HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
 
+      // Remove all references to the module currently being dumped
+      va_reconstruct_list.erase(
+        std::remove_if(std::begin(va_reconstruct_list),
+                       std::end(va_reconstruct_list),
+                       [&](VaReconstructInfo const& v)
+                       {
+                         return v.module_name_ ==
+                                hadesmem::detail::WideCharToMultiByte(
+                                  module.GetName());
+                       }),
+        std::end(va_reconstruct_list));
+
+      // Transform import reconstruction list into one grouped by module name.
+      std::map<DWORD, std::vector<VaReconstructInfo>> va_reconstruct_info_by_ft;
+      DWORD cur_rva_base = 0;
+      DWORD prev_rva = 0;
+      for (auto const& v : va_reconstruct_list)
+      {
+        if (!prev_rva || v.rva_ != prev_rva + sizeof(void*))
+        {
+          cur_rva_base = v.rva_;
+        }
+
+        va_reconstruct_info_by_ft[cur_rva_base].emplace_back(v);
+
+        prev_rva = v.rva_;
+      }
+
       // Build raw import dirs.
       std::vector<char> import_directories_buf;
-      ImportDirList import_dirs(local_process, pe_file);
+      ImportDirList import_dirs(local_process, pe_file_headers);
       auto const descriptors_size = static_cast<DWORD>(
         sizeof(IMAGE_IMPORT_DESCRIPTOR) *
         (std::distance(std::begin(import_dirs), std::end(import_dirs)) +
-         va_reconstruct_list.size() + 1));
+         va_reconstruct_info_by_ft.size() + 1));
       auto const descriptors_end_rva =
         last_section.GetVirtualAddress() + old_section_end + descriptors_size;
+      // Fix this hack (see above for the same thing being done to raw_new).
+      import_directories_buf.reserve(module_size * 2);
       import_directories_buf.resize(descriptors_size);
       DWORD descriptors_cur = 0;
+
       for (auto const& dir : import_dirs)
       {
         HADESMEM_DETAIL_TRACE_A("Adding existing import directory.");
@@ -493,86 +537,93 @@ inline void DumpAllModules(Process const& process,
 
         descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
       }
-      for (auto const& v : va_reconstruct_list)
+
+      for (auto const& va_map : va_reconstruct_info_by_ft)
       {
-        HADESMEM_DETAIL_TRACE_FORMAT_A(
-          "Processing import reconstruction entry. RVA: [%08lX], VA: "
-          "[%p]. Module: [%s]. Name: [%s]. Ordinal: "
-          "[%lu]. ByName: [%d].",
-          v.rva_,
-          v.va_,
-          v.module_name_.c_str(),
-          v.name_.c_str(),
-          v.ordinal_,
-          v.by_name_);
-
-        // TODO: Don't require one descriptor per thunk if they're all adjacent
-        // and in the same module.
-
-        // TODO: Reuse by name data for thunks with the same name.
-
+        // TODO: Reuse this where possible.
         DWORD const module_name_rva =
           descriptors_end_rva +
           static_cast<DWORD>(import_directories_buf.size()) - descriptors_size;
-        std::copy(std::begin(v.module_name_),
-                  std::end(v.module_name_),
+        auto const module_name = va_map.second.back().module_name_;
+        std::copy(std::begin(module_name),
+                  std::end(module_name),
                   std::back_inserter(import_directories_buf));
         import_directories_buf.push_back('\0');
 
-        DWORD const import_by_name_rva =
-          v.by_name_
-            ? descriptors_end_rva +
-                static_cast<DWORD>(import_directories_buf.size()) -
-                descriptors_size
-            : 0;
-        if (v.by_name_)
-        {
-          std::vector<char> import_by_name_buf(
-            sizeof(IMAGE_IMPORT_BY_NAME::Hint) + v.name_.size() + 1);
-          auto const import_by_name =
-            reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(import_by_name_buf.data());
-          std::copy(
-            std::begin(v.name_), std::end(v.name_), &import_by_name->Name[0]);
-
-          std::copy(std::begin(import_by_name_buf),
-                    std::end(import_by_name_buf),
-                    std::back_inserter(import_directories_buf));
-        }
-
-        DWORD const thunk_rva =
+        DWORD const thunks_rva =
           descriptors_end_rva +
           static_cast<DWORD>(import_directories_buf.size()) - descriptors_size;
-        IMAGE_THUNK_DATA thunk{};
-        if (v.by_name_)
-        {
-          thunk.u1.AddressOfData = import_by_name_rva;
-        }
-        else
-        {
-          thunk.u1.Ordinal =
-            IMAGE_ORDINAL_FLAG | (v.ordinal_ & static_cast<WORD>(-1));
-        }
-        std::copy(reinterpret_cast<char const*>(&thunk),
-                  reinterpret_cast<char const*>(&thunk) + sizeof(thunk),
-                  std::back_inserter(import_directories_buf));
-        IMAGE_THUNK_DATA empty_thunk{};
-        std::copy(reinterpret_cast<char const*>(&empty_thunk),
-                  reinterpret_cast<char const*>(&empty_thunk) +
-                    sizeof(empty_thunk),
-                  std::back_inserter(import_directories_buf));
+        auto const thunks_offset = import_directories_buf.size();
+        import_directories_buf.resize(thunks_offset +
+                                      sizeof(IMAGE_THUNK_DATA) *
+                                        (va_map.second.size() + 1));
+        auto thunks = reinterpret_cast<PIMAGE_THUNK_DATA>(
+          &import_directories_buf[thunks_offset]);
 
         IMAGE_IMPORT_DESCRIPTOR descriptor{};
-        descriptor.OriginalFirstThunk = thunk_rva;
+        descriptor.OriginalFirstThunk = thunks_rva;
         descriptor.TimeDateStamp = static_cast<DWORD>(-1);
         descriptor.ForwarderChain = static_cast<DWORD>(-1);
         descriptor.Name = module_name_rva;
-        descriptor.FirstThunk = v.rva_;
+        descriptor.FirstThunk = va_map.first;
         std::copy(reinterpret_cast<char const*>(&descriptor),
                   reinterpret_cast<char const*>(&descriptor) +
                     sizeof(descriptor),
                   &import_directories_buf[descriptors_cur]);
 
         descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
+
+        for (auto const& v : va_map.second)
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "Processing import reconstruction entry. RVA: [%08lX], VA: "
+            "[%p]. Module: [%s]. Name: [%s]. Ordinal: "
+            "[%lu]. ByName: [%d].",
+            v.rva_,
+            v.va_,
+            v.module_name_.c_str(),
+            v.name_.c_str(),
+            v.ordinal_,
+            v.by_name_);
+
+          // TODO: Don't require one descriptor per thunk if they're all
+          // adjacent
+          // and in the same module.
+
+          // TODO: Reuse by name data for thunks with the same name.
+
+          DWORD const import_by_name_rva =
+            v.by_name_
+              ? descriptors_end_rva +
+                  static_cast<DWORD>(import_directories_buf.size()) -
+                  descriptors_size
+              : 0;
+          if (v.by_name_)
+          {
+            std::vector<char> import_by_name_buf(
+              sizeof(IMAGE_IMPORT_BY_NAME::Hint) + v.name_.size() + 1);
+            auto const import_by_name = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(
+              import_by_name_buf.data());
+            std::copy(
+              std::begin(v.name_), std::end(v.name_), &import_by_name->Name[0]);
+
+            std::copy(std::begin(import_by_name_buf),
+                      std::end(import_by_name_buf),
+                      std::back_inserter(import_directories_buf));
+          }
+
+          if (v.by_name_)
+          {
+            thunks->u1.AddressOfData = import_by_name_rva;
+          }
+          else
+          {
+            thunks->u1.Ordinal =
+              IMAGE_ORDINAL_FLAG | (v.ordinal_ & static_cast<WORD>(-1));
+          }
+
+          ++thunks;
+        }
       }
 
       descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
@@ -603,9 +654,7 @@ inline void DumpAllModules(Process const& process,
                 std::end(import_directories_buf),
                 std::back_inserter(raw_new));
 
-      // TODO: Why is this necessary? IDA was complaining about truncated
-      // sections and this fixed it, but it seems like it's just masking a
-      // different issue...
+      // Expand to new size (because it's section aligned).
       auto const new_raw_size =
         last_section.GetPointerToRawData() + last_section.GetSizeOfRawData();
       raw_new.resize(new_raw_size);
