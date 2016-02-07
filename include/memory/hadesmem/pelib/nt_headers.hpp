@@ -837,7 +837,7 @@ public:
     }
     else
     {
-      data_32_.OptionalHeader.ImageBase = static_cast<ULONG>(image_base);
+      data_32_.OptionalHeader.ImageBase = static_cast<DWORD>(image_base);
     }
   }
 

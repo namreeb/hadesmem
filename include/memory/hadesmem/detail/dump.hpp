@@ -110,14 +110,36 @@ inline void DumpAllModules(hadesmem::Process const& process,
   hadesmem::ModuleList modules(process);
   for (auto const& module : modules)
   {
+    HADESMEM_DETAIL_TRACE_A("Got new module.");
+
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Handle: [%p]. Size: [%08lX]. Name: [%s]. Path: [%s].",
+      module.GetHandle(),
+      module.GetSize(),
+      module.GetName().c_str(),
+      module.GetPath().c_str());
+
     HADESMEM_DETAIL_TRACE_A("Checking for valid headers.");
+
+    // We can't use the module size returned by Module32First/Module32Next
+    // because it can be too large.
+    auto const module_size =
+      hadesmem::detail::GetRegionAllocSize(process, module.GetHandle());
+    if (module_size > static_cast<DWORD>(-1))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString("Region too large."));
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Calculated module size: [%08lX].",
+                                   static_cast<DWORD>(module_size));
 
     try
     {
       hadesmem::PeFile const pe_file(process,
                                      module.GetHandle(),
                                      hadesmem::PeFileType::Image,
-                                     static_cast<DWORD>(module.GetSize()));
+                                     static_cast<DWORD>(module_size));
       hadesmem::NtHeaders nt_headers(process, pe_file);
     }
     catch (std::exception const& /*e*/)
@@ -128,10 +150,6 @@ inline void DumpAllModules(hadesmem::Process const& process,
 
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
 
-    // We can't use the module size returned by Module32First/Module32Next
-    // because it can be too large.
-    auto const module_size =
-      hadesmem::detail::GetRegionAllocSize(process, module.GetHandle());
     auto raw = hadesmem::ReadVectorEx<std::uint8_t>(
       process,
       module.GetHandle(),
@@ -152,7 +170,7 @@ inline void DumpAllModules(hadesmem::Process const& process,
 
       pe_file_disk_data = hadesmem::detail::PeFileToBuffer(module.GetPath());
       pe_file_disk =
-        std::make_unique<hadesmem::PeFile>(process,
+        std::make_unique<hadesmem::PeFile>(local_process,
                                            pe_file_disk_data.data(),
                                            hadesmem::PeFileType::Data,
                                            pe_file_disk_data.size());
@@ -164,10 +182,14 @@ inline void DumpAllModules(hadesmem::Process const& process,
 
     HADESMEM_DETAIL_TRACE_A("Copying headers.");
 
-    std::vector<std::uint8_t> raw_new;
-    std::copy(std::begin(raw),
-              std::begin(raw) + nt_headers.GetSizeOfHeaders(),
-              std::back_inserter(raw_new));
+    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
+    auto const headers_buf_beg =
+      use_disk_headers
+        ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
+        : raw.data();
+    std::copy(headers_buf_beg,
+              headers_buf_beg + nt_headers.GetSizeOfHeaders(),
+              raw_new.data());
 
     HADESMEM_DETAIL_TRACE_A("Copying section data.");
 
@@ -175,10 +197,18 @@ inline void DumpAllModules(hadesmem::Process const& process,
     std::vector<std::pair<DWORD, DWORD>> raw_datas;
     for (auto const& section : sections)
     {
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "VirtualAddress: [%08lX]. PointerToRawData: [%08lX].",
+        section.GetVirtualAddress(),
+        section.GetPointerToRawData());
+
       // TODO: When rounding up from raw to virtual, we should check for
       // zero-fill pages at the end and then drop as many as possible in order
       // to reduce file size.
       // TODO: Validate section virtual sizes against the VA region sizes?
+      // TODO: Automatically align sections? (e.g. Bump section virtual size
+      // from 0x400 to 0x1000).
+
       auto const section_size =
         (std::max)(section.GetVirtualSize(), section.GetSizeOfRawData());
       auto const ptr_raw_data_new =
@@ -187,6 +217,11 @@ inline void DumpAllModules(hadesmem::Process const& process,
               RoundUp(raw_new.size(), nt_headers.GetFileAlignment()))
           : section.GetPointerToRawData();
       raw_datas.emplace_back(ptr_raw_data_new, section_size);
+
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "New PointerToRawData: [%08lX]. New SizeOfRawData: [%08lX].",
+        ptr_raw_data_new,
+        section_size);
 
       if (ptr_raw_data_new > raw_new.size())
       {
@@ -209,8 +244,24 @@ inline void DumpAllModules(hadesmem::Process const& process,
     HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
 
     hadesmem::NtHeaders nt_headers_new(local_process, pe_file_new);
-    nt_headers_new.SetImageBase(
-      reinterpret_cast<ULONG_PTR>(module.GetHandle()));
+    auto const image_base_new =
+      static_cast<ULONGLONG>(reinterpret_cast<ULONG_PTR>(module.GetHandle()));
+    HADESMEM_DETAIL_TRACE_FORMAT_A("ImageBase: [%016llX] -> [%016llX].",
+                                   nt_headers_new.GetImageBase(),
+                                   image_base_new);
+    nt_headers_new.SetImageBase(image_base_new);
+    // TODO: Attempt this even in the case that the use hasn't requested use of
+    // disk headers, because something is better than nothing. Just make sure if
+    // we can't load the file that we fail gracefully and continue.
+    if (use_disk_headers && !nt_headers_new.GetAddressOfEntryPoint())
+    {
+      hadesmem::NtHeaders nt_headers_disk(local_process, *pe_file_disk);
+      HADESMEM_DETAIL_TRACE_FORMAT_A("AddressOfEntryPoint: [%08lX] -> [%08lX].",
+                                     nt_headers_new.GetAddressOfEntryPoint(),
+                                     nt_headers_disk.GetAddressOfEntryPoint());
+      nt_headers_new.SetAddressOfEntryPoint(
+        nt_headers_disk.GetAddressOfEntryPoint());
+    }
     nt_headers_new.UpdateWrite();
 
     HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
@@ -219,6 +270,13 @@ inline void DumpAllModules(hadesmem::Process const& process,
     std::size_t n = 0;
     for (auto& section : sections_new)
     {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("PointerToRawData: [%08lX] -> [%08lX]. "
+                                     "SizeOfRawData: [%08lX] -> [%08lX].",
+                                     section.GetPointerToRawData(),
+                                     raw_datas[n].first,
+                                     section.GetSizeOfRawData(),
+                                     raw_datas[n].second);
+
       section.SetPointerToRawData(raw_datas[n].first);
       section.SetSizeOfRawData(raw_datas[n].second);
       section.UpdateWrite();

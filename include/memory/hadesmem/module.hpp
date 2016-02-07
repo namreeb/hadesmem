@@ -72,7 +72,8 @@ private:
   {
     auto const handle_check = [&](MODULEENTRY32W const& entry) -> bool
     {
-      return (entry.hModule == handle || !handle);
+      return (reinterpret_cast<HMODULE>(entry.modBaseAddr) == handle ||
+              !handle);
     };
 
     InitializeIf(handle_check);
@@ -95,7 +96,7 @@ private:
 
   void Initialize(MODULEENTRY32W const& entry)
   {
-    handle_ = entry.hModule;
+    handle_ = reinterpret_cast<HMODULE>(entry.modBaseAddr);
     size_ = entry.modBaseSize;
     name_ = entry.szModule;
     path_ = entry.szExePath;
@@ -128,38 +129,32 @@ private:
   std::wstring path_;
 };
 
-inline bool operator==(Module const& lhs,
-                       Module const& rhs) noexcept
+inline bool operator==(Module const& lhs, Module const& rhs) noexcept
 {
   return lhs.GetHandle() == rhs.GetHandle();
 }
 
-inline bool operator!=(Module const& lhs,
-                       Module const& rhs) noexcept
+inline bool operator!=(Module const& lhs, Module const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(Module const& lhs,
-                      Module const& rhs) noexcept
+inline bool operator<(Module const& lhs, Module const& rhs) noexcept
 {
   return lhs.GetHandle() < rhs.GetHandle();
 }
 
-inline bool operator<=(Module const& lhs,
-                       Module const& rhs) noexcept
+inline bool operator<=(Module const& lhs, Module const& rhs) noexcept
 {
   return lhs.GetHandle() <= rhs.GetHandle();
 }
 
-inline bool operator>(Module const& lhs,
-                      Module const& rhs) noexcept
+inline bool operator>(Module const& lhs, Module const& rhs) noexcept
 {
   return lhs.GetHandle() > rhs.GetHandle();
 }
 
-inline bool operator>=(Module const& lhs,
-                       Module const& rhs) noexcept
+inline bool operator>=(Module const& lhs, Module const& rhs) noexcept
 {
   return lhs.GetHandle() >= rhs.GetHandle();
 }
