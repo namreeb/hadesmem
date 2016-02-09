@@ -9,12 +9,11 @@
 #include <limits>
 #include <map>
 
+#include <windows.h>
 #include <psapi.h>
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/str_conv.hpp>
-#include <hadesmem/module.hpp>
-#include <hadesmem/module_list.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
 #include <hadesmem/pelib/export.hpp>
 #include <hadesmem/pelib/export_dir.hpp>
@@ -29,6 +28,8 @@
 #include <hadesmem/pelib/section_list.hpp>
 #include <hadesmem/process.hpp>
 #include <hadesmem/process_helpers.hpp>
+#include <hadesmem/region.hpp>
+#include <hadesmem/region_list.hpp>
 
 namespace hadesmem
 {
@@ -91,7 +92,89 @@ inline void WriteDumpFile(Process const& process,
   }
 }
 
+inline std::wstring GetRegionName(Process const& process, void* p)
+{
+  std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  if (::GetMappedFileNameW(process.GetHandle(),
+                           p,
+                           mapped_file_name.data(),
+                           static_cast<DWORD>(mapped_file_name.size())))
+  {
+    auto const region_name = static_cast<std::wstring>(mapped_file_name.data());
+    return region_name.substr(region_name.rfind(L'\\') + 1);
+  }
+
+  DWORD const last_error = ::GetLastError();
+  HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! GetMappedFileNameW failed. "
+                                 "Defaulting to base address as string. "
+                                 "LastError: [%08lX].",
+                                 last_error);
+
+  return L"unknown_" + PtrToHexString(p);
+}
+
+inline std::wstring GetRegionPath(Process const& process, void* p)
+{
+  std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  if (!::GetMappedFileNameW(process.GetHandle(),
+                            p,
+                            mapped_file_name.data(),
+                            static_cast<DWORD>(mapped_file_name.size())))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
+    return {};
+  }
+
+  std::vector<wchar_t> drive_strings(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  if (!GetLogicalDriveStringsW(static_cast<DWORD>(drive_strings.size() - 1),
+                               drive_strings.data()))
+  {
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! GetLogicalDriveStringsW failed. LastError: [%08lX].",
+      last_error);
+    return {};
+  }
+
+  TCHAR* d = drive_strings.data();
+
+  do
+  {
+    std::array<wchar_t, 3> drive{*d, ':', '\0'};
+    std::vector<wchar_t> device_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+    if (::QueryDosDeviceW(drive.data(),
+                          device_path.data(),
+                          static_cast<DWORD>(device_path.size())))
+    {
+      auto const device_path_len =
+        static_cast<DWORD>(std::wstring(device_path.data()).size());
+      if (device_path_len < MAX_PATH)
+      {
+        if (_wcsnicmp(mapped_file_name.data(),
+                      device_path.data(),
+                      device_path_len) == 0 &&
+            *(mapped_file_name.data() + device_path_len) == L'\\')
+        {
+          return std::wstring(drive.data()) +
+                 (mapped_file_name.data() + device_path_len);
+        }
+      }
+    }
+
+    while (*d++)
+    {
+      // Advance to next string.
+    }
+  } while (*d);
+
+  return {};
+}
+
 // TODO: Clean this up. It's a mess right now...
+// TODO: Support running this on a memory dump (i.e. a module on disk, but in
+// memory image form). Useful for reconstructing modules from crash dumps etc.
 inline void DumpAllModules(Process const& process,
                            bool use_disk_headers,
                            bool reconstruct_imports)
@@ -116,12 +199,32 @@ inline void DumpAllModules(Process const& process,
   {
     HADESMEM_DETAIL_TRACE_A("Building export list.");
 
-    ModuleList modules(process);
-    for (auto const& module : modules)
+    RegionList regions(process);
+    for (auto const& region : regions)
     {
+      auto const base = region.GetBase();
+      if (!base)
+      {
+        continue;
+      }
+
+      // TODO: Verify the pages.
+
+      // TODO: Better validations.
+      if (!CanRead(process, base) || IsBadProtect(process, base))
+      {
+        continue;
+      }
+
+      auto const mz = Read<std::array<char, 2>>(process, base);
+      if (mz[0] != 'M' || mz[1] != 'Z')
+      {
+        continue;
+      }
+
       // We can't use the module size returned by Module32First/Module32Next
       // because it can be too large.
-      auto const module_size = GetRegionAllocSize(process, module.GetHandle());
+      auto const module_size = GetRegionAllocSize(process, base, true);
       if (module_size > static_cast<DWORD>(-1))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(Error()
@@ -132,10 +235,8 @@ inline void DumpAllModules(Process const& process,
       std::unique_ptr<NtHeaders> nt_headers;
       try
       {
-        pe_file = std::make_unique<PeFile>(process,
-                                           module.GetHandle(),
-                                           PeFileType::Image,
-                                           static_cast<DWORD>(module_size));
+        pe_file = std::make_unique<PeFile>(
+          process, base, PeFileType::Image, static_cast<DWORD>(module_size));
         nt_headers = std::make_unique<NtHeaders>(process, *pe_file);
       }
       catch (std::exception const& /*e*/)
@@ -169,7 +270,8 @@ inline void DumpAllModules(Process const& process,
           VaReconstructInfo reconstruct_info;
           // TODO: What about the module name in the export directory?
           reconstruct_info.va_ = e.GetVa();
-          reconstruct_info.module_name_ = WideCharToMultiByte(module.GetName());
+          reconstruct_info.module_name_ =
+            WideCharToMultiByte(GetRegionName(process, base));
           reconstruct_info.by_name_ = e.ByName();
           if (reconstruct_info.by_name_)
           {
@@ -188,23 +290,45 @@ inline void DumpAllModules(Process const& process,
 
   HADESMEM_DETAIL_TRACE_A("Starting module enumeration.");
 
-  ModuleList modules(process);
-  for (auto const& module : modules)
+  // TODO: Reduce code duplication between this and the above loop.
+
+  RegionList regions(process);
+  for (auto const& region : regions)
   {
-    HADESMEM_DETAIL_TRACE_A("Got new module.");
+    auto const base = region.GetBase();
+    if (!base)
+    {
+      continue;
+    }
+
+    // TODO: Verify the pages.
+
+    // TODO: Better validations.
+    if (!CanRead(process, base) || IsBadProtect(process, base))
+    {
+      continue;
+    }
+
+    auto const mz = Read<std::array<char, 2>>(process, base);
+    if (mz[0] != 'M' || mz[1] != 'Z')
+    {
+      continue;
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Got new target region.");
 
     HADESMEM_DETAIL_TRACE_FORMAT_W(
-      L"Handle: [%p]. Size: [%08lX]. Name: [%s]. Path: [%s].",
-      module.GetHandle(),
-      module.GetSize(),
-      module.GetName().c_str(),
-      module.GetPath().c_str());
+      L"Base: [%p]. Size: [%08lX]. Protect: [%08lX]. Type: [%08lX].",
+      region.GetBase(),
+      region.GetSize(),
+      region.GetProtect(),
+      region.GetType());
 
     HADESMEM_DETAIL_TRACE_A("Checking for valid headers.");
 
     // We can't use the module size returned by Module32First/Module32Next
     // because it can be too large.
-    auto const module_size = GetRegionAllocSize(process, module.GetHandle());
+    auto const module_size = GetRegionAllocSize(process, base);
     if (module_size > static_cast<DWORD>(-1))
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error()
@@ -216,10 +340,8 @@ inline void DumpAllModules(Process const& process,
 
     try
     {
-      PeFile const pe_file(process,
-                           module.GetHandle(),
-                           PeFileType::Image,
-                           static_cast<DWORD>(module_size));
+      PeFile const pe_file(
+        process, base, PeFileType::Image, static_cast<DWORD>(module_size));
       NtHeaders nt_headers(process, pe_file);
     }
     catch (std::exception const& /*e*/)
@@ -231,32 +353,56 @@ inline void DumpAllModules(Process const& process,
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
 
     auto raw = ReadVectorEx<std::uint8_t>(
-      process, module.GetHandle(), module_size, ReadFlags::kZeroFillReserved);
+      process, region.GetBase(), module_size, ReadFlags::kZeroFillReserved);
     Process const local_process(::GetCurrentProcessId());
     PeFile const pe_file(local_process,
                          raw.data(),
                          PeFileType::Image,
                          static_cast<DWORD>(raw.size()));
 
+    auto const region_name = GetRegionName(process, base);
+    auto const region_path = GetRegionPath(process, base);
+
+    if (region_path.empty())
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "WARNING! No region path, not attempting to use disk headers.");
+      use_disk_headers = false;
+    }
+
+    // TODO: Don't hard-fail if we request disk headers but can't get them?
+
     std::vector<char> pe_file_disk_data;
     std::unique_ptr<PeFile> pe_file_disk;
     if (use_disk_headers)
     {
-      HADESMEM_DETAIL_TRACE_FORMAT_W(L"Using disk headers. Path: [%s].",
-                                     module.GetPath().c_str());
+      try
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(L"Using disk headers. Path: [%s].",
+                                       region_path.c_str());
 
-      // TODO: Use GetMappedFileName instead so we can also support unlinked
-      // modules.
-      // TODO: Support not failing here if we don't have file headers, because
-      // we want to support dumping manually mapped PE files with headers.
-      // (Sounds like it defeats the purpose but it's more common than you might
-      // think...)
-      pe_file_disk_data = PeFileToBuffer(module.GetPath());
-      pe_file_disk =
-        std::make_unique<PeFile>(local_process,
-                                 pe_file_disk_data.data(),
-                                 PeFileType::Data,
-                                 static_cast<DWORD>(pe_file_disk_data.size()));
+        // TODO: Disable WoW64 FS redirection.
+
+        // TODO: Support not failing here if we don't have file headers, because
+        // we want to support dumping manually mapped PE files with headers.
+        // (Sounds like it defeats the purpose but it's more common than you
+        // might think...)
+        pe_file_disk_data = PeFileToBuffer(region_path);
+        pe_file_disk = std::make_unique<PeFile>(
+          local_process,
+          pe_file_disk_data.data(),
+          PeFileType::Data,
+          static_cast<DWORD>(pe_file_disk_data.size()));
+      }
+      catch (...)
+      {
+        HADESMEM_DETAIL_TRACE_A(
+          "WARNING! Error attempting to open disk headers.");
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information().c_str());
+
+        use_disk_headers = false;
+      }
     }
 
     PeFile const& pe_file_headers = use_disk_headers ? *pe_file_disk : pe_file;
@@ -288,6 +434,9 @@ inline void DumpAllModules(Process const& process,
         section.GetVirtualAddress(),
         section.GetPointerToRawData());
 
+      // TODO: Do some validation here based on memory layout?
+      // TODO: Ensure all the crazy scenarios like overlapping virtual sections,
+      // bogus header sizes and pointers, etc. all work.
       // TODO: When rounding up from raw to virtual, we should check for
       // zero-fill pages at the end and then drop as many as possible in order
       // to reduce file size.
@@ -317,10 +466,29 @@ inline void DumpAllModules(Process const& process,
         raw_new.resize(ptr_raw_data_new);
       }
 
+      // TODO: Actually validate we're not going to read outside of the buffer?
+      // TODO: Everywhere else in this function needs hardening too.
+
+      if (section.GetVirtualAddress() >= raw.size())
+      {
+        HADESMEM_DETAIL_TRACE_A("WARNING! Not writing any data for current "
+                                "section due to out-of-bounds VA.");
+        continue;
+      }
+
       auto const raw_data = raw.data() + section.GetVirtualAddress();
-      auto const raw_data_end = raw_data + section_size;
-      raw_new.reserve(raw_new.size() + section_size);
+      auto const raw_data_end =
+        (std::min)(raw_data + section_size, raw.data() + raw.size());
+      if (raw_data_end != raw_data + section_size)
+      {
+        HADESMEM_DETAIL_TRACE_A("WARNING! Truncating read for current section "
+                                "due to out-of-bounds VA.");
+      }
+
+      auto const new_size = raw_new.size() + section_size;
+      raw_new.reserve(new_size);
       std::copy(raw_data, raw_data_end, std::back_inserter(raw_new));
+      raw_new.resize(new_size);
     }
 
     HADESMEM_DETAIL_ASSERT(raw_new.size() <
@@ -334,7 +502,7 @@ inline void DumpAllModules(Process const& process,
 
     NtHeaders nt_headers_new(local_process, pe_file_new);
     auto const image_base_new =
-      static_cast<ULONGLONG>(reinterpret_cast<ULONG_PTR>(module.GetHandle()));
+      static_cast<ULONGLONG>(reinterpret_cast<ULONG_PTR>(base));
     HADESMEM_DETAIL_TRACE_FORMAT_A("ImageBase: [%016llX] -> [%016llX].",
                                    nt_headers_new.GetImageBase(),
                                    image_base_new);
@@ -429,7 +597,7 @@ inline void DumpAllModules(Process const& process,
 
         // TODO: Use module base/size instead of name.
         if (v.module_name_ ==
-            hadesmem::detail::WideCharToMultiByte(module.GetName()))
+            hadesmem::detail::WideCharToMultiByte(region_name))
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
             "WARNING! Skipping VA in current module. "
@@ -482,7 +650,11 @@ inline void DumpAllModules(Process const& process,
 
       HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
 
+      // TODO: Don't require so many transformatins. This could be made far
+      // cleaner and more efficient.
+
       // Remove all references to the module currently being dumped
+      // TODO: Use module base/size instead of name.
       va_reconstruct_list.erase(
         std::remove_if(std::begin(va_reconstruct_list),
                        std::end(va_reconstruct_list),
@@ -490,7 +662,7 @@ inline void DumpAllModules(Process const& process,
                        {
                          return v.module_name_ ==
                                 hadesmem::detail::WideCharToMultiByte(
-                                  module.GetName());
+                                  region_name);
                        }),
         std::end(va_reconstruct_list));
 
@@ -538,6 +710,7 @@ inline void DumpAllModules(Process const& process,
         descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
       }
 
+      // TODO: Don't duplicate entries from existing IAT (above).
       for (auto const& va_map : va_reconstruct_info_by_ft)
       {
         // TODO: Reuse this where possible.
@@ -585,10 +758,6 @@ inline void DumpAllModules(Process const& process,
             v.name_.c_str(),
             v.ordinal_,
             v.by_name_);
-
-          // TODO: Don't require one descriptor per thunk if they're all
-          // adjacent
-          // and in the same module.
 
           // TODO: Reuse by name data for thunks with the same name.
 
@@ -730,7 +899,7 @@ inline void DumpAllModules(Process const& process,
     }
 
     WriteDumpFile(
-      process, module.GetName(), raw_new.data(), raw_new.size(), L"pe_dumps");
+      process, region_name, raw_new.data(), raw_new.size(), L"pe_dumps");
   }
 }
 

@@ -26,8 +26,10 @@ namespace hadesmem
 {
 namespace detail
 {
+// TODO: Should break_on_bad_protect be the default?
 inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
-                                 void const* base)
+                                 void const* base,
+                                 bool break_on_bad_protect = false)
 {
   HMODULE const ntdll = ::GetModuleHandleW(L"ntdll.dll");
   if (!ntdll)
@@ -79,27 +81,41 @@ inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
         "GetRegionAllocSize does not currently support large pages."});
   }
 
+  hadesmem::Region r{process, base};
+
   hadesmem::RegionList regions{process};
   auto iter = std::find_if(std::begin(regions),
                            std::end(regions),
                            [&](Region const& region)
                            {
-                             return region.GetAllocBase() == base;
+                             return region.GetAllocBase() == r.GetAllocBase();
                            });
   SIZE_T size{};
-  while (iter != std::end(regions) && iter->GetAllocBase() == base)
+  while (iter != std::end(regions) && iter->GetAllocBase() == r.GetAllocBase())
   {
+    if (break_on_bad_protect &&
+        hadesmem::IsBadProtect(process, iter->GetBase()))
+    {
+      break;
+    }
+
     SIZE_T const region_size = iter->GetSize();
     HADESMEM_DETAIL_ASSERT(region_size < (std::numeric_limits<DWORD>::max)());
     size += static_cast<DWORD>(region_size);
     HADESMEM_DETAIL_ASSERT(size >= region_size);
     ++iter;
   }
+
+  HADESMEM_DETAIL_ASSERT(base >= r.GetAllocBase());
+  size -= reinterpret_cast<std::intptr_t>(base) -
+          reinterpret_cast<std::intptr_t>(r.GetAllocBase());
+
   if (!size)
   {
     HADESMEM_DETAIL_THROW_EXCEPTION(
       Error{} << ErrorString{"Invalid region allocation size."});
   }
+
   return size;
 }
 }
