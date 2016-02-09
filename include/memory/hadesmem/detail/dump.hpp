@@ -110,9 +110,11 @@ inline std::wstring GetRegionName(Process const& process, void* p)
                                  "LastError: [%08lX].",
                                  last_error);
 
-  return L"unknown_" + PtrToHexString(p);
+  // TODO: Select extension based off headers (for EXE, DLL and SYS at least).
+  return L"unknown_" + PtrToHexString(p) + L".dll";
 }
 
+// TODO: Support files mapped from UNC shares? Any other corner cases?
 inline std::wstring GetRegionPath(Process const& process, void* p)
 {
   std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
@@ -175,6 +177,12 @@ inline std::wstring GetRegionPath(Process const& process, void* p)
 // TODO: Clean this up. It's a mess right now...
 // TODO: Support running this on a memory dump (i.e. a module on disk, but in
 // memory image form). Useful for reconstructing modules from crash dumps etc.
+// TODO: Support 64-bit dumping 32-bit otherwise some targets will not be
+// possible to dump due to memory pressure.
+// TODO: Scan inside the region to uncover any modules which have been manual
+// mapped not on a region boundary. For now lets start with scanning on a page
+// bonadry. Will expand that later if required, although it will likely be a lot
+// noisier so we may want to put it behind a flag.
 inline void DumpAllModules(Process const& process,
                            bool use_disk_headers,
                            bool reconstruct_imports)
