@@ -92,86 +92,101 @@ inline void WriteDumpFile(Process const& process,
   }
 }
 
-inline std::wstring GetRegionName(Process const& process, void* p)
+inline std::wstring GetRegionName(Process const& process, void* p) noexcept
 {
-  std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  if (::GetMappedFileNameW(process.GetHandle(),
-                           p,
-                           mapped_file_name.data(),
-                           static_cast<DWORD>(mapped_file_name.size())))
+  try
   {
-    auto const region_name = static_cast<std::wstring>(mapped_file_name.data());
-    return region_name.substr(region_name.rfind(L'\\') + 1);
+    std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+    if (::GetMappedFileNameW(process.GetHandle(),
+                             p,
+                             mapped_file_name.data(),
+                             static_cast<DWORD>(mapped_file_name.size())))
+    {
+      auto const region_name =
+        static_cast<std::wstring>(mapped_file_name.data());
+      return region_name.substr(region_name.rfind(L'\\') + 1);
+    }
+
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! GetMappedFileNameW failed. "
+                                   "Defaulting to base address as string. "
+                                   "LastError: [%08lX].",
+                                   last_error);
+
+    // TODO: Select extension based off headers (for EXE, DLL and SYS at least).
+    return L"unknown_" + PtrToHexString(p) + L".dll";
   }
-
-  DWORD const last_error = ::GetLastError();
-  HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! GetMappedFileNameW failed. "
-                                 "Defaulting to base address as string. "
-                                 "LastError: [%08lX].",
-                                 last_error);
-
-  // TODO: Select extension based off headers (for EXE, DLL and SYS at least).
-  return L"unknown_" + PtrToHexString(p) + L".dll";
+  catch (...)
+  {
+    return {};
+  }
 }
 
 // TODO: Support files mapped from UNC shares? Any other corner cases?
 inline std::wstring GetRegionPath(Process const& process, void* p)
 {
-  std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  if (!::GetMappedFileNameW(process.GetHandle(),
-                            p,
-                            mapped_file_name.data(),
-                            static_cast<DWORD>(mapped_file_name.size())))
+  try
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
-    return {};
-  }
-
-  std::vector<wchar_t> drive_strings(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  if (!GetLogicalDriveStringsW(static_cast<DWORD>(drive_strings.size() - 1),
-                               drive_strings.data()))
-  {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! GetLogicalDriveStringsW failed. LastError: [%08lX].",
-      last_error);
-    return {};
-  }
-
-  TCHAR* d = drive_strings.data();
-
-  do
-  {
-    std::array<wchar_t, 3> drive{*d, ':', '\0'};
-    std::vector<wchar_t> device_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-    if (::QueryDosDeviceW(drive.data(),
-                          device_path.data(),
-                          static_cast<DWORD>(device_path.size())))
+    std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+    if (!::GetMappedFileNameW(process.GetHandle(),
+                              p,
+                              mapped_file_name.data(),
+                              static_cast<DWORD>(mapped_file_name.size())))
     {
-      auto const device_path_len =
-        static_cast<DWORD>(std::wstring(device_path.data()).size());
-      if (device_path_len < MAX_PATH)
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
+      return {};
+    }
+
+    std::vector<wchar_t> drive_strings(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+    if (!GetLogicalDriveStringsW(static_cast<DWORD>(drive_strings.size() - 1),
+                                 drive_strings.data()))
+    {
+      DWORD const last_error = ::GetLastError();
+      HADESMEM_DETAIL_TRACE_FORMAT_A(
+        "WARNING! GetLogicalDriveStringsW failed. LastError: [%08lX].",
+        last_error);
+      return {};
+    }
+
+    TCHAR* d = drive_strings.data();
+
+    do
+    {
+      std::array<wchar_t, 3> drive{*d, ':', '\0'};
+      std::vector<wchar_t> device_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+      if (::QueryDosDeviceW(drive.data(),
+                            device_path.data(),
+                            static_cast<DWORD>(device_path.size())))
       {
-        if (_wcsnicmp(mapped_file_name.data(),
-                      device_path.data(),
-                      device_path_len) == 0 &&
-            *(mapped_file_name.data() + device_path_len) == L'\\')
+        auto const device_path_len =
+          static_cast<DWORD>(std::wstring(device_path.data()).size());
+        if (device_path_len < MAX_PATH)
         {
-          return std::wstring(drive.data()) +
-                 (mapped_file_name.data() + device_path_len);
+          if (_wcsnicmp(mapped_file_name.data(),
+                        device_path.data(),
+                        device_path_len) == 0 &&
+              *(mapped_file_name.data() + device_path_len) == L'\\')
+          {
+            return std::wstring(drive.data()) +
+                   (mapped_file_name.data() + device_path_len);
+          }
         }
       }
-    }
 
-    while (*d++)
-    {
-      // Advance to next string.
-    }
-  } while (*d);
+      while (*d++)
+      {
+        // Advance to next string.
+      }
+    } while (*d);
 
-  return {};
+    return {};
+  }
+  catch (...)
+  {
+    return {};
+  }
 }
 
 // TODO: Clean this up. It's a mess right now...
@@ -183,206 +198,194 @@ inline std::wstring GetRegionPath(Process const& process, void* p)
 // mapped not on a region boundary. For now lets start with scanning on a page
 // bonadry. Will expand that later if required, although it will likely be a lot
 // noisier so we may want to put it behind a flag.
+// TODO: Add option to not dump system files?
+// TODO: Split this into many smaller types and functions.
 inline void DumpAllModules(Process const& process,
                            bool use_disk_headers,
                            bool reconstruct_imports)
 {
-  struct VaReconstructInfo
-  {
-    // RVA of the reference to the export. i.e. The RVA of the fixup.
-    DWORD rva_{};
+  HADESMEM_DETAIL_TRACE_A("Getting page size.");
 
-    // VA of the export (not the reference!).
-    void* va_{};
-    std::string module_name_;
-    bool by_name_{};
-    std::string name_;
-    DWORD ordinal_{};
+  SYSTEM_INFO sys_info{};
+  ::GetSystemInfo(&sys_info);
+  auto const page_size = sys_info.dwPageSize;
+
+  struct ModuleLight
+  {
+    ModuleLight(Process const& process, void* base, std::size_t size)
+      : process_{process},
+        pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
+        nt_headers_{process_, pe_file_},
+        name_{GetRegionName(process, base)},
+        path_{GetRegionPath(process, base)}
+    {
+      // TODO: Do our best to get module name, path, etc. here. For manually
+      // mapped modules we can check the export directory for a module name.
+      // Need to be careful though because it could overlap with an existing
+      // filename, be an invalid file name, etc. Should probably do some
+      // sanitization on the data (e.g. ascii alphanumeric only) and then use it
+      // plus the region address or something to ensure it's unique.
+      // TODO: Ensure this doesn't overlap with an existing name? (We could
+      // easily get two different modules with the same name loaded into a
+      // process.)
+    }
+
+    Process process_;
+    PeFile pe_file_;
+    NtHeaders nt_headers_;
+    std::wstring name_;
+    std::wstring path_;
   };
 
-  // TODO: Fix code duplication between this branch and the rest of the function
-  // (getting module size, checking if PE file is valid, etc.).
-  std::map<void*, VaReconstructInfo> va_reconstruct_map;
-  if (reconstruct_imports)
+  std::vector<ModuleLight> modules;
+
+  HADESMEM_DETAIL_TRACE_A("Building module list.");
+
+  RegionList regions(process);
+  for (auto const& region : regions)
   {
-    HADESMEM_DETAIL_TRACE_A("Building export list.");
-
-    RegionList regions(process);
-    for (auto const& region : regions)
+    auto const region_beg = static_cast<std::uint8_t*>(region.GetBase());
+    if (!region_beg)
     {
-      auto const base = region.GetBase();
-      if (!base)
-      {
-        continue;
-      }
+      continue;
+    }
 
-      // TODO: Verify the pages.
+    auto const region_end = region_beg + region.GetSize();
 
-      // TODO: Better validations.
-      if (!CanRead(process, base) || IsBadProtect(process, base))
-      {
-        continue;
-      }
+    // TODO: Verify the pages.
 
-      auto const mz = Read<std::array<char, 2>>(process, base);
+    // TODO: Better validations.
+    if (!CanRead(process, region_beg) || IsBadProtect(process, region_beg))
+    {
+      continue;
+    }
+
+    for (auto p = region_beg; p + page_size <= region_end; p += page_size)
+    {
+      auto const mz = Read<std::array<char, 2>>(process, p);
       if (mz[0] != 'M' || mz[1] != 'Z')
       {
         continue;
       }
 
-      // We can't use the module size returned by Module32First/Module32Next
-      // because it can be too large.
-      auto const module_size = GetRegionAllocSize(process, base, true);
-      if (module_size > static_cast<DWORD>(-1))
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Found module candidate. Base: [%p].", p);
+
+      // We potentially over-estimate module size here, but it's probably best
+      // to over-estimate in the case where we have no headers, and in the case
+      // where we do have headers it's not a big deal because we only use this
+      // size to determine the maximum amount of data to read, not the minimum.
+      auto const size = GetRegionAllocSize(process, p, true);
+      if (size > static_cast<DWORD>(-1))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(Error()
                                         << ErrorString("Region too large."));
       }
 
-      std::unique_ptr<PeFile> pe_file;
-      std::unique_ptr<NtHeaders> nt_headers;
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Calculated module size: [%08lX].",
+                                     static_cast<DWORD>(size));
+
       try
       {
-        pe_file = std::make_unique<PeFile>(
-          process, base, PeFileType::Image, static_cast<DWORD>(module_size));
-        nt_headers = std::make_unique<NtHeaders>(process, *pe_file);
+        HADESMEM_DETAIL_TRACE_A("Checking for valid headers, and retrieving "
+                                "region name and optional path.");
+        modules.emplace_back(process, p, size);
       }
       catch (std::exception const& /*e*/)
       {
-        HADESMEM_DETAIL_TRACE_A("WARNING! Invalid headers.");
-        return;
-      }
-
-      ExportList exports(process, *pe_file);
-      for (auto const& e : exports)
-      {
-        if (e.IsVirtualVa())
-        {
-          HADESMEM_DETAIL_TRACE_A("WARNING! Skipping virtual VA.");
-          continue;
-        }
-
-        if (!e.GetVa())
-        {
-          // Don't warn on forwarded functions with a zero VA because it would
-          // be too noisy otherwise.
-          if (!e.IsForwarded())
-          {
-            HADESMEM_DETAIL_TRACE_A("WARNING! Skipping zero VA.");
-          }
-          continue;
-        }
-
-        if (!va_reconstruct_map.count(e.GetVa()))
-        {
-          VaReconstructInfo reconstruct_info;
-          // TODO: What about the module name in the export directory?
-          reconstruct_info.va_ = e.GetVa();
-          reconstruct_info.module_name_ =
-            WideCharToMultiByte(GetRegionName(process, base));
-          reconstruct_info.by_name_ = e.ByName();
-          if (reconstruct_info.by_name_)
-          {
-            reconstruct_info.name_ = e.GetName();
-          }
-          else
-          {
-            reconstruct_info.ordinal_ = e.GetProcedureNumber();
-          }
-
-          va_reconstruct_map[e.GetVa()] = reconstruct_info;
-        }
+        HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Invalid headers. Base: [%p].",
+                                       p);
+        continue;
       }
     }
   }
 
-  HADESMEM_DETAIL_TRACE_A("Starting module enumeration.");
-
-  // TODO: Reduce code duplication between this and the above loop.
-
-  RegionList regions(process);
-  for (auto const& region : regions)
+  struct ExportLight
   {
-    auto const base = region.GetBase();
-    if (!base)
+    ModuleLight const* module_;
+    bool by_name_;
+    std::string name_;
+    DWORD ordinal_;
+  };
+
+  std::map<void*, ExportLight> export_map;
+
+  HADESMEM_DETAIL_TRACE_A("Building export map.");
+
+  // TODO: Only do this if import reconstruction is enabled.
+  for (auto const& m : modules)
+  {
+    ExportList exports(m.process_, m.pe_file_);
+    for (auto const& e : exports)
     {
-      continue;
+      auto const va = e.GetVa();
+      if (!va)
+      {
+        // Don't warn on forwarded functions with a zero VA because it would
+        // be too noisy otherwise.
+        if (!e.IsForwarded())
+        {
+          HADESMEM_DETAIL_TRACE_A("WARNING! Skipping zero VA.");
+        }
+
+        continue;
+      }
+
+      if (e.IsVirtualVa())
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "WARNING! Skipping virtual VA. VA: [%p].", va);
+        continue;
+      }
+
+      auto const iter = export_map.find(va);
+      if (iter != std::end(export_map))
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "WARNING! Skipping duplicate VA. VA: [%p]. "
+          "Name: [%s]. Ordinal: [%d].",
+          va,
+          e.GetName(),
+          e.GetProcedureNumber());
+        continue;
+      }
+
+      export_map[va] =
+        ExportLight{&m, e.ByName(), e.GetName(), e.GetProcedureNumber()};
     }
+  }
 
-    // TODO: Verify the pages.
+  HADESMEM_DETAIL_TRACE_A("Starting module dumping.");
 
-    // TODO: Better validations.
-    if (!CanRead(process, base) || IsBadProtect(process, base))
-    {
-      continue;
-    }
-
-    auto const mz = Read<std::array<char, 2>>(process, base);
-    if (mz[0] != 'M' || mz[1] != 'Z')
-    {
-      continue;
-    }
-
-    HADESMEM_DETAIL_TRACE_A("Got new target region.");
-
-    HADESMEM_DETAIL_TRACE_FORMAT_W(
-      L"Base: [%p]. Size: [%08lX]. Protect: [%08lX]. Type: [%08lX].",
-      region.GetBase(),
-      region.GetSize(),
-      region.GetProtect(),
-      region.GetType());
-
-    HADESMEM_DETAIL_TRACE_A("Checking for valid headers.");
-
-    // We can't use the module size returned by Module32First/Module32Next
-    // because it can be too large.
-    auto const module_size = GetRegionAllocSize(process, base);
-    if (module_size > static_cast<DWORD>(-1))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                      << ErrorString("Region too large."));
-    }
-
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Calculated module size: [%08lX].",
-                                   static_cast<DWORD>(module_size));
-
-    try
-    {
-      PeFile const pe_file(
-        process, base, PeFileType::Image, static_cast<DWORD>(module_size));
-      NtHeaders nt_headers(process, pe_file);
-    }
-    catch (std::exception const& /*e*/)
-    {
-      HADESMEM_DETAIL_TRACE_A("WARNING! Invalid headers.");
-      continue;
-    }
+  for (auto const& m : modules)
+  {
+    auto const base = m.pe_file_.GetBase();
+    auto const size = m.pe_file_.GetSize();
 
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
 
     auto raw = ReadVectorEx<std::uint8_t>(
-      process, region.GetBase(), module_size, ReadFlags::kZeroFillReserved);
+      process, base, size, ReadFlags::kZeroFillReserved);
     Process const local_process(::GetCurrentProcessId());
     PeFile const pe_file(local_process,
                          raw.data(),
                          PeFileType::Image,
                          static_cast<DWORD>(raw.size()));
 
-    auto const region_name = GetRegionName(process, base);
-    auto const region_path = GetRegionPath(process, base);
+    bool has_disk_headers = use_disk_headers;
 
+    auto const& region_path = m.path_;
     if (region_path.empty())
     {
       HADESMEM_DETAIL_TRACE_A(
         "WARNING! No region path, not attempting to use disk headers.");
-      use_disk_headers = false;
+      has_disk_headers = false;
     }
 
     // TODO: Don't hard-fail if we request disk headers but can't get them?
 
     std::vector<char> pe_file_disk_data;
     std::unique_ptr<PeFile> pe_file_disk;
-    if (use_disk_headers)
+    if (has_disk_headers)
     {
       try
       {
@@ -409,11 +412,11 @@ inline void DumpAllModules(Process const& process,
         HADESMEM_DETAIL_TRACE_A(
           boost::current_exception_diagnostic_information().c_str());
 
-        use_disk_headers = false;
+        has_disk_headers = false;
       }
     }
 
-    PeFile const& pe_file_headers = use_disk_headers ? *pe_file_disk : pe_file;
+    PeFile const& pe_file_headers = has_disk_headers ? *pe_file_disk : pe_file;
     NtHeaders nt_headers(local_process, pe_file_headers);
 
     HADESMEM_DETAIL_TRACE_A("Copying headers.");
@@ -422,9 +425,9 @@ inline void DumpAllModules(Process const& process,
     // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
     // when we open the PE file object later pointing to the buffer, if we add
     // more data to the buffer it won't be reallocated.
-    raw_new.reserve(module_size * 2);
+    raw_new.reserve(size * 2);
     auto const headers_buf_beg =
-      use_disk_headers
+      has_disk_headers
         ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
         : raw.data();
     std::copy(headers_buf_beg,
@@ -518,7 +521,7 @@ inline void DumpAllModules(Process const& process,
     // TODO: Attempt this even in the case that the use hasn't requested use of
     // disk headers, because something is better than nothing. Just make sure if
     // we can't load the file that we fail gracefully and continue.
-    if (use_disk_headers && !nt_headers_new.GetAddressOfEntryPoint())
+    if (has_disk_headers && !nt_headers_new.GetAddressOfEntryPoint())
     {
       NtHeaders nt_headers_disk(local_process, *pe_file_disk);
       HADESMEM_DETAIL_TRACE_FORMAT_A("AddressOfEntryPoint: [%08lX] -> [%08lX].",
@@ -572,49 +575,46 @@ inline void DumpAllModules(Process const& process,
 
       HADESMEM_DETAIL_TRACE_A("Performing memory scan.");
 
-      // Get list of required fixups.
-      std::vector<VaReconstructInfo> va_reconstruct_list;
+      std::map<DWORD, ExportLight*> fixup_map;
       bool fixup_adjacent = false;
       for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
            p += 4)
       {
         auto const va = *reinterpret_cast<void**>(p);
-        auto const e = va_reconstruct_map.find(va);
-        if (e == std::end(va_reconstruct_map))
+        auto const i = export_map.find(va);
+        if (i == std::end(export_map))
         {
           fixup_adjacent = false;
           continue;
         }
 
-        auto v = e->second;
-        HADESMEM_DETAIL_ASSERT(v.va_ == va);
-        HADESMEM_DETAIL_TRACE_FORMAT_A("Found matching VA. VA: [%p]. Module: "
-                                       "[%s]. Name: [%s]. Ordinal: [%lu]. "
-                                       "ByName: [%d].",
-                                       v.va_,
-                                       v.module_name_.c_str(),
-                                       v.name_.c_str(),
-                                       v.ordinal_,
-                                       v.by_name_);
+        if (va >= base && va <= static_cast<std::uint8_t*>(base) + size)
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "WARNING! Skipping VA in current module. Pointer: [%p].", p);
+          continue;
+        }
+
+        auto const e = i->second;
+        HADESMEM_DETAIL_TRACE_FORMAT_A("Found matching VA. Pointer: [%p]. VA: "
+                                       "[%p]. Module: [%s]. Name: [%s]. "
+                                       "Ordinal: [%lu]. ByName: [%d].",
+                                       p,
+                                       va,
+                                       e.module_->name_.c_str(),
+                                       e.name_.c_str(),
+                                       e.ordinal_,
+                                       e.by_name_);
 
         auto const offset =
           static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(p) -
                              reinterpret_cast<std::uintptr_t>(raw_new.data()));
-        v.rva_ = FileOffsetToRva(
+
+        auto const rva = FileOffsetToRva(
           local_process, pe_file_new, static_cast<DWORD>(offset));
 
-        // TODO: Use module base/size instead of name.
-        if (v.module_name_ ==
-            hadesmem::detail::WideCharToMultiByte(region_name))
-        {
-          HADESMEM_DETAIL_TRACE_FORMAT_A(
-            "WARNING! Skipping VA in current module. "
-            "VA: [%p]. Offset: [%08lX]. RVA: [%08lX].",
-            e->first,
-            offset,
-            v.rva_);
-          continue;
-        }
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "Offset: [%08lX]. RVA: [%08lX].", offset, rva);
 
         // Only fixup page aligned VAs if they are adjacent to another fixup,
         // because it would be too risky to reconstruct them otherwise (high
@@ -628,67 +628,52 @@ inline void DumpAllModules(Process const& process,
         if (!(reinterpret_cast<std::uintptr_t>(va) % 0x1000) && !fixup_adjacent)
         {
           auto const next_va = *reinterpret_cast<void**>(p + 8);
-          auto const next_e = va_reconstruct_map.find(next_va);
-          if (next_e == std::end(va_reconstruct_map))
+          auto const next_e = export_map.find(next_va);
+          if (next_e == std::end(export_map))
           {
-            HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Skipping page aligned VA. "
-                                           "VA: [%p]. Offset: [%08lX]. RVA: "
-                                           "[%08lX].",
-                                           e->first,
-                                           offset,
-                                           v.rva_);
+            HADESMEM_DETAIL_TRACE_FORMAT_A(
+              "WARNING! Skipping page aligned VA. Pointer: [%p].", p);
             continue;
           }
         }
 
-        HADESMEM_DETAIL_TRACE_FORMAT_A(
-          "Adding match to fixup list. Offset: [%08lX]. RVA: [%08lX].",
-          offset,
-          v.rva_);
+        if (fixup_map.find(rva) != std::end(fixup_map))
+        {
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "WARNING! Skipping duplicate RVA. Pointer: [%p].", p);
+          continue;
+        }
 
-        va_reconstruct_list.push_back(v);
+        HADESMEM_DETAIL_TRACE_A("Adding match to fixup list.");
+
+        fixup_map[rva] = &i->second;
         fixup_adjacent = true;
         p += sizeof(void*) - 4;
       }
 
-      if (va_reconstruct_list.empty())
+      if (fixup_map.empty())
       {
         HADESMEM_DETAIL_TRACE_A("WARNING! Empty import reconstruction list.");
       }
 
-      HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
+      HADESMEM_DETAIL_TRACE_A("Coalescing import descriptors.");
 
-      // TODO: Don't require so many transformatins. This could be made far
-      // cleaner and more efficient.
-
-      // Remove all references to the module currently being dumped
-      // TODO: Use module base/size instead of name.
-      va_reconstruct_list.erase(
-        std::remove_if(std::begin(va_reconstruct_list),
-                       std::end(va_reconstruct_list),
-                       [&](VaReconstructInfo const& v)
-                       {
-                         return v.module_name_ ==
-                                hadesmem::detail::WideCharToMultiByte(
-                                  region_name);
-                       }),
-        std::end(va_reconstruct_list));
-
-      // Transform import reconstruction list into one grouped by module name.
-      std::map<DWORD, std::vector<VaReconstructInfo>> va_reconstruct_info_by_ft;
+      std::map<DWORD, std::vector<ExportLight*>> coalesced_fixup_map;
       DWORD cur_rva_base = 0;
       DWORD prev_rva = 0;
-      for (auto const& v : va_reconstruct_list)
+      for (auto const& f : fixup_map)
       {
-        if (!prev_rva || v.rva_ != prev_rva + sizeof(void*))
+        if (!prev_rva || f.first != prev_rva + sizeof(void*))
         {
-          cur_rva_base = v.rva_;
+          cur_rva_base = f.first;
         }
 
-        va_reconstruct_info_by_ft[cur_rva_base].emplace_back(v);
+        coalesced_fixup_map[cur_rva_base].emplace_back(f.second);
 
-        prev_rva = v.rva_;
+        prev_rva = f.first;
       }
+
+      HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
 
       // Build raw import dirs.
       std::vector<char> import_directories_buf;
@@ -696,12 +681,12 @@ inline void DumpAllModules(Process const& process,
       auto const descriptors_size = static_cast<DWORD>(
         sizeof(IMAGE_IMPORT_DESCRIPTOR) *
         (std::distance(std::begin(import_dirs), std::end(import_dirs)) +
-         va_reconstruct_info_by_ft.size() + 1));
+         coalesced_fixup_map.size() + 1));
       auto const descriptors_end_rva =
         last_section.GetVirtualAddress() + old_section_end + descriptors_size;
-      // Fix this hack (see above for the same thing being done to raw_new).
-      import_directories_buf.reserve(module_size * 2);
       import_directories_buf.resize(descriptors_size);
+      // TODO: Fix this hack (see above for the same thing being done to raw_new).
+      import_directories_buf.reserve(size * 2);
       DWORD descriptors_cur = 0;
 
       for (auto const& dir : import_dirs)
@@ -719,13 +704,14 @@ inline void DumpAllModules(Process const& process,
       }
 
       // TODO: Don't duplicate entries from existing IAT (above).
-      for (auto const& va_map : va_reconstruct_info_by_ft)
+      for (auto const& va_map : coalesced_fixup_map)
       {
         // TODO: Reuse this where possible.
         DWORD const module_name_rva =
           descriptors_end_rva +
           static_cast<DWORD>(import_directories_buf.size()) - descriptors_size;
-        auto const module_name = va_map.second.back().module_name_;
+        auto const module_name =
+          WideCharToMultiByte(va_map.second.back()->module_->name_);
         std::copy(std::begin(module_name),
                   std::end(module_name),
                   std::back_inserter(import_directories_buf));
@@ -754,52 +740,53 @@ inline void DumpAllModules(Process const& process,
 
         descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
 
-        for (auto const& v : va_map.second)
+        auto cur_rva = descriptor.FirstThunk;
+        for (auto const& e : va_map.second)
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
-            "Processing import reconstruction entry. RVA: [%08lX], VA: "
-            "[%p]. Module: [%s]. Name: [%s]. Ordinal: "
-            "[%lu]. ByName: [%d].",
-            v.rva_,
-            v.va_,
-            v.module_name_.c_str(),
-            v.name_.c_str(),
-            v.ordinal_,
-            v.by_name_);
+            "Processing import reconstruction entry. RVA: [%08lX]. Module: "
+            "[%s]. Name: [%s]. Ordinal: [%lu]. ByName: [%d].",
+            cur_rva,
+            e->module_->name_.c_str(),
+            e->name_.c_str(),
+            e->ordinal_,
+            e->by_name_);
 
           // TODO: Reuse by name data for thunks with the same name.
 
           DWORD const import_by_name_rva =
-            v.by_name_
+            e->by_name_
               ? descriptors_end_rva +
                   static_cast<DWORD>(import_directories_buf.size()) -
                   descriptors_size
               : 0;
-          if (v.by_name_)
+          if (e->by_name_)
           {
             std::vector<char> import_by_name_buf(
-              sizeof(IMAGE_IMPORT_BY_NAME::Hint) + v.name_.size() + 1);
+              sizeof(IMAGE_IMPORT_BY_NAME::Hint) + e->name_.size() + 1);
             auto const import_by_name = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(
               import_by_name_buf.data());
-            std::copy(
-              std::begin(v.name_), std::end(v.name_), &import_by_name->Name[0]);
+            std::copy(std::begin(e->name_),
+                      std::end(e->name_),
+                      &import_by_name->Name[0]);
 
             std::copy(std::begin(import_by_name_buf),
                       std::end(import_by_name_buf),
                       std::back_inserter(import_directories_buf));
           }
 
-          if (v.by_name_)
+          if (e->by_name_)
           {
             thunks->u1.AddressOfData = import_by_name_rva;
           }
           else
           {
             thunks->u1.Ordinal =
-              IMAGE_ORDINAL_FLAG | (v.ordinal_ & static_cast<WORD>(-1));
+              IMAGE_ORDINAL_FLAG | (e->ordinal_ & static_cast<WORD>(-1));
           }
 
           ++thunks;
+          cur_rva += sizeof(void*);
         }
       }
 
@@ -906,8 +893,10 @@ inline void DumpAllModules(Process const& process,
       }
     }
 
+    // TODO: Write to a new sub-directory each time (e.g.
+    // pe_dumps\foo.exe\1234\1).
     WriteDumpFile(
-      process, region_name, raw_new.data(), raw_new.size(), L"pe_dumps");
+      process, m.name_, raw_new.data(), raw_new.size(), L"pe_dumps");
   }
 }
 
