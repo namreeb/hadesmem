@@ -182,7 +182,11 @@ bool g_strings = false;
 bool g_use_disk_headers = false;
 bool g_reconstruct_imports = false;
 bool g_add_new_section = false;
-std::uintptr_t g_oep = 0;
+DWORD g_oep = 0;
+std::wstring g_module_name;
+std::uintptr_t g_module_base = 0;
+std::uintptr_t g_raw_base = 0;
+std::size_t g_raw_size = 0;
 
 template <typename CharT>
 class QuietStreamBuf : public std::basic_streambuf<CharT>
@@ -346,11 +350,42 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
 
   // TODO: Put back the useful console output we used to get when we had this
   // implemented specifically for this tool.
-  hadesmem::detail::DumpMemory(*process,
-                               g_use_disk_headers,
-                               g_reconstruct_imports,
-                               g_add_new_section,
-                               g_oep);
+  if (g_raw_base)
+  {
+    hadesmem::detail::DumpMemory(*process,
+                                 g_use_disk_headers,
+                                 g_reconstruct_imports,
+                                 g_add_new_section,
+                                 g_oep,
+                                 nullptr,
+                                 reinterpret_cast<void*>(g_raw_base),
+                                 g_raw_size);
+  }
+  else
+  {
+    auto const module_base = [&]() -> void*
+    {
+      if (g_module_base)
+      {
+        return reinterpret_cast<void*>(g_module_base);
+      }
+
+      if (!g_module_name.empty())
+      {
+        hadesmem::Module const module{*process, g_module_name};
+        return module.GetHandle();
+      }
+
+      return nullptr;
+    }();
+
+    hadesmem::detail::DumpMemory(*process,
+                                 g_use_disk_headers,
+                                 g_reconstruct_imports,
+                                 g_add_new_section,
+                                 g_oep,
+                                 module_base);
+  }
 }
 
 void DumpProcesses(bool memonly = false)
@@ -580,16 +615,21 @@ int main(int argc, char* argv[])
       "Add new section to contain reconstructed imports (as opposed to being "
       "appended to the existing last section)",
       cmd);
-    // TODO: Add option to dump only a specific module instead of the entire
-    // process.
-    // TODO: Support more than one module with this switch?
-    TCLAP::ValueArg<std::uintptr_t> oep_arg(
+    TCLAP::ValueArg<std::string> module_name_arg(
+      "", "module-name", "Module to dump", false, "", "string", cmd);
+    TCLAP::ValueArg<std::uintptr_t> module_base_arg(
+      "", "module-base", "Module to dump", false, 0, "uintptr_t", cmd);
+    TCLAP::ValueArg<std::uintptr_t> raw_base_arg(
+      "", "raw-base", "Raw memory region base", false, 0, "uintptr_t", cmd);
+    TCLAP::ValueArg<std::size_t> raw_size_arg(
+      "", "raw-size", "Raw memory region size", false, 0, "size_t", cmd);
+    TCLAP::ValueArg<DWORD> oep_arg(
       "",
       "oep",
-      "Sets AddressOfEntryPoint for the owning module",
+      "Sets AddressOfEntryPoint for specified module",
       false,
       0,
-      "uintptr_t",
+      "DWORD",
       cmd);
     cmd.parse(argc, argv);
 
@@ -599,6 +639,41 @@ int main(int argc, char* argv[])
     g_reconstruct_imports = reconstruct_imports_arg.isSet();
     g_add_new_section = add_new_section_arg.isSet();
     g_oep = oep_arg.getValue();
+    g_module_name =
+      hadesmem::detail::MultiByteToWideChar(module_name_arg.getValue());
+    g_module_base = module_base_arg.getValue();
+    if (g_module_name.empty() && !g_module_base)
+    {
+      if (g_oep)
+      {
+        HADESMEM_DETAIL_THROW_EXCEPTION(
+          hadesmem::Error()
+          << hadesmem::ErrorString("OEP specified without module."));
+      }
+    }
+    g_raw_base = raw_base_arg.getValue();
+    g_raw_size = raw_size_arg.getValue();
+
+    if (g_raw_base && !g_raw_size)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString(
+          "Please specify a size for raw region."));
+    }
+
+    if (g_raw_base && (g_module_base || !g_module_name.empty()))
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString(
+          "Please specify either a raw region or a module."));
+    }
+
+    if (!g_module_name.empty() && g_module_base)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        hadesmem::Error() << hadesmem::ErrorString(
+          "Please specify either a module name or a module base."));
+    }
 
     SetWarningsEnabled(warned_arg.getValue());
     SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());
