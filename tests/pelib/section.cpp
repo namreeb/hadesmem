@@ -91,7 +91,7 @@ void TestSection()
     {
       hadesmem::PeFile const pe_file_ntdll(
         process, ::GetModuleHandleW(L"ntdll"), hadesmem::PeFileType::Image, 0);
-      hadesmem::Section const section_ntdll(process, pe_file_ntdll, 0);
+      hadesmem::Section const section_ntdll(process, pe_file_ntdll, nullptr);
       std::stringstream test_str_3;
       test_str_3.imbue(std::locale::classic());
       test_str_3 << section_ntdll.GetBase();

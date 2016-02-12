@@ -38,7 +38,7 @@ void TestSectionList()
 
   BOOST_TEST(nt_headers_1.GetNumberOfSections() >= 1);
 
-  hadesmem::Section section_1(process, pe_file_1, 0);
+  hadesmem::Section section_1(process, pe_file_1, nullptr);
 
   hadesmem::Section section_2(section_1);
   BOOST_TEST_EQ(section_1, section_2);
@@ -102,7 +102,7 @@ void TestSectionList()
                                              ::GetModuleHandleW(L"ntdll"),
                                              hadesmem::PeFileType::Image,
                                              0);
-        hadesmem::Section const section_ntdll(process, pe_file_ntdll, 0);
+        hadesmem::Section const section_ntdll(process, pe_file_ntdll, nullptr);
         std::stringstream test_str_3;
         test_str_3.imbue(std::locale::classic());
         test_str_3 << section_ntdll.GetBase();

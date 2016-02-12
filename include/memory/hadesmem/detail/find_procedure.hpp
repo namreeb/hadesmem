@@ -69,7 +69,13 @@ inline FARPROC GetProcAddressFromExport(Process const& process, Export const& e)
 {
   if (e.IsForwarded())
   {
-    std::string const forwarder_module_name{e.GetForwarderModule()};
+    auto forwarder_module_name = e.GetForwarderModule();
+    // TODO: What is the correct logic here? Remember we don't want to get
+    // fooled by seeing Foo.DLL.DLL instead of Foo.DLL or something stupid like
+    // that...
+    forwarder_module_name = forwarder_module_name.find('.') != std::string::npos
+                              ? forwarder_module_name
+                              : (forwarder_module_name + ".DLL");
     Module const forwarder_module{process,
                                   MultiByteToWideChar(forwarder_module_name)};
     if (e.IsForwardedByOrdinal())

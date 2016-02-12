@@ -1,6 +1,11 @@
 // Copyright (C) 2010-2015 Joshua Boyce
 // See the file COPYING for copying permission.
 
+#define TCLAP_SETBASE_ZERO 1
+#if !defined(_M_X64)
+#define HAVE_LONG_LONG
+#endif
+
 #include "main.hpp"
 
 #include <algorithm>
@@ -176,6 +181,8 @@ bool g_quiet = false;
 bool g_strings = false;
 bool g_use_disk_headers = false;
 bool g_reconstruct_imports = false;
+bool g_add_new_section = false;
+std::uintptr_t g_oep = 0;
 
 template <typename CharT>
 class QuietStreamBuf : public std::basic_streambuf<CharT>
@@ -339,7 +346,11 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
 
   // TODO: Put back the useful console output we used to get when we had this
   // implemented specifically for this tool.
-  hadesmem::detail::DumpMemory(*process, g_use_disk_headers, g_reconstruct_imports);
+  hadesmem::detail::DumpMemory(*process,
+                               g_use_disk_headers,
+                               g_reconstruct_imports,
+                               g_add_new_section,
+                               g_oep);
 }
 
 void DumpProcesses(bool memonly = false)
@@ -551,9 +562,9 @@ int main(int argc, char* argv[])
                                          -1,
                                          "int",
                                          cmd);
-    TCLAP::ValueArg<DWORD> threads_arg(
+    TCLAP::ValueArg<std::size_t> threads_arg(
       "", "threads", "Number of threads", false, 0, "size_t", cmd);
-    TCLAP::ValueArg<DWORD> queue_factor_arg(
+    TCLAP::ValueArg<std::size_t> queue_factor_arg(
       "", "queue-factor", "Thread queue factor", false, 0, "size_t", cmd);
     TCLAP::SwitchArg strings_arg("", "strings", "Dump strings", cmd);
     TCLAP::SwitchArg use_disk_headers_arg(
@@ -562,9 +573,23 @@ int main(int argc, char* argv[])
       "Use on-disk PE header for section layout when performing memory dumps",
       cmd);
     TCLAP::SwitchArg reconstruct_imports_arg(
+      "", "reconstruct-imports", "Reconstruct imports (build new ILT)", cmd);
+    TCLAP::SwitchArg add_new_section_arg(
       "",
-      "reconstruct-imports",
-      "Reconstruct imports (don't use existing IAT/ILT from disk or memory)",
+      "add-new-section",
+      "Add new section to contain reconstructed imports (as opposed to being "
+      "appended to the existing last section)",
+      cmd);
+    // TODO: Add option to dump only a specific module instead of the entire
+    // process.
+    // TODO: Support more than one module with this switch?
+    TCLAP::ValueArg<std::uintptr_t> oep_arg(
+      "",
+      "oep",
+      "Sets AddressOfEntryPoint for the owning module",
+      false,
+      0,
+      "uintptr_t",
       cmd);
     cmd.parse(argc, argv);
 
@@ -572,6 +597,8 @@ int main(int argc, char* argv[])
     g_strings = strings_arg.isSet();
     g_use_disk_headers = use_disk_headers_arg.isSet();
     g_reconstruct_imports = reconstruct_imports_arg.isSet();
+    g_add_new_section = add_new_section_arg.isSet();
+    g_oep = oep_arg.getValue();
 
     SetWarningsEnabled(warned_arg.getValue());
     SetDynamicWarningsEnabled(warned_file_dynamic_arg.getValue());

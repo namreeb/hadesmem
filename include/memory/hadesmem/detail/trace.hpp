@@ -26,6 +26,9 @@
 // TODO: Add a cache of the last N lines of debug output for cases where we only
 // have a dump file and no logs (the issue may be difficult to repro).
 
+// TODO: Add support for redirecting trace output for the case where we have a
+// GUI app and we want to trace into a log window.
+
 namespace hadesmem
 {
 namespace detail

@@ -73,10 +73,6 @@ public:
                    DetourFuncT detour)
     : PatchVeh{process, target, detour}
   {
-    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<TargetFuncT>::value ||
-                                  std::is_pointer<TargetFuncT>::value);
-    HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<DetourFuncT>::value ||
-                                  std::is_pointer<DetourFuncT>::value);
   }
 
   template <typename TargetFuncT, typename DetourFuncT>
