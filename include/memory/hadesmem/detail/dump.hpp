@@ -250,7 +250,14 @@ public:
            bool add_new_section,
            DWORD oep,
            ModuleLight const* m = nullptr)
-    : process_light_(BuildExportMap(process))
+    : process_{&process},
+      base_{base},
+      use_disk_headers_{use_disk_headers},
+      reconstruct_imports_{reconstruct_imports},
+      add_new_section_{add_new_section},
+      oep_{oep},
+      m_{m},
+      process_light_(BuildExportMap(process))
   {
   }
 
@@ -378,7 +385,8 @@ private:
 
             va = GetProcAddressFromExport(process, e);
 
-            HADESMEM_DETAIL_TRACE_FORMAT_A("Resolved forwarded export. VA: [%p].", va);
+            HADESMEM_DETAIL_TRACE_FORMAT_A(
+              "Resolved forwarded export. VA: [%p].", va);
 
             // TODO: Do we need to recursively resolve forwarded exports here?
           }
