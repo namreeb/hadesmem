@@ -1263,7 +1263,7 @@ inline void
     if (module_base)
     {
       DumpSingleModule(process,
-                       base,
+                       module_base,
                        use_disk_headers,
                        reconstruct_imports,
                        add_new_section,
