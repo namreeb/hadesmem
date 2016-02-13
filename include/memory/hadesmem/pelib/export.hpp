@@ -101,7 +101,7 @@ public:
 
     // Check function RVA. If it lies inside the export dir region
     // then it's a forwarded export. Otherwise it's a regular RVA.
-    if (func_rva > export_dir_start && func_rva < export_dir_end)
+    if (func_rva >= export_dir_start && func_rva + 4 < export_dir_end)
     {
       forwarded_ = true;
       forwarder_ = detail::CheckedReadString<char>(
