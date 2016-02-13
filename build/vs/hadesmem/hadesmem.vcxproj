@@ -38,6 +38,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patcher_aux.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_code_gen.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\patch_detour_stub.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\peb.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\privilege.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_guard.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\protect_region.hpp" />

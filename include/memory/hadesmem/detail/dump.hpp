@@ -13,6 +13,7 @@
 #include <psapi.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/peb.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/find_procedure.hpp>
 #include <hadesmem/pelib/dos_header.hpp>
@@ -93,50 +94,48 @@ inline void WriteDumpFile(Process const& process,
   }
 }
 
-inline std::wstring GetRegionName(Process const& process, void* p) noexcept
+inline std::wstring
+  GetRegionPathOrDefault(Process const& process, void* p, void* imagebase)
 {
-  try
+  std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
+  if (!::GetMappedFileNameW(process.GetHandle(),
+                            p,
+                            mapped_file_name.data(),
+                            static_cast<DWORD>(mapped_file_name.size())))
   {
-    std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-    if (::GetMappedFileNameW(process.GetHandle(),
-                             p,
-                             mapped_file_name.data(),
-                             static_cast<DWORD>(mapped_file_name.size())))
+    DWORD const last_error = ::GetLastError();
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
+
+    if (p == imagebase)
     {
-      auto const region_name =
-        static_cast<std::wstring>(mapped_file_name.data());
-      return region_name.substr(region_name.rfind(L'\\') + 1);
+      try
+      {
+        return hadesmem::GetPathNative(process);
+      }
+      catch (...)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Failed to get default path.");
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information().c_str());
+      }
     }
 
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! GetMappedFileNameW failed. "
-                                   "Defaulting to base address as string. "
-                                   "LastError: [%08lX].",
-                                   last_error);
-
-    // TODO: Select extension based off headers (for EXE, DLL and SYS at least).
-    return L"unknown_" + PtrToHexString(p) + L".dll";
-  }
-  catch (...)
-  {
     return {};
   }
+
+  return mapped_file_name.data();
 }
 
 // TODO: Support files mapped from UNC shares? Any other corner cases?
-inline std::wstring GetRegionPath(Process const& process, void* p)
+inline std::wstring
+  GetRegionPath(Process const& process, void* p, void* imagebase)
 {
   try
   {
-    std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-    if (!::GetMappedFileNameW(process.GetHandle(),
-                              p,
-                              mapped_file_name.data(),
-                              static_cast<DWORD>(mapped_file_name.size())))
+    auto const mapped_file_name = GetRegionPathOrDefault(process, p, imagebase);
+    if (!mapped_file_name.size())
     {
-      DWORD const last_error = ::GetLastError();
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
       return {};
     }
 
@@ -186,7 +185,9 @@ inline std::wstring GetRegionPath(Process const& process, void* p)
   }
   catch (...)
   {
-    return {};
+    HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Error retriving region path.");
+    HADESMEM_DETAIL_TRACE_A(
+      boost::current_exception_diagnostic_information().c_str());
   }
 }
 
@@ -195,11 +196,10 @@ struct ModuleLight
   ModuleLight(Process const& process,
               void* base,
               std::size_t size,
-              bool use_disk_headers)
+              bool use_disk_headers,
+              void* imagebase)
     : process_{process},
-      pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
-      name_{GetRegionName(process, base)},
-      path_{GetRegionPath(process, base)}
+      pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)}
   {
     // TODO: Do our best to get module name, path, etc. here. For manually
     // mapped modules we can check the export directory for a module name.
@@ -211,6 +211,13 @@ struct ModuleLight
     // easily get two different modules with the same name loaded into a
     // process. For example, this happens by default with WoW64, but there are
     // also lots of other valid scenarios.
+
+    path_ = GetRegionPath(process, base, imagebase);
+    name_ = path_.empty() ? (L"unknown_" + PtrToHexString(base) + L".dll")
+                          : path_.substr(path_.rfind(L'\\') + 1);
+
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Name: [%s]. Path: [%s].", name_.c_str(), path_.c_str());
 
     // Try on-disk validation first in case the in-memory representation is
     // corrupted.
@@ -233,12 +240,17 @@ struct ModuleLight
           path_.c_str());
         HADESMEM_DETAIL_TRACE_A(
           boost::current_exception_diagnostic_information().c_str());
+
+        use_disk_headers = false;
       }
     }
 
-    // If on-disk headers are not found or not requested, try to verify using
-    // in-memory headers.
-    NtHeaders nt_headers_{process_, pe_file_};
+    if (!use_disk_headers)
+    {
+      // If on-disk headers are not found or not requested, try to verify using
+      // in-memory headers.
+      NtHeaders nt_headers_{process_, pe_file_};
+    }
   }
 
   Process process_;
@@ -311,9 +323,15 @@ private:
     ::GetSystemInfo(&sys_info);
     auto const page_size = sys_info.dwPageSize;
 
-    ProcessLight process_info;
+    HADESMEM_DETAIL_TRACE_A("Getting PEB.");
+
+    auto const peb = GetPeb(process);
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("ImageBase: [%p].", peb.ImageBaseAddress);
 
     HADESMEM_DETAIL_TRACE_A("Building module list.");
+
+    ProcessLight process_info;
 
     RegionList regions(process);
     for (auto const& region : regions)
@@ -365,12 +383,7 @@ private:
           HADESMEM_DETAIL_TRACE_A("Checking for valid headers, and retrieving "
                                   "region name and optional path.");
           process_info.modules_.emplace_back(
-            process, p, size, use_disk_headers_);
-
-          HADESMEM_DETAIL_TRACE_FORMAT_W(
-            L"Name: [%s]. Path: [%s].",
-            process_info.modules_.back().name_.c_str(),
-            process_info.modules_.back().path_.c_str());
+            process, p, size, use_disk_headers_, peb.ImageBaseAddress);
         }
         catch (...)
         {

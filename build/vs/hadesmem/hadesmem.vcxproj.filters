@@ -327,5 +327,8 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\dump.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\peb.hpp">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
