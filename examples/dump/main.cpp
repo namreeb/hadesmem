@@ -631,6 +631,12 @@ int main(int argc, char* argv[])
       0,
       "DWORD",
       cmd);
+    // TODO: Add --force-module-path to override the module path detection and
+    // allow us to attempt to dump a PE file even if we don't have in-memory
+    // headers or a file mapping backing the memory region.
+    // TODO: Add --use-disk-iat to toggle using the disk IAT during import
+    // reconstruction. Will be useful to allow using the disk headers for
+    // section layout, but then ignoring it for imports.
     cmd.parse(argc, argv);
 
     g_quiet = quiet_arg.isSet();

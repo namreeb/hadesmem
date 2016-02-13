@@ -192,10 +192,12 @@ inline std::wstring GetRegionPath(Process const& process, void* p)
 
 struct ModuleLight
 {
-  ModuleLight(Process const& process, void* base, std::size_t size)
+  ModuleLight(Process const& process,
+              void* base,
+              std::size_t size,
+              bool use_disk_headers)
     : process_{process},
       pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
-      nt_headers_{process_, pe_file_},
       name_{GetRegionName(process, base)},
       path_{GetRegionPath(process, base)}
   {
@@ -209,11 +211,38 @@ struct ModuleLight
     // easily get two different modules with the same name loaded into a
     // process. For example, this happens by default with WoW64, but there are
     // also lots of other valid scenarios.
+
+    // Try on-disk validation first in case the in-memory representation is
+    // corrupted.
+    if (use_disk_headers && !path_.empty())
+    {
+      try
+      {
+        auto buffer = PeFileToBuffer(path_);
+        Process local_process{::GetCurrentProcessId()};
+        PeFile pe_file{local_process,
+                       buffer.data(),
+                       PeFileType::Data,
+                       static_cast<DWORD>(buffer.size())};
+        NtHeaders nt_headers_{local_process, pe_file};
+      }
+      catch (...)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(
+          L"WARNING! Failed to verify on-disk headers. Path: [%s].",
+          path_.c_str());
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information().c_str());
+      }
+    }
+
+    // If on-disk headers are not found or not requested, try to verify using
+    // in-memory headers.
+    NtHeaders nt_headers_{process_, pe_file_};
   }
 
   Process process_;
   PeFile pe_file_;
-  NtHeaders nt_headers_;
   std::wstring name_;
   std::wstring path_;
 };
@@ -335,17 +364,20 @@ private:
         {
           HADESMEM_DETAIL_TRACE_A("Checking for valid headers, and retrieving "
                                   "region name and optional path.");
-          process_info.modules_.emplace_back(process, p, size);
+          process_info.modules_.emplace_back(
+            process, p, size, use_disk_headers_);
 
           HADESMEM_DETAIL_TRACE_FORMAT_W(
             L"Name: [%s]. Path: [%s].",
             process_info.modules_.back().name_.c_str(),
             process_info.modules_.back().path_.c_str());
         }
-        catch (std::exception const& /*e*/)
+        catch (...)
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
             "WARNING! Invalid headers. Base: [%p].", p);
+          HADESMEM_DETAIL_TRACE_A(
+            boost::current_exception_diagnostic_information().c_str());
           continue;
         }
       }
@@ -375,20 +407,29 @@ private:
 
           try
           {
-            // TODO: Handle API sets.
-            // API-
-            // EXT-
-            // TODO: Are there other prefixes?
-            // TODO: Do they live anywhere other than the system directory?
-            // TODO: Parse the API set schema table instead for extra accuracy
-            // (at the expense of being tied to particular windows versions)?
+            // We don't need special handling for API sets here because we are
+            // always resolving everything in the context of the remote process,
+            // and Windows should've already done all the redirections for us.
+            // One thing we could do is use the API Set Schema information to
+            // "undo" the redirections (i.e. generate an import to
+            // Kernel32.AddDllDirectory instead of KernelBase.AddDllDirectory ,
+            // currently we get the 'wrong' one due to redirection by
+            // api-ms-win-core-libraryloader-l1-1-0), but that seems to be
+            // relatively unimportant as it doesn't appear to affect the
+            // behavior of the file.
+
+            // TODO: Improve support for modules which import directly from the
+            // API set modules. They break the link between the high level and
+            // low level modules. E.g. Kernel32.AddDllDirectory ->
+            // api-ms-win-core-libraryloader-l1-1-0.AddDllDirectory ->
+            // KernelBase.AddDllDirectory. If we can't resolve the API set
+            // module then we will always select KernelBase for that API even if
+            // Kernel32 would be a better fit (e.g. for import coalescing).
 
             va = GetProcAddressFromExport(process, e);
 
             HADESMEM_DETAIL_TRACE_FORMAT_A(
               "Resolved forwarded export. VA: [%p].", va);
-
-            // TODO: Do we need to recursively resolve forwarded exports here?
           }
           catch (...)
           {
@@ -771,6 +812,10 @@ private:
       // TODO: Support other scanning algorithms.
       // TODO: Be smarter about deciding which imports are legitimate and which
       // are false positives.
+      // TODO: Ensure references to hidden modules are found correctly.
+      // Overwatch (at the moment at least) appears to be using a packer where
+      // this is required (at least until we can analyze how it's using that for
+      // import redirection so we can resolve it properly).
       std::map<DWORD, ExportLight const*> fixup_map;
       bool fixup_adjacent = false;
       for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
@@ -844,8 +889,10 @@ private:
         }
 
         // Default to the first one seen.
-        // TODO: This is just a placeholder value. We need to think about what
-        // the best thing to do here is... (Perhaps this is it?)
+        // TODO: Add some logic to determine what the best 'default' value is.
+        // E.g. We should probably pick kernel32 over kernelbase, or kernel32
+        // over api-ms-win-core-*, or kernel32 over ntdll, or pretty much
+        // anything over shimeng/apphelp/etc., etc.
         auto& fixup_export = fixup_map[rva];
         fixup_export = &i->second.front();
 
@@ -921,6 +968,8 @@ private:
 
       HADESMEM_DETAIL_TRACE_A("Removing redundant import descriptors.");
 
+      // TODO: Do this after adding the on-disk entries?
+
       ImportDirList import_dirs(local_process, pe_file_headers);
       for (auto const& id : import_dirs)
       {
@@ -938,6 +987,9 @@ private:
           }
         }
       }
+
+      // TODO: Sort fixup map by Name RVA (of the module descriptor). That seems
+      // to be how MSVC is ordering them.
 
       HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
 
@@ -1068,10 +1120,9 @@ private:
       // and coalescing the location of all descriptors, at the slight
       // disadvantage of potentially missing some APIs (although that should be
       // quite rare as long as we implement the memory scan properly).
+      HADESMEM_DETAIL_TRACE_A("Adding existing import directories.");
       for (auto const& dir : import_dirs)
       {
-        HADESMEM_DETAIL_TRACE_A("Adding existing import directory.");
-
         hadesmem::ImportThunkList import_thunks_ft(
           local_process, pe_file_headers, dir.GetFirstThunk());
         auto const num_fts = std::distance(std::begin(import_thunks_ft),
