@@ -219,6 +219,11 @@ struct ModuleLight
     HADESMEM_DETAIL_TRACE_FORMAT_W(
       L"Name: [%s]. Path: [%s].", name_.c_str(), path_.c_str());
 
+    if (path_.empty())
+    {
+      use_disk_headers = false;
+    }
+
     // Try on-disk validation first in case the in-memory representation is
     // corrupted.
     if (use_disk_headers && !path_.empty())
@@ -231,7 +236,7 @@ struct ModuleLight
                        buffer.data(),
                        PeFileType::Data,
                        static_cast<DWORD>(buffer.size())};
-        NtHeaders nt_headers_{local_process, pe_file};
+        NtHeaders nt_headers{local_process, pe_file};
       }
       catch (...)
       {
@@ -249,7 +254,9 @@ struct ModuleLight
     {
       // If on-disk headers are not found or not requested, try to verify using
       // in-memory headers.
-      NtHeaders nt_headers_{process_, pe_file_};
+      NtHeaders nt_headers{process_, pe_file_};
+
+      HADESMEM_DETAIL_TRACE_A("Successfully verified NT headers.");
     }
   }
 
@@ -312,6 +319,11 @@ public:
     {
       DumpAllModules();
     }
+  }
+
+  void Reset()
+  {
+    process_light_ = BuildExportMap(*process_);
   }
 
 private:
@@ -494,18 +506,19 @@ private:
       }
     }
 
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Num Modules: [%Iu].",
+                                   process_info.modules_.size());
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Num Export VAs: [%Iu].",
+                                   process_info.export_map_.size());
+
     return process_info;
   }
 
   inline void DumpSingleModule(void* base, ModuleLight const* m = nullptr) const
   {
-    // TODO: Don't duplicate this work when doing a full module dump. Do it once
-    // at the start and then reuse it for each module.
     auto const& process_info = process_light_;
     auto const& modules = process_info.modules_;
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Num Modules: [%Iu].", modules.size());
     auto const& export_map = process_info.export_map_;
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Num Export VAs: [%Iu].", export_map.size());
 
     auto const module_iter = std::find_if(std::begin(modules),
                                           std::end(modules),
@@ -522,9 +535,10 @@ private:
 
     m = &*module_iter;
 
-    HADESMEM_DETAIL_TRACE_A("Starting module dumping.");
-
     auto const size = m->pe_file_.GetSize();
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Starting module dumping. Base: [%p]. Size: [%X].", base, size);
 
     HADESMEM_DETAIL_TRACE_A("Reading memory.");
 
@@ -825,10 +839,8 @@ private:
       // TODO: Support other scanning algorithms.
       // TODO: Be smarter about deciding which imports are legitimate and which
       // are false positives.
-      // TODO: Ensure references to hidden modules are found correctly.
-      // Overwatch (at the moment at least) appears to be using a packer where
-      // this is required (at least until we can analyze how it's using that for
-      // import redirection so we can resolve it properly).
+      // TODO: Ensure imports to hidden modules are found correctly. Required
+      // for when a manually mapped module is manually mapping its dependencies.
       std::map<DWORD, ExportLight const*> fixup_map;
       bool fixup_adjacent = false;
       for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
