@@ -850,12 +850,29 @@ private:
           static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(p) -
                              reinterpret_cast<std::uintptr_t>(raw_new.data()));
 
-        auto const va = *reinterpret_cast<void**>(p);
-        auto const i = export_map.find(va);
+        auto va = *reinterpret_cast<void**>(p);
+        auto i = export_map.find(va);
         if (i == std::end(export_map))
         {
-          fixup_adjacent = false;
-          continue;
+          auto const resolved_va = ResolveRedirectedImport(va);
+          if (!resolved_va)
+          {
+            fixup_adjacent = false;
+            continue;
+          }
+
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "Resolved redirected import (unverified). Old: [%p]. New: [%p].",
+            va,
+            resolved_va);
+
+          i = export_map.find(resolved_va);
+          if (i == std::end(export_map))
+          {
+            HADESMEM_DETAIL_TRACE_A("WARNING! Successfully resolved redirected "
+                                    "import, but then failed to match it to an "
+                                    "export.");
+          }
         }
 
         if (va >= base && va <= static_cast<std::uint8_t*>(base) + size)
@@ -1334,6 +1351,76 @@ private:
     {
       DumpSingleModule(m.pe_file_.GetBase(), &m);
     }
+  }
+
+  // Overwatch redirects all entries in the IAT to a dynamically generated stub
+  // which performs some rudimentary pointer arithmetic to mask the API being
+  // called.
+  // 0:000> u 00007FF7170224F0
+  // Overwatch+0x1724f0:
+  // 00007ff7`170224f0 488d0d6de22f01  lea     rcx,[Overwatch+0x1470764
+  // (00007ff7`18320764)] ; "ntdll.dll"
+  // 00007ff7`170224f7 ff15cbecef00    call    qword ptr [Overwatch+0x10711c8
+  // (00007ff7`17f211c8)]
+  // 0:000> u poi(00007ff7`17f211c8)
+  // 00000223`c86f00fc 48b8151334b7fe7f0000 mov rax,offset
+  // kernel32!FindFirstVolumeW+0x195 (00007ffe`b7341315)
+  // 00000223`c86f0106 48057b390000    add     rax,397Bh
+  // 00000223`c86f010c ffe0            jmp     rax
+  // 0:000> ln 0x00007ffe`b7341315 + 0x3970
+  // (00007ffe`b7344c90)   kernel32!GetModuleHandleAStub
+  // TODO: This should be a plugin/extension/whatever.
+  void* ResolveRedirectedImportForOverwatch(void* va) const
+  {
+#if defined(HADESMEM_DETAIL_ARCH_X64)
+    try
+    {
+      if (!CanExecute(*process_, va))
+      {
+        return nullptr;
+      }
+
+      auto const stub = reinterpret_cast<std::uint8_t*>(va);
+      // mov rax, imm64
+      if (Read<std::uint8_t>(*process_, &stub[0]) != 0x48 ||
+          Read<std::uint8_t>(*process_, &stub[1]) != 0xB8)
+      {
+        return nullptr;
+      }
+
+      // add rax, imm32
+      if (Read<std::uint8_t>(*process_, &stub[0xA]) != 0x48 ||
+          Read<std::uint8_t>(*process_, &stub[0xB]) != 0x05)
+      {
+        return nullptr;
+      }
+
+      // jmp rax
+      if (Read<std::uint8_t>(*process_, &stub[0x10]) != 0xFF ||
+          Read<std::uint8_t>(*process_, &stub[0x11]) != 0xE0)
+      {
+        return nullptr;
+      }
+
+      auto const o = Read<std::uint8_t*>(*process_, &stub[2]);
+      auto const n = Read<std::uint32_t>(*process_, &stub[0xc]);
+
+      return o + n;
+    }
+    catch (...)
+    {
+      return nullptr;
+    }
+#else // #if defined(HADESMEM_DETAIL_ARCH_X64)
+    (void)va;
+    return nullptr;
+#endif
+  }
+
+  void* ResolveRedirectedImport(void* va) const
+  {
+    // Just hardcode one for now. Needs proper plugin support.
+    return ResolveRedirectedImportForOverwatch(va);
   }
 
   Process const* process_{};

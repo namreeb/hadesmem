@@ -15,7 +15,7 @@ namespace hadesmem
 {
 namespace detail
 {
-winternl::PEB GetPeb(Process const& process)
+inline winternl::PEB GetPeb(Process const& process)
 {
   HMODULE const ntdll = ::GetModuleHandleW(L"ntdll.dll");
   if (!ntdll)
