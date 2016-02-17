@@ -138,7 +138,7 @@ inline std::wstring
   try
   {
     auto const mapped_file_name = GetRegionPathOrDefault(process, p, imagebase);
-    if (!mapped_file_name.size())
+    if (mapped_file_name.empty())
     {
       return {};
     }
@@ -160,23 +160,22 @@ inline std::wstring
     // handle network paths and other tricky cases?
     do
     {
-      std::array<wchar_t, 3> drive{*d, ':', '\0'};
+      std::wstring drive{*d, L':'};
       std::vector<wchar_t> device_path(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-      if (::QueryDosDeviceW(drive.data(),
+      if (::QueryDosDeviceW(drive.c_str(),
                             device_path.data(),
                             static_cast<DWORD>(device_path.size())))
       {
-        auto const device_path_len =
-          static_cast<DWORD>(std::wstring(device_path.data()).size());
+        auto const device_path_str =
+          static_cast<std::wstring>(device_path.data());
+        auto const device_path_len = static_cast<DWORD>(device_path_str.size());
         if (device_path_len < MAX_PATH)
         {
-          if (_wcsnicmp(mapped_file_name.data(),
-                        device_path.data(),
-                        device_path_len) == 0 &&
+          if (ToUpperOrdinal(mapped_file_name) ==
+                ToUpperOrdinal(device_path_str) &&
               mapped_file_name[device_path_len] == L'\\')
           {
-            return std::wstring(drive.data()) +
-                   (mapped_file_name.data() + device_path_len);
+            return drive + &mapped_file_name[device_path_len];
           }
         }
       }
