@@ -107,6 +107,10 @@ inline std::wstring
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
 
+    // TODO: Returning a default path here should be behind a config flag. It's
+    // correct in some cases (e.g. Overwatch) but not all (e.g. some packers
+    // which unmap themselves and then write a totally new module to that
+    // location).
     if (p == imagebase)
     {
       try
@@ -152,6 +156,8 @@ inline std::wstring
 
     TCHAR* d = drive_strings.data();
 
+    // TODO: Replace this with NtQuerySymbolicLinkObject so we can correctly
+    // handle network paths and other tricky cases?
     do
     {
       std::array<wchar_t, 3> drive{*d, ':', '\0'};
@@ -167,7 +173,7 @@ inline std::wstring
           if (_wcsnicmp(mapped_file_name.data(),
                         device_path.data(),
                         device_path_len) == 0 &&
-              *(mapped_file_name.data() + device_path_len) == L'\\')
+              mapped_file_name[device_path_len] == L'\\')
           {
             return std::wstring(drive.data()) +
                    (mapped_file_name.data() + device_path_len);
@@ -188,6 +194,7 @@ inline std::wstring
     HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Error retriving region path.");
     HADESMEM_DETAIL_TRACE_A(
       boost::current_exception_diagnostic_information().c_str());
+    return {};
   }
 }
 
