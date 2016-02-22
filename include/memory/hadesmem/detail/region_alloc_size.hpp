@@ -61,8 +61,7 @@ inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
     }
 
     SIZE_T const region_size = iter->GetSize();
-    HADESMEM_DETAIL_ASSERT(region_size < (std::numeric_limits<DWORD>::max)());
-    size += static_cast<DWORD>(region_size);
+    size += region_size;
     HADESMEM_DETAIL_ASSERT(size >= region_size);
     ++iter;
   }

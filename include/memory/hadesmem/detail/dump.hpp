@@ -390,8 +390,9 @@ private:
         auto const size = GetRegionAllocSize(process, p, true);
         if (size > static_cast<DWORD>(-1))
         {
-          HADESMEM_DETAIL_THROW_EXCEPTION(Error()
-                                          << ErrorString("Region too large."));
+          HADESMEM_DETAIL_TRACE_FORMAT_A(
+            "Region too large to be a module. Size: [%IX].", size);
+          continue;
         }
 
         HADESMEM_DETAIL_TRACE_FORMAT_A("Calculated module size: [%08lX].",
@@ -646,7 +647,9 @@ private:
       // TODO: Validate section virtual sizes against the VA region sizes?
       // TODO: Automatically align sections? (e.g. Bump section virtual size
       // from 0x400 to 0x1000).
-
+      // TODO: It's not always correct to use VirtualSize here. It's great for
+      // analysis reasons, but if you want runnable dumps some programs might
+      // rely on that virtual space to be zero'd out at runtime.
       auto const section_size = static_cast<DWORD>(RoundUp(
         (std::max)(section.GetVirtualSize(), section.GetSizeOfRawData()),
         nt_headers.GetSectionAlignment()));
@@ -861,6 +864,8 @@ private:
         auto i = export_map.find(va);
         if (i == std::end(export_map))
         {
+          // TODO: Make sure this doesn't overlap with any previous fixups,
+          // redirected or otherwise?
           auto const resolved_va = ResolveRedirectedImport(va);
           if (!resolved_va)
           {
