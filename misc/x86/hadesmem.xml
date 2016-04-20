@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <HadesMem>
-  <Cerberus GUI="AntTweakBar">
+  <Cerberus GUI="ImGui">
     <BlockedProcess Name="steamerrorreporter"/>
     <BlockedProcess Name="rifterrorhandler"/>
+    <BlockedProcess Name="crashhandler"/>
+    <BlockedProcess Name="glyphcrashhandler"/>
+    <BlockedProcess Name="wowerror"/>
     <Plugin Path="cxexample.dll"/>
     <Plugin Process="foo.exe" Path="cxfoo.dll"/>
   </Cerberus>
