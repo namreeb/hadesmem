@@ -19,67 +19,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\apibegin.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\apiend.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\asmjit.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\assembler.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\codegen.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\compiler.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\constpool.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\containers.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\context_p.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\cpuinfo.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\cputicks.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\error.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\globals.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\intutil.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\lock.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\logger.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\operand.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\runtime.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\string.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\vectypes.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\vmem.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\zone.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\build.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\config.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\host.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86assembler.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86compiler.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86context_p.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86cpuinfo.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86inst.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86operand.h" />
-    <ClInclude Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86scheduler_p.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\assembler.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\codegen.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\compiler.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\compilercontext.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\constpool.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\containers.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\context.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\cpuinfo.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\cputicks.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\error.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\globals.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\intutil.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\hlstream.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\logger.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\operand.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\podvector.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\runtime.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\string.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\utils.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\vmem.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\base\zone.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86assembler.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86compiler.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86context.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86cpuinfo.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86compilercontext.cpp" />
+    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86compilerfunc.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86inst.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86operand.cpp" />
     <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86operand_regs.cpp" />
-    <ClCompile Include="..\..\..\deps\asmjit\asmjit\src\asmjit\x86\x86scheduler.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0C721345-2478-4288-B9BE-D1235C6A8F87}</ProjectGuid>

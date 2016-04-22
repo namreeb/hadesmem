@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\DARK SOULS III\Game\DarkSoulsIII.exe" --inject --steam-app-id 374320 --export Load --add-path --path-resolution --module cerberus.dll

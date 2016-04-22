@@ -47,6 +47,8 @@ extern LRESULT ImGui_ImplDX11_WndProcHandler(HWND hWnd,
 // See here: https://github.com/ocornut/imgui/issues/207
 // See here: https://github.com/ocornut/imgui/issues/269
 
+// TODO: Stop dropping imgui.ini files in game directories.
+
 namespace
 {
 hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnImguiInitializeCallback>&
@@ -1335,6 +1337,7 @@ public:
   {
     return ImGui::Value(prefix, v, float_format);
   }
+#if 0
   virtual void Color(const char* prefix, const ImVec4& v) final
   {
     return ImGui::Color(prefix, v);
@@ -1343,6 +1346,7 @@ public:
   {
     return ImGui::Color(prefix, v);
   }
+#endif
 
   // Tooltip
   virtual void SetTooltip(const char* fmt, ...) IM_PRINTFARGS(1) final

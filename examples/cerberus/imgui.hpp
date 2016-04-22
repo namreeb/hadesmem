@@ -542,8 +542,10 @@ public:
   virtual void Value(const char* prefix, unsigned int v) = 0;
   virtual void
     Value(const char* prefix, float v, const char* float_format = NULL) = 0;
+#if 0
   virtual void Color(const char* prefix, const ImVec4& v) = 0;
   virtual void Color(const char* prefix, unsigned int v) = 0;
+#endif
 
   // Tooltip
   virtual void SetTooltip(const char* fmt, ...) IM_PRINTFARGS(1) = 0;

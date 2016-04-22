@@ -1,0 +1,1 @@
+inject.exe --run "F:\SteamLibrary\steamapps\common\Divinity Original Sin Enhanced Edition\Shipping\EoCApp.exe" --inject --steam-app-id 373420 --export Load --add-path --path-resolution --module cerberus.dll

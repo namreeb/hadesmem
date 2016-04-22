@@ -156,15 +156,14 @@ void TestPatchDetour2()
 
   bool test_var = true;
   auto const scratch_detour =
-    [&](hadesmem::PatchDetourBase* patch, int a, float b, void* c)
-  {
-    BOOST_TEST_EQ(test_var, true);
-    BOOST_TEST_EQ(*static_cast<void**>(patch->GetContext()), &test_var);
-    BOOST_TEST(patch->GetTrampoline() != nullptr);
-    auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
-    BOOST_TEST_EQ(orig(a, b, c), 0x1337);
-    return 0xDEADBEEF;
-  };
+    [&](hadesmem::PatchDetourBase* patch, int a, float b, void* c) {
+      BOOST_TEST_EQ(test_var, true);
+      BOOST_TEST_EQ(*static_cast<void**>(patch->GetContext()), &test_var);
+      BOOST_TEST(patch->GetTrampoline() != nullptr);
+      auto const orig = patch->GetTrampolineT<decltype(&Scratch)>();
+      BOOST_TEST_EQ(orig(a, b, c), 0x1337);
+      return 0xDEADBEEF;
+    };
   detour_3 = std::make_unique<hadesmem::PatchDetour<decltype(Scratch)>>(
     GetThisProcess(), scratch_fn, scratch_detour, &test_var);
   detour_3->Apply();
@@ -219,37 +218,37 @@ void GenerateBasicCall(asmjit::X86Compiler& c)
                                                   std::int32_t>;
 
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  auto const call_conv = asmjit::kFuncConvHost;
+  auto const call_conv = asmjit::kCallConvHost;
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  auto const call_conv = asmjit::kFuncConvHostCDecl;
+  auto const call_conv = asmjit::kCallConvHostCDecl;
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
-  c.addFunc(call_conv, HookMeFuncBuilderT());
+  c.addFunc(HookMeFuncBuilderT(call_conv));
   c.getFunc()->setHint(asmjit::kFuncHintNaked, true);
 
-  asmjit::GpVar a1(c, asmjit::kVarTypeInt32);
+  auto a1 = c.newInt32("a1");
   c.setArg(0, a1);
-  asmjit::GpVar a2(c, asmjit::kVarTypeInt32);
-  c.setArg(1, a2);
-  asmjit::GpVar a3(c, asmjit::kVarTypeInt32);
-  c.setArg(2, a3);
-  asmjit::GpVar a4(c, asmjit::kVarTypeInt32);
-  c.setArg(3, a4);
-  asmjit::GpVar a5(c, asmjit::kVarTypeInt32);
-  c.setArg(4, a5);
-  asmjit::GpVar a6(c, asmjit::kVarTypeInt32);
-  c.setArg(5, a6);
-  asmjit::GpVar a7(c, asmjit::kVarTypeInt32);
-  c.setArg(6, a7);
-  asmjit::GpVar a8(c, asmjit::kVarTypeInt32);
-  c.setArg(7, a8);
+  auto a2 = c.newInt32("a2");
+  c.setArg(0, a2);
+  auto a3 = c.newInt32("a3");
+  c.setArg(0, a3);
+  auto a4 = c.newInt32("a4");
+  c.setArg(0, a4);
+  auto a5 = c.newInt32("a5");
+  c.setArg(0, a5);
+  auto a6 = c.newInt32("a6");
+  c.setArg(0, a6);
+  auto a7 = c.newInt32("a7");
+  c.setArg(0, a7);
+  auto a8 = c.newInt32("a8");
+  c.setArg(0, a8);
 
-  asmjit::GpVar address(c.newGpVar());
+  auto address = c.newUIntPtr("address");
   c.mov(address, asmjit::imm_u(reinterpret_cast<std::uintptr_t>(&HookMe)));
 
-  asmjit::GpVar var(c.newGpVar());
-  asmjit::X86CallNode* ctx = c.call(address, call_conv, HookMeFuncBuilderT());
+  auto ret = c.newUInt32("ret");
+  asmjit::X86CallNode* ctx = c.call(address, HookMeFuncBuilderT(call_conv));
   ctx->setArg(0, a1);
   ctx->setArg(1, a2);
   ctx->setArg(2, a3);
@@ -258,9 +257,9 @@ void GenerateBasicCall(asmjit::X86Compiler& c)
   ctx->setArg(5, a6);
   ctx->setArg(6, a7);
   ctx->setArg(7, a8);
-  ctx->setRet(0, var);
+  ctx->setRet(0, ret);
 
-  c.ret(var);
+  c.ret(ret);
 
   c.endFunc();
 }
@@ -406,16 +405,17 @@ using HookPackageData = std::tuple<decltype(&HookMe),
                                    AsmJitMemoryReleaser>;
 
 HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
-                                            asmjit::CodeGen& c)
+                                            asmjit::Assembler& a,
+                                            asmjit::Compiler& c)
 {
-  void* const hook_me_wrapper_raw = c.make();
+  c.finalize();
+  void* const hook_me_wrapper_raw = a.make();
   AsmJitMemoryReleaser hook_me_wrapper_cleanup{runtime, hook_me_wrapper_raw};
 
   auto const volatile hook_me_wrapper =
     hadesmem::detail::AliasCast<decltype(&HookMe)>(hook_me_wrapper_raw);
 
-  auto const hook_me_packaged = [=]()
-  {
+  auto const hook_me_packaged = [=]() {
     return hook_me_wrapper(1, 2, 3, 4, 5, 6, 7, 8);
   };
   BOOST_TEST_EQ(hook_me_packaged(), 0x1234UL);
@@ -427,9 +427,10 @@ HookPackageData GenerateAndCheckHookPackage(asmjit::JitRuntime& runtime,
 template <typename PatchType> void TestPatchDetourCall()
 {
   asmjit::JitRuntime runtime;
-  asmjit::X86Compiler c{&runtime};
+  asmjit::X86Assembler a{&runtime};
+  asmjit::X86Compiler c{&a};
   GenerateBasicCall(c);
-  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, c);
+  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a, c);
   TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
                                    std::get<1>(wrapper_and_package));
 }
@@ -438,8 +439,9 @@ template <typename PatchType> void TestPatchDetourJmp()
 {
   asmjit::JitRuntime runtime;
   asmjit::X86Assembler a{&runtime};
+  asmjit::X86Compiler c{&a};
   GenerateBasicJmp(a);
-  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a);
+  auto const wrapper_and_package = GenerateAndCheckHookPackage(runtime, a, c);
   TestPatchDetourCommon<PatchType>(std::get<0>(wrapper_and_package),
                                    std::get<1>(wrapper_and_package));
 }
@@ -483,9 +485,8 @@ void TestPatchIat()
   TestGetLastErrorOrig();
   auto volatile const get_last_error_orig =
     GetProcAddress(kernel32_mod, "GetLastError");
-  auto const get_last_error_detour = [](
-    hadesmem::PatchDetourBase* patch) -> DWORD
-  {
+  auto const get_last_error_detour =
+    [](hadesmem::PatchDetourBase* patch) -> DWORD {
     (void)patch;
     return 0x1337UL;
   };

@@ -322,17 +322,15 @@ public:
 private:
   template <typename T> void Initialize(T t) noexcept
   {
-    using D = typename std::conditional<sizeof(T) == sizeof(DWORD64),
-                                        DWORD64,
-                                        DWORD32>::type;
+    using D = typename std::
+      conditional<sizeof(T) == sizeof(DWORD64), DWORD64, DWORD32>::type;
     Initialize(static_cast<D>(t));
   }
 
   template <typename T> void Initialize(T const* t) noexcept
   {
-    using D = typename std::conditional<sizeof(T const*) == sizeof(DWORD64),
-                                        DWORD64,
-                                        DWORD32>::type;
+    using D = typename std::
+      conditional<sizeof(T const*) == sizeof(DWORD64), DWORD64, DWORD32>::type;
     Initialize(reinterpret_cast<D>(t));
   }
 
@@ -374,8 +372,7 @@ private:
     kFloat64
   };
 
-  union Variant
-  {
+  union Variant {
     DWORD32 i32;
     DWORD64 i64;
     float f32;
@@ -634,12 +631,9 @@ inline void GenerateCallCode32(asmjit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     ArgVisitor32 arg_visitor{assembler, num_args, call_conv};
-    std::for_each(args.rbegin(),
-                  args.rend(),
-                  [&](CallArg const& arg)
-                  {
-                    arg.Apply(std::ref(arg_visitor));
-                  });
+    std::for_each(args.rbegin(), args.rend(), [&](CallArg const& arg) {
+      arg.Apply(std::ref(arg_visitor));
+    });
 
     assembler->mov(asmjit::x86::eax,
                    asmjit::imm_u(reinterpret_cast<std::uintptr_t>(address)));
@@ -722,8 +716,7 @@ inline void GenerateCallCode64(asmjit::X86Assembler* assembler,
     args_full_beg, args_full_beg + num_addresses, ContainerSizeComparer());
   std::size_t const max_num_args = max_args_list->size();
 
-  std::size_t const stack_offset = [&]()
-  {
+  std::size_t const stack_offset = [&]() {
     // Minimum 0x20 bytes of ghost space for spilling args.
     std::size_t const ghost_size = 0x20UL;
     std::size_t stack_offs_tmp = (std::max)(ghost_size, max_num_args * 0x8);
@@ -759,12 +752,10 @@ inline void GenerateCallCode64(asmjit::X86Assembler* assembler,
     std::size_t const num_args = args.size();
 
     ArgVisitor64 arg_visitor{assembler, num_args};
-    std::for_each(std::crbegin(args),
-                  std::crend(args),
-                  [&](CallArg const& arg)
-                  {
-                    arg.Apply(std::ref(arg_visitor));
-                  });
+    std::for_each(
+      std::crbegin(args), std::crend(args), [&](CallArg const& arg) {
+        arg.Apply(std::ref(arg_visitor));
+      });
 
     assembler->mov(asmjit::x86::rax,
                    asmjit::imm_u(reinterpret_cast<DWORD_PTR>(address)));
@@ -860,9 +851,8 @@ inline Allocator GenerateCallCode(Process const& process,
   HADESMEM_DETAIL_TRACE_A("Performing code relocation.");
 
   std::vector<BYTE> code_real(stub_size);
-  assembler.setBaseAddress(
-    reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
-  assembler.relocCode(code_real.data());
+  assembler.relocCode(code_real.data(),
+                      reinterpret_cast<DWORD_PTR>(stub_mem_remote.GetBase()));
 
   HADESMEM_DETAIL_TRACE_A("Writing remote code stub.");
 
@@ -948,8 +938,7 @@ inline void CallMulti(Process const& process,
   std::transform(std::begin(return_vals_remote),
                  std::end(return_vals_remote),
                  results,
-                 [](detail::CallResultRemote const& r)
-                 {
+                 [](detail::CallResultRemote const& r) {
                    return static_cast<CallResultRaw>(r);
                  });
 }

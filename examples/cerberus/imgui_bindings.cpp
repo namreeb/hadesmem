@@ -625,7 +625,7 @@ chaiscript::ModulePtr GetImGuiChaiScriptModule()
   IMGUI_REGISTER_CONST(ImGuiCol_PlotHistogram);
   IMGUI_REGISTER_CONST(ImGuiCol_PlotHistogramHovered);
   IMGUI_REGISTER_CONST(ImGuiCol_TextSelectedBg);
-  IMGUI_REGISTER_CONST(ImGuiCol_TooltipBg);
+  //IMGUI_REGISTER_CONST(ImGuiCol_TooltipBg);
   IMGUI_REGISTER_CONST(ImGuiCol_ModalWindowDarkening);
 
   IMGUI_REGISTER_CONST(ImGuiStyleVar_Alpha);

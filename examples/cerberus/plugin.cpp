@@ -8,13 +8,13 @@
 
 #include <windows.h>
 
-#include <hadesmem/error.hpp>
-#include <hadesmem/process.hpp>
-#include <hadesmem/process_helpers.hpp>
 #include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/detail/to_upper_ordinal.hpp>
 #include <hadesmem/detail/trace.hpp>
+#include <hadesmem/error.hpp>
+#include <hadesmem/process.hpp>
+#include <hadesmem/process_helpers.hpp>
 
 #include "ant_tweak_bar.hpp"
 #include "callbacks.hpp"
@@ -44,7 +44,8 @@ hadesmem::cerberus::Callbacks<hadesmem::cerberus::OnUnloadPluginsCallback>&
   GetOnUnloadPluginsCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnUnloadPluginsCallback> callbacks;
+    hadesmem::cerberus::OnUnloadPluginsCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -313,6 +314,10 @@ struct PluginsWrapper
 {
   PluginsWrapper()
   {
+    // Hack to ensure the vector doesn't reallocate so plugins can hold on to
+    // the pointer to the PluginInterface.
+    // TODO: Fix this.
+    plugins_.reserve(50);
     GetOnUnloadPluginsCallbacks();
   }
 
@@ -355,13 +360,10 @@ void LoadPlugin(std::wstring const& path)
   auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin =
-    std::find_if(std::begin(plugins),
-                 std::end(plugins),
-                 [&](Plugin const& p)
-                 {
-                   return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
-                          hadesmem::detail::ToUpperOrdinal(path_real);
-                 });
+    std::find_if(std::begin(plugins), std::end(plugins), [&](Plugin const& p) {
+      return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
+             hadesmem::detail::ToUpperOrdinal(path_real);
+    });
   if (plugin == std::end(plugins))
   {
     plugins.emplace_back(path_real);
@@ -379,13 +381,10 @@ void UnloadPlugin(std::wstring const& path)
   auto& plugins = GetPlugins().plugins_;
   std::wstring path_real = CanonicalizePluginPath(path);
   auto const plugin =
-    std::find_if(std::begin(plugins),
-                 std::end(plugins),
-                 [&](Plugin const& p)
-                 {
-                   return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
-                          hadesmem::detail::ToUpperOrdinal(path_real);
-                 });
+    std::find_if(std::begin(plugins), std::end(plugins), [&](Plugin const& p) {
+      return hadesmem::detail::ToUpperOrdinal(p.GetPath()) ==
+             hadesmem::detail::ToUpperOrdinal(path_real);
+    });
   if (plugin == std::end(plugins))
   {
     HADESMEM_DETAIL_TRACE_FORMAT_W(

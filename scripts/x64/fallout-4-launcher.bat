@@ -1,0 +1,1 @@
+inject.exe --run "F:\SteamLibrary\steamapps\common\Fallout 4\Fallout4Launcher.exe" --inject --steam-app-id 377160 --export Load --add-path --path-resolution --module cerberus.dll
